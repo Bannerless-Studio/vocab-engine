@@ -7,6 +7,7 @@ frozen v1 id map live in the italian repo (tools/).
 import re
 
 from .base import LanguageSpec, TATOEBA_ENG, TATOEBA_LINKS, TATOEBA_AUDIO, SENSITIVE_EN, SENSITIVE_GLOSS_EN, drop_all_re
+from .es import mark_alt_forms
 
 # sensitive topics kept out of A1/A2 sentences (Italian text or English
 # translation; cross-pack policy, same tiers as de/es): sexual content, suicide,
@@ -302,6 +303,18 @@ class Italian(LanguageSpec):
         else:
             ok = art in (article_for("m", lemma), article_for("f", lemma))
         return None if ok else f"noun {w['id']} {shown!r}: wrong article form for {lemma!r}"
+
+    def finalize_words(self, env, ctx, words):
+        """Marks the gender and reflexive/base pairs alt_kind moves to
+        `forms` (es.mark_alt_forms)."""
+        mark_alt_forms(self, ctx, words)
+
+    def alt_kind(self, word, surface):
+        """A gender pair (amica for l'amico, unica for unico) or the base of a
+        pronominal verb (lavare for lavarsi) is a form: located in text, never
+        typed. Articles (lo/la/l'/i/gli/le of il) and a noun's bare form
+        (amico for l'amico) stay alts (es.mark_alt_forms)."""
+        return "form" if surface in (word.get("_form") or ()) else "alt"
 
     # ---- QA scans -----------------------------------------------------------
     qa_closed_sets = {
