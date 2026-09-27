@@ -15,7 +15,7 @@ from .sentences import build_sentences
 from .sources import ensure_downloaded, stage_corpus, audio_recorders
 from .tag import stage_tag, truecase_stats, iter_tagged, tag_rows
 from .util import STATS, log, stat, dump_json, write_json
-from .words import build_words, apply_gloss_display
+from .words import build_words, apply_gloss_display, split_alt_forms
 
 STAGES = ["all", "corpus", "tag", "lex", "freq", "words", "sentences", "final"]
 WORD_FIELDS = ("id", "w", "lemma", "pos", "en", "lv", "rank", "pron", "alt", "forms")
@@ -193,6 +193,7 @@ def finish_words(env, ctx, words, records, top3000):
             words, records, top3000 = build_words(env, ctx)
             sentences, users, primary = build_sentences(env, ctx, words, top3000)
     sp.finalize_words(env, ctx, words)
+    split_alt_forms(sp, words)
     return words, records, top3000, sentences, users, primary
 
 

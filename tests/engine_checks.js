@@ -2349,6 +2349,12 @@ async function swChecks(){
   const viaAlt = { id:"x", w:"xx", en:"other", lv:"A1", alt:["si"] };
   check("forms: collision guard ignores another word's forms (si for sí accepted), still honours an alt",
     VC.acceptTyped("si", si, LP, [], [si, viaForm]) && !VC.acceptTyped("si", si, LP, [], [si, viaAlt]));
+  // gap MC: する blanked at its form した must never offer the word whose w is した
+  const s5 = { id:"f5", t:"宿題をした。", words:["suru"] };
+  const gm5 = VC.gapMatch(s5, suru, JBF, JP);
+  const gcOk = (() => { for(let i = 0; i < 50; i++){ const gc = VC.gapChoices(suru, gm5, JWF, JP); if(gc.opts.includes("した") || gc.opts[0] !== "する") return false; } return true; })();
+  check("forms: gap choices for する blanked at した never offer 下/した (a distractor whose w fits the blank)",
+    !!gm5 && gm5.text === "した" && gcOk && VC.gapChoices(suru, gm5, JWF, JP).opts.length === 3);
   check("forms: typed した for the word した (another word's form) accepted; for する rejected",
     VC.acceptTyped("した", shita, JP, [], JWF) && !VC.acceptTyped("した", suru, JP, [], JWF));
 

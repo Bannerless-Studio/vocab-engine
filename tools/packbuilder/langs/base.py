@@ -697,6 +697,15 @@ class LanguageSpec:
         spelling, pron, gloss suffixes. May set word["pron"]."""
         return None
 
+    def alt_kind(self, word, surface):
+        """"alt" or "form" for one surface in word["alt"] after finalize_words
+        (core.words.split_alt_forms). "alt": another spelling, accepted as a
+        typed answer. "form": an inflected or used surface (ja 食べた for
+        食べる), located in text but never typed (docs/PACK_SCHEMA.md words
+        `forms`). Default: every alt stays an alt, so a pack without an
+        override ships exactly as before."""
+        return "alt"
+
     # ---- added for Indonesian (defaults are no-ops) ----------------------------
     audio_rank_bonus = 0         # sentences: a sentence with native audio has its sentence_rank penalty lowered by this
     use_audio = True             # corpus: attach permissive Tatoeba audio (id: off, TTS only)

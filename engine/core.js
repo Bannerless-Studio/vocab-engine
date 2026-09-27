@@ -569,6 +569,10 @@ function articleAgreement(pack){
 // visible before the blank (match.article), distractors cited with an agreeing article
 // come first (articleAgreement), so "la ____" offers other la-nouns; wordOpts falls back
 // to the rest when fewer than 3 agree.
+// A word one of whose own surfaces (w or an alt) is the blanked text itself never is
+// a distractor: it would fit the blank literally. The answer's `forms` are not homograph
+// surfaces (surfaces), so without this, する blanked at its form した could offer 下 (w
+// した) as a "wrong" option.
 // Returns { opts, a, byLabel } with byLabel mapping each label to its word.
 function gapChoices(entry, match, pool, pack){
   const arts = packArticles(pool);
@@ -579,7 +583,9 @@ function gapChoices(entry, match, pool, pack){
     const ok = new Set(articleAgreement(pack)[vis] || [vis]);
     prefer = v => citationArticles(v, arts).some(a => ok.has(a));
   }
-  const ds = wordOpts(entry, pool, show, pack, prefer);
+  const blank = match && match.text ? normKey(match.text) : "";
+  const fits = v => !!blank && v !== entry && !(v.id != null && v.id === entry.id) && surfaces(v).includes(blank);
+  const ds = wordOpts(entry, blank ? (pool || []).filter(v => !fits(v)) : pool, show, pack, prefer);
   const byLabel = {}; [entry, ...ds].forEach(e => { byLabel[show(e)] = e; });
   return { opts: [show(entry), ...ds.map(show)], a: show(entry), byLabel };
 }

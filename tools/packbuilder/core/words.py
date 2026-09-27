@@ -691,3 +691,28 @@ def apply_gloss_display(repo, out_words, path="tools/gloss_display.json"):
     if unused:
         log(f"gloss_display: {len(unused)} keys match no shipped word: {unused[:10]}")
     return sorted(applied), unused
+
+
+def split_alt_forms(spec, words):
+    """After spec.finalize_words: partitions each word's `alt` by
+    spec.alt_kind(word, surface) into `alt` (spellings, typed answers) and
+    `forms` (inflected/used surfaces, located in text, never typed;
+    docs/PACK_SCHEMA.md). Order within each list is kept; an empty list is
+    not written; the private `_spell` key is removed. With the base spec's
+    alt_kind every alt stays and no word gets `forms`."""
+    from .util import stat
+    n_alt = n_form = 0
+    for w in words:
+        both = w.pop("alt", None) or []
+        kinds = [spec.alt_kind(w, a) for a in both]
+        alt = [a for a, k in zip(both, kinds) if k != "form"]
+        forms = [a for a, k in zip(both, kinds) if k == "form"]
+        w.pop("_spell", None)
+        w.pop("forms", None)
+        if alt:
+            w["alt"] = alt
+        if forms:
+            w["forms"] = forms
+        n_alt += len(alt)
+        n_form += len(forms)
+    stat("alt_split", {"alt (spellings)": n_alt, "forms (inflected/used surfaces)": n_form})

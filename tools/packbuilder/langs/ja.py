@@ -20,7 +20,8 @@ Lemmas:
   (おはようございます) become `forms`: located in text (highlighting, cloze
   and its protection, passage fallback, Words search) but never typed
   answers (docs/PACK_SCHEMA.md words `forms`). Every alt filter below runs on
-  the combined list; finalize_words splits it last (_split_forms), so the
+  the combined list; core.words.split_alt_forms splits it after
+  finalize_words (alt_kind reads the spellings marked in _spell), so the
   set of surfaces the engine finds in text is the same as with one list.
 - Tatoeba's curated jpn_indices (JMdict lemma(reading){surface} per word)
   confirm or correct the Sudachi lemma of a token where they align: a
@@ -3629,7 +3630,8 @@ class Japanese(LanguageSpec):
         ship_units = defaultdict(Counter)       # key -> Counter(unit surface) linked in shipped sentences
         unit_norm = defaultdict(Counter)        # (key, unit) -> Counter(Sudachi normal form of its head)
         sfx_units = defaultdict(Counter)        # key -> Counter(noun + taught suffix), shipped sentences
-        unit_plain = {}                         # (key, unit) -> feats, when the unit is one uninflected token (surface = Dict)
+        tok_feat = {}                           # (key, token surface) -> Sudachi feats of a token written so (uninflected preferred)
+        head_plain = set()                      # keys whose lemma occurs as an uninflected token (surface = Dict = lemma)
         norm_read = defaultdict(Counter)        # Sudachi normal form -> Counter(Read of uninflected tokens written as it)
         shipped = set(self._shipped)
         ship_toks = {}
@@ -3667,8 +3669,11 @@ class Japanese(LanguageSpec):
                 # DRead to the linked lemma's (打てる: DRead うつ)
                 if toks[i][0] == f_i.get("Dict") == f_i.get("Norm"):
                     norm_read[f_i["Norm"]][f_i.get("Read", "")] += 1
-                if j == i + 1 and u == toks[i][0] == f_i.get("Dict") and (r, u) not in unit_plain:
-                    unit_plain[(r, u)] = f_i
+                ts = toks[i][0]
+                if (r, ts) not in tok_feat or (ts == f_i.get("Dict") and tok_feat[(r, ts)].get("Dict") != ts):
+                    tok_feat[(r, ts)] = f_i
+                if ts == f_i.get("Dict") == r[0]:
+                    head_plain.add(r)
                 if sid in shipped:
                     ship_units[r][u] += 1
         head_n = Counter(self.fold(w["w"]) for w in words)
@@ -3704,20 +3709,37 @@ class Japanese(LanguageSpec):
             spell = set()       # the alts that are spellings (typed answers); the rest are forms
             gsp = d["gspell"].get(k[1], Counter())
             own_norms = set(self._norms.get(lem, ())) | {lem, self.fold(lem)}
-            def group_spelling(u):
-                # the group's top normal form's reading, never a redirected potential
-                # verb's own (打てる is normalised as itself)
-                f = unit_plain.get((k, u))
-                top = (self._norm_top or {}).get(lem) or (f or {}).get("Norm")
-                top_read = [x for x, _ in norm_read.get(top, Counter()).most_common(1)]
-                if self._plain_spelling(u, f, w.get("pron"), own_norms, top_read):
+            # the group's top normal form's reading, never a redirected potential
+            # verb's own (打てる is normalised as itself)
+            top_read = [x for x, _ in norm_read.get((self._norm_top or {}).get(lem) or lem, Counter()).most_common(1)]
+            def group_spelling(u, listed=False):
+                """Marks u a spelling. A surface the sentences use (listed False)
+                is one by _plain_spelling on a token written as u. A spelling
+                _same_word_spelling already accepted (listed True: 観る, こっち,
+                プレイ) stays one unless it reads like a conjugation
+                (_conj_spelling: もらえる, いただける, 行ふ); never seen as
+                written, a kana spelling of a verb/adjective read otherwise than
+                the word (くださる for ください) is a form."""
+                f = tok_feat.get((k, u))
+                pr = w.get("pron")
+                if listed:
+                    ok = not self._conj_spelling(u, f, pr, top_read, k in head_plain) if f else \
+                        not (KANA_ONLY_RE.match(u) and k[1] in ("VERB", "ADJ") and hira(u) != hira((pr or "").lstrip("〜")))
+                else:
+                    ok = self._plain_spelling(u, f, pr, own_norms, top_read, k in head_plain)
+                if ok:
                     spell.add(u)
                     self.group_spellings.append(f"{w['w']}: {u}")
+                elif not f and JA_RE.search(u):
+                    self.stats["alts: no token read as written (a form)"] += 1
             if not lem.startswith("〜"):
                 for s, n in gsp.most_common():
                     if s != w["w"] and n >= 3 and JA_RE.search(s) and self._same_word_spelling(s, w):
                         alts.append(s)
-                        spell.add(s)
+                        # a Wiktionary/Sudachi spelling is still judged by its reading:
+                        # a potential verb (もらえる, いただける) or another conjugation's
+                        # dictionary form (くださる for ください) is a form
+                        group_spelling(s, listed=True)
                 heads = [w["w"]] + alts
                 # the forms linked in the shipped sentences (all of them, so each
                 # example shows the word), then the corpus's most used forms
@@ -3823,7 +3845,6 @@ class Japanese(LanguageSpec):
                     w.pop("alt")
         self._prune_alts(words, ship_toks, key_to_word)
         self._link_stats(words, ship_toks, key_to_word)
-        self._split_forms(words)
         from ..core.util import stat
         stat("ja", dict(sorted(self.stats.items())))
         stat("ja_pron_changes", self.pron_changes)
@@ -4137,39 +4158,53 @@ class Japanese(LanguageSpec):
         self.stats["compounds: false occurrences left unshielded (every window hides a true match)"] = n_none
 
     @staticmethod
-    def _plain_spelling(u, f, pron, own_norms, top_read):
-        """A unit the sentences use (u, with f the Sudachi feats of its one
-        token, or None when the unit is several tokens) is a spelling of the
-        word, not a form: one uninflected token (surface = its Dict form) of
-        the word's own Sudachi normal forms (own_norms), whose surface reading
-        (Read) is the word's reading (pron) or the reading its top normal form
-        is written with (top_read: 無い for ない; よい/良い for いい, whose
-        normal form 良い reads よい). Never a conjugation, a potential form
-        (言える reads いえる; the index correction rewrites its DRead to いう,
-        so DRead is not used), a classical or colloquial variant (長し,
-        おっきい, すげー) or a rendaku fragment (づよい)."""
-        if not f or not JA_RE.search(u) or f.get("Dict") != u or f.get("Norm") not in own_norms:
+    def _plain_spelling(u, f, pron, own_norms, top_read, head_plain=True):
+        """A surface u of a word (f: the Sudachi feats of a corpus token written
+        as u, one token) is a spelling of the word, not a form, when the token
+        is linked to the word and either
+        - its surface reading (Read) is the word's reading (pron): the same
+          word in other script (下さい for ください, ふれる for 触れる, ごみ for
+          ゴミ, ガン for 癌, 無し for なし), or
+        - it is of the word's own Sudachi normal forms (own_norms), uninflected
+          (surface = Dict), the word's lemma also occurs
+          uninflected (head_plain), and it reads as the top normal form is
+          written (top_read: よい/良い for いい, whose normal form 良い reads よい).
+        Never a conjugation, a potential form (もらえる, 言える: Read, since the
+        index correction rewrites DRead to the lemma's), another conjugation's
+        dictionary form (くださる for the imperative ください), a classical or
+        colloquial variant (長し, おっきい, すげー) or a rendaku fragment (づよい)."""
+        if not f or not JA_RE.search(u):
             return False
-        ok = {hira((pron or "").lstrip("〜"))} | {hira(x) for x in top_read or ()}
-        return hira(f.get("Read", "")) in ok
+        rd = hira(f.get("Read", ""))
+        if rd and rd == hira((pron or "").lstrip("〜")):
+            return True         # a token linked to the word, read as it (kana いえ for 家, whatever its Norm)
+        return f.get("Norm") in own_norms and bool(head_plain) and f.get("Dict") == u and \
+            rd in {hira(x) for x in top_read or ()}
 
-    def _split_forms(self, words):
-        """The combined alt list -> `alt` (the spellings finalize_words marked in
-        _spell: typed answers) and `forms` (every other surface: conjugations,
-        suffix uses, counters with their number, long greetings; located in
-        text, never typed). Order within each list is the combined order."""
-        for w in words:
-            spell = w.pop("_spell", set())
-            both = w.pop("alt", None) or []
-            alt = [a for a in both if a in spell]
-            forms = [a for a in both if a not in spell]
-            w.pop("forms", None)
-            if alt:
-                w["alt"] = alt
-            if forms:
-                w["forms"] = forms
-            self.stats["alt split: spellings (alt)"] += len(alt)
-            self.stats["alt split: inflected/used surfaces (forms)"] += len(forms)
+    @staticmethod
+    def _conj_spelling(u, f, pron, top_read, head_plain=True):
+        """A listed spelling u (f: feats of a corpus token written as u) that
+        reads like a conjugation: an inflecting token (verb, adjective,
+        auxiliary) read otherwise than the word, and inflected (surface !=
+        Dict), or the word's lemma is itself inflected (くださる for the
+        imperative ください), or not read as the top normal form (potential
+        もらえる, いただける; classical 行ふ). A non-inflecting variant (こっち,
+        プレイ, アイディア) never is."""
+        if not f or not str(f.get("Pos", "")).startswith(("動詞", "形容詞", "助動詞")):
+            return False
+        rd = hira(f.get("Read", ""))
+        if rd == hira((pron or "").lstrip("〜")):
+            return False
+        if f.get("Dict") != u or not head_plain:
+            return True
+        return rd not in {hira(x) for x in top_read or ()}
+
+    def alt_kind(self, word, surface):
+        """The spellings finalize_words marked in word["_spell"] are alts
+        (typed answers); every other surface (conjugations, suffix uses,
+        counters with their number, long greetings) is a form: located in
+        text, never typed. core.words.split_alt_forms applies it."""
+        return "alt" if surface in (word.get("_spell") or ()) else "form"
 
     def _link_stats(self, words, ship_toks, key_to_word):
         """How the shipped sentence links were decided: confirmed or corrected
