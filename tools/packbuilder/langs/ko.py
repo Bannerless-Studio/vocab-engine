@@ -1338,6 +1338,11 @@ def ko_romanize(text):
     return "".join(out)
 
 
+# Spellings of a headword accepted as typed answers (alt, not forms): the
+# contraction 아뇨 is how 아니요 is usually written. Every other alt is an
+# inflected eojeol (Korean.alt_kind).
+KO_SPELLINGS = {("아니요", "INTJ"): ("아뇨",)}
+
 
 class Korean(LanguageSpec):
     code = "ko"
@@ -2270,12 +2275,22 @@ class Korean(LanguageSpec):
                     if owner[f] == 1 and f != w["w"] and f not in heads and self.alt_ok(w, f)]
             if k[1] == "PART" or k[1] == "PHRASE":
                 alts = []
-            if k == ("아니요", "INTJ"):
-                alts = ["아뇨"] + alts
+            spell = KO_SPELLINGS.get(k, ())
+            alts = list(spell) + [a for a in alts if a not in spell]
             if alts:
                 w["alt"] = alts
             elif "alt" in w:
                 del w["alt"]
+            if spell:
+                w["_spell"] = set(spell)
+
+    def alt_kind(self, word, surface):
+        """Only the hand-listed spellings (KO_SPELLINGS, marked in
+        word["_spell"] by finalize_words) are alts, typed answers. Every other
+        alt is a corpus eojeol that alt_ok accepted as the word itself
+        inflected (noun + particles/copula 학교에서, conjugated verb 하던): a
+        form, located in text, never typed."""
+        return "alt" if surface in (word.get("_spell") or ()) else "form"
 
     def surface_link_ok(self, tok):
         """No sentence-initial spelling link for a token read as a name (밥은 =
