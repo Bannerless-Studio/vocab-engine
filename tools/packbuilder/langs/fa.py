@@ -1623,6 +1623,13 @@ class Persian(LanguageSpec):
             "note": "Written where Tatoeba has fewer than two usable sentences for a word; no audio."}}
 
     # ---- finishing ----------------------------------------------------------------------
+    def alt_kind(self, word, surface):
+        """A verb's present stem (خواه for خواستن), marked by finalize_words in
+        word["_form"] (not shipped), is a form: located in text, never typed.
+        The joined and spaced spellings of a ZWNJ headword (آنها, آن ها for
+        آن‌ها) stay alts."""
+        return "form" if surface in (word.get("_form") or ()) else "alt"
+
     def finalize_words(self, env, ctx, words):
         from collections import Counter
         from ..core.gloss import strip_gloss_style
@@ -1707,6 +1714,7 @@ class Persian(LanguageSpec):
                     # the present stem (رو for رفتن); a compound verb keeps no alt:
                     # the engine reads alt[0] of a multiword w as its bare trailing token
                     w["alt"] = [stem]
+                    w["_form"] = [stem]    # a form (alt_kind); the ZWNJ spellings below stay alts
                 else:
                     w.pop("alt", None)
             elif w.get("alt"):
