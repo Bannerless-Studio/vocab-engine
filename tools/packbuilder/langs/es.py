@@ -170,6 +170,52 @@ def stressed_initial_a(lemma):
     return n == 1                          # final stress
 
 
+# ---- alt / forms (alt_kind) -------------------------------------------------
+def _surf_key(s):
+    return str(s).lower().replace("\u2019", "'").replace("\u02bc", "'")
+
+
+def _trailing_token(text, tail):
+    """tail is a whole trailing token of text, after a space or apostrophe
+    (core.js trailingCut: the test bareForm applies to alt[0])."""
+    t, b = str(text), str(tail or "")
+    if not b or len(b) >= len(t):
+        return False
+    cut = len(t) - len(b)
+    return _surf_key(t[cut:]) == _surf_key(b) and (t[cut - 1].isspace() or t[cut - 1] in "'\u2019\u02bc")
+
+
+def _fem_targets(spec, lx, surface):
+    """The masculines surface is "feminine of" in the lexicon: the evidence
+    core.words uses to fold a feminine into its masculine (records fem_of)."""
+    return {m.group(1) for e in lx.E.get(surface, []) if e["p"] in ("noun", "adj")
+            for sn in e["s"] if sn[3] == "form" for m in [spec.fem_of_re.match(sn[0].lower())] if m}
+
+
+def mark_alt_forms(spec, ctx, words, extra=None):
+    """Sets word["_form"] (a private key, not shipped) to the alts alt_kind
+    moves to `forms`, by where core.words put them: the base verb of a
+    pronominal display (sentirse -> sentir, word["_base"]) and a feminine
+    folded into its masculine (el perro -> perra); `extra(word, surface)`
+    adds a spec's own inflected sources. Never marked, because the engine
+    reads them from `alt` (core.js packArticles, bareForm): every alt of a
+    pos "art" word (la/los/las of el) and alt[0] when it is a whole trailing
+    token of w (el perro -> perro, se lever -> lever)."""
+    lx = ctx["lexicon"]
+    for w in words:
+        alt = w.get("alt") or []
+        if not alt or w.get("pos") == "art":
+            continue
+        heads = {w["lemma"], w["_key"][0]}
+        base = w.get("_base")
+        form = [a for i, a in enumerate(alt)
+                if not (i == 0 and _trailing_token(w["w"], a))
+                and ((base and a == base[0] and a != w["lemma"]) or heads & _fem_targets(spec, lx, a)
+                     or (extra is not None and extra(w, a)))]
+        if form:
+            w["_form"] = form
+
+
 class Spanish(LanguageSpec):
     code = "es"
     name_en = "Spanish"
@@ -616,6 +662,18 @@ class Spanish(LanguageSpec):
         if art == "el" and w["en"].endswith("(f)") and not stressed_initial_a(lemma):
             return f"noun {w['id']} {shown!r}: el + (f) only for stressed a- nouns"
         return None
+
+    def finalize_words(self, env, ctx, words):
+        """Marks the gender and reflexive/base pairs alt_kind moves to
+        `forms` (mark_alt_forms)."""
+        mark_alt_forms(self, ctx, words)
+
+    def alt_kind(self, word, surface):
+        """A gender pair (perra for el perro, derecha for el derecho) or the
+        base of a pronominal verb (sentir for sentirse) is a form: located in
+        text, never typed. Articles (la/los/las of el) and a noun's bare form
+        (perro for el perro) stay alts (mark_alt_forms)."""
+        return "form" if surface in (word.get("_form") or ()) else "alt"
 
     # ---- QA scans ------------------------------------------------------------
     qa_closed_sets = {
