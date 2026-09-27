@@ -73,7 +73,7 @@ python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the 
 
 Dev mode without a rebuild: open `engine/app.html?pack=zh` from `file://` (loads `../packs/zh/*.js`); `?packdir=<relative path>` loads a pack elsewhere.
 
-Known state 2026-09-27: pytest shows 1 failure in test_spec for the uncommitted langs/sw.py. It is not an engine regression.
+Known state 2026-09-27: with the untracked langs/sw.py present, pytest fails 2 spec-inventory tests (test_spec, test_passage_de_ru HookOwners); without it 437 pass. Not an engine regression; goes away when sw.py is committed with its inventory entries or removed.
 
 ## Always
 
