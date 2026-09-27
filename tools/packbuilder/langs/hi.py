@@ -1601,6 +1601,7 @@ class Hindi(LanguageSpec):
                     tail = shown.split(" ")[-1]
                     w["alt"] = [tail] + [s for s in sorted(spell.get(fold(tail), {}), key=lambda s: -spell[fold(tail)][s])
                                          if s != tail][:3]
+                    w["_spell"] = set(w["alt"])     # the bare postposition (alt[0]) and its spellings
                 else:
                     w.pop("alt", None)
                 continue
@@ -1635,10 +1636,18 @@ class Hindi(LanguageSpec):
             if key == "होना":
                 al += [nfc(c) for c in sorted(COPULA_FORMS) if nfc(c) not in al and nfc(c) != shown and
                        not (c.endswith("ं") and c[:-1] + "ँ" in al)]
+            # spellings (alt): the corpus spellings of the key itself or of a
+            # SPELLING_VARIANTS headword (nukta, chandrabindu, anusvara: they
+            # fold alike); every other surface is an inflection (form)
+            spell_keys = {key} | variants.get((key, w["pos"]), set())
+            w["_spell"] = {a for a in al if fold(a) in spell_keys}
             if key == KAUNSA:
                 al, w["pron"] = list(KAUNSA_ALTS), "kaun-sā"
+                # hyphen, space or glued: कौन सा is a spelling, कौन-सी a form
+                w["_spell"] = {a for a in al if re.sub(r"[-\s]", "", fold(a)) == KAUNSA}
             if key == "का":
                 al = ["की", "के"]          # the genitive agrees: का/की/के
+                w["_spell"] = set()
             if al:
                 w["alt"] = al
             else:
@@ -1676,6 +1685,16 @@ class Hindi(LanguageSpec):
         stat("hi_alts_dropped_owned", {k: dropped[k] for k in sorted(dropped)})
         stat("hi_display", {"pron_from_wiktionary": f"{n_kaikki_pron}/{len(words)}",
                             "pron_transliterated": len(words) - n_kaikki_pron})
+
+    def alt_kind(self, word, surface):
+        """Alts (typed answers) are what finalize_words marked in
+        word["_spell"]: another spelling of the headword (नुक़सान/नुकसान,
+        साँप/सांप, a SPELLING_VARIANTS headword ख़्याल), a spacing of कौन-सा,
+        and a compound postposition's bare tail (के लिए: लिए, alt[0]). Every
+        other alt is a form, located in text, never typed: oblique and plural
+        nouns (महिलाओं), inflected adjectives (अच्छी), verb forms (समझा),
+        declined pronouns (मुझे), copula forms (था) and की/के for का."""
+        return "alt" if surface in (word.get("_spell") or ()) else "form"
 
     def check_word(self, w):
         f = fold(w["w"])
