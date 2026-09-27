@@ -37,6 +37,8 @@
 - Never blocks: on no result / error fall back to `type`. Excluded from placement.
 - Chrome 139+ has on-device mode (`processLocally`); default is server-based and needs network.
 
+- **Doc-standards pass done 2026-09-27 07:10** (every repo: CLAUDE.md + tools/README.md + end-user README; engine 9b17523, each language repo two "Docs"/"CLAUDE.md" commits). Cleanups owed: (a) delete the "Known state 2026-09-27" paragraph in CLAUDE.md once engine-ja-forms is merged and langs/sw.py is committed; (b) japanese/CLAUDE.md "in-flight work" section and the alt/forms paragraph duplicated in japanese README + tools/README go in the Japanese republish commit; (c) code-comment pruning branch for engine/core.js (~924 comment lines) and tools/packbuilder after the ja-forms merge, rule already in CLAUDE.md.
+
 ## Script support (added 2026-09-23)
 - RTL verified in a real browser on the Persian pack (2026-09-24): Vazirmatn loads, dir/lang on all target nodes, cloze blank at the correct RTL position, ZWNJ forms joined, no overflow at 360/390. Still unverified: Nastaliq (Urdu) line height. Minor: speaker icons and the "Tap a word to hear it" hint still show when no TTS voice exists for the pack language (engine already converts Listen items to read items) — hide them in that case; Words-list pron column ragged for long headwords.
 - validate_pack.py checks the script fields (`rtl`, `langTag`, `fontFamily`, `fonts`, `lineHeight`) with the same patterns as core.js, and warns when `rtl` is set without a font.
