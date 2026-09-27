@@ -69,6 +69,11 @@ CLOSED = {**{w: (w, g) for w, g in FUNCTION[:3]}, "untuk": ("untuk", "ADP"), "de
 # capitalised common words (days, months, formal Anda): lowercased on every
 # matching side (fold, fix_token), shown capitalised again in finalize_words
 CAPITALISED = {w: w.capitalize() for w in DAYS + MONTHS if w != "minggu"} | {"anda": "Anda"}
+# Other spellings of a word accepted as typed answers (alt, not forms):
+# colloquial register spellings (nggak and its variants, tapi for tetapi,
+# nonton for menonton)
+ID_SPELLINGS = {("nggak", "PART"): ("gak", "enggak", "ngga"), ("tetapi", "CONJ"): ("tapi",),
+                ("menonton", "VERB"): ("nonton",)}
 # titles and forms of address, capitalised before a name or in direct address
 # ("Pak Sasaki", "Terima kasih, Bu Ani", "Tuan Smith"): common nouns, not names
 HONORIFICS = {"pak", "bapak", "ibu", "tuan", "nyonya", "nona", "kakak", "adik", "paman", "bibi", "om", "tante",
@@ -1418,7 +1423,7 @@ class Indonesian(LanguageSpec):
             if w["_key"][1] == "VERB" and w["lemma"] == w["w"] and not w["lemma"].startswith(("me", "ber", "ter", "di")):
                 # the headword is the form learners meet: a root seen bare in
                 # under 20% of its uses is shown as its commonest me- verb
-                # (periksa -> memeriksa), the root kept as alt[0]
+                # (periksa -> memeriksa), the root kept first in alt (a form)
                 bare = sum(n for f, n in c.items() if CLITIC_TAIL_RE.sub("", f) == w["lemma"])
                 total = sum(c.values())
                 mes = {me_form(w["lemma"]) + suf for suf in ("", "kan", "i")}
@@ -1436,12 +1441,24 @@ class Indonesian(LanguageSpec):
                     w["pos"] = "adj"         # bersalah "guilty", berguna "useful": taught as adjectives
             if w["lemma"] in CAPITALISED:
                 w["w"] = CAPITALISED[w["lemma"]]
-            if w["_key"] == ("nggak", "PART"):
-                w["alt"] = ["gak", "enggak", "ngga"]
-            if w["_key"] == ("tetapi", "CONJ"):
-                w["alt"] = ["tapi"]
+            if w["_key"] in ID_SPELLINGS:
+                # the listed spellings lead; the word's other alts stay (as forms)
+                spell = ID_SPELLINGS[w["_key"]]
+                w["alt"] = list(spell) + [a for a in (w.get("alt") or []) if a not in spell]
+                w["_spell"] = set(spell)
         self.post_stats["headword shown as its me- verb"] = len(swapped)
         self.swapped_heads = swapped
+
+    def alt_kind(self, word, surface):
+        """Alts (typed answers) are only the hand-listed spellings
+        finalize_words marked in word["_spell"] (ID_SPELLINGS: gak for nggak,
+        tapi for tetapi, nonton for menonton). Every other alt is a form,
+        located in text, never typed: the corpus inflections (affixed dibaca,
+        enclitic bukunya/pergilah, reduplicated anak-anak), the voice_alt
+        spellings (object-voice lakukan, a rarer root tulis) and the root a
+        me- headword was swapped from (baca for membaca): a bare root is a
+        stem, whatever built it."""
+        return "alt" if surface in (word.get("_spell") or ()) else "form"
 
     # ---- reading passages (passage-only; the corpus build never calls these) --
     def _pack_lemmas(self):

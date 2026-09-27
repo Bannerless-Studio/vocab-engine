@@ -21,6 +21,7 @@ from packbuilder.core.pipeline import WORD_FIELDS  # noqa: E402
 from packbuilder.core.util import STATS  # noqa: E402
 from packbuilder.core.words import split_alt_forms  # noqa: E402
 from packbuilder.langs import get_spec  # noqa: E402
+from packbuilder.langs.base import LanguageSpec  # noqa: E402
 
 
 def spec(repo="/nonexistent-ja-repo"):
@@ -83,7 +84,7 @@ class ConjSpelling(unittest.TestCase):
 class SplitHook(unittest.TestCase):
     """core.words.split_alt_forms through LanguageSpec.alt_kind."""
     def test_base_spec_keeps_every_alt_and_emits_no_forms(self):
-        sp = get_spec("id", None, load=False)
+        sp = LanguageSpec()      # the base hook: no language overrides it here
         words = [{"w": "tidak", "alt": ["tidaklah", "tak"]}, {"w": "aku", "_spell": {"x"}}]
         split_alt_forms(sp, words)
         self.assertEqual(words, [{"w": "tidak", "alt": ["tidaklah", "tak"]}, {"w": "aku"}])
