@@ -12,6 +12,7 @@ import math
 import re
 
 from .base import LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_LINKS, TATOEBA_AUDIO, drop_all_re
+from .es import mark_alt_forms
 
 LETTERS = "a-zàâäçéèêëîïôöùûüÿœæ"
 VOWELS = "aeiouàâäéèêëîïôöùûüœæ"      # y counts as a consonant for elision (le yaourt)
@@ -242,6 +243,19 @@ NON_LITERARY_FORM_TAGS = {"present", "imperfect", "future", "conditional", "impe
 def _content_words(gloss):
     return {w for w in re.findall(r"[a-z]+", re.sub(r"\(.*?\)", " ", gloss.lower()))
             if w not in ("a", "an", "the", "of", "to", "or", "and", "in", "on", "one", "side", "hand")}
+
+
+_DET_FORMS = {shown: set(alts) for shown, alts in DET_ALTS.values()}
+
+
+def _fr_inflected_alt(w, a):
+    """French inflected alt sources of finalize_words: a determiner's
+    paradigm (cette/ces of ce, ma/mes of mon), the object pronoun's (la/les
+    of le) and the singular of a plural-display noun (vacance of les
+    vacances)."""
+    return ((w["pos"] == "det" and a in _DET_FORMS.get(w["lemma"], ()))
+            or (w["pos"] == "pron" and a in PRON_ALTS.get(w["lemma"], ()))
+            or (w["pos"] == "noun" and PLURAL_DISPLAY.get(a) == w["lemma"]))
 
 
 class HyphenCliticTokenMatch:
@@ -889,7 +903,8 @@ class French(LanguageSpec):
         """Gloss tidying (see _tidy) for every word without a hand/fixed gloss;
         a reverted pronominal gloss whose two halves agree keeps one ("to rest;
         se reposer: to rest" -> "to rest"); nouns in PLURAL_DISPLAY are shown
-        in the plural (les vacances)."""
+        in the plural (les vacances); last, marks the alts alt_kind moves to
+        `forms` (es.mark_alt_forms with _fr_inflected_alt)."""
         fixed = {f"{k[0]}|{k[1].lower()}" for k in self.fixed_gloss}
         for w in words:
             key = f"{w['_key'][0]}|{w['pos']}"
@@ -931,6 +946,16 @@ class French(LanguageSpec):
                 w["lemma"], w["w"] = pl, f"les {pl}"
                 w["alt"] = [pl] + [a for a in (w.get("alt") or []) if a != pl]
                 w["en"] = re.sub(r" \((m|f|m/f)\)$", "", w["en"]) + ("" if w["en"].endswith("(pl.)") else " (pl.)")
+        mark_alt_forms(self, ctx, words, extra=_fr_inflected_alt)
+
+    def alt_kind(self, word, surface):
+        """An inflected alt is a form (located in text, never typed): a gender
+        pair (amie for l'ami), the base of a pronominal display that is not
+        w's trailing token, a determiner or pronoun paradigm (cette/ces of ce,
+        la/les of le) and the singular of les vacances. Articles (la/l'/les
+        of le) and the bare form alt[0] (ami for l'ami, lever for se lever:
+        core.js bareForm labels the gap with it) stay alts (es.mark_alt_forms)."""
+        return "form" if surface in (word.get("_form") or ()) else "alt"
 
     def _reflexive_sense(self, base):
         """First translation-like sense of se <base>: its own entry, else the
