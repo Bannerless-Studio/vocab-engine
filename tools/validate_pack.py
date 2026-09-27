@@ -347,6 +347,16 @@ def check_words(words, levels, rep):
             rep.err(f"{where}.rank must be a number")
         if "alt" in w and not (isinstance(w["alt"], list) and all(is_str(a) for a in w["alt"])):
             rep.err(f"{where}.alt must be a list of non-empty strings")
+        # forms: inflected surfaces used only to locate the word in text (never typed
+        # answers). One that repeats w or an alt is redundant: it is already both.
+        if "forms" in w:
+            if not (isinstance(w["forms"], list) and all(is_str(a) for a in w["forms"])):
+                rep.err(f"{where}.forms must be a list of non-empty strings")
+            else:
+                typed = {str(x).strip() for x in [w.get("w")] + list(w.get("alt") or []) if is_str(x)}
+                for f in w["forms"]:
+                    if f.strip() in typed:
+                        rep.warn(f"{where}.forms entry {f!r} equals its w or an alt (already accepted as typed)")
     # same surface form twice in one level makes recall options ambiguous
     seen = {}
     for w in words:

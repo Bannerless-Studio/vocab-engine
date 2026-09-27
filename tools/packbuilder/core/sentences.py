@@ -283,7 +283,8 @@ def build_sentences(env, ctx, words, top3000):
     if sp.prefer_headword_sentence:
         forms_of = {}
         for w in words:
-            fs = {w["w"].lower(), w["_key"][0].lower(), w["lemma"].lower()} | {a.lower() for a in (w.get("alt") or [])}
+            fs = {w["w"].lower(), w["_key"][0].lower(), w["lemma"].lower()} | \
+                {a.lower() for a in list(w.get("alt") or []) + list(w.get("forms") or [])}
             forms_of[w["id"]] = [(f, " " in f) for f in sorted(fs) if f]
         verb_key = {w["id"]: w["_key"] for w in words if w["_key"][1] == "VERB"}
     # a word that is itself on the sensitive list (el sexo) may use those sentences
@@ -486,6 +487,7 @@ def build_sentences(env, ctx, words, top3000):
             rsi, rsi_en = w["lemma"], w["en"]
             w["lemma"], w["w"] = base, base
             w.pop("alt", None)
+            w.pop("forms", None)
             head = lambda x: re.split(r"[,;]", x)[0].strip()
             if sp.revert_dedupe_gloss and base_en and head(base_en) == head(rsi_en):
                 w["en"] = head(base_en)       # enterar / enterarse both "to find out"

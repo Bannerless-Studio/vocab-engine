@@ -10,9 +10,18 @@ Lemmas:
 - One word per Sudachi (normalised form, UPOS) group: kana and kanji
   spellings (わかる/分かる, いい/よい/良い, こと/事, する/為る) are one word. The
   headword is the spelling Tatoeba uses most; the other attested spellings
-  become alts. Conjugated surfaces (食べ+まし+た) carry the dictionary form
-  (食べる), so they link to it; potential forms fold into the verb (話せる ->
-  話す), as Sudachi normalises them.
+  (Sudachi dictionary forms of the group that _same_word_spelling accepts:
+  the kana reading or a Wiktionary alternative form) become `alt`, the only
+  other surfaces a typed answer accepts. Conjugated surfaces (食べ+まし+た)
+  carry the dictionary form (食べる), so they link to it; potential forms fold
+  into the verb (話せる -> 話す), as Sudachi normalises them. The conjugated
+  surfaces the sentences use (食べた, 食べない, します), a taught suffix's
+  whole uses (会議中), a counter with its number (７時) and the long greetings
+  (おはようございます) become `forms`: located in text (highlighting, cloze
+  and its protection, passage fallback, Words search) but never typed
+  answers (docs/PACK_SCHEMA.md words `forms`). Every alt filter below runs on
+  the combined list; finalize_words splits it last (_split_forms), so the
+  set of surfaces the engine finds in text is the same as with one list.
 - Tatoeba's curated jpn_indices (JMdict lemma(reading){surface} per word)
   confirm or correct the Sudachi lemma of a token where they align: a
   kana-written homograph (あう: 会う vs 合う) takes the index's word. The
@@ -747,6 +756,7 @@ class Japanese(LanguageSpec):
         self.sound_folded = []
         self.spelling_merges = []
         self.alt_sense_drops = []
+        self.group_spellings = []
         self._foreign_spell = {}        # kana headword -> kanji spellings that are another word (note_words)
         self.gloss_flags = []
         self._idx = None
@@ -787,7 +797,7 @@ class Japanese(LanguageSpec):
 
     def passage_text(self, text, names, lexicon):
         """Passages (Linker.pretag, before tagging): text unchanged; loads
-        passage_lemma_alias: each pack alt spelling that belongs to one word
+        passage_lemma_alias: each pack alt or `forms` surface that belongs to one word
         and is no headword -> that word's lemma (kana みんな: 皆, kanji 所:
         ところ), for classify's lemma fallback."""
         if not self.passage_lemma_alias and self.repo is not None:
@@ -795,7 +805,7 @@ class Japanese(LanguageSpec):
             heads = {w["lemma"] for w in words} | {w["w"] for w in words}
             owners = defaultdict(set)
             for w in words:
-                for a in w.get("alt") or ():
+                for a in list(w.get("alt") or ()) + list(w.get("forms") or ()):
                     owners[a].add(w["lemma"])
             self.passage_lemma_alias = {a: next(iter(o)) for a, o in owners.items() if len(o) == 1 and a not in heads}
             # headword -> build groups (passage_retag joins, the conjunction rule)
@@ -2826,7 +2836,7 @@ class Japanese(LanguageSpec):
         return (cands_l[0] if KANJI_RE.search(L) else None), (cands_r[0] if KANJI_RE.search(R) else None), True
 
     def _pack_readings(self):
-        """spelling -> kana readings from pack/words.json (headword and alts) and
+        """spelling -> kana readings from pack/words.json (headword, alts and forms) and
         characters.json units (passages: splitting a reading at a tap edge)."""
         if getattr(self, "_pack_rd", None) is None:
             out = defaultdict(list)
@@ -2836,7 +2846,7 @@ class Japanese(LanguageSpec):
                 for w in json.loads((pack / "words.json").read_text()):
                     rd = (w.get("pron") or "").strip("〜")
                     if rd and KANA_ONLY_RE.match(rd):
-                        for f in [w["w"]] + list(w.get("alt") or ()):
+                        for f in [w["w"]] + list(w.get("alt") or ()) + list(w.get("forms") or ()):
                             f = f.strip("〜")
                             if rd not in out[f]:
                                 out[f].append(rd)
@@ -3619,6 +3629,8 @@ class Japanese(LanguageSpec):
         ship_units = defaultdict(Counter)       # key -> Counter(unit surface) linked in shipped sentences
         unit_norm = defaultdict(Counter)        # (key, unit) -> Counter(Sudachi normal form of its head)
         sfx_units = defaultdict(Counter)        # key -> Counter(noun + taught suffix), shipped sentences
+        unit_plain = {}                         # (key, unit) -> feats, when the unit is one uninflected token (surface = Dict)
+        norm_read = defaultdict(Counter)        # Sudachi normal form -> Counter(Read of uninflected tokens written as it)
         shipped = set(self._shipped)
         ship_toks = {}
         for sid, toks in iter_tagged(ctx["tagged"]):
@@ -3649,7 +3661,14 @@ class Japanese(LanguageSpec):
                         j0 -= 1
                     sfx_units[r]["".join(t[0] for t in toks[j0:i]) + u] += 1
                 units[r][u] += 1
-                unit_norm[(r, u)][feats_of(toks[i][3]).get("Norm", "")] += 1
+                f_i = feats_of(toks[i][3])
+                unit_norm[(r, u)][f_i.get("Norm", "")] += 1
+                # Read (the surface's own reading): the index correction rewrites
+                # DRead to the linked lemma's (打てる: DRead うつ)
+                if toks[i][0] == f_i.get("Dict") == f_i.get("Norm"):
+                    norm_read[f_i["Norm"]][f_i.get("Read", "")] += 1
+                if j == i + 1 and u == toks[i][0] == f_i.get("Dict") and (r, u) not in unit_plain:
+                    unit_plain[(r, u)] = f_i
                 if sid in shipped:
                     ship_units[r][u] += 1
         head_n = Counter(self.fold(w["w"]) for w in words)
@@ -3682,10 +3701,23 @@ class Japanese(LanguageSpec):
                 nc = unit_norm.get((k, u))
                 return not nc or nc.most_common(1)[0][0] in allowed
             alts = []
+            spell = set()       # the alts that are spellings (typed answers); the rest are forms
+            gsp = d["gspell"].get(k[1], Counter())
+            own_norms = set(self._norms.get(lem, ())) | {lem, self.fold(lem)}
+            def group_spelling(u):
+                # the group's top normal form's reading, never a redirected potential
+                # verb's own (打てる is normalised as itself)
+                f = unit_plain.get((k, u))
+                top = (self._norm_top or {}).get(lem) or (f or {}).get("Norm")
+                top_read = [x for x, _ in norm_read.get(top, Counter()).most_common(1)]
+                if self._plain_spelling(u, f, w.get("pron"), own_norms, top_read):
+                    spell.add(u)
+                    self.group_spellings.append(f"{w['w']}: {u}")
             if not lem.startswith("〜"):
-                for s, n in d["gspell"].get(k[1], Counter()).most_common():
+                for s, n in gsp.most_common():
                     if s != w["w"] and n >= 3 and JA_RE.search(s) and self._same_word_spelling(s, w):
                         alts.append(s)
+                        spell.add(s)
                 heads = [w["w"]] + alts
                 # the forms linked in the shipped sentences (all of them, so each
                 # example shows the word), then the corpus's most used forms
@@ -3695,6 +3727,7 @@ class Japanese(LanguageSpec):
                     if u not in alts:
                         alts.append(u)
                         self.stats["alts: forms linked in shipped sentences"] += 1
+                        group_spelling(u)
                 if k[1] in ("VERB", "ADJ") and w["pos"] != "aux":
                     for u, n in units.get(k, Counter()).most_common():
                         if len(alts) >= 8:
@@ -3703,13 +3736,16 @@ class Japanese(LanguageSpec):
                         if n >= 2 and not any(u.startswith(h) for h in heads) and u not in alts and \
                                 len(u) > 1 and norm_ok(u):
                             alts.append(u)
+                            group_spelling(u)
                 self.stats["alts: forms left out (another normal form)"] += sum(
                     1 for u in units.get(k, ()) if not norm_ok(u))
             else:
                 alts.append(lem[1:])
+                spell.add(lem[1:])
                 for s, n in d["gspell"].get(k[1], Counter()).most_common():
                     if s != lem[1:] and n >= 3 and JA_RE.search(s):
                         alts.append(s)          # 〜たち: 達; 〜ヶ月: か月
+                        spell.add(s)
                 # a taught suffix spelled like another word's headword (中 なか,
                 # 君 きみ) cannot be found bare: it keeps its uses in the shipped
                 # sentences whole (会議中, トニー君). The suffix links only where it
@@ -3730,6 +3766,7 @@ class Japanese(LanguageSpec):
             if lem in MONTHS:
                 n = MONTHS.index(lem) + 1
                 alts += [f"{n}月", f"{n}月".translate(str.maketrans("0123456789", "０１２３４５６７８９"))]
+                spell.update(alts[-2:])             # 1月 / １月: spellings of 一月
             if lem == "おはよう":
                 alts.append("おはようございます")
             if lem == "ありがとう":
@@ -3739,6 +3776,7 @@ class Japanese(LanguageSpec):
                 w["alt"] = list(dict.fromkeys(f for f in (self.fold(a) for a in alts) if f != w["w"]))
             else:
                 w.pop("alt", None)
+            w["_spell"] = {self.fold(a) for a in spell}
             hand = w["en"] in hand_glosses
             w["en"] = self._style(w["en"], verb=w["pos"] == "verb" and not hand, hand=hand)
             if lem not in NUMBERS:
@@ -3785,6 +3823,7 @@ class Japanese(LanguageSpec):
                     w.pop("alt")
         self._prune_alts(words, ship_toks, key_to_word)
         self._link_stats(words, ship_toks, key_to_word)
+        self._split_forms(words)
         from ..core.util import stat
         stat("ja", dict(sorted(self.stats.items())))
         stat("ja_pron_changes", self.pron_changes)
@@ -3792,6 +3831,7 @@ class Japanese(LanguageSpec):
         stat("ja_spelling_merges", self.spelling_merges)
         stat("ja_redirects", dict(sorted(self.redirect.items())))
         stat("ja_alt_sense_drops", self.alt_sense_drops)
+        stat("ja_group_spellings", self.group_spellings)
         stat("ja_foreign_kanji_spellings", getattr(self, "foreign_spellings", []))
         stat("ja_gloss_flags_that_which", self.gloss_flags)
 
@@ -4095,6 +4135,41 @@ class Japanese(LanguageSpec):
         self.stats["compounds"] = len(self.compounds)
         self.stats["compounds: false occurrences in linking sentences"] = n_need
         self.stats["compounds: false occurrences left unshielded (every window hides a true match)"] = n_none
+
+    @staticmethod
+    def _plain_spelling(u, f, pron, own_norms, top_read):
+        """A unit the sentences use (u, with f the Sudachi feats of its one
+        token, or None when the unit is several tokens) is a spelling of the
+        word, not a form: one uninflected token (surface = its Dict form) of
+        the word's own Sudachi normal forms (own_norms), whose surface reading
+        (Read) is the word's reading (pron) or the reading its top normal form
+        is written with (top_read: 無い for ない; よい/良い for いい, whose
+        normal form 良い reads よい). Never a conjugation, a potential form
+        (言える reads いえる; the index correction rewrites its DRead to いう,
+        so DRead is not used), a classical or colloquial variant (長し,
+        おっきい, すげー) or a rendaku fragment (づよい)."""
+        if not f or not JA_RE.search(u) or f.get("Dict") != u or f.get("Norm") not in own_norms:
+            return False
+        ok = {hira((pron or "").lstrip("〜"))} | {hira(x) for x in top_read or ()}
+        return hira(f.get("Read", "")) in ok
+
+    def _split_forms(self, words):
+        """The combined alt list -> `alt` (the spellings finalize_words marked in
+        _spell: typed answers) and `forms` (every other surface: conjugations,
+        suffix uses, counters with their number, long greetings; located in
+        text, never typed). Order within each list is the combined order."""
+        for w in words:
+            spell = w.pop("_spell", set())
+            both = w.pop("alt", None) or []
+            alt = [a for a in both if a in spell]
+            forms = [a for a in both if a not in spell]
+            w.pop("forms", None)
+            if alt:
+                w["alt"] = alt
+            if forms:
+                w["forms"] = forms
+            self.stats["alt split: spellings (alt)"] += len(alt)
+            self.stats["alt split: inflected/used surfaces (forms)"] += len(forms)
 
     def _link_stats(self, words, ship_toks, key_to_word):
         """How the shipped sentence links were decided: confirmed or corrected

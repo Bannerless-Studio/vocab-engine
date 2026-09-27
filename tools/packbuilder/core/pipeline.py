@@ -18,7 +18,7 @@ from .util import STATS, log, stat, dump_json, write_json
 from .words import build_words, apply_gloss_display
 
 STAGES = ["all", "corpus", "tag", "lex", "freq", "words", "sentences", "final"]
-WORD_FIELDS = ("id", "w", "lemma", "pos", "en", "lv", "rank", "pron", "alt")
+WORD_FIELDS = ("id", "w", "lemma", "pos", "en", "lv", "rank", "pron", "alt", "forms")
 
 
 def build_pack_json(env, words, raw_upos):

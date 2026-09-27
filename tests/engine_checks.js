@@ -2304,6 +2304,75 @@ async function swChecks(){
   }
 })();
 
+// ------------------------------------------------------------ [28] word forms: located in text, never typed
+(function(){
+  console.log("\n[28] word `forms`: inflected surfaces locate the word in text but are never typed answers");
+  const hits = parts => parts.filter(p => p.hit).map(p => p.text);
+  const JP = { key:"ja_f", spaced:false, typing:{ accents:"lenient" } };
+  const taberu = { id:"taberu", w:"食べる", en:"to eat", lv:"N5", pron:"たべる", alt:["たべる"], forms:["食べない","食べた","食べます"] };
+  const shoku = { id:"shoku", w:"食", en:"food", lv:"N5" };
+  const suru = { id:"suru", w:"する", en:"to do", lv:"N5", forms:["した","して"] };
+  const shita = { id:"shita", w:"した", en:"below", lv:"N5" };
+  const JWF = [taberu, shoku, suru, shita];
+  const JBF = {}; JWF.forEach(w => { JBF[w.id] = w; });
+  check("forms: typed 食べる and alt たべる accepted",
+    VC.acceptTyped("食べる", taberu, JP, [], JWF) && VC.acceptTyped("たべる", taberu, JP, [], JWF));
+  check("forms: typed 食べない / 食べた / 食べます rejected for 食べる (forms are not typed targets)",
+    !VC.acceptTyped("食べない", taberu, JP, [], JWF) && !VC.acceptTyped("食べた", taberu, JP, [], JWF) && !VC.acceptTyped("食べます", taberu, JP, [], JWF));
+  check("forms: cloze extra (the literal blanked surface) still accepts the inflected form",
+    VC.acceptTyped("食べた", taberu, JP, ["食べた"], JWF));
+  const s1 = { id:"f1", t:"昨日パンを食べた。", words:["taberu"] };
+  check("forms: highlight bolds 食べた for 食べる", util.isDeepStrictEqual(hits(VC.highlightParts(s1, taberu, JBF, JP)), ["食べた"]));
+  const gm = VC.gapMatch(s1, taberu, JBF, JP);
+  check("forms: cloze locates 食べる at its form 食べた", !!gm && gm.text === "食べた" && gm.start === 5);
+  const s2 = { id:"f2", t:"パンを食べた。", words:["shoku","taberu"] };
+  const noForms = Object.assign({}, JBF, { taberu: Object.assign({}, taberu, { forms: undefined }) });
+  check("forms: cloze never cuts 食 out of 食べた (a form of 食べる); without the form it would",
+    VC.gapMatch(s2, shoku, JBF, JP) === null && !!VC.gapMatch(s2, shoku, noForms, JP));
+  check("forms: highlight of 食 inside the form 食べた is dropped", hits(VC.highlightParts(s2, shoku, JBF, JP)).length === 0);
+  const s3 = { id:"f3", t:"食べるのが好き。", words:["taberu"] }, s4 = { id:"f4", t:"何もない。", words:["taberu"] };
+  check("forms: example sentences rank w, then a form, then not visible",
+    util.isDeepStrictEqual(VC.exampleSentences(taberu, [s4, s1, s3], JP, 3).map(s => s.id), ["f3","f1","f4"]));
+  const seg = VC.passageSegments({ t:s1.t, words:["taberu"] }, JBF, JP);
+  check("forms: passage fallback matching taps 食べた as 食べる",
+    seg.parts.some(p => p.text === "食べた" && p.id === "taberu") && seg.unplaced.length === 0);
+  const found = VC.searchWords(JWF, "食べた");
+  check("forms: Words search 食べた finds 食べる", found.length > 0 && found[0].id === "taberu");
+  check("forms: textForms = w, alts, forms; forms never a homograph surface",
+    util.isDeepStrictEqual(VC.textForms(taberu), ["食べる","たべる","食べない","食べた","食べます"]) &&
+    util.isDeepStrictEqual(VC.meaningOpts(shita, [suru, shita]).map(v => v.id), ["suru"]));
+  // Collision guard: only lenient-fold matches consult it. sí typed as "si": the guard
+  // must not see another word's `forms` "si" (not a typed target), but must see an alt.
+  const LP = { key:"es_f", typing:{ accents:"lenient" } };
+  const si = { id:"si", w:"sí", en:"yes", lv:"A1" };
+  const viaForm = { id:"x", w:"xx", en:"other", lv:"A1", forms:["si"] };
+  const viaAlt = { id:"x", w:"xx", en:"other", lv:"A1", alt:["si"] };
+  check("forms: collision guard ignores another word's forms (si for sí accepted), still honours an alt",
+    VC.acceptTyped("si", si, LP, [], [si, viaForm]) && !VC.acceptTyped("si", si, LP, [], [si, viaAlt]));
+  check("forms: typed した for the word した (another word's form) accepted; for する rejected",
+    VC.acceptTyped("した", shita, JP, [], JWF) && !VC.acceptTyped("した", suru, JP, [], JWF));
+
+  // validator
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "vocab_pack_forms_"));
+  const run = extra => {
+    const words = Array.from({length:20}, (_,i)=>Object.assign({ id:`a${i}`, w:`w${i}`, en:`gloss ${i}`, lv:"A1" }, i === 0 ? extra : {}));
+    fs.writeFileSync(path.join(tmp, "pack.json"), JSON.stringify({ key:"t", name:"T", tts:"ja-JP", levels:[{id:"A1",label:"A1"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false }));
+    fs.writeFileSync(path.join(tmp, "words.json"), JSON.stringify(words));
+    fs.writeFileSync(path.join(tmp, "sentences.json"), "[]");
+    cp.spawnSync("python3", [path.join(ROOT, "tools", "jsonify_pack.py"), tmp]);
+    return cp.spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), tmp], { encoding:"utf8" });
+  };
+  const ok = run({ alt:["x0"], forms:["w0s","w0d"] });
+  check("validator: forms list of strings -> 0 errors, no forms warning", ok.status === 0 && !/\.forms/.test(ok.stdout));
+  const bad = run({ forms:"w0s" }), bad2 = run({ forms:["ok", ""] });
+  check("validator: forms not a list of non-empty strings -> error",
+    bad.status === 1 && /word a0\.forms must be a list of non-empty strings/.test(bad.stdout) && bad2.status === 1);
+  const dup = run({ alt:["x0"], forms:["x0", "w0"] });
+  check("validator: a form equal to w or an alt -> warning (both), not an error",
+    dup.status === 0 && /forms entry 'x0' equals/.test(dup.stdout) && /forms entry 'w0' equals/.test(dup.stdout));
+  fs.rmSync(tmp, { recursive:true, force:true });
+})();
+
 appBootChecks.catch(e => { console.error("app boot checks crashed:", e); fails++; })
   .then(() => swChecks().catch(e => { console.error("service worker checks crashed:", e); fails++; })).then(() => {
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

@@ -41,7 +41,19 @@ function nSets(list, setSize){ return Math.ceil(list.length / (setSize||10)); }
 // ------------------------------------------------------------------ distractors
 // Shared "would this distractor also be a right answer?" guards. A word's surfaces are
 // its `w` plus every `alt`; two words sharing any surface are homographs to the learner.
+// `forms` (inflected surfaces, see textForms) are never shown or typed, so never count.
 function surfaces(e){ return [e.w, ...((e && e.alt) || [])].map(normKey).filter(Boolean); }
+// Every surface a word can take inside running text: `w`, each `alt` (other spellings,
+// accepted as typed answers) and each `forms` entry (inflected surfaces such as ja
+// 食べた/食べない for 食べる: never accepted as typed answers, never distractor surfaces).
+// The one list every locate-in-text site uses: cloze location and protection, example
+// sentence tiers and highlighting, passage fallback matching and Words search. Typed
+// acceptance (acceptTyped and its collision index) and the homograph guards read w + alt
+// only. Pack schema: docs/PACK_SCHEMA.md words table.
+function textForms(e){
+  if(!e) return [];
+  return [e.w, ...(Array.isArray(e.alt) ? e.alt : []), ...(Array.isArray(e.forms) ? e.forms : [])];
+}
 function sharesSurface(a, b){ const s = new Set(surfaces(a)); return surfaces(b).some(x=>s.has(x)); }
 // Same pronunciation (when both carry pron): indistinguishable in a hear item.
 function samePron(a, b){ return !!(a && b && a.pron && b.pron) && normKey(a.pron) === normKey(b.pron); }
@@ -262,7 +274,7 @@ function pointingKey(strictForm){
     .replace(/(?<=[\u0400-\u04ff][\u0300-\u036f]*)\u0301/g, "").normalize("NFC");
 }
 // Per words array (and case mode): strict key -> entries, pointing key -> entries, over
-// every entry's w and alt. Built once.
+// every entry's w and alt (never `forms`: those are not typed targets). Built once.
 const GUARD_INDEX = new WeakMap();
 function guardIndex(words, caseSensitive){
   let byCase = GUARD_INDEX.get(words);
@@ -278,7 +290,8 @@ function guardIndex(words, caseSensitive){
   return (byCase[k] = { strict, pointing });
 }
 // Accepts entry.w or any entry.alt (plus any `extra` surfaces, e.g. the literal form a
-// cloze blank had in its sentence), compared after normalising both sides.
+// cloze blank had in its sentence), compared after normalising both sides. entry.forms
+// (inflected surfaces) are never accepted: "Type the word" wants the word itself.
 // words (optional, the pack's WORDS): collision guard for lenient folding. An exact
 // (strict-form) match to the target always passes. An answer that matches only after
 // folding (any lenient fold: accents, stress, pointing, joiners, LENIENT_LETTERS) is
@@ -346,14 +359,15 @@ function findSurface(text, surface, spaced){
   let m; while((m = re.exec(t))){ out.push({ start:m.index, end:m.index+m[0].length, text:m[0] }); }
   return out;
 }
-// Where word `entry` sits in sentence text. Every form (w and each alt) is searched;
+// Where word `entry` sits in sentence text. Every form (textForms: w, each alt, each
+// entry of `forms`) is searched;
 // overlapping hits are one occurrence (e.g. alt "acqua" inside w "l'acqua"). Returns
 // the widest hit when there is exactly one occurrence, else null: absent, or visible
 // more than once (blanking one occurrence would leave the answer — or an alt form of
 // it — in plain sight elsewhere).
 function locateWord(sentence, entry, pack){
   const spaced = !pack || pack.spaced !== false;
-  const forms = [...new Set([entry.w, ...(entry.alt||[])].filter(Boolean))];
+  const forms = [...new Set(textForms(entry).filter(Boolean))];
   const hits = [];
   forms.forEach(f => findSurface(sentence.t, f, spaced).forEach(m => hits.push(m)));
   if(!hits.length) return null;
@@ -367,7 +381,7 @@ function locateWord(sentence, entry, pack){
   }
   return best;
 }
-// Every surface string a cloze blank must not cut into: all pack words' w/alt plus
+// Every surface string a cloze blank must not cut into: all pack words' textForms plus
 // pack.compounds (multi-word or multi-glyph units that aren't drillable words, e.g.
 // zh 这个). Cached per wordsById object.
 const SURFACE_CACHE = new WeakMap();
@@ -375,7 +389,7 @@ function packSurfaces(wordsById, pack){
   let c = SURFACE_CACHE.get(wordsById);
   if(!c || c.pack !== pack){
     const set = new Set();
-    Object.values(wordsById).forEach(w => [w.w, ...(w.alt||[])].forEach(x => { if(x) set.add(String(x)); }));
+    Object.values(wordsById).forEach(w => textForms(w).forEach(x => { if(x) set.add(String(x)); }));
     ((pack && pack.compounds) || []).forEach(x => { if(x) set.add(String(x)); });
     c = { pack, list: [...set] };
     SURFACE_CACHE.set(wordsById, c);
@@ -409,8 +423,7 @@ function spannedByLonger(sentence, match, wordsById, pack){
 // article is the pack article visible right before the blank ("la", "l'", "den"), or "".
 function gapMatch(sentence, entry, wordsById, pack){
   const arts = packArticles(wordsById), bare = bareForm(entry, arts);
-  const forms = [entry.w, ...(entry.alt||[])];
-  const m = locateWord(sentence, forms.includes(bare) ? entry : Object.assign({}, entry, { alt: [...forms.slice(1), bare] }), pack);
+  const m = locateWord(sentence, textForms(entry).includes(bare) ? entry : Object.assign({}, entry, { alt: [...(entry.alt||[]), bare] }), pack);
   if(!m || spannedByLonger(sentence, m, wordsById, pack)) return null;
   const cut = articleCut(m.text, arts, entry), text = m.text.slice(cut);
   if(trailingCut(text, bare)) return null;
@@ -572,17 +585,18 @@ function gapChoices(entry, match, pool, pack){
 }
 // Up to n example sentences for `entry` (sentences whose `words` list its id), in pack
 // order within tiers: sentences where `w` is visible as a whole token first, then ones
-// where an alt is, then the rest (the headword isn't shown as written, e.g. inflected).
+// where an alt or a `forms` entry is, then the rest (the word isn't visible as any listed
+// surface).
 function exampleSentences(entry, sentences, pack, n){
   const spaced = !pack || pack.spaced !== false;
   const seen = s => findSurface(s.t, entry.w, spaced).length ? 0
-    : (entry.alt||[]).some(a => a && findSurface(s.t, a, spaced).length) ? 1 : 2;
+    : textForms(entry).slice(1).some(a => a && findSurface(s.t, a, spaced).length) ? 1 : 2;
   const tiers = [[], [], []];
   (sentences||[]).forEach(s => { if((s.words||[]).indexOf(entry.id) >= 0) tiers[seen(s)].push(s); });
   return [...tiers[0], ...tiers[1], ...tiers[2]].slice(0, n);
 }
 // Example-sentence highlighting: splits sentence text into [{text, hit}] segments where
-// hit marks each place the taught word is visible. Every form (w and each alt) is
+// hit marks each place the taught word is visible. Every textForms surface is
 // searched as findSurface does for the pack; overlapping hits merge into one (the
 // widest, e.g. "l'acqua" over "acqua"); a hit inside a longer pack word or compound
 // (本 inside 日本, 为 inside 为什么) is dropped, as for cloze. Not visible anywhere:
@@ -590,7 +604,7 @@ function exampleSentences(entry, sentences, pack, n){
 function highlightParts(sentence, entry, wordsById, pack){
   const t = String((sentence && sentence.t) || "");
   const spaced = !pack || pack.spaced !== false;
-  const forms = [...new Set([entry && entry.w, ...((entry && entry.alt) || [])].filter(Boolean))];
+  const forms = [...new Set(textForms(entry).filter(Boolean))];
   const hits = [];
   forms.forEach(f => findSurface(t, f, spaced).forEach(m => hits.push(m)));
   hits.sort((a,b)=>a.start-b.start || b.end-a.end);
@@ -618,7 +632,8 @@ function pronShown(x){
 }
 
 // ------------------------------------------------------------------ Words search
-// Words-tab search: a word matches when the query occurs in its w, any alt, its pron or
+// Words-tab search: a word matches when the query occurs in its w, any alt or `forms`
+// entry (食べた finds 食べる), its pron or
 // its gloss, compared case-folded and accent-folded (foldAccents: Latin accents, stress
 // marks, harakat, ZWNJ) on both sides. Whitespace is also ignored as a second chance, so
 // "nihao" finds "nǐ hǎo" and "ni hao" finds "nihao". Ranking (stable, pack order within
@@ -697,10 +712,10 @@ function searchForms(x){
 }
 const SEARCH_CACHE = new WeakMap();
 function searchFields(v){
-  const src = [v.w, v.pron, v.en, ...(v.alt||[])].join("\u0001");
+  const src = [v.w, v.pron, v.en, ...textForms(v).slice(1)].join("\u0001");
   let r = SEARCH_CACHE.get(v);
   if(r && r.src === src) return r;
-  const target = [v.w, v.pron, ...(v.alt||[])].filter(Boolean).flatMap(searchForms);
+  const target = [v.pron, ...textForms(v)].filter(Boolean).flatMap(searchForms);
   const g = gloss(v);
   const senses = g.split(/[,;]/).flatMap(x => [x, x.replace(/^\s*to\s+/i, "")]).flatMap(searchForms);
   r = { src, target, gloss: searchForms(g), senses };
@@ -1419,7 +1434,7 @@ function passageLength(p, pack){
 // the token each word was read from, so inflected forms like mele or va are tappable).
 // A span is used when its bounds are valid, it covers non-blank text without splitting a
 // surrogate pair, its id is in s.words and known, and it does not overlap an earlier span. Ids in s.words with no span fall back to surface matching:
-// w, every alt and its bare form, as findSurface does for the pack; overlapping hits keep
+// textForms (w, every alt and `forms` entry) and its bare form, as findSurface does for the pack; overlapping hits keep
 // the longest (per start, earliest first), so 为什么 wins over 为, and never cover a span.
 // A pack without spans behaves exactly as before. Joining every piece's text gives s.t.
 // A span may carry an optional 4th element, a display-only gloss string (zh: a phrase
@@ -1445,7 +1460,7 @@ function passageSegments(s, wordsById, pack){
   const hits = [];
   ids.forEach(id => {
     const e = by[id]; if(!e || spanned.has(id)) return;
-    const forms = [...new Set([e.w, ...(e.alt || []), bareForm(e, arts)].filter(Boolean))];
+    const forms = [...new Set([...textForms(e), bareForm(e, arts)].filter(Boolean))];
     forms.forEach(f => findSurface(t, f, spaced).forEach(m => hits.push({ start: m.start, end: m.end, id })));
   });
   hits.sort((a,b) => (b.end - b.start) - (a.end - a.start) || a.start - b.start);
@@ -3028,7 +3043,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   targetLang, fontFamilyOf, fontStackOf, lineHeightOf, fontsHref, scriptDisplay, rtlRuns,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,
-  findSurface, locateWord, packSurfaces, spannedByLonger, gapMatch, gapCandidateIndices, blankSentence,
+  findSurface, textForms, locateWord, packSurfaces, spannedByLonger, gapMatch, gapCandidateIndices, blankSentence,
   strata, placementItemCount, placementStopIndex, applyPlacement, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
