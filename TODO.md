@@ -179,6 +179,51 @@ langs/base.py bands (600/700/700 → add B2) and placement buckets, words.py lev
 (additive), 20 B2 passages per language, README scope lines. Suggested order: ja, fr, es,
 it, ru, de, ar → fa, id, ko, hi → ur → zh.
 
+Cost note (2026-09-27, after the culture-native scout round, item 3): once story sources are
+wired in, the sentence/passage half of a B2 expansion should run roughly a third cheaper —
+aligned prose from StoryWeaver/ASb/Bloom replaces generation-plus-review for any word with a
+story attestation, cutting the LLM sentence-authoring and QA pass proportionally. The
+word-list half (kaikki gloss lookup, sensitive-gloss filtering, level assignment) is
+unaffected — its cost and the viability table above are unchanged.
+
+### 3. Culture-native sentence/passage layer (approved 2026-09-27, after the story-sources scout)
+Plan: swap generated sentences for story-sourced ones where an aligned story exists, top up
+each word to a cap of 4 sentences, and add reading passages built from aligned stories,
+starting with Urdu. Backbone: StoryWeaver (CC BY 4.0) for ur/ko/fa/hi/id/ar/sw; African
+Storybook for so/sw and extra ar; Let's Read Asia's CC BY subset for native ur/id/prs
+flavour; Bloom's CC BY/BY-SA/CC0 subset for ko/sw. Per-language yields: see "Culture-native
+sources per shipped language" in docs/LANGUAGES.md.
+
+Gotchas (docs/scouts/story-sources-2026-09-27.md):
+- StoryWeaver rate-limits at ~10 fast calls (HTTP 429); a 3.5s gap between calls held.
+- A "translation" list entry tagged English can be empty (Urdu id 310774) or carry a
+  non-English title (one Arabic sample); pick the next candidate, don't assume the first
+  listed English twin has real text.
+- Alignment is reliable at the page level (7/7 sampled pairs had equal page counts) but not
+  the sentence level (per-page sentence counts differed in most samples) — align by page,
+  then split sentences within each page pair.
+- Let's Read Asia's usable (CC BY) share is small: ~41% of sampled Urdu titles (13/32), ~4%
+  of sampled Indonesian titles (2/49); most of the rest is CC BY-NC or NC-ND and not
+  shippable.
+- Rekhta is "all rights reserved" — excluded entirely, do not scrape.
+- VOA text is public domain everywhere but coverage is uneven and has no English alignment:
+  Korean and Persian still publish; Urdu and Indonesian froze 2025-03-15; Swahili froze
+  2024-12-31; Hindi VOA does not resolve.
+
+### 4. Swahili foundation (unpublished, built 2026-09-27)
+Full state, numbers, and the check.sh failure detail are in docs/LANGUAGES.md "Swahili (swh)
+BUILT, UNPUBLISHED". Summary: 2,000 words (600/700/700), 2,957 sentences, 40 passages
+(A1+A2, no B1 yet), local-only commit `88d1d5e` in `../swahili` (no remote, no push, not
+published). Measured cost: ~$77.40 (sw-pack-builder transcript, 7 compactions, Opus 5.5
+pricing). Remaining before publish: rebuild pack/*.js, commit langs/sw.py into vocab-engine
+proper, add B1 passages, a human review pass on A1/A2 sentences, then the usual
+build→check→publish→live-check sequence.
+
+**Somali: not now.** kaikki coverage (~1,285 senses, or an estimated ~1,600-2,100 with a
+Wiktionary translation table and PanLex added) stays under the 2,000-word target with no
+verified path to close the gap from open data; the only culture-native aligned source is
+African Storybook at ~87 stories. Revisit only if a bigger open Somali dictionary surfaces.
+
 ## Backlog (not scheduled)
 - **Video stage** (user 2026-09-25: backlog only): level-graded YouTube
   videos per language with a timed transcript and passage-style questions,
@@ -212,3 +257,4 @@ STATUS 2026-09-27 00:00: engine main dec16e8 = three merges on top of dfd2f6e: a
 STATUS 2026-09-27 05:15: engine main e370698 = dec16e8 + a6eb121 (engine-passage-audio: passage question spoken on mount + #rpa Replay, source sentence played on reveal + #rvp, readResults Replay per sentence; question translation hidden behind "Show translation" #qtr with per-question peek flag tr shown on the results line and NOT feeding weak words; stopSpeaking() at the top of every screen-entry function — render, todayStep, todayRender, soundsRender, wordsRender, readRender, readResults, testRender, placeRender, placeVocabNext, placeResult, progressRender, readQuestionScreen — after the review reproduced a watchdog retry speaking on the results screen and found the same class in placement; ttsDriver `cancelled` self-expires after cancelTtlMs 500 ms; dnext stops speech) + e370698 (engine-listen-mode: Today spaced re-read becomes a listening pass when every sentence has a clip or a voice is usable — text hidden behind numbered play rows, Play all chained on speak()'s onEnd with a tts.dropped() guard against engines that fire onend on cancel, "Show text" logged, ceil(n/2) audio-only questions from a passage-seeded shuffle rotated by attempt count so consecutive attempts never repeat, "Show question" logged as qh, results header lines; done record gains OPTIONAL l:1, replaced whole by a later reading pass; alternation via l; Read tab always a reading pass). Suites: engine 544, pron_aids 156, migration 279, characters_app 177, script_app 211, audio 88, passage_audio 26, listen_mode 59, flagoff 26/26. Both branches Opus-reviewed (MERGE after one fix round each). All 13 sites republished on e370698 and live md5-verified: chinese e7b797b (rollback baf8905; storage audit: only the optional l field; browser proof PASS 5/5 KEEP, see chinese/TODO.md), italian 98f863d, spanish 0ca375e, french c3b1a60, german 4f215db, russian 2a891c4, indonesian d517ec6, arabic 37f98cb, persian 4fe508f (+ f5840f9 README stale no-audio claims fixed), hindi 7db3b64, urdu 3bda819, japanese 65a3811, korean 5fbd73a. Pack files unchanged everywhere. Engine follow-up (in TODO Engine list): readRender re-mount on tab return / voiceschanged re-speaks the question and loses an answered question's reveal. Open user decision: Japanese typed items accepting inflected alts (recommendation: spelling alts only via a packbuilder split).
 STATUS 2026-09-27 05:40: DECISIONS (user): Japanese typed items accept spelling alternates only (私/わたし, こと/事) and never inflected forms (食べない for 食べる) → new optional word field `forms` (locate-in-text surfaces, not typed targets), ja builder splits alt/forms; worker ja-forms on branch engine-ja-forms (brief .cache/briefs/ja-forms-split.md), review then Japanese-only republish. SWAHILI GOES AHEAD at Urdu/Indonesian parity (user: "on par with urdu/indo is good"; Urdu TTS confirmed on Android Chrome, Indonesian on macOS): no recorded audio, corpus-frequency ranking (GlobalVoices + Tatoeba + FLORES, no subtitle list, rule-based lemmatiser in langs/sw.py), mostly generated sentences, 60 passages, human review pass on A1/A2 planned as a TODO; worker sw-pack-builder (brief .cache/briefs/sw-pack-builder.md) → QA → publish Bannerless-Studio/swahili → live check. Somali stays not viable.
 STATUS 2026-09-27 07:20: DECISION (user): alt/forms wave after the engine-ja-forms merge applies the same rule to every pack via alt_kind overrides — ko conjugated endings, id clitic/affixed forms, hi oblique/plural/verb forms (nukta/chandrabindu spellings stay alt), ar broken plurals, fa present stems, de declined forms (ß/ss stays alt), and es/it/fr gender and reflexive pairs ALSO go to forms (consistency over leniency; article bare forms alt[0] stay alt). ru/ur unchanged. Worker audit counts: .cache/briefs/engine-ja-forms-fixreport.md.
+STATUS 2026-09-27 08:20: alt/forms wave in progress. Japanese live (engine-ja-forms merged to engine 87cd160, japanese live 213679b). ko/id/hi built on branch engine-forms-a: review done, an Indonesian fix in progress. de/es/it/fr/ar/fa building on branch engine-forms-b, in progress. ru/ur are unchanged by this wave. A republish of all 13 sites follows once both branches merge.
