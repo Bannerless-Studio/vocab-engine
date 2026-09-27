@@ -2044,6 +2044,13 @@ class Arabic(LanguageSpec):
         lem, n = self._form_lemma.get(f, (None, 0))
         return lem if n >= 3 else None      # a stray reading (خطاء twice as خطوة) is no attestation
 
+    def alt_kind(self, word, surface):
+        """The surfaces finalize_words marked in word["_form"] (not shipped)
+        are forms, located in text and never typed: a noun's broken plural
+        (بلدان for بلد) and a verb's present (يكون for كان), its only alt
+        sources. Any other alt stays an alt."""
+        return "form" if surface in (word.get("_form") or ()) else "alt"
+
     def finalize_words(self, env, ctx, words):
         from ..core.gloss import strip_gloss_style
         from ..core.util import stat
@@ -2128,6 +2135,7 @@ class Arabic(LanguageSpec):
                     stems += 1
             if alt:
                 w["alt"] = alt
+                w["_form"] = list(alt)     # plural / present: forms (alt_kind)
             else:
                 w.pop("alt", None)
         stat("ar_display", {"words_without_pron": sorted(no_pron),
