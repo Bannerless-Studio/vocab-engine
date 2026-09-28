@@ -48,8 +48,8 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     check("dist/sw.js matches the sw.js a fresh build writes next to the page (not stale)",
       fs.existsSync(shippedSw) && fs.readFileSync(path.join(tmpDir, "sw.js"), "utf8") === fs.readFileSync(shippedSw, "utf8"));
     const srcs = [...built.matchAll(/<script[^>]*\ssrc=/g)].length;
-    const links = [...built.matchAll(/<link[^>]*href="([^"]+)"/g)].map(m=>m[1]).filter(h=>!/^https:\/\/fonts\.(googleapis|gstatic)\.com/.test(h));
-    check("built file is self-contained (no <script src>, only Google Fonts links)", srcs === 0 && links.length === 0);
+    const links = [...built.matchAll(/<link[^>]*href="([^"]+)"/g)].map(m=>m[1]).filter(h=>!/^https:\/\/fonts\.(googleapis|gstatic)\.com/.test(h) && !/^data:/.test(h));
+    check("built file is self-contained (no <script src>, only Google Fonts links and the data: favicon)", srcs === 0 && links.length === 0);
     check("built file has no leftover dev pack loader", !built.includes("PACK-BEGIN") && !built.includes("document.write"));
     // Fonts never block first paint: no parser-inserted <link rel="stylesheet">; the
     // IBM Plex CSS is a preload that turns itself into a stylesheet once loaded.
@@ -864,6 +864,10 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     // type a Latin reading or romanisation, not the target script)
     && [...app.matchAll(/inputTA: /g)].length === 2 && /function pronTypeItem[\s\S]*?inputTA: ""/.test(app)
     && /if\(k === "symType"\)\{[^\n]*\n[^\n]*\n\s*return \{ kind:"type", key: it\.key, label:"Type how it sounds", html: big\(it\.show\), inputTA: ""/.test(app));
+
+  // Favicon: a data: URI icon link so GitHub Pages stops 404ing /favicon.ico on every load.
+  const iconLink = /<link rel="icon" href="(data:[^"]+)">/.exec(app);
+  check("app.html: <link rel=\"icon\"> exists and is a data: URI", !!iconLink);
 })();
 
 (function(){
