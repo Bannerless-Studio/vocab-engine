@@ -980,6 +980,14 @@ class Swahili(LanguageSpec):
                  ("ke", "ADJ"): None}           # bound stem (wa kike); its corpus hits are English like/make/Mike
     sensitive_re = re.compile(r"(?<![A-Za-z])(" + SENSITIVE_SW + "|" + SENSITIVE_EN + r")(?![A-Za-z])", re.I)
     sensitive_gloss_re = re.compile(r"\b(" + SENSITIVE_GLOSS_EN + r")\b", re.I)
+    # id.py/ja.py/ko.py's shared violent/porn-industry list, extended: sw's actual
+    # A1/A2 hits (kingono "sexual", uchi "naked, nude", kimapenzi "romantic",
+    # mpenzi "lover, beloved, darling") are plain sexual/romantic glosses the
+    # shared list's kill/rape/porn/prostitut/etc terms don't match on their own
+    lower_level_gloss_re = re.compile(r"\b(kill\w*|murder\w*|rape[ds]?|raping|rapist|shoot\w*|stab\w*|"
+                                      r"porn\w*|prostitut\w*|suicid\w*|bomb\w*|explod\w*|explosi\w*|"
+                                      r"poison\w*|blood\w*|corpse\w*|dead body|sexual\w*|naked|nude\w*|"
+                                      r"romantic|lover\w*|beloved|darling)\b", re.I)
     drop_all_levels = drop_all_re(r"(?<![A-Za-z])(" + DROP_ALL_SW + r")(?![A-Za-z])")
     word_ceiling_re = make_word_ceiling_re()
     qa_closed_sets = {
