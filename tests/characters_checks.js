@@ -347,7 +347,8 @@ function suite(F){
   // ------------------------------------------------------------ [32] learning-order flip
   (function(){
     const p = P(full(i1), { [units[0].id]: rec(2, 1) });
-    p.w = { [words[0].id]: rec(3) };
+    // Records for every counted word, as real progress has; learnedWords reads records.
+    p.w = {}; VC.pinPrefixRecords(p, words, pack); p.w[words[0].id] = rec(3);
     const before = clone(p);
     const pathB = VC.stagePath(pack, words, units, p), stB = VC.nextStage(pack, words, units, p);
     VC.setCharOrder(p, true);
@@ -371,6 +372,8 @@ function suite(F){
     const c = {}; VC.charStageUnits(stageLv[0], units, pack).slice(0, 12).forEach((u, i) => { c[u.id] = rec(i % 5, i % 3 === 0 ? 1 : 0); });
     const p = P(full(i1), c);
     const lw = VC.learnedWords(words, pack, p);
+    // Records for every counted word, as real progress has; learnedWords reads records.
+    lw.forEach(w => { p.w[w.id] = { r:0, w:0, s:0 }; });
     lw.slice(0, 7).forEach((w, i) => { p.w[w.id] = { r:1, w:0, s:1, prov: i < 3 ? 1 : undefined }; if(i >= 3) delete p.w[w.id].prov; });
     const snap = VC.todaySnapshot(pack, words, units, p);
     const rng = mulberry32(34);
@@ -456,7 +459,10 @@ function flagOffEquality(){
     for(let t=0; t<150; t++){
       const sets = {}; ids.forEach(lv => { sets[lv] = Math.floor(gen() * (VC.nSets(byLv[lv], 10) + 1)); });
       const raw = { sets, w:{}, sessions: t };
-      words.forEach(w => { if(gen() < 0.3) raw.w[w.id] = { r: Math.floor(gen()*5), w: Math.floor(gen()*3), s: Math.floor(gen()*5), prov: gen() < 0.2 ? 1 : undefined }; });
+      // Records exactly cover each counter prefix, as real progress does, so the records rule
+      // and the base engine's prefix rule name the same learned words.
+      const pre = new Set(ids.flatMap(lv => byLv[lv].slice(0, sets[lv] * 10).map(w => w.id)));
+      words.forEach(w => { if(pre.has(w.id)) raw.w[w.id] = { r: Math.floor(gen()*5), w: Math.floor(gen()*3), s: Math.floor(gen()*5), prov: gen() < 0.2 ? 1 : undefined }; });
       Object.values(raw.w).forEach(r => { if(r.prov === undefined) delete r.prov; });
       if(withRecs && units && units.length){ raw.chars = { c:{} }; units.forEach(u => { if(gen() < 0.3) raw.chars.c[u.id] = { r:1, w: Math.floor(gen()*2), s: Math.floor(gen()*4) }; }); }
       // progress functions (the chars key, when a stripped pack sees one, is carried untouched by both)

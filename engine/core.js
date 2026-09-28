@@ -681,7 +681,13 @@ function applyPlacement(prog, st, passed, words, pack){
   const ids = levelIds(pack), byLv = wordsByLevel(words, pack), size = setSizeOf(pack);
   const firstIdx = ids.indexOf(String(((pack.placement||[])[0]||[])[0]));
   if(passed > 0 && firstIdx > 0) ids.slice(0, firstIdx).forEach(lv => { out.sets[lv] = Math.max(out.sets[lv]||0, nSets(byLv[lv], size)); });
-  learnedWords(words, pack, out).forEach(w => { if(!out.w[w.id]) out.w[w.id] = {r:1,w:0,s:1,prov:1}; });
+  // Legacy levels are pinned at their old counters first; then only the prefix this attempt
+  // asserted is seeded, never a counter prefix a republish may have shifted.
+  pinPrefixRecords(out, words, pack, undefined, prog.sets);
+  const seed = {};
+  for(let i=0;i<passed;i++){ const b = st[i]; seed[b.lv] = Math.max(seed[b.lv]||0, b.s1); }
+  if(passed > 0 && firstIdx > 0) ids.slice(0, firstIdx).forEach(lv => { seed[lv] = nSets(byLv[lv], size); });
+  Object.keys(seed).forEach(lv => (byLv[lv]||[]).slice(0, seed[lv]*size).forEach(w => { if(!out.w[w.id]) out.w[w.id] = {r:1,w:0,s:1,prov:1}; }));
   out.placedOnce = true;
   return out;
 }
@@ -845,22 +851,62 @@ function provPick(list, n, wrecs){
   return shuffle(list.filter(x=>{ const p = (wrecs||{})[x.id]; return p && p.prov && (p.s||0) < WORD_MASTERED; })).slice(0,n);
 }
 
-// `d`: drilled ahead of its set from the Words tab.
+// A word is learned once it has a word record: every path that creates one teaches or
+// drills the word (Learn, Words-tab drill, review), asserts it (placement) or flags it `d`
+// (a passage weak word). The set counter only feeds progress bars, because a republish that
+// reorders or edits a level would shift a counter-derived prefix (TODO.md, 2026-09-28).
+// A level without a taught record falls back to its counter prefix plus `d` words: legacy
+// exports and seeds carry sets without word records, and `d` (drilled ahead of the counter)
+// says nothing about the counter's own prefix.
+const taughtRec = (r, w) => !!(r[w.id] && !r[w.id].d);
+function levelLearned(list, sets, size, recs){
+  const r = recs || {};
+  if(list.some(w => taughtRec(r, w))) return list.filter(w => r[w.id]);
+  const pre = list.slice(0, (sets||0)*size); const seen = new Set(pre.map(w => w.id));
+  return pre.concat(list.filter(w => !seen.has(w.id) && r[w.id]));
+}
 function learnedWords(words, pack, prog){
   const size = setSizeOf(pack); const byLv = wordsByLevel(words, pack);
   const out = [];
-  levelIds(pack).forEach(lv=>{ out.push(...byLv[lv].slice(0, ((prog.sets||{})[lv]||0)*size)); });
-  const seen = new Set(out.map(w=>w.id));
-  (words||[]).forEach(v=>{ if(!seen.has(v.id) && prog.w[v.id] && prog.w[v.id].d){ out.push(v); seen.add(v.id); } });
+  levelIds(pack).forEach(lv=>{ out.push(...levelLearned(byLv[lv], (prog.sets||{})[lv], size, prog.w)); });
   return out;
 }
+// `set` is the counter capped to the level's last set, so "set N" stays in range when a
+// republish added words to a level already counted complete.
+function levelNewSet(words, pack, prog, lv){
+  const size = setSizeOf(pack); const list = wordsByLevel(words, pack)[lv] || [];
+  const done = (prog.sets||{})[lv]||0;
+  const got = new Set(levelLearned(list, done, size, prog.w).map(w => w.id));
+  const fresh = list.filter(w => !got.has(w.id)).slice(0, size);
+  if(!fresh.length) return null;
+  return { lv, set: Math.min(done, nSets(list, size) - 1), words: fresh };
+}
 function nextNewSet(words, pack, prog){
-  const size = setSizeOf(pack); const byLv = wordsByLevel(words, pack);
   for(const lv of levelIds(pack)){
-    const done = (prog.sets||{})[lv]||0;
-    if(done < nSets(byLv[lv], size)) return {lv, set: done};
+    const nn = levelNewSet(words, pack, prog, lv);
+    if(nn) return nn;
   }
   return null;
+}
+// Before the first record lands in a records-less level, its counter prefix gets placement's
+// provisional records, so switching the level to the records rule loses nothing.
+function pinPrefixRecords(prog, words, pack, lv, counters){
+  const size = setSizeOf(pack); const byLv = wordsByLevel(words, pack); const sets = counters || prog.sets || {};
+  if(!isObj(prog.w)) prog.w = {};
+  (lv === undefined ? levelIds(pack) : [String(lv)]).forEach(id => {
+    const list = byLv[id] || [];
+    if(list.some(w => taughtRec(prog.w, w))) return;
+    list.slice(0, (sets[id]||0)*size).forEach(w => { if(!prog.w[w.id]) prog.w[w.id] = {r:1,w:0,s:1,prov:1}; });
+  });
+  return prog;
+}
+// The only way word code creates a record, so pinning cannot be skipped.
+function ensureWordRec(prog, words, pack, id){
+  if(prog.w && prog.w[id]) return prog.w[id];
+  const w = (words||[]).find(x => x.id === id);
+  if(w) pinPrefixRecords(prog, words, pack, w.lv);
+  if(!isObj(prog.w)) prog.w = {};
+  return prog.w[id] || (prog.w[id] = {r:0,w:0,s:0});
 }
 function currentLevelIndex(words, pack, prog){
   const nn = nextNewSet(words, pack, prog);
@@ -1270,11 +1316,10 @@ function applyWeakWords(prog, entries, words, pack){
   const learned = new Set(learnedWords(words, pack, prog).map(w => w.id));
   (entries || []).forEach(e => {
     if(!e || !(e.weight > 0)) return;
-    const p = prog.w[e.id] || { r:0, w:0, s:0 };
+    const p = ensureWordRec(prog, words, pack, e.id);
     p.w = (p.w || 0) + e.weight; p.s = 0;
     if(p.prov) delete p.prov;
     if(!learned.has(e.id)) p.d = 1;
-    prog.w[e.id] = p;
   });
   return prog;
 }
@@ -1439,8 +1484,8 @@ function stagePath(pack, words, units, prog, sunits){
   const cfg = charsConfig(pack); const cs = charStages(pack, p);
   const out = [];
   levelIds(pack).forEach(lv => {
-    const n = nSets(byLv[lv], size), k = sets[lv] || 0;
-    out.push({ kind:"words", lv, label: levelLabel(pack, lv), set: k, nsets: n, frac: n ? k/n : 1, done: k >= n });
+    const n = nSets(byLv[lv], size), k = sets[lv] || 0, nn = levelNewSet(words, pack, p, lv);
+    out.push({ kind:"words", lv, label: levelLabel(pack, lv), set: nn ? nn.set : k, nsets: n, frac: nn ? Math.min(k, n-1)/n : 1, done: !nn });
     cs.filter(st => st.after === lv).forEach(st => {
       const list = charStageUnits(st.levels, units, pack);
       const rec = list.filter(u => hasCharRec(recs, u.id)).length;
@@ -2500,7 +2545,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   strata, placementItemCount, placementStopIndex, applyPlacement, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
-  markRec, weakScore, weakFirst, provPick, learnedWords, nextNewSet, currentLevelIndex, availableSentences,
+  markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,

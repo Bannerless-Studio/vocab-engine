@@ -63,6 +63,14 @@ const SEEDS = {
   "HEAD": Object.assign(clone(HSK_FRESH), { w: midW, sets: hsk3done, c: charsSome, charsChoiceSeen:false, placedOnce:true, soundsOpened:true, dismissedSoundsHint:1 }),
 };
 delete SEEDS["C mid-HSK2"].w_d;
+// hsk records every word below its set counter (drills mark each word, placement seeds prov
+// records), and learnedWords now reads records, so seeds carry that prefix like a real export.
+// "v2.1 sentences" keeps its d-only level: that is the counter-prefix fallback.
+for(const [name, seed] of Object.entries(SEEDS)){
+  if(name === "v2.1 sentences" || !seed.sets) continue;
+  seed.w = clone(seed.w || {});
+  for(const lv of Object.keys(seed.sets)) byLv[lv].slice(0, seed.sets[lv]*10).forEach(h => { if(!seed.w[h]) seed.w[h] = rec(1, 0, 1, { prov:1 }); });
+}
 
 const count = m => Object.keys(m || {}).length;
 console.log("[1] seeds and version shapes");

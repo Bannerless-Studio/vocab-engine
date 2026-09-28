@@ -451,7 +451,7 @@ const store = {
   backup(suffix, raw){ return this.setRaw(`${STORE_KEY}_${suffix}`, raw); }
 };
 // reqKind: a pass on a fallback item (hear shown as read, type as recall) must still clear k.
-function markWord(id, ok, kind, reqKind){ VC.markRec(prog.w, id, ok, true, kind, reqKind); store.save(); }
+function markWord(id, ok, kind, reqKind){ VC.ensureWordRec(prog, WORDS, PACK, id); VC.markRec(prog.w, id, ok, true, kind, reqKind); store.save(); }
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
 function markGapWord(id, ok, kind){ if(VC.markMissKind(prog.w, id, ok, kind)) store.save(); }
 function markSentence(id, ok){ VC.markRec(prog.s, id, ok, false); store.save(); }
@@ -1343,7 +1343,7 @@ const HAS_STAGES = HAS_CHARACTERS || HAS_SCRIPT;
 function pathStrip(){
   const stages = HAS_STAGES
     ? VC.stagePath(PACK, WORDS, CHAR_LIST, prog, SU).map(s => ({ label: s.label, frac: s.frac, tl: s.kind === "chars" || s.kind === "script" }))
-    : LEVELS.map(lv=>({ label: levelLabel(lv), frac: nSets(lv) ? (prog.sets[lv]||0)/nSets(lv) : 1 }));
+    : VC.stagePath(PACK, WORDS, [], prog).filter(s => s.kind === "words").map(s => ({ label: s.label, frac: s.frac }));
   return `<div class="path">${stages.map(s=>`<div class="seg"><div class="bar"><i style="width:${Math.round(s.frac*100)}%"></i></div>${s.tl ? tf(s.label) : escapeHtml(s.label)}</div>`).join("")}</div>`;
 }
 // Kept for the session, so finishing a stage mid-session changes neither what Learn teaches
@@ -1460,7 +1460,7 @@ function todayStep(){
   stopSpeaking();
   const snap = HAS_STAGES ? (todayStepState.snap || (todayStepState.snap = takeSnapshot())) : null;
   const lw = learnedWords();
-  const nn = snap ? (snap.stage && snap.stage.kind === "words" ? { lv: snap.stage.lv, set: snap.stage.set } : null) : nextNewSet();
+  const nn = snap ? (snap.stage && snap.stage.kind === "words" ? VC.levelNewSet(WORDS, PACK, prog, snap.stage.lv) : null) : nextNewSet();
   const avail = availableSentences();
   const g = VC.todayGates(lw.length, snap ? snapLearns(snap) : !!nn, avail.length, scriptCount());
   const units = snap && snap.charsStarted ? CHAR_LIST : undefined;
@@ -1481,12 +1481,12 @@ function todayStep(){
       charTeach(cs, snap.stage, () => drill(VC.learnCharPlan(cs.units, PACK).map(planItem), todayStep, missSummary));
       return;
     }
-    if(g.learn){
-      const list = levelList(nn.lv).slice(nn.set*SIZE, nn.set*SIZE+SIZE);
+    if(g.learn && nn){
+      const list = nn.words;
       vocabTeach(list, nn.lv, () => {
         const items = [];
         list.forEach(w => items.push(hearItem(w), readItem(w)));
-        drill(items, () => { prog.sets[nn.lv] = nn.set+1; store.save(); todayStep(); }, missSummary);
+        drill(items, () => { prog.sets[nn.lv] = Math.max(prog.sets[nn.lv]||0, nn.set+1); store.save(); todayStep(); }, missSummary);
       });
       return;
     }
@@ -1716,25 +1716,31 @@ function renderWordBody(){
     wordListInto($("wl"), matches.slice(0,150));
     return;
   }
-  const list = levelList(wordsLv); const total = nSets(wordsLv); const done = prog.sets[wordsLv]||0;
-  if(wordsSet == null) wordsSet = Math.max(0, Math.min(done, total-1));
+  // Slices here are fixed rank-order browsing sets; ✓ means every word in the slice is learned,
+  // and "next new" opens the slice holding the level's first unlearned word.
+  const list = levelList(wordsLv); const total = nSets(wordsLv);
+  const lwAll = learnedWords(); const got = new Set(lwAll.map(w => w.id));
+  const firstNew = list.findIndex(w => !got.has(w.id));
+  const next = Math.max(0, Math.min(firstNew < 0 ? total : Math.floor(firstNew/SIZE), total-1));
+  if(wordsSet == null) wordsSet = next;
   const set = list.slice(wordsSet*SIZE, wordsSet*SIZE+SIZE);
-  const canReview = learnedWords().length >= 5;
+  const setDone = set.length > 0 && set.every(w => got.has(w.id));
+  const canReview = lwAll.length >= 5;
   body.innerHTML = `<div class="row">${LEVELS.map(lv=>`<button data-l="${escapeHtml(lv)}" class="${lv===wordsLv?'on':''}">${escapeHtml(levelLabel(lv))}</button>`).join("")}</div>
-    <div class="row"><button id="pv">‹</button><button class="on">Set ${wordsSet+1} / ${total}${wordsSet<done?' ✓':''}</button><button id="nx">›</button><button id="jump">next new</button>${canReview ? `<button id="rev">review</button>` : ""}</div>
+    <div class="row"><button id="pv">‹</button><button class="on">Set ${wordsSet+1} / ${total}${setDone?' ✓':''}</button><button id="nx">›</button><button id="jump">next new</button>${canReview ? `<button id="rev">review</button>` : ""}</div>
     <div id="wl"></div><div class="actions"><button class="next" id="dr">Drill this set</button></div>`;
   body.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{ wordsLv = b.dataset.l; wordsSet = null; renderWordBody(); });
   $("pv").onclick = () => { wordsSet = Math.max(0, wordsSet-1); renderWordBody(); };
   $("nx").onclick = () => { wordsSet = Math.min(total-1, wordsSet+1); renderWordBody(); };
-  $("jump").onclick = () => { wordsSet = Math.max(0, Math.min(done, total-1)); renderWordBody(); };
+  $("jump").onclick = () => { wordsSet = next; renderWordBody(); };
   wordListInto($("wl"), set);
   $("dr").onclick = () => {
     const items = []; set.forEach(w => items.push(hearItem(w), readItem(w)));
-    // Drilling further ahead than the next unlearned set flags just these words `d`; the
-    // set pointer never skips.
+    // The drill's own records make these words learned; the counter advances only for the
+    // slice it points at, so progress bars never skip, and `d` marks drilling ahead of it.
     drill(items, () => {
       if(wordsSet === (prog.sets[wordsLv]||0)){ prog.sets[wordsLv] = wordsSet+1; }
-      else { set.forEach(w => { if(!prog.w[w.id]) prog.w[w.id] = {r:0,w:0,s:0}; prog.w[w.id].d = 1; }); }
+      else { set.forEach(w => { VC.ensureWordRec(prog, WORDS, PACK, w.id).d = 1; }); }
       store.save(); wordsRender();
     }, missSummary);
   };

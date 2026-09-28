@@ -393,10 +393,11 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const prog = VC.normalizeProg({ sets:{"1":2} }, PACK);
   const lw = VC.learnedWords(WORDS, PACK, prog);
   check("sets {1:2} -> first 20 level-1 words learned", lw.length === 20 && lw.every(w=>w.lv==="1"));
-  check("nextNewSet -> level 1, set index 2", util.isDeepStrictEqual(VC.nextNewSet(WORDS, PACK, prog), {lv:"1", set:2}));
   const byLv = VC.wordsByLevel(WORDS, PACK);
+  const nnOf = p => { const nn = VC.nextNewSet(WORDS, PACK, p); return nn && { lv: nn.lv, set: nn.set, ids: nn.words.map(w => w.id) }; };
+  check("nextNewSet -> level 1, set index 2, the counter prefix's next 10 words", util.isDeepStrictEqual(nnOf(prog), {lv:"1", set:2, ids: byLv["1"].slice(20, 30).map(w => w.id)}));
   const doneL1 = VC.normalizeProg({ sets:{"1": VC.nSets(byLv["1"], 10)} }, PACK);
-  check("level 1 complete -> next set is level 2 set 0", util.isDeepStrictEqual(VC.nextNewSet(WORDS, PACK, doneL1), {lv:"2", set:0}));
+  check("level 1 complete -> next set is level 2 set 0", util.isDeepStrictEqual(nnOf(doneL1), {lv:"2", set:0, ids: byLv["2"].slice(0, 10).map(w => w.id)}));
   const all = {}; VC.levelIds(PACK).forEach(lv=>{ all[lv] = VC.nSets(byLv[lv], 10); });
   const doneAll = VC.normalizeProg({ sets: all }, PACK);
   check("everything complete -> nextNewSet null, all words learned", VC.nextNewSet(WORDS, PACK, doneAll) === null && VC.learnedWords(WORDS, PACK, doneAll).length === WORDS.length);
@@ -1345,6 +1346,79 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
 // its top-level code and the boot IIFE. The stub is an id-registry + regex scan of
 // each innerHTML assignment (not a real parser/tree), which is enough to reach the
 // Today tab and one rendered drill item without needing the rest of the DOM surface.
+// Level 1 with 3 counted sets whose records cover the original first 3 sets, then a republish:
+// a level-2 word enters level 1 at rank 2 and ranks 5 and 35 swap.
+function reorderedLevel(pack, words){
+  const size = VC.setSizeOf(pack), l1 = words.filter(w => w.lv === "1"), l2 = words.filter(w => w.lv === "2");
+  const prog = VC.normalizeProg({ sets:{ "1": 3 } }, pack);
+  l1.slice(0, 3*size).forEach((w, i) => { prog.w[w.id] = { r: 1 + i % 3, w: i % 2, s: i % 4 }; });
+  const moved = Object.assign({}, l2[0], { lv: "1" });
+  const nl1 = l1.slice(); [nl1[5], nl1[35]] = [nl1[35], nl1[5]]; nl1.splice(2, 0, moved);
+  const rest = words.filter(w => w.lv !== "1" && w.id !== moved.id);
+  return { size, prog, words: [...nl1, ...rest], inserted: moved.id, swappedIn: l1[35].id,
+    learnedIds: new Set(l1.slice(0, 3*size).map(w => w.id)), before: VC.learnedWords(words, pack, prog).map(w => w.id).sort() };
+}
+
+(function(){
+  console.log("\n[29] learnedWords from word records: republish reorder, removal, legacy prefix fallback, d, placement seeding");
+  const ids = p => p.map(w => w.id).sort();
+  const R = reorderedLevel(PACK, WORDS);
+  const after = VC.learnedWords(R.words, PACK, R.prog);
+  check("reorder: insert at rank 2 + swap ranks 5/35 -> learnedWords identical to before", util.isDeepStrictEqual(ids(after), R.before));
+  const nn = VC.nextNewSet(R.words, PACK, R.prog);
+  check("reorder: nextNewSet holds the inserted word and the swapped-in unlearned word, no learned word, setSize long",
+    nn && nn.lv === "1" && nn.set === 3 && nn.words.length === R.size && nn.words.some(w => w.id === R.inserted)
+    && nn.words.some(w => w.id === R.swappedIn) && nn.words.every(w => !R.learnedIds.has(w.id)));
+  const l1n = R.words.filter(w => w.lv === "1");
+  check("reorder: nextNewSet is the next unlearned words in rank order", util.isDeepStrictEqual(nn.words.map(w => w.id), l1n.filter(w => !R.learnedIds.has(w.id)).slice(0, R.size).map(w => w.id)));
+
+  const gone = R.words.find(w => R.learnedIds.has(w.id));
+  const less = WORDS.filter(w => w.id !== gone.id);
+  let lr = null, thrown = null;
+  try{ lr = VC.learnedWords(less, PACK, R.prog); }catch(e){ thrown = e; }
+  check("removed learned word: learnedWords drops it, no throw, count one less", !thrown && lr.length === R.before.length - 1 && !lr.some(w => w.id === gone.id));
+  const nnLess = VC.nextNewSet(less, PACK, R.prog);
+  check("removed learned word: nextNewSet still starts after every learned word", nnLess && nnLess.words.every(w => !R.learnedIds.has(w.id)));
+
+  const size = VC.setSizeOf(PACK), l1 = WORDS.filter(w => w.lv === "1");
+  const legacy = VC.normalizeProg({ sets:{ "1": 2 } }, PACK);
+  check("legacy sets {1:2}, no records -> learnedWords is the counter prefix", util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, legacy).map(w => w.id), l1.slice(0, 2*size).map(w => w.id)));
+  const raw = JSON.parse(JSON.stringify(legacy));
+  l1.slice(2*size, 3*size).forEach(w => { raw.w[w.id] = { r:1, w:0, s:1 }; });
+  check("legacy + one set's records written directly -> the records rule applies (just those words)", util.isDeepStrictEqual(ids(VC.learnedWords(WORDS, PACK, raw)), ids(l1.slice(2*size, 3*size))));
+  const viaApp = JSON.parse(JSON.stringify(legacy));
+  l1.slice(2*size, 3*size).forEach(w => { VC.ensureWordRec(viaApp, WORDS, PACK, w.id); VC.markRec(viaApp.w, w.id, true, true, "hear"); });
+  viaApp.sets["1"] = 3;
+  check("legacy + one set drilled via ensureWordRec -> prefix pinned as prov records, records rule, 3 sets learned",
+    util.isDeepStrictEqual(ids(VC.learnedWords(WORDS, PACK, viaApp)), ids(l1.slice(0, 3*size))) && l1.slice(0, 2*size).every(w => viaApp.w[w.id].prov === 1)
+    && util.isDeepStrictEqual(VC.nextNewSet(WORDS, PACK, viaApp).words.map(w => w.id), l1.slice(3*size, 4*size).map(w => w.id)));
+
+  const dp = JSON.parse(JSON.stringify(R.prog)); const ahead = l1[6*size];
+  dp.w[ahead.id] = { r:0, w:0, s:0, d:1 };
+  check("drilled-ahead d word counts under the records rule", VC.learnedWords(WORDS, PACK, dp).some(w => w.id === ahead.id) && !VC.nextNewSet(WORDS, PACK, dp).words.some(w => w.id === ahead.id));
+  const donly = JSON.parse(JSON.stringify(legacy)); donly.w[ahead.id] = { r:0, w:0, s:0, d:1 };
+  check("d-only level: counter prefix plus the d word (d says nothing about the prefix)", util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, donly).map(w => w.id), [...l1.slice(0, 2*size).map(w => w.id), ahead.id]));
+
+  const st = VC.strata(WORDS, PACK.placement, size);
+  const placed = VC.applyPlacement(VC.defaultProg(PACK), st, 2, WORDS, PACK);
+  const seeded = {}; for(let i=0;i<2;i++) seeded[st[i].lv] = Math.max(seeded[st[i].lv]||0, st[i].s1);
+  const expect = Object.keys(seeded).flatMap(lv => WORDS.filter(w => w.lv === lv).slice(0, seeded[lv]*size).map(w => w.id)).sort();
+  check("placement seeds prov records for exactly the placed prefix", util.isDeepStrictEqual(Object.keys(placed.w).sort(), expect) && expect.every(id => placed.w[id].prov === 1));
+  const repl = VC.applyPlacement(R.prog, st, 1, R.words, PACK);
+  const newRecs = Object.keys(repl.w).filter(id => !R.prog.w[id]);
+  const bucket = R.words.filter(w => w.lv === st[0].lv).slice(0, st[0].s1*size).map(w => w.id);
+  check("placement after a reorder seeds only the placed bucket's prefix, never the counter prefix", newRecs.every(id => bucket.includes(id)) && newRecs.every(id => repl.w[id].prov === 1));
+  const legPl = VC.applyPlacement(VC.normalizeProg({ sets:{ "1": 5 } }, PACK), st, 1, WORDS, PACK);
+  check("placement on a legacy level keeps its old counter prefix learned (pinned first)", l1.slice(0, 5*size).every(w => legPl.w[w.id]));
+
+  const full = VC.normalizeProg({ sets:{ "1": VC.nSets(l1, size) } }, PACK);
+  l1.forEach(w => { full.w[w.id] = { r:1, w:0, s:1 }; });
+  const grown = [...l1, Object.assign({}, WORDS.find(w => w.lv === "2"), { lv: "1" }), ...WORDS.filter(w => w.lv !== "1" && w.id !== WORDS.find(x => x.lv === "2").id)];
+  const g = VC.nextNewSet(grown, PACK, full), gp = VC.stagePath(PACK, grown, [], full).find(s => s.lv === "1");
+  check("counted-complete level gains a word: taught once, set index capped to the level's last set, stage not done",
+    g && g.lv === "1" && g.words.length === 1 && g.set === VC.nSets(grown.filter(w => w.lv === "1"), size) - 1 && gp && !gp.done && gp.frac < 1);
+})();
+
 const appBootChecks = (async function(){
   console.log("\n[23] app.html boot: voice-probe TDZ guard, notice-on-first-shown, ko word-break");
   const appHtml = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
@@ -1467,6 +1541,9 @@ const appBootChecks = (async function(){
 let __renderCalls = 0;
 const __wrappedRender = render;
 render = function(){ __renderCalls++; return __wrappedRender.apply(this, arguments); };
+let __taught = null;
+const __wrappedTeach = vocabTeach;
+vocabTeach = function(list){ __taught = list; return __wrappedTeach.apply(this, arguments); };
 let __announced = "";
 const __wrappedAnnounce = announce;
 announce = function(h){ __announced = h; return __wrappedAnnounce.apply(this, arguments); };
@@ -1481,6 +1558,7 @@ return {
   testTab: () => { tab = "test"; testSel = null; render(); }, setProgT: p => { prog = p; },
   enterPlacement: () => { tab = "test"; testSel = "placement"; startPlacement(); }, getPL: () => PL, getTodayStepState: () => todayStepState,
   getHtml: id => { const e = document.getElementById(id); return e ? e.innerHTML : ""; },
+  wordsTab: () => { tab = "words"; wordsSet = null; wordsQuery = ""; render(); }, getTaught: () => __taught,
 };`;
     // PASSAGES only when env.passages is given (undefined -> no Read tab, as before).
     const fn = new Function("document","window","navigator","location","localStorage","matchMedia","requestAnimationFrame","PACK","WORDS","SENTENCES","LESSONS","PASSAGES", fnBody);
@@ -2006,6 +2084,22 @@ return {
     check("Today plan: no voice but the pack ships recorded clips for some weak words -> Listen line shows a count",
       /<td>3\. Listen<\/td><td>\d+ items<\/td>/.test(html));
   }catch(e){ check(`Today plan Listen-line (clips, no voice) scenario does not throw (got: ${e.message})`, false); }
+
+  // Republish that reorders level 1 (learnedWords from records, TODO.md 2026-09-28): Today's
+  // Learn and the Words tab follow records, not the counter prefix.
+  try{
+    const R = reorderedLevel(PACK, WORDS);
+    const { api } = await bootApp([{ lang:"zh-CN", name:"x" }], { words: R.words });
+    api.setProgT(R.prog);
+    api.enterTodayStep(1);
+    const taught = (api.getTaught() || []).map(w => w.id);
+    check("app, reordered level: Today Learn teaches the inserted word and the swapped-in unlearned word, no learned word",
+      taught.includes(R.inserted) && taught.includes(R.swappedIn) && taught.every(id => !R.learnedIds.has(id)) && taught.length === R.size);
+    api.wordsTab();
+    const wb = api.getHtml("wbody");
+    check("app, reordered level: Words tab opens the slice holding the first unlearned word, not marked done",
+      /Set 1 \/ \d+<\/button>/.test(wb));
+  }catch(e){ check(`app reordered-level scenario does not throw (got: ${e.message})`, false); }
 })();
 
 // ------------------------------------------------------------ [24] service worker
