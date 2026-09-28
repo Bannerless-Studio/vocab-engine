@@ -1,12 +1,8 @@
-// core.js — language-agnostic vocab trainer logic shared by engine/app.html and the
-// node checks. No DOM dependency (runs under Node for tests); exports VocabCore via
-// window or module.exports. Everything language-specific comes from the pack
-// (see docs/PACK_SCHEMA.md): levels, set size, placement buckets, function words,
-// typing rules, TTS locale.
+// core.js has no DOM dependency so the Node checks can run it. Everything
+// language-specific comes from the pack (docs/PACK_SCHEMA.md).
 (function(root){
 "use strict";
 
-// ------------------------------------------------------------------ utils
 function shuffle(a, rng){
   const r = rng || Math.random;
   for(let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
@@ -19,14 +15,11 @@ const normKey = s => String(s == null ? "" : s).trim().toLowerCase();
 // pack-level display rule has exactly one place to live.
 function gloss(entry){ return String((entry && entry.en) || "").replace(/\s+/g, " ").trim(); }
 
-// first two whitespace-separated words of a gloss, lowercased and stripped of
-// punctuation — used to reject near-synonym distractors (two "to eat"-ish glosses).
-// Returns "" for a gloss with no latin letters; callers treat "" as "no signal".
+// Rejects near-synonym distractors (two "to eat"-ish glosses). "" means no signal.
 function firstTwoWords(en){
   return String(en).toLowerCase().replace(/[^a-z\s]/g,"").trim().split(/\s+/).slice(0,2).join(" ");
 }
 
-// ------------------------------------------------------------------ levels
 function levelIds(pack){ return (pack.levels||[]).map(l=>String(l.id)); }
 function levelIndexMap(pack){ const m = {}; levelIds(pack).forEach((id,i)=>{ m[id] = i; }); return m; }
 function levelLabel(pack, id){ const l = (pack.levels||[]).find(x=>String(x.id)===String(id)); return l ? l.label : String(id); }
@@ -38,18 +31,12 @@ function wordsByLevel(words, pack){
 }
 function nSets(list, setSize){ return Math.ceil(list.length / (setSize||10)); }
 
-// ------------------------------------------------------------------ distractors
-// Shared "would this distractor also be a right answer?" guards. A word's surfaces are
-// its `w` plus every `alt`; two words sharing any surface are homographs to the learner.
-// `forms` (inflected surfaces, see textForms) are never shown or typed, so never count.
+// Two words sharing any w/alt surface are homographs to the learner. `forms` are never
+// shown or typed, so they never count.
 function surfaces(e){ return [e.w, ...((e && e.alt) || [])].map(normKey).filter(Boolean); }
-// Every surface a word can take inside running text: `w`, each `alt` (other spellings,
-// accepted as typed answers) and each `forms` entry (inflected surfaces such as ja
-// 食べた/食べない for 食べる: never accepted as typed answers, never distractor surfaces).
-// The one list every locate-in-text site uses: cloze location and protection, example
-// sentence tiers and highlighting, passage fallback matching and Words search. Typed
-// acceptance (acceptTyped and its collision index) and the homograph guards read w + alt
-// only. Pack schema: docs/PACK_SCHEMA.md words table.
+// The one surface list every locate-in-text site uses. `forms` are never typed answers or
+// distractor surfaces: acceptTyped and the homograph guards read w + alt only.
+// docs/PACK_SCHEMA.md words table.
 function textForms(e){
   if(!e) return [];
   return [e.w, ...(Array.isArray(e.alt) ? e.alt : []), ...(Array.isArray(e.forms) ? e.forms : [])];
@@ -57,11 +44,8 @@ function textForms(e){
 function sharesSurface(a, b){ const s = new Set(surfaces(a)); return surfaces(b).some(x=>s.has(x)); }
 // Same pronunciation (when both carry pron): indistinguishable in a hear item.
 function samePron(a, b){ return !!(a && b && a.pron && b.pron) && normKey(a.pron) === normKey(b.pron); }
-// entry: a word; pool: WORDS. Up to 3 other words whose gloss is a plausible wrong
-// answer: never the same gloss, never sharing the first two gloss words with the
-// answer or with each other, same level preferred over other levels. Never a
-// homograph of the answer (shared w/alt surface: the read stimulus would fit both)
-// or a homophone (same pron: the hear stimulus would fit both).
+// Never a homograph of the answer (the read stimulus would fit both), a homophone (the hear
+// stimulus would fit both) or a gloss sharing its first two words (a near-synonym).
 function meaningOpts(entry, pool){
   const ansKey = normKey(entry.en);
   const ansFirst2 = firstTwoWords(entry.en);
@@ -83,21 +67,10 @@ function meaningOpts(entry, pool){
   return chosen.slice(0,3);
 }
 
-// entry: a word; pool: WORDS. Up to 3 other words to show as wrong answers when the
-// learner sees a meaning and must pick the word (recall, gap). Never the answer's own
-// surface form, never a word whose gloss (or first two gloss words) matches the
-// answer's — that distractor would also be a correct answer. Preference order:
-// same pos AND same level, then same level, then same pos elsewhere, then anything.
-// Distractors have distinct displayed `w`; a strict pass also keeps their glosses'
-// first two words distinct from each other, relaxed only for tiny pools.
-// showOf (optional, default e => e.w): the label each option is displayed by. Distractor
-// labels are kept distinct from each other and from every answer surface under it.
-// pack (optional): word class. Distractors come from the answer's class: a content-word
-// answer never gets a pack.functionWords distractor (a learner rules those out on sight,
-// and in a cloze one may even fit the blank); a function-word answer prefers other
-// function words, then falls back to content words.
-// prefer (optional predicate): matching candidates come first, ahead of the tiers above
-// (used by gapChoices for article agreement); the rest follow when fewer than 3 match.
+// A distractor must never be a second right answer: never an answer surface, never a gloss
+// or first-two-gloss-words match. A content-word answer never gets a pack.functionWords
+// distractor: a learner rules those out on sight, and in a cloze one may even fit the blank.
+// prefer ranks matching candidates first (gapChoices article agreement).
 function wordOpts(entry, pool, showOf, pack, prefer){
   const show = showOf || (e => e.w);
   const ansGloss = normKey(entry.en), ansF2 = firstTwoWords(entry.en);
@@ -117,11 +90,8 @@ function wordOpts(entry, pool, showOf, pack, prefer){
   const byClass = ansFw ? [...tiered.filter(v=>fw.has(v.id)), ...tiered.filter(v=>!fw.has(v.id))] : tiered;
   const ordered = prefer ? [...byClass.filter(v => prefer(v)), ...byClass.filter(v => !prefer(v))] : byClass;
   function pass(strict){
-    // Every answer surface is already excluded from `cands`; among distractors only
-    // the displayed `w` must differ (their alts are never shown, so sharing one is fine).
-    // With a label fn (showOf) the label is not the written form, so distractors must
-    // also differ in every written surface: two same-w words with different labels
-    // (homographs read differently) would otherwise both be picked as one written word.
+    // Only the displayed w must differ (alts are never shown). With a label fn, written forms
+    // must differ too: same-w homographs with different labels would read as one written word.
     const chosen = []; const usedW = new Set([...surfaces(entry), normKey(show(entry))]); const usedF2 = new Set();
     for(const v of ordered){
       if(chosen.length>=3) break;
@@ -141,9 +111,7 @@ function wordOpts(entry, pool, showOf, pack, prefer){
 // Cloze distractors use the same rules as recall: plausible words, never a second right answer.
 const gapOpts = wordOpts;
 
-// sentence: a SENTENCES entry; pool: SENTENCES. Up to 3 other sentences of the same
-// level with a different English gloss, preferring ones that share a word id with
-// the answer (a plausible near-miss); widens past the level only for tiny pools.
+// Sentences sharing a word id with the answer come first: a plausible near-miss.
 function sentenceOpts(sentence, pool){
   const ansKey = normKey(sentence.en);
   const wordSet = new Set(sentence.words || []);
@@ -163,7 +131,6 @@ function sentenceOpts(sentence, pool){
   return chosen.slice(0,3);
 }
 
-// ------------------------------------------------------------------ typing
 // Accent folding (lenient typing, Words search). Rule: drop only marks that are optional
 // accents, stress or vowel pointing for their script. A mark that makes a different
 // letter is never dropped. Each precomposed code point is decomposed (NFD), its
@@ -219,26 +186,17 @@ function foldLenientLetters(s){
   return s.normalize("NFD").replace(/[\u0653-\u0655]/g, "").replace(LENIENT_RE, c => LENIENT_LETTERS[c])
     .replace(/[\u0643\u064a]/g, c => ARABIC_VARIANTS[c]).normalize("NFC");
 }
-// German-only ASCII substitutions (opts.germanAscii, applied in acceptTyped to each
-// TARGET only, gated to pack.key === "de"): a learner on a non-German keyboard types
-// ae/oe/ue/ss for \u00e4/\u00f6/\u00fc/\u00df. Run on the pre-foldAccents string, so \u00e4 -> "ae" (not the
-// bare "a" foldAccents would otherwise strip it to). acceptTyped compares the typed text,
-// which is never digraph-folded (a real "ae"/"oe" typed, as in Aerobic, must stay ASCII
-// text and never become \u00e4/\u00f6), against EACH target folded both with and without this
-// pass, so both the digraph spelling (Muede) and the plain accent-stripped spelling every
-// other Latin-script pack already accepts (Mude) match \u00e4\u00f6\u00fc\u00df words. No other pack's text
-// contains these letters, but the fold is gated by pack anyway, not by script, so a
-// future non-German pack with an \u00e4/\u00f6/\u00fc/\u00df loanword is unaffected unless it opts in.
+// German only (pack.key === "de", the documented exception): a learner on a non-German
+// keyboard types ae/oe/ue/ss for ä/ö/ü/ß. Applied to each target only, before foldAccents
+// (which would already have made ä "a"). The typed text is never digraph-folded, so a real
+// "ae" (Aerobic) never becomes ä.
 const GERMAN_ASCII = { "\u00e4":"ae", "\u00f6":"oe", "\u00fc":"ue", "\u00df":"ss",
   "\u00c4":"Ae", "\u00d6":"Oe", "\u00dc":"Ue" };
 const GERMAN_ASCII_RE = /[\u00e4\u00f6\u00fc\u00df\u00c4\u00d6\u00dc]/g;
 function foldGermanAscii(s){
   return String(s).replace(GERMAN_ASCII_RE, c => GERMAN_ASCII[c]);
 }
-// opts: {caseSensitive, foldAccents, lenientLetters, germanAscii}. Trims, collapses inner
-// whitespace, unifies typographic apostrophes, casefolds unless caseSensitive, accent-folds
-// if asked; with foldAccents also applies germanAscii (if set, before the accent strip so
-// \u00e4/\u00f6/\u00fc/\u00df are not lost to it first) and LENIENT_LETTERS unless lenientLetters === false.
+// germanAscii runs before the accent strip so ä/ö/ü/ß are not lost to it first.
 function normalizeTyped(s, opts){
   const o = opts || {};
   let out = String(s == null ? "" : s).normalize("NFC").replace(/[\u2018\u2019\u02bc`]/g, "'").replace(/[\u0643\u064a]/g, c => ARABIC_VARIANTS[c]).replace(/\s+/g, " ").trim();
@@ -251,8 +209,6 @@ function normalizeTyped(s, opts){
   return out;
 }
 function typingEnabled(pack){ return !!(pack && pack.typing); }
-// Accents are forgiven when the pack says "lenient" and the word's level is before
-// typing.strictFromLevel (or there is no strict level). "strict" never forgives.
 function typingLenientFor(entry, pack){
   const t = (pack && pack.typing) || {};
   if((t.accents || "lenient") !== "lenient") return false;
@@ -263,18 +219,15 @@ function typingLenientFor(entry, pack){
   const at = idx[String(entry.lv)];
   return at === undefined ? true : at < strictAt;
 }
-// Collision guard keys. Strict key: normalizeTyped without folds. Pointing key: the strict
-// key minus marks that never tell two written words apart, so typing them cannot turn one
-// pack word into another: Arabic harakat/Quranic marks/tatweel, Hebrew niqqud, ZWJ/ZWNJ,
-// and Cyrillic stress (U+0301 after a Cyrillic letter). Latin accents, Arabic hamza marks
-// and every LENIENT_LETTERS letter are kept (they do tell words apart: si/sí, ما/ماء).
+// Collision guard keys. The pointing key drops marks that never tell two written words
+// apart (harakat, tatweel, niqqud, ZWJ/ZWNJ, Cyrillic stress), so typing them cannot turn
+// one pack word into another. Latin accents, hamza marks and LENIENT_LETTERS are kept: si/sí, ما/ماء.
 const POINTING_MARKS = new RegExp("[" + FOLD_SCRIPTS.arabic + FOLD_SCRIPTS.hebrew + FOLD_SCRIPTS.joiners + "]", "g");
 function pointingKey(strictForm){
   return strictForm.normalize("NFD").replace(POINTING_MARKS, "")
     .replace(/(?<=[\u0400-\u04ff][\u0300-\u036f]*)\u0301/g, "").normalize("NFC");
 }
-// Per words array (and case mode): strict key -> entries, pointing key -> entries, over
-// every entry's w and alt (never `forms`: those are not typed targets). Built once.
+// w and alt only: `forms` are not typed targets.
 const GUARD_INDEX = new WeakMap();
 function guardIndex(words, caseSensitive){
   let byCase = GUARD_INDEX.get(words);
@@ -289,24 +242,9 @@ function guardIndex(words, caseSensitive){
   }));
   return (byCase[k] = { strict, pointing });
 }
-// Accepts entry.w or any entry.alt (plus any `extra` surfaces, e.g. the literal form a
-// cloze blank had in its sentence), compared after normalising both sides. entry.forms
-// (inflected surfaces) are never accepted: "Type the word" wants the word itself.
-// words (optional, the pack's WORDS): collision guard for lenient folding. An exact
-// (strict-form) match to the target always passes. An answer that matches only after
-// folding (any lenient fold: accents, stress, pointing, joiners, LENIENT_LETTERS) is
-// rejected when it spells another pack entry: its strict key is another entry's, or its
-// pointing key is another entry's and no target's (so مَا, مـا or ما typed for ماء, and
-// si or s+ZWJ+i for sí, are wrong). A pointing key the target shares stays accepted:
-// замок for за́мок passes even when замо́к is also a pack word (typed замо́к does not).
-// امس for أمس and perche for perché are fine. The German pack (pack.key === "de") also
-// folds each target (never the typed text) to ae/oe/ue/ss on top of the plain accent
-// strip, so a learner on a non-German keyboard can type "Muede" or "Strasse" for
-// müde/Straße; the plain accent-stripped spelling ("mude") a learner who just drops the
-// umlaut types still matches too, exactly as it already did for every other Latin-script
-// pack, and every collision that spelling created (schon/schön, zahlen/zählen) still
-// exists and is still caught by the guard below. The typed text is never fed the German
-// digraph fold itself: a genuine "ae" (Aerobic) must never turn into ä.
+// `forms` are never accepted: "Type the word" wants the word itself. An answer that matches
+// only after lenient folding is rejected when it spells another pack entry (مَا or ما for ماء,
+// si for sí); a pointing key the target shares stays accepted (замок for за́мок).
 function acceptTyped(input, entry, pack, extra, words){
   const t = (pack && pack.typing) || {};
   const cs = !!t.caseSensitive, lenient = typingLenientFor(entry, pack);
@@ -331,18 +269,12 @@ function acceptTyped(input, entry, pack, extra, words){
   return !(idx.pointing.get(pk) || []).some(other);
 }
 
-// ------------------------------------------------------------------ sentences
 const escapeRe = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-// Apostrophe variants treated as the same symbol when matching sentence text:
-// ASCII ', right single quote, modifier letter apostrophe.
+// ASCII ', right single quote and modifier letter apostrophe are one symbol in sentence text.
 const APOS = String.fromCodePoint(39, 0x2019, 0x02bc);
 const isApos = c => APOS.indexOf(c) >= 0;
-// All occurrences of `surface` in `text`. spaced=true (default): whole-word,
-// case-insensitive, apostrophe-variant-insensitive matches; a letter/mark/digit on
-// either side disqualifies, except that an apostrophe-final surface ("l'") may run
-// straight into the next word and an apostrophe-initial one may follow a letter.
-// ZWNJ/ZWJ count as word-internal (Persian می‌روم is one word), so "می" never matches
-// inside it. spaced=false (scripts written without spaces, e.g. Chinese): plain substring.
+// An apostrophe-final surface ("l'") may run into the next word. ZWNJ/ZWJ are word-internal
+// (Persian می‌روم is one word). spaced=false is for scripts written without spaces.
 function findSurface(text, surface, spaced){
   const out = []; const t = String(text), s = String(surface||"");
   if(!s) return out;
@@ -359,12 +291,8 @@ function findSurface(text, surface, spaced){
   let m; while((m = re.exec(t))){ out.push({ start:m.index, end:m.index+m[0].length, text:m[0] }); }
   return out;
 }
-// Where word `entry` sits in sentence text. Every form (textForms: w, each alt, each
-// entry of `forms`) is searched;
-// overlapping hits are one occurrence (e.g. alt "acqua" inside w "l'acqua"). Returns
-// the widest hit when there is exactly one occurrence, else null: absent, or visible
-// more than once (blanking one occurrence would leave the answer — or an alt form of
-// it — in plain sight elsewhere).
+// null when visible more than once: blanking one occurrence would leave the answer, or an
+// alt form of it, in plain sight elsewhere.
 function locateWord(sentence, entry, pack){
   const spaced = !pack || pack.spaced !== false;
   const forms = [...new Set(textForms(entry).filter(Boolean))];
@@ -375,15 +303,13 @@ function locateWord(sentence, entry, pack){
   const clusterEnd = hits[0].end;
   let best = hits[0], end = clusterEnd;
   for(const h of hits.slice(1)){
-    if(h.start >= end) return null; // a second, separate occurrence
+    if(h.start >= end) return null;
     end = Math.max(end, h.end);
     if(h.end - h.start > best.end - best.start) best = h;
   }
   return best;
 }
-// Every surface string a cloze blank must not cut into: all pack words' textForms plus
-// pack.compounds (multi-word or multi-glyph units that aren't drillable words, e.g.
-// zh 这个). Cached per wordsById object.
+// pack.compounds: units that aren't drillable words (zh 这个) but must not be cut into.
 const SURFACE_CACHE = new WeakMap();
 function packSurfaces(wordsById, pack){
   let c = SURFACE_CACHE.get(wordsById);
@@ -396,8 +322,7 @@ function packSurfaces(wordsById, pack){
   }
   return c.list;
 }
-// True if some longer pack surface containing match.text occurs in the sentence
-// covering the match's position (为 inside 为什么, 这 inside 这个, per inside "per favore").
+// 为 inside 为什么, per inside "per favore": blanking it would cut a longer unit.
 function spannedByLonger(sentence, match, wordsById, pack){
   const spaced = !pack || pack.spaced !== false;
   const inner = normKey(match.text);
@@ -409,18 +334,10 @@ function spannedByLonger(sentence, match, wordsById, pack){
   }
   return false;
 }
-// The blankable match for `entry` in `sentence`, or null (see locateWord and
-// spannedByLonger). The one place both gap-candidate selection and the app's gap
-// item use, so they can never disagree.
-// Design rule: the blank never includes an article. When the located form carries one
-// ("l'église", "la iglesia", "Il conto", an alt like "l'acqua"), the article stays
-// visible before the blank ("allons à l'____", "vamos a la ____") and the blank covers
-// the bare rest (articleCut). Uniqueness and spannedByLonger are judged on the full hit.
-// The bare form is searched too, so a "le/la médecin" with no alt is still found.
-// Only pack articles are ever cut. A span that still starts with something its option
-// label drops (a reflexive clitic: "se lever" labelled "lever"; an elided article the pack
-// does not list) is not a legal blank: null. Returns {start, end, text, article}, where
-// article is the pack article visible right before the blank ("la", "l'", "den"), or "".
+// The one place gap-candidate selection and the app's gap item share, so they never disagree.
+// Design rule: the blank never includes an article. It stays visible ("allons à l'____") and
+// the blank covers the bare rest. A span still starting with something its option label
+// drops (a reflexive clitic, an elided article the pack does not list) is not a legal blank.
 function gapMatch(sentence, entry, wordsById, pack){
   const arts = packArticles(wordsById), bare = bareForm(entry, arts);
   const m = locateWord(sentence, textForms(entry).includes(bare) ? entry : Object.assign({}, entry, { alt: [...(entry.alt||[]), bare] }), pack);
@@ -430,20 +347,13 @@ function gapMatch(sentence, entry, wordsById, pack){
   const start = m.start + cut;
   return { start, end: m.end, text, article: visibleArticle(String(sentence.t).slice(0, start), arts, pack) };
 }
-// The article token ending `before` (the sentence text before a blank): an elided one
-// ("l'", "dell'") or a word followed by whitespace, surf-keyed; "" unless it is a pack
-// article or a key of the pack's article-agreement table (contractions: du, al, dem).
 function visibleArticle(before, arts, pack){
   const m = before.match(/(\p{L}+['\u2019\u02bc])$/u) || before.match(/(\p{L}+)\s+$/u);
   if(!m) return "";
   const k = surfKey(m[1]);
   return (arts.has(k) || Object.prototype.hasOwnProperty.call(articleAgreement(pack), k)) ? k : "";
 }
-// Indices into sentence.words that are legal cloze blanks: a known word at the
-// sentence's own level, not a pack function word, not repeated in the sentence (by id),
-// and with a gapMatch (visible exactly once, not inside a longer pack word/compound)
-// that leaves some letter or digit outside the blank (a one-word sentence such as
-// "不客气。" blanked whole is "____。", no cloze at all).
+// Some letter or digit must stay outside the blank: "不客气。" blanked whole is no cloze.
 function gapCandidateIndices(sentence, wordsById, pack){
   const fw = new Set((pack && pack.functionWords) || []);
   const words = sentence.words || [];
@@ -465,13 +375,8 @@ function blankSentence(sentence, match){
   const t = String(sentence.t);
   return { before: t.slice(0, match.start), after: t.slice(match.end), answer: match.text };
 }
-// Surface key that also folds apostrophe variants (l’anno = l'anno).
 const surfKey = s => normKey(s).replace(/[\u2019\u02bc]/g, "'");
-// The pack's articles: w, every alt and every `forms` entry of each pos "art" word
-// (le/la/l'/les, el/la/los, il/lo/l'/gli, un/une, German der/den/dem/des as forms of der),
-// surf-keyed. Built from the word list (array or id map) and
-// cached per list object. Empty for packs without articles (zh), which disables every
-// article rule below.
+// Empty for packs without articles (zh), which disables every article rule below.
 const ART_CACHE = new WeakMap();
 function packArticles(words){
   if(!words || typeof words !== "object") return new Set();
@@ -485,12 +390,8 @@ function packArticles(words){
   }
   return set;
 }
-// Length of a leading article in `text`: a pack article (or an a/b pair of them, as in
-// "le/la médecin") followed by whitespace, or an elided article ending in an apostrophe
-// ("l'église", "un'amica"). 0 when there is none, when the rest is itself an article
-// ("l'un"), or, given `entry`, unless the word is a noun or its marked bare form
-// (markedBare) is the rest: fixed expressions that start with an article-like word
-// ("un peu", "les uns les autres", "tout le monde") are never cut.
+// Fixed expressions starting with an article-like word ("un peu", "tout le monde") are
+// never cut: only a noun, or a word whose marked bare form is the rest.
 const NOUN_POS = /^(noun|n|propn)$/i;
 function articleCut(text, arts, entry){
   if(!arts || !arts.size) return 0;
@@ -505,37 +406,27 @@ function articleCut(text, arts, entry){
   }
   return m[0].length;
 }
-// Length of the prefix of `text` that leaves exactly `tail` as a whole trailing token
-// (after a space or an apostrophe); 0 when `tail` is not such a token of `text`.
 function trailingCut(text, tail){
   const t = String(text), b = String(tail || "");
   if(!b || b.length >= t.length) return 0;
   const cut = t.length - b.length, sep = t[cut - 1] || "";
   return (surfKey(t.slice(cut)) === surfKey(b) && (/\s/.test(sep) || isApos(sep))) ? cut : 0;
 }
-// The bare lemma a word marks for itself: the optional `bare` field ("lever" for
-// "se lever", set by the builder when the bare form is not a typed answer and so lives in
-// `forms`), else the pack convention alt[0]. docs/PACK_SCHEMA.md words `bare`.
+// `bare` exists for bare forms that are not typed answers (so they live in `forms`).
+// docs/PACK_SCHEMA.md words `bare`.
 function markedBare(e){
   if(!e) return undefined;
   if(typeof e.bare === "string" && e.bare) return e.bare;
   return e.alt && e.alt[0];
 }
-// A word's bare form (what gap options show). When `w` carries an article or clitic
-// ("il gioco", "l'anno", "le/la médecin", "se lever"), the marked bare form (markedBare:
-// `bare`, else alt[0]) is the bare lemma. It counts only when it is a whole trailing
-// token of `w` (trailingCut), so alts that are other forms (il -> lo, bello -> bella) or
-// longer elided forms (acqua -> l'acqua) never replace `w`. Otherwise, given the pack's
-// articles (packArticles), a leading article is stripped from `w` (articleCut); else `w`.
+// The marked bare form counts only as a whole trailing token of `w`, so alts that are other
+// forms (il -> lo, bello -> bella) or longer elided forms (acqua -> l'acqua) never replace `w`.
 function bareForm(e, arts){
   const w = String((e && e.w) || ""), a0 = markedBare(e);
   if(a0 && trailingCut(w, a0)) return String(a0);
   const k = articleCut(w, arts, e);
   return k ? w.slice(k) : w;
 }
-// The articles a word is cited with: the parts of its leading article ("le/la médecin"
-// -> ["le","la"]), surf-keyed; [] for a word without one.
-// Cached per word object and article set.
 const CIT_CACHE = new WeakMap();
 function citationArticles(v, arts){
   if(!v || typeof v !== "object") return [];
@@ -546,13 +437,9 @@ function citationArticles(v, arts){
   CIT_CACHE.set(v, { arts, list });
   return list;
 }
-// Which citation articles each visible article agrees with, by language (targetLang).
-// A visible article before a blank tells gender (la, die), elision (l') or case form
-// (den, dem); distractors cited with an agreeing article are preferred so the article
-// never gives the answer away. l' agrees with l' (either gender); plural and indefinite
-// forms agree with every citation article they can stand for; German case forms map to
-// their gender(s). pack.articleAgreement ({visible: [citation...]}) replaces the default;
-// an article missing from the table agrees only with itself.
+// A visible article before a blank tells gender, elision or case. Distractors cited with an
+// agreeing article come first so the article never gives the answer away.
+// pack.articleAgreement replaces this default.
 const ARTICLE_AGREEMENT = {
   fr: { le:["le"], la:["la"], "l'":["l'"], les:["le","la","l'"], un:["le","l'"], une:["la","l'"], du:["le"], au:["le"],
         des:["le","la","l'"], aux:["le","la","l'"] },
@@ -571,18 +458,10 @@ function articleAgreement(pack){
   const own = pack && pack.articleAgreement;
   return (own && typeof own === "object") ? own : (ARTICLE_AGREEMENT[targetLang(pack)] || {});
 }
-// MC options for a gap item. Every option (answer and distractors) is shown by its
-// bareForm, never with an article: the blank never includes the article (gapMatch), so
-// an articled option would clash with the sentence ("le ____" offering "la loi") and a
-// mix of bare and articled options would give the answer away. When an article is
-// visible before the blank (match.article), distractors cited with an agreeing article
-// come first (articleAgreement), so "la ____" offers other la-nouns; wordOpts falls back
-// to the rest when fewer than 3 agree.
-// A word one of whose own surfaces (w or an alt) is the blanked text itself never is
-// a distractor: it would fit the blank literally. The answer's `forms` are not homograph
-// surfaces (surfaces), so without this, する blanked at its form した could offer 下 (w
-// した) as a "wrong" option.
-// Returns { opts, a, byLabel } with byLabel mapping each label to its word.
+// Options are bare forms: an articled option would clash with the sentence ("le ____"
+// offering "la loi") and a bare/articled mix would give the answer away. A word whose own
+// surface is the blanked text is never a distractor, since it fits literally: する blanked at
+// its form した must not offer 下 (w した).
 function gapChoices(entry, match, pool, pack){
   const arts = packArticles(pool);
   const show = e => bareForm(e, arts);
@@ -598,10 +477,6 @@ function gapChoices(entry, match, pool, pack){
   const byLabel = {}; [entry, ...ds].forEach(e => { byLabel[show(e)] = e; });
   return { opts: [show(entry), ...ds.map(show)], a: show(entry), byLabel };
 }
-// Up to n example sentences for `entry` (sentences whose `words` list its id), in pack
-// order within tiers: sentences where `w` is visible as a whole token first, then ones
-// where an alt or a `forms` entry is, then the rest (the word isn't visible as any listed
-// surface).
 function exampleSentences(entry, sentences, pack, n){
   const spaced = !pack || pack.spaced !== false;
   const seen = s => findSurface(s.t, entry.w, spaced).length ? 0
@@ -610,12 +485,7 @@ function exampleSentences(entry, sentences, pack, n){
   (sentences||[]).forEach(s => { if((s.words||[]).indexOf(entry.id) >= 0) tiers[seen(s)].push(s); });
   return [...tiers[0], ...tiers[1], ...tiers[2]].slice(0, n);
 }
-// Example-sentence highlighting: splits sentence text into [{text, hit}] segments where
-// hit marks each place the taught word is visible. Every textForms surface is
-// searched as findSurface does for the pack; overlapping hits merge into one (the
-// widest, e.g. "l'acqua" over "acqua"); a hit inside a longer pack word or compound
-// (本 inside 日本, 为 inside 为什么) is dropped, as for cloze. Not visible anywhere:
-// one segment, no hit. Joining every segment's text always gives back sentence.t.
+// A hit inside a longer pack word or compound (本 inside 日本) is dropped, as for cloze.
 function highlightParts(sentence, entry, wordsById, pack){
   const t = String((sentence && sentence.t) || "");
   const spaced = !pack || pack.spaced !== false;
@@ -636,65 +506,28 @@ function highlightParts(sentence, entry, wordsById, pack){
   return out;
 }
 
-// ------------------------------------------------------------------ pron display
-// The pron worth showing next to x (a word or sentence): x.pron, or "" when it repeats
-// the text itself (Russian "в" / "в"). Compared NFC, case-folded and trimmed. A pron that
-// differs only by stress marks (де́лать for делать) is kept: the stress is the point.
+// A pron differing only by stress marks (де́лать for делать) is kept: the stress is the point.
 function pronShown(x){
   const p = x && x.pron; if(!p) return "";
   const k = s => String(s == null ? "" : s).normalize("NFC").trim().toLowerCase();
   return k(p) === k(x.w != null ? x.w : x.t) ? "" : String(p);
 }
 
-// ------------------------------------------------------------------ Words search
-// Words-tab search: a word matches when the query occurs in its w, any alt or `forms`
-// entry (食べた finds 食べる), its pron or
-// its gloss, compared case-folded and accent-folded (foldAccents: Latin accents, stress
-// marks, harakat, ZWNJ) on both sides. Whitespace is also ignored as a second chance, so
-// "nihao" finds "nǐ hǎo" and "ni hao" finds "nihao". Ranking (stable, pack order within
-// a tier): 0 = the query is the word itself (w, an alt or pron, whole), 1 = it is one
-// whole gloss sense ("book" in "book, volume"), 2 = w/alt/pron starts with it, 3 = the
-// rest. So "делать" lists делать before сделать.
-// Folded search fields are computed once per word (SEARCH_CACHE, rebuilt if the word's
-// text changes), so a keystroke only compares strings.
-// Arabic script (ar/fa/ur): search has its own folds, independent of lenient typing's
-// LENIENT_LETTERS (searchFold turns that layer off; strict typing keeps ة/ى distinct).
-// Search keeps ھ and ء, and makes a leading ال optional. A search key also folds the
-// letters learners routinely type without their marks or in a keyboard variant: hamza
-// and madda on a carrier (أ إ آ ؤ ئ ۀ ۂ -> ا و ی ه ہ, by dropping U+0653..U+0655 after
-// decomposition), alef wasla ٱ -> ا, teh marbuta ة -> ہ, alef maksura ى -> ی (ي is
-// already ی). Harakat, tatweel and ZWNJ go in foldAccents; ي/ك -> ی/ک in normalizeTyped.
-// Urdu spelling variants fold to the same canonical letter as Urdu heh goal (ہ): Arabic
-// heh ه, Urdu teh marbuta goal ۃ, and the Arabic-preset heh+hamza ۀ. Do-chashmi heh ھ
-// (a distinct phoneme, aspiration) is deliberately never folded into ہ. Urdu bari ye ے
-// (almost always word-final) also folds to ی at a word boundary, so a masculine/feminine
-// pair spelled with ے vs ی (بڑے/بڑی) search as one: a known, accepted tradeoff — an
-// exact-glyph reveal still shows the pack's own spelling, only search is lenient.
-// Anything without an Arabic-script letter is left exactly as normalizeTyped folds it.
-// Order matters: stripping a carrier's hamza can expose a letter normalizeTyped already
-// unified on the typed side (ئ = Arabic ي + hamza), so the keyboard-variant map
-// (ARABIC_VARIANTS: ي -> ی, ك -> ک) is applied again last: one canonical yeh and kaf.
-// ٲ ٳ ٵ / ٶ ٷ / ٸ (hamza/wavy-hamza letters with no canonical decomposition) map directly.
+// Arabic-script search has its own folds, independent of lenient typing (searchFold turns
+// LENIENT_LETTERS off). Do-chashmi heh ھ is a distinct phoneme, so it is never folded into ہ.
+// Bari ye ے folds to ی at a word boundary so ے/ی gender pairs (بڑے/بڑی) search as one: an
+// accepted tradeoff, since the reveal still shows the pack's own spelling.
+// ARABIC_VARIANTS runs again last: stripping a carrier's hamza can expose ي (ئ = ي + hamza).
+// ٲ ٳ ٵ ٶ ٷ ٸ have no canonical decomposition, so they are mapped directly.
 const AR_SEARCH_MAP = { "ٱ":"ا", "ٲ":"ا", "ٳ":"ا", "ٵ":"ا", "ٶ":"و", "ٷ":"و", "ٸ":"ی",
   "ة":"ہ", "ى":"ی", "ۀ":"ہ", "ۃ":"ہ", "ه":"ہ" };
-// Devanagari (hi): search does the same nukta and chandrabindu folds as lenient typing
-// (LENIENT_LETTERS), here always; strict typing keeps both. A search key folds nukta
-// away (जरूर finds ज़रूर, लडका finds लड़का) — decomposing first (NFD) so a precomposed
-// nukta letter (क़ ख़ ग़ ज़ ड़ ढ़ फ़ य़, U+0958-095F) is caught the same as a bare base+nukta
-// pair — and unifies chandrabindu ँ into anusvara ं (हैँ finds हैं), a common informal
-// spelling swap. ZWJ/ZWNJ are already dropped for every script by foldAccents.
+// Search always folds nukta and chandrabindu (strict typing keeps both). NFD first so a
+// precomposed nukta letter (U+0958-095F) is caught too.
 function foldDevanagari(f){
   return f.normalize("NFD").replace(/़/g, "").replace(/ँ/g, "ं").normalize("NFC");
 }
-// A reduplicated or doubled-word query or entry ("dhīre dhīre", "धीरे धीरे", "kabhī
-// kabhī") folds to its single token, so search treats a reduplicated spelling, its
-// hyphenated form (already turned to a space above) and the bare word as one and the
-// same phrase in both directions: the bare form is a substring of the doubled one either
-// way once both are folded down to one token, and a doubled query still matches an entry
-// stored bare. Consecutive identical whitespace-delimited tokens collapse to one; this
-// runs after every script fold (so accents/nukta/Arabic variants are already unified and
-// two spellings of "the same" token compare equal) and is a no-op for scripts written
-// without spaces (zh/ja/ko han text has no tokens to collapse).
+// A doubled word ("धीरे धीरे") folds to one token so doubled, hyphenated and bare spellings
+// match either way. Runs after every script fold so equal tokens compare equal.
 function foldReduplication(f){
   const parts = f.split(" ");
   const out = [];
@@ -702,11 +535,9 @@ function foldReduplication(f){
   return out.join(" ");
 }
 function searchFold(s){
-  // Nasal tildes over a romanised vowel (kahā̃) are how this pack's roman pron marks
-  // nasalisation; loose ASCII typing spells that with a trailing n (kahan), so convert
-  // the combining tilde (U+0303) to a literal "n" before foldAccents would otherwise
-  // just discard it. A hyphen is folded to a space so a reduplicated/hyphenated lemma
-  // (धीरे-धीरे) and its unhyphenated spelling (धीरे धीरे) search as the same phrase.
+  // This pack's roman pron marks nasalisation with a tilde (kahā̃); ASCII typing spells it with
+  // a trailing n (kahan), and foldAccents would otherwise discard it. Hyphen to space so
+  // धीरे-धीरे and धीरे धीरे search as one phrase.
   const pre = String(s == null ? "" : s).normalize("NFD").replace(/̃/g, "n").normalize("NFC").replace(/-/g, " ");
   let f = normalizeTyped(pre, { foldAccents: true, lenientLetters: false });
   if(/[ऀ-ॿ]/.test(f)) f = foldDevanagari(f);
@@ -716,11 +547,9 @@ function searchFold(s){
   }
   return foldReduplication(f);
 }
-// The Arabic definite article: a word-initial ال before at least two more letters is
-// optional in search (كتاب finds الكتاب, and الكتاب finds كتاب). Applied to folded text.
+// A leading ال is optional in search: كتاب finds الكتاب, and back.
 const stripArabicArticle = f => f.replace(/(^|\s)ال(?=\S{2,})/g, "$1");
-// A field's search forms: the folded text and, when it differs, the article-free text;
-// each with a whitespace-free copy (ns).
+// Folded fields are cached per word (SEARCH_CACHE) so a keystroke only compares strings.
 function searchForms(x){
   const f = x ? searchFold(x) : "";
   return [...new Set([f, stripArabicArticle(f)])].map(v => ({ f: v, ns: v.replace(/\s/g, "") }));
@@ -754,29 +583,22 @@ function searchWords(words, query, limit){
   return limit ? out.slice(0, limit) : out;
 }
 
-// ------------------------------------------------------------------ script display
-// How target-language text is marked up (docs/PACK_SCHEMA.md "Script display").
-// lang: pack.langTag, else the language part of pack.tts ("fa-IR" -> "fa").
+// docs/PACK_SCHEMA.md "Script display".
 function targetLang(pack){
   const tag = pack && typeof pack.langTag === "string" && /^[A-Za-z]{2,8}(-[A-Za-z0-9]{1,8})*$/.test(pack.langTag) ? pack.langTag : "";
   return tag || (String((pack && pack.tts) || "").split(/[-_]/)[0].toLowerCase() || "und");
 }
-// pack.fontFamily is a CSS font-family list ('"Noto Nastaliq Urdu", serif'). Anything
-// that could leave the declaration (; { } < > \ or a url()) is refused: null.
+// Refuses anything that could leave the CSS declaration (; { } < > \ or a url()).
 function fontFamilyOf(pack){
   const f = pack && typeof pack.fontFamily === "string" ? pack.fontFamily.trim() : "";
   if(!f || /[;{}<>\\]|url\s*\(|\/\*/i.test(f)) return null;
   return f;
 }
-// pack.lineHeight: unitless number 1..4, else null (the stylesheet's own line-heights).
 function lineHeightOf(pack){
   const n = pack && pack.lineHeight;
   return (typeof n === "number" && isFinite(n) && n >= 1 && n <= 4) ? n : null;
 }
-// Google Fonts is the only external resource a page may load. pack.fonts lists family
-// names, optionally with a css2 axis spec ("Noto Naskh Arabic:wght@400;700"). Returns
-// {href, rejected}: href is a fonts.googleapis.com css2 URL (null when nothing valid),
-// rejected lists entries that failed the name/axis pattern and were left out.
+// Google Fonts is the only external resource a page may load.
 const FONT_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9 ]{0,60}(:[a-z,]+@[0-9.,;]+)?$/;
 function fontsHref(pack){
   const list = (pack && Array.isArray(pack.fonts)) ? pack.fonts : [];
@@ -786,12 +608,9 @@ function fontsHref(pack){
   const fam = ok.map(f => "family=" + f.trim().replace(/ +/g, "+")).join("&");
   return { href: `https://fonts.googleapis.com/css2?${fam}&display=swap`, rejected };
 }
-// The pack font stack the UI prepends to its own (--wfont = <this>, UI stack): the named
-// families of fontFamilyOf with generic keywords (serif, sans-serif, ...) dropped, so a
-// Latin run inside target text (pron, roman, a number) falls through to the UI font
-// instead of a generic serif. null when no named family is left. The list is split on
-// commas outside quotes, so a quoted family name holding a comma stays one family. The UI
-// uses it for pack.rtl packs only; LTR packs keep fontFamily as given.
+// Generic keywords are dropped so a Latin run inside target text (pron, a number) falls
+// through to the UI font instead of a generic serif. Split on commas outside quotes: a
+// quoted family name may hold a comma.
 const GENERIC_FAMILY_RE = /^(serif|sans-serif|monospace|cursive|fantasy|system-ui|math|emoji|fangsong|ui-serif|ui-sans-serif|ui-monospace|ui-rounded)$/i;
 function fontStackOf(pack){
   const f = fontFamilyOf(pack); if(!f) return null;
@@ -806,19 +625,12 @@ function fontStackOf(pack){
   const named = parts.map(x => x.trim()).filter(x => x && !GENERIC_FAMILY_RE.test(x));
   return named.length ? named.join(", ") : null;
 }
-// Everything the UI needs to mark target-language text: {lang, rtl, fontFamily, fontStack, lineHeight}.
 function scriptDisplay(pack){
   return { lang: targetLang(pack), rtl: !!(pack && pack.rtl === true), fontFamily: fontFamilyOf(pack), fontStack: fontStackOf(pack), lineHeight: lineHeightOf(pack) };
 }
-// RTL packs (docs/PACK_SCHEMA.md "RTL rendering"): a UI/English string (gloss, note,
-// label) split into runs, each run of right-to-left script (Hebrew/Arabic blocks) flagged
-// rtl, so the UI can isolate it in its own <bdi> and the English around it keeps its
-// order. A run spans from an RTL letter to the last RTL letter reachable without crossing
-// a strong-LTR letter: everything between (spaces, ZWNJ, "...", "…", "/", commas, digits,
-// brackets) is neutral or weak and, as in the Unicode bidi algorithm, takes the
-// direction of the RTL text on both sides, so a phrase such as "از ... متنفرم" or
-// "کا/کی/کے" stays one run in its own order. Trailing neutrals (": I have)") stay
-// outside. Joined, the runs' text is the input. [] for "" / null.
+// RTL packs (docs/PACK_SCHEMA.md "RTL rendering"): each RTL run gets its own <bdi> so the
+// English around it keeps its order. Neutrals between RTL letters take the RTL direction, as
+// in the Unicode bidi algorithm, so "از ... متنفرم" stays one run.
 const RTL_CH = "\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF";
 const RTL_RUN_RE = new RegExp(`[${RTL_CH}](?:(?:[${RTL_CH}]|[^\\p{L}\\p{M}])*[${RTL_CH}])?`, "gu");
 function rtlRuns(s){
@@ -832,9 +644,6 @@ function rtlRuns(s){
   return out;
 }
 
-// ------------------------------------------------------------------ placement
-// Splits a word pool into placement buckets: bucketSpec = [[levelId, bucketCount], ...]
-// (pack.placement). Each bucket covers a contiguous run of sets s0..s1 within its level.
 function strata(pool, bucketSpec, setSize){
   const size = setSize || 10;
   const out = [];
@@ -849,13 +658,8 @@ function strata(pool, bucketSpec, setSize){
   });
   return out;
 }
-// Items drawn per bucket: alternating 2 and 3 (16 buckets -> 40 items).
 const placementItemCount = bucketIndex => bucketIndex%2===0 ? 2 : 3;
 
-// Where placement stops, given per-bucket results res=[{r,n},...] in bucket order.
-// Bucket i passes if the rolling window (it plus up to two predecessors) is >=75%
-// correct AND bucket i itself has at least 1 right. Returns the first failing
-// index, or null if every bucket passed.
 function placementStopIndex(res){
   for(let i=0;i<res.length;i++){
     const lo = Math.max(0, i-2);
@@ -867,13 +671,8 @@ function placementStopIndex(res){
   return null;
 }
 
-// Applies a finished placement to progress (returns a new object; input untouched).
-// passed = number of leading buckets passed. Placement only ever moves a learner
-// forward: each level's counter becomes max(existing, furthest passed bucket end),
-// and no existing word record is removed or downgraded (learned, mastered and
-// drilled-ahead state all survive a poor retake). Levels before the first placement
-// level count as fully known once anything passed. Words newly covered and without a
-// record are seeded provisional; provisional flags are only ever added.
+// Placement only ever moves a learner forward: no word record is removed or downgraded, so
+// learned and drilled-ahead state survive a poor retake.
 function applyPlacement(prog, st, passed, words, pack){
   const out = Object.assign({}, prog, { w: {} });
   Object.keys(prog.w||{}).forEach(k => { out.w[k] = Object.assign({}, prog.w[k]); });
@@ -887,9 +686,7 @@ function applyPlacement(prog, st, passed, words, pack){
   return out;
 }
 
-// Groups a drill's missed items by their `key` (one word or sentence, whatever
-// question type it was missed as), keeping the first item seen as the representative.
-// Returns [{item, count}] ordered by count desc, then first-miss order.
+// One entry per word or sentence, whatever question type it was missed as.
 function dedupeMisses(miss){
   const by = new Map();
   (miss||[]).forEach((m, i) => {
@@ -900,9 +697,8 @@ function dedupeMisses(miss){
   return [...by.values()].sort((a,b)=>b.count-a.count || a.order-b.order).map(({item, count})=>({item, count}));
 }
 
-// ------------------------------------------------------------------ progress
 const PROG_VERSION = 1;
-const WORD_MASTERED = 3;      // word streak for "mastered"
+const WORD_MASTERED = 3;
 const SENTENCE_MASTERED = 2;  // sentences draw on several known words at once: lower bar
 function storageKey(pack){ return `vocab_${pack.key}`; }
 function defaultProg(pack){
@@ -925,9 +721,6 @@ function validateRecMap(m, name, allowWordFlags){
   }
   return null;
 }
-// Validates imported progress JSON before it replaces the live object.
-// levelIdList: the pack's level ids (sets keys must be among them).
-// Returns {ok:true, data} or {ok:false, reason}.
 function validateProgShape(data, levelIdList){
   if(!isObj(data)) return {ok:false, reason:"not a JSON object"};
   if(data.v !== undefined && data.v !== PROG_VERSION) return {ok:false, reason:`unknown progress version ${data.v}`};
@@ -954,8 +747,6 @@ function validateProgShape(data, levelIdList){
   if(data.script !== undefined){ const e = validateScriptShape(data.script); if(e) return {ok:false, reason:e}; }
   return {ok:true, data};
 }
-// Fills every missing field of validated (or stored) progress from the pack's
-// defaults, and gives every pack level a sets counter. Fields present are kept.
 function normalizeProg(data, pack){
   const base = defaultProg(pack);
   const merged = Object.assign({}, base, data||{}, {v:PROG_VERSION});
@@ -966,8 +757,7 @@ function normalizeProg(data, pack){
   merged.w = dropBadMissKinds(merged.w);
   return merged;
 }
-// A word record's k outside MISS_KINDS is dropped (the record is kept); records without
-// k, or with a valid one, are the same objects, so they round-trip unchanged.
+// Records without k, or with a valid one, stay the same objects so they round-trip unchanged.
 function dropBadMissKinds(w){
   let out = w;
   Object.keys(w).forEach(id => {
@@ -978,17 +768,15 @@ function dropBadMissKinds(w){
   });
   return out;
 }
-// Parses a stored/imported progress string. Only a JSON object is progress;
-// arrays, strings, numbers, null are rejected rather than Object.assign'ed.
+// Only a JSON object is progress: arrays, strings, numbers and null are never Object.assign'ed.
 function parseStored(raw){
   let data;
   try{ data = JSON.parse(raw); }catch(e){ return {ok:false, reason:"not valid JSON"}; }
   if(!isObj(data)) return {ok:false, reason:"not a JSON object"};
   return {ok:true, data};
 }
-// Boot-time leniency: a pack that renamed/removed a level must not wipe everything
-// else. Drops `sets` keys that aren't current pack levels (reported in `dropped`),
-// leaving the rest for strict validation. Manual import stays strict.
+// Boot-time leniency: a pack that renamed or removed a level must not wipe everything else.
+// Manual import stays strict.
 function dropUnknownSets(data, levelIdList){
   const allowed = new Set((levelIdList||[]).map(String));
   if(!isObj(data) || !isObj(data.sets)) return { data, dropped: [] };
@@ -997,13 +785,9 @@ function dropUnknownSets(data, levelIdList){
   const sets = {}; Object.keys(data.sets).forEach(k=>{ if(allowed.has(k)) sets[k] = data.sets[k]; });
   return { data: Object.assign({}, data, { sets }), dropped };
 }
-// Decides boot progress from the raw stored string (null = nothing stored).
-// Returns {prog, backupRaw, dropped, reason}: backupRaw non-null means the stored
-// value was unusable and must be preserved under the invalid-backup key before the
-// defaults replace it on the next save.
-// readError: the storage backend threw on read. Nothing is known about what is stored,
-// so the session runs read-only (defaults, never saved) rather than risk a save
-// clobbering real progress that merely failed to load.
+// An unusable stored value is returned as backupRaw so it is preserved before the defaults
+// replace it. readError: nothing is known about what is stored, so the session runs
+// read-only rather than risk a save clobbering real progress that merely failed to load.
 function bootProg(raw, pack, readError){
   const out = { prog: defaultProg(pack), backupRaw: null, dropped: [], reason: null, readOnly: false };
   if(readError){ out.readOnly = true; out.reason = "storage read failed"; return out; }
@@ -1017,8 +801,7 @@ function bootProg(raw, pack, readError){
   out.prog = normalizeProg(d.data, pack);
   return out;
 }
-// Manual import (strict). prev = current progress: its theme/showPron survive when
-// the import doesn't carry them. Returns {ok, prog} or {ok:false, reason}.
+// theme and showPron survive an import that doesn't carry them.
 function applyImport(prev, text, pack){
   const p = parseStored(text);
   if(!p.ok) return p;
@@ -1031,11 +814,9 @@ function applyImport(prev, text, pack){
   if(prog.chars && !(isObj(v.data.chars) && v.data.chars.mix !== undefined) && prev && isObj(prev.chars) && typeof prev.chars.mix === "boolean") prog.chars.mix = prev.chars.mix;
   return {ok:true, prog};
 }
-// kind (optional, word items only): the item kind shown, one of MISS_KINDS. A miss
-// remembers it as p.k so the next review asks the word the same way; a pass in that
-// exact kind clears it (user decision 2026-09-28). reqKind: the kind the plan asked for
-// when a fallback was shown (hear shown as read, type as recall); a pass clears k equal
-// to either, or the fallback would leave k stuck.
+// A miss remembers the shown kind as p.k so the next review asks the word the same way; a
+// pass in that kind clears it (user decision 2026-09-28). reqKind also clears, or a
+// fallback kind (hear shown as read) would leave k stuck.
 function markRec(map, key, ok, isWord, kind, reqKind){
   const p = map[key] || {r:0,w:0,s:0};
   if(ok){ p.r++; p.s++; } else { p.w++; p.s=0; }
@@ -1049,9 +830,7 @@ function setMissKind(p, ok, kind, reqKind){
   if(p.k !== undefined && (p.k === kind || p.k === reqKind)){ delete p.k; return true; }
   return false;
 }
-// Cloze items (gap: kind "recall", gapType: "type") touch only the blanked word's k; its
-// r/w/s stay untouched since the sentence record carries the answer. A word with no record
-// is left alone. Returns whether the record changed.
+// Only the blanked word's k changes: the sentence record carries the answer.
 function markMissKind(map, key, ok, kind){
   const p = map[key];
   return isObj(p) ? setMissKind(p, ok, kind) : false;
@@ -1066,8 +845,7 @@ function provPick(list, n, wrecs){
   return shuffle(list.filter(x=>{ const p = (wrecs||{})[x.id]; return p && p.prov && (p.s||0) < WORD_MASTERED; })).slice(0,n);
 }
 
-// Words from completed sets (per level, in pack order), plus any word flagged `d`
-// (drilled ahead of its set from the Words tab).
+// `d`: drilled ahead of its set from the Words tab.
 function learnedWords(words, pack, prog){
   const size = setSizeOf(pack); const byLv = wordsByLevel(words, pack);
   const out = [];
@@ -1076,7 +854,6 @@ function learnedWords(words, pack, prog){
   (words||[]).forEach(v=>{ if(!seen.has(v.id) && prog.w[v.id] && prog.w[v.id].d){ out.push(v); seen.add(v.id); } });
   return out;
 }
-// Next unlearned set, iterating levels in pack order: {lv, set} or null.
 function nextNewSet(words, pack, prog){
   const size = setSizeOf(pack); const byLv = wordsByLevel(words, pack);
   for(const lv of levelIds(pack)){
@@ -1085,27 +862,20 @@ function nextNewSet(words, pack, prog){
   }
   return null;
 }
-// Index of the level nextNewSet() would teach from, or levels.length when all done.
 function currentLevelIndex(words, pack, prog){
   const nn = nextNewSet(words, pack, prog);
   return nn ? levelIndexMap(pack)[nn.lv] : levelIds(pack).length;
 }
-// A sentence is available once every word id in it is learned, or once the learner
-// has moved past the sentence's level entirely.
 function availableSentences(sentences, words, pack, prog){
   const lw = new Set(learnedWords(words, pack, prog).map(w=>w.id));
   const cur = currentLevelIndex(words, pack, prog); const idx = levelIndexMap(pack);
   return (sentences||[]).filter(s => cur > idx[s.lv] || (s.words||[]).every(id=>lw.has(id)));
 }
 
-// ------------------------------------------------------------------ Today item plans
-// Plans are [{kind, word}] (words) or [{kind, sentence}] — the app turns each into a
-// drill item. Kept here, DOM-free, so composition rules are testable under Node.
+// Plans live here, DOM-free, so composition rules are testable under Node.
 const PRODUCTION_KINDS = ["recall","type"];
 const MISS_KINDS = ["recall","type","hear","read"];
 const REVIEW_SIZE = 15, REVIEW_PROV = 5, REVIEW_PRODUCTION_SHARE = 0.4;
-// Assigns kinds to n slots: ceil(share*n) production (recall/type alternating when
-// typing is on, else all recall), the rest receptive hear:read at 2:1.
 function kindMix(n, share, typing, rng){
   const nProd = Math.ceil(n*share - 1e-9);
   const kinds = [];
@@ -1113,16 +883,8 @@ function kindMix(n, share, typing, rng){
   for(let i=0;i<n-nProd;i++) kinds.push(i%3===2 ? "read" : "hear");
   return shuffle(kinds, rng);
 }
-// Review step: up to REVIEW_PROV provisional (placement-guessed) words plus the
-// weakest learned words, REVIEW_SIZE total, >= REVIEW_PRODUCTION_SHARE production.
-// opts.units (optional): the pack's character units. When the pack has a characters
-// block and some unit has a record, Review is unified (see unifiedReviewPlan); with no
-// such unit the code below runs unchanged, so the output is identical to a word-only plan.
-// opts.scriptCtx (optional): {byId | words, tts} for scriptKindFits, so a script unit
-// never gets a kind with fewer than 4 options (the units are opts.script).
-// opts.script (optional): the pack's script units (pack.script). Recorded ones join the
-// same unified ranking as kind "x" (scriptReviewScore); none recorded, or the primer
-// skipped, leaves the plan as above.
+// Character and script units join one ranking only when some are recorded. With none the
+// word-only code runs unchanged, so the output is identical to a word-only plan.
 function buildReviewPlan(learned, prog, pack, opts){
   const o = opts || {}; const n = o.size || REVIEW_SIZE;
   const ru = recordedUnits(o.units, prog, pack);
@@ -1135,9 +897,6 @@ function buildReviewPlan(learned, prog, pack, opts){
   const kinds = kindMix(pool.length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
   return applyMissedKinds(pool.map((word,i)=>({ kind: kinds[i], word })), prog, pack, false, o);
 }
-// Recall step: weakest n learned words, all production (recall/type mix).
-// opts.units / opts.rng: as buildReviewPlan. Recorded units join the same weakest-first
-// ranking as charRecall items; with none the word-only code below runs unchanged.
 function buildRecallPlan(learned, prog, pack, n, opts){
   const o = opts || {};
   const ru = recordedUnits(o.units, prog, pack);
@@ -1146,15 +905,9 @@ function buildRecallPlan(learned, prog, pack, n, opts){
   const kinds = kindMix(pool.length, 1, typingEnabled(pack));
   return applyMissedKinds(pool.map((word,i)=>({ kind: kinds[i], word })), prog, pack, true, o);
 }
-// A word item whose record remembers a missed kind (k) is asked in that kind instead of
-// kindMix's. production (Recall plans): a receptive k becomes "recall". "type" with typing
-// off becomes "recall". The wanted kind is got by swapping kinds with another word item
-// that holds it, so the plan's kinds stay exactly kindMix's (Review keeps its >= 40%
-// production share); with no such partner the word keeps its kind. At most ceil(n/2) words
-// (n word items) are moved, weakest first (weakScore, ties in plan order), so a plan full of
-// k never becomes all repeats of one kind. Unit items and words without k keep their kind;
-// no rng is drawn, so a progress without k gives the plan unchanged. opts.missedKinds ===
-// false (the Test tab) skips it.
+// Swapping kinds with a partner keeps the plan's kinds exactly kindMix's, so Review keeps its
+// production share. At most ceil(n/2) words move, so a plan full of k never becomes all
+// repeats of one kind. No rng is drawn: progress without k gives the plan unchanged.
 function applyMissedKinds(plan, prog, pack, production, opts){
   if(opts && opts.missedKinds === false) return plan;
   const recs = (prog && prog.w) || {}; const typing = typingEnabled(pack);
@@ -1176,7 +929,6 @@ function applyMissedKinds(plan, prog, pack, production, opts){
   const wantOf = new Map(wanted.map(x => [x.i, x.k]));
   for(const x of order){
     if(moved >= cap) break;
-    // Partner: an unsettled word item holding the wanted kind, one without its own k first.
     const cands = wordIdx.filter(j => j !== x.i && !settled.has(j) && kindAt(j) === x.k);
     const free = cands.filter(c => !wantOf.has(c)); const j = free.length ? free[0] : cands[0];
     if(j === undefined) continue;
@@ -1188,9 +940,7 @@ function applyMissedKinds(plan, prog, pack, production, opts){
   }
   return out;
 }
-// Sentence kind: hear 50 / read 25 / gap 25. Gap is "gapType" (type the blank) half
-// the time when the pack types written words, else multiple choice. A pack that types
-// the reading (typing "pron", pronTypingOn) never gets gapType: the blank is written.
+// A pack that types the reading (pronTypingOn) never gets gapType: the blank is written.
 function sentenceKind(pack, rng){
   const r = (rng || Math.random)();
   if(r < 0.5) return "hear";
@@ -1198,15 +948,9 @@ function sentenceKind(pack, rng){
   return typingEnabled(pack) && !pronTypingOn(pack) && (rng || Math.random)() < 0.5 ? "gapType" : "gap";
 }
 
-// ------------------------------------------------------------------ lessons
-// Miss-dedupe key for a lesson item: its lesson id plus its index in lesson.items
-// (question text is reused across items, so it can't be the key).
+// Question text is reused across lesson items, so it can't be the miss-dedupe key.
 const lessonItemKey = (lessonId, index) => `l:${lessonId}#${index}`;
-// How a lesson item with `say` (audio) runs when speech may be unavailable:
-//   "audio"  speech works (or the item has no say): play it as authored
-//   "inq"    no speech, but the question text already contains the say text: run as is
-//   "text"   no speech: show the say text in place of the audio
-//   "skip"   no speech, and the say text would give the answer away (contains it)
+// "skip": with no speech, showing the say text would give the answer away.
 function lessonSayMode(item, speechOK){
   if(!item || !item.say || speechOK) return "audio";
   const say = normKey(item.say), q = normKey(item.q), a = normKey(item.a);
@@ -1215,50 +959,32 @@ function lessonSayMode(item, speechOK){
   return "text";
 }
 
-// Which Today steps run, given the learned-word count, whether a new set remains,
-// and the available-sentence count. Shared by the Today plan table and the runner.
-// scriptCount (optional, pack.script): recorded script units; any opens Review, since a
-// learner in the primer has no learned words yet.
+// Shared by the Today plan table and the runner. Any script record opens Review: a learner
+// in the primer has no learned words yet.
 function todayGates(learnedCount, hasNextSet, availSentCount, scriptCount){
   return { review: learnedCount >= 5 || (scriptCount || 0) > 0, learn: !!hasNextSet, listen: learnedCount >= 4, recall: learnedCount >= 4, sentences: availSentCount >= 8 };
 }
-// How many of the Listen step's 12 words will actually be served as a Listen item, so
-// the Today plan line agrees with the session: app.html's hearItem() falls back to a
-// Read item (canHearWord false — no TTS voice and no recorded clip for that word), so a
-// word that can't be heard is not a Listen item even though the same 12 words are
-// drilled either way. canHear(word) is the caller's canHearWord.
-// Deliberately not weakFirst(learned, 12): app.html calls weakFirst(lw,12) with no recs,
-// so its "weakest first" is really an unweighted jitter shuffle that draws from the
-// global Math.random — calling it again here, purely to render a plan line, would burn
-// extra draws on every Today render and shift every later shuffle/weakFirst call in the
-// same session (the review/recall word picks, seeded-RNG test goldens, ...). A plain
-// slice is just as representative a sample of the unweighted pool, with no such
-// side effect.
+// Mirrors app.html hearItem's Read fallback so the plan line agrees with the session.
+// Deliberately not weakFirst(learned, 12): it draws from the global Math.random, so calling
+// it just to render a plan line would shift every later shuffle in the session (and the
+// seeded-RNG test goldens). A plain slice is as representative of the unweighted pool.
 function listenPlanCount(learned, canHear){
   return (learned || []).slice(0, 12).filter(canHear).length;
 }
-// Test tab: free word tests need TEST_MIN_WORDS learned words; the sentence test needs
-// TEST_MIN_SENTENCES available sentences. The "learn first" notice depends on learned words
-// only (placement itself needs no sentences); a held-back sentence test shows an unlock note.
+// The "learn first" notice depends on learned words only: placement needs no sentences.
 const TEST_MIN_WORDS = 8, TEST_MIN_SENTENCES = 8;
 function testGates(learnedCount, availSentCount){
   const words = learnedCount >= TEST_MIN_WORDS, sentences = availSentCount >= TEST_MIN_SENTENCES;
   return { words, sentences, needPlacement: !words };
 }
 
-// ------------------------------------------------------------------ speech
 const normLang = s => String(s||"").replace(/_/g,"-").toLowerCase();
-// Best voice for a BCP-47 locale: exact locale, else same base language, else null.
 function pickVoice(voices, lang){
   const want = normLang(lang), base = want.split("-")[0];
   const vs = voices || [];
   return vs.find(v=>normLang(v.lang)===want) || vs.find(v=>normLang(v.lang).split("-")[0]===base) || null;
 }
-// The voice to put on an utterance now: the chosen voice (pickVoice at the last
-// voiceschanged) when the current list still holds it (matched by voiceURI, else name:
-// some browsers hand out fresh voice objects per getVoices call), as the list's own object;
-// else a fresh pick from the current list; null (utterance keeps only its lang) when the
-// list has no voice for the language or is empty.
+// Matched by voiceURI, else name: some browsers hand out fresh voice objects per getVoices call.
 function liveVoice(chosen, voices, lang){
   const vs = voices || [];
   if(chosen){
@@ -1269,8 +995,8 @@ function liveVoice(chosen, voices, lang){
   }
   return pickVoice(vs, lang);
 }
-// ---- TTS sequencing (docs/AUDIO.md "Playback reliability"). A small driver around
-// speechSynthesis (ss) that works around three Chrome/Android failure modes:
+// TTS sequencing (docs/AUDIO.md "Playback reliability"): works around three Chrome/Android
+// failure modes:
 //  1. cancel() followed at once by speak() can drop the new utterance: cancel only when
 //     something is speaking/pending, and then speak after o.deferMs; a newer say()/stop()
 //     (generation counter) wins over a deferred one.
@@ -1281,20 +1007,13 @@ function liveVoice(chosen, voices, lang){
 //     keep the exact old synchronous behaviour).
 //  3. an utterance garbage-collected mid-speech (onend never fires): the driver keeps the
 //     current utterance referenced until its onend/onerror.
-// make(): builds a fresh utterance with its own handlers (called again for the retry).
-// o: { setTimeout, clearTimeout, deferMs, watchMs, pollMs }.
 const TTS_TIMING = { deferMs: 80, watchMs: 1200, pollMs: 200, cancelTtlMs: 500 };
 function ttsDriver(ss, o){
   const opt = Object.assign({}, TTS_TIMING, o || {});
   const setT = opt.setTimeout, clrT = opt.clearTimeout;
-  // cancelled: a cancel() has been issued and no deferred speak has run since, so the next
-  // say() defers too (speak() calls stop() then say(): the cancel is stop's). It is cleared
-  // by go() actually running -- but a stop() with no follow-up say() (leaving the screen), or
-  // a later stop() bumping gen before a deferred go() gets to run, would otherwise leave it
-  // stuck true forever, deferring a wholly unrelated say() seconds or minutes later for no
-  // reason. cancelledTimer self-clears it after cancelTtlMs on its own timer, independent of
-  // the retry/poll timers stop()/say() sweep on every call, so it fires regardless of what
-  // else the driver does (or doesn't do) in the meantime.
+  // cancelled makes the next say() defer. A stop() with no follow-up say(), or a later stop()
+  // bumping gen before a deferred go() runs, would leave it stuck true and defer an unrelated
+  // say() much later, so it self-clears after cancelTtlMs on its own timer.
   let gen = 0, cur = null, timers = [], cancelled = false, cancelledTimer = null;
   // Utterances the driver itself cancelled to retry (never started): an engine that fires
   // onend (not an error) on cancel makes that look like a finished utterance, so callers
@@ -1308,8 +1027,7 @@ function ttsDriver(ss, o){
     cancelledTimer = setT(() => { cancelled = false; cancelledTimer = null; }, opt.cancelTtlMs);
   };
   const clearCancelled = () => { cancelled = false; if(cancelledTimer){ try{ clrT(cancelledTimer); }catch(e){} cancelledTimer = null; } };
-  // Stops whatever TTS is playing or waiting (a deferred say, a retry); cancel() only
-  // when the engine reports something to cancel.
+  // cancel() only when the engine reports something to cancel (failure mode 1).
   function stop(){
     gen++; clear(); cur = null;
     if(busy()){ markCancelled(); try{ ss.cancel(); }catch(e){} return true; }
@@ -1345,11 +1063,8 @@ function ttsDriver(ss, o){
   }
   return { say, stop, current: () => cur, dropped: u => !!(droppedSet && droppedSet.has(u)) };
 }
-// Recorded clip start watchdog (docs/AUDIO.md): a clip that has not fired "playing" within
-// ms of play() (a hung load, a stalled start) is reported once through onFail. Armed only
-// on a media element that has the onplaying property (a real HTMLAudioElement; the test
-// fakes without it keep the old behaviour). Returns disarm(): call it on playing, end,
-// error, a blocked autoplay, or when a newer speak replaces the clip.
+// Recorded clip start watchdog (docs/AUDIO.md). Armed only on an element with onplaying
+// (a real HTMLAudioElement), so the test fakes keep the old behaviour.
 const CLIP_START_MS = 4000;
 function clipStartWatch(a, ms, onFail, timers){
   if(!a || !("onplaying" in a)) return () => {};
@@ -1380,20 +1095,15 @@ function isSamsungBrowser(ua){
   return /SamsungBrowser/i.test(String(ua||""));
 }
 
-// ------------------------------------------------------------------ audio
-// Recorded clips (docs/AUDIO.md). wordAudio: a word's clip URL (words[].audio), or
-// undefined. packAudio: whether pack.json declares shipped recordings (audio {voice,
-// version}); the app then hides its no-voice notices. Both are false/undefined for every
-// pack without the new fields, which is what keeps those packs byte-identical.
+// Recorded clips (docs/AUDIO.md). Both are false/undefined for packs without the new
+// fields, which is what keeps those packs byte-identical.
 function wordAudio(w){
   return isObj(w) && typeof w.audio === "string" && w.audio ? w.audio : undefined;
 }
 function packAudio(pack){
   return isObj(pack) && isObj(pack.audio) && typeof pack.audio.voice === "string" && !!pack.audio.voice;
 }
-// One shared playback slot for recorded audio. play(url) pauses whatever the slot played
-// last and reuses a single audio object (created once via make()), so repeated or
-// duplicated taps can never stack parallel players or requests.
+// One shared slot so repeated or duplicated taps never stack parallel players or requests.
 function audioSlot(make){
   let a = null;
   return {
@@ -1406,15 +1116,10 @@ function audioSlot(make){
   };
 }
 
-// ------------------------------------------------------------------ reading passages
-// Optional pack data (passages.json, docs/PACK_SCHEMA.md "passages.json"). A level's
-// passages unlock once READ_UNLOCK of that level's words are learned; the unlock is
-// stored in prog.read.unlocked so it survives later changes. Reading state lives in
-// prog.read = { unlocked: {levelId: 1}, done: {passageId: {sc, n, d, x, l?}} } and is absent
-// until the learner first meets a passage, so older stored progress needs no migration.
-// l: 1 marks a latest attempt that was a listening pass (readPassMode); absent = reading.
+// Optional pack data (docs/PACK_SCHEMA.md "passages.json"). The unlock is stored in
+// prog.read.unlocked so it survives later changes. prog.read is absent until the learner
+// first meets a passage, so older stored progress needs no migration.
 const READ_UNLOCK = 0.7;
-// Weights for "Weak words from this passage": misses added to prog.w[id].w.
 // reopened 0: looking back is shown on the results screen but never weakens a word (user 2026-09-28).
 const READ_WEIGHT = { tapped: 2, wrong: 2, reopened: 0 };
 function readState(prog){
@@ -1423,8 +1128,6 @@ function readState(prog){
   if(!isObj(prog.read.done)) prog.read.done = {};
   return prog.read;
 }
-// Per pack level: {lv, total, learned, need, frac, met, unlocked, count}. count = passages
-// at that level; need = learned words the threshold asks for (ceil(70% of total)).
 function readingLevels(passages, words, pack, prog){
   const learned = learnedWords(words, pack, prog);
   const byLv = wordsByLevel(words, pack);
@@ -1437,26 +1140,18 @@ function readingLevels(passages, words, pack, prog){
       count: (passages||[]).filter(p => p.lv === lv).length };
   });
 }
-// Records newly met thresholds in prog.read.unlocked (sticky). Only levels that have
-// passages are recorded. Returns the level ids unlocked by this call.
 function updateReadUnlocks(passages, words, pack, prog){
   const fresh = readingLevels(passages, words, pack, prog).filter(l => l.met && l.count > 0 && !(isObj(prog.read) && isObj(prog.read.unlocked) && prog.read.unlocked[l.lv]));
   if(fresh.length){ const st = readState(prog); fresh.forEach(l => { st.unlocked[l.lv] = 1; }); }
   return fresh.map(l => l.lv);
 }
-// Today's suggestion: the first not-done passage in pack order at an unlocked level, or null.
 function suggestPassage(passages, words, pack, prog){
   const open = new Set(readingLevels(passages, words, pack, prog).filter(l => l.unlocked).map(l => l.lv));
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
   return (passages||[]).find(p => open.has(p.lv) && !done[p.id]) || null;
 }
-// Today's Read stage (README "Today"): one passage per session. First choice is
-// suggestPassage (reason "new"). When nothing new is left, a spaced re-read: among passages
-// at unlocked levels whose latest attempt missed a question (done[id].sc < n), the one
-// with the oldest completion date d, no sooner than READ_REREAD_DAYS after it (ties: pack
-// order); reason "reread". null when neither exists, and the stage is absent. `now` is a
-// Date (local calendar day) or "YYYY-MM-DD" (app.html todayISO). Skipping the stage writes
-// nothing, so the same passage comes back next session.
+// Today's Read stage (README "Today"). Skipping the stage writes nothing, so the same
+// passage comes back next session.
 const READ_REREAD_DAYS = 7;
 function isoDayNumber(d){
   if(d instanceof Date) return isNaN(d) ? NaN : Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 864e5;
@@ -1480,23 +1175,16 @@ function nextReadItem(passages, words, pack, prog, now){
   });
   return best ? { p: best, reason: "reread" } : null;
 }
-// Listen mode (docs/PACK_SCHEMA.md "passages.json", Listening pass): how Today runs the
-// Read stage's item r ({p, reason} from nextReadItem). "listen" only for a spaced re-read
-// (reason "reread") on a device that can play every sentence (canListen: app.html checks
-// each sentence has a clip or a voice is usable), and only when the latest attempt was not
-// itself a listening pass (done[id].l), so re-reads alternate listen, read, listen...
-// Everything else, and every Read-tab passage, is an ordinary reading pass: "read".
+// Listen mode (docs/PACK_SCHEMA.md "passages.json", Listening pass). Only a spaced re-read
+// whose latest attempt was not a listening pass, so re-reads alternate listen, read, listen.
 function readPassMode(r, prog, canListen){
   if(!r || !r.p || r.reason !== "reread" || !canListen) return "read";
   const done = (isObj(prog && prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
   const rec = done[r.p.id];
   return isObj(rec) && rec.l ? "read" : "listen";
 }
-// The questions of a listening pass that are audio-only (text behind "Show question"):
-// ceil(n/2) indexes, ascending. The question order is a shuffle seeded by the passage id
-// alone, rotated by the number of previous attempts (done[id].x), and the first ceil(n/2)
-// taken: stable for one pass across re-renders, and for n >= 2 consecutive attempts never
-// pick the same set (the rotation shifts the window by one position each time).
+// Seeded by the passage id and rotated by attempt count: stable across re-renders, and
+// consecutive attempts never hide the same question set.
 function hashSeed(str){
   let h = 2166136261 >>> 0;
   for(let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
@@ -1513,26 +1201,14 @@ function listenAudioOnly(pid, attempts, n){
   const r = (((attempts || 0) % n) + n) % n;
   return idx.slice(r).concat(idx.slice(0, r)).slice(0, k).sort((a, b) => a - b);
 }
-// Length in words: whitespace tokens for spaced scripts, linked word tokens otherwise.
 function passageLength(p, pack){
   if(!pack || pack.spaced !== false) return String((p && p.text) || "").trim().split(/\s+/).filter(Boolean).length;
   return ((p && p.sentences) || []).reduce((n, s) => n + ((s.words || []).length), 0);
 }
-// Sentence text split into tappable pieces: [{text, id}] where id is the linked word
-// found there (null for plain text), plus `unplaced`, the linked ids not visible in the
-// text, which the UI lists under the sentence so every linked word stays tappable.
-// Builder spans come first: s.spans = [[start, end, wordId]] (UTF-16 offsets into s.t,
-// the token each word was read from, so inflected forms like mele or va are tappable).
-// A span is used when its bounds are valid, it covers non-blank text without splitting a
-// surrogate pair, its id is in s.words and known, and it does not overlap an earlier span. Ids in s.words with no span fall back to surface matching:
-// textForms (w, every alt and `forms` entry) and its bare form, as findSurface does for the pack; overlapping hits keep
-// the longest (per start, earliest first), so 为什么 wins over 为, and never cover a span.
-// A pack without spans behaves exactly as before. Joining every piece's text gives s.t.
-// A span may carry an optional 4th element, a display-only gloss string (zh: a phrase
-// such as 越来越 "more and more", or a sense of the word shown on tap); its piece then
-// has `gloss`, which the popover shows instead of the word's gloss. Pieces without one
-// are unchanged.
-// True when UTF-16 index i falls between the two halves of a surrogate pair.
+// Builder spans (s.spans, [start, end, wordId, gloss?]) come first: they carry the token each
+// word was read from, so inflected forms like mele or va are tappable. Ids with no span fall
+// back to surface matching and never cover a span. Unplaced ids are returned so the UI can
+// list them and every linked word stays tappable.
 function splitsPair(t, i){ return i > 0 && i < t.length && t.codePointAt(i - 1) > 0xFFFF; }
 function passageSegments(s, wordsById, pack){
   const t = String((s && s.t) || "");
@@ -1563,19 +1239,13 @@ function passageSegments(s, wordsById, pack){
   const placed = new Set(keep.map(h => h.id));
   return { parts, unplaced: ids.filter(id => !placed.has(id) && by[id]) };
 }
-// Grades one answer: mc = option index, tf = boolean. Anything else is wrong.
 function gradeQuestion(q, answer){
   if(!q) return false;
   if(q.type === "tf") return typeof answer === "boolean" && answer === q.answer;
   return Number.isInteger(answer) && answer === q.answer;
 }
-// "Weak words from this passage". log = {tapped: [wordId], answers: [{ok, reopened}] by
-// question index}. Tapped words and the words of wrongly answered questions weigh
-// READ_WEIGHT.tapped / .wrong (2); the words of questions answered while the passage was
-// reopened weigh .reopened (0: listed as information only, applyWeakWords skips them).
-// A word with several reasons takes the largest weight,
-// never the sum. Order: tapped first (tap order), then question order. Returns
-// [{id, weight, why: ["tapped"|"wrong"|"reopened"]}]; ids not in wordsById are dropped.
+// A word with several reasons takes the largest weight, never the sum. Reopened answers
+// weigh 0: listed as information only.
 function passageWeakWords(passage, log, wordsById){
   const out = new Map();
   const add = (id, why) => {
@@ -1594,12 +1264,8 @@ function passageWeakWords(passage, log, wordsById){
   });
   return [...out.values()];
 }
-// Applies chosen weak words to progress in place: misses (rec.w) += weight, streak reset,
-// provisional flag cleared, as a miss in markRec does, so weakScore ranks them first in
-// the next review. A word not yet learned is flagged `d` (as a Words-tab drill ahead
-// does), so learnedWords, and with it Today's review, includes it. Side effect, accepted:
-// a `d` word counts as learned everywhere learnedWords is used, including the READ_UNLOCK
-// threshold, exactly as a Words-tab drill-ahead does.
+// A not-yet-learned word is flagged `d` so Today's review includes it. Accepted side effect:
+// it then counts as learned everywhere, including the READ_UNLOCK threshold.
 function applyWeakWords(prog, entries, words, pack){
   const learned = new Set(learnedWords(words, pack, prog).map(w => w.id));
   (entries || []).forEach(e => {
@@ -1612,17 +1278,13 @@ function applyWeakWords(prog, entries, words, pack){
   });
   return prog;
 }
-// Records a finished passage: sc right of n questions on date d ("YYYY-MM-DD"); x counts
-// attempts. The latest attempt's score is kept. listen: the attempt was a listening pass,
-// stored as l: 1 (absent for a reading pass, so reading-only records are unchanged).
+// l is absent for a reading pass, so reading-only records are unchanged.
 function markPassageDone(prog, pid, sc, n, d, listen){
   const st = readState(prog); const prev = st.done[pid];
   st.done[pid] = { sc, n, d: String(d), x: ((prev && prev.x) || 0) + 1 };
   if(listen) st.done[pid].l = 1;
   return st.done[pid];
 }
-// Progress tab: per level with passages {lv, total, done, avg} where avg is the mean
-// latest score in percent over done passages (null when none).
 function readingStats(passages, pack, prog){
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
   return levelIds(pack).map(lv => {
@@ -1650,21 +1312,15 @@ function validateReadShape(r){
   return null;
 }
 
-// ------------------------------------------------------------------ characters
-// Optional characters stage (design: the merge plan in docs/, §2-3). Nothing here runs for a pack
-// without a `characters` block. A character unit is the written form of a known word:
-// {id, t, words:[wordId,...], lv, reading?} (pack characters.js). words[0] supplies the
-// gloss, the audio and the default reading. Progress lives in prog.chars =
-// {v, c:{[unitId]:{r,w,s}}, defer, choiceSeen, mix}; scoring writes prog.chars.c only.
-// Language-agnostic: the pack decides what a unit is (zh: every word, read by its pron;
-// ja: words written with non-kana glyphs, read by their kana pron).
+// Optional characters stage (the merge plan in docs/, §2-3). Nothing here runs for a pack
+// without a `characters` block. Language-agnostic: the pack decides what a unit is (zh:
+// every word, read by its pron; ja: words written with non-kana glyphs).
 const CHARS_PROG_VERSION = 1;
 const CHAR_SET_SIZE = 10, CHAR_MASTERED = 3, CHAR_BARE = 6;
 const REVIEW_SIZE_CHARS = 20; // Review once characters have started (15 before)
 const CHAR_KINDS = ["charRead","charSound","charPick","charRecall"];
 const hasOwn = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 const cpLen = s => [...String(s == null ? "" : s)].length;
-// pack.characters with defaults filled, or null when the pack has none.
 function charsConfig(pack){
   const c = pack && pack.characters;
   if(!isObj(c)) return null;
@@ -1682,17 +1338,13 @@ function charsConfig(pack){
     compose: c.compose === true,
   };
 }
-// pack.characters.testKinds: {kind: weight} for the Test tab's Characters N (the predecessor app's mix,
-// charRead 40 / charSound 30 / charPick 30, by default). Unknown kinds and non-positive
-// or non-finite weights are dropped; nothing left means the default.
+// Default mix is the predecessor app's.
 const CHAR_TEST_KINDS = { charRead:40, charSound:30, charPick:30 };
-// kinds/def (optional): the known kinds and default map (pack.script passes its own).
 function testKinds(tk, kinds, def){
   const out = {};
   if(isObj(tk)) for(const k of (kinds || CHAR_KINDS)) if(typeof tk[k] === "number" && isFinite(tk[k]) && tk[k] > 0) out[k] = tk[k];
   return Object.keys(out).length ? out : Object.assign({}, def || CHAR_TEST_KINDS);
 }
-// One kind drawn from a {kind: weight} map (rng in [0, 1)).
 function pickWeighted(weights, rng){
   const ks = Object.keys(weights); const total = ks.reduce((a, k) => a + weights[k], 0);
   let x = (rng || Math.random)() * total;
@@ -1700,11 +1352,9 @@ function pickWeighted(weights, rng){
   return ks[ks.length - 1];
 }
 
-// ---- progress (prog.chars)
 function defaultCharsProg(){ return { v:CHARS_PROG_VERSION, c:{}, defer:false, choiceSeen:false, mix:true }; }
-// Returns an error string or null. Validated whenever present, pack or no pack.
-// chars.v is its own version: any positive integer is accepted and kept, so a newer
-// chars shape never invalidates (and so resets) the whole progress record.
+// chars.v is its own version: any positive integer is kept, so a newer chars shape never
+// invalidates (and so resets) the whole progress record.
 function validateCharsShape(ch){
   if(!isObj(ch)) return "chars must be an object";
   if(ch.v !== undefined && !(Number.isInteger(ch.v) && ch.v >= 1)) return "chars.v must be a positive integer";
@@ -1712,7 +1362,6 @@ function validateCharsShape(ch){
   for(const f of ["defer","choiceSeen","mix"]) if(ch[f] !== undefined && typeof ch[f] !== "boolean") return `chars.${f} must be a boolean`;
   return null;
 }
-// Missing fields filled from defaults; fields present are kept.
 function normalizeCharsProg(ch){
   const out = Object.assign(defaultCharsProg(), isObj(ch) ? ch : {});
   if(!isObj(out.c)) out.c = {};
@@ -1725,24 +1374,19 @@ function ensureChars(prog){
 }
 function charRecs(prog){ return (prog && isObj(prog.chars) && isObj(prog.chars.c)) ? prog.chars.c : {}; }
 const hasCharRec = (recs, id) => hasOwn(recs, id) && !!recs[id];
-// Scores one character item (writes prog.chars.c only).
 function markChar(prog, unitId, ok){ return markRec(ensureChars(prog).c, unitId, ok, false); }
-// The one-time choice card: start characters now, or defer them past the later levels.
 function answerCharChoice(prog, start){
   const ch = ensureChars(prog); ch.choiceSeen = true; if(!start) ch.defer = true; return prog;
 }
-// The reversible learning-order switch (Progress): flips the flag only. The path is
-// re-derived from it; no record, set counter or choice state is touched.
+// Flips the flag only: the path is re-derived from it, no record or set state is touched.
 function setCharOrder(prog, defer){ ensureChars(prog).defer = !!defer; return prog; }
 
-// ---- units
 function unitWord(unit, byId){ return (byId || {})[((unit && unit.words) || [])[0]] || null; }
 function unitReading(unit, byId){
   if(unit && unit.reading != null && unit.reading !== "") return String(unit.reading);
   const w = unitWord(unit, byId); return w && w.pron ? String(w.pron) : "";
 }
 function unitGloss(unit, byId){ return gloss(unitWord(unit, byId)); }
-// wordId -> the unit whose words[0] it is (the unit a sentence ruby token follows).
 const UNIT_BY_WORD = new WeakMap();
 function unitByWord(units){
   if(!Array.isArray(units)) return new Map();
@@ -1750,15 +1394,12 @@ function unitByWord(units){
   if(!m){ m = new Map(); units.forEach(u => { const w = (u.words || [])[0]; if(w != null && !m.has(w)) m.set(w, u); }); UNIT_BY_WORD.set(units, m); }
   return m;
 }
-// Units with a character record: the pool unified Review and Recall draw from.
 function recordedUnits(units, prog, pack){
   if(!charsConfig(pack) || !Array.isArray(units) || !units.length) return [];
   const recs = charRecs(prog);
   return units.filter(u => hasCharRec(recs, u.id));
 }
 
-// ---- stages and sets
-// A stage's units: level order (pack order), then file order.
 function charStageUnits(levels, units, pack){
   const want = new Set((levels || []).map(String)); const idx = levelIndexMap(pack);
   const at = lv => idx[lv] !== undefined ? idx[lv] : Infinity;
@@ -1771,18 +1412,13 @@ function charSets(levels, units, pack){
   for(let i=0; i<list.length; i+=size) out.push(list.slice(i, i+size));
   return out;
 }
-// A set is taught once every unit in it has a record (no separate counter).
+// No separate set counter: a set is taught once every unit in it has a record.
 function charSetTaught(set, prog){ const r = charRecs(prog); return (set || []).every(u => hasCharRec(r, u.id)); }
-// First untaught set of the stage: {index, units, total} or null.
 function nextCharSet(levels, units, pack, prog){
   const sets = charSets(levels, units, pack);
   for(let i=0; i<sets.length; i++) if(!charSetTaught(sets[i], prog)) return { index:i, units:sets[i], total:sets.length };
   return null;
 }
-// Character stages in path order for this learner: the configured stages, or with
-// prog.chars.defer one stage covering all their levels after the latest `after` level.
-// A stage whose `after` is not a pack level sits after the last level.
-// Each: {after, levels, label}. Later stages append their last level id to the label.
 function charStages(pack, prog){
   const cfg = charsConfig(pack); if(!cfg || !cfg.stages.length) return [];
   const ids = levelIds(pack), idx = levelIndexMap(pack);
@@ -1796,12 +1432,7 @@ function charStages(pack, prog){
   return cfg.stages.map((st, i) => ({ after: ids[pos(st.after)], levels: st.levels,
     label: i === 0 ? cfg.label : cfg.label + (st.levels.length ? st.levels[st.levels.length-1] : "") }));
 }
-// Every stage in path order. Word stage: {kind:"words", lv, label, set, nsets, frac,
-// done} (set = the level's sets counter, as nextNewSet reports it). Character stage:
-// {kind:"chars", key, levels, label, recorded, nunits, nsets, frac, done}.
 // Without pack.characters this is exactly the level strip: one word stage per level.
-// sunits (optional, pack.script): the script units. With pack.script and the primer not
-// skipped, one script stage per pack.script.stages entry comes first (scriptStages).
 function stagePath(pack, words, units, prog, sunits){
   const p = prog || {}; const sets = p.sets || {};
   const size = setSizeOf(pack), byLv = wordsByLevel(words, pack), recs = charRecs(p);
@@ -1821,26 +1452,22 @@ function stagePath(pack, words, units, prog, sunits){
   return sc.length ? [...sc, ...out] : out;
 }
 function nextStage(pack, words, units, prog, sunits){ return stagePath(pack, words, units, prog, sunits).find(s => !s.done) || null; }
-// Every level up to the first character stage's `after` is taught: the point the
-// learning-order switch becomes available.
+// The point the learning-order switch becomes available.
 function charsUnlocked(pack, words, prog){
   const cfg = charsConfig(pack); if(!cfg || !cfg.stages.length) return false;
   const path = stagePath(pack, words, [], Object.assign({}, prog, { chars: Object.assign({}, (prog && prog.chars) || {}, { defer:false }) }));
   const first = path.findIndex(s => s.kind === "chars");
   return first > 0 && path.slice(0, first).every(s => s.done);
 }
-// Characters have started: any character record exists, or the current stage is a
-// character stage. Gates every character surface outside the path strip.
+// Gates every character surface outside the path strip.
 function charsStarted(pack, words, units, prog, sunits){
   if(!charsConfig(pack)) return false;
   if(Object.keys(charRecs(prog)).length) return true;
   const st = nextStage(pack, words, units, prog, sunits);
   return !!(st && st.kind === "chars");
 }
-// The one-time choice card shows iff it is unanswered, the order is not deferred, every
-// level before the first character stage is taught, that stage is incomplete (records
-// elsewhere don't matter), and a later word level that deferring would put first (up to
-// the latest stage's `after`) is still incomplete. Otherwise the choice changes nothing.
+// Shown only when deferring would actually put an incomplete later word level first;
+// otherwise the choice changes nothing.
 function showCharChoice(pack, words, units, prog, sunits){
   const cfg = charsConfig(pack); if(!cfg || !cfg.stages.length) return false;
   const ch = (prog && isObj(prog.chars)) ? prog.chars : {};
@@ -1853,30 +1480,20 @@ function showCharChoice(pack, words, units, prog, sunits){
   return path.slice(first + 1).some(s => s.kind === "words" && idx[s.lv] <= last && !s.done);
 }
 
-// ---- tiers
-// Streak -> tier: "pron" below mastered, "ruby" (written form with its reading above)
-// from mastered, "bare" (written form alone) from bare.
 function charTier(streak, pack){
   const cfg = charsConfig(pack); const s = +streak || 0;
   if(s >= (cfg ? cfg.bare : CHAR_BARE)) return "bare";
   if(s >= (cfg ? cfg.mastered : CHAR_MASTERED)) return "ruby";
   return "pron";
 }
-// Per sentence token: null (no mixing: the sentence renders as it does without
-// characters) unless characters have started and the mix preference is on. Then "ruby"
-// below bare and "bare" at or above it. Word-first packs show the written form from day
-// one, so "pron" only exists for a pack.pronFirst pack (reading-only below mastered).
+// Word-first packs show the written form from day one, so "pron" only exists for pronFirst.
 function sentenceTokenTier(streak, started, mix, pack){
   if(!started || !mix) return null;
   const t = charTier(streak, pack);
   return t === "pron" && !(pack && pack.pronFirst === true) ? "ruby" : t;
 }
-// sentence.ruby tokens with their tiers: [{start, end, reading, wordId, unitId, tier}],
-// or null when the sentence has no ruby or mixing is off (see sentenceTokenTier).
-// pack.pronFirst: tiers are always returned for a sentence with ruby (every token is
-// "pron" before characters start or with mix off: the reading replaces the written form,
-// as in the predecessor app's reading-only sentences), and follow sentenceTokenTier once
-// characters have started with mix on.
+// pronFirst: tokens are "pron" before characters start or with mix off, as in the
+// predecessor app's reading-only sentences.
 function rubyTiers(sentence, units, prog, pack, started){
   const mix = !!(prog && isObj(prog.chars) && prog.chars.mix !== false);
   const pf = pronFirstOn(pack);
@@ -1890,15 +1507,9 @@ function rubyTiers(sentence, units, prog, pack, started){
   });
 }
 
-// ---- pronunciation-first (pack.pronFirst, docs/PACK_SCHEMA.md "pronFirst")
-// On only for pack.pronFirst === true with a characters stage: a word whose unit is below
-// the mastered tier is shown by its reading (pron) wherever its written form would appear
-// outside the characters stage, which is where the written form is learned.
+// pronFirst (docs/PACK_SCHEMA.md "pronFirst"): a word below the mastered tier is shown by its
+// reading outside the characters stage, which is where the written form is learned.
 function pronFirstOn(pack){ return !!(pack && pack.pronFirst === true && charsConfig(pack)); }
-// word -> {text, isPron, written}: text is what to display for the word, written its `w`.
-// isPron when pronFirstOn, the word has a pron and a unit (unitByWord: the unit whose
-// words[0] it is) and that unit's streak is below mastered (charTier "pron"). A word with
-// no unit (kana/latin word) or no pron is shown as written. DOM-free, no side effects.
 function displayForm(word, units, prog, pack){
   const written = String((word && word.w) || "");
   const out = { text: written, isPron: false, written };
@@ -1909,28 +1520,16 @@ function displayForm(word, units, prog, pack){
   if(charTier(rec ? rec.s : 0, pack) !== "pron") return out;
   return { text: String(word.pron), isPron: true, written };
 }
-// What a learner hears/reads for a word under pron display: its pron, else its w.
 const sayKey = e => normKey((e && (e.pron || e.w)) || "");
-// Homophone guard for pron display: two words that sound the same (same pron, or one's
-// written form is the other's reading, e.g. a word spelled in its reading and one read alike) are
-// indistinguishable once both are shown by their reading.
+// Two words shown by their reading are indistinguishable when they sound the same.
 function pronClash(a, b){ return !!(a && b) && sayKey(a) !== "" && sayKey(a) === sayKey(b); }
 
 const LATIN_RE = /\p{Script=Latin}/u;
 const HAN_RE = /\p{Script=Han}/u;
-// Full-width punctuation next to a Latin-script reading, as the reading line writes it.
 const ASCII_PUNCT = { "\uff0c":", ", "\u3001":", ", "\u3002":". ", "\uff01":"! ", "\uff1f":"? ", "\uff1a":": ", "\uff1b":"; ", "\uff08":" (", "\uff09":") ",
   "\u201c":" \u201c", "\u201d":"\u201d ", "\u2018":" \u2018", "\u2019":"\u2019 ", "\u300a":" \u201c", "\u300b":"\u201d ", "\u2026":"\u2026 ", "\u2014":" \u2014 " };
-// Display pieces of a sentence under pron display, in order: ruby tokens (rubyTiers, or
-// any [{start, end, tier, reading, wordId}] non-overlapping and sorted) and the text
-// around them. A "pron"-tier token shows its reading instead of its written form.
-// blank (optional {start, end}): that range, widened to every token it overlaps, becomes
-// one {kind:"blank"} piece. cuts (optional offsets): text pieces are also split there
-// (passage tap-span edges). When any shown reading is Latin script, adjacent
-// tokens with a reading or blank between them are spaced (pre " ") and full-width punctuation
-// touching a reading or blank is shown in ASCII form with a space; readings in a
-// script written without spaces need neither. Piece: {kind:"text"|"tok"|"blank", start, end, text, pre, tier?, reading?,
-// wordId?, unitId?}. Joining pre+text of every piece gives the displayed line.
+// A Latin-script reading needs spacing and ASCII punctuation around it; a reading in a
+// script written without spaces needs neither.
 function sentencePieces(sentence, toks, blank, cuts){
   const t = String((sentence && sentence.t) || "");
   const valid = []; let pos = 0;
@@ -1963,15 +1562,9 @@ function sentencePieces(sentence, toks, blank, cuts){
   text(pos, t.length);
   const shown = p => (p.kind === "tok" && p.tier === "pron") || p.kind === "blank";
   if(!out.some(p => p.kind === "tok" && p.tier === "pron" && LATIN_RE.test(p.text))) return out;
-  // Latin line: full-width punctuation in ASCII form; a reading or blank is spaced from
-  // a neighbour that meets it with a letter or digit (a token, or text such as a name).
   const edgeL = p => p.kind !== "text" || /^[\p{L}\p{N}]/u.test(p.text);
   const edgeR = p => p.kind !== "text" || /[\p{L}\p{N}]$/u.test(p.text);
   out.forEach(p => { if(p.kind === "text") p.text = p.text.replace(/[\uff0c\u3001\u3002\uff01\uff1f\uff1a\uff1b\uff08\uff09\u201c\u201d\u2018\u2019\u300a\u300b\u2026\u2014]/g, c => ASCII_PUNCT[c]).replace(/\s+(?=[\u201d\u2019)\u2026,.!?:;])/g, ""); });
-  // A reading that starts a sentence is capitalised: the first one when only opening
-  // punctuation precedes it, the first after a sentence-internal . ! or ? (ba! Ni...), and
-  // the first inside a quote opened after a colon (Ta shuo: "Ni..."). An ellipsis (…) stays
-  // as written and starts nothing.
   let atStart = true;
   out.forEach(p => {
     if(p.kind === "tok" && p.tier === "pron"){ if(atStart) p.text = p.text.charAt(0).toUpperCase() + p.text.slice(1); atStart = false; }
@@ -1980,7 +1573,6 @@ function sentencePieces(sentence, toks, blank, cuts){
     else if(!/^[\s"'\u201c\u2018(]*$/.test(p.text)) atStart = false;
   });
   out.forEach((p, i) => { const prev = out[i-1]; if(prev && (shown(p) || shown(prev)) && edgeL(p) && edgeR(prev)) p.pre = " "; });
-  // tidy: no doubled or edge spaces
   let last = "";
   out.forEach((p, i) => {
     if(/\s$/.test(last)){ p.pre = ""; p.text = p.text.replace(/^\s+/, ""); }
@@ -1991,22 +1583,14 @@ function sentencePieces(sentence, toks, blank, cuts){
   for(let i = out.length - 1; i >= 0; i--){ const p = out[i]; if(p.kind === "text"){ p.text = p.text.replace(/\s+$/, ""); if(p.text) break; } else break; }
   return out;
 }
-// Whether ruby tokens ([{start, end}], UTF-16 offsets) cover every Han character of text t:
-// the characters that need a reading to be shown with ruby. Kana, Latin letters, digits and
-// punctuation are readable as written. sentenceDisplay shows a sentence with ruby only when
-// this holds; unitExampleSentences prefers such sentences.
+// Kana, Latin letters, digits and punctuation are readable as written: only Han needs ruby.
 function rubyCovers(t, toks){
   const cov = new Array(t.length).fill(false);
   (toks || []).forEach(k => { for(let i = Math.max(0, k.start); i < Math.min(t.length, k.end); i++) cov[i] = true; });
   for(let i = 0; i < t.length; i++){ if(!cov[i]){ const cp = t.codePointAt(i); if(HAN_RE.test(String.fromCodePoint(cp))) return false; if(cp > 0xFFFF) i++; } }
   return true;
 }
-// A characters-stage teach card's examples for unit (its word `word`): exampleSentences'
-// order within three tiers. First, sentences with a ruby token of the unit's own word
-// (unit.words) whose ruby covers every Han character (rubyCovers): they can show the
-// unit written with its reading, under pack.pronFirst too. Then sentences with the
-// unit's token but uncovered characters, then the rest. Without pack.characters it is
-// exampleSentences.
+// Fully covered sentences come first: they can show the unit written with its reading.
 function unitExampleSentences(unit, word, sentences, pack, n){
   if(!word) return [];
   const all = exampleSentences(word, sentences, pack, Infinity);
@@ -2020,16 +1604,7 @@ function unitExampleSentences(unit, word, sentences, pack, n){
   });
   return [...tiers[0], ...tiers[1], ...tiers[2]].slice(0, n);
 }
-// A sentence under pack.pronFirst: how to show it. null when pron display is off (the
-// caller renders as without it). Else {mode, pieces?, text?}:
-//  "pieces": ruby tokens by tier (sentencePieces), when every Han character of the text
-//    lies inside a ruby token;
-//  "pron": the sentence's own reading line (sentence.pron), when written characters
-//    would otherwise show outside any token (a name, a word with no unit) or the sentence
-//    has no ruby; never used for a blank (null then: the sentence cannot be a gap item);
-//  "text": the text as is (it has no Han characters: kana or Latin only).
-// written (optional, word ids): tokens of these words show at least the ruby tier (the
-// written form with its reading): the unit a characters-stage teach card is teaching.
+// "pron" (the reading line) is never used for a blank: that sentence cannot be a gap item.
 function sentenceDisplay(sentence, units, prog, pack, started, blank, written){
   if(!pronFirstOn(pack) || !sentence) return null;
   const t = String(sentence.t || "");
@@ -2042,13 +1617,8 @@ function sentenceDisplay(sentence, units, prog, pack, started, blank, written){
   return sentence.pron ? { mode:"pron", text: String(sentence.pron) } : { mode:"text" };
 }
 
-// ---- options
-// Written-form distractors (charPick: reading+audio -> form; charRecall: meaning -> form).
-// Up to 3 other units, never a second right answer: not the answer's form or any surface
-// of its word, not the same reading (a homophone fits the pick stimulus), not the same
-// gloss or first two gloss words (fits the recall stimulus). Pairwise distinct forms and
-// glosses; a strict pass also keeps first-two-gloss-words distinct, relaxed for tiny pools.
-// Preference: same level and form length, then same level, then any.
+// Never a second right answer: a homophone fits the pick stimulus, a same gloss fits the
+// recall stimulus.
 function charOpts(unit, units, byId){
   const aw = unitWord(unit, byId);
   const ansG = normKey(unitGloss(unit, byId)), ansF2 = firstTwoWords(unitGloss(unit, byId)), ansR = normKey(unitReading(unit, byId));
@@ -2080,12 +1650,8 @@ function charOpts(unit, units, byId){
   if(chosen.length < 3) chosen = pass(false);
   return chosen;
 }
-// charRecall options: the answer's form plus the charOpts distractors' forms.
 function recallCharOpts(unit, units, byId){ return [unit.t, ...charOpts(unit, units, byId).map(v => v.t)]; }
-// Reading distractors for charSound (form -> reading): up to 3 readings of other units,
-// never a homophone of the answer and never a reading the answer's form also has (a
-// homograph unit or word with the same form). Pairwise distinct. Preference: same level
-// and form length, then same form length, then same level, then any.
+// Never a homophone, nor a reading the answer's form also has (a homograph unit or word).
 function charSoundOpts(unit, units, byId){
   const ansT = normKey(unit.t), ansR = normKey(unitReading(unit, byId));
   const forbid = new Set([ansR]);
@@ -2105,17 +1671,12 @@ function charSoundOpts(unit, units, byId){
   }
   return out;
 }
-// Meaning distractors for charRead (form alone -> meaning): meaningOpts on the unit's
-// word, with every word the form could also be read as removed from the pool.
+// Every word the form could also be read as is removed from the pool.
 function charReadOpts(unit, words, byId){
   const w = unitWord(unit, byId); if(!w) return [];
   const t = normKey(unit.t);
   return meaningOpts(w, (words || []).filter(v => v.id === w.id || !surfaces(v).includes(t)));
 }
-// One drill item for a unit, DOM-free: {kind, key, unitId, wordId, t, reading, gloss,
-// show, audio, options, answer}. show is the stimulus field ("t", "reading" or "gloss");
-// audio: play words[0]. options are shuffled strings that include answer.
-// ctx: {units, words, byId?, rng?}.
 function charItem(kind, unit, ctx){
   const c = ctx || {}; const byId = c.byId || Object.fromEntries((c.words || []).map(w => [w.id, w]));
   const w = unitWord(unit, byId), t = String(unit.t), reading = unitReading(unit, byId), g = unitGloss(unit, byId);
@@ -2129,23 +1690,18 @@ function charItem(kind, unit, ctx){
   return Object.assign(base, { show, audio, answer, options: shuffle([answer, ...others], c.rng) });
 }
 
-// ---- plans
-// Learn step for a character set: each unit gets one item per pack learnKinds, in order.
 function learnCharPlan(set, pack){
   const cfg = charsConfig(pack); if(!cfg) return [];
   const out = []; (set || []).forEach(unit => cfg.learnKinds.forEach(kind => out.push({ kind, unit })));
   return out;
 }
-// Unified weakness score: words keep weakScore; an unmastered unit (s < mastered)
-// scores at least 0, tying with never-drilled words so fresh units aren't starved by a
-// large pool of unrecorded words. Mastered units keep w*3 - s.
+// An unmastered unit scores at least 0, tying with never-drilled words, so fresh units
+// aren't starved by a large pool of unrecorded words.
 function charReviewScore(rec, pack){
   const cfg = charsConfig(pack); const p = rec || {}; const sc = weakScore(p);
   return (p.s || 0) < (cfg ? cfg.mastered : CHAR_MASTERED) ? Math.max(sc, 0) : sc;
 }
-// One ranking over words and units: the n weakest as [{kind:"w"|"c"|"x", entry, score}],
-// with weakFirst's jitter (below 1, so it only reorders equal scores). sunits/srecs
-// (optional): script units and their records, kind "x" (scriptReviewScore).
+// Jitter stays below 1, so it only reorders equal scores.
 function rankUnified(words, wrecs, units, crecs, n, pack, rng, sunits, srecs){
   const r = rng || Math.random;
   const pool = [...(words || []).map(e => ({ kind:"w", entry:e, score: weakScore((wrecs || {})[e.id]) })),
@@ -2153,10 +1709,6 @@ function rankUnified(words, wrecs, units, crecs, n, pack, rng, sunits, srecs){
     ...(sunits || []).map(u => ({ kind:"x", entry:u, score: scriptReviewScore((srecs || {})[u.id], pack) }))];
   return pool.map(x => ({ x, k: x.score + (r() - 0.5) })).sort((a, b) => b.k - a.k).slice(0, n).map(o => o.x);
 }
-// Unified Review: provisional words as before, then the weakest words and recorded units
-// under one ranking, n total. Word items keep the >= 40% production mix; each unit gets
-// a random pack reviewKind. Items: {kind, word} or {kind, unit}. rs (optional): recorded
-// script units; each gets a random pack.script reviewKind that fits it (pickScriptKind).
 function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx, opts){
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = rng || Math.random;
   const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
@@ -2170,8 +1722,6 @@ function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx, opts){
     : { kind: pickScriptKind(scfg.reviewKinds, x.entry, scfg, r, sctx), unit: x.entry });
   return applyMissedKinds(out.filter(it => it.kind), prog, pack, false, opts);
 }
-// Unified Recall: the n weakest words and recorded units, weakest first; words as
-// recall/type, units as charRecall.
 function unifiedRecallPlan(learned, ru, prog, pack, n, rng, opts){
   const ranked = rankUnified(learned, prog.w, ru, charRecs(prog), n, pack, rng);
   const kinds = kindMix(ranked.filter(x => x.kind === "w").length, 1, typingEnabled(pack), rng);
@@ -2179,13 +1729,7 @@ function unifiedRecallPlan(learned, ru, prog, pack, n, rng, opts){
   return applyMissedKinds(ranked.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry } : { kind:"charRecall", unit: x.entry }), prog, pack, true, opts);
 }
 // Taken at "Start today" and kept for the whole session, so finishing a stage mid-session
-// changes neither what Learn teaches nor Review/Recall's mode: {stage, cset, charsStarted,
-// reviewSize, choice}. choice true means the choice card replaces Start today.
-// Without pack.characters: the next word stage, cset null, charsStarted false, REVIEW_SIZE.
-// sunits (optional, pack.script): the script units. With pack.script the snapshot also has
-// ssets: the script sets Learn teaches (nextScriptSets, up to setsPerSession) while a
-// script stage is next, else []; reviewSize is REVIEW_SIZE_SCRIPT then; and choice is
-// "script" while the script choice card shows (it comes before the characters card).
+// changes neither what Learn teaches nor Review/Recall's mode.
 function todaySnapshot(pack, words, units, prog, sunits){
   const stage = nextStage(pack, words, units, prog, sunits);
   const cset = stage && stage.kind === "chars" ? nextCharSet(stage.levels, units, pack, prog) : null;
@@ -2200,15 +1744,11 @@ function todaySnapshot(pack, words, units, prog, sunits){
   }
   return snap;
 }
-// Learned words' units without a record, level order then file order, at most n.
 function newCharUnits(units, learned, prog, pack, n){
   const ids = new Set((learned || []).map(w => w.id)); const recs = charRecs(prog);
   const ok = new Set((units || []).filter(u => ids.has((u.words || [])[0]) && !hasCharRec(recs, u.id)).map(u => u.id));
   return charStageUnits(levelIds(pack), (units || []).filter(u => ok.has(u.id)), pack).slice(0, n);
 }
-// Test tab's Characters N (the predecessor app's test): the n weakest recorded units,
-// topped up to n with learned words' unrecorded units (newCharUnits: level order, then
-// file order); each gets a kind drawn from pack.characters.testKinds. [{kind, unit}].
 function charTestPlan(units, learned, prog, pack, n, rng){
   const cfg = charsConfig(pack); if(!cfg) return [];
   const rec = weakFirst(recordedUnits(units, prog, pack), n, charRecs(prog), undefined, rng);
@@ -2216,23 +1756,15 @@ function charTestPlan(units, learned, prog, pack, n, rng){
   return pool.map(unit => ({ kind: pickWeighted(cfg.testKinds, rng), unit }));
 }
 
-// ------------------------------------------------------------------ script primer
-// Pack-gated (pack.script + pack/script.json, docs/SCRIPT_PRIMER.md, docs/PACK_SCHEMA.md
-// "Script primer"): one stage per pack.script.stages entry, before the first word level,
-// teaches a writing system symbol by symbol. A unit is one symbol (or a symbol in one
-// role); `st` names its stage and `set` its teaching set. Progress lives in prog.script =
-// {v, u:{[unitId]:{r,w,s}}, skipped, skip:{[stageKey]:bool}, choiceSeen, notice}; skipped
-// switches the whole primer off, skip one stage. Scoring writes prog.script.u only. Taught, done and mastered are derived from records, never stored. Without
-// pack.script every function here returns its empty value and nothing else changes.
-// Item keys are "x:" + unitId (the character stage uses "c:"). All pure and DOM-free.
+// Script primer (docs/SCRIPT_PRIMER.md, docs/PACK_SCHEMA.md "Script primer"). Taught, done
+// and mastered are derived from records, never stored. Without pack.script every function
+// here returns its empty value and nothing else changes.
 const SCRIPT_PROG_VERSION = 1;
 const SCRIPT_MASTERED = 3, SCRIPT_SETS_PER_SESSION = 2, REVIEW_SIZE_SCRIPT = 12;
 const SCRIPT_KINDS = ["symSound","soundSym","symType","compose","formFind","formMatch","wordRead","wordHear"];
 const SCRIPT_SOUND_KINDS = ["symSound","soundSym","symType"]; // never asked of a sound:false unit
 const SCRIPT_TEST_KINDS = { symSound:35, soundSym:25, wordRead:25, symType:15 };
 const ZWJ = "‍";
-// pack.script with defaults filled (known kinds only), or null when the pack has none.
-// stages: [{key, label}] with unique non-empty keys, in path order.
 function scriptConfig(pack){
   const c = pack && pack.script;
   if(!isObj(c)) return null;
@@ -2253,10 +1785,8 @@ function scriptConfig(pack){
   };
 }
 
-// ---- progress (prog.script)
 function defaultScriptProg(){ return { v:SCRIPT_PROG_VERSION, u:{}, skipped:false, skip:{}, choiceSeen:false, notice:false }; }
-// Error string or null. Validated whenever present, pack or no pack; script.v is its own
-// version (any positive integer is kept, like chars.v).
+// script.v is its own version: any positive integer is kept, like chars.v.
 function validateScriptShape(sc){
   if(!isObj(sc)) return "script must be an object";
   if(sc.v !== undefined && !(Number.isInteger(sc.v) && sc.v >= 1)) return "script.v must be a positive integer";
@@ -2269,10 +1799,9 @@ function validateScriptShape(sc){
   return null;
 }
 const hasWordRecords = data => isObj(data) && isObj(data.w) && Object.keys(data.w).length > 0;
-// Missing fields filled from defaults; fields present are kept. Stored progress with a
-// word record and no script field predates the primer: that learner is already reading,
-// so the primer starts skipped (choice answered) with a one-time notice pending, instead
-// of sending them back before their next word set. Fresh progress starts unskipped.
+// Stored progress with a word record and no script field predates the primer: that learner
+// is already reading, so the primer starts skipped with a one-time notice instead of sending
+// them back before their next word set.
 function normalizeScriptProg(sc, data){
   if(isObj(sc)){ const out = Object.assign(defaultScriptProg(), sc); if(!isObj(out.u)) out.u = {}; if(!isObj(out.skip)) out.skip = {}; return out; }
   const out = defaultScriptProg();
@@ -2286,48 +1815,36 @@ function ensureScript(prog){
   return prog.script;
 }
 function scriptRecs(prog){ return (prog && isObj(prog.script) && isObj(prog.script.u)) ? prog.script.u : {}; }
-// The whole primer is off (no key), or that stage is off (the primer, or the stage alone).
 function scriptSkipped(prog, key){
   const sc = prog && isObj(prog.script) ? prog.script : null;
   if(!sc) return false;
   if(sc.skipped === true) return true;
   return key != null && isObj(sc.skip) && sc.skip[key] === true;
 }
-// The reversible on/off switch (Progress): flips one flag only, the primer's or (with key)
-// one stage's. The path is re-derived from it; no record or set counter is touched.
-// Turning a stage on while the whole primer is off leaves the primer off. Turning the
-// primer or a stage on also clears the pending notice (the learner has found the switch),
-// so turning it off again does not bring the notice back.
+// Turning the primer or a stage on clears the pending notice (the learner has found the
+// switch), so turning it off again does not bring the notice back.
 function setScriptSkipped(prog, skipped, key){
   const sc = ensureScript(prog);
   if(key == null) sc.skipped = !!skipped; else sc.skip[String(key)] = !!skipped;
   if(!skipped) sc.notice = false;
   return prog;
 }
-// The choice card's answer: learn (primer on) or skip (primer off).
 function answerScriptChoice(prog, learn){ const sc = ensureScript(prog); sc.choiceSeen = true; sc.skipped = !learn; return prog; }
-// The one-time "a primer is available" line for learners who predate it.
 function scriptNotice(pack, prog){ return !!scriptConfig(pack) && !!(prog && isObj(prog.script) && prog.script.notice === true); }
 function dismissScriptNotice(prog){ ensureScript(prog).notice = false; return prog; }
-// Scores one script item (writes prog.script.u only).
 function markScript(prog, unitId, ok){ return markRec(ensureScript(prog).u, unitId, ok, false); }
 function scriptMastered(rec, pack){ const cfg = scriptConfig(pack); return ((rec && rec.s) || 0) >= (cfg ? cfg.mastered : SCRIPT_MASTERED); }
 
-// ---- units, sets, stages
-// A stage's units: `set` order, then file order.
 function scriptStageUnits(key, units){
   return (Array.isArray(units) ? units : []).map((u, i) => ({u, i})).filter(x => isObj(x.u) && x.u.st === key)
     .sort((a, b) => ((+a.u.set || 0) - (+b.u.set || 0)) || (a.i - b.i)).map(x => x.u);
 }
-// [[unit]] grouped by `set`, ascending.
 function scriptSets(key, units){
   const out = []; let cur = null, last;
   scriptStageUnits(key, units).forEach(u => { if(!cur || u.set !== last){ cur = []; out.push(cur); last = u.set; } cur.push(u); });
   return out;
 }
-// A set is taught once every unit in it has a record (the characters rule).
 function scriptSetTaught(set, prog){ const r = scriptRecs(prog); return (set || []).every(u => hasCharRec(r, u.id)); }
-// Up to n (default setsPerSession) first untaught sets of the stage: [{index, units, total}].
 function nextScriptSets(key, units, pack, prog, n){
   const cfg = scriptConfig(pack); if(!cfg) return [];
   const k = n == null ? cfg.setsPerSession : n;
@@ -2335,11 +1852,8 @@ function nextScriptSets(key, units, pack, prog, n){
   for(let i=0; i<sets.length && out.length<k; i++) if(!scriptSetTaught(sets[i], prog)) out.push({ index:i, units:sets[i], total:sets.length });
   return out;
 }
-// Script stages for this learner, in path order ([] when skipped or without pack.script):
-// {kind:"script", key, label, recorded, nunits, nsets, frac, done}. done = every unit
-// recorded, so a missed review never pulls the stage back into the path.
-// The primer runs only with a config AND its units: pack.script without script.js data
-// (absent or empty units) is the primer off everywhere, exactly the flag-off output.
+// done = every unit recorded, so a missed review never pulls the stage back into the path.
+// pack.script without units is the primer off everywhere, exactly the flag-off output.
 function scriptActive(pack, units){ return !!scriptConfig(pack) && Array.isArray(units) && units.length > 0; }
 function scriptStages(pack, units, prog){
   const cfg = scriptConfig(pack); if(!cfg || !scriptActive(pack, units) || scriptSkipped(prog)) return [];
@@ -2351,21 +1865,17 @@ function scriptStages(pack, units, prog){
       nsets: scriptSets(st.key, units).length, frac: list.length ? rec/list.length : 1, done: rec >= list.length };
   });
 }
-// Units with a script record, of a configured stage that is on: the pool Review and Test
-// draw from. Empty while the primer is skipped.
 function recordedScriptUnits(units, prog, pack){
   const cfg = scriptConfig(pack);
   if(!cfg || scriptSkipped(prog) || !Array.isArray(units) || !units.length) return [];
   const recs = scriptRecs(prog); const keys = new Set(cfg.stages.filter(s => !scriptSkipped(prog, s.key)).map(s => s.key));
   return units.filter(u => isObj(u) && keys.has(u.st) && hasCharRec(recs, u.id));
 }
-// Recorded units plus the set being taught: the distractor pool of a Learn item.
 function scriptPool(units, prog, set){
   const recs = scriptRecs(prog); const cur = new Set((set || []).map(u => u.id));
   return (Array.isArray(units) ? units : []).filter(u => isObj(u) && (cur.has(u.id) || hasCharRec(recs, u.id)));
 }
-// The choice card shows while it is unanswered, the primer is not switched off, and no
-// script record exists. Placement does not answer it (it tests words, not the script).
+// Placement does not answer the choice: it tests words, not the script.
 function showScriptChoice(pack, units, prog){
   const cfg = scriptConfig(pack); if(!cfg || !cfg.stages.length || !scriptActive(pack, units)) return false;
   const sc = (prog && isObj(prog.script)) ? prog.script : {};
@@ -2374,9 +1884,7 @@ function showScriptChoice(pack, units, prog){
   return !Object.keys(recs).some(id => hasCharRec(recs, id));
 }
 
-// ---- item kinds
 const hasEx = u => Array.isArray(u.ex) && u.ex.some(e => Array.isArray(e) && e[0] != null);
-// Whether a unit has the fields a kind needs (structure only; scriptItem's own check).
 function scriptKindShape(kind, unit){
   if(!isObj(unit)) return false;
   if(SCRIPT_SOUND_KINDS.includes(kind)) return unit.sound !== false && !!unit.roman;
@@ -2386,12 +1894,8 @@ function scriptKindShape(kind, unit){
   return false;
 }
 const SCRIPT_MIN_OPTIONS = 4;
-// Whether a unit can carry an item of this kind. ctx (optional) = {units (every script
-// unit), byId | words, tts}: with it, an option kind (all but symType) also needs at least
-// SCRIPT_MIN_OPTIONS distinct options when distractors may come from every unit, else it
-// does not fit and the pickers move on to another kind. Word kinds are counted only when
-// ctx has the words (byId/words); without them only the structure is checked, as it is
-// without ctx.
+// With ctx, an option kind also needs SCRIPT_MIN_OPTIONS distinct options, else it does not
+// fit and the pickers move on to another kind.
 function scriptKindFits(kind, unit, ctx){
   if(!scriptKindShape(kind, unit)) return false;
   if(!isObj(ctx) || !Array.isArray(ctx.units) || kind === "symType") return true;
@@ -2400,24 +1904,18 @@ function scriptKindFits(kind, unit, ctx){
   const it = scriptItem(kind, unit, { units: ctx.units, pool: ctx.units, byId: ctx.byId, words: ctx.words, tts: ctx.tts, rng: () => 0 });
   return Array.isArray(it.options) && it.options.length >= SCRIPT_MIN_OPTIONS;
 }
-// The kind actually asked: wordHear is wordRead when the pack has no voice (tts false, or
-// ctx.tts false); null when the unit cannot carry it (scriptKindFits, with ctx).
-// A wordHear stays wordHear without a voice when every example word of the unit has a
-// recorded clip (exRecorded; needs ctx words).
+// A wordHear stays wordHear with no voice when every example word has a recorded clip.
 function scriptKindFor(kind, unit, cfg, ctx){
   const byId = isObj(ctx) ? (ctx.byId || (Array.isArray(ctx.words) ? Object.fromEntries(ctx.words.map(w => [w.id, w])) : null)) : null;
   const k = kind === "wordHear" && ((cfg && !cfg.tts) || (isObj(ctx) && ctx.tts === false)) && !exRecorded(unit, byId) ? "wordRead" : kind;
   return scriptKindFits(k, unit, ctx) ? k : null;
 }
-// One fitting kind from `kinds` at random; else the first fitting of wordRead, symSound,
-// formMatch; else null (the unit is left out).
 function pickScriptKind(kinds, unit, cfg, rng, ctx){
   const fit = [...new Set((kinds || []).map(k => scriptKindFor(k, unit, cfg, ctx)).filter(Boolean))];
   if(fit.length) return fit[Math.floor((rng || Math.random)() * fit.length)];
   return ["wordRead","symSound","formMatch"].find(k => scriptKindFits(k, unit, ctx)) || null;
 }
-// A text's writing system: the Unicode script of its first letter that has one of these
-// (Hiragana and Katakana are two), or "" when none does. Compose distractors never cross it.
+// Compose distractors never cross a writing system (Hiragana and Katakana are two).
 const SCRIPT_FAMILIES = ["Hangul","Hiragana","Katakana","Han","Cyrillic","Greek","Arabic","Hebrew","Devanagari","Bengali","Gurmukhi","Gujarati","Tamil","Telugu","Kannada","Malayalam","Thai","Lao","Georgian","Armenian","Ethiopic","Latin"]
   .map(n => [n, new RegExp(`\\p{Script=${n}}`, "u")]);
 function scriptFamily(text){
@@ -2425,16 +1923,10 @@ function scriptFamily(text){
   return "";
 }
 
-// ---- options
-// The glyph an item shows: the last space-separated form of `t` (a teach card may show
-// "upper lower"; items use the lower form).
+// A teach card may show "upper lower"; items use the lower form.
 function scriptGlyph(unit){ const p = String((unit && unit.t) || "").trim().split(/\s+/); return p[p.length - 1]; }
-// "Does this symbol occur in that text", the same rule as tools/validate_pack.py glyph_in
-// (which checks every ex word): lower case, compatibility decomposition (presentation forms
-// and composed syllables split into letters, آ = ا + madda, dakuten split off), and a
-// positional Hangul letter (initial U+1100.., medial U+1161.., final U+11A8..) keyed as
-// its compatibility letter, so the batchim ㄱ of 책 is the letter ㄱ. A match is a
-// contiguous run of keys.
+// Same rule as tools/validate_pack.py glyph_in: compatibility decomposition, and a
+// positional Hangul letter keyed as its compatibility letter (the batchim ㄱ of 책 is ㄱ).
 const HANGUL_POS_KEY = (() => {
   const m = {}, put = (base, letters) => [...letters].forEach((c, i) => { m[String.fromCharCode(base + i)] = c; });
   put(0x1100, "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ");
@@ -2455,9 +1947,9 @@ function scriptGlyphIn(glyph, text){
 // (joining context survives a boundary, a ligature does not), so a highlight or any other
 // element boundary inside a word must fall between clusters. A cluster is a grapheme
 // (base + marks: a haraka stays on its letter, a matra/nukta on its consonant), and then:
-//  - Arabic script: lam + alef (ل with ا أ إ آ ٱ ٲ ٳ ٵ, marks or a ZWJ between allowed: shapers ligate
-//    through ZWJ) is one
-//    mandatory ligature (لا). Tatweel between them blocks the ligature, so it splits.
+//  - Arabic script: lam + alef (ل with ا أ إ آ ٱ ٲ ٳ ٵ, marks or a ZWJ between allowed:
+//    shapers ligate through ZWJ) is one mandatory ligature (لا). Tatweel between them
+//    blocks the ligature, so it splits.
 //  - Brahmic scripts: a grapheme ending in a virama (Devanagari ्, and the Bengali ..
 //    Sinhala viramas) joins the next one (क्ष, स्त्र, reph र्क). A ZWNJ after the virama
 //    asks for no conjunct and so splits (ZWJ still joins: the half form is shaped with it).
@@ -2483,31 +1975,22 @@ function shapingClusters(s){
   }
   return out;
 }
-// A unit's note as shown on its teach card and answer screen: none when it only repeats
-// the roman ("b" | "b"), compared trimmed and case-insensitively (normKey).
 function scriptUnitNote(unit){
   const n = unit && unit.note != null ? String(unit.note) : "";
   return n && normKey(n) !== normKey(String((unit && unit.roman) || "")) ? n : "";
 }
-// A unit's name as shown on its teach card head and reveal ("name | roman"): none when
-// it only repeats the roman ("ka" | "ka", "kṣa" | "kṣa"), compared the same way as
-// scriptUnitNote (trimmed, case-insensitive normKey).
 function scriptUnitHeadName(unit){
   const n = unit && unit.name != null ? String(unit.name) : "";
   return n && normKey(n) !== normKey(String((unit && unit.roman) || "")) ? n : "";
 }
-// True when a word (its w or pron) contains any of the unit's glyphs (upper and lower).
 function scriptWordHas(unit, word){
   const gs = String((unit && unit.t) || "").trim().split(/\s+/).filter(Boolean);
   const texts = [word && word.w, word && word.pron].filter(t => typeof t === "string" && t);
   return gs.some(g => texts.some(t => scriptGlyphIn(g, t)));
 }
 const scriptRomans = u => [u.roman, ...(Array.isArray(u.alt) ? u.alt : [])].map(normKey).filter(Boolean);
-// True when `cand` would be a second right answer to `unit`'s option item: the same glyph,
-// the same `say`, the same roman, or homophones by `alt` (each accepts the other's roman:
-// fa غ gh/q and ق q/gh). A one-way alt is a contrast to drill, not a second answer: ko ㄱ
-// accepts "k" (its final sound) yet ㄱ/ㅋ are offered against each other, likewise ru Е
-// (alt "e") and Э. Typed answers (symType) still accept roman + alt.
+// A one-way alt is a contrast to drill, not a second answer: ko ㄱ accepts "k" (its final
+// sound) yet ㄱ/ㅋ are offered against each other. Two-way alts (fa غ/ق) are homophones.
 function scriptSecondRight(unit, cand, kind){
   if(cand.id === unit.id) return true;
   if(normKey(scriptGlyph(cand)) === normKey(scriptGlyph(unit))) return true;
@@ -2516,12 +1999,8 @@ function scriptSecondRight(unit, cand, kind){
   if(ur && ur === cr) return true;
   return !!(ur && cr) && scriptRomans(unit).includes(cr) && scriptRomans(cand).includes(ur);
 }
-// Up to 3 distractor units for a symbol item. Candidates share the unit's stage (units of
-// two stages never mix), are never a second right answer (scriptSecondRight), and are
-// pairwise distinct in glyph and roman; sound kinds skip sound:false units. Preference
-// within `pool` (recorded units plus the current set): the unit's `confuse` list, same
-// group, same set, any. Then padding from all units of the stage: `confuse` first even
-// when untaught, then same group, then any, so a set-1 item still gets 4 options.
+// Padding from all units of the stage (confuse first even when untaught) so a set-1 item
+// still gets 4 options. Units of two stages never mix.
 function scriptOpts(unit, pool, all, kind, rng){
   const every = Array.isArray(all) ? all : (Array.isArray(pool) ? pool : []);
   const inPool = Array.isArray(pool) ? pool : every;
@@ -2543,9 +2022,7 @@ function scriptOpts(unit, pool, all, kind, rng){
   }
   return out;
 }
-// symSound options: the distractors' romans.
 function scriptRomanOpts(unit, pool, all, rng){ return scriptOpts(unit, pool, all, "symSound", rng).map(v => String(v.roman)); }
-// A unit's example words that exist in the pack: [{id, w, roman, unitId}].
 function exRecorded(unit, byId){
   if(!byId || !isObj(unit)) return false;
   const ex = scriptExamples(unit, byId);
@@ -2565,10 +2042,6 @@ function editDistance(a, b){
   }
   return prev[y.length];
 }
-// Up to 3 distractor words for a word item (ans = {id, w, roman}): example words of the
-// same stage's units in `pool` (taught), padded from `all`; never the answer's word or a
-// word with its roman, pairwise distinct in word and roman. Nearest first: edit distance
-// to the answer (a word differing in one symbol comes first), then same length.
 function scriptWordOpts(unit, ans, pool, all, byId, rng){
   const every = Array.isArray(all) ? all : (Array.isArray(pool) ? pool : []);
   const inPool = Array.isArray(pool) ? pool : every;
@@ -2587,26 +2060,14 @@ function scriptWordOpts(unit, ans, pool, all, byId, rng){
   }
   return out;
 }
-// Joined forms for formMatch: dual joiners have initial, medial and final; right joiners
-// only final. Unicode shaping draws them from the letter plus a zero-width joiner.
+// Unicode shaping draws the joined forms from the letter plus a zero-width joiner.
 function scriptJoinedForms(unit){
   const L = scriptGlyph(unit);
   if(unit && unit.joins === "dual") return [{ form:"init", t: L + ZWJ }, { form:"medi", t: ZWJ + L + ZWJ }, { form:"fina", t: ZWJ + L }];
   if(unit && unit.joins === "right") return [{ form:"fina", t: ZWJ + L }];
   return [];
 }
-// One drill item for a unit, DOM-free: {kind, key, unitId, show, hint, form, audio, say,
-// audioUrl, wordId, options, answer, accept, reveal}.
-//  - show: the stimulus text, or null for a sound-only stimulus.
-//  - audio: "before" (the stimulus), "after" (played on answering) or null. say is the
-//    TTS text, audioUrl a recorded clip that beats it; both null when audio is null.
-//  - options: shuffled strings including answer (null for symType, which checks typed
-//    input against accept).
-//  - reveal: {t, glyph, name, roman, note, word} for the answer screen (gloss lives on
-//    the word, never in the stimulus).
-// ctx: {units (all script units), pool (distractor pool; default units), words | byId,
-// tts (false: no usable voice, so soundSym shows the roman and wordHear becomes wordRead),
-// rng}. Throws on an unknown kind or a unit that cannot carry it.
+// The gloss lives on the revealed word, never in the stimulus.
 function scriptItem(kind, unit, ctx){
   const c = ctx || {}; const r = c.rng || Math.random;
   const all = Array.isArray(c.units) ? c.units : []; const pool = Array.isArray(c.pool) ? c.pool : all;
@@ -2639,9 +2100,7 @@ function scriptItem(kind, unit, ctx){
     const s = sy[Math.floor(r() * sy.length)];
     it.show = s.parts.map(String).join(" + "); it.answer = String(s.t);
     reveal.roman = String(s.roman || ""); reveal.syll = { t: String(s.t), parts: s.parts.map(String), roman: String(s.roman || "") };
-    // Distractor syllables, widening scope: the same set, the same stage, then any stage
-    // written in the same script (hiragana and katakana never mix). Within a scope: taught
-    // (pool) sharing a part, taught, any sharing a part, any.
+    // Widening scope stays within one writing system: hiragana and katakana never mix.
     const parts = new Set(s.parts.map(String)), fam = scriptFamily(it.answer);
     const scopes = [u => u.st === unit.st && u.set === unit.set, u => u.st === unit.st, () => true];
     const cand = (list, sc) => list.filter(u => isObj(u) && Array.isArray(u.syll) && sc(u)).flatMap(u => u.syll)
@@ -2678,11 +2137,7 @@ function scriptItem(kind, unit, ctx){
   return it;
 }
 
-// ---- plans
-// Learn step for a script set: per unit one item per pack learnKind that fits it. A
-// sound:false unit gets wordRead in place of the sound kinds; compose needs `syll`. A unit
-// no learnKind fits gets its first fitting kind, so every unit of the set is asked.
-// ctx (optional): as scriptKindFits; with it, a kind that cannot get 4 options is skipped.
+// A unit no learnKind fits gets its first fitting kind, so every unit of the set is asked.
 function learnScriptPlan(set, pack, ctx){
   const cfg = scriptConfig(pack); if(!cfg) return [];
   const out = [];
@@ -2697,15 +2152,10 @@ function learnScriptPlan(set, pack, ctx){
   });
   return out;
 }
-// Review weakness score, the characters rule with pack.script.mastered: an unmastered
-// unit scores at least 0; mastered units keep w*3 - s and sink.
 function scriptReviewScore(rec, pack){
   const cfg = scriptConfig(pack); const p = rec || {}; const sc = weakScore(p);
   return (p.s || 0) < (cfg ? cfg.mastered : SCRIPT_MASTERED) ? Math.max(sc, 0) : sc;
 }
-// Test tab's script practice: the n weakest recorded units, each with a kind drawn from
-// pack.script.testKinds among the kinds that fit it. [{kind, unit}]. ctx (optional): as
-// scriptKindFits; its units default to `units`, so option kinds are always counted.
 function scriptTestPlan(units, prog, pack, n, rng, ctx){
   const cfg = scriptConfig(pack); if(!cfg) return [];
   const kctx = Object.assign({ units }, ctx || {});
@@ -2719,14 +2169,9 @@ function scriptTestPlan(units, prog, pack, n, rng, ctx){
   return out;
 }
 
-// ------------------------------------------------------------------ pronunciation aids
-// Pack-gated helpers (docs/PACK_SCHEMA.md "Pronunciation aids"), all pure. Off for every
-// pack without the field, so no other pack's output changes.
-//  - pack.tones: the reading is Latin letters with tone marks on a vowel (macron 1, acute
-//    2, caron 3, grave 4, unmarked 5 = neutral). The validator admits one mark system,
-//    whose syllable inventory is SYL_FINALS below; toneHTML colours each syllable.
-//  - pack.typing === "pron": typed production of the reading (checkPronTyped).
-//  - composeSpanReading: the reading of a tap span longer than its word.
+// Pronunciation aids (docs/PACK_SCHEMA.md "Pronunciation aids"). Off for every pack without
+// the field, so no other pack's output changes. pack.tones: macron 1, acute 2, caron 3,
+// grave 4, unmarked 5 = neutral.
 const TONE_MARKS = {
   a: ["a","\u0101","\u00e1","\u01ce","\u00e0"],
   e: ["e","\u0113","\u00e9","\u011b","\u00e8"],
@@ -2738,20 +2183,18 @@ const TONE_MARKS = {
 const MARK_OF = {}; // marked (or plain) vowel -> [plain vowel, tone 1-4, or 0 for none]
 Object.keys(TONE_MARKS).forEach(v => TONE_MARKS[v].forEach((c, t) => { MARK_OF[c] = [v, t]; }));
 function tonesOn(pack){ return !!(pack && typeof pack.tones === "string" && pack.tones); }
-// A reading with its tone marks removed, case and everything else kept.
 function stripMarks(s){
   return [...String(s == null ? "" : s).normalize("NFC")].map(c => {
     const m = MARK_OF[c.toLowerCase()]; if(!m) return c;
     return c === c.toLowerCase() ? m[0] : m[0].toUpperCase();
   }).join("");
 }
-// Tone of a marked letter string: the tone of its (first) marked vowel, 5 when unmarked.
 function syllableTone(s){
   for(const c of String(s || "")){ const m = MARK_OF[c.toLowerCase()]; if(m && m[1]) return m[1]; }
   return 5;
 }
 const markCount = s => [...String(s || "")].filter(c => { const m = MARK_OF[c.toLowerCase()]; return !!(m && m[1]); }).length;
-// Mark placement: a, else e, else o, else the last of i/u/ü. tone 0 or 5: unmarked.
+// Tone mark placement: a, else e, else o, else the last of i/u/ü.
 function markVowelIndex(letters){
   const lower = String(letters).toLowerCase();
   for(const v of ["a","e","o"]){ const i = lower.indexOf(v); if(i >= 0) return i; }
@@ -2793,19 +2236,15 @@ const SYL_FINALS = {
 };
 const SYL_SET = {}; Object.keys(SYL_FINALS).forEach(k => { SYL_SET[k] = new Set(SYL_FINALS[k].split(" ")); });
 const SYL_INITIALS = Object.keys(SYL_FINALS).filter(Boolean).sort((a, b) => b.length - a.length);
-// Toneless syllable -> {initial, final}, or null when it is not in the inventory.
 function splitSyllable(toneless){
   const s = String(toneless || "").toLowerCase();
   for(const ini of SYL_INITIALS) if(s.indexOf(ini) === 0 && SYL_SET[ini].has(s.slice(ini.length))) return { initial: ini, final: s.slice(ini.length) };
   return SYL_SET[""].has(s) ? { initial: "", final: s } : null;
 }
-// A syllable with a trailing r-suffix ("r" after a full syllable, not "er" itself).
 const isRSuffixed = s => s.length > 1 && s[s.length - 1] === "r" && s !== "er" && !!splitSyllable(s.slice(0, -1));
 const SYL_MAX = 7;
-// One run of letters -> syllables [{text, tone, r}] or null when it does not split into
-// the inventory with at most one mark each. Fewest syllables wins; a syllable starting
-// with a/o/e inside the run (where the writing would put an apostrophe) costs extra;
-// among equals the longest first syllable wins (the usual left-to-right reading).
+// A syllable starting with a/o/e inside the run costs extra (the writing would put an
+// apostrophe there); among equals the longest first syllable wins (left-to-right reading).
 function splitRun(run){
   const chars = [...run]; const n = chars.length;
   const bare = chars.map(c => { const m = MARK_OF[c.toLowerCase()]; return m ? m[0] : c.toLowerCase(); });
@@ -2826,9 +2265,6 @@ function splitRun(run){
   while(i < n){ const j = best[i].next; const text = chars.slice(i, j).join(""); out.push({ text, tone: syllableTone(text), r: !!best[i].r }); i = j; }
   return out;
 }
-// Reading -> pieces [{text, tone?}]: each syllable of each letter run with its tone; text
-// between runs (spaces, punctuation, other scripts) has no tone. A run that does not split
-// is one piece, toned only when it carries exactly one mark.
 const LETTER_RUN = /[\p{Script=Latin}\u0300-\u036f]+/gu;
 function splitReading(text){
   const t = String(text == null ? "" : text).normalize("NFC");
@@ -2843,14 +2279,11 @@ function splitReading(text){
   if(pos < t.length) out.push({ text: t.slice(pos) });
   return out;
 }
-// Escaped HTML of a reading, each syllable in <span class="t1".."t5">.
 function toneHTML(text){
   return splitReading(text).map(p => p.tone ? `<span class="t${p.tone}">${escapeHtml(p.text)}</span>` : escapeHtml(p.text)).join("");
 }
-// ---- typed reading (pack.typing === "pron")
 function pronTypingOn(pack){ return !!(pack && pack.typing === "pron"); }
-// Comparison key: case-folded, v and u: as ü, ü after j/q/x/y as u (the writing drops
-// the dots there), apostrophes, hyphens, spaces and punctuation removed; marks and digits kept.
+// ü after j/q/x/y folds to u: the writing drops the dots there.
 function pronKey(s){
   return String(s == null ? "" : s).normalize("NFC").toLowerCase()
     .replace(/u:/g, "\u00fc").replace(/v/g, "\u00fc")
@@ -2858,10 +2291,6 @@ function pronKey(s){
     .replace(/([jqxy])([\u00fc\u01d6\u01d8\u01da\u01dc])/g, (m, a, b) => a + TONE_MARKS.u[MARK_OF[b][1]]);
 }
 const NUMBERED_MAX = 64;
-// Every numbered spelling of pron: syllable letters + tone digit; a neutral syllable as
-// 5, 0 or no digit; an r-suffixed syllable with its digit after the r, or before it with
-// the r bare, r5 or r0.
-// [] when pron does not split into syllables (then only the marked form is accepted).
 function numberedForms(pron){
   const runs = String(pron || "").normalize("NFC").match(LETTER_RUN) || [];
   let combos = [""];
@@ -2881,13 +2310,8 @@ function numberedForms(pron){
   }
   return runs.length ? combos.map(pronKey) : [];
 }
-// Typed reading vs a word's pron: "ok" (marked, or numbered per numberedForms, case and
-// apostrophes ignored), "tones" (right letters, no tone marks or digits), "tonesDiff"
-// (right letters, tones given but not all right, e.g. ni2hao3 or nihao5) or "wrong"
-// (the letters differ). Tones are optional: the typed-reading item accepts every verdict
-// but "wrong" and notes the marked form after "tones" or "tonesDiff".
-// pack (optional): a pack without `tones` (e.g. ja: kana readings) takes the plain path
-// instead, plainPronKey equality, "ok" or "wrong" only; no pack keeps the tonal path.
+// Tones are optional: the typed-reading item accepts every verdict but "wrong". A pack
+// without `tones` (ja: kana readings) compares plainPronKey only.
 const pronLetters = s => pronKey(stripMarks(s)).replace(/\p{N}/gu, "");
 function checkPronTyped(input, pron, pack){
   if(pack && !tonesOn(pack)){ const k = plainPronKey(input); return k && pron && k === plainPronKey(pron) ? "ok" : "wrong"; }
@@ -2897,46 +2321,22 @@ function checkPronTyped(input, pron, pack){
   if(pronLetters(got) !== pronLetters(pron)) return "wrong";
   return !/\p{N}/u.test(got) && markCount(got) === 0 ? "tones" : "tonesDiff";
 }
-// Kana fold for readings: NFKC (half-width kana to full width), then katakana to hiragana
-// (U+30A1-30F6 to U+3041-3096, the iteration marks ヽヾ to ゝゞ), so a katakana reading
-// may be typed in hiragana and the reverse. The long-vowel mark ー, small kana (ゃ is not
-// や) and voicing marks are kept: they spell a different reading.
+// ー, small kana and voicing marks are kept: they spell a different reading.
 function kanaFold(s){
   return String(s == null ? "" : s).normalize("NFKC").replace(/[\u30a1-\u30f6\u30fd\u30fe]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
 }
-// Comparison key for a reading typed without tones: kanaFold, normalizeTyped (case,
-// whitespace, apostrophes), then everything but letters, marks and digits removed (spaces,
-// the affix mark 〜 of 〜ねん, the middle dot ・), then NFC again: a standalone voicing
-// mark (U+309B ゛, not the combining U+3099) NFKC-decomposes inside kanaFold to a space
-// plus the combining mark, so stripping the space above leaves the combining mark right
-// after its base kana; NFC here recomposes them (は + ゛ + す -> ばす, matching バス).
+// NFC again at the end: a standalone voicing mark (U+309B) NFKC-decomposes to a space plus
+// the combining mark; with the space stripped, NFC recomposes it (は + ゛ + す -> ばす).
 function plainPronKey(s){ return normalizeTyped(kanaFold(s)).replace(/[^\p{L}\p{M}\p{N}]/gu, "").normalize("NFC"); }
-// A written form without its affix mark: 〜年 -> 年 (wave dash or full-width tilde at
-// either end), so a typed suffix/prefix word needs no 〜. The form itself when it has none.
-// Affix marks in the written form a learner should not have to type: Japanese \u301c/\uff5e
-// (noun-modifier tilde) and the ASCII hyphen (Korean particle words like -\uc774\ub2e4, -\uc774/\uac00).
-// Only a leading or trailing run is an affix mark; stripped from either end, never both
-// meanings at once mattering since the anchors are independent. An inner hyphen (Hindi
-// \u0927\u0940\u0930\u0947-\u0927\u0940\u0930\u0947, \u0915\u094c\u0928-\u0938\u093e) or inner tilde (\u5e74\u301c\u5e74) is a real character, never touched.
+// Affix marks a learner should not have to type: ja 〜/～, ko -이다. Only a leading or
+// trailing run; an inner hyphen (धीरे-धीरे) or tilde (年〜年) is a real character.
 function affixBare(w){ return String(w == null ? "" : w).replace(/^[\u301c\uff5e-]+|[\u301c\uff5e-]+$/g, ""); }
-// A single "(x)" optional-syllable group (Korean -(\uc73c)\ub85c, -(\uc774)\ub098, -(\uc774)\ub791: (\uc73c)/(\uc774) is
-// dropped after a vowel-final stem, kept after a consonant-final one) expands to the form
-// with the parens dropped but the syllable kept (\uc73c\ub85c) and the form with the whole group
-// dropped (\ub85c). [] with no parenthetical group.
+// Korean -(으)로: (으) is dropped after a vowel-final stem, kept after a consonant-final one.
 function parenAlts(s){
   const m = s.match(/^(.*)\(([^()]*)\)(.*)$/);
   return m ? [m[1] + m[2] + m[3], m[1] + m[3]] : [];
 }
-// Extra accepted written forms for a word whose display form carries a leading/trailing
-// affix mark (see affixBare): the bare form with the affix stripped, plus \u2014 when that
-// bare form is itself a "/"-separated set of alternatives (Korean particle pairs like
-// -\uc774/\uac00 -> \uc774/\uac00 -> \uc774, \uac00) \u2014 each alternative on its own, and \u2014 when a part carries a
-// "(x)" optional-syllable group (Korean -(\uc73c)\ub85c -> (\uc73c)\ub85c -> \uc73c\ub85c, \ub85c) \u2014 both the with- and
-// without-the-syllable forms (combined with the slash rule, if a word ever has both).
-// Returns [] when the word has no affix mark (bare === original), so callers can splice
-// this straight into acceptTyped's `extra` list without conditionals. entry.w itself (with
-// its affix mark, e.g. -\uc774/\uac00, -(\uc73c)\ub85c) is already checked by acceptTyped, so it is not
-// repeated here.
+// [] without an affix mark, so callers splice it into acceptTyped's `extra` unconditionally.
 function affixAlts(w){
   const s = String(w == null ? "" : w);
   const bare = affixBare(s);
@@ -2946,43 +2346,22 @@ function affixAlts(w){
   parts.forEach(p => out.push(...parenAlts(p)));
   return out;
 }
-// A typed "characters" answer, NFKC-folded (half-width kana ﾃﾚﾋﾞ -> full-width テレビ) with
-// ～ (full-width tilde) unified to 〜 (wave dash), the affix mark a pack's written forms
-// actually use: either may be typed for either. The tilde swap runs before NFKC, since
-// NFKC's own compatibility mapping turns ～ into a bare ASCII "~" (〜 has no such
-// mapping), which would make it unmatchable by either the ～ or 〜 spelling afterwards.
-// Used only on the written item of a no-tones typing:"pron" pack (ja): unlike kanaFold, it never folds
-// katakana to hiragana, since the written form's spelling (テレビ, not てれび) must still
-// match exactly. Never applied to a Latin pack (no half-width/tilde concern there) or a
-// tones pack (zh), whose written check is unaffected.
+// The tilde swap runs before NFKC, which would turn ～ into ASCII "~". Never folds katakana
+// to hiragana: the written spelling (テレビ, not てれび) must still match exactly.
 function writtenTypedFold(s){ return String(s == null ? "" : s).replace(/～/g, "〜").normalize("NFKC"); }
-// pack.typing "pron": the typed item a plan's "type" slot (a word's production slot) is.
-// The type slots alternate in plan order, reading first: "pron" (type the reading, silent,
-// tones optional), then "written" (type the characters, the word's audio played). Plan
-// order is already fixed by the plan builders' rng, so no randomness is added and every
-// plan is unchanged; i undefined (a lone item) is "pron".
-// The app still gives a "written" slot the reading item when the word's written form is
-// not on display (pronFirst: a word below its character tier is shown by its reading).
+// Plan order is already fixed by the plan builders' rng, so alternating reading/written adds
+// no randomness and every plan is unchanged.
 function typeSlotKind(plan, i){
   let n = 0;
   for(let j = 0; j < (i || 0); j++) if(plan && plan[j] && plan[j].kind === "type") n++;
   return n % 2 ? "written" : "pron";
 }
-// ---- span reading
-// Joins two readings: with pack.tones an apostrophe goes before a syllable starting with
-// a/o/e (the writing's syllable-boundary rule), otherwise they are simply concatenated.
 function joinReadings(a, b, pack){
   if(!a) return b; if(!b) return a;
   return tonesOn(pack) && /^[aoe]/i.test(stripMarks(b)) && /[\p{L}]$/u.test(a) ? a + "'" + b : a + b;
 }
-// The reading of a tap span whose text may be longer than its word (越来越 for 越, 一下 for
-// 下). Returns pieces [{start, end, reading}] covering text in order, offsets relative to
-// text: each occurrence of the word's written form gets word.pron. Every other character
-// gets readingOf(char) (e.g. its single-character unit's reading) only when the pack opts
-// in with pack.characters.compose (a character reads the same in every word, as each
-// character unit has one reading); otherwise, and for a character with no reading, it gets
-// reading "" (shown written): a reading is never guessed. Adjacent read pieces are merged
-// with joinReadings, as are adjacent written ones. No character is ever dropped.
+// A reading is never guessed: other characters get a reading only when the pack opts in with
+// pack.characters.compose (each character unit has one reading), else they show written.
 function composeSpanReading(text, word, readingOf, pack){
   const t = String(text == null ? "" : text); const w = String((word && word.w) || ""); const wp = String((word && word.pron) || "");
   const cfg = charsConfig(pack); if(!(cfg && cfg.compose)) readingOf = null;
@@ -3001,36 +2380,20 @@ function composeSpanReading(text, word, readingOf, pack){
   });
   return out;
 }
-// The reading line of a span as one string: composeSpanReading's readings, with a written
-// piece's own text in place.
 function spanReadingText(text, word, readingOf, pack){
   const t = String(text == null ? "" : text);
   return composeSpanReading(t, word, readingOf, pack).map(p => p.reading || t.slice(p.start, p.end)).join("");
 }
 
 // ------------------------------------------------------------------ legacy migration
+// Delimits the section tests/engine_checks.js [10] exempts; keep both banners.
 // One-way import of a predecessor app's progress into this pack's shape (design: the
 // merge plan in docs/, §4). zh: the hsk trainer's "hsk_pinyin" record. Every hsk release
 // (v1, v2, v2.1 sentences, v2.2 characters, v2.3/HEAD path flags) stored v:1 or v:2 and
 // only ever added fields, so one reader covers them all. Pure and DOM-free.
 //
-// legacyMap is the pack's LEGACY const (legacy.js): {w: hanzi -> word id, s: sentence
-// text -> sentence id, c: hanzi -> character unit id}.
-//
-// migrateLegacy(pack, legacyMap, oldRecord), oldRecord an object or its JSON string:
-//   {ok:false, reason}  not a JSON object, an unknown legacy version, or no pack.legacy
-//   {ok:true, prog, unmapped, dropped, already}
-//     prog      normalizeProg output carrying the marker prog.legacy = {key, format}
-//     unmapped  [{path, value, reason}]: every part of the old record with no place in
-//               prog (a key the maps lack, an unknown field, a value of the wrong type).
-//               Nothing is discarded silently. Acceptance for the real switch: empty.
-//     dropped   [{path, value}]: fields retired on purpose (LEGACY_DROPPED).
-//     already   true when oldRecord carries the marker, i.e. it is already migrated:
-//               prog = normalizeProg(oldRecord) and both lists empty. A second run is a no-op.
-// Field mapping: v -> PROG_VERSION; w[hanzi] -> w[wordId] and s[text] -> s[sentId] with
-// r/w/s (and w's prov/d) verbatim; c[hanzi] -> chars.c[unitId]; sets, lessons, sessions,
-// theme, placedOnce, soundsOpened as-is; mixChars/charsAfterHsk4/charsChoiceSeen ->
-// chars.mix/defer/choiceSeen; showPron takes the pack default.
+// Nothing in the old record is discarded silently: every part with no place in prog is
+// reported in `unmapped` (acceptance for the real switch: empty). A second run is a no-op.
 //
 // Caller contract (boot hook and import path, not in this file):
 // - Boot: migrate only when pack.legacy is set, storageKey(pack) holds nothing and the
@@ -3045,7 +2408,6 @@ const NATIVE_ONLY_FIELDS = ["chars","showPron","read"];
 function legacyBackupKey(pack){ return `${pack.legacy.key}.bak`; }
 function legacyMarker(pack){ return { key: String(pack.legacy.key || ""), format: String(pack.legacy.format || "") }; }
 function hasLegacyMarker(data){ return isObj(data) && isObj(data.legacy) && typeof data.legacy.key === "string"; }
-// True when data looks like a legacy export rather than this engine's own progress.
 function isLegacyRecord(pack, legacyMap, data){
   if(!isObj(pack && pack.legacy) || !isObj(data) || hasLegacyMarker(data)) return false;
   if(NATIVE_ONLY_FIELDS.some(f => data[f] !== undefined)) return false;
@@ -3071,7 +2433,6 @@ function migrateLegacy(pack, legacyMap, oldRecord){
   const cfg = charsConfig(pack);
   const isNum = x => typeof x === "number" && isFinite(x);
   const numOrBool = x => isNum(x) || typeof x === "boolean";
-  // One record bucket: keys through the map, known fields verbatim, the rest reported.
   function recMap(bucket, map, wordFlags){
     const src = data[bucket], dst = {};
     if(src === undefined) return dst;
