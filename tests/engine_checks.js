@@ -661,6 +661,13 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("level with fewer words than one set is a warning, not an error", thin.status === 0 && /fewer than one set/.test(thin.stdout));
   const small = run(Object.assign({}, base, { setSize:2, placement:[["A1",3]] }), [...mkw(5,"A1"), ...mkw(12,"A2")]);
   check("placement bucket with < 3 words (set-boundary math) is an error", small.status === 1 && /needs >= 3/.test(small.stdout));
+  const wordsAB = [...mkw(20,"A1"), ...mkw(12,"A2")];
+  const shOk = run(Object.assign({}, base, { soundsHint: "A few short lessons explain how Whistled Turkish sounds." }), wordsAB);
+  check("pack.soundsHint: non-empty string validates", shOk.status === 0);
+  const shBad = run(Object.assign({}, base, { soundsHint: "" }), wordsAB);
+  check("pack.soundsHint: empty string is an error", shBad.status === 1 && /soundsHint must be a non-empty string/.test(shBad.stdout));
+  const shType = run(Object.assign({}, base, { soundsHint: 3 }), wordsAB);
+  check("pack.soundsHint: non-string is an error", shType.status === 1 && /soundsHint must be a non-empty string/.test(shType.stdout));
   fs.rmSync(tmp, { recursive:true, force:true });
 })();
 
@@ -902,6 +909,11 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   // Favicon: a data: URI icon link so GitHub Pages stops 404ing /favicon.ico on every load.
   const iconLink = /<link rel="icon" href="(data:[^"]+)">/.exec(app);
   check("app.html: <link rel=\"icon\"> exists and is a data: URI", !!iconLink);
+
+  // pack.soundsHint (TODO.md "the Sounds hint text on Today is generic"): overrides the
+  // generic Today lesson hint when set, default text unchanged when absent.
+  check("app.html: Today lesson hint uses PACK.soundsHint when set, else the generic text",
+    /\$\{PACK\.soundsHint \? ui\(PACK\.soundsHint\) : `A few short lessons explain how \$\{ui\(PACK\.name\)\} sounds and is written\.`\}/.test(app));
 })();
 
 (function(){

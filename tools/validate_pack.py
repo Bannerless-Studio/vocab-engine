@@ -119,6 +119,8 @@ def check_pack(pack, rep):
     for f in ("showPron", "hasLessons"):
         if not is_bool(pack.get(f)):
             rep.err(f"pack.{f} must be a boolean")
+    if "soundsHint" in pack and not (isinstance(pack["soundsHint"], str) and pack["soundsHint"]):
+        rep.err("pack.soundsHint must be a non-empty string")
     if "spaced" in pack and not is_bool(pack["spaced"]):
         rep.err("pack.spaced must be a boolean")
     if "compounds" in pack and not (isinstance(pack["compounds"], list) and all(is_str(c) for c in pack["compounds"])):
