@@ -456,7 +456,9 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     const deferred = seedB(); VC.answerCharChoice(deferred, false);
     api.setProg(deferred); api.goto("test");
     check("unlocked but deferred (not started): no Characters test", VC.charsUnlocked(PACK, WORDS, deferred) && !VC.charsStarted(PACK, WORDS, CHARACTERS, deferred) && !/id="tChars"/.test(api.html("panel")));
+    check("not started: an unlock note in its place", /id="tCharsLock"[^>]*>Characters test: unlocks when the characters stage starts on Today\.</.test(api.html("panel")), api.html("panel").slice(0, 600));
     api.setProg(seedB()); api.goto("test");
+    check("started: no unlock note", !/id="tCharsLock"/.test(api.html("panel")));
     check("started, no unit recorded yet: Characters 20 (hsk parity: shown once started)", /id="tChars">Characters 20</.test(api.html("panel")));
     api.el("tChars").click();
     let items = [api.getCur(), ...api.getD().q];

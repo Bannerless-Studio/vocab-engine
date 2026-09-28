@@ -1583,11 +1583,11 @@ function listenPlanCount(learned, canHear){
   return (learned || []).slice(0, 12).filter(canHear).length;
 }
 // Test tab: free word tests need TEST_MIN_WORDS learned words; the sentence test needs
-// 8 available sentences. The "learn first" notice depends on learned words only
-// (placement itself needs no sentences); the sentence button simply stays hidden.
-const TEST_MIN_WORDS = 8;
+// TEST_MIN_SENTENCES available sentences. The "learn first" notice depends on learned words
+// only (placement itself needs no sentences); a held-back sentence test shows an unlock note.
+const TEST_MIN_WORDS = 8, TEST_MIN_SENTENCES = 8;
 function testGates(learnedCount, availSentCount){
-  const words = learnedCount >= TEST_MIN_WORDS, sentences = availSentCount >= 8;
+  const words = learnedCount >= TEST_MIN_WORDS, sentences = availSentCount >= TEST_MIN_SENTENCES;
   return { words, sentences, needPlacement: !words };
 }
 
@@ -3476,7 +3476,7 @@ function migrateLegacy(pack, legacyMap, oldRecord){
 // ------------------------------------------------------------------ export
 const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   levelIds, levelIndexMap, levelLabel, setSizeOf, wordsByLevel, nSets,
-  meaningOpts, wordOpts, gapOpts, sentenceOpts, bareForm, packArticles, articleCut, trailingCut, citationArticles, articleAgreement, visibleArticle, gapChoices, exampleSentences, unitExampleSentences, rubyCovers, highlightParts, searchWords, pronShown, audioSlot, TEST_MIN_WORDS,
+  meaningOpts, wordOpts, gapOpts, sentenceOpts, bareForm, packArticles, articleCut, trailingCut, citationArticles, articleAgreement, visibleArticle, gapChoices, exampleSentences, unitExampleSentences, rubyCovers, highlightParts, searchWords, pronShown, audioSlot, TEST_MIN_WORDS, TEST_MIN_SENTENCES,
   targetLang, fontFamilyOf, fontStackOf, lineHeightOf, fontsHref, scriptDisplay, rtlRuns,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,
@@ -5618,7 +5618,13 @@ function testRender(){
   // 20 with learned words' unrecorded units, each a pack testKinds kind (VC.charTestPlan).
   // Shown once characters have started (VC.charsStarted), not only once a record exists.
   const charPlan = () => VC.charTestPlan(CHAR_LIST, learnedWords(), prog, PACK, 20);
-  const charN = HAS_CHARACTERS && VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU) ? charPlan().length : 0;
+  const charsOn = HAS_CHARACTERS && VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU);
+  const charN = charsOn ? charPlan().length : 0;
+  // Every free test held back by a threshold says what unlocks it, in its place. The word
+  // tests' note is the needMore card; with it showing, it speaks for the rest too.
+  const lockNote = (id, text) => `<p class="q" id="${id}" style="margin:8px 0 0">${text}</p>`;
+  const sentNote = !needMore && !tg.sentences ? lockNote("tSentLock", `Sentences test: unlocks at ${VC.TEST_MIN_SENTENCES} sentences (${availSent.length} so far).`) : "";
+  const charNote = !needMore && HAS_CHARACTERS && !charsOn ? lockNote("tCharsLock", "Characters test: unlocks when the characters stage starts on Today.") : "";
   P.innerHTML = `<p class="q">Placement finds where to start. Free tests draw from what's already learned.</p>
     <div class="actions">
       ${needMore ? `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far). Learn ${VC.TEST_MIN_WORDS} words first, or let placement find where to start.<button class="next" id="needPlace" style="margin-top:8px">Take the placement test</button></div>` : `<button class="next" id="pl">Take Placement</button>`}
@@ -5626,8 +5632,8 @@ function testRender(){
         <button class="ghost" id="tListen" style="flex:1">Listen ${n20}</button>
         <button class="ghost" id="tRecall" style="flex:1">Recall ${n20}</button>
       </div>` : ""}
-      ${tg.sentences ? `<button class="ghost" id="tSentences">Sentences ${sentN}</button>` : ""}${charN ? `
-      <button class="ghost" id="tChars">Characters ${charN}</button>` : ""}
+      ${tg.sentences ? `<button class="ghost" id="tSentences">Sentences ${sentN}</button>` : sentNote}${charN ? `
+      <button class="ghost" id="tChars">Characters ${charN}</button>` : charNote}
     </div>`;
   if(needMore) $("needPlace").onclick = enterPlacementFromToday;
   else $("pl").onclick = () => { testSel = "placement"; testRender(); };
@@ -5968,4 +5974,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2003569603-1591649-->
+<!--ve-build:2813066361-1592375-->

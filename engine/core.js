@@ -1229,11 +1229,11 @@ function listenPlanCount(learned, canHear){
   return (learned || []).slice(0, 12).filter(canHear).length;
 }
 // Test tab: free word tests need TEST_MIN_WORDS learned words; the sentence test needs
-// 8 available sentences. The "learn first" notice depends on learned words only
-// (placement itself needs no sentences); the sentence button simply stays hidden.
-const TEST_MIN_WORDS = 8;
+// TEST_MIN_SENTENCES available sentences. The "learn first" notice depends on learned words
+// only (placement itself needs no sentences); a held-back sentence test shows an unlock note.
+const TEST_MIN_WORDS = 8, TEST_MIN_SENTENCES = 8;
 function testGates(learnedCount, availSentCount){
-  const words = learnedCount >= TEST_MIN_WORDS, sentences = availSentCount >= 8;
+  const words = learnedCount >= TEST_MIN_WORDS, sentences = availSentCount >= TEST_MIN_SENTENCES;
   return { words, sentences, needPlacement: !words };
 }
 
@@ -3122,7 +3122,7 @@ function migrateLegacy(pack, legacyMap, oldRecord){
 // ------------------------------------------------------------------ export
 const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   levelIds, levelIndexMap, levelLabel, setSizeOf, wordsByLevel, nSets,
-  meaningOpts, wordOpts, gapOpts, sentenceOpts, bareForm, packArticles, articleCut, trailingCut, citationArticles, articleAgreement, visibleArticle, gapChoices, exampleSentences, unitExampleSentences, rubyCovers, highlightParts, searchWords, pronShown, audioSlot, TEST_MIN_WORDS,
+  meaningOpts, wordOpts, gapOpts, sentenceOpts, bareForm, packArticles, articleCut, trailingCut, citationArticles, articleAgreement, visibleArticle, gapChoices, exampleSentences, unitExampleSentences, rubyCovers, highlightParts, searchWords, pronShown, audioSlot, TEST_MIN_WORDS, TEST_MIN_SENTENCES,
   targetLang, fontFamilyOf, fontStackOf, lineHeightOf, fontsHref, scriptDisplay, rtlRuns,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,

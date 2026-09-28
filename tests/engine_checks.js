@@ -1477,6 +1477,7 @@ return {
   setQueueAndNext:(items, onDone) => { D = { q: items.slice(), right:0, seen:0, miss:[], onDone: onDone||(()=>{}), summary:null }; dnext(); },
   today: () => { tab = "today"; render(); },
   enterTodayStep: (step, read) => { todayStepState = read === undefined ? { step } : { step, read }; todayStep(); },
+  testTab: () => { tab = "test"; testSel = null; render(); }, setProgT: p => { prog = p; },
   enterPlacement: () => { tab = "test"; testSel = "placement"; startPlacement(); }, getPL: () => PL, getTodayStepState: () => todayStepState,
   getHtml: id => { const e = document.getElementById(id); return e ? e.innerHTML : ""; },
 };`;
@@ -1550,6 +1551,22 @@ return {
     b2.ss.getVoices = () => [{ lang:"zh-CN", name:"y" }]; b2.ss.onvoiceschanged();
     check("voice change on a Today teach screen: no re-render, session kept", /id="dr"/.test(t0) && b2.api.getRenderCalls() === r2 && b2.api.getTodayStepState() && b2.document.getElementById("panel").innerHTML === t0);
   }catch(e){ check(`re-mount guard scenario does not throw (got: ${e.stack})`, false); }
+
+  // Test tab: a free test held back by a threshold shows an unlock note in its place.
+  try{
+    const b = await bootApp([{ lang:"zh-CN", name:"x" }]);
+    const fresh = VC.normalizeProg({ sets: {}, placedOnce: true, sessions: 1 }, PACK);
+    b.api.setProgT(fresh); b.api.testTab();
+    const h0 = b.api.getHtml("panel");
+    check("Test tab, nothing learned: the learn-first card only (it covers every free test)", /id="needPlace"/.test(h0) && !/id="tSentLock"/.test(h0) && !/id="tSentences"/.test(h0));
+    const lv = PACK.levels[0].id, pr = VC.normalizeProg({ sets: {}, placedOnce: true, sessions: 1 }, PACK);
+    let k = 0; for(const w of WORDS){ if(w.lv !== lv) continue; pr.w[w.id] = { r: 3, w: 0, s: 3, d: 1 }; if(++k >= 8) break; }
+    pr.sets[lv] = 1;
+    b.api.setProgT(pr); b.api.testTab();
+    const h1 = b.api.getHtml("panel"), m = h1.match(/id="tSentLock"[^>]*>([^<]*)</);
+    const learned = WORDS.filter(w => pr.w[w.id]).length;
+    check(`Test tab, ${learned} learned words, few sentences: word tests + "Sentences test: unlocks at 8 sentences (N so far)" note`, /id="tListen"/.test(h1) && !/id="tSentences"/.test(h1) && !!m && /^Sentences test: unlocks at 8 sentences \(\d+ so far\)\.$/.test(m[1]), m ? m[1] : h1.slice(0, 300));
+  }catch(e){ check(`Test tab unlock notes do not throw (got: ${e.stack})`, false); }
 
   // Notice timing: the item built first must not be the one that gets the one-time
   // no-voice notice if a later-built item is the one actually shown first (shuffle),
