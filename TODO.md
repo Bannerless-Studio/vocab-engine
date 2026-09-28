@@ -43,6 +43,8 @@
 
 - **Passage "looked back" should not weaken words** (user 2026-09-28): READ_WEIGHT.reopened = 1 treats reopening the passage before answering as a language miss, but it measures story recall. Decision pending user go: set reopened weight to 0 (label stays on the results screen, unticked by default), tests in engine_checks/listen_mode updated. Related question answered: prog.w is one r/w/s per word across meaning/pinyin/cloze/typed (no per-aspect memory); prog.chars.c is separate and only character items write it.
 
+- **Requeue a missed word in the kind it was missed in** (user question 2026-09-28): prog.w is one r/w/s per word, so a typed/cloze miss on a word whose meaning is known returns it in a random kind (wasted meaning reps). Recognition misses rightly weaken everything. Proposal: keep one record for scheduling, add an optional `k` (last missed kind) to the word record (migration-safe like read.done.l), and let the next review pick that kind first; clear it on a pass in that kind. Pending user go; ships with the look-back weight change.
+
 ## Script support (added 2026-09-23)
 - RTL verified in a real browser on the Persian pack (2026-09-24): Vazirmatn loads, dir/lang on all target nodes, cloze blank at the correct RTL position, ZWNJ forms joined, no overflow at 360/390. Still unverified: Nastaliq (Urdu) line height. Minor: speaker icons and the "Tap a word to hear it" hint still show when no TTS voice exists for the pack language (engine already converts Listen items to read items) — hide them in that case; Words-list pron column ragged for long headwords.
 - validate_pack.py checks the script fields (`rtl`, `langTag`, `fontFamily`, `fonts`, `lineHeight`) with the same patterns as core.js, and warns when `rtl` is set without a font.
