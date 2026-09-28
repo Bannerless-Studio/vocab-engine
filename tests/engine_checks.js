@@ -407,6 +407,26 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("availability otherwise requires every word learned", VC.availableSentences(SENTENCES, WORDS, PACK, prog).every(s=>s.words.every(id=>lwSet.has(id))));
   const ahead = VC.normalizeProg({ w:{ [byLv["3"][0].id]:{r:1,w:0,s:1,d:1} } }, PACK);
   check("drilled-ahead (d) words count as learned", VC.learnedWords(WORDS, PACK, ahead).some(w=>w.id===byLv["3"][0].id));
+
+  // Set N labels name the set holding the FIRST fresh word by rank position, not the
+  // sets counter (TODO.md "Set N" fix): a gap in taught ranks, or a word inserted after a
+  // level was counted complete, must not shift the label off the rank the fresh word sits at.
+  const gapPack = Object.assign({}, PACK, { setSize: 10 });
+  const gapWords = Array.from({length: 40}, (_, i) => ({ id: `g${i+1}`, lv: "1" }));
+  const gapRecs = {}; [1,2,3,4,5,6,7,8,11,12].forEach(rank => { gapRecs[`g${rank}`] = { r:1, w:0, s:1 }; });
+  const gapProg = VC.normalizeProg({ w: gapRecs }, gapPack);
+  const gapNn = VC.nextNewSet(gapWords, gapPack, gapProg);
+  check("Set N label: taught ranks 1-8, 11-12 (gap at 9-10) -> fresh starts at rank 9, set 1 (not set 2)",
+    gapNn && gapNn.words[0].id === "g9" && gapNn.set === 0);
+
+  const insWords = Array.from({length: 29}, (_, i) => ({ id: `i${i+1}`, lv: "1" }));
+  insWords.splice(29, 0, { id: "iNew", lv: "1" }); // inserted untaught word at rank 30
+  const insRecs = {}; insWords.slice(0, 29).forEach(w => { insRecs[w.id] = { r:1, w:0, s:1 }; });
+  const insPack = Object.assign({}, PACK, { setSize: 10 });
+  const insProg = VC.normalizeProg({ sets:{"1": VC.nSets(insWords.slice(0,29), 10)}, w: insRecs }, insPack);
+  const insNn = VC.nextNewSet(insWords, insPack, insProg);
+  check("Set N label: complete counter (29/29 taught) + one inserted untaught word at rank 30 -> set 3, not set 4",
+    insNn && insNn.words[0].id === "iNew" && insNn.set === 2);
 })();
 
 (function(){
@@ -1366,8 +1386,8 @@ function reorderedLevel(pack, words){
   const after = VC.learnedWords(R.words, PACK, R.prog);
   check("reorder: insert at rank 2 + swap ranks 5/35 -> learnedWords identical to before", util.isDeepStrictEqual(ids(after), R.before));
   const nn = VC.nextNewSet(R.words, PACK, R.prog);
-  check("reorder: nextNewSet holds the inserted word and the swapped-in unlearned word, no learned word, setSize long",
-    nn && nn.lv === "1" && nn.set === 3 && nn.words.length === R.size && nn.words.some(w => w.id === R.inserted)
+  check("reorder: nextNewSet holds the inserted word and the swapped-in unlearned word, no learned word, set is the inserted word's rank position (0), not the counter (3)",
+    nn && nn.lv === "1" && nn.set === 0 && nn.words.length === R.size && nn.words.some(w => w.id === R.inserted)
     && nn.words.some(w => w.id === R.swappedIn) && nn.words.every(w => !R.learnedIds.has(w.id)));
   const l1n = R.words.filter(w => w.lv === "1");
   check("reorder: nextNewSet is the next unlearned words in rank order", util.isDeepStrictEqual(nn.words.map(w => w.id), l1n.filter(w => !R.learnedIds.has(w.id)).slice(0, R.size).map(w => w.id)));

@@ -1219,15 +1219,17 @@ function learnedWords(words, pack, prog){
   levelIds(pack).forEach(lv=>{ out.push(...levelLearned(byLv[lv], (prog.sets||{})[lv], size, prog.w)); });
   return out;
 }
-// `set` is the counter capped to the level's last set, so "set N" stays in range when a
-// republish added words to a level already counted complete.
+// `set` names the set that holds fresh[0] by its position in the level's list (rank order),
+// not the counter: a records-less prefix or an inserted untaught word can put fresh[0] in a
+// different set than the counter says, and the label must match what is actually taught.
 function levelNewSet(words, pack, prog, lv){
   const size = setSizeOf(pack); const list = wordsByLevel(words, pack)[lv] || [];
   const done = (prog.sets||{})[lv]||0;
   const got = new Set(levelLearned(list, done, size, prog.w).map(w => w.id));
   const fresh = list.filter(w => !got.has(w.id)).slice(0, size);
   if(!fresh.length) return null;
-  return { lv, set: Math.min(done, nSets(list, size) - 1), words: fresh };
+  const idx = list.findIndex(w => w.id === fresh[0].id);
+  return { lv, set: Math.floor((idx < 0 ? 0 : idx) / size), words: fresh };
 }
 function nextNewSet(words, pack, prog){
   for(const lv of levelIds(pack)){
@@ -5021,4 +5023,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3308528884-1511110-->
+<!--ve-build:831757945-1511293-->
