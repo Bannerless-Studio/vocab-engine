@@ -13,7 +13,7 @@
   {
    "step": 0,
    "label": "Review",
-   "html": "<div class=\"drill-body\"><p class=\"q\">What does it mean?</p><div class=\"warn\">This browser has no text-to-speech voice for this language, so listening items show the word instead of playing audio.</div><div class=\"big wd\" data-tl lang=\"ja\">近所</div><div class=\"pron\">きんじょ</div><div class=\"opts opts-hero\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">What does it mean?</p><div class=\"warn\">This browser has no text-to-speech voice for this language, so listening items show the word instead of playing audio.</div><div class=\"big wd\" data-tl lang=\"ja\">済む</div><div class=\"pron\">すむ</div><div class=\"opts opts-hero\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   },
   {
    "step": 1,
@@ -23,17 +23,17 @@
   {
    "step": 2,
    "label": "Listen",
-   "html": "<div class=\"drill-body\"><p class=\"q\">What does it mean?</p><div class=\"big wd\" data-tl lang=\"ja\">守る</div><div class=\"pron\">まもる</div><div class=\"opts opts-hero\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">What does it mean?</p><div class=\"big wd\" data-tl lang=\"ja\">ます</div><div class=\"opts opts-hero\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   },
   {
    "step": 3,
    "label": "Recall",
-   "html": "<div class=\"drill-body\"><p class=\"q\">Which word is this?</p><div class=\"med\" style=\"text-align:center\">(negative ending) not</div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">Which word is this?</p><div class=\"med\" style=\"text-align:center\">attendance, presence</div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   },
   {
    "step": 4,
    "label": "Sentences",
-   "html": "<div class=\"drill-body\"><p class=\"q\">What&#39;s the missing word?</p><div class=\"med wd\" data-tl lang=\"ja\">トムを<span class=\"blank\">____</span>べきではありませんでした。</div><div class=\"q cue\">You shouldn&#39;t have killed Tom.</div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">What does it mean?</p><div class=\"med wd\" data-tl lang=\"ja\">私が、その決断を下した者です。</div><div class=\"q cue\">わたしが、そのけつだんをくだしたものです。</div><div class=\"opts opts-hero\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   }
  ],
  "savedProgressStrings": []
