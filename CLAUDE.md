@@ -79,6 +79,7 @@ Known state 2026-09-27: with the untracked langs/sw.py present, pytest fails 2 s
 
 - Rebuild dist after any change to engine/ or packs/zh: `./build.sh packs/zh dist/zh.html`, then commit dist/zh.html and dist/sw.js with the change.
 - Run every tests/*.js suite plus `flagoff_snapshot.js --check` before merging an engine change; paste the counts.
+- After any language-repo pack republish, run `flagoff_snapshot.js --check` here; a pack golden that drifted is recaptured with `--capture` in its own commit that names the republish (the goldens read ../<lang>/pack).
 - Keep new engine behaviour pack-gated and prove the flag-off path byte-identical (a control check against a pinned sha, as pron_aids and listen_mode do).
 - Use one git worktree per branch (`git worktree add ../vocab-engine-<branch> <branch>`); other workers share this checkout.
 - Regenerate goldens (`--capture`) only in a commit whose message explains why the output changed.
