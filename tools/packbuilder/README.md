@@ -37,7 +37,7 @@ packbuilder/
   passages.py           reading passages: tools/passages_src.json -> pack/passages.json
   audio.py              recorded audio (Piper clips), docs/AUDIO.md
   langs/base.py         LanguageSpec: the interface and its defaults
-  langs/<code>.py       one spec per language: it es fr de ru fa id ko ja ar hi ur (ru: ё/е folding, stressed pron); zh is passage-only
+  langs/<code>.py       one spec per language: it es fr de ru fa id ko ja ar hi ur sw (ru: ё/е folding, stressed pron; sw: hand-written rule tagger, no spaCy/Stanza model); zh is passage-only
   qa/check.py           hard gate: schema, ids, levels, coverage, spec.check_word, shipped passages vs the level budget
   qa/scans.py           review scans 1-3 (gloss junk, articles/closed sets, non-lemmas)
   qa/sample.py          stratified word/sentence samples for hand QA
