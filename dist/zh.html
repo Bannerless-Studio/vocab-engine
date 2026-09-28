@@ -1685,7 +1685,8 @@ function audioSlot(make){
 // l: 1 marks a latest attempt that was a listening pass (readPassMode); absent = reading.
 const READ_UNLOCK = 0.7;
 // Weights for "Weak words from this passage": misses added to prog.w[id].w.
-const READ_WEIGHT = { tapped: 2, wrong: 2, reopened: 1 };
+// reopened 0: looking back is shown on the results screen but never weakens a word (user 2026-09-28).
+const READ_WEIGHT = { tapped: 2, wrong: 2, reopened: 0 };
 function readState(prog){
   if(!isObj(prog.read)) prog.read = {};
   if(!isObj(prog.read.unlocked)) prog.read.unlocked = {};
@@ -1841,7 +1842,8 @@ function gradeQuestion(q, answer){
 // "Weak words from this passage". log = {tapped: [wordId], answers: [{ok, reopened}] by
 // question index}. Tapped words and the words of wrongly answered questions weigh
 // READ_WEIGHT.tapped / .wrong (2); the words of questions answered while the passage was
-// reopened weigh .reopened (1). A word with several reasons takes the largest weight,
+// reopened weigh .reopened (0: listed as information only, applyWeakWords skips them).
+// A word with several reasons takes the largest weight,
 // never the sum. Order: tapped first (tap order), then question order. Returns
 // [{id, weight, why: ["tapped"|"wrong"|"reopened"]}]; ids not in wordsById are dropped.
 function passageWeakWords(passage, log, wordsById){
@@ -5448,11 +5450,14 @@ function readResults(){
   const p = RD.p, P = $("panel");
   const sc = RD.answers.filter(a => a && a.ok).length;
   const weak = VC.passageWeakWords(p, { tapped: RD.tapped, answers: RD.answers }, WORDS_BY_ID);
+  // Weight-0 entries (looked back only) are information: listed without a checkbox, never
+  // applied; with no weighted entry the list and its heading are not shown.
+  const anyWeak = weak.some(w => w.weight > 0);
   P.innerHTML = `<div class="done"><h2>${sc} / ${p.questions.length}</h2>
     ${RD.mode === "listen" ? `<p class="q" id="lmode" style="margin-bottom:4px">Listening pass${RD.peekText ? "<br>Text shown while listening" : ""}</p>` : ""}<p class="q"${TA} style="margin-bottom:8px">${rubyTextOr(p.title, p.titleRuby)}</p>
     ${p.questions.map((q, i) => { const a = RD.answers[i] || {}; const s = p.sentences[q.sentence]; const hearS = canHearSentence(s);
       return `<div class="stmt"${TOKBOX}><div class="q" style="margin:0 0 4px;color:${a.ok ? "var(--ok)" : "var(--bad)"}">${a.ok ? "✓" : "✗"} Question ${i+1}${a.reopened ? " · looked back" : ""}${a.qh ? " · question shown" : ""}${a.tr ? " · translation shown" : ""}</div><div${TA}>${rubyTextOr(q.q, q.ruby)}</div><div style="margin-top:6px"${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:2px 0 0">${ui(s.en)}</div>${hearS ? `<button type="button" class="replay" id="rr${i}" aria-label="Replay">${REPLAY_SVG}</button>` : ""}</div>`; }).join("")}
-    ${weak.length ? `<p class="q">Weak words from this passage${RD.today ? ". Ticked ones go to your next review." : ""}</p><div id="weak">${weak.map((w, i) => `<label class="wk"${DISP.rtl ? ' dir="rtl"' : ""}><input type="checkbox" data-wi="${i}" checked> ${glossHTML(w.id, RD.glosses && RD.glosses[w.id])} <span class="q"${UIA} style="margin:0;font-size:13px">${escapeHtml(w.why.map(x => WHY_LABEL[x]).join(", "))}</span></label>`).join("")}</div>
+    ${anyWeak ? `<p class="q">Weak words from this passage${RD.today ? ". Ticked ones go to your next review." : ""}</p><div id="weak">${weak.map((w, i) => `<label class="wk"${DISP.rtl ? ' dir="rtl"' : ""}>${w.weight > 0 ? `<input type="checkbox" data-wi="${i}" checked> ` : ""}${glossHTML(w.id, RD.glosses && RD.glosses[w.id])} <span class="q"${UIA} style="margin:0;font-size:13px">${escapeHtml(w.why.map(x => WHY_LABEL[x]).join(", "))}</span></label>`).join("")}</div>
       ${RD.today ? "" : `<button class="next" id="addrev">Add to review</button>`}` : `<p class="q">No weak words from this passage.</p>`}
     ${RD.today ? `<button class="next" id="rcont" style="margin-top:10px">Continue</button></div>` : `<div id="addmsg" class="q" hidden></div>
     <button class="ghost" id="rlist" style="margin-top:10px">Back to passages</button></div>`}`;
@@ -5462,13 +5467,13 @@ function readResults(){
   // drill misses are, then the session goes on.
   if(RD.today){
     $("rcont").onclick = () => {
-      const chosen = weak.filter((w, i) => { const x = P.querySelector(`[data-wi="${i}"]`); return !x || x.checked; });
+      const chosen = weak.filter((w, i) => { const x = P.querySelector(`[data-wi="${i}"]`); return w.weight > 0 && (!x || x.checked); });
       if(chosen.length){ VC.applyWeakWords(prog, chosen, WORDS, PACK); store.save(); }
       RD = null; todayStep();
     };
     return;
   }
-  if(weak.length) $("addrev").onclick = () => {
+  if(anyWeak) $("addrev").onclick = () => {
     const chosen = [...P.querySelectorAll("[data-wi]")].filter(x => x.checked).map(x => weak[+x.dataset.wi]);
     VC.applyWeakWords(prog, chosen, WORDS, PACK); store.save();
     $("addrev").disabled = true; P.querySelectorAll("[data-wi]").forEach(x => { x.disabled = true; });
@@ -5843,4 +5848,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:450990724-1583559-->
+<!--ve-build:1334812684-1583971-->

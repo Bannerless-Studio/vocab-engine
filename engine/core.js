@@ -1331,7 +1331,8 @@ function audioSlot(make){
 // l: 1 marks a latest attempt that was a listening pass (readPassMode); absent = reading.
 const READ_UNLOCK = 0.7;
 // Weights for "Weak words from this passage": misses added to prog.w[id].w.
-const READ_WEIGHT = { tapped: 2, wrong: 2, reopened: 1 };
+// reopened 0: looking back is shown on the results screen but never weakens a word (user 2026-09-28).
+const READ_WEIGHT = { tapped: 2, wrong: 2, reopened: 0 };
 function readState(prog){
   if(!isObj(prog.read)) prog.read = {};
   if(!isObj(prog.read.unlocked)) prog.read.unlocked = {};
@@ -1487,7 +1488,8 @@ function gradeQuestion(q, answer){
 // "Weak words from this passage". log = {tapped: [wordId], answers: [{ok, reopened}] by
 // question index}. Tapped words and the words of wrongly answered questions weigh
 // READ_WEIGHT.tapped / .wrong (2); the words of questions answered while the passage was
-// reopened weigh .reopened (1). A word with several reasons takes the largest weight,
+// reopened weigh .reopened (0: listed as information only, applyWeakWords skips them).
+// A word with several reasons takes the largest weight,
 // never the sum. Order: tapped first (tap order), then question order. Returns
 // [{id, weight, why: ["tapped"|"wrong"|"reopened"]}]; ids not in wordsById are dropped.
 function passageWeakWords(passage, log, wordsById){
