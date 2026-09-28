@@ -171,6 +171,12 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const lastEnds = PACK.placement.every(([lv])=>{ const bs = st.filter(b=>b.lv===lv); return bs[bs.length-1].s1 === VC.nSets(byLv[lv], PACK.setSize); });
   check("each level's last bucket ends exactly at its set count", lastEnds);
   check("strata honours a non-10 setSize", (()=>{ const s = VC.strata(WORDS, [["1",2]], 5); return s.length===2 && s[1].s1 === Math.ceil(byLv["1"].length/5); })());
+  // pack.placementItems (TODO.md "placement has a fixed 2/3 alternating item count"): cycled
+  // per bucket; default (no field, or omitted pack arg) is today's fixed 2,3 alternation.
+  check("placementItemCount default (no pack arg): 2,3,2,3,... (flagoff must not drift)",
+    [0,1,2,3,4].every(i => VC.placementItemCount(i) === (i%2===0?2:3)));
+  check("placementItemCount with pack.placementItems unset: same as default", [0,1,2,3].every(i => VC.placementItemCount(i, PACK) === (i%2===0?2:3)));
+  check("placementItemCount cycles a custom pack.placementItems", [0,1,2,3,4,5].every(i => VC.placementItemCount(i, {placementItems:[4,1,2]}) === [4,1,2][i%3]));
   const allRight = Array.from({length:6}, ()=>({r:3,n:3}));
   check("all buckets correct -> null", VC.placementStopIndex(allRight) === null);
   check("bucket 3 entirely wrong -> stops at 3", VC.placementStopIndex([{r:3,n:3},{r:3,n:3},{r:3,n:3},{r:0,n:3},{r:3,n:3},{r:3,n:3}]) === 3);
@@ -668,6 +674,12 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("pack.soundsHint: empty string is an error", shBad.status === 1 && /soundsHint must be a non-empty string/.test(shBad.stdout));
   const shType = run(Object.assign({}, base, { soundsHint: 3 }), wordsAB);
   check("pack.soundsHint: non-string is an error", shType.status === 1 && /soundsHint must be a non-empty string/.test(shType.stdout));
+  const piOk = run(Object.assign({}, base, { placementItems: [3,2] }), wordsAB);
+  check("pack.placementItems: list of positive ints validates", piOk.status === 0);
+  const piBad = run(Object.assign({}, base, { placementItems: [2, 0] }), wordsAB);
+  check("pack.placementItems: a non-positive entry is an error", piBad.status === 1 && /placementItems must be a list of positive integers/.test(piBad.stdout));
+  const piType = run(Object.assign({}, base, { placementItems: "23" }), wordsAB);
+  check("pack.placementItems: non-list is an error", piType.status === 1 && /placementItems must be a list of positive integers/.test(piType.stdout));
   fs.rmSync(tmp, { recursive:true, force:true });
 })();
 

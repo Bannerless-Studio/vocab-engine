@@ -718,7 +718,12 @@ function strata(pool, bucketSpec, setSize){
   });
   return out;
 }
-const placementItemCount = bucketIndex => bucketIndex%2===0 ? 2 : 3;
+// pack.placementItems (default [2,3], today's alternating count) cycles per bucket.
+const DEFAULT_PLACEMENT_ITEMS = [2, 3];
+function placementItemCount(bucketIndex, pack){
+  const items = (pack && Array.isArray(pack.placementItems) && pack.placementItems.length) ? pack.placementItems : DEFAULT_PLACEMENT_ITEMS;
+  return items[bucketIndex % items.length];
+}
 
 function placementStopIndex(res){
   for(let i=0;i<res.length;i++){

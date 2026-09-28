@@ -121,6 +121,10 @@ def check_pack(pack, rep):
             rep.err(f"pack.{f} must be a boolean")
     if "soundsHint" in pack and not (isinstance(pack["soundsHint"], str) and pack["soundsHint"]):
         rep.err("pack.soundsHint must be a non-empty string")
+    if "placementItems" in pack:
+        pi = pack["placementItems"]
+        if not (isinstance(pi, list) and pi and all(isinstance(x, int) and not is_bool(x) and x > 0 for x in pi)):
+            rep.err("pack.placementItems must be a list of positive integers (default [2, 3])")
     if "spaced" in pack and not is_bool(pack["spaced"]):
         rep.err("pack.spaced must be a boolean")
     if "compounds" in pack and not (isinstance(pack["compounds"], list) and all(is_str(c) for c in pack["compounds"])):

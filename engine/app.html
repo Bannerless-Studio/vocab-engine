@@ -2151,7 +2151,7 @@ function testRender(){
   }
   if(charN) $("tChars").onclick = () => drill(charPlan().map(planItem), testRender, missSummary);
 }
-function placementItemTotal(){ return VC.strata(WORDS, PACK.placement, SIZE).reduce((n,_,i)=>n+VC.placementItemCount(i), 0); }
+function placementItemTotal(){ return VC.strata(WORDS, PACK.placement, SIZE).reduce((n,_,i)=>n+VC.placementItemCount(i, PACK), 0); }
 function placeRender(){
   stopSpeaking();
   D = null; drillKeyHandler = null; PL = null; setScore(0,0);
@@ -2168,7 +2168,7 @@ function startPlacement(){
   D = null; drillKeyHandler = null; setScore(0,0);
   const st = VC.strata(WORDS, PACK.placement, SIZE);
   const bucketItems = [];
-  st.forEach((b,bi) => { pick(b.words, VC.placementItemCount(bi)).forEach(w=>bucketItems.push({b:bi, w})); });
+  st.forEach((b,bi) => { pick(b.words, VC.placementItemCount(bi, PACK)).forEach(w=>bucketItems.push({b:bi, w})); });
   PL = { vocab:{items:shuffle(bucketItems), i:0}, st, res: st.map(()=>({r:0,n:0})) };
   placeVocabNext();
 }
