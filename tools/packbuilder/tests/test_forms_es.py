@@ -1,8 +1,9 @@
 """Spanish alt / forms split (langs/es.py mark_alt_forms, alt_kind through
 core.words.split_alt_forms). A gender pair (perra for el perro) and the base of
-a pronominal verb (sentir for sentirse) go to `forms`; the article paradigm
-(la/los/las of el) and a noun's bare form alt[0] (perro for el perro) stay
-`alt`, because core.js packArticles and bareForm read them there. Stdlib only.
+a pronominal verb (sentir for sentirse) go to `forms`, and so does the article
+paradigm (la/los/las of el: core.js packArticles reads forms of article words);
+a noun's bare form alt[0] (perro for el perro) stays `alt`, where core.js
+bareForm reads it. Stdlib only.
 
     python3 -m pytest -q tools/packbuilder/tests/test_forms_es.py     (from vocab-engine/)
 """
@@ -45,7 +46,7 @@ class SpanishForms(unittest.TestCase):
         self.assertNotIn("alt", words[1])
         self.assertEqual(words[1]["forms"], ["sentir"])
 
-    def test_articles_bare_forms_and_spellings_stay_alt(self):
+    def test_article_paradigm_is_forms_bare_forms_and_spellings_stay_alt(self):
         words = build([
             {"w": "el", "lemma": "el", "pos": "art", "_key": ("el", "DET"), "alt": ["la", "los", "las"]},
             {"w": "el agua", "lemma": "agua", "pos": "noun", "_key": ("agua", "NOUN"), "alt": ["agua"]},
@@ -54,12 +55,12 @@ class SpanishForms(unittest.TestCase):
             {"w": "casar", "lemma": "casar", "pos": "verb", "_key": ("casarse", "VERB"),
              "_base": ("casar", "to marry"), "alt": ["casar"]},
         ], {"la": [fem_entry("feminine singular of el", "art")]})
-        self.assertEqual(words[0], {"w": "el", "lemma": "el", "pos": "art", "_key": ("el", "DET"),
-                                    "alt": ["la", "los", "las"]})
+        self.assertEqual((words[0].get("alt"), words[0]["forms"]), (None, ["la", "los", "las"]))
         self.assertEqual(words[1]["alt"], ["agua"])
         self.assertEqual(words[2]["alt"], ["foto", "fotografía"])      # a plain spelling variant stays alt
         self.assertEqual(words[3]["alt"], ["casar"])
-        self.assertFalse(any("forms" in w for w in words))
+        self.assertFalse(any("forms" in w for w in words[1:]))
+        self.assertFalse(any("bare" in w for w in words))
 
     def test_bare_form_wins_over_a_feminine_reading(self):
         # alt[0] trailing token of w is the engine's bare form even if the lexicon calls it a feminine

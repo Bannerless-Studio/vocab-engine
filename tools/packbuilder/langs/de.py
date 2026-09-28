@@ -1134,6 +1134,13 @@ class German(LanguageSpec):
         self.plural_debug.append((lem, pl, round(zs, 2), round(zp, 2), sg, pc))
         return sg >= RARE_PLURAL_MIN_SG and pc * RARE_PLURAL_SHARE < sg
 
+    def alt_kind(self, word, surface):
+        """The declensions of an article (die/das/den/dem/des of der,
+        eine/einen/... of ein) are forms: located in text (core.js
+        packArticles reads forms of pos "art" words), never typed. Every other
+        alt (a noun's bare form, ae/oe/ue/ss spellings) stays an alt."""
+        return "form" if word.get("pos") == "art" else "alt"
+
     def finalize_words(self, env, ctx, words):
         """Display case (nouns, Sie, Entschuldigung, phrases), noun gender
         with neuter from the corpus when Wiktionary gives none, the plural

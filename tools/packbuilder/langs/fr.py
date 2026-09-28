@@ -248,6 +248,14 @@ def _content_words(gloss):
 _DET_FORMS = {shown: set(alts) for shown, alts in DET_ALTS.values()}
 
 
+def _fr_pronominal_base(w, a):
+    """The base of a pronominal display (lever for se lever, asseoir for
+    s'asseoir): another verb, never a typed answer for w; it is the gap
+    label (word `bare`)."""
+    head = w["w"][: len(w["w"]) - len(a)].rstrip()
+    return w["pos"] == "verb" and head in ("se", "s'", "s\u2019")
+
+
 def _fr_inflected_alt(w, a):
     """French inflected alt sources of finalize_words: a determiner's
     paradigm (cette/ces of ce, ma/mes of mon), the object pronoun's (la/les
@@ -901,7 +909,8 @@ class French(LanguageSpec):
         a reverted pronominal gloss whose two halves agree keeps one ("to rest;
         se reposer: to rest" -> "to rest"); nouns in PLURAL_DISPLAY are shown
         in the plural (les vacances); last, marks the alts alt_kind moves to
-        `forms` (es.mark_alt_forms with _fr_inflected_alt)."""
+        `forms` (es.mark_alt_forms with _fr_inflected_alt and
+        _fr_pronominal_base)."""
         fixed = {f"{k[0]}|{k[1].lower()}" for k in self.fixed_gloss}
         for w in words:
             key = f"{w['_key'][0]}|{w['pos']}"
@@ -943,15 +952,16 @@ class French(LanguageSpec):
                 w["lemma"], w["w"] = pl, f"les {pl}"
                 w["alt"] = [pl] + [a for a in (w.get("alt") or []) if a != pl]
                 w["en"] = re.sub(r" \((m|f|m/f)\)$", "", w["en"]) + ("" if w["en"].endswith("(pl.)") else " (pl.)")
-        mark_alt_forms(self, ctx, words, extra=_fr_inflected_alt)
+        mark_alt_forms(self, ctx, words, extra=_fr_inflected_alt, bare_form=_fr_pronominal_base)
 
     def alt_kind(self, word, surface):
         """An inflected alt is a form (located in text, never typed): a gender
-        pair (amie for l'ami), the base of a pronominal display that is not
-        w's trailing token, a determiner or pronoun paradigm (cette/ces of ce,
-        la/les of le) and the singular of les vacances. Articles (la/l'/les
-        of le) and the bare form alt[0] (ami for l'ami, lever for se lever:
-        core.js bareForm labels the gap with it) stay alts (es.mark_alt_forms)."""
+        pair (amie for l'ami), the base of a pronominal display (lever for se
+        lever, with word `bare` = lever: core.js bareForm labels the gap with
+        it), a determiner, pronoun or article paradigm (cette/ces of ce, la/les
+        of le, la/l'/les of the article le) and the singular of les vacances.
+        A noun's bare form alt[0] (ami for l'ami) stays an alt
+        (es.mark_alt_forms)."""
         return "form" if surface in (word.get("_form") or ()) else "alt"
 
     def _reflexive_sense(self, base):

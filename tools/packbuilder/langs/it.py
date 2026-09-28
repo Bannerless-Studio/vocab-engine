@@ -310,8 +310,9 @@ class Italian(LanguageSpec):
     def alt_kind(self, word, surface):
         """A gender pair (amica for l'amico, unica for unico) or the base of a
         pronominal verb (lavare for lavarsi) is a form: located in text, never
-        typed. Articles (lo/la/l'/i/gli/le of il) and a noun's bare form
-        (amico for l'amico) stay alts (es.mark_alt_forms)."""
+        typed; so are the declensions of an article (lo/la/l'/i/gli/le of
+        il). A noun's bare form (amico for l'amico) stays an alt
+        (es.mark_alt_forms)."""
         return "form" if surface in (word.get("_form") or ()) else "alt"
 
     qa_closed_sets = {

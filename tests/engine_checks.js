@@ -1113,6 +1113,29 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("clitic: bare form in the sentence is still a blank ('Je me lève' -> blank lève, label lever)", (() => {
     const m = VC.gapMatch({ id:"c3", t:"Je me lève tôt.", en:"x", lv:"A1", words:["lev"] }, FB.lev, FB, F);
     return !!m && m.text === "lève" && m.article === "" && VC.gapChoices(FB.lev, m, FW, F).a === "lever"; })());
+  // Article declensions and se-verb bases in `forms` (not typed answers): packArticles reads
+  // forms of pos "art" words, and the optional `bare` field marks the gap label.
+  const FW2 = [{ id:"le", w:"le", en:"the", lv:"A1", pos:"art", forms:["la","l'","les"] },
+    { id:"lev", w:"se lever", en:"to get up", lv:"A1", pos:"verb", bare:"lever", forms:["lever","lève"] },
+    { id:"ass", w:"s'asseoir", en:"to sit down", lv:"A1", pos:"verb", bare:"asseoir", forms:["asseoir"] }, mk("gare","la gare","station"), mk("loi","la loi","law")];
+  const FB2 = {}; FW2.forEach(w => { FB2[w.id] = w; });
+  check("packArticles reads forms of pos-art words (le + forms la, l', les)", ["le","la","l'","les"].every(a => VC.packArticles(FW2).has(a)) && VC.packArticles(FW2).size === 4);
+  check("bare field: bareForm('se lever', bare lever, lever only in forms) = lever; s'asseoir -> asseoir", VC.bareForm(FB2.lev, VC.packArticles(FW2)) === "lever" && VC.bareForm(FB2.ass, VC.packArticles(FW2)) === "asseoir");
+  check("bare field: gap item for 'se lever' still labelled 'lever' ('Je me lève' -> blank lève)", (() => {
+    const m = VC.gapMatch({ id:"c3", t:"Je me lève tôt.", en:"x", lv:"A1", words:["lev"] }, FB2.lev, FB2, F);
+    return !!m && m.text === "lève" && VC.gapChoices(FB2.lev, m, FW2, F).a === "lever"; })());
+  check("bare field: 'se lever' / 's'asseoir' verbatim still no blank", VC.gapMatch({ id:"c1", t:"Il faut se lever tôt.", en:"x", lv:"A1", words:["lev"] }, FB2.lev, FB2, F) === null &&
+    VC.gapMatch({ id:"c2", t:"Tu vas s'asseoir ici.", en:"x", lv:"A1", words:["ass"] }, FB2.ass, FB2, F) === null);
+  check("article in forms: 'la ____' visible article from a forms-only article", (() => {
+    const m = VC.gapMatch({ id:"c4", t:"Je vais à la gare.", en:"x", lv:"A1", words:["gare"] }, FB2.gare, FB2, F); return !!m && m.text === "gare" && m.article === "la"; })());
+  check("bare field ignored unless a trailing token of w (falls back to alt[0] rule / w)", VC.bareForm({ w:"se lever", pos:"verb", bare:"lev", alt:["lever"] }, new Set()) === "se lever" &&
+    VC.bareForm({ w:"se lever", pos:"verb", alt:["lever"] }, new Set()) === "lever");
+  const DEF = [{ id:"der", w:"der", en:"the", lv:"A1", pos:"art", forms:["die","das","den","dem","des"] },
+    ...[["hund","der Hund"],["tisch","der Tisch"],["katze","die Katze"],["haus","das Haus"]].map(([id,w]) => ({ id, w, en:id, lv:"A1", pos:"noun", alt:[w.split(" ")[1]] }))];
+  const DB = {}; DEF.forEach(w => { DB[w.id] = w; });
+  check("de: der declensions in forms -> 'den ____' visible, citation der", (() => {
+    const m = VC.gapMatch({ id:"g2", t:"Ich sehe den Hund.", en:"x", lv:"A1", words:["hund"] }, DB.hund, DB, { tts:"de-DE", levels:[{id:"A1",label:"A1"}], spaced:true });
+    return !!m && m.article === "den" && m.text === "Hund" && VC.citationArticles(DB.katze, VC.packArticles(DEF)).join() === "die"; })());
 })();
 
 // ------------------------------------------------------------ [22] reading passages
@@ -2579,6 +2602,12 @@ async function swChecks(){
   const dup = run({ alt:["x0"], forms:["x0", "w0"] });
   check("validator: a form equal to w or an alt -> warning (both), not an error",
     dup.status === 0 && /forms entry 'x0' equals/.test(dup.stdout) && /forms entry 'w0' equals/.test(dup.stdout));
+  const bOk = run({ w:"se w0", bare:"w0", forms:["w0"] });
+  check("validator: bare a trailing token of w -> 0 errors, no bare warning", bOk.status === 0 && !/\.bare/.test(bOk.stdout));
+  const bBad = run({ bare:["w0"] }), bSame = run({ bare:"w0" }), bOff = run({ w:"se w0", bare:"zz" });
+  check("validator: bare not a string -> error; equal to w -> warning; not a trailing token -> warning",
+    bBad.status === 1 && /word a0\.bare must be a non-empty string/.test(bBad.stdout) && bSame.status === 0 && /word a0\.bare equals its w/.test(bSame.stdout) &&
+    bOff.status === 0 && /bare 'zz' is not a trailing token/.test(bOff.stdout));
   fs.rmSync(tmp, { recursive:true, force:true });
 })();
 

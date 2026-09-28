@@ -357,6 +357,17 @@ def check_words(words, levels, rep):
                 for f in w["forms"]:
                     if f.strip() in typed:
                         rep.warn(f"{where}.forms entry {f!r} equals its w or an alt (already accepted as typed)")
+        # bare: the gap label for a w that carries an article or clitic ("lever" for
+        # "se lever"), used by core.js bareForm only when it is a whole trailing token of w.
+        if "bare" in w:
+            if not is_str(w["bare"]):
+                rep.err(f"{where}.bare must be a non-empty string when present")
+            elif is_str(w.get("w")):
+                b, ww = w["bare"].strip(), w["w"].strip()
+                if b == ww:
+                    rep.warn(f"{where}.bare equals its w (redundant: w is already the gap label)")
+                elif not (ww.endswith(b) and len(ww) > len(b) and (ww[-len(b) - 1].isspace() or ww[-len(b) - 1] in "'\u2019\u02bc")):
+                    rep.warn(f"{where}.bare {w['bare']!r} is not a trailing token of w (the engine ignores it)")
     # same surface form twice in one level makes recall options ambiguous
     seen = {}
     for w in words:

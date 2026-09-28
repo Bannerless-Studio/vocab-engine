@@ -2,10 +2,11 @@
 last step of langs/fr.py finalize_words; alt_kind through
 core.words.split_alt_forms). Gender pairs (amie for l'ami), determiner and
 pronoun paradigms (cette/ces of ce, la/les of le) and the singular of a
-plural-display noun (vacance of les vacances) go to `forms`. The article
-paradigm (la/l'/les of le, une of un) and the bare form alt[0] stay `alt`:
-ami for l'ami, and lever for se lever, which core.js bareForm uses as the
-gap label. Stdlib only.
+plural-display noun (vacance of les vacances) go to `forms`, and so do the
+article paradigm (la/l'/les of le, une of un: core.js packArticles reads forms
+of article words) and the base of a pronominal display (lever for se lever),
+which the word's `bare` field keeps as the gap label (core.js bareForm). A
+noun's bare form alt[0] (ami for l'ami) stays `alt`. Stdlib only.
 
     python3 -m pytest -q tools/packbuilder/tests/test_forms_fr.py     (from vocab-engine/)
 """
@@ -18,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from packbuilder.core.words import split_alt_forms  # noqa: E402
 from packbuilder.langs import get_spec  # noqa: E402
 from packbuilder.langs.es import mark_alt_forms  # noqa: E402
-from packbuilder.langs.fr import _fr_inflected_alt  # noqa: E402
+from packbuilder.langs.fr import _fr_inflected_alt, _fr_pronominal_base  # noqa: E402
 
 
 class Lex:
@@ -28,7 +29,7 @@ class Lex:
 
 def build(words, lex_e=None):
     sp = get_spec("fr", None, load=False)
-    mark_alt_forms(sp, {"lexicon": Lex(lex_e or {})}, words, extra=_fr_inflected_alt)
+    mark_alt_forms(sp, {"lexicon": Lex(lex_e or {})}, words, extra=_fr_inflected_alt, bare_form=_fr_pronominal_base)
     split_alt_forms(sp, words)
     return words
 
@@ -49,7 +50,7 @@ class FrenchForms(unittest.TestCase):
         self.assertEqual((words[3].get("alt"), words[3]["forms"]), (None, ["la", "les"]))
         self.assertEqual((words[4]["alt"], words[4]["forms"]), (["vacances"], ["vacance"]))
 
-    def test_articles_and_bare_forms_stay_alt(self):
+    def test_articles_and_pronominal_bases_are_forms_noun_bare_stays_alt(self):
         words = build([
             {"w": "le", "lemma": "le", "pos": "art", "_key": ("le", "DET"), "alt": ["la", "l'", "les"]},
             {"w": "un", "lemma": "un", "pos": "art", "_key": ("un", "DET"), "alt": ["une"]},
@@ -59,17 +60,18 @@ class FrenchForms(unittest.TestCase):
             {"w": "le/la médecin", "lemma": "médecin", "pos": "noun", "_key": ("médecin", "NOUN"),
              "alt": ["médecin", "medecin"]},
         ])
-        self.assertEqual(words[0]["alt"], ["la", "l'", "les"])
-        self.assertEqual(words[1]["alt"], ["une"])
-        self.assertEqual(words[2]["alt"], ["lever"])
-        self.assertEqual(words[3]["alt"], ["asseoir"])
-        self.assertEqual(words[4]["alt"], ["médecin", "medecin"])     # a plain spelling variant stays alt
-        self.assertFalse(any("forms" in w for w in words))
+        self.assertEqual((words[0].get("alt"), words[0]["forms"]), (None, ["la", "l'", "les"]))
+        self.assertEqual((words[1].get("alt"), words[1]["forms"]), (None, ["une"]))
+        self.assertEqual((words[2].get("alt"), words[2]["forms"], words[2]["bare"]), (None, ["lever"], "lever"))
+        self.assertEqual((words[3].get("alt"), words[3]["forms"], words[3]["bare"]), (None, ["asseoir"], "asseoir"))
+        self.assertEqual(words[4]["alt"], ["médecin", "medecin"])     # a noun's bare form and a spelling stay alt
+        self.assertNotIn("forms", words[4])
+        self.assertFalse(any("bare" in w for w in (words[0], words[1], words[4])))
 
     def test_finalize_words_ends_with_the_mark(self):
         src = (Path(__file__).resolve().parents[1] / "langs" / "fr.py").read_text()
         body = src.split("    def finalize_words(self, env, ctx, words):", 1)[1].split("\n    def ", 1)[0]
-        self.assertTrue(body.rstrip().endswith("mark_alt_forms(self, ctx, words, extra=_fr_inflected_alt)"))
+        self.assertTrue(body.rstrip().endswith("mark_alt_forms(self, ctx, words, extra=_fr_inflected_alt, bare_form=_fr_pronominal_base)"))
 
 
 if __name__ == "__main__":

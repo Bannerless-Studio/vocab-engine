@@ -467,8 +467,9 @@ function blankSentence(sentence, match){
 }
 // Surface key that also folds apostrophe variants (l’anno = l'anno).
 const surfKey = s => normKey(s).replace(/[\u2019\u02bc]/g, "'");
-// The pack's articles: w and every alt of each pos "art" word (le/la/l'/les, el/la/los,
-// il/lo/l'/gli, un/une...), surf-keyed. Built from the word list (array or id map) and
+// The pack's articles: w, every alt and every `forms` entry of each pos "art" word
+// (le/la/l'/les, el/la/los, il/lo/l'/gli, un/une, German der/den/dem/des as forms of der),
+// surf-keyed. Built from the word list (array or id map) and
 // cached per list object. Empty for packs without articles (zh), which disables every
 // article rule below.
 const ART_CACHE = new WeakMap();
@@ -478,7 +479,7 @@ function packArticles(words){
   if(!set){
     set = new Set();
     (Array.isArray(words) ? words : Object.values(words)).forEach(v => {
-      if(v && v.pos === "art") [v.w, ...(v.alt||[])].forEach(a => { if(a) set.add(surfKey(a)); });
+      if(v && v.pos === "art") textForms(v).forEach(a => { if(a) set.add(surfKey(a)); });
     });
     ART_CACHE.set(words, set);
   }
@@ -487,9 +488,9 @@ function packArticles(words){
 // Length of a leading article in `text`: a pack article (or an a/b pair of them, as in
 // "le/la médecin") followed by whitespace, or an elided article ending in an apostrophe
 // ("l'église", "un'amica"). 0 when there is none, when the rest is itself an article
-// ("l'un"), or, given `entry`, unless the word is a noun or its alt[0] is the rest: fixed
-// expressions that start with an article-like word ("un peu", "les uns les autres",
-// "tout le monde") are never cut.
+// ("l'un"), or, given `entry`, unless the word is a noun or its marked bare form
+// (markedBare) is the rest: fixed expressions that start with an article-like word
+// ("un peu", "les uns les autres", "tout le monde") are never cut.
 const NOUN_POS = /^(noun|n|propn)$/i;
 function articleCut(text, arts, entry){
   if(!arts || !arts.size) return 0;
@@ -499,7 +500,7 @@ function articleCut(text, arts, entry){
   const rest = t.slice(m[0].length);
   if(arts.has(surfKey(rest))) return 0;
   if(entry){
-    const a0 = entry.alt && entry.alt[0];
+    const a0 = markedBare(entry);
     if(!NOUN_POS.test(entry.pos || "") && !(a0 && surfKey(a0) === surfKey(rest))) return 0;
   }
   return m[0].length;
@@ -512,14 +513,22 @@ function trailingCut(text, tail){
   const cut = t.length - b.length, sep = t[cut - 1] || "";
   return (surfKey(t.slice(cut)) === surfKey(b) && (/\s/.test(sep) || isApos(sep))) ? cut : 0;
 }
-// A word's bare form (what gap options show). Pack convention: when `w` carries an
-// article or clitic ("il gioco", "l'anno", "le/la médecin", "se lever"), alt[0] is the
-// bare lemma. alt[0] counts as the bare form only when it is a whole trailing token of
-// `w` (trailingCut), so alts that are other forms (il -> lo, bello -> bella) or longer
-// elided forms (acqua -> l'acqua) never replace `w`. Otherwise, given the pack's
+// The bare lemma a word marks for itself: the optional `bare` field ("lever" for
+// "se lever", set by the builder when the bare form is not a typed answer and so lives in
+// `forms`), else the pack convention alt[0]. docs/PACK_SCHEMA.md words `bare`.
+function markedBare(e){
+  if(!e) return undefined;
+  if(typeof e.bare === "string" && e.bare) return e.bare;
+  return e.alt && e.alt[0];
+}
+// A word's bare form (what gap options show). When `w` carries an article or clitic
+// ("il gioco", "l'anno", "le/la médecin", "se lever"), the marked bare form (markedBare:
+// `bare`, else alt[0]) is the bare lemma. It counts only when it is a whole trailing
+// token of `w` (trailingCut), so alts that are other forms (il -> lo, bello -> bella) or
+// longer elided forms (acqua -> l'acqua) never replace `w`. Otherwise, given the pack's
 // articles (packArticles), a leading article is stripped from `w` (articleCut); else `w`.
 function bareForm(e, arts){
-  const w = String((e && e.w) || ""), a0 = e && e.alt && e.alt[0];
+  const w = String((e && e.w) || ""), a0 = markedBare(e);
   if(a0 && trailingCut(w, a0)) return String(a0);
   const k = articleCut(w, arts, e);
   return k ? w.slice(k) : w;
