@@ -12,4 +12,4 @@ Build-time helpers for packs and sites. Language repos call them as `engine/tool
 | tts_probe.html | Dev-only, self-contained, no-network TTS probe for the script primer (docs/SCRIPT_PRIMER.md §5, brief S0): ear-check which browser voices can say the primer units. |
 | packbuilder/ | Shared corpus-based pack builder for language repos. See its README.md; hook reference in docs/PACKBUILDER_HOOKS.md. |
 
-Language repos add their own `tools/` (build_pack.py shim, gloss_overrides.json, forced_a1.txt, id_map_v1.json, passages_src.json, REPORT.md); the contract is in packbuilder/README.md "Language repo contract".
+Language repos add their own `tools/` (build_pack.py shim, gloss_overrides.json, forced_a1.txt, bad_sentences.txt, id_map_v1.json, passages_src.json, REPORT.md); the contract is in packbuilder/README.md "Language repo contract".

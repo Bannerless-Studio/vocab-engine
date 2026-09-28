@@ -57,6 +57,7 @@ tools/build_pack.py        shim: PYTHONPATH=engine/tools python3 -m packbuilder 
 tools/gloss_overrides.json hand gloss fixes, "lemma|pos": "gloss" (keys starting with _ are comments)
 tools/gloss_display.json   optional display-only glosses, same key format (see below)
 tools/forced_a1.txt        A1 core list: [NOUN] / [VERB] / [ADJ] / [ADV] headers, then lemmas
+tools/bad_sentences.txt    optional: hand-reviewed sentences to drop verbatim, one per line, "#..." comments
 tools/id_map_v1.json       frozen "lemma|pos" -> word id (keeps learner progress across rebuilds)
 tools/REPORT.md            generated; text between <!-- manual:begin/end --> is kept
 build.sh check.sh README.md TODO.md
@@ -152,7 +153,7 @@ pip install https://github.com/explosion/spacy-models/releases/download/es_core_
    - Override `pronominal_base`/`pronominal_form` (it: -rsi; es: -rse; fr: se + verb, usually `None`), and override `is_reflexive`/`carries_refl_clitic`/`stative_aux` to match the language.
    - Override `is_marked_past` only for a literary tense that should be kept to the top level (it: passato remoto). Spanish preterite is everyday and must not be marked.
    - Tables left empty switch their rule off.
-7. **Add hand tables only after a QA round shows a need.** These are `gloss_overrides.json`, `drop_keys`, `apocope`, `multiword`, `profanity` and `bad_text_re`. Fix categories with a rule first; a hand table is for residuals.
+7. **Add hand tables only after a QA round shows a need.** These are `gloss_overrides.json`, `drop_keys`, `apocope`, `multiword`, `profanity`, `bad_text_re` and `tools/bad_sentences.txt`. Fix categories with a rule first; a hand table is for residuals.
 8. **Run and check.** Run `build`, then `check`, then `python3 engine/tools/validate_pack.py pack`, then `./build.sh`. Run the unit tests. The every-language test checks the new module's required fields.
 9. **Do three QA rounds.** Each round runs `scan` and reads every "should be empty" list. It then runs `sample` with a new seed and hand-checks the samples. Rounds so far used seeds 7, 303 and 404. Fix the rule behind each finding, rebuild, and record the rules, counts and seeds in the manual section of `tools/REPORT.md`. The pack ships when all of these hold:
    - at least 95% correct primary sense on the 60-word stratified sample,

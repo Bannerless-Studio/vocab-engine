@@ -307,6 +307,9 @@ def build_sentences(env, ctx, words, top3000):
         if sp.bad_text_re is not None and sp.bad_text_re.search(text):
             st["ungrammatical_italian"] += 1
             continue
+        if sp.bad_sentences and sp.bad_sentence_norm(text) in sp.bad_sentences:
+            st["listed_bad_sentence"] += 1
+            continue
         if EN_REGISTER_RE.search(rows[sid][3]):
             st["non_standard_english_register"] += 1
             continue

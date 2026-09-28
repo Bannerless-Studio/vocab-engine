@@ -190,11 +190,13 @@ class LanguageSpec:
     profanity = set()
     profane_stems = ()
     bad_text_re = None          # target-language sentences to skip (known errors)
+    bad_sentences = frozenset()   # bad_sentence_norm(sentence) -> drop it; loaded from bad_sentences_file
 
     # repo-relative
     gloss_overrides_file = "tools/gloss_overrides.json"
     gloss_display_file = "tools/gloss_display.json"   # display-only en per "lemma|pos", applied to words.json after linking (core/words.apply_gloss_display)
     forced_a1_file = "tools/forced_a1.txt"
+    bad_sentences_file = "tools/bad_sentences.txt"   # optional hand-reviewed drop list, one sentence per line
     id_map_file = "tools/id_map_v1.json"
     report_file = "tools/REPORT.md"
 
@@ -227,7 +229,22 @@ class LanguageSpec:
                 self.forced_level = {**type(self).forced_level, **self.a1_core.levels}
         self.forced = list(self.forced_closed) + [(w, g) for g, ws in self.a1_core.items() for w in ws]
         self.forced = list(dict.fromkeys(self.forced))   # a word listed twice must not become two words
+        listed = set()
+        p = self.repo / self.bad_sentences_file
+        if p.exists():
+            for line in p.read_text(encoding="utf-8").splitlines():
+                line = line.split("#", 1)[0].strip()
+                if line:
+                    listed.add(self.bad_sentence_norm(line))
+        self.bad_sentences = listed
         return self
+
+    def bad_sentence_norm(self, s):
+        """Match key for bad_sentences_file lines and shipped sentence text
+        (core/sentences.py): whitespace only by default. A language whose
+        sentence text needs its own repair pass before comparison overrides
+        this (ur: text_norm, its spelling-slip fixes)."""
+        return " ".join(s.split())
 
     @property
     def n_words(self):

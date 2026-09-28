@@ -885,18 +885,18 @@ class _PolicyDrop:
 
 
 class _TextDrop:
-    """spec.bad_text_re for ur: profanity, TEXT_DROP_RE, and the hand-reviewed
-    drop list tools/bad_sentences.txt (one sentence per line, as text_norm
-    prints it; # comments). Matched on text_norm(text). Only .search is used."""
+    """spec.bad_text_re for ur: profanity and TEXT_DROP_RE, matched on
+    text_norm(text). The hand-reviewed drop list tools/bad_sentences.txt
+    (one sentence per line, as text_norm prints it; # comments) is the
+    generic LanguageSpec.bad_sentences gate (core/sentences.py), which for
+    ur matches via Urdu.bad_sentence_norm = text_norm. Only .search is used."""
 
-    def __init__(self, base, listed):
-        self.base, self.listed = base, listed
+    def __init__(self, base):
+        self.base = base
         self.pattern = base.pattern
 
     def search(self, s, *a):
         t = text_norm(s)
-        if t in self.listed:
-            return True
         return self.base.search(t) or TEXT_DROP_RE.search(t)
 
 
@@ -1088,18 +1088,12 @@ class Urdu(LanguageSpec):
                           "particles, ہونا/سکنا, six light verbs, A1 core list")
     numeral_exclusion = "numeral outside 0-20/tens/100/1000/lakh/crore/ordinals 1-3/fractions"
 
+    bad_sentence_norm = staticmethod(text_norm)
+
     def __init__(self, repo=None):
         super().__init__(repo)
         self.drop_all_levels = _PolicyDrop(type(self).drop_all_levels, self.RELIGIOUS_RE, PK_RE, IN_RE)
-        listed = set()
-        f = self.repo / "tools" / "bad_sentences.txt" if self.repo else None
-        if f is not None and f.exists():
-            for line in f.read_text(encoding="utf-8").splitlines():
-                line = line.split("#", 1)[0].strip()
-                if line:
-                    listed.add(text_norm(line))
-        self.bad_text_list = listed
-        self.bad_text_re = _TextDrop(type(self).bad_text_re, listed)
+        self.bad_text_re = _TextDrop(type(self).bad_text_re)
 
     def load(self):
         """Forced words in canonical folded spelling (پاؤں -> پاوں; a dictionary spelling
