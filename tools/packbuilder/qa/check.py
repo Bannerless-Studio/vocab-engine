@@ -38,6 +38,22 @@ def drop_all_violation(spec, s, examples):
     return bool(spec.drop_all_levels.search(s.get("t", "")) or spec.drop_all_levels.search(s.get("en", "")))
 
 
+def bad_sentences_dead(spec):
+    """tools/bad_sentences.txt entries (spec.bad_sentences) matched by no row
+    of the cached corpus (a typo, or text the build's own repairs already
+    changed): a WARN, since `check` has no other way to catch a listed
+    sentence that silently drops nothing. Needs the corpus cache a build
+    already wrote (.cache/derived/corpus_*.json.gz); [] when it is missing,
+    since that is a repo `check` was not asked to build."""
+    from ..core.sources import corpus_path, stage_corpus
+    from ..core.util import Env
+    env = Env(spec)
+    if not corpus_path(env).exists():
+        return []
+    seen = {spec.bad_sentence_norm(r[1]) for r in stage_corpus(env)["rows"]}
+    return sorted(spec.bad_sentences - seen)
+
+
 def word_ceiling_violation(spec, w):
     """A word below the top level whose gloss matches spec.word_ceiling_re."""
     rx = getattr(spec, "word_ceiling_re", None)
@@ -132,6 +148,12 @@ def check(spec):
         fail(f"only {pct_ge1:.1f}% of words have >=1 sentence (need >={MIN_COVERAGE_1}%)")
     if pct_ge2 < MIN_COVERAGE_2:
         warn(f"only {pct_ge2:.1f}% of words have >=2 sentences (target >={MIN_COVERAGE_2}%)")
+
+    if spec.bad_sentences:
+        dead = bad_sentences_dead(spec)
+        if dead:
+            warn(f"tools/bad_sentences.txt: {len(dead)} entries match no corpus row: "
+                 f"{', '.join(repr(t) for t in dead[:5])}")
 
     print("=== check_pack summary ===")
     print(f"words: {len(words)} total; levels: {dict(lv_counts)}")

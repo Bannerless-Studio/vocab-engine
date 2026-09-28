@@ -112,6 +112,9 @@ def write_report(env, ctx):
     a(f"- Word coverage: 0 = {st['coverage_0']}, 1 = {st['coverage_1']}, 2 = {st['coverage_2']}.")
     if st["zero_sentence_words"]:
         a(f"- Words with no sentence: {', '.join(st['zero_sentence_words'])}.")
+    if st.get("bad_sentences_dead_count"):
+        a(f"- `tools/bad_sentences.txt`: {st['bad_sentences_dead_count']} entries matched no corpus row: "
+          + ", ".join(repr(t) for t in st["bad_sentences_dead"]) + ".")
     a(f"- Candidate sentences (terminal punctuation, 3-{sp.max_len} tokens, content lemmas in pack/top-3000, "
       f">=1 link): {st['candidates']:,}. Rejected for a content lemma outside pack/top-3000: "
       f"{st.get('content_lemma_outside_pack_top3000', 0):,}.")

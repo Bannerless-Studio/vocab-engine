@@ -6,7 +6,7 @@ from itertools import chain
 
 from .lexicon import CONTENT_GROUPS, SKIP_UPOS
 from .tag import iter_tagged
-from .util import stat
+from .util import log, stat
 
 SENT_END_RE = re.compile(r"[.!?…؟][\"'»”)]*$")     # ؟ Arabic-script question mark (fa)
 PRONOMINAL_LINKED_SHARE = 0.6   # -rsi label needs this share of its linked sentences reflexive
@@ -253,6 +253,22 @@ def dropped_everywhere(sp, sid, text, en, example_rows):
     return bool(sp.drop_all_levels.search(text) or sp.drop_all_levels.search(en))
 
 
+def bad_sentence_dropped(sp, text, matched=None):
+    """spec.bad_sentences (tools/bad_sentences.txt, LanguageSpec.load): a
+    listed sentence is dropped before it can become a candidate. `matched`,
+    when given, gets the listed entry seen (the dead-entry report in
+    build_sentences and qa/check.py: an entry never seen here is a typo or
+    text the build's own repairs already changed)."""
+    if not sp.bad_sentences:
+        return False
+    key = sp.bad_sentence_norm(text)
+    if key not in sp.bad_sentences:
+        return False
+    if matched is not None:
+        matched.add(key)
+    return True
+
+
 def build_sentences(env, ctx, words, top3000):
     sp = env.spec
     lv_ord = {b: i for i, b in enumerate(sp.level_ids)}
@@ -297,6 +313,7 @@ def build_sentences(env, ctx, words, top3000):
     link_where = {}    # sid -> (token surfaces, sentence_links where records); spec.emit_ruby only
     spec_dropped = {}  # sid -> links before fix_links (spec.fix_links_floor only)
     merge_sids = defaultdict(set)  # wid -> sids linked to it through a drop_keys merge (spec.merge_sense_examples only)
+    bad_sentences_matched = set()   # bad_sentences.txt entries seen among corpus rows (dead-entry report below)
     for sid, toks in chain(iter_tagged(ctx["tagged"]), ctx.get("example_tagged", ())):
         text = rows[sid][1]
         if sp.untranslated_rows and not rows[sid][3]:
@@ -307,7 +324,7 @@ def build_sentences(env, ctx, words, top3000):
         if sp.bad_text_re is not None and sp.bad_text_re.search(text):
             st["ungrammatical_italian"] += 1
             continue
-        if sp.bad_sentences and sp.bad_sentence_norm(text) in sp.bad_sentences:
+        if bad_sentence_dropped(sp, text, bad_sentences_matched):
             st["listed_bad_sentence"] += 1
             continue
         if EN_REGISTER_RE.search(rows[sid][3]):
@@ -524,6 +541,12 @@ def build_sentences(env, ctx, words, top3000):
         "zero_sentence_words": [w["w"] for w in words if not chosen.get(w["id"])],
         "rsi_reverted_to_base": st_rev,
     })
+    if sp.bad_sentences:
+        dead = sorted(sp.bad_sentences - bad_sentences_matched)
+        st["bad_sentences_dead"] = dead[:5]
+        st["bad_sentences_dead_count"] = len(dead)
+        if dead:
+            log(f"tools/bad_sentences.txt: {len(dead)} entries matched no corpus row: {dead[:5]}")
     stat("sentences", dict(st))
     ctx["example_rows_shipped"] = n_examples
     return sentences, sorted(users), primary

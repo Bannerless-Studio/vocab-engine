@@ -233,18 +233,23 @@ class LanguageSpec:
         p = self.repo / self.bad_sentences_file
         if p.exists():
             for line in p.read_text(encoding="utf-8").splitlines():
-                line = line.split("#", 1)[0].strip()
-                if line:
-                    listed.add(self.bad_sentence_norm(line))
+                if not line.strip():
+                    continue
+                text = line.split("#", 1)[0].strip()   # "#" starts a comment, own line or trailing
+                if not text:
+                    continue
+                listed.add(self.bad_sentence_norm(text))
         self.bad_sentences = listed
         return self
 
     def bad_sentence_norm(self, s):
         """Match key for bad_sentences_file lines and shipped sentence text
-        (core/sentences.py): whitespace only by default. A language whose
-        sentence text needs its own repair pass before comparison overrides
-        this (ur: text_norm, its spelling-slip fixes)."""
-        return " ".join(s.split())
+        (core/sentences.py): clean_sentence_text (the same repair a spec
+        applies before a sentence ships, e.g. ar/ru/it/hi letter rewrites)
+        plus whitespace collapse, so a line copied from the pack matches.
+        A language whose match needs a different repair overrides this
+        (ur: text_norm, its own spelling-slip fixes, run before ship too)."""
+        return " ".join(self.clean_sentence_text(s).split())
 
     @property
     def n_words(self):

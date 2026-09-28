@@ -1,14 +1,18 @@
 """tools/bad_sentences.txt (docs/PACKBUILDER_HOOKS.md): an optional,
 repo-relative, hand-reviewed drop list every LanguageSpec can have
-(LanguageSpec.load, base.py), one sentence per line, blank lines and
-"#..." comments ignored, matched after LanguageSpec.bad_sentence_norm
-(whitespace collapse by default; ur overrides it with its own text_norm,
-so its spelling-slip repairs still apply the same way they did before
-this was pulled out of langs/ur.py's private _TextDrop). The gate itself
-(core/sentences.py build_sentences) is exercised end to end by ur's real
-../urdu rebuild (its tools/bad_sentences.txt has 187 real rows); this
-file covers the loading contract and the drop predicate in isolation.
-Stdlib only.
+(LanguageSpec.load, base.py), one sentence per line, blank lines ignored
+and "#" starting a comment (own line, or trailing after the sentence text
+-- ur's real file uses "<sentence> # <english gloss>" on 180 of its 181
+entries), matched after LanguageSpec.bad_sentence_norm
+(clean_sentence_text plus whitespace collapse by default; ur overrides
+it with its own text_norm, so its spelling-slip repairs still apply the
+same way they did before this was pulled out of langs/ur.py's private
+_TextDrop). The gate itself is core.sentences.bad_sentence_dropped,
+called from build_sentences (core/sentences.py:310) exactly as
+dropped_everywhere is for drop_all_levels; this file drives that real
+function, not a reimplementation of its predicate, and is exercised end
+to end by ur's real ../urdu rebuild (its tools/bad_sentences.txt has 181
+real entries, 187 lines including blanks/comments). Stdlib only.
 
     python3 -m pytest -q tools/packbuilder/tests/test_bad_sentences.py     (from vocab-engine/)
 """
@@ -19,6 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from packbuilder.core.sentences import bad_sentence_dropped  # noqa: E402
 from packbuilder.langs import get_spec  # noqa: E402
 
 
@@ -31,13 +36,12 @@ def repo_with(text):
 
 
 def drops(sp, text):
-    """The exact predicate core/sentences.py's build_sentences applies."""
-    return bool(sp.bad_sentences) and sp.bad_sentence_norm(text) in sp.bad_sentences
+    return bad_sentence_dropped(sp, text)
 
 
 class Loading(unittest.TestCase):
     def test_blank_lines_and_comments_ignored(self):
-        repo = repo_with("Tom hit Mary.\n\n# a policy note\n   \nJohn ate the cat.  # trailing comment\n")
+        repo = repo_with("Tom hit Mary.\n\n# a policy note\n   \n  # indented comment\nJohn ate the cat.\n")
         sp = get_spec("it", repo)
         self.assertEqual(sp.bad_sentences, {"Tom hit Mary.", "John ate the cat."})
 
@@ -53,6 +57,16 @@ class Loading(unittest.TestCase):
         self.assertEqual(sp.bad_sentences, set())
         self.assertFalse(drops(sp, "Anything at all."))
 
+    def test_trailing_comment_after_a_sentence_is_stripped(self):
+        """ur's real tools/bad_sentences.txt: "<sentence> # <english gloss>"
+        on 180 of its 181 entries; "#" starts a comment anywhere on the line,
+        matching the file's own header ('"#" starts a comment') and keeping
+        the ur rebuild byte-identical (a literal "#" inside sentence text is
+        not something either corpus uses, so this trade-off is accepted)."""
+        repo = repo_with("Il gatto mangia il pesce. # The cat eats the fish.\n# a real comment\n")
+        sp = get_spec("it", repo)
+        self.assertEqual(sp.bad_sentences, {"Il gatto mangia il pesce."})
+
     def test_no_repo_is_unaffected(self):
         sp = get_spec("it", None, load=False)
         self.assertEqual(sp.bad_sentences, set())
@@ -67,13 +81,34 @@ class DropPredicate(unittest.TestCase):
         self.assertFalse(drops(sp, "Il cane mangia il pesce."))
 
     def test_row_disappears_from_a_small_sentence_set(self):
-        """Simulates the build_sentences gate over a tiny row set: the listed
-        row is the only one filtered out."""
+        """bad_sentence_dropped over a tiny row set, same call build_sentences
+        makes per row: the listed row is the only one filtered out."""
         repo = repo_with("Bad one.\n")
         sp = get_spec("it", repo)
         rows = {1: "Good one.", 2: "Bad one.", 3: "Also good."}
-        kept = {sid: t for sid, t in rows.items() if not drops(sp, t)}
+        kept = {sid: t for sid, t in rows.items() if not bad_sentence_dropped(sp, t)}
         self.assertEqual(kept, {1: "Good one.", 3: "Also good."})
+
+    def test_matched_set_tracks_which_entries_fired(self):
+        """build_sentences' dead-entry report: an entry that dropped a row is
+        recorded; one that never matched anything is not."""
+        repo = repo_with("Bad one.\nNever seen.\n")
+        sp = get_spec("it", repo)
+        matched = set()
+        for t in ("Good one.", "Bad one.", "Also good."):
+            bad_sentence_dropped(sp, t, matched)
+        self.assertEqual(matched, {"Bad one."})
+        self.assertEqual(sp.bad_sentences - matched, {"Never seen."})
+
+    def test_clean_sentence_text_applies_before_matching(self):
+        """base.py MAJOR fix: the default key runs clean_sentence_text (the
+        same repair a spec applies before a sentence ships) before collapsing
+        whitespace, so a line copied from the shipped pack matches the raw
+        corpus text it came from. it strips a space before ?!."""
+        repo = repo_with("Che dici ?\n")
+        sp = get_spec("it", repo)
+        self.assertIn("Che dici?", sp.bad_sentences)   # stored key already cleaned
+        self.assertTrue(bad_sentence_dropped(sp, "Che dici ?"))    # raw corpus text, uncleaned
 
 
 class UrduOverride(unittest.TestCase):
