@@ -1647,6 +1647,50 @@ return {
       gt.kind === "type" && tMiss === "type" && keptType && !("k" in pr4.w[bid]) && pr4.w[bid].r === 4 && pr4.w[bid].w === 1);
   }catch(e){ check(`missed-kind item scenario does not throw (got: ${e.message})`, false); }
 
+  // A missed typed item comes back until typed right; from its second miss in the drill it
+  // comes back as its choice counterpart (word -> recall, typed gap -> choice gap), which
+  // keeps k at "type" (a pass there leaves it, a miss records type).
+  try{
+    const typPack = Object.assign({}, PACK, { typing:{ caseSensitive:false, accents:"lenient", strictFromLevel:null } });
+    const b = await bootApp([{ lang:"zh-CN", name:"x" }], { pack: typPack }); const pr = b.api.getProg(), el = id => b.document.getElementById(id);
+    const w = WORDS[60]; pr.w[w.id] = { r:2, w:0, s:2 };
+    const typeOnce = v => { el("tin").value = v; el("submit").click(); };
+    const label = () => (el("panel").innerHTML.match(/<p class="q">([^<]*)<\/p>/) || [])[1];
+    b.api.setQueueAndNext([b.api.itemFromPlan({ kind:"type", word: w }, 0, [])], () => {});
+    check("setup: a typed word item", label() === "Type the word");
+    typeOnce("zzz"); const k1 = pr.w[w.id].k; el("nx").click();
+    check("first miss: requeued as the same typed item, k=type", label() === "Type the word" && k1 === "type");
+    typeOnce("zzz"); el("nx").click();
+    const opts = el("o") ? el("o").children : [];
+    check("second miss: comes back as a recall item (answer among the options), k still type", label() === "Which word is this?" && opts.some(o => o.dataset.v === w.id) && pr.w[w.id].k === "type" && pr.w[w.id].w === 2);
+    opts.find(o => o.dataset.v !== w.id).click();
+    check("a miss on the recall fallback records k=type (not recall)", pr.w[w.id].k === "type" && pr.w[w.id].w === 3);
+    el("nx").click();
+    check("missed recall fallback: requeued as recall", label() === "Which word is this?");
+    el("o").children.find(o => o.dataset.v === w.id).click();
+    check("a pass on the recall fallback keeps k=type (production still owed)", pr.w[w.id].k === "type" && pr.w[w.id].r === 3);
+    el("nx").click();
+    check("drill ends after the pass (1 right of 4 answers)", /<h2>1 \/ 4<\/h2>/.test(el("panel").innerHTML));
+    // A pass on the first retry never reaches the fallback.
+    const w2 = WORDS[61]; pr.w[w2.id] = { r:2, w:0, s:2 };
+    b.api.setQueueAndNext([b.api.itemFromPlan({ kind:"type", word: w2 }, 0, [])], () => {});
+    typeOnce("zzz"); el("nx").click(); typeOnce(w2.w); el("nx").click();
+    check("miss then typed right: done, k cleared", /<h2>1 \/ 2<\/h2>/.test(el("panel").innerHTML) && !("k" in pr.w[w2.id]));
+    // Typed gap -> choice gap on the second miss, same blank.
+    const WB = Object.fromEntries(WORDS.map(x => [x.id, x]));
+    const one = SENTENCES.find(x => VC.gapCandidateIndices(x, WB, typPack).length === 1);
+    const bid = one.words[VC.gapCandidateIndices(one, WB, typPack)[0]]; pr.w[bid] = { r:4, w:1, s:2 };
+    const gt = b.api.gapSentence(one, true);
+    b.api.setQueueAndNext([gt], () => {});
+    const gapHtml = (el("panel").innerHTML.match(/<div class="med wd"[^>]*>[\s\S]*?<\/div>/) || [])[0];
+    typeOnce("zzz"); el("nx").click(); typeOnce("zzz"); el("nx").click();
+    const gOpts = el("o") ? el("o").children : [];
+    const gapHtml2 = (el("panel").innerHTML.match(/<div class="med wd"[^>]*>[\s\S]*?<\/div>/) || [])[0];
+    check("typed gap, second miss: the choice gap on the same blank, k=type", label() === "What&#39;s the missing word?" && !!gapHtml && gapHtml2 === gapHtml && gOpts.length >= 2 && pr.w[bid].k === "type");
+    gOpts.find(o => o.dataset.v === gt.choiceFallback().a).click();
+    check("a pass on the choice gap keeps k=type; the sentence record counts it", pr.w[bid].k === "type" && pr.s[one.id].r >= 1 && pr.w[bid].r === 4);
+  }catch(e){ check(`typed requeue scenario does not throw (got: ${e.stack})`, false); }
+
   try{
     const { api, document } = await bootApp([{ lang:"en-US", name:"x" }]); // hasSpeech=false
     const plainRead = api.readItem(WORDS[9]);

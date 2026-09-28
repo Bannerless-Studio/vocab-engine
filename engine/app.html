@@ -888,6 +888,14 @@ function renderMcItem(it){
     else if(e.key === "Escape"){ quitDrill(); }
   };
 }
+// A missed typed item comes back until typed right; from its second miss in this drill it
+// comes back as its choice counterpart (it.choiceFallback: word -> recall, typed gap ->
+// choice gap, symType -> symSound), where the answer is among the options. The fallback
+// keeps the word's k at "type" (typedFallbackMark), so the next review still asks for it typed.
+function typedRequeue(it){
+  it.typedMisses = (it.typedMisses || 0) + 1;
+  return it.typedMisses >= 2 && it.choiceFallback ? it.choiceFallback() : it;
+}
 function renderTypeItem(it){
   const P = $("panel");
   P.innerHTML = `<div class="drill-body"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}
@@ -900,7 +908,7 @@ function renderTypeItem(it){
     if(answered) return; if(!input.value.trim()) return;
     answered = true; input.disabled = true; $("submit").style.display = "none";
     const ok = it.check(input.value);
-    D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(it); }
+    D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(typedRequeue(it)); }
     if(it.onAnswer) it.onAnswer(ok);
     showReveal(revealHTML(it, (ok ? "" : `<div class="diff">you typed: ${escapeHtml(input.value)}</div>`) + (it.feedback ? it.feedback(input.value) : "") + (it.reveal||"")));
     playReveal(it);
@@ -1186,7 +1194,15 @@ function typeItem(entry){
   return { kind:"type", key:"w:"+entry.id, label:"Type the word",
     html: `<div class="med" style="text-align:center">${ui(VC.gloss(entry))}</div>`,
     check: val => VC.acceptTyped(val, entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
-    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
+    choiceFallback: () => typedRecallFallback(entry) };
+}
+// The recall item a twice-missed typed word item comes back as (typedRequeue). A miss is
+// recorded as a type miss and a pass leaves k alone: seeing the answer among the options
+// does not show the word can be produced.
+const typedFallbackKind = ok => ok ? "recall" : "type";
+function typedRecallFallback(entry){
+  return Object.assign(recallItem(entry), { onAnswer(ok){ markWord(entry.id, ok, typedFallbackKind(ok)); } });
 }
 // pack.typing "pron": the word's production slot (kindMix "type", the slot recall also
 // fills) is one of two typed items, alternating in plan order (VC.typeSlotKind), each
@@ -1213,7 +1229,8 @@ function pronTypeItem(entry){
     placeholder: TONES ? `${PRON_NOUN}, tones optional…` : `${PRON_NOUN}…`, inputTA: LATIN_PRON.test(entry.pron) ? ' lang="en"' : undefined,
     check: val => VC.checkPronTyped(val, entry.pron, PACK) !== "wrong",
     feedback: val => { const v = VC.checkPronTyped(val, entry.pron, PACK); return v === "tones" || v === "tonesDiff" ? `<div class="diff">tones: <span class="tpron">${readingHTML(entry.pron)}</span></div>` : ""; },
-    reveal: revealBlock(entry), onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    reveal: revealBlock(entry), onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
+    choiceFallback: () => typedRecallFallback(entry) };
 }
 function writtenTypeItem(entry){
   const hear = canHearWord(entry);
@@ -1227,7 +1244,8 @@ function writtenTypeItem(entry){
     placeholder: "characters…",
     mount: () => { if(hear){ const b = $("rp2"); sayWord(entry, b); b.onclick = () => sayWord(entry, b); } },
     check: val => VC.acceptTyped(foldTyped(val), entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
-    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
+    choiceFallback: () => typedRecallFallback(entry) };
 }
 // The characters item only for a word whose written form is on display (dispWord: under
 // pronFirst, a word below its character tier shows its reading only, so its characters
@@ -1303,13 +1321,15 @@ function gapSentence(s, typed){
   const gapKind = typed && TYPING ? "type" : "recall";
   const base = { key:"s:"+s.id, reveal: sentenceRevealBlock(s), onAnswer: ok=>{ markSentence(s.id, ok); markGapWord(entry.id, ok, gapKind); },
     onReveal: b => saySentence(s, b), revealHear: canHearSentence(s) };
+  const choice = () => { const gc = VC.gapChoices(entry, match, WORDS, PACK);
+    return { kind:"mc", label:"What's the missing word?", optsClass:"opts-hero opts-w", html, opts: gc.opts, a: gc.a, optHtml: wordOptHtml(gc.byLabel), optsT: true }; };
   if(typed && TYPING){
+    // Same blank, same word: the choice gap after a second miss (typedRequeue).
     return Object.assign(base, { kind:"type", label:"Type the missing word", html,
-      check: val => VC.acceptTyped(val, entry, PACK, [match.text], WORDS) });
+      check: val => VC.acceptTyped(val, entry, PACK, [match.text], WORDS),
+      choiceFallback: () => Object.assign({}, base, choice(), { onAnswer: ok => { markSentence(s.id, ok); markGapWord(entry.id, ok, typedFallbackKind(ok)); } }) });
   }
-  const gc = VC.gapChoices(entry, match, WORDS, PACK);
-  return Object.assign(base, { kind:"mc", label:"What's the missing word?", optsClass:"opts-hero opts-w", html,
-    opts: gc.opts, a: gc.a, optHtml: wordOptHtml(gc.byLabel), optsT: true });
+  return Object.assign(base, choice());
 }
 function sentenceItemFor(s){
   const k = VC.sentenceKind(PACK);
@@ -1390,7 +1410,8 @@ function scriptDrillItem(kind, unit, ctx){
   if(k === "symType"){
     const accept = (it.accept || [it.answer]).map(VC.normKey);
     return { kind:"type", key: it.key, label:"Type how it sounds", html: big(it.show), inputTA: "", placeholder: "type the sound",
-      check: v => accept.includes(VC.normKey(v)), reveal: base.reveal, onAnswer: base.onAnswer, onReveal: base.onReveal, revealHear: base.revealHear };
+      check: v => accept.includes(VC.normKey(v)), reveal: base.reveal, onAnswer: base.onAnswer, onReveal: base.onReveal, revealHear: base.revealHear,
+      choiceFallback: () => scriptDrillItem("symSound", unit, ctx) };
   }
   if(k === "compose") return Object.assign(base, glyphOpts, { label:"Put them together", html: big(it.show) });
   if(k === "formFind") return Object.assign(base, wordOpts, { label:"Which word has this letter?", html: big(it.show) + sub(it.hint) });

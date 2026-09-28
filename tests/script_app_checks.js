@@ -323,6 +323,11 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("symType: glyph + a typed input", /class="big wd xg"[^>]*>ㄱ</.test(r.h) && /id="tin"/.test(r.h) && /placeholder="type the sound"/.test(r.h));
     r.api.el("tin").value = "K"; r.api.el("submit").click();
     check("symType: an alt (k) is accepted, case-insensitive", r.api.getProg().script.u["ko-g"].s === 2);
+    r = await one(KO, "symType", "ko-g");
+    r.api.el("tin").value = "zz"; r.api.el("submit").click(); r.api.el("nx").click();
+    const again = /id="tin"/.test(r.api.html("panel"));
+    r.api.el("tin").value = "zz"; r.api.el("submit").click(); r.api.el("nx").click();
+    check("symType: first miss comes back typed, second miss as symSound (4 roman options)", again && !/id="tin"/.test(r.api.html("panel")) && /How does it sound\?/.test(r.api.html("panel")) && r.api.el("o").children.length === 4);
     r = await one(KO, "compose", "ko-n");
     check("compose: parts joined with +, syllable options", /class="big wd xg"[^>]*>ㄴ \+ ㅏ<|class="big wd xg"[^>]*>ㄴ \+ ㅓ</.test(r.h) && r.api.el("o").children.length >= 2);
     answer(r.api, true);
