@@ -401,6 +401,18 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     if(!(ds.length===3 && new Set(g).size===4 && ds.every(d=>d.id!==e.id) && !f2.includes(af2 || "\u0000") && new Set(f2).size===f2.length)) bad++;
   });
   check("meaningOpts: 3 distinct glosses, no near-synonym (first two words) distractors (300 samples)", bad === 0);
+
+  // meaningOpts prefers same-pos distractors like wordOpts (TODO.md "meaningOpts could also
+  // prefer the same pos"), falling back to any pos when the same-pos pool is short.
+  const mpAns = { id:"mp0", w:"correre", en:"to run", lv:"A1", pos:"v" };
+  const mpSamePos = ["saltare:to jump","nuotare:to swim","volare:to fly"].map((x,i)=>{ const [w,en]=x.split(":"); return { id:"mv"+i, w, en, lv:"A1", pos:"v" }; });
+  const mpOtherPos = ["sedia:chair","tavolo:table","porta:door"].map((x,i)=>{ const [w,en]=x.split(":"); return { id:"mn"+i, w, en, lv:"A1", pos:"n" }; });
+  let mpAllSamePos = true;
+  for(let i=0;i<50;i++) if(!VC.meaningOpts(mpAns, [...mpSamePos, ...mpOtherPos]).every(d=>d.pos==="v")) mpAllSamePos = false;
+  check("meaningOpts: with 3+ same-pos candidates, every distractor shares the answer's pos", mpAllSamePos);
+  const mpShort = VC.meaningOpts(mpAns, [mpSamePos[0], ...mpOtherPos]);
+  check("meaningOpts: same-pos pool short (1) -> falls back to any pos to still fill 3",
+    mpShort.length === 3 && mpShort.some(d=>d.pos==="n") && mpShort.some(d=>d.id===mpSamePos[0].id));
   let sbad = 0;
   sample(SENTENCES, 300).forEach(s=>{
     const ds = VC.sentenceOpts(s, SENTENCES);

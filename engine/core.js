@@ -45,12 +45,21 @@ function sharesSurface(a, b){ const s = new Set(surfaces(a)); return surfaces(b)
 // Same pronunciation (when both carry pron): indistinguishable in a hear item.
 function samePron(a, b){ return !!(a && b && a.pron && b.pron) && normKey(a.pron) === normKey(b.pron); }
 // Never a homograph of the answer (the read stimulus would fit both), a homophone (the hear
-// stimulus would fit both) or a gloss sharing its first two words (a near-synonym).
+// stimulus would fit both) or a gloss sharing its first two words (a near-synonym). Prefers
+// same-part-of-speech distractors like wordOpts, falling back to any pos when the same-pos
+// pool is smaller than needed (a verb answer never runs short of options just because the
+// level has only two other verbs).
 function meaningOpts(entry, pool){
   const ansKey = normKey(entry.en);
   const ansFirst2 = firstTwoWords(entry.en);
+  const hasPos = !!entry.pos;
+  const samePos = v => hasPos && v.pos === entry.pos;
   const candidates = (pool||[]).filter(v=>v.id!==entry.id && normKey(v.en)!==ansKey && !sharesSurface(v, entry) && !samePron(v, entry));
-  const ordered = [...shuffle(candidates.filter(v=>v.lv===entry.lv)), ...shuffle(candidates.filter(v=>v.lv!==entry.lv))];
+  const t1 = candidates.filter(v=>v.lv===entry.lv && samePos(v));
+  const t2 = candidates.filter(v=>v.lv===entry.lv && !samePos(v));
+  const t3 = candidates.filter(v=>v.lv!==entry.lv && samePos(v));
+  const t4 = candidates.filter(v=>v.lv!==entry.lv && !samePos(v));
+  const ordered = [...shuffle(t1), ...shuffle(t2), ...shuffle(t3), ...shuffle(t4)];
   function pass(strict){
     const chosen = []; const usedFirst2 = new Set(ansFirst2 ? [ansFirst2] : []); const usedGloss = new Set([ansKey]);
     ordered.forEach(v=>{
