@@ -900,7 +900,7 @@ function pinPrefixRecords(prog, words, pack, lv, counters){
   });
   return prog;
 }
-// The only way word code creates a record, so pinning cannot be skipped.
+// Record creation goes through here so a records-less level is pinned before it changes rule.
 function ensureWordRec(prog, words, pack, id){
   if(prog.w && prog.w[id]) return prog.w[id];
   const w = (words||[]).find(x => x.id === id);

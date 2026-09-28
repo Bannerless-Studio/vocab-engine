@@ -1559,6 +1559,7 @@ return {
   enterPlacement: () => { tab = "test"; testSel = "placement"; startPlacement(); }, getPL: () => PL, getTodayStepState: () => todayStepState,
   getHtml: id => { const e = document.getElementById(id); return e ? e.innerHTML : ""; },
   wordsTab: () => { tab = "words"; wordsSet = null; wordsQuery = ""; render(); }, getTaught: () => __taught,
+  setWordsSet: n => { wordsSet = n; renderWordBody(); }, finishDrill: () => D.onDone(), clickId: id => document.getElementById(id).onclick({}),
 };`;
     // PASSAGES only when env.passages is given (undefined -> no Read tab, as before).
     const fn = new Function("document","window","navigator","location","localStorage","matchMedia","requestAnimationFrame","PACK","WORDS","SENTENCES","LESSONS","PASSAGES", fnBody);
@@ -2100,6 +2101,25 @@ return {
     check("app, reordered level: Words tab opens the slice holding the first unlearned word, not marked done",
       /Set 1 \/ \d+<\/button>/.test(wb));
   }catch(e){ check(`app reordered-level scenario does not throw (got: ${e.message})`, false); }
+
+  // Re-drilling a taught slice away from the counter must not add d: an all-d level would fall
+  // back to the counter prefix.
+  try{
+    const size = VC.setSizeOf(PACK), l1 = WORDS.filter(w => w.lv === "1");
+    const { api } = await bootApp([{ lang:"zh-CN", name:"x" }]);
+    const pr = VC.normalizeProg({ sets:{ "1": 1 } }, PACK);
+    l1.slice(0, 2*size).forEach(w => { pr.w[w.id] = { r:1, w:0, s:1 }; });
+    api.setProgT(pr);
+    const before = VC.learnedWords(WORDS, PACK, pr).map(w => w.id);
+    api.wordsTab(); api.setWordsSet(0); api.clickId("dr"); api.finishDrill();
+    const p1 = api.getProg();
+    check("app Words tab: re-drilling a taught slice off the counter adds no d, counter and learned set unchanged",
+      l1.slice(0, size).every(w => !p1.w[w.id].d) && p1.sets["1"] === 1 && util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, p1).map(w => w.id), before));
+    api.setWordsSet(4); api.clickId("dr"); api.finishDrill();
+    const p2 = api.getProg();
+    check("app Words tab: drilling an untaught slice ahead flags exactly its words d, counter unchanged",
+      l1.slice(4*size, 5*size).every(w => p2.w[w.id] && p2.w[w.id].d === 1) && l1.slice(0, 2*size).every(w => !p2.w[w.id].d) && p2.sets["1"] === 1);
+  }catch(e){ check(`app Words-tab re-drill scenario does not throw (got: ${e.message})`, false); }
 })();
 
 // ------------------------------------------------------------ [24] service worker

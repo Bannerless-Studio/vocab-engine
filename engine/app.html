@@ -1716,8 +1716,8 @@ function renderWordBody(){
     wordListInto($("wl"), matches.slice(0,150));
     return;
   }
-  // Slices here are fixed rank-order browsing sets; ✓ means every word in the slice is learned,
-  // and "next new" opens the slice holding the level's first unlearned word.
+  // Browsing slices stay fixed rank order so a set's words don't move as the learner progresses;
+  // done-ness comes from records because a republish can shift the counter prefix.
   const list = levelList(wordsLv); const total = nSets(wordsLv);
   const lwAll = learnedWords(); const got = new Set(lwAll.map(w => w.id));
   const firstNew = list.findIndex(w => !got.has(w.id));
@@ -1736,11 +1736,12 @@ function renderWordBody(){
   wordListInto($("wl"), set);
   $("dr").onclick = () => {
     const items = []; set.forEach(w => items.push(hearItem(w), readItem(w)));
-    // The drill's own records make these words learned; the counter advances only for the
-    // slice it points at, so progress bars never skip, and `d` marks drilling ahead of it.
+    // The counter advances only for the slice it points at, so progress bars never skip. `d` goes
+    // only on words untaught before the drill: on a taught word it would hide the level's taught
+    // record and could flip the level back to the counter-prefix fallback.
     drill(items, () => {
       if(wordsSet === (prog.sets[wordsLv]||0)){ prog.sets[wordsLv] = wordsSet+1; }
-      else { set.forEach(w => { VC.ensureWordRec(prog, WORDS, PACK, w.id).d = 1; }); }
+      else { set.forEach(w => { if(!got.has(w.id)) VC.ensureWordRec(prog, WORDS, PACK, w.id).d = 1; }); }
       store.save(); wordsRender();
     }, missSummary);
   };
