@@ -186,7 +186,6 @@ function playDrill(api, maxItems){
 const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+>/g, "").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&");
 
 (async function main(){
-  // ---------------------------------------------------------------- [1] strip
   console.log("\n[1] path strip uses stagePath");
   {
     const { api } = await boot();
@@ -199,7 +198,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     check("fresh learner: no choice card, Start today shown", !/id="charChoice"/.test(h) && /id="go"/.test(h));
   }
 
-  // ---------------------------------------------------------------- [2] choice card
   console.log("\n[2] seed B: the one-time choice card");
   {
     const { api } = await boot();
@@ -261,7 +259,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     check(`skip: strip puts one merged stage last (got ${segs.join(" | ")})`, segs.join("|") === ["HSK 1","HSK 2","HSK 3","HSK 4",CFG.label].join("|"));
   }
 
-  // ---------------------------------------------------------------- [3] item renderers
   console.log("\n[3] the four unit item renderers");
   {
     const { api } = await boot();
@@ -283,7 +280,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     check("answer marking writes prog.chars.c only", r && r.r === 1 && r.w === 1 && r.s === 0 && JSON.stringify(api.getProg().w) === before);
   }
 
-  // ---------------------------------------------------------------- [4] unified Review / Recall
   console.log("\n[4] seed C: unified Review (20) and Recall with unit items");
   {
     const { api } = await boot();
@@ -334,7 +330,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
       api.getState().snap.reviewSize === 15 && [api.getCur(), ...api.getD().q].length === 15 && [api.getCur(), ...api.getD().q].every(x => x.key.startsWith("w:")));
   }
 
-  // ---------------------------------------------------------------- [5] sentence ruby
   console.log("\n[5] sentence ruby by tier");
   {
     const off = await boot({ chars: false });
@@ -397,7 +392,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
       !/hasruby/.test(appHtml.match(/function gapSentence[\s\S]*?\n}\n/)[0].replace(/pf\.ruby \? " hasruby" : ""/g, "")));
   }
 
-  // ---------------------------------------------------------------- [6] flag-off
   console.log("\n[6] flag-off: no characters -> Today identical");
   {
     const stripped = Object.assign({}, PACK); delete stripped.characters;
@@ -449,7 +443,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
   }
   const segsOf = h => [...h.matchAll(/<div class="seg">[\s\S]*?<\/i><\/div>([\s\S]*?)<\/div>/g)].map(m => stripTags(m[1]));
 
-  // ---------------------------------------------------------------- [7] Test: Characters N
   console.log("\n[7] Test tab: Characters N");
   {
     const { api } = await boot();
@@ -496,7 +489,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     check("Continue returns to the Test tab", /id="tChars"/.test(api.html("panel")));
   }
 
-  // ---------------------------------------------------------------- [8] Progress
   console.log("\n[8] Progress: stage rows, order chips, mix chip, choice card line");
   {
     const { api } = await boot();
@@ -543,7 +535,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     check("choice card says 'You can change this later in Progress.'", /id="charChoice"[\s\S]*You can change this later in Progress\./.test(api.html("panel")));
   }
 
-  // ---------------------------------------------------------------- [9] reset
   console.log("\n[9] reset clears chars, never touches the legacy keys");
   {
     const st = memStorage({ [BAK]: "OLD", [LKEY]: "{}" });
@@ -557,7 +548,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     check(`reset writes only ${SKEY} and its _reset_backup (legacy key and ${BAK} untouched)`, st.writes.every(k => k === SKEY || k === SKEY + "_reset_backup") && st.map.get(BAK) === "OLD" && st.map.get(LKEY) === "{}");
   }
 
-  // ---------------------------------------------------------------- [10] legacy import
   console.log("\n[10] Progress import of legacy exports (seeds C and D1)");
   for(const [name, seed] of [["C", LSEED_C], ["D1", LSEED_D1]]){
     const st = memStorage({});
@@ -606,7 +596,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     check("an invalid record still gets the normal import error", api.el("impErr").style.display === "block");
   }
 
-  // ---------------------------------------------------------------- [11] boot migration hook
   console.log("\n[11] boot migration hook");
   {
     const oldRec = Object.assign(clone(LSEED_D1), { foo: 1 });
@@ -676,7 +665,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     check("no legacy.js: the legacy key is ignored", Object.keys(r.api.getProg().w).length === 0 && !st5.map.has(BAK));
   }
 
-  // ---------------------------------------------------------------- [12] passage ruby
   console.log("\n[12] passage ruby in the Read tab");
   {
     const ubw = VC.unitByWord(CHARACTERS);
@@ -732,7 +720,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     check("CSS: passage ruby line box overrides the passage line height", /\.psent \.ptxt\.hasruby\{line-height:2\.3\}/.test(appHtml));
   }
 
-  // ---------------------------------------------------------------- [13] B8 nits
   console.log("\n[13] astral ruby, HAS_CHARACTERS from charsConfig");
   {
     const { api } = await boot();
@@ -751,7 +738,6 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     check("pack.characters not an object (true): HAS_CHARACTERS off (charsConfig null), no crash", !err && !r.api.hasChars() && !/charChoice|<ruby/.test(r.api.html("panel")));
   }
 
-  // ---------------------------------------------------------------- [14] pronFirst
   console.log("\n[14] pronunciation-first (pack.pronFirst, brief BP): the zh pack as shipped");
   // Visible written characters in markup: Han outside the show-written tap's hidden form.
   // (data-pg: a span's display gloss, shown only in the popover, may quote its headword.)

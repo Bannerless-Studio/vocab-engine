@@ -194,7 +194,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
   const KO = FX.ko();
   const koSets = VC.scriptSets("hangul", KO.script.units);
 
-  // ---------------------------------------------------------------- [1] fresh ko: choice card
   console.log("\n[1] fresh ko-like seed: the choice card, the strip, the Script tab");
   {
     const { api, document } = await boot(KO);
@@ -215,7 +214,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("Learn the script: choiceSeen, primer on", p.script.choiceSeen === true && p.script.skipped === false && /id="go"/.test(api.html("panel")) && !/id="scriptChoice"/.test(api.html("panel")));
   }
 
-  // ---------------------------------------------------------------- [2] Learn runs 2 sets
   console.log("\n[2] ko: Start today, Learn set 1, One more set, set 2, finish");
   let afterLearn = null;
   {
@@ -266,7 +264,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check(`Review drill plays through${err ? ` (${err.message})` : ""}`, !err);
   }
 
-  // ---------------------------------------------------------------- [3] Progress chips
   console.log("\n[3] Progress: primer off moves Learn to A1 set 1; on brings the script back");
   {
     const { api } = await boot(KO);
@@ -292,7 +289,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("every unit mastered: Script mastered line", /id="xMastered"><td colspan="2">Script mastered<\/td>/.test(h) && /20 \/ 20 taught · 20 mastered/.test(h));
   }
 
-  // ---------------------------------------------------------------- [4] skip
   console.log("\n[4] skip on the choice card");
   {
     const { api } = await boot(KO);
@@ -301,7 +297,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("skip: choiceSeen + skipped, Learn is A1 set 1, Start today back", api.getProg().script.skipped === true && api.getProg().script.choiceSeen === true && learnLine(h) === "A1, set 1" && /id="go"/.test(h));
   }
 
-  // ---------------------------------------------------------------- [5] item kinds
   console.log("\n[5] one boot check per item kind");
   const one = async (fx, kind, unitId, opts) => {
     const b = await boot(fx, opts);
@@ -345,7 +340,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("ja: a word written with symbols the primer does not teach is shown by its kana pron", r.api.byId()[JA.words.find(w => w.w === "画家").id].w === "がか" && r.api.byId()[JA.words.find(w => w.w === "アイス").id].w === "アイス");
   }
 
-  // ---------------------------------------------------------------- [6] no voice
   console.log("\n[6] no-voice path: fa (tts:false legacy hard off), ko and fa with voices stubbed out");
   {
     const FA = FX.fa();
@@ -392,7 +386,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       && VC.speechUsable(true, [{ lang:"fa_IR" }], "fa-IR") === true && VC.pickVoice(LANGLESS, "fa-IR") === null);
   }
 
-  // ---------------------------------------------------------------- [7] teach-card rows
   console.log("\n[7] teach-card rows: forms strip, base -> variant, italic, highlight");
   {
     const FA = FX.fa(), JA = FX.ja(), RU = ru();
@@ -476,7 +469,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("ltr pack (ko): no data-tlrtl on the root", kb.document.documentElement._attrs["data-tlrtl"] === undefined);
   }
 
-  // ---------------------------------------------------------------- [8] existing learner
   console.log("\n[8] existing learner: boots skipped, the notice once");
   {
     const key = VC.storageKey(KO.pack);
@@ -507,7 +499,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("fresh learner: never the notice", !/scriptNotice/.test(fresh.api.html("panel")));
   }
 
-  // ---------------------------------------------------------------- [9] Script tab
   console.log("\n[9] Script tab: chart, one utterance per tap, practice");
   {
     const b = await boot(KO);
@@ -532,7 +523,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check(`practice drill (with symType) plays through${err ? ` (${err.message})` : ""}`, !err);
   }
 
-  // ---------------------------------------------------------------- [10] ja two stages
   console.log("\n[10] ja: two stages, per-stage chips");
   {
     const JA = FX.ja();
@@ -549,7 +539,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check(`hira off: the path starts with カタカナ, Learn is kata sets (got "${learnLine(h)}")`, segsOf(h)[0] === "カタカナ" && learnLine(h) === "カタカナ, sets 1–2 of 2");
   }
 
-  // ---------------------------------------------------------------- [11] flag-off
   console.log("\n[11] flag-off: no pack.script, no script markup");
   {
     const off = FX.ko(); delete off.pack.script;
@@ -657,7 +646,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("glyph options: 2 columns of minmax(0,1fr) (never wider than the row)", /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/.test(css(".opts-g")));
   }
 
-  // ---------------------------------------------------------------- [13] real sibling packs
   // S2's data (../{korean,russian,persian,japanese}/pack) when present; skipped otherwise
   // (the data lives in the sibling repos, not here). Read-only.
   console.log("\n[13] real sibling packs (when present): boot, two Learn sets, every unit x kind, width proxy");
@@ -707,7 +695,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check(`${lang}: Script tab chart has every unit`, count(b.api.html("panel"), /data-xopen/g) === units.length);
   }
 
-  // ---------------------------------------------------------------- [14] RTL rendering rules
   console.log("\n[14] RTL rendering rules: bidi isolation and pack font on rendered markup (fa-like)");
   {
     const FA = FX.fa();

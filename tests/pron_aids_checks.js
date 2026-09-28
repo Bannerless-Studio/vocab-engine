@@ -213,7 +213,6 @@ function walk(api, stopAt){
 }
 
 (async function main(){
-  // ---------------------------------------------------------------- [1] tones: core
   console.log("\n[1] tone colouring: core helpers (pack.tones)");
   try {
     check("zh pack.json ships tones \"pinyin\", typing \"pron\", soundsReference true", PACK.tones === "pinyin" && PACK.typing === "pron" && PACK.soundsReference === true);
@@ -238,7 +237,6 @@ function walk(api, stopAt){
     check("splitReading: a run with a/o/e inside prefers the apostrophe-less split (fāngàn = fān|gàn)", VC.splitReading("fāngàn").map(p => p.text).join("|") === "fān|gàn");
   } catch(e){ check(`section threw: ${e.message}`, false); }
 
-  // ---------------------------------------------------------------- [2] typed reading: core
   console.log("\n[2] typed reading: core (pack.typing \"pron\")");
   try {
     const T = [
@@ -273,7 +271,6 @@ function walk(api, stopAt){
       typeSeen > 0 && recallSeen > 0 && rc.filter(p => p.kind === "type").length === 4 && rc.filter(p => p.kind === "recall").length === 4);
   } catch(e){ check(`section threw: ${e.message}`, false); }
 
-  // ---------------------------------------------------------------- [3] app: tones everywhere, typed items, taps
   console.log("\n[3] app: colouring on every screen, the typed-reading item");
   try {
     const { api } = await boot({ seed: 7 });
@@ -477,7 +474,6 @@ function walk(api, stopAt){
     check("affix word 〜X: characters accepts X and 〜X, reading accepts ねん and 〜ねん", aw.label === "Type the characters" && aw.check("濿") && aw.check(affix.w) && !aw.check("〜") && ar.check("ねん") && ar.check("〜ねん"));
   } catch(e){ check(`section threw: ${e.message}`, false); }
 
-  // ---------------------------------------------------------------- [3b] word taps
   console.log("\n[3b] app: word taps inside sentences (sentences with ruby)");
   try {
     const { api, spoken } = await boot({ seed: 7 });
@@ -567,7 +563,6 @@ function walk(api, stopAt){
     check(`popover of every word: reading coloured (${pb.length} bad)`, pb.length === 0);
   } catch(e){ check(`section threw: ${e.message}`, false); }
 
-  // ---------------------------------------------------------------- [4] Sounds Reference card
   console.log("\n[4] Sounds Reference card (pack.soundsReference)");
   try {
     const { api } = await boot();
@@ -657,7 +652,6 @@ function walk(api, stopAt){
     check(`linked word mastered: the span is written as a whole (${h3})`, /越来越/.test(h3));
   } catch(e){ check(`section threw: ${e.message}`, false); }
 
-  // ---------------------------------------------------------------- [6] capitals
   console.log("\n[6] a reading that starts a sentence is capitalised");
   try {
     const toks = [{ start: 0, end: 1, tier: "pron", reading: "hǎo" }, { start: 1, end: 2, tier: "pron", reading: "ba" }, { start: 3, end: 4, tier: "pron", reading: "nǐ" }, { start: 4, end: 5, tier: "pron", reading: "huì" }, { start: 6, end: 7, tier: "pron", reading: "shì" }, { start: 8, end: 9, tier: "pron", reading: "duì" }];
@@ -678,7 +672,6 @@ function walk(api, stopAt){
     check(`passage sentences with an internal . ! ? (${n}): every reading after one is capitalised (${badCap.length} bad${badCap[0] ? ": " + badCap[0] : ""})`, n > 0 && badCap.length === 0);
   } catch(e){ check(`section threw: ${e.message}`, false); }
 
-  // ---------------------------------------------------------------- [8] titles, questions, options (ruby)
   console.log("\n[8] passage titleRuby, questions[].ruby, optionsRuby under pronFirst; no hanzi in the Read tab");
   try {
     const withTR = PASSAGES.filter(p => Array.isArray(p.titleRuby) && p.titleRuby.length).length;
@@ -752,7 +745,6 @@ function walk(api, stopAt){
     check("without pronFirst the heading, question and options stay written", a3.el("o").children.some(b => b.innerHTML.includes(PASSAGES[0].questions[0].options[0])) && a3.html("panel").includes(VC.escapeHtml(PASSAGES[0].questions[0].q)));
   } catch(e){ check(`section threw: ${e.message}`, false); }
 
-  // ---------------------------------------------------------------- [9] phrase tokens in sentences
   console.log("\n[9] sentence tokens longer than their word (这个 for 这): popover head and speech");
   try {
     const { api, spoken } = await boot();
@@ -856,7 +848,6 @@ function walk(api, stopAt){
     } else check("zh 我来介绍一下 passage sentence found", false);
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  // ---------------------------------------------------------------- [10] review nits
   console.log("\n[10] r-suffix numbered forms, Escape on a tap, quotes and ellipsis");
   try {
     const w = WORDS.find(x => x.w === "一会儿");
@@ -893,7 +884,6 @@ function walk(api, stopAt){
     check(`ellipsis kept as written (no "..."), no capital after it (${q2})`, q2 === "Hǎo…… hǎo");
   } catch(e){ check(`section threw: ${e.message}`, false); }
 
-  // ---------------------------------------------------------------- [7] control vs main
   console.log(`\n[7] control: BP2 fields absent -> HTML byte-identical to main ${MAIN}`);
   {
     let mainHtml = null, mainCore = null;
@@ -949,7 +939,6 @@ function walk(api, stopAt){
     }
   }
 
-  // ---------------------------------------------------------------- [12] replay rule
   console.log("\n[12] replay rule (docs/AUDIO.md \"Playback reliability\"): every autoplay site shows a Replay button");
   try{
     const { rtlAudit } = require("./fixtures/rtl_audit.js");
@@ -1018,7 +1007,6 @@ function walk(api, stopAt){
     check("no voice: recall reveal has no Replay and nothing is spoken", !/id="rvp"/.test(nv.api.html("rv")) && nv.spoken.length === 0);
   }catch(e){ check(`replay rule section threw: ${e.stack}`, false); }
 
-  // ---------------------------------------------------------------- [13] dnext() cancels a still-pending TTS retry
   console.log("\n[13] dnext(): moving to a silent item (no mount) cancels a still-pending TTS watchdog retry from the item before it");
   try{
     // neverSpeaking: the engine never confirms "speaking", so ttsDriver's watchdog (docs/

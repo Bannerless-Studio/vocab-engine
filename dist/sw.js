@@ -1,7 +1,5 @@
-// Service worker for a built trainer page. build.sh writes it as sw.js next to the page,
-// filling in 3239310308-1541396 (cksum of the built page before its marker line) and zh.html
-// (its file name), so every rebuild that changes the page also changes sw.js and the
-// browser installs it. build.sh ends the page with the marker <!--ve-build:<id>-->.
+// build.sh fills 3161950330-1507691 (cksum of the built page before its marker line) and zh.html
+// so every rebuild that changes the page also changes sw.js and the browser installs it.
 //
 // - Cache-first for the page only (packs are inlined into it).
 // - A page is only ever cached when it carries this build's marker. A CDN edge can still
@@ -13,7 +11,6 @@
 //   keyed by scope and a site only ever deletes its own caches.
 // - Only same-origin requests inside this worker's scope are handled (SCOPE includes the
 //   origin). Cross-origin requests (Google Fonts, tatoeba.org audio) are never intercepted.
-// - Other in-scope navigations try the network and fall back to the cached page offline.
 // - Any cache failure falls back to the plain network, so the worker never breaks a load.
 // - skipWaiting + claim: a new build takes over at once. The open page keeps running on
 //   what it already loaded (the page is self-contained); the next load gets the new build.
@@ -27,7 +24,7 @@
 //   range behaviour is untested until the phase 3 live check (docs/AUDIO.md).
 // Kill switch / rollback: README "Offline and repeat loads"; never delete a published sw.js.
 "use strict";
-const BUILD = "3239310308-1541396";
+const BUILD = "3161950330-1507691";
 const PAGE = "zh.html";
 const MARK = "<!--ve-build:" + BUILD + "-->";
 const SCOPE = self.registration ? self.registration.scope : new URL("./", self.location.href).href;
@@ -37,7 +34,6 @@ const PAGE_URL = new URL(PAGE, SCOPE).href;
 const AUDIO_CACHE = PREFIX + "audio:v" + "0";
 const AUDIO_CAP = 800;
 
-// true when res is a direct 200 whose body carries this build's marker. Reads a clone.
 function isThisBuild(res){
   if(!res.ok || res.redirected) return Promise.resolve(false);
   return res.clone().text().then(t => t.indexOf(MARK) >= 0);
@@ -59,8 +55,6 @@ self.addEventListener("activate", e => {
     .then(() => self.clients.claim()));
 });
 
-// Cached page, else the network (stored only if it is this build). A cache error of any
-// kind falls back to a plain network fetch.
 function pageResponse(req){
   return caches.open(CACHE).then(c => c.match(PAGE_URL).then(hit => hit || fetch(req).then(res => {
     if(!res.ok || res.redirected) return res;
@@ -69,9 +63,6 @@ function pageResponse(req){
   }))).catch(() => fetch(req));
 }
 
-// A recorded clip: the cached copy, else the network (a 200 is stored, then the cache is
-// trimmed to AUDIO_CAP). A Range request gets a 206 slice of the full clip. Any cache
-// error falls back to the plain network; offline with no copy the request fails.
 function audioResponse(req, href){
   const range = req.headers.get("range");
   return caches.open(AUDIO_CACHE).then(c => c.match(href).then(hit => hit || fetch(href).then(res => {

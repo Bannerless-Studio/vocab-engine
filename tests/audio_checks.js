@@ -176,7 +176,6 @@ return {
   return { api, document, log: f.log, ss: f.window.speechSynthesis };
 }
 
-// ------------------------------------------------------------------ [1] core.js
 function coreChecks(){
   console.log("\n[1] core.js: wordAudio, packAudio, script primer example-word clips");
   check("wordAudio: a word's non-empty audio string", VC.wordAudio({ w: "x", audio: "audio/w/w1.opus" }) === "audio/w/w1.opus");

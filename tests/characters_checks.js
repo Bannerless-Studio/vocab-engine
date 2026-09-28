@@ -423,7 +423,6 @@ function suite(F){
   })();
 }
 
-// ------------------------------------------------------------ [33] flag-off equality
 function flagOffEquality(){
   console.log("\n================ [33] plans and progress equal the pre-characters engine when there is no unit pool");
   let OLD = null;

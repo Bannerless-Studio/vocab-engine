@@ -63,7 +63,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   }finally{ fs.rmSync(tmpDir, { recursive: true, force: true }); }
 })();
 
-// ------------------------------------------------------------ [1] pack validation
 (function(){
   console.log("\n[1] validate_pack.py packs/zh");
   const r = cp.spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), ZH], { encoding: "utf8" });
@@ -78,7 +77,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("lesson items: answer is one of the options", LESSONS.every(l => l.items.every(it => it.opts.includes(it.a))));
 })();
 
-// ------------------------------------------------------------ [2] wordOpts
 (function(){
   console.log("\n[2] wordOpts (recall/gap distractors)");
   let bad = 0; const badEx = [];
@@ -122,7 +120,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("synthetic: tiny pool returns what it can without duplicates", td.length === 2 && new Set(td.map(d=>d.w)).size === 2);
 })();
 
-// ------------------------------------------------------------ [3] typing normaliser
 (function(){
   console.log("\n[3] typing normaliser");
   const P = { levels:[{id:"A1",label:"A1"},{id:"A2",label:"A2"},{id:"B1",label:"B1"},{id:"B2",label:"B2"}],
@@ -162,7 +159,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("typingEnabled false for zh (typing:null)", VC.typingEnabled(PACK) === false);
 })();
 
-// ------------------------------------------------------------ [4] placement ports
 (function(){
   console.log("\n[4] strata / placementStopIndex");
   const st = VC.strata(WORDS, PACK.placement, PACK.setSize);
@@ -181,7 +177,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("a single miss in a big-enough bucket 0 still passes", VC.placementStopIndex([{r:3,n:4},{r:3,n:3},{r:3,n:3},{r:3,n:3}]) === null);
 })();
 
-// ------------------------------------------------------------ [5] progress shape
 (function(){
   console.log("\n[5] progress shape (pack-supplied levels)");
   const L = VC.levelIds(PACK);
@@ -205,7 +200,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("markRec clears provisional on a miss", pv.k.prov === undefined);
 })();
 
-// ------------------------------------------------------------ [6] gap candidates
 (function(){
   console.log("\n[6] cloze gap candidates");
   const fw = new Set(PACK.functionWords);
@@ -253,7 +247,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("spaced: match is case-insensitive and blank keeps surrounding text", m4 && VC.blankSentence(s4, m4).after === "!" && m4.text === "Casa");
 })();
 
-// ------------------------------------------------------------ [7] Today composition
 (function(){
   console.log("\n[7] Today item plans");
   const typingPack = Object.assign({}, PACK, { typing:{caseSensitive:false, accents:"lenient", strictFromLevel:null} });
@@ -375,7 +368,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("sentence kinds ~50/25/25 hear/read/gap; no typed gap without typing", Math.abs(counts.hear/4000-0.5)<0.04 && Math.abs(counts.gap/4000-0.25)<0.04 && counts.gapType===0);
 })();
 
-// ------------------------------------------------------------ [8] meaningOpts / sentenceOpts ports
 (function(){
   console.log("\n[8] meaningOpts / sentenceOpts");
   let bad = 0;
@@ -396,7 +388,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("sentenceOpts: 3 distinct other sentences (300 samples)", sbad === 0);
 })();
 
-// ------------------------------------------------------------ [9] learned / unlock
 (function(){
   console.log("\n[9] learned words, set unlock, sentence availability");
   const prog = VC.normalizeProg({ sets:{"1":2} }, PACK);
@@ -417,7 +408,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("drilled-ahead (d) words count as learned", VC.learnedWords(WORDS, PACK, ahead).some(w=>w.id===byLv["3"][0].id));
 })();
 
-// ------------------------------------------------------------ [10] engine is language-agnostic
 (function(){
   console.log("\n[10] no pinyin/script-specific logic in engine/");
   // Allowed: the HTML charset declaration only. "tone" is not banned since BP2: tone
@@ -450,7 +440,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("engine/ has no pinyin/CJK/hsk/hanzi/kanji references (besides <meta charset>)", hits.length === 0);
 })();
 
-// ------------------------------------------------------------ [11] homographs / homophones (review major 1)
 (function(){
   console.log("\n[11] distractor homograph / homophone guards");
   const P = { levels:[{id:"1",label:"L1"},{id:"2",label:"L2"}] };
@@ -474,7 +463,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("zh: no meaningOpts distractor shares pron or surface with the answer (400 words)", zhHomophone);
 })();
 
-// ------------------------------------------------------------ [12] cloze boundaries (minor 6, 11)
 (function(){
   console.log("\n[12] cloze: longer-word spans, compounds, alt leaks, apostrophes");
   const Z = { levels:[{id:"1",label:"1"}], spaced:false, functionWords:[], compounds:["这个"] };
@@ -505,7 +493,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("blank covers exactly the located surface", b4.before === "" && b4.answer === "Per favore" && b4.after === ", grazie.");
 })();
 
-// ------------------------------------------------------------ [13] progress robustness (majors 2, 3; minors 4, 9; nit 12)
 (function(){
   console.log("\n[13] boot / import / placement / gates");
   const L = VC.levelIds(PACK);
@@ -595,7 +582,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     !VC.isSamsungBrowser(undefined));
 })();
 
-// ------------------------------------------------------------ [14] validator (minor 7, nit 15)
 (function(){
   console.log("\n[14] validate_pack.py parity and level checks");
   const r = cp.spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), ZH, "--dump-strata"], { encoding:"utf8" });
@@ -623,7 +609,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   fs.rmSync(tmp, { recursive:true, force:true });
 })();
 
-// ------------------------------------------------------------ [15] final round (N1-N4)
 (function(){
   console.log("\n[15] lesson keys, lesson no-speech mode, wordOpts alt dedupe, read-error boot");
   // N1: distinct lesson items never merge in the Missed list, even with the same q.
@@ -652,7 +637,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("bootProg: normal read is not read-only", VC.bootProg(null, PACK).readOnly === false && VC.bootProg('{"sessions":2}', PACK).readOnly === false);
 })();
 
-// ------------------------------------------------------------ [16] Italian browser-verify round
 (function(){
   console.log("\n[16] gap option bare forms, example-sentence chooser, audio slot");
   const I = { levels:[{id:"A1",label:"A1"}], functionWords:[], spaced:true };
@@ -725,7 +709,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("audioSlot: stop() before any play creates nothing", made === 1);
 })();
 
-// ------------------------------------------------------------ [17] scripts: RTL, no-space, readings
 (function(){
   console.log("\n[17] script display, RTL / no-space synthetic packs, highlight, search, folding");
   const join = parts => parts.map(x=>x.text).join("");
@@ -862,7 +845,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     && /if\(k === "symType"\)\{[^\n]*\n[^\n]*\n\s*return \{ kind:"type", key: it\.key, label:"Type how it sounds", html: big\(it\.show\), inputTA: ""/.test(app));
 })();
 
-// ------------------------------------------------------------ [18] validator script fields; distractor word class
 (function(){
   console.log("\n[18] validate_pack.py script-display fields; word-option distractors keep the answer's word class");
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "vocab_pack_"));
@@ -911,7 +893,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("zh gap sweep (300 sentences): no function-word distractor in any cloze", zhFw === 0);
 })();
 
-// ------------------------------------------------------------ [19] gap articles: blank never includes the article, options always bare
 (function(){
   console.log("\n[19] gap article rule (fr/es browser-verify)");
   const F = { levels:[{id:"A1",label:"A1"}], functionWords:["le","un"], spaced:true, typing:{ enabled:true, accents:"lenient" } };
@@ -973,7 +954,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("zh (no articles): gap span = located span, answer label = w", zhSame);
 })();
 
-// ------------------------------------------------------------ [20] Russian browser-verify round
 (function(){
   console.log("\n[20] script-aware fold, pron display, search ranking");
   const F = VC.foldAccents, same = (a, b) => F(a) === F(b);
@@ -1050,7 +1030,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     VC.normalizeTyped("مدرسة", { foldAccents: true }) === VC.normalizeTyped("مدرسه", { foldAccents: true }));
 })();
 
-// ------------------------------------------------------------ [21] review round: article agreement, fixed expressions, clitics
 (function(){
   console.log("\n[21] gap article agreement, articleCut on fixed expressions, reflexive clitics");
   const mk = (id, w, en, pos, alt) => ({ id, w, en, lv:"A1", pos: pos || "noun", alt: alt || [String(w).replace(/^(il\/la|il|lo|la|l') ?/, "")] });
@@ -1138,7 +1117,6 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     return !!m && m.article === "den" && m.text === "Hund" && VC.citationArticles(DB.katze, VC.packArticles(DEF)).join() === "die"; })());
 })();
 
-// ------------------------------------------------------------ [22] reading passages
 (function(){
   console.log("\n[22] reading passages: unlock, grading, weak words, progress, validator");
   const RP = { key:"rp", name:"RP", tts:"it-IT", levels:[{id:"A1",label:"A1"},{id:"A2",label:"A2"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false };
@@ -2178,7 +2156,6 @@ async function swChecks(){
   finally{ fs.rmSync(dir, { recursive: true, force: true }); }
 }
 
-// ------------------------------------------------------------ [25] hi/ur searchFold classes + script head dedupe
 (function(){
   console.log("\n[25] Devanagari + Urdu search fold, roman nasal tilde, script head dedupe");
   const HW = [
@@ -2378,7 +2355,6 @@ async function swChecks(){
         VC.acceptTyped("Maße", MASSE2, LEN_DE, null, W) && !VC.acceptTyped("Maße", MASSE, LEN_DE); })());
 })();
 
-// ------------------------------------------------------------ [27] playback reliability
 (function(){
   console.log("\n[27] playback reliability: ttsDriver (cancel race, paused, no-start retry, utterance kept), liveVoice, clipStartWatch");
   // Fake timers: advance(ms) runs every due timer in time order.
@@ -2530,7 +2506,6 @@ async function swChecks(){
   }
 })();
 
-// ------------------------------------------------------------ [28] word forms: located in text, never typed
 (function(){
   console.log("\n[28] word `forms`: inflected surfaces locate the word in text but are never typed answers");
   const hits = parts => parts.filter(p => p.hit).map(p => p.text);

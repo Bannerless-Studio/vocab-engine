@@ -170,7 +170,6 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
 
 (async function main(){
   const P = PASSAGES[5];
-  // ---------------------------------------------------------------- [1] core
   console.log("\n[1] core: readPassMode, listenAudioOnly, markPassageDone l:1, progress shape");
   {
     const pr = rereadProg(PASSAGES, P);
@@ -201,7 +200,6 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("validateProgShape rejects a non-number l", !VC.validateProgShape({ read: { done: { a: { sc:1, n:2, l:"yes" } } } }, []).ok);
   }
 
-  // ---------------------------------------------------------------- [2] Today plan + mode
   console.log("\n[2] Today: Listen row for a listenable re-read, Read row otherwise");
   try{
     const b = await boot();
@@ -237,7 +235,6 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("no voice, one sentence without a clip: Read row", !!planRow(c2.api.html("panel"), "Read") && !planRow(c2.api.html("panel"), "Listen"));
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  // ---------------------------------------------------------------- [3] listen screen
   console.log("\n[3] listening passage screen: text hidden, n play rows, Show text logged");
   try{
     const b = await boot();
@@ -261,7 +258,6 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("Hide text: play rows back, peekText stays logged", /class="ghost lsay"/.test(b.api.html("pbox")) && b.api.rd().peekText === true);
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  // ---------------------------------------------------------------- [4] Play all
   console.log("\n[4] Play all: n sentences in order, each after the last ends; stops on Done listening");
   try{
     const b = await boot();
@@ -343,7 +339,6 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check(`clips: ${n} plays in order, no TTS`, d.plays.length === n && d.plays.every((s, i) => s === `audio/p/${i}.mp3`) && d.spoken.length === 0);
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  // ---------------------------------------------------------------- [5] questions + results
   console.log("\n[5] questions: seeded half audio-only behind Show question; results lines; done record l:1");
   try{
     const b = await boot();
@@ -401,7 +396,6 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("clips but no voice: the questions cannot be spoken, so none is audio-only", noneHidden);
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  // ---------------------------------------------------------------- [6] control vs base branch
   console.log(`\n[6] control: no voice, no clips -> Today + reading pass markup byte-identical to ${BASE}`);
   try{
     let baseHtml = null;
