@@ -2694,6 +2694,14 @@ async function swChecks(){
   const s3 = { id:"f3", t:"食べるのが好き。", words:["taberu"] }, s4 = { id:"f4", t:"何もない。", words:["taberu"] };
   check("forms: example sentences rank w, then a form, then not visible",
     util.isDeepStrictEqual(VC.exampleSentences(taberu, [s4, s1, s3], JP, 3).map(s => s.id), ["f3","f1","f4"]));
+  // Words-tab/teach-card picker (TODO.md line 18): a repeat of an already-shown surface is
+  // skipped in favour of a not-yet-shown inflected form, in rank order.
+  const g1 = { id:"g1", t:"食べるのが好き。", words:["taberu"] };       // headword
+  const g2 = { id:"g2", t:"また食べる。", words:["taberu"] };          // headword again (repeat, skipped)
+  const g3 = { id:"g3", t:"昨日パンを食べた。", words:["taberu"] };    // form: 食べた
+  const g4 = { id:"g4", t:"肉を食べない。", words:["taberu"] };        // form: 食べない
+  check("forms: Words-tab picker covers distinct surfaces (headword, then each new form), skips a repeat",
+    util.isDeepStrictEqual(VC.exampleSentences(taberu, [g1, g2, g3, g4], JP, 3).map(s => s.id), ["g1","g3","g4"]));
   const seg = VC.passageSegments({ t:s1.t, words:["taberu"] }, JBF, JP);
   check("forms: passage fallback matching taps 食べた as 食べる",
     seg.parts.some(p => p.text === "食べた" && p.id === "taberu") && seg.unplaced.length === 0);

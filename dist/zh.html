@@ -857,11 +857,35 @@ function gapChoices(entry, match, pool, pack){
 }
 function exampleSentences(entry, sentences, pack, n){
   const spaced = !pack || pack.spaced !== false;
-  const seen = s => findSurface(s.t, entry.w, spaced).length ? 0
-    : textForms(entry).slice(1).some(a => a && findSurface(s.t, a, spaced).length) ? 1 : 2;
-  const tiers = [[], [], []];
-  (sentences||[]).forEach(s => { if((s.words||[]).indexOf(entry.id) >= 0) tiers[seen(s)].push(s); });
-  return [...tiers[0], ...tiers[1], ...tiers[2]].slice(0, n);
+  const cands = (sentences||[]).filter(s => (s.words||[]).indexOf(entry.id) >= 0);
+  if(!Array.isArray(entry.forms) || !entry.forms.length){
+    const seen = s => findSurface(s.t, entry.w, spaced).length ? 0
+      : textForms(entry).slice(1).some(a => a && findSurface(s.t, a, spaced).length) ? 1 : 2;
+    const tiers = [[], [], []];
+    cands.forEach(s => tiers[seen(s)].push(s));
+    return [...tiers[0], ...tiers[1], ...tiers[2]].slice(0, n);
+  }
+  // A word with `forms` (inflected surfaces) can show the same bare headword 5 times running
+  // while its inflections go unseen. Cover distinct surface forms instead: the headword's
+  // own example first, then rank order picking the first sentence with a not-yet-shown
+  // form, then rank order again to pad out to n regardless of form (TODO.md line 18).
+  const forms = textForms(entry).filter(Boolean);
+  const formOf = s => { for(const f of forms){ if(findSurface(s.t, f, spaced).length) return normKey(f); } return null; };
+  const headKey = normKey(entry.w || "");
+  const out = [], used = new Set(), seenForms = new Set();
+  const hi = cands.findIndex(s => formOf(s) === headKey);
+  if(hi >= 0){ out.push(cands[hi]); used.add(hi); seenForms.add(headKey); }
+  for(let i = 0; i < cands.length && out.length < n; i++){
+    if(used.has(i)) continue;
+    const k = formOf(cands[i]);
+    if(k === null || seenForms.has(k)) continue;
+    out.push(cands[i]); used.add(i); seenForms.add(k);
+  }
+  for(let i = 0; i < cands.length && out.length < n; i++){
+    if(used.has(i)) continue;
+    out.push(cands[i]); used.add(i);
+  }
+  return out.slice(0, n);
 }
 // A hit inside a longer pack word or compound (本 inside 日本) is dropped, as for cloze.
 function highlightParts(sentence, entry, wordsById, pack){
@@ -5053,4 +5077,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2105190325-1513735-->
+<!--ve-build:1440266307-1514987-->
