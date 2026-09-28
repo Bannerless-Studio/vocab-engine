@@ -344,9 +344,31 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     const bare = VC.defaultProg(PACK); L.forEach((w, i) => { bare.w[w.id] = {r:i%3,w:i%2,s:0}; });
     const same = JSON.stringify(seeded(rng => VC.buildReviewPlan(L, bare, typingPack, { rng }))) === JSON.stringify(seeded(rng => VC.buildReviewPlan(L, bare, typingPack, { rng, missedKinds: false })));
     check("applyMissedKinds: progress without k gives the same plan as with it skipped (seeded)", same);
-    const aplan = [{ kind:"hear", word:L[2] }, { kind:"charRead", unit:{ id:"c1" } }];
+    const aplan = [{ kind:"hear", word:L[2] }, { kind:"charRead", unit:{ id:"c1" } }, { kind:"type", word:L[9] }];
     const out = VC.applyMissedKinds(aplan, pk, typingPack, false);
-    check("applyMissedKinds: unit items untouched; returns new items, input plan not mutated", out[1] === aplan[1] && out[0].kind === "type" && aplan[0].kind === "hear");
+    check("applyMissedKinds: swaps kinds with a word holding k (L[2] type, partner gets hear); unit items untouched; input not mutated",
+      out[1] === aplan[1] && out[0].kind === "type" && out[2].kind === "hear" && aplan[0].kind === "hear" && aplan[2].kind === "type");
+    const lone = VC.applyMissedKinds([{ kind:"hear", word:L[2] }], pk, typingPack, false);
+    check("applyMissedKinds: no word holds the wanted kind -> kind kept", lone[0].kind === "hear");
+    // Guarantee: the plan's kinds stay kindMix's multiset (Review production share intact);
+    // at most ceil(n/2) words moved to their k, weakest first.
+    const allHear = VC.defaultProg(PACK); L.forEach(w => { allHear.w[w.id] = {r:0,w:1,s:0,k:"hear"}; });
+    let shareOk = true, hearMax = 0;
+    for(let i = 0; i < 20; i++){
+      const pl = VC.buildReviewPlan(L, allHear, PACK), ref = VC.buildReviewPlan(L, VC.defaultProg(PACK), PACK);
+      const cnt = p => p.map(x => x.kind).sort().join();
+      if(cnt(pl) !== cnt(ref) || pl.filter(x => VC.PRODUCTION_KINDS.includes(x.kind)).length !== 6) shareOk = false;
+      hearMax = Math.max(hearMax, pl.filter(x => x.kind === "hear").length);
+    }
+    check(`cap: 15 words all with k=hear -> Review keeps exactly 6 production (kindMix's), same kind counts; hear items ${hearMax} (= kindMix's 6)`, shareOk && hearMax === 6);
+    const cyc = VC.defaultProg(typingPack); const K4 = ["read","recall","type","hear"];
+    L.slice(0, 4).forEach((w, i) => { cyc.w[w.id] = {r:0,w:1,s:0,k:K4[i]}; });
+    const c4 = VC.applyMissedKinds(["hear","read","recall","type"].map((k, i) => ({ kind:k, word:L[i] })), cyc, typingPack, false);
+    check("cap: 4 words in a 4-cycle of wanted kinds -> ceil(4/2)=2 moves: first two honoured, last two not, kinds still one each",
+      c4.map(x => x.kind).join() === "read,recall,hear,type" && c4.map(x => x.kind).sort().join() === "hear,read,recall,type");
+    const wk = VC.defaultProg(typingPack); L.slice(0, 4).forEach((w, i) => { wk.w[w.id] = {r:0,w:i===3?9:1,s:0,k:K4[i]}; });
+    const c4w = VC.applyMissedKinds(["hear","read","recall","type"].map((k, i) => ({ kind:k, word:L[i] })), wk, typingPack, false);
+    check("cap: the weakest word moves first (L[3], w 9, gets hear)", c4w[3].kind === "hear");
     check("Test tab (missedKinds: false) keeps kindMix's production kinds", testOk); }
   const counts = {hear:0, read:0, gap:0, gapType:0};
   for(let i=0;i<4000;i++) counts[VC.sentenceKind(PACK)]++;
@@ -1450,7 +1472,7 @@ announce = function(h){ __announced = h; return __wrappedAnnounce.apply(this, ar
 return {
   getAnnounced:()=>__announced,
   glossHTML, glossBox, startPassage, readResults, readRender, getProg:()=>prog, readQuestion: qi => { RD.qi = qi; readQuestionScreen(); },
-  optsMarkup: () => { const o = document.getElementById("o"); return o ? o.children.map(b => \`<button\${b.dir ? \` dir="\${b.dir}"\` : ""}>\${b.innerHTML}</button>\`).join("") : ""; }, passageSentenceHTML, getRD:()=>RD, getHasSpeech:()=>hasSpeech, getRenderCalls:()=>__renderCalls, hearItem, hearSentence, readItem, typeItem, recallItem, pronTypeItem, writtenTypeItem, dnext,
+  optsMarkup: () => { const o = document.getElementById("o"); return o ? o.children.map(b => \`<button\${b.dir ? \` dir="\${b.dir}"\` : ""}>\${b.innerHTML}</button>\`).join("") : ""; }, passageSentenceHTML, getRD:()=>RD, getHasSpeech:()=>hasSpeech, getRenderCalls:()=>__renderCalls, hearItem, hearSentence, readItem, typeItem, recallItem, pronTypeItem, writtenTypeItem, itemFromPlan, gapSentence, dnext,
   setHasSpeech: v => { hasSpeech = v; },
   setQueueAndNext:(items, onDone) => { D = { q: items.slice(), right:0, seen:0, miss:[], onDone: onDone||(()=>{}), summary:null }; dnext(); },
   today: () => { tab = "today"; render(); },
@@ -1554,6 +1576,37 @@ return {
     const { api: api2 } = await bootApp([{ lang:"en-US", name:"x" }]); const pr2 = api2.getProg();
     api2.hearItem(WORDS[50]).onAnswer(false);
     check("unhearable hear item (degraded to read) records the kind shown: read", pr2.w[WORDS[50].id].k === "read");
+    pr2.w[WORDS[51].id] = { r:1, w:1, s:0, k:"hear" };
+    const fb = api2.itemFromPlan({ kind:"hear", word: WORDS[51] }, 0, []);
+    fb.onAnswer(true);
+    check("sticky k: k=hear on a no-voice device clears after a pass on the read fallback", fb.reqKind === "hear" && !("k" in pr2.w[WORDS[51].id]));
+    const { api: api3 } = await bootApp([{ lang:"zh-CN", name:"x" }], { pack: Object.assign({}, PACK, { typing: undefined }) }); const pr3 = api3.getProg();
+    pr3.w[WORDS[52].id] = { r:1, w:1, s:0, k:"type" };
+    const tf = api3.itemFromPlan({ kind:"type", word: WORDS[52] }, 0, []);
+    tf.onAnswer(true);
+    check("sticky k: k=type with typing off clears after a pass on the recall fallback", tf.reqKind === "type" && tf.kind === "mc" && !("k" in pr3.w[WORDS[52].id]));
+    pr3.w[WORDS[53].id] = { r:1, w:0, s:1, k:"hear" }; api3.itemFromPlan({ kind:"recall", word: WORDS[53] }, 0, []).onAnswer(true);
+    check("sticky k: a pass in an unrelated kind still keeps k", pr3.w[WORDS[53].id].k === "hear");
+    // Cloze: a gap/gapType answer sets or clears the blanked word's k only; its r/w/s are the sentence's.
+    const one = SENTENCES.find(s => VC.gapCandidateIndices(s, Object.fromEntries(WORDS.map(w => [w.id, w])), PACK).length === 1);
+    const bid = one.words[VC.gapCandidateIndices(one, Object.fromEntries(WORDS.map(w => [w.id, w])), PACK)[0]];
+    pr.w[bid] = { r:4, w:1, s:2 };
+    const g1 = api.gapSentence(one, false); g1.onAnswer(false);
+    const afterMiss = JSON.stringify(pr.w[bid]);
+    api.gapSentence(one, false).onAnswer(true);
+    check(`cloze (choice) miss sets k=recall on the blank word ${bid}, r/w/s untouched; a gap pass clears it`,
+      afterMiss === JSON.stringify({ r:4, w:1, s:2, k:"recall" }) && JSON.stringify(pr.w[bid]) === JSON.stringify({ r:4, w:1, s:2 }) && pr.s[one.id] && pr.s[one.id].w === 1);
+    const saved = pr.w[bid]; delete pr.w[bid]; api.gapSentence(one, false).onAnswer(false);
+    check("cloze: a blank word with no record is not given one", !(bid in pr.w)); pr.w[bid] = saved;
+    const typPack = Object.assign({}, PACK, { typing:{ caseSensitive:false, accents:"lenient", strictFromLevel:null } });
+    const { api: api4 } = await bootApp([{ lang:"zh-CN", name:"x" }], { pack: typPack }); const pr4 = api4.getProg();
+    pr4.w[bid] = { r:4, w:1, s:2, k:"recall" };
+    const gt = api4.gapSentence(one, true); gt.onAnswer(false);
+    const tMiss = pr4.w[bid].k;
+    api4.gapSentence(one, false).onAnswer(true); const keptType = pr4.w[bid].k === "type";
+    api4.gapSentence(one, true).onAnswer(true);
+    check("cloze gapType: miss sets k=type (r/w/s untouched); a choice-gap pass keeps k=type; a gapType pass clears it",
+      gt.kind === "type" && tMiss === "type" && keptType && !("k" in pr4.w[bid]) && pr4.w[bid].r === 4 && pr4.w[bid].w === 1);
   }catch(e){ check(`missed-kind item scenario does not throw (got: ${e.message})`, false); }
 
   try{

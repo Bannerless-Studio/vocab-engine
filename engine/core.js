@@ -1022,18 +1022,30 @@ function applyImport(prev, text, pack){
   if(prog.chars && !(isObj(v.data.chars) && v.data.chars.mix !== undefined) && prev && isObj(prev.chars) && typeof prev.chars.mix === "boolean") prog.chars.mix = prev.chars.mix;
   return {ok:true, prog};
 }
-// kind (optional, word items only): the item kind answered, one of MISS_KINDS. A miss
+// kind (optional, word items only): the item kind shown, one of MISS_KINDS. A miss
 // remembers it as p.k so the next review asks the word the same way; a pass in that
-// exact kind clears it (user decision 2026-09-28).
-function markRec(map, key, ok, isWord, kind){
+// exact kind clears it (user decision 2026-09-28). reqKind: the kind the plan asked for
+// when a fallback was shown (hear shown as read, type as recall); a pass clears k equal
+// to either, or the fallback would leave k stuck.
+function markRec(map, key, ok, isWord, kind, reqKind){
   const p = map[key] || {r:0,w:0,s:0};
   if(ok){ p.r++; p.s++; } else { p.w++; p.s=0; }
   if(isWord && p.prov && (p.s>=WORD_MASTERED || !ok)) delete p.prov;
-  if(isWord && MISS_KINDS.includes(kind)){
-    if(!ok) p.k = kind;
-    else if(p.k === kind) delete p.k;
-  }
+  if(isWord) setMissKind(p, ok, kind, reqKind);
   map[key] = p; return p;
+}
+function setMissKind(p, ok, kind, reqKind){
+  if(!MISS_KINDS.includes(kind)) return false;
+  if(!ok){ if(p.k === kind) return false; p.k = kind; return true; }
+  if(p.k !== undefined && (p.k === kind || p.k === reqKind)){ delete p.k; return true; }
+  return false;
+}
+// Cloze items (gap: kind "recall", gapType: "type") touch only the blanked word's k; its
+// r/w/s stay untouched since the sentence record carries the answer. A word with no record
+// is left alone. Returns whether the record changed.
+function markMissKind(map, key, ok, kind){
+  const p = map[key];
+  return isObj(p) ? setMissKind(p, ok, kind) : false;
 }
 const weakScore = rec => { const p = rec || {r:0,w:0,s:0}; return (p.w||0)*3 - (p.s||0); };
 // Weakest first with jitter (ties and near-ties shuffle so reviews don't repeat).
@@ -1106,7 +1118,7 @@ function buildReviewPlan(learned, prog, pack, opts){
   const o = opts || {}; const n = o.size || REVIEW_SIZE;
   const ru = recordedUnits(o.units, prog, pack);
   const rs = recordedScriptUnits(o.script, prog, pack);
-  if(ru.length || rs.length) return unifiedReviewPlan(learned, ru, prog, pack, n, o.rng, rs, Object.assign({ units: o.script }, o.scriptCtx || {}));
+  if(ru.length || rs.length) return unifiedReviewPlan(learned, ru, prog, pack, n, o.rng, rs, Object.assign({ units: o.script }, o.scriptCtx || {}), o);
   const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
   const pvSet = new Set(pv.map(w=>w.id));
   const rest = weakFirst(learned.filter(x=>!pvSet.has(x.id)), n - pv.length, prog.w, null, o.rng);
@@ -1127,19 +1139,45 @@ function buildRecallPlan(learned, prog, pack, n, opts){
 }
 // A word item whose record remembers a missed kind (k) is asked in that kind instead of
 // kindMix's. production (Recall plans): a receptive k becomes "recall". "type" with typing
-// off becomes "recall". Unit items and words without k keep their kind; no rng is drawn,
-// so a progress without k gives the plan unchanged. opts.missedKinds === false (the Test
-// tab) skips it.
+// off becomes "recall". The wanted kind is got by swapping kinds with another word item
+// that holds it, so the plan's kinds stay exactly kindMix's (Review keeps its >= 40%
+// production share); with no such partner the word keeps its kind. At most ceil(n/2) words
+// (n word items) are moved, weakest first (weakScore, ties in plan order), so a plan full of
+// k never becomes all repeats of one kind. Unit items and words without k keep their kind;
+// no rng is drawn, so a progress without k gives the plan unchanged. opts.missedKinds ===
+// false (the Test tab) skips it.
 function applyMissedKinds(plan, prog, pack, production, opts){
   if(opts && opts.missedKinds === false) return plan;
   const recs = (prog && prog.w) || {}; const typing = typingEnabled(pack);
-  return plan.map(it => {
+  const want = it => {
     const k = it.word && recs[it.word.id] && recs[it.word.id].k;
-    if(!MISS_KINDS.includes(k)) return it;
-    let kind = production && !PRODUCTION_KINDS.includes(k) ? "recall" : k;
-    if(kind === "type" && !typing) kind = "recall";
-    return kind === it.kind ? it : Object.assign({}, it, { kind });
-  });
+    if(!MISS_KINDS.includes(k)) return null;
+    const kind = production && !PRODUCTION_KINDS.includes(k) ? "recall" : k;
+    return kind === "type" && !typing ? "recall" : kind;
+  };
+  const wordIdx = plan.map((it, i) => it.word ? i : -1).filter(i => i >= 0);
+  const wanted = wordIdx.map(i => ({ i, k: want(plan[i]) })).filter(x => x.k);
+  if(!wanted.length) return plan;
+  const out = plan.slice(); const kindAt = i => out[i].kind;
+  const settled = new Set(wanted.filter(x => kindAt(x.i) === x.k).map(x => x.i));
+  const cap = Math.ceil(wordIdx.length / 2); let moved = 0;
+  const order = wanted.filter(x => !settled.has(x.i))
+    .map((x, n) => ({ x, n, w: weakScore(recs[out[x.i].word.id]) }))
+    .sort((a, b) => b.w - a.w || a.n - b.n).map(o => o.x);
+  const wantOf = new Map(wanted.map(x => [x.i, x.k]));
+  for(const x of order){
+    if(moved >= cap) break;
+    // Partner: an unsettled word item holding the wanted kind, one without its own k first.
+    const cands = wordIdx.filter(j => j !== x.i && !settled.has(j) && kindAt(j) === x.k);
+    const free = cands.filter(c => !wantOf.has(c)); const j = free.length ? free[0] : cands[0];
+    if(j === undefined) continue;
+    const mine = kindAt(x.i);
+    out[x.i] = Object.assign({}, out[x.i], { kind: x.k });
+    out[j] = Object.assign({}, out[j], { kind: mine });
+    settled.add(x.i); moved++;
+    if(wantOf.get(j) === mine) settled.add(j);
+  }
+  return out;
 }
 // Sentence kind: hear 50 / read 25 / gap 25. Gap is "gapType" (type the blank) half
 // the time when the pack types written words, else multiple choice. A pack that types
@@ -2110,7 +2148,7 @@ function rankUnified(words, wrecs, units, crecs, n, pack, rng, sunits, srecs){
 // under one ranking, n total. Word items keep the >= 40% production mix; each unit gets
 // a random pack reviewKind. Items: {kind, word} or {kind, unit}. rs (optional): recorded
 // script units; each gets a random pack.script reviewKind that fits it (pickScriptKind).
-function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx){
+function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx, opts){
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = rng || Math.random;
   const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
   const pvSet = new Set(pv.map(w => w.id));
@@ -2121,7 +2159,7 @@ function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx){
   const out = pool.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry }
     : x.kind === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: x.entry }
     : { kind: pickScriptKind(scfg.reviewKinds, x.entry, scfg, r, sctx), unit: x.entry });
-  return applyMissedKinds(out.filter(it => it.kind), prog, pack, false);
+  return applyMissedKinds(out.filter(it => it.kind), prog, pack, false, opts);
 }
 // Unified Recall: the n weakest words and recorded units, weakest first; words as
 // recall/type, units as charRecall.
@@ -3093,7 +3131,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   markRec, weakScore, weakFirst, provPick, learnedWords, nextNewSet, currentLevelIndex, availableSentences,
-  PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
+  PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,

@@ -475,8 +475,12 @@ const store = {
   save(){ return this.setRaw(STORE_KEY, JSON.stringify(prog)); },
   backup(suffix, raw){ return this.setRaw(`${STORE_KEY}_${suffix}`, raw); }
 };
-// kind: the word item kind answered ("hear"|"read"|"recall"|"type"), remembered on a miss (VC.markRec).
-function markWord(id, ok, kind){ VC.markRec(prog.w, id, ok, true, kind); store.save(); }
+// kind: the word item kind shown ("hear"|"read"|"recall"|"type"), remembered on a miss (VC.markRec).
+// reqKind: the kind the plan asked for when a fallback item is shown instead (hear shown as
+// read without a voice, type as recall), so a pass on the fallback still clears that k.
+function markWord(id, ok, kind, reqKind){ VC.markRec(prog.w, id, ok, true, kind, reqKind); store.save(); }
+// Cloze: the blanked word's missed kind only (VC.markMissKind); its r/w/s stay with the sentence item.
+function markGapWord(id, ok, kind){ if(VC.markMissKind(prog.w, id, ok, kind)) store.save(); }
 function markSentence(id, ok){ VC.markRec(prog.s, id, ok, false); store.save(); }
 function markChar(unitId, ok){ VC.markChar(prog, unitId, ok); store.save(); } // prog.chars.c only
 const mastered = id => ((prog.w[id]||{}).s||0) >= VC.WORD_MASTERED;
@@ -1149,11 +1153,11 @@ function revealBlock(entry){
 const meaningChoices = entry => [VC.gloss(entry), ...VC.meaningOpts(entry, WORDS).map(d=>VC.gloss(d))];
 // hear — the word's clip or TTS plays it; pick the meaning. Unhearable, it degrades to read.
 function hearItem(entry){
-  if(!canHearWord(entry)) return Object.assign(readItem(entry), { needsNotice: true });
+  if(!canHearWord(entry)) return Object.assign(readItem(entry), { needsNotice: true, reqKind: "hear" });
   return { kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero",
     html: `<div class="hear-stage"><button class="speaker" id="sp" aria-label="Replay">${SPEAKER_SVG}</button></div>`,
     opts: meaningChoices(entry), a: VC.gloss(entry), reveal: `<div class="q">You heard:</div>${revealBlock(entry)}`,
-    onAnswer: ok=>markWord(entry.id, ok, "hear"),
+    onAnswer(ok){ markWord(entry.id, ok, "hear", this.reqKind); },
     mount: () => { const btn = $("sp"); sayWord(entry, btn); btn.onclick = ()=>sayWord(entry, btn); },
     };
 }
@@ -1163,7 +1167,7 @@ function readItem(entry){
   const hear = canHearWord(entry);
   return { kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero",
     html: bigWordHTML(entry) + (hear ? REPLAY_STAGE : ""), opts: meaningChoices(entry), a: VC.gloss(entry), reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok, "read"), mount: () => { const b = hear ? $("rpa") : null; sayWord(entry, b || undefined); if(b) b.onclick = () => sayWord(entry, b); }, };
+    onAnswer(ok){ markWord(entry.id, ok, "read", this.reqKind); }, mount: () => { const b = hear ? $("rpa") : null; sayWord(entry, b || undefined); if(b) b.onclick = () => sayWord(entry, b); }, };
 }
 // recall — meaning shown; pick the word (wordOpts: same pos/level first, never a
 // distractor that would also be a right answer).
@@ -1175,7 +1179,7 @@ function recallItem(entry){
   return { kind:"mc", key:"w:"+entry.id, label:"Which word is this?", optsClass:"opts-hero opts-w",
     html: `<div class="med" style="text-align:center">${ui(VC.gloss(entry))}</div>`,
     opts: [entry.id, ...ds.map(d=>d.id)], a: entry.id, optHtml: wordOptHtml(byId, o => byId[o].w), optsT: true, reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok, "recall"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer(ok){ markWord(entry.id, ok, "recall", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 // type — meaning shown; type the word (normalised per pack.typing, alt forms and any
 // affix-bare/slash-alternative forms from VC.affixAlts accepted, e.g. 이 or 가 for -이/가).
@@ -1183,7 +1187,7 @@ function typeItem(entry){
   return { kind:"type", key:"w:"+entry.id, label:"Type the word",
     html: `<div class="med" style="text-align:center">${ui(VC.gloss(entry))}</div>`,
     check: val => VC.acceptTyped(val, entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok, "type"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 // pack.typing "pron": the word's production slot (kindMix "type", the slot recall also
 // fills) is one of two typed items, alternating in plan order (VC.typeSlotKind), each
@@ -1210,7 +1214,7 @@ function pronTypeItem(entry){
     placeholder: TONES ? `${PRON_NOUN}, tones optional…` : `${PRON_NOUN}…`, inputTA: LATIN_PRON.test(entry.pron) ? ' lang="en"' : undefined,
     check: val => VC.checkPronTyped(val, entry.pron, PACK) !== "wrong",
     feedback: val => { const v = VC.checkPronTyped(val, entry.pron, PACK); return v === "tones" || v === "tonesDiff" ? `<div class="diff">tones: <span class="tpron">${readingHTML(entry.pron)}</span></div>` : ""; },
-    reveal: revealBlock(entry), onAnswer: ok=>markWord(entry.id, ok, "type"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    reveal: revealBlock(entry), onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 function writtenTypeItem(entry){
   const hear = canHearWord(entry);
@@ -1224,7 +1228,7 @@ function writtenTypeItem(entry){
     placeholder: "characters…",
     mount: () => { if(hear){ const b = $("rp2"); sayWord(entry, b); b.onclick = () => sayWord(entry, b); } },
     check: val => VC.acceptTyped(foldTyped(val), entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok, "type"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 // The characters item only for a word whose written form is on display (dispWord: under
 // pronFirst, a word below its character tier shows its reading only, so its characters
@@ -1234,9 +1238,10 @@ function pronSlotItem(entry, slot){
   if(shown && (slot === "written" || !entry.pron)) return writtenTypeItem(entry);
   return entry.pron ? pronTypeItem(entry) : recallItem(entry);
 }
-const WORD_ITEM = { hear: hearItem, read: readItem, recall: recallItem, type: (e, slot) => PRON_TYPING ? pronSlotItem(e, slot) : TYPING ? typeItem(e) : recallItem(e) };
+const withReq = (it, k) => Object.assign(it, { reqKind: it.reqKind || k });
+const WORD_ITEM = { hear: hearItem, read: readItem, recall: recallItem, type: (e, slot) => withReq(PRON_TYPING ? pronSlotItem(e, slot) : TYPING ? typeItem(e) : recallItem(e), "type") };
 // (p, i, plan): as an Array.map callback; i/plan pick the type slot's item (PRON_TYPING).
-const itemFromPlan = (p, i, plan) => WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? VC.typeSlotKind(plan, i) : undefined);
+const itemFromPlan = (p, i, plan) => withReq(WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? VC.typeSlotKind(plan, i) : undefined), p.kind);
 // One card per missed word/sentence (items carry `key`), however many question types
 // it was missed as; the most-missed first, with a count when missed more than once.
 function missSummary(miss){
@@ -1296,7 +1301,8 @@ function gapSentence(s, typed){
   if(pf === false) return null;
   const html = pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div><div class="q cue">${ui(s.en)}</div>`
     : `<div class="med wd"${TA}>${escapeHtml(b.before)}<span class="blank">____</span>${escapeHtml(b.after)}</div><div class="q cue">${ui(s.en)}</div>`;
-  const base = { key:"s:"+s.id, reveal: sentenceRevealBlock(s), onAnswer: ok=>markSentence(s.id, ok),
+  const gapKind = typed && TYPING ? "type" : "recall";
+  const base = { key:"s:"+s.id, reveal: sentenceRevealBlock(s), onAnswer: ok=>{ markSentence(s.id, ok); markGapWord(entry.id, ok, gapKind); },
     onReveal: b => saySentence(s, b), revealHear: canHearSentence(s) };
   if(typed && TYPING){
     return Object.assign(base, { kind:"type", label:"Type the missing word", html,

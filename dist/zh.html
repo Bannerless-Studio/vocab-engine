@@ -1376,18 +1376,30 @@ function applyImport(prev, text, pack){
   if(prog.chars && !(isObj(v.data.chars) && v.data.chars.mix !== undefined) && prev && isObj(prev.chars) && typeof prev.chars.mix === "boolean") prog.chars.mix = prev.chars.mix;
   return {ok:true, prog};
 }
-// kind (optional, word items only): the item kind answered, one of MISS_KINDS. A miss
+// kind (optional, word items only): the item kind shown, one of MISS_KINDS. A miss
 // remembers it as p.k so the next review asks the word the same way; a pass in that
-// exact kind clears it (user decision 2026-09-28).
-function markRec(map, key, ok, isWord, kind){
+// exact kind clears it (user decision 2026-09-28). reqKind: the kind the plan asked for
+// when a fallback was shown (hear shown as read, type as recall); a pass clears k equal
+// to either, or the fallback would leave k stuck.
+function markRec(map, key, ok, isWord, kind, reqKind){
   const p = map[key] || {r:0,w:0,s:0};
   if(ok){ p.r++; p.s++; } else { p.w++; p.s=0; }
   if(isWord && p.prov && (p.s>=WORD_MASTERED || !ok)) delete p.prov;
-  if(isWord && MISS_KINDS.includes(kind)){
-    if(!ok) p.k = kind;
-    else if(p.k === kind) delete p.k;
-  }
+  if(isWord) setMissKind(p, ok, kind, reqKind);
   map[key] = p; return p;
+}
+function setMissKind(p, ok, kind, reqKind){
+  if(!MISS_KINDS.includes(kind)) return false;
+  if(!ok){ if(p.k === kind) return false; p.k = kind; return true; }
+  if(p.k !== undefined && (p.k === kind || p.k === reqKind)){ delete p.k; return true; }
+  return false;
+}
+// Cloze items (gap: kind "recall", gapType: "type") touch only the blanked word's k; its
+// r/w/s stay untouched since the sentence record carries the answer. A word with no record
+// is left alone. Returns whether the record changed.
+function markMissKind(map, key, ok, kind){
+  const p = map[key];
+  return isObj(p) ? setMissKind(p, ok, kind) : false;
 }
 const weakScore = rec => { const p = rec || {r:0,w:0,s:0}; return (p.w||0)*3 - (p.s||0); };
 // Weakest first with jitter (ties and near-ties shuffle so reviews don't repeat).
@@ -1460,7 +1472,7 @@ function buildReviewPlan(learned, prog, pack, opts){
   const o = opts || {}; const n = o.size || REVIEW_SIZE;
   const ru = recordedUnits(o.units, prog, pack);
   const rs = recordedScriptUnits(o.script, prog, pack);
-  if(ru.length || rs.length) return unifiedReviewPlan(learned, ru, prog, pack, n, o.rng, rs, Object.assign({ units: o.script }, o.scriptCtx || {}));
+  if(ru.length || rs.length) return unifiedReviewPlan(learned, ru, prog, pack, n, o.rng, rs, Object.assign({ units: o.script }, o.scriptCtx || {}), o);
   const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
   const pvSet = new Set(pv.map(w=>w.id));
   const rest = weakFirst(learned.filter(x=>!pvSet.has(x.id)), n - pv.length, prog.w, null, o.rng);
@@ -1481,19 +1493,45 @@ function buildRecallPlan(learned, prog, pack, n, opts){
 }
 // A word item whose record remembers a missed kind (k) is asked in that kind instead of
 // kindMix's. production (Recall plans): a receptive k becomes "recall". "type" with typing
-// off becomes "recall". Unit items and words without k keep their kind; no rng is drawn,
-// so a progress without k gives the plan unchanged. opts.missedKinds === false (the Test
-// tab) skips it.
+// off becomes "recall". The wanted kind is got by swapping kinds with another word item
+// that holds it, so the plan's kinds stay exactly kindMix's (Review keeps its >= 40%
+// production share); with no such partner the word keeps its kind. At most ceil(n/2) words
+// (n word items) are moved, weakest first (weakScore, ties in plan order), so a plan full of
+// k never becomes all repeats of one kind. Unit items and words without k keep their kind;
+// no rng is drawn, so a progress without k gives the plan unchanged. opts.missedKinds ===
+// false (the Test tab) skips it.
 function applyMissedKinds(plan, prog, pack, production, opts){
   if(opts && opts.missedKinds === false) return plan;
   const recs = (prog && prog.w) || {}; const typing = typingEnabled(pack);
-  return plan.map(it => {
+  const want = it => {
     const k = it.word && recs[it.word.id] && recs[it.word.id].k;
-    if(!MISS_KINDS.includes(k)) return it;
-    let kind = production && !PRODUCTION_KINDS.includes(k) ? "recall" : k;
-    if(kind === "type" && !typing) kind = "recall";
-    return kind === it.kind ? it : Object.assign({}, it, { kind });
-  });
+    if(!MISS_KINDS.includes(k)) return null;
+    const kind = production && !PRODUCTION_KINDS.includes(k) ? "recall" : k;
+    return kind === "type" && !typing ? "recall" : kind;
+  };
+  const wordIdx = plan.map((it, i) => it.word ? i : -1).filter(i => i >= 0);
+  const wanted = wordIdx.map(i => ({ i, k: want(plan[i]) })).filter(x => x.k);
+  if(!wanted.length) return plan;
+  const out = plan.slice(); const kindAt = i => out[i].kind;
+  const settled = new Set(wanted.filter(x => kindAt(x.i) === x.k).map(x => x.i));
+  const cap = Math.ceil(wordIdx.length / 2); let moved = 0;
+  const order = wanted.filter(x => !settled.has(x.i))
+    .map((x, n) => ({ x, n, w: weakScore(recs[out[x.i].word.id]) }))
+    .sort((a, b) => b.w - a.w || a.n - b.n).map(o => o.x);
+  const wantOf = new Map(wanted.map(x => [x.i, x.k]));
+  for(const x of order){
+    if(moved >= cap) break;
+    // Partner: an unsettled word item holding the wanted kind, one without its own k first.
+    const cands = wordIdx.filter(j => j !== x.i && !settled.has(j) && kindAt(j) === x.k);
+    const free = cands.filter(c => !wantOf.has(c)); const j = free.length ? free[0] : cands[0];
+    if(j === undefined) continue;
+    const mine = kindAt(x.i);
+    out[x.i] = Object.assign({}, out[x.i], { kind: x.k });
+    out[j] = Object.assign({}, out[j], { kind: mine });
+    settled.add(x.i); moved++;
+    if(wantOf.get(j) === mine) settled.add(j);
+  }
+  return out;
 }
 // Sentence kind: hear 50 / read 25 / gap 25. Gap is "gapType" (type the blank) half
 // the time when the pack types written words, else multiple choice. A pack that types
@@ -2464,7 +2502,7 @@ function rankUnified(words, wrecs, units, crecs, n, pack, rng, sunits, srecs){
 // under one ranking, n total. Word items keep the >= 40% production mix; each unit gets
 // a random pack reviewKind. Items: {kind, word} or {kind, unit}. rs (optional): recorded
 // script units; each gets a random pack.script reviewKind that fits it (pickScriptKind).
-function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx){
+function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx, opts){
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = rng || Math.random;
   const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
   const pvSet = new Set(pv.map(w => w.id));
@@ -2475,7 +2513,7 @@ function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx){
   const out = pool.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry }
     : x.kind === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: x.entry }
     : { kind: pickScriptKind(scfg.reviewKinds, x.entry, scfg, r, sctx), unit: x.entry });
-  return applyMissedKinds(out.filter(it => it.kind), prog, pack, false);
+  return applyMissedKinds(out.filter(it => it.kind), prog, pack, false, opts);
 }
 // Unified Recall: the n weakest words and recorded units, weakest first; words as
 // recall/type, units as charRecall.
@@ -3447,7 +3485,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   markRec, weakScore, weakFirst, provPick, learnedWords, nextNewSet, currentLevelIndex, availableSentences,
-  PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
+  PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
@@ -3602,8 +3640,12 @@ const store = {
   save(){ return this.setRaw(STORE_KEY, JSON.stringify(prog)); },
   backup(suffix, raw){ return this.setRaw(`${STORE_KEY}_${suffix}`, raw); }
 };
-// kind: the word item kind answered ("hear"|"read"|"recall"|"type"), remembered on a miss (VC.markRec).
-function markWord(id, ok, kind){ VC.markRec(prog.w, id, ok, true, kind); store.save(); }
+// kind: the word item kind shown ("hear"|"read"|"recall"|"type"), remembered on a miss (VC.markRec).
+// reqKind: the kind the plan asked for when a fallback item is shown instead (hear shown as
+// read without a voice, type as recall), so a pass on the fallback still clears that k.
+function markWord(id, ok, kind, reqKind){ VC.markRec(prog.w, id, ok, true, kind, reqKind); store.save(); }
+// Cloze: the blanked word's missed kind only (VC.markMissKind); its r/w/s stay with the sentence item.
+function markGapWord(id, ok, kind){ if(VC.markMissKind(prog.w, id, ok, kind)) store.save(); }
 function markSentence(id, ok){ VC.markRec(prog.s, id, ok, false); store.save(); }
 function markChar(unitId, ok){ VC.markChar(prog, unitId, ok); store.save(); } // prog.chars.c only
 const mastered = id => ((prog.w[id]||{}).s||0) >= VC.WORD_MASTERED;
@@ -4276,11 +4318,11 @@ function revealBlock(entry){
 const meaningChoices = entry => [VC.gloss(entry), ...VC.meaningOpts(entry, WORDS).map(d=>VC.gloss(d))];
 // hear — the word's clip or TTS plays it; pick the meaning. Unhearable, it degrades to read.
 function hearItem(entry){
-  if(!canHearWord(entry)) return Object.assign(readItem(entry), { needsNotice: true });
+  if(!canHearWord(entry)) return Object.assign(readItem(entry), { needsNotice: true, reqKind: "hear" });
   return { kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero",
     html: `<div class="hear-stage"><button class="speaker" id="sp" aria-label="Replay">${SPEAKER_SVG}</button></div>`,
     opts: meaningChoices(entry), a: VC.gloss(entry), reveal: `<div class="q">You heard:</div>${revealBlock(entry)}`,
-    onAnswer: ok=>markWord(entry.id, ok, "hear"),
+    onAnswer(ok){ markWord(entry.id, ok, "hear", this.reqKind); },
     mount: () => { const btn = $("sp"); sayWord(entry, btn); btn.onclick = ()=>sayWord(entry, btn); },
     };
 }
@@ -4290,7 +4332,7 @@ function readItem(entry){
   const hear = canHearWord(entry);
   return { kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero",
     html: bigWordHTML(entry) + (hear ? REPLAY_STAGE : ""), opts: meaningChoices(entry), a: VC.gloss(entry), reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok, "read"), mount: () => { const b = hear ? $("rpa") : null; sayWord(entry, b || undefined); if(b) b.onclick = () => sayWord(entry, b); }, };
+    onAnswer(ok){ markWord(entry.id, ok, "read", this.reqKind); }, mount: () => { const b = hear ? $("rpa") : null; sayWord(entry, b || undefined); if(b) b.onclick = () => sayWord(entry, b); }, };
 }
 // recall — meaning shown; pick the word (wordOpts: same pos/level first, never a
 // distractor that would also be a right answer).
@@ -4302,7 +4344,7 @@ function recallItem(entry){
   return { kind:"mc", key:"w:"+entry.id, label:"Which word is this?", optsClass:"opts-hero opts-w",
     html: `<div class="med" style="text-align:center">${ui(VC.gloss(entry))}</div>`,
     opts: [entry.id, ...ds.map(d=>d.id)], a: entry.id, optHtml: wordOptHtml(byId, o => byId[o].w), optsT: true, reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok, "recall"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer(ok){ markWord(entry.id, ok, "recall", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 // type — meaning shown; type the word (normalised per pack.typing, alt forms and any
 // affix-bare/slash-alternative forms from VC.affixAlts accepted, e.g. 이 or 가 for -이/가).
@@ -4310,7 +4352,7 @@ function typeItem(entry){
   return { kind:"type", key:"w:"+entry.id, label:"Type the word",
     html: `<div class="med" style="text-align:center">${ui(VC.gloss(entry))}</div>`,
     check: val => VC.acceptTyped(val, entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok, "type"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 // pack.typing "pron": the word's production slot (kindMix "type", the slot recall also
 // fills) is one of two typed items, alternating in plan order (VC.typeSlotKind), each
@@ -4337,7 +4379,7 @@ function pronTypeItem(entry){
     placeholder: TONES ? `${PRON_NOUN}, tones optional…` : `${PRON_NOUN}…`, inputTA: LATIN_PRON.test(entry.pron) ? ' lang="en"' : undefined,
     check: val => VC.checkPronTyped(val, entry.pron, PACK) !== "wrong",
     feedback: val => { const v = VC.checkPronTyped(val, entry.pron, PACK); return v === "tones" || v === "tonesDiff" ? `<div class="diff">tones: <span class="tpron">${readingHTML(entry.pron)}</span></div>` : ""; },
-    reveal: revealBlock(entry), onAnswer: ok=>markWord(entry.id, ok, "type"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    reveal: revealBlock(entry), onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 function writtenTypeItem(entry){
   const hear = canHearWord(entry);
@@ -4351,7 +4393,7 @@ function writtenTypeItem(entry){
     placeholder: "characters…",
     mount: () => { if(hear){ const b = $("rp2"); sayWord(entry, b); b.onclick = () => sayWord(entry, b); } },
     check: val => VC.acceptTyped(foldTyped(val), entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok, "type"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 // The characters item only for a word whose written form is on display (dispWord: under
 // pronFirst, a word below its character tier shows its reading only, so its characters
@@ -4361,9 +4403,10 @@ function pronSlotItem(entry, slot){
   if(shown && (slot === "written" || !entry.pron)) return writtenTypeItem(entry);
   return entry.pron ? pronTypeItem(entry) : recallItem(entry);
 }
-const WORD_ITEM = { hear: hearItem, read: readItem, recall: recallItem, type: (e, slot) => PRON_TYPING ? pronSlotItem(e, slot) : TYPING ? typeItem(e) : recallItem(e) };
+const withReq = (it, k) => Object.assign(it, { reqKind: it.reqKind || k });
+const WORD_ITEM = { hear: hearItem, read: readItem, recall: recallItem, type: (e, slot) => withReq(PRON_TYPING ? pronSlotItem(e, slot) : TYPING ? typeItem(e) : recallItem(e), "type") };
 // (p, i, plan): as an Array.map callback; i/plan pick the type slot's item (PRON_TYPING).
-const itemFromPlan = (p, i, plan) => WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? VC.typeSlotKind(plan, i) : undefined);
+const itemFromPlan = (p, i, plan) => withReq(WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? VC.typeSlotKind(plan, i) : undefined), p.kind);
 // One card per missed word/sentence (items carry `key`), however many question types
 // it was missed as; the most-missed first, with a count when missed more than once.
 function missSummary(miss){
@@ -4423,7 +4466,8 @@ function gapSentence(s, typed){
   if(pf === false) return null;
   const html = pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div><div class="q cue">${ui(s.en)}</div>`
     : `<div class="med wd"${TA}>${escapeHtml(b.before)}<span class="blank">____</span>${escapeHtml(b.after)}</div><div class="q cue">${ui(s.en)}</div>`;
-  const base = { key:"s:"+s.id, reveal: sentenceRevealBlock(s), onAnswer: ok=>markSentence(s.id, ok),
+  const gapKind = typed && TYPING ? "type" : "recall";
+  const base = { key:"s:"+s.id, reveal: sentenceRevealBlock(s), onAnswer: ok=>{ markSentence(s.id, ok); markGapWord(entry.id, ok, gapKind); },
     onReveal: b => saySentence(s, b), revealHear: canHearSentence(s) };
   if(typed && TYPING){
     return Object.assign(base, { kind:"type", label:"Type the missing word", html,
@@ -5886,4 +5930,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3439911189-1586170-->
+<!--ve-build:374025918-1589219-->

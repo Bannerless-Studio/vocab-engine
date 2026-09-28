@@ -114,7 +114,7 @@ Scoring writes `prog.chars.c` only. charSound drills `pron`, breaking the engine
 | hsk field | vocab_zh |
 |---|---|
 | `v` (1 or 2) | `v:1` |
-| `w[hanzi]` `{r,w,s,prov,d}` | `w[wordId]`, fields verbatim |
+| `w[hanzi]` `{r,w,s,prov,d}` | `w[wordId]`, fields verbatim; the engine later added optional `k` (last missed kind, 2026-09-28) |
 | `s[zh]` `{r,w,s}` | `s[sentId]` |
 | `sets{1..4}` | `sets{"1".."4"}` |
 | `lessons`, `sessions`, `theme`, `placedOnce`, `soundsOpened` | same |
