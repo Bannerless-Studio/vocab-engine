@@ -134,7 +134,7 @@ def display_norm(s):
     return MARKS_RE.sub("", s.translate(CHAR_MAP)).strip()
 
 
-# ---- closed sets (folded spellings; DISPLAY restores ZWNJ) --------------------
+# closed sets: folded spellings; DISPLAY restores ZWNJ
 DAYS = "شنبه یکشنبه دوشنبه سهشنبه چهارشنبه پنجشنبه جمعه".split()
 MONTHS = "فروردین اردیبهشت خرداد تیر مرداد شهریور مهر آبان آذر دی بهمن اسفند".split()
 SEASONS = "بهار تابستان پاییز زمستان".split()
@@ -163,8 +163,8 @@ PLEASE_PHRASE = "خواهش میکنم"      # "you're welcome / please", taught
 FIXED_PRON = {"ابتدا": "ebtedâ", "همگی": "hamegi", "اینکه": "inke", "خواهش میکنم": "xâheš mikonam", "یعنی": "ya'ni", "ایشان": "išân", "لطفا": "lotfan", "متشکرم": "motešakkeram", "ببخشید": "bebaxšid", "خداحافظ": "xodâhâfez",
               "آنها": "ânhâ", "سهشنبه": "se-šanbe", "پنجشنبه": "panj-šanbe", "قهوهای": "qahve-i"}
 
-# ---- light-verb compounds: "noun verb|gloss"; a leading preposition is part of
-# the compound (از دست دادن "to lose" vs دست دادن "to shake hands") -------------
+# light-verb compounds "noun verb|gloss"; a leading preposition is part of
+# the compound (از دست دادن "to lose" vs دست دادن "to shake hands")
 LIGHT_VERBS_SRC = """
 کار کردن|to work
 دیر کردن|to be late
@@ -465,8 +465,8 @@ for _line in LIGHT_VERBS_SRC.strip().splitlines():
     _pre = _parts[0] if len(_parts) == 3 else ""
     LV_INDEX.setdefault(_parts[-1], {}).setdefault(_parts[-2], []).append((_pre, _comp))
 
-# ---- colloquial subtitle spellings -> written forms (folded). None drops a
-# detached fragment (ها, می, ام) that the subtitle tokeniser split off ------------
+# colloquial subtitle spellings -> written forms (folded). None drops a
+# detached fragment (ها, می, ام) that the subtitle tokeniser split off
 COLLOQUIAL = {
     "رو": "را", "اون": "آن", "یه": "یک", "چی": "چه", "اگه": "اگر", "داره": "دارد", "دیگه": "دیگر",
     "کنه": "کند", "اونا": "آنها", "منو": "من", "میشه": "میشود", "بهت": "به", "بهم": "به", "بهش": "به",
@@ -535,7 +535,7 @@ PROFANE = ("کیر", "کون", "جنده", "گاییدن", "گایید", "بگا
            "کصکش", "کسخل", "مادرجنده", "پفیوز", "کثافت", "لعنتی", "لعنت")
 
 
-# ---- script primer (docs/SCRIPT_PRIMER.md ss3) -------------------------------
+# script primer: docs/SCRIPT_PRIMER.md ss3
 # Persian alphabet: 33 units in 6 sets, dot families taught together. Romans
 # follow the pack's pron scheme (â kh sh zh gh q '); example words use the
 # word's own pron. Short vowels and ZWNJ are not letters; hamza seats (ء أ ئ ؤ)
@@ -790,7 +790,6 @@ class Persian(LanguageSpec):
                           "pronouns, question words, core prepositions/conjunctions, five light verbs, A1 core list")
     numeral_exclusion = "numeral outside 0-20/tens/100/1000/million/ordinals 1-3"
 
-    # ---- spelling / frequency --------------------------------------------------
     def fold(self, s):
         return fold(s)
 
@@ -814,7 +813,6 @@ class Persian(LanguageSpec):
     def is_profane(self, w):
         return w in self.profanity
 
-    # ---- tagging (Stanza) ---------------------------------------------------------
     def tagger_desc(self):
         import stanza
         return f"Stanza {stanza.__version__}, fa default package (UD Persian-Seraji)"
@@ -844,7 +842,7 @@ class Persian(LanguageSpec):
         per word, so پائین = پایین and final ابتداء = ابتدا)."""
         return fold(s)
 
-    # ---- reading passages only (never run by `build`) -----------------------
+    # reading passages only (never run by `build`)
     X_POS = (("noun", "NOUN"), ("adj", "ADJ"), ("adv", "ADV"), ("pron", "PRON"), ("prep", "ADP"))
 
     def passage_retag(self, toks):
@@ -1077,7 +1075,6 @@ class Persian(LanguageSpec):
             # Clitic=Yes: a host + enclitic(s) token kept whole; Host= its host word's UPOS
             yield [(x[0], x[1], x[2], dict(x[3], Clitic="Yes") if x[4] else x[3]) for x in raw[t]]
 
-    # ---- kaikki side info (verbs: present stems; romanisation) -------------------------
     def _info(self):
         """{folded headword: [[display word, pos, romanisation, present stem, is_lemma, gloss]]}."""
         if hasattr(self, "_info_cache"):
@@ -1424,7 +1421,6 @@ class Persian(LanguageSpec):
                 out.append(wid)
         return out
 
-    # ---- resolution ----------------------------------------------------------------
     def post_resolve(self, toks, out):
         """Light-verb compounds: a light verb with its noun/adjective up to 3
         tokens before it (skipping auxiliaries, not across را, punctuation or
@@ -1589,7 +1585,6 @@ class Persian(LanguageSpec):
             else:
                 del lexicon.E[s]
 
-    # ---- sentences written for the pack ----------------------------------------------
     def pack_json_extra(self):
         return {"spaced": True, "rtl": True, "langTag": "fa", "fontFamily": "Vazirmatn, \"Noto Naskh Arabic\", sans-serif",
                 "fonts": ["Vazirmatn:wght@400;700"], "lineHeight": 1.9}
@@ -1622,7 +1617,6 @@ class Persian(LanguageSpec):
             "licence": "CC-BY-SA-4.0", "count": n,
             "note": "Written where Tatoeba has fewer than two usable sentences for a word; no audio."}}
 
-    # ---- finishing ----------------------------------------------------------------------
     def alt_kind(self, word, surface):
         """A verb's present stem (خواه for خواستن), marked by finalize_words in
         word["_form"] (not shipped), is a form: located in text, never typed.
@@ -1731,7 +1725,6 @@ class Persian(LanguageSpec):
         stat("fa_display", {"words_without_pron": sorted(no_pron),
                             "pron_coverage": f"{len(words) - len(no_pron)}/{len(words)}"})
 
-    # ---- checks ----------------------------------------------------------------------
     def check_word(self, w):
         f = fold(w["w"])
         if w.get("pos") == "noun" and (w["w"].endswith(ZWNJ + "ها") or (
@@ -1745,7 +1738,6 @@ class Persian(LanguageSpec):
             return f"word {w['id']} {w['w']!r}: Arabic yeh/kaf or harakat in w"
         return None
 
-    # ---- QA scans ------------------------------------------------------------------------
     qa_closed_sets = {
         "days": " ".join(DISPLAY.get(x, x) for x in DAYS), "months": " ".join(MONTHS),
         "seasons": " ".join(SEASONS), "num": " ".join(NUMBERS),
@@ -1757,7 +1749,6 @@ class Persian(LanguageSpec):
     qa_foreign_letters_re = r"[a-z]"
     qa_proper_re = r"\b(Iran|Tehran|Persia|Islam|Muhammad|God|Allah)\b"
 
-    # ---- script primer ------------------------------------------------------
     # tts false: no fa voice on Apple, Windows, Google TTS or the user's Android
     # (ear-check 2026-09-26: silent). Probe onend events fire silently for lang-tag-only
     # requests, so duration is not evidence (docs/SCRIPT_PRIMER.md ss0, ss5).

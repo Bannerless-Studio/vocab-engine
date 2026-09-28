@@ -14,7 +14,6 @@ N_WORDFREQ = 30000
 
 
 def corpus_usage(tagged, lexicon, groups=None):
-    """One pass over the tagged corpus."""
     sp = lexicon.spec
     t0 = time.time()
     surf = defaultdict(Counter)       # surface -> Counter((lemma, group))

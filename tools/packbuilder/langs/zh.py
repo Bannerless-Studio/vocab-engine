@@ -127,7 +127,7 @@ MEIYOU_GLOSS = "did not; have not (没有+V)"     # 没有 before a verb, 在 or
 JIEBA_NAME_FLAGS = ("nr", "ns", "nt", "nz")
 JIEBA_MIN_FREQ = 100      # jieba dictionary entries tagged nr below this are phrases (太贵 17, 张老师 3)
 
-# ---- readings (passage_ruby): HSK-context overrides for what the pack does not cover
+# readings (passage_ruby): HSK-context overrides for what the pack does not cover
 # Whole surfaces whose reading is not their pieces' (a phrase whose head word's pack
 # pron is the other reading: 长 cháng, 地 de) or a fixed neutral tone.
 SURFACE_READINGS = {"长大": "zhǎngdà", "草地": "cǎodì", "便宜": "piányi"}
@@ -229,7 +229,6 @@ class ZhLinker:
         self.lowered = {}           # the Linker's truecase bookkeeping: always empty here
         self._jieba = None
 
-    # ---- per-passage declarations -------------------------------------------
     @staticmethod
     def declared(p):
         """The passage's segmentation units, as passages.run's `names`:
@@ -240,7 +239,6 @@ class ZhLinker:
             out.add(("oopname", k) if str(why).startswith("name") else ("oop", k))
         return frozenset(out)
 
-    # ---- segmentation -------------------------------------------------------
     def pretag(self, items):
         for k in items:
             self.tag(k[0], k[1], k[2] if len(k) > 2 else frozenset())
@@ -432,7 +430,6 @@ class ZhLinker:
             toks.append([surf, lemma if kind != "unk" else surf, upos, info])
         return toks
 
-    # ---- the Linker interface -------------------------------------------------
     def classify(self, toks, en=None, lowered=()):
         """Counted tokens: (surface, lemma, word id or None, True, index).
         Not counted: punctuation, numerals (digits, numeral characters, 第),
@@ -520,7 +517,6 @@ class ZhLinker:
                                  f"{' + '.join(tk[0] for tk in inner)}; declare it in names if it is one")
         return notes
 
-    # ---- readings (ruby, docs/PACK_SCHEMA.md passages.json) ---------------------
     def passage_ruby(self, passages, names_of):
         """passages.run hook, before writing: with a characters stage (self.readings
         not None) adds `ruby` to every sentence that has a hanzi, `titleRuby`, and

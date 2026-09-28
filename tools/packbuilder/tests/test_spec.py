@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # vocab-engine/tools
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from packbuilder import langs  # noqa: E402
 from packbuilder.langs import get_spec  # noqa: E402

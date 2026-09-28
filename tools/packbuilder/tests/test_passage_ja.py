@@ -18,7 +18,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # vocab-engine/tools
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from packbuilder import passages  # noqa: E402
 from packbuilder.core.util import derived_write_ok  # noqa: E402
@@ -473,7 +473,6 @@ if __name__ == "__main__":
     unittest.main()
 
 
-# ---- readings (Japanese.passage_ruby / text_ruby / _counter_sounds) --------------------
 from collections import Counter, defaultdict  # noqa: E402
 import re  # noqa: E402
 

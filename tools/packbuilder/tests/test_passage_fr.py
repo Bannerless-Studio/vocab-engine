@@ -13,7 +13,7 @@ import unittest
 from collections import Counter
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # vocab-engine/tools
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from packbuilder.langs import get_spec  # noqa: E402
 from packbuilder.passages import Linker  # noqa: E402

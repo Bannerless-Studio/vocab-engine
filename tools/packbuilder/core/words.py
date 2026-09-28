@@ -121,7 +121,6 @@ def build_words(env, ctx):
                     bound.setdefault(p, phrase)
         stat("phrase_bound_words", {k: bound[k] for k in sorted(bound)})
 
-    # --- candidate pool: one key per lemma (its best-ranked POS), plus articles
     forced_keys = []
     for w, g in sp.forced:
         if g is None:
@@ -175,8 +174,7 @@ def build_words(env, ctx):
                 prev = done_lemma[lem][1]
                 if records[prev]["forced"] or share(lem, g) <= share(lem, prev[1]):
                     continue
-                displaced = prev       # one entry per lemma (its best-ranked POS with a usable entry), plus
-            #                a second POS holding >=20% of the lemma's tokens with a different sense
+                displaced = prev
         if g == "PHRASE" or g == "FORM":
             records[k] = {"lemma": lem, "group": g, "pos": "phrase" if g == "PHRASE" else "verb",
                           "en": sp.fixed_gloss[k], "w": lem, "alt": None, "forced": True,
@@ -385,7 +383,6 @@ def build_words(env, ctx):
     stat("gloss_overrides", {"applied": sorted(set(overridden)),
                              "unused": sorted(set(sp.gloss_overrides) - set(overridden))})
 
-    # --- selection + levels
     ranked = [k for k in pool if k in records and not records[k]["forced"]]
     ranked.sort(key=lambda k: order.get(k, 10**9))
     forced_ok = [k for k in forced_keys if k in records]

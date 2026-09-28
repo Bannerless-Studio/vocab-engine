@@ -76,10 +76,6 @@ def ensure_downloaded(env, check_remote=False):
                 fout.write(chunk)
 
 
-# ---------------------------------------------------------------------------
-# Stage corpus: target-language sentences that have an English translation
-# ---------------------------------------------------------------------------
-
 def corpus_path(env):
     sp = env.spec
     ver = sp.versions["corpus"]

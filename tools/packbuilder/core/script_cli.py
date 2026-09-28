@@ -11,7 +11,7 @@ from ..langs import get_spec
 from .pipeline import write_script, script_pack_fields
 from .util import Env, STATS, write_json
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # vocab-engine/tools
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from jsonify_pack import render  # noqa: E402
 
 

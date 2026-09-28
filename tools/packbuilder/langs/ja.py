@@ -58,7 +58,6 @@ from collections import Counter, defaultdict
 
 from .base import LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_AUDIO, drop_all_re
 
-# ---- script ---------------------------------------------------------------
 HIRA = "ぁ-ゖゝゞ"
 KATA = "ァ-ヺー-ヾ"
 KANJI = "㐀-䶿一-鿿豈-﫿々〆ヵヶ"
@@ -90,7 +89,6 @@ def hira(s):
     return "".join(out)
 
 
-# ---- closed sets -----------------------------------------------------------
 NUMBERS = "ゼロ 一 二 三 四 五 六 七 八 九 十 百 千 万".split()
 DAYS = "月曜日 火曜日 水曜日 木曜日 金曜日 土曜日 日曜日".split()
 MONTHS = [f"{n}月" for n in "一 二 三 四 五 六 七 八 九 十 十一 十二".split()]
@@ -278,7 +276,6 @@ NUMERAL_CHARS = frozenset("0123456789０１２３４５６７８９一二三四�
 NAME_SUFFIX = frozenset({"城", "寺"})    # after a declared name, when the joined form is
                                           # itself declared: じょう/じ, not the noun 城 しろ, 寺 てら
 
-# ---- register / content filters --------------------------------------------
 # kana items are bounded by non-hiragana on the left (やくそく is not くそ)
 VULGAR_JA = (r"(?<![ぁ-ゖ])(?:くそ|くたばれ|ちくしょう|てめえ|てめー|きさま|ぶっころ|うるせえ|うるせー|ばかやろ|"
              r"ふざけんな|ざけんな|ちんこ|まんこ|おっぱい|きもい)|"
@@ -477,7 +474,7 @@ def feats_of(ms):
     return dict(kv.split("=", 1) for kv in ms.split("|") if "=" in kv) if ms else {}
 
 
-# ---- script primer (docs/SCRIPT_PRIMER.md ss3) -------------------------------
+# script primer: docs/SCRIPT_PRIMER.md ss3
 # Kana: hiragana (108 units, 12 sets) then katakana (the same 108, plus ー and 12
 # extended syllables: 121 units, 13 sets). The small ゃ ゅ ょ っ are units of
 # their own, taught in the set before the first yōon set; a yōon unit is read
@@ -775,7 +772,7 @@ class Japanese(LanguageSpec):
         self.function_lemmas = set(self.function_lemmas)
         self.function_verbs = set(self.function_verbs)
 
-    # ---- reading passages (passages.py only; the corpus build never reads these)
+    # reading passages: the corpus build never reads these
     passage_join = ""               # unspaced: sentences join without a space
     passage_unspaced = True         # report ws_words: the linked word count
     passage_words_counted = True    # length band: the counted tokens (particles the pack has count)
@@ -1062,7 +1059,6 @@ class Japanese(LanguageSpec):
         d["_tok"] = None
         return d
 
-    # ---- tagging (SudachiPy) ---------------------------------------------------
     def tagger_desc(self):
         import sudachipy
         from importlib.metadata import version
@@ -1520,7 +1516,7 @@ class Japanese(LanguageSpec):
             out.append((surf, lemma, upos, {k: v.replace("|", "").replace("=", "") for k, v in feats.items() if v}))
         return out
 
-    # ---- Tatoeba indices: curated JMdict lemma per word -----------------------
+    # Tatoeba indices: curated JMdict lemma per word
     def _indices(self):
         if self._idx is None:
             item_re = re.compile(r"^([^(\[{~]+)(?:\(([^)]*)\))?(?:\[\d+\])?(?:\{([^}]*)\})?~?$")
@@ -1915,7 +1911,6 @@ class Japanese(LanguageSpec):
         """A reading-homograph lemma (方（かた）) is spelled like its headword."""
         return s.split("（", 1)[0] if s and "（" in s else s
 
-    # ---- lexicon ---------------------------------------------------------------
     def gender_from_entry(self, d):
         """The entry's kana reading (hiragana) is kept in the lexicon's "g"
         slot: the reading picks entries (bind_lexicon) and the pron."""
@@ -2356,7 +2351,6 @@ class Japanese(LanguageSpec):
         self.stats["kana lemmas glossed from kanji headwords of the same reading"] = n_read
         self.stats["common lemmas whose only senses were marked literary/archaic"] = n_unmarked
 
-    # ---- resolution --------------------------------------------------------------
     def _usable(self, lemma, group):
         k = (lemma, group)
         if k not in self._res_cache:
@@ -2574,7 +2568,6 @@ class Japanese(LanguageSpec):
                 return rd + "ない", spelled, c if KANJI_RE.search(c) else spelled
         return None
 
-    # ---- sentences -----------------------------------------------------------------
     def sentence_rank(self, toks, lv):
         """Polite (です/ます) and neutral sentences first; casual speech after."""
         pen = 0
@@ -2679,7 +2672,7 @@ class Japanese(LanguageSpec):
             return None
         return a, b, rd
 
-    # ---- passage readings (ruby, docs/PACK_SCHEMA.md passages.json) -------------------
+    # passage readings: ruby, docs/PACK_SCHEMA.md passages.json
     # Counters whose sound changes after a number (_counter_sounds): counter ->
     # (reading, class). A class names the numbers that double (いっ, ろっ, はっ,
     # じゅっ): h and k after 1 6 8 10, s and t after 1 8 10. h also turns the
@@ -3004,7 +2997,6 @@ class Japanese(LanguageSpec):
         n = Counter()
 
         def cp_spans(text, spans):
-            # UTF-16 spans -> code points
             idx = {_u16(text, i): i for i in range(len(text) + 1)}
             return [(idx[a], idx[b], w) for a, b, w in (s[:3] for s in spans) if a in idx and b in idx]
 
@@ -3614,7 +3606,6 @@ class Japanese(LanguageSpec):
             out["compounds"] = self.compounds
         return out
 
-    # ---- finishing ---------------------------------------------------------------------
     def finalize_words(self, env, ctx, words):
         from ..core.lexicon import GROUP_LABEL
         from ..core.tag import iter_tagged
@@ -3625,7 +3616,6 @@ class Japanese(LanguageSpec):
         rows = ctx["rows_by_sid"]
         key_to_word = {w["_key"]: w for w in words}
         self.build_keys = {w["id"]: f"{w['_key'][0]}|{GROUP_LABEL.get(w['_key'][1], w['pos'])}" for w in words}
-        # --- conjugated units per token (a content token + its inflection tail)
         units = defaultdict(Counter)            # key -> Counter(unit surface), whole corpus
         ship_units = defaultdict(Counter)       # key -> Counter(unit surface) linked in shipped sentences
         unit_norm = defaultdict(Counter)        # (key, unit) -> Counter(Sudachi normal form of its head)
@@ -3683,16 +3673,13 @@ class Japanese(LanguageSpec):
             w["w"] = self.fold(w["w"])          # 方（かた） is shown as 方
             other_heads = {h for h, n in head_n.items() if n > (h == w["w"])}
             d = info.get(lem, {"spell": Counter(), "read": Counter(), "gspell": {}, "n": 0})
-            # --- POS labels
             if k[1] == "VERB" and lem in AUXILIARIES:
                 w["pos"] = "aux"
                 self.function_verbs.add(lem)
             if lem.startswith("〜"):
                 w["pos"] = "counter" if k[1] == "NOUN" else w["pos"]
                 self.function_lemmas.add(lem)
-            # --- reading
             w["pron"] = self.word_reading(w, d)
-            # --- alts: other spellings + the forms the word takes in sentences.
             # Every alt shares the word's Sudachi normal form (入れる is not a
             # form of 入る); a pure potential form counts as its verb.
             allowed = set(self._norms.get(lem, ())) | {lem, self.fold(lem)}
@@ -4218,7 +4205,6 @@ class Japanese(LanguageSpec):
                       else "sudachi"] += 1
         self.stats.update({f"links: {k}": v for k, v in c.items()})
 
-    # ---- script primer ------------------------------------------------------
     script = {"stages": [{"key": "hira", "label": "ひらがな"}, {"key": "kata", "label": "カタカナ"}],
               "setsPerSession": 2, "mastered": 3, "tts": True,
               "learnKinds": ["symSound", "soundSym"],

@@ -96,7 +96,7 @@ def normalize_pron(p):
     return nfc(p)
 
 
-# ---- closed sets (NFC spellings; fold() is applied where they are matched) ----
+# closed sets: NFC spellings; fold() is applied where they are matched
 DAYS = "सोमवार मंगलवार बुधवार गुरुवार शुक्रवार शनिवार रविवार".split()
 MONTHS = "जनवरी फ़रवरी मार्च अप्रैल मई जून जुलाई अगस्त सितंबर अक्टूबर नवंबर दिसंबर".split()
 SEASONS = "गर्मी सर्दी बरसात वसंत पतझड़ मौसम".split()
@@ -143,8 +143,8 @@ NAMES = {"टॉम", "मैरी", "जॉन", "सामी", "लैला
 PROFANE = ("चूतिया", "चुतिया", "मादरचोद", "बहनचोद", "भेनचोद", "भोसड़ी", "भोसडी", "रंडी", "हरामी", "हरामज़ादा",
            "हरामजादा", "चूत", "साला", "साली", "गांड", "गाँड", "लौड़ा", "लौडा", "लंड", "चुदाई", "चोदना", "चोद", "कुतिया", "कमीना", "कमीने")
 
-# ---- compound postpositions: "phrase|gloss"; matched on tokens after a
-# genitive का/की/के (or से) or a possessive pronoun form (मेरे लिए, उसकी तरफ़) --
+# compound postpositions "phrase|gloss", matched on tokens after a
+# genitive का/की/के (or से) or a possessive pronoun form (मेरे लिए, उसकी तरफ़)
 POSTP_SRC = """
 के लिए|for
 के बाद|after
@@ -186,7 +186,7 @@ for _line in POSTP_SRC.strip().splitlines():
     POSTP[" ".join(_parts)] = _gloss
     POSTP_TAIL.setdefault(tuple(_parts[1:]), []).append((_parts[0], " ".join(_parts)))
 
-# ---- light verbs: "noun verb|gloss" (noun + करना/होना/आना/लगना/देना/रखना...) ----
+# light verbs "noun verb|gloss" (noun + करना/होना/आना/लगना/देना/रखना...)
 LIGHT_VERBS_SRC = """
 काम करना|to work
 बात करना|to talk, to speak
@@ -281,8 +281,8 @@ LIGHT_VERBS_SRC = """
 हार मानना|to give up, to admit defeat
 रोक लगाना|to ban, to put a stop to
 """
-# ---- vector compounds: "V1-form V2|gloss" (first token: the V1 stem or, for
-# चला/ले/दे, the form written) ----------------------------------------------
+# vector compounds "V1-form V2|gloss" (first token: the V1 stem or, for
+# चला/ले/दे, the form written)
 VECTOR_SRC = """
 चला जाना|to go away, to leave
 भूल जाना|to forget
@@ -328,7 +328,7 @@ LV_GAP_OK = {fold(x) for x in ("भी", "नहीं", "ही", "तो", "�
                                    "क्यों", "कब", "कैसे", "कहाँ")}
 PERF_PART = ("Aspect=Perf", "VerbForm=Part")
 
-# ---- script primer (docs/SCRIPT_PRIMER.md ss3) -------------------------------
+# script primer: docs/SCRIPT_PRIMER.md ss3
 # Devanagari: 73 units in 10 sets. Independent vowels, their matras (vowel signs
 # on a consonant, `base` = the vowel), consonants with the inherent a, nukta
 # letters, the signs ं ँ ः ्, and six conjuncts with shapes of their own. Romans
@@ -457,7 +457,6 @@ HI_MATRA = {nfc(g) for _, grp, _, g, *_ in HI_SCRIPT if grp == "matra"}
 HI_ROMAN = {slug: roman for _, _, slug, _, _, roman, *_ in HI_SCRIPT}
 
 
-# ---- folded lookup tables built from the hand lists above ---------------------
 MISSPELLED = {"मे": "में", "मै": "मैं", "मेँ": "में"}
 def _f(xs):
     return {fold(x) for x in xs}
@@ -548,7 +547,7 @@ for _w in (DAYS + MONTHS + SEASONS + NUMBERS + COLOURS + PRONOUNS + POSSESSIVES 
     DISPLAY.setdefault(fold(_w), nfc(_w))
 DISPLAY[KAUNSA] = "कौन-सा"
 
-# ---- verb paradigm (folded forms; forms the Wiktionary tables lack) ------------
+# verb paradigm: forms the Wiktionary tables lack (folded)
 VOWEL_END = set("ािीुूृेैोौ") | set("अआइईउऊएऐओऔ")
 IRREG_PERF = {"जाना": ("गया", "गई", "गए", "गईं"), "करना": ("किया", "की", "किए", "कीं"),
               "लेना": ("लिया", "ली", "लिए", "लीं"), "देना": ("दिया", "दी", "दिए", "दीं"),
@@ -590,7 +589,7 @@ def verb_forms(inf):
     return {fold(x) for x in f}
 
 
-# ---- romanisation fallback (words Wiktionary gives none) -------------------------
+# romanisation fallback for words Wiktionary gives none
 _TR_V = {"अ": "a", "आ": "ā", "इ": "i", "ई": "ī", "उ": "u", "ऊ": "ū", "ऋ": "ŕ", "ए": "e", "ऐ": "ai", "ओ": "o",
          "औ": "au", "ऑ": "ŏ"}
 _TR_M = {"ा": "ā", "ि": "i", "ी": "ī", "ु": "u", "ू": "ū", "ृ": "ŕ", "े": "e", "ै": "ai", "ो": "o", "ौ": "au",
@@ -642,7 +641,7 @@ def translit(word):
     return nfc("".join(out))
 
 
-# ---- sensitive content (Hindi half; English via the shared lists) ------------------
+# sensitive content: Hindi half; English via the shared lists
 def _alt(terms):
     return "|".join(dev_rx(t) + f"[{DEV}]*" for t in terms)
 
@@ -888,7 +887,6 @@ class Hindi(LanguageSpec):
                 self.fixed_gloss[(lem, group[lab])] = v
         return self
 
-    # ---- spelling --------------------------------------------------------------
     def fold(self, s):
         return fold(s)
 
@@ -905,7 +903,6 @@ class Hindi(LanguageSpec):
     def default_gender(self, lemma):
         return None
 
-    # ---- tagging (Stanza) -------------------------------------------------------------
     def tagger_desc(self):
         import stanza
         return f"Stanza {stanza.__version__}, hi default package (UD Hindi-HDTB)"
@@ -959,7 +956,6 @@ class Hindi(LanguageSpec):
         for t in texts:
             yield [tuple(x) for x in raw[t]]
 
-    # ---- kaikki side info ---------------------------------------------------------------
     def _info(self):
         """{folded headword: [[headword, pos, romanisation, is_lemma, gloss, gender, [folded table forms]]]}."""
         if hasattr(self, "_info_cache"):
@@ -1084,7 +1080,6 @@ class Hindi(LanguageSpec):
                 t[1], t[2] = "क्या", "PART"
         return toks
 
-    # ---- resolution ------------------------------------------------------------------------
     def post_resolve(self, toks, out):
         """Context rules: fixed phrases, compound postpositions, light verbs,
         vector compounds; vector/passive V2 and conjunctive कर link nothing."""
@@ -1539,7 +1534,6 @@ class Hindi(LanguageSpec):
         return {"spaced": True, "rtl": False, "langTag": "hi", "fontFamily": "\"Noto Sans Devanagari\", sans-serif",
                 "fonts": ["Noto Sans Devanagari:wght@400;700"], "lineHeight": 1.8}
 
-    # ---- finishing ----------------------------------------------------------------------
     def finalize_words(self, env, ctx, words):
         from collections import Counter
         from ..core.gloss import strip_gloss_style
@@ -1711,7 +1705,6 @@ class Hindi(LanguageSpec):
             return f"word {w['id']} {w['w']!r}: precomposed nukta letter (not NFC)"
         return None
 
-    # ---- QA scans ----------------------------------------------------------------------------
     qa_closed_sets = {
         "days": " ".join(DAYS), "months": " ".join(MONTHS), "seasons": " ".join(SEASONS),
         "num": " ".join(NUMBERS), "col": " ".join(COLOURS),
@@ -1721,7 +1714,6 @@ class Hindi(LanguageSpec):
     qa_foreign_letters_re = r"[a-z]"
     qa_proper_re = r"\b(India|Delhi|Mumbai|Hindu|Muslim|Pakistan|Krishna|Rama?|Shiva|Allah|God)\b"
 
-    # ---- script primer ------------------------------------------------------------------------
     # tts true: hi-IN voices ship with Android/Google TTS, iOS and Windows; not ear-checked
     # on the user's devices (docs/SCRIPT_PRIMER.md ss0 probe pending).
     script = {"stages": [{"key": "deva", "label": "देवनागरी"}],

@@ -449,7 +449,6 @@ class French(LanguageSpec):
             self.h_aspire = {w.strip() for w in p.read_text().split() if w.strip()}
         return self
 
-    # ---- tagging -----------------------------------------------------------
     def tag_text(self, text):
         return text.replace("’", "'").replace(" ", " ").replace(" ", " ")
 
@@ -501,7 +500,6 @@ class French(LanguageSpec):
                 toks[i] = [text, lemma, upos, f"Gender={g}" + ("|" + ms if ms else "")]
         return toks
 
-    # ---- resolution --------------------------------------------------------
     def bind_lexicon(self, lexicon):
         """Adjust the loaded Wiktionary lexicon:
         - feminine nouns with a masculine counterpart in their head template
@@ -871,7 +869,6 @@ class French(LanguageSpec):
                         out[i] = (lx.best_by_freq(a), "ADJ")
         return out
 
-    # ---- finishing ----------------------------------------------------------
     def _tidy(self, text, pos):
         """One gloss segment: drop definitional tails after the first
         alternative ("eye, helping organisms to see", "water, a liquid that
@@ -1005,7 +1002,6 @@ class French(LanguageSpec):
             added.append(w["lemma"])
         self._reflexive_senses_added = added
 
-    # ---- morphology hooks ----------------------------------------------------
     def elides(self, w):
         """Article elides before this word: vowel or mute h."""
         f = w[:1]
@@ -1208,7 +1204,6 @@ class French(LanguageSpec):
         # passé simple: finite indicative past (passé composé is aux + participle)
         return "Tense=Past" in ms and "Mood=Ind" in ms and "VerbForm=Fin" in ms
 
-    # ---- nouns / articles -------------------------------------------------
     def default_gender(self, lemma):
         return "f" if lemma.endswith(("tion", "sion", "té", "ette", "ance", "ence", "ure", "ie", "ade")) else "m"
 
@@ -1260,7 +1255,7 @@ class French(LanguageSpec):
             return f"noun {w['id']} {shown!r}: l' noun without a (m)/(f) gender tag"
         return None
 
-    # ---- passages only (packbuilder passages; the word/sentence build never calls these).
+    # passages only: the word/sentence build never calls these.
     # The subject-pronoun repair (passage_retag) is passage-only: in the word
     # build it shifted 3 word ids.
     passage_form_base = True      # amie -> ami, dansé -> danser, allemande -> allemand
@@ -1408,7 +1403,6 @@ class French(LanguageSpec):
                 i += 1
         return ranges
 
-    # ---- QA scans -----------------------------------------------------------
     qa_closed_sets = {
         "days": " ".join(DAYS), "months": " ".join(MONTHS), "seasons": " ".join(SEASONS),
         "num": " ".join(NUMBERS), "col": " ".join(COLOURS),

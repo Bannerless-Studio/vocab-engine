@@ -202,7 +202,6 @@ class Italian(LanguageSpec):
     # vocabulary and keep their level (same call as de/es/ru); their violent
     # sentences are held to B1 by sensitive_re.
 
-    # ---- morphology hooks ------------------------------------------------
     def pronominal_base(self, lemma):
         return lemma[:-2] + "e" if lemma.endswith("rsi") else None     # farsi -> fare
 
@@ -259,7 +258,6 @@ class Italian(LanguageSpec):
     def is_marked_past(self, ms):
         return "Tense=Past" in ms and "Mood=Ind" in ms and "VerbForm=Fin" in ms
 
-    # ---- nouns / articles -------------------------------------------------
     def default_gender(self, lemma):
         return "f" if lemma.endswith("a") else "m"
 
@@ -316,7 +314,6 @@ class Italian(LanguageSpec):
         (amico for l'amico) stay alts (es.mark_alt_forms)."""
         return "form" if surface in (word.get("_form") or ()) else "alt"
 
-    # ---- QA scans -----------------------------------------------------------
     qa_closed_sets = {
         "days": " ".join(DAYS), "months": " ".join(MONTHS), "num": " ".join(NUMBERS),
         "col": "rosso blu azzurro verde giallo nero bianco grigio marrone rosa viola arancione",

@@ -93,7 +93,6 @@ DEFAULT_GROUP_KPOS = {
 
 
 class LanguageSpec:
-    # ---- identity -------------------------------------------------------
     code = None                 # pack key and wordfreq/simplemma/kaikki language code
     name_en = None              # "Italian"
     pack_name = None            # "Italian (A1–B1)"
@@ -105,7 +104,6 @@ class LanguageSpec:
     kaikki_lang_code = None     # defaults to code
     tatoeba_code = None         # ISO 639-3, "ita"
 
-    # ---- tagger -----------------------------------------------------------
     spacy_model = None          # "it_core_news_sm"
     spacy_n_process = 6
     tagger_attribution = None   # dict written to attribution.json["tagger"]
@@ -121,7 +119,7 @@ class LanguageSpec:
     tagger = "spacy"            # "spacy" (spacy_model) or "stanza" (stanza_lang; spec.tag_texts does the tagging)
     stanza_lang = None          # Stanza language code when tagger == "stanza" (fa)
 
-    # ---- sources (file name in .cache/ -> url). Roles name the files the
+    # sources: .cache file name -> url. Roles name the files the
     # stages read; file names are part of the cache keys.
     sources = {}
     subtitles_file = None       # hermitdave FrequencyWords <code>_full.txt
@@ -132,11 +130,10 @@ class LanguageSpec:
     audio_file = TATOEBA_AUDIO[0]
     kelly_file = None           # optional CEFR cross-check list (never shipped)
 
-    # ---- cache versions: bump when the stage's code or this language's rules
+    # cache versions: bump when the stage's code or this language's rules
     # for that stage change (the old cache file is then ignored).
     versions = {"corpus": "c1", "tag": "t1", "lex": "l1"}
 
-    # ---- levels / pack.json -------------------------------------------------
     bands = [("A1", 600), ("A2", 700), ("B1", 700)]
     placement = [["A1", 4], ["A2", 4], ["B1", 4]]
     set_size = 10
@@ -147,7 +144,7 @@ class LanguageSpec:
     min_len = {"A1": 4, "A2": 4, "B1": 5}
     max_len = 14
 
-    # ---- orthography (regexes over lowercase text) --------------------------
+    # regexes over lowercase text
     word_re = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ]+")                 # a word in raw text
     lex_word_re = re.compile(r"^[a-z']+$")                       # a usable Wiktionary headword
     sub_token_re = re.compile(r"^[a-z]+'?$")                     # a usable frequency-list surface
@@ -155,12 +152,11 @@ class LanguageSpec:
     fem_of_re = re.compile(r"(?:female equivalent|(?:singular )?feminine(?: singular)?) of ([a-z]+)")
     accent_variants = {}        # unaccented final letter -> accented letters (subtitles drop accents)
 
-    # ---- Wiktionary --------------------------------------------------------
     noun_head_template = None   # kaikki head template carrying noun gender ("it-noun")
     regional_tags = set()       # kaikki region tags that mark a sense as non-standard
     group_kpos = DEFAULT_GROUP_KPOS
 
-    # ---- morphology / resolution tables (empty = rule off) ------------------
+    # empty table = rule off
     clitic_re = None            # verb+enclitic surface splitter
     art_prep = {}               # articulated preposition surface -> preposition
     article_forms = {}          # article lemma -> its surface forms
@@ -173,7 +169,6 @@ class LanguageSpec:
     verb_endings = None         # infinitive endings; None = any lemma can be a verb
     function_verbs = set()      # verbs kept in functionWords (essere, avere)
 
-    # ---- forced items / hand tables ------------------------------------------
     forced_closed = []          # [(lemma, group)] closed sets forced into A1
     forced_level = {}           # (lemma, group) -> level a forced word ships at (default: bands[0][0]).
         # Mostly populated from forced_a1_file's word@LEVEL annotations (ur: ماموں@A2); a subclass may
@@ -196,14 +191,13 @@ class LanguageSpec:
     profane_stems = ()
     bad_text_re = None          # target-language sentences to skip (known errors)
 
-    # ---- language repo data files (repo-relative) ---------------------------
+    # repo-relative
     gloss_overrides_file = "tools/gloss_overrides.json"
     gloss_display_file = "tools/gloss_display.json"   # display-only en per "lemma|pos", applied to words.json after linking (core/words.apply_gloss_display)
     forced_a1_file = "tools/forced_a1.txt"
     id_map_file = "tools/id_map_v1.json"
     report_file = "tools/REPORT.md"
 
-    # ---- report wording -----------------------------------------------------
     report_title = None
     forced_description = "closed sets, A1 core list"
     numeral_exclusion = "numeral outside the allowed set"
@@ -220,7 +214,6 @@ class LanguageSpec:
         self.a1_core = {}
         self.forced = list(self.forced_closed)
 
-    # ------------------------------------------------------------------
     def load(self):
         """Read the language repo's data files. Needs self.repo."""
         p = self.repo / self.gloss_overrides_file
@@ -244,7 +237,6 @@ class LanguageSpec:
     def level_ids(self):
         return [b[0] for b in self.bands]
 
-    # ---- hooks: orthography / morphology -------------------------------------
     def is_verb_lemma(self, w):
         return self.verb_endings is None or w.endswith(self.verb_endings)
 
@@ -416,7 +408,7 @@ class LanguageSpec:
         """Language-specific pack assertion on one word; error string or None."""
         return None
 
-    # ---- normalisation / finishing hooks (defaults are no-ops) ---------------
+    # defaults are no-ops
     morph_keep = None            # UD features kept in the tagged corpus; None = core.tag.MORPH_KEEP
     rare_zipf = None             # rare-reading override threshold; None = core.lexicon.RARE_ZIPF
     finite_verb_lemma = False     # a finite verb token keeps the tagger lemma over a same-spelling infinitive (ru: есть)
@@ -438,7 +430,7 @@ class LanguageSpec:
         shows; a spec may reject it (ru: abbreviation expansions мм -> миллиметр)."""
         return lemma
 
-    # ---- corpus / tagger hooks (added for Persian; defaults are no-ops) --------
+    # defaults are no-ops
     min_corpus_tokens = 0        # words: a non-forced (lemma, POS) needs this many tagged-corpus tokens (fa: 3)
     untranslated_rows = False    # corpus: also tag target sentences with no English link (english ""), never shipped
     extra_corpus_files = ()      # repo-relative files read by extra_corpus_rows (part of the corpus cache key)
@@ -477,7 +469,7 @@ class LanguageSpec:
         fontFamily, fonts, lineHeight, spaced; see docs/PACK_SCHEMA.md)."""
         return {}
 
-    # ---- characters stage (docs/HSK_MERGE.md ss2; defaults emit nothing) -------
+    # characters stage (docs/HSK_MERGE.md ss2); defaults emit nothing
     # pack.json "characters" block, written only when character_units returns units
     characters = None
     # True: pack.json also gets "pronFirst": true alongside "characters" (and only
@@ -500,7 +492,7 @@ class LanguageSpec:
         words.json records, in teaching order within each level; None: no file."""
         return None
 
-    # ---- script primer (docs/SCRIPT_PRIMER.md ss3; defaults emit nothing) -------
+    # script primer (docs/SCRIPT_PRIMER.md ss3); defaults emit nothing
     # pack.json "script" block ({stages, setsPerSession, mastered, tts, *Kinds});
     # set together with script_units, which turns on pack/script.json
     script = None
@@ -706,7 +698,7 @@ class LanguageSpec:
         override ships exactly as before."""
         return "alt"
 
-    # ---- added for Indonesian (defaults are no-ops) ----------------------------
+    # defaults are no-ops
     audio_rank_bonus = 0         # sentences: a sentence with native audio has its sentence_rank penalty lowered by this
     use_audio = True             # corpus: attach permissive Tatoeba audio (id: off, TTS only)
     corpus_rank_weight = 0       # >0: the tagged corpus's (lemma, POS) counts join the frequency blend
@@ -714,13 +706,12 @@ class LanguageSpec:
     keep_keys = frozenset()      # (lemma, group) kept in the word list even when ranked past the cut
     level_ceiling = {}           # (lemma, group) -> highest level it may take (ko: NIKL beginner words <= A2)
 
-    # ---- added for Japanese (defaults keep every other language unchanged) ------
+    # defaults keep every other language unchanged
     spoken_from_corpus = False   # freq: the tagged corpus's (lemma, POS) counts are the spoken list; subtitles_file is not read (ja: hermitdave list unusable)
     spoken_freq_label = None     # REPORT.md label of the spoken-list row (None: the subtitle list's)
     use_simplemma = True         # freq: simplemma fallback lemma for surfaces unseen in the corpus (ja: unsupported, the surface is kept)
     sentence_end_re = None       # sentences: regex a usable sentence must match at its end (None: core SENT_END_RE; ja adds 。！？)
 
-    # ---- QA scan config ---------------------------------------------------
     qa_closed_sets = {}          # name -> space-separated lemmas that must be A1
     qa_verb_re = None            # regex a verb lemma must match
     qa_article_rules = []        # [(regex over a noun's w, message)] flagged when matching
@@ -747,9 +738,7 @@ def parse_gender(g):
 
 
 class ForcedGroups(dict):
-    """dict {"NOUN": [word, ...], ...}, exactly like the old parse_forced_file return, plus
-    `.levels`: {(word, GROUP): "A2"} for words written as word@LEVEL. Every existing
-    forced_a1.txt (no @LEVEL anywhere) parses to a plain-looking dict with `.levels == {}`."""
+    """dict {GROUP: [word, ...]} plus `.levels` {(word, GROUP): LEVEL} for word@LEVEL entries."""
     def __init__(self):
         super().__init__()
         self.levels = {}
@@ -757,10 +746,7 @@ class ForcedGroups(dict):
 
 def parse_forced_file(text):
     """'[NOUN]\\nword word\\n[VERB]\\n...' -> {"NOUN": [...], ...}, order kept.
-    '#' starts a comment. A word may carry an explicit level as word@LEVEL (e.g. ماموں@A2);
-    the level is stripped from the returned word list and collected in the result's
-    `.levels` dict {(word, GROUP): LEVEL} instead (see ForcedGroups). A bare word (no @)
-    is unaffected: this is backwards compatible with every existing forced_a1.txt."""
+    '#' starts a comment. word@LEVEL (ur: ماموں@A2) goes to `.levels` (see ForcedGroups)."""
     out, cur, g = ForcedGroups(), None, None
     for line in text.splitlines():
         line = line.split("#", 1)[0].strip()

@@ -7,7 +7,7 @@ import sys
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # vocab-engine/tools
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from packbuilder.langs import get_spec  # noqa: E402
 from packbuilder.langs.base import drop_all_re  # noqa: E402

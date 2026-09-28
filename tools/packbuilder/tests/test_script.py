@@ -13,7 +13,7 @@ import unittest
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(TOOLS))   # vocab-engine/tools
+sys.path.insert(0, str(TOOLS))
 
 from packbuilder.core.script import build_script, _prune_syll  # noqa: E402
 from packbuilder.core.script_opts import option_counts  # noqa: E402

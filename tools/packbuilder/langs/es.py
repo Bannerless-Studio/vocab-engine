@@ -170,7 +170,6 @@ def stressed_initial_a(lemma):
     return n == 1                          # final stress
 
 
-# ---- alt / forms (alt_kind) -------------------------------------------------
 def _surf_key(s):
     return str(s).lower().replace("\u2019", "'").replace("\u02bc", "'")
 
@@ -394,7 +393,6 @@ class Spanish(LanguageSpec):
         self._voseo = {}
         self._gender_homonym = {}
 
-    # ---- orthography -------------------------------------------------------
     def accent_candidates(self, s):
         return ACCENT_PAIRS.get(s, [])
 
@@ -405,7 +403,6 @@ class Spanish(LanguageSpec):
             return []
         return [stem] if plain == stem else [stem, plain]
 
-    # ---- morphology hooks --------------------------------------------------
     def pronominal_base(self, lemma):
         return lemma[:-2] if lemma.endswith(("arse", "erse", "irse", "írse")) else None   # levantarse -> levantar
 
@@ -474,7 +471,6 @@ class Spanish(LanguageSpec):
         return any(t[0].lower() in MARKED_TOKENS or (t[2] in ("VERB", "AUX", "ADJ", "PROPN") and self.is_voseo(t[0].lower()))
                    for t in toks)
 
-    # ---- nouns / articles ----------------------------------------------------
     lemma_tiebreak_corpus = True
     revert_dedupe_gloss = True
 
@@ -675,7 +671,6 @@ class Spanish(LanguageSpec):
         (perro for el perro) stay alts (mark_alt_forms)."""
         return "form" if surface in (word.get("_form") or ()) else "alt"
 
-    # ---- QA scans ------------------------------------------------------------
     qa_closed_sets = {
         "days": " ".join(DAYS), "months": " ".join(MONTHS), "seasons": " ".join(SEASONS),
         "num": " ".join(NUMBERS), "col": " ".join(COLOURS),

@@ -36,7 +36,6 @@ FIELD_ORDER = ("id", "st", "set", "group", "t", "name", "roman", "alt", "say", "
 
 
 def _unit_out(u):
-    """Drop empty optional fields and order keys stably."""
     out = {}
     for k in FIELD_ORDER:
         if k not in u:

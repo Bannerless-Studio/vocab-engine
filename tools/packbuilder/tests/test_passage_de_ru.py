@@ -18,7 +18,7 @@ from collections import Counter
 from pathlib import Path
 from unittest import mock
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # vocab-engine/tools
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from packbuilder import langs, passages  # noqa: E402
 from packbuilder.langs import get_spec  # noqa: E402
@@ -73,8 +73,6 @@ def linker(spec, lex, words):
 def ids(cl):
     return {c[0]: c[2] for c in cl}
 
-
-# ---- German -----------------------------------------------------------------
 
 def de_spec(lex):
     sp = get_spec("de", TMP)
@@ -302,8 +300,6 @@ class GermanClassify(unittest.TestCase):
         self.assertEqual(self.cl(t, res)["auf"], "w_aufstehen")
         self.assertIsNone(self.cl(t, res, passage_particle_links=False)["auf"])
 
-
-# ---- Russian ----------------------------------------------------------------
 
 class RussianRetag(unittest.TestCase):
     def setUp(self):

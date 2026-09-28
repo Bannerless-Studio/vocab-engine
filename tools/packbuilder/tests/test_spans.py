@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))   # vocab-engine/tools
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from packbuilder.core.sentences import phrase_spans, sentence_links  # noqa: E402
 from packbuilder.langs import get_spec  # noqa: E402
@@ -112,7 +112,7 @@ class SentenceLinksWhere(unittest.TestCase):
                 tok(",", ",", "PUNCT"), tok("per", "per", "ADP"), tok("favore", "favore", "NOUN"), tok(".", ".", "PUNCT")]
         where = []
         links = sentence_links(toks, lex, k2i, {"comprare", "mela"}, text, where=where)
-        self.assertEqual(links, sentence_links(toks, lex, k2i, {"comprare", "mela"}, text))   # unchanged
+        self.assertEqual(links, sentence_links(toks, lex, k2i, {"comprare", "mela"}, text))
         self.assertEqual(sorted(links), ["c", "m", "pf"])
         self.assertIn(("tok", 0, 0, "c"), where)
         self.assertIn(("tok", 2, 2, "m"), where)

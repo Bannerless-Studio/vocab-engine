@@ -92,7 +92,7 @@ def main(argv):
         raise SystemExit("pack_from_hsk: SENTENCE_FUNCTION_WORDS not found in hsk src/pinyin_core.js")
     fw_strings = json.loads(m.group(1))
 
-    # ---- words: ids in hsk file order (which is also set order within a level)
+    # ids in hsk file order (which is also set order within a level)
     words, id_of = [], {}
     for i, v in enumerate(vocab):
         wid = f"w{i + 1:04d}"
@@ -110,7 +110,6 @@ def main(argv):
             return id_of[e["base"]], token
         return None, None
 
-    # ---- sentences
     out_sent, fallback, unresolved, merged, unplaced = [], {}, [], {}, []
     for i, s in enumerate(sentences):
         sid = f"s{i + 1:04d}"
@@ -163,7 +162,7 @@ def main(argv):
             rec["ruby"] = ruby
         out_sent.append(rec)
 
-    # ---- function words (compounds collapse onto their base word)
+    # compounds collapse onto their base word
     fw, fw_notes = [], []
     for tok in fw_strings:
         wid, via = resolve(tok)
@@ -218,7 +217,7 @@ def main(argv):
         "soundsReference": True,
     }
 
-    # ---- characters: one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).
+    # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).
     # Unit id = "c" + the word id's digits (w0416 -> c0416): ids follow word ids and are
     # never renumbered (they are progress keys).
     characters = []
@@ -232,7 +231,7 @@ def main(argv):
             "lv": w["lv"],
             "reading": w["pron"],
         })
-    # ---- legacy map for the hsk_pinyin -> vocab_zh progress migration (docs/HSK_MERGE.md §4)
+    # legacy map for the hsk_pinyin -> vocab_zh progress migration (docs/HSK_MERGE.md §4)
     legacy = {
         "w": {w["w"]: w["id"] for w in words},
         "s": {s["t"]: s["id"] for s in out_sent},

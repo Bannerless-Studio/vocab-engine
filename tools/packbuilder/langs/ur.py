@@ -92,7 +92,7 @@ def fold(s):
     return _fold1(s)
 
 
-# ---- sentence text repair (Tatoeba spelling slips) ----------------------------------
+# Tatoeba spelling slips:
 # One class, applied to the tagger input and the shipped text alike (text_norm):
 # invisible bidi/zero-width characters dropped; ASCII sentence punctuation ->
 # Urdu (. ? , ; -> ۔ ؟ ، ؛); broken he/hamza/ye spellings repaired (یے/ھے -> ہے,
@@ -155,7 +155,7 @@ def text_norm(s):
 DATIVE_PRON = {"مجھے", "تجھے", "اسے", "انہیں", "انھیں", "ہمیں", "تمہیں", "تمھیں", "آپکو", "جسے", "جنہیں", "کسے"}
 
 
-# ---- closed sets (folded spellings) --------------------------------------------
+# closed sets: folded spellings
 DAYS = "پیر منگل بدھ جمعرات جمعہ ہفتہ اتوار".split()
 MONTHS = "جنوری فروری مارچ اپریل مئی جون جولائی اگست ستمبر اکتوبر نومبر دسمبر".split()
 SEASONS = "گرمی سردی بہار خزاں برسات".split()
@@ -194,7 +194,7 @@ FIXED_PRON = {"حد": "had", "فلم": "film", "براہ کرم": "barāh-e kara
               "وعلیکم السلام": "va-ʿalaikum as-salām", "خوش آمدید": "xuś āmdīd",
               "معاف کیجیے": "māf kījiye", "شکریہ": "śukriya"}
 
-# ---- light-verb and vector compounds: "part verb|gloss" -------------------------
+# light-verb and vector compounds "part verb|gloss"
 LIGHT_VERBS_SRC = """
 کام کرنا|to work
 شروع کرنا|to start, to begin
@@ -413,7 +413,7 @@ GEN_SID_BASE = 90_000_000          # corpus sids of sentences written for the pa
 VOWEL_STEM_END = ("ا", "و")
 
 
-# ---- inflection by rule (Hindi-twin entries; Urdu entries have tables) --------------
+# inflection by rule for Hindi-twin entries (Urdu entries have tables)
 IRREG = {
     "کر": {"کیا", "کی", "کیے", "کیں", "کیجیے", "کرو", "کروں", "کرے", "کریں"},
     "جا": {"گیا", "گئی", "گئے", "گئیں"},
@@ -469,7 +469,7 @@ GROUP_LABEL_POS = {"noun": "noun", "verb": "verb", "adj": "adj", "adv": "adv", "
 SKIP_POS = {"name", "character", "suffix", "prefix", "symbol", "punct", "proverb", "combining_form"}
 _ROM_TRIM = re.compile(r"\s*\(.*?\)")
 
-# ---- romanisation: one scheme for kaikki, Hindi-twin and manual prons -----------
+# romanisation: one scheme for kaikki, Hindi-twin and manual prons
 # Long vowels ā ī ū e o ai au, short a i u; retroflex ṭ ḍ ṛ (the only dotted
 # consonants); aspirates bh ph th ṭh ch kh gh ...; c چ, x خ, ġ غ, ś ش, ž ژ; ʿ for ع
 # (always written); ʾ for hamza after a consonant (jurʾat, masʾala; one glyph, never ASCII ');
@@ -783,7 +783,7 @@ PK_RE = re.compile("(?<![" + LET + "a-z])(?:پاکستان\\w*|pakistan\\w*)", r
 IN_RE = re.compile("(?<![" + LET + "a-z])(?:بھارت\\w*|ہندوستان\\w*|انڈیا|india\\w*)", re.I)
 
 
-# ---- script primer (docs/SCRIPT_PRIMER.md ss3) -------------------------------
+# script primer: docs/SCRIPT_PRIMER.md ss3
 # Urdu alphabet: 39 units in 8 sets, dot families (rasm) taught together. Romans
 # follow the pack's pron scheme (pron_norm: ā c x ġ ś ž ṭ ḍ ṛ, ʿ ain, ʾ hamza, ̃ nasal);
 # example words use the word's own pron. Short vowels (zabar, zer, pesh) and ZWNJ
@@ -1112,7 +1112,6 @@ class Urdu(LanguageSpec):
         self.forced_level = {(canon(w), g): lvl for (w, g), lvl in self.forced_level.items()}
         return res
 
-    # ---- spelling / frequency --------------------------------------------------
     def fold(self, s):
         return fold(s)
 
@@ -1167,7 +1166,6 @@ class Urdu(LanguageSpec):
     def is_profane(self, w):
         return w in self.profanity
 
-    # ---- dictionary: kaikki Urdu + its Hindi twin ------------------------------------
     def _dict(self):
         """{"info": {folded headword: [[display, pos, rom, gender, gloss, src]]},
         "forms": {folded surface: [[lemma, pos]]}, "twin": [[lemma, pos, [glosses], rom, gender]]}.
@@ -1303,7 +1301,6 @@ class Urdu(LanguageSpec):
     def _forms_of(self, surface, poses):
         return sorted({lem for lem, p in self._dict()["forms"].get(surface, []) if p in poses})
 
-    # ---- tagging (Stanza) ---------------------------------------------------------
     def tagger_desc(self):
         import stanza
         return f"Stanza {stanza.__version__}, ur default package (UD Urdu-UDTB)"
@@ -1371,7 +1368,6 @@ class Urdu(LanguageSpec):
         for t in texts:
             yield [(x[0], x[1], x[2], x[3]) for x in raw[t]]
 
-    # ---- token fixes -----------------------------------------------------------------
     UPOS_FIX = {"بہت": "ADV", "زیادہ": "ADJ", "کم": "ADJ", "بہتر": "ADJ", "یہاں": "ADV", "وہاں": "ADV",
                 "اب": "ADV", "پھر": "ADV", "ابھی": "ADV", "کبھی": "ADV", "ہمیشہ": "ADV", "آج": "ADV",
                 "کل": "ADV", "جلدی": "ADV", "واپس": "ADV", "صرف": "ADV", "بالکل": "ADV", "شاید": "ADV",
@@ -1782,7 +1778,7 @@ class Urdu(LanguageSpec):
                 n_ = self._noun_base(t[0], self._has)
                 if n_:
                     t[1], t[2] = n_, "NOUN"
-            # link traps (QA 2026-09-26) ---------------------------------------------
+            # link traps (QA 2026-09-26)
             # imperative/future دو of دینا, not "two": at a clause end (خون دو، / دھیان دو۔)
             # or before نا / the future گے (دو گے)
             if t[0] == "دو" and t[2] == "NUM" and i and toks[i - 1][2] != "NUM" and \
@@ -1863,7 +1859,6 @@ class Urdu(LanguageSpec):
                 t[3] = re.sub(r"\|?Gender=\w+", "", t[3]).lstrip("|")
         return toks
 
-    # ---- resolution --------------------------------------------------------------------
     def bind_lexicon(self, lexicon):
         """Hindi-twin entries join the lexicon; the inflection forms (tables and
         rule-built) become form pointers."""
@@ -2232,8 +2227,6 @@ class Urdu(LanguageSpec):
                 taken |= {i, j}
         return out
 
-    # ---- sentences written for the pack ----------------------------------------------
-    # ---- script primer ------------------------------------------------------
     # tts false: no Urdu voice on macOS (`say -v ?` lists none; the only Indic voice is
     # hi_IN Lekha) and none shipped with Windows; Android Google TTS may have one but it
     # is unverified (no ear-check yet). Bare-letter speech is unreliable anyway; a
@@ -2390,7 +2383,6 @@ class Urdu(LanguageSpec):
                           "romanisation for Urdu words the Urdu extract lacks)",
                 "licence": "CC-BY-SA-3.0/GFDL", "url": self.sources[self.hindi_file]}}
 
-    # ---- finishing ----------------------------------------------------------------------
     def finalize_words(self, env, ctx, words):
         from collections import Counter
         from ..core.gloss import strip_gloss_style
@@ -2516,7 +2508,6 @@ class Urdu(LanguageSpec):
                             "words_glossed_via_hindi_twin": len(twin_gloss),
                             "words_glossed_via_hindi_twin_list": sorted(twin_gloss)})
 
-    # ---- checks ----------------------------------------------------------------------
     def check_word(self, w):
         f = fold(w["w"])
         last = f.split(" ")[-1]
@@ -2531,7 +2522,6 @@ class Urdu(LanguageSpec):
             return f"word {w['id']} {w['w']!r}: Arabic yeh/kaf/heh or harakat in w"
         return None
 
-    # ---- QA scans ------------------------------------------------------------------------
     qa_closed_sets = {
         "days": " ".join(DAYS), "months": " ".join(MONTHS), "seasons": " ".join(SEASONS),
         "num": " ".join(NUMBERS), "col": " ".join(COLOURS),

@@ -86,7 +86,7 @@ DIALECT_MARKERS = set(lfold(w) for w in (
     "هاذي ويش وش شكون فماش بالزاف تبغى ابغى أبغى يبغى وايد جدام").split())
 
 
-# ---- closed sets (lemma keys: fold() spelling, hamza kept) ------------------------------
+# closed sets: lemma keys in fold() spelling, hamza kept
 DAYS = [("الأحد", "sunday", "Sunday"), ("الاثنين", "monday", "Monday"), ("الثلاثاء", "tuesday", "Tuesday"),
         ("الأربعاء", "wednesday", "Wednesday"), ("الخميس", "thursday", "Thursday"), ("الجمعة", "friday", "Friday"),
         ("السبت", "saturday", "Saturday")]
@@ -273,7 +273,6 @@ NAMES = {"مصر", "مسيح", "صين", "بن", "مناد", "منادي", "سك
          "ماري", "فاضل", "دانيا", "دانية", "دانيه", "باية", "بايه", "رامي", "مريم", "نورة", "نوره", "ميمون", "مزيان"}
 POS_KAIKKI = {"NOUN": ("noun",), "ADJ": ("adj",), "VERB": ("verb",), "ADV": ("adv",)}
 
-# ---- compounds --------------------------------------------------------------------
 # "phrase|gloss|GROUP". A verb compound is "verb prep" (free preposition) or
 # "verb بـ/لـ/كـ" (bound: the next token's proclitic, or ب/ل with a pronoun),
 # or "verb noun" (light verb + object noun), the second part within 4 tokens
@@ -448,7 +447,7 @@ FIXED_PRON = {"الأحد": "al-ʾaḥad", "الاثنين": "al-iṯnayn", "ا�
               "أربعة عشر": "ʾarbaʿata ʿašara", "خمسة عشر": "ḫamsata ʿašara", "ستة عشر": "sittata ʿašara",
               "سبعة عشر": "sabʿata ʿašara", "ثمانية عشر": "ṯamāniyata ʿašara", "تسعة عشر": "tisʿata ʿašara"}
 
-# ---- script primer (docs/SCRIPT_PRIMER.md ss3) -------------------------------------
+# script primer: docs/SCRIPT_PRIMER.md ss3
 # 28 letters + the hamza forms ء أ إ آ ؤ ئ + ة ى as units, 7 sets: the dot
 # family ب ت ث ن ي with alef first, so set 1 already reads بيت, بنت, ابن.
 # Names and romanisation after the Wiktionary "Arabic alphabet" appendix, in
@@ -641,7 +640,6 @@ class Arabic(LanguageSpec):
         "marijuana|cannabis|overdose|abus(?:e|ed|es|ing|er|ers|ive)|"
         + SENSITIVE_EN + f")(?![{LET}a-z])", re.I)
 
-    # ---- spelling ---------------------------------------------------------------
     def fold(self, s):
         return fold(s)
 
@@ -657,7 +655,6 @@ class Arabic(LanguageSpec):
                 c = raw.pop(w)
                 raw[k] = raw.get(k, 0) + c
 
-    # ---- tagging (CAMeL Tools) ----------------------------------------------------
     def _camel_env(self):
         if self.repo is not None:
             os.environ.setdefault("CAMELTOOLS_DATA", str(self.repo / ".cache" / "camel_tools"))
@@ -860,7 +857,6 @@ class Arabic(LanguageSpec):
 
 
 
-    # ---- kaikki side info -------------------------------------------------------------
     def _info(self):
         """{fold(headword): [[pos, romanisation, [plurals], non-past, gender, is_lemma, gloss, vocalised,
         [singulatives], [lfold imperatives]]]}. A participle sense with a lexical gloss
@@ -920,7 +916,6 @@ class Arabic(LanguageSpec):
     def _has(self, w, poses):
         return any(r[0] in poses and r[5] for r in self._info().get(w, []))
 
-    # ---- token fixes (tag time) ------------------------------------------------------
     def fix_token(self, tok):
         text, lemma, upos, ms = tok
         if upos == "X" and "Dialect=Yes" in ms:
@@ -1372,7 +1367,6 @@ class Arabic(LanguageSpec):
 
     _mle = None
 
-    # ---- passages ---------------------------------------------------------------
     passage_retag_names = True
     NAME_PROCLITICS = ("", "و", "ف", "ل", "ب", "ك", "ول", "وب", "فل", "فب", "وك")
 
@@ -1519,7 +1513,6 @@ class Arabic(LanguageSpec):
     def is_verb_lemma(self, w):
         return True
 
-    # ---- resolution ------------------------------------------------------------------
     def bind_lexicon(self, lexicon):
         """Letters, roots and affixes are no words; a Classical-spelling alt-of
         (كِتٰب, whose dagger alef fold() strips) points nowhere; verbal nouns
@@ -2016,7 +2009,6 @@ class Arabic(LanguageSpec):
                     break           # another preposition first: not this compound
         return out
 
-    # ---- words ------------------------------------------------------------------------
     noun_head_template = "ar-noun"
 
     def noun_display(self, lemma, gender, plural, en):
@@ -2200,13 +2192,11 @@ class Arabic(LanguageSpec):
         return bool(nouns) and not any(r[5] for r in nouns) and any("plural of" in (r[6] or "") for r in nouns) and \
             not any((r[6] or "").startswith("verbal noun of") for r in nouns)
 
-    # ---- sentences --------------------------------------------------------------------
     def pack_json_extra(self):
         return {"spaced": True, "compounds": [], "rtl": True, "langTag": "ar",
                 "fontFamily": "\"Noto Naskh Arabic\", serif", "fonts": ["Noto Naskh Arabic:wght@400;700"],
                 "lineHeight": 1.8}
 
-    # ---- QA scans ------------------------------------------------------------------------
     qa_closed_sets = {
         "days": " ".join(d for d, _, _ in DAYS), "months": " ".join(m for m, _ in MONTHS),
         "seasons": " ".join(x for x, _ in SEASONS), "num": " ".join(n for n, _ in NUMBERS if " " not in n),
@@ -2218,7 +2208,6 @@ class Arabic(LanguageSpec):
     qa_foreign_letters_re = r"[a-z]"
     qa_proper_re = r"\b(Egypt|Cairo|Arabia|Saudi|Syria|Iraq|Morocco|Islam|Muhammad|Mohammed|God|Allah|Quran)\b"
 
-    # ---- script primer ------------------------------------------------------------------
     # tts true: ar-SA / ar-EG voices ship with Apple, Windows and Google TTS
     # (unverified on the user's phone; see TODO.md). say = letter + fatha.
     script = {"stages": [{"key": "abjad", "label": "الأبجدية"}],

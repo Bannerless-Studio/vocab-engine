@@ -93,7 +93,7 @@ def n_vowels(s):
     return sum(1 for ch in s.lower() if ch in VOWELS)
 
 
-# ---- script primer (docs/SCRIPT_PRIMER.md ss3) -------------------------------
+# script primer: docs/SCRIPT_PRIMER.md ss3
 # Cyrillic: 33 letters in 6 sets (true friends, false friends, new shapes,
 # hushers, vowels, signs). Romanisation BGN-like; й is "j" (ISO 9) so it shares a
 # roman with neither и ("i") nor ы ("y"), and no alt: an alt equal to a sibling's
@@ -291,7 +291,6 @@ class Russian(LanguageSpec):
                           "и/а/но/или, core prepositions, A1 core list")
     numeral_exclusion = "numeral outside 0-20/tens/100/1000"
 
-    # ---- spelling ------------------------------------------------------------
     def fold(self, s):
         return fold(s)
 
@@ -300,7 +299,7 @@ class Russian(LanguageSpec):
         spans are matched in folded text, oop lemmas compared folded."""
         return fold(s)
 
-    # ---- passages only (packbuilder passages; the corpus build never runs these)
+    # passages only: the corpus build never runs these
     # хорошо/лучше/тихо/странно read as the short or comparative adjective, больше as a numeral
     passage_adverb_from = ("ADJ", "NUM")
 
@@ -569,7 +568,6 @@ class Russian(LanguageSpec):
                                          [(w, g) for g, ws in self.a1_core.items() for w in ws]))
         return self
 
-    # ---- nouns ---------------------------------------------------------------
     def gender_from_entry(self, d):
         """'m' / 'f' / 'n' / 'mf', with '-p' for plural-only, from the canonical
         form's tags (ru-noun+) or the head template's g= (head)."""
@@ -628,7 +626,6 @@ class Russian(LanguageSpec):
             return lemma, f"{en} (pl.)"
         return lemma, f"{en} ({'m/f' if gender == 'mf' else gender})"
 
-    # ---- sentences -----------------------------------------------------------
     def sentence_rank(self, toks, lv):
         """A1 prefers sentences whose nouns are Nom/Acc only; prepositional case
         after в/на is allowed. Gen/Dat/Ins (and other Prep uses) from A2."""
@@ -664,7 +661,6 @@ class Russian(LanguageSpec):
                 n += 1
         return n
 
-    # ---- finishing: display spelling, pron, aspect ------------------------------
     def _kaikki_info(self, env):
         """{folded headword: [[word, pos, canonical, aspect, gender, is_lemma, gloss]]}
         from the kaikki extract (cached in .cache/derived)."""
@@ -803,7 +799,6 @@ class Russian(LanguageSpec):
         """Aspect from spaCy's Aspect= majority on the verb's tokens (fallback)."""
         return None
 
-    # ---- checks --------------------------------------------------------------
     def check_word(self, w):
         if any(m in w["w"] for m in STRESS):
             return f"word {w['id']} {w['w']!r}: stress mark in w (pron only)"
@@ -817,7 +812,6 @@ class Russian(LanguageSpec):
             return f"word {w['id']} {w['w']!r}: pron {w['pron']!r} is not the stressed w"
         return None
 
-    # ---- QA scans --------------------------------------------------------------
     qa_closed_sets = {
         "days": " ".join(DAYS), "months": " ".join(MONTHS), "seasons": " ".join(SEASONS),
         "num": " ".join(NUMBERS), "col": " ".join(COLOURS),
@@ -828,7 +822,6 @@ class Russian(LanguageSpec):
     qa_foreign_letters_re = r"[a-z]"
     qa_proper_re = r"\b(Moscow|Russia|Russian|Petersburg|Christ|God|Lenin|Soviet)\b"
 
-    # ---- script primer ------------------------------------------------------
     script = {"stages": [{"key": "cyr", "label": "Алфавит"}],
               "setsPerSession": 2, "mastered": 3, "tts": True,
               "learnKinds": ["symSound", "soundSym"],

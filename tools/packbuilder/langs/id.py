@@ -478,7 +478,6 @@ class Indonesian(LanguageSpec):
         self.n_derived_unlinked = 0
         self.post_stats = Counter()
 
-    # ---- orthography -------------------------------------------------------
     def fold(self, s):
         return s.lower() if s and s.lower() in LOWER_SURFACES and s[:1].isupper() else s
 
@@ -487,7 +486,6 @@ class Indonesian(LanguageSpec):
         split = self.clitic_split(w)
         return split[0] if split else w        # bukunya -> buku (the corpus splits clitics too)
 
-    # ---- tagging (Stanza) ---------------------------------------------------
     def tagger_desc(self):
         import stanza
         return f"Stanza {stanza.__version__}, id gsd (tokenize, mwt, pos, lemma); clitic rule 3"
@@ -686,7 +684,6 @@ class Indonesian(LanguageSpec):
             "source": "written for this pack (tools/generated_sentences.tsv), marked \"src\": \"gen\"",
             "licence": "CC-BY-SA-4.0", "count": n, "audio": "none (TTS)"}}
 
-    # ---- lexicon rewrites -----------------------------------------------------
     def _stem(self, w):
         if self._stemmer is None:
             from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
@@ -1305,7 +1302,6 @@ class Indonesian(LanguageSpec):
                         st["idiom part unlinked"] += 1
         return out
 
-    # ---- sentences ------------------------------------------------------------
     def sentence_rank(self, toks, lv):
         if lv == self.level_ids[0] and any(t[0].lower() in COLLOQ_MARK for t in toks):
             return 1        # A1 examples: formal/neutral register first
@@ -1460,7 +1456,7 @@ class Indonesian(LanguageSpec):
         stem, whatever built it."""
         return "alt" if surface in (word.get("_spell") or ()) else "form"
 
-    # ---- reading passages (passage-only; the corpus build never calls these) --
+    # reading passages: the corpus build never calls these
     def _pack_lemmas(self):
         """Passages: {lemma: pos} of the shipped pack words (pack/words.json)."""
         if getattr(self, "_pl", None) is None:

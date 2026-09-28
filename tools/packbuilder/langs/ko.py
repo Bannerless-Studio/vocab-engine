@@ -38,9 +38,6 @@ from collections import Counter, defaultdict
 
 from .base import LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, drop_all_re
 
-# =============================================================================
-# Hangul and the eojeol analyser
-# =============================================================================
 S0, NV, NT = 0xAC00, 21, 28
 T_JAMO = ["", "ㄱ", "ㄲ", "ㄳ", "ㄴ", "ㄵ", "ㄶ", "ㄷ", "ㄹ", "ㄺ", "ㄻ", "ㄼ", "ㄽ", "ㄾ", "ㄿ", "ㅀ", "ㅁ", "ㅂ",
           "ㅄ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"]
@@ -92,7 +89,6 @@ def has_batchim(w):
     return bool(w) and fin(w[-1]) != 0
 
 
-# ---- endings ----------------------------------------------------------------
 # after the raw stem (먹-, 가-, 알-): connective, adnominal, sentence endings
 RAW_E = """고 고요 고서 고는 지 지요 죠 지만 지도 지는 지를 지않 는 는데 는데요 는지 는지요 는구나 는군요 는다 는다고
 는다는 는대 는대요 는다면 는가 는가요 는걸 는걸요 다 다가 다고 다는 다니 다면 다니까 던 던데 던데요 던가 게 게끔
@@ -235,7 +231,7 @@ def particle_chains(host, rest, depth=0):
     return out
 
 
-# ---- regular infinitive for verbs Wiktionary gives no table for --------------
+# regular infinitive for verbs Wiktionary gives no table for
 def regular_infinitive(stem):
     if not stem:
         return None
@@ -439,7 +435,6 @@ class KoMorph:
                 if not u.endswith("시") or lem.endswith("시다"):
                     self.eu[u].add(lem)
 
-    # ---- lookups -----------------------------------------------------------
     def verb_group(self, lem, hint=None):
         """VERB or ADJ: the listed group of a closed/core word, else the only
         one Wiktionary has, else the tagger's (paa: adjective), else the
@@ -528,7 +523,6 @@ class KoMorph:
         g = self.canon.get(w)
         return g if g else KPOS_GROUP[p]
 
-    # ---- candidate generation ---------------------------------------------------
     def verb_readings(self, E):
         """[(lemma, cost)] for E as one conjugated verb/adjective word."""
         out = {}
@@ -809,9 +803,6 @@ def hint_of(xpos):
     return None
 
 
-# =============================================================================
-# closed sets and keys
-# =============================================================================
 DAYS = "월요일 화요일 수요일 목요일 금요일 토요일 일요일".split()
 MONTHS = "일월 이월 삼월 사월 오월 유월 칠월 팔월 구월 시월 십일월 십이월".split()
 # Sino-Korean numerals share their spelling with common words (일 "work", 이
@@ -1206,7 +1197,7 @@ class _PassageAlias(dict):
         return d
 
 
-# ---- script primer (docs/SCRIPT_PRIMER.md ss3) -------------------------------
+# script primer: docs/SCRIPT_PRIMER.md ss3
 # Hangul: 47 units in 7 sets; the silent ㅇ comes first, with the vowels, so
 # set 1 already spells words (아이, 오, 우유). One jamo in two roles is two units (ㄱ initial,
 # ㄱ final). Blocks are split by Unicode arithmetic; example romanisation is
@@ -1518,7 +1509,6 @@ class Korean(LanguageSpec):
         self.post_stats = Counter()
         self._mispaired = None
 
-    # ---- frequency ------------------------------------------------------------
     def ko_zipf(self, w):
         """zipf of a Korean word from wordfreq's ko list without its mecab
         tokenizer: the list's own entry, a verb/adjective by its stem (먹다 ->
@@ -1720,7 +1710,6 @@ class Korean(LanguageSpec):
         a = self.morph().analyse(surface)
         return a[1][0][1] if a else surface
 
-    # ---- tagging ------------------------------------------------------------------
     def fix_sentence(self, toks, row, doc):
         """spaCy's eojeol tokens -> analysed pieces. A noun + particles eojeol
         becomes the noun token plus one token per particle; the copula and the
@@ -1906,7 +1895,6 @@ class Korean(LanguageSpec):
                     out[b] = [out[b][0], out[b][0], "NOUN", f"Ko=closed|G=NOUN|{out[b][3].split('|')[-1]}"]
         return out
 
-    # ---- reading choice in context ------------------------------------------------
     def _route(self, j, toks, pre, en_words):
         """The analyser's reading of eojeol j, revised with its neighbours and
         the English translation:
@@ -2050,7 +2038,6 @@ class Korean(LanguageSpec):
                 best = (c, k2, [tuple(x) for x in p])
         return (best[1], best[2]) if best else None
 
-    # ---- names the English carries (마리 = Mary) ---------------------------------------
     def _en_names(self, en):
         """Capitalised English words that may be names: mid-sentence ones, and a
         sentence-initial one that is not a common English word."""
@@ -2179,7 +2166,6 @@ class Korean(LanguageSpec):
             return True                   # 너가, 왔어죠: non-standard spelling taught as Korean
         return (re.sub(r"\s+", "", "".join(t[0] for t in toks)), (en or "").strip()) in self._mispaired
 
-    # ---- corpus rows: sentences written for the pack ----------------------------
     def sentence_fields(self, row):
         return {"src": "gen"} if row[0] >= self.GEN_BASE else {}
 
@@ -2220,7 +2206,6 @@ class Korean(LanguageSpec):
                 "fontFamily": '"Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif',
                 "fonts": ["Noto Sans KR:wght@400;700"]}
 
-    # ---- sentences ------------------------------------------------------------------
     def sentence_rank(self, toks, lv):
         """Polite style (해요체 / 합쇼체) first, then plain written (-다), and a
         반말 sentence (들어, 뭐야, 먹자) last by a wide margin at every level:
@@ -2228,7 +2213,6 @@ class Korean(LanguageSpec):
         let 반말 back into A2."""
         return {"polite": 0, "plain": 1, "none": 1}.get(speech_register(toks), 4)
 
-    # ---- words ------------------------------------------------------------------------
     def eojeol_forms(self, ctx, words):
         """{word key: Counter(written eojeol)}: every whole written word of a
         translated corpus sentence whose first piece resolves to the key
@@ -2347,7 +2331,7 @@ class Korean(LanguageSpec):
         return None
 
 
-    # ---- reading passages only (passages.Linker; the corpus build never calls these) ----
+    # reading passages only: the corpus build never calls these
     passage_retag_names = True      # passage_retag also gets the declared names
     # suppletive honorific verbs link the plain verb, as 드시다 -> 먹다 does in the build
     passage_lemma_alias = _PassageAlias({"주무시다": "자다", "잡수시다": "먹다"})
@@ -2519,7 +2503,6 @@ class Korean(LanguageSpec):
                     continue
             out.append(t)
             i += 1
-        # context repairs over the rebuilt tokens
         for j, t in enumerate(out):
             if t is None:
                 continue
@@ -2582,7 +2565,6 @@ class Korean(LanguageSpec):
                 out[j] = [t[0], "자다", "VERB", "Ko=verb|G=VERB|X="]
         return out
 
-    # ---- script primer ------------------------------------------------------
     script = {"stages": [{"key": "hangul", "label": "한글"}],
               "setsPerSession": 2, "mastered": 3, "tts": True,
               "learnKinds": ["symSound", "compose"],

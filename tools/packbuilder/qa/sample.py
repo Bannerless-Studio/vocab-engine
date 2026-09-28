@@ -35,7 +35,7 @@ def sample(spec, seed, n_words=60, n_sentences=60):
                 print(f"      e.g. {ex['t']}  |  {ex['en']}")
     per_s = max(n_sentences // len(levels), 1)
     picks = []
-    for lv in levels:                       # equal share per sentence level
+    for lv in levels:
         pool = sorted((s for s in S if s["lv"] == lv), key=lambda s: s["id"])
         picks += rng.sample(pool, min(per_s, len(pool)))
     picks.sort(key=lambda s: (levels.index(s["lv"]), s["id"]))

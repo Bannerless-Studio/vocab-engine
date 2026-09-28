@@ -313,7 +313,7 @@ class Linker:
         sp = self.spec
         own = getattr(type(sp), "passage_retag", LanguageSpec.passage_retag)
         if own is LanguageSpec.passage_retag and not self.adverbs and not names:
-            return toks         # nothing to rewrite: the tagged tokens as they are
+            return toks
         toks = [list(t) for t in toks]
         for t in toks:
             if t[0] in names and t[0][:1].isupper():

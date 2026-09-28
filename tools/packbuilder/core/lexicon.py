@@ -90,7 +90,6 @@ class Lexicon:
         self.lemma_votes = Counter()
         spec.bind_lexicon(self)
 
-    # ---- word frequency -------------------------------------------------
     def zipf(self, w):
         if w not in self._zipf:
             from wordfreq import zipf_frequency
@@ -121,7 +120,6 @@ class Lexicon:
     def verbs_only(self, cands):
         return {c for c in cands if self.spec.is_verb_lemma(c)}
 
-    # ---- entries ----------------------------------------------------------
     def entry_usable(self, ent):
         # a translation recovered from a form-of line ("...of molto; more")
         # glosses the word but does not make the entry a lemma of its own
@@ -239,7 +237,7 @@ class Lexicon:
         return any(sn[3] == "form" and "plural" in sn[2]
                    for e in self.E.get(s, []) if e["p"] == "noun" for sn in e["s"])
 
-    # ---- clitics / imperatives (off when spec.clitic_re is None) -------------
+    # off when spec.clitic_re is None
     def clitic_verb(self, s):
         """farlo -> fare, dimmi -> dire, portami -> portare, dirglielo -> dire."""
         clitic_re, mono = self.spec.clitic_re, self.spec.mono_imperative
@@ -306,7 +304,6 @@ class Lexicon:
                     return True
         return False
 
-    # ---- resolution ---------------------------------------------------------
     def resolve_sentence(self, toks, groups=None):
         """Resolve every token of a tagged sentence, with context rules on top
         of the tagger: a numeral that is also a verb form and is not followed

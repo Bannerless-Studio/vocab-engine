@@ -15,7 +15,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 TOOLS = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(TOOLS))   # vocab-engine/tools
+sys.path.insert(0, str(TOOLS))
 
 from packbuilder import audio  # noqa: E402
 from packbuilder.langs import get_spec  # noqa: E402

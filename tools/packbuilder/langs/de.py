@@ -347,11 +347,9 @@ class German(LanguageSpec):
         self.forced = list(self.forced_closed) + [(w, g) for g, ws in self.a1_core.items() for w in ws]
         return self
 
-    # ---- orthography -------------------------------------------------------
     def fold(self, s):
         return s.lower()
 
-    # ---- tag time -----------------------------------------------------------
     def fix_sentence(self, toks, row, doc):
         spt = [t for t in doc if not t.is_space]
         if len(spt) != len(toks):
@@ -383,7 +381,6 @@ class German(LanguageSpec):
             out.append([text, lem, upos, ms])
         return out
 
-    # ---- resolve time -------------------------------------------------------
     def bind_lexicon(self, lexicon):
         """Wiktionary conventions the core would misread, fixed in the loaded
         lexicon: agent nouns (Lehrer "agent noun of lehren: teacher") are
@@ -991,7 +988,6 @@ class German(LanguageSpec):
         their participle is the verb, not an adjective."""
         return verb in SEIN_VERBS or (self._lex is not None and "sein" in self._verb_aux(verb))
 
-    # ---- sentences ------------------------------------------------------------
     def marks_sentence(self, toks):
         """Präteritum other than sein/haben/modals, and the past subjunctive
         (hätte ... gemacht, hätte ... sollen; not the polite hätte gern):
@@ -1008,7 +1004,6 @@ class German(LanguageSpec):
                 return True
         return False
 
-    # ---- nouns / articles ----------------------------------------------------
     def gender_from_entry(self, d):
         """'<gender>|<plural>' for a de-noun head: gender m/f/n/mf/p from the
         expansion ("Tisch m (strong, ... plural Tische)"), mf for adjectival
@@ -1139,7 +1134,6 @@ class German(LanguageSpec):
         self.plural_debug.append((lem, pl, round(zs, 2), round(zp, 2), sg, pc))
         return sg >= RARE_PLURAL_MIN_SG and pc * RARE_PLURAL_SHARE < sg
 
-    # ---- finishing -------------------------------------------------------------
     def finalize_words(self, env, ctx, words):
         """Display case (nouns, Sie, Entschuldigung, phrases), noun gender
         with neuter from the corpus when Wiktionary gives none, the plural
@@ -1205,7 +1199,6 @@ class German(LanguageSpec):
         from ..core.util import stat
         stat("separable_verbs", {**self.sep_stats, "examples_not_in_dictionary": sorted(self.sep_examples)})
 
-    # ---- QA scans ------------------------------------------------------------
     qa_closed_sets = {
         "days": " ".join(DAYS), "months": " ".join(MONTHS), "seasons": " ".join(SEASONS),
         "num": " ".join(NUMBERS), "col": " ".join(COLOURS), "pron": " ".join(PERSONAL + POSSESSIVE),

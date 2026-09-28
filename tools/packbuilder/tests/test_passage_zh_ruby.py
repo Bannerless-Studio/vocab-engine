@@ -14,7 +14,7 @@ import unittest
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(TOOLS))   # vocab-engine/tools
+sys.path.insert(0, str(TOOLS))
 
 import validate_pack  # noqa: E402
 from packbuilder import passages  # noqa: E402
