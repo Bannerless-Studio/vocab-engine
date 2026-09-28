@@ -25,7 +25,7 @@
 - **Test tab**: the sentence test button stays hidden below 8 available sentences with no explanation. Consider a one-line "unlocks at 8 sentences" note.
 - **Voice detection:** when the browser never reports a voice list, the engine optimistically assumes speech works. On browsers that report the list late, the first hear item may be spoken by a default voice.
 - A missed **type** item is requeued until the learner types it correctly, as in hsk. Consider turning it into a recall item on the second miss.
-- `rank` is validated but unused. Sets follow file order. Consider sorting by `rank` within each level at pack-build time.
+- ~~`rank` is validated but unused.~~ **Done 2026-09-28** (branch engine-data-fixes): the packbuilder already sorted each level by rank in build_words; `core/words.sort_by_rank` now also runs at the end of `finish_words`, after the spec hooks. Every shipped packbuilder pack was already rank-sorted (0 inversions), so no pack reorders; packs/zh has no rank and keeps file order.
 - `pos` is used only by `wordOpts`. `meaningOpts` could also prefer the same pos.
 - Cloze needs the word's surface form in `t`, found via `w` or one of `alt`. For heavily inflected languages, consider an optional per-sentence `forms` array aligned with `words`.
 - Placement has a fixed 2/3 alternating item count per bucket. Consider making it pack-configurable.

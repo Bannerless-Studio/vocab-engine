@@ -548,8 +548,7 @@ def build_words(env, ctx):
         word["_epos"] = rec.get("entry_pos")
         word["_sidx"] = rec.get("sense_idx") if rec.get("sense_idx") is not None else 99
         words.append(word)
-    lvl = {b: i for i, b in enumerate(sp.level_ids)}
-    words.sort(key=lambda x: (lvl[x["lv"]], x["rank"]))
+    sort_by_rank(sp.level_ids, words)
 
     id_map = env.repo / sp.id_map_file
     idmap = json.loads(id_map.read_text()) if id_map.exists() else {}
@@ -688,6 +687,24 @@ def apply_gloss_display(repo, out_words, path="tools/gloss_display.json"):
     if unused:
         log(f"gloss_display: {len(unused)} keys match no shipped word: {unused[:10]}")
     return sorted(applied), unused
+
+
+def sort_by_rank(level_ids, words):
+    """Learn sets are cut from words.json in file order (core.js
+    wordsByLevel), so the shipped order is level, then `rank` ascending: a set
+    holds the commonest words not yet learned. Stable, so equal ranks keep
+    their order; a word without a rank goes after the ranked words of its
+    level, in file order. A level the spec does not list goes last. Sorts in
+    place and returns the words."""
+    lvl = {b: i for i, b in enumerate(level_ids)}
+
+    def key(w):
+        r = w.get("rank")
+        ranked = isinstance(r, (int, float)) and not isinstance(r, bool)
+        return lvl.get(w.get("lv"), len(lvl)), 0 if ranked else 1, r if ranked else 0
+
+    words.sort(key=key)
+    return words
 
 
 def split_alt_forms(spec, words):
