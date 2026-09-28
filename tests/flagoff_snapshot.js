@@ -211,6 +211,8 @@ function buildFixtureProg(level, pack, words, sentences) {
     prog.sets[lv] = Math.min(setsPerLevel, avail);
   });
   const learned = VC.learnedWords(words, pack, prog);
+  // Real progress has a record for every taught word; learnedWords reads records, not sets.
+  learned.forEach(w => { prog.w[w.id] = { r: 0, w: 0, s: 0 }; });
   learned.slice(0, 5).forEach(w => { prog.w[w.id] = { r: 5, w: 0, s: 5 }; });
   learned.slice(5, 8).forEach(w => { prog.w[w.id] = { r: 1, w: 3, s: 0 }; });
   if (learned.length > 8) prog.w[learned[8].id] = { r: 0, w: 0, s: 0, prov: true };
