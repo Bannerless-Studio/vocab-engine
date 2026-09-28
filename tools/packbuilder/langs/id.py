@@ -147,6 +147,8 @@ COLLOQ_MARK = set(COLLOQ_WORDS) | {"udah", "aja", "emang", "kalo", "tau", "liat"
 AFFIX_OF_RE = re.compile(r"^(?:(?:transitive|intransitive|ditransitive|active|passive|imperative|jussive|emphatic|"
                          r"basic|colloquial|informal)[/ ]?)*(?:active|passive|imperative|jussive|emphatic|basic)"
                          r"(?:[/ ](?:[a-z]+))* (?:form )?of ([a-z]+(?:-[a-z]+)*)\b")
+RAW_FORM_OF_RE = re.compile(r"^(?:alternative )?form of ([a-z]+)\b")
+RAW_ACTIVE_OF_RE = re.compile(r"^active of ([a-z]+)\b")
 ME_RE = re.compile(r"^(?:me|di)[a-z]{3,}$")
 BER_RE = re.compile(r"^(?:ber|be)([a-z]{3,})$")
 KAN_RE = re.compile(r"^([a-z]{3,}?)(?:kan|i)$")
@@ -715,6 +717,16 @@ class Indonesian(LanguageSpec):
         E, F = lx.E, lx.F
         stats = Counter()
         self.affix_log = []
+        # kaikki's own sense lines, before the steps below rewrite senses
+        raw_glosses = {w: [sn[0] for e in es for sn in e["s"]] for w, es in E.items()}
+
+        def raw_form_of(r, w):
+            """kaikki ties root r to me- verb w itself: r has a line "(alternative)
+            form of w" (terap), or w "active of <r>kan/<r>i" (mengabaikan)."""
+            if any(m and m.group(1) == w for m in map(RAW_FORM_OF_RE.match, raw_glosses.get(r, ()))):
+                return True
+            return any(m and m.group(1) in (r + "kan", r + "i")
+                       for m in map(RAW_ACTIVE_OF_RE.match, raw_glosses.get(w, ())))
 
         def verb_senses(w):
             return [(e, sn) for e in E.get(w, []) if e["p"] == "verb" for sn in e["s"] if sn[3] == ""
@@ -962,12 +974,13 @@ class Indonesian(LanguageSpec):
                 if r == w or not verb_senses(r) or not (voice or overlaps(verb_words(w), verb_words(r))):
                     continue
                 # a stripped root is a surface of this verb only when attested as
-                # it: a shared sense, or a verb and nothing else. Bare tawar is
+                # it: a shared sense, a verb and nothing else, or a kaikki line
+                # tying the two (raw_form_of: terap, abai). Bare tawar is
                 # mostly "bland", kembang "flower" (menawarkan "to offer",
                 # mengembangkan "to develop"); a verb-tagged token of the root
                 # still counts toward the me- verb (ditawarkan)
                 bare_ok = not stripped or overlaps(verb_words(w), verb_words(r)) or \
-                    not any(e["p"] != "verb" and lx.entry_usable(e) for e in E.get(r, []))
+                    not any(e["p"] != "verb" and lx.entry_usable(e) for e in E.get(r, [])) or raw_form_of(r, w)
                 if stripped and zipf_ok(r, w, free_margin(w)):
                     break       # mengikuti / ikut, menduduki / duduk: the -i verb is a word of its own
                 if kan_form(r) and r in me_roots(w):

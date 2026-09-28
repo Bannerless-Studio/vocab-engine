@@ -49,5 +49,25 @@ class RankSort(unittest.TestCase):
         self.assertEqual(ids(sort_by_rank(LV, ws)), ["a", "f", "b"])
 
 
+class FinishWordsResort(unittest.TestCase):
+    """pipeline.finish_words re-sorts after spec.finalize_words, so a hook
+    that reorders the list cannot change the Learn-set order."""
+
+    def test_hook_reorder_is_undone(self):
+        from types import SimpleNamespace
+        from unittest import mock
+        from packbuilder.core import pipeline
+        from packbuilder.langs import get_spec
+        sp = get_spec("it", None, load=False)
+        sp.refill_unexampled = False
+        self.assertEqual(list(sp.level_ids), LV)
+        sp.finalize_words = lambda env, ctx, words: words.reverse()
+        words = [{"id": "a", "lv": "A1", "rank": 1}, {"id": "b", "lv": "A1", "rank": 2},
+                 {"id": "c", "lv": "A2", "rank": 3}, {"id": "d", "lv": "B1", "rank": 4}]
+        with mock.patch.object(pipeline, "build_sentences", lambda env, ctx, w, t: ([], {}, {})):
+            out = pipeline.finish_words(SimpleNamespace(spec=sp), {}, words, {}, set())[0]
+        self.assertEqual(ids(out), ["a", "b", "c", "d"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -42,6 +42,61 @@ class BudgetRule(unittest.TestCase):
         self.assertEqual(budget_errors("B1", {}, DEFAULT_RULES["budget"]), [])
 
 
+class BudgetMissingLevel(unittest.TestCase):
+    def test_level_without_budget_is_an_error(self):
+        budget = {"A1": ["A2", 3], "A2": ["B1", 3]}
+        self.assertEqual(budget_errors("B1", {}, budget), ["no level budget for B1 (rules.budget)"])
+
+    def test_shipped_passage_at_unbudgeted_level_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            repo = Path(d)
+            (repo / "tools").mkdir()
+            (repo / "tools" / "passages_src.json").write_text(json.dumps(
+                {"rules": {"budget": {"A1": ["A2", 3], "A2": ["B1", 3]}}, "passages": []}))
+            e = shipped_level_errors(repo, LEVELS, [word("w1", "a", "A1")], [passage("p1", "B1", ["w1"])])
+            self.assertEqual(e, ["passage p1 (B1): no level budget for B1 (rules.budget)"])
+
+    def test_unknown_passage_level_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            e = shipped_level_errors(Path(d), LEVELS, [word("w1", "a", "A1")], [passage("p1", "C2", ["w1"])])
+            self.assertEqual(e, ["passage p1: unknown level C2"])
+
+
+class CheckWiring(unittest.TestCase):
+    """qa.check.check on a fixture repo: a shipped passage above its level
+    budget fails the pack check."""
+
+    def run_check(self, passages):
+        import contextlib
+        import io
+        from packbuilder.langs import get_spec
+        from packbuilder.qa.check import check
+        with tempfile.TemporaryDirectory() as d:
+            repo = Path(d)
+            (repo / "pack").mkdir()
+            (repo / "tools").mkdir()
+            sp = get_spec("it", repo, load=False)
+            words = [{"id": "w1", "w": "casa", "lemma": "casa", "pos": "verb", "en": "x", "lv": "A1", "rank": 1},
+                     {"id": "w2", "w": "dopo", "lemma": "dopo", "pos": "verb", "en": "y", "lv": "B1", "rank": 2}]
+            (repo / "pack" / "pack.json").write_text(json.dumps({"key": "it"}))
+            (repo / "pack" / "words.json").write_text(json.dumps(words))
+            (repo / "pack" / "sentences.json").write_text("[]")
+            (repo / "pack" / "passages.json").write_text(json.dumps(passages))
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                rc = check(sp)
+            return rc, out.getvalue()
+
+    def test_above_level_passage_fails_check(self):
+        rc, out = self.run_check([passage("p1", "A1", ["w1", "w2"])])
+        self.assertEqual(rc, 1)
+        self.assertIn("passage p1 (A1): B1 words not allowed at A1: ['dopo']", out)
+
+    def test_in_budget_passage_adds_no_failure(self):
+        _rc, out = self.run_check([passage("p1", "A1", ["w1"])])
+        self.assertNotIn("passage p1", out)
+
+
 class ShippedPassages(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

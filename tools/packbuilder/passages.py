@@ -794,7 +794,7 @@ def budget_errors(lv, above, budget):
     """The level budget over a passage: `above` maps each level above `lv` to
     the lemmas used from it."""
     if lv not in budget:
-        return []
+        return [f"no level budget for {lv} (rules.budget)"]
     nxt, cap = budget[lv]
     out = []
     for alv, lems in sorted(above.items()):
@@ -821,6 +821,7 @@ def shipped_level_errors(repo, level_ids, words, passages):
     for p in passages:
         lv = p.get("lv")
         if lv not in lv_rank:
+            errors.append(f"passage {p.get('id')}: unknown level {lv}")
             continue
         ids = [wid for s in p.get("sentences", []) for wid in s.get("words", [])] + \
               [wid for q in p.get("questions", []) for wid in q.get("words", [])]

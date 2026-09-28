@@ -94,6 +94,28 @@ class StrippedRootAttestation(unittest.TestCase):
                      {"menghindari": 4.8, "hindar": 0.0})
         self.assertIn("hindar", sp.voice_alt.get("menghindari", set()))
 
+    def test_raw_form_of_line_attests_root(self):
+        # terap "alternative form of menerapkan" (kaikki), though also a noun
+        sp, _ = bind({"menerapkan": [ent("verb", "to apply")],
+                      "terap": [ent("verb", "to carve"), {"p": "verb", "s": [["alternative form of menerapkan", "", [], "form"]]},
+                                ent("noun", "Artocarpus blumei")]},
+                     {"menerapkan": 4.5, "terap": 0.0})
+        self.assertIn("terap", sp.voice_alt.get("menerapkan", set()))
+
+    def test_raw_active_of_line_attests_root(self):
+        # mengabaikan "active of abaikan": step 1 rewrites that sense, the raw line counts
+        sp, _ = bind({"mengabaikan": [ent("verb", "to ignore", "active of abaikan")],
+                      "abai": [ent("verb", "not to care"), ent("adj", "careless")]},
+                     {"mengabaikan": 4.5, "abai": 3.1})
+        self.assertIn("abai", sp.voice_alt.get("mengabaikan", set()))
+
+    def test_form_of_another_verb_does_not_attest(self):
+        sp, _ = bind({"menawarkan": [ent("verb", "to offer")],
+                      "tawar": [{"p": "verb", "s": [["form of menawar", "", [], "form"]]}, ent("verb", "to bargain"),
+                                ent("adj", "bland")]},
+                     {"menawarkan": 4.9, "tawar": 4.3})
+        self.assertNotIn("tawar", sp.voice_alt.get("menawarkan", set()))
+
     def test_impossible_root_is_never_tried(self):
         # unjuk "to show" shares the sense but men- + vowel is not Indonesian
         sp, lx = bind({"menunjukkan": [ent("verb", "to show")], "unjuk": [ent("verb", "to show")],
