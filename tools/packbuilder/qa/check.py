@@ -5,6 +5,7 @@
 Exits non-zero on any failure. Language-specific assertions (it: noun article
 forms) come from LanguageSpec.check_word.
 """
+import json
 from collections import Counter
 
 from . import load_pack
@@ -110,6 +111,12 @@ def check(spec):
         for wid in s.get("words", []):
             if wid not in ids_seen:
                 fail(f"sentence {s['id']} references unknown word id {wid}")
+
+    pj = spec.repo / "pack" / "passages.json"
+    if pj.exists():
+        from ..passages import shipped_level_errors
+        for e in shipped_level_errors(spec.repo, spec.level_ids, words, json.loads(pj.read_text())):
+            fail(e)
 
     word_sentence_count = Counter()
     for s in sentences:

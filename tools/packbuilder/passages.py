@@ -790,6 +790,51 @@ def layout(repo):
     return repo / "tools", repo / "pack"
 
 
+def budget_errors(lv, above, budget):
+    """The level budget over a passage: `above` maps each level above `lv` to
+    the lemmas used from it."""
+    if lv not in budget:
+        return []
+    nxt, cap = budget[lv]
+    out = []
+    for alv, lems in sorted(above.items()):
+        if alv != nxt:
+            out.append(f"{alv} words not allowed at {lv}: {sorted(lems)}")
+        elif len(lems) > cap:
+            out.append(f"{len(lems)} {alv} words > {cap}: {sorted(lems)}")
+    return out
+
+
+def shipped_level_errors(repo, level_ids, words, passages):
+    """The level budget re-applied to a shipped passages.json against the
+    current words.json. A words rebuild can move a linked word above its
+    passage's level without passages.json being regenerated (hi p0016 linked
+    सुनाना after it moved A2 -> B1), so the pack check runs this over the
+    linked ids of the sentences and the question words. Question and option
+    text without ids is covered only by `passages --check`."""
+    tools_dir, _pack_dir = layout(repo)
+    src = tools_dir / "passages_src.json"
+    budget = {**DEFAULT_RULES, **(json.loads(src.read_text()).get("rules", {}) if src.exists() else {})}["budget"]
+    lv_rank = {lv: i for i, lv in enumerate(level_ids)}
+    by_id = {w["id"]: w for w in words}
+    errors = []
+    for p in passages:
+        lv = p.get("lv")
+        if lv not in lv_rank:
+            continue
+        ids = [wid for s in p.get("sentences", []) for wid in s.get("words", [])] + \
+              [wid for q in p.get("questions", []) for wid in q.get("words", [])]
+        above = {}
+        for wid in ids:
+            w = by_id.get(wid)
+            if w is None:
+                errors.append(f"passage {p.get('id')}: unknown word id {wid}")
+            elif lv_rank.get(w.get("lv"), -1) > lv_rank[lv]:
+                above.setdefault(w["lv"], set()).add(w.get("lemma", w["w"]))
+        errors += [f"passage {p.get('id')} ({lv}): {e}" for e in budget_errors(lv, above, budget)]
+    return list(dict.fromkeys(errors))
+
+
 def run(spec, check_only=False, out=sys.stdout):
     repo = spec.repo
     tools_dir, pack_dir = layout(repo)
@@ -974,13 +1019,7 @@ def run(spec, check_only=False, out=sys.stdout):
         stale = sorted(oop_name[k] for k in set(oop_ok) - set(oop) - used_oop)
         if stale:
             perr.append(f"oop lists lemmas used nowhere: {stale}")
-        # level budget over the passage, its questions and options
-        nxt, cap = rules["budget"][lv]
-        for alv, lems in sorted(above.items()):
-            if alv != nxt:
-                perr.append(f"{alv} words not allowed at {lv}: {sorted(lems)}")
-            elif len(lems) > cap:
-                perr.append(f"{len(lems)} {alv} words > {cap}: {sorted(lems)}")
+        perr += budget_errors(lv, above, rules["budget"])
         passages.append({"id": pid, "lv": lv, "title": p["title"], "text": text, "sentences": sents,
                          "questions": qs, "src": "gen"})
         # unspaced script (zh): the app's length is the linked word count

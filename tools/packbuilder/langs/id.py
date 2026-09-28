@@ -238,6 +238,22 @@ DROP_ALL_ID = (r"perkosa\w*|memperkosa\w*|diperkosa|pemerkosa\w*|pelecehan seksu
                r"rape[ds]?|raping|rapist\w*|molest\w*|sexual(?:ly)? abus\w*|child abuse|pedophil\w*|paedophil\w*")
 
 
+VOWELS = "aeiou"
+
+
+def nasal_ok(pre, added, rest):
+    """The me- prefix rule (KBBI): a vowel-initial root takes meng- (mengambil,
+    mengutus), so mem-/men-/me- before a vowel only ever lost a p-/t- (memutuskan
+    = putus, menurunkan = turun, menunjukkan = tunjuk, never utus/urun/unjuk);
+    a restored p-/t-/k-/s- needs the vowel after it. Loans that keep the
+    consonant (mempunyai, mengkritik) stay readable as the bare remainder, and
+    meng- also stands before g-/h- roots (menggunakan, menghasilkan)."""
+    v = rest[:1] in tuple(VOWELS)
+    if added:
+        return v
+    return pre == "meng" or not v
+
+
 def me_roots(w):
     """Shorter spellings a me-/di- verb may be built on (nasal assimilation
     undone): memakai -> pakai, menulis -> tulis, melakukan -> lakukan,
@@ -248,7 +264,8 @@ def me_roots(w):
     for pre, adds in (("meny", ("s",)), ("meng", ("", "k")), ("mem", ("", "p")), ("men", ("", "t")),
                       ("me", ("",))):
         if w.startswith(pre):
-            out += [a + w[len(pre):] for a in adds]
+            rest = w[len(pre):]
+            out += [a + rest for a in adds if nasal_ok(pre, a, rest)]
     seen, res = set(), []
     for r in out:
         if len(r) >= 3 and r not in seen:
@@ -475,6 +492,7 @@ class Indonesian(LanguageSpec):
         self._idioms = None
         self._key_index = None
         self.voice_alt = {}
+        self.voice_root_dropped = Counter()
         self.n_derived_unlinked = 0
         self.post_stats = Counter()
 
@@ -943,6 +961,13 @@ class Indonesian(LanguageSpec):
                 # its form; a bare root must also share a sense (menarik / tarik)
                 if r == w or not verb_senses(r) or not (voice or overlaps(verb_words(w), verb_words(r))):
                     continue
+                # a stripped root is a surface of this verb only when attested as
+                # it: a shared sense, or a verb and nothing else. Bare tawar is
+                # mostly "bland", kembang "flower" (menawarkan "to offer",
+                # mengembangkan "to develop"); a verb-tagged token of the root
+                # still counts toward the me- verb (ditawarkan)
+                bare_ok = not stripped or overlaps(verb_words(w), verb_words(r)) or \
+                    not any(e["p"] != "verb" and lx.entry_usable(e) for e in E.get(r, []))
                 if stripped and zipf_ok(r, w, free_margin(w)):
                     break       # mengikuti / ikut, menduduki / duduk: the -i verb is a word of its own
                 if kan_form(r) and r in me_roots(w):
@@ -954,7 +979,10 @@ class Indonesian(LanguageSpec):
                     mark_form(w, "verb", r, "me-/di- verb = root")
                 else:
                     mark_form(r, "verb", w, "root = its me- verb (root rarer)")
-                    self.voice_alt.setdefault(w, set()).add(r)
+                    if bare_ok:
+                        self.voice_alt.setdefault(w, set()).add(r)
+                    else:
+                        self.voice_root_dropped[(w, r)] += 1
                 break
         # (3) a root verb with the sense of its ber- verb folds into it when the
         # ber- verb is the usual word (main -> bermain) or the root verb is

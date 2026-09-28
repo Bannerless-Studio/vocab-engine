@@ -38,7 +38,7 @@ packbuilder/
   audio.py              recorded audio (Piper clips), docs/AUDIO.md
   langs/base.py         LanguageSpec: the interface and its defaults
   langs/<code>.py       one spec per language: it es fr de ru fa id ko ja ar hi ur (ru: ё/е folding, stressed pron); zh is passage-only
-  qa/check.py           hard gate: schema, ids, levels, coverage, spec.check_word
+  qa/check.py           hard gate: schema, ids, levels, coverage, spec.check_word, shipped passages vs the level budget
   qa/scans.py           review scans 1-3 (gloss junk, articles/closed sets, non-lemmas)
   qa/sample.py          stratified word/sentence samples for hand QA
   tests/                unittest/pytest suite (spec fields, links, spans, passages per language, audio, script)
@@ -62,6 +62,8 @@ tools/REPORT.md            generated; text between <!-- manual:begin/end --> is 
 build.sh check.sh README.md TODO.md
 .cache/                    gitignored: downloads + derived/ (corpus, tagged corpus, lexicon)
 ```
+
+Word order: words.json is written level by level, each level sorted by `rank` ascending (`core/words.sort_by_rank`, run in `build_words` and again at the end of `finish_words` so no spec hook can reorder it). The engine cuts Learn sets in file order, so sets follow frequency. Every pack shipped as of 2026-09-28 was already in this order, so no pack reorders at its next rebuild.
 
 Two gloss files take the same `"lemma|pos"` keys: the shipped words.json `lemma` and `pos` (e.g. `"orang|noun"`), with keys starting with `_` as comments. The build reads `gloss_overrides.json` early. Its glosses steer the build: English-overlap example ranking, word rank, and language rules that read hand glosses (id `_idiom_pairs`: a part whose gloss names its compound keeps its link). Use it for a gloss that should change which examples and links a word gets. `gloss_display.json` is merged into `en` only when words.json is written, after ranking, example selection and linking (`core/words.apply_gloss_display`). A display sense never changes corpus links, example choice, rank or order, and sentences.json stays byte-identical. Passage rules that read a word's gloss (fr `passage_fallback_ok` reads `en`) would otherwise see the display text in pack/words.json. For words in the display table, the passage Linker therefore gets the build's own gloss (`passages.Linker`), so display senses never change passage links either. A repo without the file is untouched. Use it for senses that only the learner should see, such as a compound sense on a first word that passages link as one tap: orang "(orang tua) parents". A display entry replaces the whole `en`. A key that matches no shipped word is logged. Without the file, nothing changes.
 
