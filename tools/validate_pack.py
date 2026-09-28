@@ -98,6 +98,10 @@ def check_pack(pack, rep):
             rep.err("pack.placement levels must be distinct and in pack.levels order")
     if not isinstance(pack.get("functionWords", []), list):
         rep.err("pack.functionWords must be a list of word ids")
+    if "clitics" in pack:
+        cl = pack["clitics"]
+        if not (isinstance(cl, list) and all(isinstance(c, str) and c for c in cl)):
+            rep.err("pack.clitics must be a list of non-empty strings (default: none)")
     if "typing" not in pack:
         rep.warn("pack.typing absent: typed items are off (same as typing: null)")
     ty = pack.get("typing", None)

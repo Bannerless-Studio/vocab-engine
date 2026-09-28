@@ -331,6 +331,11 @@ class Indonesian(LanguageSpec):
         "note": "Used at build time only; the pack ships no model files.",
     }
 
+    # A cloze blank must cover the whole token, not just the host before the suffix
+    # (alat-alatnya, anak-anak); docs/PACK_SCHEMA.md `clitics`. Matches clitic_split's list
+    # minus "pun" (an emphatic particle usually written with a space, not fused).
+    clitics = ["nya", "lah", "kah", "ku", "mu"]
+
     subtitles_file = "id_full.txt"
     kaikki_file = "kaikki_id.jsonl.gz"
     sentences_file = "ind_sentences_detailed.tsv.bz2"
@@ -703,6 +708,9 @@ class Indonesian(LanguageSpec):
         return {"generated_sentences": {
             "source": "written for this pack (tools/generated_sentences.tsv), marked \"src\": \"gen\"",
             "licence": "CC-BY-SA-4.0", "count": n, "audio": "none (TTS)"}}
+
+    def pack_json_extra(self):
+        return {"clitics": self.clitics}
 
     def _stem(self, w):
         if self._stemmer is None:

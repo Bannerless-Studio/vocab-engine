@@ -245,6 +245,28 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const s4 = { id:"s4", t:"Casa!", en:"x", lv:"A1", words:["casa"] };
   const m4 = VC.locateWord(s4, W.casa, P);
   check("spaced: match is case-insensitive and blank keeps surrounding text", m4 && VC.blankSentence(s4, m4).after === "!" && m4.text === "Casa");
+
+  // Reduplication (either side) and a trailing clitic (pack.clitics) extend the blank to
+  // the whole token: TODO.md "Gap blank on reduplicated inflections" (Indonesian).
+  const IDP = { levels:[{id:"A1",label:"A1"}], functionWords:[], clitics:["nya","lah","kah","ku","mu"] };
+  const IDW = { anak:{id:"anak",w:"anak",en:"child",lv:"A1"}, alat:{id:"alat",w:"alat",en:"tool",lv:"A1"},
+    rumah:{id:"rumah",w:"rumah",en:"house",lv:"A1"} };
+  const rs1 = { id:"r1", t:"Anak-anak bermain.", en:"x", lv:"A1", words:["anak"] };
+  const rm1 = VC.gapMatch(rs1, IDW.anak, IDW, IDP);
+  check("reduplication both sides visible (anak-anak) -> whole token blanked, not null (not \"visible twice\")",
+    rm1 && rm1.text === "Anak-anak" && VC.blankSentence(rs1, rm1).after === " bermain.");
+  const rs2 = { id:"r2", t:"Kumpulkan alat-alatnya sekarang.", en:"x", lv:"A1", words:["alat"] };
+  const rm2 = VC.gapMatch(rs2, IDW.alat, IDW, IDP);
+  check("reduplication + trailing clitic (alat-alatnya) -> whole token blanked, including -nya",
+    rm2 && rm2.text === "alat-alatnya" && VC.blankSentence(rs2, rm2).before === "Kumpulkan ");
+  const rs3 = { id:"r3", t:"Ini rumahnya.", en:"x", lv:"A1", words:["rumah"] };
+  const rm3 = VC.gapMatch(rs3, IDW.rumah, IDW, IDP);
+  check("trailing clitic alone, no reduplication (rumahnya) -> blank includes -nya",
+    rm3 && rm3.text === "rumahnya");
+  const rs4 = { id:"r4", t:"Rumah itu besar.", en:"x", lv:"A1", words:["rumah"] };
+  const rm4 = VC.gapMatch(rs4, IDW.rumah, IDW, IDP);
+  check("plain word, no reduplication or clitic -> blank is just the word (no over-extension)",
+    rm4 && rm4.text === "Rumah");
 })();
 
 (function(){
