@@ -171,8 +171,8 @@ no text, so RTL/pronFirst audits (tests/fixtures/rtl_audit.js) see nothing new.
 | reveal: `gapSentence` (choice and typed) | autoplay after answering; tappable row | plus `#rvp` when `canHearSentence`; nothing before the answer (the blank is never given away) |
 | reveal: `charDrillItem` | `sayUnit`; unit with no linked word had no control | plus `#rvp` when `canHearUnit` |
 | reveal: primer items with `audio: "after"` (incl. symType) | `sayScript`; no control for the unit's own sound | plus `#rvp` |
-| passage question (`readQuestionScreen`) mount | n/a (new) | autoplay + `REPLAY_STAGE` (`#rpa`) when `hasSpeech` |
-| passage reveal (`readQuestionScreen` answer click) | n/a (new) | autoplay + `REVEAL_REPLAY` (`#rvp`) when `canHearSentence` |
+| passage question (`readQuestionScreen`) mount | n/a (new) | autoplay once per question (`RD.qv[qi].spoken`; a re-mount or an answered question plays nothing) + `REPLAY_STAGE` (`#rpa`) when `hasSpeech` |
+| passage reveal (`readQuestionScreen` answer click) | n/a (new) | autoplay on the answer only (a restored reveal is silent) + `REVEAL_REPLAY` (`#rvp`) when `canHearSentence` |
 | passage results (`readResults`), per source sentence | n/a (new) | Replay only (`#rr{i}`) when `canHearSentence`; no autoplay -- results is a review screen |
 
 The reveal button is added by the drill runner (`revealHTML` / `playReveal`), never stored in

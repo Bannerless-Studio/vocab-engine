@@ -301,7 +301,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     t.api.el("lplay").click();
     const cur = t.utts[t.utts.length - 1], c0 = t.ss.cancels, t0 = t.spoken.length;
     t.document.querySelectorAll('#tabs button[data-t="words"]')[0].click();
-    check("tab switch: the playing sentence is cancelled at once", t.ss.cancels === c0 + 1 && t.api.rd() === null);
+    check("tab switch: the playing sentence is cancelled at once (the Read-tab passage is kept for the return)", t.ss.cancels === c0 + 1 && t.api.rd() && t.api.rd().p === P);
     fire(t.ss, cur); await sleep(DEFER);
     check("tab switch: the cancelled sentence's late end starts nothing", t.spoken.length === t0);
     // A re-render of the listening screen (readRender stops speech) resets Play all.
@@ -431,6 +431,29 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
       const diff = cur.findIndex((h, i) => h !== base[i]);
       check(`Today plan, passage, ${P.questions.length} questions + reveals, results, done record: identical (${cur.length} captures)`, cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
     }
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  console.log("\n[7] re-mount: a voiceschanged during the Today Read stage restores it; a tab switch ends it");
+  try{
+    const voices = [{ lang: "zh-CN", name: "x" }];
+    const b = await boot({ voices });
+    b.api.setProg(rereadProg(PASSAGES, P));
+    b.api.today();
+    b.api.enterTodayStep(5, { p: P, reason: "reread", mode: "listen" });
+    const rd = b.api.rd();
+    b.api.el("ltext").click();
+    const flip = () => { voices[0] = { lang: "en-US", name: "en" }; b.ss.onvoiceschanged(); voices[0] = { lang: "zh-CN", name: "x" }; b.ss.onvoiceschanged(); };
+    flip();
+    check("listening screen: voiceschanged keeps the Today passage (same RD, text still shown, no Today plan)", b.api.rd() === rd && /id="ltext"[^>]*>Hide text/.test(b.api.html("panel")) && /Done listening/.test(b.api.html("panel")) && !/id="go"/.test(b.api.html("panel")));
+    b.api.el("rdone").click(); await sleep(DEFER);
+    const k = b.spoken.length, q0 = P.questions[0];
+    if(rd.audioOnly.indexOf(0) >= 0) b.api.el("qsh").click();
+    flip(); await sleep(DEFER);
+    check("question: voiceschanged keeps it (same question, nothing spoken again)", b.api.rd() === rd && rd.qi === 0 && b.spoken.length === k && /Question 1 \//.test(b.api.html("panel")));
+    check("question: an opened audio-only question stays open", rd.audioOnly.indexOf(0) < 0 || (/class="med wd"/.test(b.api.html("panel")) && !/id="qsh"/.test(b.api.html("panel"))));
+    b.api.el("o").children.find(x => x.dataset.v === String(q0.answer)).click();
+    b.document.querySelectorAll('#tabs button[data-t="words"]')[0].click();
+    check("tab switch from the Today Read stage ends it (RD dropped with the session)", b.api.rd() === null);
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);

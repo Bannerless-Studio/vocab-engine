@@ -1477,6 +1477,7 @@ return {
   setQueueAndNext:(items, onDone) => { D = { q: items.slice(), right:0, seen:0, miss:[], onDone: onDone||(()=>{}), summary:null }; dnext(); },
   today: () => { tab = "today"; render(); },
   enterTodayStep: (step, read) => { todayStepState = read === undefined ? { step } : { step, read }; todayStep(); },
+  enterPlacement: () => { tab = "test"; testSel = "placement"; startPlacement(); }, getPL: () => PL, getTodayStepState: () => todayStepState,
   getHtml: id => { const e = document.getElementById(id); return e ? e.innerHTML : ""; },
 };`;
     // PASSAGES only when env.passages is given (undefined -> no Read tab, as before).
@@ -1529,6 +1530,26 @@ return {
     check("a voice change after boot flips hasSpeech", boot.api.getHasSpeech() === true);
     check("a voice change after boot re-renders", boot.api.getRenderCalls() === 2);
   }catch(e){ check(`boot-gating scenario does not throw (got: ${e.message})`, false); }
+
+  // Screen re-entry restores, never restarts (TODO.md "readRender re-mount"): a voice
+  // change mid-placement or on a Today teach screen between steps leaves the screen as it
+  // is; render() would restart placement from its intro or drop the session to the plan.
+  try{
+    let voices = [{ lang:"en-US", name:"x" }];
+    const b = await bootApp(voices);
+    b.ss.getVoices = () => voices;
+    b.api.enterPlacement();
+    const pl = b.api.getPL(), h0 = b.document.getElementById("panel").innerHTML, r0 = b.api.getRenderCalls();
+    voices = [{ lang:"zh-CN", name:"y" }]; b.ss.onvoiceschanged();
+    check("voice change mid-placement: no re-render, same placement run and item on screen",
+      b.api.getHasSpeech() === true && b.api.getRenderCalls() === r0 && b.api.getPL() === pl && b.document.getElementById("panel").innerHTML === h0);
+    const b2 = await bootApp([{ lang:"en-US", name:"x" }]);
+    b2.api.today();
+    b2.api.enterTodayStep(1); // Learn: the teach screen (D not set yet)
+    const t0 = b2.document.getElementById("panel").innerHTML, r2 = b2.api.getRenderCalls();
+    b2.ss.getVoices = () => [{ lang:"zh-CN", name:"y" }]; b2.ss.onvoiceschanged();
+    check("voice change on a Today teach screen: no re-render, session kept", /id="dr"/.test(t0) && b2.api.getRenderCalls() === r2 && b2.api.getTodayStepState() && b2.document.getElementById("panel").innerHTML === t0);
+  }catch(e){ check(`re-mount guard scenario does not throw (got: ${e.stack})`, false); }
 
   // Notice timing: the item built first must not be the one that gets the one-time
   // no-voice notice if a later-built item is the one actually shown first (shuffle),

@@ -380,6 +380,89 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     check("results screen: the previous reveal's watchdog retry never fires here (nothing new spoken)", spoken.length === k);
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
+  // ---------------------------------------------------------------- (f) re-mount restores, never restarts
+  // TODO.md "readRender re-mount": leaving the Read tab mid-question and returning, or a
+  // late voiceschanged, re-mounts the question screen. It must restore what the learner
+  // had (option order, translation, passage shown, reveal) and speak nothing new.
+  console.log("\n[7] re-mount (tab return, voiceschanged): the question screen is restored silently");
+  const tabClick = (document, t) => document.querySelectorAll(`#tabs button[data-t="${t}"]`)[0].click();
+  const optOrder = api => api.el("o").children.map(b => b.dataset.v).join();
+  try{
+    const voices = [{ lang: "zh-CN", name: "x" }];
+    const { api, spoken, document, ss } = await boot({ voices });
+    api.setProg(seedPF());
+    const p = PASSAGES.find(x => x.questions[0].en && x.questions.length > 1);
+    const q0 = p.questions[0];
+    api.startPassage(p);
+    api.el("rdone").click();
+    const ord = optOrder(api);
+    api.el("qtr").click(); api.el("ptoggle").click();
+    const k = spoken.length;
+    tabClick(document, "words"); tabClick(document, "read");
+    await sleep(DEFER);
+    check("tab return: same question, nothing spoken again", api.rd() && api.rd().qi === 0 && spoken.length === k);
+    check("tab return: option order kept", optOrder(api) === ord);
+    check("tab return: translation still shown, passage still open", api.html("panel").includes(VC.escapeHtml(q0.en)) && /id="pbox">/.test(api.html("panel")) && /Hide passage/.test(api.html("panel")));
+    check("tab return: the pre-answer logs are kept (tr, reopened)", api.rd().answers[0].tr === true && api.rd().answers[0].reopened === true);
+    api.el("o").children.find(b => b.dataset.v !== String(q0.answer)).click();
+    await sleep(DEFER);
+    const k2 = spoken.length;
+    voices.length = 0; voices.push({ lang: "en-US", name: "en" }); ss.onvoiceschanged();
+    voices.length = 0; voices.push({ lang: "zh-CN", name: "x" }); ss.onvoiceschanged();
+    await sleep(DEFER);
+    const opts = api.el("o").children;
+    check("voiceschanged after answering: reveal restored (source sentence, Next shown), nothing spoken",
+      /The answer is in this sentence/.test(api.html("rv")) && api.el("nx").style.display === "block" && spoken.length === k2);
+    check("restored reveal: options disabled, right one marked ok, the given wrong one bad",
+      opts.every(b => b.disabled) && opts.find(b => b.dataset.v === String(q0.answer)).classList.contains("ok") && opts.find(b => b.dataset.v === String(api.rd().answers[0].given)).classList.contains("bad"));
+    check("restored reveal: the answer is not re-graded (still wrong, still one record)", api.rd().answers[0].ok === false && api.rd().answers.length === 1);
+    check("restored reveal: Replay (#rvp) present and still plays the sentence", RVP.test(api.html("rv")));
+    api.el("nx").click(); await sleep(DEFER);
+    check("Next after a restore: question 2 starts with the passage hidden and speaks once", api.rd().qi === 1 && /id="pbox" hidden/.test(api.html("panel")) && spoken[spoken.length - 1] === p.questions[1].q);
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  try{
+    const voices = [{ lang: "en-US", name: "en" }];
+    const { api, spoken, ss } = await boot({ voices });
+    api.setProg(seedPF());
+    const p = PASSAGES[0];
+    api.startPassage(p);
+    api.el("rdone").click();
+    check("setup: no voice, nothing spoken on the question", spoken.length === 0);
+    voices.length = 0; voices.push({ lang: "zh-CN", name: "x" }); ss.onvoiceschanged();
+    check("a voice arriving before the answer: the question is spoken once (never spoken yet)", spoken.join() === p.questions[0].q && RPA.test(api.html("panel")));
+    voices.length = 0; voices.push({ lang: "en-US", name: "en" }); ss.onvoiceschanged();
+    voices.length = 0; voices.push({ lang: "zh-CN", name: "x" }); ss.onvoiceschanged();
+    await sleep(DEFER);
+    check("a second voice flip: not spoken again", spoken.length === 1);
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  console.log("\n[8] re-mount of the results screen keeps ticks and 'Add to review' done");
+  try{
+    const { api, document } = await boot();
+    api.setProg(seedPF());
+    const p = PASSAGES[0];
+    api.startPassage(p);
+    api.el("rdone").click();
+    for(let qi = 0; qi < p.questions.length; qi++){
+      const q = p.questions[qi];
+      api.el("o").children.find(b => b.dataset.v !== String(q.answer)).click();
+      api.el("nx").click();
+    }
+    const boxes = (api.html("panel").match(/data-wi="\d+"/g) || []).length;
+    check("setup: results list weighted weak words", boxes > 0 && /id="addrev"/.test(api.html("panel")));
+    api.rd().unticked[0] = true;
+    tabClick(document, "words"); tabClick(document, "read");
+    check("tab return: an unticked weak word stays unticked, the rest ticked", !/data-wi="0" checked/.test(api.html("panel")) && (boxes < 2 || /data-wi="1" checked/.test(api.html("panel"))));
+    api.el("addrev").click();
+    const msg = api.rd().added;
+    check("Add to review applies the ticked words only", msg === (boxes - 1 ? `Added ${boxes - 1} word${boxes - 1 > 1 ? "s" : ""} to your next review.` : "Nothing added."));
+    tabClick(document, "words"); tabClick(document, "read");
+    const h = api.html("panel");
+    check("tab return after Add to review: button disabled, message shown, boxes disabled", /id="addrev" disabled/.test(h) && h.includes(`<div id="addmsg" class="q">${VC.escapeHtml(msg)}</div>`) && /data-wi="\d+"[^>]*disabled/.test(h));
+    check("the restored button cannot apply again", !api.el("addrev").onclick);
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails === 0 ? 0 : 1);
 })().catch(e => { console.error(e); process.exit(1); });

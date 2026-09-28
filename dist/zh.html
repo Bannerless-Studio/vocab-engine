@@ -3703,14 +3703,13 @@ let ttsVoice = null, noticeShown = false;
 let hasSpeech = VC.speechUsable(speechAPI, [], TTS_LANG);
 if(speechAPI){
   // Some browsers report the voice list late (voiceschanged fires after first
-  // paint). When hasSpeech flips, re-render the current tab so speaker icons
-  // and hints catch up — skipped mid-drill (D set) so an in-progress answer
-  // isn't torn down under the learner.
+  // paint). When hasSpeech flips, the current screen is re-mounted (remountScreen)
+  // so speaker icons and hints catch up.
   const pv = () => {
     const v = SS.getVoices(); ttsVoice = VC.pickVoice(v, TTS_LANG);
     const was = hasSpeech;
     hasSpeech = VC.speechUsable(speechAPI, v, TTS_LANG);
-    if(hasSpeech !== was && !D && booted) render();
+    if(hasSpeech !== was && booted) remountScreen();
   };
   pv(); SS.onvoiceschanged = pv;
 }
@@ -4675,9 +4674,25 @@ if(!HAS_PASSAGES) document.querySelector('#tabs button[data-t="read"]').hidden =
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("#tabs button").forEach(x=>x.classList.remove("on"));
   b.classList.add("on"); tab = b.dataset.t; D = null; drillKeyHandler = null;
-  todayStepState = null; soundsSel = null; wordsSet = null; testSel = null; RD = null;
+  todayStepState = null; soundsSel = null; wordsSet = null; testSel = null;
+  // A Read-tab passage survives a tab switch and is restored on return (readRender); the
+  // Today Read stage belongs to the Today session, which a tab switch ends.
+  if(RD && RD.today) RD = null;
   render();
 });
+// Re-entering a screen restores it, never restarts it (TODO.md "Engine follow-ups",
+// readRender re-mount). A screen that cannot be rebuilt from its state is left as it is:
+// a drill item (speaks on mount, D), a Today session between steps (teach screens hold
+// their continuation in closures; render() would drop the session to the plan), and a
+// placement run or its result (PL; render() would restart it from the intro). A passage
+// restores from RD (readRender), silently.
+function remountScreen(){
+  if(D) return;
+  if(RD && tab === (RD.today ? "today" : "read")){ readRender(); return; }
+  if(tab === "today" && todayStepState) return;
+  if(tab === "test" && testSel === "placement" && PL) return;
+  render();
+}
 function render(){
   stopSpeaking();
   D = null; drillKeyHandler = null; screenTop();
@@ -4751,6 +4766,7 @@ function charChoiceHTML(){
 }
 function todayRender(){
   stopSpeaking();
+  todayStepState = null;
   screenTop();
   setScore(0,0);
   const P = $("panel"); const lw = learnedWords(); const nn = nextNewSet();
@@ -5149,7 +5165,9 @@ function renderWordBody(){
 // ===================== Read (passages) =====================
 // Only packs with passages.json (PASSAGES, appended to sentences.js) show this tab.
 // RD is the passage in progress: {p, tapped: [wordId], answers: [{ok, reopened, given, tr}],
-// qi, shown, resultsDone, today}. Tapped ids and per-question reopen flags feed
+// qv: [{order, spoken, trShown, qOpen}], qi, shown, resultsDone, today, unticked, added}:
+// everything a screen shows, so re-entering it (tab return, voiceschanged) restores it
+// silently (readQuestionScreen, readResults). Tapped ids and per-question reopen flags feed
 // VC.passageWeakWords on the results screen; tr (translation peeked before answering) is a
 // results-line note only and does not feed weak words. today: the Today Read stage runs it (same
 // screens; "Skip today" instead of the passage list link, Continue on to the next step).
@@ -5184,7 +5202,7 @@ function readRender(){
 // hide their text behind "Show question". Any other mode is the ordinary reading pass.
 function startPassage(p, today, mode){
   if(!p) return;
-  RD = { p, tapped: [], glosses: {}, answers: [], qi: null, shown: false, resultsDone: false, today: !!today };
+  RD = { p, tapped: [], glosses: {}, answers: [], qv: [], qi: null, shown: false, resultsDone: false, today: !!today, unticked: {}, added: null };
   if(mode === "listen"){
     const prev = prog.read && prog.read.done && prog.read.done[p.id];
     Object.assign(RD, { mode: "listen", peekText: false, textShown: false, playing: false,
@@ -5446,19 +5464,22 @@ function readQuestionScreen(){
   const p = RD.p, P = $("panel"), qi = RD.qi, q = p.questions[qi];
   if(!RD.answers[qi]) RD.answers[qi] = { ok: null, reopened: false, given: null, tr: false };
   const rec = RD.answers[qi];
-  // Each question starts with the passage hidden, so "reopened" is logged per question.
-  RD.shown = false;
-  setScore(qi, p.questions.length);
+  // RD.qv[qi]: what this question's screen has already done (option order, question
+  // spoken, translation / hidden question opened), so a re-mount (tab return,
+  // voiceschanged) restores it silently. RD.shown is reset by the callers that move to a
+  // new question (each starts with the passage hidden, so "reopened" is per question).
   const tf = q.type === "tf";
-  const order = tf ? [true, false] : shuffle([0,1,2,3]);
+  const view = RD.qv[qi] || (RD.qv[qi] = { order: tf ? [true, false] : shuffle([0,1,2,3]), spoken: false, trShown: false, qOpen: false });
+  const order = view.order;
+  setScore(qi, p.questions.length);
   // The question is TTS only (no per-question clip in the pack schema), so it plays iff a
   // voice is usable, same "no voice -> no replay" rule as every other spoken site.
   const hearQ = hasSpeech;
   // Listening pass: an audioOnly question (spoken, so only while a voice is usable) keeps
   // its text and translation behind "Show question"; a tap before answering is logged (qh).
   const qText = () => `<div class="med wd"${TA}>${rubyTextOr(q.q, q.ruby)}</div>`;
-  const qTr = () => q.en ? `<div id="qtrwrap">${rec.tr ? `<div class="q cue">${ui(q.en)}</div>` : `<button class="ghost" id="qtr" style="margin:8px 0">Show translation</button>`}</div>` : "";
-  const qHidden = RD.mode === "listen" && hearQ && RD.audioOnly.indexOf(qi) >= 0 && !rec.qh;
+  const qTr = () => q.en ? `<div id="qtrwrap">${view.trShown ? `<div class="q cue">${ui(q.en)}</div>` : `<button class="ghost" id="qtr" style="margin:8px 0">Show translation</button>`}</div>` : "";
+  const qHidden = RD.mode === "listen" && hearQ && RD.audioOnly.indexOf(qi) >= 0 && !view.qOpen && rec.ok === null;
   P.innerHTML = `<div class="drill-body top"><p class="q">Question ${qi+1} / ${p.questions.length}</p>
     ${qHidden ? `<div id="qshwrap"><button class="ghost" id="qsh" style="margin:8px 0">Show question</button></div>${REPLAY_STAGE}` : `${qText()}${hearQ ? REPLAY_STAGE : ""}${qTr()}`}
     <div class="opts ${tf ? "" : "opts-w"}" id="o"></div>
@@ -5468,17 +5489,23 @@ function readQuestionScreen(){
     <div class="passage" id="pbox"${RD.shown ? "" : " hidden"}>${passageHTML(-1)}</div>
     </div><div class="actions"><button class="next" id="nx" style="display:none">${qi+1 < p.questions.length ? "Next" : "See results"}</button></div>`;
   wirePassage($("pbox"), $("gloss"));
-  if(hearQ){ const qb = $("rpa"); speak(q.q, qb); qb.onclick = () => speak(q.q, qb); }
+  // Spoken once per question: a re-mount, or a voice arriving after it was answered, only
+  // offers Replay.
+  if(hearQ){
+    const qb = $("rpa");
+    if(!view.spoken && rec.ok === null){ view.spoken = true; speak(q.q, qb); }
+    qb.onclick = () => speak(q.q, qb);
+  }
   const wireTr = () => {
     const qtr = q.en && $("qtr");
     // Same "logged only before answering" rule as reopening the passage: a peek after the
     // question is already answered is just curiosity, not a hint the learner used.
-    if(qtr) qtr.onclick = () => { if(rec.ok === null) rec.tr = true; $("qtrwrap").innerHTML = `<div class="q cue">${ui(q.en)}</div>`; };
+    if(qtr) qtr.onclick = () => { if(rec.ok === null) rec.tr = true; view.trShown = true; $("qtrwrap").innerHTML = `<div class="q cue">${ui(q.en)}</div>`; };
   };
   wireTr();
   // Answering reveals it too (not logged: qh is only a tap before answering).
   let qOpen = !qHidden;
-  const revealQ = () => { if(qOpen) return; qOpen = true; $("qshwrap").innerHTML = qText() + qTr(); wireTr(); };
+  const revealQ = () => { view.qOpen = true; if(qOpen) return; qOpen = true; $("qshwrap").innerHTML = qText() + qTr(); wireTr(); };
   if(qHidden) $("qsh").onclick = () => { if(rec.ok === null) rec.qh = true; revealQ(); };
   $("ptoggle").onclick = () => {
     RD.shown = !RD.shown;
@@ -5488,6 +5515,20 @@ function readQuestionScreen(){
     $("ptoggle").setAttribute("aria-expanded", String(RD.shown));
   };
   const box = $("o");
+  // fresh: the answer was just given, so the source sentence plays; a restored reveal
+  // (re-mount of an answered question) only offers Replay.
+  const reveal = fresh => {
+    revealQ();
+    [...box.children].forEach(x => { x.disabled = true; if(x.dataset.v === String(q.answer)) x.classList.add("ok"); if(!rec.ok && x.dataset.v === String(rec.given)) x.classList.add("bad"); });
+    const s = p.sentences[q.sentence];
+    const hearS = canHearSentence(s);
+    showReveal(`<div class="q" style="margin:0 0 6px">${rec.ok ? "Right." : "Not quite."} The answer is in this sentence:</div><div class="stmt hi" style="margin:0"${TOKBOX}><div${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:4px 0 0">${ui(s.en)}</div></div>${hearS ? REVEAL_REPLAY : ""}`);
+    // speak() cancels whatever the question was saying (audioOut.stop / tts.stop), so
+    // the source sentence never overlaps the question's own TTS.
+    if(hearS){ const rb = $("rvp"); if(fresh) saySentence(s, rb); rb.onclick = () => saySentence(s, rb); }
+    const hs = $("pbox").querySelector(`[data-si="${q.sentence}"]`); if(hs) hs.classList.add("hi");
+    showNext(); setScore(qi+1, p.questions.length);
+  };
   order.forEach((v, i) => {
     const b = document.createElement("button");
     b.innerHTML = `<b class="num"${UIA}>${i+1}</b>${tf ? (v ? "True" : "False") : rubyTw(q.options[v], (q.optionsRuby || [])[v], true)}`;
@@ -5496,20 +5537,11 @@ function readQuestionScreen(){
     b.onclick = () => {
       if(rec.ok !== null) return;
       rec.given = v; rec.ok = VC.gradeQuestion(q, v);
-      revealQ();
-      [...box.children].forEach(x => { x.disabled = true; if(x.dataset.v === String(q.answer)) x.classList.add("ok"); });
-      if(!rec.ok) b.classList.add("bad");
-      const s = p.sentences[q.sentence];
-      const hearS = canHearSentence(s);
-      showReveal(`<div class="q" style="margin:0 0 6px">${rec.ok ? "Right." : "Not quite."} The answer is in this sentence:</div><div class="stmt hi" style="margin:0"${TOKBOX}><div${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:4px 0 0">${ui(s.en)}</div></div>${hearS ? REVEAL_REPLAY : ""}`);
-      // speak() cancels whatever the question was saying (audioOut.stop / tts.stop), so
-      // the source sentence never overlaps the question's own TTS.
-      if(hearS){ const rb = $("rvp"); saySentence(s, rb); rb.onclick = () => saySentence(s, rb); }
-      const hs = $("pbox").querySelector(`[data-si="${q.sentence}"]`); if(hs) hs.classList.add("hi");
-      showNext(); setScore(qi+1, p.questions.length);
+      reveal(true);
     };
     box.appendChild(b);
   });
+  if(rec.ok !== null) reveal(false);
   $("nx").onclick = () => {
     if(qi+1 < p.questions.length){ RD.qi = qi+1; RD.shown = false; readQuestionScreen(); }
     else { RD.resultsDone = true; markPassageFinished(); readResults(); }
@@ -5535,31 +5567,37 @@ function readResults(){
   // Weight-0 entries (looked back only) are information: listed without a checkbox, never
   // applied; with no weighted entry the list and its heading are not shown.
   const anyWeak = weak.some(w => w.weight > 0);
+  // RD.unticked (weak-word indexes the learner unticked) and RD.added (the "Added ..."
+  // message once applied) restore this screen on a re-mount; without RD.added a re-mount
+  // would offer "Add to review" again and apply the same words twice.
   P.innerHTML = `<div class="done"><h2>${sc} / ${p.questions.length}</h2>
     ${RD.mode === "listen" ? `<p class="q" id="lmode" style="margin-bottom:4px">Listening pass${RD.peekText ? "<br>Text shown while listening" : ""}</p>` : ""}<p class="q"${TA} style="margin-bottom:8px">${rubyTextOr(p.title, p.titleRuby)}</p>
     ${p.questions.map((q, i) => { const a = RD.answers[i] || {}; const s = p.sentences[q.sentence]; const hearS = canHearSentence(s);
       return `<div class="stmt"${TOKBOX}><div class="q" style="margin:0 0 4px;color:${a.ok ? "var(--ok)" : "var(--bad)"}">${a.ok ? "✓" : "✗"} Question ${i+1}${a.reopened ? " · looked back" : ""}${a.qh ? " · question shown" : ""}${a.tr ? " · translation shown" : ""}</div><div${TA}>${rubyTextOr(q.q, q.ruby)}</div><div style="margin-top:6px"${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:2px 0 0">${ui(s.en)}</div>${hearS ? `<button type="button" class="replay" id="rr${i}" aria-label="Replay">${REPLAY_SVG}</button>` : ""}</div>`; }).join("")}
-    ${anyWeak ? `<p class="q">Weak words from this passage${RD.today ? ". Ticked ones go to your next review." : ""}</p><div id="weak">${weak.map((w, i) => `<label class="wk"${DISP.rtl ? ' dir="rtl"' : ""}>${w.weight > 0 ? `<input type="checkbox" data-wi="${i}" checked> ` : ""}${glossHTML(w.id, RD.glosses && RD.glosses[w.id])} <span class="q"${UIA} style="margin:0;font-size:13px">${escapeHtml(w.why.map(x => WHY_LABEL[x]).join(", "))}</span></label>`).join("")}</div>
-      ${RD.today ? "" : `<button class="next" id="addrev">Add to review</button>`}` : `<p class="q">No weak words from this passage.</p>`}
-    ${RD.today ? `<button class="next" id="rcont" style="margin-top:10px">Continue</button></div>` : `<div id="addmsg" class="q" hidden></div>
+    ${anyWeak ? `<p class="q">Weak words from this passage${RD.today ? ". Ticked ones go to your next review." : ""}</p><div id="weak">${weak.map((w, i) => `<label class="wk"${DISP.rtl ? ' dir="rtl"' : ""}>${w.weight > 0 ? `<input type="checkbox" data-wi="${i}"${RD.unticked[i] ? "" : " checked"}${RD.added ? " disabled" : ""}> ` : ""}${glossHTML(w.id, RD.glosses && RD.glosses[w.id])} <span class="q"${UIA} style="margin:0;font-size:13px">${escapeHtml(w.why.map(x => WHY_LABEL[x]).join(", "))}</span></label>`).join("")}</div>
+      ${RD.today ? "" : `<button class="next" id="addrev"${RD.added ? " disabled" : ""}>Add to review</button>`}` : `<p class="q">No weak words from this passage.</p>`}
+    ${RD.today ? `<button class="next" id="rcont" style="margin-top:10px">Continue</button></div>` : `<div id="addmsg" class="q"${RD.added ? "" : " hidden"}>${RD.added ? escapeHtml(RD.added) : ""}</div>
     <button class="ghost" id="rlist" style="margin-top:10px">Back to passages</button></div>`}`;
   // Replay only: results is a review screen, nothing autoplays here.
   p.questions.forEach((q, i) => { const s = p.sentences[q.sentence]; if(canHearSentence(s)){ const rb = $("rr"+i); rb.onclick = () => saySentence(s, rb); } });
+  const rd = RD;
+  P.querySelectorAll("[data-wi]").forEach(x => { x.onchange = () => { rd.unticked[x.dataset.wi] = !x.checked; }; });
   // Today Read stage: the ticked weak words (all by default) are applied on Continue, as
   // drill misses are, then the session goes on.
   if(RD.today){
     $("rcont").onclick = () => {
-      const chosen = weak.filter((w, i) => { const x = P.querySelector(`[data-wi="${i}"]`); return w.weight > 0 && (!x || x.checked); });
+      const chosen = weak.filter((w, i) => w.weight > 0 && !rd.unticked[i]);
       if(chosen.length){ VC.applyWeakWords(prog, chosen, WORDS, PACK); store.save(); }
       RD = null; todayStep();
     };
     return;
   }
-  if(anyWeak) $("addrev").onclick = () => {
-    const chosen = [...P.querySelectorAll("[data-wi]")].filter(x => x.checked).map(x => weak[+x.dataset.wi]);
+  if(anyWeak && !RD.added) $("addrev").onclick = () => {
+    const chosen = weak.filter((w, i) => w.weight > 0 && !rd.unticked[i]);
     VC.applyWeakWords(prog, chosen, WORDS, PACK); store.save();
     $("addrev").disabled = true; P.querySelectorAll("[data-wi]").forEach(x => { x.disabled = true; });
-    const m = $("addmsg"); m.hidden = false; m.textContent = chosen.length ? `Added ${chosen.length} word${chosen.length > 1 ? "s" : ""} to your next review.` : "Nothing added.";
+    rd.added = chosen.length ? `Added ${chosen.length} word${chosen.length > 1 ? "s" : ""} to your next review.` : "Nothing added.";
+    const m = $("addmsg"); m.hidden = false; m.textContent = rd.added;
     bringIntoView(m);
   };
   $("rlist").onclick = () => { RD = null; readRender(); };
@@ -5605,7 +5643,7 @@ function testRender(){
 function placementItemTotal(){ return VC.strata(WORDS, PACK.placement, SIZE).reduce((n,_,i)=>n+VC.placementItemCount(i), 0); }
 function placeRender(){
   stopSpeaking();
-  D = null; drillKeyHandler = null; setScore(0,0);
+  D = null; drillKeyHandler = null; PL = null; setScore(0,0);
   const P = $("panel"); const lw = learnedWords();
   const first = levelLabel(PACK.placement[0][0]), last = levelLabel(PACK.placement[PACK.placement.length-1][0]);
   P.innerHTML = `<div class="row"><button id="back">‹ test</button></div>
@@ -5930,4 +5968,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:374025918-1589219-->
+<!--ve-build:2003569603-1591649-->
