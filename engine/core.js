@@ -954,7 +954,20 @@ function normalizeProg(data, pack){
   for(const k of ["w","s","lessons"]) if(!isObj(merged[k])) merged[k] = {};
   if(charsConfig(pack)) merged.chars = normalizeCharsProg(data && data.chars);
   if(scriptConfig(pack)) merged.script = normalizeScriptProg(data && data.script, data);
+  merged.w = dropBadMissKinds(merged.w);
   return merged;
+}
+// A word record's k outside MISS_KINDS is dropped (the record is kept); records without
+// k, or with a valid one, are the same objects, so they round-trip unchanged.
+function dropBadMissKinds(w){
+  let out = w;
+  Object.keys(w).forEach(id => {
+    const p = w[id];
+    if(!isObj(p) || p.k === undefined || MISS_KINDS.includes(p.k)) return;
+    if(out === w) out = Object.assign({}, w);
+    const q = Object.assign({}, p); delete q.k; out[id] = q;
+  });
+  return out;
 }
 // Parses a stored/imported progress string. Only a JSON object is progress;
 // arrays, strings, numbers, null are rejected rather than Object.assign'ed.
@@ -1009,10 +1022,17 @@ function applyImport(prev, text, pack){
   if(prog.chars && !(isObj(v.data.chars) && v.data.chars.mix !== undefined) && prev && isObj(prev.chars) && typeof prev.chars.mix === "boolean") prog.chars.mix = prev.chars.mix;
   return {ok:true, prog};
 }
-function markRec(map, key, ok, isWord){
+// kind (optional, word items only): the item kind answered, one of MISS_KINDS. A miss
+// remembers it as p.k so the next review asks the word the same way; a pass in that
+// exact kind clears it (user decision 2026-09-28).
+function markRec(map, key, ok, isWord, kind){
   const p = map[key] || {r:0,w:0,s:0};
   if(ok){ p.r++; p.s++; } else { p.w++; p.s=0; }
   if(isWord && p.prov && (p.s>=WORD_MASTERED || !ok)) delete p.prov;
+  if(isWord && MISS_KINDS.includes(kind)){
+    if(!ok) p.k = kind;
+    else if(p.k === kind) delete p.k;
+  }
   map[key] = p; return p;
 }
 const weakScore = rec => { const p = rec || {r:0,w:0,s:0}; return (p.w||0)*3 - (p.s||0); };
@@ -1061,6 +1081,7 @@ function availableSentences(sentences, words, pack, prog){
 // Plans are [{kind, word}] (words) or [{kind, sentence}] — the app turns each into a
 // drill item. Kept here, DOM-free, so composition rules are testable under Node.
 const PRODUCTION_KINDS = ["recall","type"];
+const MISS_KINDS = ["recall","type","hear","read"];
 const REVIEW_SIZE = 15, REVIEW_PROV = 5, REVIEW_PRODUCTION_SHARE = 0.4;
 // Assigns kinds to n slots: ceil(share*n) production (recall/type alternating when
 // typing is on, else all recall), the rest receptive hear:read at 2:1.
@@ -1091,7 +1112,7 @@ function buildReviewPlan(learned, prog, pack, opts){
   const rest = weakFirst(learned.filter(x=>!pvSet.has(x.id)), n - pv.length, prog.w, null, o.rng);
   const pool = shuffle([...rest, ...pv], o.rng);
   const kinds = kindMix(pool.length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
-  return pool.map((word,i)=>({ kind: kinds[i], word }));
+  return applyMissedKinds(pool.map((word,i)=>({ kind: kinds[i], word })), prog, pack, false, o);
 }
 // Recall step: weakest n learned words, all production (recall/type mix).
 // opts.units / opts.rng: as buildReviewPlan. Recorded units join the same weakest-first
@@ -1099,10 +1120,26 @@ function buildReviewPlan(learned, prog, pack, opts){
 function buildRecallPlan(learned, prog, pack, n, opts){
   const o = opts || {};
   const ru = recordedUnits(o.units, prog, pack);
-  if(ru.length) return unifiedRecallPlan(learned, ru, prog, pack, n, o.rng);
+  if(ru.length) return unifiedRecallPlan(learned, ru, prog, pack, n, o.rng, o);
   const pool = weakFirst(learned, n, prog.w);
   const kinds = kindMix(pool.length, 1, typingEnabled(pack));
-  return pool.map((word,i)=>({ kind: kinds[i], word }));
+  return applyMissedKinds(pool.map((word,i)=>({ kind: kinds[i], word })), prog, pack, true, o);
+}
+// A word item whose record remembers a missed kind (k) is asked in that kind instead of
+// kindMix's. production (Recall plans): a receptive k becomes "recall". "type" with typing
+// off becomes "recall". Unit items and words without k keep their kind; no rng is drawn,
+// so a progress without k gives the plan unchanged. opts.missedKinds === false (the Test
+// tab) skips it.
+function applyMissedKinds(plan, prog, pack, production, opts){
+  if(opts && opts.missedKinds === false) return plan;
+  const recs = (prog && prog.w) || {}; const typing = typingEnabled(pack);
+  return plan.map(it => {
+    const k = it.word && recs[it.word.id] && recs[it.word.id].k;
+    if(!MISS_KINDS.includes(k)) return it;
+    let kind = production && !PRODUCTION_KINDS.includes(k) ? "recall" : k;
+    if(kind === "type" && !typing) kind = "recall";
+    return kind === it.kind ? it : Object.assign({}, it, { kind });
+  });
 }
 // Sentence kind: hear 50 / read 25 / gap 25. Gap is "gapType" (type the blank) half
 // the time when the pack types written words, else multiple choice. A pack that types
@@ -2084,15 +2121,15 @@ function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx){
   const out = pool.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry }
     : x.kind === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: x.entry }
     : { kind: pickScriptKind(scfg.reviewKinds, x.entry, scfg, r, sctx), unit: x.entry });
-  return out.filter(it => it.kind);
+  return applyMissedKinds(out.filter(it => it.kind), prog, pack, false);
 }
 // Unified Recall: the n weakest words and recorded units, weakest first; words as
 // recall/type, units as charRecall.
-function unifiedRecallPlan(learned, ru, prog, pack, n, rng){
+function unifiedRecallPlan(learned, ru, prog, pack, n, rng, opts){
   const ranked = rankUnified(learned, prog.w, ru, charRecs(prog), n, pack, rng);
   const kinds = kindMix(ranked.filter(x => x.kind === "w").length, 1, typingEnabled(pack), rng);
   let wi = 0;
-  return ranked.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry } : { kind:"charRecall", unit: x.entry });
+  return applyMissedKinds(ranked.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry } : { kind:"charRecall", unit: x.entry }), prog, pack, true, opts);
 }
 // Taken at "Start today" and kept for the whole session, so finishing a stage mid-session
 // changes neither what Learn teaches nor Review/Recall's mode: {stage, cset, charsStarted,
@@ -3056,7 +3093,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   markRec, weakScore, weakFirst, provPick, learnedWords, nextNewSet, currentLevelIndex, availableSentences,
-  PRODUCTION_KINDS, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
+  PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,

@@ -311,6 +311,43 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     && rpPron.map((p, j) => p.kind === "type" ? VC.typeSlotKind(rpPron, j) : "").filter(Boolean).sort().join(",") === "pron,pron,written,written");
   const km = VC.kindMix(15, 0.4, false);
   check("kindMix(15): exactly 6 production, hear:read 2:1 over the rest", km.filter(k=>k==="recall").length===6 && km.filter(k=>k==="hear").length===6 && km.filter(k=>k==="read").length===3);
+  // Missed kind (k, user decision 2026-09-28): a word-item miss remembers its kind, a pass in that kind clears it.
+  { const m = {};
+    VC.markRec(m, "a", false, true, "type");
+    const set = m.a.k === "type";
+    VC.markRec(m, "a", true, true, "hear"); const keptOther = m.a.k === "type";
+    VC.markRec(m, "a", true, true, "type"); const cleared = m.a.k === undefined && !("k" in m.a);
+    VC.markRec(m, "a", false, true, "hear"); VC.markRec(m, "a", false, true, "read"); const latest = m.a.k === "read";
+    VC.markRec(m, "b", false, true); VC.markRec(m, "c", false, false, "recall"); VC.markRec(m, "d", false, true, "gap");
+    check("markRec k: miss sets k; pass in another kind keeps it; pass in the same kind deletes it; latest miss wins", set && keptOther && cleared && latest);
+    check("markRec k: no kind, a non-word record (chars/script/sentence), or a kind outside MISS_KINDS never sets k", !("k" in m.b) && !("k" in m.c) && !("k" in m.d)); }
+  { const ks = (plan, id) => plan.filter(p => p.word && p.word.id === id).map(p => p.kind);
+    const pk = VC.defaultProg(PACK); const L = WORDS.slice(0, 15);
+    pk.w[L[0].id] = {r:0,w:1,s:0,k:"hear"}; pk.w[L[1].id] = {r:0,w:1,s:0,k:"read"}; pk.w[L[2].id] = {r:0,w:1,s:0,k:"type"}; pk.w[L[3].id] = {r:0,w:1,s:0,k:"recall"};
+    let revOk = true, revTypOk = true, recOk = true, recTypOk = true, testOk = true;
+    for(let i = 0; i < 20; i++){
+      const r0 = VC.buildReviewPlan(L, pk, PACK), r1 = VC.buildReviewPlan(L, pk, typingPack);
+      const c0 = VC.buildRecallPlan(L, pk, PACK, 15), c1 = VC.buildRecallPlan(L, pk, typingPack, 15);
+      if(ks(r0, L[0].id)[0] !== "hear" || ks(r0, L[1].id)[0] !== "read" || ks(r0, L[2].id)[0] !== "recall" || ks(r0, L[3].id)[0] !== "recall") revOk = false;
+      if(ks(r1, L[2].id)[0] !== "type" || ks(r1, L[0].id)[0] !== "hear") revTypOk = false;
+      if(![0,1,2,3].every(j => ks(c0, L[j].id)[0] === "recall")) recOk = false;
+      if(ks(c1, L[0].id)[0] !== "recall" || ks(c1, L[1].id)[0] !== "recall" || ks(c1, L[2].id)[0] !== "type" || ks(c1, L[3].id)[0] !== "recall") recTypOk = false;
+      const t1 = VC.buildRecallPlan(L, pk, typingPack, 15, { missedKinds: false });
+      if(!t1.every(p => VC.PRODUCTION_KINDS.includes(p.kind))) testOk = false;
+    }
+    check("Review plan: a word with k is asked in k (hear, read kept; type -> recall when typing is off)", revOk);
+    check("Review plan, typing on: k type stays type", revTypOk);
+    check("Recall plan: receptive k -> recall; typing off: every k -> recall", recOk);
+    check("Recall plan, typing on: k type -> type, hear/read/recall -> recall", recTypOk);
+    // Plans without k are unchanged: the helper draws no rng.
+    const seeded = (f) => { const rng = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(7); return f(rng); };
+    const bare = VC.defaultProg(PACK); L.forEach((w, i) => { bare.w[w.id] = {r:i%3,w:i%2,s:0}; });
+    const same = JSON.stringify(seeded(rng => VC.buildReviewPlan(L, bare, typingPack, { rng }))) === JSON.stringify(seeded(rng => VC.buildReviewPlan(L, bare, typingPack, { rng, missedKinds: false })));
+    check("applyMissedKinds: progress without k gives the same plan as with it skipped (seeded)", same);
+    const aplan = [{ kind:"hear", word:L[2] }, { kind:"charRead", unit:{ id:"c1" } }];
+    const out = VC.applyMissedKinds(aplan, pk, typingPack, false);
+    check("applyMissedKinds: unit items untouched; returns new items, input plan not mutated", out[1] === aplan[1] && out[0].kind === "type" && aplan[0].kind === "hear");
+    check("Test tab (missedKinds: false) keeps kindMix's production kinds", testOk); }
   const counts = {hear:0, read:0, gap:0, gapType:0};
   for(let i=0;i<4000;i++) counts[VC.sentenceKind(PACK)]++;
   check("sentence kinds ~50/25/25 hear/read/gap; no typed gap without typing", Math.abs(counts.hear/4000-0.5)<0.04 && Math.abs(counts.gap/4000-0.25)<0.04 && counts.gapType===0);
@@ -1413,7 +1450,7 @@ announce = function(h){ __announced = h; return __wrappedAnnounce.apply(this, ar
 return {
   getAnnounced:()=>__announced,
   glossHTML, glossBox, startPassage, readResults, readRender, getProg:()=>prog, readQuestion: qi => { RD.qi = qi; readQuestionScreen(); },
-  optsMarkup: () => { const o = document.getElementById("o"); return o ? o.children.map(b => \`<button\${b.dir ? \` dir="\${b.dir}"\` : ""}>\${b.innerHTML}</button>\`).join("") : ""; }, passageSentenceHTML, getRD:()=>RD, getHasSpeech:()=>hasSpeech, getRenderCalls:()=>__renderCalls, hearItem, hearSentence, readItem, typeItem, dnext,
+  optsMarkup: () => { const o = document.getElementById("o"); return o ? o.children.map(b => \`<button\${b.dir ? \` dir="\${b.dir}"\` : ""}>\${b.innerHTML}</button>\`).join("") : ""; }, passageSentenceHTML, getRD:()=>RD, getHasSpeech:()=>hasSpeech, getRenderCalls:()=>__renderCalls, hearItem, hearSentence, readItem, typeItem, recallItem, pronTypeItem, writtenTypeItem, dnext,
   setHasSpeech: v => { hasSpeech = v; },
   setQueueAndNext:(items, onDone) => { D = { q: items.slice(), right:0, seen:0, miss:[], onDone: onDone||(()=>{}), summary:null }; dnext(); },
   today: () => { tab = "today"; render(); },
@@ -1503,6 +1540,21 @@ return {
     const html = document.getElementById("panel").innerHTML;
     check("a needsNotice item shows no notice if hasSpeech flips true before it's shown", !html.includes("no text-to-speech voice"));
   }catch(e){ check(`hasSpeech-flips-before-show scenario does not throw (got: ${e.message})`, false); }
+
+  // Every word item passes its own kind to markWord, so a miss is remembered as prog.w[id].k.
+  try{
+    const { api } = await bootApp([{ lang:"zh-CN", name:"x" }]);
+    const pr = api.getProg();
+    const sites = [["hearItem","hear"],["readItem","read"],["recallItem","recall"],["typeItem","type"],["pronTypeItem","type"],["writtenTypeItem","type"]];
+    const got = sites.map(([f, k], i) => { const w = WORDS[40 + i]; api[f](w).onAnswer(false); return (pr.w[w.id] || {}).k === k; });
+    check(`word items: a miss records its kind as k (${sites.map(([f, k], i) => `${f}:${got[i] ? k : "?"}`).join(" ")})`, got.every(Boolean));
+    const w = WORDS[40]; api.readItem(w).onAnswer(true); const kept = pr.w[w.id].k === "hear";
+    api.hearItem(w).onAnswer(true);
+    check("word items: a pass in another kind keeps k, a pass in the same kind clears it", kept && !("k" in pr.w[w.id]));
+    const { api: api2 } = await bootApp([{ lang:"en-US", name:"x" }]); const pr2 = api2.getProg();
+    api2.hearItem(WORDS[50]).onAnswer(false);
+    check("unhearable hear item (degraded to read) records the kind shown: read", pr2.w[WORDS[50].id].k === "read");
+  }catch(e){ check(`missed-kind item scenario does not throw (got: ${e.message})`, false); }
 
   try{
     const { api, document } = await bootApp([{ lang:"en-US", name:"x" }]); // hasSpeech=false

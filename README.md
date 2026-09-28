@@ -42,6 +42,8 @@ The question types are:
 - **type:** see the meaning, then type the word. A pack with `typing: "pron"` (zh) alternates two tagged kinds here instead. "Type the pinyin" is silent and tones are optional. "Type the characters" plays the word first. See docs/PACK_SCHEMA.md "Pronunciation aids".
 - **gap:** fill a cloze sentence, by picking or typing.
 
+A word keeps one progress record, `prog.w[id] = {r, w, s, prov?, d?, k?}`: right and wrong counts, streak, the placement-guessed flag, the drilled-ahead flag, and `k`, the kind (hear, read, recall or type) of its last miss. Today's Review and Recall and the Words-tab review ask a word with `k` in that kind (a Recall plan turns a receptive `k` into recall, and `type` becomes recall when the pack has no typing). A pass in that same kind clears `k`; a pass in another kind leaves it. The Test tab and placement ignore it. A stored `k` outside those four kinds is dropped on load (core.js `markRec`, `applyMissedKinds`).
+
 An item that plays audio by itself shows a Replay button. A gap item plays its sentence only after the answer, with Replay in the reveal. See docs/AUDIO.md "Playback reliability".
 
 After the first visit a site loads instantly and works offline. When a new version is published, the open page keeps running and shows "Updated, reload for the new version"; the next load gets it.

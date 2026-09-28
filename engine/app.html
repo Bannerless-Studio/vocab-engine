@@ -475,7 +475,8 @@ const store = {
   save(){ return this.setRaw(STORE_KEY, JSON.stringify(prog)); },
   backup(suffix, raw){ return this.setRaw(`${STORE_KEY}_${suffix}`, raw); }
 };
-function markWord(id, ok){ VC.markRec(prog.w, id, ok, true); store.save(); }
+// kind: the word item kind answered ("hear"|"read"|"recall"|"type"), remembered on a miss (VC.markRec).
+function markWord(id, ok, kind){ VC.markRec(prog.w, id, ok, true, kind); store.save(); }
 function markSentence(id, ok){ VC.markRec(prog.s, id, ok, false); store.save(); }
 function markChar(unitId, ok){ VC.markChar(prog, unitId, ok); store.save(); } // prog.chars.c only
 const mastered = id => ((prog.w[id]||{}).s||0) >= VC.WORD_MASTERED;
@@ -1152,7 +1153,7 @@ function hearItem(entry){
   return { kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero",
     html: `<div class="hear-stage"><button class="speaker" id="sp" aria-label="Replay">${SPEAKER_SVG}</button></div>`,
     opts: meaningChoices(entry), a: VC.gloss(entry), reveal: `<div class="q">You heard:</div>${revealBlock(entry)}`,
-    onAnswer: ok=>markWord(entry.id, ok),
+    onAnswer: ok=>markWord(entry.id, ok, "hear"),
     mount: () => { const btn = $("sp"); sayWord(entry, btn); btn.onclick = ()=>sayWord(entry, btn); },
     };
 }
@@ -1162,7 +1163,7 @@ function readItem(entry){
   const hear = canHearWord(entry);
   return { kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero",
     html: bigWordHTML(entry) + (hear ? REPLAY_STAGE : ""), opts: meaningChoices(entry), a: VC.gloss(entry), reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok), mount: () => { const b = hear ? $("rpa") : null; sayWord(entry, b || undefined); if(b) b.onclick = () => sayWord(entry, b); }, };
+    onAnswer: ok=>markWord(entry.id, ok, "read"), mount: () => { const b = hear ? $("rpa") : null; sayWord(entry, b || undefined); if(b) b.onclick = () => sayWord(entry, b); }, };
 }
 // recall — meaning shown; pick the word (wordOpts: same pos/level first, never a
 // distractor that would also be a right answer).
@@ -1174,7 +1175,7 @@ function recallItem(entry){
   return { kind:"mc", key:"w:"+entry.id, label:"Which word is this?", optsClass:"opts-hero opts-w",
     html: `<div class="med" style="text-align:center">${ui(VC.gloss(entry))}</div>`,
     opts: [entry.id, ...ds.map(d=>d.id)], a: entry.id, optHtml: wordOptHtml(byId, o => byId[o].w), optsT: true, reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer: ok=>markWord(entry.id, ok, "recall"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 // type — meaning shown; type the word (normalised per pack.typing, alt forms and any
 // affix-bare/slash-alternative forms from VC.affixAlts accepted, e.g. 이 or 가 for -이/가).
@@ -1182,7 +1183,7 @@ function typeItem(entry){
   return { kind:"type", key:"w:"+entry.id, label:"Type the word",
     html: `<div class="med" style="text-align:center">${ui(VC.gloss(entry))}</div>`,
     check: val => VC.acceptTyped(val, entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer: ok=>markWord(entry.id, ok, "type"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 // pack.typing "pron": the word's production slot (kindMix "type", the slot recall also
 // fills) is one of two typed items, alternating in plan order (VC.typeSlotKind), each
@@ -1209,7 +1210,7 @@ function pronTypeItem(entry){
     placeholder: TONES ? `${PRON_NOUN}, tones optional…` : `${PRON_NOUN}…`, inputTA: LATIN_PRON.test(entry.pron) ? ' lang="en"' : undefined,
     check: val => VC.checkPronTyped(val, entry.pron, PACK) !== "wrong",
     feedback: val => { const v = VC.checkPronTyped(val, entry.pron, PACK); return v === "tones" || v === "tonesDiff" ? `<div class="diff">tones: <span class="tpron">${readingHTML(entry.pron)}</span></div>` : ""; },
-    reveal: revealBlock(entry), onAnswer: ok=>markWord(entry.id, ok), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    reveal: revealBlock(entry), onAnswer: ok=>markWord(entry.id, ok, "type"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 function writtenTypeItem(entry){
   const hear = canHearWord(entry);
@@ -1223,7 +1224,7 @@ function writtenTypeItem(entry){
     placeholder: "characters…",
     mount: () => { if(hear){ const b = $("rp2"); sayWord(entry, b); b.onclick = () => sayWord(entry, b); } },
     check: val => VC.acceptTyped(foldTyped(val), entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
-    onAnswer: ok=>markWord(entry.id, ok), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+    onAnswer: ok=>markWord(entry.id, ok, "type"), onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 // The characters item only for a word whose written form is on display (dispWord: under
 // pronFirst, a word below its character tier shows its reading only, so its characters
@@ -2423,7 +2424,7 @@ function testRender(){
   else $("pl").onclick = () => { testSel = "placement"; testRender(); };
   if(tg.words){
     $("tListen").onclick = () => drill(weakFirst(lw,20).map(hearItem), testRender, missSummary);
-    $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20).map(itemFromPlan), testRender, missSummary);
+    $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20, { missedKinds: false }).map(itemFromPlan), testRender, missSummary);
   }
   if(tg.sentences){
     $("tSentences").onclick = () => drill(weakFirstSentences(availSent,20).map(hearSentence), testRender, missSummary);

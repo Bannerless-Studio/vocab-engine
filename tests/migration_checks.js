@@ -203,5 +203,39 @@ console.log("\n[read.done.l] listening-pass marker");
   check("progress carrying read (with l) is native, not legacy", !VC.isLegacyRecord(PACK, LEGACY, p));
 }
 
+// prog.w[id].k (engine-miss-kind): optional last missed kind. Old records round-trip
+// byte-for-byte; a k outside MISS_KINDS is dropped on load, the record kept.
+console.log("\n[w.k] missed-kind marker");
+{
+  const W = WORDS.slice(0, 3).map(w => w.id);
+  const wOld = { [W[0]]: { r: 3, w: 1, s: 2 }, [W[1]]: { r: 0, w: 0, s: 0, prov: 1 }, [W[2]]: { r: 1, w: 2, s: 0, d: 1 } };
+  const oldRaw = JSON.stringify({ w: wOld, sessions: 4 });
+  const bo = VC.bootProg(oldRaw, PACK);
+  check("stored word records without k boot unchanged (no backup, no k added)", bo.backupRaw === null && eq(bo.prog.w, wOld) && Object.values(bo.prog.w).every(r => !("k" in r)));
+  check("... and save back byte-for-byte", JSON.stringify(bo.prog.w) === JSON.stringify(wOld));
+  const im = VC.applyImport(null, oldRaw, PACK);
+  check("import of word records without k: unchanged", im.ok && JSON.stringify(im.prog.w) === JSON.stringify(wOld));
+  const p = clone(bo.prog);
+  VC.markRec(p.w, W[0], false, true, "type");
+  check("a typed miss writes k:\"type\" on that record only", eq(p.w[W[0]], { r: 3, w: 2, s: 0, k: "type" }) && eq(p.w[W[1]], wOld[W[1]]));
+  const raw2 = JSON.stringify(p);
+  const ps = VC.parseStored(raw2), v = VC.validateProgShape(ps.data, PACK.levels.map(l => l.id));
+  check("parseStored + validateProgShape accept a record with k", ps.ok && v.ok);
+  const b2 = VC.bootProg(raw2, PACK);
+  check("record with k survives a save/boot round trip", b2.backupRaw === null && eq(b2.prog.w, p.w) && JSON.stringify(b2.prog.w) === JSON.stringify(p.w));
+  const i2 = VC.applyImport(null, raw2, PACK);
+  check("record with k survives export/import", i2.ok && eq(i2.prog.w, p.w));
+  VC.markRec(p.w, W[0], true, true, "type");
+  check("a pass in the missed kind removes k", eq(p.w[W[0]], { r: 4, w: 2, s: 1 }));
+  for(const [label, bad] of [["unknown string", "gap"], ["number", 3], ["null", null], ["object", {}]]){
+    const raw = JSON.stringify({ w: { [W[0]]: { r: 1, w: 1, s: 0, k: bad }, [W[1]]: { r: 2, w: 0, s: 2, k: "hear" } } });
+    const b = VC.bootProg(raw, PACK), i = VC.applyImport(null, raw, PACK);
+    check(`bad k (${label}) dropped on boot and import; record and a valid k on another word kept`,
+      b.backupRaw === null && eq(b.prog.w[W[0]], { r: 1, w: 1, s: 0 }) && eq(b.prog.w[W[1]], { r: 2, w: 0, s: 2, k: "hear" })
+      && i.ok && eq(i.prog.w[W[0]], { r: 1, w: 1, s: 0 }) && eq(i.prog.w[W[1]], { r: 2, w: 0, s: 2, k: "hear" }));
+  }
+  check("progress carrying w.k is native, not legacy", !VC.isLegacyRecord(PACK, LEGACY, p));
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

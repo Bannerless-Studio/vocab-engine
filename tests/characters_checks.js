@@ -390,6 +390,18 @@ function suite(F){
     // recall is weakest-first: a missed unit always makes the cut
     const missed = Object.keys(c).find(k => c[k].w > 0);
     const recallWeak = [0,1,2,3,4].every(() => VC.buildRecallPlan(lw, p, pack, 8, { units, rng }).some(x => x.unit && x.unit.id === missed));
+    // Missed kind (k): the unified plans apply it too (applyMissedKinds); units untouched.
+    const pk = JSON.parse(JSON.stringify(p));
+    pk.w[lw[0].id] = Object.assign({}, pk.w[lw[0].id], { k: "hear" }); pk.w[lw[1].id] = Object.assign({}, pk.w[lw[1].id], { k: "read" });
+    pk.w[lw[8].id] = { r:0, w:30, s:0, k: "read" };
+    let kBad = 0;
+    for(let t=0; t<10; t++){
+      const rv = VC.buildReviewPlan(lw, pk, pack, { units, size: snap.reviewSize, rng });
+      const kOf = (pl, id) => (pl.find(x => x.word && x.word.id === id) || {}).kind;
+      const rcl = VC.buildRecallPlan(lw, pk, pack, 8, { units, rng });
+      if(kOf(rv, lw[0].id) !== "hear" || kOf(rv, lw[1].id) !== "read" || kOf(rcl, lw[8].id) !== "recall" || !rv.some(x => x.unit) || !rcl.filter(x => x.unit).every(x => x.kind === "charRecall")) kBad++;
+    }
+    check(tag("unified Review/Recall: a word's missed kind k is applied (review keeps hear/read, recall turns read into recall); units keep their kinds"), kBad === 0);
     const snapOk = snap.stage.kind === "chars" && snap.cset && snap.cset.index === 1 && snap.charsStarted === true && snap.reviewSize === VC.REVIEW_SIZE_CHARS && snap.choice === true;
     const fresh = VC.todaySnapshot(pack, words, units, P({}, {}));
     const freshOk = fresh.stage.kind === "words" && fresh.stage.lv === ids[0] && fresh.cset === null && fresh.charsStarted === false && fresh.reviewSize === VC.REVIEW_SIZE && fresh.choice === false;
