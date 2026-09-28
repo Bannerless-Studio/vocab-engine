@@ -29,11 +29,13 @@ class SpecFields(unittest.TestCase):
     def check_spec(self, sp):
         for f in REQUIRED:
             self.assertTrue(getattr(sp, f), f"{sp.code}: {f} is empty")
-        # the tagger: a spaCy model, or a Stanza language (fa) whose spec tags the texts itself
-        # (a spec with spacy_model None and its own tag_texts is a custom tagger: id)
-        self.assertIn(sp.tagger, ("spacy", "stanza"), f"{sp.code}: unknown tagger")
+        # the tagger: a spaCy model, a Stanza language (fa, id) whose spec tags the texts
+        # itself, or a hand-written rule tagger with no statistical model (sw)
+        self.assertIn(sp.tagger, ("spacy", "stanza", "rules"), f"{sp.code}: unknown tagger")
         if sp.tagger == "stanza":
             self.assertTrue(sp.stanza_lang, f"{sp.code}: stanza_lang is empty")
+        if sp.tagger == "rules":
+            self.assertIsNone(sp.spacy_model, f"{sp.code}: rules tagger with a spacy_model")
         if not (sp.tagger == "spacy" and sp.spacy_model):
             self.assertIsNot(type(sp).tag_texts, LanguageSpec.tag_texts, f"{sp.code}: no spacy_model and no tag_texts")
             self.assertIsNot(type(sp).tagger_desc, LanguageSpec.tagger_desc, f"{sp.code}: no spacy_model and no tagger_desc")
