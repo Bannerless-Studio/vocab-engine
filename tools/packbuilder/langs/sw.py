@@ -227,7 +227,7 @@ for _om in ("ni", "tu", "m", "mw", "wa", "ki", "vi", "zi", "li", "ya", "i", "u")
     for _f in ("pe", "peni"):
         CLOSED[_om + _f] = ("pa", "VERB")
 # kwa + X fixed phrases (one tap, one word): taught as phrases
-PHRASES = {"kwa nini": "why", "kwa sababu": "because", "kwa hiyo": "so, therefore", "hivi karibuni": "recently",
+PHRASES = {"kwa nini": "why", "kwa sababu": "because", "kwa hiyo": "so, therefore", "hivi karibuni": "recently; soon",
            "sasa hivi": "right now, just now"}
 
 # multi-POS surfaces: a noun reading of these tokens after the associative or
@@ -995,6 +995,17 @@ class Analyser:
         return upos in ("VERB", "AUX") and feats.get("VerbForm") != "Inf" and feats.get("Mood") != "Imp" and \
             feats.get("PronType") != "Rel"
 
+    def _route_to(self, right):
+        """hadi/mpaka closes a kutoka route only before the clause's verb:
+        njia ya kutoka Nairobi hadi Mombasa; after one it is temporal "until"
+        (njia ya kutoka nje ilikuwa wazi hadi saa tano)."""
+        for w in right:
+            if w in ROUTE_TO:
+                return True
+            if self._clause_verb(w):
+                return False
+        return False
+
     def kuwa_reading(self, prev, right, brk, prev_surface=""):
         """kuwa: the conjunction "that" (kwa kuwa "since, because") when a
         finite clause follows it: a finite verb or copula at once (alisema
@@ -1102,7 +1113,7 @@ class Analyser:
         if low == "kutoka" and (nxt is None or prev is not None and prev[0] == "a" and nxt in ASSOC_FORMS or
                                 prev is not None and prev[0] == "a" and prev2 is not None and
                                 prev2[0] in EXIT_HEADS and not (nxt[:1].isupper() or nxt in PLACE_NAMES or
-                                                                ROUTE_TO & set(right)) or
+                                                                self._route_to(right)) or
                                 prev is not None and prev[1] == "VERB" and prev[0] in INF_TAKERS or
                                 prev is not None and prev[1] == "ADV" and prev2 is not None and prev2[1] == "VERB" and
                                 prev2[0] in INF_TAKERS):

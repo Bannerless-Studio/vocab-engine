@@ -758,6 +758,11 @@ class SharedSurfaceAuditRules(unittest.TestCase):
         self.assertEqual(self.reading("Hii ni njia ya kutoka mji huu mpaka pwani.", "kutoka")[1], "ADP")
         self.assertEqual(self.reading("Hii ni njia ya kutoka mji huu.", "kutoka"), ("toka", "VERB"))
 
+    def test_hadi_after_the_clause_verb_is_until_not_a_route(self):
+        self.assertEqual(self.reading("Njia ya kutoka nje ilikuwa wazi hadi saa tano.", "kutoka"), ("toka", "VERB"))
+        self.assertEqual(self.reading("Njia ya kutoka mji huu ilikuwa wazi mpaka saa tano.", "kutoka"),
+                         ("toka", "VERB"))
+
     def test_kina_before_its_object_is_has(self):
         self.assertNotEqual(self.reading("Kizazi kinachoibuka kina maoni.", "kina")[1], "NOUN")
         self.assertEqual(self.reading("Waligundua kina cha maji.", "kina"), ("kina", "NOUN"))
@@ -856,7 +861,7 @@ def kuwa_spec():
                     "amua": "amua", "kana": "kana", "jua": "jua", "choka": "choka", "julikana": "julikana",
                     "chukulia": "chukulia", "maliza": "maliza", "saidia": "saidia", "omba": "omba", "jibu": "jibu",
                     "taka": "taka", "anza": "anza", "toka": "toka", "tuma": "tuma", "pata": "pata",
-                    "ripoti": "ripoti", "ambia": "ambia"})
+                    "ripoti": "ripoti", "ambia": "ambia", "hofia": "hofu", "semekana": "semeka"})
     an.adj_stem |= {"huru", "tulivu", "pya"}
     an.adj_form.update({"huru": "huru", "utulivu": "tulivu", "mtulivu": "tulivu", "mpya": "pya"})
     return sp
@@ -889,6 +894,7 @@ class KuwaVerbVersusConjunction(unittest.TestCase):
 
     def test_kuwa_na_is_to_have_even_after_a_say_verb(self):
         self.verb("Alikana kuwa na hatia.")
+        self.verb("Alisema kuwa na hatia.")    # na is no fronted adverbial: the say-verb stop-word path skips it
         self.conj("Alikana kuwa ana hatia.")
 
     def test_noun_before_kuwa_and_a_clause_is_that(self):
@@ -923,6 +929,11 @@ class KuwaVerbVersusConjunction(unittest.TestCase):
 
     def test_clause_initial_kuwa_is_the_verb(self):
         self.verb("Kuwa mwalimu mzuri.")
+
+    def test_hofia_and_inasemekana_are_say_verbs(self):
+        self.conj("Alihofia kuwa katika mji huo adui anasubiri.")
+        self.conj("Inasemekana kuwa katika mwaka huo rais amefika.")
+        self.conj("Alihofia kuwa adui anasubiri.")
 
     def test_say_verb_before_a_fronted_adverbial_is_that(self):
         self.conj("Alisema kuwa katika mwaka huo.")
