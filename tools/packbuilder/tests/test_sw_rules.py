@@ -43,6 +43,12 @@ def spec():
     return sp
 
 
+class WordCeiling(unittest.TestCase):
+    def test_gender_based_gloss_is_held_at_the_top_level(self):
+        self.assertTrue(Swahili.word_ceiling_re.search("gender-related, gender-based"))
+        self.assertFalse(Swahili.word_ceiling_re.search("number, count (how many)"))
+
+
 class NounClassPrefixes(unittest.TestCase):
     """noun_lemma: the plural class prefix and the locative -ni both link
     the singular headword the pack teaches."""

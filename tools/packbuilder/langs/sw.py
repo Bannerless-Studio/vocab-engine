@@ -1389,9 +1389,12 @@ class Swahili(LanguageSpec):
     # romance glosses (kimapenzi "romantic", mpenzi "lover, beloved, darling")
     # and keeps the violent terms of id/ja/ko's lower_level_gloss_re that the
     # shared list lacks (bomu, mlipuko, kulipuka stay B1). A ceiling moves the
-    # word whole: no gloss segment is stripped (imara keeps "stable, firm")
+    # word whole: no gloss segment is stripped (imara keeps "stable, firm").
+    # gender-based keeps kijinsia at B1 once its gloss drops "sexual": its
+    # corpus rows are about gender-based violence and harassment
     word_ceiling_re = make_word_ceiling_re(r"romantic|lovers?|beloved|darling|shoot(?:s|ing|er|ers)?|"
-                                           r"stab(?:s|bed|bing)?|porn\w*|bomb\w*|explod\w*|explosi\w*|poison\w*")
+                                           r"stab(?:s|bed|bing)?|porn\w*|bomb\w*|explod\w*|explosi\w*|poison\w*|"
+                                           r"gender-based")
     qa_closed_sets = {
         "days": " ".join(DAYS), "months": " ".join(MONTHS),
         "numbers": " ".join(n for n in NUMBERS if n != "laki"), "pronouns": " ".join(PRONOUNS),
