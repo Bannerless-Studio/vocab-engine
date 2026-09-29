@@ -222,7 +222,7 @@ Gotchas (docs/scouts/story-sources-2026-09-27.md):
   Korean and Persian still publish; Urdu and Indonesian froze 2025-03-15; Swahili froze
   2024-12-31; Hindi VOA does not resolve.
 
-### 4. Swahili foundation — PUBLISHED 2026-09-29 (Bannerless-Studio/swahili 9b7de8c, engine bf612ee; 2,777 sentences, 60 passages; three QA rounds, see swahili/tools/REPORT.md). Follow-ups: core silently ignores `|phrase` gloss overrides (apply or warn); `taratibu` clause-final after an object tags NOUN; RAISING_VERBS passive detection misses elezwa/ambiwa lemmas (no shipped row affected). History below.
+### 4. Swahili foundation — PUBLISHED 2026-09-29 (Bannerless-Studio/swahili 9b7de8c, engine bf612ee; 2,777 sentences, 60 passages; three QA rounds, see swahili/tools/REPORT.md). Live check 2026-09-29: 7 PASS / 1 PARTIAL, 0 console errors. PARTIAL = inflected verb forms are never cloze targets (gapMatch null for anatumia/liko/unatoka; pack has 0 `forms` on 522 verbs) — this is the per-sentence forms task, Swahili first. Also: passage spans split `kuwa na` (w0016) into kuwa + na in p0032/p0036 (tagger should prefer the multiword id); the no-voice notice shows on ordinary meaning items, not only listen items. Follow-ups: core silently ignores `|phrase` gloss overrides (apply or warn); `taratibu` clause-final after an object tags NOUN; RAISING_VERBS passive detection misses elezwa/ambiwa lemmas (no shipped row affected). History below.
 Full state, numbers, and the check.sh failure detail are in docs/LANGUAGES.md "Swahili (swh)
 BUILT, UNPUBLISHED". Summary: 2,000 words (600/700/700), 2,957 sentences, 40 passages
 (A1+A2, no B1 yet), local-only commit `88d1d5e` in `../swahili` (no remote, no push, not
