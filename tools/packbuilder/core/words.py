@@ -581,7 +581,7 @@ def overridden_gloss(sp, k, gloss, applied):
 
 def check_gloss_overrides(overrides, applied, records, words):
     """Every gloss_overrides.json key must reach a gloss: applied by
-    build_words, or by a spec hook (hi/ur fold keys into fixed glosses; ko
+    build_words, or by a spec hook (hi folds keys into fixed glosses; ko
     builds entries from them), seen as a record or shipped word under that key
     carrying the override text. Returns [(key, reason)] for the rest; a
     silently skipped override ships the gloss it was written to replace."""

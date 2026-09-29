@@ -1902,6 +1902,20 @@ return {
     check("Progress drops the line once a voice is usable", !/No text-to-speech voice is available/.test(document.getElementById("panel").innerHTML));
   }catch(e){ check(`zero-converted drill / Progress line scenario does not throw (got: ${e.message})`, false); }
 
+  // A remembered hear miss (k) on a word the planner turned into read must still clear on a pass.
+  try{
+    const { api, document } = await bootApp([{ lang:"en-US", name:"x" }]); // hasSpeech=false
+    const w = WORDS[13];
+    api.getProg().w[w.id] = { r:1, w:1, s:0, k:"hear" };
+    const p = VC.hearableKinds([{ kind:"hear", word:w }], api.canHearWord || (() => false))[0];
+    const it = api.itemFromPlan(p, 0, [p]);
+    check("no voice, k:hear word: planned as read, item keeps reqKind hear, no notice flag", p.kind === "read" && it.reqKind === "hear" && !it.needsNotice);
+    api.setQueueAndNext([it], () => {});
+    const opt = document.getElementById("o").children.find(o => o.dataset.v === it.a);
+    opt.click();
+    check("a pass on that read item clears k", api.getProg().w[w.id].k === undefined && api.getProg().w[w.id].r === 2);
+  }catch(e){ check(`k:hear read stand-in scenario does not throw (got: ${e.stack})`, false); }
+
   // ko word-break:keep-all: scoped to the lang attribute TA sets from pack.langTag, not
   // a blanket [data-tl] rule (which would also wrap ja/zh, which have no spaces, mid-word).
   // [lang|="ko"] semantics: matches exactly "ko" or "ko-*", not other ko-prefixed codes

@@ -1084,7 +1084,7 @@ function pronSlotItem(entry, slot){
 }
 const withReq = (it, k) => Object.assign(it, { reqKind: it.reqKind || k });
 const WORD_ITEM = { hear: hearItem, read: readItem, recall: recallItem, type: (e, slot) => withReq(PRON_TYPING ? pronSlotItem(e, slot) : TYPING ? typeItem(e) : recallItem(e), "type") };
-const itemFromPlan = (p, i, plan) => withReq(WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? VC.typeSlotKind(plan, i) : undefined), p.kind);
+const itemFromPlan = (p, i, plan) => withReq(WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? VC.typeSlotKind(plan, i) : undefined), p.reqKind || p.kind);
 function missSummary(miss){
   const u = VC.dedupeMisses(miss);
   return u.length ? `<p class="q">Missed:</p>${u.map(({item, count})=>`<div class="stmt rvb">${count > 1 ? `<div class="q" style="margin:0 0 4px">missed ${count}×</div>` : ""}${item.reveal}</div>`).join("")}` : "<p class='q'>Clean.</p>";
@@ -1752,9 +1752,9 @@ function renderWordBody(){
   $("dr").onclick = () => {
     const items = []; set.forEach(w => items.push(...learnPair(w)));
     // The counter stops at the first set with an unrecorded word, so drilling ahead never makes
-    // the bars skip a gap. `d` goes
-    // only on words untaught before the drill: on a taught word it would hide the level's taught
-    // record and could flip the level back to the counter-prefix fallback.
+    // the bars skip a gap. `d` goes only on words untaught before the drill: on a taught word it
+    // would hide the level's taught record and could flip the level back to the counter-prefix
+    // fallback.
     drill(items, () => {
       if(wordsSet !== (prog.sets[wordsLv]||0)) set.forEach(w => { if(!got.has(w.id)) VC.ensureWordRec(prog, WORDS, PACK, w.id).d = 1; });
       VC.settleSetCounter(prog, WORDS, PACK, wordsLv);

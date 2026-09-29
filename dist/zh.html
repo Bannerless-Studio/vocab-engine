@@ -1441,7 +1441,8 @@ function buildRecallPlan(learned, prog, pack, n, opts){
 // (owner decision 2026-09-30: the no-voice notice is for a voice lost mid-session only).
 function hearableKinds(plan, canHear){
   if(typeof canHear !== "function") return plan;
-  return plan.map(it => it.kind === "hear" && it.word && !canHear(it.word) ? Object.assign({}, it, { kind: "read" }) : it);
+  // reqKind "hear": a pass on the read stand-in still clears a remembered hear miss (k).
+  return plan.map(it => it.kind === "hear" && it.word && !canHear(it.word) ? Object.assign({}, it, { kind: "read", reqKind: "hear" }) : it);
 }
 // Swapping kinds with a partner keeps the plan's kinds exactly kindMix's, so Review keeps its
 // production share. At most ceil(n/2) words move, so a plan full of k never becomes all
@@ -3812,7 +3813,7 @@ function pronSlotItem(entry, slot){
 }
 const withReq = (it, k) => Object.assign(it, { reqKind: it.reqKind || k });
 const WORD_ITEM = { hear: hearItem, read: readItem, recall: recallItem, type: (e, slot) => withReq(PRON_TYPING ? pronSlotItem(e, slot) : TYPING ? typeItem(e) : recallItem(e), "type") };
-const itemFromPlan = (p, i, plan) => withReq(WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? VC.typeSlotKind(plan, i) : undefined), p.kind);
+const itemFromPlan = (p, i, plan) => withReq(WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? VC.typeSlotKind(plan, i) : undefined), p.reqKind || p.kind);
 function missSummary(miss){
   const u = VC.dedupeMisses(miss);
   return u.length ? `<p class="q">Missed:</p>${u.map(({item, count})=>`<div class="stmt rvb">${count > 1 ? `<div class="q" style="margin:0 0 4px">missed ${count}×</div>` : ""}${item.reveal}</div>`).join("")}` : "<p class='q'>Clean.</p>";
@@ -4480,9 +4481,9 @@ function renderWordBody(){
   $("dr").onclick = () => {
     const items = []; set.forEach(w => items.push(...learnPair(w)));
     // The counter stops at the first set with an unrecorded word, so drilling ahead never makes
-    // the bars skip a gap. `d` goes
-    // only on words untaught before the drill: on a taught word it would hide the level's taught
-    // record and could flip the level back to the counter-prefix fallback.
+    // the bars skip a gap. `d` goes only on words untaught before the drill: on a taught word it
+    // would hide the level's taught record and could flip the level back to the counter-prefix
+    // fallback.
     drill(items, () => {
       if(wordsSet !== (prog.sets[wordsLv]||0)) set.forEach(w => { if(!got.has(w.id)) VC.ensureWordRec(prog, WORDS, PACK, w.id).d = 1; });
       VC.settleSetCounter(prog, WORDS, PACK, wordsLv);
@@ -5186,4 +5187,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:341781732-1600287-->
+<!--ve-build:2781172751-1600407-->

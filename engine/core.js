@@ -1090,7 +1090,8 @@ function buildRecallPlan(learned, prog, pack, n, opts){
 // (owner decision 2026-09-30: the no-voice notice is for a voice lost mid-session only).
 function hearableKinds(plan, canHear){
   if(typeof canHear !== "function") return plan;
-  return plan.map(it => it.kind === "hear" && it.word && !canHear(it.word) ? Object.assign({}, it, { kind: "read" }) : it);
+  // reqKind "hear": a pass on the read stand-in still clears a remembered hear miss (k).
+  return plan.map(it => it.kind === "hear" && it.word && !canHear(it.word) ? Object.assign({}, it, { kind: "read", reqKind: "hear" }) : it);
 }
 // Swapping kinds with a partner keeps the plan's kinds exactly kindMix's, so Review keeps its
 // production share. At most ceil(n/2) words move, so a plan full of k never becomes all

@@ -146,7 +146,7 @@ return {
 };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"ListenModeChecks/1.0" }, undefined, localStorage, () => ({ matches:false }), fn => setTimeout(fn, 0),
-    function(){ audio = { onended: null, onerror: null, play(){ plays.push(this.src); return Promise.resolve(); }, pause(){} }; return audio; }, () => true, () => {}, PACK, WORDS, SENTENCES, LESSONS, o.passages || PASSAGES, CHARACTERS];
+    function(){ audio = { onended: null, onerror: null, play(){ plays.push(this.src); return Promise.resolve(); }, pause(){} }; return audio; }, () => true, () => {}, o.pack || PACK, o.words || WORDS, SENTENCES, LESSONS, o.passages || PASSAGES, CHARACTERS];
   const api = new Function(...names, fnBody)(...args);
   await tick(); await tick();
   return { api, document, spoken, utts, plays, ss, audio: () => audio };
@@ -535,6 +535,44 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("Test tab: Listen button replaced by its no-items note; Recall stays", !b.api.el("tListen") && /Listen test: no items until a voice or recording is available/.test(th) && !!b.api.el("tRecall"));
     b.api.el("tSentences").onclick({});
     check("Test Sentences: no item flagged for the notice", (b.api.dq() || []).every(x => !x[3]));
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  console.log("\n[10] clips on some words, no voice (persian-style): clipped words keep their hear items, unclipped do not");
+  try{
+    const l1 = WORDS.filter(w => w.lv === "1");
+    const clipped = new Set(l1.slice(0, 110).filter((_, i) => i % 4 < 2).map(w => w.id));
+    const words = WORDS.map(w => clipped.has(w.id) ? Object.assign({}, w, { audio: `audio/w/${w.id}.opus` }) : w);
+    const pack = Object.assign({}, PACK, { audio: { voice: "test", version: 1 } });
+    const idOf = key => key.slice(2);
+    Math.random = mulberry32(5);
+    let b;
+    try{ b = await boot({ voices: [{ lang: "en-US", name: "en" }], pack, words }); }
+    finally{ Math.random = real; }
+    b.api.setProg(sessionProg());
+    b.api.today();
+    const heard = q => q.filter(x => x[4]);
+    b.api.enterTodayStep(0);
+    const review = b.api.dq() || [];
+    check("Review: hear items only on clipped words, at least one planned, unclipped words present, none flagged",
+      heard(review).length > 0 && review.some(x => !clipped.has(idOf(x[0]))) && heard(review).every(x => clipped.has(idOf(x[0]))) && review.every(x => !x[3]));
+    b.api.enterTodayStep(1); b.api.el("dr").onclick({});
+    const learn = b.api.dq() || [];
+    const perWord = {}; learn.forEach(x => { perWord[x[0]] = (perWord[x[0]] || 0) + 1; });
+    const taughtIds = l1.slice(100, 110).map(w => w.id);
+    const count = id => (perWord["w:" + id] || 0);
+    // The drill already showed its first item, so one clipped word's pair is one short in the queue.
+    const shown = taughtIds.map(id => ({ id, n: count(id), want: clipped.has(id) ? 2 : 1 }));
+    check("Learn pair: clipped words asked by ear and by sight, unclipped once (first item already shown)",
+      shown.filter(x => x.n !== x.want).length === 1 && shown.every(x => x.n === x.want || x.n === x.want - 1) && learn.every(x => !x[3]));
+    b.api.enterTodayStep(2);
+    const listen = b.api.dq() || [];
+    check("Today Listen: only clipped words, each with the speaker", listen.length > 0 && listen.every(x => x[4] && clipped.has(idOf(x[0]))));
+    b.api.testTab();
+    const nClipped = VC.learnedWords(words, pack, sessionProg()).filter(w => clipped.has(w.id)).length;
+    check(`Test Listen: button counts only clipped learned words (${Math.min(20, nClipped)})`, !!b.api.el("tListen") && new RegExp(`Listen ${Math.min(20, nClipped)}<`).test(b.api.html("panel")));
+    b.api.el("tListen").onclick({});
+    const tl = b.api.dq() || [];
+    check("Test Listen: every item a clipped word with the speaker", tl.length + 1 === Math.min(20, nClipped) && tl.every(x => x[4] && clipped.has(idOf(x[0]))));
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);
