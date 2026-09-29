@@ -1008,6 +1008,8 @@ function revealBlock(entry){
   return `<div${hear ? ` data-wid="${escapeHtml(entry.id)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${wordFormHTML(entry)}${icon}</div>${p ? `<div class="rp">${readingHTML(p)}</div>` : ""}<div style="color:var(--mute)">${ui(VC.gloss(entry))}</div></div>${exampleSentencesHTML(entry)}`;
 }
 const meaningChoices = entry => [VC.gloss(entry), ...VC.meaningOpts(entry, WORDS).map(d=>VC.gloss(d))];
+// Plans skip unplayable words (hearableKinds, learnPair); this fallback covers a voice lost
+// between planning and display, the one case the notice is for.
 function hearItem(entry){
   if(!canHearWord(entry)) return Object.assign(readItem(entry), { needsNotice: true, reqKind: "hear" });
   return { kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero",
@@ -1115,6 +1117,9 @@ function readSentence(s){
     opts: sentenceChoices(s), a: s.en, reveal: sentenceRevealBlock(s), onAnswer: ok=>markSentence(s.id, ok),
     mount: () => { const b = hear ? $("rpa") : null; saySentence(s, b || undefined); if(b) b.onclick = () => saySentence(s, b); }, };
 }
+// The Learn drill asks a word by ear and by sight; with nothing to play, the ear item would be
+// the same meaning question twice.
+const learnPair = w => canHearWord(w) ? [hearItem(w), readItem(w)] : [readItem(w)];
 function hearSentence(s){
   if(!canHearSentence(s)) return Object.assign(readSentence(s), { needsNotice: true });
   return { kind:"mc", key:"s:"+s.id, label:"What did they say?", optsClass:"opts-hero",
@@ -1147,9 +1152,10 @@ function gapSentence(s, typed){
   }
   return Object.assign(base, choice());
 }
+const sentenceByEar = s => canHearSentence(s) ? hearSentence(s) : readSentence(s);
 function sentenceItemFor(s){
   const k = VC.sentenceKind(PACK);
-  if(k === "hear") return hearSentence(s);
+  if(k === "hear") return sentenceByEar(s);
   if(k === "read") return readSentence(s);
   return gapSentence(s, k === "gapType") || readSentence(s);
 }
@@ -1397,7 +1403,7 @@ function todayRender(){
   const g = VC.todayGates(lw.length, snap ? snapLearns(snap) : !!nn, availSent.length, scriptCount());
   // Start today runs exactly this plan, so the line names units only when the plan holds
   // some (a first character day has no unit records yet).
-  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx() }) : null } : null;
+  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord }) : null } : null;
   const reviewLine = snap
     ? `${snap.reviewSize} items, weakest first${reviewWhat(snap, todayPrep.review)}`
     : `${VC.REVIEW_SIZE} items, weakest first`;
@@ -1470,11 +1476,11 @@ function todayStep(){
   const s = todayStepState.step++;
   if(s === 0){
     if(g.review && snap){
-      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units, script: SU, scriptCtx: scriptKindCtx() });
+      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord });
       todayStepState.review = null;
       drill(plan.map(planItem), todayStep, missSummary); return;
     }
-    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK).map(itemFromPlan), todayStep, missSummary); return; }
+    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, { canHear: canHearWord }).map(itemFromPlan), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 1){
@@ -1488,7 +1494,7 @@ function todayStep(){
       const list = nn.words;
       vocabTeach(list, nn.lv, () => {
         const items = [];
-        list.forEach(w => items.push(hearItem(w), readItem(w)));
+        list.forEach(w => items.push(...learnPair(w)));
         drill(items, () => {
           // nn.set is the first taught word's set; a leftover teach can close that set and the
           // next, so the counter is recounted from the records instead of set to nn.set+1.
@@ -1501,12 +1507,13 @@ function todayStep(){
     return todayStep();
   }
   if(s === 2){
-    if(g.listen){ drill(weakFirst(lw,12).map(hearItem), todayStep, missSummary); return; }
+    const hearable = g.listen ? lw.filter(canHearWord) : [];
+    if(hearable.length){ drill(weakFirst(hearable,12).map(hearItem), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 3){
-    if(g.recall && units){ drill(VC.buildRecallPlan(lw, prog, PACK, 8, { units }).map(planItem), todayStep, missSummary); return; }
-    if(g.recall){ drill(VC.buildRecallPlan(lw, prog, PACK, 8).map(itemFromPlan), todayStep, missSummary); return; }
+    if(g.recall && units){ drill(VC.buildRecallPlan(lw, prog, PACK, 8, { units, canHear: canHearWord }).map(planItem), todayStep, missSummary); return; }
+    if(g.recall){ drill(VC.buildRecallPlan(lw, prog, PACK, 8, { canHear: canHearWord }).map(itemFromPlan), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 4){
@@ -1743,7 +1750,7 @@ function renderWordBody(){
   $("jump").onclick = () => { wordsSet = next; renderWordBody(); };
   wordListInto($("wl"), set);
   $("dr").onclick = () => {
-    const items = []; set.forEach(w => items.push(hearItem(w), readItem(w)));
+    const items = []; set.forEach(w => items.push(...learnPair(w)));
     // The counter stops at the first set with an unrecorded word, so drilling ahead never makes
     // the bars skip a gap. `d` goes
     // only on words untaught before the drill: on a taught word it would hide the level's taught
@@ -1754,7 +1761,7 @@ function renderWordBody(){
       store.save(); wordsRender();
     }, missSummary);
   };
-  if(canReview) $("rev").onclick = () => drill(VC.buildReviewPlan(learnedWords(), prog, PACK).map(itemFromPlan), wordsRender, missSummary);
+  if(canReview) $("rev").onclick = () => drill(VC.buildReviewPlan(learnedWords(), prog, PACK, { canHear: canHearWord }).map(itemFromPlan), wordsRender, missSummary);
 }
 
 // RD holds everything a passage screen shows, so re-entering it (tab return, voiceschanged)
@@ -2128,6 +2135,7 @@ function testRender(){
   const lw = learnedWords(); const availSent = availableSentences();
   const tg = VC.testGates(lw.length, availSent.length);
   const needMore = tg.needPlacement;
+  const hearLw = lw.filter(canHearWord), hearN = Math.min(20, hearLw.length);
   const n20 = Math.min(20, lw.length), sentN = Math.min(20, availSent.length);
   // Predecessor-app parity. Shown once characters have started, not only once a record exists.
   const charPlan = () => VC.charTestPlan(CHAR_LIST, learnedWords(), prog, PACK, 20);
@@ -2140,20 +2148,20 @@ function testRender(){
     <div class="actions">
       ${needMore ? `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far). Learn ${VC.TEST_MIN_WORDS} words first, or let placement find where to start.<button class="next" id="needPlace" style="margin-top:8px">Take the placement test</button></div>` : `<button class="next" id="pl">Take Placement</button>`}
       ${tg.words ? `<div class="row" style="margin-top:8px;margin-bottom:0">
-        <button class="ghost" id="tListen" style="flex:1">Listen ${n20}</button>
+        ${hearN ? `<button class="ghost" id="tListen" style="flex:1">Listen ${hearN}</button>` : ""}
         <button class="ghost" id="tRecall" style="flex:1">Recall ${n20}</button>
-      </div>` : ""}
+      </div>${hearN ? "" : lockNote("tListenLock", "Listen test: no items until a voice or recording is available.")}` : ""}
       ${tg.sentences ? `<button class="ghost" id="tSentences">Sentences ${sentN}</button>` : sentNote}${charN ? `
       <button class="ghost" id="tChars">Characters ${charN}</button>` : charNote}
     </div>`;
   if(needMore) $("needPlace").onclick = enterPlacementFromToday;
   else $("pl").onclick = () => { testSel = "placement"; testRender(); };
   if(tg.words){
-    $("tListen").onclick = () => drill(weakFirst(lw,20).map(hearItem), testRender, missSummary);
-    $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20, { missedKinds: false }).map(itemFromPlan), testRender, missSummary);
+    if(hearN) $("tListen").onclick = () => drill(weakFirst(hearLw,20).map(hearItem), testRender, missSummary);
+    $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20, { missedKinds: false, canHear: canHearWord }).map(itemFromPlan), testRender, missSummary);
   }
   if(tg.sentences){
-    $("tSentences").onclick = () => drill(weakFirstSentences(availSent,20).map(hearSentence), testRender, missSummary);
+    $("tSentences").onclick = () => drill(weakFirstSentences(availSent,20).map(sentenceByEar), testRender, missSummary);
   }
   if(charN) $("tChars").onclick = () => drill(charPlan().map(planItem), testRender, missSummary);
 }

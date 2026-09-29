@@ -23,6 +23,9 @@ const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 // [6] control baseline, pinned like pron_aids_checks.js MAIN: engine-passage-audio at
 // ea5dcbc (its fix round, merged into this branch), the engine before listen mode.
 const BASE = "ea5dcbc";
+// [8] with-voice control for the no-voice planner (owner decision 2026-09-30, branch
+// engine-w7): main before it.
+const BASE_W7 = "4303f59";
 
 let fails = 0, passes = 0;
 function check(name, cond, detail){
@@ -126,7 +129,7 @@ async function boot(opts){
     speak(u){ spoken.push(u.text); utts.push(u); ss.speaking = true; },
   };
   if(o.ssHook) o.ssHook(ss, spoken, utts);
-  const window = { VocabCore: VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
+  const window = { VocabCore: o.vc || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
   const localStorage = { getItem(){ return null; }, setItem(){} };
   const fnBody = scriptOf(src) + `
 return {
@@ -138,6 +141,8 @@ return {
   enterTodayStep: (step, read) => { tab = "today"; todayStepState = read === undefined ? { step } : { step, read }; todayStep(); },
   rd: () => RD,
   rerender: () => render(),
+  dq: () => D ? D.q.map(it => [it.key, it.kind, it.label, !!it.needsNotice, /id="sp"/.test(it.html || "")]) : null,
+  testTab: () => { tab = "test"; testSel = null; render(); },
 };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"ListenModeChecks/1.0" }, undefined, localStorage, () => ({ matches:false }), fn => setTimeout(fn, 0),
@@ -448,6 +453,88 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     b.api.el("o").children.find(x => x.dataset.v === String(q0.answer)).click();
     b.document.querySelectorAll('#tabs button[data-t="words"]')[0].click();
     check("tab switch from the Today Read stage ends it (RD dropped with the session)", b.api.rd() === null);
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  // A learner with 100 level-1 words, a set to learn next and sentences available.
+  const sessionProg = () => {
+    const pr = VC.normalizeProg({ sets: { "1": 10 }, placedOnce: true, sessions: 3 }, PACK);
+    WORDS.filter(w => w.lv === "1").slice(0, 100).forEach((w, i) => { pr.w[w.id] = { r: 1 + i % 3, w: i % 2, s: i % 3 }; });
+    return pr;
+  };
+  // Every Today step's plan and first screen, then the Test tab and its three word/sentence tests.
+  const walk = async (opts) => {
+    const b = await boot(opts);
+    const pr = sessionProg(); b.api.setProg(pr);
+    const out = [];
+    b.api.today(); out.push(b.api.html("panel"));
+    for(const st of [0, 1, 2, 3, 4]){
+      b.api.enterTodayStep(st);
+      out.push(b.api.html("panel"));
+      if(st === 1 && b.api.el("dr")) b.api.el("dr").onclick({});
+      out.push(JSON.stringify(b.api.dq()), b.api.html("panel"));
+    }
+    b.api.testTab(); out.push(b.api.html("panel"));
+    for(const id of ["tListen", "tRecall", "tSentences"]){
+      b.api.testTab();
+      const e = b.api.el(id);
+      if(e){ e.onclick({}); out.push(JSON.stringify(b.api.dq())); } else out.push(`${id} absent`);
+    }
+    return out;
+  };
+  const real = Math.random;
+  const seededWalk = async opts => { Math.random = mulberry32(7); try{ return await walk(opts); } finally { Math.random = real; } };
+
+  console.log(`\n[8] control: with a voice (or clips), Today + Test plans and screens byte-identical to ${BASE_W7}`);
+  try{
+    let baseHtml = null, baseVC = null;
+    try{
+      baseHtml = cp.execSync(`git show ${BASE_W7}:engine/app.html`, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+      const src = cp.execSync(`git show ${BASE_W7}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseVC = m.exports;
+    }catch(e){}
+    check(`base ${BASE_W7} engine/app.html + core.js loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseVC);
+    if(baseHtml && baseVC){
+      const cur = await seededWalk({}), base = await seededWalk({ html: baseHtml, vc: baseVC });
+      const diff = cur.findIndex((h, i) => h !== base[i]);
+      check(`zh voice: Today steps 0-4 (plans, screens) + Test Listen/Recall/Sentences identical (${cur.length} captures)`,
+        cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
+      const hearN = cur.map(h => { try{ const q = JSON.parse(h); return Array.isArray(q) ? q.filter(x => x[4] || x[2] === "What did they say?").length : 0; }catch(e){ return 0; } }).reduce((a, n) => a + n, 0);
+      const hasHear = hearN > 0 && cur.some(h => /id="tSentences"/.test(h));
+      check("control is not vacuous: the with-voice walk plans hear items", hasHear);
+    }
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  console.log("\n[9] no voice, no clips: no hear item is planned, so no drill shows the notice");
+  try{
+    const NV = [{ lang: "en-US", name: "en" }];
+    const b = await boot({ voices: NV });
+    const pr = sessionProg(); b.api.setProg(pr);
+    b.api.today();
+    const planHtml = b.api.html("panel");
+    b.api.enterTodayStep(0);
+    const review = b.api.dq() || [];
+    const reviewScreen = b.api.html("panel");
+    check("Review: zero hear kinds and no item flagged for the notice", review.length > 0 && review.every(x => !x[3]) && !/no text-to-speech voice/.test(reviewScreen));
+    const lw = VC.learnedWords(WORDS, PACK, pr);
+    const plan = VC.buildReviewPlan(lw, pr, PACK, { canHear: () => false });
+    check("buildReviewPlan with canHear false: zero hear kinds, production share kept", plan.every(x => x.kind !== "hear") && plan.filter(x => x.kind === "recall" || x.kind === "type").length === Math.ceil(plan.length * 0.4 - 1e-9));
+    b.api.enterTodayStep(1);
+    b.api.el("dr").onclick({});
+    const learn = b.api.dq() || [];
+    const keys = learn.map(x => x[0]);
+    check("Learn drill asks each word's meaning once (one item per word, none flagged)", learn.length + 1 === 10 && new Set(keys).size === keys.length && learn.every(x => !x[3]));
+    b.api.enterTodayStep(2);
+    const afterListen = b.api.dq() || [];
+    check("Today Listen step is skipped: the next drill is Recall (8 production items), nothing heard or flagged",
+      /no items until a voice or recording is available/.test(planHtml) && afterListen.length + 1 === 8 && afterListen.every(x => !x[3] && !x[4]));
+    b.api.enterTodayStep(4);
+    const sents = b.api.dq() || [];
+    check("Sentences step: no hear sentence planned, none flagged", sents.every(x => !x[3]) && !/no text-to-speech voice/.test(b.api.html("panel")));
+    b.api.testTab();
+    const th = b.api.html("panel");
+    check("Test tab: Listen button replaced by its no-items note; Recall stays", !b.api.el("tListen") && /Listen test: no items until a voice or recording is available/.test(th) && !!b.api.el("tRecall"));
+    b.api.el("tSentences").onclick({});
+    check("Test Sentences: no item flagged for the notice", (b.api.dq() || []).every(x => !x[3]));
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);

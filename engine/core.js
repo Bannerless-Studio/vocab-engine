@@ -1069,21 +1069,28 @@ function buildReviewPlan(learned, prog, pack, opts){
   const o = opts || {}; const n = o.size || REVIEW_SIZE;
   const ru = recordedUnits(o.units, prog, pack);
   const rs = recordedScriptUnits(o.script, prog, pack);
-  if(ru.length || rs.length) return unifiedReviewPlan(learned, ru, prog, pack, n, o.rng, rs, Object.assign({ units: o.script }, o.scriptCtx || {}), o);
+  if(ru.length || rs.length) return hearableKinds(unifiedReviewPlan(learned, ru, prog, pack, n, o.rng, rs, Object.assign({ units: o.script }, o.scriptCtx || {}), o), o.canHear);
   const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
   const pvSet = new Set(pv.map(w=>w.id));
   const rest = weakFirst(learned.filter(x=>!pvSet.has(x.id)), n - pv.length, prog.w, null, o.rng);
   const pool = shuffle([...rest, ...pv], o.rng);
   const kinds = kindMix(pool.length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
-  return applyMissedKinds(pool.map((word,i)=>({ kind: kinds[i], word })), prog, pack, false, o);
+  return hearableKinds(applyMissedKinds(pool.map((word,i)=>({ kind: kinds[i], word })), prog, pack, false, o), o.canHear);
 }
 function buildRecallPlan(learned, prog, pack, n, opts){
   const o = opts || {};
   const ru = recordedUnits(o.units, prog, pack);
-  if(ru.length) return unifiedRecallPlan(learned, ru, prog, pack, n, o.rng, o);
+  if(ru.length) return hearableKinds(unifiedRecallPlan(learned, ru, prog, pack, n, o.rng, o), o.canHear);
   const pool = weakFirst(learned, n, prog.w);
   const kinds = kindMix(pool.length, 1, typingEnabled(pack));
-  return applyMissedKinds(pool.map((word,i)=>({ kind: kinds[i], word })), prog, pack, true, o);
+  return hearableKinds(applyMissedKinds(pool.map((word,i)=>({ kind: kinds[i], word })), prog, pack, true, o), o.canHear);
+}
+// A word this device cannot play is never planned as a listening item: hear becomes read
+// after the mix, so no rng is drawn and a plan whose words are all playable is unchanged
+// (owner decision 2026-09-30: the no-voice notice is for a voice lost mid-session only).
+function hearableKinds(plan, canHear){
+  if(typeof canHear !== "function") return plan;
+  return plan.map(it => it.kind === "hear" && it.word && !canHear(it.word) ? Object.assign({}, it, { kind: "read" }) : it);
 }
 // Swapping kinds with a partner keeps the plan's kinds exactly kindMix's, so Review keeps its
 // production share. At most ceil(n/2) words move, so a plan full of k never becomes all
@@ -2686,7 +2693,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   strata, placementItemCount, placementStopIndex, applyPlacement, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
-  markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,

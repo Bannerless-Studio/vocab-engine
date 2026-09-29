@@ -1662,6 +1662,7 @@ return {
   enterPlacement: () => { tab = "test"; testSel = "placement"; startPlacement(); }, getPL: () => PL, getTodayStepState: () => todayStepState,
   getHtml: id => { const e = document.getElementById(id); return e ? e.innerHTML : ""; },
   wordsTab: () => { tab = "words"; wordsSet = null; wordsQuery = ""; render(); }, getTaught: () => __taught,
+  progressTab: () => { tab = "progress"; render(); },
   setWordsSet: n => { wordsSet = n; renderWordBody(); }, finishDrill: () => D.onDone(), clickId: id => document.getElementById(id).onclick({}),
 };`;
     // PASSAGES only when env.passages is given (undefined -> no Read tab, as before).
@@ -1881,6 +1882,25 @@ return {
     const html = document.getElementById("panel").innerHTML;
     check("a plain read item (not hearItem's no-speech fallback) never shows the notice", !html.includes("no text-to-speech voice"));
   }catch(e){ check(`plain read item scenario does not throw (got: ${e.message})`, false); }
+
+  // The notice explains a replaced listening item; a drill with none replaced never shows it,
+  // while Progress keeps its standing line whenever nothing can be heard.
+  try{
+    const { api, document } = await bootApp([{ lang:"en-US", name:"x" }]); // hasSpeech=false
+    const htmls = [];
+    const q = [api.readItem(WORDS[10]), api.readItem(WORDS[11]), api.readItem(WORDS[12])];
+    api.setQueueAndNext(q, () => {});
+    for(let i = 0; i < q.length; i++){
+      htmls.push(document.getElementById("panel").innerHTML);
+      document.getElementById("o").children[0].click();
+      document.getElementById("nx").click();
+    }
+    check("no-voice drill with zero converted items: no notice on any item", htmls.length === 3 && htmls.every(h => !h.includes("no text-to-speech voice")));
+    api.progressTab();
+    check("Progress shows the no-voice line when hasSpeech is false and the pack has no clips", /No text-to-speech voice is available/.test(document.getElementById("panel").innerHTML));
+    api.setHasSpeech(true); api.progressTab();
+    check("Progress drops the line once a voice is usable", !/No text-to-speech voice is available/.test(document.getElementById("panel").innerHTML));
+  }catch(e){ check(`zero-converted drill / Progress line scenario does not throw (got: ${e.message})`, false); }
 
   // ko word-break:keep-all: scoped to the lang attribute TA sets from pack.langTag, not
   // a blanket [data-tl] rule (which would also wrap ja/zh, which have no spaces, mid-word).
@@ -2999,6 +3019,25 @@ async function swChecks(){
   check("placement settles a lagged counter from the records", VC.applyPlacement(lagged, [], 0, WORDS, PACK).sets["1"] === 3 && lagged.sets["1"] === 1);
   check("app.html: no teach site writes prog.sets directly; Today Learn and the Words-tab drill settle",
     !/prog\.sets\[[^\]]+\]\s*=(?!=)/.test(APP_SRC_W7) && (APP_SRC_W7.match(/VC\.settleSetCounter\(prog, WORDS, PACK, /g) || []).length === 2);
+})();
+
+(function(){
+  console.log("\n[32] no-voice planner: a word that cannot be heard is never planned as a hear item");
+  const mk = seed => { let a = seed; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+  const pr = VC.normalizeProg({ sets:{ "1": 6 } }, PACK);
+  const lw = VC.learnedWords(WORDS, PACK, pr);
+  pr.w[lw[0].id] = { r:1, w:2, s:0, k:"hear" };
+  const plain = VC.buildReviewPlan(lw, pr, PACK, { rng: mk(3) });
+  const voiced = VC.buildReviewPlan(lw, pr, PACK, { rng: mk(3), canHear: () => true });
+  check("Review with every word playable: plan identical to one built without canHear", util.isDeepStrictEqual(plain, voiced) && plain.some(x => x.kind === "hear"));
+  const mute = VC.buildReviewPlan(lw, pr, PACK, { rng: mk(3), canHear: () => false });
+  check("Review with nothing playable: zero hear kinds; each hear slot became read, same words, same order",
+    mute.every(x => x.kind !== "hear") && mute.length === plain.length && mute.every((x, i) => x.word.id === plain[i].word.id && x.kind === (plain[i].kind === "hear" ? "read" : plain[i].kind)));
+  const some = VC.buildReviewPlan(lw, pr, PACK, { rng: mk(3), canHear: w => w.id !== plain.find(x => x.kind === "hear").word.id });
+  check("Review: only the unplayable word loses its hear slot", some.filter(x => x.kind === "hear").length === plain.filter(x => x.kind === "hear").length - 1);
+  check("hearableKinds leaves unit (character/script) items alone", util.isDeepStrictEqual(VC.hearableKinds([{ kind:"hear", unit:{ id:"u" } }], () => false), [{ kind:"hear", unit:{ id:"u" } }]));
+  const r1 = VC.buildRecallPlan(lw, pr, PACK, 8, { canHear: () => false });
+  check("Recall with nothing playable: zero hear kinds", r1.every(x => x.kind !== "hear"));
 })();
 
 appBootChecks.catch(e => { console.error("app boot checks crashed:", e); fails++; })

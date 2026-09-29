@@ -133,6 +133,7 @@ Call-site audit: every place that speaks a pack word, with its verdict (all migr
 Lesson `say` strings (Sounds tab, lesson items and reference card) are free text with no clip: unchanged.
 Notices: `speechNotice()` and the Progress-tab warning are hidden when `PACK_AUDIO`; the Sounds-lesson
 warning stays. A pack with clips but no `pack.audio` plays them and still shows the notices (validator warns).
+Plans never pick a listening item for a word or sentence this device cannot play (core.js `hearableKinds` via the `canHear` plan option; app.html `learnPair`, `sentenceByEar`; the Today Listen step and the Test Listen button draw only playable words). With no voice and no clips, drills therefore ask each word's meaning once, and the drill notice appears only when a voice disappears between planning and display. The Progress line, the Sounds-lesson line and the Today "Listen: no items" line stay (owner decision 2026-09-30).
 Flag-off: with no `audio` fields every gate reduces to `hasSpeech`, so packs without audio behave as before
 (flagoff goldens unchanged; `tests/flagoff_snapshot.js` strips `pack.audio`, `words[].audio` and relative
 sentence `audio` so the phase 3 render is not drift; absolute Tatoeba URLs stay hashed).
