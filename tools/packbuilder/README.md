@@ -27,7 +27,8 @@ packbuilder/
     english.py          English stemming for gloss <-> translation overlap
     gloss.py            gloss cleaning, sense ranking, shared style strip list
     words.py            pool, entry/sense choice, second-POS entries, levels, frozen ids
-    sentences.py        in-context links, sentence choice, -rsi gate
+    sentences.py        in-context links, sentence choice, -rsi gate, sentences.json spans
+    spans.py            token offsets and link spans, shared by sentences and passages
     report.py           REPORT.md (keeps the manual section)
     pipeline.py         stage driver, pack.json, attribution.json, script.json
     script.py           script primer emitter (script.json)
@@ -96,6 +97,10 @@ commands) with 0 renders, since the manifest and the clip files on disk never mo
 A test or code comparing a freshly regenerated `words.json`/`sentences.json`/`passages.json`/`script.json`
 to the shipped one must strip `audio` fields first (`core/util.strip_audio`, mirrored on the JS side by
 `tests/flagoff_snapshot.js`'s `stripFlagOnFields`) -- the emitter not carrying `audio` is correct, not stale.
+
+Every sentences.json record carries `spans` (`[[start, end, wordId]]`, UTF-16 offsets into `t`) for every
+language, from the same link records and offset rules as passage spans. A word the builder cannot place has no
+span, and the engine locates it by surface. Rules and hooks: docs/PACKBUILDER_HOOKS.md "Sentence spans".
 
 ### Script primer
 

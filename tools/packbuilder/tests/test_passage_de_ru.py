@@ -439,6 +439,7 @@ class HookOwners(unittest.TestCase):
             self.assertEqual(hasattr(sp, "passage_uncounted"), m in ("ja", "ar", "hi", "ur"), m)
             self.assertEqual(bool(getattr(sp, "passage_words_counted", False)), m in ("ja", "hi"), m)
             self.assertEqual(own(sp, "standalone_intj_ok"), m == "sw", m)
+            self.assertEqual(own(sp, "multiword_units"), m == "sw", m)
             self.assertEqual(own(sp, "surface_link_ok"), m in ("id", "ja", "ko", "ru", "sw", "ur"), m)
             self.assertFalse(sp.passage_mode, m)
             self.assertFalse(sp.passage_tagging, m)
