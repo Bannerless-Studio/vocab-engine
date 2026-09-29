@@ -75,6 +75,14 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const lvIds = new Set(VC.levelIds(PACK));
   check("every word/sentence lv is a pack level", WORDS.every(w=>lvIds.has(w.lv)) && SENTENCES.every(s=>lvIds.has(s.lv)));
   check("lesson items: answer is one of the options", LESSONS.every(l => l.items.every(it => it.opts.includes(it.a))));
+  const spanBad = SENTENCES.filter(s => !Array.isArray(s.spans) || !s.spans.every((x, i) =>
+    x.length === 3 && x[0] < x[1] && x[1] <= s.t.length && s.words.includes(x[2]) && (i === 0 || s.spans[i-1][1] <= x[0])));
+  check("pack_from_hsk: every zh sentence has sorted, non-overlapping spans with ids in words", spanBad.length === 0);
+  const compSpan = SENTENCES.flatMap(s => s.spans.filter(x => PACK.compounds.includes(s.t.slice(x[0], x[1]))));
+  check("pack_from_hsk: no span covers a pack.compounds token (a lone span would blank 这个 for 这)", compSpan.length === 0);
+  const unstripped = SENTENCES.map(s => Object.assign({}, s, { spans: undefined }));
+  check("zh spans leave cloze targets unchanged (gapMatch with vs without spans)", SENTENCES.every((s, i) =>
+    s.words.every(id => util.isDeepStrictEqual(VC.gapMatch(s, BY_ID[id], BY_ID, PACK), VC.gapMatch(unstripped[i], BY_ID[id], BY_ID, PACK)))));
 })();
 
 (function(){

@@ -25,6 +25,8 @@ Each resolved sentence token also gets a `sentences[].ruby` tuple
 [start, end, reading, wordId] at its literal UTF-16 offset in the sentence
 text (docs/HSK_MERGE.md §2.3): reading is the SENTENCE_EXTRA compound's own
 `py` when resolved that way, else the resolved word's own `pron`.
+The same offsets give `sentences[].spans` [start, end, wordId] (docs/PACK_SCHEMA.md),
+except for tokens resolved via a SENTENCE_EXTRA base (see the loop).
 
 `characters.json` mirrors words.json one-to-one (hsk teaches whole words, not
 glyphs: docs/HSK_MERGE.md §2.1), and `legacy.json`/`pack.legacy` carry the
@@ -40,6 +42,8 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+from packbuilder.core.spans import make_spans  # noqa: E402
 
 # English for hsk sentences whose upstream `en` is unusable (the hsk repo is read-only):
 # sentence text -> English. The build fails if any PLACEHOLDER_ string survives.
@@ -142,7 +146,7 @@ def main(argv):
             else:
                 segs.append((toks[j], pos[j]))
                 j += 1
-        ruby = []
+        ruby, recs = [], []
         for tok, start in segs:
             wid, via = resolve(tok)
             if wid is None:
@@ -154,12 +158,20 @@ def main(argv):
             if start is not None:
                 reading = extra[via]["py"] if via else pron_of[wid]
                 ruby.append([start, start + len(tok), reading, wid])
+                # No span for a compound resolved to its base (这个 -> 这): a lone span is the
+                # cloze target, so it would blank 这个 for the answer 这, which pack.compounds
+                # exists to prevent (136 such blanks when tried).
+                if not via:
+                    recs.append(("chars", start, start + len(tok), wid))
             else:
                 unplaced.append((sid, s["zh"], tok))
         ruby.sort(key=lambda r: r[0])
         rec = {"id": sid, "t": s["zh"], "en": EN_OVERRIDES.get(s["zh"], s["en"]), "lv": str(s["lv"]), "words": ids, "pron": s["py"]}
         if ruby:
             rec["ruby"] = ruby
+        spans = make_spans(s["zh"], None, recs, ids)
+        if spans:
+            rec["spans"] = spans
         out_sent.append(rec)
 
     # compounds collapse onto their base word
