@@ -241,6 +241,8 @@ OM_HOMOGRAPHS = (
      re.compile(r"\bsen[dt]s?\b|\bsending\b|\bmail(s|ed|ing)?\b|\bforward", re.I)),
     ("tumia", "tumie", "tuma", re.compile(r"\bus(e|es|ed|ing)\b|\bspen[dt]", re.I),
      re.compile(r"\bsen[dt]s?\b|\bsending\b|\bmail(s|ed|ing)?\b|\bforward", re.I)),
+    ("tumia", "tumieni", "tuma", re.compile(r"\bus(e|es|ed|ing)\b|\bspen[dt]", re.I),
+     re.compile(r"\bsen[dt]s?\b|\bsending\b|\bmail(s|ed|ing)?\b|\bforward", re.I)),
     ("tupa", "pa", "pa", re.compile(r"\bthr[eo]w|\bthrown\b|\btoss|\bdump|\bdiscard|\bcast\b|\bwaste", re.I),
      re.compile(r"\bg[ai]ve[ns]?\b|\bgiving\b|\bprovid|\boffer|\bgrant", re.I)),
 )
@@ -261,11 +263,19 @@ def _has_object_prefix(prefix):
     return False
 
 
+def _subjunctive_object_prefix(prefix):
+    """the imperative and subjunctive carry no tense: the object prefix alone
+    (Ni-tumie "send me"), after a subject (u-ni-tumie) or after negative si
+    (u-si-ni-tumie)"""
+    return prefix in OM or any(prefix in (sm + om, sm + "si" + om) for sm in SM for om in OM)
+
+
 def _om_homograph_surface(surf, tail):
     """surf is SM/TAM + object prefix + tail (ku-me-tu-pa), or the tenseless
     relative SM + object prefix + tail + relative suffix (i-tu-pa-yo "which gives us")."""
     if surf.endswith(tail):
-        return _has_object_prefix(surf[:-len(tail)])
+        pre = surf[:-len(tail)]
+        return _has_object_prefix(pre) or tail.endswith(("e", "eni")) and _subjunctive_object_prefix(pre)
     for rel in REL:
         if surf.endswith(tail + rel):
             pre = surf[:-len(tail + rel)]
@@ -296,7 +306,9 @@ YOU_RE = re.compile(r"\byou|\bthy\b|\bthine\b", re.I)
 RULE_OBJ_VERBS = {"fuata", "weka", "zingatia", "kamilisha", "badilisha", "heshimu", "vunja", "jua", "eleza",
                   "andaa", "anzisha"}   # kufuata taratibu "follow the procedures": the noun
 
-# verbs of saying/thinking after which kuwa is the conjunction "that"
+# verbs of saying/thinking: kuwa after one is "that" when a preposition or
+# clause word follows it (alisema kuwa katika mwaka huo ..., alisema kuwa kwa
+# sababu hiyo ...); a predicate still makes it the verb (aliamua kuwa mwalimu)
 SAY_VERBS = {"sema", "eleza", "ambia", "jua", "fikiri", "dhani", "amini", "ona", "sikia", "andika", "tangaza",
              "thibitisha", "kubali", "hakikisha", "onyesha", "gundua", "elewa", "kumbuka", "sahau", "ripoti",
              "ongeza", "shauri", "taarifu", "fahamu", "tambua", "hisi", "ota", "kiri", "dai", "julisha", "sisitiza",
@@ -304,7 +316,16 @@ SAY_VERBS = {"sema", "eleza", "ambia", "jua", "fikiri", "dhani", "amini", "ona",
              # deciding, promising, warning, seeming (iliamua kuwa, inaonekana kuwa)
              "amua", "ahidi", "onya", "pendekeza", "elezea", "fichua", "shuhudia", "lalamika", "onekana",
              "julikana", "kataa", "kana", "jibu", "sadiki", "ashiria", "tabiri", "kisia", "hakiki", "dhihirisha",
-             "shtaki", "lalamikia", "gundulika", "semekana", "aminika", "fahamika", "elezwa", "ambiwa"}
+             "shtaki", "lalamikia", "gundulika", "semekana", "aminika", "fahamika", "elezwa", "ambiwa",
+             # the lemmas hofia and inasemekana fold to
+             "hofu", "semeka"}
+# seeming/feeling, deciding/promising verbs and passives also take the
+# infinitive kuwa: inaonekana kuwa katika hali mbaya, alijisikia kuwa kwenye
+# shinikizo, aliamua kuwa kwenye timu, aliripotiwa kuwa katika miaka yake ya 20
+# "seems/felt/decided/was reported to be in"; "that" only when a finite clause
+# follows the phrase (ilisemekana kuwa kwenye jiji la Tacna hapakuwa)
+RAISING_VERBS = {"onekana", "sikia", "hisi", "amua", "ahidi", "kataa", "kubali", "tarajia", "tumaini",
+                 "ogopa", "hofu", "kana"}
 # ni wazi kuwa "it is clear that"
 THAT_AFTER = {"wazi", "kweli", "dhahiri", "hakika", "bayana", "ukweli", "uhakika"}
 # kuwa after a modal is the verb even before a finite verb, a compound tense
@@ -327,11 +348,14 @@ WHEN_REL_RE = re.compile(r"^(?:ni|u|a|tu|m|mu|wa|i|li|ya|ki|vi|zi|ku|pa)(?:li|na
 INF_TAKERS = {"taka", "weza", "jaribu", "shindwa", "kataa", "penda", "ogopa", "amua", "hitaji", "lazimika",
               "bidi", "paswa", "pasa", "subiri", "ruhusu", "zuia", "sahau"}
 # a noun that spells a bare verb stem is the imperative before one of these
-# (tafadhali jibu haraka "please reply quickly", Saini hapa "sign here")
+# (tafadhali jibu haraka "please reply quickly", Saini hapa "sign here"),
+# unless a copula or finite verb follows: Hesabu hapa ni rahisi "the sums here"
 IMP_NEXT = {"haraka", "upesi", "vizuri", "hapa", "tafadhali", "tena", "polepole", "mara", "badala"}
 # nouns an infinitive kutoka "leaving, exit" qualifies through an associative
-# (njia ya kutoka "the way out", ruhusa ya kutoka); wa kutoka Kenya stays "from"
+# (njia ya kutoka "the way out", ruhusa ya kutoka); wa kutoka Kenya stays "from",
+# and so does a route: njia ya kutoka Nairobi hadi Mombasa
 EXIT_HEADS = {"njia", "mlango", "ruhusa", "idhini", "nafasi"}
+ROUTE_TO = {"hadi", "mpaka"}
 LINK_VERBS = ("wa", "ni", "si", "kuwa", "onekana", "baki", "kaa", "fanya", "endelea", "bakia",
               "weka", "acha")   # + resultative: kuweka bayana/wazi "make clear"
 NP_SLOT = ("NOUN", "VERB", "AUX", "NUM", "DET", "ADJ")   # POS after which an agreeing form is the adjective
@@ -561,13 +585,17 @@ def _next_word(raw, j):
 def _clause_right(raw, j, n=8):
     """The next n word surfaces after raw[j] inside its clause (lowercase,
     a numeral as NUM_NEXT), and whether a comma or colon follows raw[j] at
-    once (kuwa, ... / kuwa: "that")."""
+    once (kuwa, ... / kuwa: "that"). An opening quote or bracket at once is
+    skipped as in _next_word: alisema kuwa "hii ndio njia" reads the quote."""
     if j + 1 < len(raw) and raw[j + 1] in (",", ":"):
         return [], True
     out = []
-    for x in raw[j + 1:]:
+    for k in range(j + 1, len(raw)):
+        x = raw[k]
         if len(out) >= n:
             break
+        if not out and (x in OPEN_MARKS or x in ("\"", "'") and raw[:k].count(x) % 2 == 0):
+            continue
         if WORD_RE.fullmatch(x):
             out.append(x.lower().replace("’", "'"))
         elif x[:1].isdigit():
@@ -936,13 +964,13 @@ class Analyser:
                      "taratibu", "hazina", "kina", "vina", "nina", "wana", "pana", "swala", "zima", "mkubwa",
                      "wakubwa", "kinywa", "kutoka"}
 
-    def analyse_memo(self, low, prev=None, prev2=None, nxt=None):
+    def analyse_memo(self, low, prev=None, prev2=None, nxt=None, right=None):
         """analyse with a cache: context matters only for CONTEXT_WORDS and
         adjective forms (after a noun)."""
         memo = self.__dict__.setdefault("_memo", {})
         if low in self.CONTEXT_WORDS or (prev is None and nxt in IMP_NEXT) or \
                 (prev is not None and prev[0] == "tafadhali"):
-            key = (low, prev, prev2, nxt)
+            key = (low, prev, prev2, nxt, tuple(right) if right is not None else None)
         elif low in self.adj_form or "adj" in self.other.get(low, ()):
             key = (low, prev[1] if prev is not None else None,
                    prev is not None and prev[0] in LINK_VERBS, nxt in ASSOC_FORMS,
@@ -952,7 +980,7 @@ class Analyser:
             key = low
         r = memo.get(key)
         if r is None:
-            r = memo[key] = self.analyse(low, prev, prev2, nxt)
+            r = memo[key] = self.analyse(low, prev, prev2, nxt, right)
         return r
 
     def _clause_verb(self, w):
@@ -967,7 +995,7 @@ class Analyser:
         return upos in ("VERB", "AUX") and feats.get("VerbForm") != "Inf" and feats.get("Mood") != "Imp" and \
             feats.get("PronType") != "Rel"
 
-    def kuwa_reading(self, prev, right, brk):
+    def kuwa_reading(self, prev, right, brk, prev_surface=""):
         """kuwa: the conjunction "that" (kwa kuwa "since, because") when a
         finite clause follows it: a finite verb or copula at once (alisema
         kuwa anasoma, tunalichukulia kuwa ni ukweli), a subject and then one
@@ -977,11 +1005,21 @@ class Analyser:
         (anaweza kuwa hajui), before na (kuwa na "to have"), an associative
         or a preposition (kuwa wa kuchekesha, kuwa katika), and before a
         predicate noun or adjective (niliamua kuwa mchora katuni, kwa kuwa
-        karibu na). right: the word surfaces after kuwa inside its clause."""
+        karibu na). right: the word surfaces after kuwa inside its clause;
+        prev_surface: the previous word as written (a passive raises)."""
         verb = ("wa", "VERB", {})
         if prev is None or prev[1] == "VERB" and prev[0] in KUWA_MODALS:
             return verb
         if brk:
+            return "kuwa", "SCONJ", {}
+        # after a verb of saying a fronted adverbial opens the "that" clause
+        # (alisema kuwa katika mwaka huo ...); this must precede the stop-word
+        # test below, which reads the same words as "to be in / by"
+        if right and right[0] != "na" and right[0] in KUWA_SCAN_STOP and \
+                (prev[1] == "VERB" and prev[0] in SAY_VERBS or prev[0] in THAT_AFTER):
+            raising = prev[0] in RAISING_VERBS or prev_surface.lower().endswith("wa") and not prev[0].endswith("wa")
+            if raising and not any(self._clause_verb(w) for w in right[1:]):
+                return verb
             return "kuwa", "SCONJ", {}
         if not right or right[0] == "na" or right[0] in ASSOC_FORMS or right[0] in KUWA_SCAN_STOP:
             return verb
@@ -999,9 +1037,13 @@ class Analyser:
                 return "kuwa", "SCONJ", {}
         return verb
 
-    def analyse(self, low, prev=None, prev2=None, nxt=None):
+    def analyse(self, low, prev=None, prev2=None, nxt=None, right=None):
         """(lemma, UPOS, feats) for a lowercase word token; prev: the previous
-        token's (lemma, UPOS), nxt: the next lowercase surface."""
+        token's (lemma, UPOS), nxt: the next lowercase surface, right: the
+        lowercase words after it inside its clause (_clause_right; [nxt] when
+        not given)."""
+        if right is None:
+            right = [nxt.lower()] if nxt else []
         prev_noun = prev is not None and prev[1] == "NOUN"
         if low == "wao" and prev_noun:
             return "ao", "DET", {}
@@ -1059,7 +1101,8 @@ class Analyser:
             return "enda", "VERB", {"VerbForm": "Fin", "Aspect": "Hab"}
         if low == "kutoka" and (nxt is None or prev is not None and prev[0] == "a" and nxt in ASSOC_FORMS or
                                 prev is not None and prev[0] == "a" and prev2 is not None and
-                                prev2[0] in EXIT_HEADS or
+                                prev2[0] in EXIT_HEADS and not (nxt[:1].isupper() or nxt in PLACE_NAMES or
+                                                                ROUTE_TO & set(right)) or
                                 prev is not None and prev[1] == "VERB" and prev[0] in INF_TAKERS or
                                 prev is not None and prev[1] == "ADV" and prev2 is not None and prev2[1] == "VERB" and
                                 prev2[0] in INF_TAKERS):
@@ -1127,7 +1170,7 @@ class Analyser:
         if low == "swala" and nxt is not None and (nxt in LI_AGREE or self._sm_verb(nxt, "li")):
             return "suala", "NOUN", {}      # swala hili/la (li class): a spelling of suala "issue", not "prayer"
         if low in self.verb and self.noun_lemma(low) and (
-                prev is None and nxt in IMP_NEXT or
+                prev is None and nxt in IMP_NEXT and not (len(right) > 1 and self._clause_verb(right[1])) or
                 prev is not None and prev[0] == "tafadhali" and
                 not (nxt in ASSOC_FORMS or nxt in LI_AGREE or nxt in POSS_FORMS or nxt in KUWA_COPULAS)):
             # a noun that spells a verb stem is the imperative after tafadhali or
@@ -1409,7 +1452,10 @@ class Swahili(LanguageSpec):
                     initial = False
                     continue
                 if low == "kuwa":
-                    lem, upos, feats = an.kuwa_reading(prev, *_clause_right(raw, j))
+                    lem, upos, feats = an.kuwa_reading(prev, *_clause_right(raw, j),
+                                                       prev_surface=toks[-1][0] if prev is not None else "")
+                elif low == "kutoka" or prev is None and nxt in IMP_NEXT:
+                    lem, upos, feats = an.analyse_memo(low, prev, prev2, nxt, _clause_right(raw, j)[0])
                 else:
                     lem, upos, feats = an.analyse_memo(low, prev, prev2, nxt)
                 # days, months, languages are written capitalised: the token keeps the

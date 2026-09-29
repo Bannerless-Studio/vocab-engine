@@ -1,8 +1,9 @@
 """Swahili rule-tagger tests (packbuilder/langs/sw.py): Analyser.noun_lemma
 (noun class prefixes) and Analyser.parse_verb (verb morphology) against a
 small synthetic index, tag_texts end to end over fixture sentences (the
-CLOSED table forcing a fixed reading, and its one context override: kuwa is
-the copula unless the previous word is a verb of saying), and the generic
+CLOSED table forcing a fixed reading; the context rules for homographs such
+as kuwa, verb "to be" or conjunction "that" read from the clause to its
+right and the verb of saying before it), and the generic
 passage_names_never_link fallback (Linker.links_all) for the sw homographs
 it exists for (Simba the name vs simba "lion"). Stdlib only.
 
@@ -114,9 +115,9 @@ class VerbMorphology(unittest.TestCase):
 
 
 class ClosedWordForcing(unittest.TestCase):
-    """analyse: a CLOSED-table word (pronouns, kuwa) keeps its forced
-    reading regardless of context, except the one documented override:
-    kuwa is the conjunction "that" right after a verb of saying/thinking."""
+    """analyse: a CLOSED-table word (pronouns) keeps its forced reading
+    regardless of context; kuwa is read from its context (see
+    KuwaVerbVersusConjunction)."""
 
     def setUp(self):
         self.sp = spec()
@@ -499,6 +500,25 @@ class ObjectPrefixHomographs(unittest.TestCase):
         self.assertEqual(self.fix("Asante kwa kunitumia kadi.", "Thanks for sending me a card.",
                                   ["w_tumia", "w_kadi"]), ["w_tuma", "w_kadi"])
 
+    def test_subjunctive_om_tumie_with_send_is_tuma(self):
+        self.assertEqual(self.fix("Nitumie ujumbe kuwa amefika.", "Send me word that he has arrived.",
+                                  ["w_tumia"]), ["w_tuma"])
+        self.assertEqual(self.fix("Mtumie kadi.", "Send him a card.", ["w_tumia", "w_kadi"]), ["w_tuma", "w_kadi"])
+        self.assertEqual(self.fix("Watumieni kadi.", "Send them a card.", ["w_tumia", "w_kadi"]),
+                         ["w_tuma", "w_kadi"])
+        self.assertEqual(self.fix("Usinitumie kadi.", "Don't send me a card.", ["w_tumia", "w_kadi"]),
+                         ["w_tuma", "w_kadi"])
+
+    def test_subjunctive_tumie_with_use_stays(self):
+        self.assertEqual(self.fix("Nitumie kalamu yako?", "May I use your pen?", ["w_tumia"]), ["w_tumia"])
+        self.assertEqual(self.fix("Tutumie pesa vizuri.", "Let us use money well.", ["w_tumia"]), ["w_tumia"])
+
+    def test_tensed_om_tumia_with_send_stays_tuma(self):
+        for sw_, en in (("Asante kwa kunitumia kadi.", "Thanks for sending me a card."),
+                        ("Amekutumia kadi.", "He has sent you a card."),
+                        ("Nitakutumia kadi.", "I will send you a card.")):
+            self.assertEqual(self.fix(sw_, en, ["w_tumia", "w_kadi"]), ["w_tuma", "w_kadi"], sw_)
+
     def test_tumia_without_object_prefix_or_with_use_stays(self):
         self.assertEqual(self.fix("Walitumia kadi.", "They sent a card.", ["w_tumia", "w_kadi"]),
                          ["w_tumia", "w_kadi"])
@@ -732,6 +752,12 @@ class SharedSurfaceAuditRules(unittest.TestCase):
         self.assertEqual(self.reading("Tutafute njia ya kutoka kwenye pango.", "kutoka"), ("toka", "VERB"))
         self.assertEqual(self.reading("Wageni wa kutoka Kenya walifika.", "kutoka")[1], "ADP")
 
+    def test_kutoka_on_a_route_after_an_exit_head_is_from(self):
+        self.assertEqual(self.reading("Hii ni njia ya kutoka Nairobi hadi Mombasa.", "kutoka")[1], "ADP")
+        self.assertEqual(self.reading("Hii ni njia ya kutoka arusha.", "kutoka")[1], "ADP")
+        self.assertEqual(self.reading("Hii ni njia ya kutoka mji huu mpaka pwani.", "kutoka")[1], "ADP")
+        self.assertEqual(self.reading("Hii ni njia ya kutoka mji huu.", "kutoka"), ("toka", "VERB"))
+
     def test_kina_before_its_object_is_has(self):
         self.assertNotEqual(self.reading("Kizazi kinachoibuka kina maoni.", "kina")[1], "NOUN")
         self.assertEqual(self.reading("Waligundua kina cha maji.", "kina"), ("kina", "NOUN"))
@@ -829,7 +855,8 @@ def kuwa_spec():
     an.verb.update({"dhani": "dhani", "weza": "weza", "onekana": "onekana", "timiza": "timiza", "subiri": "subiri",
                     "amua": "amua", "kana": "kana", "jua": "jua", "choka": "choka", "julikana": "julikana",
                     "chukulia": "chukulia", "maliza": "maliza", "saidia": "saidia", "omba": "omba", "jibu": "jibu",
-                    "taka": "taka", "anza": "anza", "toka": "toka", "tuma": "tuma", "pata": "pata"})
+                    "taka": "taka", "anza": "anza", "toka": "toka", "tuma": "tuma", "pata": "pata",
+                    "ripoti": "ripoti", "ambia": "ambia"})
     an.adj_stem |= {"huru", "tulivu", "pya"}
     an.adj_form.update({"huru": "huru", "utulivu": "tulivu", "mtulivu": "tulivu", "mpya": "pya"})
     return sp
@@ -897,6 +924,25 @@ class KuwaVerbVersusConjunction(unittest.TestCase):
     def test_clause_initial_kuwa_is_the_verb(self):
         self.verb("Kuwa mwalimu mzuri.")
 
+    def test_say_verb_before_a_fronted_adverbial_is_that(self):
+        self.conj("Alisema kuwa katika mwaka huo.")
+        self.conj("Alisema kuwa kwa sababu hiyo.")
+        self.conj("Ni wazi kuwa katika mji huo.")
+        self.conj("Ni kweli kuwa kwa sababu hiyo adui anasubiri.")
+        self.verb("Nataka nchi kuwa katika amani.")     # no verb of saying: the stop word reads "to be in"
+
+    def test_seem_decide_or_passive_before_a_phrase_is_to_be(self):
+        self.verb("Inaonekana kuwa katika hatari kubwa.")
+        self.verb("Aliamua kuwa kwenye timu.")
+        self.verb("Aliripotiwa kuwa katika miaka yake ya 20.")
+        self.conj("Inaonekana kuwa katika mji huo rais ametimiza ahadi.")
+        self.conj("Aliambiwa kuwa kwa sababu hiyo adui anasubiri.")
+
+    def test_quote_after_kuwa_is_read_inside(self):
+        self.conj('Alisema kuwa "anasoma".')
+        self.conj("Alisema kuwa “rais amefika”.")
+        self.verb('Aliamua kuwa "mwalimu".')
+
 
 class NounVerbStemImperative(unittest.TestCase):
     """A noun that spells a verb stem (jibu "answer" / jibu! "reply") is the
@@ -912,6 +958,11 @@ class NounVerbStemImperative(unittest.TestCase):
         self.assertEqual(self.reading("Kwa hivyo tafadhali jibu haraka."), ("jibu", "VERB"))
         self.assertEqual(self.reading("Jibu haraka!"), ("jibu", "VERB"))
         self.assertEqual(self.reading("Jibu badala ya kunyamaza!"), ("jibu", "VERB"))
+
+    def test_noun_before_an_adverb_and_a_clause_verb(self):
+        self.assertEqual(self.reading("Jibu hapa ni rahisi."), ("jibu", "NOUN"))
+        self.assertEqual(self.reading("Jibu hapa linasaidia."), ("jibu", "NOUN"))
+        self.assertEqual(self.reading("Jibu hapa tafadhali."), ("jibu", "VERB"))
 
     def test_noun_with_agreement_or_as_object(self):
         self.assertEqual(self.reading("Jibu lake ni nini?"), ("jibu", "NOUN"))
