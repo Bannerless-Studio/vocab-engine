@@ -1490,12 +1490,9 @@ function todayStep(){
         const items = [];
         list.forEach(w => items.push(hearItem(w), readItem(w)));
         drill(items, () => {
-          // A records-less prefix or an inserted word can make this teach the level's last
-          // unlearned set even though nn.set (rank position) is short of the level's total set
-          // count; the legacy "sets done" summary reads the counter, so it must land on the
-          // true total rather than one below it.
-          const stillFresh = VC.levelNewSet(WORDS, PACK, prog, nn.lv);
-          prog.sets[nn.lv] = stillFresh ? Math.max(prog.sets[nn.lv]||0, nn.set+1) : VC.nSets(VC.wordsByLevel(WORDS, PACK)[nn.lv] || [], VC.setSizeOf(PACK));
+          // nn.set is the first taught word's set; a leftover teach can close that set and the
+          // next, so the counter is recounted from the records instead of set to nn.set+1.
+          VC.settleSetCounter(prog, WORDS, PACK, nn.lv);
           store.save(); todayStep();
         }, missSummary);
       });
@@ -1747,12 +1744,13 @@ function renderWordBody(){
   wordListInto($("wl"), set);
   $("dr").onclick = () => {
     const items = []; set.forEach(w => items.push(hearItem(w), readItem(w)));
-    // The counter advances only for the slice it points at, so progress bars never skip. `d` goes
+    // The counter stops at the first set with an unrecorded word, so drilling ahead never makes
+    // the bars skip a gap. `d` goes
     // only on words untaught before the drill: on a taught word it would hide the level's taught
     // record and could flip the level back to the counter-prefix fallback.
     drill(items, () => {
-      if(wordsSet === (prog.sets[wordsLv]||0)){ prog.sets[wordsLv] = wordsSet+1; }
-      else { set.forEach(w => { if(!got.has(w.id)) VC.ensureWordRec(prog, WORDS, PACK, w.id).d = 1; }); }
+      if(wordsSet !== (prog.sets[wordsLv]||0)) set.forEach(w => { if(!got.has(w.id)) VC.ensureWordRec(prog, WORDS, PACK, w.id).d = 1; });
+      VC.settleSetCounter(prog, WORDS, PACK, wordsLv);
       store.save(); wordsRender();
     }, missSummary);
   };

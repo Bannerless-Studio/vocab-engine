@@ -807,6 +807,7 @@ function applyPlacement(prog, st, passed, words, pack){
   for(let i=0;i<passed;i++){ const b = st[i]; seed[b.lv] = Math.max(seed[b.lv]||0, b.s1); }
   if(passed > 0 && firstIdx > 0) ids.slice(0, firstIdx).forEach(lv => { seed[lv] = nSets(byLv[lv], size); });
   Object.keys(seed).forEach(lv => (byLv[lv]||[]).slice(0, seed[lv]*size).forEach(w => { if(!out.w[w.id]) out.w[w.id] = {r:1,w:0,s:1,prov:1}; }));
+  ids.forEach(lv => settleSetCounter(out, words, pack, lv));
   out.placedOnce = true;
   return out;
 }
@@ -1001,6 +1002,18 @@ function levelNewSet(words, pack, prog, lv){
   if(!fresh.length) return null;
   const idx = list.findIndex(w => w.id === fresh[0].id);
   return { lv, set: Math.floor((idx < 0 ? 0 : idx) / size), words: fresh };
+}
+// The counter only feeds bars and labels, so it follows the records: a teach that finishes one
+// set's leftovers and then most of the next must move it past both (TODO.md, set counter lag).
+// The stored value stays a floor, except when a republish shrank the level below it.
+function settleSetCounter(prog, words, pack, lv){
+  const size = setSizeOf(pack), list = wordsByLevel(words, pack)[lv] || [], n = nSets(list, size);
+  if(!isObj(prog.sets)) prog.sets = {};
+  if(!levelNewSet(words, pack, prog, lv)) return (prog.sets[lv] = n);
+  const r = prog.w || {};
+  let lead = 0;
+  while(lead < n && list.slice(lead*size, (lead+1)*size).every(w => r[w.id])) lead++;
+  return (prog.sets[lv] = Math.max(Math.min(prog.sets[lv] || 0, n), lead));
 }
 function nextNewSet(words, pack, prog){
   for(const lv of levelIds(pack)){
@@ -2673,7 +2686,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   strata, placementItemCount, placementStopIndex, applyPlacement, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
-  markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,

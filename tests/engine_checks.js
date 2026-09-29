@@ -2228,6 +2228,21 @@ return {
       api.getProg().sets["1"] === nSetsL1);
   }catch(e){ check(`app leftover-teach-exhausts-level scenario does not throw (got: ${e.message})`, false); }
 
+  // chinese proof dbbf541: a leftover teach of set 1's last two words plus eight of set 2 (whose
+  // first two were already recorded) closes both sets; the counter must move by two.
+  try{
+    const size = VC.setSizeOf(PACK), l1 = WORDS.filter(w => w.lv === "1");
+    const pr = VC.normalizeProg({ sets:{ "1": 0 } }, PACK);
+    [...l1.slice(0, size - 2), ...l1.slice(size, size + 2)].forEach(w => { pr.w[w.id] = { r:1, w:0, s:1 }; });
+    const { api } = await bootApp([{ lang:"zh-CN", name:"x" }]);
+    api.setProgT(pr);
+    api.enterTodayStep(1);
+    api.clickId("dr");
+    (api.getTaught() || []).forEach(w => { api.getProg().w[w.id] = { r:1, w:0, s:1 }; });
+    api.finishDrill();
+    check("app Learn teach spanning two sets -> sets[lv] advances by two (was nn.set+1 = 1)", api.getProg().sets["1"] === 2);
+  }catch(e){ check(`app two-set leftover teach scenario does not throw (got: ${e.message})`, false); }
+
   // Re-drilling a taught slice away from the counter must not add d: an all-d level would fall
   // back to the counter prefix.
   try{
@@ -2239,12 +2254,13 @@ return {
     const before = VC.learnedWords(WORDS, PACK, pr).map(w => w.id);
     api.wordsTab(); api.setWordsSet(0); api.clickId("dr"); api.finishDrill();
     const p1 = api.getProg();
-    check("app Words tab: re-drilling a taught slice off the counter adds no d, counter and learned set unchanged",
-      l1.slice(0, size).every(w => !p1.w[w.id].d) && p1.sets["1"] === 1 && util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, p1).map(w => w.id), before));
+    // The stored counter (1) lags the records (2 full sets); any drill settles it to 2.
+    check("app Words tab: re-drilling a taught slice off the counter adds no d, learned set unchanged, lagging counter settles to the records",
+      l1.slice(0, size).every(w => !p1.w[w.id].d) && p1.sets["1"] === 2 && util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, p1).map(w => w.id), before));
     api.setWordsSet(4); api.clickId("dr"); api.finishDrill();
     const p2 = api.getProg();
-    check("app Words tab: drilling an untaught slice ahead flags exactly its words d, counter unchanged",
-      l1.slice(4*size, 5*size).every(w => p2.w[w.id] && p2.w[w.id].d === 1) && l1.slice(0, 2*size).every(w => !p2.w[w.id].d) && p2.sets["1"] === 1);
+    check("app Words tab: drilling an untaught slice ahead flags exactly its words d, counter stops at the gap",
+      l1.slice(4*size, 5*size).every(w => p2.w[w.id] && p2.w[w.id].d === 1) && l1.slice(0, 2*size).every(w => !p2.w[w.id].d) && p2.sets["1"] === 2);
   }catch(e){ check(`app Words-tab re-drill scenario does not throw (got: ${e.message})`, false); }
 })();
 
@@ -2944,6 +2960,45 @@ async function swChecks(){
   check("spans: exampleSentences without spans keeps old order", util.isDeepStrictEqual(VC.exampleSentences(verb, ex.map(s => { const c = Object.assign({}, s); delete c.spans; return c; }), SW, 2).map(s => s.id), ["e1", "e2"]));
 
   // Flag-off control against a pinned sha: tests/sentence_spans_checks.js (too slow for this suite).
+})();
+
+(function(){
+  console.log("\n[31] set counter follows the records after any teach (settleSetCounter)");
+  const APP_SRC_W7 = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
+  const size = VC.setSizeOf(PACK), l1 = WORDS.filter(w => w.lv === "1"), n1 = VC.nSets(l1, size);
+  const rec = (prog, ws) => ws.forEach(w => { prog.w[w.id] = { r:1, w:0, s:1 }; });
+  const teach = (prog, lv) => { const nn = VC.levelNewSet(WORDS, PACK, prog, lv); rec(prog, nn.words); return nn; };
+  const span = VC.normalizeProg({ sets:{ "1": 0 } }, PACK);
+  rec(span, l1.slice(0, size - 2)); rec(span, l1.slice(size, size + 2));
+  const nnSpan = teach(span, "1");
+  check("teach spanning two sets (2 leftovers of set 1 + 8 of set 2) -> counter advances by two, not to nn.set+1",
+    nnSpan.set === 0 && VC.settleSetCounter(span, WORDS, PACK, "1") === 2 && span.sets["1"] === 2);
+  const within = VC.normalizeProg({ sets:{ "1": 1 } }, PACK);
+  rec(within, l1.slice(0, size));
+  const nnWithin = teach(within, "1");
+  check("teach within one set -> counter lands on nn.set+1 as before", VC.settleSetCounter(within, WORDS, PACK, "1") === nnWithin.set + 1 && within.sets["1"] === 2);
+  const partial = VC.normalizeProg({ sets:{ "1": 1 } }, PACK);
+  rec(partial, l1.slice(0, size + 5));
+  check("partial set recorded -> counter unchanged", VC.settleSetCounter(partial, WORDS, PACK, "1") === 1);
+  const ahead = VC.normalizeProg({ sets:{ "1": 1 } }, PACK);
+  rec(ahead, l1.slice(0, size)); rec(ahead, l1.slice(2*size, 3*size));
+  check("a drilled-ahead set past a gap does not move the counter", VC.settleSetCounter(ahead, WORDS, PACK, "1") === 1);
+  const kept = VC.normalizeProg({ sets:{ "1": 5 } }, PACK);
+  rec(kept, l1.slice(0, size));
+  check("never lowers a stored counter within the level's set count", VC.settleSetCounter(kept, WORDS, PACK, "1") === 5);
+  const over = VC.normalizeProg({ sets:{ "1": n1 + 4 } }, PACK);
+  rec(over, l1.slice(0, size));
+  check("a stored counter above nSets (level shrank) is clamped to nSets", VC.settleSetCounter(over, WORDS, PACK, "1") === n1);
+  const exhausted = VC.normalizeProg({ sets:{ "1": 3 } }, PACK);
+  rec(exhausted, l1);
+  check("level exhausted -> nSets", VC.settleSetCounter(exhausted, WORDS, PACK, "1") === n1);
+  const legacy = VC.normalizeProg({ sets:{ "1": n1 } }, PACK);
+  check("records-less level whose counter prefix covers it -> nSets, no records written", VC.settleSetCounter(legacy, WORDS, PACK, "1") === n1 && Object.keys(legacy.w).length === 0);
+  const lagged = VC.normalizeProg({ sets:{ "1": 1 } }, PACK);
+  rec(lagged, l1.slice(0, 3*size));
+  check("placement settles a lagged counter from the records", VC.applyPlacement(lagged, [], 0, WORDS, PACK).sets["1"] === 3 && lagged.sets["1"] === 1);
+  check("app.html: no teach site writes prog.sets directly; Today Learn and the Words-tab drill settle",
+    !/prog\.sets\[[^\]]+\]\s*=(?!=)/.test(APP_SRC_W7) && (APP_SRC_W7.match(/VC\.settleSetCounter\(prog, WORDS, PACK, /g) || []).length === 2);
 })();
 
 appBootChecks.catch(e => { console.error("app boot checks crashed:", e); fails++; })

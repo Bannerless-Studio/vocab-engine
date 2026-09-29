@@ -1158,6 +1158,7 @@ function applyPlacement(prog, st, passed, words, pack){
   for(let i=0;i<passed;i++){ const b = st[i]; seed[b.lv] = Math.max(seed[b.lv]||0, b.s1); }
   if(passed > 0 && firstIdx > 0) ids.slice(0, firstIdx).forEach(lv => { seed[lv] = nSets(byLv[lv], size); });
   Object.keys(seed).forEach(lv => (byLv[lv]||[]).slice(0, seed[lv]*size).forEach(w => { if(!out.w[w.id]) out.w[w.id] = {r:1,w:0,s:1,prov:1}; }));
+  ids.forEach(lv => settleSetCounter(out, words, pack, lv));
   out.placedOnce = true;
   return out;
 }
@@ -1352,6 +1353,18 @@ function levelNewSet(words, pack, prog, lv){
   if(!fresh.length) return null;
   const idx = list.findIndex(w => w.id === fresh[0].id);
   return { lv, set: Math.floor((idx < 0 ? 0 : idx) / size), words: fresh };
+}
+// The counter only feeds bars and labels, so it follows the records: a teach that finishes one
+// set's leftovers and then most of the next must move it past both (TODO.md, set counter lag).
+// The stored value stays a floor, except when a republish shrank the level below it.
+function settleSetCounter(prog, words, pack, lv){
+  const size = setSizeOf(pack), list = wordsByLevel(words, pack)[lv] || [], n = nSets(list, size);
+  if(!isObj(prog.sets)) prog.sets = {};
+  if(!levelNewSet(words, pack, prog, lv)) return (prog.sets[lv] = n);
+  const r = prog.w || {};
+  let lead = 0;
+  while(lead < n && list.slice(lead*size, (lead+1)*size).every(w => r[w.id])) lead++;
+  return (prog.sets[lv] = Math.max(Math.min(prog.sets[lv] || 0, n), lead));
 }
 function nextNewSet(words, pack, prog){
   for(const lv of levelIds(pack)){
@@ -3024,7 +3037,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   strata, placementItemCount, placementStopIndex, applyPlacement, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
-  markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,
@@ -4198,12 +4211,9 @@ function todayStep(){
         const items = [];
         list.forEach(w => items.push(hearItem(w), readItem(w)));
         drill(items, () => {
-          // A records-less prefix or an inserted word can make this teach the level's last
-          // unlearned set even though nn.set (rank position) is short of the level's total set
-          // count; the legacy "sets done" summary reads the counter, so it must land on the
-          // true total rather than one below it.
-          const stillFresh = VC.levelNewSet(WORDS, PACK, prog, nn.lv);
-          prog.sets[nn.lv] = stillFresh ? Math.max(prog.sets[nn.lv]||0, nn.set+1) : VC.nSets(VC.wordsByLevel(WORDS, PACK)[nn.lv] || [], VC.setSizeOf(PACK));
+          // nn.set is the first taught word's set; a leftover teach can close that set and the
+          // next, so the counter is recounted from the records instead of set to nn.set+1.
+          VC.settleSetCounter(prog, WORDS, PACK, nn.lv);
           store.save(); todayStep();
         }, missSummary);
       });
@@ -4455,12 +4465,13 @@ function renderWordBody(){
   wordListInto($("wl"), set);
   $("dr").onclick = () => {
     const items = []; set.forEach(w => items.push(hearItem(w), readItem(w)));
-    // The counter advances only for the slice it points at, so progress bars never skip. `d` goes
+    // The counter stops at the first set with an unrecorded word, so drilling ahead never makes
+    // the bars skip a gap. `d` goes
     // only on words untaught before the drill: on a taught word it would hide the level's taught
     // record and could flip the level back to the counter-prefix fallback.
     drill(items, () => {
-      if(wordsSet === (prog.sets[wordsLv]||0)){ prog.sets[wordsLv] = wordsSet+1; }
-      else { set.forEach(w => { if(!got.has(w.id)) VC.ensureWordRec(prog, WORDS, PACK, w.id).d = 1; }); }
+      if(wordsSet !== (prog.sets[wordsLv]||0)) set.forEach(w => { if(!got.has(w.id)) VC.ensureWordRec(prog, WORDS, PACK, w.id).d = 1; });
+      VC.settleSetCounter(prog, WORDS, PACK, wordsLv);
       store.save(); wordsRender();
     }, missSummary);
   };
@@ -5160,4 +5171,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1954840683-1598239-->
+<!--ve-build:3483679563-1598786-->
