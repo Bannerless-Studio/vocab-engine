@@ -1,6 +1,6 @@
 """Tests for the shared tagging entry point (core.tag.tag_docs / doc_tokens),
 its use by passages.Linker, and fold-aware span alignment
-(passages.token_offsets with spec.span_fold / span_joiners). Stdlib only.
+(core.spans.token_offsets with spec.span_fold / span_joiners). Stdlib only.
 
     python3 -m unittest discover -s tools/packbuilder/tests -t tools     (from vocab-engine/)
 """

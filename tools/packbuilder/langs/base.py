@@ -107,7 +107,7 @@ class LanguageSpec:
     spacy_model = None          # "it_core_news_sm"
     spacy_n_process = 6
     tagger_attribution = None   # dict written to attribution.json["tagger"]
-    # passages span alignment (passages.token_offsets): tagger surfaces may be a
+    # passages span alignment (core.spans.token_offsets): tagger surfaces may be a
     # normalised spelling of the text. span_fold(s) -> str folds surfaces and
     # the text (per word / per other character) before matching (fa: Arabic
     # yeh/kaf, hamza carriers, ZWNJ and harakat dropped); span_joiners are characters the tagger's input rewrite

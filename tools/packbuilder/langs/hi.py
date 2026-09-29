@@ -479,7 +479,7 @@ POSS_OBL = {"के": _f(p[:-1] + "े" for p in _GEN_OBL), "की": _f(p[:-1] 
 PHRASE_SEQ = {tuple(fold(x) for x in p.split()): fold(p) for p in PHRASES}
 # a V2 after a bare verb stem is a vector (explicator) verb: the V1 carries the meaning
 POSTPS_F = frozenset(_f(POSTPS))
-_span_fold = fold      # module fold for passages.token_offsets (the class shadows `fold`)
+_span_fold = fold      # module fold for core.spans.token_offsets (the class shadows `fold`)
 
 
 class _FoldedZipf:

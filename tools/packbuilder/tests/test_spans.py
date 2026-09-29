@@ -1,4 +1,4 @@
-"""Tests for passage token spans (passages.token_offsets / make_spans and the
+"""Tests for passage token spans (core.spans.token_offsets / make_spans and the
 `where` records of core.sentences.sentence_links). Stdlib only.
 
     python3 -m unittest discover -s tools/packbuilder/tests -t tools     (from vocab-engine/)
@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from packbuilder.core.sentences import phrase_spans, sentence_links  # noqa: E402
 from packbuilder.langs import get_spec  # noqa: E402
-from packbuilder.passages import make_spans, token_offsets, utf16_index  # noqa: E402
+from packbuilder.core.spans import make_spans, token_offsets, utf16_index  # noqa: E402
 
 
 def tok(w, lemma=None, upos="X"):

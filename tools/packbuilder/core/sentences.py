@@ -5,6 +5,7 @@ from collections import Counter, defaultdict
 from itertools import chain
 
 from .lexicon import CONTENT_GROUPS, SKIP_UPOS
+from .spans import sentence_spans
 from .tag import iter_tagged
 from .util import log, stat
 
@@ -311,6 +312,7 @@ def build_sentences(env, ctx, words, top3000):
     cands = defaultdict(list)
     tok_forms = {}     # sid -> folded token surfaces (example_shows_word only)
     link_where = {}    # sid -> (token surfaces, sentence_links where records); spec.emit_ruby only
+    span_src = {}      # sid -> (tagged text, tokens, sentence_links where records): sentences.json spans
     spec_dropped = {}  # sid -> links before fix_links (spec.fix_links_floor only)
     merge_sids = defaultdict(set)  # wid -> sids linked to it through a drop_keys merge (spec.merge_sense_examples only)
     bad_sentences_matched = set()   # bad_sentences.txt entries seen among corpus rows (dead-entry report below)
@@ -337,7 +339,7 @@ def build_sentences(env, ctx, words, top3000):
         if n < 3 or n > sp.max_len:
             st["length_out_of_range"] += 1
             continue
-        where = [] if sp.emit_ruby else None
+        where = []
         merged = set() if sp.merge_sense_examples else None
         links = sentence_links(toks, lexicon, key_to_id, allowed, text, groups, gender_of, epos_to_id,
                                lemma_ids, rows[sid][3], homs, st, where=where, merged_out=merged)
@@ -377,7 +379,8 @@ def build_sentences(env, ctx, words, top3000):
         if remoto:
             st["candidates_with_passato_remoto"] += 1
         info[sid] = (n, remoto, rows[sid][4] is not None, maxlv, links)
-        if where is not None:
+        span_src[sid] = (text, toks, where)
+        if sp.emit_ruby:
             link_where[sid] = ([t[0] for t in toks], where)
         if sp.example_shows_word:
             tok_forms[sid] = {sp.fold(t[0]) for t in toks}
@@ -523,6 +526,19 @@ def build_sentences(env, ctx, words, top3000):
             if drop and len(drop) < len(rec["words"]):
                 rec["words"] = [x for x in rec["words"] if x not in drop]
                 st["pronominal_links_dropped"] += len(drop)
+    # spans last: rec["words"] is final here. A link restored by
+    # fix_links_floor keeps the where records sentence_links made for it (the
+    # same token reading, as ruby does); an id fix_links put in has none
+    n_links = n_placed = n_moved_out = 0
+    for rec, sid in zip(sentences, sel):
+        text, toks, where = span_src[sid]
+        rec["spans"], dropped = sentence_spans(sp, text, rec["t"], toks, where, rec["words"])
+        n_links += len(rec["words"])
+        n_placed += len({x[2] for x in rec["spans"]})
+        n_moved_out += dropped
+    st["spans_links"] = n_links
+    st["spans_links_placed"] = n_placed
+    st["spans_dropped_by_clean_sentence_text"] = n_moved_out
     st_rev = sorted(reverted)
     cov = Counter(min(len(chosen.get(w["id"], [])), 2) for w in words)
     lens = Counter(info[s][0] for s in sel)

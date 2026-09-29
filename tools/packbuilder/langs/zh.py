@@ -446,7 +446,7 @@ class ZhLinker:
         return out
 
     def links_all(self, toks, text, en, names=frozenset()):
-        from ..passages import utf16_index
+        from ..core.spans import utf16_index
         ids, spans, claimed = [], [], set()
         for i, t in enumerate(toks):
             wid = t[3]["wid"]
@@ -563,7 +563,7 @@ class ZhLinker:
     def text_ruby(self, text, toks):
         """[[start, end, reading, wordId or None]] (UTF-16) for every token of
         `text` (its segment() tokens) that holds a hanzi."""
-        from ..passages import utf16_index
+        from ..core.spans import utf16_index
         out = []
         for i, t in enumerate(toks):
             if not HAN_RE.search(t[0]):

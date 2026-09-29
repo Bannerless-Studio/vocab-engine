@@ -73,7 +73,7 @@ NUMERAL_RE = re.compile(r"^[0-9０-９,，.．一二三四五六七八九十百�
 
 
 def _u16(text, i):
-    """Python str index -> UTF-16 code-unit index (passages.utf16_index)."""
+    """Python str index -> UTF-16 code-unit index (core.spans.utf16_index)."""
     return i + sum(1 for ch in text[:i] if ord(ch) > 0xFFFF)
 
 

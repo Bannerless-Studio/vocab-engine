@@ -1,5 +1,5 @@
 """Passage spans own trailing combining marks (Unicode Mn/Mc) and never start
-on one (passages._mark_bounds via make_spans). Stdlib only.
+on one (core.spans._mark_bounds via make_spans). Stdlib only.
 
     python3 -m pytest -q tools/packbuilder/tests/test_passage_spans_marks.py     (from vocab-engine/)
 """
@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from packbuilder.passages import _mark_bounds, make_spans, token_offsets  # noqa: E402
+from packbuilder.core.spans import _mark_bounds, make_spans, token_offsets  # noqa: E402
 
 FA_FOLD = lambda s: re.sub("[ً-ٰٟ]", "", s)      # noqa: E731  tanwin/harakat off, as fa span_fold
 
