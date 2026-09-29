@@ -65,6 +65,22 @@ console.log("Checking tools/validate_pack.py sentence spans (Node harness, spawn
   check("coverage: one pack-level WARN line counting unspanned linked words (3 of 5 in 2 sentences; 1 without spans)",
     r.status === 0 && warns.length === 1 && /3 of 5 linked words in 2 sentences with spans have no span/.test(warns[0]) && /1 sentences have no spans/.test(warns[0]), r.out);
 }
+{
+  const fx = fixture(); fx.sentences[1].id = "s1";
+  const r = run(fx);
+  check("duplicate sentence id after a sentence with spans: error", r.status === 1 && /ERROR sentences\[1\]\.id s1 duplicated/.test(r.out), r.out);
+}
+{
+  const fx = fixture(); fx.sentences[1].id = "sw-simu";
+  const r = run(fx);
+  check("sentence id equal to a word id of an earlier spanned sentence: no false duplicate", r.status === 0 && !/duplicated/.test(r.out), r.out);
+}
+{
+  const fx = fixture(); fx.sentences[0].spans = [[5, 13, "sw-tumia"], [14, 40, "sw-simu"], [0, 4, "sw-yeye"]];
+  const r = run(fx);
+  const warn = r.out.split("\n").find(l => /^WARN  sentence spans:/.test(l)) || "";
+  check("coverage counts only valid spans (out-of-bounds and overlapping spans leave simu and yeye unspanned: 2 of 3)", r.status === 1 && /2 of 3 linked words/.test(warn), r.out);
+}
 expectError("unsorted / overlapping", s => { s.spans = [[5, 13, "sw-tumia"], [0, 4, "sw-yeye"]]; }, /ERROR sentence s1\.spans\[1\] starts at 0, before the previous span's end 13/);
 expectError("out of bounds", s => { s.spans = [[14, 40, "sw-simu"]]; }, /ERROR sentence s1\.spans\[0\] \[14, 40\] out of bounds/);
 expectError("word not in words", s => { s.spans = [[0, 4, "sw-x0"]]; }, /ERROR sentence s1\.spans\[0\] word 'sw-x0' is not in the sentence's words/);

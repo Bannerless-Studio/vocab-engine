@@ -59,7 +59,7 @@ $NODE tests/listen_mode_checks.js                # 59
 $NODE tests/validate_pack_audio_checks.js        # 30
 $NODE tests/validate_pack_characters_checks.js   # 71
 $NODE tests/validate_pack_script_checks.js       # 56
-$NODE tests/validate_pack_spans_checks.js        # 10
+$NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)

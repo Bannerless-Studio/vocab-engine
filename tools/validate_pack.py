@@ -514,13 +514,12 @@ def check_sentences(sents, levels, by_id, rep, char_word0=None):
                 rep.warn(f"{where}.ruby present but pack.characters is absent: ruby is never rendered")
             check_ruby(s["ruby"], s.get("t"), ws, char_word0, where, rep, null_ok=True)
         if "spans" in s:
-            check_spans(s["spans"], s.get("t"), ws, where, rep, gloss_ok=False)
+            have = check_spans(s["spans"], s.get("t"), ws, where, rep, gloss_ok=False)
             if isinstance(s["spans"], list) and isinstance(ws, list):
                 spanned += 1
-                have = {x[2] for x in s["spans"] if isinstance(x, list) and len(x) >= 3}
-                ids = set(ws)
-                linked += len(ids)
-                unspanned += len(ids - have)
+                linked_ids = set(ws)
+                linked += len(linked_ids)
+                unspanned += len(linked_ids - have)
     # One pack-level line, not one per sentence: this is the builder's coverage metric.
     if unspanned:
         rep.warn(f"sentence spans: {unspanned} of {linked} linked words in {spanned} sentences with spans have no span "
@@ -573,10 +572,11 @@ def check_spans(spans, t, words, where, rep, gloss_ok=True):
     units of t, sorted, non-overlapping, wordId in the sentence's words, and each
     slice non-blank text that does not split a surrogate pair. A passage span may carry a
     4th element, a non-empty display-only gloss string ([start, end, wordId, gloss]);
-    sentences.json spans may not (gloss_ok=False)."""
+    sentences.json spans may not (gloss_ok=False). Returns the word ids of the valid spans."""
+    valid = set()
     if not isinstance(spans, list):
         rep.err(f"{where}.spans must be a list of [start, end, wordId]")
-        return
+        return valid
     u = t.encode("utf-16-le") if isinstance(t, str) else b""
     n = len(u) // 2
     ws = set(words) if isinstance(words, list) else set()
@@ -597,11 +597,14 @@ def check_spans(spans, t, words, where, rep, gloss_ok=True):
         if not 0 <= a < b <= n:
             rep.err(f"{sw} [{a}, {b}] out of bounds for a {n}-unit sentence (need 0 <= start < end <= length)")
             continue
+        ok = True
         if a < prev:
             rep.err(f"{sw} starts at {a}, before the previous span's end {prev} (spans must be sorted and not overlap)")
+            ok = False
         prev = max(prev, b)
         if wid not in ws:
             rep.err(f"{sw} word {wid!r} is not in the sentence's words")
+            ok = False
         try:
             piece = u[2 * a:2 * b].decode("utf-16-le")
         except UnicodeDecodeError:
@@ -609,6 +612,10 @@ def check_spans(spans, t, words, where, rep, gloss_ok=True):
             continue
         if not piece.strip():
             rep.err(f"{sw} [{a}, {b}] covers only whitespace")
+            ok = False
+        if ok:
+            valid.add(wid)
+    return valid
 
 
 def check_passages(passages, levels, by_id, rep, char_word0=None):

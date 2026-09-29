@@ -2867,11 +2867,16 @@ async function swChecks(){
   const t3 = "Kutumia: anatumia, anatumia.";
   const s3 = { id:"s3", t:t3, lv:"A1", words:[tumia.id, tumia.id], spans:[[...at(t3, "anatumia"), tumia.id], [...at(t3, "anatumia", 12), tumia.id]] };
   const l3 = VC.locateWord(s3, tumia, SW, SWB);
-  check("spans: two spans for the id -> regex path (finds Kutumia at 0, not a span)", !!l3 && l3.text === "Kutumia" && l3.start === 0);
+  check("spans: two spans for the id -> null, no regex fallback (Kutumia is not blanked)", l3 === null && VC.gapMatch(s3, tumia, SWB, SW) === null);
   check("spans: two spans -> highlightParts bolds both spans", util.isDeepStrictEqual(hits(VC.highlightParts(s3, tumia, SWB, SW)), ["anatumia", "anatumia"]));
   const t3b = "simu na simu";
   const s3b = { id:"s3b", t:t3b, lv:"A1", words:[simu.id, simu.id], spans:[[0, 4, simu.id], [8, 12, simu.id]] };
   check("spans: two spans over a twice-visible word -> null (as without spans)", VC.locateWord(s3b, simu, SW, SWB) === null && VC.gapMatch(s3b, simu, SWB, SW) === null);
+  // one span, but the word's surface is also visible outside it -> null
+  const t3c = "Simu yangu, anatumia simu.";
+  const s3c = { id:"s3c", t:t3c, lv:"A1", words:[simu.id, tumia.id], spans:[[...at(t3c, "anatumia"), tumia.id], [...at(t3c, "simu"), simu.id]] };
+  check("spans: one span + an unspanned visible surface elsewhere -> locateWord/gapMatch null (Simu would stay visible)",
+    VC.locateWord(s3c, simu, SW, SWB) === null && VC.gapMatch(s3c, simu, SWB, SW) === null && !!VC.gapMatch(s3c, tumia, SWB, SW));
   // invalid spans ignored
   const bad = (name, sp, extra) => {
     const s = Object.assign({ id:"sb", t:t1, lv:"A1", words:[tumia.id, simu.id], spans:sp }, extra || {});
@@ -2921,6 +2926,13 @@ async function swChecks(){
   ];
   check("spans: exampleSentences counts a span-only form as a new form (e3 before the e2 repeat)",
     util.isDeepStrictEqual(VC.exampleSentences(verb, ex, SW, 2).map(s => s.id), ["e1", "e3"]));
+  const libro = { id:"it-libro", w:"il libro", en:"book", lv:"A1", pos:"noun", alt:["libro","libri"], forms:["libretto"] };
+  const exIt = [
+    { id:"i1", t:"Leggo i libri.", lv:"A1", words:[libro.id] },
+    { id:"i2", t:"Ho letto il libro.", lv:"A1", words:[libro.id], spans:[[12, 17, libro.id]] },
+  ];
+  check("spans: exampleSentences maps span libro to the headword il libro (headword slot first)",
+    util.isDeepStrictEqual(VC.exampleSentences(libro, exIt, SW, 2).map(s => s.id), ["i2", "i1"]));
   check("spans: exampleSentences without spans keeps old order", util.isDeepStrictEqual(VC.exampleSentences(verb, ex.map(s => { const c = Object.assign({}, s); delete c.spans; return c; }), SW, 2).map(s => s.id), ["e1", "e2"]));
 
   // Flag-off control against a pinned sha: tests/sentence_spans_checks.js (too slow for this suite).

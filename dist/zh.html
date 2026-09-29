@@ -665,17 +665,23 @@ function findSurface(text, surface, spaced, clitics, blockKeys){
 // (Indonesian anak-anak) is the same token, not a second occurrence, so it merges into one
 // span instead of nulling out. `wordsById`, when given, feeds the fused-clitic collision
 // guard (findSurface, extendRedupClitic); gapMatch is the only caller with it in scope.
-// A builder span (sentence.spans) wins only when it is the word's single span: it carries
-// inflected surfaces no w/alt/forms entry lists. Two spans mean the word is visible twice,
-// which the regex path already turns into null (docs/PACK_SCHEMA.md "sentences.json").
+// Builder spans (sentence.spans) replace surface matching whenever the word has any: they
+// carry inflected surfaces no w/alt/forms entry lists. One span is the target unless a
+// w/alt/forms surface is also visible outside it; two spans mean the word is visible twice.
+// Either way blanking would leave the answer in sight, so null, never a regex fallback that
+// could blank an unrelated surface (docs/PACK_SCHEMA.md "sentences.json").
 function locateWord(sentence, entry, pack, wordsById){
   const spaced = !pack || pack.spaced !== false;
   const clitics = (pack && Array.isArray(pack.clitics)) ? pack.clitics : [];
   const blockKeys = (clitics.length && wordsById) ? packSurfaceKeys(wordsById, pack) : null;
   const t = String(sentence.t || "");
   const own = entrySpans(sentence, entry, wordsById);
-  if(own.length === 1) return extendRedupClitic(t, own[0], pack, blockKeys);
   const hits = surfaceHits(sentence.t, entry, spaced, clitics, blockKeys);
+  if(own.length > 1) return null;
+  if(own.length === 1){
+    const m = extendRedupClitic(t, own[0], pack, blockKeys);
+    return hits.some(h => h.end <= m.start || h.start >= m.end) ? null : m;
+  }
   if(!hits.length) return null;
   const clusterStart = hits[0].start;
   let best = hits[0], end = hits[0].end, merged = false;
@@ -909,9 +915,16 @@ function exampleSentences(entry, sentences, pack, n){
   // own example first, then rank order picking the first sentence with a not-yet-shown
   // form, then rank order again to pad out to n regardless of form (TODO.md line 18).
   const forms = textForms(entry).filter(Boolean);
+  // A span's text maps back to the first form (w first) it equals or shares a trailing token
+  // with, so "libro" under w "il libro" keeps the headword slot.
+  const spanForm = x => {
+    const k = normKey(x);
+    const f = forms.find(f => normKey(f) === k || trailingCut(f, x) || trailingCut(x, f));
+    return f ? normKey(f) : k;
+  };
   const formOf = s => {
     const sp = entrySpans(s, entry);
-    if(sp.length) return normKey(sp[0].text);
+    if(sp.length) return spanForm(sp[0].text);
     for(const f of forms){ if(findSurface(s.t, f, spaced).length) return normKey(f); } return null; };
   const headKey = normKey(entry.w || "");
   const out = [], used = new Set(), seenForms = new Set();
@@ -5147,4 +5160,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3393943065-1519528-->
+<!--ve-build:3467820645-1520160-->
