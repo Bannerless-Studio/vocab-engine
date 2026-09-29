@@ -624,6 +624,12 @@ class LanguageSpec:
         homograph of a preposition/conjunction ("О нет!" is not о "about")."""
         return True
 
+    def standalone_intj_ok(self, tok):
+        """May a token before punctuation that the tagger read as another POS
+        link the interjection spelled like it ("Prego." / "Grazie!")? sw: not
+        a word its context rules disambiguate ("hapa karibu." is "near")."""
+        return True
+
     def cross_pos_link(self, lexicon, lem, group, key_to_id):
         """Sentence linking: (lem, group) has no pack word and no same-headword
         entry -> another pack word id for this token, or None (default: no

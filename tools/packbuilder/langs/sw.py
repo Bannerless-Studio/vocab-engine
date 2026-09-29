@@ -209,7 +209,21 @@ CLOSED.update({"kuwa": ("wa", "VERB"),          # the infinitive; "that" only af
                "wacha": ("acha", "VERB"),     # colloquial acha "leave, let", not the plural of mcha
                "kati": ("kati", "ADV"), "katikati": ("katikati", "ADV"),
                "hauna": ("na", "VERB"), "hio": ("hiyo", "DET"), "kwasababu": ("kwasababu", "X"),
-               "iko": ("wa", "VERB")})
+               "iko": ("wa", "VERB"),
+               # spellings the morphology misreads as a pack word: m-na-mo "you have it"
+               # is mnamo "in (a date)", hu-susa-ni is hususani "especially",
+               # ku-pinduk-ia (a stative-applicative of pindua) is kupindukia "excessively"
+               "mnamo": ("mnamo", "ADP"), "hususani": ("hususani", "ADV"), "hususan": ("hususani", "ADV"),
+               "kupindukia": ("kupindukia", "ADV"),
+               "juzi": ("juzi", "ADV"), "keshokutwa": ("keshokutwa", "ADV"),
+               "miongoni": ("miongoni", "ADP"),
+               "kiamsha": ("kiamsha", "X"),
+               "undani": ("undani", "NOUN"), "ripoti": ("ripoti", "NOUN"), "kuulia": ("ua", "VERB"), "kuzima": ("zima", "VERB"), "zimeni": ("zima", "VERB")})   # miongoni mwa "among", not mwongo "decade"
+# OM + pe, the imperative/subjunctive of pa "give" (nipe, wape "give me / them"):
+# not SM + apa "swear" (w-ape) or other one-letter readings
+for _om in ("ni", "tu", "m", "mw", "wa", "ki", "vi", "zi", "li", "ya", "i", "u"):
+    for _f in ("pe", "peni"):
+        CLOSED[_om + _f] = ("pa", "VERB")
 # kwa + X fixed phrases (one tap, one word): taught as phrases
 PHRASES = {"kwa nini": "why", "kwa sababu": "because", "kwa hiyo": "so, therefore", "hivi karibuni": "recently",
            "sasa hivi": "right now, just now"}
@@ -217,6 +231,69 @@ PHRASES = {"kwa nini": "why", "kwa sababu": "because", "kwa hiyo": "so, therefor
 # multi-POS surfaces: a noun reading of these tokens after the associative or
 # a preposition is the noun (kwa haraka "in a hurry"), handled by the default
 # (closed ADV) reading otherwise
+# object-prefix homographs (Swahili.fix_links): (analysed lemma, stem tail
+# after the object prefix, rival lemma, English that keeps the analysed
+# reading, English that picks the rival)
+OM_HOMOGRAPHS = (
+    ("tumia", "tumia", "tuma", re.compile(r"\bus(e|es|ed|ing)\b|\bspen[dt]", re.I),
+     re.compile(r"\bsen[dt]s?\b|\bsending\b|\bmail(s|ed|ing)?\b|\bforward", re.I)),
+    ("tumia", "tumie", "tuma", re.compile(r"\bus(e|es|ed|ing)\b|\bspen[dt]", re.I),
+     re.compile(r"\bsen[dt]s?\b|\bsending\b|\bmail(s|ed|ing)?\b|\bforward", re.I)),
+    ("tupa", "pa", "pa", re.compile(r"\bthr[eo]w|\bthrown\b|\btoss|\bdump|\bdiscard|\bcast\b|\bwaste", re.I),
+     re.compile(r"\bg[ai]ve[ns]?\b|\bgiving\b|\bprovid|\boffer|\bgrant", re.I)),
+)
+
+
+def _has_object_prefix(prefix):
+    """prefix (the verb before its stem) ends in an object prefix after a
+    subject + tense prefix, the infinitive ku- or habitual hu- (alini-,
+    kuni-, ameku-, kumetu-, kinachotu- with a relative); wali- (wa + li past) has none."""
+    for om in OM:
+        if not prefix.endswith(om) or len(prefix) == len(om):
+            continue
+        r = prefix[:-len(om)]
+        if r in ("ku", "kuto", "hu") or any(r == sm + tam or r.startswith(sm + tam) and r[len(sm + tam):] in REL
+                                            for sm in SM for tam in TAM) or \
+                any(r == n + tam for n in NEG_SM for tam in NEG_TAM if tam):
+            return True
+    return False
+
+
+def _om_homograph_surface(surf, tail):
+    """surf is SM/TAM + object prefix + tail (ku-me-tu-pa), or the tenseless
+    relative SM + object prefix + tail + relative suffix (i-tu-pa-yo "which gives us")."""
+    if surf.endswith(tail):
+        return _has_object_prefix(surf[:-len(tail)])
+    for rel in REL:
+        if surf.endswith(tail + rel):
+            pre = surf[:-len(tail + rel)]
+            if _has_object_prefix(pre) or any(pre == sm + om for sm in SM for om in OM):
+                return True
+    return False
+
+
+# context sets for the homograph rules in Analyser.analyse
+WELCOME_NEXT = {"sana", "tena", "nyumbani", "kwetu", "kwangu", "kwenu", "kwao", "ndani", "mezani", "nyote",
+                "wageni", "mgeni", "chakula", "karibu"}
+BUS_BEFORE = {"kwa", "a", "katika", "kwenye", "panda", "subiri", "ngoja", "kosa", "endesha", "shuka"}
+LI_AGREE = {"la", "hili", "hilo", "lile", "langu", "lako", "lake", "letu", "lenu", "lao", "lingine", "lolote",
+            "lenyewe", "jipya", "jingine", "moja", "kubwa", "dogo"}
+U_AGREE = {"huu", "huo", "ule", "wangu", "wako", "wake", "wetu", "wenu", "wao", "mmoja", "mpya", "mrefu"}
+N_PLURAL_AGREE = {"hizi", "hizo", "zile", "kali", "nyingi", "nyingine", "zote", "mbalimbali"}
+PLACE_NEXT = {"kwenye", "katika", "nje", "ndani", "huko", "kule", "hapa", "pale", "hapo", "mjini", "kwa", "hadi",
+              "mpaka", "shule", "sokoni", "kazini", "nyumbani", "safari", "mbali", "juu", "chini"}
+HAVE_NOUNS_STRONG = {"hazina", "kina", "vina"}
+NP_HEAD = ("NOUN", "NUM", "DET", "ADJ", "PROPN", "PRON")
+POSS_FORMS = {p + st for p in POSS_PREFIX for st in POSS_STEMS}
+# place names a sentence can open with, lower-cased there, that the verb or noun
+# morphology would otherwise read as a pack word
+PLACE_NAMES = set("uganda arusha rwanda lamu tanga kigali dodoma pemba unguja iringa tabora kigoma mwanza kisumu "
+                  "nakuru kampala malawi zambia burundi kongo somalia ethiopia misri sudani msumbiji mombasa "
+                  "nairobi zanzibar tanzania kenya mganda waganda".split())
+YOU_RE = re.compile(r"\byou|\bthy\b|\bthine\b", re.I)
+RULE_OBJ_VERBS = {"fuata", "weka", "zingatia", "kamilisha", "badilisha", "heshimu", "vunja", "jua", "eleza",
+                  "andaa", "anzisha"}   # kufuata taratibu "follow the procedures": the noun
+
 # verbs of saying/thinking after which kuwa is the conjunction "that"
 SAY_VERBS = {"sema", "eleza", "ambia", "jua", "fikiri", "dhani", "amini", "ona", "sikia", "andika", "tangaza",
              "thibitisha", "kubali", "hakikisha", "onyesha", "gundua", "elewa", "kumbuka", "sahau", "ripoti",
@@ -250,6 +327,9 @@ REL = ["ye", "o", "cho", "vyo", "lo", "yo", "zo", "po", "ko", "mo"]
 OM = ["ni", "ku", "m", "mw", "tu", "wa", "ki", "vi", "li", "ya", "i", "zi", "u", "ji", "pa", "mu", "wa"]
 # derived verbs (kaikki "Passive form of -X: ...") kept as words / always folded (hand residuals)
 KEEP_DERIVED = {"zaliwa"}
+# stem spelling variants read as the standard stem (kudhibitisha is kuthibitisha
+# "to confirm", not a causative of dhibiti "to control")
+STEM_SPELLING = (("dhibitish", "thibitish"),)
 DERIV_TAGS = {"passive", "applicative", "reciprocal", "causative", "stative", "conversive", "reflexive", "intensive"}
 GLOSS_STOP = {"to", "be", "the", "a", "an", "of", "for", "each", "other", "one", "another", "someone", "something",
               "with", "and", "or", "in", "on", "at", "up", "down", "out", "get", "make", "cause"}
@@ -370,6 +450,8 @@ CLOSED_GLOSS = {
     ("bado", "ADV"): "still; not yet", ("tu", "ADV"): "only, just", ("pia", "ADV"): "also, too",
     ("sana", "ADV"): "very, a lot", ("sasa", "ADV"): "now", ("leo", "ADV"): "today",
     ("kesho", "ADV"): "tomorrow", ("jana", "ADV"): "yesterday", ("tena", "ADV"): "again",
+    ("juzi", "ADV"): "the day before yesterday", ("keshokutwa", "ADV"): "the day after tomorrow",
+    ("basi", "NOUN"): "bus",
     ("ndiyo", "INTJ"): "yes", ("siyo", "INTJ"): "no, it is not", ("hapana", "INTJ"): "no",
     ("je", "PART"): "question marker (je...?)",
     ("nini", "PRON"): "what", ("nani", "PRON"): "who", ("wapi", "ADV"): "where", ("lini", "ADV"): "when",
@@ -399,7 +481,7 @@ FORCED_CLOSED = (
      ("na", "CCONJ"), ("lakini", "CCONJ"), ("au", "CCONJ"), ("ili", "SCONJ"), ("kwamba", "SCONJ"),
      ("kama", "SCONJ"), ("katika", "ADP"), ("kwenye", "ADP"), ("kwa", "ADP"),
      ("bado", "ADV"), ("tu", "ADV"), ("pia", "ADV"), ("sana", "ADV"), ("sasa", "ADV"), ("leo", "ADV"),
-     ("kesho", "ADV"), ("jana", "ADV"),
+     ("kesho", "ADV"), ("jana", "ADV"), ("juzi", "ADV"), ("keshokutwa", "ADV"), ("basi", "NOUN"),
      ("ndiyo", "INTJ"), ("siyo", "INTJ"), ("hapana", "INTJ"), ("je", "PART"),
      ("nini", "PRON"), ("nani", "PRON"), ("wapi", "ADV"), ("lini", "ADV"), ("gani", "DET"), ("vipi", "ADV"),
      ("ngapi", "ADJ"),
@@ -620,6 +702,9 @@ class Analyser:
         (derived=True: scored below a plain reading)."""
         if len(rest) < 1:
             return None
+        for a, b in STEM_SPELLING:
+            if rest.startswith(a):
+                rest = b + rest[len(a):]
         if finals == "e" and rest.endswith("a"):
             return None     # a subjunctive of an -a verb ends in -e: i-menyesha is i-me-nyesha
         if rest in self.verb:
@@ -740,6 +825,27 @@ class Analyser:
         res.sort(key=lambda x: (-x[2], x[0]))
         return res
 
+    # ---- context helpers ----------------------------------------------------
+    def _sm_verb(self, w, sm):
+        """w is a finite verb with subject prefix sm (basi limefika: li-)."""
+        if not w or not w.startswith(sm) or w in self.noun or w in self.noun_form:
+            return False
+        return any(f.get("VerbForm") == "Fin" and f.get("Mood") != "Imp" for _, f, _ in self.parse_verb(w)[:1])
+
+    def _finite(self, w):
+        """w is a finite verb form and not a noun (huenda kikatoa)."""
+        if not w or w in CLOSED or self.noun_lemma(w):
+            return False
+        pv = self.parse_verb(w)
+        return bool(pv) and pv[0][1].get("VerbForm") == "Fin" and pv[0][1].get("Mood") != "Imp"
+
+    def _locative(self, w):
+        """w is a place phrase opener: a -ni locative noun or a locative adverb."""
+        if not w:
+            return False
+        return w in LOCATIVE_ADVS or (w.endswith("ni") and len(w) > 4 and w[:-2] != "" and
+                                      bool(self.noun_lemma(w)) and self.noun_lemma(w) != w)
+
     # ---- nominal readings -------------------------------------------------------
     def noun_lemma(self, w):
         if w in self.noun:
@@ -756,17 +862,20 @@ class Analyser:
         return None
 
     CONTEXT_WORDS = {"wao", "vizuri", "vibaya", "kidogo", "kuwa", "kulia", "basi", "huenda", "karibu",
-                     "ndiyo", "ndio", "la"}
+                     "karibuni", "ndiyo", "ndio", "la", "mpaka", "ua", "uani", "jumbe", "pepo", "wako", "yako",
+                     "taratibu", "hazina", "kina", "vina", "nina", "wana", "pana", "swala", "zima", "mkubwa",
+                     "wakubwa", "kinywa", "kutoka"}
 
     def analyse_memo(self, low, prev=None, prev2=None, nxt=None):
         """analyse with a cache: context matters only for CONTEXT_WORDS and
         adjective forms (after a noun)."""
         memo = self.__dict__.setdefault("_memo", {})
         if low in self.CONTEXT_WORDS:
-            key = (low, prev, nxt)
+            key = (low, prev, prev2, nxt)
         elif low in self.adj_form or "adj" in self.other.get(low, ()):
             key = (low, prev[1] if prev is not None else None,
-                   prev is not None and prev[0] in LINK_VERBS, nxt in ASSOC_FORMS)
+                   prev is not None and prev[0] in LINK_VERBS, nxt in ASSOC_FORMS,
+                   prev2[1] if prev2 is not None else None, prev is not None and prev[1] == "ADJ" and self._finite(nxt))
         else:
             key = low
         r = memo.get(key)
@@ -787,26 +896,100 @@ class Analyser:
             return "kuwa", "SCONJ", {}
         if low in ("ndiyo", "ndio") and prev is not None:
             return low, "X", {}     # mid-sentence: the focus copula "it is" (ndio silaha), not "yes"
-        if low == "la" and prev is None:
-            return low, "X", {}     # sentence-initial La, "no" (the associative never opens a sentence)
+        if low == "la" and (prev is None or prev[0] == "au" or nxt is None):
+            return low, "X", {}     # La "no" opening or ending a clause, au la "or not": not the associative
+        if low == "kinywa" and prev is not None and prev[0] == "kiamsha":
+            return "kiamsha", "X", {}       # kiamsha kinywa "breakfast": neither amsha "wake" nor kinywa "mouth"
         if low == "ukiwa":
             # u-ki-wa "(when) you are"; the noun ukiwa "solitude" is rare (the only
             # noun/verb homograph of a one-syllable verb where the verb dominates)
             return "wa", "VERB", {"VerbForm": "Fin"}
-        if low == "karibu":
-            # "near; almost" before na, before a quantity, or after a copula (karibu
-            # na shule, karibu kila siku, iko karibu); otherwise the greeting, also
-            # inside quoted speech (anasema, "Karibu sana!")
-            if nxt == "na" or nxt in ("kila", "wote", "nusu", "asilimia", "mara") or \
-                    (prev is not None and prev[0] in ("wa", "ni", "si")):
-                return "karibu", "ADV", {}
-            return "karibu", "INTJ", {}
+        if low in ("karibu", "karibuni"):
+            # the greeting only opens a clause and stands alone or before a
+            # name or a welcome complement (Karibu! / Karibu, madaktari / Karibu
+            # sana / Karibuni Tanzania); every other karibu is "near; almost"
+            # (duka la karibu, karibu kila siku, karibu nusu, karibu sijawahi);
+            # hivi karibuni "recently" is the phrase, never karibu itself
+            if prev is not None and prev[0] == "hivi":
+                return low, "X", {}
+            if prev is None and (nxt is None or nxt[:1].isupper() or nxt in WELCOME_NEXT):
+                return "karibu", "INTJ", {}
+            if low == "karibuni":
+                return "karibuni", "ADV", {}    # "soon, recently": not karibu "near; almost"
+            return "karibu", "ADV", {}
         if low == "kulia" and prev is not None and (prev[0] in ("upande", "mkono", "kwa", "a") or nxt == "na"):
             return "kulia", "ADV", {}
-        if low == "basi" and prev is not None and prev[0] in ("kwa", "a", "katika", "kwenye"):
-            return "basi", "NOUN", {}           # kwa basi "by bus", not basi "so, well"
-        if low == "huenda" and prev is not None and prev[1] in ("NOUN", "PRON", "PROPN"):
-            return "enda", "VERB", {"VerbForm": "Fin", "Aspect": "Hab"}   # X huenda "X goes", not "maybe"
+        if low == "basi" and (prev is not None and prev[0] in BUS_BEFORE or
+                              nxt is not None and (nxt in LI_AGREE or self._sm_verb(nxt, "li"))):
+            return "basi", "NOUN", {}           # kwa basi "by bus", basi hili, basi limefika; not "so, well"
+        if low == "huenda":
+            # habitual kwenda before a destination (huenda sokoni, huenda nje ya
+            # nchi) or ending its clause; "maybe" before a clause (huenda
+            # kikatoa mwanga, huenda mvua ikanyesha); else by the subject slot
+            if nxt is None or nxt in PLACE_NEXT or self._locative(nxt):
+                return "enda", "VERB", {"VerbForm": "Fin", "Aspect": "Hab"}
+            if self._finite(nxt) or prev is None or prev[1] not in ("NOUN", "PRON", "PROPN") or \
+                    self.noun_lemma(nxt) or nxt in CLOSED and CLOSED[nxt][1] == "PRON":
+                return "huenda", "ADV", {}      # ... huenda watu watanufaika: a new subject follows
+            return "enda", "VERB", {"VerbForm": "Fin", "Aspect": "Hab"}
+        if low == "kutoka" and (nxt is None or prev is not None and prev[0] == "a" and nxt in ASSOC_FORMS):
+            # the infinitive "to go out, leave" ends its clause or follows an
+            # associative (idhini ya kutoka., milango ya kutoka ya jengo, kabla
+            # ya jua kutoka.); "from" always has a source after it
+            return "toka", "VERB", {"VerbForm": "Inf"}
+        if low == "mpaka":
+            # the noun "border, limit" as a noun phrase head (mpaka wa, kuna mpaka,
+            # hauna mpaka., mpaka huu); otherwise "until, up to" (mpaka sasa,
+            # mpaka kesho, mpaka nirudi, mpaka sokoni)
+            if nxt is None or nxt in ASSOC_FORMS or nxt in U_AGREE or nxt == "kati" or \
+                    (prev is not None and (prev[0] in ("kwenye", "katika") or prev[0] == "a")) or \
+                    (prev is not None and prev[0] in ("kuna", "na", "vuka") and prev[1] == "VERB"):
+                return "mpaka", "NOUN", {}
+            return "mpaka", "ADP", {}
+        if low == "uani" or (low == "ua" and (nxt in U_AGREE or nxt in ("wa", "mzuri", "mkubwa", "mdogo") or
+                                               (prev is not None and prev[0] == "a" and prev2 is not None and
+                                                prev2[0] in ("nje", "ndani")))):
+            return "ua", "X", {}      # ua "yard, courtyard" (u class, ua wa nyumba): not maua "flower"
+        if low == "jumbe" and not (nxt is not None and (nxt in ("wa", "la", "huyo", "huyu", "yule") or
+                                                        nxt[:1].isupper()) or
+                                   prev is not None and prev[1] == "PROPN"):
+            return "ujumbe", "NOUN", {"Number": "Plur"}     # jumbe za, jumbe hizo "messages"; not jumbe "chief"
+        if low == "pepo" and nxt is not None and (nxt[:1] == "z" or nxt in N_PLURAL_AGREE):
+            return "upepo", "NOUN", {"Number": "Plur"}      # pepo kali, pepo za "winds"; not pepo "spirit"
+        if low in ("wako", "yako") and (nxt == "wapi" or nxt in LOCATIVE_ADVS or self._locative(nxt) or
+                                        prev is None or prev[1] in ("PRON", "PROPN", "ADJ")):
+            # located copula: wako wapi "where are they", makao makuu yako katika
+            # "the headquarters are in" (a possessive precedes an adjective,
+            # never follows it); not -ako "your"
+            return "wa", "VERB", {}
+        if low == "taratibu" and not (nxt is not None and (nxt[:1] == "z" or nxt in N_PLURAL_AGREE)) and \
+                (prev is None or prev[0] == "kwa" or prev[1] == "VERB" and prev[0] not in RULE_OBJ_VERBS):
+            return "taratibu", "ADV", {}    # alitembea taratibu "slowly"; not taratibu za "procedures"
+        if low in HAVE_FORMS and low in self.noun_form or low in HAVE_FORMS and low in self.noun:
+            # a kuwa na form that spells a noun (hazina "treasure", kina "depth",
+            # wana "sons") is the noun after a preposition or associative (kwa
+            # kina, wa hazina) and, for the inanimate ones, after a verb or
+            # opening the sentence (waligundua hazina, Kina cha maji); after its
+            # subject it is "has / have not" (nyumba hazina maji, kitabu kina picha)
+            # (wana wao "their sons", Wana huzika "sons bury": a possessive or a
+            # finite verb follows the noun, never "have")
+            if prev is not None and (prev[1] == "ADP" or prev[0] == "a") or \
+                    low in HAVE_NOUNS_STRONG and (prev is None or prev[1] == "VERB") and \
+                    not (nxt is not None and nxt not in ASSOC_FORMS and self.noun_lemma(nxt)) or \
+                    nxt is not None and (nxt in POSS_FORMS or self._finite(nxt)):
+                return self.noun_lemma(low), "NOUN", {}
+        if low == "pana" and prev is not None and (prev[1] in ("NOUN", "ADJ") or prev[0] in ("ni", "si", "siyo")) and \
+                not (nxt is not None and (self.noun_lemma(nxt) or nxt in CLOSED and CLOSED[nxt][1] == "PRON")):
+            return "pana", "ADJ", {}        # simulizi pana "a broad story"; not pana "there is (here)"
+        if low == "zima" and prev is None:
+            return "zima", "VERB", {}       # clause-initial Zima is the imperative "put out": -zima follows its noun
+        if low in ("mkubwa", "wakubwa") and prev is not None and prev[0] == "na" and prev2 is not None and \
+                prev2[1] == "ADJ":
+            return "kubwa", "ADJ", {}       # mpana na mkubwa: a coordinated adjective, not mkubwa "elder"
+        if low == "swala" and nxt is not None and (nxt in LI_AGREE or self._sm_verb(nxt, "li")):
+            return "suala", "NOUN", {}      # swala hili/la (li class): a spelling of suala "issue", not "prayer"
+        if low in PLACE_NAMES:
+            return low, "PROPN", {}     # sentence-initial Uganda: not u-ganda "you freeze"
         if low in CLOSED:
             lem, upos = CLOSED[low]
             return lem, upos, {}
@@ -828,7 +1011,11 @@ class Analyser:
             # (a modifier slot keeps the adjective: maumivu makali ya tumbo)
             (nxt in ASSOC_FORMS and "adj" not in self.other.get(low, ()) and
              (prev is None or prev[1] not in ("NOUN", "NUM", "DET", "ADJ"))) or
-            (prev is not None and prev[1] == "VERB" and prev[0] not in LINK_VERBS))
+            (prev is not None and prev[1] == "VERB" and prev[0] not in LINK_VERBS) or
+            # a predicate adjective before it heads no noun phrase, and a verb
+            # follows its subject (Ni bora wageni wasiokuwa na muda: "visitors")
+            (prev is not None and prev[1] == "ADJ" and (prev2 is None or prev2[1] not in NP_HEAD) and
+             self._finite(nxt)))
         # the modifier slot also follows a numeral, possessive/demonstrative or
         # another adjective (watoto wawili wadogo, rafiki yangu mzuri)
         if prev is not None and prev[1] in NP_SLOT and low in self.adj_form and \
@@ -893,6 +1080,11 @@ class Swahili(LanguageSpec):
     tatoeba_code = "swh"
     kaikki_lang_code = "sw"
     wordfreq_code = "sw"        # wordfreq has no Swahili: extra_wordfreq replaces its list, bind_lexicon its zipf
+    # Global Voices media-credit captions ("Picha kwa hisani ya X.", "Imechapishwa kwa ruhusa ya PRI."):
+    # verbless or formulaic lines, not sentences to learn from (2026-09-29 QA read)
+    bad_text_re = re.compile(r"^(?:Picha|Mchoro|Video|Imechapishwa|Imewekwa|Imetumiwa|Imetumika)\b(?=[^.!?]*\b(?:ruhusa|hisani|idhini|leseni|imepigwa|iliyopigwa|"
+                             r"kupitia|kutoka|mmiliki|Twitter|Facebook|Instagram|Flickr|YouTube|tovuti|blogu)\b)"
+                             r"[^.!?]{0,80}[.!?]?$")
 
     spacy_model = None
     tagger = "rules"
@@ -968,14 +1160,22 @@ class Swahili(LanguageSpec):
     function_verbs = {"ni", "si"}
     function_lemmas = FUNCTION_LEMMAS
     # na: "and" (CCONJ) and "to have" (kuwa na): one spelling, two words;
-    # karibu: "welcome" and "near"
-    second_entry_overlap_exempt = frozenset({"na", "karibu"})
+    # karibu: "welcome" and "near"; jibu: "to answer" and "answer" (majibu), a
+    # deverbal pair the passages need (QA 2026-09-29: the noun linked as kujibu)
+    second_entry_overlap_exempt = frozenset({"na", "karibu", "jibu"})
     # jamii VERB "to have sex" (kujamiiana): never a word; its sentences are sensitive
     drop_keys = {("jamii", "VERB"): None, ("badala", "ADJ"): ("badala", "NOUN"),
                  ("shoga", "NOUN"): None,       # "girlfriend" / slur homograph
                  ("msagaji", "NOUN"): None,     # "miller" / slur homograph
                  ("kucha", "NOUN"): None,       # usiku kucha "all night" / "warbler": no teachable sense
                  ("onesha", "VERB"): ("onyesha", "VERB"),     # spelling variant of onyesha
+                 # one word, two headwords (QA 2026-09-29): the merged-away one links, and
+                 # is typed, as the kept one (finalize_words adds it to alt)
+                 ("mwanaume", "NOUN"): ("mwanamume", "NOUN"),     # variant spelling, same "man"
+                 ("maamuzi", "NOUN"): ("uamuzi", "NOUN"),         # plural headword of uamuzi "decision"
+                 ("taratibu", "NOUN"): ("utaratibu", "NOUN"),     # plural headword of utaratibu "procedure"
+                 ("kimya", "NOUN"): ("ukimya", "NOUN"),           # "silence" (kimya ADJ "quiet" stays)
+                 ("makini", "NOUN"): ("umakini", "NOUN"),         # "attention" (makini ADJ "careful" stays)
                  ("mpiga", "NOUN"): None,       # bound: mpiga picha, mpiga kura (the compound is the word)
                  ("ke", "ADJ"): None}           # bound stem (wa kike); its corpus hits are English like/make/Mike
     sensitive_re = re.compile(r"(?<![A-Za-z])(" + SENSITIVE_SW + "|" + SENSITIVE_EN + r")(?![A-Za-z])", re.I)
@@ -998,7 +1198,7 @@ class Swahili(LanguageSpec):
         "question": "nini nani wapi lini gani vipi ngapi",
         "greetings": "habari jambo hujambo sijambo shikamoo marahaba asante karibu pole hodi kwaheri tafadhali "
                      "samahani",
-        "time": "leo kesho jana sasa",
+        "time": "leo kesho jana sasa juzi keshokutwa",
         "function": "na a katika kwenye kama lakini au ili kwamba bado tu pia sana siyo ndiyo hapana je",
     }
 
@@ -1044,11 +1244,13 @@ class Swahili(LanguageSpec):
                     toks.append((s, s, upos, {}))
                     if s in ".!?:;…\"“”«»":
                         initial = True
-                    if s in ",;:()[]—–\"“”«»":
+                    if s in ",;:()[]—–\"“”«».!?…":
                         prev, prev2 = None, None    # no modifier across a clause break (harusi, wageni ...)
                     continue
                 low = s.lower().replace("’", "'")
-                nxt = next((x.lower() for x in raw[j + 1:j + 2] if WORD_RE.fullmatch(x)), None)
+                # a capitalised next word keeps its case (a name: Karibu Tanzania)
+                nxt = next((x if x[:1].isupper() and x.lower() not in CAPITALISED else x.lower()
+                            for x in raw[j + 1:j + 2] if WORD_RE.fullmatch(x)), None)
                 if s[:1].isupper() and not initial and low not in CAPITALISED:
                     toks.append((s, s, "PROPN", {}))
                     prev2, prev = prev, (s, "PROPN")
@@ -1134,6 +1336,60 @@ class Swahili(LanguageSpec):
             t = toks[0]
             toks[0] = [t[0], t[1], t[2], (t[3] + "|" if t[3] else "") + "Src=" + src]
         return toks
+
+    def standalone_intj_ok(self, tok):
+        # the context rules already return INTJ for the greeting (Karibu! /
+        # Karibu, madaktari); a clause-final karibu they read as ADV is "near"
+        # (hapa karibu., miji ya karibu.)
+        return tok[0].lower() not in Analyser.CONTEXT_WORDS
+
+    def fix_links(self, row, toks, links, key_to_id):
+        """Object-prefix homographs the analyser cannot split without the
+        English: a verb with an object prefix whose stem spells another verb's
+        applicative or OM + stem (a-li-ni-tumia "he sent me", not tumia "use";
+        ku-me-tu-pa "it has given us", not tupa "throw") is relinked to the
+        reading the English carries, or unlinked when it carries neither."""
+        en = (row[3] if row is not None and len(row) > 3 else "") or ""
+        if not links or not en:
+            return links
+        out = list(links)
+        for t in toks:
+            surf = t[0].lower()
+            for lem, tail, alt_lem, keep_re, alt_re in OM_HOMOGRAPHS:
+                if t[1] != lem or t[2] != "VERB" or not _om_homograph_surface(surf, tail):
+                    continue
+                if keep_re.search(en):
+                    continue
+                wid, nid = key_to_id.get((lem, "VERB")), key_to_id.get((alt_lem, "VERB"))
+                if wid not in out:
+                    continue
+                i = out.index(wid)
+                if alt_re.search(en) and nid:
+                    if nid in out:
+                        out.pop(i)
+                    else:
+                        out[i] = nid
+                else:
+                    out.pop(i)
+        # wako / yako after a noun are also the locative copula (w-a-ko "they are
+        # there": Majina yako katika ...); -ako always carries "you" in the English,
+        # so without it the copula is the reading
+        # and the other way: a wako / yako read as the copula before a locative
+        # (faragha yako mtandaoni) is the possessive when the English has "your"
+        ako, wa = key_to_id.get(("ako", "DET")), key_to_id.get(("wa", "VERB"))
+        if wa in out and ako and ako not in out and YOU_RE.search(en):
+            cop = [t for t in toks if t[1] == "wa" and t[2] == "VERB"]
+            if cop and all(t[0].lower() in ("wako", "yako") for t in cop):
+                out[out.index(wa)] = ako
+        if ako in out and not YOU_RE.search(en):
+            poss = [t for t in toks if t[1] == "ako"]
+            if poss and all(t[0].lower() in ("wako", "yako") for t in poss):
+                i = out.index(ako)
+                if wa and wa not in out:
+                    out[i] = wa
+                else:
+                    out.pop(i)
+        return out
 
     def sentence_rank(self, toks, lv):
         if toks and "Src=" in toks[0][3]:
@@ -1326,6 +1582,10 @@ class Swahili(LanguageSpec):
         surf, _ = self.corpus_counts()
         plural_of = an.plural
         heads = {w["w"] for w in words}
+        merged_into = {}
+        for (src, sg), tgt in self.drop_keys.items():
+            if tgt and sg == "NOUN" and tgt[1] == "NOUN":
+                merged_into.setdefault(tgt, []).append(src)
         for w in words:
             lem, g = w["_key"]
             alt = list(w.get("alt") or [])
@@ -1383,6 +1643,7 @@ class Swahili(LanguageSpec):
                 alt = [f for f in fs if f not in heads] + alt
             if lem in CAPITALISED:
                 w["w"] = CAPITALISED[lem]
+            alt += [m for m in merged_into.get((lem, g), []) if m not in heads]
             seen, out = {w["w"].lower()}, []
             for a in alt:
                 if a.lower() not in seen:

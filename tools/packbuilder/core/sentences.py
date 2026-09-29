@@ -171,7 +171,7 @@ def sentence_links(toks, lexicon, key_to_id, allowed, text, groups=None, gender_
         nxt = toks[i + 1][2] if i + 1 < len(toks) else "PUNCT"
         if (text_t.lower(), "FORM") in key_to_id:
             wid = key_to_id[(text_t.lower(), "FORM")]    # it: "è" -> the forced form entry
-        elif (text_t.lower(), "INTJ") in key_to_id and nxt == "PUNCT" and g != "INTJ":
+        elif (text_t.lower(), "INTJ") in key_to_id and nxt == "PUNCT" and g != "INTJ" and sp.standalone_intj_ok(toks[i]):
             # "Prego." / "Scusa, ..." / "Grazie!": standalone greeting use
             wid = key_to_id[(text_t.lower(), "INTJ")]
         else:

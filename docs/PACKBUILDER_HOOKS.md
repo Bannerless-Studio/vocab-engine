@@ -34,6 +34,7 @@ Added for Russian; each defaults to a no-op, so other languages are unchanged.
 - `bare_prefer_shared`: with `example_shows_word`, the bare-form sentence is picked with audio first, then one already chosen for another word.
 - `derived_form_tags` also takes gloss phrases (ru: "female equivalent"), and `clean_sentence_text` strips stress marks (ru).
 - `surface_link_ok(tok)`: may an unresolved token fall back to linking by surface (ru: not "О нет!" -> о "about").
+- `standalone_intj_ok(tok)`: may a token before punctuation that the tagger read as another POS link the interjection spelled like it ("Prego.", "Grazie!")? Default: yes. sw: not a word its context rules disambiguate (clause-final "hapa karibu." is karibu "near", not the greeting).
 - `refill_unexampled`: words left with no example sentence (and not forced) are dropped and the next words by rank take their place (one extra words+sentences pass). A word that pass brings in can itself have no example; check sentences.json after a ranking change.
 - `keep_keys`: frozenset of (lemma, group) kept in the word list when the blend ranks them past the cut (ko, de, id). They replace the lowest-ranked unkept chosen words and keep their own rank order. Only keys inside the candidate pool (`POOL_KEYS` lemmas) can be kept.
 - `caps_proper_pool`: gates the capitalisation-based proper-noun test in word selection, separately from `caps_mark_names` (ru: off, so Земля and Бог stay).
