@@ -1480,7 +1480,7 @@ class Korean(LanguageSpec):
     sensitive_re = re.compile(r"(?:" + SENSITIVE_KO + r")|(?<![A-Za-z])(?:" + SENSITIVE_EN + "|" + SENSITIVE_KO_EN +
                               r")(?![A-Za-z])", re.I)
     sensitive_gloss_re = re.compile(r"\b(" + SENSITIVE_GLOSS_EN + r")\b", re.I)
-    lower_level_gloss_re = re.compile(r"\b(kill\w*|murder\w*|rape[ds]?|raping|rapist|shoot\w*|stab\w*|"
+    lower_level_gloss_re = re.compile(r"\b(kill\w*|murder\w*|rape[ds]?|raping|rapist|shoot\w*|stab(?:s|bed|bing)?|"
                                       r"porn\w*|prostitut\w*|suicid\w*|bomb\w*|explod\w*|explosi\w*|"
                                       r"poison\w*|blood\w*|corpse\w*|dead body)\b", re.I)
 

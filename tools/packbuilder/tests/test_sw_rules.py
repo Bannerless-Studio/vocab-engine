@@ -433,9 +433,13 @@ class MisreadStems(unittest.TestCase):
 
     def test_miongoni_is_not_mwongo(self):
         self.assertEqual(self.reading("Yeye ni miongoni mwa watu.", "miongoni"), ("miongoni", "ADP"))
+        self.sp._an.noun.update({"mwongo": "m/mi"})
+        self.assertEqual(self.reading("Mwongo huu ulikuwa mgumu.", "mwongo"), ("mwongo", "NOUN"))
 
     def test_undani_is_not_unda(self):
         self.assertEqual(self.reading("Aliongea kwa undani.", "undani"), ("undani", "NOUN"))
+        self.sp._an.verb.update({"unda": "unda"})
+        self.assertEqual(self.reading("Wataunda kamati.", "wataunda"), ("unda", "VERB"))
 
     def test_sentence_initial_uganda_is_a_place(self):
         self.sp._an.verb.update({"ganda": "ganda"})
@@ -718,3 +722,68 @@ class SharedSurfaceAuditRules(unittest.TestCase):
     def test_noun_adjective_homograph_after_predicate_adjective_is_noun(self):
         self.assertEqual(self.reading("Ni bora wageni walale hapa.", "wageni"), ("mgeni", "NOUN"))
         self.assertEqual(self.reading("Watoto wageni walale hapa.", "wageni"), ("geni", "ADJ"))
+
+
+class ClauseEndIsNotANumeralOrQuote(unittest.TestCase):
+    """The rules that read nxt None as a clause end (la, mpaka, karibu) see
+    a numeral or an opening quote as the clause going on."""
+
+    def setUp(self):
+        self.sp = rich_spec()
+
+    def reading(self, text, surface):
+        return HomographContextRules.reading(self, text, surface)
+
+    def test_la_before_a_numeral_or_quote_is_the_associative(self):
+        self.assertEqual(self.reading("Ni jimbo la 31.", "la"), ("a", "ADP"))
+        self.assertEqual(self.reading('Aliandika neno la "amani".', "la"), ("a", "ADP"))
+        self.assertEqual(self.reading("Utakuja au la?", "la")[1], "X")
+        self.assertEqual(self.reading("Akili inasema la.", "la")[1], "X")
+
+    def test_mpaka_before_a_numeral_is_until(self):
+        self.assertEqual(self.reading("Nitakaa hapa mpaka 2030.", "mpaka"), ("mpaka", "ADP"))
+        self.assertEqual(self.reading("Dunia hauna mpaka.", "mpaka"), ("mpaka", "NOUN"))
+
+    def test_karibu_before_a_numeral_is_about(self):
+        self.assertEqual(self.reading("Karibu 30 walikuja.", "karibu"), ("karibu", "ADV"))
+        self.assertEqual(self.reading('"Karibu," alisema.', "karibu"), ("karibu", "INTJ"))
+
+
+class NdiyoFocusCopulaVersusYes(unittest.TestCase):
+    def setUp(self):
+        self.sp = rich_spec()
+
+    def reading(self, text, surface):
+        return HomographContextRules.reading(self, text, surface)
+
+    def test_mid_clause_ndiyo_is_the_focus_copula(self):
+        self.assertEqual(self.reading("Hiyo ndiyo picha.", "ndiyo")[1], "X")
+
+    def test_clause_final_or_initial_ndiyo_is_yes(self):
+        self.assertEqual(self.reading("Akili inasema ndiyo, lakini moyo unasema la.", "ndiyo"), ("ndiyo", "INTJ"))
+        self.assertEqual(self.reading("Ndiyo, kuna sababu.", "ndiyo"), ("ndiyo", "INTJ"))
+
+    def test_clause_initial_ndio_idiom_is_the_focus_copula(self):
+        self.assertEqual(self.reading("Ndio maana alikuja.", "ndio")[1], "X")
+        self.assertEqual(self.reading("Ndio kwanza nimeamka.", "ndio")[1], "X")
+
+
+class SurfaceFallbackSkipsContextWords(unittest.TestCase):
+    """sw.surface_link_ok: a context-rule word the rules left unresolved
+    (mid-sentence ndiyo, the focus copula) never links the interjection by
+    surface; another interjection still does."""
+
+    def links(self, toks, res, words):
+        return StandaloneIntjOnlyWithoutContextRule.links(self, toks, res, words)
+
+    def test_focus_ndiyo_does_not_link_yes(self):
+        words = [word("w_yes", "ndiyo", "INTJ", "intj", 1), word("w_picha", "picha", "NOUN", "noun", 2)]
+        toks = [T("hiyo", "DET"), T("ndiyo", "X"), T("picha", "NOUN"), T(".", "PUNCT")]
+        ids = self.links(toks, {"ndiyo": ("ndiyo", "X"), "picha": ("picha", "NOUN")}, words)
+        self.assertEqual(ids, ["w_picha"])
+
+    def test_other_unresolved_interjection_links_by_surface(self):
+        words = [word("w_asante", "asante", "INTJ", "intj", 1), word("w_sana", "sana", "ADV", "adv", 2)]
+        toks = [T("asante", "X"), T("sana", "ADV"), T(".", "PUNCT")]
+        ids = self.links(toks, {"asante": ("asante", "X"), "sana": ("sana", "ADV")}, words)
+        self.assertEqual(ids, ["w_asante", "w_sana"])

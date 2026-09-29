@@ -469,7 +469,7 @@ class Indonesian(LanguageSpec):
     sensitive_re = re.compile(r"(?<![A-Za-z])(" + SENSITIVE_ID + "|" + SENSITIVE_EN + r")(?![A-Za-z])", re.I)
     sensitive_gloss_re = re.compile(r"\b(" + SENSITIVE_GLOSS_EN + r")\b", re.I)    # vulgar senses never lead
     # kill/murder/rape glosses stay out of A1/A2 (clean ";"-segments kept, else the word moves to B1)
-    lower_level_gloss_re = re.compile(r"\b(kill\w*|murder\w*|rape[ds]?|raping|rapist|shoot\w*|stab\w*|"
+    lower_level_gloss_re = re.compile(r"\b(kill\w*|murder\w*|rape[ds]?|raping|rapist|shoot\w*|stab(?:s|bed|bing)?|"
                                       r"porn\w*|prostitut\w*|suicid\w*|bomb\w*|explod\w*|explosi\w*|"
                                       r"poison\w*|blood\w*|corpse\w*|dead body)\b", re.I)
 

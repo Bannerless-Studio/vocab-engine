@@ -216,9 +216,11 @@ CLOSED.update({"kuwa": ("wa", "VERB"),          # the infinitive; "that" only af
                "mnamo": ("mnamo", "ADP"), "hususani": ("hususani", "ADV"), "hususan": ("hususani", "ADV"),
                "kupindukia": ("kupindukia", "ADV"),
                "juzi": ("juzi", "ADV"), "keshokutwa": ("keshokutwa", "ADV"),
+               # miongoni mwa "among", not mwongo "decade"
                "miongoni": ("miongoni", "ADP"),
                "kiamsha": ("kiamsha", "X"),
-               "undani": ("undani", "NOUN"), "ripoti": ("ripoti", "NOUN"), "kuulia": ("ua", "VERB"), "kuzima": ("zima", "VERB"), "zimeni": ("zima", "VERB")})   # miongoni mwa "among", not mwongo "decade"
+               "undani": ("undani", "NOUN"), "ripoti": ("ripoti", "NOUN"), "kuulia": ("ua", "VERB"),
+               "kuzima": ("zima", "VERB"), "zimeni": ("zima", "VERB")})
 # OM + pe, the imperative/subjunctive of pa "give" (nipe, wape "give me / them"):
 # not SM + apa "swear" (w-ape) or other one-letter readings
 for _om in ("ni", "tu", "m", "mw", "wa", "ki", "vi", "zi", "li", "ya", "i", "u"):
@@ -338,6 +340,12 @@ APPL_FOLD_RE = re.compile(r"\b(?:for|to|at|on behalf of|with)\s+(?:someone|someb
                           r"\b(?:someone|something)$|^(?:to )?\w+ for(?:,|$)")
 
 WORD_RE = re.compile(r"[A-Za-z]+(?:['’][A-Za-z]+)*")
+# nxt for a numeral: the clause goes on (jimbo la 31, mpaka 2010), so the
+# rules that read nxt None as a clause end (la, mpaka, huenda, kutoka, karibu)
+# must not fire; no word or rule matches it
+NUM_NEXT = "#"
+NDIYO_FOCUS_NEXT = {"maana", "kwanza", "hivyo", "sababu"}
+OPEN_MARKS = set("([{“«‘")
 TOKEN_RE = re.compile(r"[A-Za-z]+(?:['’][A-Za-z]+)*|\d+(?:[.,:]\d+)*|[^\sA-Za-z\d]")
 APPENDIX_RE = re.compile(r"\[\[Appendix|inflected form(?: and adverbial form)? of|\bobject of ndi|"
                          r"\binflection of si-|\bform of amba-|class form of\b|^(?:Class|Wa class|U class|Ki class|"
@@ -505,6 +513,24 @@ DROP_ALL_SW = (r"kubaka|alibaka|ubakaji|alibakwa|kubakwa|kujiua|alijiua|amejiua|
                r"alijinyonga|unyanyasaji wa kingono|kulawiti")
 
 SIMPLE_BAD_RE = re.compile(r"[\d\"“”«»()\[\]/@#&*_=+<>|{}~]|https?:|www\.|\.com|\s-\s|--")
+
+
+def _next_word(raw, j):
+    """The word after raw[j] for Analyser.analyse's nxt, or None at a real
+    clause end (end of text or a break mark). A numeral gives NUM_NEXT; an
+    opening bracket or quote is skipped (la "Simba"). A capitalised word keeps
+    its case (a name: Karibu Tanzania)."""
+    for k in range(j + 1, len(raw)):
+        x = raw[k]
+        if WORD_RE.fullmatch(x):
+            return x if x[:1].isupper() and x.lower() not in CAPITALISED else x.lower()
+        if x[:1].isdigit():
+            return NUM_NEXT
+        # a straight quote opens a quotation when it is the odd one ("..." pairs)
+        if x in OPEN_MARKS or x in ("\"", "'") and raw[:k].count(x) % 2 == 0:
+            continue
+        return None
+    return None
 
 
 class _Zipf:
@@ -894,8 +920,12 @@ class Analyser:
         if low == "kuwa" and prev is not None and (prev[1] == "VERB" and prev[0] in SAY_VERBS or
                                                    prev[0] in THAT_AFTER):
             return "kuwa", "SCONJ", {}
-        if low in ("ndiyo", "ndio") and prev is not None:
-            return low, "X", {}     # mid-sentence: the focus copula "it is" (ndio silaha), not "yes"
+        if low in ("ndiyo", "ndio") and prev is None and nxt in NDIYO_FOCUS_NEXT:
+            return low, "X", {}     # Ndio maana / Ndio kwanza / Ndiyo hivyo: "that is why / just / that's it"
+        if low in ("ndiyo", "ndio") and prev is not None and nxt is not None:
+            # mid-sentence: the focus copula "it is" (ndio silaha), not "yes";
+            # ending its clause it is the answer (inasema ndiyo, lakini ...)
+            return low, "X", {}
         if low == "la" and (prev is None or prev[0] == "au" or nxt is None):
             return low, "X", {}     # La "no" opening or ending a clause, au la "or not": not the associative
         if low == "kinywa" and prev is not None and prev[0] == "kiamsha":
@@ -1180,16 +1210,14 @@ class Swahili(LanguageSpec):
                  ("ke", "ADJ"): None}           # bound stem (wa kike); its corpus hits are English like/make/Mike
     sensitive_re = re.compile(r"(?<![A-Za-z])(" + SENSITIVE_SW + "|" + SENSITIVE_EN + r")(?![A-Za-z])", re.I)
     sensitive_gloss_re = re.compile(r"\b(" + SENSITIVE_GLOSS_EN + r")\b", re.I)
-    # id.py/ja.py/ko.py's shared violent/porn-industry list, extended: sw's actual
-    # A1/A2 hits (kingono "sexual", uchi "naked, nude", kimapenzi "romantic",
-    # mpenzi "lover, beloved, darling") are plain sexual/romantic glosses the
-    # shared list's kill/rape/porn/prostitut/etc terms don't match on their own
-    lower_level_gloss_re = re.compile(r"\b(kill\w*|murder\w*|rape[ds]?|raping|rapist|shoot\w*|stab\w*|"
-                                      r"porn\w*|prostitut\w*|suicid\w*|bomb\w*|explod\w*|explosi\w*|"
-                                      r"poison\w*|blood\w*|corpse\w*|dead body|sexual\w*|naked|nude\w*|"
-                                      r"romantic|lover\w*|beloved|darling)\b", re.I)
     drop_all_levels = drop_all_re(r"(?<![A-Za-z])(" + DROP_ALL_SW + r")(?![A-Za-z])")
-    word_ceiling_re = make_word_ceiling_re()
+    # the shared ceiling covers sexual/naked/nude (kingono, uchi); sw adds the
+    # romance glosses (kimapenzi "romantic", mpenzi "lover, beloved, darling")
+    # and keeps the violent terms of id/ja/ko's lower_level_gloss_re that the
+    # shared list lacks (bomu, mlipuko, kulipuka stay B1). A ceiling moves the
+    # word whole: no gloss segment is stripped (imara keeps "stable, firm")
+    word_ceiling_re = make_word_ceiling_re(r"romantic|lovers?|beloved|darling|shoot(?:s|ing|er|ers)?|"
+                                           r"stab(?:s|bed|bing)?|porn\w*|bomb\w*|explod\w*|explosi\w*|poison\w*")
     qa_closed_sets = {
         "days": " ".join(DAYS), "months": " ".join(MONTHS),
         "numbers": " ".join(n for n in NUMBERS if n != "laki"), "pronouns": " ".join(PRONOUNS),
@@ -1248,9 +1276,7 @@ class Swahili(LanguageSpec):
                         prev, prev2 = None, None    # no modifier across a clause break (harusi, wageni ...)
                     continue
                 low = s.lower().replace("’", "'")
-                # a capitalised next word keeps its case (a name: Karibu Tanzania)
-                nxt = next((x if x[:1].isupper() and x.lower() not in CAPITALISED else x.lower()
-                            for x in raw[j + 1:j + 2] if WORD_RE.fullmatch(x)), None)
+                nxt = _next_word(raw, j)
                 if s[:1].isupper() and not initial and low not in CAPITALISED:
                     toks.append((s, s, "PROPN", {}))
                     prev2, prev = prev, (s, "PROPN")
@@ -1336,6 +1362,12 @@ class Swahili(LanguageSpec):
             t = toks[0]
             toks[0] = [t[0], t[1], t[2], (t[3] + "|" if t[3] else "") + "Src=" + src]
         return toks
+
+    def surface_link_ok(self, tok):
+        # a context-rule word the rules read as something else stays unlinked:
+        # mid-sentence ndiyo is the focus copula (Hiyo ndiyo picha), never
+        # the interjection "yes" by surface
+        return tok[0].lower() not in Analyser.CONTEXT_WORDS
 
     def standalone_intj_ok(self, tok):
         # the context rules already return INTJ for the greeting (Karibu! /
