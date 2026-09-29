@@ -316,6 +316,11 @@ KUWA_MODALS = {"weza", "paswa", "pasa", "bidi", "faa", "takiwa", "stahili", "laz
 KUWA_SCAN_STOP = {"na", "lakini", "au", "ama", "ili", "kwamba", "ingawa", "wakati", "kwa", "katika", "kwenye",
                   "hadi", "mpaka", "bila", "kuliko", "tangu"}
 KUWA_COPULAS = {"ni", "si", "siyo", "sio", "ndiyo", "ndio"}
+# negative perfect of kuwa "has not yet been" (haijawa bayana, sijawa tayari):
+# the -ja- tense marker plus the monosyllabic stem wa; the passive of jaa "be
+# filled" (alijawa na huzuni) takes an affirmative subject, and its negative is
+# ha-...-ja-jawa
+NEG_JAWA_RE = re.compile(r"^(?:si|hu|ha|hatu|ham|hamu|hawa|hai|hazi|hali|haya|haki|havi|hau|hapa|haku)jawa$")
 WHEN_REL_RE = re.compile(r"^(?:ni|u|a|tu|m|mu|wa|i|li|ya|ki|vi|zi|ku|pa)(?:li|na|ta|me|si)po")
 # after these an infinitive is the verb's complement (alitaka kutoka nje "wanted to go out");
 # anza/endelea are left out: anza kutoka Nairobi is "start from Nairobi"
@@ -1004,6 +1009,8 @@ class Analyser:
             return {"vizuri": "zuri", "vibaya": "baya", "kidogo": "dogo"}[low], "ADJ", {}
         if low == "kuwa":
             return self.kuwa_reading(prev, [nxt] if nxt else [], False)
+        if NEG_JAWA_RE.match(low):
+            return "wa", "VERB", {"VerbForm": "Fin", "Polarity": "Neg"}
         if low in ("ndiyo", "ndio") and prev is None and nxt is not None and \
                 (nxt in NDIYO_FOCUS_NEXT or not self._clause_verb(nxt)):
             # clause-initial and not the answer: Ndio maana / Ndio kwanza, and after
@@ -1088,9 +1095,14 @@ class Analyser:
             # never follows it); not -ako "your". A bare Wako, closing a letter
             # (Wako, Jamila.) is "yours"
             return "wa", "VERB", {}
-        if low == "taratibu" and not (nxt is not None and (nxt[:1] == "z" or nxt in N_PLURAL_AGREE)) and \
-                (prev is None or prev[0] == "kwa" or prev[1] == "VERB" and prev[0] not in RULE_OBJ_VERBS):
-            return "taratibu", "ADV", {}    # alitembea taratibu "slowly"; not taratibu za "procedures"
+        if low == "taratibu" and not (nxt is not None and (nxt[:1] == "z" or nxt[:3] == "haz" or
+                                                           nxt in N_PLURAL_AGREE)) and \
+                (prev is None or prev[0] == "kwa" or prev[1] == "VERB" and prev[0] not in RULE_OBJ_VERBS or
+                 self._finite(nxt)):
+            # alitembea taratibu "slowly"; jiji hili taratibu litafutika: before a
+            # verb whose subject is not the n-class plural; not taratibu za,
+            # taratibu zinafuatwa "procedures"
+            return "taratibu", "ADV", {}
         if low in HAVE_FORMS and low in self.noun_form or low in HAVE_FORMS and low in self.noun:
             # a kuwa na form that spells a noun (hazina "treasure", kina "depth",
             # wana "sons") is the noun after a preposition or associative (kwa

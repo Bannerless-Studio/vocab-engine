@@ -364,6 +364,11 @@ class HomographContextRules(unittest.TestCase):
     def test_yako_after_an_adjective_is_the_copula(self):
         self.assertEqual(self.reading("Nyumba kubwa yako katika mji.", "yako"), ("wa", "VERB"))
 
+    def test_negative_perfect_jawa_is_kuwa(self):
+        self.assertEqual(self.reading("Sababu bado haijawa wazi.", "haijawa"), ("wa", "VERB"))
+        self.assertEqual(self.reading("Mimi sijawa tayari.", "sijawa"), ("wa", "VERB"))
+        self.assertNotEqual(self.reading("Alijawa na huzuni.", "alijawa")[0], "wa")
+
     def test_wako_closing_a_letter_is_yours(self):
         self.assertEqual(self.reading("Wako, Jamila.", "wako"), ("ako", "DET"))
         self.assertEqual(self.reading("Wako tayari kusaidia.", "wako"), ("wa", "VERB"))
@@ -374,6 +379,10 @@ class HomographContextRules(unittest.TestCase):
     def test_taratibu_slowly_after_a_verb_or_clause_initial(self):
         self.assertEqual(self.reading("Alitembea taratibu.", "taratibu"), ("taratibu", "ADV"))
         self.assertEqual(self.reading("Taratibu upepo ulivuma.", "taratibu"), ("taratibu", "ADV"))
+
+    def test_taratibu_before_a_non_n_class_verb_is_slowly(self):
+        self.assertEqual(self.reading("Mtoto huyu taratibu alisimama.", "taratibu"), ("taratibu", "ADV"))
+        self.assertEqual(self.reading("Kanuni hizo taratibu zinafuatwa.", "taratibu")[1], "NOUN")
 
     def test_taratibu_procedures_with_n_agreement_or_after_follow(self):
         self.assertEqual(self.reading("Tufuate taratibu hizi.", "taratibu")[1], "NOUN")
