@@ -20,6 +20,7 @@ Every site runs on this engine and keeps its own progress in the browser.
 | Persian | https://bannerless-studio.github.io/persian/ |
 | Russian | https://bannerless-studio.github.io/russian/ |
 | Spanish | https://bannerless-studio.github.io/spanish/ |
+| Swahili | https://bannerless-studio.github.io/swahili/ |
 | Urdu | https://bannerless-studio.github.io/urdu/ |
 
 Each site's source is `https://github.com/Bannerless-Studio/<language>`; this repo is https://github.com/Bannerless-Studio/vocab-engine.
