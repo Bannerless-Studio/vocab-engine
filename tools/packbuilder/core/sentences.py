@@ -108,6 +108,9 @@ def sentence_links(toks, lexicon, key_to_id, allowed, text, groups=None, gender_
     token-level phrases, ("chars", start, end, id) for a spec.multiword
     phrase matched in `text` (Python str offsets). Links are unchanged.
 
+    A spec.multiword_units range links its word once, at its first token,
+    recorded as one ("tok", first, last, id); its other tokens link nothing.
+
     `merged_out`, when a set, gets the id of a word whose link came through
     spec.drop_keys (a merged-away sense), one add per occurrence
     (spec.merge_sense_examples)."""
@@ -125,6 +128,13 @@ def sentence_links(toks, lexicon, key_to_id, allowed, text, groups=None, gender_
         phrase_ids, consumed, partial = phrase_spans(toks, sp, key_to_id, en, ranges)
         for a, b, wid in ranges or ():
             note("tok", a, b, wid)
+    units, unit_tail = {}, set()
+    for a, b, key in sp.multiword_units(toks, resolved):
+        wid = key_to_id.get(key)
+        span = set(range(a, b + 1))
+        if wid and not span & (consumed | set(partial) | unit_tail | set(units)):
+            units[a] = (b, wid)
+            unit_tail |= span - {a}
     en_words = None
     if homs and en:
         en_words = set(EN_WORD_RE.findall(en.lower()))
@@ -136,8 +146,13 @@ def sentence_links(toks, lexicon, key_to_id, allowed, text, groups=None, gender_
                 initial = True
             continue
         was_initial, initial = initial, False
-        if i in consumed:
+        if i in consumed or i in unit_tail:
             continue            # inside a matched phrase: the phrase is the link
+        if i in units:
+            note("tok", i, units[i][0], units[i][1])
+            if units[i][1] not in links:
+                links.append(units[i][1])
+            continue
         if i in partial:
             for w in partial[i]:                # "a pesar del": the article part of del
                 wid = key_to_id.get((w, "DET"))

@@ -689,6 +689,15 @@ class LanguageSpec:
         ferme "farm" is not ferme "firm"."""
         return True
 
+    def multiword_units(self, toks, resolved):
+        """Sentences and passages (sentence_links): [(first, last, (lemma,
+        group))] token ranges that are one pack word spread over several
+        tokens. The word owns every token of its range: it links once, the
+        parts link nothing, and one span covers the range. `resolved` is
+        resolve_sentence's list. sw: a form of kuwa + na is kuwa na "to have"
+        (alikuwa na), a locative one kuna (kulikuwa na "there was")."""
+        return []
+
     def passage_phrase_ranges(self, toks):
         """Passages only: [(first, last, anchor)] token ranges of multiword
         expressions resolved on one anchor token: the other parts read as

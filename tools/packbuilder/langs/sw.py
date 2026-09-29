@@ -93,6 +93,12 @@ HAVE_FORMS = set("nina una ana tuna mna wana ina lina kina vina zina yana".split
                  "sina huna hana hatuna hamna hawana haina halina hakina havina hazina hayana".split())
 # existential "there is" (kuna/pana/mna and negatives) -> ("kuna", VERB)
 EXIST_FORMS = {"kuna", "pana", "hakuna", "hapakuna"}
+# a kuwa form with a locative subject (ku-/pa-, negative ha-) before na is
+# existential "there was / will be / must be" (kulikuwa na, hakukuwa na,
+# patakuwa na, kulikokuwa na, kuwe na): kuna's other tenses
+# (Swahili.multiword_units). mu- is left out: m- is also the 2nd plural
+# (mlikuwa na "you had"); kutokuwa is the negative infinitive
+LOC_KUWA_RE = re.compile(r"^(?:ha)?(?:ku|pa)(?:li|ta|me|nge|ngali|si)?(?:ko|po)?(?:kuwa|we)$")
 # located copula: SM + ko/po/mo "is (there)" -> kuwa
 LOC_COPULA = set()
 for _sm in ("ni", "u", "yu", "tu", "m", "wa", "i", "li", "ya", "ki", "vi", "zi", "ku", "pa", "mu"):
@@ -1741,6 +1747,19 @@ class Swahili(LanguageSpec):
         fz = self._zipf_table()
         lexicon.zipf = _Zipf(fz)
         lexicon.best_by_freq = _BestByFreq(fz)
+
+    def multiword_units(self, toks, resolved):
+        """kuwa na "to have" in every tense: a token read as kuwa (wa VERB)
+        right before na is the pack word kuwa na over both tokens (alikuwa na
+        mkutano, anapaswa kuwa na leseni), not kuwa + na "and, with"; with a
+        locative subject it is kuna (kulikuwa na watu "there were people").
+        The present forms are one token already (ana, nina: HAVE_FORMS)."""
+        out = []
+        for i in range(len(toks) - 1):
+            if resolved[i] == ("wa", "VERB") and toks[i + 1][0].lower() == "na":
+                key = ("kuna", "VERB") if LOC_KUWA_RE.match(toks[i][0].lower()) else ("na", "VERB")
+                out.append((i, i + 1, key))
+        return out
 
     def post_resolve(self, toks, out):
         """The analyser is the lemmatiser: its (lemma, UPOS) stands for every
