@@ -364,6 +364,10 @@ class HomographContextRules(unittest.TestCase):
     def test_yako_after_an_adjective_is_the_copula(self):
         self.assertEqual(self.reading("Nyumba kubwa yako katika mji.", "yako"), ("wa", "VERB"))
 
+    def test_wako_closing_a_letter_is_yours(self):
+        self.assertEqual(self.reading("Wako, Jamila.", "wako"), ("ako", "DET"))
+        self.assertEqual(self.reading("Wako tayari kusaidia.", "wako"), ("wa", "VERB"))
+
     def test_wako_possessive_after_a_noun(self):
         self.assertEqual(self.reading("Mteja wako amefika.", "wako"), ("ako", "DET"))
 
@@ -715,6 +719,10 @@ class SharedSurfaceAuditRules(unittest.TestCase):
         self.assertEqual(self.reading("Funga milango ya kutoka ya jengo.", "kutoka"), ("toka", "VERB"))
         self.assertEqual(self.reading("Alipata barua kutoka kwa mama.", "kutoka")[1], "ADP")
 
+    def test_kutoka_after_an_exit_head_is_the_infinitive(self):
+        self.assertEqual(self.reading("Tutafute njia ya kutoka kwenye pango.", "kutoka"), ("toka", "VERB"))
+        self.assertEqual(self.reading("Wageni wa kutoka Kenya walifika.", "kutoka")[1], "ADP")
+
     def test_kina_before_its_object_is_has(self):
         self.assertNotEqual(self.reading("Kizazi kinachoibuka kina maoni.", "kina")[1], "NOUN")
         self.assertEqual(self.reading("Waligundua kina cha maji.", "kina"), ("kina", "NOUN"))
@@ -767,6 +775,15 @@ class NdiyoFocusCopulaVersusYes(unittest.TestCase):
         self.assertEqual(self.reading("Ndio maana alikuja.", "ndio")[1], "X")
         self.assertEqual(self.reading("Ndio kwanza nimeamka.", "ndio")[1], "X")
 
+    def test_ndio_opening_a_clause_before_a_noun_is_the_focus_copula(self):
+        # after a comma the clause restarts: ", ndio utamaduni wao" is "that is their culture"
+        self.assertEqual(self.reading("Wanaimba hivi, ndio utamaduni wao.", "ndio")[1], "X")
+        self.assertEqual(self.reading("Hiyo ni picha, ndiyo picha yangu.", "ndiyo")[1], "X")
+
+    def test_ndiyo_opening_a_finite_clause_is_yes(self):
+        self.assertEqual(self.reading("Ndiyo nitafika kesho.", "ndiyo"), ("ndiyo", "INTJ"))
+        self.assertEqual(self.reading("Ndiyo ni kweli.", "ndiyo"), ("ndiyo", "INTJ"))
+
 
 class SurfaceFallbackSkipsContextWords(unittest.TestCase):
     """sw.surface_link_ok: a context-rule word the rules left unresolved
@@ -787,3 +804,149 @@ class SurfaceFallbackSkipsContextWords(unittest.TestCase):
         toks = [T("asante", "X"), T("sana", "ADV"), T(".", "PUNCT")]
         ids = self.links(toks, {"asante": ("asante", "X"), "sana": ("sana", "ADV")}, words)
         self.assertEqual(ids, ["w_asante", "w_sana"])
+
+
+def kuwa_spec():
+    """rich_spec plus the vocabulary the kuwa, imperative, kutoka and -enye tests read."""
+    sp = rich_spec()
+    an = sp._an
+    an.noun.update({"habari": "n/n", "adui": "n/n", "rais": "n/n", "ahadi": "n/n", "kiongozi": "ki/vi",
+                    "mwalimu": "m/wa", "hatia": "n/n", "ukweli": "u", "lengo": "ji/ma", "furaha": "n/n",
+                    "nchi": "n/n", "kazi": "n/n", "fahari": "n/n", "mvuto": "m/mi", "shahada": "n/n",
+                    "jibu": "ji/ma", "sauti": "n/n", "utulivu": "u", "safari": "n/n", "nje": "",
+                    "shambulio": "ji/ma", "kaburi": "ji/ma"})
+    an.noun_form.update({"majibu": "jibu"})
+    an.other["kutoka"] = {"prep"}
+    an.verb.update({"dhani": "dhani", "weza": "weza", "onekana": "onekana", "timiza": "timiza", "subiri": "subiri",
+                    "amua": "amua", "kana": "kana", "jua": "jua", "choka": "choka", "julikana": "julikana",
+                    "chukulia": "chukulia", "maliza": "maliza", "saidia": "saidia", "omba": "omba", "jibu": "jibu",
+                    "taka": "taka", "anza": "anza", "toka": "toka", "tuma": "tuma", "pata": "pata"})
+    an.adj_stem |= {"huru", "tulivu", "pya"}
+    an.adj_form.update({"huru": "huru", "utulivu": "tulivu", "mtulivu": "tulivu", "mpya": "pya"})
+    return sp
+
+
+class KuwaVerbVersusConjunction(unittest.TestCase):
+    """Analyser.kuwa_reading (re-QA 2026-09-29: 44 of 153 kuwa sites
+    mislinked): the conjunction "that" before a finite clause, the verb
+    "to be" before na, a predicate or after a modal. Each sub-case has a
+    sentence that takes it and one that does not."""
+
+    def setUp(self):
+        self.sp = kuwa_spec()
+
+    def reading(self, text, surface="kuwa"):
+        return HomographContextRules.reading(self, text, surface)
+
+    def conj(self, text):
+        self.assertEqual(self.reading(text), ("kuwa", "SCONJ"), text)
+
+    def verb(self, text):
+        self.assertEqual(self.reading(text), ("wa", "VERB"), text)
+
+    def test_say_verb_before_a_finite_verb_is_that(self):
+        self.conj("Alisema kuwa anasoma.")
+
+    def test_say_verb_before_a_predicate_noun_is_to_be(self):
+        self.verb("Aliamua kuwa mwalimu.")
+        self.verb("Inaonekana kuwa kiongozi mpya.")
+
+    def test_kuwa_na_is_to_have_even_after_a_say_verb(self):
+        self.verb("Alikana kuwa na hatia.")
+        self.conj("Alikana kuwa ana hatia.")
+
+    def test_noun_before_kuwa_and_a_clause_is_that(self):
+        self.conj("Tulipata habari kuwa adui anasubiri.")
+        self.verb("Nataka nchi kuwa huru.")
+
+    def test_subject_then_finite_verb_is_that(self):
+        self.conj("Inaonekana kuwa rais ametimiza ahadi.")
+
+    def test_ni_kuwa_before_a_clause_is_that(self):
+        self.conj("Ukweli ni kuwa, rais amefika.")
+        self.verb("Lengo ni kuwa na furaha.")
+
+    def test_copula_after_kuwa_is_that(self):
+        self.conj("Tunachukulia kuwa ni ukweli.")
+
+    def test_kwa_kuwa_before_a_clause_is_since(self):
+        self.conj("Aliondoka kwa kuwa alichoka.")
+        self.verb("Mji unajulikana kwa kuwa na soko.")
+
+    def test_after_a_modal_kuwa_is_the_verb_before_a_finite_verb(self):
+        self.verb("Anaweza kuwa hajui.")
+        self.conj("Anasema kuwa hajui.")
+
+    def test_when_relative_ends_the_subject_scan(self):
+        self.verb("Aliamua kuwa mwalimu alipokuwa amemaliza shule.")
+        self.conj("Alidhani kuwa kazi aliyoomba ingemsaidia.")
+
+    def test_after_an_associative_the_clause_verb_comes_first(self):
+        self.verb("Mvuto wa kuwa mwalimu mwenye shahada unaanza.")
+        self.conj("Tuna fahari ya kuwa tumefika.")
+
+    def test_clause_initial_kuwa_is_the_verb(self):
+        self.verb("Kuwa mwalimu mzuri.")
+
+
+class NounVerbStemImperative(unittest.TestCase):
+    """A noun that spells a verb stem (jibu "answer" / jibu! "reply") is the
+    imperative after tafadhali or before a manner adverb; the noun elsewhere."""
+
+    def setUp(self):
+        self.sp = kuwa_spec()
+
+    def reading(self, text, surface="jibu"):
+        return HomographContextRules.reading(self, text, surface)
+
+    def test_imperative_after_please_or_before_an_adverb(self):
+        self.assertEqual(self.reading("Kwa hivyo tafadhali jibu haraka."), ("jibu", "VERB"))
+        self.assertEqual(self.reading("Jibu haraka!"), ("jibu", "VERB"))
+        self.assertEqual(self.reading("Jibu badala ya kunyamaza!"), ("jibu", "VERB"))
+
+    def test_noun_with_agreement_or_as_object(self):
+        self.assertEqual(self.reading("Jibu lake ni nini?"), ("jibu", "NOUN"))
+        self.assertEqual(self.reading("Alituma jibu haraka."), ("jibu", "NOUN"))
+        self.assertEqual(self.reading("Tafadhali jibu lake ni nini?"), ("jibu", "NOUN"))
+
+
+class KutokaAfterAnInfinitiveTaker(unittest.TestCase):
+    def setUp(self):
+        self.sp = kuwa_spec()
+
+    def reading(self, text, surface="kutoka"):
+        return HomographContextRules.reading(self, text, surface)
+
+    def test_after_taka_it_is_the_infinitive(self):
+        self.assertEqual(self.reading("Alitaka kutoka nje."), ("toka", "VERB"))
+
+    def test_after_anza_it_stays_from(self):
+        self.assertNotEqual(self.reading("Safari ilianza kutoka Nairobi.")[1], "VERB")
+
+
+class EnyeTakesANoun(unittest.TestCase):
+    """-enye "having" takes a noun: utulivu after yenye is the noun "calm",
+    not the adjective -tulivu in u- agreement."""
+
+    def setUp(self):
+        self.sp = kuwa_spec()
+
+    def test_after_yenye_the_noun(self):
+        self.assertEqual(HomographContextRules.reading(self, "Alisema kwa sauti yenye utulivu.", "utulivu"),
+                         ("utulivu", "NOUN"))
+
+    def test_after_a_noun_the_adjective(self):
+        self.assertEqual(HomographContextRules.reading(self, "Ana sauti mtulivu.", "mtulivu"), ("tulivu", "ADJ"))
+
+
+class MergedAttackAndGraveHeadwords(unittest.TestCase):
+    """Fix wave 2: shambulizi merges into shambulio and makaburi (graves,
+    cemetery) into kaburi, as mwanaume into mwanamume."""
+
+    def test_merged_lemmas_become_alts(self):
+        ws = MergedHeadwords.run_finalize(self, [
+            {"_key": ("shambulio", "NOUN"), "w": "shambulio", "lemma": "shambulio", "en": "attack"},
+            {"_key": ("kaburi", "NOUN"), "w": "kaburi", "lemma": "kaburi", "en": "grave"}])
+        self.assertIn("shambulizi", ws[0]["alt"])
+        self.assertIn("makaburi", ws[1]["alt"])
+        self.assertEqual(Swahili.drop_keys[("shambulizi", "NOUN")], ("shambulio", "NOUN"))
