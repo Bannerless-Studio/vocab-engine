@@ -2834,6 +2834,98 @@ async function swChecks(){
   fs.rmSync(tmp, { recursive:true, force:true });
 })();
 
+(function(){
+  console.log("\n[30] sentence `spans`: builder spans locate inflected surfaces; absent -> byte-identical");
+  const hits = parts => parts.filter(p => p.hit).map(p => p.text);
+  const at = (t, x, from) => { const i = t.indexOf(x, from || 0); return [i, i + x.length]; };
+  const SW = { key:"sw_s", spaced:true, typing:{ accents:"lenient" } };
+  const tumia = { id:"sw-tumia", w:"kutumia", en:"to use", lv:"A1", pos:"verb" };
+  const simu = { id:"sw-simu", w:"simu", en:"phone", lv:"A1", pos:"noun" };
+  const kuwana = { id:"sw-kuwana", w:"kuwa na", en:"to have", lv:"A1", pos:"verb" };
+  const SWB = {}; [tumia, simu, kuwana].forEach(w => { SWB[w.id] = w; });
+  const t1 = "Yeye anatumia simu.";
+  const s1 = { id:"s1", t:t1, lv:"A1", words:[tumia.id, simu.id], spans:[[...at(t1, "anatumia"), tumia.id], [...at(t1, "simu"), simu.id]] };
+  const s1off = Object.assign({}, s1); delete s1off.spans;
+  const l1 = VC.locateWord(s1, tumia, SW, SWB);
+  check("spans: locateWord finds sw anatumia for kutumia (surface in no w/alt/forms)", !!l1 && l1.text === "anatumia" && l1.start === 5 && l1.end === 13);
+  check("spans: same sentence without spans -> locateWord null (regex path unchanged)", VC.locateWord(s1off, tumia, SW, SWB) === null);
+  const g1 = VC.gapMatch(s1, tumia, SWB, SW);
+  check("spans: gapMatch blanks anatumia", !!g1 && g1.text === "anatumia" && g1.start === 5 && g1.end === 13);
+  check("spans: gapCandidateIndices gains the verb only with spans", util.isDeepStrictEqual(VC.gapCandidateIndices(s1, SWB, SW), [0, 1]) && util.isDeepStrictEqual(VC.gapCandidateIndices(s1off, SWB, SW), [1]));
+  check("spans: highlightParts bolds anatumia", util.isDeepStrictEqual(hits(VC.highlightParts(s1, tumia, SWB, SW)), ["anatumia"]));
+  check("spans: highlightParts parts rejoin to t", VC.highlightParts(s1, tumia, SWB, SW).map(p => p.text).join("") === t1);
+  // ru inflected noun (accusative книгу for книга)
+  const RU = { key:"ru_s", spaced:true, typing:{ accents:"lenient" } };
+  const kniga = { id:"ru-kniga", w:"книга", en:"book", lv:"A1", pos:"noun" };
+  const RUB = { [kniga.id]: kniga };
+  const t2 = "Я читаю книгу.";
+  const s2 = { id:"s2", t:t2, lv:"A1", words:[kniga.id], spans:[[...at(t2, "книгу"), kniga.id]] };
+  const l2 = VC.locateWord(s2, kniga, RU, RUB), g2 = VC.gapMatch(s2, kniga, RUB, RU);
+  check("spans: ru книгу located for книга (locateWord + gapMatch)", !!l2 && l2.text === "книгу" && !!g2 && g2.text === "книгу" && g2.start === 8);
+  check("spans: ru без spans -> null", VC.locateWord(Object.assign({}, s2, { spans: undefined }), kniga, RU, RUB) === null);
+  // two spans for one id -> regex fallback
+  const t3 = "Kutumia: anatumia, anatumia.";
+  const s3 = { id:"s3", t:t3, lv:"A1", words:[tumia.id, tumia.id], spans:[[...at(t3, "anatumia"), tumia.id], [...at(t3, "anatumia", 12), tumia.id]] };
+  const l3 = VC.locateWord(s3, tumia, SW, SWB);
+  check("spans: two spans for the id -> regex path (finds Kutumia at 0, not a span)", !!l3 && l3.text === "Kutumia" && l3.start === 0);
+  check("spans: two spans -> highlightParts bolds both spans", util.isDeepStrictEqual(hits(VC.highlightParts(s3, tumia, SWB, SW)), ["anatumia", "anatumia"]));
+  const t3b = "simu na simu";
+  const s3b = { id:"s3b", t:t3b, lv:"A1", words:[simu.id, simu.id], spans:[[0, 4, simu.id], [8, 12, simu.id]] };
+  check("spans: two spans over a twice-visible word -> null (as without spans)", VC.locateWord(s3b, simu, SW, SWB) === null && VC.gapMatch(s3b, simu, SWB, SW) === null);
+  // invalid spans ignored
+  const bad = (name, sp, extra) => {
+    const s = Object.assign({ id:"sb", t:t1, lv:"A1", words:[tumia.id, simu.id], spans:sp }, extra || {});
+    const off = Object.assign({}, s); delete off.spans;
+    check(`spans: invalid span ignored (${name}) -> same as no spans`,
+      util.isDeepStrictEqual(VC.locateWord(s, tumia, SW, SWB), VC.locateWord(off, tumia, SW, SWB)) &&
+      util.isDeepStrictEqual(VC.highlightParts(s, tumia, SWB, SW), VC.highlightParts(off, tumia, SWB, SW)));
+  };
+  bad("out of bounds", [[5, 99, tumia.id]]);
+  bad("start >= end", [[13, 5, tumia.id]]);
+  bad("id not in words", [[5, 13, "sw-other"]], { words:[simu.id] });
+  bad("whitespace only", [[4, 5, tumia.id]]);
+  bad("not an array", "5,13");
+  {
+    const te = "Yeye 😀anatumia simu.";
+    const s = { id:"se", t:te, lv:"A1", words:[tumia.id], spans:[[6, 15, tumia.id]] };
+    check("spans: a span splitting a surrogate pair is ignored", VC.locateWord(s, tumia, SW, SWB) === null);
+  }
+  // multiword unit is one span
+  const t4 = "Nilikuwa na simu.";
+  const s4 = { id:"s4", t:t4, lv:"A1", words:[kuwana.id, simu.id], spans:[[0, 11, kuwana.id], [12, 16, simu.id]] };
+  const l4 = VC.locateWord(s4, kuwana, SW, SWB), g4 = VC.gapMatch(s4, kuwana, SWB, SW);
+  check("spans: multiword span Nilikuwa na -> one locate/gap span", !!l4 && l4.text === "Nilikuwa na" && !!g4 && g4.text === "Nilikuwa na" && g4.start === 0);
+  check("spans: multiword highlight", util.isDeepStrictEqual(hits(VC.highlightParts(s4, kuwana, SWB, SW)), ["Nilikuwa na"]));
+  // gapMatch articleCut over a span (fr plural les chevaux for le cheval)
+  const FR = { key:"fr_s", spaced:true, typing:{ accents:"lenient" } };
+  const le = { id:"fr-le", w:"le", en:"the", lv:"A1", pos:"art", alt:["la","l'","les"] };
+  const cheval = { id:"fr-cheval", w:"le cheval", en:"horse", lv:"A1", pos:"noun" };
+  const FRB = { [le.id]: le, [cheval.id]: cheval };
+  const t5 = "J'aime les chevaux.";
+  const s5 = { id:"s5", t:t5, lv:"A1", words:[cheval.id], spans:[[...at(t5, "les chevaux"), cheval.id]] };
+  const g5 = VC.gapMatch(s5, cheval, FRB, FR);
+  check("spans: gapMatch cuts the article off a span (les chevaux -> blank chevaux, article les)", !!g5 && g5.text === "chevaux" && g5.start === t5.indexOf("chevaux") && g5.article === "les");
+  // an extension still runs after a span (pack.clitics)
+  const ID = { key:"id_s", spaced:true, clitics:["nya"], typing:{ accents:"lenient" } };
+  const rumah = { id:"id-rumah", w:"rumah", en:"house", lv:"A1", pos:"noun" };
+  const t6 = "Itu rumah-rumahnya.";
+  const s6 = { id:"s6", t:t6, lv:"A1", words:[rumah.id], spans:[[10, 15, rumah.id]] };
+  const l6 = VC.locateWord(s6, rumah, ID, { [rumah.id]: rumah });
+  check("spans: extendRedupClitic still runs after a span (second-half rumah span -> rumah-rumahnya)", !!l6 && l6.text === "rumah-rumahnya" && l6.start === 4);
+  // exampleSentences formOf reads the span text
+  const verb = { id:"sw-tumia", w:"kutumia", en:"to use", lv:"A1", forms:["alitumia"] };
+  const ex = [
+    { id:"e1", t:"Alitumia simu.", lv:"A1", words:[verb.id] },
+    { id:"e2", t:"Alitumia kalamu.", lv:"A1", words:[verb.id] },
+    { id:"e3", t:"Anatumia simu.", lv:"A1", words:[verb.id], spans:[[0, 8, verb.id]] },
+  ];
+  check("spans: exampleSentences counts a span-only form as a new form (e3 before the e2 repeat)",
+    util.isDeepStrictEqual(VC.exampleSentences(verb, ex, SW, 2).map(s => s.id), ["e1", "e3"]));
+  check("spans: exampleSentences without spans keeps old order", util.isDeepStrictEqual(VC.exampleSentences(verb, ex.map(s => { const c = Object.assign({}, s); delete c.spans; return c; }), SW, 2).map(s => s.id), ["e1", "e2"]));
+
+  // Flag-off control against a pinned sha: tests/sentence_spans_checks.js (too slow for this suite).
+})();
+
 appBootChecks.catch(e => { console.error("app boot checks crashed:", e); fails++; })
   .then(() => swChecks().catch(e => { console.error("service worker checks crashed:", e); fails++; })).then(() => {
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

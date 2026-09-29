@@ -18,6 +18,8 @@ Node checks with no dependencies. Each suite `require`s `engine/core.js`, and th
 | validate_pack_audio_checks.js | tools/validate_pack.py rules for `pack.audio` and clip fields. |
 | validate_pack_characters_checks.js | validate_pack/jsonify/build.sh handling of characters.json, ruby, legacy.json. |
 | validate_pack_script_checks.js | validate_pack/jsonify/build.sh handling of script.json. |
+| validate_pack_spans_checks.js | tools/validate_pack.py rules for sentences.json `spans` and the pack-level coverage warning. |
+| sentence_spans_checks.js | Flag-off control for sentence `spans`: core locate/gap/highlight/examples/passageSegments identical to pinned sha 8ad46d6 on zh (full) and every sibling pack (sampled). |
 | fixtures/chars_packs.js | Synthetic zh-like and ja-like packs with deliberate hazards. |
 | fixtures/script_packs.js | Synthetic ko-like, fa-like, ja-like primer packs. |
 | fixtures/rtl_audit.js | RTL markup audit shared by engine, script_app and characters_app checks. |

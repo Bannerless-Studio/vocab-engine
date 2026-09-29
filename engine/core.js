@@ -314,16 +314,18 @@ function findSurface(text, surface, spaced, clitics, blockKeys){
 // (Indonesian anak-anak) is the same token, not a second occurrence, so it merges into one
 // span instead of nulling out. `wordsById`, when given, feeds the fused-clitic collision
 // guard (findSurface, extendRedupClitic); gapMatch is the only caller with it in scope.
+// A builder span (sentence.spans) wins only when it is the word's single span: it carries
+// inflected surfaces no w/alt/forms entry lists. Two spans mean the word is visible twice,
+// which the regex path already turns into null (docs/PACK_SCHEMA.md "sentences.json").
 function locateWord(sentence, entry, pack, wordsById){
   const spaced = !pack || pack.spaced !== false;
   const clitics = (pack && Array.isArray(pack.clitics)) ? pack.clitics : [];
   const blockKeys = (clitics.length && wordsById) ? packSurfaceKeys(wordsById, pack) : null;
-  const forms = [...new Set(textForms(entry).filter(Boolean))];
-  const hits = [];
-  forms.forEach(f => findSurface(sentence.t, f, spaced, clitics, blockKeys).forEach(m => hits.push(Object.assign({ form: f }, m))));
-  if(!hits.length) return null;
-  hits.sort((a,b)=>a.start-b.start || b.end-a.end);
   const t = String(sentence.t || "");
+  const own = entrySpans(sentence, entry, wordsById);
+  if(own.length === 1) return extendRedupClitic(t, own[0], pack, blockKeys);
+  const hits = surfaceHits(sentence.t, entry, spaced, clitics, blockKeys);
+  if(!hits.length) return null;
   const clusterStart = hits[0].start;
   let best = hits[0], end = hits[0].end, merged = false;
   for(const h of hits.slice(1)){
@@ -338,6 +340,16 @@ function locateWord(sentence, entry, pack, wordsById){
   }
   const m = merged ? { start: clusterStart, end, text: t.slice(clusterStart, end) } : best;
   return extendRedupClitic(t, m, pack, blockKeys);
+}
+function surfaceHits(text, entry, spaced, clitics, blockKeys){
+  const hits = [];
+  [...new Set(textForms(entry).filter(Boolean))].forEach(f => findSurface(text, f, spaced, clitics, blockKeys).forEach(m => hits.push(Object.assign({ form: f }, m))));
+  return hits.sort((a,b)=>a.start-b.start || b.end-a.end);
+}
+function entrySpans(sentence, entry, wordsById){
+  if(!sentence || !Array.isArray(sentence.spans)) return [];
+  const t = String(sentence.t || "");
+  return keptSpans(sentence, wordsById).filter(h => h.id === entry.id).map(h => ({ start: h.start, end: h.end, text: t.slice(h.start, h.end) }));
 }
 // The other reduplication side (alat-alatnya: only the half before the hyphen has a clean
 // word boundary, since a trailing clitic letter blocks the regex boundary on the second
@@ -546,7 +558,10 @@ function exampleSentences(entry, sentences, pack, n){
   // own example first, then rank order picking the first sentence with a not-yet-shown
   // form, then rank order again to pad out to n regardless of form (TODO.md line 18).
   const forms = textForms(entry).filter(Boolean);
-  const formOf = s => { for(const f of forms){ if(findSurface(s.t, f, spaced).length) return normKey(f); } return null; };
+  const formOf = s => {
+    const sp = entrySpans(s, entry);
+    if(sp.length) return normKey(sp[0].text);
+    for(const f of forms){ if(findSurface(s.t, f, spaced).length) return normKey(f); } return null; };
   const headKey = normKey(entry.w || "");
   const out = [], used = new Set(), seenForms = new Set();
   const hi = cands.findIndex(s => formOf(s) === headKey);
@@ -572,13 +587,12 @@ function exampleSentences(entry, sentences, pack, n){
   return out.slice(0, n);
 }
 // A hit inside a longer pack word or compound (本 inside 日本) is dropped, as for cloze.
+// Builder spans, when the word has any, replace surface matching: every span is bolded.
 function highlightParts(sentence, entry, wordsById, pack){
   const t = String((sentence && sentence.t) || "");
   const spaced = !pack || pack.spaced !== false;
-  const forms = [...new Set(textForms(entry).filter(Boolean))];
-  const hits = [];
-  forms.forEach(f => findSurface(t, f, spaced).forEach(m => hits.push(m)));
-  hits.sort((a,b)=>a.start-b.start || b.end-a.end);
+  const own = entrySpans(sentence, entry, wordsById);
+  const hits = own.length ? own : surfaceHits(t, entry, spaced);
   const clusters = [];
   for(const h of hits){
     const c = clusters[clusters.length-1];
@@ -1350,20 +1364,27 @@ function passageLength(p, pack){
 // back to surface matching and never cover a span. Unplaced ids are returned so the UI can
 // list them and every linked word stays tappable.
 function splitsPair(t, i){ return i > 0 && i < t.length && t.codePointAt(i - 1) > 0xFFFF; }
+// Shared by passage and plain-sentence spans. Without wordsById (exampleSentences has none)
+// the known-word check is skipped; the id must still be in the sentence's words.
+function keptSpans(s, wordsById){
+  const t = String((s && s.t) || "");
+  const idSet = new Set((s && s.words) || []);
+  const keep = [];
+  ((s && Array.isArray(s.spans)) ? s.spans : [])
+    .filter(x => Array.isArray(x) && Number.isInteger(x[0]) && Number.isInteger(x[1]) && x[0] >= 0 && x[0] < x[1] && x[1] <= t.length && idSet.has(x[2]) && (!wordsById || wordsById[x[2]])
+      && t.slice(x[0], x[1]).trim() && !splitsPair(t, x[0]) && !splitsPair(t, x[1]))
+    .map(x => (typeof x[3] === "string" && x[3].trim() ? { start: x[0], end: x[1], id: x[2], gloss: x[3] } : { start: x[0], end: x[1], id: x[2] }))
+    .sort((a,b) => a.start - b.start)
+    .forEach(h => { if(!keep.some(k => h.start < k.end && k.start < h.end)) keep.push(h); });
+  return keep;
+}
 function passageSegments(s, wordsById, pack){
   const t = String((s && s.t) || "");
   const spaced = !pack || pack.spaced !== false;
   const by = wordsById || {};
   const arts = packArticles(by);
   const ids = [...new Set((s && s.words) || [])];
-  const idSet = new Set(ids);
-  const keep = [], spanned = new Set();
-  ((s && Array.isArray(s.spans)) ? s.spans : [])
-    .filter(x => Array.isArray(x) && Number.isInteger(x[0]) && Number.isInteger(x[1]) && x[0] >= 0 && x[0] < x[1] && x[1] <= t.length && idSet.has(x[2]) && by[x[2]]
-      && t.slice(x[0], x[1]).trim() && !splitsPair(t, x[0]) && !splitsPair(t, x[1]))
-    .map(x => (typeof x[3] === "string" && x[3].trim() ? { start: x[0], end: x[1], id: x[2], gloss: x[3] } : { start: x[0], end: x[1], id: x[2] }))
-    .sort((a,b) => a.start - b.start)
-    .forEach(h => { if(!keep.some(k => h.start < k.end && k.start < h.end)){ keep.push(h); spanned.add(h.id); } });
+  const keep = keptSpans(s, by), spanned = new Set(keep.map(h => h.id));
   const hits = [];
   ids.forEach(id => {
     const e = by[id]; if(!e || spanned.has(id)) return;

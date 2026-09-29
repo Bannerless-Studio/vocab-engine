@@ -477,9 +477,11 @@ def check_ruby(ruby, t, ws, char_word0, where, rep, null_ok=False):
 
 
 def check_sentences(sents, levels, by_id, rep, char_word0=None):
+    """Returns the number of sentences carrying spans (0 when none do)."""
     if not isinstance(sents, list):
         rep.err("sentences.json must be a list")
-        return
+        return 0
+    spanned, unspanned, linked = 0, 0, 0
     if not sents:
         rep.warn("sentences.json is empty: the Sentences step will always be skipped")
     ids = set()
@@ -511,6 +513,19 @@ def check_sentences(sents, levels, by_id, rep, char_word0=None):
             if char_word0 is None:
                 rep.warn(f"{where}.ruby present but pack.characters is absent: ruby is never rendered")
             check_ruby(s["ruby"], s.get("t"), ws, char_word0, where, rep, null_ok=True)
+        if "spans" in s:
+            check_spans(s["spans"], s.get("t"), ws, where, rep, gloss_ok=False)
+            if isinstance(s["spans"], list) and isinstance(ws, list):
+                spanned += 1
+                have = {x[2] for x in s["spans"] if isinstance(x, list) and len(x) >= 3}
+                ids = set(ws)
+                linked += len(ids)
+                unspanned += len(ids - have)
+    # One pack-level line, not one per sentence: this is the builder's coverage metric.
+    if unspanned:
+        rep.warn(f"sentence spans: {unspanned} of {linked} linked words in {spanned} sentences with spans have no span "
+                 f"(located by w/alt/forms instead); {len(sents) - spanned} sentences have no spans")
+    return spanned
 
 
 def check_lessons(pack, lessons, rep):
@@ -553,11 +568,12 @@ def check_lessons(pack, lessons, rep):
 PASSAGE_Q_TYPES = ("mc", "tf")
 
 
-def check_spans(spans, t, words, where, rep):
+def check_spans(spans, t, words, where, rep, gloss_ok=True):
     """sentences[].spans (optional): [[start, end, wordId], ...] in UTF-16 code
     units of t, sorted, non-overlapping, wordId in the sentence's words, and each
-    slice non-blank text that does not split a surrogate pair. A span may carry a
-    4th element, a non-empty display-only gloss string ([start, end, wordId, gloss])."""
+    slice non-blank text that does not split a surrogate pair. A passage span may carry a
+    4th element, a non-empty display-only gloss string ([start, end, wordId, gloss]);
+    sentences.json spans may not (gloss_ok=False)."""
     if not isinstance(spans, list):
         rep.err(f"{where}.spans must be a list of [start, end, wordId]")
         return
@@ -570,6 +586,9 @@ def check_spans(spans, t, words, where, rep):
         if not (isinstance(x, list) and len(x) in (3, 4) and all(isinstance(v, int) and not is_bool(v) for v in x[:2])
                 and isinstance(x[2], str)):
             rep.err(f"{sw} must be [start, end, wordId] or [start, end, wordId, gloss] with integer offsets")
+            continue
+        if len(x) == 4 and not gloss_ok:
+            rep.err(f"{sw} must be [start, end, wordId]: sentences.json spans take no gloss")
             continue
         if len(x) == 4 and not (isinstance(x[3], str) and x[3].strip()):
             rep.err(f"{sw} gloss (4th element) must be a non-empty string")
@@ -1048,7 +1067,7 @@ def validate(packdir):
     if has_chars_file and not has_pack_chars:
         rep.err("characters.json is present but pack.characters is not set")
     char_ids, char_word0 = check_characters_data(chars, char_levels, by_id, rep)
-    check_sentences(sents, levels, by_id, rep, char_word0=char_word0 if has_pack_chars else None)
+    sent_spans = check_sentences(sents, levels, by_id, rep, char_word0=char_word0 if has_pack_chars else None)
     check_lessons(pack, lessons, rep)
     check_pron_aids_data(pack, words, lessons, rep)
     check_passages(passages, levels, by_id, rep, char_word0=char_word0 if has_pack_chars else None)
@@ -1069,6 +1088,7 @@ def validate(packdir):
     counts = {"words": len(words), "sentences": len(sents) if isinstance(sents, list) else 0,
               "lessons": len(lessons) if isinstance(lessons, list) else 0,
               "passages": len(passages) if isinstance(passages, list) else 0,
+              "sentence_spans": sent_spans,
               "characters": len(chars) if isinstance(chars, list) else 0,
               "script": len(script["units"]) if isinstance(script, dict) and isinstance(script.get("units"), list) else 0}
     return rep, counts
@@ -1078,6 +1098,12 @@ def passages_note(counts):
     # Only packs with passages mention them, so existing packs' output is unchanged.
     n = counts.get("passages", 0)
     return f", {n} passages" if n else ""
+
+
+def sentence_spans_note(counts):
+    # Only packs whose sentences carry spans mention them, so existing packs' output is unchanged.
+    n = counts.get("sentence_spans", 0)
+    return f", {n} sentences with spans" if n else ""
 
 
 def characters_note(counts):
@@ -1111,7 +1137,7 @@ def main(argv):
         print(f"ERROR ... and {len(rep.errors) - 50} more")
     status = "FAIL" if rep.errors else "OK"
     print(f"{status} {packdir}: {counts.get('words', 0)} words, {counts.get('sentences', 0)} sentences, "
-          f"{counts.get('lessons', 0)} lessons{passages_note(counts)}{characters_note(counts)}{script_note(counts)}; "
+          f"{counts.get('lessons', 0)} lessons{sentence_spans_note(counts)}{passages_note(counts)}{characters_note(counts)}{script_note(counts)}; "
           f"{len(rep.errors)} errors, {len(rep.warnings)} warnings")
     return 1 if rep.errors else 0
 
