@@ -96,9 +96,10 @@ EXIST_FORMS = {"kuna", "pana", "hakuna", "hapakuna"}
 # a kuwa form with a locative subject (ku-/pa-, negative ha-) before na is
 # existential "there was / will be / must be" (kulikuwa na, hakukuwa na,
 # patakuwa na, kulikokuwa na, kuwe na): kuna's other tenses
-# (Swahili.multiword_units). mu- is left out: m- is also the 2nd plural
+# (Swahili.multiword_units); ka/ki/ja/na and singe cover kukawa na, kukiwa na,
+# hakujakuwa na, kunakuwa na, kusingekuwa na. mu- is left out: m- is also the 2nd plural
 # (mlikuwa na "you had"); kutokuwa is the negative infinitive
-LOC_KUWA_RE = re.compile(r"^(?:ha)?(?:ku|pa)(?:li|ta|me|nge|ngali|si)?(?:ko|po)?(?:kuwa|we)$")
+LOC_KUWA_RE = re.compile(r"^(?:ha)?(?:ku|pa)(?:(?:li|ta|me|nge|ngali|singe|si|ja|na)?(?:ko|po)?(?:kuwa|we)|(?:ka|ki)wa)$")
 # located copula: SM + ko/po/mo "is (there)" -> kuwa
 LOC_COPULA = set()
 for _sm in ("ni", "u", "yu", "tu", "m", "wa", "i", "li", "ya", "ki", "vi", "zi", "ku", "pa", "mu"):

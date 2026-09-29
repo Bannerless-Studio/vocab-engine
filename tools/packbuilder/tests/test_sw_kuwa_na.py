@@ -53,7 +53,8 @@ class KuwaNa(unittest.TestCase):
 
     def test_locative_subject_is_kuna(self):
         for text, surf in (("Kulikuwa na watoto.", "Kulikuwa na"), ("Hakukuwa na kitabu.", "Hakukuwa na"),
-                           ("Kuwe na kitabu.", "Kuwe na")):
+                           ("Kuwe na kitabu.", "Kuwe na"), ("Kukawa na kitabu.", "Kukawa na"),
+                           ("Hakujakuwa na kitabu.", "Hakujakuwa na"), ("Kusingekuwa na mtoto.", "Kusingekuwa na")):
             links, spans = self.link(text)
             self.assertEqual(spans[0], (surf, "kuna"), text)
             self.assertNotIn("kuwa_na", links)
