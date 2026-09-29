@@ -15,7 +15,7 @@ from .sentences import build_sentences
 from .sources import ensure_downloaded, stage_corpus, audio_recorders
 from .tag import stage_tag, truecase_stats, iter_tagged, tag_rows
 from .util import STATS, log, stat, dump_json, write_json
-from .words import build_words, apply_gloss_display, split_alt_forms, sort_by_rank
+from .words import build_words, apply_gloss_display, split_alt_forms, sort_by_rank, check_gloss_overrides
 
 STAGES = ["all", "corpus", "tag", "lex", "freq", "words", "sentences", "final"]
 WORD_FIELDS = ("id", "w", "lemma", "pos", "en", "lv", "rank", "pron", "alt", "forms", "bare")
@@ -197,6 +197,10 @@ def finish_words(env, ctx, words, records, top3000):
     # build_words sorted by rank before the hooks ran; re-sorting after them
     # keeps the Learn-set order whatever a spec hook does to the list
     sort_by_rank(sp.level_ids, words)
+    bad = check_gloss_overrides(sp.gloss_overrides or {}, ctx.get("gloss_overrides_applied", set()), records, words)
+    if bad:
+        raise SystemExit("ERROR gloss_overrides.json: keys the build cannot apply (fix or delete them):\n" +
+                         "\n".join(f"  {k}: {why}" for k, why in bad))
     return words, records, top3000, sentences, users, primary
 
 

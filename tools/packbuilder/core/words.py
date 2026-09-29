@@ -176,15 +176,19 @@ def build_words(env, ctx):
                     continue
                 displaced = prev
         if g == "PHRASE" or g == "FORM":
+            # FORM glosses name their base word ("is (from essere)"): they stay the
+            # spec's, and check_gloss_overrides rejects an override aimed at one
+            en = sp.fixed_gloss[k] if g == "FORM" else overridden_gloss(sp, k, sp.fixed_gloss[k], overridden)
             records[k] = {"lemma": lem, "group": g, "pos": "phrase" if g == "PHRASE" else "verb",
-                          "en": sp.fixed_gloss[k], "w": lem, "alt": None, "forced": True,
+                          "en": en, "w": lem, "alt": None, "forced": True,
                           "entry_pos": None, "sense_idx": None, "gender": None}
             continue
         if k in sp.fixed_gloss and not lexicon.usable_entries(lem, sp.group_kpos.get(g)):
             # closed-class word whose Wiktionary entry is only form-of lines
             # (es: me "accusative of yo: me"): the fixed gloss is its entry
             done_lemma.setdefault(lem, []).append(k)
-            records[k] = {"lemma": lem, "group": g, "en": sp.fixed_gloss[k], "forced": forced,
+            en = overridden_gloss(sp, k, sp.fixed_gloss[k], overridden)
+            records[k] = {"lemma": lem, "group": g, "en": en, "forced": forced,
                           "pos_from_dict": False, "entry_pos": None, "sense_idx": None, "sense_score": 0.0,
                           "gender": None, "nsent": 0, "rows": [], "display": None, "base_en": None,
                           "fem_of": [], "fixed": True}
@@ -324,10 +328,7 @@ def build_words(env, ctx):
                 exclude("feminine of an adjective used as a noun", lem); continue
         if k in sp.fixed_gloss:
             gloss = sp.fixed_gloss[k]
-        okey = f"{lem}|{GROUP_LABEL.get(g, g.lower())}"
-        if okey in sp.gloss_overrides:
-            gloss = sp.gloss_overrides[okey]
-            overridden.append(okey)
+        gloss = overridden_gloss(sp, k, gloss, overridden)
         if second:
             fk = done_lemma[lem][0]
             first = records[fk]
@@ -370,7 +371,7 @@ def build_words(env, ctx):
         records[k] = {"lemma": lem, "group": g, "en": gloss, "forced": forced, "pos_from_dict": k[1] == "?",
                       "entry_pos": ent["p"], "sense_idx": top["idx"], "sense_score": top["score"],
                       "gender": ent.get("g"), "nsent": nsent, "rows": rows, "display": disp, "base_en": base_gloss,
-                      "fem_of": fem_of, "fixed": okey in sp.gloss_overrides or k in sp.fixed_gloss}
+                      "fem_of": fem_of, "fixed": override_key(lem, g) in sp.gloss_overrides or k in sp.fixed_gloss}
     stat("excluded", dict(excluded))
     stat("excluded_examples", {k: v for k, v in ex_examples.items()})
     stat("multi_pos_lemmas_in_pool", multi_pos)
@@ -382,6 +383,7 @@ def build_words(env, ctx):
         stat("sensitive_gloss_senses_skipped", sorted(set(x for x in gloss_dropped if x)))
     stat("gloss_overrides", {"applied": sorted(set(overridden)),
                              "unused": sorted(set(sp.gloss_overrides) - set(overridden))})
+    ctx["gloss_overrides_applied"] = set(overridden)
 
     ranked = [k for k in pool if k in records and not records[k]["forced"]]
     ranked.sort(key=lambda k: order.get(k, 10**9))
@@ -561,6 +563,47 @@ def build_words(env, ctx):
         if len(top3000) >= 3000:
             break
     return words, records, top3000
+
+
+def override_key(lem, g):
+    return f"{lem}|{GROUP_LABEL.get(g, g.lower())}"
+
+
+def overridden_gloss(sp, k, gloss, applied):
+    """The one place a record's gloss meets gloss_overrides.json, so no record
+    kind can skip it; applied collects the keys for check_gloss_overrides."""
+    key = override_key(*k)
+    if key not in sp.gloss_overrides:
+        return gloss
+    applied.append(key)
+    return sp.gloss_overrides[key]
+
+
+def check_gloss_overrides(overrides, applied, records, words):
+    """Every gloss_overrides.json key must reach a gloss: applied by
+    build_words, or by a spec hook (hi/ur fold keys into fixed glosses; ko
+    builds entries from them), seen as a record or shipped word under that key
+    carrying the override text. Returns [(key, reason)] for the rest; a
+    silently skipped override ships the gloss it was written to replace."""
+    have = {}
+    for rec in records.values():
+        have.setdefault(override_key(rec["lemma"], rec["group"]), []).append((rec["group"], rec["en"]))
+    for w in words:
+        k = w.get("_key") or (w.get("w"), "")
+        for lem in {w.get("lemma"), w.get("w"), k[0]} - {None}:
+            have.setdefault(f"{lem}|{w['pos']}", []).append((k[1], w["en"]))
+    bad = []
+    for key, val in sorted(overrides.items()):
+        if key in applied or any(en == val for _, en in have.get(key, [])):
+            continue
+        kinds = sorted({g for g, _ in have.get(key, [])})
+        if not kinds:
+            bad.append((key, "matches no record"))
+        elif "FORM" in kinds:
+            bad.append((key, "targets a FORM record: its gloss is the spec's fixed gloss"))
+        else:
+            bad.append((key, f"record kind {'/'.join(kinds)} was built without applying it"))
+    return bad
 
 
 def apply_word_ceiling(records, forced_ok, chosen, level_of, sp):
