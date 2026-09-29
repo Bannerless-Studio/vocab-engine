@@ -1489,7 +1489,15 @@ function todayStep(){
       vocabTeach(list, nn.lv, () => {
         const items = [];
         list.forEach(w => items.push(hearItem(w), readItem(w)));
-        drill(items, () => { prog.sets[nn.lv] = Math.max(prog.sets[nn.lv]||0, nn.set+1); store.save(); todayStep(); }, missSummary);
+        drill(items, () => {
+          // A records-less prefix or an inserted word can make this teach the level's last
+          // unlearned set even though nn.set (rank position) is short of the level's total set
+          // count; the legacy "sets done" summary reads the counter, so it must land on the
+          // true total rather than one below it.
+          const stillFresh = VC.levelNewSet(WORDS, PACK, prog, nn.lv);
+          prog.sets[nn.lv] = stillFresh ? Math.max(prog.sets[nn.lv]||0, nn.set+1) : VC.nSets(VC.wordsByLevel(WORDS, PACK)[nn.lv] || [], VC.setSizeOf(PACK));
+          store.save(); todayStep();
+        }, missSummary);
       });
       return;
     }

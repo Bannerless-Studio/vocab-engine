@@ -256,7 +256,8 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   // the whole token: TODO.md "Gap blank on reduplicated inflections" (Indonesian).
   const IDP = { levels:[{id:"A1",label:"A1"}], functionWords:[], clitics:["nya","lah","kah","ku","mu"] };
   const IDW = { anak:{id:"anak",w:"anak",en:"child",lv:"A1"}, alat:{id:"alat",w:"alat",en:"tool",lv:"A1"},
-    rumah:{id:"rumah",w:"rumah",en:"house",lv:"A1"} };
+    rumah:{id:"rumah",w:"rumah",en:"house",lv:"A1"}, ada:{id:"ada",w:"ada",en:"there is",lv:"A1"},
+    adalah:{id:"adalah",w:"adalah",en:"is",lv:"A1"}, mobil:{id:"mobil",w:"mobil",en:"car",lv:"A1"} };
   const rs1 = { id:"r1", t:"Anak-anak bermain.", en:"x", lv:"A1", words:["anak"] };
   const rm1 = VC.gapMatch(rs1, IDW.anak, IDW, IDP);
   check("reduplication both sides visible (anak-anak) -> whole token blanked, not null (not \"visible twice\")",
@@ -273,6 +274,18 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const rm4 = VC.gapMatch(rs4, IDW.rumah, IDW, IDP);
   check("plain word, no reduplication or clitic -> blank is just the word (no over-extension)",
     rm4 && rm4.text === "Rumah");
+  // A fused clitic that spells a different real pack word (ada+lah = adalah) must never be
+  // blanked as if it were entry+clitic: that would blank the wrong word.
+  const rs5 = { id:"r5", t:"Ini adalah buku.", en:"x", lv:"A1", words:["ada"] };
+  const rm5 = VC.gapMatch(rs5, IDW.ada, IDW, IDP);
+  check("fused clitic colliding with a real pack word (ada+lah=adalah) -> no match, not the wrong word blanked",
+    rm5 === null);
+  // The right-side repeat needs its own boundary: "mobil-mobilan" is one word (a toy car),
+  // not "mobil" reduplicated with a dangling "an".
+  const rs6 = { id:"r6", t:"Ini mobil-mobilan.", en:"x", lv:"A1", words:["mobil"] };
+  const rm6 = VC.gapMatch(rs6, IDW.mobil, IDW, IDP);
+  check("right-side repeat boundary (mobil-mobilan) -> blank stops at the first mobil, not mid-word",
+    rm6 && rm6.text === "mobil" && VC.blankSentence(rs6, rm6).after === "-mobilan.");
 })();
 
 (function(){
@@ -2184,6 +2197,29 @@ return {
       /Set 1 \/ \d+<\/button>/.test(wb));
   }catch(e){ check(`app reordered-level scenario does not throw (got: ${e.message})`, false); }
 
+  // A leftover teach can be the level's last unlearned set (nothing fresh remains after it)
+  // while its rank-position label (nn.set) still sits below the level's last bucket, when the
+  // unlearned words are scattered rather than a single trailing run: the legacy "sets done"
+  // summary reads the counter, so it must land on the true total, not one short (TODO.md).
+  try{
+    const size = VC.setSizeOf(PACK), l1 = WORDS.filter(w => w.lv === "1"), nSetsL1 = VC.nSets(l1, size);
+    const scatter = [...new Set([5, Math.floor(l1.length/3), Math.floor(2*l1.length/3), l1.length-1])].filter(v => v >= 0 && v < l1.length);
+    const pr = VC.normalizeProg({}, PACK);
+    l1.forEach((w,i) => { if(!scatter.includes(i)) pr.w[w.id] = { r:1, w:0, s:1 }; });
+    check("precondition: leftover teach's rank-position label is short of the level's true set count",
+      VC.levelNewSet(WORDS, PACK, pr, "1").set + 1 < nSetsL1);
+    const { api } = await bootApp([{ lang:"zh-CN", name:"x" }]);
+    api.setProgT(pr);
+    api.enterTodayStep(1);
+    api.clickId("dr");
+    // finishDrill() (test-only) calls onDone directly, bypassing per-item scoring; mark the
+    // taught words learned first, as real correct answers would during the drill.
+    (api.getTaught() || []).forEach(w => { api.getProg().w[w.id] = { r:1, w:0, s:1 }; });
+    api.finishDrill();
+    check("app Learn teach exhausting a level's scattered leftover -> sets[lv] lands on the true total, not one short",
+      api.getProg().sets["1"] === nSetsL1);
+  }catch(e){ check(`app leftover-teach-exhausts-level scenario does not throw (got: ${e.message})`, false); }
+
   // Re-drilling a taught slice away from the counter must not add d: an all-d level would fall
   // back to the counter prefix.
   try{
@@ -2738,6 +2774,14 @@ async function swChecks(){
   const g4 = { id:"g4", t:"肉を食べない。", words:["taberu"] };        // form: 食べない
   check("forms: Words-tab picker covers distinct surfaces (headword, then each new form), skips a repeat",
     util.isDeepStrictEqual(VC.exampleSentences(taberu, [g1, g2, g3, g4], JP, 3).map(s => s.id), ["g1","g3","g4"]));
+  // Padding must still prefer a sentence where the word is visible/locatable (even a repeat
+  // of a form already shown) over one where it's only linked by id and not locatable at all
+  // (regressed real packs: it l'amico, ja 早い/行う/降る, id orang/tahu/mana).
+  const h1 = { id:"h1", t:"食べるのが好き。", words:["taberu"] };       // headword
+  const h2 = { id:"h2", t:"何もない。", words:["taberu"] };            // id-linked, not locatable
+  const h3 = { id:"h3", t:"また食べる。", words:["taberu"] };          // headword again (locatable repeat)
+  check("forms: padding prefers a locatable repeat over an unlocatable id-only sentence",
+    util.isDeepStrictEqual(VC.exampleSentences(taberu, [h1, h2, h3], JP, 2).map(s => s.id), ["h1","h3"]));
   const seg = VC.passageSegments({ t:s1.t, words:["taberu"] }, JBF, JP);
   check("forms: passage fallback matching taps 食べた as 食べる",
     seg.parts.some(p => p.text === "食べた" && p.id === "taberu") && seg.unplaced.length === 0);

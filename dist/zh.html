@@ -635,9 +635,12 @@ const APOS = String.fromCodePoint(39, 0x2019, 0x02bc);
 const isApos = c => APOS.indexOf(c) >= 0;
 // An apostrophe-final surface ("l'") may run into the next word. ZWNJ/ZWJ are word-internal
 // (Persian می‌روم is one word). spaced=false is for scripts written without spaces.
-// `clitics` (pack.clitics, locateWord only): an optional fused suffix (Indonesian -nya) is
-// allowed to sit between the surface and the right boundary, so "rumahnya" is one match.
-function findSurface(text, surface, spaced, clitics){
+// The clitic group sits inside this regex rather than as a post-hoc extension because a
+// clitic-only case with no reduplication ("rumahnya") never reaches a post-hoc step: the
+// base regex's own right boundary fails first, before any hit exists to extend. `blockKeys`
+// exists because a fused hit can coincide with a different real pack word's own surface
+// (Indonesian ada+lah = adalah, apa+kah = apakah, bu+ku = buku) — that word, not entry+clitic.
+function findSurface(text, surface, spaced, clitics, blockKeys){
   const out = []; const t = String(text), s = String(surface||"");
   if(!s) return out;
   if(spaced === false){
@@ -651,19 +654,24 @@ function findSurface(text, surface, spaced, clitics){
   const cliticGroup = (clitics && clitics.length) ? `(?:${clitics.map(escapeRe).join("|")})?` : "";
   const la = isApos(cps[cps.length-1]) ? "" : "(?![\\p{L}\\p{M}\\p{N}\\u200c\\u200d])";
   const re = new RegExp(lb + body + cliticGroup + la, "giu");
-  let m; while((m = re.exec(t))){ out.push({ start:m.index, end:m.index+m[0].length, text:m[0] }); }
+  let m; while((m = re.exec(t))){
+    if([...m[0]].length > cps.length && blockKeys && blockKeys.has(normKey(m[0]))) continue;
+    out.push({ start:m.index, end:m.index+m[0].length, text:m[0] });
+  }
   return out;
 }
 // null when visible more than once: blanking one occurrence would leave the answer, or an
 // alt form of it, in plain sight elsewhere. A hyphen-joined repeat of the same form
 // (Indonesian anak-anak) is the same token, not a second occurrence, so it merges into one
-// span instead of nulling out.
-function locateWord(sentence, entry, pack){
+// span instead of nulling out. `wordsById`, when given, feeds the fused-clitic collision
+// guard (findSurface, extendRedupClitic); gapMatch is the only caller with it in scope.
+function locateWord(sentence, entry, pack, wordsById){
   const spaced = !pack || pack.spaced !== false;
   const clitics = (pack && Array.isArray(pack.clitics)) ? pack.clitics : [];
+  const blockKeys = (clitics.length && wordsById) ? packSurfaceKeys(wordsById, pack) : null;
   const forms = [...new Set(textForms(entry).filter(Boolean))];
   const hits = [];
-  forms.forEach(f => findSurface(sentence.t, f, spaced, clitics).forEach(m => hits.push(Object.assign({ form: f }, m))));
+  forms.forEach(f => findSurface(sentence.t, f, spaced, clitics, blockKeys).forEach(m => hits.push(Object.assign({ form: f }, m))));
   if(!hits.length) return null;
   hits.sort((a,b)=>a.start-b.start || b.end-a.end);
   const t = String(sentence.t || "");
@@ -680,19 +688,25 @@ function locateWord(sentence, entry, pack){
     if(h.end - h.start > best.end - best.start) best = h;
   }
   const m = merged ? { start: clusterStart, end, text: t.slice(clusterStart, end) } : best;
-  return extendRedupClitic(t, m, pack);
+  return extendRedupClitic(t, m, pack, blockKeys);
 }
 // The other reduplication side (alat-alatnya: only the half before the hyphen has a clean
 // word boundary, since a trailing clitic letter blocks the regex boundary on the second
 // half) and a trailing clitic (pack.clitics, docs/PACK_SCHEMA.md) both belong in the blank.
-function extendRedupClitic(t, m, pack){
+// The right-side repeat needs its own right-boundary check ("mobil-mobilan" is one word,
+// not "mobil" reduplicated plus a dangling "an": without the check the blank would stop
+// mid-word). blockKeys guards a fused clitic the same way findSurface does.
+function extendRedupClitic(t, m, pack, blockKeys){
   let start = m.start, end = m.end; const text = m.text;
+  const notWordChar = c => !c || !/[\p{L}\p{M}\p{N}‌‍]/u.test(c);
   if(start - 1 - text.length >= 0 && t.slice(start - 1 - text.length, start) === text + "-") start -= 1 + text.length;
-  if(t.slice(end, end + 1 + text.length) === "-" + text) end += 1 + text.length;
+  if(t.slice(end, end + 1 + text.length) === "-" + text && notWordChar(t[end + 1 + text.length])) end += 1 + text.length;
   ((pack && Array.isArray(pack.clitics)) ? pack.clitics : []).forEach(c => {
     if(!c || t.slice(end, end + c.length) !== c) return;
     const after = t[end + c.length] || "";
-    if(!/[\p{L}\p{M}\p{N}‌‍]/u.test(after)) end += c.length;
+    if(!notWordChar(after)) return;
+    if(blockKeys && blockKeys.has(normKey(t.slice(start, end + c.length)))) return;
+    end += c.length;
   });
   return (start === m.start && end === m.end) ? m : { start, end, text: t.slice(start, end) };
 }
@@ -704,10 +718,14 @@ function packSurfaces(wordsById, pack){
     const set = new Set();
     Object.values(wordsById).forEach(w => textForms(w).forEach(x => { if(x) set.add(String(x)); }));
     ((pack && pack.compounds) || []).forEach(x => { if(x) set.add(String(x)); });
-    c = { pack, list: [...set] };
+    c = { pack, list: [...set], keys: new Set([...set].map(normKey)) };
     SURFACE_CACHE.set(wordsById, c);
   }
   return c.list;
+}
+function packSurfaceKeys(wordsById, pack){
+  packSurfaces(wordsById, pack); // fills/refreshes the cache entry, including .keys
+  return SURFACE_CACHE.get(wordsById).keys;
 }
 // 为 inside 为什么, per inside "per favore": blanking it would cut a longer unit.
 function spannedByLonger(sentence, match, wordsById, pack){
@@ -727,7 +745,7 @@ function spannedByLonger(sentence, match, wordsById, pack){
 // drops (a reflexive clitic, an elided article the pack does not list) is not a legal blank.
 function gapMatch(sentence, entry, wordsById, pack){
   const arts = packArticles(wordsById), bare = bareForm(entry, arts);
-  const m = locateWord(sentence, textForms(entry).includes(bare) ? entry : Object.assign({}, entry, { alt: [...(entry.alt||[]), bare] }), pack);
+  const m = locateWord(sentence, textForms(entry).includes(bare) ? entry : Object.assign({}, entry, { alt: [...(entry.alt||[]), bare] }), pack, wordsById);
   if(!m || spannedByLonger(sentence, m, wordsById, pack)) return null;
   const cut = articleCut(m.text, arts, entry), text = m.text.slice(cut);
   if(trailingCut(text, bare)) return null;
@@ -889,6 +907,14 @@ function exampleSentences(entry, sentences, pack, n){
     const k = formOf(cands[i]);
     if(k === null || seenForms.has(k)) continue;
     out.push(cands[i]); used.add(i); seenForms.add(k);
+  }
+  // Padding keeps the old rule: a sentence where the word is actually visible/locatable
+  // (even if its form repeats one already shown) still outranks one where it isn't (a
+  // compound-absorbed or otherwise unlocatable id-only listing) — plain rank order over
+  // both together let an unlocatable sentence jump ahead of a visible repeat.
+  for(let i = 0; i < cands.length && out.length < n; i++){
+    if(used.has(i) || formOf(cands[i]) === null) continue;
+    out.push(cands[i]); used.add(i);
   }
   for(let i = 0; i < cands.length && out.length < n; i++){
     if(used.has(i)) continue;
@@ -1069,7 +1095,8 @@ function strata(pool, bucketSpec, setSize){
   });
   return out;
 }
-// pack.placementItems (default [2,3], today's alternating count) cycles per bucket.
+// Default matches the fixed 2/3 alternation shipped before this field existed, so a pack
+// without it renders byte-identically (flag-off proof).
 const DEFAULT_PLACEMENT_ITEMS = [2, 3];
 function placementItemCount(bucketIndex, pack){
   const items = (pack && Array.isArray(pack.placementItems) && pack.placementItems.length) ? pack.placementItems : DEFAULT_PLACEMENT_ITEMS;
@@ -4136,7 +4163,15 @@ function todayStep(){
       vocabTeach(list, nn.lv, () => {
         const items = [];
         list.forEach(w => items.push(hearItem(w), readItem(w)));
-        drill(items, () => { prog.sets[nn.lv] = Math.max(prog.sets[nn.lv]||0, nn.set+1); store.save(); todayStep(); }, missSummary);
+        drill(items, () => {
+          // A records-less prefix or an inserted word can make this teach the level's last
+          // unlearned set even though nn.set (rank position) is short of the level's total set
+          // count; the legacy "sets done" summary reads the counter, so it must land on the
+          // true total rather than one below it.
+          const stillFresh = VC.levelNewSet(WORDS, PACK, prog, nn.lv);
+          prog.sets[nn.lv] = stillFresh ? Math.max(prog.sets[nn.lv]||0, nn.set+1) : VC.nSets(VC.wordsByLevel(WORDS, PACK)[nn.lv] || [], VC.setSizeOf(PACK));
+          store.save(); todayStep();
+        }, missSummary);
       });
       return;
     }
@@ -5091,4 +5126,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2396329661-1515873-->
+<!--ve-build:62160064-1518294-->
