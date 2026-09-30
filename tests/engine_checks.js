@@ -931,8 +931,8 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   // --- word popover (.gloss) is a floating card clear of the top edge (owner report 2026-09-30)
   {
     const g = (fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8").match(/\n  \.gloss\{([^}]*)\}/) || [])[1] || "";
-    check("popover .gloss: sticky below the top edge + safe-area inset, visible --mute border, shadow",
-      /position:sticky/.test(g) && /top:calc\(env\(safe-area-inset-top, 0px\) \+ \d+px\)/.test(g) && /border:1(\.5)?px solid var\(--mute\)/.test(g) && /box-shadow:/.test(g));
+    check("popover .gloss: sticky below the top edge + safe-area inset, 2px --mute border (1.5px computes to 1px at DPR 1), shadow",
+      /position:sticky/.test(g) && /top:calc\(env\(safe-area-inset-top, 0px\) \+ \d+px\)/.test(g) && /border:2px solid var\(--mute\)/.test(g) && /box-shadow:/.test(g));
   }
   // --- app.html render-site guard: every target-text element carries ${TA} (lang/dir/font)
   const app = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
