@@ -43,23 +43,24 @@ Why it is built this way (one line each):
 
 ## Commands (pinned)
 
-Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-09-27, main e15c378.
+Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-09-30, branch zh-typed-drills (main 9744ad1 merged).
 
 ```sh
-$NODE tests/engine_checks.js                     # 544 passed; includes the dist/zh.html + sw.js stale guard
+$NODE tests/engine_checks.js                     # 703 passed; includes the dist/zh.html + sw.js stale guard
 $NODE tests/pron_aids_checks.js                  # 156
-$NODE tests/migration_checks.js                  # 279 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
-$NODE tests/characters_checks.js                 # 132
-$NODE tests/characters_app_checks.js             # 177
+$NODE tests/migration_checks.js                  # 292 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
+$NODE tests/characters_checks.js                 # 134
+$NODE tests/characters_app_checks.js             # 179
 $NODE tests/script_checks.js                     # 128
-$NODE tests/script_app_checks.js                 # 211
+$NODE tests/script_app_checks.js                 # 212
 $NODE tests/audio_checks.js                      # 88 (app section needs ../persian)
-$NODE tests/passage_audio_checks.js              # 26
-$NODE tests/listen_mode_checks.js                # 59
+$NODE tests/passage_audio_checks.js              # 43
+$NODE tests/listen_mode_checks.js                # 78
 $NODE tests/validate_pack_audio_checks.js        # 30
 $NODE tests/validate_pack_characters_checks.js   # 71
 $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
+$NODE tests/typed_from_checks.js                 # 62 (pack.typedFrom / glossFocus; control vs ef44c6e)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)

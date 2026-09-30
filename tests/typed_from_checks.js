@@ -292,7 +292,7 @@ function walk(api, stopAt){
     check(`glossParts table (${P.length} cases${pb.length ? `; wrong: ${JSON.stringify(pb.map(x => [x[0], VC.glossParts(x[0])]))}` : ""})`, pb.length === 0);
     check("every zh gloss accepts itself typed in full (reading notes and fragments included)", WORDS.every(w => VC.checkGlossTyped(VC.gloss(w), VC.gloss(w))));
     const noSelf = WORDS.filter(w => { const g = VC.gloss(w); return !VC.checkGlossTyped(VC.glossParts(g).primary, g); }).map(w => w.w);
-    check(`every zh gloss accepts its own primary, except those holding a dropped alternative (的 "~'s", 相信 "to…", 只好 "to be…"): ${noSelf.join(" ")}`, noSelf.join(" ") === "的 相信 只好");
+    check(`every zh gloss accepts its own primary, except a primary that differs from the gloss and holds a dropped alternative (的 "~'s", 相信 "to…"): ${noSelf.join(" ")}`, noSelf.join(" ") === "的 相信");
     // Fix round (docs/PACK_SCHEMA.md "Typed meaning" rules 1-5).
     const G = Object.fromEntries(WORDS.map(w => [w.w, VC.gloss(w)]));
     const NOTE_WORDS = ["知道", "母亲", "父亲", "谁", "那", "血"];
