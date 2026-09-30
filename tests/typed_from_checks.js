@@ -310,6 +310,17 @@ function walk(api, stopAt){
     ];
     const rb = R.filter(([v, g, want]) => VC.checkGlossTyped(v, g) !== want);
     check(`rules 1-4 matcher table (${R.length} cases${rb.length ? `; wrong: ${JSON.stringify(rb.slice(0, 4))}` : ""})`, rb.length === 0);
+    // Browser-run edge case: a gloss that is only a (...) group (吗, 了, 分之, 呀) keeps it as its
+    // primary and display, and the text inside the brackets is a right answer; an alternative
+    // that is only a group (很, 来, 吧, 之) is accepted without its brackets too.
+    const groupOnly = a => { const p = VC.parenPieces(a.trim()); return p.length > 0 && p.every(x => x.g || !x.t.trim()); };
+    const gAll = WORDS.filter(w => VC.splitTopLevel(VC.gloss(w), [";", ","]).every(groupOnly));
+    const gSome = WORDS.filter(w => { const a = VC.splitTopLevel(VC.gloss(w), [";", ","]); return a.some(groupOnly) && !a.every(groupOnly); });
+    const gBad = [...gAll, ...gSome].filter(w => { const g = VC.gloss(w), p = VC.glossParts(g);
+      const inner = VC.splitTopLevel(g, [";", ","]).filter(groupOnly).map(a => a.trim().slice(1, -1));
+      return !p.primary.trim() || !p.pieces.map(x => x.t).join("").trim() || (gAll.includes(w) && (p.primary !== g || p.pieces.length !== 1 || p.pieces[0].dim)) || !inner.every(t => VC.checkGlossTyped(t, g)); }).map(w => w.w);
+    check(`group-only glosses (${gAll.map(w => w.w).join(" ")}) keep the gloss as primary, undimmed; group-only alternatives (${gSome.map(w => w.w).join(" ")}) never empty the primary; bracket text accepted (bad: ${gBad.join(" ") || "none"})`,
+      gAll.length >= 4 && gAll.some(w => w.w === "吗") && gBad.length === 0);
     const disp = g => VC.glossParts(g).pieces.map(y => y.dim ? `<${y.t}>` : y.t).join("");
     const D5 = [
       ["might; possible (happen)", "might; possible <(happen)>"],
