@@ -651,7 +651,7 @@ class Japanese(LanguageSpec):
         TATOEBA_ENG[0]: TATOEBA_ENG[1],
         TATOEBA_AUDIO[0]: TATOEBA_AUDIO[1],
     }
-    versions = {"corpus": "c1", "tag": "t22", "lex": "l1"}
+    versions = {"corpus": "c1", "tag": "t23", "lex": "l1"}   # t23: tag meta records overrides _homophone used
 
     typing = "pron"              # typed reading (kana, silent) alternating with typed word (spoken); PACK_SCHEMA typing "pron"
     show_pron = True             # kana reading toggle
@@ -1797,6 +1797,9 @@ class Japanese(LanguageSpec):
             return lemma
         pos = "verb" if upos == "VERB" else "noun"
         score = {c: len(self._cues(c, pos) & en_words) for c in cands}
+        for c in cands:
+            if score[c] and f"{c}|{pos}" in self.gloss_overrides:
+                self.use_override(f"{c}|{pos}")     # the hand gloss is the candidate's cues (_cues)
         best = max(score.values())
         top_c = [c for c in cands if score[c] == best]
         share = seen.get(lemma, 0) / tot if tot else 0.0
@@ -2274,9 +2277,11 @@ class Japanese(LanguageSpec):
             g = up.most_common(1)[0][0] if up else "NOUN"
             return self._noun_pref.get(lem, {"AUX": "VERB", "CCONJ": "CONJ", "SCONJ": "CONJ"}.get(g, g))
 
-        def primary(lem, g):
-            label = {"NOUN": "noun", "VERB": "verb", "ADJ": "adj", "ADV": "adv"}.get(g, g.lower())
-            ov = self.gloss_overrides.get(f"{lem}|{label}")
+        def ov_key(lem, g):
+            return f"{lem}|" + {"NOUN": "noun", "VERB": "verb", "ADJ": "adj", "ADV": "adv"}.get(g, g.lower())
+
+        def primary(lem, g, hand=True):
+            ov = self.gloss_overrides.get(ov_key(lem, g)) if hand else None
             txt = ov.split(";")[0] if ov else ""
             if not txt:
                 kp_ = self.group_kpos.get(g, [])
@@ -2290,7 +2295,12 @@ class Japanese(LanguageSpec):
         def same_sense(a, b):
             # either word's POS: 何時も (noun) and いつも (adv) are both "always"
             gs = {top_g(a), top_g(b)}
-            return any(same_sense_words(primary(a, g), primary(b, g)) for g in gs)
+            same = any(same_sense_words(primary(a, g), primary(b, g)) for g in gs)
+            keys = {ov_key(x, g) for x in (a, b) for g in gs} & set(self.gloss_overrides)
+            if keys and same != any(same_sense_words(primary(a, g, False), primary(b, g, False)) for g in gs):
+                for k in keys:
+                    self.use_override(k)
+            return same
         # a word split off by its first sound (よい from いい) is the same word
         # when its primary senses agree (めくる "turn over" is not まくる "roll up")
         for a, b in sorted(self._sound_splits.items()):
@@ -2507,9 +2517,12 @@ class Japanese(LanguageSpec):
                 continue
             d = info.get(lem, {})
             norms, top = d.get("norm") or {}, self._norm_top.get(lem)
-            en = self.gloss_overrides.get(f"{lem}|{w['pos']}") or self.gloss_overrides.get(lem) or w["en"]
-            bad = {sp_ for sp_ in (d.get("spell") or {})
-                   if KANJI_RE.search(sp_) and sp_ != top and sp_ in norms and self._foreign_sense(w, sp_, en)}
+            ov_k = next((k for k in (f"{lem}|{w['pos']}", lem) if self.gloss_overrides.get(k)), None)
+            en = self.gloss_overrides[ov_k] if ov_k else w["en"]
+            cand = [sp_ for sp_ in (d.get("spell") or {}) if KANJI_RE.search(sp_) and sp_ != top and sp_ in norms]
+            bad = {sp_ for sp_ in cand if self._foreign_sense(w, sp_, en)}
+            if ov_k and bad != {sp_ for sp_ in cand if self._foreign_sense(w, sp_, w["en"])}:
+                self.use_override(ov_k)
             if bad:
                 self._foreign_spell[lem] = bad
         self.foreign_spellings = sorted(f"{k}: {' '.join(sorted(v))}" for k, v in self._foreign_spell.items())

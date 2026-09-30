@@ -244,8 +244,26 @@ class LanguageSpec:
         self.kaikki_lang_code = self.kaikki_lang_code or self.code
         self.all_article_forms = set().union(*self.article_forms.values()) if self.article_forms else set()
         self.gloss_overrides = {}
+        # gloss_overrides.json keys a spec hook consumed (use_override): an
+        # override can shape the build (an entry, a merge, a link) without its
+        # text landing in a shipped gloss; check_gloss_overrides counts these
+        self.overrides_used = set()
         self.a1_core = {}
         self.forced = list(self.forced_closed)
+
+    def use_override(self, key):
+        """Record that a hook's decision depended on gloss_overrides.json[key].
+        Register only a key whose presence or text changed the outcome (an
+        entry built, words merged, a link or POS decided), never every key a
+        hook iterates: an unregistered key is what the dead-key check sees."""
+        self.overrides_used.add(key)
+
+    def override(self, key):
+        """gloss_overrides.json[key] or None; a hit registers the key (use_override)."""
+        v = (self.gloss_overrides or {}).get(key)
+        if v is not None:
+            self.use_override(key)
+        return v
 
     def load(self):
         """Read the language repo's data files. Needs self.repo."""

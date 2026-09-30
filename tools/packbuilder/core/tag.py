@@ -148,7 +148,13 @@ def stage_tag(env, corpus):
     stat("tagger", desc)
     meta_path = out.with_suffix(".meta.json")
     if out.exists() and meta_path.exists():
-        stat("tag_meta", json.loads(meta_path.read_text()))
+        meta = json.loads(meta_path.read_text())
+        # overrides a fix_sentence hook consumed while tagging (ja homophones):
+        # a cached corpus still carries their effect, so they stay registered
+        used = meta.pop("overrides_used", ())
+        if used:
+            sp.overrides_used |= set(used)
+        stat("tag_meta", meta)
         return out
     t0 = time.time()
     rows = corpus["rows"]
@@ -161,6 +167,7 @@ def stage_tag(env, corpus):
     # corpus_tagging: the only time a corpus-keyed aggregate over the tagger
     # input (ja word groups) may be written (core.util.corpus_write_ok)
     prior = getattr(sp, "corpus_tagging", False)
+    used_before = set(getattr(sp, "overrides_used", ()))
     sp.corpus_tagging = True
     try:
         docs, fields = tag_docs(sp, texts)
@@ -174,7 +181,8 @@ def stage_tag(env, corpus):
     tmp.replace(out)
     meta = {"sentences": len(rows), "tokens": n_tok, "seconds": round(time.time() - t0, 1),
             "truecased_initials": n_lowered}
-    meta_path.write_text(json.dumps(meta, sort_keys=True))
+    used = sorted(set(getattr(sp, "overrides_used", ())) - used_before)
+    meta_path.write_text(json.dumps({**meta, "overrides_used": used} if used else meta, sort_keys=True))
     stat("tag_meta", meta)
     log(f"tag: {len(rows)} sentences, {n_tok} tokens in {meta['seconds']}s")
     return out

@@ -1059,8 +1059,10 @@ class Indonesian(LanguageSpec):
             if usable:
                 if usable[0]["s"][0][0] != ov[key]:
                     usable[0]["s"].insert(0, [ov[key], "", [], ""])
+                    self.use_override(key)
             elif not any(f[1] == kp for f in F.get(lem, [])):
                 E.setdefault(lem, []).append({"p": kp, "s": [[ov[key], "", [], ""]], "ht": set()})
+                self.use_override(key)
                 stats["entry from hand gloss (no usable Wiktionary entry)"] += 1
                 self.affix_log.append(f"{lem} {kp}: entry from hand gloss")
         self.affix_stats = dict(stats)
@@ -1082,9 +1084,17 @@ class Indonesian(LanguageSpec):
         if self._idioms is None:
             from ..core.english import en_stem
             kw = self._kaikki_words()
-            ov_by = {}
+            ov_by, ov_keys = {}, {}
             for k, v in (self.gloss_overrides or {}).items():
                 ov_by.setdefault(k.rpartition("|")[0], []).append(v)
+                ov_keys.setdefault(k.rpartition("|")[0], []).append(k)
+
+            def use_hand(xs, phrase=None):
+                # the hand glosses of xs decided the pair (all of them, or those naming the phrase)
+                for x in xs:
+                    for k in ov_keys.get(x, []):
+                        if phrase is None or phrase in self.gloss_overrides[k]:
+                            self.use_override(k)
             closed = set(self.closed_surfaces) | {w for w, _ in self.forced_closed} | self.function_lemmas | \
                 set(NUMBERS) | set(PHRASES)
             pointer = re.compile(r"^(?:synonym of|(?:active|passive|imperative|basic)(?: form)? of|alternative "
@@ -1114,28 +1124,38 @@ class Indonesian(LanguageSpec):
                 cg = stems({w for g in glosses(pair) for w in re.findall(r"[a-z]+", g.lower())})
                 if not cg:
                     continue
-                parts = []
+                parts, bare, ys = [], [], set()
                 for x in pair:
-                    pw = set()
+                    pw, pb = set(), set()
                     for y in {x, self._lx.chase(x, None) if self._lx is not None else None} - {None}:
-                        pw |= set(kw.get(y, (set(), set()))[1])      # merokok: the glosses of rokok
+                        pb |= set(kw.get(y, (set(), set()))[1])      # merokok: the glosses of rokok
                         for g in ov_by.get(y, []):
                             pw |= set(re.findall(r"[a-z]+", g.lower()))
-                    parts.append(stems(pw))
-                if any(overlaps(cg, pw) for pw in parts):
+                        ys.add(y)
+                    parts.append(stems(pw | pb))
+                    bare.append(stems(pb))
+                compositional = any(overlaps(cg, pw) for pw in parts)
+                if compositional != any(overlaps(cg, pw) for pw in bare):
+                    use_hand(ys)
+                if compositional:
                     continue
                 phrase = " ".join(pair)
                 res[pair] = {x for x in pair if any(phrase in g for g in ov_by.get(x, []))}
+                use_hand(res[pair], phrase)
             for pair in sorted((FORCED_IDIOMS | OPAQUE_IDIOMS) - set(res)):
                 phrase = " ".join(pair)
                 keep = {x for x in pair if any(phrase in g for g in ov_by.get(x, []))}
+                use_hand(keep, phrase)
                 if pair in FORCED_IDIOMS:
                     cg = stems({w for g in glosses(pair) for w in re.findall(r"[a-z]+", g.lower())})
                     for x in pair:
-                        pw = set(kw.get(x, (set(), set()))[1])
+                        pb = set(kw.get(x, (set(), set()))[1])
+                        pw = set(pb)
                         for g in ov_by.get(x, []):
                             pw |= set(re.findall(r"[a-z]+", g.lower()))
                         if cg and overlaps(cg, stems(pw)):
+                            if x not in keep and not overlaps(cg, stems(pb)):
+                                use_hand([x])
                             keep.add(x)
                 if keep != set(pair):
                     res[pair] = keep
@@ -1150,16 +1170,29 @@ class Indonesian(LanguageSpec):
         cross_pos_link, which checks the sense."""
         return tok[2] in ("PROPN", "X", "INTJ")
 
-    def _gloss_stems(self, word, kpos=None, extra=()):
+    def _hand_keys(self, word):
+        return [k for k in (self.gloss_overrides or {}) if k.rpartition("|")[0] == word]
+
+    def _redup_own_word(self, low, root):
+        """No gloss (or stem) shared between a reduplication and its root; the
+        hand glosses that decide it are registered (use_override)."""
+        own = not overlaps(self._gloss_stems(low), self._gloss_stems(root))
+        keys = self._hand_keys(low) + self._hand_keys(root)
+        if keys and own != (not overlaps(self._gloss_stems(low, hand=False), self._gloss_stems(root, hand=False))):
+            for k in keys:
+                self.use_override(k)
+        return own
+
+    def _gloss_stems(self, word, kpos=None, extra=(), hand=True):
         """Gloss words (and their English stems) of word's usable entries, plus
-        extra glosses; with kpos=None the word's hand glosses are added too."""
+        extra glosses; with kpos=None (and hand) the word's hand glosses are added too."""
         from ..core.english import en_stem
         ws = set()
         for e in self._lx.usable_entries(word, kpos):
             for sense in e["s"]:
                 ws |= gloss_words(str(sense[0]))
-        if kpos is None:
-            extra = list(extra) + [v for k, v in (self.gloss_overrides or {}).items() if k.rpartition("|")[0] == word]
+        if kpos is None and hand:
+            extra = list(extra) + [self.gloss_overrides[k] for k in self._hand_keys(word)]
         for g in extra:
             ws |= gloss_words(g)
         return ws | {en_stem(x) for x in ws}
@@ -1196,8 +1229,12 @@ class Indonesian(LanguageSpec):
         tagged = stems(lexicon.usable_entries(lem, self.group_kpos[group]))
         if not tagged:
             return None
-        ov = [v for k, v in (self.gloss_overrides or {}).items() if k.rpartition("|")[0] == lem]
-        packed = stems(lexicon.usable_entries(lem, self.group_kpos[ks[0][1]]), ov)
+        ov_keys = self._hand_keys(lem)
+        pack_entries = lexicon.usable_entries(lem, self.group_kpos[ks[0][1]])
+        packed = stems(pack_entries, [self.gloss_overrides[k] for k in ov_keys])
+        if ov_keys and overlaps(tagged, packed) != overlaps(tagged, stems(pack_entries)):
+            for k in ov_keys:
+                self.use_override(k)
         if overlaps(tagged, packed):
             self.post_stats["other-POS reading, same sense: the pack entry"] += 1
             return key_to_id[ks[0]]
@@ -1260,7 +1297,7 @@ class Indonesian(LanguageSpec):
                     st["kena + verb: the verb"] += 1
                     continue
             if r and "-" in low and r[0] != low and (low in LEXICAL_REDUP or lx.usable_entries(low, None) and
-                                                      not overlaps(self._gloss_stems(low), self._gloss_stems(r[0]))):
+                                                      self._redup_own_word(low, r[0])):
                 # a reduplication that is a word of its own, its glosses sharing
                 # nothing with the root's (rata-rata "average", mata-mata "spy",
                 # satu-satunya "the only"), is not its root; dalam-dalam
@@ -1305,8 +1342,11 @@ class Indonesian(LanguageSpec):
             obj_clitic = i + 1 < n and toks[i + 1][2] == "X" and toks[i + 1][0].lower() in ("nya", "ku", "mu")
             nxt = next((u[2] for u in toks[i + 1:] if u[2] != "X"), "PUNCT")
             both = re.search(r"\bto [a-z]", (self.gloss_overrides or {}).get(f"{low}|adj", ""))
+            clause_end = not obj_clitic and nxt in ("PUNCT", "ADV", "ADP", "CCONJ", "PART")
             if t[2] == "VERB" and low.startswith("me") and r[0] != low and lx.usable_entries(low, adj_kp) and \
-                    (both or (not obj_clitic and nxt in ("PUNCT", "ADV", "ADP", "CCONJ", "PART"))):
+                    (both or clause_end):
+                if both and not clause_end:
+                    self.use_override(f"{low}|adj")
                 # me- adjectives the tagger calls verbs, ending a clause: "Buku
                 # itu menarik" "interesting", menyenangkan "pleasant", membosankan
                 # "boring"; with an object ("mendengarnya", "mendengar kalau ...")
