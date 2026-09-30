@@ -24,6 +24,9 @@ const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
+// The zh pack without typedFrom/glossFocus: the typed-slot rules and controls below predate them
+// (tests/typed_from_checks.js covers them).
+const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; return p; })(Object.assign({}, PACK));
 console.log(`Loaded zh pack: ${WORDS.length} words, ${SENTENCES.length} sentences, ${PASSAGES.length} passages, ${CHARACTERS.length} units`);
 
 let fails = 0, passes = 0;
@@ -176,7 +179,9 @@ const ENGLISH = [...WORDS.map(w => w.en), ...SENTENCES.map(s => s.en),
 // uncoloured). Text that occurs in the pack's English is a gloss, not a reading.
 function uncoloured(html){
   const h = String(html).replace(/<span class="t[1-5]">[^<]*<\/span>/g, "");
-  return h.split(/<[^>]+>/).map(unesc).map(x => x.trim()).filter(x => x && MARKED.test(x) && !ENGLISH.includes(x));
+  // glossFocus joins a gloss's qualifiers into one dimmed run: each "(...)" is English on its own.
+  const english = x => ENGLISH.includes(x) || x.split(/(?<=\))\s+(?=\()/).every(y => ENGLISH.includes(y));
+  return h.split(/<[^>]+>/).map(unesc).map(x => x.trim()).filter(x => x && MARKED.test(x) && !english(x));
 }
 const tspans = h => (String(h).match(/<span class="t[1-5]">/g) || []).length;
 const syllables = t => VC.splitReading(t).filter(p => p.tone).reduce((n, p) => n + (/r$/i.test(VC.stripMarks(p.text)) && !/^er$/i.test(VC.stripMarks(p.text)) && !VC.splitSyllable(VC.stripMarks(p.text)) ? 2 : 1), 0);
@@ -194,7 +199,7 @@ function walk(api, stopAt){
       if(it.kind === "type"){
         seen.push({ where: it.key, kind: "type", it, html: P });
         const w = BY_ID[it.key.slice(2)];
-        api.el("tin").value = it.label === "Type the pinyin" ? w.pron : w.w; api.el("submit").click();
+        api.el("tin").value = it.label === "Type the pinyin" ? w.pron : it.label === "Type the meaning" ? VC.gloss(w) : w.w; api.el("submit").click();
         seen.push({ where: it.key + " reveal", html: api.html("rv") }); api.el("nx").click(); continue;
       }
       const btns = api.el("o").children;
@@ -296,27 +301,29 @@ function walk(api, stopAt){
     // The walk's words are all below their character tier (shown by their reading), so
     // every type slot is the pinyin item: characters never asked before they were shown.
     const walkProg = api.getProg();
-    const belowBad = typed.filter(x => VC.displayForm(BY_ID[x.it.key.slice(2)], CHARACTERS, walkProg, PACK).isPron && x.it.label !== "Type the pinyin");
-    check(`typed items appear in the Today walk's production slots, only word keys; a below-tier word never gets "Type the characters" (${tLabels.filter(l => l === "Type the pinyin").length} pinyin, ${tLabels.filter(l => l === "Type the characters").length} characters, ${belowBad.length} bad)`,
-      typed.length > 1 && tLabels.every(l => l === "Type the pinyin" || l === "Type the characters") && belowBad.length === 0 && typed.every(x => x.it.key.startsWith("w:")));
+    // typedFrom adds "Type the meaning"; a below-tier word never gets characters as answer or stimulus.
+    const belowBad = typed.filter(x => VC.displayForm(BY_ID[x.it.key.slice(2)], CHARACTERS, walkProg, PACK).isPron && (x.it.label === "Type the characters" || HAN.test(stripTags(x.it.html))));
+    check(`typed items appear in the Today walk's production slots, only word keys; a below-tier word never gets "Type the characters" (${tLabels.filter(l => l === "Type the pinyin").length} pinyin, ${tLabels.filter(l => l === "Type the characters").length} characters, ${tLabels.filter(l => l === "Type the meaning").length} meaning, ${belowBad.length} bad)`,
+      typed.length > 1 && tLabels.every(l => l === "Type the pinyin" || l === "Type the characters" || l === "Type the meaning") && belowBad.length === 0 && typed.every(x => x.it.key.startsWith("w:")));
+    const { api: bApi } = await boot({ seed: 7, pack: PACK_BASE });
     check("no typed gap item (gapType) in the walk", !seen.some(x => x.kind === "type" && x.it.key.startsWith("s:")));
     const w = BY_ID["w0077"]; // 学生 xuésheng
     // At tier: the word's character unit has a mastered record, so its written form shows.
     const wUnit = CHARACTERS.find(u => (u.words || []).includes(w.id));
     const atTier = () => { const pm = seedPF(); VC.ensureChars(pm).c[wUnit.id] = { r: 5, w: 0, s: 5 }; return pm; };
     const below = seedPF();
-    api.setProg(below);
+    bApi.setProg(below);
     const bPlan = [{ kind: "type", word: w }, { kind: "type", word: w }, { kind: "type", word: w }];
     check("below tier (shown by its reading): every type slot gives Type the pinyin, never the characters",
-      VC.displayForm(w, CHARACTERS, below, PACK).isPron && bPlan.map(api.itemFromPlan).every(x => x.label === "Type the pinyin"));
-    api.setProg(atTier());
-    check("at tier: the written form is on display", !VC.displayForm(w, CHARACTERS, api.getProg(), PACK).isPron);
+      VC.displayForm(w, CHARACTERS, below, PACK).isPron && bPlan.map(bApi.itemFromPlan).every(x => x.label === "Type the pinyin"));
+    bApi.setProg(atTier());
+    check("at tier: the written form is on display", !VC.displayForm(w, CHARACTERS, bApi.getProg(), PACK).isPron);
     // Plan order picks the item: 1st type slot pinyin, 2nd characters, 3rd pinyin.
     const tPlan = [{ kind: "type", word: w }, { kind: "recall", word: w }, { kind: "type", word: w }, { kind: "type", word: w }];
-    const tItems = tPlan.map(api.itemFromPlan);
+    const tItems = tPlan.map(bApi.itemFromPlan);
     check("itemFromPlan as a map callback: type slots alternate Type the pinyin / Type the characters in plan order",
       tItems.map(x => x.label).join("|") === "Type the pinyin|Which word is this?|Type the characters|Type the pinyin");
-    const it = api.itemFromPlan({ kind: "type", word: w });
+    const it = bApi.itemFromPlan({ kind: "type", word: w });
     check("pinyin item: gloss stimulus, 'pinyin · tones optional' tag, no audio markup (no replay/speaker, no mount), no written form, Latin input (lang=en)",
       it.kind === "type" && it.label === "Type the pinyin" && it.html.includes(VC.escapeHtml(VC.gloss(w))) && /class="ktag"><b>pinyin<\/b> · tones optional</.test(it.html)
       && !/id="rp2"|id="sp"|class="replay|class="speaker|data-wid/.test(it.html) && !it.mount && !HAN.test(stripTags(it.html)) && it.inputTA === ' lang="en"' && it.placeholder === "pinyin, tones optional…");
@@ -329,7 +336,7 @@ function walk(api, stopAt){
       && /id="rp2"/.test(wi.html) && typeof wi.mount === "function" && !HAN.test(stripTags(wi.html)) && wi.inputTA === undefined && wi.placeholder === "characters…");
     check("characters check: the written form (and alt forms) right, the reading or another word wrong", wi.check(w.w) && wi.check(" " + w.w + " ") && !wi.check(w.pron) && !wi.check("学习") && (w.alt || []).every(a => wi.check(a)));
     // Drive both items through the renderer, with the spoken log.
-    const { api: a2, spoken } = await boot({ seed: 3 });
+    const { api: a2, spoken } = await boot({ seed: 3, pack: PACK_BASE });
     a2.setProg(atTier());
     const s0 = spoken.length;
     const r = runTyped(a2, w, "xuesheng", 0, spoken);
@@ -895,7 +902,7 @@ function walk(api, stopAt){
     check(`main ${MAIN} engine loaded from git`, !!mainHtml && !!mainCore && typeof mainCore.sentencePieces === "function");
     // The fields BP2 gates on: pack.tones, typing "pron", soundsReference, sentence ruby (word
     // taps), and pronFirst (phrase-span readings in passages). Characters block kept.
-    const offPack = Object.assign({}, PACK, { typing: null }); delete offPack.tones; delete offPack.soundsReference; delete offPack.pronFirst;
+    const offPack = Object.assign({}, PACK_BASE, { typing: null }); delete offPack.tones; delete offPack.soundsReference; delete offPack.pronFirst;
     const offSent = SENTENCES.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; });
     const offPass = PASSAGES.map(p => Object.assign({}, p, { sentences: p.sentences.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; }) }));
     async function screens(html, core, pack, sents, passages, seed){

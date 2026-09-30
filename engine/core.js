@@ -2550,6 +2550,142 @@ function typeSlotKind(plan, i){
   for(let j = 0; j < (i || 0); j++) if(plan && plan[j] && plan[j].kind === "type") n++;
   return n % 2 ? "written" : "pron";
 }
+
+// ------------------------------------------------------------------ typed from the target side
+// pack.typedFrom / pack.glossFocus (docs/PACK_SCHEMA.md "typedFrom and glossFocus"). Off unless
+// the pack sets them; typeSlotKind above stays the rule for every pack without typedFrom.
+const TYPED_FROM_SIDES = ["written", "pron"];
+function typedFromSides(pack){
+  const t = pack && typingEnabled(pack) && Array.isArray(pack.typedFrom) ? pack.typedFrom : [];
+  return TYPED_FROM_SIDES.filter(s => t.includes(s));
+}
+function typedFromOn(pack){ return typedFromSides(pack).length > 0; }
+// Production (meaning -> target) and target-side kinds alternate, so a short plan still mixes
+// both directions.
+function typedKinds(pack){
+  const sides = typedFromSides(pack), pt = pronTypingOn(pack);
+  const w = sides.includes("written"), p = sides.includes("pron");
+  const out = [pt ? "pron" : "word"];
+  if(w) out.push("writtenMeaning");
+  if(pt) out.push("written");
+  if(p) out.push("pronMeaning");
+  if(w && pt) out.push("writtenPron");
+  return out;
+}
+// A stimulus two pack words share (他/她/它 are all tā) cannot ask for one of them: such a
+// word never gets the kind that shows it.
+function typedAmbiguity(words){
+  const bySurf = new Map(), byPron = new Map(), add = (m, k, id) => { if(!k) return; if(!m.has(k)) m.set(k, new Set()); m.get(k).add(id); };
+  (words || []).forEach(w => {
+    [w.w, ...(Array.isArray(w.alt) ? w.alt : [])].forEach(s => add(bySurf, String(s || "").normalize("NFC"), w.id));
+    if(w.pron) add(byPron, pronKey(w.pron), w.id);
+  });
+  const shared = m => { const s = new Set(); m.forEach(ids => { if(ids.size > 1) ids.forEach(id => s.add(id)); }); return s; };
+  return { written: shared(bySurf), pron: shared(byPron) };
+}
+// shownWritten: the learner sees this word's written form (pronFirst: its unit is mastered).
+function typedKindOk(kind, word, shownWritten, amb){
+  const a = amb || { written: new Set(), pron: new Set() };
+  const hasW = !!(word && word.w), hasP = !!(word && word.pron), hasG = !!gloss(word);
+  if(kind === "word") return hasW;
+  if(kind === "pron") return hasP;
+  if(kind === "written") return hasW && shownWritten;
+  if(kind === "writtenMeaning") return hasW && shownWritten && hasG && !a.written.has(word.id);
+  if(kind === "writtenPron") return hasW && hasP && shownWritten && !a.written.has(word.id);
+  if(kind === "pronMeaning") return hasP && hasG && !a.pron.has(word.id);
+  return false;
+}
+// Slot order in the plan plus the word's recorded answers picks the start of the rotation: a
+// Review has only three type slots, so the order alone would never reach the later kinds.
+// No rng: the same plan and progress give the same kinds. An unavailable kind passes to the
+// next one; null only when no kind fits.
+function typedSlotKind(plan, i, prog, pack, ok){
+  const kinds = typedKinds(pack);
+  let n = 0;
+  for(let j = 0; j < (i || 0); j++) if(plan && plan[j] && plan[j].kind === "type") n++;
+  const word = plan && plan[i] && plan[i].word;
+  const rec = word && prog && isObj(prog.w) ? prog.w[word.id] : null;
+  const seen = rec ? (rec.r || 0) + (rec.w || 0) : 0;
+  for(let s = 0; s < kinds.length; s++){
+    const k = kinds[(n + seen + s) % kinds.length];
+    if(!ok || ok(k)) return k;
+  }
+  return null;
+}
+// Top-level split: separators inside (...) or [...] never split.
+function splitTopLevel(s, seps){
+  const out = []; let depth = 0, cur = "";
+  for(const c of String(s)){
+    if(c === "(" || c === "[") depth++;
+    else if((c === ")" || c === "]") && depth > 0) depth--;
+    if(depth === 0 && seps.includes(c)){ out.push(cur); cur = ""; } else cur += c;
+  }
+  out.push(cur);
+  return out;
+}
+// Top-level (...) groups, nested parens kept inside their group; an unclosed "(" is text.
+function parenGroups(s){
+  const t = String(s); const groups = []; let rest = "", depth = 0, cur = "";
+  for(const c of t){
+    if(c === "("){ if(depth === 0) cur = ""; depth++; cur += c; continue; }
+    if(depth > 0){ cur += c; if(c === ")" && --depth === 0) groups.push(cur); continue; }
+    rest += c;
+  }
+  if(depth > 0) rest += cur;
+  return { rest, groups };
+}
+const tidyAlt = s => splitTopLevel(s, [","]).map(x => x.replace(/\s+/g, " ").trim()).filter(Boolean).join(", ");
+// Shared by the display and the matcher: the gloss with its (...) qualifiers taken out, and the
+// qualifiers in order. A gloss that is nothing but qualifiers stays whole.
+function glossParts(en){
+  const g = String(en == null ? "" : en).replace(/\s+/g, " ").trim();
+  const { rest, groups } = parenGroups(g);
+  const primary = splitTopLevel(rest, [";"]).map(tidyAlt).filter(Boolean).join("; ");
+  if(!primary || !groups.length) return { primary: g, qualifiers: [] };
+  return { primary, qualifiers: groups };
+}
+const GLOSS_DROP = new Set(["a", "an", "the", "sb", "sth", "someone", "somebody", "something", "etc", "eg"]);
+function glossKey(s){
+  const toks = String(s == null ? "" : s).normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase()
+    .replace(/[.'‘’ʼ`]/g, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim().split(" ").filter(Boolean);
+  let t = toks.filter(x => !GLOSS_DROP.has(x));
+  if(!t.length) t = toks;
+  if(t.length > 1 && t[0] === "to") t = t.slice(1);
+  return t.join("");
+}
+const GLOSS_GROUPS_MAX = 4;
+// Every alternative with each (...) group kept (brackets dropped) or left out; groups past
+// the cap are always kept.
+function glossAltKeys(en){
+  const keys = new Set();
+  splitTopLevel(String(en == null ? "" : en), [";", ","]).forEach(alt => {
+    const n = Math.min(parenGroups(alt).groups.length, GLOSS_GROUPS_MAX);
+    for(let mask = 0; mask < (1 << n); mask++){
+      let gi = 0, depth = 0, cur = "", v = "";
+      for(const c of alt){
+        if(c === "("){ if(depth === 0) cur = ""; depth++; cur += c; continue; }
+        if(depth > 0){
+          cur += c;
+          if(c === ")" && --depth === 0){ v += gi >= n || (mask >> gi) & 1 ? " " + cur.slice(1, -1) + " " : " "; gi++; }
+          continue;
+        }
+        v += c;
+      }
+      if(depth > 0) v += cur;
+      const k = glossKey(v); if(k) keys.add(k);
+    }
+  });
+  return keys;
+}
+// One meaning is enough: the whole typed text, or every part of it split like the gloss, must
+// be one of the gloss's alternatives. Rules: docs/PACK_SCHEMA.md "Typed meaning".
+function checkGlossTyped(val, en){
+  const keys = glossAltKeys(en), v = String(val == null ? "" : val);
+  if(keys.has(glossKey(v))) return true;
+  const parts = splitTopLevel(v, [";", ","]).map(glossKey).filter(Boolean);
+  return parts.length > 0 && parts.every(k => keys.has(k));
+}
+function glossFocusOn(pack){ return !!(pack && pack.glossFocus === true); }
 function joinReadings(a, b, pack){
   if(!a) return b; if(!b) return a;
   return tonesOn(pack) && /^[aoe]/i.test(stripMarks(b)) && /[\p{L}]$/u.test(a) ? a + "'" + b : a + b;
@@ -2709,7 +2845,8 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   scriptNotice, dismissScriptNotice, markScript, scriptMastered, scriptStageUnits, scriptSets, scriptSetTaught, nextScriptSets, scriptStages,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
   scriptOpts, scriptRomanOpts, scriptExamples, scriptWordOpts, scriptJoinedForms, scriptItem, learnScriptPlan, scriptReviewScore, scriptTestPlan,
-  tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings, composeSpanReading, spanReadingText,
+  tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings,
+  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, parenGroups, glossParts, glossKey, glossAltKeys, checkGlossTyped, glossFocusOn, composeSpanReading, spanReadingText,
   LEGACY_DROPPED, legacyBackupKey, isLegacyRecord, migrateLegacy };
 if(typeof module!=="undefined" && module.exports) module.exports = API;
 if(root) root.VocabCore = API;

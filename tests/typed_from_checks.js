@@ -1,0 +1,452 @@
+// Checks for typed items from the target side and focused gloss display (pack.typedFrom,
+// pack.glossFocus; docs/PACK_SCHEMA.md "typedFrom and glossFocus"): [1] config and kind
+// rotation (core.js typedKinds/typedSlotKind/typedKindOk), [2] typed-meaning matcher
+// (checkGlossTyped) and gloss formatter (glossParts), [3] app items on the zh pack: fallback
+// when characters are not displayed, stimulus leaks (audio, taps, ruby, readings, tags), the
+// renderer, choice fallback, miss kind, [4] glossFocus render sites, [5] control: with both
+// fields absent the zh markup is byte-identical to main ef44c6e's engine and plans are
+// unchanged. Boots engine/app.html in the fake DOM of tests/pron_aids_checks.js.
+// Run: node tests/typed_from_checks.js
+"use strict";
+const fs = require("fs");
+const path = require("path");
+const cp = require("child_process");
+
+const ROOT = path.join(__dirname, "..");
+const VC = require(path.join(ROOT, "engine", "core.js"));
+const ZH = path.join(ROOT, "packs", "zh");
+const MAIN = "ef44c6e"; // main before typedFrom/glossFocus
+function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
+const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
+const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
+const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
+const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
+const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
+const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
+const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; return p; })(Object.assign({}, PACK));
+
+let fails = 0, passes = 0;
+function check(name, cond){
+  if(cond){ passes++; console.log(`PASS  ${name}`); }
+  else { fails++; console.log(`FAIL  ${name}`); }
+}
+
+// ------------------------------------------------------------------ fake DOM + boot (copied from pron_aids_checks.js)
+let appHtml = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
+const CUR_HTML = appHtml;
+const scriptOf = html => { const b = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]; return b[b.length - 1][1]; };
+function extractAttrs(tag){
+  const attrs = {}; const re = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)(?:\s*=\s*"([^"]*)")?/g;
+  let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; }
+  return attrs;
+}
+function makeFakeDom(){
+  const registry = new Map(); const tabButtons = [];
+  class El {
+    constructor(tag, attrs){
+      this.tagName = (tag||"div").toUpperCase();
+      this._attrs = Object.assign({}, attrs);
+      this._classes = new Set((this._attrs.class||"").split(/\s+/).filter(Boolean));
+      this._html = ""; this._text = "";
+      this.style = { setProperty(k,v){ this[k]=v; } };
+      this.hidden = false; this.disabled = false; this.value = "";
+      this.onclick = null; this.oninput = null; this.onchange = null;
+      this._listeners = {}; this._children = [];
+      if(this._attrs.id) registry.set(this._attrs.id, this);
+    }
+    get id(){ return this._attrs.id || ""; }
+    set id(v){ this._attrs.id = v; registry.set(v, this); }
+    get classList(){
+      const s = this._classes;
+      return { add:(...c)=>c.forEach(x=>s.add(x)), remove:(...c)=>c.forEach(x=>s.delete(x)),
+        toggle:(c,f)=>{ if(f===undefined){ s.has(c)?s.delete(c):s.add(c); } else { f?s.add(c):s.delete(c); } },
+        contains:c=>s.has(c) };
+    }
+    get dataset(){
+      const attrs = this._attrs; const toKebab = k => k.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
+      return new Proxy({}, { get(_, k){ return attrs["data-" + toKebab(String(k))]; }, set(_, k, v){ attrs["data-" + toKebab(String(k))] = String(v); return true; } });
+    }
+    get children(){ return this._children; }
+    get innerHTML(){ return this._html; }
+    set innerHTML(h){ this._html = h; this._children = []; registerIdsFromHtml(h); }
+    get textContent(){ return this._text; }
+    set textContent(t){ this._text = String(t); this._html = String(t); }
+    setAttribute(k,v){ this._attrs[k]=String(v); if(k==="id") registry.set(v,this); }
+    getAttribute(k){ return this._attrs[k]; }
+    addEventListener(t,f){ (this._listeners[t]=this._listeners[t]||[]).push(f); }
+    removeEventListener(){}
+    appendChild(c){ this._children.push(c); return c; }
+    remove(){}
+    focus(){}
+    click(){ if(this.onclick) this.onclick({}); (this._listeners.click||[]).forEach(f=>f({})); }
+    closest(){ return null; }
+    querySelector(){ return null; }
+    querySelectorAll(){ return []; }
+  }
+  function registerIdsFromHtml(html){
+    const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
+    let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); }
+  }
+  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
+  const btnRe = /<button([^>]*)>/g;
+  let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
+  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  return {
+    title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
+    write(){}, createElement(tag){ return new El(tag, {}); },
+    getElementById(id){ return registry.get(id) || null; },
+    querySelector(sel){ return this.querySelectorAll(sel)[0] || null; },
+    querySelectorAll(sel){
+      const m = sel.match(/^#tabs\s+button(?:\[data-t="([^"]+)"\])?$/);
+      if(m) return m[1] ? tabButtons.filter(b=>b.dataset.t===m[1]) : tabButtons.slice();
+      return [];
+    },
+    _listeners: {},
+    addEventListener(t,f){ (this._listeners[t]=this._listeners[t]||[]).push(f); },
+  };
+}
+const tick = () => new Promise(r => setTimeout(r, 0));
+function mulberry32(seed){
+  let a = seed >>> 0;
+  return function(){ a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+// Boots an app. opts: html (app.html text, default this tree's), core (VocabCore, default
+// this tree's), pack, words, sentences, passages, units (false: no CHARACTERS), seed
+// (Math.random is replaced by a seeded generator for the boot and everything after it,
+// until the next boot). spoken: every text passed to speechSynthesis.speak.
+const REAL_RANDOM = Math.random;
+async function boot(opts){
+  const o = opts || {};
+  Math.random = o.seed ? mulberry32(o.seed) : REAL_RANDOM;
+  appHtml = o.html || CUR_HTML;
+  const document = makeFakeDom();
+  const spoken = [];
+  // neverSpeaking: a boolean-reporting engine that never confirms speaking (ttsDriver's
+  // watchdog retry path, docs/AUDIO.md "Playback reliability"; the default mock below has
+  // no speaking/pending at all, which ttsDriver treats as "no watchdog", so it can never
+  // exercise this). Default: unchanged, for every other check in this file.
+  const ss = o.neverSpeaking ? {
+    speaking: false, pending: false,
+    getVoices: () => o.voices || [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null,
+    cancel(){ ss.speaking = false; ss.pending = false; },
+    speak(u){ spoken.push(u.text); },
+  } : { getVoices: () => o.voices || [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(u){ spoken.push(u.text); } };
+  const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
+  const localStorage = { getItem(){ return null; }, setItem(){} };
+  const hook = n => `typeof ${n} === "function" ? ${n} : null`;
+  const fnBody = scriptOf(appHtml) + `
+let __cur = null;
+const __mc = renderMcItem; renderMcItem = function(it){ __cur = it; return __mc(it); };
+const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; return __ty(it); };
+return {
+  html: id => { const e = document.getElementById(id); return e ? e.innerHTML : null; },
+  el: id => document.getElementById(id),
+  getProg: () => prog, setProg: p => { prog = p; },
+  today: () => { tab = "today"; render(); }, goto: t => { tab = t; testSel = null; RD = null; soundsSel = null; render(); },
+  getD: () => D, getCur: () => __cur, panelListeners: t => document.getElementById("panel")._listeners[t || "click"] || [],
+  startPassage: p => { tab = "read"; startPassage(p); }, rd: () => RD,
+  sentenceRowHTML, sentenceRevealBlock, readSentence, gapSentence, passageSentenceHTML, passagePlainHTML, glossHTML, revealBlock, recallItem, readItem, wordRowHTML, charTeach, charDrillItem,
+  pronTypeItem: ${hook("pronTypeItem")},
+  glossOut: ${hook("glossOut")}, hearItem, typedFromSlotItem: ${hook("typedFromSlotItem")},
+  itemFromPlan: ${hook("itemFromPlan")}, tokTap: ${hook("tokTap")}, onTok: ${hook("onTok")}, tokOwns: ${hook("tokOwns")}, docListeners: t => document._listeners[t] || [], soundsRefGroups: ${hook("soundsRefGroups")},
+  drill1: it => drill([it], () => {}, null),
+  wordsPage: (lv, set) => { tab = "words"; wordsQuery = ""; wordsLv = lv; wordsSet = set; render(); },
+};`;
+  const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","PACK","WORDS","SENTENCES","LESSONS","PASSAGES"];
+  const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"PronAidsChecks/1.0" }, undefined, localStorage, () => ({ matches:false }), fn => setTimeout(fn, 0),
+    function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, o.pack || PACK, o.words || WORDS, o.sentences || SENTENCES, LESSONS, o.passages || PASSAGES];
+  if(o.units !== false){ names.push("CHARACTERS"); args.push(o.units || CHARACTERS); }
+  const api = new Function(...names, fnBody)(...args);
+  await tick(); await tick();
+  return { api, document, spoken };
+}
+
+
+// ------------------------------------------------------------------ helpers
+const stripTags = h => String(h).replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+>/g, "").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&");
+const MARKED = /[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/i;
+const HAN = /\p{Script=Han}/u;
+const byLv = VC.wordsByLevel(WORDS, PACK);
+const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
+const seedPF = () => VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5 }, PACK);
+const unitOf = w => CHARACTERS.find(u => (u.words || [])[0] === w.id);
+const atTierProg = ws => { const pm = seedPF(); ws.forEach(w => { VC.ensureChars(pm).c[unitOf(w).id] = { r: 5, w: 0, s: 5 }; }); return pm; };
+const typePlan = (w, n) => Array.from({ length: n }, () => ({ kind: "type", word: w }));
+// Plays the active flow: answers every item right (mc: the answer option; type: the
+// word's pron), presses Continue / Drill / Next; records every screen, option and reveal.
+function walk(api, stopAt){
+  const seen = [];
+  for(let i = 0; i < 600; i++){
+    const P = api.html("panel");
+    if(api.getD()){
+      const it = api.getCur();
+      if(it.kind === "type"){
+        seen.push({ where: it.key, kind: "type", it, html: P });
+        const w = BY_ID[it.key.slice(2)];
+        api.el("tin").value = it.label === "Type the pinyin" ? w.pron : it.label === "Type the meaning" ? VC.gloss(w) : w.w; api.el("submit").click();
+        seen.push({ where: it.key + " reveal", html: api.html("rv") }); api.el("nx").click(); continue;
+      }
+      const btns = api.el("o").children;
+      seen.push({ where: it.key, kind: "mc", it, html: P + btns.map(b => b.innerHTML).join("|"), opts: btns.map(b => b.innerHTML) });
+      const btn = btns.find(b => b.dataset.v === it.a); if(!btn) throw new Error("no answer option " + it.key);
+      btn.click(); seen.push({ where: it.key + " reveal", html: api.html("rv") }); api.el("nx").click(); continue;
+    }
+    if(/id="rskip"/.test(P)){ api.el("rskip").click(); continue; } // Today Read stage: skipped (engine_checks covers it)
+    seen.push({ where: "screen", html: P });
+    if(stopAt && stopAt.test(P)) return seen;
+    if(/id="ok"/.test(P)){ api.el("ok").click(); continue; }
+    if(/id="dr"/.test(P)){ const tl = api.el("tl"); if(tl) seen.push({ where: "teach", html: tl.children.map(c => c.innerHTML).join("|") }); api.el("dr").click(); continue; }
+    return seen;
+  }
+  throw new Error("walk did not finish");
+}
+
+
+(async function main(){
+  const AMB = VC.typedAmbiguity(WORDS);
+  // ---------------------------------------------------------------- [1] config + rotation
+  console.log("\n[1] config and kind rotation");
+  {
+    check("zh ships typedFrom [written, pron] + glossFocus on top of typing pron", JSON.stringify(PACK.typedFrom) === '["written","pron"]' && PACK.glossFocus === true && PACK.typing === "pron");
+    check("typedFromOn: off without the field, off without typing, invalid sides ignored",
+      !VC.typedFromOn(PACK_BASE) && !VC.typedFromOn(Object.assign({}, PACK, { typing: null })) && !VC.typedFromOn({ typing: "pron", typedFrom: "written" })
+      && JSON.stringify(VC.typedFromSides({ typing: "pron", typedFrom: ["pron", "x", "written"] })) === '["written","pron"]' && VC.typedFromOn(PACK));
+    check("glossFocusOn: only true turns it on", VC.glossFocusOn(PACK) && !VC.glossFocusOn(PACK_BASE) && !VC.glossFocusOn({ glossFocus: "yes" }));
+    check("typedKinds zh: pron, writtenMeaning, written, pronMeaning, writtenPron",
+      VC.typedKinds(PACK).join() === "pron,writtenMeaning,written,pronMeaning,writtenPron");
+    check("typedKinds: pron side only -> pron, written, pronMeaning; written side only -> pron, writtenMeaning, written, writtenPron",
+      VC.typedKinds({ typing: "pron", typedFrom: ["pron"] }).join() === "pron,written,pronMeaning" && VC.typedKinds({ typing: "pron", typedFrom: ["written"] }).join() === "pron,writtenMeaning,written,writtenPron");
+    check("typedKinds, a plain typing pack (for later): word, writtenMeaning, pronMeaning",
+      VC.typedKinds({ typing: {}, typedFrom: ["written", "pron"] }).join() === "word,writtenMeaning,pronMeaning");
+    const w = { id: "x1", w: "学", pron: "xué", en: "to study" };
+    const fresh = VC.normalizeProg({}, PACK);
+    const plan = [{ kind: "type", word: w }, { kind: "recall", word: w }, { kind: "type", word: w }, { kind: "type", word: w }, { kind: "hear", word: w }, { kind: "type", word: w }, { kind: "type", word: w }, { kind: "type", word: w }];
+    const tIdx = plan.map((p, i) => p.kind === "type" ? i : -1).filter(i => i >= 0);
+    const seq = tIdx.map(i => VC.typedSlotKind(plan, i, fresh, PACK));
+    check(`rotation: type slots walk the kinds in order, other slots do not advance (${seq.join(",")})`, seq.join() === "pron,writtenMeaning,written,pronMeaning,writtenPron,pron");
+    const seen2 = VC.normalizeProg({ w: { x1: { r: 1, w: 1, s: 0 } } }, PACK);
+    check("rotation: the word's recorded answers (r+w) shift the start", VC.typedSlotKind(plan, 0, seen2, PACK) === "written" && VC.typedSlotKind(plan, 2, seen2, PACK) === "pronMeaning");
+    check("rotation is deterministic (same plan + progress -> same kinds, no Math.random)", (() => {
+      const r = Math.random; let drawn = 0; Math.random = () => { drawn++; return r(); };
+      const a = tIdx.map(i => VC.typedSlotKind(plan, i, seen2, PACK)).join(), b = tIdx.map(i => VC.typedSlotKind(plan, i, seen2, PACK)).join();
+      Math.random = r; return a === b && drawn === 0; })());
+    const below = k => VC.typedKindOk(k, w, false, AMB);
+    const bseq = tIdx.map(i => VC.typedSlotKind(plan, i, fresh, PACK, below));
+    check(`fallback, characters not displayed: only kinds without characters, next in rotation (${bseq.join(",")})`, bseq.join() === "pron,pronMeaning,pronMeaning,pronMeaning,pron,pron");
+    check("typedKindOk, characters displayed: every kind fits", VC.typedKinds(PACK).every(k => VC.typedKindOk(k, w, true, AMB)));
+    check("typedKindOk: no pron -> no pron/writtenPron/pronMeaning; no gloss -> no meaning kinds; nothing fits -> null",
+      !VC.typedKindOk("pron", { id: "n", w: "学", en: "x" }, true) && !VC.typedKindOk("writtenPron", { id: "n", w: "学", en: "x" }, true) && !VC.typedKindOk("pronMeaning", { id: "n", w: "学", en: "x" }, true)
+      && !VC.typedKindOk("writtenMeaning", { id: "n", w: "学", pron: "xué", en: "" }, true) && VC.typedSlotKind([{ kind: "type", word: w }], 0, fresh, PACK, () => false) === null);
+    const ta = BY_ID[WORDS.find(x => x.w === "他").id], she = WORDS.find(x => x.w === "她");
+    check(`homophones (他/她 tā): no pinyin->meaning; ${AMB.pron.size} zh words share a reading, ${AMB.written.size} a written form`,
+      AMB.pron.has(ta.id) && AMB.pron.has(she.id) && !VC.typedKindOk("pronMeaning", ta, true, AMB) && VC.typedKindOk("writtenMeaning", ta, true, AMB) && AMB.pron.size === 73 && AMB.written.size === 0);
+    const hg = VC.typedAmbiguity([{ id: "a", w: "长", pron: "cháng", en: "long" }, { id: "b", w: "长", pron: "zhǎng", en: "to grow" }]);
+    check("homographs (长 cháng/zhǎng): no characters-stimulus kind", hg.written.has("a") && !VC.typedKindOk("writtenMeaning", { id: "a", w: "长", pron: "cháng", en: "long" }, true, hg) && !VC.typedKindOk("writtenPron", { id: "a", w: "长", pron: "cháng", en: "long" }, true, hg) && VC.typedKindOk("pronMeaning", { id: "a", w: "长", pron: "cháng", en: "long" }, true, hg));
+    // Plans do not depend on the new fields.
+    const pr = seedPF(); const lw = VC.learnedWords(WORDS, PACK, pr);
+    // Math.random seeded too: buildRecallPlan's weakFirst draws from it.
+    const mk = (pk, seed) => { const rng = mulberry32(seed); Math.random = mulberry32(seed + 100); return JSON.stringify([VC.buildReviewPlan(lw, pr, pk, { rng }), VC.buildRecallPlan(lw, pr, pk, 8, { rng })].map(p => p.map(x => [x.kind, x.word && x.word.id]))); };
+    check("Review/Recall plans identical with and without typedFrom/glossFocus (3 seeds)", [1, 2, 3].every(s => mk(PACK, s) === mk(PACK_BASE, s)));
+    Math.random = REAL_RANDOM;
+  }
+
+  // ---------------------------------------------------------------- [2] matcher + formatter
+  console.log("\n[2] typed-meaning matcher and gloss formatter");
+  {
+    const G1 = "to kick; to play (e.g. soccer)", G2 = "(of a contagious disease etc) to spread; to propagate", G3 = "no matter what or how; regardless of whether...";
+    const T = [
+      ["kick", G1, true], ["to kick", G1, true], ["Kick!", G1, true], ["play", G1, true], ["to play soccer", G1, true], ["to play (e.g. soccer)", G1, true], ["play e.g. soccer", G1, true],
+      ["to kick; to play", G1, true], ["kick, play", G1, true], ["soccer", G1, false], ["kick ball", G1, false], ["kick; run", G1, false],
+      ["spread", G2, true], ["to propagate", G2, true], ["  PROPAGATE ", G2, true], ["of a contagious disease etc to spread", G2, true], ["contagious disease", G2, false],
+      ["regardless of whether", G3, true], ["regardless of whether...", G3, true], ["regardless of whether …", G3, true], ["no matter what or how", G3, true], ["no matter", G3, false], ["regardless", G3, false],
+      ["introduce", "to introduce (sb to sb); to give a presentation", true], ["introduce someone to someone", "to introduce (sb to sb); to give a presentation", true],
+      ["introduce sb", "to introduce (sb to sb); to give a presentation", true],
+      ["wish bon voyage, happy birthday", "to pray for; to wish (sb bon voyage, happy birthday etc)", true],
+      ["happy birthday", "to pray for; to wish (sb bon voyage, happy birthday etc)", false],
+      ["be at", "to exist; to be alive; (of sb or sth) to be (located) at", true], ["to be located at", "to exist; to be alive; (of sb or sth) to be (located) at", true],
+      ["do of one's own accord", "to take the initiative; to do sth of one's own accord", true], ["do something of ones own accord", "to take the initiative; to do sth of one's own accord", true],
+      ["teacher", "the teacher", true], ["an apple", "apple", true], ["apples", "apple", false],
+      ["oclock", "o'clock; a little", true], ["o’clock", "o'clock; a little", true], ["a little", "o'clock; a little", true],
+      ["on", "on, in (N上)", true], ["in", "on, in (N上)", true], ["cafe", "café", true], ["mister", "teacher; gentleman; sir; mister (Mr.)", true], ["mister mr", "teacher; gentleman; sir; mister (Mr.)", true],
+      ["to", "to", true], ["the", "the", true], ["completed action marker", "(completed action marker)", true], ["", G1, false], ["   ", G1, false], ["to", G1, false],
+      ["him", "he; him…", true], ["rental car", "taxi; (Tw) rental car", true],
+    ];
+    const bad = T.filter(([v, g, want]) => VC.checkGlossTyped(v, g) !== want);
+    check(`checkGlossTyped table (${T.length} cases${bad.length ? `; wrong: ${JSON.stringify(bad.slice(0, 4))}` : ""})`, T.length >= 25 && bad.length === 0);
+    const P = [
+      [G2, "to spread; to propagate", ["(of a contagious disease etc)"]],
+      [G1, "to kick; to play", ["(e.g. soccer)"]],
+      [G3, G3, []],
+      ["(completed action marker)", "(completed action marker)", []],
+      ["of; ~'s (possessive particle); (used after an attribute)", "of; ~'s", ["(possessive particle)", "(used after an attribute)"]],
+      ["to wish (sb bon voyage, happy birthday etc)", "to wish", ["(sb bon voyage, happy birthday etc)"]],
+      ["to eat at (a cafeteria (or canteen))", "to eat at", ["(a cafeteria (or canteen))"]],
+      ["on, in (N上)", "on, in", ["(N上)"]],
+      ["big; (broken", "big; (broken", []],
+      ["  to  kick ;  to play  ", "to kick ; to play", []],
+    ];
+    const pb = P.filter(([g, p, q]) => { const r = VC.glossParts(g); return r.primary !== p || JSON.stringify(r.qualifiers) !== JSON.stringify(q); });
+    check(`glossParts table (${P.length} cases${pb.length ? `; wrong: ${JSON.stringify(pb.map(x => [x[0], VC.glossParts(x[0])]))}` : ""})`, pb.length === 0);
+    check("every zh gloss accepts its own primary and each of its alternatives", WORDS.every(w => { const g = VC.gloss(w); return VC.checkGlossTyped(g, g) && VC.checkGlossTyped(VC.glossParts(g).primary, g); }));
+  }
+
+  // ---------------------------------------------------------------- [3] app items (zh)
+  console.log("\n[3] app: typed items from the target side (zh)");
+  try {
+    const { api, spoken } = await boot({ seed: 5 });
+    // A level-1 word with a unique reading and a (...) qualifier in its gloss.
+    const w = WORDS.find(x => x.lv === "1" && !AMB.pron.has(x.id) && /\(/.test(x.en) && VC.glossParts(x.en).qualifiers.length && unitOf(x));
+    const below = seedPF();
+    api.setProg(below);
+    check(`test word ${w.w} ${w.pron} "${w.en}" is shown by its reading below tier`, VC.displayForm(w, CHARACTERS, below, PACK).isPron);
+    const bItems = typePlan(w, 5).map(api.itemFromPlan);
+    check(`below tier: only kinds without characters (${bItems.map(x => x.label).join("|")}); the meaning stimulus is the reading, no Han`,
+      bItems.every(x => x.label === "Type the pinyin" || x.label === "Type the meaning") && bItems.some(x => x.label === "Type the meaning")
+      && bItems.filter(x => x.label === "Type the meaning").every(x => !HAN.test(stripTags(x.html)) && x.html.includes(VC.toneHTML(w.pron))));
+    const at = atTierProg([w]); api.setProg(at);
+    const items = typePlan(w, 5).map(api.itemFromPlan);
+    const tagOf = x => (x.html.match(/class="ktag"[^>]*><b>([^<]*)<\/b>/) || [])[1];
+    const byStim = x => HAN.test(stripTags(x.html)) ? "chars" : x.html.includes(VC.toneHTML(w.pron)) ? "pinyin" : "gloss";
+    const sig = items.map(x => `${x.label}/${byStim(x)}`);
+    check(`at tier: the five kinds in rotation order (${sig.join(", ")})`,
+      sig.join() === "Type the pinyin/gloss,Type the meaning/chars,Type the characters/gloss,Type the meaning/pinyin,Type the pinyin/chars");
+    const [, wMean, , pMean, wPron] = items;
+    const NEW = [["characters -> meaning", wMean], ["pinyin -> meaning", pMean], ["characters -> pinyin", wPron]];
+    for(const [name, it] of NEW){
+      const h = it.html;
+      const leaks = [];
+      if(it.mount) leaks.push("mount");
+      if(/id="(?:rp2|rpa|sp)"|class="(?:replay|speaker)/.test(h)) leaks.push("audio button");
+      if(/data-(?:wid|tok|showw|sent|xw)=|class="(?:tk|pw)\b/.test(h)) leaks.push("tap target");
+      if(/<ruby|<rt/.test(h)) leaks.push("ruby");
+      if(byStim(it) === "chars" && (MARKED.test(stripTags(h)) || /class="t[1-5]"/.test(h) || /class="pron"/.test(h))) leaks.push("reading on characters");
+      if(byStim(it) === "pinyin" && HAN.test(stripTags(h))) leaks.push("characters under pinyin");
+      const answerBits = it.label === "Type the meaning" ? VC.glossParts(w.en).primary.split(/[;,]/).map(s => s.trim().replace(/^to /, "")).filter(s => s.length > 2) : [VC.stripMarks(w.pron)];
+      const meta = [it.label, it.placeholder || "", tagOf(it) || "", stripTags(h.replace(/<div class="big wd"[\s\S]*$/, ""))].join(" ").toLowerCase();
+      answerBits.forEach(b => { if(meta.includes(b.toLowerCase())) leaks.push("answer in label/tag/placeholder: " + b); });
+      if(it.label === "Type the meaning" && stripTags(h).includes(VC.glossParts(w.en).primary)) leaks.push("gloss on card");
+      check(`${name}: no audio, no taps, no ruby, no reading/characters leak, answer not in label/tag/placeholder (${leaks.join("; ") || "clean"})`, leaks.length === 0);
+    }
+    check("tags and placeholders: meaning items 'meaning · any one' + 'meaning…' + Latin input; characters->pinyin 'pinyin · tones optional'",
+      [wMean, pMean].every(x => /class="ktag"[^>]*><b>meaning<\/b> · any one</.test(x.html) && x.placeholder === "meaning…" && x.inputTA === ' lang="en"')
+      && /class="ktag"[^>]*><b>pinyin<\/b> · tones optional</.test(wPron.html) && wPron.placeholder === "pinyin, tones optional…" && wPron.inputTA === ' lang="en"');
+    // Renderer: nothing spoken before the answer; reveal plays the word and has Replay.
+    const primary1 = VC.glossParts(w.en).primary.split(";")[0].trim();
+    const run = (slot, value, prog) => {
+      api.setProg(prog || atTierProg([w]));
+      const plan = typePlan(w, 5); const k0 = spoken.length;
+      api.drill1(api.itemFromPlan(plan[slot], slot, plan));
+      const html = api.html("panel"); const before = spoken.length - k0;
+      api.el("tin").value = value; api.el("submit").click();
+      return { html, before, after: spoken.length - k0 - before, rv: api.html("rv"), wrong: api.getD().miss.length > 0, prog: api.getProg() };
+    };
+    const r1 = run(1, primary1);
+    check(`renderer, characters -> meaning: silent before the answer, "${primary1}" right, reveal speaks + Replay`, r1.before === 0 && !r1.wrong && r1.after > 0 && /id="rvp"/.test(r1.rv) && /id="tin"[^>]*lang="en"/.test(r1.html) && /placeholder="meaning…"/.test(r1.html));
+    const r2 = run(3, primary1.toUpperCase() + "!");
+    check("renderer, pinyin -> meaning: silent before the answer, case/punctuation-insensitive right", r2.before === 0 && !r2.wrong && r2.after > 0);
+    const r3 = run(4, VC.stripMarks(w.pron));
+    check("renderer, characters -> pinyin: silent before the answer, toneless right with the tones note", r3.before === 0 && !r3.wrong && /tones: /.test(r3.rv));
+    const r4 = run(1, "zzz not it");
+    const rec = r4.prog.w[w.id];
+    check(`renderer, a wrong meaning: 'you typed' shown, the miss is k="type" and the record keeps its shape (${JSON.stringify(rec)})`,
+      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov"].includes(k)));
+    // Second miss: the silent choice counterpart with the same stimulus.
+    api.setProg(atTierProg([w]));
+    const plan = typePlan(w, 5); const mi = api.itemFromPlan(plan[1], 1, plan);
+    const fb = mi.choiceFallback();
+    check("meaning item's choice fallback: 'What does it mean?', same characters stimulus, no mount, answer among glosses",
+      fb.kind === "mc" && fb.label === "What does it mean?" && !fb.mount && HAN.test(stripTags(fb.html)) && !/data-wid|class="replay/.test(fb.html) && fb.opts.includes(VC.gloss(w)) && fb.a === VC.gloss(w));
+    const k1 = spoken.length; api.drill1(fb); const fbBefore = spoken.length - k1;
+    check("choice fallback renders silent", fbBefore === 0);
+    // Words without a pron or with a shared reading.
+    const ta = WORDS.find(x => x.w === "他");
+    api.setProg(atTierProg([ta]));
+    const taKinds = typePlan(ta, 5).map(api.itemFromPlan).map(x => `${x.label}/${byStim(x)}`);
+    check(`homophone 他 tā: never pinyin -> meaning (${taKinds.join(", ")})`, !taKinds.some(s => s === "Type the meaning/pinyin" || (s.startsWith("Type the meaning") && !s.endsWith("chars"))));
+    // The walk: Today with typedFrom on still plays through, typed items only on word keys.
+    api.setProg(seedPF()); api.today(); api.el("go").click();
+    let seen = [], err = null; try{ seen = walk(api, /id="again"/); }catch(e){ err = e; }
+    const typed = seen.filter(x => x.kind === "type");
+    check(`Today walk plays through (${typed.length} typed items: ${[...new Set(typed.map(x => x.it.label))].join(", ")})${err ? " ERROR " + err.message : ""}`, !err && typed.length > 0 && typed.some(x => x.it.label === "Type the meaning"));
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  // ---------------------------------------------------------------- [4] glossFocus sites
+  console.log("\n[4] glossFocus: every word-gloss render site");
+  try {
+    const { api } = await boot({ seed: 9 });
+    const w = WORDS.find(x => x.lv === "1" && /^\(/.test(x.en) && VC.glossParts(x.en).qualifiers.length && unitOf(x));
+    const g = VC.gloss(w), gp = VC.glossParts(g);
+    const want = `${VC.escapeHtml(gp.primary)} <span class="dim">${VC.escapeHtml(gp.qualifiers.join(" "))}</span>`;
+    check(`glossOut("${g}") -> primary then dimmed qualifiers`, api.glossOut(g) === want);
+    check("glossOut: a gloss with no qualifier is plain escaped text", api.glossOut("to study") === "to study" && api.glossOut("(completed action marker)") === "(completed action marker)");
+    api.setProg(atTierProg([w]));
+    const raw = VC.escapeHtml(g);
+    const sites = {
+      reveal: api.revealBlock(w), wordsRow: api.wordRowHTML(w, "wl"), popover: api.glossHTML(w.id, "", null),
+      recall: api.recallItem(w).html, readOpts: (it => it.opts.map(o => it.optHtml(o)).join("|"))(api.readItem(w)),
+      hearOpts: (it => it.opts.map(o => it.optHtml ? it.optHtml(o) : o).join("|"))(api.hearItem(w)),
+      charRead: (it => it.opts.map(o => it.optHtml(o)).join("|") + it.reveal)(api.charDrillItem("charRead", unitOf(w))),
+      charRecall: api.charDrillItem("charRecall", unitOf(w)).html,
+    };
+    const badSites = Object.entries(sites).filter(([, h]) => !h.includes(want) || h.includes(raw));
+    check(`focused gloss at every site (${Object.keys(sites).join(", ")}; bad: ${badSites.map(x => x[0]).join(", ") || "none"})`, badSites.length === 0);
+    api.wordsPage(w.lv, 0);
+    const wl = api.el("wl").children.map(c => c.innerHTML).join("|");
+    check("Words tab rows carry the dimmed qualifiers, never a raw (...)-first gloss", /class="dim"/.test(wl) && !WORDS.filter(x => /^\(/.test(x.en) && VC.glossParts(x.en).qualifiers.length).some(x => wl.includes(`>${VC.escapeHtml(VC.gloss(x))}<`)));
+    // Sweep: tabs, a Today walk and a Test recall drill; no raw gloss whose qualifiers move.
+    const moved = WORDS.map(x => VC.gloss(x)).filter(x => VC.glossParts(x).primary !== x && VC.glossParts(x).qualifiers.length).map(x => ">" + VC.escapeHtml(x) + "<");
+    const sweep = [];
+    const pr = seedPF(); WORDS.filter(x => x.lv === "1").slice(0, 30).forEach((x, i) => { pr.w[x.id] = { r: 1, w: 2 + (i % 3), s: 0 }; });
+    for(const t of ["words", "read", "sounds", "test", "progress"]){ api.setProg(pr); api.goto(t); sweep.push([t, api.html("panel")]); }
+    api.setProg(pr); api.goto("test"); const tr = api.el("tRecall");
+    if(tr){ tr.onclick(); try{ walk(api, /id="ok"|class="done"/).forEach(x => sweep.push(["test recall " + x.where, x.html])); }catch(e){ sweep.push(["test recall ERR", e.message]); } }
+    api.setProg(pr); api.today(); api.el("go").click();
+    try{ walk(api, /id="again"/).forEach(x => sweep.push(["today " + x.where, x.html])); }catch(e){ sweep.push(["today ERR", e.message]); }
+    const hits = sweep.filter(([, h]) => moved.some(m => h.includes(m)));
+    check(`sweep of ${sweep.length} screens (tabs, Test recall, Today): no raw gloss with qualifiers left${hits.length ? ` (${hits.slice(0, 3).map(x => x[0]).join(", ")})` : ""}; dim spans seen`,
+      sweep.length > 20 && hits.length === 0 && sweep.some(([, h]) => /class="dim"/.test(h)) && !sweep.some(([k]) => /ERR/.test(k)));
+    const { api: off } = await boot({ seed: 9, pack: PACK_BASE });
+    off.setProg(atTierProg([w]));
+    check("glossFocus off: raw gloss everywhere, no dim span", off.glossOut(g) === raw && off.revealBlock(w).includes(raw) && !/class="dim"/.test(off.revealBlock(w) + off.wordRowHTML(w, "wl")) && off.readItem(w).optHtml === undefined);
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  // ---------------------------------------------------------------- [5] control vs main
+  console.log(`\n[5] control: typedFrom + glossFocus absent -> HTML byte-identical to main ${MAIN}`);
+  {
+    let mainHtml = null, mainCore = null;
+    try{
+      mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const src = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); mainCore = m.exports;
+    }catch(e){ console.log("    cannot read main: " + e.message); }
+    check(`main ${MAIN} engine loaded from git (a missing sha is a failure)`, !!mainHtml && !!mainCore);
+    async function screens(html, core, pack, seed){
+      const { api } = await boot({ html, core, pack, seed });
+      const out = {};
+      api.setProg(seedPF()); api.today(); out.today = api.html("panel");
+      api.el("go").click();
+      let walked = []; try{ walked = walk(api, /id="again"/); }catch(e){ walked = [{ where: "ERR", html: e.message }]; }
+      out.walk = walked.map(x => x.where + "\n" + x.html).join("\n----\n");
+      const ws = WORDS.filter(x => x.lv === "1").slice(0, 40);
+      api.setProg(atTierProg(ws.slice(0, 20)));
+      out.items = ws.map(x => { const p = typePlan(x, 3); return p.map(api.itemFromPlan).map(it => it.label + it.html + it.reveal + (it.placeholder || "")).join("\n"); }).join("\n");
+      out.reveals = ws.map(x => api.revealBlock(x) + api.wordRowHTML(x, "wl") + api.glossHTML(x.id, "", null)).join("\n");
+      api.wordsPage("1", 0); out.words = api.html("panel") + api.el("wl").children.map(c => c.innerHTML).join("|");
+      return out;
+    }
+    if(mainHtml && mainCore){
+      const cases = [["zh, typing pron", PACK_BASE], ["zh, typing object", Object.assign({}, PACK_BASE, { typing: { caseSensitive: false, accents: "lenient", strictFromLevel: null } })]];
+      for(const [name, pk] of cases){
+        const a = await screens(mainHtml, mainCore, pk, 11), b = await screens(CUR_HTML, VC, pk, 11);
+        for(const k of Object.keys(a)){
+          let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
+          check(`${name}: ${k} byte-identical to main (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: main ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);
+        }
+      }
+    }
+  }
+
+  console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
+  process.exit(fails ? 1 : 0);
+})();
