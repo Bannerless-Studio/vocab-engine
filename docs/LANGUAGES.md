@@ -41,6 +41,7 @@ Scout findings per language: sources, licences, counts, and pipeline gotchas. It
 - Tagger: Stanza fa (Apache 2.0; model UD Persian-Seraji CC BY-SA 4.0). Hazm MIT alt.
 - No CEFR list. User CSV ~/Downloads/persian_common_words_1000_clean.csv: sanity only, never ship.
 - Gotchas: engine needs rtl flag; ZWNJ normalisation; ی/ي ک/ك normalise to Persian codepoints; ezafe unwritten; compound light verbs (کار کردن) as multiword lemmas w/ hand list; plurals -ها + broken plurals hand table; colloquial subtitles (میخوام) vs formal wordfreq/Wiktionary — normalise before matching; pron = kaikki romanisation (coverage unverified); typing: null; TTS fa-IR unverified (Android likely, desktop patchy); STT fa-IR ok.
+- lower_level_gloss_re added 2026-09-30 (+ illicit drugs): 2 moved (سم "poison", بمب "bomb" A2->B1), 0 cleaned; سم keeps 1 sentence (B1 min length)
 
 # Indonesian (id / Tatoeba ind) — verified 2026-09-23
 - hermitdave id_full.txt 357,441 lines; colloquial-heavy (gue, lo, nggak, banget)

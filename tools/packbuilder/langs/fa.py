@@ -28,7 +28,7 @@ import hashlib
 import json
 import re
 
-from .base import LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN, SENSITIVE_GLOSS_EN, drop_all_re
+from .base import make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN, SENSITIVE_GLOSS_EN, drop_all_re
 
 ZWNJ = "\u200c"
 LET = "ء-غف-يٱ-ۓۺ-ۿ"
@@ -772,6 +772,8 @@ class Persian(LanguageSpec):
         "rape[ds]?|raping|rapist\\w*|molest\\w*|child abuse|sexual(?:ly)? abuse\\w*|paedophil\\w*|pedophil\\w*)"
         "(?![" + LET + "a-z])", re.I))
     sensitive_gloss_re = re.compile(r"\b(" + SENSITIVE_GLOSS_EN + r")\b", re.I)
+    # no violent/sexual gloss below B1 (README content policy adds illicit drugs): clean ";"-segments stay, else the word moves to B1
+    lower_level_gloss_re = make_lower_level_gloss_re(LOWER_LEVEL_DRUGS_EN)
     # A1/A2 tier: sexual content, threats/violence, dying/death wishes, weapons
     sensitive_re = re.compile(
         "(?<![" + LET + "a-z])(?:بمیر\\w*|می\u200c?میر\\w*|نمیر\\w*|مرده|مرگ\\w*|بکشمت|بکشیمت|بکشش|"
