@@ -2614,68 +2614,156 @@ function typedSlotKind(plan, i, prog, pack, ok){
 }
 // Top-level split: separators inside (...) or [...] never split.
 function splitTopLevel(s, seps){
+  return splitSeps(s, seps).map(x => x.t);
+}
+// As splitTopLevel, keeping the separator that ended each part ("" for the last).
+function splitSeps(s, seps){
   const out = []; let depth = 0, cur = "";
   for(const c of String(s)){
     if(c === "(" || c === "[") depth++;
     else if((c === ")" || c === "]") && depth > 0) depth--;
-    if(depth === 0 && seps.includes(c)){ out.push(cur); cur = ""; } else cur += c;
+    if(depth === 0 && seps.includes(c)){ out.push({ t: cur, sep: c }); cur = ""; } else cur += c;
   }
-  out.push(cur);
+  out.push({ t: cur, sep: "" });
   return out;
 }
 // Top-level (...) groups, nested parens kept inside their group; an unclosed "(" is text.
 function parenGroups(s){
-  const t = String(s); const groups = []; let rest = "", depth = 0, cur = "";
-  for(const c of t){
-    if(c === "("){ if(depth === 0) cur = ""; depth++; cur += c; continue; }
-    if(depth > 0){ cur += c; if(c === ")" && --depth === 0) groups.push(cur); continue; }
-    rest += c;
-  }
-  if(depth > 0) rest += cur;
-  return { rest, groups };
+  const ps = parenPieces(s);
+  return { rest: ps.filter(p => !p.g).map(p => p.t).join(""), groups: ps.filter(p => p.g).map(p => p.t) };
 }
-const tidyAlt = s => splitTopLevel(s, [","]).map(x => x.replace(/\s+/g, " ").trim()).filter(Boolean).join(", ");
-// Shared by the display and the matcher: the gloss with its (...) qualifiers taken out, and the
-// qualifiers in order. A gloss that is nothing but qualifiers stays whole.
+// The text as ordered pieces: top-level (...) groups (g: true) and the text between them.
+function parenPieces(s){
+  const out = []; let depth = 0, cur = "", txt = "";
+  const flush = () => { if(txt){ out.push({ t: txt, g: false }); txt = ""; } };
+  for(const c of String(s)){
+    if(c === "("){ if(depth === 0){ flush(); cur = ""; } depth++; cur += c; continue; }
+    if(depth > 0){ cur += c; if(c === ")" && --depth === 0) out.push({ t: cur, g: true }); continue; }
+    txt += c;
+  }
+  if(depth > 0) txt += cur;
+  flush();
+  return out;
+}
+// A reading note in a gloss ("also pr. [shuí]", "(colloquial pr. [nèi])", a bare "[shuí]")
+// spells the answer of a meaning -> reading item: it is shown only after the answer and is
+// never a typed meaning (docs/PACK_SCHEMA.md "Typed meaning").
+const PR_NOTE = /^\(?\s*(?:also|colloquial)\s+pr\.\s*\[[^\]]*\]\s*\)?$/i;
+const BRACKET_NOTE = /^\[[^\]]*\]$/;
+const isPronNote = s => { const t = String(s).trim(); return PR_NOTE.test(t) || BRACKET_NOTE.test(t); };
+// Shared by the display and the matcher. Alternatives are the top-level ";"/","-parts; reading
+// notes are taken out. In the display (pieces) a (...) group that opens its alternative moves
+// to the end of that alternative, any other stays in place; groups are dimmed and never cross
+// alternatives. primary is the display text without groups; a gloss that is nothing but groups
+// stays whole.
 function glossParts(en){
   const g = String(en == null ? "" : en).replace(/\s+/g, " ").trim();
-  const { rest, groups } = parenGroups(g);
-  const primary = splitTopLevel(rest, [";"]).map(tidyAlt).filter(Boolean).join("; ");
-  if(!primary || !groups.length) return { primary: g, qualifiers: [] };
-  return { primary, qualifiers: groups };
+  const notes = [], qualifiers = [], alts = [];
+  let sep = "";
+  splitSeps(g, [";", ","]).forEach(({ t, sep: after }) => {
+    const a = t.trim();
+    if(a && isPronNote(a)){ notes.push(a); sep = sep === ";" || after === ";" ? ";" : after || sep; return; }
+    const ps = parenPieces(a).filter(p => { if(p.g && isPronNote(p.t)){ notes.push(p.t); return false; } return true; });
+    ps.forEach(p => { if(p.g) qualifiers.push(p.t); });
+    const text = ps.filter(p => !p.g).map(p => p.t).join("").replace(/\s+/g, " ").trim();
+    let lead = [];
+    if(text) while(ps.length && (ps[0].g || !ps[0].t.trim())){ const p = ps.shift(); if(p.g) lead.push(p); }
+    const pieces = [];
+    ps.concat(lead.length ? [{ t: " ", g: false }, ...lead.flatMap((p, i) => i ? [{ t: " ", g: false }, p] : [p])] : []).forEach(p => {
+      const last = pieces[pieces.length - 1];
+      if(!p.g && last && !last.dim) last.t += p.t; else pieces.push({ t: p.t, dim: p.g });
+    });
+    pieces.forEach(p => { if(!p.dim) p.t = p.t.replace(/\s+/g, " "); });
+    if(pieces.length){ if(!pieces[0].dim) pieces[0].t = pieces[0].t.replace(/^ /, ""); const z = pieces[pieces.length - 1]; if(!z.dim) z.t = z.t.replace(/ $/, ""); }
+    const kept = pieces.filter(p => p.dim || p.t);
+    if(kept.length) alts.push({ sep: alts.length ? sep : "", pieces: kept, text });
+    sep = after;
+  });
+  if(!qualifiers.length && !notes.length) return { primary: g, qualifiers: [], notes: [], pieces: [{ t: g, dim: false }] };
+  if(!alts.some(a => a.text)) return { primary: g, qualifiers: [], notes: [], pieces: [{ t: g, dim: false }] };
+  const pieces = [];
+  alts.forEach(a => {
+    if(a.sep) pieces.push({ t: a.sep + " ", dim: false });
+    a.pieces.forEach(p => { const last = pieces[pieces.length - 1]; if(!p.dim && last && !last.dim) last.t += p.t; else pieces.push(Object.assign({}, p)); });
+  });
+  const primary = alts.filter(a => a.text).map((a, i) => (i ? (a.sep || ";") + " " : "") + a.text).join("").replace(/\s+/g, " ").trim();
+  return { primary, qualifiers, notes, pieces };
 }
 const GLOSS_DROP = new Set(["a", "an", "the", "sb", "sth", "someone", "somebody", "something", "etc", "eg"]);
-function glossKey(s){
-  const toks = String(s == null ? "" : s).normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase()
+// Words that alone are not a meaning: "to…", "to be…" and the left of "in or out" never count.
+const GLOSS_FUNC = new Set([...GLOSS_DROP, "to", "be", "is", "are", "am", "was", "were", "been", "being", "of", "and", "or", "that"]);
+function glossWords(s){
+  return String(s == null ? "" : s).normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase()
     .replace(/[.'‘’ʼ`]/g, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim().split(" ").filter(Boolean);
+}
+function glossKey(s){
+  const toks = glossWords(s);
   let t = toks.filter(x => !GLOSS_DROP.has(x));
   if(!t.length) t = toks;
   if(t.length > 1 && t[0] === "to") t = t.slice(1);
   return t.join("");
 }
+const glossHasContent = s => glossWords(s).some(x => !GLOSS_FUNC.has(x));
 const GLOSS_GROUPS_MAX = 4;
-// Every alternative with each (...) group kept (brackets dropped) or left out; groups past
-// the cap are always kept.
+// The alternative with each (...) group kept (brackets dropped) or left out; groups past the
+// cap are always kept.
+function glossAltVariants(alt){
+  const ps = parenPieces(alt), n = Math.min(ps.filter(p => p.g).length, GLOSS_GROUPS_MAX), out = [];
+  for(let mask = 0; mask < (1 << n); mask++){
+    let gi = 0;
+    out.push(ps.map(p => { if(!p.g) return p.t; const keep = gi >= n || (mask >> gi) & 1; gi++; return keep ? " " + p.t.slice(1, -1) + " " : " "; }).join(""));
+  }
+  return out;
+}
+// Text before the first top-level " or ": "no matter what or how" also takes "no matter what".
+function leftOfOr(alt){
+  let depth = 0; const s = String(alt);
+  for(let i = 0; i < s.length; i++){
+    const c = s[i];
+    if(c === "(" || c === "[") depth++;
+    else if((c === ")" || c === "]") && depth > 0) depth--;
+    else if(depth === 0 && s.startsWith(" or ", i)) return s.slice(0, i);
+  }
+  return "";
+}
 function glossAltKeys(en){
   const keys = new Set();
-  splitTopLevel(String(en == null ? "" : en), [";", ","]).forEach(alt => {
-    const n = Math.min(parenGroups(alt).groups.length, GLOSS_GROUPS_MAX);
-    for(let mask = 0; mask < (1 << n); mask++){
-      let gi = 0, depth = 0, cur = "", v = "";
-      for(const c of alt){
-        if(c === "("){ if(depth === 0) cur = ""; depth++; cur += c; continue; }
-        if(depth > 0){
-          cur += c;
-          if(c === ")" && --depth === 0){ v += gi >= n || (mask >> gi) & 1 ? " " + cur.slice(1, -1) + " " : " "; gi++; }
-          continue;
-        }
-        v += c;
-      }
-      if(depth > 0) v += cur;
-      const k = glossKey(v); if(k) keys.add(k);
-    }
+  const add = v => {
+    const k = glossKey(v); if(!k) return;
+    // A lone letter left by punctuation ("~'s" -> s) is not a meaning; a gloss "I" is.
+    if(/^\p{L}$/u.test(k) && String(v).trim().toLowerCase() !== k) return;
+    keys.add(k);
+  };
+  splitTopLevel(String(en == null ? "" : en), [";", ","]).forEach(raw => {
+    if(isPronNote(raw)) return;
+    const alt = parenPieces(raw).filter(p => !(p.g && isPronNote(p.t))).map(p => p.t).join("");
+    if(/(?:…|\.\.\.)\s*$/.test(alt) && !glossHasContent(parenGroups(alt).rest)) return;
+    glossAltVariants(alt).forEach(add);
+    const left = leftOfOr(alt);
+    if(left) glossAltVariants(left).forEach(v => { if(glossHasContent(v)) add(v); });
   });
   return keys;
+}
+// characters -> reading as a choice (typedFrom writtenPron, from the second miss): three other
+// readings from pool (the learned words), topped up from all, same syllable count first. Never
+// the answer's reading, a reading the answer's written form also has, or two alike. No rng: the
+// order within a tier is a hash of the two ids; the drill shuffles the shown order.
+function pronChoiceOpts(entry, pool, all){
+  if(!entry || !entry.pron) return [];
+  const ansT = new Set(surfaces(entry)), used = new Set([pronKey(entry.pron)]);
+  (all || []).forEach(v => { if(v && v.pron && surfaces(v).some(x => ansT.has(x))) used.add(pronKey(v.pron)); });
+  const syl = s => splitReading(s).filter(x => x.tone !== undefined).length || 1, n = syl(entry.pron);
+  const hash = s => { let h = 2166136261; for(const c of s){ h ^= c.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
+  const rank = list => list.filter(v => v && v.id !== entry.id && v.pron)
+    .map(v => ({ v, t: syl(v.pron) === n ? 0 : 1, h: hash(entry.id + "|" + v.id) }))
+    .sort((a, b) => a.t - b.t || a.h - b.h || (a.v.id < b.v.id ? -1 : 1)).map(x => x.v);
+  const out = [];
+  for(const v of [...rank(pool || []), ...rank(all || [])]){
+    if(out.length >= 3) break;
+    const k = pronKey(v.pron); if(!k || used.has(k)) continue;
+    used.add(k); out.push(v.pron);
+  }
+  return out;
 }
 // One meaning is enough: the whole typed text, or every part of it split like the gloss, must
 // be one of the gloss's alternatives. Rules: docs/PACK_SCHEMA.md "Typed meaning".
@@ -2846,7 +2934,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
   scriptOpts, scriptRomanOpts, scriptExamples, scriptWordOpts, scriptJoinedForms, scriptItem, learnScriptPlan, scriptReviewScore, scriptTestPlan,
   tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings,
-  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, parenGroups, glossParts, glossKey, glossAltKeys, checkGlossTyped, glossFocusOn, composeSpanReading, spanReadingText,
+  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, composeSpanReading, spanReadingText,
   LEGACY_DROPPED, legacyBackupKey, isLegacyRecord, migrateLegacy };
 if(typeof module!=="undefined" && module.exports) module.exports = API;
 if(root) root.VocabCore = API;

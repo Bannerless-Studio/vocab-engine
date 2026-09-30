@@ -5,7 +5,9 @@
 // when characters are not displayed, stimulus leaks (audio, taps, ruby, readings, tags), the
 // renderer, choice fallback, miss kind, [4] glossFocus render sites, [5] control: with both
 // fields absent the zh markup is byte-identical to main ef44c6e's engine and plans are
-// unchanged. Boots engine/app.html in the fake DOM of tests/pron_aids_checks.js.
+// unchanged. The fix round adds reading notes kept off stimuli, the truncated / lone-letter /
+// "A or B" matcher rules, qualifier placement and the characters -> pinyin choice fallback
+// ([2], [3]). Boots engine/app.html in the fake DOM of tests/pron_aids_checks.js.
 // Run: node tests/typed_from_checks.js
 "use strict";
 const fs = require("fs");
@@ -288,7 +290,42 @@ function walk(api, stopAt){
     ];
     const pb = P.filter(([g, p, q]) => { const r = VC.glossParts(g); return r.primary !== p || JSON.stringify(r.qualifiers) !== JSON.stringify(q); });
     check(`glossParts table (${P.length} cases${pb.length ? `; wrong: ${JSON.stringify(pb.map(x => [x[0], VC.glossParts(x[0])]))}` : ""})`, pb.length === 0);
-    check("every zh gloss accepts its own primary and each of its alternatives", WORDS.every(w => { const g = VC.gloss(w); return VC.checkGlossTyped(g, g) && VC.checkGlossTyped(VC.glossParts(g).primary, g); }));
+    const noSelf = WORDS.filter(w => { const g = VC.gloss(w); return !VC.checkGlossTyped(VC.glossParts(g).primary, g); }).map(w => w.w);
+    check(`every zh gloss accepts its own primary, except those holding a dropped alternative (的 "~'s", 相信 "to…", 只好 "to be…"): ${noSelf.join(" ")}`, noSelf.join(" ") === "的 相信 只好");
+    // Fix round (docs/PACK_SCHEMA.md "Typed meaning" rules 1-5).
+    const G = Object.fromEntries(WORDS.map(w => [w.w, VC.gloss(w)]));
+    const NOTE_WORDS = ["知道", "母亲", "父亲", "谁", "那", "血"];
+    const noteBad = NOTE_WORDS.filter(x => { const p = VC.glossParts(G[x]); const shown = p.pieces.map(y => y.t).join(""); return !p.notes.length || /\[|\]|pr\./.test(shown) || /\[|pr\./.test(p.primary); });
+    check(`rule 1: reading notes of ${NOTE_WORDS.join(" ")} go to notes, never into the display pieces or primary (bad: ${noteBad.join(" ") || "none"})`, noteBad.length === 0);
+    const auditBad = WORDS.filter(w => { const p = VC.glossParts(VC.gloss(w)); return /\[|\bpr\./.test(p.pieces.map(y => y.t).join("")); }).map(w => w.w);
+    check(`rule 1 audit: none of the ${WORDS.length} zh glosses shows "[" or "pr." in its display pieces (${auditBad.join(" ") || "clean"})`, WORDS.length === 1193 && auditBad.length === 0);
+    const R = [
+      ["also pr shui", G["谁"], false], ["also pr. [shuí]", G["谁"], false], ["shui", G["谁"], false], ["who", G["谁"], true],
+      ["colloquial pr nei", G["那"], false], ["those", G["那"], true], ["colloquial pr xie", G["血"], false], ["blood", G["血"], true], ["also pr zhi dao", G["知道"], false],
+      ["to", G["相信"], false], ["to…", G["相信"], false], ["believe", G["相信"], true], ["be", G["只好"], false], ["to be", G["只好"], false], ["to have to", G["只好"], true],
+      ["with", G["和"], true], ["him", G["他"], true],
+      ["s", G["的"], false], ["'s", G["的"], false], ["of", G["的"], true], ["i", G["我"], true], ["I", G["我"], true], ["be", G["是"], true], ["the", "the", true], ["one", "one", true],
+      ["no matter what", G["无论"], true], ["how", G["无论"], false], ["we", G["咱们"], true], ["us", G["咱们"], false], ["in confusion", G["乱"], true], ["disorder", G["乱"], false],
+    ];
+    const rb = R.filter(([v, g, want]) => VC.checkGlossTyped(v, g) !== want);
+    check(`rules 1-4 matcher table (${R.length} cases${rb.length ? `; wrong: ${JSON.stringify(rb.slice(0, 4))}` : ""})`, rb.length === 0);
+    const disp = g => VC.glossParts(g).pieces.map(y => y.dim ? `<${y.t}>` : y.t).join("");
+    const D5 = [
+      ["might; possible (happen)", "might; possible <(happen)>"],
+      ["just at; right in (that time) (that place)", "just at; right in <(that time)> <(that place)>"],
+      ["(of a contagious disease etc) to spread; to propagate", "to spread <(of a contagious disease etc)>; to propagate"],
+      ["to exist; to be alive; (of sb or sth) to be (located) at", "to exist; to be alive; to be <(located)> at <(of sb or sth)>"],
+      ["(joining two nouns) and; together with; with…", "and <(joining two nouns)>; together with; with…"],
+      ["of; ~'s (possessive particle); (used after an attribute)", "of; ~'s <(possessive particle)>; <(used after an attribute)>"],
+      ["(specifier) that; the; those (colloquial pr. [nèi])", "that <(specifier)>; the; those"],
+      ["(completed action marker)", "(completed action marker)"],
+    ];
+    const db = D5.filter(([g, want]) => disp(g) !== want);
+    check(`rule 5 display: a leading group moves to the end of its own alternative, others stay in place, dimmed${db.length ? `; wrong: ${JSON.stringify(db.map(([g]) => disp(g)))}` : ""}`, db.length === 0);
+    const cross = WORDS.filter(w => { const g = VC.gloss(w); const p = VC.glossParts(g); const d = p.pieces.map(y => y.t).join("");
+      const altsIn = VC.splitTopLevel(g, [";", ","]).filter(a => !VC.isPronNote(a)).length, altsOut = VC.splitTopLevel(d, [";", ","]).length;
+      return p.qualifiers.length && altsIn !== altsOut; }).map(w => w.w);
+    check(`rule 5 sweep: no zh gloss changes its number of alternatives in display (${cross.join(" ") || "none"})`, cross.length === 0);
   }
 
   // ---------------------------------------------------------------- [3] app items (zh)
@@ -359,6 +396,40 @@ function walk(api, stopAt){
       fb.kind === "mc" && fb.label === "What does it mean?" && !fb.mount && HAN.test(stripTags(fb.html)) && !/data-wid|class="replay/.test(fb.html) && fb.opts.includes(VC.gloss(w)) && fb.a === VC.gloss(w));
     const k1 = spoken.length; api.drill1(fb); const fbBefore = spoken.length - k1;
     check("choice fallback renders silent", fbBefore === 0);
+    // Fix round rule 6: characters -> pinyin comes back as a silent pinyin choice.
+    {
+      const pr = atTierProg([w]); api.setProg(pr);
+      const pl = typePlan(w, 5); const it = api.itemFromPlan(pl[4], 4, pl);
+      const fb = it.choiceFallback(), fb2 = it.choiceFallback();
+      const learned = new Set(VC.learnedWords(WORDS, PACK, pr).map(x => x.pron));
+      const syl = x => VC.splitReading(x).filter(y => y.tone !== undefined).length;
+      const keys = new Set(fb.opts.map(VC.pronKey));
+      check(`rule 6: characters -> pinyin choice fallback "${fb.label}": characters stimulus, no reading on it, 4 distinct readings incl. the answer (${fb.opts.join(", ")})`,
+        fb.kind === "mc" && fb.label === "How is it said?" && !fb.mount && HAN.test(stripTags(fb.html)) && !MARKED.test(stripTags(fb.html)) && !/data-wid|class="replay|<ruby/.test(fb.html)
+        && fb.opts.length === 4 && keys.size === 4 && fb.a === w.pron && fb.opts[0] === w.pron && fb.opts.every(o => !HAN.test(o)));
+      check(`rule 6: distractors are learned words' readings with the answer's syllable count (${syl(w.pron)}), chosen without rng (same on a second build)`,
+        fb.opts.slice(1).every(o => learned.has(o) && syl(o) === syl(w.pron)) && JSON.stringify(fb.opts) === JSON.stringify(fb2.opts));
+      const k0 = spoken.length; api.drill1(fb); const before = spoken.length - k0;
+      const btn = api.el("o").children.find(b => b.dataset.v === w.pron); btn.click();
+      check("rule 6: renders silent before the answer; the reveal speaks; a pass records as the other fallbacks do", before === 0 && spoken.length - k0 > 0 && api.getD().miss.length === 0);
+    }
+    // Fix round rule 1: reading notes never reach a stimulus, an option or a Words row.
+    {
+      const bad = [];
+      ["知道", "母亲", "父亲", "谁", "那", "血"].forEach(x => {
+        const e = WORDS.find(y => y.w === x); const note = (VC.gloss(e).match(/\[([^\]]*)\]/) || [])[1];
+        api.setProg(atTierProg([e]));
+        const pl = typePlan(e, 5); const typed = pl.map((p, i) => api.itemFromPlan(p, i, pl));
+        const read = api.readItem(e);
+        const sites = { pronType: api.pronTypeItem(e).html, recall: api.recallItem(e).html, wordsRow: api.wordRowHTML(e, "wl"), readOpts: read.opts.map(o => read.optHtml(o)).join("|"),
+          typed: typed.map(t => t.html).join("|") };
+        Object.entries(sites).forEach(([k, h]) => { const t = stripTags(h); if(/\[|\]|\bpr\./.test(t) || (note && t.includes(note))) bad.push(`${x}:${k}`); });
+        if(!stripTags(api.revealBlock(e)).includes("[" + note + "]")) bad.push(`${x}:reveal lacks the note`);
+      });
+      check(`rule 1: no stimulus/option/Words row of 知道 母亲 父亲 谁 那 血 has "[", "pr." or the note's reading; the reveal keeps the note (${bad.join(" ") || "clean"})`, bad.length === 0);
+      const leak = WORDS.filter(e => /\[|\bpr\./.test(stripTags(api.glossOut(VC.gloss(e))))).map(e => e.w);
+      check(`rule 1 audit: glossOut (every stimulus/option/row) of all ${WORDS.length} zh glosses has no "[" or "pr." (${leak.join(" ") || "clean"})`, leak.length === 0);
+    }
     // Words without a pron or with a shared reading.
     const ta = WORDS.find(x => x.w === "他");
     api.setProg(atTierProg([ta]));
@@ -377,8 +448,10 @@ function walk(api, stopAt){
     const { api } = await boot({ seed: 9 });
     const w = WORDS.find(x => x.lv === "1" && /^\(/.test(x.en) && VC.glossParts(x.en).qualifiers.length && unitOf(x));
     const g = VC.gloss(w), gp = VC.glossParts(g);
-    const want = `${VC.escapeHtml(gp.primary)} <span class="dim">${VC.escapeHtml(gp.qualifiers.join(" "))}</span>`;
-    check(`glossOut("${g}") -> primary then dimmed qualifiers`, api.glossOut(g) === want);
+    const want = gp.pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join("");
+    check(`glossOut("${g}") -> the leading qualifier dimmed at the end of its alternative (${want})`, api.glossOut(g) === want && (g !== "(joining two nouns) and; together with; with…" || want === 'and <span class="dim">(joining two nouns)</span>; together with; with…'));
+    check("glossOut with notes (reveal, popover) appends the reading note dimmed; without, it is gone",
+      api.glossOut("who; also pr. [shuí]") === "who" && api.glossOut("who; also pr. [shuí]", true) === 'who <span class="dim">also pr. [shuí]</span>');
     check("glossOut: a gloss with no qualifier is plain escaped text", api.glossOut("to study") === "to study" && api.glossOut("(completed action marker)") === "(completed action marker)");
     api.setProg(atTierProg([w]));
     const raw = VC.escapeHtml(g);

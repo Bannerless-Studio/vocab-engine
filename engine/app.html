@@ -666,14 +666,18 @@ const readingHTML = s => TONES ? VC.toneHTML(s) : escapeHtml(s);
 const twReading = s => TONES ? `<bdi${TA}>${VC.toneHTML(s)}</bdi>` : tw(s);
 const PRON_TYPING = VC.pronTypingOn(PACK);
 // pack.glossFocus (docs/PACK_SCHEMA.md "typedFrom and glossFocus"): a word gloss leads with its
-// meanings and its (...) qualifiers follow, dimmed. Off, glossOut is ui().
+// meanings; a (...) qualifier is dimmed, and one that opens its alternative moves to that
+// alternative's end. Off, glossOut is ui().
 const GLOSS_FOCUS = VC.glossFocusOn(PACK);
-function glossOut(s){
+// withNotes: reading notes ("also pr. [shuí]") are shown after the answer only; they would
+// give a reading away on a stimulus, an option or a Words row.
+function glossOut(s, withNotes){
   if(!GLOSS_FOCUS) return ui(s);
   const p = VC.glossParts(s);
-  return p.qualifiers.length ? `${ui(p.primary)} <span class="dim">${ui(p.qualifiers.join(" "))}</span>` : ui(p.primary);
+  const body = p.pieces.map(x => x.dim ? `<span class="dim">${ui(x.t)}</span>` : ui(x.t)).join("");
+  return withNotes && p.notes.length ? `${body} <span class="dim">${ui(p.notes.join("; "))}</span>` : body;
 }
-const GLOSS_OPT = GLOSS_FOCUS ? glossOut : undefined;
+const GLOSS_OPT = GLOSS_FOCUS ? (o => glossOut(o)) : undefined;
 // Only used with pack.characters.compose; first unit in file order wins.
 const CHAR_READING = new Map();
 CHAR_LIST.forEach(u => { const t = String((u && u.t) || ""); if([...t].length === 1 && !CHAR_READING.has(t)){ const r = VC.unitReading(u, WORDS_BY_ID); if(r) CHAR_READING.set(t, r); } });
@@ -1018,7 +1022,7 @@ function exampleSentencesHTML(entry){
 function revealBlock(entry){
   const p = pronBeside(entry), hear = canHearWord(entry);
   const icon = hear ? ` <span style="color:var(--mute);vertical-align:middle">${TEACH_PLAY_SVG}</span>` : "";
-  return `<div${hear ? ` data-wid="${escapeHtml(entry.id)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${wordFormHTML(entry)}${icon}</div>${p ? `<div class="rp">${readingHTML(p)}</div>` : ""}<div style="color:var(--mute)">${glossOut(VC.gloss(entry))}</div></div>${exampleSentencesHTML(entry)}`;
+  return `<div${hear ? ` data-wid="${escapeHtml(entry.id)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${wordFormHTML(entry)}${icon}</div>${p ? `<div class="rp">${readingHTML(p)}</div>` : ""}<div style="color:var(--mute)">${glossOut(VC.gloss(entry), true)}</div></div>${exampleSentencesHTML(entry)}`;
 }
 const meaningChoices = entry => [VC.gloss(entry), ...VC.meaningOpts(entry, WORDS).map(d=>VC.gloss(d))];
 // Plans skip unplayable words (hearableKinds, learnPair); this fallback covers a voice lost
@@ -1113,7 +1117,14 @@ function meaningTypeItem(entry, fromPron){
       opts: meaningChoices(entry), a: VC.gloss(entry), optHtml: GLOSS_OPT, reveal: revealBlock(entry),
       onAnswer(ok){ markWord(entry.id, ok, typedFallbackKind(ok)); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) }) };
 }
-const writtenPronTypeItem = entry => Object.assign(pronTypeItem(entry), { html: kindTag(PRON_NOUN, TONES ? "tones optional" : "") + stimWritten(entry) });
+// Second miss: "How is it said?" with the same characters, silent until answered (as charSound).
+function writtenPronTypeItem(entry){
+  const choice = opts => opts.length < 3 ? typedRecallFallback(entry) : { kind:"mc", key:"w:"+entry.id, label:"How is it said?", optsClass:"opts-hero", html: stimWritten(entry),
+      opts: [entry.pron, ...opts], a: entry.pron, optHtml: o => `<bdi>${readingHTML(o)}</bdi>`, reveal: revealBlock(entry),
+      onAnswer(ok){ markWord(entry.id, ok, typedFallbackKind(ok)); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+  return Object.assign(pronTypeItem(entry), { html: kindTag(PRON_NOUN, TONES ? "tones optional" : "") + stimWritten(entry),
+    choiceFallback: () => choice(VC.pronChoiceOpts(entry, learnedWords(), WORDS)) });
+}
 const TYPED_ITEM = { word: typeItem, pron: pronTypeItem, written: writtenTypeItem, writtenPron: writtenPronTypeItem,
   writtenMeaning: e => meaningTypeItem(e, false), pronMeaning: e => meaningTypeItem(e, true) };
 function typedFromSlotItem(plan, i){
@@ -1204,7 +1215,7 @@ const canHearUnit = it => { const w = WORDS_BY_ID[it.wordId]; return w ? canHear
 function charRevealBlock(it){
   const tap = WORDS_BY_ID[it.wordId] && canHearWord(WORDS_BY_ID[it.wordId]);
   const icon = tap ? ` <span style="color:var(--mute);vertical-align:middle">${TEACH_PLAY_SVG}</span>` : "";
-  return `<div${tap ? ` data-wid="${escapeHtml(it.wordId)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${escapeHtml(it.t)}${icon}</div>${it.reading ? `<div class="rp">${readingHTML(it.reading)}</div>` : ""}<div style="color:var(--mute)">${glossOut(it.gloss)}</div></div>`;
+  return `<div${tap ? ` data-wid="${escapeHtml(it.wordId)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${escapeHtml(it.t)}${icon}</div>${it.reading ? `<div class="rp">${readingHTML(it.reading)}</div>` : ""}<div style="color:var(--mute)">${glossOut(it.gloss, true)}</div></div>`;
 }
 function charDrillItem(kind, unit){
   const it = VC.charItem(kind, unit, CHAR_CTX);
@@ -1951,7 +1962,7 @@ const glossBox = () => `<div class="gloss" id="gloss"${LTR} hidden></div>`;
 function glossHTML(id, spanGloss, head){
   const w = WORDS_BY_ID[id]; if(!w) return "";
   const g = spanGloss ? String(spanGloss).replace(/\s+/g, " ").trim() : "";
-  const ge = ` <span class="ge"${LTR}>${g ? ui(g) : glossOut(VC.gloss(w))}</span>`;
+  const ge = ` <span class="ge"${LTR}>${g ? ui(g) : glossOut(VC.gloss(w), true)}</span>`;
   if(head){
     const r = head.reading || "";
     if(dispWord(w).isPron && r) return `<span class="gw"${TA}>${readingHTML(r)}${showWrittenBtn(head.surface)}</span>${ge}`;
