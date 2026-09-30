@@ -22,6 +22,7 @@ Scout findings per language: sources, licences, counts, and pipeline gotchas. It
 - Kelly ru.json: 8,958 words, real CEFR tiers, "research use only" → sanity only
 - TORFL lexical minimum: no open copy
 - Gotchas: aspect pairs → separate entries (делать / сделать), cross-link via alt? no — separate; -ся verbs separate lemmas; A1 sentences prefer Nom/Acc (use Case= morph), defer other cases to A2/B1; typing lenient ё/е and no stress; no articles; TTS ru-RU; STT ru-RU
+- lower_level_gloss_re added 2026-09-30: 1 moved (стрелять "to shoot" A2->B1), 0 cleaned; убить/убийство stay B1 through the word ceiling
 
 # German (de / Tatoeba deu) — verified 2026-09-23
 - hermitdave de_full.txt 1,157,685 rows, 100% lowercased → noun capitalisation lost; recover case from kaikki headword, disambiguate homographs (essen/Essen) by kaikki POS

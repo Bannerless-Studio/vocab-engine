@@ -17,7 +17,7 @@ import hashlib
 import json
 import re
 
-from .base import LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_LINKS, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, drop_all_re
+from .base import make_lower_level_gloss_re, LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_LINKS, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, drop_all_re
 
 STRESS = "\u0301\u0300"
 VOWELS = "аеёиоуыэюя"
@@ -281,6 +281,8 @@ class Russian(LanguageSpec):
         r"rape[ds]?|raping|rapist\w*|molest\w*|child abuse|sexual(?:ly)? abuse\w*|paedophil\w*|pedophil\w*)(?![а-яёa-z])",
         re.I))
     sensitive_gloss_re = re.compile(r"\b(" + SENSITIVE_GLOSS_EN + r")\b", re.I)
+    # no violent/sexual gloss below B1 (README content policy: sexual content, violence, weapons; умереть stays neutral core): clean ";"-segments stay, else the word moves to B1
+    lower_level_gloss_re = make_lower_level_gloss_re()
     # lex: diminutive / female-equivalent senses are words of their own, not
     # inflections (столик is not a form of стол, принцесса not of принц)
     derived_form_tags = {"diminutive", "augmentative", "pejorative", "endearing",
