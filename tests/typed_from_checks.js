@@ -307,9 +307,10 @@ function walk(api, stopAt){
       ["with", G["和"], true], ["him", G["他"], true],
       ["s", G["的"], false], ["'s", G["的"], false], ["of", G["的"], true], ["i", G["我"], true], ["I", G["我"], true], ["be", G["是"], true], ["the", "the", true], ["one", "one", true],
       ["no matter what", G["无论"], true], ["how", G["无论"], false], ["we", G["咱们"], true], ["us", G["咱们"], false], ["in confusion", G["乱"], true], ["disorder", G["乱"], false],
+      ["hot", G["汤"], false], ["give", G["打针"], false], ["go on official", G["出差"], false], ["hang", G["挂"], true], ["deep", G["厚"], true], ["actor", G["演员"], true],
     ];
     const rb = R.filter(([v, g, want]) => VC.checkGlossTyped(v, g) !== want);
-    check(`rules 1-4 matcher table (${R.length} cases${rb.length ? `; wrong: ${JSON.stringify(rb.slice(0, 4))}` : ""})`, rb.length === 0);
+    check(`rules 1-4 matcher table (rule 4 only with a one-word right side) (${R.length} cases${rb.length ? `; wrong: ${JSON.stringify(rb.slice(0, 4))}` : ""})`, rb.length === 0);
     // Browser-run edge case: a gloss that is only a (...) group (吗, 了, 分之, 呀) keeps it as its
     // primary and display, and the text inside the brackets is a right answer; an alternative
     // that is only a group (很, 来, 吧, 之) is accepted without its brackets too.

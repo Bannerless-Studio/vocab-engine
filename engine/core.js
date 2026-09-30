@@ -2715,14 +2715,16 @@ function glossAltVariants(alt){
   }
   return out;
 }
-// Text before the first top-level " or ": "no matter what or how" also takes "no matter what".
+// Text before the first top-level " or " when one word follows it: "no matter what or how"
+// also takes "no matter what". A longer right side ("hot or boiling water") shares its tail
+// with the left, so the left alone is not a meaning.
 function leftOfOr(alt){
   let depth = 0; const s = String(alt);
   for(let i = 0; i < s.length; i++){
     const c = s[i];
     if(c === "(" || c === "[") depth++;
     else if((c === ")" || c === "]") && depth > 0) depth--;
-    else if(depth === 0 && s.startsWith(" or ", i)) return s.slice(0, i);
+    else if(depth === 0 && s.startsWith(" or ", i)) return glossWords(parenGroups(s.slice(i + 4)).rest).length === 1 ? s.slice(0, i) : "";
   }
   return "";
 }
