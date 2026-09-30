@@ -78,6 +78,7 @@ Scout findings per language: sources, licences, counts, and pipeline gotchas. It
 - Tagger: CAMeL Tools (MIT) primary; Stanza ar PADT is CC BY-NC-SA; Farasa research-only
 - Kelly ar.json hybrid (Kelly core + wordfreq tail) → soft sanity only
 - Gotchas: MSA filter = require kaikki entry + tagger POS; clitic split via CAMeL; strip ال for lemma, display nouns without article; normalise alef variants/ة-ه/ى-ي/tatweel before matching; broken plurals from kaikki forms + hand table; verb lemma 3sg masc perfective; rtl:true; pron = vocalised headword (+romanization when present); typing: null; TTS ar-SA/ar-EG, STT ar unverified
+- lower_level_gloss_re added 2026-09-30 (+ illicit drugs): 1 moved (قنبلة "bomb" A2->B1), 0 cleaned; the shared blood-kinship exclusion returns عم "paternal blood uncle" to A2
 
 # Hindi (hi / hin) — verified 2026-09-23
 - hermitdave hi_full.txt 21,309 rows (real words; danda । as punct); wordfreq small_hi (26.6k)

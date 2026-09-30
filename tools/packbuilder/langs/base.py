@@ -61,8 +61,12 @@ def drop_all_re(own=None, flags=re.I):
 # prostitution, narcotics, rape, suicide, plus the vulgar SENSITIVE_GLOSS_EN
 # class. "drug" counts only when the gloss has no medical sense (fa دارو
 # "medicine, drug" stays). English only: glosses are English.
-WORD_CEILING_EN = (r"kill(?:s|ed|ing|er|ers)?|murder\w*|weapons?|guns?|pistols?|rifles?|firearms?|"
-                   r"blood|bloody|corpses?|dead bod(?:y|ies)|"
+# "blood" but not kinship or medicine (ar عم "paternal blood uncle", fr
+# tension "blood pressure"): neutral core words, shared by both lists below
+BLOOD = (r"blood(?! (?:uncles?|aunts?|relatives?|relations?|brothers?|sisters?|kin\w*|ties|"
+         r"pressure|types?|tests?|sugar|vessels?|cells?|donors?|groups?))")
+WORD_CEILING_EN = (r"kill(?:s|ed|ing|er|ers)?|murder\w*|weapons?|guns?|pistols?|rifles?|firearms?|" +
+                   BLOOD + r"|bloody|corpses?|dead bod(?:y|ies)|"
                    r"sex|sexy|sexual\w*|naked|nude|prostitut\w*|narcotics?|"
                    r"rape[ds]?|raping|rapist\w*|suicid\w*|" + SENSITIVE_GLOSS_EN)
 _NARCOTIC_DRUG = r"^(?!.*(?:medic|pharmac))(?=.*(?<![A-Za-z])drugs?(?![A-Za-z]))"
@@ -73,6 +77,33 @@ def make_word_ceiling_re(own=None, flags=re.I):
     spec's own English gloss terms `own` (pattern string, whole words)."""
     terms = WORD_CEILING_EN if own is None else WORD_CEILING_EN + "|" + own
     return re.compile(r"(?<![A-Za-z])(?:" + terms + r")(?![A-Za-z])|" + _NARCOTIC_DRUG, flags)
+
+
+# Shared list for spec.lower_level_gloss_re (core/words.py): below the top
+# level a matching ";"-segment is dropped from the gloss, and a word with no
+# clean segment moves to the top level. Modelled on id/ja/ko's list plus the
+# sexual and weapon terms of WORD_CEILING_EN, so a mixed gloss ("to hit, to
+# beat; to kill") keeps its clean senses instead of moving whole. Word-bounded:
+# stab never matches stable; the verb "explode" is left out (hi फटना "to burst,
+# to explode, to pop" is core), explosion/explosive stay. Death words (die,
+# dead) stay out: es morir/muerto and ru умереть are neutral core. "sex" next
+# to "gender" is the category (ar جنس "gender, sex; kind, type"): that segment
+# stays, so the word ceiling keeps the word at the top level instead of
+# shipping it lower with only its minor sense.
+LOWER_LEVEL_GLOSS_EN = (r"kill\w*|murder\w*|rape[ds]?|raping|rapist\w*|shoot\w*|stab(?:s|bed|bing)?|strangl\w*|"
+                        r"porn\w*|prostitut\w*|suicid\w*|bomb\w*|explosi\w*|poison\w*|" + BLOOD + r"\w*|" +
+                        r"corpses?|dead bod(?:y|ies)|(?<!gender, )sex(?!, gender)|sexy|sexual\w*|naked|nude|orgasm\w*|condoms?|"
+                        r"weapons?|guns?|pistols?|rifles?|firearms?")
+# per-pack additions, where the repo's content policy names them
+LOWER_LEVEL_DRUGS_EN = r"narcotics?|cocaine|heroin|opium|marijuana|cannabis|hashish"
+LOWER_LEVEL_ALCOHOL_EN = r"alcohol\w*|liquors?|beers?|wines?|whisk(?:e)?y|drunk\w*"
+
+
+def make_lower_level_gloss_re(own=None, flags=re.I):
+    """spec.lower_level_gloss_re: the shared LOWER_LEVEL_GLOSS_EN plus a spec's
+    own English gloss terms `own` (pattern string), all whole words."""
+    terms = LOWER_LEVEL_GLOSS_EN if own is None else LOWER_LEVEL_GLOSS_EN + "|" + own
+    return re.compile(r"\b(?:" + terms + r")\b", flags)
 
 
 EXAMPLE_SID_BASE = 95_000_000   # sids of example-only written sentences (spec.example_rows)
