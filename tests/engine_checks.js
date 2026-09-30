@@ -928,6 +928,12 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   // --- showPron default comes from the pack
   check("showPron default comes from pack.showPron", VC.defaultProg({levels:[], showPron:false}).showPron === false && VC.defaultProg({levels:[], showPron:true}).showPron === true);
 
+  // --- word popover (.gloss) is a floating card clear of the top edge (owner report 2026-09-30)
+  {
+    const g = (fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8").match(/\n  \.gloss\{([^}]*)\}/) || [])[1] || "";
+    check("popover .gloss: sticky below the top edge + safe-area inset, visible --mute border, shadow",
+      /position:sticky/.test(g) && /top:calc\(env\(safe-area-inset-top, 0px\) \+ \d+px\)/.test(g) && /border:1(\.5)?px solid var\(--mute\)/.test(g) && /box-shadow:/.test(g));
+  }
   // --- app.html render-site guard: every target-text element carries ${TA} (lang/dir/font)
   const app = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
   const bare = [...app.matchAll(/class="(big wd|med wd|wd|st|rw)"(?!\$\{TA\})/g)].map(m=>m[0]);
