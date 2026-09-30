@@ -70,6 +70,7 @@ Scout findings per language: sources, licences, counts, and pipeline gotchas. It
 - Tagger: spaCy ko_core_news_sm 3.8.0, CC BY-SA 4.0, no external tokenizer dep. Avoid KoNLPy (GPL).
 - NIKL 한국어 학습용 어휘 목록 5,965 words graded 초/중/고 (982/2,111/2,872), KOGL Type 1 (≈CC BY) → could SHIP as level source (초급≈A1-A2, 중급≈B1); fetch needs browser (gongu.copyright.or.kr mirror)
 - Gotchas: lemma -다 form; register 반말/존댓말 (prefer polite in examples); Sino vs native numerals both; romanisation: write own RR (avoid GPL lib); typing: null; sentence coverage risk — supplement Tatoeba with other CC corpora or generated+reviewed sentences
+- 거/꺼 + particles after a modifier (않다는 거는) link 것 + particle, not 걸다 (geo_after_modifier, 2026-09-30; tag cache t3): 1 sentence relinked
 
 # Arabic (ar / Tatoeba ara) — verified 2026-09-23
 - hermitdave ar_full.txt 2,507,189 lines (punctuation not stripped; MSA+dialect mix)

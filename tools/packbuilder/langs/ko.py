@@ -867,6 +867,38 @@ def limit_modifier(tok):
     return tok[0].endswith("는") or (tok[2] == "ADJ" and is_syl(tok[0][-1]) and fin(tok[0][-1]) == T_IDX["ㄴ"])
 
 
+def modifier_form(tok):
+    """A verb/adjective eojeol ending in a modifier syllable (-ㄴ/-는/-ㄹ/-던:
+    하는, 한, 할, 않다는), i.e. one that must stand before a noun."""
+    return tok[2] in ("VERB", "ADJ") and bool(tok[0]) and is_syl(tok[0][-1]) and \
+        fin(tok[0][-1]) in (T_IDX["ㄴ"], T_IDX["ㄹ"])
+
+
+def geo_after_modifier(out):
+    """The spoken 것 spelled 거/꺼 with particles (거는, 거를, 거도, 꺼만) after a
+    modifier form is 것 + particles, never the verb the analyser reads in the
+    whole eojeol (거는 = 걸다's modifier "hanging"): a modifier needs a noun
+    after it. Bare 거, 거야 and 건/걸/게 are handled by HAND and the pass after
+    this one. out: linked pieces [surface, lemma, upos, misc]; returns a new list."""
+    res, prev = [], None
+    for t in out:
+        rest = t[0][1:]
+        # only a whole-eojeol verb reading is rewritten: 거의 "almost" stays the adverb
+        ch = particle_chains("거", rest) if t[0][:1] in ("거", "꺼") and rest and t[2] in ("VERB", "ADJ") else []
+        if ch and ch[0] and prev is not None and modifier_form(prev):
+            x = t[3].split("|")[-1]
+            res.append([t[0][0], "것", "NOUN", f"Ko=closed|G=NOUN|{x}"])
+            res.extend([s, key, "X", f"Ko=closed|G=PART|{x}"] for s, key in ch[0])
+            prev = res[-len(ch[0]) - 1]
+            continue
+        res.append(t)
+        if t[2] == "PUNCT":
+            prev = None
+        elif t[2] != "X" or "Ko=unk" in t[3]:
+            prev = t
+    return res
+
+
 BOUND_AFTER_MOD = ("수", "것", "거", "때", "줄", "곳", "적", "리", "뻔", "만큼", "데", "뿐", "예정", "계획")
 # nouns a verb modifier 한 (하다 "did") stands before, never a native numeral's counter
 VERB_MOD_NOUNS = {"일", "말", "짓", "것", "거", "적", "게", "줄", "건", "걸", "얘기", "이야기", "약속", "생각"}
@@ -1372,7 +1404,7 @@ class Korean(LanguageSpec):
             "https://raw.githubusercontent.com/julienshim/combined_korean_vocabulary_list/master/results.tsv",
     }
     nikl_file = "nikl_results.tsv"
-    versions = {"corpus": "c1", "tag": "t2", "lex": "l1"}
+    versions = {"corpus": "c1", "tag": "t3", "lex": "l1"}   # t3: geo_after_modifier changes fix_sentence output
 
     # typed production on: caseSensitive is irrelevant (no case in Hangul),
     # accents lenient is a no-op (no combining marks to fold), strictFromLevel
@@ -1834,6 +1866,7 @@ class Korean(LanguageSpec):
             # -고 나서 "after doing": 나서 is grammar, not 나서다 "to step forward"
             if t[0] in ("나서", "나서는", "나서도", "나서야") and i and out[i - 1][0].endswith("고"):
                 out[i] = [t[0], t[0], "X", "Ko=gram"]
+        out = geo_after_modifier(out)
         # numerals: a numeral spelling right before a counter (삼 년, 두 명, 천 원)
         # or one the tagger reads as a numeral (nn*: 두 나라, 한 부분, 오 곱하기 오)
         # is the number; elsewhere 이/일/팔 keep their word reading
