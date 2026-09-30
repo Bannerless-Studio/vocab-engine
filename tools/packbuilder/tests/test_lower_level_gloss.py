@@ -56,11 +56,11 @@ class LowerLevelGloss(unittest.TestCase):
                 with self.subTest(code=code, gloss=g):
                     self.assertEqual(bool(rx(code).search(g)), code in ("ar", "fa", "hi", "ur"))
 
-    def test_alcohol_only_in_urdu(self):
+    def test_alcohol_only_in_urdu_and_hindi(self):
         for code in CODES:
             for g in ALCOHOL:
                 with self.subTest(code=code, gloss=g):
-                    self.assertEqual(bool(rx(code).search(g)), code == "ur")
+                    self.assertEqual(bool(rx(code).search(g)), code in ("ur", "hi"))
 
     def test_mixed_gloss_keeps_its_clean_senses(self):
         self.assertEqual(clean("ur", "to hit, to beat; to kill"), "to hit, to beat")
@@ -73,6 +73,10 @@ class LowerLevelGloss(unittest.TestCase):
         # ar جنس: dropping "gender, sex" would ship the word at A2 as "kind, type"
         self.assertEqual(clean("ar", "gender, sex; kind, type"), "gender, sex; kind, type")
 
+    def test_hindi_sharab_wine_moves_up(self):
+        # hi शराब "wine" sat at A2 while the hi sentence tier screens drunkenness
+        self.assertIsNone(clean("hi", "wine"))
+        self.assertEqual(clean("hi", "wine; drink"), "drink")
 
     def test_word_ceiling_skips_kinship_and_medical_blood(self):
         # the shared ceiling (every spec) shares BLOOD: ar عم stays a core word

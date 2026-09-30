@@ -870,8 +870,14 @@ def limit_modifier(tok):
 def modifier_form(tok):
     """A verb/adjective eojeol ending in a modifier syllable (-ㄴ/-는/-ㄹ/-던:
     하는, 한, 할, 않다는), i.e. one that must stand before a noun."""
-    return tok[2] in ("VERB", "ADJ") and bool(tok[0]) and is_syl(tok[0][-1]) and \
-        fin(tok[0][-1]) in (T_IDX["ㄴ"], T_IDX["ㄹ"])
+    if tok[2] not in ("VERB", "ADJ") or not tok[0] or not is_syl(tok[0][-1]):
+        return False
+    # ㄴ/ㄹ-final endings that are not modifiers: conditional -면 (하면) and
+    # -든/-거든 (하거든) are connectives, and -ㄹ걸 (할걸) is a sentence ending;
+    # none of them takes a noun, so a following 거는 is not 것 + 는 there
+    if tok[0][-1] in "면든" or (len(tok[0]) > 1 and tok[0][-1] == "걸"):
+        return False
+    return fin(tok[0][-1]) in (T_IDX["ㄴ"], T_IDX["ㄹ"])
 
 
 def geo_after_modifier(out):

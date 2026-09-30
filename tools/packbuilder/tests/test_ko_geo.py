@@ -74,6 +74,21 @@ class GeoAfterModifier(unittest.TestCase):
         toks = [V("하고", "하다"), V("거는", "걸다")]
         self.assertEqual(geo_after_modifier([list(t) for t in toks]), toks)
 
+    def test_conditional_and_concessive_endings_are_not_modifiers(self):
+        for conn in ("하면", "하거든", "먹든", "할걸"):
+            with self.subTest(conn=conn):
+                toks = [V(conn, "하다"), V("거는", "걸다")]
+                self.assertEqual(geo_after_modifier([list(t) for t in toks]), toks)
+
+    def test_geo_words_untouched(self):
+        # 거기 "there" and 거리 "street" are nouns, and never a verb reading
+        for w in ("거기", "거리"):
+            with self.subTest(w=w):
+                toks = [V("하는", "하다"), N(w)]
+                self.assertEqual(geo_after_modifier([list(t) for t in toks]), toks)
+                toks = [V("하는", "하다"), V(w, "걸다")]
+                self.assertEqual(geo_after_modifier([list(t) for t in toks]), toks)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -630,7 +630,7 @@ class Arabic(LanguageSpec):
         "تحرش\\s*جنسي\\w*|اعتداء\\s*جنسي\\w*|الاعتداء\\s*الجنسي)"
         f"(?![{LET}a-z])|" + POLITICAL_EN + "|" + GROUP_CLAIM_EN + "|" + MISSPELT_RE.pattern, re.I))
     sensitive_gloss_re = re.compile(r"\b(" + SENSITIVE_GLOSS_EN + r")\b", re.I)
-    # no violent/sexual gloss below B1 (sexual content, violence, weapons and drugs (the A1/A2 sentence tier below)): clean ";"-segments stay, else the word moves to B1
+    # no gloss below B1 on sexual content, violence, weapons or drugs, the same topics the A1/A2 sentence tier below screens: clean ";"-segments stay, else the word moves to B1
     lower_level_gloss_re = make_lower_level_gloss_re(LOWER_LEVEL_DRUGS_EN)
     # A1/A2 tier: sexual content, threats/violence, dying, weapons, drugs
     sensitive_re = re.compile(

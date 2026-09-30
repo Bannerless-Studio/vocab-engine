@@ -36,7 +36,7 @@ import json
 import re
 import unicodedata
 
-from .base import (make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN,
+from .base import (make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LOWER_LEVEL_ALCOHOL_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN,
                    SENSITIVE_GLOSS_EN, drop_all_re, make_word_ceiling_re)
 
 DEV = "\u0900-\u0963\u0971-\u097f"          # Devanagari letters and signs (no danda, no digits)
@@ -858,8 +858,8 @@ class Hindi(LanguageSpec):
         "|^(?=[\\s\\S]*" + _NB + "(?:" + _alt(RELIGION) + "|" + RELIGION_EN + ")" + _NA + ")" +
         "(?=[\\s\\S]*" + _NB + "(?:" + _alt(POLEMIC) + "|" + POLEMIC_EN + ")" + _NA + ")" + "|" + POLICY_RX, re.I))
     sensitive_gloss_re = re.compile(r"\b(" + SENSITIVE_GLOSS_EN + r")\b", re.I)
-    # no violent/sexual gloss below B1 (tools/README content policy adds drugs): clean ";"-segments stay, else the word moves to B1
-    lower_level_gloss_re = make_lower_level_gloss_re(LOWER_LEVEL_DRUGS_EN)
+    # no violent/sexual gloss below B1 (tools/README content policy adds drugs); alcohol too, since the hi sentence tier below already treats drunkenness (शराबी/नशा, drunk) as sensitive: clean ";"-segments stay, else the word moves to B1
+    lower_level_gloss_re = make_lower_level_gloss_re(LOWER_LEVEL_DRUGS_EN + "|" + LOWER_LEVEL_ALCOHOL_EN)
     sensitive_re = re.compile(_NB + "(?:" + _alt(SENSITIVE_HI) + "|" + SENSITIVE_EN +
                               r"|die[ds]?|dying|death|weapons?|guns?|knife|knives|bomb\w*|drugs?|drunk\w*|blood)" +
                               _NA, re.I)
