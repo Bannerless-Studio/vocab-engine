@@ -38,7 +38,7 @@ import json
 import re
 from collections import Counter
 
-from .base import LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN, SENSITIVE_GLOSS_EN, drop_all_re
+from .base import make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LOWER_LEVEL_ALCOHOL_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN, SENSITIVE_GLOSS_EN, drop_all_re
 
 ZWNJ = "‌"
 LET = "ء-غف-يٱ-ۓۺ-ۿ"
@@ -1061,6 +1061,8 @@ class Urdu(LanguageSpec):
         "rape[ds]?|raping|rapist\\w*|molest\\w*|child abuse|sexual(?:ly)? abuse\\w*|paedophil\\w*|pedophil\\w*)"
         "(?![" + LET + "a-z])", re.I))
     sensitive_gloss_re = re.compile(r"\b(" + SENSITIVE_GLOSS_EN + r")\b", re.I)
+    # no violent/sexual gloss below B1 (tools/README content policy adds drugs and alcohol): clean ";"-segments stay, else the word moves to B1
+    lower_level_gloss_re = make_lower_level_gloss_re(LOWER_LEVEL_DRUGS_EN + "|" + LOWER_LEVEL_ALCOHOL_EN)
     # A1/A2 tier: sexual content, threats/violence, dying/death wishes, weapons, drugs;
     # religious/communal/political side-taking is dropped at every level (RELIGIOUS_RE)
     sensitive_re = re.compile(

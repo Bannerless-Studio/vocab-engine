@@ -96,6 +96,7 @@ Scout findings per language: sources, licences, counts, and pipeline gotchas. It
 - Tatoeba urd 2,851 sentences, 2,433 w/ eng link (THIN); audio 2 permissive → none; hin↔urd links only 246
 - Tagger: Stanza ur (UD Urdu-UDTB, CC BY-NC-SA 4.0)
 - Gotchas: RTL + Noto Nastaliq Urdu (Google Fonts ok) + larger line-height; normalise ي/ك/ه → ی/ک/ہ, ZWNJ; sentences per word sparse → supplement with reviewed generated sentences; typing null
+- lower_level_gloss_re added 2026-09-30 (+ illicit drugs, alcohol): 2 moved (شراب "alcohol", زہر "poison" A2->B1), 1 cleaned (مارنا "to hit, to beat; to kill" -> "to hit, to beat", B1->A1); شراب keeps 1 sentence
 
 # Spanish (es)
 - Sources are documented in the spanish repo.
