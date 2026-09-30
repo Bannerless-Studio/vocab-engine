@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from packbuilder.langs import get_spec  # noqa: E402
 
-CODES = ("ar", "es", "fa")
+CODES = ("ar", "es", "fa", "hi")
 SHARED_HITS = ["to kill", "murder", "killer, murderer", "to shoot, to fire", "bomb, grenade", "explosion, blast",
                "poison", "blood", "sex", "sexual", "sexy", "naked, nude", "corpse", "dead body", "weapon, arm",
                "gun, rifle", "pistol, handgun", "firearm", "suicide", "to rape", "pornography", "prostitute",

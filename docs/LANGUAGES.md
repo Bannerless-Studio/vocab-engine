@@ -88,6 +88,7 @@ Scout findings per language: sources, licences, counts, and pipeline gotchas. It
 - Tagger: Stanza hi (UD Hindi-HDTB, CC BY-NC-SA 4.0 — non-commercial like Italian); indic_nlp_library MIT for normalisation
 - No graded list
 - Gotchas: nukta/chandrabindu normalisation; compound verbs (कर देना) multiword; gender m/f; verb lemma -ना; LTR Devanagari; pron = kaikki romanization; typing null; TTS hi-IN unverified
+- lower_level_gloss_re added 2026-09-30 (+ illicit drugs): 2 moved (बम "bomb", विस्फोट "explosion" A2->B1), 0 cleaned
 # Urdu (ur / urd)
 - hermitdave ur_full.txt 9,592 rows; wordfreq small_ur (23.1k)
 - kaikki Urdu jsonl.gz 4.9MB, 10,421 entries; romanization 99.5%; vocalised forms in head args
