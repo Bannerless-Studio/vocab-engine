@@ -580,11 +580,13 @@ def overridden_gloss(sp, k, gloss, applied):
 
 
 def check_gloss_overrides(overrides, applied, records, words):
-    """Every gloss_overrides.json key must reach a gloss: applied by
-    build_words, or by a spec hook (hi folds keys into fixed glosses; ko
-    builds entries from them), seen as a record or shipped word under that key
-    carrying the override text. Returns [(key, reason)] for the rest; a
-    silently skipped override ships the gloss it was written to replace."""
+    """Every gloss_overrides.json key must shape the build: applied by
+    build_words or registered by a spec hook that consumed it (applied holds
+    both: spec.use_override, e.g. ko/id entries built from a hand gloss, ja
+    merges and links decided by one), or seen as a record or shipped word
+    under that key carrying the override text (hi folds keys into fixed
+    glosses). Returns [(key, reason)] for the rest; a silently skipped
+    override ships the gloss it was written to replace."""
     have = {}
     for rec in records.values():
         have.setdefault(override_key(rec["lemma"], rec["group"]), []).append((rec["group"], rec["en"]))

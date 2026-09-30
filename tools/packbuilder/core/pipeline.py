@@ -197,7 +197,9 @@ def finish_words(env, ctx, words, records, top3000):
     # build_words sorted by rank before the hooks ran; re-sorting after them
     # keeps the Learn-set order whatever a spec hook does to the list
     sort_by_rank(sp.level_ids, words)
-    bad = check_gloss_overrides(sp.gloss_overrides or {}, ctx.get("gloss_overrides_applied", set()), records, words)
+    bad = check_gloss_overrides(sp.gloss_overrides or {},
+                                ctx.get("gloss_overrides_applied", set()) | getattr(sp, "overrides_used", set()),
+                                records, words)
     if bad:
         raise SystemExit("ERROR gloss_overrides.json: keys the build cannot apply (fix or delete them):\n" +
                          "\n".join(f"  {k}: {why}" for k, why in bad))

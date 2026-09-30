@@ -1596,6 +1596,7 @@ class Korean(LanguageSpec):
                 continue
             lexicon.E[lem].append({"p": kp[0],
                           "s": [[self.gloss_overrides[key], "", [], ""]], "ht": set()})
+            self.use_override(key)
 
     def nikl_floors(self):
         """NIKL grade as a level floor: a word graded 중급 (B) only is never
