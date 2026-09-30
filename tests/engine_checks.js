@@ -928,15 +928,22 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   // --- showPron default comes from the pack
   check("showPron default comes from pack.showPron", VC.defaultProg({levels:[], showPron:false}).showPron === false && VC.defaultProg({levels:[], showPron:true}).showPron === true);
 
+  // --- word popover (.gloss) is a floating card clear of the top edge (owner report 2026-09-30)
+  {
+    const g = (fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8").match(/\n  \.gloss\{([^}]*)\}/) || [])[1] || "";
+    check("popover .gloss: sticky below the top edge + safe-area inset, 2px --mute border (1.5px computes to 1px at DPR 1), shadow",
+      /position:sticky/.test(g) && /top:calc\(env\(safe-area-inset-top, 0px\) \+ \d+px\)/.test(g) && /border:2px solid var\(--mute\)/.test(g) && /box-shadow:/.test(g));
+  }
   // --- app.html render-site guard: every target-text element carries ${TA} (lang/dir/font)
   const app = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
   const bare = [...app.matchAll(/class="(big wd|med wd|wd|st|rw)"(?!\$\{TA\})/g)].map(m=>m[0]);
   const optsW = [...app.matchAll(/optHtml: wordOptHtml\([^)]*\)(, optsT: true)?/g)];
   check("app.html: every target-text element (big/med/wd/st/rw) carries ${TA}; every word-option item sets optsT",
     bare.length === 0 && optsW.length >= 2 && optsW.every(m=>!!m[1]) && /id="tin"[^>]*\$\{it\.inputTA !== undefined \? it\.inputTA : TA\}/.test(app)
-    // the only overrides are the typed-reading item and the script primer's symType (both
-    // type a Latin reading or romanisation, not the target script)
-    && [...app.matchAll(/inputTA: /g)].length === 2 && /function pronTypeItem[\s\S]*?inputTA: ""/.test(app)
+    // the only overrides are the typed-reading item, the typed-meaning item (English) and the
+    // script primer's symType (both type a Latin reading or romanisation, not the target script)
+    && [...app.matchAll(/inputTA: /g)].length === 3 && /function pronTypeItem[\s\S]*?inputTA: ""/.test(app)
+    && /function meaningTypeItem[^\n]*\n(?:[^\n]*\n){0,3}[^\n]*inputTA: ' lang="en"'/.test(app)
     && /if\(k === "symType"\)\{[^\n]*\n[^\n]*\n\s*return \{ kind:"type", key: it\.key, label:"Type how it sounds", html: big\(it\.show\), inputTA: ""/.test(app));
 
   // Favicon: a data: URI icon link so GitHub Pages stops 404ing /favicon.ico on every load.
@@ -1820,7 +1827,7 @@ return {
       afterMiss === JSON.stringify({ r:4, w:1, s:2, k:"recall" }) && JSON.stringify(pr.w[bid]) === JSON.stringify({ r:4, w:1, s:2 }) && pr.s[one.id] && pr.s[one.id].w === 1);
     const saved = pr.w[bid]; delete pr.w[bid]; api.gapSentence(one, false).onAnswer(false);
     check("cloze: a blank word with no record is not given one", !(bid in pr.w)); pr.w[bid] = saved;
-    const typPack = Object.assign({}, PACK, { typing:{ caseSensitive:false, accents:"lenient", strictFromLevel:null } });
+    const typPack = Object.assign({}, PACK, { typing:{ caseSensitive:false, accents:"lenient", strictFromLevel:null }, typedFrom: undefined });
     const { api: api4 } = await bootApp([{ lang:"zh-CN", name:"x" }], { pack: typPack }); const pr4 = api4.getProg();
     pr4.w[bid] = { r:4, w:1, s:2, k:"recall" };
     const gt = api4.gapSentence(one, true); gt.onAnswer(false);
@@ -1835,7 +1842,7 @@ return {
   // comes back as its choice counterpart (word -> recall, typed gap -> choice gap), which
   // keeps k at "type" (a pass there leaves it, a miss records type).
   try{
-    const typPack = Object.assign({}, PACK, { typing:{ caseSensitive:false, accents:"lenient", strictFromLevel:null } });
+    const typPack = Object.assign({}, PACK, { typing:{ caseSensitive:false, accents:"lenient", strictFromLevel:null }, typedFrom: undefined });
     const b = await bootApp([{ lang:"zh-CN", name:"x" }], { pack: typPack }); const pr = b.api.getProg(), el = id => b.document.getElementById(id);
     const w = WORDS[60]; pr.w[w.id] = { r:2, w:0, s:2 };
     const typeOnce = v => { el("tin").value = v; el("submit").click(); };

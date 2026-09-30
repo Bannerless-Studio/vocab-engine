@@ -59,6 +59,11 @@
   "w0144"
  ],
  "typing": "pron",
+ "typedFrom": [
+  "written",
+  "pron"
+ ],
+ "glossFocus": true,
  "showPron": true,
  "hasLessons": true,
  "spaced": false,

@@ -200,6 +200,11 @@ def main(argv):
         # instead (hsk's typed drill; docs/PACK_SCHEMA.md "Pronunciation aids"): the same
         # word slot recall uses, never a stand-alone pinyin drill.
         "typing": "pron",
+        # Typed items from the target side too (characters -> pinyin, characters -> meaning,
+        # pinyin -> meaning) and focused gloss display; zh only until it is perfected
+        # (docs/PACK_SCHEMA.md "typedFrom and glossFocus", TODO.md).
+        "typedFrom": ["written", "pron"],
+        "glossFocus": True,
         "showPron": True,
         "hasLessons": True,
         "spaced": False,

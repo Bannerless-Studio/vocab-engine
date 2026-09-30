@@ -33,6 +33,8 @@ const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const LEGACY = loadConst(path.join(ZH, "legacy.js"), "LEGACY");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
+// pack.glossFocus renders the gloss as glossParts pieces, qualifiers dimmed (app.html glossOut).
+const glossShown = g => VC.glossFocusOn(PACK) ? VC.glossParts(g).pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join("") : VC.escapeHtml(g);
 const CFG = VC.charsConfig(PACK);
 console.log(`Loaded zh pack: ${WORDS.length} words, ${SENTENCES.length} sentences, ${CHARACTERS.length} units, label ${CFG.label}`);
 
@@ -227,7 +229,7 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     const cs = st.snap.cset;
     check("Learn teaches a unit set with 10 teach cards", count(h, /class="charteach"/g) === 10 && cs.units.length === 10);
     check("teach card: written form, reading and gloss of every unit",
-      cs.units.every(u => h.includes(`>${u.t}</span>`) && h.includes(VC.unitReading(u, BY_ID)) && h.includes(VC.escapeHtml(VC.unitGloss(u, BY_ID)))));
+      cs.units.every(u => h.includes(`>${u.t}</span>`) && h.includes(VC.unitReading(u, BY_ID)) && h.includes(glossShown(VC.unitGloss(u, BY_ID)))));
     const withEx = cs.units.filter(u => VC.exampleSentences(BY_ID[u.words[0]], SENTENCES, PACK, 1).length).length;
     check(`teach cards carry the linked word's example sentence (${withEx} of 10 have one)`, count(h, /class="sent[" ]/g) === withEx && withEx > 0);
     check("teach heading uses the stage label and set position", /<bdi[^>]*>字<\/bdi>, set 1 of \d+: the written form/.test(h));
