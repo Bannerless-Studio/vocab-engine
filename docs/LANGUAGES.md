@@ -94,6 +94,10 @@ Scout findings per language: sources, licences, counts, and pipeline gotchas. It
 - Tagger: Stanza ur (UD Urdu-UDTB, CC BY-NC-SA 4.0)
 - Gotchas: RTL + Noto Nastaliq Urdu (Google Fonts ok) + larger line-height; normalise ي/ك/ه → ی/ک/ہ, ZWNJ; sentences per word sparse → supplement with reviewed generated sentences; typing null
 
+# Spanish (es)
+- Sources are documented in the spanish repo.
+- lower_level_gloss_re added 2026-09-30: 2 moved (disparar "to shoot", la bomba A2->B1), 0 cleaned; matar/sangre/sexo stay B1 through the word ceiling
+
 # Swahili / Somali — verified 2026-09-23, updated 2026-09-27 (build + scouts), spec committed 2026-09-29 (see below)
 ## Swahili (swh) PUBLISHED — https://bannerless-studio.github.io/swahili/ (2026-09-29, engine bf612ee)
 Published 2026-09-29: 2,000 words (A1 600/A2 700/B1 700), 2,777 sentences (A1 522/A2 976/B1 1,279, every word ≥2, 678 written and marked `"src":"gen"`), 60 A1/A2/B1 reading passages. Sentence review ran three hand-read QA rounds plus a re-QA, with the last fresh 20% samples under 1% defects; details in `../swahili/tools/REPORT.md`. The word/sentence/passage counts and check.sh status below are from the 2026-09-27 build session and are superseded by the numbers above; kept for the build-history detail (tagger, corpus sourcing, md5s from that session).

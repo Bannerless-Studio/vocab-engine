@@ -7,7 +7,7 @@ repo's tools/.
 """
 import re
 
-from .base import LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_AUDIO, drop_all_re
+from .base import make_lower_level_gloss_re, LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_AUDIO, drop_all_re
 
 VOWELS = "aeiouáéíóúü"
 STRONG = "aeoáéó"
@@ -282,6 +282,8 @@ class Spanish(LanguageSpec):
     sensitive_re = SENSITIVE_RE
     drop_all_levels = DROP_ALL_LEVELS_RE
     sensitive_gloss_re = re.compile(r"\b(" + SENSITIVE_GLOSS_EN + r")\b", re.I)
+    # no violent/sexual gloss below B1 (README content policy: sexual content, violence, weapons; morir/muerto stay neutral core): clean ";"-segments stay, else the word moves to B1
+    lower_level_gloss_re = make_lower_level_gloss_re()
     # pronoun paradigms the small tagger mangles (vosotros NOUN -> "vosotro",
     # contigo PROPN, conmigo NOUN/ADP): the surface is the word
     closed_surfaces = {**{p: (p, "PRON") for p in ("yo tú él ella ello nosotros nosotras vosotros vosotras "
