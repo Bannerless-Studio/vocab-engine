@@ -2770,6 +2770,8 @@ function pronChoiceOpts(entry, pool, all){
 function checkGlossTyped(val, en){
   const keys = glossAltKeys(en), v = String(val == null ? "" : val);
   if(keys.has(glossKey(v))) return true;
+  // The whole gloss typed as written is right, reading notes and fragments included.
+  if(glossKey(v) && glossKey(v) === glossKey(en)) return true;
   const parts = splitTopLevel(v, [";", ","]).map(glossKey).filter(Boolean);
   return parts.length > 0 && parts.every(k => keys.has(k));
 }

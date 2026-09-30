@@ -290,6 +290,7 @@ function walk(api, stopAt){
     ];
     const pb = P.filter(([g, p, q]) => { const r = VC.glossParts(g); return r.primary !== p || JSON.stringify(r.qualifiers) !== JSON.stringify(q); });
     check(`glossParts table (${P.length} cases${pb.length ? `; wrong: ${JSON.stringify(pb.map(x => [x[0], VC.glossParts(x[0])]))}` : ""})`, pb.length === 0);
+    check("every zh gloss accepts itself typed in full (reading notes and fragments included)", WORDS.every(w => VC.checkGlossTyped(VC.gloss(w), VC.gloss(w))));
     const noSelf = WORDS.filter(w => { const g = VC.gloss(w); return !VC.checkGlossTyped(VC.glossParts(g).primary, g); }).map(w => w.w);
     check(`every zh gloss accepts its own primary, except those holding a dropped alternative (的 "~'s", 相信 "to…", 只好 "to be…"): ${noSelf.join(" ")}`, noSelf.join(" ") === "的 相信 只好");
     // Fix round (docs/PACK_SCHEMA.md "Typed meaning" rules 1-5).
