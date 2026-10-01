@@ -72,6 +72,7 @@ python3 tools/validate_pack.py packs/zh          # schema + referential integrit
 python3 -m unittest discover -s tools/packbuilder/tests -t tools   # same suite, stdlib runner
 (cd tools && python3 -m packbuilder audio --lang fa --repo ../../persian --check)   # recorded-audio status of a repo
 python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the hsk data (idempotent)
+.cache/venv/bin/python tools/zh_say_scan.py [--write]   # zh polyphone TTS carriers; venv: pip install pypinyin jieba
 ```
 
 Dev mode without a rebuild: open `engine/app.html?pack=zh` from `file://` (loads `../packs/zh/*.js`); `?packdir=<relative path>` loads a pack elsewhere.
@@ -113,6 +114,7 @@ Dev mode without a rebuild: open `engine/app.html?pack=zh` from `file://` (loads
 | dist/zh.html, dist/sw.js | build.sh (committed; engine_checks fails when stale) |
 | packs/zh/*.js | tools/jsonify_pack.py |
 | packs/zh/*.json except passages_src.json, gloss_display.json | tools/pack_from_hsk.py; passages.json + REPORT_passages.md by `packbuilder passages` |
+| tools/zh_say.json, docs/ZH_SAY.md | tools/zh_say_scan.py --write (pypinyin + jieba venv; read by pack_from_hsk.py) |
 | tests/golden/*.json | tests/flagoff_snapshot.js --capture |
 | <lang>/pack/*, index.html, sw.js, tools/REPORT.md | packbuilder, jsonify, build.sh in each language repo |
 

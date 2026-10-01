@@ -256,7 +256,8 @@
   "w": "几",
   "en": "how much; how many",
   "lv": "1",
-  "pron": "jǐ"
+  "pron": "jǐ",
+  "say": "挤"
  },
  {
   "id": "w0038",
@@ -396,7 +397,8 @@
   "w": "喂",
   "en": "hello (when answering the phone)",
   "lv": "1",
-  "pron": "wéi"
+  "pron": "wéi",
+  "say": "围"
  },
  {
   "id": "w0058",
@@ -774,7 +776,8 @@
   "w": "没",
   "en": "(negative prefix for verbs) have not; not",
   "lv": "1",
-  "pron": "méi"
+  "pron": "méi",
+  "say": "梅"
  },
  {
   "id": "w0112",
@@ -1005,7 +1008,8 @@
   "w": "都",
   "en": "all; both; entirely; (used for emphasis) even",
   "lv": "1",
-  "pron": "dōu"
+  "pron": "dōu",
+  "say": "兜"
  },
  {
   "id": "w0145",
@@ -1082,7 +1086,8 @@
   "w": "为",
   "en": "because of; for",
   "lv": "2",
-  "pron": "wèi"
+  "pron": "wèi",
+  "say": "未"
  },
  {
   "id": "w0156",
@@ -1796,7 +1801,8 @@
   "w": "累",
   "en": "tired; weary",
   "lv": "2",
-  "pron": "lèi"
+  "pron": "lèi",
+  "say": "泪"
  },
  {
   "id": "w0258",
@@ -1957,7 +1963,8 @@
   "w": "还",
   "en": "still; still in progress",
   "lv": "2",
-  "pron": "hái"
+  "pron": "hái",
+  "say": "孩"
  },
  {
   "id": "w0281",
@@ -1992,7 +1999,8 @@
   "w": "长",
   "en": "length; long",
   "lv": "2",
-  "pron": "cháng"
+  "pron": "cháng",
+  "say": "常"
  },
  {
   "id": "w0286",
@@ -2601,7 +2609,8 @@
   "w": "只",
   "en": "only; merely",
   "lv": "3",
-  "pron": "zhǐ"
+  "pron": "zhǐ",
+  "say": "止"
  },
  {
   "id": "w0373",
@@ -2853,7 +2862,8 @@
   "w": "差",
   "en": "different; wrong; mistaken",
   "lv": "3",
-  "pron": "chà"
+  "pron": "chà",
+  "say": "诧"
  },
  {
   "id": "w0409",
@@ -3070,7 +3080,8 @@
   "w": "教",
   "en": "to teach",
   "lv": "3",
-  "pron": "jiāo"
+  "pron": "jiāo",
+  "say": "交"
  },
  {
   "id": "w0440",
@@ -3343,7 +3354,8 @@
   "w": "照片",
   "en": "photograph; picture",
   "lv": "3",
-  "pron": "zhàopiàn"
+  "pron": "zhàopiàn",
+  "say": "照骗"
  },
  {
   "id": "w0479",
@@ -3553,7 +3565,8 @@
   "w": "种",
   "en": "seed; species",
   "lv": "3",
-  "pron": "zhǒng"
+  "pron": "zhǒng",
+  "say": "肿"
  },
  {
   "id": "w0509",
@@ -4050,7 +4063,8 @@
   "w": "难",
   "en": "difficult (to...); problem",
   "lv": "3",
-  "pron": "nán"
+  "pron": "nán",
+  "say": "男"
  },
  {
   "id": "w0580",
@@ -4603,7 +4617,8 @@
   "w": "假",
   "en": "fake; false",
   "lv": "4",
-  "pron": "jiǎ"
+  "pron": "jiǎ",
+  "say": "甲"
  },
  {
   "id": "w0659",
@@ -5443,7 +5458,8 @@
   "w": "大夫",
   "en": "doctor; physician",
   "lv": "4",
-  "pron": "dàifu"
+  "pron": "dàifu",
+  "say": "代夫"
  },
  {
   "id": "w0779",
@@ -5716,7 +5732,8 @@
   "w": "干",
   "en": "tree trunk; main part of sth",
   "lv": "4",
-  "pron": "gàn"
+  "pron": "gàn",
+  "say": "赣"
  },
  {
   "id": "w0818",
@@ -5828,7 +5845,8 @@
   "w": "弹",
   "en": "to pluck (a string); to play (a string instrument)",
   "lv": "4",
-  "pron": "tán"
+  "pron": "tán",
+  "say": "谈"
  },
  {
   "id": "w0834",
@@ -7522,7 +7540,8 @@
   "w": "肚子",
   "en": "belly; abdomen",
   "lv": "4",
-  "pron": "dùzi"
+  "pron": "dùzi",
+  "say": "渡子"
  },
  {
   "id": "w1076",
@@ -7543,7 +7562,8 @@
   "w": "脏",
   "en": "dirty; filthy",
   "lv": "4",
-  "pron": "zāng"
+  "pron": "zāng",
+  "say": "赃"
  },
  {
   "id": "w1079",

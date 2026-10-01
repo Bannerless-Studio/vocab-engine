@@ -98,14 +98,14 @@ Helpers (app.html, speech section):
 
 ```js
 const wordAudio = VC.wordAudio;                    // core.js: a word's non-empty audio string, else undefined
-const sayWord = (w, btn) => speak(w.w, btn, wordAudio(w));
+const sayWord = (w, btn) => speak(VC.wordSay(w), btn, wordAudio(w));   // wordSay: words[].say carrier, else w
 const canHearWord = w => hasSpeech || !!wordAudio(w);   // mirrors canHearSentence
 const PACK_AUDIO = VC.packAudio(PACK);             // pack.json audio {voice: non-empty, ...}
 ```
 
 Fallback order in `speak(text, btn, url)`: the clip; if it fails to load (a 404, or offline and not
 cached), TTS of the same text when a voice is usable (script units: their `say` carrier when the script is
-voiced); else a short toast. Offline, a same-site clip says "Offline: this recording isn't saved on this
+voiced; words: their `say` carrier when set, docs/ZH_SAY.md); else a short toast. Offline, a same-site clip says "Offline: this recording isn't saved on this
 device yet."; a cross-origin clip (Tatoeba, never cached by sw.js) says "Recording needs a connection.";
 online, "This recording couldn't be played.". An interrupted clip (AbortError, a later `speak` replaced
 it) and a blocked autoplay (NotAllowedError) are not failures; a generation counter drops failures and

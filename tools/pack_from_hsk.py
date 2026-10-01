@@ -28,6 +28,10 @@ text (docs/HSK_MERGE.md §2.3): reading is the SENTENCE_EXTRA compound's own
 The same offsets give `sentences[].spans` [start, end, wordId] (docs/PACK_SCHEMA.md),
 except for tokens resolved via a SENTENCE_EXTRA base (see the loop).
 
+Words listed in tools/zh_say.json (written by tools/zh_say_scan.py) get a `say` TTS carrier
+(还 hái -> 孩: a lone polyphonic character is read by the TTS's own default), copied to the
+word's characters.json unit; docs/ZH_SAY.md has the table.
+
 `characters.json` mirrors words.json one-to-one (hsk teaches whole words, not
 glyphs: docs/HSK_MERGE.md §2.1), and `legacy.json`/`pack.legacy` carry the
 hsk_pinyin -> vocab_zh progress-migration id maps (docs/HSK_MERGE.md §4).
@@ -51,6 +55,7 @@ EN_OVERRIDES = {
     "我们应该看自己的优点，也要改变缺点。": "We should look at our own strengths, and also change our weaknesses.",
 }
 OUT = os.path.join(ROOT, "packs", "zh")
+SAY = os.path.join(ROOT, "tools", "zh_say.json")
 
 
 def js_const_json(path, name):
@@ -105,6 +110,13 @@ def main(argv):
         id_of[v["w"]] = wid
         words.append({"id": wid, "w": v["w"], "en": v["en"], "lv": str(v["lv"]), "pron": v["py"]})
     pron_of = {w["id"]: w["pron"] for w in words}
+    say = json.load(open(SAY, encoding="utf-8"))
+    for k, v in say.items():
+        if k not in id_of or not isinstance(v, str) or len(v) != len(k) or v == k:
+            raise SystemExit(f"pack_from_hsk: bad tools/zh_say.json entry {k!r}: {v!r}")
+    for w in words:
+        if w["w"] in say:
+            w["say"] = say[w["w"]]
 
     def resolve(token):
         if token in id_of:
@@ -247,6 +259,7 @@ def main(argv):
             "words": [w["id"]],
             "lv": w["lv"],
             "reading": w["pron"],
+            **({"say": w["say"]} if "say" in w else {}),
         })
     # legacy map for the hsk_pinyin -> vocab_zh progress migration (docs/HSK_MERGE.md §4)
     legacy = {
@@ -273,6 +286,7 @@ def main(argv):
     total_tokens = sum(len(s["words"]) for s in sentences)  # hsk tokens, before merging
     ruby_tokens = sum(len(s.get("ruby", ())) for s in out_sent)
     print(f"words {len(words)}  sentences {len(out_sent)}  lessons {len(lessons)}  functionWords {len(fw)}")
+    print(f"say carriers {len(say)}")
     print(f"characters {len(characters)}  legacy w={len(legacy['w'])} s={len(legacy['s'])} c={len(legacy['c'])}")
     print(f"sentence tokens {total_tokens}: {sum(fallback.values())} resolved via SENTENCE_EXTRA base, {len(unresolved)} unresolved, ruby tokens {ruby_tokens}, unplaced (no ruby) {len(unplaced)}")
     print(f"longest-match merges of adjacent hsk tokens: {sum(merged.values())}")
