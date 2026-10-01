@@ -4184,7 +4184,7 @@ const sayUnit = (it, btn) => { const w = WORDS_BY_ID[it.wordId]; if(w) sayWord(w
 const canHearUnit = it => { const w = WORDS_BY_ID[it.wordId]; return w ? canHearWord(w) : hasSpeech; };
 // Memory hints (characters.json `hint`) show only on teach cards and reveals: a hint names
 // the character's meaning and parts, so on a stimulus it would give the answer away.
-// `skip` holds characters already hinted on this screen; the hanzi prefixes a line only
+// `skip` holds characters already hinted on this screen; the character prefixes a line only
 // when the unit has more than one character.
 function charHintHTML(u, skip){
   const hs = VC.unitHints(u).filter(x => !(skip && skip.has(x.c)));
@@ -5491,4 +5491,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2846832643-1695918-->
+<!--ve-build:4097791243-1695922-->
