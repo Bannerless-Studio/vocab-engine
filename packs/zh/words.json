@@ -414,7 +414,8 @@
   "w": "喝",
   "en": "to drink",
   "lv": "1",
-  "pron": "hē"
+  "pron": "hē",
+  "say": "诃"
  },
  {
   "id": "w0060",
@@ -1202,7 +1203,8 @@
   "w": "别",
   "en": "to leave; to part (from); don't ...!",
   "lv": "2",
-  "pron": "bié"
+  "pron": "bié",
+  "say": "蹩"
  },
  {
   "id": "w0172",
@@ -5153,7 +5155,8 @@
   "w": "台",
   "en": "platform; stage",
   "lv": "4",
-  "pron": "tái"
+  "pron": "tái",
+  "say": "邰"
  },
  {
   "id": "w0734",
@@ -5370,7 +5373,8 @@
   "w": "场",
   "en": "large place used for a specific purpose; stage",
   "lv": "4",
-  "pron": "chǎng"
+  "pron": "chǎng",
+  "say": "氅"
  },
  {
   "id": "w0765",
@@ -5862,7 +5866,8 @@
   "w": "当",
   "en": "to be; to act as",
   "lv": "4",
-  "pron": "dāng"
+  "pron": "dāng",
+  "say": "裆"
  },
  {
   "id": "w0835",
@@ -6745,7 +6750,8 @@
   "w": "汤",
   "en": "soup; hot or boiling water",
   "lv": "4",
-  "pron": "tāng"
+  "pron": "tāng",
+  "say": "羰"
  },
  {
   "id": "w0961",
@@ -7109,7 +7115,8 @@
   "w": "省",
   "en": "to save; to economize; to be frugal",
   "lv": "4",
-  "pron": "shěng"
+  "pron": "shěng",
+  "say": "眚"
  },
  {
   "id": "w1013",
@@ -7656,7 +7663,8 @@
   "w": "血",
   "en": "blood; colloquial pr. [xiě]",
   "lv": "4",
-  "pron": "xuè"
+  "pron": "xuè",
+  "say": "谑"
  },
  {
   "id": "w1091",
