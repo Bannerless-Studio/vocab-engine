@@ -2576,12 +2576,12 @@ function typedFromSides(pack){
 function typedFromOn(pack){ return typedFromSides(pack).length > 0; }
 // Production (meaning -> target) and target-side kinds alternate, so a short plan still mixes
 // both directions. With both characters <-> meaning kinds present (typedFrom "written" on a
-// typing "pron" pack), each comes twice per cycle and every reading kind once (owner feedback
+// typing "pron" pack), each comes three times per cycle of nine and every reading kind once (owner feedback
 // 2026-10-01: more characters <-> meaning writing practice).
 function typedKinds(pack){
   const sides = typedFromSides(pack), pt = pronTypingOn(pack);
   const w = sides.includes("written"), p = sides.includes("pron");
-  if(w && pt) return ["writtenMeaning", "written", "pron", "writtenMeaning", "written", ...(p ? ["pronMeaning"] : []), "writtenPron"];
+  if(w && pt) return ["writtenMeaning", "written", "pron", "writtenMeaning", "written", ...(p ? ["pronMeaning"] : []), "writtenMeaning", "written", "writtenPron"];
   const out = [pt ? "pron" : "word"];
   if(w) out.push("writtenMeaning");
   if(pt) out.push("written");

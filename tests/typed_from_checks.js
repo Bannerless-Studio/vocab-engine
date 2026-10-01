@@ -215,13 +215,17 @@ function walk(api, stopAt){
       !VC.typedFromOn(PACK_BASE) && !VC.typedFromOn(Object.assign({}, PACK, { typing: null })) && !VC.typedFromOn({ typing: "pron", typedFrom: "written" })
       && JSON.stringify(VC.typedFromSides({ typing: "pron", typedFrom: ["pron", "x", "written"] })) === '["written","pron"]' && VC.typedFromOn(PACK));
     check("glossFocusOn: only true turns it on", VC.glossFocusOn(PACK) && !VC.glossFocusOn(PACK_BASE) && !VC.glossFocusOn({ glossFocus: "yes" }));
-    check("typedKinds zh: writtenMeaning, written, pron, writtenMeaning, written, pronMeaning, writtenPron (characters <-> meaning 2:1 against each reading kind)",
-      VC.typedKinds(PACK).join() === "writtenMeaning,written,pron,writtenMeaning,written,pronMeaning,writtenPron");
-    check("typedKinds 2:1 share: writtenMeaning and written twice per cycle, pron, pronMeaning, writtenPron once", (() => {
+    check("typedKinds zh: 9-slot cycle writtenMeaning, written, pron, writtenMeaning, written, pronMeaning, writtenMeaning, written, writtenPron (characters <-> meaning 6:3 against the pinyin kinds)",
+      VC.typedKinds(PACK).join() === "writtenMeaning,written,pron,writtenMeaning,written,pronMeaning,writtenMeaning,written,writtenPron");
+    check("typedKinds 2x share: writtenMeaning and written three times per cycle, pron, pronMeaning, writtenPron once", (() => {
       const n = {}; VC.typedKinds(PACK).forEach(k => { n[k] = (n[k] || 0) + 1; });
-      return n.writtenMeaning === 2 && n.written === 2 && n.pron === 1 && n.pronMeaning === 1 && n.writtenPron === 1; })());
-    check("typedKinds: pron side only -> pron, written, pronMeaning; written side only -> writtenMeaning, written, pron, writtenMeaning, written, writtenPron",
-      VC.typedKinds({ typing: "pron", typedFrom: ["pron"] }).join() === "pron,written,pronMeaning" && VC.typedKinds({ typing: "pron", typedFrom: ["written"] }).join() === "writtenMeaning,written,pron,writtenMeaning,written,writtenPron");
+      return n.writtenMeaning === 3 && n.written === 3 && n.pron === 1 && n.pronMeaning === 1 && n.writtenPron === 1; })());
+    check("rotation over 90 consecutive typed slots (words taking every kind): 30/30 writtenMeaning/written, 10 each pron/pronMeaning/writtenPron", (() => {
+      const wd = { id: "x1", w: "学", pron: "xué", en: "to study" }, pl = Array.from({ length: 90 }, () => ({ kind: "type", word: wd }));
+      const n = {}; pl.forEach((_, i) => { const k = VC.typedSlotKind(pl, i, VC.normalizeProg({}, PACK), PACK, k2 => VC.typedKindOk(k2, wd, true, AMB)); n[k] = (n[k] || 0) + 1; });
+      return n.writtenMeaning === 30 && n.written === 30 && n.pron === 10 && n.pronMeaning === 10 && n.writtenPron === 10; })());
+    check("typedKinds: pron side only -> pron, written, pronMeaning; written side only -> writtenMeaning, written, pron, writtenMeaning, written, writtenMeaning, written, writtenPron",
+      VC.typedKinds({ typing: "pron", typedFrom: ["pron"] }).join() === "pron,written,pronMeaning" && VC.typedKinds({ typing: "pron", typedFrom: ["written"] }).join() === "writtenMeaning,written,pron,writtenMeaning,written,writtenMeaning,written,writtenPron");
     check("typedKinds, a plain typing pack (for later): word, writtenMeaning, pronMeaning",
       VC.typedKinds({ typing: {}, typedFrom: ["written", "pron"] }).join() === "word,writtenMeaning,pronMeaning");
     const w = { id: "x1", w: "学", pron: "xué", en: "to study" };
@@ -358,13 +362,13 @@ function walk(api, stopAt){
       bItems.every(x => x.label === "Type the pinyin" || x.label === "Type the meaning") && bItems.some(x => x.label === "Type the meaning")
       && bItems.filter(x => x.label === "Type the meaning").every(x => !HAN.test(stripTags(x.html)) && x.html.includes(VC.toneHTML(w.pron))));
     const at = atTierProg([w]); api.setProg(at);
-    const items = typePlan(w, 7).map(api.itemFromPlan);
+    const items = typePlan(w, 9).map(api.itemFromPlan);
     const tagOf = x => (x.html.match(/class="ktag"[^>]*><b>([^<]*)<\/b>/) || [])[1];
     const byStim = x => HAN.test(stripTags(x.html)) ? "chars" : x.html.includes(VC.toneHTML(w.pron)) ? "pinyin" : "gloss";
     const sig = items.map(x => `${x.label}/${byStim(x)}`);
-    check(`at tier: the seven slots in rotation order (${sig.join(", ")})`,
-      sig.join() === "Type the meaning/chars,Type the characters/gloss,Type the pinyin/gloss,Type the meaning/chars,Type the characters/gloss,Type the meaning/pinyin,Type the pinyin/chars");
-    const [wMean, wChars, , , , pMean, wPron] = items;
+    check(`at tier: the nine slots in rotation order (${sig.join(", ")})`,
+      sig.join() === "Type the meaning/chars,Type the characters/gloss,Type the pinyin/gloss,Type the meaning/chars,Type the characters/gloss,Type the meaning/pinyin,Type the meaning/chars,Type the characters/gloss,Type the pinyin/chars");
+    const [wMean, wChars, , , , pMean, , , wPron] = items;
     const NEW = [["characters -> meaning", wMean], ["pinyin -> meaning", pMean], ["characters -> pinyin", wPron], ["meaning -> characters", wChars]];
     for(const [name, it] of NEW){
       const h = it.html;
@@ -388,7 +392,7 @@ function walk(api, stopAt){
     const primary1 = VC.glossParts(w.en).primary.split(";")[0].trim();
     const run = (slot, value, prog) => {
       api.setProg(prog || atTierProg([w]));
-      const plan = typePlan(w, 7); const k0 = spoken.length;
+      const plan = typePlan(w, 9); const k0 = spoken.length;
       api.drill1(api.itemFromPlan(plan[slot], slot, plan));
       const html = api.html("panel"); const before = spoken.length - k0;
       api.el("tin").value = value; api.el("submit").click();
@@ -398,7 +402,7 @@ function walk(api, stopAt){
     check(`renderer, characters -> meaning: silent before the answer, "${primary1}" right, reveal speaks + Replay`, r1.before === 0 && !r1.wrong && r1.after > 0 && /id="rvp"/.test(r1.rv) && /id="tin"[^>]*lang="en"/.test(r1.html) && /placeholder="meaning…"/.test(r1.html));
     const r2 = run(5, primary1.toUpperCase() + "!");
     check("renderer, pinyin -> meaning: silent before the answer, case/punctuation-insensitive right", r2.before === 0 && !r2.wrong && r2.after > 0);
-    const r3 = run(6, VC.stripMarks(w.pron));
+    const r3 = run(8, VC.stripMarks(w.pron));
     check("renderer, characters -> pinyin: silent before the answer, toneless right with the tones note", r3.before === 0 && !r3.wrong && /tones: /.test(r3.rv));
     const r5 = run(1, w.w);
     check(`meaning -> characters (typedFrom): kind tag "characters" without "listen", no Replay before the answer, nothing spoken on mount; right; the reveal speaks + Replay (tag ${JSON.stringify(stripTags((wChars.html.match(/<div class="ktag"[\s\S]*?<\/div>/) || [""])[0]))})`,
@@ -423,7 +427,7 @@ function walk(api, stopAt){
     // Fix round rule 6: characters -> pinyin comes back as a silent pinyin choice.
     {
       const pr = atTierProg([w]); api.setProg(pr);
-      const pl = typePlan(w, 7); const it = api.itemFromPlan(pl[6], 6, pl);
+      const pl = typePlan(w, 9); const it = api.itemFromPlan(pl[8], 8, pl);
       const fb = it.choiceFallback(), fb2 = it.choiceFallback();
       const learned = new Set(VC.learnedWords(WORDS, PACK, pr).map(x => x.pron));
       const syl = x => VC.splitReading(x).filter(y => y.tone !== undefined).length;
