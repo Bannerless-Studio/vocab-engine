@@ -411,7 +411,7 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     check(`localStorage holds only the progress key (${st.ls.keys().join(", ")}); sessionStorage only ${SKEY} (${st.ss.keys().join(", ")})`,
       st.ls.keys().join() === KEY && st.ss.keys().join() === SKEY);
     const base = Object.keys(VC.normalizeProg(seedPF(), PACK));
-    check(`progress keeps its top-level shape, no session fields (${Object.keys(p).sort().join(", ")}; read comes from the Read unlocks as before)`, Object.keys(p).every(k => base.includes(k) || k === "read"));
+    check(`progress keeps its top-level shape, no session fields (${Object.keys(p).sort().join(", ")}; read comes from the Read unlocks as before, day from dayAware)`, Object.keys(p).every(k => base.includes(k) || k === "read" || k === "day"));
     const r = sess(st.ss);
     check("record shape: v, build, t, fp, tab, today, drill (o, cur, ord, q, right, seen, miss)", JSON.stringify(Object.keys(r).sort()) === JSON.stringify(["build", "drill", "fp", "t", "tab", "today", "v"]) && JSON.stringify(Object.keys(r.drill).sort()) === JSON.stringify(["cur", "miss", "o", "ord", "q", "right", "seen"]));
   } catch(e){ check(`section threw: ${e.stack}`, false); }

@@ -137,6 +137,8 @@ def check_pack(pack, rep):
     char_levels = check_characters_pack(pack, ids, rep)
     check_pron_aids_pack(pack, rep)
     check_audio_pack(pack, rep)
+    if "dayAware" in pack and not is_bool(pack["dayAware"]):
+        rep.err("pack.dayAware must be a boolean")
     if "pronFirst" in pack:
         if not is_bool(pack["pronFirst"]):
             rep.err("pack.pronFirst must be a boolean")

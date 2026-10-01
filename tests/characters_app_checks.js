@@ -317,12 +317,20 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
   {
     // Characters started and units recorded, but every recorded unit is bare (well below
     // the learned words in the ranking): the plan holds no unit, so the line says "words".
-    const { api } = await boot();
+    // Without dayAware only: with it, mastered units unseen longest get the refresh share.
+    const noDay = Object.assign({}, PACK); delete noDay.dayAware;
+    const { api } = await boot({ pack: noDay });
     const q = seedB(); VC.answerCharChoice(q, true);
     VC.charStageUnits(["1","2","3"], CHARACTERS, PACK).slice(0, 40).forEach(u => { q.chars.c[u.id] = { r:9, w:0, s:9 }; });
     api.setProg(q); api.today();
     const h = api.html("panel"), prep = api.getPrep().review;
     check("units recorded but crowded out of the plan: Review line says words only", VC.recordedUnits(CHARACTERS, q, PACK).length === 40 && !prep.some(x => x.unit) && /1\. Review<\/td><td>20 items, weakest first, words<\/td>/.test(h));
+    if(PACK.dayAware){
+      const { api: a2 } = await boot();
+      a2.setProg(JSON.parse(JSON.stringify(q))); a2.today();
+      const p2 = a2.getPrep().review;
+      check(`dayAware: the same bare units take the refresh share (${p2.filter(x => x.unit).length} of ${p2.length}) and the line names them`, p2.filter(x => x.unit).length >= Math.ceil(p2.length * VC.DAY_REFRESH_SHARE) && /1\. Review<\/td><td>20 items, weakest first, words and /.test(a2.html("panel")));
+    }
   }
   {
     // Snapshot keeps Review word-only when it was taken before characters started.

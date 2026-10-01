@@ -26,7 +26,8 @@ const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
-const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; return p; })(Object.assign({}, PACK));
+// dayAware post-dates main ef44c6e: the control strips it with the fields under test.
+const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; return p; })(Object.assign({}, PACK));
 
 let fails = 0, passes = 0;
 function check(name, cond){
@@ -415,7 +416,7 @@ function walk(api, stopAt){
     const r4 = run(0, "zzz not it");
     const rec = r4.prog.w[w.id];
     check(`renderer, a wrong meaning: 'you typed' shown, the miss is k="type" and the record keeps its shape (${JSON.stringify(rec)})`,
-      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov"].includes(k)));
+      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov", "t"].includes(k)));
     // Second miss: the silent choice counterpart with the same stimulus.
     api.setProg(atTierProg([w]));
     const plan = typePlan(w, 7); const mi = api.itemFromPlan(plan[0], 0, plan);

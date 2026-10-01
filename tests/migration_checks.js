@@ -258,5 +258,41 @@ console.log("\n[session] session resume key (docs/PACK_SCHEMA.md \"Session resum
   check("a session record is not a legacy record", !VC.isLegacyRecord(PACK, LEGACY, { v: VC.SESSION_VERSION, build: "x", t: 0, fp: "0", tab: "today" }));
 }
 
+console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"dayAware\")");
+{
+  const p = mig("C mid-HSK2");
+  const hasDayFields = x => "day" in x || [x.w, x.s, (x.chars || {}).c].some(m => Object.values(m || {}).some(r => "t" in r));
+  check("migrated legacy progress carries no day log and no t (both are written by drills only)", !hasDayFields(p));
+  if(!Object.keys(p.chars.c).length) p.chars.c[U[0].id] = { r: 1, w: 0, s: 1 };
+  if(!Object.keys(p.s).length) p.s.x1 = { r: 1, w: 0, s: 1 };
+  const W0 = Object.keys(p.w)[0], S0 = Object.keys(p.s)[0], C0 = Object.keys(p.chars.c)[0];
+  const today = "2026-10-02";
+  check("pack.dayAware is on for zh", VC.dayAwareOn(PACK) === true);
+  VC.dayStart(p, PACK, today);
+  VC.noteDay(p, PACK, today, "w:" + W0, "hear", true);
+  VC.noteDay(p, PACK, today, "s:" + S0, "gap", false);
+  VC.noteDay(p, PACK, today, "c:" + C0, "charRead", true);
+  const dn = Date.UTC(2026, 9, 2) / 864e5;
+  check("noteDay: additive only (day log + t on the answered records; r/w/s untouched by it)",
+    eq(p.day, { d: today, n: 1, a: { ["w:" + W0]: { r: ["hear"], c: 1 }, ["s:" + S0]: { m: 1 }, ["c:" + C0]: { r: ["charRead"], c: 1 } } })
+    && p.w[W0].t === dn && p.s[S0].t === dn && p.chars.c[C0].t === dn);
+  const raw = JSON.stringify(p);
+  const b = VC.bootProg(raw, PACK);
+  check("progress with day + t survives a save/boot round trip", b.backupRaw === null && eq(b.prog.day, p.day) && eq(b.prog.w, p.w) && eq(b.prog.s, p.s) && eq(b.prog.chars.c, p.chars.c));
+  const i = VC.applyImport(null, raw, PACK);
+  check("progress with day + t survives export/import", i.ok && eq(i.prog.day, p.day) && eq(i.prog.w, p.w));
+  check("progress with day + t is native, not legacy", !VC.isLegacyRecord(PACK, LEGACY, p));
+  for(const [label, bad] of [["array", []], ["string", "x"], ["null", null], ["no a", { d: today, n: 1 }], ["n not an integer", { d: today, n: "1", a: {} }]]){
+    const r2 = JSON.stringify(Object.assign({}, p, { day: bad }));
+    const b2 = VC.bootProg(r2, PACK);
+    check(`malformed day (${label}) never invalidates progress; it reads as a fresh day`, b2.backupRaw === null && eq(b2.prog.w, p.w) && eq(VC.dayLog(b2.prog, today), { d: today, n: 0, a: {} }));
+  }
+  check("a day log from another date reads as a fresh day", eq(VC.dayLog(p, "2026-10-03"), { d: "2026-10-03", n: 0, a: {} }));
+  const off = Object.assign({}, PACK); delete off.dayAware;
+  const q = mig("C mid-HSK2"), before = JSON.stringify(q);
+  VC.dayStart(q, off, today); VC.noteDay(q, off, today, "w:" + Object.keys(q.w)[0], "hear", true);
+  check("without pack.dayAware, dayStart/noteDay write nothing", JSON.stringify(q) === before);
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

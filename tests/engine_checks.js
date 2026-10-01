@@ -1823,8 +1823,10 @@ return {
     const g1 = api.gapSentence(one, false); g1.onAnswer(false);
     const afterMiss = JSON.stringify(pr.w[bid]);
     api.gapSentence(one, false).onAnswer(true);
+    // t: the day of the last answer, written under pack.dayAware (zh).
+    const noT = j => { const r = Object.assign({}, typeof j === "string" ? JSON.parse(j) : j); delete r.t; return JSON.stringify(r); };
     check(`cloze (choice) miss sets k=recall on the blank word ${bid}, r/w/s untouched; a gap pass clears it`,
-      afterMiss === JSON.stringify({ r:4, w:1, s:2, k:"recall" }) && JSON.stringify(pr.w[bid]) === JSON.stringify({ r:4, w:1, s:2 }) && pr.s[one.id] && pr.s[one.id].w === 1);
+      noT(afterMiss) === JSON.stringify({ r:4, w:1, s:2, k:"recall" }) && noT(pr.w[bid]) === JSON.stringify({ r:4, w:1, s:2 }) && pr.s[one.id] && pr.s[one.id].w === 1);
     const saved = pr.w[bid]; delete pr.w[bid]; api.gapSentence(one, false).onAnswer(false);
     check("cloze: a blank word with no record is not given one", !(bid in pr.w)); pr.w[bid] = saved;
     const typPack = Object.assign({}, PACK, { typing:{ caseSensitive:false, accents:"lenient", strictFromLevel:null }, typedFrom: undefined });

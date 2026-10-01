@@ -62,7 +62,8 @@ $NODE tests/validate_pack_characters_checks.js   # 78
 $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/typed_from_checks.js                 # 67 (pack.typedFrom / glossFocus; control vs ef44c6e)
-$NODE tests/session_resume_checks.js             # 46 (drill/passage resume after a tab switch or reload)
+$NODE tests/session_resume_checks.js             # 67 (drill/passage resume after a tab switch or reload)
+$NODE tests/day_sim_checks.js                    # 34 (pack.dayAware: 8 sessions in one day, before/after numbers; --why)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)

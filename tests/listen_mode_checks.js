@@ -16,7 +16,8 @@ const ZH = path.join(ROOT, "packs", "zh");
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // typedFrom/glossFocus postdate the pinned control shas and change drill and gloss markup;
 // this suite is about listening, so it runs the zh pack with them off.
-const PACK = (p => { delete p.typedFrom; delete p.glossFocus; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// dayAware (docs/PACK_SCHEMA.md) post-dates the pinned controls and is not what this suite checks.
+const PACK = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");

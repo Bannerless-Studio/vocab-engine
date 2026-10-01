@@ -129,5 +129,6 @@
  },
  "pronFirst": true,
  "tones": "pinyin",
- "soundsReference": true
+ "soundsReference": true,
+ "dayAware": true
 }

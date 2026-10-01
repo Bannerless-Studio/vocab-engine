@@ -134,6 +134,8 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     // relative sentence clips are new. An absolute sentence URL (Tatoeba) predates it
     // and stays hashed.
     delete pack.audio;
+    // Day-aware planning (docs/PACK_SCHEMA.md "dayAware") is a new, flag-on field.
+    delete pack.dayAware;
   }
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   const generated = u => typeof u === "string" && !/^[a-z][a-z0-9+.-]*:/i.test(u);
