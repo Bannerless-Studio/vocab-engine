@@ -903,7 +903,7 @@ function walk(api, stopAt){
     check(`main ${MAIN} engine loaded from git`, !!mainHtml && !!mainCore && typeof mainCore.sentencePieces === "function");
     // The fields BP2 gates on: pack.tones, typing "pron", soundsReference, sentence ruby (word
     // taps), and pronFirst (phrase-span readings in passages). Characters block kept.
-    const offPack = Object.assign({}, PACK_BASE, { typing: null }); delete offPack.tones; delete offPack.soundsReference; delete offPack.pronFirst;
+    const offPack = Object.assign({}, PACK_BASE, { typing: null }); delete offPack.tones; delete offPack.soundsReference; delete offPack.pronFirst; delete offPack.dayAware; // dayAware post-dates the control
     const offSent = SENTENCES.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; });
     const offPass = PASSAGES.map(p => Object.assign({}, p, { sentences: p.sentences.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; }) }));
     async function screens(html, core, pack, sents, passages, seed){
