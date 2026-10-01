@@ -135,9 +135,10 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     // and stays hashed.
     delete pack.audio;
   }
+  // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   const generated = u => typeof u === "string" && !/^[a-z][a-z0-9+.-]*:/i.test(u);
   const words = Array.isArray(wordsJson)
-    ? wordsJson.map(w => { if(!w || !("audio" in w)) return w; const c = Object.assign({}, w); delete c.audio; return c; })
+    ? wordsJson.map(w => { if(!w || !("audio" in w || "say" in w)) return w; const c = Object.assign({}, w); delete c.audio; delete c.say; return c; })
     : wordsJson;
   const sentences = Array.isArray(sentencesJson)
     ? sentencesJson.map(s => { const c = Object.assign({}, s); delete c.ruby; if(generated(c.audio)) delete c.audio; return c; })

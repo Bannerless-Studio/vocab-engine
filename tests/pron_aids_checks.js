@@ -778,11 +778,12 @@ function walk(api, stopAt){
         if(isPhrase){ phrase++;
           if(tk.ts !== surf || tk.tr !== r[2] || pop.head !== r[2] || pop.showw !== surf || pop.said[0] !== surf) bad.push(`${snt.id} ${surf}: head ${pop.head}/${pop.showw}, said ${pop.said}`);
         } else { plainN++;
-          if(tk.ts !== undefined || pop.head !== w.pron || pop.showw !== w.w || pop.said[0] !== w.w) bad.push(`${snt.id} ${surf}: ${pop.head}/${pop.showw}`);
+          // A one-word tap speaks the word alone, so its say carrier (还 -> 孩, docs/ZH_SAY.md).
+          if(tk.ts !== undefined || pop.head !== w.pron || pop.showw !== w.w || pop.said[0] !== (w.say || w.w)) bad.push(`${snt.id} ${surf}: ${pop.head}/${pop.showw}, said ${pop.said}`);
         }
       });
     });
-    check(`every zh sentence ruby token: a phrase token (${phrase}) heads its popover with the surface's reading, show-written = the surface, speaks the surface; the rest (${plainN}) keep the word (${bad.length} bad${bad[0] ? ": " + bad.slice(0, 3).join(" | ") : ""})`, phrase >= 140 && bad.length === 0);
+    check(`every zh sentence ruby token: a phrase token (${phrase}) heads its popover with the surface's reading, show-written = the surface, speaks the surface; the rest (${plainN}) keep the word, spoken by its say carrier when set (${bad.length} bad${bad[0] ? ": " + bad.slice(0, 3).join(" | ") : ""})`, phrase >= 140 && bad.length === 0);
     // The same through the reveal block and through the word-first ruby path (rubyTextHTML).
     const s这个 = SENTENCES.find(x => x.ruby.some(r => x.t.slice(r[0], r[1]) === "这个"));
     check("reveal block: 这个 carries its head", /data-ts="这个" data-tr="[^"]+"/.test(api.sentenceRevealBlock(s这个)));

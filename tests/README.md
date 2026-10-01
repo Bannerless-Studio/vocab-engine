@@ -9,7 +9,7 @@ Node checks with no dependencies. Each suite `require`s `engine/core.js`, and th
 | pron_aids_checks.js | Pronunciation aids (tones, typed reading, word taps, Sounds reference); control byte-identical to pinned engine sha 55c843e. Uses ../korean for one guard. |
 | migration_checks.js | `migrateLegacy` (hsk_pinyin -> vocab_zh) and tools/diff_hsk_migration.js on synthetic hsk records of every version; cross-checks against ../chinese when present. |
 | characters_checks.js | Characters stage logic on tests/fixtures/chars_packs.js; flag-off proof against pinned sha ee67120; pronFirst display rules; ../japanese when present. |
-| characters_app_checks.js | Characters stage in app.html: path strip, unit Learn, item renderers, Test/Progress rows, legacy import, passage ruby, pronFirst; zh and ../japanese. |
+| characters_app_checks.js | Characters stage in app.html: path strip, unit Learn, item renderers, Test/Progress rows, legacy import, passage ruby, pronFirst, word `say` carriers spoken and never shown; zh and ../japanese. |
 | script_checks.js | Script primer logic on tests/fixtures/script_packs.js (ko-like, fa-like, ja-like). |
 | script_app_checks.js | Script primer in app.html: choice card, Learn, Review, Script tab, no-voice path, RTL audit, 390px layout. |
 | audio_checks.js | Recorded audio: core.js clip lookup, app call sites and fallback order, build.sh audio version, sw.js audio cache. App part boots ../persian. |
@@ -18,7 +18,7 @@ Node checks with no dependencies. Each suite `require`s `engine/core.js`, and th
 | session_resume_checks.js | Session resume on zh: core key/fingerprint/staleness rules; reload mid-drill (same item, option order, queue, counts), tab switch and back, stale records dropped with no answer lost, Test and Words-tab drills, a typed item's choice counterpart, the Read flow and Today Read stage, storage keys. |
 | typed_from_checks.js | `pack.typedFrom` / `pack.glossFocus`: kind rotation and fallback, typed-meaning matcher and gloss formatter tables, stimulus leak checks and renderer on zh, every glossFocus render site; fix-round rules (reading notes off stimuli + 1193-gloss audit, truncated/lone-letter/"A or B" matcher rules, qualifier placement, characters -> pinyin choice fallback); control byte-identical to pinned engine sha ef44c6e with both fields absent. |
 | validate_pack_audio_checks.js | tools/validate_pack.py rules for `pack.audio` and clip fields. |
-| validate_pack_characters_checks.js | validate_pack/jsonify/build.sh handling of characters.json, ruby, legacy.json. |
+| validate_pack_characters_checks.js | validate_pack/jsonify/build.sh handling of characters.json, ruby, legacy.json, words/units `say`. |
 | validate_pack_script_checks.js | validate_pack/jsonify/build.sh handling of script.json. |
 | validate_pack_spans_checks.js | tools/validate_pack.py rules for sentences.json `spans` and the pack-level coverage warning. |
 | sentence_spans_checks.js | Flag-off control for sentence `spans`: core locate/gap/highlight/examples/passageSegments identical to pinned sha 8ad46d6 on zh (full) and every sibling pack (sampled). |

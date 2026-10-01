@@ -1288,6 +1288,11 @@ function isSamsungBrowser(ua){
 function wordAudio(w){
   return isObj(w) && typeof w.audio === "string" && w.audio ? w.audio : undefined;
 }
+// A word's TTS text: its `say` carrier when set (zh 还 hái -> 孩, docs/PACK_SCHEMA.md words.json),
+// else the written form. Spoken only, never displayed.
+function wordSay(w){
+  return isObj(w) && typeof w.say === "string" && w.say ? w.say : (isObj(w) ? w.w : undefined);
+}
 function packAudio(pack){
   return isObj(pack) && isObj(pack.audio) && typeof pack.audio.voice === "string" && !!pack.audio.voice;
 }
@@ -2281,7 +2286,7 @@ function scriptItem(kind, unit, ctx){
     wordId: null, options: null, answer: null, accept: null, reveal };
   const unitSound = when => { if(unitAudio){ it.audio = when; it.say = unitSay; it.audioUrl = unitUrl; } };
   // An example word's clip (words[].audio) beats TTS and plays with no voice, as unitSound.
-  const wordSound = (when, e) => { const url = wordAudio(byId[e.id]); if(voice || url){ it.audio = when; it.say = voice ? e.w : null; it.audioUrl = url || null; } };
+  const wordSound = (when, e) => { const url = wordAudio(byId[e.id]); if(voice || url){ it.audio = when; it.say = voice ? (byId[e.id] && byId[e.id].w === e.w ? wordSay(byId[e.id]) : e.w) : null; it.audioUrl = url || null; } };
   let others = [];
   if(k === "symSound"){ it.show = glyph; it.answer = roman; others = scriptRomanOpts(unit, pool, all, r); unitSound("after"); }
   else if(k === "soundSym"){
@@ -2946,7 +2951,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   surfaces, sharesSurface, samePron,
   findSurface, textForms, locateWord, packSurfaces, spannedByLonger, gapMatch, gapCandidateIndices, blankSentence,
   strata, placementItemCount, placementStopIndex, applyPlacement, dedupeMisses,
-  parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, packAudio,
+  parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
   markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
