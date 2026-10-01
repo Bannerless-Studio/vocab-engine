@@ -1,0 +1,16 @@
+{
+ "_note": "Hand-written hints that win over tools/zh_hints.py rules, for frequent HSK 1 characters the rules leave awkward. At most 15; each states why the rule fails and the source it restates (MMAH = Make Me a Hanzi dictionary.txt at the pinned commit). Facts only, no invented etymology.",
+ "了": {"hint": "a swaddled child, like 子 without its arms 一: done", "reason": "rule quotes a source typo (blanklets) and adds nothing to 子", "source": "MMAH 了 (child swaddled) and 子 (decomposition 了 + 一)"},
+ "气": {"hint": "rising vapour: air, gas", "reason": "MMAH names 亻 as a part, but 气 shows no person", "source": "MMAH 气 (breathing air); Wiktionary 气 glyph origin: pictogram of vapour"},
+ "一": {"hint": "a single stroke: one", "reason": "source hint is a list of senses with Han characters in parentheses", "source": "MMAH 一 (the number 1)"},
+ "电": {"hint": "lightning 申 from 電 without its storm cloud 雨: electricity", "reason": "rule quotes the source's simplified-form note verbatim", "source": "MMAH 电 and 電 (thunderbolt 电 cast by a storm cloud 雨)"},
+ "关": {"hint": "simplified from 關, a gate 門: to close", "reason": "simplified parts 丷 + 天 carry no meaning", "source": "MMAH 關 (semantic 門 gate)"},
+ "上": {"hint": "a mark above the line 一 (opposite of 下): above, up", "reason": "HSK gloss's first alternative is 'first', and the source hint names no part", "source": "MMAH 上 (one stroke on top of another; compare 下)"},
+ "生": {"hint": "a shoot growing out of the soil 土: to grow, life", "reason": "rule shows 屮, which the simplified decomposition (一 + 土) does not contain", "source": "MMAH 生 (a shoot 屮 growing in the soil 土)"},
+ "机": {"hint": "a table 几 made of wood 木; 几 gives the sound: machine", "reason": "full source hint plus meaning runs over 14 words", "source": "MMAH 机 (a table 几 made of wood 木; 几 also provides the pronunciation)"},
+ "时": {"hint": "日 (day) + 寸, simplified from 時 (sound 寺): time", "reason": "source names only the semantic side 日", "source": "MMAH 时 (semantic 日 day) and 時 (phonetic 寺)"},
+ "不": {"hint": "a bird flying toward the sky 一: not", "reason": "HSK gloss's first alternative 'no' reads as an answer, 'not' is the sense", "source": "MMAH 不 (a bird flying toward the sky 一)"},
+ "来": {"hint": "a wheat plant (from 來), borrowed for its sound: to come", "reason": "rule shows 未 not yet + 丷, misleading for 来", "source": "MMAH 來 (a wheat plant); Wiktionary 來 glyph origin: wheat, phonetic loan for 'come'"},
+ "么": {"hint": "simplified from 麼: 麻 (sound má) + 幺 (tiny): question particle", "reason": "simplified parts 丿 + 厶 carry no meaning", "source": "MMAH 麼 (phonetic 麻, semantic 幺) and 幺 (tiny, small)"},
+ "中": {"hint": "a line 丨 through the middle of a box 口: middle", "reason": "HSK 中 is not a single-character word, so the rule falls back to the source sense 'central'", "source": "MMAH 中 (a line 丨 through the center of a box 口)"}
+}

@@ -8,7 +8,7 @@
   "lv": "1",
   "reading": "yī",
   "hint": [
-   "represents heaven (天), earth (旦), or the number 1: one"
+   "a single stroke: one"
   ]
  },
  {
@@ -32,7 +32,7 @@
   "lv": "1",
   "reading": "sān",
   "hint": [
-   "一 one + 二 two: three"
+   "three parallel lines: three"
   ]
  },
  {
@@ -44,7 +44,7 @@
   "lv": "1",
   "reading": "shàng",
   "hint": [
-   "⺊ + 一 one: above"
+   "a mark above the line 一 (opposite of 下): above, up"
   ]
  },
  {
@@ -56,7 +56,7 @@
   "lv": "1",
   "reading": "shàngwǔ",
   "hint": [
-   "⺊ + 一 one: above",
+   "a mark above the line 一 (opposite of 下): above, up",
    "丿 + 干 arid"
   ]
  },
@@ -69,7 +69,7 @@
   "lv": "1",
   "reading": "xià",
   "hint": [
-   "一 one + 卜 divination: below"
+   "one stroke under another: down"
   ]
  },
  {
@@ -81,7 +81,7 @@
   "lv": "1",
   "reading": "xiàwǔ",
   "hint": [
-   "一 one + 卜 divination: below",
+   "one stroke under another: down",
    "丿 + 干 arid"
   ]
  },
@@ -94,8 +94,8 @@
   "lv": "1",
   "reading": "xiàyǔ",
   "hint": [
-   "一 one + 卜 divination: below",
-   "picture of rain"
+   "one stroke under another: down",
+   "picture of rain drops falling from a cloud"
   ]
  },
  {
@@ -107,7 +107,7 @@
   "lv": "1",
   "reading": "bù",
   "hint": [
-   "a bird flying toward the sky 一: no"
+   "a bird flying toward the sky 一: not"
   ]
  },
  {
@@ -119,9 +119,9 @@
   "lv": "1",
   "reading": "bùkèqi",
   "hint": [
-   "a bird flying toward the sky 一: no",
-   "宀 roof + 各 person: guest",
-   "a person 亻 breathing air: air"
+   "a bird flying toward the sky 一: not",
+   "a person 各 welcomed under one's roof 宀: guest",
+   "rising vapour: air, gas"
   ]
  },
  {
@@ -133,7 +133,7 @@
   "lv": "1",
   "reading": "dōngxi",
   "hint": [
-   "picture of east",
+   "picture of the sun rising behind a tree",
    "picture of a bird settling into its nest, representing sunset"
   ]
  },
@@ -146,7 +146,7 @@
   "lv": "1",
   "reading": "gè",
   "hint": [
-   "人 people + 丨: this"
+   "a tally 丨 of people 人"
   ]
  },
  {
@@ -158,7 +158,7 @@
   "lv": "1",
   "reading": "zhōngwǔ",
   "hint": [
-   "口 box + 丨: central",
+   "a line 丨 through the middle of a box 口: middle",
    "丿 + 干 arid"
   ]
  },
@@ -171,8 +171,8 @@
   "lv": "1",
   "reading": "Zhōngguó",
   "hint": [
-   "口 box + 丨: central",
-   "囗 borders + 玉 treasure: country"
+   "a line 丨 through the middle of a box 口: middle",
+   "treasure 玉 within a country's borders 囗: country"
   ]
  },
  {
@@ -196,7 +196,7 @@
   "lv": "1",
   "reading": "shū",
   "hint": [
-   "a mark made by a pen ⺺: book"
+   "a mark made by a pen: book"
   ]
  },
  {
@@ -220,7 +220,7 @@
   "lv": "1",
   "reading": "le",
   "hint": [
-   "picture of a child swaddled in blanklets"
+   "a swaddled child, like 子 without its arms 一: done"
   ]
  },
  {
@@ -232,7 +232,7 @@
   "lv": "1",
   "reading": "èr",
   "hint": [
-   "一 one + 一 one: two"
+   "two parallel lines: two"
   ]
  },
  {
@@ -242,7 +242,10 @@
    "w0020"
   ],
   "lv": "1",
-  "reading": "wǔ"
+  "reading": "wǔ",
+  "hint": [
+   "five elements (the cross with the extra stroke) between heaven and earth: five"
+  ]
  },
  {
   "id": "c0021",
@@ -277,8 +280,8 @@
   "lv": "1",
   "reading": "shénme",
   "hint": [
-   "亻 people + 十 ten: what? mixed",
-   "丿 + 厶 private"
+   "a file of ten 十 people 亻: what? mixed",
+   "simplified from 麼: 麻 (sound má) + 幺 (tiny): question particle"
   ]
  },
  {
@@ -290,8 +293,8 @@
   "lv": "1",
   "reading": "jīntiān",
   "hint": [
-   "a mouth 亼 talking about things: modern",
-   "一 heavens + 大 man: sky"
+   "a mouth talking about things: modern",
+   "the heavens 一 above a man 大: sky"
   ]
  },
  {
@@ -303,7 +306,7 @@
   "lv": "1",
   "reading": "tā",
   "hint": [
-   "亻 person + 也 also: other"
+   "an additional, \"also\" 也 person 亻: he"
   ]
  },
  {
@@ -315,7 +318,7 @@
   "lv": "1",
   "reading": "huì",
   "hint": [
-   "人 people + 云 speaking: to assemble"
+   "people 人 speaking 云: can"
   ]
  },
  {
@@ -327,7 +330,7 @@
   "lv": "1",
   "reading": "zhù",
   "hint": [
-   "亻 person + 主 hosts: to reside"
+   "a person 亻 who hosts 主: to live"
   ]
  },
  {
@@ -339,7 +342,7 @@
   "lv": "1",
   "reading": "nǐ",
   "hint": [
-   "亻 person + 尔 pronoun: you"
+   "pronoun 尔 for a person 亻: you"
   ]
  },
  {
@@ -351,7 +354,7 @@
   "lv": "1",
   "reading": "zuò",
   "hint": [
-   "亻 someone + 故 happen: to work"
+   "someone 亻 who causes things to happen 故; 故 also provides the pronuncation"
   ]
  },
  {
@@ -363,7 +366,7 @@
   "lv": "1",
   "reading": "érzi",
   "hint": [
-   "picture of son",
+   "picture of a child",
    "picture of a child in a wrap, with outstretched arms but bundled legs"
   ]
  },
@@ -376,8 +379,8 @@
   "lv": "1",
   "reading": "xiānsheng",
   "hint": [
-   "土 soil + 儿 person: first",
-   "一 one + 土 soil: life"
+   "someone stepping in front of another person 儿: early",
+   "a shoot growing out of the soil 土: to grow, life"
   ]
  },
  {
@@ -413,8 +416,8 @@
   "lv": "1",
   "reading": "zàijiàn",
   "hint": [
-   "picture of again",
-   "冂 wide + 儿 man: to see"
+   "picture of two fish caught on a line",
+   "a man 儿 with the eye emphasized: to see"
   ]
  },
  {
@@ -462,9 +465,9 @@
   "lv": "1",
   "reading": "chūzūchē",
   "hint": [
-   "屮 sprout + 凵 container: to go out",
-   "禾 grain + 且 paid: to rent",
-   "picture of cart"
+   "a sprout 屮 growing out of a container 凵: to go out",
+   "regularly paid 且 tribute in grain 禾: to hire",
+   "picture of a cart with two wheels, seen from above"
   ]
  },
  {
@@ -476,7 +479,7 @@
   "lv": "1",
   "reading": "fēnzhōng",
   "hint": [
-   "八 pieces + 刀 knife: to divide",
+   "pieces 八 being further subdivided with a knife 刀: to divide",
    "钅 (metal) + 中 (sound zhōng)"
   ]
  },
@@ -489,7 +492,7 @@
   "lv": "1",
   "reading": "qiánmiàn",
   "hint": [
-   "丷 + 一 one + 刖",
+   null,
    "picture of a person's face"
   ]
  },
@@ -502,7 +505,7 @@
   "lv": "1",
   "reading": "Běijīng",
   "hint": [
-   "picture of north",
+   "picture of two people sitting back-to-back",
    "picture of a capital building on a hill"
   ]
  },
@@ -516,7 +519,7 @@
   "reading": "yīshēng",
   "hint": [
    "矢 (arrow) + 匸 (sound xì)",
-   "一 one + 土 soil: life"
+   "a shoot growing out of the soil 土: to grow, life"
   ]
  },
  {
@@ -589,8 +592,8 @@
   "lv": "1",
   "reading": "tóngxué",
   "hint": [
-   "凡 common + 口 tongue: same",
-   "⺍ + 冖 building + 子 children: learning"
+   "sharing a common 凡 tongue 口: same",
+   "a building 冖 where children 子 study: learning"
   ]
  },
  {
@@ -602,8 +605,8 @@
   "lv": "1",
   "reading": "míngzi",
   "hint": [
-   "夕 night + 口 out: name",
-   "宀 house + 子 child: character"
+   "a name called out 口 to hail someone at night 夕: name",
+   "a child 子 in a house 宀: letter"
   ]
  },
  {
@@ -640,7 +643,7 @@
   "lv": "1",
   "reading": "tīng",
   "hint": [
-   "口 words + 斤 ear: to hear"
+   "words 口 reaching an ear 斤: to listen to"
   ]
  },
  {
@@ -713,7 +716,7 @@
   "lv": "1",
   "reading": "xǐhuan",
   "hint": [
-   "壴 drums + 口 singing: to love",
+   "singing 口 and beating drums 壴: to love",
    "又 and + 欠 to lack"
   ]
  },
@@ -738,7 +741,7 @@
   "lv": "1",
   "reading": "sì",
   "hint": [
-   "囗 walls + 儿 child: four"
+   "a child 儿 in a room with four walls 囗: four"
   ]
  },
  {
@@ -750,7 +753,7 @@
   "lv": "1",
   "reading": "huí",
   "hint": [
-   "囗 enclosure + 口 mouth: to return"
+   "originally, a spiral signifying return: to circle"
   ]
  },
  {
@@ -774,7 +777,7 @@
   "lv": "1",
   "reading": "zuò",
   "hint": [
-   "从 people + 土 ground: seat"
+   "two people 从 sitting on the ground 土: to sit"
   ]
  },
  {
@@ -798,7 +801,7 @@
   "lv": "1",
   "reading": "duō",
   "hint": [
-   "夕 nights + 夕 nights: much"
+   "two nights 夕, suggesting many: many"
   ]
  },
  {
@@ -810,7 +813,7 @@
   "lv": "1",
   "reading": "duōshao",
   "hint": [
-   "夕 nights + 夕 nights: much",
+   "two nights 夕, suggesting many: many",
    "picture of grains of sand"
   ]
  },
@@ -823,7 +826,7 @@
   "lv": "1",
   "reading": "dà",
   "hint": [
-   "一 one + 人 man: big"
+   "a man 人 with outstretched arms: big"
   ]
  },
  {
@@ -835,8 +838,8 @@
   "lv": "1",
   "reading": "tiānqì",
   "hint": [
-   "一 heavens + 大 man: sky",
-   "a person 亻 breathing air: air"
+   "the heavens 一 above a man 大: sky",
+   "rising vapour: air, gas"
   ]
  },
  {
@@ -848,7 +851,7 @@
   "lv": "1",
   "reading": "tài",
   "hint": [
-   "大 giant + 丶: very"
+   "a giant 大 with a normal-sized man 丶 for scale: highest"
   ]
  },
  {
@@ -861,7 +864,7 @@
   "reading": "nǚ'ér",
   "hint": [
    "picture of a woman turned to the side",
-   "picture of son"
+   "picture of a child"
   ]
  },
  {
@@ -873,7 +876,7 @@
   "lv": "1",
   "reading": "tā",
   "hint": [
-   "女 woman + 也 you: she"
+   "a woman 女 beside you 也: she"
   ]
  },
  {
@@ -885,7 +888,7 @@
   "lv": "1",
   "reading": "hǎo",
   "hint": [
-   "女 woman + 子 son: good"
+   "a woman 女 with a son 子: good"
   ]
  },
  {
@@ -910,7 +913,7 @@
   "lv": "1",
   "reading": "zì",
   "hint": [
-   "宀 house + 子 child: character"
+   "a child 子 in a house 宀: letter"
   ]
  },
  {
@@ -922,7 +925,7 @@
   "lv": "1",
   "reading": "xuéxí",
   "hint": [
-   "⺍ + 冖 building + 子 children: learning",
+   "a building 冖 where children 子 study: learning",
    null
   ]
  },
@@ -935,7 +938,7 @@
   "lv": "1",
   "reading": "xuéxiào",
   "hint": [
-   "⺍ + 冖 building + 子 children: learning",
+   "a building 冖 where children 子 study: learning",
    "木 (wood) + 交 (sound jiāo)"
   ]
  },
@@ -948,8 +951,8 @@
   "lv": "1",
   "reading": "xuésheng",
   "hint": [
-   "⺍ + 冖 building + 子 children: learning",
-   "一 one + 土 soil: life"
+   "a building 冖 where children 子 study: learning",
+   "a shoot growing out of the soil 土: to grow, life"
   ]
  },
  {
@@ -973,8 +976,8 @@
   "lv": "1",
   "reading": "duìbuqǐ",
   "hint": [
-   "又 pair + 寸 hands: correct",
-   "a bird flying toward the sky 一: no",
+   "a pair 又 of hands 寸: right",
+   "a bird flying toward the sky 一: not",
    "走 (walk) + 己 (sound jǐ)"
   ]
  },
@@ -987,7 +990,7 @@
   "lv": "1",
   "reading": "xiǎo",
   "hint": [
-   "亅 + 八 dividing: small"
+   "dividing 八 by a line 亅: small"
   ]
  },
  {
@@ -999,7 +1002,7 @@
   "lv": "1",
   "reading": "xiǎojie",
   "hint": [
-   "亅 + 八 dividing: small",
+   "dividing 八 by a line 亅: small",
    "女 (woman) + 且 (sound qiě)"
   ]
  },
@@ -1037,7 +1040,7 @@
   "reading": "gōngzuò",
   "hint": [
    "picture of a spade or other workman's tool",
-   "亻 person + 乍 time: to make"
+   "a person 亻 making something for the first time 乍: to make"
   ]
  },
  {
@@ -1061,7 +1064,7 @@
   "lv": "1",
   "reading": "kāi",
   "hint": [
-   "一 latch + 廾 hands: to open"
+   "hands 廾 lifting the latch 一 of a door: to open"
   ]
  },
  {
@@ -1086,7 +1089,7 @@
   "reading": "zěnme",
   "hint": [
    "心 (heart) + 乍 (sound zhà)",
-   "丿 + 厶 private"
+   "simplified from 麼: 麻 (sound má) + 幺 (tiny): question particle"
   ]
  },
  {
@@ -1099,7 +1102,7 @@
   "reading": "zěnmeyàng",
   "hint": [
    "心 (heart) + 乍 (sound zhà)",
-   "丿 + 厶 private",
+   "simplified from 麼: 麻 (sound má) + 幺 (tiny): question particle",
    "木 (tree) + 羊 (sound yáng)"
   ]
  },
@@ -1124,7 +1127,7 @@
   "lv": "1",
   "reading": "wǒ",
   "hint": [
-   "扌 hand + 戈 weapon: I"
+   "a hand 扌 holding a weapon 戈: I"
   ]
  },
  {
@@ -1136,7 +1139,7 @@
   "lv": "1",
   "reading": "wǒmen",
   "hint": [
-   "扌 hand + 戈 weapon: I",
+   "a hand 扌 holding a weapon 戈: I",
    "亻 (people) + 门 (sound mén)"
   ]
  },
@@ -1150,8 +1153,8 @@
   "reading": "dǎdiànhuà",
   "hint": [
    "扌 (hand) + 丁 (sound dīng)",
-   "曰 to speak + 乚: electricity",
-   "讠 spoken + 舌 tongue: talk"
+   "lightning 申 from 電 without its storm cloud 雨: electricity",
+   "a spoken 讠 tongue 舌: talk"
   ]
  },
  {
@@ -1175,7 +1178,7 @@
   "lv": "1",
   "reading": "shíhou",
   "hint": [
-   "日 (day)",
+   "日 (day) + 寸, simplified from 時 (sound 寺): time",
    "亻 (person) + 矦 (sound hóu)"
   ]
  },
@@ -1188,8 +1191,8 @@
   "lv": "1",
   "reading": "míngtiān",
   "hint": [
-   "日 sun + 月 moon: bright",
-   "一 heavens + 大 man: sky"
+   "the light of the sun 日 and moon 月: bright",
+   "the heavens 一 above a man 大: sky"
   ]
  },
  {
@@ -1215,7 +1218,7 @@
   "reading": "zuótiān",
   "hint": [
    "日 (day) + 乍 (sound zhà)",
-   "一 heavens + 大 man: sky"
+   "the heavens 一 above a man 大: sky"
   ]
  },
  {
@@ -1227,7 +1230,7 @@
   "lv": "1",
   "reading": "shì",
   "hint": [
-   "日 speak + 疋 directly: to be"
+   "to speak 日 directly 疋: to be"
   ]
  },
  {
@@ -1249,10 +1252,7 @@
    "w0101"
   ],
   "lv": "1",
-  "reading": "yǒu",
-  "hint": [
-   "月 (sound yuè)"
-  ]
+  "reading": "yǒu"
  },
  {
   "id": "c0102",
@@ -1263,8 +1263,8 @@
   "lv": "1",
   "reading": "péngyou",
   "hint": [
-   "月 people + 月 people: friend",
-   "two hands 又 joined, representing friendship; 又 also provides the pronunciation: friend"
+   "two people 月 walking together: friend",
+   "two hands 又 joined, representing friendship: friend"
   ]
  },
  {
@@ -1276,7 +1276,7 @@
   "lv": "1",
   "reading": "běn",
   "hint": [
-   "木 tree + 一 one: root"
+   "a tree 木 with its roots highlighted: root"
   ]
  },
  {
@@ -1288,7 +1288,7 @@
   "lv": "1",
   "reading": "lái",
   "hint": [
-   "未 not yet + 丷: to arrive"
+   "a wheat plant (from 來), borrowed for its sound: to come"
   ]
  },
  {
@@ -1352,7 +1352,7 @@
   "reading": "shuǐguǒ",
   "hint": [
    "picture of a river running between two banks",
-   "田 fruit + 木 tree: fruit"
+   "fruit 田 growing on a tree 木: fruit"
   ]
  },
  {
@@ -1364,7 +1364,7 @@
   "lv": "1",
   "reading": "Hànyǔ",
   "hint": [
-   "氵 river + 又 and: Chinese people",
+   "the Han river 氵: Chinese people",
    "讠 (words) + 吾 (sound wú)"
   ]
  },
@@ -1390,8 +1390,8 @@
   "reading": "méiguānxi",
   "hint": [
    "氵 (water) + 殳 (sound shū)",
-   "丷 + 天 sky",
-   "糸 (thread)"
+   "simplified from 關, a gate 門: to close",
+   "糸 (thread) + 丿"
   ]
  },
  {
@@ -1417,7 +1417,7 @@
   "reading": "huǒchēzhàn",
   "hint": [
    "picture of flames",
-   "picture of cart",
+   "picture of a cart with two wheels, seen from above",
    "立 (stand) + 占 (sound zhàn)"
   ]
  },
@@ -1454,7 +1454,7 @@
   "lv": "1",
   "reading": "ài",
   "hint": [
-   "爫 claws + 冖 house + 友 friend: to love"
+   "to bring a friend 友 into one's house 冖: to love"
   ]
  },
  {
@@ -1503,7 +1503,7 @@
   "lv": "1",
   "reading": "xiànzài",
   "hint": [
-   "王 jade + 见 see: to appear",
+   "to see 见 jade 王: to appear",
    "土 (earth) + 才 (sound cái)"
   ]
  },
@@ -1516,7 +1516,7 @@
   "lv": "1",
   "reading": "diànyǐng",
   "hint": [
-   "曰 to speak + 乚: electricity",
+   "lightning 申 from 電 without its storm cloud 雨: electricity",
    "彡 (sunlight) + 景 (sound jǐng)"
   ]
  },
@@ -1529,8 +1529,8 @@
   "lv": "1",
   "reading": "diànnǎo",
   "hint": [
-   "曰 to speak + 乚: electricity",
-   "⺼ (flesh)"
+   "lightning 申 from 電 without its storm cloud 雨: electricity",
+   null
   ]
  },
  {
@@ -1542,7 +1542,7 @@
   "lv": "1",
   "reading": "diànshì",
   "hint": [
-   "曰 to speak + 乚: electricity",
+   "lightning 申 from 電 without its storm cloud 雨: electricity",
    "见 (see) + 礻 (sound shì)"
   ]
  },
@@ -1567,7 +1567,7 @@
   "lv": "1",
   "reading": "kàn",
   "hint": [
-   "手 hand + 目 eyes: to look"
+   "shielding one's eyes 目 with a hand 手 to look to the distance"
   ]
  },
  {
@@ -1579,8 +1579,8 @@
   "lv": "1",
   "reading": "kànjiàn",
   "hint": [
-   "手 hand + 目 eyes: to look",
-   "冂 wide + 儿 man: to see"
+   "shielding one's eyes 目 with a hand 手 to look to the distance",
+   "a man 儿 with the eye emphasized: to see"
   ]
  },
  {
@@ -1618,8 +1618,8 @@
   "lv": "1",
   "reading": "lǎoshī",
   "hint": [
-   "picture of old",
-   "刂 knife + 帀 wield: teacher"
+   "picture of a person bent over with long hair and a crutch",
+   "to skillfully wield 帀 a knife 刂: teacher"
   ]
  },
  {
@@ -1631,7 +1631,7 @@
   "lv": "1",
   "reading": "néng",
   "hint": [
-   "picture of can"
+   "picture of a bear's head, body, and claws"
   ]
  },
  {
@@ -1644,7 +1644,7 @@
   "reading": "píngguǒ",
   "hint": [
    "艹 (plant) + 平 (sound píng)",
-   "田 fruit + 木 tree: fruit"
+   "fruit 田 growing on a tree 木: fruit"
   ]
  },
  {
@@ -1654,10 +1654,7 @@
    "w0133"
   ],
   "lv": "1",
-  "reading": "chá",
-  "hint": [
-   "艹 (plant)"
-  ]
+  "reading": "chá"
  },
  {
   "id": "c0134",
@@ -1681,7 +1678,7 @@
   "reading": "yīfu",
   "hint": [
    "picture of a woman's dress",
-   "月 coat + 卩 person + 又 and: clothes"
+   "a person 卩 putting on 又 a coat 月: clothes"
   ]
  },
  {
@@ -1707,7 +1704,7 @@
   "reading": "shuōhuà",
   "hint": [
    "讠 (speech) + 兑 (sound duì)",
-   "讠 spoken + 舌 tongue: talk"
+   "a spoken 讠 tongue 舌: talk"
   ]
  },
  {
@@ -1731,7 +1728,7 @@
   "lv": "1",
   "reading": "dú",
   "hint": [
-   "讠 literacy + 卖 off: to study"
+   "to show off 卖 one's literacy 讠: to read out"
   ]
  },
  {
@@ -1801,7 +1798,7 @@
   "lv": "1",
   "reading": "lǐ",
   "hint": [
-   "田 farm + 土 land: unit of distance equal to 0.5km"
+   "unit of measure for farm 田 land 土: lining"
   ]
  },
  {
@@ -1838,7 +1835,7 @@
   "reading": "fēijī",
   "hint": [
    "picture of a bird flapping its wings",
-   "木 wood + 几 table: desk"
+   "a table 几 made of wood 木; 几 gives the sound: machine"
   ]
  },
  {
@@ -1851,7 +1848,7 @@
   "reading": "fànguǎn",
   "hint": [
    "饣 (food) + 反 (sound fǎn)",
-   "饣 food + 官 public: public building"
+   "a public 官 building where food 饣 is served: public building"
   ]
  },
  {
@@ -1864,7 +1861,7 @@
   "reading": "gāoxìng",
   "hint": [
    "picture of a tall palace",
-   "⺍ + 一 one + 八 eight"
+   null
   ]
  },
  {
@@ -1876,7 +1873,7 @@
   "lv": "2",
   "reading": "yīqǐ",
   "hint": [
-   "represents heaven (天), earth (旦), or the number 1: one",
+   "a single stroke: one",
    "走 (walk) + 己 (sound jǐ)"
   ]
  },
@@ -1890,7 +1887,7 @@
   "reading": "zhàngfu",
   "hint": [
    "一 one + 又 and",
-   "一 hairpin + 大 man: man"
+   "a man 大 wearing a coming-of-age hairpin 一: man"
   ]
  },
  {
@@ -1902,8 +1899,8 @@
   "lv": "2",
   "reading": "shàngbān",
   "hint": [
-   "⺊ + 一 one: above",
-   "王 jade + 刂 cutting + 王 jade: class"
+   "a mark above the line 一 (opposite of 下): above, up",
+   "cutting 刂 a piece of jade 王 in two, symbolizing two classes: team"
   ]
  },
  {
@@ -1915,7 +1912,7 @@
   "lv": "2",
   "reading": "liǎng",
   "hint": [
-   "一 one + 冂 wide + 从 people: two"
+   "two people 从 together in a cart: two"
   ]
  },
  {
@@ -1925,10 +1922,7 @@
    "w0155"
   ],
   "lv": "2",
-  "reading": "wèi",
-  "hint": [
-   "丶 + 力 strength + 丶"
-  ]
+  "reading": "wèi"
  },
  {
   "id": "c0156",
@@ -1948,7 +1942,7 @@
   "lv": "2",
   "reading": "shìqing",
   "hint": [
-   "一 one + 口 mouth + 彐 snout + 亅",
+   null,
    "忄 (heart) + 青 (sound qīng)"
   ]
  },
@@ -1961,7 +1955,7 @@
   "lv": "2",
   "reading": "jièshào",
   "hint": [
-   "a border 八 dividing people 人: agent",
+   "a border dividing people 人: agent",
    "纟 (thread) + 召 (sound zhào)"
   ]
  },
@@ -1974,7 +1968,7 @@
   "lv": "2",
   "reading": "cóng",
   "hint": [
-   "人 person + 人 person: from"
+   "one person 人 following another: from"
   ]
  },
  {
@@ -1986,7 +1980,7 @@
   "lv": "2",
   "reading": "jiàn",
   "hint": [
-   "亻 man + 牛 cow: item"
+   "a man 亻 dividing up a cow 牛: item"
   ]
  },
  {
@@ -1998,8 +1992,8 @@
   "lv": "2",
   "reading": "xiūxi",
   "hint": [
-   "亻 person + 木 tree: to rest",
-   "自 nose + 心 heart: to end"
+   "a person 亻 leaning against a tree 木: to rest",
+   "to breathe (life, 心) through one's nose 自: to end"
   ]
  },
  {
@@ -2011,8 +2005,8 @@
   "lv": "2",
   "reading": "dànshì",
   "hint": [
-   "旦 (sound dàn)",
-   "日 speak + 疋 directly: to be"
+   "亻 + 旦 (sound dàn)",
+   "to speak 日 directly 疋: to be"
   ]
  },
  {
@@ -2025,7 +2019,7 @@
   "reading": "piányi",
   "hint": [
    "亻 man + 更 more",
-   "宀 house + 且 service: fitting"
+   "a memorial service 且 held in a house 宀: fitting"
   ]
  },
  {
@@ -2037,7 +2031,7 @@
   "lv": "2",
   "reading": "yuán",
   "hint": [
-   "picture of first"
+   "picture of a man with two lines emphasizing their head"
   ]
  },
  {
@@ -2049,10 +2043,10 @@
   "lv": "2",
   "reading": "gōnggòngqìchē",
   "hint": [
-   "八 divide + 厶 private: fair",
-   "廾 object + 一 one + 八 hands: all",
-   "氵 liquid + 气 gas: gasoline",
-   "picture of cart"
+   "to divide 八 what is private 厶: fair",
+   "two hands 八 holding one object 廾: all",
+   "liquid 氵 gas 气: gasoline",
+   "picture of a cart with two wheels, seen from above"
   ]
  },
  {
@@ -2064,7 +2058,7 @@
   "lv": "2",
   "reading": "gōngsī",
   "hint": [
-   "八 divide + 厶 private: fair",
+   "to divide 八 what is private 厶: fair",
    "a person speaking orders 口 and raising their arm: to take charge of"
   ]
  },
@@ -2077,7 +2071,7 @@
   "lv": "2",
   "reading": "gōngjīn",
   "hint": [
-   "八 divide + 厶 private: fair",
+   "to divide 八 what is private 厶: fair",
    "厂 cliff + 下 below"
   ]
  },
@@ -2090,7 +2084,7 @@
   "lv": "2",
   "reading": "zài",
   "hint": [
-   "picture of again"
+   "picture of two fish caught on a line"
   ]
  },
  {
@@ -2103,7 +2097,7 @@
   "reading": "zhǔnbèi",
   "hint": [
    "冫 (water in a spirit level) + 隹 (sound zhuī)",
-   "夂 go + 田 farm: to prepare"
+   "to go 夂 to the farm 田 to prepare for a harvest: to prepare"
   ]
  },
  {
@@ -2115,7 +2109,7 @@
   "lv": "2",
   "reading": "chū",
   "hint": [
-   "屮 sprout + 凵 container: to go out"
+   "a sprout 屮 growing out of a container 凵: to go out"
   ]
  },
  {
@@ -2127,7 +2121,7 @@
   "lv": "2",
   "reading": "bié",
   "hint": [
-   "另 classes + 刂 boundaries: to separate"
+   "to draw boundaries 刂 between classes 另: to leave"
   ]
  },
  {
@@ -2202,7 +2196,7 @@
   "reading": "kěnéng",
   "hint": [
    "丁 (vigorous) + 口 (sound kǒu)",
-   "picture of can"
+   "picture of a bear's head, body, and claws"
   ]
  },
  {
@@ -2260,8 +2254,8 @@
   "lv": "2",
   "reading": "gàosu",
   "hint": [
-   "牛 ox + 口 speak: to tell",
-   "讠 words + 斥 blame: to accuse"
+   "to speak 口 with the force of an ox 牛: to tell",
+   "words 讠 of blame 斥: to accuse"
   ]
  },
  {
@@ -2286,8 +2280,8 @@
   "lv": "2",
   "reading": "gēge",
   "hint": [
-   "可 talking + 可 talking: elder brother",
-   "可 talking + 可 talking: elder brother"
+   "one person talking 可 over another 可: elder brother",
+   "one person talking 可 over another 可: elder brother"
   ]
  },
  {
@@ -2312,7 +2306,7 @@
   "lv": "2",
   "reading": "huídá",
   "hint": [
-   "囗 enclosure + 口 mouth: to return",
+   "originally, a spiral signifying return: to circle",
    "⺮ bamboo + 合 to combine"
   ]
  },
@@ -2326,7 +2320,7 @@
   "reading": "yīnwèi",
   "hint": [
    "囗 enclosure + 大 big",
-   "丶 + 力 strength + 丶"
+   null
   ]
  },
  {
@@ -2338,7 +2332,7 @@
   "lv": "2",
   "reading": "wài",
   "hint": [
-   "夕 night-time + 卜 divinations: out"
+   "night-time 夕 divinations 卜; the supernatural, the foreign: outside"
   ]
  },
  {
@@ -2350,7 +2344,7 @@
   "lv": "2",
   "reading": "dàjiā",
   "hint": [
-   "一 one + 人 man: big",
+   "a man 人 with outstretched arms: big",
    "宀 (roof) + 豕 (sound shǐ)"
   ]
  },
@@ -2376,7 +2370,7 @@
   "lv": "2",
   "reading": "hǎochī",
   "hint": [
-   "女 woman + 子 son: good",
+   "a woman 女 with a son 子: good",
    "口 (mouth) + 乞 (sound qǐ)"
   ]
  },
@@ -2402,7 +2396,7 @@
   "lv": "2",
   "reading": "qīzi",
   "hint": [
-   "十 broom + 彐 hand + 女 woman: wife",
+   "a woman 女 holding a broom 十 in her hand 彐: wife",
    "picture of a child in a wrap, with outstretched arms but bundled legs"
   ]
  },
@@ -2477,8 +2471,8 @@
   "lv": "2",
   "reading": "xiǎoshí",
   "hint": [
-   "亅 + 八 dividing: small",
-   "日 (day)"
+   "dividing 八 by a line 亅: small",
+   "日 (day) + 寸, simplified from 時 (sound 寺): time"
   ]
  },
  {
@@ -2529,7 +2523,7 @@
   "reading": "xīwàng",
   "hint": [
    "乂 to govern + 布 cotton",
-   "亡 death + 月 moon + 王 king: to expect"
+   "a king 王 gazing at the moon 月: to expect"
   ]
  },
  {
@@ -2541,7 +2535,7 @@
   "lv": "2",
   "reading": "bāngzhù",
   "hint": [
-   "邦 nation's + 巾 flag: to help",
+   "a nation's 邦 flag 巾: to help",
    "力 (strength) + 且 (sound qiě)"
   ]
  },
@@ -2554,7 +2548,7 @@
   "lv": "2",
   "reading": "kāishǐ",
   "hint": [
-   "一 latch + 廾 hands: to open",
+   "hands 廾 lifting the latch 一 of a door: to open",
    "女 (woman) + 台 (sound tái)"
   ]
  },
@@ -2592,7 +2586,7 @@
   "lv": "2",
   "reading": "de",
   "hint": [
-   "彳 + 旦 shell + 寸 hand: to obtain"
+   "a hand 寸 grabbing a shell 旦: structural particle: used after a verb…"
   ]
  },
  {
@@ -2604,7 +2598,7 @@
   "lv": "2",
   "reading": "máng",
   "hint": [
-   "忄 heart + 亡 death: busy"
+   "a heart 忄 faced with death 亡: busy"
   ]
  },
  {
@@ -2616,7 +2610,7 @@
   "lv": "2",
   "reading": "kuài",
   "hint": [
-   "忄 will + 夬 decisive: speedy"
+   "a decisive 夬 will 忄: rapid"
   ]
  },
  {
@@ -2628,8 +2622,8 @@
   "lv": "2",
   "reading": "kuàilè",
   "hint": [
-   "忄 will + 夬 decisive: speedy",
-   "丿 + 小 small: cheerful"
+   "a decisive 夬 will 忄: rapid",
+   "a musical instrument with wood, strings, and a pick: cheerful"
   ]
  },
  {
@@ -2641,7 +2635,7 @@
   "lv": "2",
   "reading": "nín",
   "hint": [
-   "你 you + 心 affection: honorific for 'you'"
+   "you 你 said with affection 心: you"
   ]
  },
  {
@@ -2654,7 +2648,7 @@
   "reading": "yìsi",
   "hint": [
    "心 (heart) + 音 (sound yīn)",
-   "田 field + 心 heart: to think"
+   "weighing something with your mind and heart 心: to think"
   ]
  },
  {
@@ -2691,7 +2685,7 @@
   "reading": "fángjiān",
   "hint": [
    "户 (door) + 方 (sound fāng)",
-   "门 doorway + 日 sun: between"
+   "the sun 日 shining through a doorway 门: between"
   ]
  },
  {
@@ -2703,7 +2697,7 @@
   "lv": "2",
   "reading": "suǒyǐ",
   "hint": [
-   "户 door + 斤 axe: place",
+   "an axe 斤 swung at a door 户: place",
    null
   ]
  },
@@ -2717,7 +2711,7 @@
   "reading": "shǒujī",
   "hint": [
    "picture of a hand with the fingers splayed",
-   "木 wood + 几 table: desk"
+   "a table 几 made of wood 木; 几 gives the sound: machine"
   ]
  },
  {
@@ -2730,7 +2724,7 @@
   "reading": "shǒubiǎo",
   "hint": [
    "picture of a hand with the fingers splayed",
-   "毛 fur + 衣 clothing: to show"
+   "fur 毛 clothing 衣; a shawl or wrap: to show"
   ]
  },
  {
@@ -2756,7 +2750,7 @@
   "lv": "2",
   "reading": "zhǎo",
   "hint": [
-   "扌 hand + 戈 spear: to search for"
+   "to go searching with a spear 戈 in hand 扌: to try to find"
   ]
  },
  {
@@ -2768,7 +2762,7 @@
   "lv": "2",
   "reading": "bàozhǐ",
   "hint": [
-   "扌 hand + 卩 criminal + 又 cuffing: to announce",
+   "a hand 扌 cuffing 又 a criminal 卩, representing sentencing: to announce",
    "纟 (silk) + 氏 (sound shì)"
   ]
  },
@@ -2794,7 +2788,7 @@
   "lv": "2",
   "reading": "xīn",
   "hint": [
-   "亲 tree + 斤 chopped: new"
+   "a freshly chopped 斤 tree 亲: new"
   ]
  },
  {
@@ -2819,8 +2813,8 @@
   "lv": "2",
   "reading": "lǚyóu",
   "hint": [
-   "方 man + 氏 pack: journey",
-   "氵 seas + 斿 freely: to wander"
+   "a man 方 traveling with a pack 氏 on his back: journey",
+   "to swim freely 斿 through the seas 氵: to wander"
   ]
  },
  {
@@ -2832,8 +2826,8 @@
   "lv": "2",
   "reading": "zǎoshang",
   "hint": [
-   "日 sun + 十 rays: early",
-   "⺊ + 一 one: above"
+   "the first rays 十 of the sun 日: early",
+   "a mark above the line 一 (opposite of 下): above, up"
   ]
  },
  {
@@ -2845,8 +2839,8 @@
   "lv": "2",
   "reading": "shíjiān",
   "hint": [
-   "日 (day)",
-   "门 doorway + 日 sun: between"
+   "日 (day) + 寸, simplified from 時 (sound 寺): time",
+   "the sun 日 shining through a doorway 门: between"
   ]
  },
  {
@@ -2858,8 +2852,8 @@
   "lv": "2",
   "reading": "wǎnshang",
   "hint": [
-   "日 sun + 免 avoiding: night",
-   "⺊ + 一 one: above"
+   "avoiding 免 the sun 日: night",
+   "a mark above the line 一 (opposite of 下): above, up"
   ]
  },
  {
@@ -2883,7 +2877,7 @@
   "lv": "2",
   "reading": "zuì",
   "hint": [
-   "日 sun + 取 place: most"
+   "to take place 取 under the sun 日 (that is, everywhere): most"
   ]
  },
  {
@@ -2895,9 +2889,9 @@
   "lv": "2",
   "reading": "fúwùyuán",
   "hint": [
-   "月 coat + 卩 person + 又 and: clothes",
+   "a person 卩 putting on 又 a coat 月: clothes",
    "夂 to go + 力 strength",
-   "贝 (money)"
+   "贝 (money) + 口"
   ]
  },
  {
@@ -2909,7 +2903,7 @@
   "lv": "2",
   "reading": "jīchǎng",
   "hint": [
-   "木 wood + 几 table: desk",
+   "a table 几 made of wood 木; 几 gives the sound: machine",
    "土 (earth) + 昜 (sound yáng)"
   ]
  },
@@ -2922,7 +2916,7 @@
   "lv": "2",
   "reading": "cì",
   "hint": [
-   "冫 times + 欠 person: order"
+   "a person 欠 yawning multiple times 冫: next in sequence"
   ]
  },
  {
@@ -2947,7 +2941,7 @@
   "lv": "2",
   "reading": "zhèngzài",
   "hint": [
-   "一 place + 止 foot: straight",
+   "a foot 止 stopping in the right place 一: straight",
    "土 (earth) + 才 (sound cái)"
   ]
  },
@@ -2958,10 +2952,7 @@
    "w0237"
   ],
   "lv": "2",
-  "reading": "měi",
-  "hint": [
-   "母 (sound mǔ)"
-  ]
+  "reading": "měi"
  },
  {
   "id": "c0238",
@@ -2972,7 +2963,7 @@
   "lv": "2",
   "reading": "bǐ",
   "hint": [
-   "匕 spoons + 匕 spoons: to compare"
+   "two spoons 匕 side-by-side: to compare"
   ]
  },
  {
@@ -2996,7 +2987,7 @@
   "lv": "2",
   "reading": "yóuyǒng",
   "hint": [
-   "氵 seas + 斿 freely: to wander",
+   "to swim freely 斿 through the seas 氵: to wander",
    "氵 (water) + 永 (sound yǒng)"
   ]
  },
@@ -3034,7 +3025,7 @@
   "lv": "2",
   "reading": "shēngrì",
   "hint": [
-   "一 one + 土 soil: life",
+   "a shoot growing out of the soil 土: to grow, life",
    "picture of the sun"
   ]
  },
@@ -3047,7 +3038,7 @@
   "lv": "2",
   "reading": "shēngbìng",
   "hint": [
-   "一 one + 土 soil: life",
+   "a shoot growing out of the soil 土: to grow, life",
    "疒 (sickness) + 丙 (sound bǐng)"
   ]
  },
@@ -3060,7 +3051,7 @@
   "lv": "2",
   "reading": "nánrén",
   "hint": [
-   "田 farm + 力 work: man",
+   "someone who can work 力 the farm 田: man",
    "picture of the legs of a human being"
   ]
  },
@@ -3097,7 +3088,7 @@
   "lv": "2",
   "reading": "zhēn",
   "hint": [
-   "直 straight + 几 table: real"
+   "a straight 直 (that is, level) table 几: really"
   ]
  },
  {
@@ -3145,10 +3136,7 @@
    "w0252"
   ],
   "lv": "2",
-  "reading": "piào",
-  "hint": [
-   "覀 flames + 示 altar: bank note"
-  ]
+  "reading": "piào"
  },
  {
   "id": "c0253",
@@ -3183,7 +3171,7 @@
   "lv": "2",
   "reading": "xiào",
   "hint": [
-   "⺮ grin + 夭 person: to smile"
+   "a person 夭 with a big grin ⺮: to laugh"
   ]
  },
  {
@@ -3195,8 +3183,8 @@
   "lv": "2",
   "reading": "dìyī",
   "hint": [
-   "⺮ strips + 弟 young brother: sequence",
-   "represents heaven (天), earth (旦), or the number 1: one"
+   "bamboo strips ⺮ arrayed in sequence: sequence",
+   "a single stroke: one"
   ]
  },
  {
@@ -3208,7 +3196,7 @@
   "lv": "2",
   "reading": "lèi",
   "hint": [
-   "田 field + 糸 silk: tired"
+   "growing silk 糸 in the fields: tired"
   ]
  },
  {
@@ -3271,8 +3259,8 @@
   "reading": "zìxíngchē",
   "hint": [
    "picture of a nose",
-   "彳 feet + 亍 steps: to go",
-   "picture of cart"
+   "to take small steps 亍 with one's feet 彳: to walk",
+   "picture of a cart with two wheels, seen from above"
   ]
  },
  {
@@ -3282,10 +3270,7 @@
    "w0263"
   ],
   "lv": "2",
-  "reading": "chuán",
-  "hint": [
-   "舟 (ship)"
-  ]
+  "reading": "chuán"
  },
  {
   "id": "c0264",
@@ -3321,7 +3306,7 @@
   "lv": "2",
   "reading": "yào",
   "hint": [
-   "覀 waist + 女 woman: essential"
+   "a woman 女 with hands on her waist 覀: to want"
   ]
  },
  {
@@ -3334,7 +3319,7 @@
   "reading": "juéde",
   "hint": [
    "见 (see) + ⺍ (sound)",
-   "彳 + 旦 shell + 寸 hand: to obtain"
+   "a hand 寸 grabbing a shell 旦: structural particle: used after a verb…"
   ]
  },
  {
@@ -3368,10 +3353,7 @@
    "w0270"
   ],
   "lv": "2",
-  "reading": "guì",
-  "hint": [
-   "贝 (money)"
-  ]
+  "reading": "guì"
  },
  {
   "id": "c0271",
@@ -3382,7 +3364,7 @@
   "lv": "2",
   "reading": "zǒu",
   "hint": [
-   "土 someone + 止 foot: to walk"
+   "someone 土 stepping with their foot 止: to walk"
   ]
  },
  {
@@ -3395,7 +3377,7 @@
   "reading": "qǐchuáng",
   "hint": [
    "走 (walk) + 己 (sound jǐ)",
-   "广 house + 木 wood: bed"
+   "a house 广 made out of wood 木: bed"
   ]
  },
  {
@@ -3408,7 +3390,7 @@
   "reading": "pǎobù",
   "hint": [
    "足 (foot) + 包 (sound bāo)",
-   "modern form of 歨; putting one foot 止 in front of the other: walk"
+   "putting one foot 止 in front of the other: walk"
   ]
  },
  {
@@ -3433,7 +3415,7 @@
   "reading": "tiàowǔ",
   "hint": [
    "足 (foot) + 兆 (sound zhào)",
-   "無 no + 舛 hand: to dance"
+   "a hand 舛 holding a fan: to dance"
   ]
  },
  {
@@ -3471,7 +3453,7 @@
   "reading": "yùndòng",
   "hint": [
    "辶 (walk) + 云 (sound yún)",
-   "力 (strength)"
+   "力 (strength) + 云"
   ]
  },
  {
@@ -3495,7 +3477,7 @@
   "lv": "2",
   "reading": "hái",
   "hint": [
-   "辶 moving + 不 not: also"
+   "not 不 moving 辶: still"
   ]
  },
  {
@@ -3531,7 +3513,7 @@
   "lv": "2",
   "reading": "sòng",
   "hint": [
-   "辶 away + 关 waving: to see off"
+   "a person waving 关 to someone walking away 辶: to send"
   ]
  },
  {
@@ -3543,7 +3525,7 @@
   "lv": "2",
   "reading": "cuò",
   "hint": [
-   "钅 gold + 昔 was: error"
+   "gold 钅 that once was 昔 but is lost: mistake"
   ]
  },
  {
@@ -3555,7 +3537,7 @@
   "lv": "2",
   "reading": "cháng",
   "hint": [
-   "simplified form of 長; an old man with long hair and a cane: long"
+   "an old man with long hair and a cane: length"
   ]
  },
  {
@@ -3604,7 +3586,7 @@
   "lv": "2",
   "reading": "yīn",
   "hint": [
-   "阝 place + 月 moon: the female principle"
+   "the place 阝 of the moon 月: overcast"
   ]
  },
  {
@@ -3654,7 +3636,7 @@
   "reading": "yánsè",
   "hint": [
    "页 (head) + 彦 (sound yàn)",
-   "⺈ + 巴 desires: color"
+   "what a person ⺈ desires 巴: color"
   ]
  },
  {
@@ -3690,7 +3672,7 @@
   "lv": "2",
   "reading": "jīdàn",
   "hint": [
-   "又 another + 鸟 bird: chicken",
+   "another 又 kind of bird 鸟: chicken",
    "虫 (insect) + 延 (sound yán)"
   ]
  },
@@ -3715,9 +3697,9 @@
   "lv": "3",
   "reading": "yīhuìr",
   "hint": [
-   "represents heaven (天), earth (旦), or the number 1: one",
-   "人 people + 云 speaking: to assemble",
-   "picture of son"
+   "a single stroke: one",
+   "people 人 speaking 云: can",
+   "picture of a child"
   ]
  },
  {
@@ -3729,8 +3711,8 @@
   "lv": "3",
   "reading": "yīgòng",
   "hint": [
-   "represents heaven (天), earth (旦), or the number 1: one",
-   "廾 object + 一 one + 八 hands: all"
+   "a single stroke: one",
+   "two hands 八 holding one object 廾: all"
   ]
  },
  {
@@ -3742,8 +3724,8 @@
   "lv": "3",
   "reading": "yīdìng",
   "hint": [
-   "represents heaven (天), earth (旦), or the number 1: one",
-   "宀 roof + 疋 person: to decide"
+   "a single stroke: one",
+   "a person 疋 settling under a roof 宀: to decide"
   ]
  },
  {
@@ -3755,7 +3737,7 @@
   "lv": "3",
   "reading": "yīyàng",
   "hint": [
-   "represents heaven (天), earth (旦), or the number 1: one",
+   "a single stroke: one",
    "木 (tree) + 羊 (sound yáng)"
   ]
  },
@@ -3768,8 +3750,8 @@
   "lv": "3",
   "reading": "yīzhí",
   "hint": [
-   "represents heaven (天), earth (旦), or the number 1: one",
-   "十 ten + 目 eye + 一 one: straight"
+   "a single stroke: one",
+   "to look someone in the eye 目: straight"
   ]
  },
  {
@@ -3781,8 +3763,8 @@
   "lv": "3",
   "reading": "yībān",
   "hint": [
-   "represents heaven (天), earth (旦), or the number 1: one",
-   "舟 tray + 殳 tool: sort"
+   "a single stroke: one",
+   "using a tool 殳 to sort items on a tray 舟: sort"
   ]
  },
  {
@@ -3794,7 +3776,7 @@
   "lv": "3",
   "reading": "yībiān",
   "hint": [
-   "represents heaven (天), earth (旦), or the number 1: one",
+   "a single stroke: one",
    "辶 (walk) + 臱 (sound mián)"
   ]
  },
@@ -3816,7 +3798,7 @@
   "lv": "3",
   "reading": "shàngwǎng",
   "hint": [
-   "⺊ + 一 one: above",
+   "a mark above the line 一 (opposite of 下): above, up",
    "picture of a net for catching fish"
   ]
  },
@@ -3842,7 +3824,7 @@
   "lv": "3",
   "reading": "dōng",
   "hint": [
-   "picture of east"
+   "picture of the sun rising behind a tree"
   ]
  },
  {
@@ -3854,8 +3836,8 @@
   "lv": "3",
   "reading": "zhōngjiān",
   "hint": [
-   "口 box + 丨: central",
-   "门 doorway + 日 sun: between"
+   "a line 丨 through the middle of a box 口: middle",
+   "the sun 日 shining through a doorway 门: between"
   ]
  },
  {
@@ -3867,8 +3849,8 @@
   "lv": "3",
   "reading": "wèile",
   "hint": [
-   "丶 + 力 strength + 丶",
-   "picture of a child swaddled in blanklets"
+   null,
+   "a swaddled child, like 子 without its arms 一: done"
   ]
  },
  {
@@ -3880,9 +3862,9 @@
   "lv": "3",
   "reading": "wèishénme",
   "hint": [
-   "丶 + 力 strength + 丶",
-   "亻 people + 十 ten: what? mixed",
-   "丿 + 厶 private"
+   null,
+   "a file of ten 十 people 亻: what? mixed",
+   "simplified from 麼: 麻 (sound má) + 幺 (tiny): question particle"
   ]
  },
  {
@@ -3894,8 +3876,8 @@
   "lv": "3",
   "reading": "zhǔyào",
   "hint": [
-   "picture of to own",
-   "覀 waist + 女 woman: essential"
+   "picture of a lamp with a flame",
+   "a woman 女 with hands on her waist 覀: to want"
   ]
  },
  {
@@ -3908,7 +3890,7 @@
   "reading": "jǔxíng",
   "hint": [
    "扌 (hand) + 舉 (sound jǔ)",
-   "彳 feet + 亍 steps: to go"
+   "to take small steps 亍 with one's feet 彳: to walk"
   ]
  },
  {
@@ -3942,8 +3924,8 @@
   "lv": "3",
   "reading": "liǎojiě",
   "hint": [
-   "picture of a child swaddled in blanklets",
-   "角 horns + 刀 cut + 牛 ox: to explain"
+   "a swaddled child, like 子 without its arms 一: done",
+   "to cut 刀 the horns 角 off of an ox 牛: to explain"
   ]
  },
  {
@@ -3965,11 +3947,7 @@
    "w0318"
   ],
   "lv": "3",
-  "reading": "yǐwéi",
-  "hint": [
-   null,
-   "丶 + 力 strength + 丶"
-  ]
+  "reading": "yǐwéi"
  },
  {
   "id": "c0319",
@@ -3978,11 +3956,7 @@
    "w0319"
   ],
   "lv": "3",
-  "reading": "yǐqián",
-  "hint": [
-   null,
-   "丷 + 一 one + 刖"
-  ]
+  "reading": "yǐqián"
  },
  {
   "id": "c0320",
@@ -4002,7 +3976,7 @@
   "lv": "3",
   "reading": "huìyì",
   "hint": [
-   "人 people + 云 speaking: to assemble",
+   "people 人 speaking 云: can",
    "讠 (speech) + 义 (sound yì)"
   ]
  },
@@ -4027,7 +4001,7 @@
   "lv": "3",
   "reading": "wèi",
   "hint": [
-   "亻 person + 立 stands: seat"
+   "the place where a person 亻 stands 立: position"
   ]
  },
  {
@@ -4039,7 +4013,7 @@
   "lv": "3",
   "reading": "dī",
   "hint": [
-   "氐 (sound dī)"
+   "亻 + 氐 (sound dī)"
   ]
  },
  {
@@ -4052,7 +4026,7 @@
   "reading": "tǐyù",
   "hint": [
    "亻 man + 本 root",
-   "亠 lid + 厶 private + ⺼ baby: to produce"
+   "a pregnant woman with a baby ⺼ in her womb: to produce"
   ]
  },
  {
@@ -4064,7 +4038,7 @@
   "lv": "3",
   "reading": "zuòyè",
   "hint": [
-   "亻 person + 乍 time: to make",
+   "a person 亻 making something for the first time 乍: to make",
    null
   ]
  },
@@ -4077,7 +4051,7 @@
   "lv": "3",
   "reading": "zuòyòng",
   "hint": [
-   "亻 person + 乍 time: to make",
+   "a person 亻 making something for the first time 乍: to make",
    null
   ]
  },
@@ -4090,7 +4064,7 @@
   "lv": "3",
   "reading": "shǐ",
   "hint": [
-   "亻 person + 吏 government: cause"
+   "a person 亻 working for the government 吏: to make"
   ]
  },
  {
@@ -4126,8 +4100,8 @@
   "lv": "3",
   "reading": "jiànkāng",
   "hint": [
-   "亻 someone + 建 build: strong",
-   "广 home + 隶 servant: health"
+   "someone 亻 who can build 建 things: strong",
+   "a home 广 with a servant 隶: health"
   ]
  },
  {
@@ -4151,7 +4125,7 @@
   "lv": "3",
   "reading": "xiān",
   "hint": [
-   "土 soil + 儿 person: first"
+   "someone stepping in front of another person 儿: early"
   ]
  },
  {
@@ -4163,7 +4137,7 @@
   "lv": "3",
   "reading": "gōngyuán",
   "hint": [
-   "八 divide + 厶 private: fair",
+   "to divide 八 what is private 厶: fair",
    "囗 (enclosure) + 元 (sound yuán)"
   ]
  },
@@ -4176,7 +4150,7 @@
   "lv": "3",
   "reading": "guān",
   "hint": [
-   "丷 + 天 sky"
+   "simplified from 關, a gate 門: to close"
   ]
  },
  {
@@ -4188,7 +4162,7 @@
   "lv": "3",
   "reading": "guānyú",
   "hint": [
-   "丷 + 天 sky",
+   "simplified from 關, a gate 門: to close",
    "二 two + 亅"
   ]
  },
@@ -4201,7 +4175,7 @@
   "lv": "3",
   "reading": "guānxīn",
   "hint": [
-   "丷 + 天 sky",
+   "simplified from 關, a gate 門: to close",
    "picture of a heart"
   ]
  },
@@ -4214,8 +4188,8 @@
   "lv": "3",
   "reading": "guānxi",
   "hint": [
-   "丷 + 天 sky",
-   "糸 (thread)"
+   "simplified from 關, a gate 門: to close",
+   "糸 (thread) + 丿"
   ]
  },
  {
@@ -4227,7 +4201,7 @@
   "lv": "3",
   "reading": "xìngqù",
   "hint": [
-   "⺍ + 一 one + 八 eight",
+   null,
    "走 (walk) + 取 (sound qǔ)"
   ]
  },
@@ -4240,8 +4214,8 @@
   "lv": "3",
   "reading": "qítā",
   "hint": [
-   "甘 sweet + 一 one + 八 eight",
-   "亻 person + 也 also: other"
+   null,
+   "an additional, \"also\" 也 person 亻: he"
   ]
  },
  {
@@ -4253,7 +4227,7 @@
   "lv": "3",
   "reading": "qíshí",
   "hint": [
-   "甘 sweet + 一 one + 八 eight",
+   null,
    "宀 roof + 头 head"
   ]
  },
@@ -4266,7 +4240,7 @@
   "lv": "3",
   "reading": "dōng",
   "hint": [
-   "夂 walking + ⺀ ice: winter"
+   "a man walking 夂 on ice ⺀: winter"
   ]
  },
  {
@@ -4278,7 +4252,7 @@
   "lv": "3",
   "reading": "bīngxiāng",
   "hint": [
-   "冫 ice + 水 water: ice",
+   "ice-cold冫 water 水: ice",
    "⺮ (bamboo) + 相 (sound xiāng)"
   ]
  },
@@ -4292,7 +4266,7 @@
   "reading": "juédìng",
   "hint": [
    "冫 ice + 夬 decisive",
-   "宀 roof + 疋 person: to decide"
+   "a person 疋 settling under a roof 宀: to decide"
   ]
  },
  {
@@ -4317,8 +4291,8 @@
   "lv": "3",
   "reading": "chūxiàn",
   "hint": [
-   "屮 sprout + 凵 container: to go out",
-   "王 jade + 见 see: to appear"
+   "a sprout 屮 growing out of a container 凵: to go out",
+   "to see 见 jade 王: to appear"
   ]
  },
  {
@@ -4330,7 +4304,7 @@
   "lv": "3",
   "reading": "fēn",
   "hint": [
-   "八 pieces + 刀 knife: to divide"
+   "pieces 八 being further subdivided with a knife 刀: to divide"
   ]
  },
  {
@@ -4355,7 +4329,7 @@
   "lv": "3",
   "reading": "biéren",
   "hint": [
-   "另 classes + 刂 boundaries: to separate",
+   "to draw boundaries 刂 between classes 另: to leave",
    "picture of the legs of a human being"
   ]
  },
@@ -4380,7 +4354,7 @@
   "lv": "3",
   "reading": "shuā",
   "hint": [
-   "尸 body + 巾 towel + 刂 knife: brush"
+   "a person bent over 尸 with a towel 巾: to brush"
   ]
  },
  {
@@ -4405,7 +4379,7 @@
   "reading": "bàngōngshì",
   "hint": [
    "力 (strength) + 八 (sound bā)",
-   "八 divide + 厶 private: fair",
+   "to divide 八 what is private 厶: fair",
    "宀 (roof) + 至 (sound zhì)"
   ]
  },
@@ -4419,7 +4393,7 @@
   "reading": "bànfǎ",
   "hint": [
    "力 (strength) + 八 (sound bā)",
-   "氵 stream + 去 course: law"
+   "the course 去 followed by a stream 氵: law"
   ]
  },
  {
@@ -4431,7 +4405,7 @@
   "lv": "3",
   "reading": "dòngwù",
   "hint": [
-   "力 (strength)",
+   "力 (strength) + 云",
    "牛 (ox) + 勿 (sound wù)"
   ]
  },
@@ -4457,7 +4431,7 @@
   "lv": "3",
   "reading": "bāo",
   "hint": [
-   "勹 swaddle + 巳 baby: wrap"
+   "to swaddle 勹 a baby 巳: to cover"
   ]
  },
  {
@@ -4469,7 +4443,7 @@
   "lv": "3",
   "reading": "běifāng",
   "hint": [
-   "picture of north",
+   "picture of two people sitting back-to-back",
    null
   ]
  },
@@ -4482,7 +4456,7 @@
   "lv": "3",
   "reading": "bàn",
   "hint": [
-   "丷 + 牛 cow: half"
+   "a cow 牛 splitting 丷 wood in half: half"
   ]
  },
  {
@@ -4507,7 +4481,7 @@
   "reading": "lìshǐ",
   "hint": [
    "厤 (calendar) + 力 (sound lì)",
-   "口 mouth + 乂 hand: history"
+   "a hand 乂 using a pen to record a history: history"
   ]
  },
  {
@@ -4532,8 +4506,8 @@
   "lv": "3",
   "reading": "cānjiā",
   "hint": [
-   "彡 (sound shān)",
-   "力 strength + 口 words: to add to"
+   null,
+   "supporting a cause with the strength 力 of one's words 口: to add to"
   ]
  },
  {
@@ -4557,7 +4531,7 @@
   "lv": "3",
   "reading": "shuāng",
   "hint": [
-   "又 hands + 又 hands: pair"
+   "two hands 又 side-by-side: two"
   ]
  },
  {
@@ -4583,7 +4557,7 @@
   "reading": "fāxiàn",
   "hint": [
    null,
-   "王 jade + 见 see: to appear"
+   "to see 见 jade 王: to appear"
   ]
  },
  {
@@ -4595,8 +4569,8 @@
   "lv": "3",
   "reading": "shūshu",
   "hint": [
-   "上 above + 小 smaller + 又 and: uncle",
-   "上 above + 小 smaller + 又 and: uncle"
+   "the smaller 小 brother: uncle",
+   "the smaller 小 brother: uncle"
   ]
  },
  {
@@ -4633,7 +4607,7 @@
   "lv": "3",
   "reading": "jùzi",
   "hint": [
-   "勹 phrase + 口 mouth: sentence",
+   "a phrase 勹 from the mouth 口: sentence",
    "picture of a child in a wrap, with outstretched arms but bundled legs"
   ]
  },
@@ -4646,7 +4620,7 @@
   "lv": "3",
   "reading": "zhǐ",
   "hint": [
-   "口 mouth + 八 words: only"
+   "simple words 八 coming from the mouth 口: only"
   ]
  },
  {
@@ -4659,7 +4633,7 @@
   "reading": "kě'ài",
   "hint": [
    "丁 (vigorous) + 口 (sound kǒu)",
-   "爫 claws + 冖 house + 友 friend: to love"
+   "to bring a friend 友 into one's house 冖: to love"
   ]
  },
  {
@@ -4672,7 +4646,7 @@
   "reading": "sījī",
   "hint": [
    "a person speaking orders 口 and raising their arm: to take charge of",
-   "木 wood + 几 table: desk"
+   "a table 几 made of wood 木; 几 gives the sound: machine"
   ]
  },
  {
@@ -4684,8 +4658,8 @@
   "lv": "3",
   "reading": "tóngshì",
   "hint": [
-   "凡 common + 口 tongue: same",
-   "一 one + 口 mouth + 彐 snout + 亅"
+   "sharing a common 凡 tongue 口: same",
+   null
   ]
  },
  {
@@ -4697,7 +4671,7 @@
   "lv": "3",
   "reading": "tóngyì",
   "hint": [
-   "凡 common + 口 tongue: same",
+   "sharing a common 凡 tongue 口: same",
    "心 (heart) + 音 (sound yīn)"
   ]
  },
@@ -4710,8 +4684,8 @@
   "lv": "3",
   "reading": "zhōumò",
   "hint": [
-   "冂 border + 土 land + 口 well: Zhou dynasty",
-   "木 tree + 一 top: end"
+   "border 冂 around land 土 with a well 口: Zhou dynasty",
+   "the top 一 of a tree 木: end"
   ]
  },
  {
@@ -4723,7 +4697,7 @@
   "lv": "3",
   "reading": "kū",
   "hint": [
-   "口 eyes + 口 eyes + 犬 person: to weep"
+   "to shed a tear from your eyes 口 over a person 犬: to cry"
   ]
  },
  {
@@ -4748,7 +4722,7 @@
   "reading": "píjiǔ",
   "hint": [
    "口 (mouth) + 卑 (sound bēi)",
-   "氵 wine + 酉 jar: wine"
+   "a jar 酉 of wine 氵: wine"
   ]
  },
  {
@@ -4760,7 +4734,7 @@
   "lv": "3",
   "reading": "guójiā",
   "hint": [
-   "囗 borders + 玉 treasure: country",
+   "treasure 玉 within a country's borders 囗: country",
    "宀 (roof) + 豕 (sound shǐ)"
   ]
  },
@@ -4773,9 +4747,9 @@
   "lv": "3",
   "reading": "túshūguǎn",
   "hint": [
-   "囗 borders + 冬 winter: diagram",
-   "a mark made by a pen ⺺: book",
-   "饣 food + 官 public: public building"
+   "a map of a district's borders 囗: diagram",
+   "a mark made by a pen: book",
+   "a public 官 building where food 饣 is served: public building"
   ]
  },
  {
@@ -4800,7 +4774,7 @@
   "reading": "dìtú",
   "hint": [
    "土 (earth) + 也 (sound yě)",
-   "囗 borders + 冬 winter: diagram"
+   "a map of a district's borders 囗: diagram"
   ]
  },
  {
@@ -4863,8 +4837,8 @@
   "lv": "3",
   "reading": "shēngyīn",
   "hint": [
-   "simplified form of 聲; see that character for the etymology: sound",
-   "立 tongue + 日 mouth: sound"
+   null,
+   "a tongue 立 forming a sound in the mouth 日: sound"
   ]
  },
  {
@@ -4876,7 +4850,7 @@
   "lv": "3",
   "reading": "fùxí",
   "hint": [
-   "亻 person + 日 day + 夂 somewhere: again",
+   "a person 亻 who goes somewhere 夂 every day 日: again",
    null
   ]
  },
@@ -4887,10 +4861,7 @@
    "w0391"
   ],
   "lv": "3",
-  "reading": "xià",
-  "hint": [
-   "一 one + 自 self + 夂 to go"
-  ]
+  "reading": "xià"
  },
  {
   "id": "c0392",
@@ -4901,8 +4872,8 @@
   "lv": "3",
   "reading": "duōme",
   "hint": [
-   "夕 nights + 夕 nights: much",
-   "丿 + 厶 private"
+   "two nights 夕, suggesting many: many",
+   "simplified from 麼: 麻 (sound má) + 幺 (tiny): question particle"
   ]
  },
  {
@@ -4914,8 +4885,8 @@
   "lv": "3",
   "reading": "tàiyang",
   "hint": [
-   "大 giant + 丶: very",
-   "阝 place + 日 sun: the male principle"
+   "a giant 大 with a normal-sized man 丶 for scale: highest",
+   "the place 阝 of the sun 日: the male principle"
   ]
  },
  {
@@ -4927,7 +4898,7 @@
   "lv": "3",
   "reading": "tóufa",
   "hint": [
-   "大 (high)",
+   "大 (high) + ⺀",
    null
   ]
  },
@@ -4940,7 +4911,7 @@
   "lv": "3",
   "reading": "qíguài",
   "hint": [
-   "大 person + 可 horse: strange",
+   "a person 大 riding a horse 可: strange",
    "忄 heart + 圣 holy"
   ]
  },
@@ -4966,8 +4937,8 @@
   "lv": "3",
   "reading": "rúguǒ",
   "hint": [
-   "女 wife + 口 words: as",
-   "田 fruit + 木 tree: fruit"
+   "a wife 女 following her husband's words 口: as",
+   "fruit 田 growing on a tree 木: fruit"
   ]
  },
  {
@@ -4979,8 +4950,8 @@
   "lv": "3",
   "reading": "zìdiǎn",
   "hint": [
-   "宀 house + 子 child: character",
-   "曲 crooked + 八 hands: law"
+   "a child 子 in a house 宀: letter",
+   "two hands 八 holding a book: law"
   ]
  },
  {
@@ -4992,8 +4963,8 @@
   "lv": "3",
   "reading": "jìjié",
   "hint": [
-   "禾 grain + 子 seeds: a quarter-year",
-   "simplified form of 節; sections of bamboo ⺮: festival"
+   "the time for planting seeds 子 of grain 禾: a quarter-year",
+   "sections of bamboo: festival"
   ]
  },
  {
@@ -5005,7 +4976,7 @@
   "lv": "3",
   "reading": "ānjìng",
   "hint": [
-   "宀 house + 女 woman: peaceful",
+   "a woman 女 safe in a house 宀: peaceful",
    "青 (nature) + 争 (sound zhēng)"
   ]
  },
@@ -5031,7 +5002,7 @@
   "lv": "3",
   "reading": "kèrén",
   "hint": [
-   "宀 roof + 各 person: guest",
+   "a person 各 welcomed under one's roof 宀: guest",
    "picture of the legs of a human being"
   ]
  },
@@ -5044,7 +5015,7 @@
   "lv": "3",
   "reading": "hàipà",
   "hint": [
-   "宀 roof + 丰 abundant + 口 mouth",
+   null,
    "忄 (heart) + 白 (sound bái)"
   ]
  },
@@ -5057,7 +5028,7 @@
   "lv": "3",
   "reading": "róngyì",
   "hint": [
-   "宀 (roof)",
+   "宀 (roof) + 谷",
    "日 sun + 勿 must not"
   ]
  },
@@ -5070,8 +5041,8 @@
   "lv": "3",
   "reading": "bīnguǎn",
   "hint": [
-   "宀 roof + 兵 solider: guest",
-   "饣 food + 官 public: public building"
+   "a solider 兵 quartered under one's roof 宀: guest",
+   "a public 官 building where food 饣 is served: public building"
   ]
  },
  {
@@ -5083,7 +5054,7 @@
   "lv": "3",
   "reading": "xiǎoxīn",
   "hint": [
-   "亅 + 八 dividing: small",
+   "dividing 八 by a line 亅: small",
    "picture of a heart"
   ]
  },
@@ -5094,10 +5065,7 @@
    "w0407"
   ],
   "lv": "3",
-  "reading": "céng",
-  "hint": [
-   "尸 body + 云 cloud: layer"
-  ]
+  "reading": "céng"
  },
  {
   "id": "c0408",
@@ -5108,7 +5076,7 @@
   "lv": "3",
   "reading": "chà",
   "hint": [
-   "羊 sheep + 工 work: difference"
+   "work 工 done by a sheep 羊; incompetence: different"
   ]
  },
  {
@@ -5120,7 +5088,7 @@
   "lv": "3",
   "reading": "dài",
   "hint": [
-   "卅 above + 冖 cover + 巾 below: belt"
+   "a belt, creasing one's robe above 卅 but not below 巾: band"
   ]
  },
  {
@@ -5132,8 +5100,8 @@
   "lv": "3",
   "reading": "bāngmáng",
   "hint": [
-   "邦 nation's + 巾 flag: to help",
-   "忄 heart + 亡 death: busy"
+   "a nation's 邦 flag 巾: to help",
+   "a heart 忄 faced with death 亡: busy"
   ]
  },
  {
@@ -5197,7 +5165,7 @@
   "lv": "3",
   "reading": "yīnggāi",
   "hint": [
-   "广 broad + ⺍ + 一 one",
+   null,
    "讠 (speech) + 亥 (sound hài)"
   ]
  },
@@ -5237,7 +5205,7 @@
   "reading": "bìxū",
   "hint": [
    "心 heart + 丿",
-   "彡 hair + 页 face: beard"
+   "hair 彡 growing on the face 页: beard"
   ]
  },
  {
@@ -5250,7 +5218,7 @@
   "reading": "wàngjì",
   "hint": [
    "心 (heart) + 亡 (sound wáng)",
-   "讠 note + 己 private: mark"
+   "a private 己 note 讠: mark"
   ]
  },
  {
@@ -5262,8 +5230,8 @@
   "lv": "3",
   "reading": "zǒngshì",
   "hint": [
-   "丷 + 口 mouths + 心 mind: to gather",
-   "日 speak + 疋 directly: to be"
+   "many mouths 口 speaking with one mind 心: to gather",
+   "to speak 日 directly 疋: to be"
   ]
  },
  {
@@ -5275,7 +5243,7 @@
   "lv": "3",
   "reading": "gǎnmào",
   "hint": [
-   "咸 together + 心 hearts: to affect",
+   "two hearts 心 beating together 咸: to affect",
    "目 (eye) + 冃 (sound)"
   ]
  },
@@ -5302,7 +5270,7 @@
   "reading": "chéngjì",
   "hint": [
    "丁 male adult + 戈 spear",
-   "纟 complete + 责 duties: achievements"
+   "to complete 纟 one's duties 责: achievements"
   ]
  },
  {
@@ -5314,7 +5282,7 @@
   "lv": "3",
   "reading": "huòzhě",
   "hint": [
-   "戈 spear + 口 yourself + 一 one: or",
+   "to defend yourself 口 with a spear 戈; \"or else\": or",
    "耂 old + 日 sun"
   ]
  },
@@ -5340,7 +5308,7 @@
   "reading": "dǎsǎo",
   "hint": [
    "扌 (hand) + 丁 (sound dīng)",
-   "扌 use + 彐 snout: to clean"
+   "to use 扌 a broom: to clean"
   ]
  },
  {
@@ -5353,7 +5321,7 @@
   "reading": "dǎsuàn",
   "hint": [
    "扌 (hand) + 丁 (sound dīng)",
-   "⺮ bamboo + 具 abacus: to calculate"
+   "a bamboo ⺮ abacus 具: to regard as"
   ]
  },
  {
@@ -5377,7 +5345,7 @@
   "lv": "3",
   "reading": "hùzhào",
   "hint": [
-   "扌 guarding + 户 home: to defend",
+   "guarding 扌 a home 户: to defend",
    "灬 (fire) + 昭 (sound zhāo)"
   ]
  },
@@ -5490,7 +5458,7 @@
   "reading": "gùshi",
   "hint": [
    "攵 (tap) + 古 (sound gǔ)",
-   "一 one + 口 mouth + 彐 snout + 亅"
+   null
   ]
  },
  {
@@ -5514,7 +5482,7 @@
   "lv": "3",
   "reading": "gǎn",
   "hint": [
-   "耳 beast + 攵 stick: bold"
+   "a hand with a stick 攵 striking a beast 耳: to dare"
   ]
  },
  {
@@ -5527,7 +5495,7 @@
   "reading": "shùxué",
   "hint": [
    "攵 (script) + 娄 (sound lóu)",
-   "⺍ + 冖 building + 子 children: learning"
+   "a building 冖 where children 子 study: learning"
   ]
  },
  {
@@ -5552,7 +5520,7 @@
   "lv": "3",
   "reading": "xīnwén",
   "hint": [
-   "亲 tree + 斤 chopped: new",
+   "a freshly chopped 斤 tree 亲: new",
    "耳 (ear) + 门 (sound mén)"
   ]
  },
@@ -5565,7 +5533,7 @@
   "lv": "3",
   "reading": "xīnxiān",
   "hint": [
-   "亲 tree + 斤 chopped: new",
+   "a freshly chopped 斤 tree 亲: new",
    "鱼 (fish) + 羊 (sound yáng)"
   ]
  },
@@ -5591,7 +5559,7 @@
   "lv": "3",
   "reading": "jiù",
   "hint": [
-   "丨 + 日 sun: old"
+   "older than 丨 the sun 日: old"
   ]
  },
  {
@@ -5603,7 +5571,7 @@
   "lv": "3",
   "reading": "míngbai",
   "hint": [
-   "日 sun + 月 moon: bright",
+   "the light of the sun 日 and moon 月: bright",
    "a burning candle; the rays of the sun: white"
   ]
  },
@@ -5614,10 +5582,7 @@
    "w0448"
   ],
   "lv": "3",
-  "reading": "chūn",
-  "hint": [
-   "日 (sun)"
-  ]
+  "reading": "chūn"
  },
  {
   "id": "c0449",
@@ -5628,9 +5593,9 @@
   "lv": "3",
   "reading": "pǔtōnghuà",
   "hint": [
-   "並 everyone + 日 sun: widespread",
+   "everyone 並 under the sun 日: widespread",
    "辶 (walk) + 甬 (sound yǒng)",
-   "讠 spoken + 舌 tongue: talk"
+   "a spoken 讠 tongue 舌: talk"
   ]
  },
  {
@@ -5640,10 +5605,7 @@
    "w0450"
   ],
   "lv": "3",
-  "reading": "gèng",
-  "hint": [
-   "一 one + 曰 to speak + 乂 to govern"
-  ]
+  "reading": "gèng"
  },
  {
   "id": "c0451",
@@ -5654,7 +5616,7 @@
   "lv": "3",
   "reading": "zuìjìn",
   "hint": [
-   "日 sun + 取 place: most",
+   "to take place 取 under the sun 日 (that is, everywhere): most",
    "辶 (walk) + 斤 (sound jīn)"
   ]
  },
@@ -5680,8 +5642,8 @@
   "lv": "3",
   "reading": "yǒumíng",
   "hint": [
-   "月 (sound yuè)",
-   "夕 night + 口 out: name"
+   null,
+   "a name called out 口 to hail someone at night 夕: name"
   ]
  },
  {
@@ -5693,8 +5655,8 @@
   "lv": "3",
   "reading": "jīhuì",
   "hint": [
-   "木 wood + 几 table: desk",
-   "人 people + 云 speaking: to assemble"
+   "a table 几 made of wood 木; 几 gives the sound: machine",
+   "people 人 speaking 云: can"
   ]
  },
  {
@@ -5730,7 +5692,7 @@
   "lv": "3",
   "reading": "guǒzhī",
   "hint": [
-   "田 fruit + 木 tree: fruit",
+   "fruit 田 growing on a tree 木: fruit",
    "氵 (water) + 十 (sound shí)"
   ]
  },
@@ -5756,7 +5718,7 @@
   "reading": "xiàozhǎng",
   "hint": [
    "木 (wood) + 交 (sound jiāo)",
-   "simplified form of 長; an old man with long hair and a cane: long"
+   "an old man with long hair and a cane: length"
   ]
  },
  {
@@ -5806,7 +5768,7 @@
   "lv": "3",
   "reading": "duàn",
   "hint": [
-   "a hand using a chisel 殳 to cut stone: section"
+   "a hand using a chisel 殳 to cut stone: paragraph"
   ]
  },
  {
@@ -5818,7 +5780,7 @@
   "lv": "3",
   "reading": "bǐsài",
   "hint": [
-   "匕 spoons + 匕 spoons: to compare",
+   "two spoons 匕 side-by-side: to compare",
    "贝 (money) + 宀 (sound gài)"
   ]
  },
@@ -5831,7 +5793,7 @@
   "lv": "3",
   "reading": "bǐjiào",
   "hint": [
-   "匕 spoons + 匕 spoons: to compare",
+   "two spoons 匕 side-by-side: to compare",
    "车 (cart) + 交 (sound jiāo)"
   ]
  },
@@ -5884,7 +5846,7 @@
   "hint": [
    "氵 (water) + 先 (sound xiān)",
    "picture of a hand with the fingers splayed",
-   "门 doorway + 日 sun: between"
+   "the sun 日 shining through a doorway 门: between"
   ]
  },
  {
@@ -5934,8 +5896,8 @@
   "lv": "3",
   "reading": "yóuxì",
   "hint": [
-   "氵 seas + 斿 freely: to wander",
-   "又 hand + 戈 spear: play"
+   "to swim freely 斿 through the seas 氵: to wander",
+   "a hand 又 doing tricks with a spear 戈: play"
   ]
  },
  {
@@ -6012,8 +5974,8 @@
   "reading": "zhàoxiàngjī",
   "hint": [
    "灬 (fire) + 昭 (sound zhāo)",
-   "木 tree + 目 stare: mutual",
-   "木 wood + 几 table: desk"
+   "to stare 目 at a tree 木, meaning to observe: mutual",
+   "a table 几 made of wood 木; 几 gives the sound: machine"
   ]
  },
  {
@@ -6038,7 +6000,7 @@
   "lv": "3",
   "reading": "xióngmāo",
   "hint": [
-   "能 bear's + 灬 footprints: a bear",
+   "a bear's 能 footprints 灬: a bear",
    "犭 (animal) + 苗 (sound miáo)"
   ]
  },
@@ -6064,8 +6026,8 @@
   "lv": "3",
   "reading": "àihào",
   "hint": [
-   "爫 claws + 冖 house + 友 friend: to love",
-   "女 woman + 子 son: good"
+   "to bring a friend 友 into one's house 冖: to love",
+   "a woman 女 with a son 子: good"
   ]
  },
  {
@@ -6091,7 +6053,7 @@
   "reading": "tèbié",
   "hint": [
    "牛 (ox) + 寺 (sound sì)",
-   "另 classes + 刂 boundaries: to separate"
+   "to draw boundaries 刂 between classes 另: to leave"
   ]
  },
  {
@@ -6116,7 +6078,7 @@
   "lv": "3",
   "reading": "bān",
   "hint": [
-   "王 jade + 刂 cutting + 王 jade: class"
+   "cutting 刂 a piece of jade 王 in two, symbolizing two classes: team"
   ]
  },
  {
@@ -6128,7 +6090,7 @@
   "lv": "3",
   "reading": "tián",
   "hint": [
-   "舌 tongue + 甘 tasty: sweet"
+   "something tasty 甘 to the tongue 舌: sweet"
   ]
  },
  {
@@ -6140,8 +6102,8 @@
   "lv": "3",
   "reading": "shēngqì",
   "hint": [
-   "一 one + 土 soil: life",
-   "a person 亻 breathing air: air"
+   "a shoot growing out of the soil 土: to grow, life",
+   "rising vapour: air, gas"
   ]
  },
  {
@@ -6162,7 +6124,7 @@
   "lv": "3",
   "reading": "diànzǐ",
   "hint": [
-   "曰 to speak + 乚: electricity",
+   "lightning 申 from 電 without its storm cloud 雨: electricity",
    "picture of a child in a wrap, with outstretched arms but bundled legs"
   ]
  },
@@ -6175,7 +6137,7 @@
   "lv": "3",
   "reading": "diàntī",
   "hint": [
-   "曰 to speak + 乚: electricity",
+   "lightning 申 from 電 without its storm cloud 雨: electricity",
    "木 (wood) + 弟 (sound dì)"
   ]
  },
@@ -6188,7 +6150,7 @@
   "lv": "3",
   "reading": "huà",
   "hint": [
-   "一 one + 凵 container + 田 field: picture"
+   "a painting on an easel: to draw"
   ]
  },
  {
@@ -6237,7 +6199,7 @@
   "lv": "3",
   "reading": "xiāngxìn",
   "hint": [
-   "木 tree + 目 stare: mutual",
+   "to stare 目 at a tree 木, meaning to observe: mutual",
    "亻 man + 言 words"
   ]
  },
@@ -6250,8 +6212,8 @@
   "lv": "3",
   "reading": "xiāngtóng",
   "hint": [
-   "木 tree + 目 stare: mutual",
-   "凡 common + 口 tongue: same"
+   "to stare 目 at a tree 木, meaning to observe: mutual",
+   "sharing a common 凡 tongue 口: same"
   ]
  },
  {
@@ -6338,7 +6300,7 @@
   "lv": "3",
   "reading": "zhù",
   "hint": [
-   "礻 altar + 兄 person: to pray"
+   "a person 兄 praying before an altar 礻: to pray for"
   ]
  },
  {
@@ -6351,7 +6313,7 @@
   "reading": "líkāi",
   "hint": [
    "picture of an animal standing straight",
-   "一 latch + 廾 hands: to open"
+   "hands 廾 lifting the latch 一 of a door: to open"
   ]
  },
  {
@@ -6363,7 +6325,7 @@
   "lv": "3",
   "reading": "qiū",
   "hint": [
-   "禾 burn + 火 crops: autumn"
+   "the time of year when farmers would burn 禾 crops 火: autumn"
   ]
  },
  {
@@ -6400,7 +6362,7 @@
   "lv": "3",
   "reading": "tūrán",
   "hint": [
-   "穴 cave + 犬 dog: sudden",
+   "a dog 犬 rushing out of a cave 穴: sudden",
    "灬 (fire) + 肰 (sound rán)"
   ]
  },
@@ -6554,7 +6516,7 @@
   "reading": "jiéshù",
   "hint": [
    "纟 (thread) + 吉 (sound jí)",
-   "木 lumber + 口 rope: to bind"
+   "lumber 木 bound by rope 口: to bind"
   ]
  },
  {
@@ -6578,7 +6540,7 @@
   "lv": "3",
   "reading": "lǎo",
   "hint": [
-   "picture of old"
+   "picture of a person bent over with long hair and a crutch"
   ]
  },
  {
@@ -6604,7 +6566,7 @@
   "reading": "ěrduo",
   "hint": [
    "picture of an ear",
-   "几 flowers + 木 tree: cluster of flowers"
+   "flowers 几 blooming on a tree 木: flower"
   ]
  },
  {
@@ -6617,7 +6579,7 @@
   "reading": "cōngming",
   "hint": [
    "耳 (ear) + 总 (sound zǒng)",
-   "日 sun + 月 moon: bright"
+   "the light of the sun 日 and moon 月: bright"
   ]
  },
  {
@@ -6665,7 +6627,7 @@
   "lv": "3",
   "reading": "tuǐ",
   "hint": [
-   "⺼ flesh + 退 walk: legs"
+   "flesh ⺼ used to walk 退: leg"
   ]
  },
  {
@@ -6691,7 +6653,7 @@
   "reading": "shūfu",
   "hint": [
    "舍 (home) + 予 (sound yǔ)",
-   "月 coat + 卩 person + 又 and: clothes"
+   "a person 卩 putting on 又 a coat 月: clothes"
   ]
  },
  {
@@ -6703,7 +6665,7 @@
   "lv": "3",
   "reading": "jiérì",
   "hint": [
-   "simplified form of 節; sections of bamboo ⺮: festival",
+   "sections of bamboo: festival",
    "picture of the sun"
   ]
  },
@@ -6716,7 +6678,7 @@
   "lv": "3",
   "reading": "jiémù",
   "hint": [
-   "simplified form of 節; sections of bamboo ⺮: festival",
+   "sections of bamboo: festival",
    "picture of an eye drawn on its side"
   ]
  },
@@ -6729,7 +6691,7 @@
   "lv": "3",
   "reading": "huā",
   "hint": [
-   "艹 flower + 化 bloom: flower"
+   "a flower 艹 in bloom 化: flower"
   ]
  },
  {
@@ -6741,7 +6703,7 @@
   "lv": "3",
   "reading": "huāyuán",
   "hint": [
-   "艹 flower + 化 bloom: flower",
+   "a flower 艹 in bloom 化: flower",
    "囗 (enclosure) + 元 (sound yuán)"
   ]
  },
@@ -6830,7 +6792,7 @@
   "lv": "3",
   "reading": "xínglixiāng",
   "hint": [
-   "彳 feet + 亍 steps: to go",
+   "to take small steps 亍 with one's feet 彳: to walk",
    "木 (wood) + 子 (sound zi)",
    "⺮ (bamboo) + 相 (sound xiāng)"
   ]
@@ -6857,7 +6819,7 @@
   "lv": "3",
   "reading": "biǎoyǎn",
   "hint": [
-   "毛 fur + 衣 clothing: to show",
+   "fur 毛 clothing 衣; a shawl or wrap: to show",
    "氵 (water) + 寅 (sound yín)"
   ]
  },
@@ -6870,7 +6832,7 @@
   "lv": "3",
   "reading": "biǎoshì",
   "hint": [
-   "毛 fur + 衣 clothing: to show",
+   "fur 毛 clothing 衣; a shawl or wrap: to show",
    "picture of an altar"
   ]
  },
@@ -6946,7 +6908,7 @@
   "lv": "3",
   "reading": "yāoqiú",
   "hint": [
-   "覀 waist + 女 woman: essential",
+   "a woman 女 with hands on her waist 覀: to want",
    "一 one + 氺"
   ]
  },
@@ -6959,7 +6921,7 @@
   "lv": "3",
   "reading": "jiànmiàn",
   "hint": [
-   "冂 wide + 儿 man: to see",
+   "a man 儿 with the eye emphasized: to see",
    "picture of a person's face"
   ]
  },
@@ -6984,7 +6946,7 @@
   "lv": "3",
   "reading": "jiějué",
   "hint": [
-   "角 horns + 刀 cut + 牛 ox: to explain",
+   "to cut 刀 the horns 角 off of an ox 牛: to explain",
    "冫 ice + 夬 decisive"
   ]
  },
@@ -6998,7 +6960,7 @@
   "reading": "rènwéi",
   "hint": [
    "讠 (speech) + 人 (sound rén)",
-   "丶 + 力 strength + 丶"
+   null
   ]
  },
  {
@@ -7011,7 +6973,7 @@
   "reading": "rènzhēn",
   "hint": [
    "讠 (speech) + 人 (sound rén)",
-   "直 straight + 几 table: real"
+   "a straight 直 (that is, level) table 几: really"
   ]
  },
  {
@@ -7023,8 +6985,8 @@
   "lv": "3",
   "reading": "jìde",
   "hint": [
-   "讠 note + 己 private: mark",
-   "彳 + 旦 shell + 寸 hand: to obtain"
+   "a private 己 note 讠: mark",
+   "a hand 寸 grabbing a shell 旦: structural particle: used after a verb…"
   ]
  },
  {
@@ -7098,7 +7060,7 @@
   "lv": "3",
   "reading": "liàng",
   "hint": [
-   "车 carts + 两 two: measure word for vehicles"
+   "two 两 carts 车: classifier for vehicles"
   ]
  },
  {
@@ -7123,8 +7085,8 @@
   "lv": "3",
   "reading": "háishi",
   "hint": [
-   "辶 moving + 不 not: also",
-   "日 speak + 疋 directly: to be"
+   "not 不 moving 辶: still",
+   "to speak 日 directly 疋: to be"
   ]
  },
  {
@@ -7188,8 +7150,8 @@
   "lv": "3",
   "reading": "zhòngyào",
   "hint": [
-   "千 thousand + 里 miles: heavy",
-   "覀 waist + 女 woman: essential"
+   "a burden carried for a thousand 千 miles 里: heavy",
+   "a woman 女 with hands on her waist 覀: to want"
   ]
  },
  {
@@ -7202,7 +7164,7 @@
   "reading": "qiānbǐ",
   "hint": [
    "钅 (metal) + 几 (sound jǐ)",
-   "⺮ rod + 毛 hair: pen"
+   "a bamboo rod ⺮ tipped with hair 毛: pen"
   ]
  },
  {
@@ -7215,7 +7177,7 @@
   "reading": "yínháng",
   "hint": [
    "钅 (money) + 艮 (sound gěn)",
-   "彳 feet + 亍 steps: to go"
+   "to take small steps 亍 with one's feet 彳: to walk"
   ]
  },
  {
@@ -7266,8 +7228,8 @@
   "lv": "3",
   "reading": "chúle",
   "hint": [
-   "阝 city + 余 waste: to eliminate",
-   "picture of a child swaddled in blanklets"
+   "the waste 余 produced by a city 阝: to eliminate",
+   "a swaddled child, like 子 without its arms 一: done"
   ]
  },
  {
@@ -7279,7 +7241,7 @@
   "lv": "3",
   "reading": "nán",
   "hint": [
-   "又 hand + 隹 bird: hard"
+   "a hand 又 trying to grasp at a bird 隹: difficult"
   ]
  },
  {
@@ -7291,7 +7253,7 @@
   "lv": "3",
   "reading": "nánguò",
   "hint": [
-   "又 hand + 隹 bird: hard",
+   "a hand 又 trying to grasp at a bird 隹: difficult",
    "辶 (walk) + 咼 (sound guō)"
   ]
  },
@@ -7304,8 +7266,8 @@
   "lv": "3",
   "reading": "xūyào",
   "hint": [
-   "雨 rain + 而 and: to need",
-   "覀 waist + 女 woman: essential"
+   "rain 雨 needed for crops to grow: to need",
+   "a woman 女 with hands on her waist 覀: to want"
   ]
  },
  {
@@ -7318,7 +7280,7 @@
   "reading": "miànbāo",
   "hint": [
    "picture of a person's face",
-   "勹 swaddle + 巳 baby: wrap"
+   "to swaddle 勹 a baby 巳: to cover"
   ]
  },
  {
@@ -7355,8 +7317,8 @@
   "lv": "3",
   "reading": "yīnyuè",
   "hint": [
-   "立 tongue + 日 mouth: sound",
-   "丿 + 小 small: cheerful"
+   "a tongue 立 forming a sound in the mouth 日: sound",
+   "a musical instrument with wood, strings, and a pick: cheerful"
   ]
  },
  {
@@ -7380,7 +7342,7 @@
   "lv": "3",
   "reading": "è",
   "hint": [
-   "饣 food + 我 want: hungry"
+   "to want 我 food 饣: to be hungry"
   ]
  },
  {
@@ -7392,7 +7354,7 @@
   "lv": "3",
   "reading": "xiāngjiāo",
   "hint": [
-   "禾 herb + 日 sun: incense",
+   "a herb 禾 with a sweet smell: fragrant",
    "艹 (plant) + 焦 (sound jiāo)"
   ]
  },
@@ -7405,7 +7367,7 @@
   "lv": "3",
   "reading": "mǎ",
   "hint": [
-   "picture of horse"
+   "picture of a horse galloping to the left"
   ]
  },
  {
@@ -7417,8 +7379,8 @@
   "lv": "3",
   "reading": "mǎshàng",
   "hint": [
-   "picture of horse",
-   "⺊ + 一 one: above"
+   "picture of a horse galloping to the left",
+   "a mark above the line 一 (opposite of 下): above, up"
   ]
  },
  {
@@ -7442,7 +7404,7 @@
   "lv": "3",
   "reading": "niǎo",
   "hint": [
-   "picture of bird"
+   "picture of a bird"
   ]
  },
  {
@@ -7492,7 +7454,7 @@
   "lv": "4",
   "reading": "yīqiè",
   "hint": [
-   "represents heaven (天), earth (旦), or the number 1: one",
+   "a single stroke: one",
    "刀 (knife) + 七 (sound qī)"
   ]
  },
@@ -7505,8 +7467,8 @@
   "lv": "4",
   "reading": "bùjǐn",
   "hint": [
-   "a bird flying toward the sky 一: no",
-   "亻 (person)"
+   "a bird flying toward the sky 一: not",
+   "亻 (person) + 又"
   ]
  },
  {
@@ -7518,8 +7480,8 @@
   "lv": "4",
   "reading": "bùdàn",
   "hint": [
-   "a bird flying toward the sky 一: no",
-   "旦 (sound dàn)"
+   "a bird flying toward the sky 一: not",
+   "亻 + 旦 (sound dàn)"
   ]
  },
  {
@@ -7531,9 +7493,9 @@
   "lv": "4",
   "reading": "bùdébù",
   "hint": [
-   "a bird flying toward the sky 一: no",
-   "彳 + 旦 shell + 寸 hand: to obtain",
-   "a bird flying toward the sky 一: no"
+   "a bird flying toward the sky 一: not",
+   "a hand 寸 grabbing a shell 旦: structural particle: used after a verb…",
+   "a bird flying toward the sky 一: not"
   ]
  },
  {
@@ -7545,7 +7507,7 @@
   "lv": "4",
   "reading": "bùguǎn",
   "hint": [
-   "a bird flying toward the sky 一: no",
+   "a bird flying toward the sky 一: not",
    "⺮ (bamboo) + 官 (sound guān)"
   ]
  },
@@ -7558,7 +7520,7 @@
   "lv": "4",
   "reading": "bùguò",
   "hint": [
-   "a bird flying toward the sky 一: no",
+   "a bird flying toward the sky 一: not",
    "辶 (walk) + 咼 (sound guō)"
   ]
  },
@@ -7615,7 +7577,7 @@
   "lv": "4",
   "reading": "diū",
   "hint": [
-   "王 king + 厶 lost: to lose"
+   "a lost 厶 jade: to lose"
   ]
  },
  {
@@ -7641,7 +7603,7 @@
   "reading": "yánzhòng",
   "hint": [
    "亚 Asia + 厂 cliff",
-   "千 thousand + 里 miles: heavy"
+   "a burden carried for a thousand 千 miles 里: heavy"
   ]
  },
  {
@@ -7653,7 +7615,7 @@
   "lv": "4",
   "reading": "gèzi",
   "hint": [
-   "人 people + 丨: this",
+   "a tally 丨 of people 人",
    "picture of a child in a wrap, with outstretched arms but bundled legs"
   ]
  },
@@ -7666,7 +7628,7 @@
   "lv": "4",
   "reading": "Zhōngwén",
   "hint": [
-   "口 box + 丨: central",
+   "a line 丨 through the middle of a box 口: middle",
    "picture of a tattooed chest, representing writing"
   ]
  },
@@ -7692,8 +7654,8 @@
   "lv": "4",
   "reading": "zhǔdòng",
   "hint": [
-   "picture of to own",
-   "力 (strength)"
+   "picture of a lamp with a flame",
+   "力 (strength) + 云"
   ]
  },
  {
@@ -7705,7 +7667,7 @@
   "lv": "4",
   "reading": "zhǔyi",
   "hint": [
-   "picture of to own",
+   "picture of a lamp with a flame",
    "心 (heart) + 音 (sound yīn)"
   ]
  },
@@ -7729,7 +7691,10 @@
    "w0615"
   ],
   "lv": "4",
-  "reading": "zhī"
+  "reading": "zhī",
+  "hint": [
+   "a foot meaning \"to follow\": him"
+  ]
  },
  {
   "id": "c0616",
@@ -7740,8 +7705,8 @@
   "lv": "4",
   "reading": "pīngpāngqiú",
   "hint": [
-   "丘 mound + 丿: used with pong for ping pong",
-   "丘 mound + 丶: used with ping for ping pong",
+   "a ball bouncing back and forth: used with pong for ping pong",
+   "a ball bouncing back and forth: used with ping for ping pong",
    "王 (jade) + 求 (sound qiú)"
   ]
  },
@@ -7754,8 +7719,8 @@
   "lv": "4",
   "reading": "chéngzuò",
   "hint": [
-   "禾 beanstalk + 北 feet: ride",
-   "从 people + 土 ground: seat"
+   "two feet 北 climbing a beanstalk 禾: ride",
+   "two people 从 sitting on the ground 土: to sit"
   ]
  },
  {
@@ -7793,7 +7758,7 @@
   "reading": "yúshì",
   "hint": [
    "二 two + 亅",
-   "日 speak + 疋 directly: to be"
+   "to speak 日 directly 疋: to be"
   ]
  },
  {
@@ -7806,7 +7771,7 @@
   "reading": "hùxiāng",
   "hint": [
    "two hooks hooking eachother: mutually",
-   "木 tree + 目 stare: mutual"
+   "to stare 目 at a tree 木, meaning to observe: mutual"
   ]
  },
  {
@@ -7818,8 +7783,8 @@
   "lv": "4",
   "reading": "Yàzhōu",
   "hint": [
-   "picture of picture of a cross-shaped house or temple",
-   "氵 water + 州 state: continent"
+   "picture of a cross-shaped house or temple",
+   "a state 州 surrounded by water 氵: continent"
   ]
  },
  {
@@ -7831,7 +7796,7 @@
   "lv": "4",
   "reading": "jiāo",
   "hint": [
-   "六 six + 乂 to govern: to connect"
+   "a person with crossed (intersecting) legs: to hand over"
   ]
  },
  {
@@ -7843,7 +7808,7 @@
   "lv": "4",
   "reading": "jiāoliú",
   "hint": [
-   "六 six + 乂 to govern: to connect",
+   "a person with crossed (intersecting) legs: to hand over",
    "氵 (water) + 㐬 (sound liú)"
   ]
  },
@@ -7856,7 +7821,7 @@
   "lv": "4",
   "reading": "jiāotōng",
   "hint": [
-   "六 six + 乂 to govern: to connect",
+   "a person with crossed (intersecting) legs: to hand over",
    "辶 (walk) + 甬 (sound yǒng)"
   ]
  },
@@ -7894,8 +7859,8 @@
   "lv": "4",
   "reading": "qīnqi",
   "hint": [
-   "立 fruit + 一 one + 小 small: relatives",
-   "戊 + 尗 brother: ashamed"
+   "a tree bearing fruit 立: relatives",
+   "a younger brother 尗 killed in a war: ashamed"
   ]
  },
  {
@@ -7908,8 +7873,8 @@
   "reading": "rénmínbì",
   "hint": [
    "picture of the legs of a human being",
-   "巳 eye + 戈 dagger: citizens",
-   "丿 + 巾 silk: currency"
+   "an eye 巳 pierced by a dagger 戈, an old mark of slavery: citizens",
+   "bills written on silk 巾: currency"
   ]
  },
  {
@@ -7946,8 +7911,8 @@
   "lv": "4",
   "reading": "cónglái",
   "hint": [
-   "人 person + 人 person: from",
-   "未 not yet + 丷: to arrive"
+   "one person 人 following another: from",
+   "a wheat plant (from 來), borrowed for its sound: to come"
   ]
  },
  {
@@ -7959,7 +7924,7 @@
   "lv": "4",
   "reading": "zǐxì",
   "hint": [
-   "亻 person + 子 child: small thing",
+   "a person 亻 keeping watch over a child 子: small thing",
    "纟 (silk) + 田 (sound tián)"
   ]
  },
@@ -7972,8 +7937,8 @@
   "lv": "4",
   "reading": "dàitì",
   "hint": [
-   "亻 man + 弋 caught: era",
-   "夫 man + 夫 man + 日 sun: to change"
+   "a man 亻 caught 弋 by the passing of time: era",
+   "one man 夫 replacing another: to change"
   ]
  },
  {
@@ -7985,8 +7950,8 @@
   "lv": "4",
   "reading": "dàibiǎo",
   "hint": [
-   "亻 man + 弋 caught: era",
-   "毛 fur + 衣 clothing: to show"
+   "a man 亻 caught 弋 by the passing of time: era",
+   "fur 毛 clothing 衣; a shawl or wrap: to show"
   ]
  },
  {
@@ -8007,7 +7972,7 @@
   "lv": "4",
   "reading": "jiàgé",
   "hint": [
-   "介 (sound jiè)",
+   "亻 + 介 (sound jiè)",
    "木 (wood) + 各 (sound gè)"
   ]
  },
@@ -8046,7 +8011,7 @@
   "lv": "4",
   "reading": "fèn",
   "hint": [
-   "亻 man + 分 portion: job"
+   "the lot or portion 分 allotted to a man 亻: classifier for gifts"
   ]
  },
  {
@@ -8072,7 +8037,7 @@
   "reading": "yōuxiù",
   "hint": [
    "亻 (person) + 尤 (sound yóu)",
-   "禾 (flower)"
+   "禾 (flower) + 乃"
   ]
  },
  {
@@ -8085,7 +8050,7 @@
   "reading": "chuánzhēn",
   "hint": [
    "亻 (people) + 专 (sound zhuān)",
-   "直 straight + 几 table: real"
+   "a straight 直 (that is, level) table 几: really"
   ]
  },
  {
@@ -8123,7 +8088,7 @@
   "lv": "4",
   "reading": "zuòzhě",
   "hint": [
-   "亻 person + 乍 time: to make",
+   "a person 亻 making something for the first time 乍: to make",
    "耂 old + 日 sun"
   ]
  },
@@ -8136,7 +8101,7 @@
   "lv": "4",
   "reading": "shǐyòng",
   "hint": [
-   "亻 person + 吏 government: cause",
+   "a person 亻 working for the government 吏: to make",
    null
   ]
  },
@@ -8150,7 +8115,7 @@
   "reading": "lìrú",
   "hint": [
    "亻 (person) + 列 (sound liè)",
-   "女 wife + 口 words: as"
+   "a wife 女 following her husband's words 口: as"
   ]
  },
  {
@@ -8163,7 +8128,7 @@
   "reading": "bǎohù",
   "hint": [
    "亻 (person) + 呆 (sound dāi)",
-   "扌 guarding + 户 home: to defend"
+   "guarding 扌 a home 户: to defend"
   ]
  },
  {
@@ -8176,7 +8141,7 @@
   "reading": "bǎozhèng",
   "hint": [
    "亻 (person) + 呆 (sound dāi)",
-   "讠 speak + 正 truth: to prove"
+   "to speak 讠 the truth 正: to prove"
   ]
  },
  {
@@ -8216,7 +8181,7 @@
   "hint": [
    "亻 man + 言 words",
    null,
-   "上 above + 卜 divination: card"
+   "a card squeezed between 上 and: card"
   ]
  },
  {
@@ -8228,7 +8193,7 @@
   "lv": "4",
   "reading": "liǎ",
   "hint": [
-   "亻 man + 两 two: two"
+   "a couple: two"
   ]
  },
  {
@@ -8265,7 +8230,7 @@
   "reading": "zhíde",
   "hint": [
    "亻 (person) + 直 (sound zhí)",
-   "彳 + 旦 shell + 寸 hand: to obtain"
+   "a hand 寸 grabbing a shell 旦: structural particle: used after a verb…"
   ]
  },
  {
@@ -8277,7 +8242,7 @@
   "lv": "4",
   "reading": "jiǎ",
   "hint": [
-   "亻 person + 叚 false: fake"
+   "a false 叚 person 亻: fake"
   ]
  },
  {
@@ -8289,8 +8254,8 @@
   "lv": "4",
   "reading": "zuòshēngyì",
   "hint": [
-   "亻 someone + 故 happen: to work",
-   "一 one + 土 soil: life",
+   "someone 亻 who causes things to happen 故; 故 also provides the pronuncation",
+   "a shoot growing out of the soil 土: to grow, life",
    "心 (heart) + 音 (sound yīn)"
   ]
  },
@@ -8329,8 +8294,8 @@
   "lv": "4",
   "reading": "értóng",
   "hint": [
-   "picture of son",
-   "立 standing + 里 village: child"
+   "picture of a child",
+   "a child standing 立 in the village 里: child"
   ]
  },
  {
@@ -8355,7 +8320,7 @@
   "lv": "4",
   "reading": "guāng",
   "hint": [
-   "⺌ + 兀 weak: light"
+   "a person carrying a torch: light"
   ]
  },
  {
@@ -8367,7 +8332,7 @@
   "lv": "4",
   "reading": "miǎnfèi",
   "hint": [
-   "⺈ + 口 mouth + 儿 son",
+   null,
    "贝 (money) + 弗 (sound fú)"
   ]
  },
@@ -8393,7 +8358,7 @@
   "lv": "4",
   "reading": "quánbù",
   "hint": [
-   "入 away + 玉 jade: whole",
+   "jade 玉 put away 入 for safe-keeping: whole",
    "阝 (place) + 咅 (sound pǒu)"
   ]
  },
@@ -8406,8 +8371,8 @@
   "lv": "4",
   "reading": "gōnglǐ",
   "hint": [
-   "八 divide + 厶 private: fair",
-   "田 farm + 土 land: unit of distance equal to 0.5km"
+   "to divide 八 what is private 厶: fair",
+   "unit of measure for farm 田 land 土: lining"
   ]
  },
  {
@@ -8419,8 +8384,8 @@
   "lv": "4",
   "reading": "gòngtóng",
   "hint": [
-   "廾 object + 一 one + 八 hands: all",
-   "凡 common + 口 tongue: same"
+   "two hands 八 holding one object 廾: all",
+   "sharing a common 凡 tongue 口: same"
   ]
  },
  {
@@ -8432,7 +8397,7 @@
   "lv": "4",
   "reading": "guānjiàn",
   "hint": [
-   "丷 + 天 sky",
+   "simplified from 關, a gate 門: to close",
    "钅 (metal) + 建 (sound jiàn)"
   ]
  },
@@ -8445,8 +8410,8 @@
   "lv": "4",
   "reading": "xīngfèn",
   "hint": [
-   "⺍ + 一 one + 八 eight",
-   "大 man + 田 farm: to strive"
+   null,
+   "a man 大 working on the farm 田: to strive"
   ]
  },
  {
@@ -8458,8 +8423,8 @@
   "lv": "4",
   "reading": "qízhōng",
   "hint": [
-   "甘 sweet + 一 one + 八 eight",
-   "口 box + 丨: central"
+   null,
+   "a line 丨 through the middle of a box 口: middle"
   ]
  },
  {
@@ -8471,8 +8436,8 @@
   "lv": "4",
   "reading": "qícì",
   "hint": [
-   "甘 sweet + 一 one + 八 eight",
-   "冫 times + 欠 person: order"
+   null,
+   "a person 欠 yawning multiple times 冫: next in sequence"
   ]
  },
  {
@@ -8497,7 +8462,7 @@
   "lv": "4",
   "reading": "nèi",
   "hint": [
-   "冂 door + 人 man: inside"
+   "a man 人 entering a door 冂: inside"
   ]
  },
  {
@@ -8509,8 +8474,8 @@
   "lv": "4",
   "reading": "nèiróng",
   "hint": [
-   "冂 door + 人 man: inside",
-   "宀 (roof)"
+   "a man 人 entering a door 冂: inside",
+   "宀 (roof) + 谷"
   ]
  },
  {
@@ -8522,7 +8487,7 @@
   "lv": "4",
   "reading": "nóngcūn",
   "hint": [
-   "picture of agriculture",
+   "picture of tilling the field with a hoe",
    "木 (tree) + 寸 (sound cùn)"
   ]
  },
@@ -8549,7 +8514,7 @@
   "reading": "zhǔnshí",
   "hint": [
    "冫 (water in a spirit level) + 隹 (sound zhuī)",
-   "日 (day)"
+   "日 (day) + 寸, simplified from 時 (sound 寺): time"
   ]
  },
  {
@@ -8575,7 +8540,7 @@
   "reading": "liángkuai",
   "hint": [
    "冫 (ice) + 京 (sound jīng)",
-   "忄 will + 夬 decisive: speedy"
+   "a decisive 夬 will 忄: rapid"
   ]
  },
  {
@@ -8613,7 +8578,7 @@
   "lv": "4",
   "reading": "chūfā",
   "hint": [
-   "屮 sprout + 凵 container: to go out",
+   "a sprout 屮 growing out of a container 凵: to go out",
    null
   ]
  },
@@ -8626,8 +8591,8 @@
   "lv": "4",
   "reading": "chūchāi",
   "hint": [
-   "屮 sprout + 凵 container: to go out",
-   "羊 sheep + 工 work: difference"
+   "a sprout 屮 growing out of a container 凵: to go out",
+   "work 工 done by a sheep 羊; incompetence: different"
   ]
  },
  {
@@ -8639,8 +8604,8 @@
   "lv": "4",
   "reading": "chūshēng",
   "hint": [
-   "屮 sprout + 凵 container: to go out",
-   "一 one + 土 soil: life"
+   "a sprout 屮 growing out of a container 凵: to go out",
+   "a shoot growing out of the soil 土: to grow, life"
   ]
  },
  {
@@ -8661,8 +8626,8 @@
   "lv": "4",
   "reading": "fēnzhī",
   "hint": [
-   "八 pieces + 刀 knife: to divide",
-   null
+   "pieces 八 being further subdivided with a knife 刀: to divide",
+   "a foot meaning \"to follow\": him"
   ]
  },
  {
@@ -8688,7 +8653,7 @@
   "reading": "pànduàn",
   "hint": [
    "刂 (knife) + 半 (sound bàn)",
-   "米 grain + 斤 axe: to sever"
+   "using an axe 斤 to harvest grain 米: to break"
   ]
  },
  {
@@ -8701,7 +8666,7 @@
   "reading": "dàochù",
   "hint": [
    "至 (arrive) + 刂 (sound dāo)",
-   "夂 somewhere + 卜 flag: to reside at"
+   "to go somewhere 夂 and put down a flag 卜: to reside at"
   ]
  },
  {
@@ -8752,7 +8717,7 @@
   "reading": "lìqi",
   "hint": [
    "a plow's head representing strength: strength",
-   "a person 亻 breathing air: air"
+   "rising vapour: air, gas"
   ]
  },
  {
@@ -8764,7 +8729,7 @@
   "lv": "4",
   "reading": "jiāyóuzhàn",
   "hint": [
-   "力 strength + 口 words: to add to",
+   "supporting a cause with the strength 力 of one's words 口: to add to",
    "氵 (water) + 由 (sound yóu)",
    "立 (stand) + 占 (sound zhàn)"
   ]
@@ -8778,8 +8743,8 @@
   "lv": "4",
   "reading": "jiābān",
   "hint": [
-   "力 strength + 口 words: to add to",
-   "王 jade + 刂 cutting + 王 jade: class"
+   "supporting a cause with the strength 力 of one's words 口: to add to",
+   "cutting 刂 a piece of jade 王 in two, symbolizing two classes: team"
   ]
  },
  {
@@ -8791,8 +8756,8 @@
   "lv": "4",
   "reading": "dòngzuò",
   "hint": [
-   "力 (strength)",
-   "亻 person + 乍 time: to make"
+   "力 (strength) + 云",
+   "a person 亻 making something for the first time 乍: to make"
   ]
  },
  {
@@ -8805,7 +8770,7 @@
   "reading": "yǒnggǎn",
   "hint": [
    "力 (strength) + 甬 (sound yǒng)",
-   "耳 beast + 攵 stick: bold"
+   "a hand with a stick 攵 striking a beast 耳: to dare"
   ]
  },
  {
@@ -8817,7 +8782,7 @@
   "lv": "4",
   "reading": "bāokuò",
   "hint": [
-   "勹 swaddle + 巳 baby: wrap",
+   "to swaddle 勹 a baby 巳: to cover",
    "扌 (hand) + 舌 (sound shé)"
   ]
  },
@@ -8830,8 +8795,8 @@
   "lv": "4",
   "reading": "qūbié",
   "hint": [
-   "匸 place + 乂 control: area",
-   "另 classes + 刂 boundaries: to separate"
+   "a place 匸 under a lord's control 乂: area",
+   "to draw boundaries 刂 between classes 另: to leave"
   ]
  },
  {
@@ -8844,7 +8809,7 @@
   "reading": "shífēn",
   "hint": [
    "一 one + 丨",
-   "八 pieces + 刀 knife: to divide"
+   "pieces 八 being further subdivided with a knife 刀: to divide"
   ]
  },
  {
@@ -8882,8 +8847,8 @@
   "lv": "4",
   "reading": "yìnxiàng",
   "hint": [
-   "a hand 爪 stamping a seal 卩: print",
-   "豕 (boar)"
+   "a hand stamping a seal 卩: print",
+   null
   ]
  },
  {
@@ -8895,7 +8860,7 @@
   "lv": "4",
   "reading": "wēixiǎn",
   "hint": [
-   "厃 cliff + 㔾 person: dangerous",
+   "a person 㔾 at the edge of a cliff 厃: dangerous",
    "阝 (hill) + 佥 (sound qiān)"
   ]
  },
@@ -8908,8 +8873,8 @@
   "lv": "4",
   "reading": "jíshǐ",
   "hint": [
-   "a hungry person卩 kneeling over food 皀; compare 既: promptly",
-   "亻 person + 吏 government: cause"
+   "a hungry person卩 kneeling over food: promptly",
+   "a person 亻 working for the government 吏: to make"
   ]
  },
  {
@@ -8934,7 +8899,7 @@
   "reading": "lìhai",
   "hint": [
    "厂 cliff + 万 ten thousand",
-   "宀 roof + 丰 abundant + 口 mouth"
+   null
   ]
  },
  {
@@ -8946,7 +8911,7 @@
   "lv": "4",
   "reading": "yālì",
   "hint": [
-   "厂 pressure + 土 soil + 丶: press",
+   "soil 土 crushed under pressure 厂: press",
    "a plow's head representing strength: strength"
   ]
  },
@@ -8959,7 +8924,7 @@
   "lv": "4",
   "reading": "hòu",
   "hint": [
-   "厂 building + 日 sunlight + 子 children: generous"
+   "sunlight 日 and children 子 in a building 厂: thick"
   ]
  },
  {
@@ -8985,7 +8950,7 @@
   "reading": "yuánlái",
   "hint": [
    "厂 (cliff) + 泉 (sound quán)",
-   "未 not yet + 丷: to arrive"
+   "a wheat plant (from 來), borrowed for its sound: to come"
   ]
  },
  {
@@ -9010,8 +8975,8 @@
   "lv": "4",
   "reading": "cānguān",
   "hint": [
-   "彡 (sound shān)",
-   "又 again + 见 see: to observe"
+   null,
+   "to see 见 again 又: to observe"
   ]
  },
  {
@@ -9024,7 +8989,7 @@
   "reading": "jíshí",
   "hint": [
    null,
-   "日 (day)"
+   "日 (day) + 寸, simplified from 時 (sound 寺): time"
   ]
  },
  {
@@ -9036,8 +9001,8 @@
   "lv": "4",
   "reading": "yǒuhǎo",
   "hint": [
-   "two hands 又 joined, representing friendship; 又 also provides the pronunciation: friend",
-   "女 woman + 子 son: good"
+   "two hands 又 joined, representing friendship: friend",
+   "a woman 女 with a son 子: good"
   ]
  },
  {
@@ -9049,8 +9014,8 @@
   "lv": "4",
   "reading": "yǒuyì",
   "hint": [
-   "two hands 又 joined, representing friendship; 又 also provides the pronunciation: friend",
-   "讠 speech + 宜 fitting: friendship"
+   "two hands 又 joined, representing friendship: friend",
+   "fitting 宜 speech 讠: friendship"
   ]
  },
  {
@@ -9062,8 +9027,8 @@
   "lv": "4",
   "reading": "fǎnduì",
   "hint": [
-   "厂 cliff + 又 hand: reverse",
-   "又 pair + 寸 hands: correct"
+   "a hand 又 held up against a cliff 厂: reverse",
+   "a pair 又 of hands 寸: right"
   ]
  },
  {
@@ -9075,7 +9040,7 @@
   "lv": "4",
   "reading": "fǎnyìng",
   "hint": [
-   "厂 cliff + 又 hand: reverse",
+   "a hand 又 held up against a cliff 厂: reverse",
    "日 (sun) + 央 (sound yāng)"
   ]
  },
@@ -9098,7 +9063,7 @@
   "reading": "fāzhǎn",
   "hint": [
    null,
-   "尸 market + 衣 cloth: to open"
+   "laying out clothes for sale in a market 尸: to open"
   ]
  },
  {
@@ -9111,7 +9076,7 @@
   "reading": "fāshēng",
   "hint": [
    null,
-   "一 one + 土 soil: life"
+   "a shoot growing out of the soil 土: to grow, life"
   ]
  },
  {
@@ -9123,7 +9088,7 @@
   "lv": "4",
   "reading": "qǔ",
   "hint": [
-   "耳 ear + 又 hand: to take"
+   "a hand 又 taking the ear 耳 of a fallen enemy: to take"
   ]
  },
  {
@@ -9135,9 +9100,9 @@
   "lv": "4",
   "reading": "shòubùliǎo",
   "hint": [
-   "爫 hand + 冖 something + 又 another: to receive",
-   "a bird flying toward the sky 一: no",
-   "picture of a child swaddled in blanklets"
+   "something 冖 passed from one hand 爫 to another 又: to receive",
+   "a bird flying toward the sky 一: not",
+   "a swaddled child, like 子 without its arms 一: done"
   ]
  },
  {
@@ -9149,7 +9114,7 @@
   "lv": "4",
   "reading": "shòudào",
   "hint": [
-   "爫 hand + 冖 something + 又 another: to receive",
+   "something 冖 passed from one hand 爫 to another 又: to receive",
    "至 (arrive) + 刂 (sound dāo)"
   ]
  },
@@ -9163,7 +9128,7 @@
   "reading": "lìngwài",
   "hint": [
    "口 mouth + 力 strength",
-   "夕 night-time + 卜 divinations: out"
+   "night-time 夕 divinations 卜; the supernatural, the foreign: outside"
   ]
  },
  {
@@ -9175,8 +9140,8 @@
   "lv": "4",
   "reading": "zhǐhǎo",
   "hint": [
-   "口 mouth + 八 words: only",
-   "女 woman + 子 son: good"
+   "simple words 八 coming from the mouth 口: only",
+   "a woman 女 with a son 子: good"
   ]
  },
  {
@@ -9188,8 +9153,8 @@
   "lv": "4",
   "reading": "zhǐyào",
   "hint": [
-   "口 mouth + 八 words: only",
-   "覀 waist + 女 woman: essential"
+   "simple words 八 coming from the mouth 口: only",
+   "a woman 女 with hands on her waist 覀: to want"
   ]
  },
  {
@@ -9215,7 +9180,7 @@
   "reading": "kěxī",
   "hint": [
    "丁 (vigorous) + 口 (sound kǒu)",
-   "忄 feel + 昔 past: pity"
+   "to feel 忄 for the past 昔: pity"
   ]
  },
  {
@@ -9228,7 +9193,7 @@
   "reading": "kěshì",
   "hint": [
    "丁 (vigorous) + 口 (sound kǒu)",
-   "日 speak + 疋 directly: to be"
+   "to speak 日 directly 疋: to be"
   ]
  },
  {
@@ -9291,7 +9256,7 @@
   "lv": "4",
   "reading": "gè",
   "hint": [
-   "夂 walking + 口 talking: individual"
+   "walking 夂 and talking 口: each"
   ]
  },
  {
@@ -9329,7 +9294,7 @@
   "lv": "4",
   "reading": "tóngqíng",
   "hint": [
-   "凡 common + 口 tongue: same",
+   "sharing a common 凡 tongue 口: same",
    "忄 (heart) + 青 (sound qīng)"
   ]
  },
@@ -9356,7 +9321,7 @@
   "reading": "hòulái",
   "hint": [
    null,
-   "未 not yet + 丷: to arrive"
+   "a wheat plant (from 來), borrowed for its sound: to come"
   ]
  },
  {
@@ -9369,7 +9334,7 @@
   "reading": "fǒuzé",
   "hint": [
    "不 (no) + 口 (sound kǒu)",
-   "贝 slate + 刂 inscribed: rule"
+   "laws inscribed 刂 on a slate 贝: rule"
   ]
  },
  {
@@ -9394,7 +9359,7 @@
   "reading": "xīyǐn",
   "hint": [
    "口 (mouth) + 及 (sound jí)",
-   "弓 bow's + 丨: to pull"
+   "to pull back a bow's 弓 drawstring 丨: to pull"
   ]
  },
  {
@@ -9418,7 +9383,7 @@
   "lv": "4",
   "reading": "zhōuwéi",
   "hint": [
-   "冂 border + 土 land + 口 well: Zhou dynasty",
+   "border 冂 around land 土 with a well 口: Zhou dynasty",
    "囗 (enclosure) + 韦 (sound wéi)"
   ]
  },
@@ -9470,7 +9435,7 @@
   "lv": "4",
   "reading": "xián",
   "hint": [
-   "戊 + 一 one + 口 voice: all"
+   "one 一 voice 口 surrounded by conflict: all"
   ]
  },
  {
@@ -9494,9 +9459,9 @@
   "lv": "4",
   "reading": "shòuhuòyuán",
   "hint": [
-   "隹 bird + 口 talks: to sell",
+   "a street vendor talks 口 incessantly, like a bird 隹: to sell",
    "贝 (money) + 化 (sound huà)",
-   "贝 (money)"
+   "贝 (money) + 口"
   ]
  },
  {
@@ -9533,7 +9498,7 @@
   "lv": "4",
   "reading": "huíyì",
   "hint": [
-   "囗 enclosure + 口 mouth: to return",
+   "originally, a spiral signifying return: to circle",
    "忄 (heart) + 乙 (sound yǐ)"
   ]
  },
@@ -9559,7 +9524,7 @@
   "lv": "4",
   "reading": "kùn",
   "hint": [
-   "囗 fence + 木 tree: to surround"
+   "a fence 囗 built around a tree 木: to trap"
   ]
  },
  {
@@ -9571,8 +9536,8 @@
   "lv": "4",
   "reading": "kùnnan",
   "hint": [
-   "囗 fence + 木 tree: to surround",
-   "又 hand + 隹 bird: hard"
+   "a fence 囗 built around a tree 木: to trap",
+   "a hand 又 trying to grasp at a bird 隹: difficult"
   ]
  },
  {
@@ -9584,7 +9549,7 @@
   "lv": "4",
   "reading": "guójì",
   "hint": [
-   "囗 borders + 玉 treasure: country",
+   "treasure 玉 within a country's borders 囗: country",
    "阝 (hill) + 示 (sound shì)"
   ]
  },
@@ -9688,7 +9653,7 @@
   "reading": "dǔchē",
   "hint": [
    "土 (earth) + 者 (sound zhě)",
-   "picture of cart"
+   "picture of a cart with two wheels, seen from above"
   ]
  },
  {
@@ -9701,7 +9666,7 @@
   "reading": "sùliàodài",
   "hint": [
    "土 (earth) + 朔 (sound shuò)",
-   "米 rice + 斗 measuring: ingredients",
+   "a hand measuring 斗 a cup of rice 米: ingredients",
    "衣 (clothes) + 代 (sound dài)"
   ]
  },
@@ -9740,7 +9705,7 @@
   "reading": "zēngjiā",
   "hint": [
    "土 (earth) + 曾 (sound céng)",
-   "力 strength + 口 words: to add to"
+   "supporting a cause with the strength 力 of one's words 口: to add to"
   ]
  },
  {
@@ -9753,7 +9718,7 @@
   "reading": "zēngzhǎng",
   "hint": [
    "土 (earth) + 曾 (sound céng)",
-   "simplified form of 長; an old man with long hair and a cane: long"
+   "an old man with long hair and a cane: length"
   ]
  },
  {
@@ -9765,8 +9730,8 @@
   "lv": "4",
   "reading": "fùyìn",
   "hint": [
-   "亻 person + 日 day + 夂 somewhere: again",
-   "a hand 爪 stamping a seal 卩: print"
+   "a person 亻 who goes somewhere 夂 every day 日: again",
+   "a hand stamping a seal 卩: print"
   ]
  },
  {
@@ -9778,7 +9743,7 @@
   "lv": "4",
   "reading": "fùzá",
   "hint": [
-   "亻 person + 日 day + 夂 somewhere: again",
+   "a person 亻 who goes somewhere 夂 every day 日: again",
    "九 nine + 木 tree"
   ]
  },
@@ -9803,9 +9768,9 @@
   "lv": "4",
   "reading": "dàshǐguǎn",
   "hint": [
-   "一 one + 人 man: big",
-   "亻 person + 吏 government: cause",
-   "饣 food + 官 public: public building"
+   "a man 人 with outstretched arms: big",
+   "a person 亻 working for the government 吏: to make",
+   "a public 官 building where food 饣 is served: public building"
   ]
  },
  {
@@ -9817,8 +9782,8 @@
   "lv": "4",
   "reading": "dàifu",
   "hint": [
-   "一 one + 人 man: big",
-   "一 hairpin + 大 man: man"
+   "a man 人 with outstretched arms: big",
+   "a man 大 wearing a coming-of-age hairpin 一: man"
   ]
  },
  {
@@ -9830,7 +9795,7 @@
   "lv": "4",
   "reading": "dàgài",
   "hint": [
-   "一 one + 人 man: big",
+   "a man 人 with outstretched arms: big",
    "木 (tree) + 既 (sound jì)"
   ]
  },
@@ -9843,8 +9808,8 @@
   "lv": "4",
   "reading": "dàyuē",
   "hint": [
-   "一 one + 人 man: big",
-   "纟 (thread)"
+   "a man 人 with outstretched arms: big",
+   "纟 (thread) + 勺"
   ]
  },
  {
@@ -9856,8 +9821,8 @@
   "lv": "4",
   "reading": "shīwàng",
   "hint": [
-   "丿 + 夫 hand: to lose",
-   "亡 death + 月 moon + 王 king: to expect"
+   "something 丿 falling from a hand 夫: to lose",
+   "a king 王 gazing at the moon 月: to expect"
   ]
  },
  {
@@ -9869,7 +9834,7 @@
   "lv": "4",
   "reading": "shībài",
   "hint": [
-   "丿 + 夫 hand: to lose",
+   "something 丿 falling from a hand 夫: to lose",
    "攵 (rap) + 贝 (sound bèi)"
   ]
  },
@@ -9895,7 +9860,7 @@
   "lv": "4",
   "reading": "hǎoxiàng",
   "hint": [
-   "女 woman + 子 son: good",
+   "a woman 女 with a son 子: good",
    "亻 (person) + 象 (sound xiàng)"
   ]
  },
@@ -9908,8 +9873,8 @@
   "lv": "4",
   "reading": "hǎochu",
   "hint": [
-   "女 woman + 子 son: good",
-   "夂 somewhere + 卜 flag: to reside at"
+   "a woman 女 with a son 子: good",
+   "to go somewhere 夂 and put down a flag 卜: to reside at"
   ]
  },
  {
@@ -9921,7 +9886,7 @@
   "lv": "4",
   "reading": "sūnzi",
   "hint": [
-   "子 descent + 小 small: grandchild",
+   "a chain of descent 子: grandchild",
    "picture of a child in a wrap, with outstretched arms but bundled legs"
   ]
  },
@@ -9947,8 +9912,8 @@
   "lv": "4",
   "reading": "ānquán",
   "hint": [
-   "宀 house + 女 woman: peaceful",
-   "入 away + 玉 jade: whole"
+   "a woman 女 safe in a house 宀: peaceful",
+   "jade 玉 put away 入 for safe-keeping: whole"
   ]
  },
  {
@@ -9960,7 +9925,7 @@
   "lv": "4",
   "reading": "ānpái",
   "hint": [
-   "宀 house + 女 woman: peaceful",
+   "a woman 女 safe in a house 宀: peaceful",
    "扌 (hand) + 非 (sound fēi)"
   ]
  },
@@ -9974,7 +9939,7 @@
   "reading": "wánquán",
   "hint": [
    "宀 (roof) + 元 (sound yuán)",
-   "入 away + 玉 jade: whole"
+   "jade 玉 put away 入 for safe-keeping: whole"
   ]
  },
  {
@@ -10012,8 +9977,8 @@
   "lv": "4",
   "reading": "hàixiū",
   "hint": [
-   "宀 roof + 丰 abundant + 口 mouth",
-   "羊 sheep + 丑 ugly: shame"
+   null,
+   "an ugly 丑 sheep 羊: shame"
   ]
  },
  {
@@ -10026,7 +9991,7 @@
   "reading": "jiājù",
   "hint": [
    "宀 (roof) + 豕 (sound shǐ)",
-   "目 tablet + 一 one + 八 hands: tool"
+   "two hands 八 writing on a tablet 目: tool"
   ]
  },
  {
@@ -10062,7 +10027,7 @@
   "lv": "4",
   "reading": "mìmǎ",
   "hint": [
-   "宓 silent + 山 mountain: secret",
+   "a silent 宓 mountain 山: secret",
    "石 (stone) + 马 (sound mǎ)"
   ]
  },
@@ -10088,7 +10053,7 @@
   "reading": "hánjià",
   "hint": [
    null,
-   "亻 person + 叚 false: fake"
+   "a false 叚 person 亻: fake"
   ]
  },
  {
@@ -10100,7 +10065,7 @@
   "lv": "4",
   "reading": "duì",
   "hint": [
-   "又 pair + 寸 hands: correct"
+   "a pair 又 of hands 寸: right"
   ]
  },
  {
@@ -10112,8 +10077,8 @@
   "lv": "4",
   "reading": "duìhuà",
   "hint": [
-   "又 pair + 寸 hands: correct",
-   "讠 spoken + 舌 tongue: talk"
+   "a pair 又 of hands 寸: right",
+   "a spoken 讠 tongue 舌: talk"
   ]
  },
  {
@@ -10125,7 +10090,7 @@
   "lv": "4",
   "reading": "duìmiàn",
   "hint": [
-   "又 pair + 寸 hands: correct",
+   "a pair 又 of hands 寸: right",
    "picture of a person's face"
   ]
  },
@@ -10138,8 +10103,8 @@
   "lv": "4",
   "reading": "dǎoyóu",
   "hint": [
-   "巳 someplace + 寸 hand: to direct",
-   "氵 seas + 斿 freely: to wander"
+   "a hand 寸 pointing the way to someplace 巳: to direct",
+   "to swim freely 斿 through the seas 氵: to wander"
   ]
  },
  {
@@ -10151,8 +10116,8 @@
   "lv": "4",
   "reading": "jiānglái",
   "hint": [
-   "丬 bed + 夕 night + 寸 inch: the future",
-   "未 not yet + 丷: to arrive"
+   "going to bed 丬 at night 夕, a predictable future: the future",
+   "a wheat plant (from 來), borrowed for its sound: to come"
   ]
  },
  {
@@ -10164,8 +10129,8 @@
   "lv": "4",
   "reading": "zūnzhòng",
   "hint": [
-   "酋 wine + 寸 hand: to honor",
-   "千 thousand + 里 miles: heavy"
+   "a hand 寸 making an offering of wine 酋: to honor",
+   "a burden carried for a thousand 千 miles 里: heavy"
   ]
  },
  {
@@ -10177,7 +10142,7 @@
   "lv": "4",
   "reading": "xiǎoshuō",
   "hint": [
-   "亅 + 八 dividing: small",
+   "dividing 八 by a line 亅: small",
    "讠 (speech) + 兑 (sound duì)"
   ]
  },
@@ -10202,8 +10167,8 @@
   "lv": "4",
   "reading": "yóuqí",
   "hint": [
-   "尢 (sound yóu)",
-   "甘 sweet + 一 one + 八 eight"
+   "丶 + 尢 (sound yóu)",
+   null
   ]
  },
  {
@@ -10229,7 +10194,7 @@
   "reading": "gōngjù",
   "hint": [
    "picture of a spade or other workman's tool",
-   "目 tablet + 一 one + 八 hands: tool"
+   "two hands 八 writing on a tablet 目: tool"
   ]
  },
  {
@@ -10255,7 +10220,7 @@
   "reading": "qiǎokèlì",
   "hint": [
    "工 (work) + 丂 (sound kǎo)",
-   "十 weapon + 兄 beast: to subdue",
+   "a weapon 十 used to subdue a beast 兄: to subdue",
    "a plow's head representing strength: strength"
   ]
  },
@@ -10268,9 +10233,9 @@
   "lv": "4",
   "reading": "chàbuduō",
   "hint": [
-   "羊 sheep + 工 work: difference",
-   "a bird flying toward the sky 一: no",
-   "夕 nights + 夕 nights: much"
+   "work 工 done by a sheep 羊; incompetence: different",
+   "a bird flying toward the sky 一: not",
+   "two nights 夕, suggesting many: many"
   ]
  },
  {
@@ -10295,7 +10260,7 @@
   "lv": "4",
   "reading": "shuài",
   "hint": [
-   "刂 weapon + 巾 flag: commander"
+   "an army officer carrying a weapon 刂 and a flag 巾: handsome"
   ]
  },
  {
@@ -10307,8 +10272,8 @@
   "lv": "4",
   "reading": "shīfu",
   "hint": [
-   "刂 knife + 帀 wield: teacher",
-   "亻 someone + 尃 lectures: tutor"
+   "to skillfully wield 帀 a knife 刂: teacher",
+   "someone 亻 who lectures 尃: tutor"
   ]
  },
  {
@@ -10359,7 +10324,7 @@
   "reading": "píngshí",
   "hint": [
    "picture of a leveling scale",
-   "日 (day)"
+   "日 (day) + 寸, simplified from 時 (sound 寺): time"
   ]
  },
  {
@@ -10384,7 +10349,7 @@
   "lv": "4",
   "reading": "bìngqiě",
   "hint": [
-   "丷 + 开 to open: to combine",
+   "two men standing side-by-side: to combine",
    "picture of a stone altar"
   ]
  },
@@ -10397,7 +10362,7 @@
   "lv": "4",
   "reading": "xìngfú",
   "hint": [
-   "土 alive + 丷 + 干 dead: favor",
+   "two men, one alive 土 and one dead 干; the living one is lucky",
    "礻 (spirit) + 畐 (sound fú)"
   ]
  },
@@ -10410,8 +10375,8 @@
   "lv": "4",
   "reading": "yōumò",
   "hint": [
-   "山 mountainside + 幺 niches + 幺 niches: quiet",
-   "picture of silent"
+   "small niches 幺 in the mountainside 山: quiet",
+   "picture of a dog watching in the dark"
   ]
  },
  {
@@ -10423,8 +10388,8 @@
   "lv": "4",
   "reading": "guǎnggào",
   "hint": [
-   "丶 + 厂 lean-to: broad",
-   "牛 ox + 口 speak: to tell"
+   "a lean-to 厂, suggesting a building: broad",
+   "to speak 口 with the force of an ox 牛: to tell"
   ]
  },
  {
@@ -10436,8 +10401,8 @@
   "lv": "4",
   "reading": "guǎngbō",
   "hint": [
-   "丶 + 厂 lean-to: broad",
-   "扌 hand + 番 seeds: to sow seeds"
+   "a lean-to 厂, suggesting a building: broad",
+   "to sow seeds 番 by hand 扌: to sow seeds"
   ]
  },
  {
@@ -10461,7 +10426,7 @@
   "lv": "4",
   "reading": "zuò",
   "hint": [
-   "广 wide + 坐 seat: seat"
+   "a wide 广 seat 坐: seat"
   ]
  },
  {
@@ -10473,8 +10438,8 @@
   "lv": "4",
   "reading": "zuòwèi",
   "hint": [
-   "广 wide + 坐 seat: seat",
-   "亻 person + 立 stands: seat"
+   "a wide 广 seat 坐: seat",
+   "the place where a person 亻 stands 立: position"
   ]
  },
  {
@@ -10486,9 +10451,9 @@
   "lv": "4",
   "reading": "kāiwánxiào",
   "hint": [
-   "一 latch + 廾 hands: to open",
+   "hands 廾 lifting the latch 一 of a door: to open",
    "王 (jade) + 元 (sound yuán)",
-   "⺮ grin + 夭 person: to smile"
+   "a person 夭 with a big grin ⺮: to laugh"
   ]
  },
  {
@@ -10500,7 +10465,7 @@
   "lv": "4",
   "reading": "nòng",
   "hint": [
-   "玉 jade + 廾 hands: to do"
+   "two hands 廾 playing with a piece of jade 玉: to do"
   ]
  },
  {
@@ -10512,7 +10477,7 @@
   "lv": "4",
   "reading": "yǐnqǐ",
   "hint": [
-   "弓 bow's + 丨: to pull",
+   "to pull back a bow's 弓 drawstring 丨: to pull",
    "走 (walk) + 己 (sound jǐ)"
   ]
  },
@@ -10563,7 +10528,7 @@
   "reading": "dāngshí",
   "hint": [
    "⺌ + 彐 snout",
-   "日 (day)"
+   "日 (day) + 寸, simplified from 時 (sound 寺): time"
   ]
  },
  {
@@ -10600,8 +10565,8 @@
   "lv": "4",
   "reading": "lǜshī",
   "hint": [
-   "彳 walk + 聿 law: statute",
-   "刂 knife + 帀 wield: teacher"
+   "to walk 彳 as required by law 聿: statute",
+   "to skillfully wield 帀 a knife 刂: teacher"
   ]
  },
  {
@@ -10613,7 +10578,7 @@
   "lv": "4",
   "reading": "déyì",
   "hint": [
-   "彳 + 旦 shell + 寸 hand: to obtain",
+   "a hand 寸 grabbing a shell 旦: structural particle: used after a verb…",
    "心 (heart) + 音 (sound yīn)"
   ]
  },
@@ -10653,7 +10618,7 @@
   "reading": "huáiyí",
   "hint": [
    "忄 (heart) + 不 (sound bù)",
-   "匕 holding + 矢 cane + 疋 walking: to doubt"
+   "an old man walking 疋 while holding 匕 a cane 矢: to doubt"
   ]
  },
  {
@@ -10666,7 +10631,7 @@
   "reading": "tàidu",
   "hint": [
    "心 (heart) + 太 (sound tài)",
-   "广 building + 廿 twenty + 又 people: degree"
+   "twenty 廿 people 又 meeting inside a building 广 to deliberate: degree"
   ]
  },
  {
@@ -10679,7 +10644,7 @@
   "reading": "xìngbié",
   "hint": [
    "忄 (heart) + 生 (sound shēng)",
-   "另 classes + 刂 boundaries: to separate"
+   "to draw boundaries 刂 between classes 另: to leave"
   ]
  },
  {
@@ -10704,7 +10669,7 @@
   "lv": "4",
   "reading": "zǒngjié",
   "hint": [
-   "丷 + 口 mouths + 心 mind: to gather",
+   "many mouths 口 speaking with one mind 心: to gather",
    "纟 (thread) + 吉 (sound jí)"
   ]
  },
@@ -10744,7 +10709,7 @@
   "reading": "yúkuài",
   "hint": [
    "忄 (heart) + 俞 (sound yú)",
-   "忄 will + 夬 decisive: speedy"
+   "a decisive 夬 will 忄: rapid"
   ]
  },
  {
@@ -10757,7 +10722,7 @@
   "reading": "yìjiàn",
   "hint": [
    "心 (heart) + 音 (sound yīn)",
-   "冂 wide + 儿 man: to see"
+   "a man 儿 with the eye emphasized: to see"
   ]
  },
  {
@@ -10769,8 +10734,8 @@
   "lv": "4",
   "reading": "gǎndòng",
   "hint": [
-   "咸 together + 心 hearts: to affect",
-   "力 (strength)"
+   "two hearts 心 beating together 咸: to affect",
+   "力 (strength) + 云"
   ]
  },
  {
@@ -10782,7 +10747,7 @@
   "lv": "4",
   "reading": "gǎnqíng",
   "hint": [
-   "咸 together + 心 hearts: to affect",
+   "two hearts 心 beating together 咸: to affect",
    "忄 (heart) + 青 (sound qīng)"
   ]
  },
@@ -10795,7 +10760,7 @@
   "lv": "4",
   "reading": "gǎnjué",
   "hint": [
-   "咸 together + 心 hearts: to affect",
+   "two hearts 心 beating together 咸: to affect",
    "见 (see) + ⺍ (sound)"
   ]
  },
@@ -10808,7 +10773,7 @@
   "lv": "4",
   "reading": "gǎnxiè",
   "hint": [
-   "咸 together + 心 hearts: to affect",
+   "two hearts 心 beating together 咸: to affect",
    "讠 (speech) + 射 (sound shè)"
   ]
  },
@@ -10834,7 +10799,7 @@
   "reading": "chéngwéi",
   "hint": [
    "丁 male adult + 戈 spear",
-   "丶 + 力 strength + 丶"
+   null
   ]
  },
  {
@@ -10847,7 +10812,7 @@
   "reading": "chénggōng",
   "hint": [
    "丁 male adult + 戈 spear",
-   "工 labor + 力 capable: achievement"
+   "results produced by capable 力 labor 工: achievement"
   ]
  },
  {
@@ -10870,10 +10835,7 @@
    "w0860"
   ],
   "lv": "4",
-  "reading": "dài",
-  "hint": [
-   "十 ten + 異 different + 戈 spear"
-  ]
+  "reading": "dài"
  },
  {
   "id": "c0861",
@@ -10884,8 +10846,8 @@
   "lv": "4",
   "reading": "suǒyǒu",
   "hint": [
-   "户 door + 斤 axe: place",
-   "月 (sound yuè)"
+   "an axe 斤 swung at a door 户: place",
+   null
   ]
  },
  {
@@ -10898,7 +10860,7 @@
   "reading": "dǎyìn",
   "hint": [
    "扌 (hand) + 丁 (sound dīng)",
-   "a hand 爪 stamping a seal 卩: print"
+   "a hand stamping a seal 卩: print"
   ]
  },
  {
@@ -10937,7 +10899,7 @@
   "reading": "dǎzhé",
   "hint": [
    "扌 (hand) + 丁 (sound dīng)",
-   "扌 hand + 斤 axe: to break"
+   "a hand 扌 wielding an axe 斤: to break"
   ]
  },
  {
@@ -10950,7 +10912,7 @@
   "reading": "dǎzhēn",
   "hint": [
    "扌 (hand) + 丁 (sound dīng)",
-   "钅 metal + 十 pin: needle"
+   "a metal 钅 pin 十: needle"
   ]
  },
  {
@@ -10975,7 +10937,7 @@
   "reading": "kuòdà",
   "hint": [
    "广 (wide) + 扌 (sound shǒu)",
-   "一 one + 人 man: big"
+   "a man 人 with outstretched arms: big"
   ]
  },
  {
@@ -11013,7 +10975,7 @@
   "lv": "4",
   "reading": "hùshi",
   "hint": [
-   "扌 guarding + 户 home: to defend",
+   "guarding 扌 a home 户: to defend",
    null
   ]
  },
@@ -11026,8 +10988,8 @@
   "lv": "4",
   "reading": "bàomíng",
   "hint": [
-   "扌 hand + 卩 criminal + 又 cuffing: to announce",
-   "夕 night + 口 out: name"
+   "a hand 扌 cuffing 又 a criminal 卩, representing sentencing: to announce",
+   "a name called out 口 to hail someone at night 夕: name"
   ]
  },
  {
@@ -11039,7 +11001,7 @@
   "lv": "4",
   "reading": "bàodào",
   "hint": [
-   "扌 hand + 卩 criminal + 又 cuffing: to announce",
+   "a hand 扌 cuffing 又 a criminal 卩, representing sentencing: to announce",
    "辶 (walk) + 首 (sound shǒu)"
   ]
  },
@@ -11064,7 +11026,7 @@
   "lv": "4",
   "reading": "bào",
   "hint": [
-   "扌 arms + 包 wrap: to embrace"
+   "to wrap 包 in one's arms 扌: to hold"
   ]
  },
  {
@@ -11076,7 +11038,7 @@
   "lv": "4",
   "reading": "bàoqiàn",
   "hint": [
-   "扌 arms + 包 wrap: to embrace",
+   "to wrap 包 in one's arms 扌: to hold",
    "欠 (lack) + 兼 (sound jiān)"
   ]
  },
@@ -11127,7 +11089,7 @@
   "lv": "4",
   "reading": "zhāopìn",
   "hint": [
-   "扌 arms + 召 call: to summon",
+   "a call 召 to arms 扌: to summon",
    "耳 (ear) + 甹 (sound pīng)"
   ]
  },
@@ -11152,7 +11114,7 @@
   "lv": "4",
   "reading": "zhǐ",
   "hint": [
-   "扌 hand + 旨 point: finger"
+   "to point 旨 by hand 扌: finger"
   ]
  },
  {
@@ -11165,7 +11127,7 @@
   "reading": "ànshí",
   "hint": [
    "扌 (hand) + 安 (sound ān)",
-   "日 (day)"
+   "日 (day) + 寸, simplified from 時 (sound 寺): time"
   ]
  },
  {
@@ -11215,7 +11177,7 @@
   "reading": "páiliè",
   "hint": [
    "扌 (hand) + 非 (sound fēi)",
-   "刂 (line)"
+   "刂 (line) + 歹"
   ]
  },
  {
@@ -11228,7 +11190,7 @@
   "reading": "jiēshòu",
   "hint": [
    "扌 (hand) + 妾 (sound qiè)",
-   "爫 hand + 冖 something + 又 another: to receive"
+   "something 冖 passed from one hand 爫 to another 又: to receive"
   ]
  },
  {
@@ -11266,7 +11228,7 @@
   "reading": "tígōng",
   "hint": [
    "扌 (hand) + 是 (sound shì)",
-   "亻 person + 共 hands: to supply"
+   "a person 亻 making an offering with both hands 共: to supply"
   ]
  },
  {
@@ -11279,7 +11241,7 @@
   "reading": "tíqián",
   "hint": [
    "扌 (hand) + 是 (sound shì)",
-   "丷 + 一 one + 刖"
+   null
   ]
  },
  {
@@ -11341,7 +11303,7 @@
   "lv": "4",
   "reading": "zhīchí",
   "hint": [
-   "十 branch + 又 hand: to support",
+   "a hand 又 holding a branch 十 for support: to support",
    "扌 (hand) + 寺 (sound sì)"
   ]
  },
@@ -11380,7 +11342,7 @@
   "reading": "shōushi",
   "hint": [
    "攵 (hand) + 丩 (sound jiū)",
-   "扌 hands + 合 gather: to collect"
+   "to gather 合 things in one's hands 扌: to collect"
   ]
  },
  {
@@ -11392,7 +11354,7 @@
   "lv": "4",
   "reading": "gǎibiàn",
   "hint": [
-   "己 child + 攵 stick: to alter",
+   "a hand with a stick 攵 disciplining a kneeling child 己: to alter",
    "亦 also + 又 and"
   ]
  },
@@ -11406,7 +11368,7 @@
   "reading": "fàngqì",
   "hint": [
    "攵 (let go) + 方 (sound fāng)",
-   "亠 baby + 厶 private + 廾 hands: to abandon"
+   "two hands 廾 discarding a dead, swaddled baby 亠厶: to abandon"
   ]
  },
  {
@@ -11420,7 +11382,7 @@
   "hint": [
    "攵 (let go) + 方 (sound fāng)",
    "日 (sun) + 者 (sound zhě)",
-   "亻 person + 叚 false: fake"
+   "a false 叚 person 亻: fake"
   ]
  },
  {
@@ -11446,7 +11408,7 @@
   "reading": "xiàoguǒ",
   "hint": [
    "攵 (strike) + 交 (sound jiāo)",
-   "田 fruit + 木 tree: fruit"
+   "fruit 田 growing on a tree 木: fruit"
   ]
  },
  {
@@ -11472,7 +11434,7 @@
   "reading": "jiàoyù",
   "hint": [
    "攵 (script) + 孝 (sound xiào)",
-   "亠 lid + 厶 private + ⺼ baby: to produce"
+   "a pregnant woman with a baby ⺼ in her womb: to produce"
   ]
  },
  {
@@ -11484,8 +11446,8 @@
   "lv": "4",
   "reading": "sànbù",
   "hint": [
-   "⺼ meat + 攵 hand: to scatter",
-   "modern form of 歨; putting one foot 止 in front of the other: walk"
+   "a hand 攵 tossing seeds from a basket: to scatter",
+   "putting one foot 止 in front of the other: walk"
   ]
  },
  {
@@ -11498,7 +11460,7 @@
   "reading": "shùzì",
   "hint": [
    "攵 (script) + 娄 (sound lóu)",
-   "宀 house + 子 child: character"
+   "a child 子 in a house 宀: letter"
   ]
  },
  {
@@ -11562,7 +11524,7 @@
   "reading": "wénzhāng",
   "hint": [
    "picture of a tattooed chest, representing writing",
-   "音 music + 十 ten: chapter"
+   "the ten 十 movements of a piece of music 音: chapter"
   ]
  },
  {
@@ -11574,7 +11536,7 @@
   "lv": "4",
   "reading": "duàn",
   "hint": [
-   "米 grain + 斤 axe: to sever"
+   "using an axe 斤 to harvest grain 米: to break"
   ]
  },
  {
@@ -11596,7 +11558,7 @@
   "reading": "fāngfǎ",
   "hint": [
    null,
-   "氵 stream + 去 course: law"
+   "the course 去 followed by a stream 氵: law"
   ]
  },
  {
@@ -11647,7 +11609,7 @@
   "reading": "wúlùn",
   "hint": [
    "一 one + 尢 weak",
-   "讠 speech + 仑 logic: debate"
+   "speech 讠 that explains the logic 仑: debate"
   ]
  },
  {
@@ -11659,7 +11621,7 @@
   "lv": "4",
   "reading": "jìrán",
   "hint": [
-   "a person 旡 turning away from food 皀; compare 即: already",
+   "a person 旡 turning away from food: already",
    "灬 (fire) + 肰 (sound rán)"
   ]
  },
@@ -11673,7 +11635,7 @@
   "reading": "rìjì",
   "hint": [
    "picture of the sun",
-   "讠 note + 己 private: mark"
+   "a private 己 note 讠: mark"
   ]
  },
  {
@@ -11685,7 +11647,7 @@
   "lv": "4",
   "reading": "pǔbiàn",
   "hint": [
-   "並 everyone + 日 sun: widespread",
+   "everyone 並 under the sun 日: widespread",
    "辶 (walk) + 扁 (sound biǎn)"
   ]
  },
@@ -11699,7 +11661,7 @@
   "reading": "zànshí",
   "hint": [
    "日 (sun) + 斩 (sound zhǎn)",
-   "日 (day)"
+   "日 (day) + 寸, simplified from 時 (sound 寺): time"
   ]
  },
  {
@@ -11736,7 +11698,7 @@
   "lv": "4",
   "reading": "zuìhòu",
   "hint": [
-   "日 sun + 取 place: most",
+   "to take place 取 under the sun 日 (that is, everywhere): most",
    null
   ]
  },
@@ -11749,8 +11711,8 @@
   "lv": "4",
   "reading": "zuìhǎo",
   "hint": [
-   "日 sun + 取 place: most",
-   "女 woman + 子 son: good"
+   "to take place 取 under the sun 日 (that is, everywhere): most",
+   "a woman 女 with a son 子: good"
   ]
  },
  {
@@ -11762,7 +11724,7 @@
   "lv": "4",
   "reading": "yǒuqù",
   "hint": [
-   "月 (sound yuè)",
+   null,
    "走 (walk) + 取 (sound qǔ)"
   ]
  },
@@ -11775,8 +11737,8 @@
   "lv": "4",
   "reading": "běnlái",
   "hint": [
-   "木 tree + 一 one: root",
-   "未 not yet + 丷: to arrive"
+   "a tree 木 with its roots highlighted: root",
+   "a wheat plant (from 來), borrowed for its sound: to come"
   ]
  },
  {
@@ -11788,7 +11750,7 @@
   "lv": "4",
   "reading": "duǒ",
   "hint": [
-   "几 flowers + 木 tree: cluster of flowers"
+   "flowers 几 blooming on a tree 木: flower"
   ]
  },
  {
@@ -11801,7 +11763,7 @@
   "reading": "zázhì",
   "hint": [
    "九 nine + 木 tree",
-   "士 scholar + 心 mind: determination"
+   "the mind 心 of a scholar 士: determination"
   ]
  },
  {
@@ -11814,7 +11776,7 @@
   "reading": "cáiliào",
   "hint": [
    "木 (wood) + 才 (sound cái)",
-   "米 rice + 斗 measuring: ingredients"
+   "a hand measuring 斗 a cup of rice 米: ingredients"
   ]
  },
  {
@@ -11827,7 +11789,7 @@
   "reading": "tiáojiàn",
   "hint": [
    "夂 to go + 木 tree",
-   "亻 man + 牛 cow: item"
+   "a man 亻 dividing up a cow 牛: item"
   ]
  },
  {
@@ -11839,8 +11801,8 @@
   "lv": "4",
   "reading": "láibují",
   "hint": [
-   "未 not yet + 丷: to arrive",
-   "a bird flying toward the sky 一: no",
+   "a wheat plant (from 來), borrowed for its sound: to come",
+   "a bird flying toward the sky 一: not",
    null
   ]
  },
@@ -11853,8 +11815,8 @@
   "lv": "4",
   "reading": "láidejí",
   "hint": [
-   "未 not yet + 丷: to arrive",
-   "彳 + 旦 shell + 寸 hand: to obtain",
+   "a wheat plant (from 來), borrowed for its sound: to come",
+   "a hand 寸 grabbing a shell 旦: structural particle: used after a verb…",
    null
   ]
  },
@@ -11868,7 +11830,7 @@
   "reading": "jíqí",
   "hint": [
    "木 (wood) + 及 (sound jí)",
-   "甘 sweet + 一 one + 八 eight"
+   null
   ]
  },
  {
@@ -11880,7 +11842,7 @@
   "lv": "4",
   "reading": "guǒrán",
   "hint": [
-   "田 fruit + 木 tree: fruit",
+   "fruit 田 growing on a tree 木: fruit",
    "灬 (fire) + 肰 (sound rán)"
   ]
  },
@@ -11931,7 +11893,7 @@
   "lv": "4",
   "reading": "mèng",
   "hint": [
-   "林 shut + 夕 night: dream"
+   "two eyes shut 林 at night 夕: dream"
   ]
  },
  {
@@ -11943,8 +11905,8 @@
   "lv": "4",
   "reading": "sēnlín",
   "hint": [
-   "木 trees + 木 trees + 木 trees: forest",
-   "木 trees + 木 trees: forest"
+   "many trees 木 forming a forest: forest",
+   "two trees 木 representing a forest: forest"
   ]
  },
  {
@@ -11981,8 +11943,8 @@
   "lv": "4",
   "reading": "zhènghǎo",
   "hint": [
-   "一 place + 止 foot: straight",
-   "女 woman + 子 son: good"
+   "a foot 止 stopping in the right place 一: straight",
+   "a woman 女 with a son 子: good"
   ]
  },
  {
@@ -11994,7 +11956,7 @@
   "lv": "4",
   "reading": "zhèngcháng",
   "hint": [
-   "一 place + 止 foot: straight",
+   "a foot 止 stopping in the right place 一: straight",
    "巾 (cloth) + 尚 (sound shàng)"
   ]
  },
@@ -12007,8 +11969,8 @@
   "lv": "4",
   "reading": "zhèngshì",
   "hint": [
-   "一 place + 止 foot: straight",
-   "弋 awl + 工 square: formula"
+   "a foot 止 stopping in the right place 一: straight",
+   "a craftsman using an awl 弋 and a measuring square 工: formula"
   ]
  },
  {
@@ -12020,7 +11982,7 @@
   "lv": "4",
   "reading": "zhèngquè",
   "hint": [
-   "一 place + 止 foot: straight",
+   "a foot 止 stopping in the right place 一: straight",
    "石 (stone) + 角 (sound jiǎo)"
   ]
  },
@@ -12033,7 +11995,7 @@
   "lv": "4",
   "reading": "sǐ",
   "hint": [
-   "歹 corpse + 匕 kneeling: dead"
+   "a person kneeling 匕 before a corpse 歹: to die"
   ]
  },
  {
@@ -12046,7 +12008,7 @@
   "reading": "mǔqīn",
   "hint": [
    "a mother's breasts: mother",
-   "立 fruit + 一 one + 小 small: relatives"
+   "a tree bearing fruit 立: relatives"
   ]
  },
  {
@@ -12084,8 +12046,8 @@
   "lv": "4",
   "reading": "mínzú",
   "hint": [
-   "巳 eye + 戈 dagger: citizens",
-   "方 flag + 矢 arrow: race"
+   "an eye 巳 pierced by a dagger 戈, an old mark of slavery: citizens",
+   "a group of people that swear by 矢 a single flag 方: race"
   ]
  },
  {
@@ -12097,7 +12059,7 @@
   "lv": "4",
   "reading": "qìhòu",
   "hint": [
-   "a person 亻 breathing air: air",
+   "rising vapour: air, gas",
    "亻 (person) + 矦 (sound hóu)"
   ]
  },
@@ -12136,7 +12098,7 @@
   "reading": "wūrǎn",
   "hint": [
    "氵 (water) + 亏 (sound kuī)",
-   "氿 spring + 木 wooden: dye"
+   "water and wine mixed in a wooden 木 bowl: dye"
   ]
  },
  {
@@ -12173,8 +12135,8 @@
   "lv": "4",
   "reading": "fǎlǜ",
   "hint": [
-   "氵 stream + 去 course: law",
-   "彳 walk + 聿 law: statute"
+   "the course 去 followed by a stream 氵: law",
+   "to walk 彳 as required by law 聿: statute"
   ]
  },
  {
@@ -12188,7 +12150,7 @@
   "hint": [
    "氵 (water) + 先 (sound xiān)",
    "picture of a woman's dress",
-   "木 wood + 几 table: desk"
+   "a table 几 made of wood 木; 几 gives the sound: machine"
   ]
  },
  {
@@ -12201,7 +12163,7 @@
   "reading": "huódòng",
   "hint": [
    "氵 (water) + 舌 (sound shé)",
-   "力 (strength)"
+   "力 (strength) + 云"
   ]
  },
  {
@@ -12214,7 +12176,7 @@
   "reading": "huópo",
   "hint": [
    "氵 (water) + 舌 (sound shé)",
-   "氵 water + 发 forth: to pour"
+   "to send forth 发 water 氵: to pour"
   ]
  },
  {
@@ -12227,7 +12189,7 @@
   "reading": "liúlì",
   "hint": [
    "氵 (water) + 㐬 (sound liú)",
-   "禾 grain + 刂 harvesting: gains"
+   "harvesting 刂 grain 禾: gains"
   ]
  },
  {
@@ -12240,7 +12202,7 @@
   "reading": "liúlèi",
   "hint": [
    "氵 (water) + 㐬 (sound liú)",
-   "氵 water + 目 eyes: tears"
+   "water 氵 from the eyes 目: tears"
   ]
  },
  {
@@ -12253,7 +12215,7 @@
   "reading": "liúxíng",
   "hint": [
    "氵 (water) + 㐬 (sound liú)",
-   "彳 feet + 亍 steps: to go"
+   "to take small steps 亍 with one's feet 彳: to walk"
   ]
  },
  {
@@ -12305,7 +12267,7 @@
   "reading": "xiāoxi",
   "hint": [
    "氵 (water) + 肖 (sound xiào)",
-   "自 nose + 心 heart: to end"
+   "to breathe (life, 心) through one's nose 自: to end"
   ]
  },
  {
@@ -12317,7 +12279,7 @@
   "lv": "4",
   "reading": "shēn",
   "hint": [
-   "氵 water + 罙 deep: deep"
+   "deep 罙 water 氵: deep"
   ]
  },
  {
@@ -12330,7 +12292,7 @@
   "reading": "wēndù",
   "hint": [
    "氵 (water) + 昷 (sound wēn)",
-   "广 building + 廿 twenty + 又 people: degree"
+   "twenty 廿 people 又 meeting inside a building 广 to deliberate: degree"
   ]
  },
  {
@@ -12368,7 +12330,7 @@
   "reading": "yǎnchū",
   "hint": [
    "氵 (water) + 寅 (sound yín)",
-   "屮 sprout + 凵 container: to go out"
+   "a sprout 屮 growing out of a container 凵: to go out"
   ]
  },
  {
@@ -12381,7 +12343,7 @@
   "reading": "yǎnyuán",
   "hint": [
    "氵 (water) + 寅 (sound yín)",
-   "贝 (money)"
+   "贝 (money) + 口"
   ]
  },
  {
@@ -12394,7 +12356,7 @@
   "reading": "jīdòng",
   "hint": [
    "氵 (water) + 敫 (sound jiǎo)",
-   "力 (strength)"
+   "力 (strength) + 云"
   ]
  },
  {
@@ -12419,7 +12381,7 @@
   "reading": "fánnǎo",
   "hint": [
    "火 (fire) + 页 (sound yè)",
-   "忄 (heart)"
+   null
   ]
  },
  {
@@ -12432,7 +12394,7 @@
   "reading": "rènao",
   "hint": [
    "灬 (fire) + 执 (sound zhí)",
-   "门 gate + 市 market: busy"
+   "as busy as the market 市 gate 门: busy"
   ]
  },
  {
@@ -12470,7 +12432,7 @@
   "lv": "4",
   "reading": "àiqíng",
   "hint": [
-   "爫 claws + 冖 house + 友 friend: to love",
+   "to bring a friend 友 into one's house 冖: to love",
    "忄 (heart) + 青 (sound qīng)"
   ]
  },
@@ -12483,8 +12445,8 @@
   "lv": "4",
   "reading": "fùqīn",
   "hint": [
-   "八 axe + 乂 hand: father",
-   "立 fruit + 一 one + 小 small: relatives"
+   "a hand 乂 holding an axe 八: father",
+   "a tree bearing fruit 立: relatives"
   ]
  },
  {
@@ -12572,8 +12534,8 @@
   "lv": "4",
   "reading": "xiàndài",
   "hint": [
-   "王 jade + 见 see: to appear",
-   "亻 man + 弋 caught: era"
+   "to see 见 jade 王: to appear",
+   "a man 亻 caught 弋 by the passing of time: era"
   ]
  },
  {
@@ -12612,7 +12574,7 @@
   "reading": "lǐjiě",
   "hint": [
    "王 (king) + 里 (sound lǐ)",
-   "角 horns + 刀 cut + 牛 ox: to explain"
+   "to cut 刀 the horns 角 off of an ox 牛: to explain"
   ]
  },
  {
@@ -12638,7 +12600,7 @@
   "reading": "shènzhì",
   "hint": [
    "甘 sweet + 匹",
-   "一 one + 厶 private + 土 ground: reach"
+   "a bird alighting on the ground 土: reach"
   ]
  },
  {
@@ -12650,8 +12612,8 @@
   "lv": "4",
   "reading": "shēngmìng",
   "hint": [
-   "一 one + 土 soil: life",
-   "令 order + 口 mouth: life"
+   "a shoot growing out of the soil 土: to grow, life",
+   "an order 令 given by mouth 口: life"
   ]
  },
  {
@@ -12663,7 +12625,7 @@
   "lv": "4",
   "reading": "shēnghuó",
   "hint": [
-   "一 one + 土 soil: life",
+   "a shoot growing out of the soil 土: to grow, life",
    "氵 (water) + 舌 (sound shé)"
   ]
  },
@@ -12676,7 +12638,7 @@
   "lv": "4",
   "reading": "yóu",
   "hint": [
-   "road 丨 leading to the farm 田: cause"
+   "road leading to the farm 田: to follow"
   ]
  },
  {
@@ -12688,7 +12650,7 @@
   "lv": "4",
   "reading": "yóuyú",
   "hint": [
-   "road 丨 leading to the farm 田: cause",
+   "road leading to the farm 田: to follow",
    "二 two + 亅"
   ]
  },
@@ -12727,7 +12689,7 @@
   "reading": "liúxué",
   "hint": [
    "卯 + 田 field",
-   "⺍ + 冖 building + 子 children: learning"
+   "a building 冖 where children 子 study: learning"
   ]
  },
  {
@@ -12739,7 +12701,7 @@
   "lv": "4",
   "reading": "pífū",
   "hint": [
-   "picture of skin",
+   "picture of a hand using a tool to strip the hide from a carcass",
    "⺼ (flesh) + 夫 (sound fū)"
   ]
  },
@@ -12790,7 +12752,7 @@
   "lv": "4",
   "reading": "zhíjiē",
   "hint": [
-   "十 ten + 目 eye + 一 one: straight",
+   "to look someone in the eye 目: straight",
    "扌 (hand) + 妾 (sound qiè)"
   ]
  },
@@ -12803,8 +12765,8 @@
   "lv": "4",
   "reading": "xiāngfǎn",
   "hint": [
-   "木 tree + 目 stare: mutual",
-   "厂 cliff + 又 hand: reverse"
+   "to stare 目 at a tree 木, meaning to observe: mutual",
+   "a hand 又 held up against a cliff 厂: reverse"
   ]
  },
  {
@@ -12828,8 +12790,8 @@
   "lv": "4",
   "reading": "kànfǎ",
   "hint": [
-   "手 hand + 目 eyes: to look",
-   "氵 stream + 去 course: law"
+   "shielding one's eyes 目 with a hand 手 to look to the distance",
+   "the course 去 followed by a stream 氵: law"
   ]
  },
  {
@@ -12841,8 +12803,8 @@
   "lv": "4",
   "reading": "zhēnzhèng",
   "hint": [
-   "直 straight + 几 table: real",
-   "一 place + 止 foot: straight"
+   "a straight 直 (that is, level) table 几: really",
+   "a foot 止 stopping in the right place 一: straight"
   ]
  },
  {
@@ -12869,7 +12831,7 @@
   "hint": [
    "石 (stone) + 开 (sound kāi)",
    "穴 (cave) + 九 (sound jiǔ)",
-   "一 one + 土 soil: life"
+   "a shoot growing out of the soil 土: to grow, life"
   ]
  },
  {
@@ -12893,7 +12855,7 @@
   "lv": "4",
   "reading": "shuòshì",
   "hint": [
-   "石 stone + 页 sheet: great",
+   "like a sheet 页 of stone 石: great",
    null
   ]
  },
@@ -12932,7 +12894,7 @@
   "reading": "lǐmào",
   "hint": [
    "礻 (spirit) + 乚 (sound gōu)",
-   "豸 beast's + 皃 appearance: countenance"
+   "a beast's 豸 appearance 皃: countenance"
   ]
  },
  {
@@ -12944,8 +12906,8 @@
   "lv": "4",
   "reading": "shèhuì",
   "hint": [
-   "礻 spirit + 土 earth: group",
-   "人 people + 云 speaking: to assemble"
+   "an earth 土 spirit 礻: group",
+   "people 人 speaking 云: can"
   ]
  },
  {
@@ -12957,8 +12919,8 @@
   "lv": "4",
   "reading": "zhùhè",
   "hint": [
-   "礻 altar + 兄 person: to pray",
-   "加 add + 贝 fortune: to congratulate"
+   "a person 兄 praying before an altar 礻: to pray for",
+   "to add 加 to someone else's fortune 贝: to congratulate"
   ]
  },
  {
@@ -12983,8 +12945,8 @@
   "lv": "4",
   "reading": "kēxué",
   "hint": [
-   "禾 grain + 斗 measuring: section",
-   "⺍ + 冖 building + 子 children: learning"
+   "a hand measuring 斗 grain 禾: section",
+   "a building 冖 where children 子 study: learning"
   ]
  },
  {
@@ -12996,7 +12958,7 @@
   "lv": "4",
   "reading": "zū",
   "hint": [
-   "禾 grain + 且 paid: to rent"
+   "regularly paid 且 tribute in grain 禾: to hire"
   ]
  },
  {
@@ -13022,7 +12984,7 @@
   "reading": "jīlěi",
   "hint": [
    "禾 (grain) + 只 (sound zhī)",
-   "田 field + 糸 silk: tired"
+   "growing silk 糸 in the fields: tired"
   ]
  },
  {
@@ -13034,8 +12996,8 @@
   "lv": "4",
   "reading": "shāowēi",
   "hint": [
-   "禾 grain + 肖 resembling: somewhat",
-   "彳 + 山 mountain + 兀 weak + 攵 to rap"
+   "resembling 肖 grain 禾: somewhat",
+   null
   ]
  },
  {
@@ -13048,7 +13010,7 @@
   "reading": "jiūjìng",
   "hint": [
    "穴 (cave) + 九 (sound jiǔ)",
-   "音 piece + 儿 person: finally"
+   "a person 儿 finishing a musical piece 音: finally"
   ]
  },
  {
@@ -13073,7 +13035,7 @@
   "reading": "kōngqì",
   "hint": [
    "穴 (cave) + 工 (sound gōng)",
-   "a person 亻 breathing air: air"
+   "rising vapour: air, gas"
   ]
  },
  {
@@ -13098,7 +13060,7 @@
   "reading": "chuānghu",
   "hint": [
    "穴 (hole) + 囱 (sound cōng)",
-   "picture of door"
+   "picture of a door swinging on its hinge"
   ]
  },
  {
@@ -13110,8 +13072,8 @@
   "lv": "4",
   "reading": "jìngzhēng",
   "hint": [
-   "立 up + 兄 foe: to compete",
-   "⺈ + 彐 snout + 亅: to dispute"
+   "to stand up 立 to a foe 兄: to compete",
+   "two hands and 彐 fighting over 亅: to dispute"
   ]
  },
  {
@@ -13123,7 +13085,7 @@
   "lv": "4",
   "reading": "jìngrán",
   "hint": [
-   "音 piece + 儿 person: finally",
+   "a person 儿 finishing a musical piece 音: finally",
    "灬 (fire) + 肰 (sound rán)"
   ]
  },
@@ -13136,8 +13098,8 @@
   "lv": "4",
   "reading": "xiàohua",
   "hint": [
-   "⺮ grin + 夭 person: to smile",
-   "讠 spoken + 舌 tongue: talk"
+   "a person 夭 with a big grin ⺮: to laugh",
+   "a spoken 讠 tongue 舌: talk"
   ]
  },
  {
@@ -13149,9 +13111,9 @@
   "lv": "4",
   "reading": "bǐjìběn",
   "hint": [
-   "⺮ rod + 毛 hair: pen",
-   "讠 note + 己 private: mark",
-   "木 tree + 一 one: root"
+   "a bamboo rod ⺮ tipped with hair 毛: pen",
+   "a private 己 note 讠: mark",
+   "a tree 木 with its roots highlighted: root"
   ]
  },
  {
@@ -13188,7 +13150,7 @@
   "lv": "4",
   "reading": "děng",
   "hint": [
-   "⺮ strips + 寺 court: rank"
+   "bamboo strips ⺮ laid before a court 寺: class"
   ]
  },
  {
@@ -13214,7 +13176,7 @@
   "reading": "qiānzhèng",
   "hint": [
    "⺮ (bamboo) + 佥 (sound qiān)",
-   "讠 speak + 正 truth: to prove"
+   "to speak 讠 the truth 正: to prove"
   ]
  },
  {
@@ -13226,7 +13188,7 @@
   "lv": "4",
   "reading": "suàn",
   "hint": [
-   "⺮ bamboo + 具 abacus: to calculate"
+   "a bamboo ⺮ abacus 具: to regard as"
   ]
  },
  {
@@ -13251,7 +13213,7 @@
   "lv": "4",
   "reading": "piān",
   "hint": [
-   "⺮ bamboo + 扁 tablet: chapter"
+   "a bamboo ⺮ tablet 扁: sheet"
   ]
  },
  {
@@ -13302,7 +13264,7 @@
   "lv": "4",
   "reading": "jǐnzhāng",
   "hint": [
-   "糸 (silk)",
+   null,
    "弓 (bow) + 长 (sound zhǎng)"
   ]
  },
@@ -13315,8 +13277,8 @@
   "lv": "4",
   "reading": "yuēhuì",
   "hint": [
-   "纟 (thread)",
-   "人 people + 云 speaking: to assemble"
+   "纟 (thread) + 勺",
+   "people 人 speaking 云: can"
   ]
  },
  {
@@ -13394,7 +13356,7 @@
   "reading": "jiéguǒ",
   "hint": [
    "纟 (thread) + 吉 (sound jí)",
-   "田 fruit + 木 tree: fruit"
+   "fruit 田 growing on a tree 木: fruit"
   ]
  },
  {
@@ -13471,8 +13433,8 @@
   "lv": "4",
   "reading": "měilì",
   "hint": [
-   "羊 crown + 大 person: beautiful",
-   "一 one + 冂 wide + 丶 + 冂 wide + 丶: beautiful"
+   "a person 大 wearing an elegant crown 羊: beautiful",
+   "the antlers of a deer: beautiful"
   ]
  },
  {
@@ -13484,7 +13446,7 @@
   "lv": "4",
   "reading": "xiànmù",
   "hint": [
-   "羊 sheep + 次 row: to envy",
+   "someone who has a whole row 次 of sheep 羊: to envy",
    "⺗ (heart) + 莫 (sound mò)"
   ]
  },
@@ -13524,7 +13486,7 @@
   "reading": "fānyì",
   "hint": [
    "羽 (wings) + 番 (sound fān)",
-   "讠 (speech)"
+   null
   ]
  },
  {
@@ -13536,8 +13498,8 @@
   "lv": "4",
   "reading": "lǎohǔ",
   "hint": [
-   "picture of old",
-   "虍 tiger + 几 rock: tiger"
+   "picture of a person bent over with long hair and a crutch",
+   "a tiger 虍 standing on a rock 几: tiger"
   ]
  },
  {
@@ -13550,7 +13512,7 @@
   "reading": "kǎolǜ",
   "hint": [
    "耂 (old) + 丂 (sound kǎo)",
-   "虍 tiger + 心 heart: anxious"
+   "a tiger 虍 striking fear into the heart 心: anxious"
   ]
  },
  {
@@ -13585,7 +13547,7 @@
   "reading": "liáotiān",
   "hint": [
    "耳 (ear) + 卯 (sound mǎo)",
-   "一 heavens + 大 man: sky"
+   "the heavens 一 above a man 大: sky"
   ]
  },
  {
@@ -13611,7 +13573,7 @@
   "reading": "liánxì",
   "hint": [
    "耳 (ear) + 关 (sound guān)",
-   "糸 (thread)"
+   "糸 (thread) + 丿"
   ]
  },
  {
@@ -13636,8 +13598,8 @@
   "lv": "4",
   "reading": "kěndìng",
   "hint": [
-   "止 stop + ⺼ muscles: to agree to",
-   "宀 roof + 疋 person: to decide"
+   "to stop 止 flexing one's muscles ⺼: to agree to",
+   "a person 疋 settling under a roof 宀: to decide"
   ]
  },
  {
@@ -13649,7 +13611,7 @@
   "lv": "4",
   "reading": "nénglì",
   "hint": [
-   "picture of can",
+   "picture of a bear's head, body, and claws",
    "a plow's head representing strength: strength"
   ]
  },
@@ -13687,7 +13649,7 @@
   "reading": "píqi",
   "hint": [
    "⺼ (flesh) + 卑 (sound bēi)",
-   "a person 亻 breathing air: air"
+   "rising vapour: air, gas"
   ]
  },
  {
@@ -13712,7 +13674,7 @@
   "lv": "4",
   "reading": "zhìshǎo",
   "hint": [
-   "一 one + 厶 private + 土 ground: reach",
+   "a bird alighting on the ground 土: reach",
    "picture of grains of sand"
   ]
  },
@@ -13726,7 +13688,7 @@
   "reading": "hángbān",
   "hint": [
    "舟 (ship) + 亢 (sound kàng)",
-   "王 jade + 刂 cutting + 王 jade: class"
+   "cutting 刂 a piece of jade 王 in two, symbolizing two classes: team"
   ]
  },
  {
@@ -13751,8 +13713,8 @@
   "lv": "4",
   "reading": "jiéyuē",
   "hint": [
-   "simplified form of 節; sections of bamboo ⺮: festival",
-   "纟 (thread)"
+   "sections of bamboo: festival",
+   "纟 (thread) + 勺"
   ]
  },
  {
@@ -13790,7 +13752,7 @@
   "reading": "huòdé",
   "hint": [
    "艹 grass + 犾",
-   "彳 + 旦 shell + 寸 hand: to obtain"
+   "a hand 寸 grabbing a shell 旦: structural particle: used after a verb…"
   ]
  },
  {
@@ -13803,7 +13765,7 @@
   "reading": "zhùmíng",
   "hint": [
    "艹 (plant) + 者 (sound zhě)",
-   "夕 night + 口 out: name"
+   "a name called out 口 to hail someone at night 夕: name"
   ]
  },
  {
@@ -13815,7 +13777,7 @@
   "lv": "4",
   "reading": "xuè",
   "hint": [
-   "丿 + 皿 chalice: blood"
+   "a chalice 皿 filled with blood 丿: blood"
   ]
  },
  {
@@ -13827,7 +13789,7 @@
   "lv": "4",
   "reading": "xíng",
   "hint": [
-   "彳 feet + 亍 steps: to go"
+   "to take small steps 亍 with one's feet 彳: to walk"
   ]
  },
  {
@@ -13839,7 +13801,7 @@
   "lv": "4",
   "reading": "biǎoyáng",
   "hint": [
-   "毛 fur + 衣 clothing: to show",
+   "fur 毛 clothing 衣; a shawl or wrap: to show",
    "扌 (hand) + 昜 (sound yáng)"
   ]
  },
@@ -13852,7 +13814,7 @@
   "lv": "4",
   "reading": "biǎogé",
   "hint": [
-   "毛 fur + 衣 clothing: to show",
+   "fur 毛 clothing 衣; a shawl or wrap: to show",
    "木 (wood) + 各 (sound gè)"
   ]
  },
@@ -13865,7 +13827,7 @@
   "lv": "4",
   "reading": "biǎodá",
   "hint": [
-   "毛 fur + 衣 clothing: to show",
+   "fur 毛 clothing 衣; a shawl or wrap: to show",
    "辶 (to walk) + 大 (sound dà)"
   ]
  },
@@ -13905,8 +13867,8 @@
   "lv": "4",
   "reading": "guānzhòng",
   "hint": [
-   "又 again + 见 see: to observe",
-   "人 people + 人 people + 人 people: multitude"
+   "to see 见 again 又: to observe",
+   "three people 人 representing a crowd: multitude"
   ]
  },
  {
@@ -13919,7 +13881,7 @@
   "reading": "guīdìng",
   "hint": [
    "见 (observe) + 夫 (sound fū)",
-   "宀 roof + 疋 person: to decide"
+   "a person 疋 settling under a roof 宀: to decide"
   ]
  },
  {
@@ -13931,7 +13893,7 @@
   "lv": "4",
   "reading": "jiěshì",
   "hint": [
-   "角 horns + 刀 cut + 牛 ox: to explain",
+   "to cut 刀 the horns 角 off of an ox 牛: to explain",
    "釆 (collect) + 睪 (sound yì)"
   ]
  },
@@ -13970,7 +13932,7 @@
   "lv": "4",
   "reading": "tǎoyàn",
   "hint": [
-   "讠 ask + 寸 something: to haggle",
+   "to ask 讠 for something 寸: to haggle",
    "厂 (cliff) + 犬 (sound quǎn)"
   ]
  },
@@ -13983,8 +13945,8 @@
   "lv": "4",
   "reading": "tǎolùn",
   "hint": [
-   "讠 ask + 寸 something: to haggle",
-   "讠 speech + 仑 logic: debate"
+   "to ask 讠 for something 寸: to haggle",
+   "speech 讠 that explains the logic 仑: debate"
   ]
  },
  {
@@ -13996,7 +13958,7 @@
   "lv": "4",
   "reading": "jìzhě",
   "hint": [
-   "讠 note + 己 private: mark",
+   "a private 己 note 讠: mark",
    "耂 old + 日 sun"
   ]
  },
@@ -14010,7 +13972,7 @@
   "reading": "xǔduō",
   "hint": [
    "讠 (speech) + 午 (sound wǔ)",
-   "夕 nights + 夕 nights: much"
+   "two nights 夕, suggesting many: many"
   ]
  },
  {
@@ -14035,8 +13997,8 @@
   "lv": "4",
   "reading": "zhèngmíng",
   "hint": [
-   "讠 speak + 正 truth: to prove",
-   "日 sun + 月 moon: bright"
+   "to speak 讠 the truth 正: to prove",
+   "the light of the sun 日 and moon 月: bright"
   ]
  },
  {
@@ -14049,7 +14011,7 @@
   "reading": "cídiǎn",
   "hint": [
    "讠 (words) + 司 (sound sī)",
-   "曲 crooked + 八 hands: law"
+   "two hands 八 holding a book: law"
   ]
  },
  {
@@ -14100,7 +14062,7 @@
   "reading": "yǔfǎ",
   "hint": [
    "讠 (words) + 吾 (sound wú)",
-   "氵 stream + 去 course: law"
+   "the course 去 followed by a stream 氵: law"
   ]
  },
  {
@@ -14113,7 +14075,7 @@
   "reading": "yǔyán",
   "hint": [
    "讠 (words) + 吾 (sound wú)",
-   "亠 lid + 二 two + 口 mouth: words"
+   "a tongue sticking out of a mouth 口: words"
   ]
  },
  {
@@ -14126,7 +14088,7 @@
   "reading": "wùhuì",
   "hint": [
    "讠 (speech) + 吴 (sound wú)",
-   "人 people + 云 speaking: to assemble"
+   "people 人 speaking 云: can"
   ]
  },
  {
@@ -14139,7 +14101,7 @@
   "reading": "shuōmíng",
   "hint": [
    "讠 (speech) + 兑 (sound duì)",
-   "日 sun + 月 moon: bright"
+   "the light of the sun 日 and moon 月: bright"
   ]
  },
  {
@@ -14152,7 +14114,7 @@
   "reading": "qǐngjià",
   "hint": [
    "讠 (speech) + 青 (sound qīng)",
-   "亻 person + 叚 false: fake"
+   "a false 叚 person 亻: fake"
   ]
  },
  {
@@ -14165,7 +14127,7 @@
   "reading": "qǐngkè",
   "hint": [
    "讠 (speech) + 青 (sound qīng)",
-   "宀 roof + 各 person: guest"
+   "a person 各 welcomed under one's roof 宀: guest"
   ]
  },
  {
@@ -14202,8 +14164,8 @@
   "lv": "4",
   "reading": "fùzé",
   "hint": [
-   "⺈ + 贝 money: load",
-   "龶 + 贝 money: one's responsibility"
+   "a person carrying a lot of money 贝: load",
+   "money 贝 that must be repaid: one's responsibility"
   ]
  },
  {
@@ -14215,7 +14177,7 @@
   "lv": "4",
   "reading": "zérèn",
   "hint": [
-   "龶 + 贝 money: one's responsibility",
+   "money 贝 that must be repaid: one's responsibility",
    "亻 (person) + 壬 (sound rén)"
   ]
  },
@@ -14264,10 +14226,7 @@
    "w1125"
   ],
   "lv": "4",
-  "reading": "yíng",
-  "hint": [
-   "贝 (money)"
-  ]
+  "reading": "yíng"
  },
  {
   "id": "c1126",
@@ -14279,7 +14238,7 @@
   "reading": "qǐlai",
   "hint": [
    "走 (walk) + 己 (sound jǐ)",
-   "未 not yet + 丷: to arrive"
+   "a wheat plant (from 來), borrowed for its sound: to come"
   ]
  },
  {
@@ -14454,7 +14413,7 @@
   "reading": "jìnxíng",
   "hint": [
    "辶 (walk) + 井 (sound jǐng)",
-   "彳 feet + 亍 steps: to go"
+   "to take small steps 亍 with one's feet 彳: to walk"
   ]
  },
  {
@@ -14466,7 +14425,7 @@
   "lv": "4",
   "reading": "lián",
   "hint": [
-   "辶 moving + 车 cart: to join"
+   "a cart 车 moving 辶 goods between cities: to link"
   ]
  },
  {
@@ -14492,7 +14451,7 @@
   "reading": "shìyìng",
   "hint": [
    "辶 (walk) + 舌 (sound shé)",
-   "广 broad + ⺍ + 一 one"
+   null
   ]
  },
  {
@@ -14556,7 +14515,7 @@
   "reading": "sùdù",
   "hint": [
    "辶 (walk) + 束 (sound shù)",
-   "广 building + 廿 twenty + 又 people: degree"
+   "twenty 廿 people 又 meeting inside a building 广 to deliberate: degree"
   ]
  },
  {
@@ -14607,7 +14566,7 @@
   "reading": "bùfen",
   "hint": [
    "阝 (place) + 咅 (sound pǒu)",
-   "八 pieces + 刀 knife: to divide"
+   "pieces 八 being further subdivided with a knife 刀: to divide"
   ]
  },
  {
@@ -14619,7 +14578,7 @@
   "lv": "4",
   "reading": "suān",
   "hint": [
-   "酉 wine + 夋 long: tart"
+   "wine 酉 aged too long 夋: sour"
   ]
  },
  {
@@ -14643,8 +14602,8 @@
   "lv": "4",
   "reading": "chóngxīn",
   "hint": [
-   "千 thousand + 里 miles: heavy",
-   "亲 tree + 斤 chopped: new"
+   "a burden carried for a thousand 千 miles 里: heavy",
+   "a freshly chopped 斤 tree 亲: new"
   ]
  },
  {
@@ -14656,7 +14615,7 @@
   "lv": "4",
   "reading": "zhòngdiǎn",
   "hint": [
-   "千 thousand + 里 miles: heavy",
+   "a burden carried for a thousand 千 miles 里: heavy",
    "灬 (fire) + 占 (sound zhàn)"
   ]
  },
@@ -14669,7 +14628,7 @@
   "lv": "4",
   "reading": "zhòngshì",
   "hint": [
-   "千 thousand + 里 miles: heavy",
+   "a burden carried for a thousand 千 miles 里: heavy",
    "见 (see) + 礻 (sound shì)"
   ]
  },
@@ -14708,7 +14667,7 @@
   "lv": "4",
   "reading": "Chángchéng",
   "hint": [
-   "simplified form of 長; an old man with long hair and a cane: long",
+   "an old man with long hair and a cane: length",
    "土 (earth) + 成 (sound chéng)"
   ]
  },
@@ -14721,7 +14680,7 @@
   "lv": "4",
   "reading": "Chángjiāng",
   "hint": [
-   "simplified form of 長; an old man with long hair and a cane: long",
+   "an old man with long hair and a cane: length",
    "氵 (water) + 工 (sound gōng)"
   ]
  },
@@ -14735,7 +14694,7 @@
   "reading": "yuèdú",
   "hint": [
    "门 gate + 兑 cash",
-   "讠 literacy + 卖 off: to study"
+   "to show off 卖 one's literacy 讠: to read out"
   ]
  },
  {
@@ -14747,8 +14706,8 @@
   "lv": "4",
   "reading": "yángguāng",
   "hint": [
-   "阝 place + 日 sun: the male principle",
-   "⺌ + 兀 weak: light"
+   "the place 阝 of the sun 日: the male principle",
+   "a person carrying a torch: light"
   ]
  },
  {
@@ -14761,7 +14720,7 @@
   "reading": "jiàngdī",
   "hint": [
    "阝 (hill) + 夅 (sound jiàng)",
-   "氐 (sound dī)"
+   "亻 + 氐 (sound dī)"
   ]
  },
  {
@@ -14798,7 +14757,7 @@
   "lv": "4",
   "reading": "suíbiàn",
   "hint": [
-   "阝 city + 迶 walk: to follow",
+   "to walk 迶 to the city 阝; to follow a path: to follow",
    "亻 man + 更 more"
   ]
  },
@@ -14811,7 +14770,7 @@
   "lv": "4",
   "reading": "suízhe",
   "hint": [
-   "阝 city + 迶 walk: to follow",
+   "to walk 迶 to the city 阝; to follow a path: to follow",
    "羊 sheep + 目 eye"
   ]
  },
@@ -14824,8 +14783,8 @@
   "lv": "4",
   "reading": "nánshòu",
   "hint": [
-   "又 hand + 隹 bird: hard",
-   "爫 hand + 冖 something + 又 another: to receive"
+   "a hand 又 trying to grasp at a bird 隹: difficult",
+   "something 冖 passed from one hand 爫 to another 又: to receive"
   ]
  },
  {
@@ -14837,7 +14796,7 @@
   "lv": "4",
   "reading": "nándào",
   "hint": [
-   "又 hand + 隹 bird: hard",
+   "a hand 又 trying to grasp at a bird 隹: difficult",
    "辶 (walk) + 首 (sound shǒu)"
   ]
  },
@@ -14850,7 +14809,7 @@
   "lv": "4",
   "reading": "jíhé",
   "hint": [
-   "隹 birds + 木 tree: to gather",
+   "birds 隹 flocking on a tree 木: to gather",
    "亼 to assemble + 口 mouth"
   ]
  },
@@ -14889,7 +14848,7 @@
   "reading": "shùnlì",
   "hint": [
    "页 (head) + 川 (sound chuān)",
-   "禾 grain + 刂 harvesting: gains"
+   "harvesting 刂 grain 禾: gains"
   ]
  },
  {
@@ -14915,7 +14874,7 @@
   "reading": "gùkè",
   "hint": [
    "页 (head) + 厄 (sound è)",
-   "宀 roof + 各 person: guest"
+   "a person 各 welcomed under one's roof 宀: guest"
   ]
  },
  {
@@ -14953,7 +14912,7 @@
   "reading": "fēngjǐng",
   "hint": [
    "几 small table + 乂 to govern",
-   "日 sun + 京 city: scenery"
+   "the sun 日 rising over a city 京: scenery"
   ]
  },
  {
@@ -14965,8 +14924,8 @@
   "lv": "4",
   "reading": "shípǐn",
   "hint": [
-   "picture of food",
-   "口 talking + 口 talking + 口 talking: article"
+   "picture of a dish of food with a lid on top",
+   "something that everyone is talking 口 about: article"
   ]
  },
  {
@@ -14979,7 +14938,7 @@
   "reading": "yǐnliào",
   "hint": [
    "饣 (food) + 欠 (sound qiàn)",
-   "米 rice + 斗 measuring: ingredients"
+   "a hand measuring 斗 a cup of rice 米: ingredients"
   ]
  },
  {
@@ -15017,8 +14976,8 @@
   "lv": "4",
   "reading": "shǒuxiān",
   "hint": [
-   "丷 + 自 head: chief",
-   "土 soil + 儿 person: first"
+   "a deer's head 自 adorned with antlers 丷: chief",
+   "someone stepping in front of another person 儿: early"
   ]
  },
  {
@@ -15030,7 +14989,7 @@
   "lv": "4",
   "reading": "shǒudū",
   "hint": [
-   "丷 + 自 head: chief",
+   "a deer's head 自 adorned with antlers 丷: chief",
    "阝 (city) + 者 (sound zhě)"
   ]
  },
@@ -15043,7 +15002,7 @@
   "lv": "4",
   "reading": "xiāng",
   "hint": [
-   "禾 herb + 日 sun: incense"
+   "a herb 禾 with a sweet smell: fragrant"
   ]
  },
  {
@@ -15055,8 +15014,8 @@
   "lv": "4",
   "reading": "mǎhu",
   "hint": [
-   "picture of horse",
-   "虍 tiger + 几 rock: tiger"
+   "picture of a horse galloping to the left",
+   "a tiger 虍 standing on a rock 几: tiger"
   ]
  },
  {
@@ -15068,7 +15027,7 @@
   "lv": "4",
   "reading": "jiāo'ào",
   "hint": [
-   "马 horse + 乔 proud: haughty",
+   "a proud 乔 horse 马: haughty",
    "亻 (person) + 敖 (sound áo)"
   ]
  },
@@ -15106,7 +15065,7 @@
   "lv": "4",
   "reading": "máfan",
   "hint": [
-   "广 greenhouse + 林 plants: hemp",
+   "hemp plants 林 growing in a greenhouse 广: hemp",
    "火 (fire) + 页 (sound yè)"
   ]
  },

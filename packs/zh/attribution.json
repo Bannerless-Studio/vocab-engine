@@ -2,7 +2,8 @@
  "vocabulary": {
   "source": "complete-hsk-vocabulary via the chinese repo (data/hsk_vocab.json, tools/build_vocab.py)",
   "licence": "MIT",
-  "url": "https://github.com/drkameleon/complete-hsk-vocabulary"
+  "url": "https://github.com/drkameleon/complete-hsk-vocabulary",
+  "glosses": "the English `en` senses originate from CC-CEDICT (complete-hsk-vocabulary README, Sources: \"Dictionary definitions: mdbg.net (CC-CEDICT)\"), licensed CC-BY-SA-4.0: https://cc-cedict.org/wiki/"
  },
  "sentences": {
   "source": "hand-authored for this pack (chinese repo data/hsk_sentences.js)",
@@ -12,6 +13,11 @@
   "source": "Make Me a Hanzi dictionary.txt (decomposition, etymology, definition, pinyin), itself derived from Unihan and CJKlib; composed into characters.json `hint` by tools/zh_hints.py",
   "licence": "LGPL-3.0-or-later",
   "url": "https://github.com/skishore/makemeahanzi/blob/bddc96d41bef78427ed0e034e9f7e31d71fd1b92/dictionary.txt",
-  "copyright": "Shaunak Kishore and contributors"
+  "copyright": "Shaunak Kishore and contributors",
+  "licence_text": "LICENSES/LGPL-3.0.txt, with LICENSES/GPL-3.0.txt (LGPL-3.0 is a set of additional permissions on GPL-3.0)"
+ },
+ "not_used": {
+  "Wiktionary via kaikki.org": "no zh input reads kaikki; zh glosses come from CC-CEDICT via complete-hsk-vocabulary",
+  "hermitdave/FrequencyWords": "zh word order and levels come from the HSK lists, not a frequency list"
  }
 }

@@ -33,16 +33,20 @@ https://creativecommons.org/licenses/by-sa/4.0/
 This reflects upstream share-alike terms: glosses and inflection data
 originate from Wiktionary via kaikki.org (CC BY-SA 3.0), and frequency
 data originates from hermitdave/FrequencyWords (CC BY-SA 4.0), both of
-which require share-alike redistribution of derived data. Where a pack
-directory has its own `attribution.json`, per-source and per-contributor
-attribution is recorded there.
+which require share-alike redistribution of derived data. The Mandarin
+pack uses neither: its glosses originate from CC-CEDICT (CC BY-SA 4.0) via
+complete-hsk-vocabulary. Where a pack directory has its own
+`attribution.json`, per-source and per-contributor attribution is recorded
+there.
 
 Exception: the character memory hints (`hint` in packs/zh/characters.json and
 tools/zh_hints.json) are derived from Make Me a Hanzi dictionary.txt
 (https://github.com/skishore/makemeahanzi, Shaunak Kishore and contributors;
 itself derived from Unihan and CJKlib), licensed under the GNU Lesser General
 Public License v3.0 or later. Those hints remain under LGPL-3.0-or-later; see
-packs/zh/attribution.json.
+packs/zh/attribution.json. The licence texts are in LICENSES/LGPL-3.0.txt and
+LICENSES/GPL-3.0.txt (LGPL-3.0 adds permissions to GPL-3.0; both verbatim from
+gnu.org).
 
 Build-time tools and models used to construct pack data (for example
 part-of-speech taggers) may carry non-commercial or copyleft licences of

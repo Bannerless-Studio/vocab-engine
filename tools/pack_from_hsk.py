@@ -60,6 +60,8 @@ ATTRIBUTION = {
         "source": "complete-hsk-vocabulary via the chinese repo (data/hsk_vocab.json, tools/build_vocab.py)",
         "licence": "MIT",
         "url": "https://github.com/drkameleon/complete-hsk-vocabulary",
+        "glosses": "the English `en` senses originate from CC-CEDICT (complete-hsk-vocabulary README, Sources: "
+                   "\"Dictionary definitions: mdbg.net (CC-CEDICT)\"), licensed CC-BY-SA-4.0: https://cc-cedict.org/wiki/",
     },
     "sentences": {"source": "hand-authored for this pack (chinese repo data/hsk_sentences.js)", "licence": "CC-BY-SA-4.0"},
     "character_hints": {
@@ -68,6 +70,14 @@ ATTRIBUTION = {
         "licence": "LGPL-3.0-or-later",
         "url": "https://github.com/skishore/makemeahanzi/blob/bddc96d41bef78427ed0e034e9f7e31d71fd1b92/dictionary.txt",
         "copyright": "Shaunak Kishore and contributors",
+        "licence_text": "LICENSES/LGPL-3.0.txt, with LICENSES/GPL-3.0.txt (LGPL-3.0 is a set of additional permissions on GPL-3.0)",
+    },
+    # LICENSE names these share-alike sources for pack data in general; neither feeds packs/zh
+    # (pack_from_hsk.py reads only the chinese repo's data/ and src/pinyin_core.js; passages are
+    # hand-written in passages_src.json; langs/zh.py loads no kaikki or frequency data).
+    "not_used": {
+        "Wiktionary via kaikki.org": "no zh input reads kaikki; zh glosses come from CC-CEDICT via complete-hsk-vocabulary",
+        "hermitdave/FrequencyWords": "zh word order and levels come from the HSK lists, not a frequency list",
     },
 }
 
@@ -100,6 +110,21 @@ def dump(path, data):
         with open(path, "w", encoding="utf-8") as f:
             f.write(text)
         print(f"wrote {os.path.relpath(path, ROOT)}")
+
+
+def attach_hints(units, hints):
+    """Sets each unit's `hint` (one per character of `t`, null where none; omitted when all
+    are null) from the zh_hints.py table. A character the table lacks means the table is
+    stale: tools/zh_hints.py reads the same hsk input, so rerun it."""
+    missing = sorted({c for u in units for c in u["t"] if c not in hints})
+    if missing:
+        raise SystemExit(f"pack_from_hsk: characters missing from tools/zh_hints.json (run tools/zh_hints.py): {''.join(missing)}")
+    for u in units:
+        h = [hints[c] for c in u["t"]]
+        if any(h):
+            u["hint"] = h
+        else:
+            u.pop("hint", None)
 
 
 def main(argv):
@@ -257,7 +282,7 @@ def main(argv):
     # Unit id = "c" + the word id's digits (w0416 -> c0416): ids follow word ids and are
     # never renumbered (they are progress keys).
     hints = json.load(open(HINTS, encoding="utf-8"))
-    characters, hint_missing = [], []
+    characters = []
     for w in words:
         if not re.fullmatch(r"w\d+", w["id"]):
             raise SystemExit(f"pack_from_hsk: word id {w['id']!r} is not w<digits>; unit ids derive from it")
@@ -268,13 +293,8 @@ def main(argv):
             "lv": w["lv"],
             "reading": w["pron"],
         }
-        hint_missing += [c for c in w["w"] if c not in hints]
-        h = [hints.get(c) for c in w["w"]]
-        if any(h):
-            unit["hint"] = h
         characters.append(unit)
-    if hint_missing:
-        raise SystemExit(f"pack_from_hsk: characters missing from tools/zh_hints.json (run tools/zh_hints.py): {''.join(sorted(set(hint_missing)))}")
+    attach_hints(characters, hints)
     # legacy map for the hsk_pinyin -> vocab_zh progress migration (docs/HSK_MERGE.md §4)
     legacy = {
         "w": {w["w"]: w["id"] for w in words},

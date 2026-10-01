@@ -143,7 +143,7 @@ return {
   goto: t => { tab = t; testSel = null; RD = null; render(); },
   legacyNotice: () => legacyNotice, legacyFail: () => legacyFail, readOnly: () => storeReadOnly, getPrep: () => todayPrep,
   rubyTextHTML, sentenceRowHTML, sentenceRevealBlock, readSentence, charDrillItem, passageSentenceHTML, hasChars: () => HAS_CHARACTERS,
-  onShowWritten, gapSentence, recallItem, readItem, hearItem, revealBlock, wordRowHTML, glossHTML, passagePlainHTML, charTeach, revealWritten, pronFirst: () => PRON_FIRST,
+  onShowWritten, gapSentence, recallItem, readItem, hearItem, revealBlock, wordRowHTML, glossHTML, passagePlainHTML, charTeach, revealWritten, pronFirst: () => PRON_FIRST, tokTap,
   panelListeners: () => document.getElementById("panel")._listeners.click || [],
   wordsSearch: q => { tab = "words"; wordsQuery = q; render(); }, startPassage: p => { tab = "read"; startPassage(p); },
 };`;
@@ -986,11 +986,11 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     api.setProg(seedC());
     const byT = t => CHARACTERS.find(u => u.t === t);
     const hao = byT("好"), haochi = byT("好吃"), mama = byT("妈妈");
-    check("zh units carry hints for 好 / 好吃 / 妈妈", hao.hint && haochi.hint && mama.hint && hao.hint[0] === "女 woman + 子 son: good");
+    check("zh units carry hints for 好 / 好吃 / 妈妈", hao.hint && haochi.hint && mama.hint && hao.hint[0] === "a woman 女 with a son 子: good");
     api.charTeach({ units: [hao, haochi, mama], index: 0, total: 1 }, { label: "字" }, () => {});
     const cards = api.html("panel").split('<div class="charteach">').slice(1);
     check("teach card (one character): the hint under the form, no character prefix",
-      cards[0].includes('<span class="chint"><span><span data-tl lang="zh">女</span> woman + <span data-tl lang="zh">子</span> son: good</span></span>'), cards[0]);
+      cards[0].includes('<span class="chint"><span>a woman <span data-tl lang="zh">女</span> with a son <span data-tl lang="zh">子</span>: good</span></span>'), cards[0]);
     check("teach card (two characters): 好 already hinted on this screen, so only 吃 with its prefix",
       /<span class="chint"><span><span class="hc" data-tl[^>]*>吃<\/span> /.test(cards[1]) && !cards[1].includes("son: good"), cards[1]);
     check("teach card 妈妈: the repeated character is hinted once", (cards[2].match(/sound mǎ/g) || []).length === 1, cards[2]);
@@ -1000,7 +1000,8 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
       ["charRead", "charSound", "charPick", "charRecall"].forEach(k => {
         const it = api.charDrillItem(k, u); n++;
         const stim = it.html + it.opts.map(o => it.optHtml ? it.optHtml(o) : o).join("");
-        if(/chint/.test(stim) || hs.some(x => stripTags(stim).includes(x.hint))) stimBad.push(`${k} ${u.t}`);
+        // class="chint", not /chint/: adjacent option texts concatenate ("to teach" + "intelligent").
+        if(/class="chint"/.test(stim) || hs.some(x => stripTags(stim).includes(x.hint))) stimBad.push(`${k} ${u.t}`);
         if(hs.length && !(it.reveal.includes('class="chint"') && hs.every(x => stripTags(it.reveal).includes(x.hint)))) revealMiss.push(`${k} ${u.t}`);
       });
     });
@@ -1012,11 +1013,33 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     b2.api.setProg(seedC());
     b2.api.charTeach({ units: bare.slice(0, 10), index: 0, total: 1 }, { label: "字" }, () => {});
     const it2 = b2.api.charDrillItem("charRead", bare[0]);
-    check("units without hint: no hint markup on teach cards or reveals", !/chint/.test(b2.api.html("panel")) && !/chint/.test(it2.reveal));
+    check("units without hint: no hint markup on teach cards or reveals", !/class="chint"/.test(b2.api.html("panel")) && !/class="chint"/.test(it2.reveal));
     const stripHint = h => h.replace(/<span class="chint">(?:<span>(?:<span[^>]*>[^<]*<\/span>|[^<])*<\/span>)+<\/span>/g, "");
     api.charTeach({ units: CHARACTERS.slice(0, 10), index: 0, total: 1 }, { label: "字" }, () => {});
     check("hinted teach cards and reveals equal the hint-free ones with the hint block removed",
       stripHint(api.html("panel")) === b2.api.html("panel") && stripHint(api.charDrillItem("charRead", CHARACTERS[0]).reveal) === it2.reveal);
+    // Word popover (tap on a sentence token or a passage word: post-answer context): the
+    // word's unit hints, dimmed, once per character; only when the word shows written, since
+    // under pronFirst a hint's characters would spell the form the learner has not been taught.
+    const unitOf = VC.unitByWord(CHARACTERS);
+    const visHan = h => (String(h).replace(/data-(showw|pg|ts)="[^"]*"/g, "").match(/\p{Script=Han}/gu) || []).join("");
+    const hinted = WORDS.filter(w => unitOf.get(w.id) && VC.unitHints(unitOf.get(w.id)).length);
+    const shown = hinted.filter(w => visHan(api.glossHTML(w.id, "", null)));
+    const pf = await boot({ pack: PF_ZH }); pf.api.setProg(seedC());
+    const pinyin = hinted.filter(w => !visHan(pf.api.glossHTML(w.id, "", null)));
+    const pfShown = hinted.filter(w => visHan(pf.api.glossHTML(w.id, "", null)));
+    const popBad = shown.filter(w => { const h = api.glossHTML(w.id, "", null, true), hs = VC.unitHints(unitOf.get(w.id));
+      return stripHint(h) !== api.glossHTML(w.id, "", null) || (h.match(/class="chint"/g) || []).length !== 1 || stripTags((h.match(/<span class="chint">[\s\S]*<\/span>$/) || [""])[0]) !== stripTags(hs.map(x => ([...unitOf.get(w.id).t].length > 1 ? x.c + " " : "") + x.hint).join("")); });
+    check(`popover of a written word: the gloss line + its unit's hints once each (${shown.length} words, ${popBad.length} bad${popBad[0] ? ": " + popBad.slice(0, 5).map(w => w.w).join(" ") : ""})`, shown.length > 0 && popBad.length === 0);
+    check(`pronFirst: popover of a pinyin-first word has no hint (${pinyin.length} words), of a mastered one has it (${pfShown.length})`,
+      pinyin.length > 0 && pinyin.every(w => !/class="chint"/.test(pf.api.glossHTML(w.id, "", null, true))) &&
+      pfShown.length > 0 && pfShown.every(w => /class="chint"/.test(pf.api.glossHTML(w.id, "", null, true))));
+    check("glossHTML without the popover flag (results weak-word rows) never carries a hint", WORDS.every(w => !/class="chint"/.test(api.glossHTML(w.id, "", null))));
+    const tw = shown[0], appended = [];
+    const box = { querySelectorAll: () => [], querySelector: () => null, appendChild(c){ appended.push(c); return c; } };
+    api.tokTap({ dataset: { tok: tw.id }, closest: sel => sel === "[data-tokbox]" ? box : null, classList: { add(){}, remove(){} } });
+    check(`sentence token tap on ${tw.w}: the popover carries the hint`, appended.length === 1 && appended[0].innerHTML === api.glossHTML(tw.id, "", null, true) && /class="chint"/.test(appended[0].innerHTML));
+    check("units without hint: popovers equal the plain gloss line", WORDS.every(w => b2.api.glossHTML(w.id, "", null, true) === b2.api.glossHTML(w.id, "", null)));
   } catch(e){ check(`hints section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- RTL rendering rules
