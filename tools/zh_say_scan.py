@@ -13,14 +13,18 @@ Needs pypinyin and jieba (not pack dependencies): run from a venv outside the re
   .cache/venv/bin/python tools/zh_say_scan.py [--write]
 Without --write it prints the table and exits 1 when the checked-in files differ.
 
-pypinyin's phrase dictionary (47k phrases) stands in for what a TTS has learned: a reading
-counts as a real alternative when it occurs in at least MIN_PHRASES phrases. Confidence:
-  high    a multi-character word whose pypinyin context reading differs from the pack, or a
-          single character whose pack reading is not its most frequent phrase reading (还)
-  medium  a single character whose other reading has at least MEDIUM_SHARE of its phrases
-  low     a single character with a rarer real alternative (listed, no carrier)
-High and medium get a carrier; a carrier costs nothing when the TTS was already right,
-because the substitute sounds the same.
+Candidates: every word and character unit whose pypinyin reading in context differs from
+the pack's on some character, plus every single character with another reading in at least
+MIN_PHRASES phrases of pypinyin's phrase dictionary (47k phrases; it stands in for what a TTS
+has learned). Each gets a carrier when one can be built: every carrier character must be
+monophonic (pypinyin heteronym=True gives exactly one reading) with the pack's syllable and
+tone, so a carrier is harmless where the TTS was already right. A syllable with no common
+monophonic character keeps the written form, listed in docs/ZH_SAY.md.
+Confidence (how likely the original was misread) is recorded only:
+  high    the pypinyin context reading differs, or the pack reading is not the character's
+          most frequent phrase reading (还)
+  medium  the other reading has at least MEDIUM_SHARE of the character's phrases
+  low     a rarer real alternative
 """
 import json
 import os
@@ -34,6 +38,7 @@ from pypinyin.phrases_dict import phrases_dict
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORDS = os.path.join(ROOT, "packs", "zh", "words.json")
 SENTENCES = os.path.join(ROOT, "packs", "zh", "sentences.json")
+UNITS = os.path.join(ROOT, "packs", "zh", "characters.json")
 OUT_JSON = os.path.join(ROOT, "tools", "zh_say.json")
 OUT_MD = os.path.join(ROOT, "docs", "ZH_SAY.md")
 MIN_PHRASES = 3
@@ -100,8 +105,7 @@ def align(word, pron):
 
 
 def monophonic(ch, syl):
-    rs = set(readings(ch))
-    return rs == {syl} and set(PHRASE[ch]) <= {syl}
+    return readings(ch) == [syl] and set(PHRASE[ch]) <= {syl}
 
 
 def char_use():
@@ -134,29 +138,53 @@ def carrier_pool(words, sentences, pack_syl):
     return by_syl
 
 
-def scan(words, sentences):
-    aligned = {w["id"]: align(w["w"], w["pron"]) for w in words}
-    pack_syl = defaultdict(set)
-    for w in words:
-        for ch, a in zip(w["w"], aligned[w["id"]] or ()):
-            if a != "r" and tone(a):
-                pack_syl[ch].add(a)
-    pool = carrier_pool(words, sentences, pack_syl)
-    rows = []
-    for w in words:
-        word = w["w"]
-        syl = aligned[w["id"]]
-        if syl is None:
-            rows.append(dict(w=w, conf="check", why="pron does not align with pypinyin readings", fix=[]))
+def strictly_monophonic(ch, syl):
+    """The hard rule for every carrier character: pypinyin heteronym=True gives exactly one
+    reading, and it is syl."""
+    return [norm(r) for r in pinyin(ch, style=Style.TONE, heteronym=True)[0]] == [syl]
+
+
+def make_carrier(text, syl, pool):
+    """Every character of the carrier is strictly monophonic with the pack syllable at its
+    position: a kept character must already be, any other is replaced. None (with the
+    reasons) when some position has no such character."""
+    out, missing = [], []
+    for ch, a in zip(text, syl):
+        if strictly_monophonic(ch, a):
+            out.append(ch)
             continue
-        ctx = [norm(x[0]) for x in pinyin(word, style=Style.TONE)]
-        fix, why, conf = [], [], None
-        for i, (ch, a, b) in enumerate(zip(word, syl, ctx)):
+        cands = [c for c in pool.get(a, []) if c != ch]
+        if cands:
+            out.append(cands[0])
+        else:
+            missing.append(f"no common monophonic {a} character for {ch}")
+    if missing:
+        return None, missing
+    say = "".join(out)
+    if say == text or not all(strictly_monophonic(c, x) for c, x in zip(say, syl)):
+        return None, ["carrier check failed"]
+    return say, []
+
+
+def scan_items(items, pool):
+    """items: [(id, text, pron)]. A row for every item where pypinyin's reading in context
+    differs from the pack's on some character (neutral tone and 一/不 sandhi aside), or where
+    a single character has another reading in at least MIN_PHRASES phrases (a TTS reads a
+    lone character by its own default: 还 is hái in context-free pypinyin but huán in 103 of
+    118 phrases, and the device said huán). Every row gets a carrier when one can be built."""
+    rows = []
+    for iid, text, pron in items:
+        syl = align(text, pron)
+        if syl is None:
+            rows.append(dict(id=iid, t=text, pron=pron, conf="check", why="pron does not align with pypinyin readings", say=None, missing=["unaligned"]))
+            continue
+        ctx = [norm(x[0]) for x in pinyin(text, style=Style.TONE)]
+        why, conf = [], None
+        for ch, a, b in zip(text, syl, ctx):
             if ch in SANDHI or a == "r":
                 continue
-            if len(word) > 1:
+            if len(text) > 1:
                 if not same_sound(a, b):
-                    fix.append(i)
                     why.append(f"{ch}: pack {a}, pypinyin in context {b}")
                     conf = "high"
                 continue
@@ -170,65 +198,70 @@ def scan(words, sentences):
             top = max(ph, key=ph.get) if ph else b
             mine = sum(n for r, n in ph.items() if same_sound(r, a))
             if not same_sound(a, b) or not same_sound(top, a) or mine < max(alts.values()):
-                c = "high"
+                conf = "high"
             elif max(alts.values()) / total >= MEDIUM_SHARE:
-                c = "medium"
+                conf = "medium"
             else:
-                c = "low"
-            conf = c
-            fix.append(i)
+                conf = "low"
             why.append(f"{ch}: pack {a}; phrases " + ", ".join(f"{r} {n}" for r, n in sorted(ph.items(), key=lambda x: -x[1])))
         if conf is None:
             continue
-        subs, missing = list(word), []
-        for i in fix:
-            cands = [c for c in pool.get(syl[i], []) if c != word[i]]
-            if cands:
-                subs[i] = cands[0]
-            else:
-                missing.append(f"no common monophonic {syl[i]} character for {word[i]}")
-        say = "".join(subs) if not missing else None
-        if say:
-            got = [norm(x[0]) for x in pinyin(say, style=Style.TONE)]
-            bad = [i for i in fix if not same_sound(got[i], syl[i])]
-            if bad:
-                missing.append("carrier reads " + " ".join(got[i] for i in bad))
-                say = None
-        rows.append(dict(w=w, conf=conf, why="; ".join(why), say=say, missing=missing))
+        say, missing = make_carrier(text, syl, pool)
+        rows.append(dict(id=iid, t=text, pron=pron, conf=conf, why="; ".join(why), say=say, missing=missing))
     return rows
 
 
-def render(rows):
-    emit = {r["w"]["w"]: r["say"] for r in rows if r.get("say") and r["conf"] in ("high", "medium")}
+def scan(words, sentences, units):
+    aligned = {w["id"]: align(w["w"], w["pron"]) for w in words}
+    pack_syl = defaultdict(set)
+    for w in words:
+        for ch, a in zip(w["w"], aligned[w["id"]] or ()):
+            if a != "r" and tone(a):
+                pack_syl[ch].add(a)
+    pool = carrier_pool(words, sentences, pack_syl)
+    by_id = {w["id"]: w for w in words}
+    wrows = scan_items([(w["id"], w["w"], w["pron"]) for w in words], pool)
+    urows = scan_items([(u["id"], u["t"], u.get("reading") or by_id[u["words"][0]]["pron"]) for u in units], pool)
+    return wrows, urows
+
+
+def render(wrows, urows):
+    emit = {}
+    for r in wrows + urows:
+        if r["say"]:
+            if emit.get(r["t"], r["say"]) != r["say"]:
+                raise SystemExit(f"zh_say_scan: {r['t']} gets two carriers (two readings); key tools/zh_say.json by reading first")
+            emit[r["t"]] = r["say"]
     order = {"high": 0, "medium": 1, "low": 2, "check": 3}
+    nw = sum(1 for r in wrows if r["say"])
+    nu = sum(1 for r in urows if r["say"])
     lines = [
         "# zh TTS carriers (polyphonic characters)",
         "",
-        "Generated by `tools/zh_say_scan.py --write`; do not edit by hand. The engine speaks a word's `say` in place of",
-        "its written form (docs/PACK_SCHEMA.md words.json). Each carrier swaps a polyphonic character for a monophonic one",
-        "with the same syllable and tone, so it sounds the same when the TTS was already right.",
+        "Generated by `tools/zh_say_scan.py --write`; do not edit by hand. A record of which zh words and character",
+        "units get a `say` carrier, the text the TTS speaks in place of the written form (docs/PACK_SCHEMA.md",
+        "words.json). Safe by construction: every carrier character is monophonic in pypinyin (exactly one reading)",
+        "with the pack's syllable and tone at its position, so the carrier sounds as the pack's pinyin whatever the",
+        "TTS's default for the original character. A row whose syllable has no common monophonic character keeps the",
+        "written form. Confidence says how likely a TTS was to misread the original (pypinyin phrase dictionary).",
         "",
-        "**Owner ear-check:** on the phone, tap each word below in the Words list and confirm the pinyin is what you hear.",
-        "Rows marked \"no carrier\" keep the written form; confirm those too. Confidence comes from pypinyin's phrase",
-        "dictionary, not from the device voice, which cannot be checked here.",
+        f"Words: {len(wrows)} mismatched, {nw} carriers, {len(wrows) - nw} without. "
+        f"Character units: {len(urows)} mismatched, {nu} carriers, {len(urows) - nu} without.",
         "",
-        f"Carriers emitted: {len(emit)}. Candidates: {len(rows)}.",
-        "",
-        "| id | word | pack pron | carrier | confidence | evidence |",
+        "| id | text | pack pron | carrier | confidence | evidence |",
         "|---|---|---|---|---|---|",
     ]
-    for r in sorted(rows, key=lambda r: (order[r["conf"]], r["w"]["id"])):
-        c = r.get("say") if r["conf"] in ("high", "medium") else None
-        cell = c or ("none (low confidence)" if r["conf"] == "low" else "none: " + "; ".join(r.get("missing") or []))
-        lines.append(f"| {r['w']['id']} | {r['w']['w']} | {r['w']['pron']} | {cell} | {r['conf']} | {r['why']} |")
+    for r in sorted(wrows, key=lambda r: (order[r["conf"]], r["id"])) + sorted(urows, key=lambda r: (order[r["conf"]], r["id"])):
+        cell = r["say"] or "none: " + "; ".join(r["missing"])
+        lines.append(f"| {r['id']} | {r['t']} | {r['pron']} | {cell} | {r['conf']} | {r['why']} |")
     return emit, "\n".join(lines) + "\n"
 
 
 def main(argv):
     words = json.load(open(WORDS, encoding="utf-8"))
     sentences = json.load(open(SENTENCES, encoding="utf-8"))
-    rows = scan(words, sentences)
-    emit, md = render(rows)
+    units = json.load(open(UNITS, encoding="utf-8"))
+    emit, md = render(*scan(words, sentences, units))
     js = json.dumps(dict(sorted(emit.items(), key=lambda kv: kv[0])), ensure_ascii=False, indent=1) + "\n"
     sys.stdout.write(md)
     if "--write" in argv:

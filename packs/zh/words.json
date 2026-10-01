@@ -179,7 +179,8 @@
   "w": "会",
   "en": "can; to have the skill; to know how to",
   "lv": "1",
-  "pron": "huì"
+  "pron": "huì",
+  "say": "汇"
  },
  {
   "id": "w0027",
@@ -376,7 +377,8 @@
   "w": "和",
   "en": "(joining two nouns) and; together with; with…",
   "lv": "1",
-  "pron": "hé"
+  "pron": "hé",
+  "say": "河"
  },
  {
   "id": "w0055",
@@ -882,7 +884,8 @@
   "w": "看",
   "en": "to see; to look at; to read",
   "lv": "1",
-  "pron": "kàn"
+  "pron": "kàn",
+  "say": "瞰"
  },
  {
   "id": "w0127",
@@ -1255,7 +1258,8 @@
   "w": "号",
   "en": "ordinal number; day of a month",
   "lv": "2",
-  "pron": "hào"
+  "pron": "hào",
+  "say": "灏"
  },
  {
   "id": "w0180",
@@ -1865,7 +1869,8 @@
   "w": "要",
   "en": "to want; to need; to ask for; will; shall; about to",
   "lv": "2",
-  "pron": "yào"
+  "pron": "yào",
+  "say": "药"
  },
  {
   "id": "w0267",
@@ -2434,7 +2439,8 @@
   "w": "分",
   "en": "to divide; to separate; to distribute; to allocate",
   "lv": "3",
-  "pron": "fēn"
+  "pron": "fēn",
+  "say": "纷"
  },
  {
   "id": "w0348",
@@ -3671,7 +3677,8 @@
   "w": "绿",
   "en": "green",
   "lv": "3",
-  "pron": "lǜ"
+  "pron": "lǜ",
+  "say": "律"
  },
  {
   "id": "w0524",
@@ -3853,7 +3860,8 @@
   "w": "被",
   "en": "quilt; to cover (with)",
   "lv": "3",
-  "pron": "bèi"
+  "pron": "bèi",
+  "say": "备"
  },
  {
   "id": "w0550",
@@ -3895,7 +3903,8 @@
   "w": "角",
   "en": "angle; corner",
   "lv": "3",
-  "pron": "jiǎo"
+  "pron": "jiǎo",
+  "say": "饺"
  },
  {
   "id": "w0556",
@@ -4225,7 +4234,8 @@
   "w": "与",
   "en": "and; to give",
   "lv": "4",
-  "pron": "yǔ"
+  "pron": "yǔ",
+  "say": "宇"
  },
  {
   "id": "w0603",
@@ -5458,8 +5468,7 @@
   "w": "大夫",
   "en": "doctor; physician",
   "lv": "4",
-  "pron": "dàifu",
-  "say": "代夫"
+  "pron": "dàifu"
  },
  {
   "id": "w0779",
@@ -6721,7 +6730,8 @@
   "w": "汗",
   "en": "perspiration; sweat",
   "lv": "4",
-  "pron": "hàn"
+  "pron": "hàn",
+  "say": "汉"
  },
  {
   "id": "w0959",
@@ -7540,8 +7550,7 @@
   "w": "肚子",
   "en": "belly; abdomen",
   "lv": "4",
-  "pron": "dùzi",
-  "say": "渡子"
+  "pron": "dùzi"
  },
  {
   "id": "w1076",
@@ -7654,7 +7663,8 @@
   "w": "行",
   "en": "to walk; to go",
   "lv": "4",
-  "pron": "xíng"
+  "pron": "xíng",
+  "say": "形"
  },
  {
   "id": "w1092",
