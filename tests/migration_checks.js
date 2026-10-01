@@ -247,8 +247,9 @@ console.log("\n[w.k] missed-kind marker");
 
 console.log("\n[session] session resume key (docs/PACK_SCHEMA.md \"Session resume\")");
 {
-  // A new key, never a new progress field: the record lives in sessionStorage beside the
-  // progress key and is never read by boot, migration, import or export.
+  // A new key, never a new progress field: the record lives in localStorage (sessionStorage
+  // before fb2-ui) beside the progress key and is never read by boot, migration, import or
+  // export. Its value is the latest record with other app tabs' records under `park`.
   const SK = VC.sessionKey(PACK);
   check(`session key ${SK} differs from the progress, legacy, legacy-backup and progress-backup keys`,
     SK === "vocab_zh_session" && new Set([SK, VC.storageKey(PACK), PACK.legacy.key, VC.legacyBackupKey(PACK), ...["invalid_backup", "pre_import_backup", "reset_backup"].map(x => `${VC.storageKey(PACK)}_${x}`)]).size === 7);
@@ -256,6 +257,8 @@ console.log("\n[session] session resume key (docs/PACK_SCHEMA.md \"Session resum
   const b = VC.bootProg(raw, PACK);
   check("migrated progress boots unchanged with no session field (the session record is never part of it)", b.backupRaw === null && eq(b.prog, VC.normalizeProg(p, PACK)) && !Object.keys(b.prog).some(k => /^session(?!s$)/.test(k)));
   check("a session record is not a legacy record", !VC.isLegacyRecord(PACK, LEGACY, { v: VC.SESSION_VERSION, build: "x", t: 0, fp: "0", tab: "today" }));
+  const parked = { v: VC.SESSION_VERSION, build: "x", t: 0, fp: "0", tab: "today", park: { test: { v: VC.SESSION_VERSION, build: "x", t: 0, fp: "0", tab: "test" } } };
+  check("a session value with parked records is not a legacy record", !VC.isLegacyRecord(PACK, LEGACY, parked));
 }
 
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);

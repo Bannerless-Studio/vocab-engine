@@ -64,6 +64,7 @@
   "pron"
  ],
  "glossFocus": true,
+ "helpClose": true,
  "showPron": true,
  "hasLessons": true,
  "spaced": false,

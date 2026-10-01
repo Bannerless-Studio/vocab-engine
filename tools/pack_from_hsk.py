@@ -269,6 +269,9 @@ def main(argv):
         # (docs/PACK_SCHEMA.md "typedFrom and glossFocus", TODO.md).
         "typedFrom": ["written", "pron"],
         "glossFocus": True,
+        # Help overlays (word popovers, audio toast) get a close button, tap-outside, Escape
+        # and an 8 s timer (docs/PACK_SCHEMA.md "helpClose"; owner feedback 2026-10-02).
+        "helpClose": True,
         "showPron": True,
         "hasLessons": True,
         "spaced": False,

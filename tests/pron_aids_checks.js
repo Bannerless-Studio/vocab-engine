@@ -8,6 +8,8 @@
 // DOM as tests/characters_app_checks.js (id registry + regex scan of innerHTML).
 // Run: node tests/pron_aids_checks.js
 "use strict";
+// zh sets pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): popovers end with its close button.
+const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
 const cp = require("child_process");
@@ -508,7 +510,7 @@ function walk(api, stopAt){
     const progBefore = JSON.stringify(api.getProg()); spoken.length = 0;
     api.tokTap(tok);
     check(`tap on ${s0.t.slice(s0.ruby[4][0], s0.ruby[4][1])}: popover = the Read-tab popover of the word, inside the row, token marked on`,
-      appended.length === 1 && /gloss tokgloss/.test(appended[0].className) && appended[0].innerHTML === api.glossHTML(wid, "", null) && cls.has("on") && appended[0].hidden === false);
+      appended.length === 1 && /gloss tokgloss/.test(appended[0].className) && appended[0].innerHTML.replace(HELPX, "") === api.glossHTML(wid, "", null) && cls.has("on") && appended[0].hidden === false);
     check("the popover shows the coloured reading, the show-written tap and the gloss", tspans(appended[0].innerHTML) > 0 && /data-showw="学生"/.test(appended[0].innerHTML) && appended[0].innerHTML.includes(VC.escapeHtml(VC.gloss(tw0))));
     check(`the tap speaks the word only (${JSON.stringify(spoken)}), progress unchanged`, spoken.length === 1 && spoken[0] === tw0.w && JSON.stringify(api.getProg()) === progBefore);
     check("keyboard: one keydown listener on #panel (Enter/Space on a tap); drill shortcuts skip a focused tap",

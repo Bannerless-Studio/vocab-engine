@@ -107,7 +107,7 @@ To take an engine update, run this and then rebuild:
 git submodule update --remote engine
 ```
 
-Progress lives in the browser under `vocab_<pack.key>`, so each language keeps separate progress. A drill in progress also survives a tab switch or a page reload (sessionStorage `vocab_<pack.key>_session`, dropped after 12 hours; docs/PACK_SCHEMA.md "Session resume"). How the service worker caches and updates: engine/README.md. Engine development, tests and architecture: CLAUDE.md.
+Progress lives in the browser under `vocab_<pack.key>`, so each language keeps separate progress. A drill in progress also survives a tab switch or a page reload (localStorage `vocab_<pack.key>_session`, one per app tab, dropped after 12 hours; docs/PACK_SCHEMA.md "Session resume"). How the service worker caches and updates: engine/README.md. Engine development, tests and architecture: CLAUDE.md.
 
 ## Licence
 
