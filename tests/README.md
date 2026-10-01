@@ -9,7 +9,7 @@ Node checks with no dependencies. Each suite `require`s `engine/core.js`, and th
 | pron_aids_checks.js | Pronunciation aids (tones, typed reading, word taps, Sounds reference); control byte-identical to pinned engine sha 55c843e. Uses ../korean for one guard. |
 | migration_checks.js | `migrateLegacy` (hsk_pinyin -> vocab_zh) and tools/diff_hsk_migration.js on synthetic hsk records of every version; cross-checks against ../chinese when present. |
 | characters_checks.js | Characters stage logic on tests/fixtures/chars_packs.js; flag-off proof against pinned sha ee67120; pronFirst display rules; ../japanese when present. |
-| characters_app_checks.js | Characters stage in app.html: path strip, unit Learn, item renderers, Test/Progress rows, legacy import, passage ruby, pronFirst, word `say` carriers spoken and never shown; zh and ../japanese. |
+| characters_app_checks.js | Characters stage in app.html: path strip, unit Learn, item renderers, Test/Progress rows, legacy import, passage ruby, pronFirst, memory hints (teach cards, reveals and the written word's popover only, never a stimulus), word `say` carriers spoken and never shown; zh and ../japanese. |
 | script_checks.js | Script primer logic on tests/fixtures/script_packs.js (ko-like, fa-like, ja-like). |
 | script_app_checks.js | Script primer in app.html: choice card, Learn, Review, Script tab, no-voice path, RTL audit, 390px layout. |
 | audio_checks.js | Recorded audio: core.js clip lookup, app call sites and fallback order, build.sh audio version, sw.js audio cache. App part boots ../persian. |

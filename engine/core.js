@@ -1586,6 +1586,15 @@ function unitReading(unit, byId){
   const w = unitWord(unit, byId); return w && w.pron ? String(w.pron) : "";
 }
 function unitGloss(unit, byId){ return gloss(unitWord(unit, byId)); }
+// characters.json `hint` is aligned with the code points of `t`; a character repeated in
+// `t` (妈妈) or without a hint is listed once or not at all (docs/PACK_SCHEMA.md).
+function unitHints(unit){
+  const h = unit && unit.hint;
+  if(!Array.isArray(h)) return [];
+  const out = [], seen = new Set();
+  [...String(unit.t || "")].forEach((c, i) => { const x = h[i]; if(typeof x === "string" && x && !seen.has(c)){ seen.add(c); out.push({ c, hint: x }); } });
+  return out;
+}
 const UNIT_BY_WORD = new WeakMap();
 function unitByWord(units){
   if(!Array.isArray(units)) return new Map();
@@ -2960,7 +2969,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder,
-  unitWord, unitReading, unitGloss, unitByWord, recordedUnits,
+  unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
   charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,

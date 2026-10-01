@@ -115,7 +115,8 @@ Dev mode without a rebuild: open `engine/app.html?pack=zh` from `file://` (loads
 |---|---|
 | dist/zh.html, dist/sw.js | build.sh (committed; engine_checks fails when stale) |
 | packs/zh/*.js | tools/jsonify_pack.py |
-| packs/zh/*.json except passages_src.json, gloss_display.json | tools/pack_from_hsk.py; passages.json + REPORT_passages.md by `packbuilder passages` |
+| packs/zh/*.json except passages_src.json, gloss_display.json | tools/pack_from_hsk.py (incl. attribution.json); passages.json + REPORT_passages.md by `packbuilder passages` |
+| tools/zh_hints.json | tools/zh_hints.py [../chinese] from the hsk vocabulary + .cache/makemeahanzi/dictionary.txt (`--fetch`) + tools/zh_hints_overrides.json; committed so pack_from_hsk.py needs no network (run it first when the hsk vocabulary gains characters) |
 | tools/zh_say.json, docs/ZH_SAY.md | tools/zh_say_scan.py --write (pypinyin + jieba venv; read by pack_from_hsk.py) |
 | tests/golden/*.json | tests/flagoff_snapshot.js --capture |
 | <lang>/pack/*, index.html, sw.js, tools/REPORT.md | packbuilder, jsonify, build.sh in each language repo |
