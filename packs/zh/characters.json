@@ -317,6 +317,7 @@
   ],
   "lv": "1",
   "reading": "huì",
+  "say": "汇",
   "hint": [
    "people 人 speaking 云: can"
   ]
@@ -452,6 +453,7 @@
   ],
   "lv": "1",
   "reading": "jǐ",
+  "say": "挤",
   "hint": [
    "picture of a small table"
   ]
@@ -666,6 +668,7 @@
   ],
   "lv": "1",
   "reading": "hé",
+  "say": "河",
   "hint": [
    "口 (mouth) + 禾 (sound hé)"
   ]
@@ -703,6 +706,7 @@
   ],
   "lv": "1",
   "reading": "wéi",
+  "say": "围",
   "hint": [
    "口 (mouth) + 畏 (sound wèi)"
   ]
@@ -728,6 +732,7 @@
   ],
   "lv": "1",
   "reading": "hē",
+  "say": "诃",
   "hint": [
    "口 (mouth) + 曷 (sound hé)"
   ]
@@ -1376,6 +1381,7 @@
   ],
   "lv": "1",
   "reading": "méi",
+  "say": "梅",
   "hint": [
    "氵 (water) + 殳 (sound shū)"
   ]
@@ -1566,6 +1572,7 @@
   ],
   "lv": "1",
   "reading": "kàn",
+  "say": "瞰",
   "hint": [
    "shielding one's eyes 目 with a hand 手 to look to the distance"
   ]
@@ -1785,6 +1792,7 @@
   ],
   "lv": "1",
   "reading": "dōu",
+  "say": "兜",
   "hint": [
    "阝 (city) + 者 (sound zhě)"
   ]
@@ -1922,7 +1930,8 @@
    "w0155"
   ],
   "lv": "2",
-  "reading": "wèi"
+  "reading": "wèi",
+  "say": "未"
  },
  {
   "id": "c0156",
@@ -2120,6 +2129,7 @@
   ],
   "lv": "2",
   "reading": "bié",
+  "say": "蹩",
   "hint": [
    "to draw boundaries 刂 between classes 另: to leave"
   ]
@@ -2220,6 +2230,7 @@
   ],
   "lv": "2",
   "reading": "hào",
+  "say": "灏",
   "hint": [
    "口 (mouth) + 丂 (sound kǎo)"
   ]
@@ -3195,6 +3206,7 @@
   ],
   "lv": "2",
   "reading": "lèi",
+  "say": "泪",
   "hint": [
    "growing silk 糸 in the fields: tired"
   ]
@@ -3305,6 +3317,7 @@
   ],
   "lv": "2",
   "reading": "yào",
+  "say": "药",
   "hint": [
    "a woman 女 with hands on her waist 覀: to want"
   ]
@@ -3476,6 +3489,7 @@
   ],
   "lv": "2",
   "reading": "hái",
+  "say": "孩",
   "hint": [
    "not 不 moving 辶: still"
   ]
@@ -3536,6 +3550,7 @@
   ],
   "lv": "2",
   "reading": "cháng",
+  "say": "常",
   "hint": [
    "an old man with long hair and a cane: length"
   ]
@@ -4303,6 +4318,7 @@
   ],
   "lv": "3",
   "reading": "fēn",
+  "say": "纷",
   "hint": [
    "pieces 八 being further subdivided with a knife 刀: to divide"
   ]
@@ -4619,6 +4635,7 @@
   ],
   "lv": "3",
   "reading": "zhǐ",
+  "say": "止",
   "hint": [
    "simple words 八 coming from the mouth 口: only"
   ]
@@ -5075,6 +5092,7 @@
   ],
   "lv": "3",
   "reading": "chà",
+  "say": "诧",
   "hint": [
    "work 工 done by a sheep 羊; incompetence: different"
   ]
@@ -5469,6 +5487,7 @@
   ],
   "lv": "3",
   "reading": "jiāo",
+  "say": "交",
   "hint": [
    "攵 (script) + 孝 (sound xiào)"
   ]
@@ -5959,6 +5978,7 @@
   ],
   "lv": "3",
   "reading": "zhàopiàn",
+  "say": "照骗",
   "hint": [
    "灬 (fire) + 昭 (sound zhāo)",
    "picture of half of a tree trunk"
@@ -6336,6 +6356,7 @@
   ],
   "lv": "3",
   "reading": "zhǒng",
+  "say": "肿",
   "hint": [
    "禾 (grain) + 中 (sound zhōng)"
   ]
@@ -6527,6 +6548,7 @@
   ],
   "lv": "3",
   "reading": "lǜ",
+  "say": "律",
   "hint": [
    "纟 (silk) + 录 (sound lù)"
   ]
@@ -6857,6 +6879,7 @@
   ],
   "lv": "3",
   "reading": "bèi",
+  "say": "备",
   "hint": [
    "衤 (cloth) + 皮 (sound pí)"
   ]
@@ -6933,6 +6956,7 @@
   ],
   "lv": "3",
   "reading": "jiǎo",
+  "say": "饺",
   "hint": [
    "picture of a rhinoceros or other animal horn"
   ]
@@ -7240,6 +7264,7 @@
   ],
   "lv": "3",
   "reading": "nán",
+  "say": "男",
   "hint": [
    "a hand 又 trying to grasp at a bird 隹: difficult"
   ]
@@ -7531,7 +7556,8 @@
    "w0602"
   ],
   "lv": "4",
-  "reading": "yǔ"
+  "reading": "yǔ",
+  "say": "宇"
  },
  {
   "id": "c0603",
@@ -8241,6 +8267,7 @@
   ],
   "lv": "4",
   "reading": "jiǎ",
+  "say": "甲",
   "hint": [
    "a false 叚 person 亻: fake"
   ]
@@ -9204,6 +9231,7 @@
   ],
   "lv": "4",
   "reading": "tái",
+  "say": "邰",
   "hint": [
    "厶 private + 口 mouth"
   ]
@@ -9599,6 +9627,7 @@
   ],
   "lv": "4",
   "reading": "chǎng",
+  "say": "氅",
   "hint": [
    "土 (earth) + 昜 (sound yáng)"
   ]
@@ -10284,6 +10313,7 @@
   ],
   "lv": "4",
   "reading": "gàn",
+  "say": "赣",
   "hint": [
    "picture of a club or axe"
   ]
@@ -10489,6 +10519,7 @@
   ],
   "lv": "4",
   "reading": "tán",
+  "say": "谈",
   "hint": [
    "弓 (bow) + 单 (sound dān)"
   ]
@@ -10501,6 +10532,7 @@
   ],
   "lv": "4",
   "reading": "dāng",
+  "say": "裆",
   "hint": [
    "⺌ + 彐 snout"
   ]
@@ -12084,6 +12116,7 @@
   ],
   "lv": "4",
   "reading": "hàn",
+  "say": "汉",
   "hint": [
    "氵 (water) + 干 (sound gàn)"
   ]
@@ -12109,6 +12142,7 @@
   ],
   "lv": "4",
   "reading": "tāng",
+  "say": "羰",
   "hint": [
    "氵 (water) + 昜 (sound yáng)"
   ]
@@ -12777,6 +12811,7 @@
   ],
   "lv": "4",
   "reading": "shěng",
+  "say": "眚",
   "hint": [
    "目 (division) + 少 (sound shǎo)"
   ]
@@ -13623,6 +13658,7 @@
   ],
   "lv": "4",
   "reading": "zāng",
+  "say": "赃",
   "hint": [
    "⺼ (flesh) + 庄 (sound zhuāng)"
   ]
@@ -13776,6 +13812,7 @@
   ],
   "lv": "4",
   "reading": "xuè",
+  "say": "谑",
   "hint": [
    "a chalice 皿 filled with blood 丿: blood"
   ]
@@ -13788,6 +13825,7 @@
   ],
   "lv": "4",
   "reading": "xíng",
+  "say": "形",
   "hint": [
    "to take small steps 亍 with one's feet 彳: to walk"
   ]

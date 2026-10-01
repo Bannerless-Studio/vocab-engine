@@ -353,6 +353,9 @@ def check_words(words, levels, rep):
         for f in ("pos", "pron", "audio"):
             if f in w and not is_str(w[f]):
                 rep.err(f"{where}.{f} must be a non-empty string when present")
+        # say: TTS carrier spoken in place of w, never displayed (zh 还 -> 孩, docs/ZH_SAY.md).
+        if "say" in w and not (is_str(w["say"]) and w["say"] != w.get("w")):
+            rep.err(f"{where}.say must be a non-empty string other than w when present")
         if "rank" in w and not is_num(w["rank"]):
             rep.err(f"{where}.rank must be a number")
         if "alt" in w and not (isinstance(w["alt"], list) and all(is_str(a) for a in w["alt"])):
@@ -787,6 +790,15 @@ def check_characters_data(chars, char_levels, by_id, rep):
                 rep.err(f"{where}.hint has {len(h)} entries for {len(t)} characters of t")
             elif not any(h):
                 rep.err(f"{where}.hint has no hint; leave the field out instead")
+        if "say" in c:
+            if not (is_str(c["say"]) and c["say"] != c.get("t")):
+                rep.err(f"{where}.say must be a non-empty string other than t when present")
+            else:
+                # The app speaks a unit through its words[0] when that word exists, so a
+                # different carrier on the unit would never be heard.
+                w0 = by_id.get((ws or [None])[0]) if isinstance(ws, list) and ws and is_str(ws[0]) else None
+                if isinstance(w0, dict) and w0.get("w") == c.get("t") and w0.get("say") != c["say"]:
+                    rep.warn(f"{where}.say {c['say']!r} differs from its word {w0.get('id')}'s say {w0.get('say')!r} (the word's is spoken)")
     return ids, word0
 
 

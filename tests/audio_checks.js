@@ -208,6 +208,14 @@ function coreChecks(){
   check("scriptKindFor keeps wordHear for pack.script tts false when every example word has a clip",
     VC.scriptKindFor("wordHear", units[0], { tts: false }, { units, byId: byIdRec }) === "wordHear" &&
     VC.scriptKindFor("wordHear", units[0], { tts: false }, { units, byId: byIdPlain }) === "wordRead");
+  // words[].say: a TTS carrier spoken in place of w (zh 还 hái -> 孩, docs/PACK_SCHEMA.md words.json).
+  check("wordSay: the say carrier when set, else w; non-string or empty say ignored",
+    VC.wordSay({ w: "还", say: "孩" }) === "孩" && VC.wordSay({ w: "一" }) === "一" &&
+    [{ w: "x", say: "" }, { w: "x", say: 3 }, { w: "x", say: null }].every(w => VC.wordSay(w) === "x") && VC.wordSay(null) === undefined);
+  const byIdSay = Object.fromEntries(words.map(w => [w.id, Object.assign({}, w, { say: w.w + "!" })]));
+  const sayIt = VC.scriptItem("wordHear", units[0], ctx(byIdSay, true));
+  check("script example word with a say carrier: TTS speaks the carrier; the answer stays the written word",
+    sayIt.say === byIdSay[sayIt.wordId].say && sayIt.answer === byIdSay[sayIt.wordId].w);
 }
 
 // ------------------------------------------------------------------ [2]-[5] app

@@ -405,5 +405,28 @@ console.log("Checking tools/validate_pack.py characters/legacy/ruby cases (Node 
   check("warns: soundsReference with no one-character lesson row (empty card)", empty.status === 0 && /WARN.*Reference card is empty/.test(empty.out), empty.out);
 })();
 
+// words[].say / characters[].say: TTS carriers (docs/PACK_SCHEMA.md words.json, docs/ZH_SAY.md).
+(function sayCarriers(){
+  console.log("\n[say] words[].say and characters[].say");
+  const withSay = (wsay, usay) => {
+    const words = baseWords(); if(wsay !== undefined) words[0].say = wsay;
+    return mkPack({ pack: basePack({ characters: baseCharacters() }), words, characters: baseCharUnits(words, usay !== undefined ? [{ say: usay }] : []) });
+  };
+  const ok = runValidate(withSay("carrier", "carrier"));
+  check("accepts: a word say and the same say on its unit (no say lines)", ok.status === 0 && !/say/.test(ok.out), ok.out);
+  for(const [label, v] of [["empty", ""], ["a number", 3], ["equal to w", "word1_1"]]){
+    const r = runValidate(withSay(v));
+    check(`rejects: word say ${label}`, r.status !== 0 && /words?\b.*\.say must be a non-empty string other than w/.test(r.out), r.out);
+  }
+  for(const [label, v] of [["empty", ""], ["equal to t", "字A"]]){
+    const r = runValidate(withSay(undefined, v));
+    check(`rejects: unit say ${label}`, r.status !== 0 && /character unit c0001\.say must be a non-empty string other than t/.test(r.out), r.out);
+  }
+  const words = baseWords(); words[0].w = "字A"; words[0].say = "x";
+  const d = mkPack({ pack: basePack({ characters: baseCharacters() }), words, characters: baseCharUnits(words, [{ say: "y" }]) });
+  const diff = runValidate(d);
+  check("warns: unit say differs from its same-text word's say (the word's is spoken)", diff.status === 0 && /WARN.*c0001\.say 'y' differs from its word w1_1's say 'x'/.test(diff.out), diff.out);
+})();
+
 console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);
 process.exit(fails === 0 ? 0 : 1);
