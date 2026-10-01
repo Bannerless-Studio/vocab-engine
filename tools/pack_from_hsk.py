@@ -76,11 +76,19 @@ ATTRIBUTION = {
         "copyright": "Shaunak Kishore and contributors",
         "licence_text": "LICENSES/LGPL-3.0.txt, with LICENSES/GPL-3.0.txt (LGPL-3.0 is a set of additional permissions on GPL-3.0)",
     },
+    "character_hint_overrides": {
+        "source": "tools/zh_hints_overrides.json: 13 hand-written hints restating Make Me a Hanzi entries; "
+                  "气 and 来 also restate English Wiktionary's glyph origin for 气 (pictogram of vapour) and 來 "
+                  "(wheat, phonetic loan for 'come')",
+        "licence": "CC-BY-SA-4.0 (Wiktionary text); the rest as character_hints",
+        "url": "https://en.wiktionary.org/wiki/气 https://en.wiktionary.org/wiki/來",
+    },
     # LICENSE names these share-alike sources for pack data in general; neither feeds packs/zh
     # (pack_from_hsk.py reads only the chinese repo's data/ and src/pinyin_core.js; passages are
     # hand-written in passages_src.json; langs/zh.py loads no kaikki or frequency data).
     "not_used": {
-        "Wiktionary via kaikki.org": "no zh input reads kaikki; zh glosses come from CC-CEDICT via complete-hsk-vocabulary",
+        "Wiktionary via kaikki.org": "no zh input reads kaikki; zh glosses come from CC-CEDICT via complete-hsk-vocabulary "
+                                     "(Wiktionary itself is cited only by two hint overrides, see character_hint_overrides)",
         "hermitdave/FrequencyWords": "zh word order and levels come from the HSK lists, not a frequency list",
     },
 }
