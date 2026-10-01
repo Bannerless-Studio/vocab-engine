@@ -2566,10 +2566,13 @@ function typedFromSides(pack){
 }
 function typedFromOn(pack){ return typedFromSides(pack).length > 0; }
 // Production (meaning -> target) and target-side kinds alternate, so a short plan still mixes
-// both directions.
+// both directions. With both characters <-> meaning kinds present (typedFrom "written" on a
+// typing "pron" pack), each comes twice per cycle and every reading kind once (owner feedback
+// 2026-10-01: more characters <-> meaning writing practice).
 function typedKinds(pack){
   const sides = typedFromSides(pack), pt = pronTypingOn(pack);
   const w = sides.includes("written"), p = sides.includes("pron");
+  if(w && pt) return ["writtenMeaning", "written", "pron", "writtenMeaning", "written", ...(p ? ["pronMeaning"] : []), "writtenPron"];
   const out = [pt ? "pron" : "word"];
   if(w) out.push("writtenMeaning");
   if(pt) out.push("written");
@@ -2616,6 +2619,29 @@ function typedSlotKind(plan, i, prog, pack, ok){
     if(!ok || ok(k)) return k;
   }
   return null;
+}
+// ------------------------------------------------------------------ session resume
+// app.html keeps the drill or passage in progress under sessionKey(pack) so an app-tab switch
+// or a reload returns to the same item (docs/PACK_SCHEMA.md "Session resume"). Progress is
+// never stored there: it is written per answer under storageKey(pack) as before.
+const SESSION_VERSION = 1;
+const SESSION_MAX_AGE_MS = 12 * 3600 * 1000;
+function sessionKey(pack){ return `${storageKey(pack)}_session`; }
+// FNV-1a over UTF-16 code units: a fingerprint, not a security hash.
+function sessionHash(s){
+  let h = 0x811c9dc5; s = String(s == null ? "" : s);
+  for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h.toString(16).padStart(8, "0");
+}
+// "" when the record may be resumed, else why not. o: { build, fp: [fingerprints of the
+// progress as it stands now], now }. A clock up to a minute behind the save is tolerated.
+function sessionStale(rec, o){
+  if(!isObj(rec) || rec.v !== SESSION_VERSION) return "version";
+  if(!o || rec.build !== o.build) return "build";
+  const age = (o.now || 0) - rec.t;
+  if(typeof rec.t !== "number" || !(age >= -60000 && age <= SESSION_MAX_AGE_MS)) return "age";
+  if(!Array.isArray(o.fp) || !o.fp.includes(rec.fp)) return "progress";
+  return "";
 }
 // Top-level split: separators inside (...) or [...] never split.
 function splitTopLevel(s, seps){
@@ -2927,6 +2953,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   strata, placementItemCount, placementStopIndex, applyPlacement, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
+  SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
   markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,

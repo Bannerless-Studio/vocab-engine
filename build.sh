@@ -13,6 +13,7 @@
 # cksum of the built page) and the page's file name filled in. The page then gets a last
 # line <!--ve-build:<id>--> that sw.js checks before caching it. Publish sw.js with the
 # page; app.html registers it (offline use and instant repeat loads, see README).
+# app.html's VE_BUILD gets a cksum of the sources (session resume, docs/PACK_SCHEMA.md).
 # tools/check_site.sh is the stale-build guard for a language repo.
 set -e
 if [ $# -ne 2 ]; then echo "usage: $0 <packdir> <out.html>" >&2; exit 2; fi
@@ -54,12 +55,17 @@ if [ ! -f "$LEGACY" ]; then LEGACY=""; fi
 
 mkdir -p "$(dirname "$OUT")"
 TMP="$OUT.tmp.$$"
+# Source id: cksum of everything the page is built from, written into app.html's VE_BUILD so
+# the page knows its build while still parsing (session resume drops another build's session).
+# The page cksum below cannot go inside the page it is the checksum of.
+SRC_ID="$(for f in "$SRC" "$CORE" "$PACKDIR/pack.js" "$PACKDIR/words.js" "$PACKDIR/sentences.js" "$LESSONS" "$CHARS" "$SCRIPTF" "$LEGACY"; do
+  if [ -n "$f" ]; then cat "$f"; fi; done | cksum | awk '{ printf "%s-%s", $1, $2 }')"
 # Paths go to awk via ENVIRON, not -v: -v expands backslash escapes in values.
 VE_PACK="$PACKDIR/pack.js" VE_WORDS="$PACKDIR/words.js" VE_SENTS="$PACKDIR/sentences.js" \
-VE_LESSONS="$LESSONS" VE_CHARS="$CHARS" VE_SCRIPT="$SCRIPTF" VE_LEGACY="$LEGACY" VE_CORE="$CORE" awk '
+VE_LESSONS="$LESSONS" VE_CHARS="$CHARS" VE_SCRIPT="$SCRIPTF" VE_LEGACY="$LEGACY" VE_CORE="$CORE" VE_SRCID="$SRC_ID" awk '
   BEGIN { pack = ENVIRON["VE_PACK"]; words = ENVIRON["VE_WORDS"]; sents = ENVIRON["VE_SENTS"]
           lessons = ENVIRON["VE_LESSONS"]; chars = ENVIRON["VE_CHARS"]; script = ENVIRON["VE_SCRIPT"]; legacy = ENVIRON["VE_LEGACY"]
-          core = ENVIRON["VE_CORE"] }
+          core = ENVIRON["VE_CORE"]; srcid = ENVIRON["VE_SRCID"] }
   function inline(f,   line){ print "<script>"; while ((getline line < f) > 0) print line; close(f); print "</script>" }
   /<!-- PACK-BEGIN/ { skipping = 1; seen_begin = 1
                       inline(pack); inline(words); inline(sents)
@@ -71,8 +77,9 @@ VE_LESSONS="$LESSONS" VE_CHARS="$CHARS" VE_SCRIPT="$SCRIPTF" VE_LEGACY="$LEGACY"
   skipping && /<!-- PACK-END -->/ { skipping = 0; seen_end = 1; next }
   skipping { next }
   /<script src="core\.js"><\/script>/ { inline(core); seen_core = 1; next }
+  /__VE_SRC_BUILD__/ { gsub(/__VE_SRC_BUILD__/, srcid); seen_id = 1 }
   { print }
-  END { if (!seen_begin || !seen_end || !seen_core) { print "build.sh: PACK-BEGIN/PACK-END markers or core.js tag not found in app.html" > "/dev/stderr"; exit 1 } }
+  END { if (!seen_begin || !seen_end || !seen_core || !seen_id) { print "build.sh: PACK-BEGIN/PACK-END markers, core.js tag or __VE_SRC_BUILD__ not found in app.html" > "/dev/stderr"; exit 1 } }
 ' "$SRC" > "$TMP" || { rm -f "$TMP"; exit 1; }
 
 # Build id: cksum of the page before the marker line. sw.js cache name = build id, so any

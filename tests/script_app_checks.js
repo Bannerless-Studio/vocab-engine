@@ -1,6 +1,6 @@
 // App checks for the script primer in engine/app.html (docs/SCRIPT_PRIMER.md §1, §2, §5,
 // check 11 of §6, brief S3): the choice card, script Learn (teach cards, drill, "One more
-// set"), the 12-item Review, Progress on/off chips (and per-stage chips), the one-time
+// set", kept across a reload), the 12-item Review, Progress on/off chips (and per-stage chips), the one-time
 // existing-learner notice, one boot check per item kind, the no-voice path (tts:false and
 // no browser voice), teach-card rows (forms strip, compose, base -> variant, italic), the
 // Script tab chart and practice, flag-off (no pack.script: no script markup), and a 390px
@@ -262,6 +262,24 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("Review drill: 12 script items, every one a script key", rv.length === 12 && rv.every(x => x.key.startsWith("x:")));
     err = null; try{ playDrill(api); }catch(e){ err = e; }
     check(`Review drill plays through${err ? ` (${err.message})` : ""}`, !err);
+  }
+
+  console.log("\n[2b] ko: a reload on the set 1 results screen keeps One more set (session resume)");
+  {
+    const store = () => { const m = new Map(); return { getItem: k => m.has(k) ? m.get(k) : null, setItem: (k, v) => { m.set(k, String(v)); }, removeItem: k => { m.delete(k); } }; };
+    const ls = store(), ss = store();
+    let { api } = await boot(KO, { storage: ls, extra: { sessionStorage: ss } });
+    api.el("scriptLearn").click(); api.el("go").click(); api.el("dr").click();
+    playDrill(api);
+    const before = api.html("panel");
+    check("set 1 results: One more set before the reload", /id="moreSet"[^>]*>One more set</.test(before));
+    ({ api } = await boot(KO, { storage: ls, extra: { sessionStorage: ss } }));
+    const h = api.html("panel");
+    check("after the reload: the same results screen, One more set and Continue", h === before && /id="ok"/.test(h));
+    api.el("moreSet").click();
+    check("One more set after the reload: set 2 teach cards", count(api.html("panel"), /class="xteach"/g) === koSets[1].length);
+    api.el("dr").click(); playDrill(api);
+    check("set 2 results after the reload: no third set offered", /id="ok"/.test(api.html("panel")) && !/id="moreSet"/.test(api.html("panel")));
   }
 
   console.log("\n[3] Progress: primer off moves Learn to A1 set 1; on brings the script back");

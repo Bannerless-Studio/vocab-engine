@@ -245,5 +245,18 @@ console.log("\n[w.k] missed-kind marker");
   check("progress carrying w.k is native, not legacy", !VC.isLegacyRecord(PACK, LEGACY, p));
 }
 
+console.log("\n[session] session resume key (docs/PACK_SCHEMA.md \"Session resume\")");
+{
+  // A new key, never a new progress field: the record lives in sessionStorage beside the
+  // progress key and is never read by boot, migration, import or export.
+  const SK = VC.sessionKey(PACK);
+  check(`session key ${SK} differs from the progress, legacy, legacy-backup and progress-backup keys`,
+    SK === "vocab_zh_session" && new Set([SK, VC.storageKey(PACK), PACK.legacy.key, VC.legacyBackupKey(PACK), ...["invalid_backup", "pre_import_backup", "reset_backup"].map(x => `${VC.storageKey(PACK)}_${x}`)]).size === 7);
+  const p = mig("C mid-HSK2"), raw = JSON.stringify(p);
+  const b = VC.bootProg(raw, PACK);
+  check("migrated progress boots unchanged with no session field (the session record is never part of it)", b.backupRaw === null && eq(b.prog, VC.normalizeProg(p, PACK)) && !Object.keys(b.prog).some(k => /^session(?!s$)/.test(k)));
+  check("a session record is not a legacy record", !VC.isLegacyRecord(PACK, LEGACY, { v: VC.SESSION_VERSION, build: "x", t: 0, fp: "0", tab: "today" }));
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);
