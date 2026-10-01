@@ -182,6 +182,9 @@
   .charteach .pr{font-size:16px}
   .charteach .en{color:var(--mute);font-size:14px;text-align:left;margin:0}
   .charteach .sent{border-bottom:none;padding:4px 0 0;font-size:14px}
+  .chint{display:block;color:var(--mute);font-size:13px;line-height:1.35}
+  .chint>span{display:block}
+  .chint .hc{font-size:15px}
   .big.xg{font-size:64px;line-height:1.2}
   .opts-g{grid-template-columns:repeat(2,minmax(0,1fr))}
   .opts-g button{text-align:center;font-size:28px;line-height:1.3}
@@ -1212,14 +1215,26 @@ function sentenceItemFor(s){
 
 const sayUnit = (it, btn) => { const w = WORDS_BY_ID[it.wordId]; if(w) sayWord(w, btn); else speak(it.t, btn); };
 const canHearUnit = it => { const w = WORDS_BY_ID[it.wordId]; return w ? canHearWord(w) : hasSpeech; };
-function charRevealBlock(it){
+// Memory hints (characters.json `hint`) show only on teach cards and reveals: a hint names
+// the character's meaning and parts, so on a stimulus it would give the answer away.
+// `skip` holds characters already hinted on this screen; the hanzi prefixes a line only
+// when the unit has more than one character.
+function charHintHTML(u, skip){
+  const hs = VC.unitHints(u).filter(x => !(skip && skip.has(x.c)));
+  if(skip) hs.forEach(x => skip.add(x.c));
+  if(!hs.length) return "";
+  const multi = [...String(u.t)].length > 1;
+  const line = h => escapeHtml(h).replace(/\p{Script=Han}+/gu, m => `<span${TA}>${m}</span>`);
+  return `<span class="chint">${hs.map(x => `<span>${multi ? `<span class="hc"${TA}>${escapeHtml(x.c)}</span> ` : ""}${line(x.hint)}</span>`).join("")}</span>`;
+}
+function charRevealBlock(it, unit){
   const tap = WORDS_BY_ID[it.wordId] && canHearWord(WORDS_BY_ID[it.wordId]);
   const icon = tap ? ` <span style="color:var(--mute);vertical-align:middle">${TEACH_PLAY_SVG}</span>` : "";
-  return `<div${tap ? ` data-wid="${escapeHtml(it.wordId)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${escapeHtml(it.t)}${icon}</div>${it.reading ? `<div class="rp">${readingHTML(it.reading)}</div>` : ""}<div style="color:var(--mute)">${glossOut(it.gloss, true)}</div></div>`;
+  return `<div${tap ? ` data-wid="${escapeHtml(it.wordId)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${escapeHtml(it.t)}${icon}</div>${it.reading ? `<div class="rp">${readingHTML(it.reading)}</div>` : ""}<div style="color:var(--mute)">${glossOut(it.gloss, true)}</div>${charHintHTML(unit)}</div>`;
 }
 function charDrillItem(kind, unit){
   const it = VC.charItem(kind, unit, CHAR_CTX);
-  const base = { kind:"mc", key: it.key, opts: it.options, a: it.answer, reveal: charRevealBlock(it),
+  const base = { kind:"mc", key: it.key, opts: it.options, a: it.answer, reveal: charRevealBlock(it, unit),
     onAnswer: ok => markChar(it.unitId, ok), onReveal: b => sayUnit(it, b), revealHear: canHearUnit(it) };
   const form = `<div class="big wd"${TA}>${escapeHtml(it.t)}</div>`;
   const formOpts = { optsClass:"opts-hero opts-w", optHtml: o => tw(o), optsT: true };
@@ -1618,11 +1633,12 @@ function charTeach(cs, stage, onDrill){
   setScore(0,0); screenTop();
   const P = $("panel");
   const hint = hasSpeech || cs.units.some(u => { const w = VC.unitWord(u, WORDS_BY_ID); return w && canHearWord(w); }) ? " Tap one to hear it." : "";
+  const hinted = new Set();
   const cards = cs.units.map(u => {
     const w = VC.unitWord(u, WORDS_BY_ID), reading = VC.unitReading(u, WORDS_BY_ID);
     const tap = w && canHearWord(w);
     const ex = VC.unitExampleSentences(u, w, SENTENCES, PACK, 1);
-    return `<div class="charteach"><div class="chead"${tap ? ` data-wid="${escapeHtml(w.id)}" style="cursor:pointer"` : ""}><span class="cform"${TA}>${escapeHtml(u.t)}</span><span class="info">${reading ? `<span class="pr">${readingHTML(reading)}</span>` : ""}<span class="en">${glossOut(VC.unitGloss(u, WORDS_BY_ID))}</span></span>${tap ? `<span style="color:var(--mute);flex:0 0 auto">${TEACH_PLAY_SVG}</span>` : ""}</div>${ex.map(s => sentenceRowHTML(s, w, u.words)).join("")}</div>`;
+    return `<div class="charteach"><div class="chead"${tap ? ` data-wid="${escapeHtml(w.id)}" style="cursor:pointer"` : ""}><span class="cform"${TA}>${escapeHtml(u.t)}</span><span class="info">${reading ? `<span class="pr">${readingHTML(reading)}</span>` : ""}<span class="en">${glossOut(VC.unitGloss(u, WORDS_BY_ID))}</span>${charHintHTML(u, hinted)}</span>${tap ? `<span style="color:var(--mute);flex:0 0 auto">${TEACH_PLAY_SVG}</span>` : ""}</div>${ex.map(s => sentenceRowHTML(s, w, u.words)).join("")}</div>`;
   }).join("");
   P.innerHTML = `<p class="q">${tf(stage.label)}, set ${cs.index+1} of ${cs.total}: the written form of words you already know.${hint}</p>
     <div id="ctl">${cards}</div><div class="actions"><button class="next" id="dr">Drill these</button></div>`;

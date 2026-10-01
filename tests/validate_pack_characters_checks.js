@@ -123,6 +123,24 @@ console.log("Checking tools/validate_pack.py characters/legacy/ruby cases (Node 
   check("rejects: characters.json unit with a dangling word id", r.status !== 0 && /unknown ids/.test(r.out), r.out);
 })();
 
+// ------------------------------------------------------------ unit hint (memory hints, brief zh-hints)
+(function(){
+  const words = baseWords();
+  const cases = [
+    ["accepts: hint list aligned with t, null for a character without one", [{ hint: ["picture of x", null] }], 0, null],
+    ["rejects: hint shorter than t", [{ hint: ["picture of x"] }], 1, /hint has 1 entries for 2 characters/],
+    ["rejects: hint not a list", [{ hint: "picture of x" }], 1, /hint must be a list/],
+    ["rejects: hint with an empty string", [{ hint: ["", null] }], 1, /hint must be a list/],
+    ["rejects: hint all null", [{ hint: [null, null] }], 1, /no hint; leave the field out/],
+  ];
+  for(const [name, extra, want, re] of cases){
+    const dir = mkPack({ pack: basePack({ characters: baseCharacters() }), words });
+    fs.writeFileSync(path.join(dir, "characters.json"), JSON.stringify(baseCharUnits(words, extra)));
+    const r = runValidate(dir);
+    check(name, (want === 0 ? r.status === 0 : r.status !== 0) && (!re || re.test(r.out)), r.out);
+  }
+})();
+
 (function(){
   // unit.lv valid pack level but not covered by any stage
   const words = baseWords();

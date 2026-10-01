@@ -1,0 +1,17 @@
+{
+ "vocabulary": {
+  "source": "complete-hsk-vocabulary via the chinese repo (data/hsk_vocab.json, tools/build_vocab.py)",
+  "licence": "MIT",
+  "url": "https://github.com/drkameleon/complete-hsk-vocabulary"
+ },
+ "sentences": {
+  "source": "hand-authored for this pack (chinese repo data/hsk_sentences.js)",
+  "licence": "CC-BY-SA-4.0"
+ },
+ "character_hints": {
+  "source": "Make Me a Hanzi dictionary.txt (decomposition, etymology, definition, pinyin), itself derived from Unihan and CJKlib; composed into characters.json `hint` by tools/zh_hints.py",
+  "licence": "LGPL-3.0-or-later",
+  "url": "https://github.com/skishore/makemeahanzi/blob/bddc96d41bef78427ed0e034e9f7e31d71fd1b92/dictionary.txt",
+  "copyright": "Shaunak Kishore and contributors"
+ }
+}

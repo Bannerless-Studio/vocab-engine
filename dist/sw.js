@@ -1,4 +1,4 @@
-// build.sh fills 4162193655-1617365 (cksum of the built page before its marker line) and zh.html
+// build.sh fills 2846832643-1695918 (cksum of the built page before its marker line) and zh.html
 // so every rebuild that changes the page also changes sw.js and the browser installs it.
 //
 // - Cache-first for the page only (packs are inlined into it).
@@ -24,7 +24,7 @@
 //   range behaviour is untested until the phase 3 live check (docs/AUDIO.md).
 // Kill switch / rollback: README "Offline and repeat loads"; never delete a published sw.js.
 "use strict";
-const BUILD = "4162193655-1617365";
+const BUILD = "2846832643-1695918";
 const PAGE = "zh.html";
 const MARK = "<!--ve-build:" + BUILD + "-->";
 const SCOPE = self.registration ? self.registration.scope : new URL("./", self.location.href).href;

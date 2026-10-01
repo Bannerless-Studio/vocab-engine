@@ -977,6 +977,48 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     } catch(e){ check(`${name}: section threw: ${e.message}`, false); }
   }
 
+  // ---------------------------------------------------------------- memory hints (brief zh-hints)
+  // characters.json `hint`: teach cards and reveals show it; no stimulus or option does
+  // (a hint names the meaning and parts, so it would give charRead/charSound/charPick away).
+  console.log("\n[hints] character memory hints on teach cards and reveals only");
+  try{
+    const { api } = await boot();
+    api.setProg(seedC());
+    const byT = t => CHARACTERS.find(u => u.t === t);
+    const hao = byT("好"), haochi = byT("好吃"), mama = byT("妈妈");
+    check("zh units carry hints for 好 / 好吃 / 妈妈", hao.hint && haochi.hint && mama.hint && hao.hint[0] === "女 woman + 子 son: good");
+    api.charTeach({ units: [hao, haochi, mama], index: 0, total: 1 }, { label: "字" }, () => {});
+    const cards = api.html("panel").split('<div class="charteach">').slice(1);
+    check("teach card (one character): the hint under the form, no character prefix",
+      cards[0].includes('<span class="chint"><span><span data-tl lang="zh">女</span> woman + <span data-tl lang="zh">子</span> son: good</span></span>'), cards[0]);
+    check("teach card (two characters): 好 already hinted on this screen, so only 吃 with its prefix",
+      /<span class="chint"><span><span class="hc" data-tl[^>]*>吃<\/span> /.test(cards[1]) && !cards[1].includes("son: good"), cards[1]);
+    check("teach card 妈妈: the repeated character is hinted once", (cards[2].match(/sound mǎ/g) || []).length === 1, cards[2]);
+    let stimBad = [], revealMiss = [], n = 0;
+    CHARACTERS.forEach(u => {
+      const hs = VC.unitHints(u);
+      ["charRead", "charSound", "charPick", "charRecall"].forEach(k => {
+        const it = api.charDrillItem(k, u); n++;
+        const stim = it.html + it.opts.map(o => it.optHtml ? it.optHtml(o) : o).join("");
+        if(/chint/.test(stim) || hs.some(x => stripTags(stim).includes(x.hint))) stimBad.push(`${k} ${u.t}`);
+        if(hs.length && !(it.reveal.includes('class="chint"') && hs.every(x => stripTags(it.reveal).includes(x.hint)))) revealMiss.push(`${k} ${u.t}`);
+      });
+    });
+    check(`no stimulus or option carries a hint (${n} items, ${stimBad.length} bad${stimBad[0] ? ": " + stimBad.slice(0, 5).join(", ") : ""})`, n === CHARACTERS.length * 4 && stimBad.length === 0);
+    check(`every hinted unit's reveal shows each of its hints (${revealMiss.length} missing${revealMiss[0] ? ": " + revealMiss.slice(0, 5).join(", ") : ""})`, revealMiss.length === 0);
+    // Flag off: the same units without `hint` render exactly as before the field existed.
+    const bare = CHARACTERS.map(u => { const v = Object.assign({}, u); delete v.hint; return v; });
+    const b2 = await boot({ units: bare });
+    b2.api.setProg(seedC());
+    b2.api.charTeach({ units: bare.slice(0, 10), index: 0, total: 1 }, { label: "字" }, () => {});
+    const it2 = b2.api.charDrillItem("charRead", bare[0]);
+    check("units without hint: no hint markup on teach cards or reveals", !/chint/.test(b2.api.html("panel")) && !/chint/.test(it2.reveal));
+    const stripHint = h => h.replace(/<span class="chint">(?:<span>(?:<span[^>]*>[^<]*<\/span>|[^<])*<\/span>)+<\/span>/g, "");
+    api.charTeach({ units: CHARACTERS.slice(0, 10), index: 0, total: 1 }, { label: "字" }, () => {});
+    check("hinted teach cards and reveals equal the hint-free ones with the hint block removed",
+      stripHint(api.html("panel")) === b2.api.html("panel") && stripHint(api.charDrillItem("charRead", CHARACTERS[0]).reveal) === it2.reveal);
+  } catch(e){ check(`hints section threw: ${e.stack}`, false); }
+
   // ---------------------------------------------------------------- RTL rendering rules
   // charTeach and the character drill under pack.rtl (docs/PACK_SCHEMA.md "RTL rendering"):
   // glosses that embed an RTL phrase go through ui(); no UI text sits in a dir=rtl context.

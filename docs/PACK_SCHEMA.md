@@ -282,7 +282,7 @@ Three pack fields and the sentence `ruby` turn on learning aids for the reading.
 
 Required when `pack.characters` is set (and must be absent otherwise). Holds the units, in teaching order within each level: sets are consecutive runs of `setSize` units of one level, in file order.
 
-`[{ id, t, words, lv, reading? }]`
+`[{ id, t, words, lv, reading?, hint? }]`
 
 | field | type | meaning |
 |---|---|---|
@@ -291,8 +291,9 @@ Required when `pack.characters` is set (and must be absent otherwise). Holds the
 | `words` | `[wordId]`, non-empty | Linked words, ids from this pack's `words.json`. `words[0]` supplies the gloss and the audio. |
 | `lv` | levelId | Must be one of `pack.levels[].id`, equal to the `lv` of `words[0]`, and covered by one of `pack.characters.stages[].levels` — decides which stage the unit belongs to. |
 | `reading` | string | Optional. Answer for `charSound` and the ruby text. Defaults to the `pron` of `words[0]`. |
+| `hint` | `[string \| null]` | Optional. A memory hint per character of `t` (aligned by code point, `null` for a character without one; at least one string, else leave the field out). Shown dimmed under the form on the teach card and in every unit item's reveal, one line per distinct character, prefixed with the character when `t` has more than one; a character already hinted on the same teach screen is not repeated (core.js `unitHints`, app.html `charHintHTML`). Never on a stimulus or option: a hint names the meaning and parts, so it would answer charRead/charSound/charPick. Absent, nothing renders (byte-identical). zh: `tools/pack_from_hsk.py` from the committed tools/zh_hints.json (tools/zh_hints.py over Make Me a Hanzi, LGPL-3.0-or-later, credited in packs/zh/attribution.json). |
 
-`tools/validate_pack.py` checks unique ids, that every `words` id exists, and that `lv` is a pack level, equals the level of `words[0]`, and is covered by a stage.
+`tools/validate_pack.py` checks unique ids, that every `words` id exists, and that `lv` is a pack level, equals the level of `words[0]`, and is covered by a stage; a `hint` must be a list of non-empty strings or null, one per character of `t`, not all null.
 
 ## Script primer
 

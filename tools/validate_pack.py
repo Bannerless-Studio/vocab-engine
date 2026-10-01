@@ -779,6 +779,14 @@ def check_characters_data(chars, char_levels, by_id, rep):
                 rep.err(f"{where}.lv {c.get('lv')!r} is not covered by any pack.characters.stages[].levels")
         if "reading" in c and not is_str(c["reading"]):
             rep.err(f"{where}.reading must be a non-empty string when present")
+        if "hint" in c:
+            h, t = c["hint"], c.get("t")
+            if not isinstance(h, list) or not all(x is None or is_str(x) for x in h):
+                rep.err(f"{where}.hint must be a list of non-empty strings or null")
+            elif is_str(t) and len(h) != len(t):
+                rep.err(f"{where}.hint has {len(h)} entries for {len(t)} characters of t")
+            elif not any(h):
+                rep.err(f"{where}.hint has no hint; leave the field out instead")
     return ids, word0
 
 

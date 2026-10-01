@@ -31,6 +31,9 @@ except for tokens resolved via a SENTENCE_EXTRA base (see the loop).
 `characters.json` mirrors words.json one-to-one (hsk teaches whole words, not
 glyphs: docs/HSK_MERGE.md §2.1), and `legacy.json`/`pack.legacy` carry the
 hsk_pinyin -> vocab_zh progress-migration id maps (docs/HSK_MERGE.md §4).
+Each unit gets a `hint` list (one per character of `t`, null where none) from the
+committed tools/zh_hints.json (tools/zh_hints.py; Make Me a Hanzi, LGPL-3.0-or-later),
+credited in attribution.json.
 
 Usage: python3 tools/pack_from_hsk.py [HSK_REPO_DIR]   (default: ../chinese beside this repo, formerly ../hsk)
 """
@@ -51,6 +54,22 @@ EN_OVERRIDES = {
     "我们应该看自己的优点，也要改变缺点。": "We should look at our own strengths, and also change our weaknesses.",
 }
 OUT = os.path.join(ROOT, "packs", "zh")
+HINTS = os.path.join(ROOT, "tools", "zh_hints.json")
+ATTRIBUTION = {
+    "vocabulary": {
+        "source": "complete-hsk-vocabulary via the chinese repo (data/hsk_vocab.json, tools/build_vocab.py)",
+        "licence": "MIT",
+        "url": "https://github.com/drkameleon/complete-hsk-vocabulary",
+    },
+    "sentences": {"source": "hand-authored for this pack (chinese repo data/hsk_sentences.js)", "licence": "CC-BY-SA-4.0"},
+    "character_hints": {
+        "source": "Make Me a Hanzi dictionary.txt (decomposition, etymology, definition, pinyin), "
+                  "itself derived from Unihan and CJKlib; composed into characters.json `hint` by tools/zh_hints.py",
+        "licence": "LGPL-3.0-or-later",
+        "url": "https://github.com/skishore/makemeahanzi/blob/bddc96d41bef78427ed0e034e9f7e31d71fd1b92/dictionary.txt",
+        "copyright": "Shaunak Kishore and contributors",
+    },
+}
 
 
 def js_const_json(path, name):
@@ -237,17 +256,25 @@ def main(argv):
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).
     # Unit id = "c" + the word id's digits (w0416 -> c0416): ids follow word ids and are
     # never renumbered (they are progress keys).
-    characters = []
+    hints = json.load(open(HINTS, encoding="utf-8"))
+    characters, hint_missing = [], []
     for w in words:
         if not re.fullmatch(r"w\d+", w["id"]):
             raise SystemExit(f"pack_from_hsk: word id {w['id']!r} is not w<digits>; unit ids derive from it")
-        characters.append({
+        unit = {
             "id": "c" + w["id"][1:],
             "t": w["w"],
             "words": [w["id"]],
             "lv": w["lv"],
             "reading": w["pron"],
-        })
+        }
+        hint_missing += [c for c in w["w"] if c not in hints]
+        h = [hints.get(c) for c in w["w"]]
+        if any(h):
+            unit["hint"] = h
+        characters.append(unit)
+    if hint_missing:
+        raise SystemExit(f"pack_from_hsk: characters missing from tools/zh_hints.json (run tools/zh_hints.py): {''.join(sorted(set(hint_missing)))}")
     # legacy map for the hsk_pinyin -> vocab_zh progress migration (docs/HSK_MERGE.md §4)
     legacy = {
         "w": {w["w"]: w["id"] for w in words},
@@ -269,10 +296,13 @@ def main(argv):
     dump(os.path.join(OUT, "lessons.json"), lessons)
     dump(os.path.join(OUT, "characters.json"), characters)
     dump(os.path.join(OUT, "legacy.json"), legacy)
+    dump(os.path.join(OUT, "attribution.json"), ATTRIBUTION)
 
     total_tokens = sum(len(s["words"]) for s in sentences)  # hsk tokens, before merging
     ruby_tokens = sum(len(s.get("ruby", ())) for s in out_sent)
     print(f"words {len(words)}  sentences {len(out_sent)}  lessons {len(lessons)}  functionWords {len(fw)}")
+    hinted = {c for u in characters for c, h in zip(u["t"], u.get("hint", ())) if h}
+    print(f"character hints: {len(hinted)} of {len({c for u in characters for c in u['t']})} distinct characters; units with hint {sum(1 for u in characters if 'hint' in u)}")
     print(f"characters {len(characters)}  legacy w={len(legacy['w'])} s={len(legacy['s'])} c={len(legacy['c'])}")
     print(f"sentence tokens {total_tokens}: {sum(fallback.values())} resolved via SENTENCE_EXTRA base, {len(unresolved)} unresolved, ruby tokens {ruby_tokens}, unplaced (no ruby) {len(unplaced)}")
     print(f"longest-match merges of adjacent hsk tokens: {sum(merged.values())}")

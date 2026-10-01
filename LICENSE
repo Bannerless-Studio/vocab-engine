@@ -37,6 +37,13 @@ which require share-alike redistribution of derived data. Where a pack
 directory has its own `attribution.json`, per-source and per-contributor
 attribution is recorded there.
 
+Exception: the character memory hints (`hint` in packs/zh/characters.json and
+tools/zh_hints.json) are derived from Make Me a Hanzi dictionary.txt
+(https://github.com/skishore/makemeahanzi, Shaunak Kishore and contributors;
+itself derived from Unihan and CJKlib), licensed under the GNU Lesser General
+Public License v3.0 or later. Those hints remain under LGPL-3.0-or-later; see
+packs/zh/attribution.json.
+
 Build-time tools and models used to construct pack data (for example
 part-of-speech taggers) may carry non-commercial or copyleft licences of
 their own. These are used only while building a pack and ship nothing
