@@ -6,7 +6,10 @@
 // records (other build, over 12 h, progress changed) are dropped silently and no answer is
 // lost, [5] Test and Words-tab set drills, a typed item's choice counterpart, [6] the Read
 // passage flow (Done reading, a question mid-flow, tapped words) and the Today Read stage,
-// [7] the progress key is untouched (only vocab_<pack>_session is added, in sessionStorage).
+// [7] the progress key is untouched (only vocab_<pack>_session is added, in sessionStorage),
+// [8] the build id is known at boot (built page), [9] record size (draws kept as results,
+// misses as recipes), [10] a results screen survives voiceschanged and render() ends it,
+// [11] a hear item resumed before the language's voice is listed becomes a hear item when it is.
 // Boots engine/app.html in the fake DOM of tests/typed_from_checks.js with storages that
 // survive a reboot (the reload).
 // Run: node tests/session_resume_checks.js
@@ -120,10 +123,12 @@ function memStore(){
 // uses another seed, so a matching item proves the replay, not the seed.
 async function boot(o){
   Math.random = mulberry32(o.seed || 1);
-  appHtml = CUR_HTML;
+  appHtml = o.html || CUR_HTML;
   const document = makeFakeDom();
+  if(o.mark) document.lastChild = { nodeType: 8, nodeValue: o.mark, previousSibling: null };
   const spoken = [];
-  const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(u){ spoken.push(u.text); } };
+  const voices = o.voices || [{ lang:"zh-CN", name:"x" }];
+  const ss = { getVoices: () => voices, onvoiceschanged: null, cancel(){}, speak(u){ spoken.push(u.text); } };
   const window = { VocabCore: VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
   const fnBody = scriptOf(appHtml) + `
 let __cur = null;
@@ -136,13 +141,14 @@ return {
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
   startPassage: p => { startPassage(p); },
   todayAt: s => { todayStepState = { step: s }; todayStep(); },
+  build: () => sessionBuild(), render: () => render(), hide: () => (document._listeners.visibilitychange || []).forEach(f => { document.visibilityState = "hidden"; f(); }),
 };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"SessionResumeChecks/1.0" }, undefined, o.ls, o.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
     function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, PACK, WORDS, SENTENCES, LESSONS, PASSAGES, CHARACTERS];
   const api = new Function(...names, fnBody)(...args);
   await tick(); await tick();
-  return { api, spoken };
+  return { api, spoken, ss, voices, document };
 }
 
 // ------------------------------------------------------------------ helpers
@@ -408,6 +414,88 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     check(`progress keeps its top-level shape, no session fields (${Object.keys(p).sort().join(", ")}; read comes from the Read unlocks as before)`, Object.keys(p).every(k => base.includes(k) || k === "read"));
     const r = sess(st.ss);
     check("record shape: v, build, t, fp, tab, today, drill (o, cur, ord, q, right, seen, miss)", JSON.stringify(Object.keys(r).sort()) === JSON.stringify(["build", "drill", "fp", "t", "tab", "today", "v"]) && JSON.stringify(Object.keys(r.drill).sort()) === JSON.stringify(["cur", "miss", "o", "ord", "q", "right", "seen"]));
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  // ---------------------------------------------------------------- [8] build id
+  console.log("\n[8] build id: known while the page parses");
+  try {
+    const dist = fs.readFileSync(path.join(ROOT, "dist", "zh.html"), "utf8");
+    const id = (dist.match(/const VE_BUILD = "([^"]*)"/) || [])[1];
+    const tail = (dist.match(/<!--ve-build:([^>]*)-->\s*$/) || [])[1];
+    check(`dist/zh.html carries a real VE_BUILD (${id}) and its trailing marker`, !!id && !/^__VE_/.test(id) && !!tail);
+    const st = fresh();
+    let { api } = await boot(Object.assign({ seed: 30, html: dist }, st));
+    check(`built page, no DOM marker yet (boot-time resume): sessionBuild() is "${id}:<pack fp>" (got ${api.build()})`, api.build().startsWith(id + ":") && !api.build().startsWith("dev:"));
+    api.el("go").click(); play(api, [true]);
+    const a = snapOf(api);
+    check("built page: the saved record carries that id", sess(st.ss).build === api.build());
+    ({ api } = await boot(Object.assign({ seed: 31, html: dist }, st)));
+    check(`built page: a reload resumes the session (${same(a, snapOf(api)).join(", ") || "all equal"})`, same(a, snapOf(api)).length === 0);
+    const other = dist.replace(`const VE_BUILD = "${id}"`, 'const VE_BUILD = "1-2"');
+    ({ api } = await boot(Object.assign({ seed: 32, html: other }, st)));
+    check("an engine-only rebuild (another VE_BUILD, same pack) drops the old session", !api.getD() && !st.ss.getItem(SKEY));
+    const dev = await boot(Object.assign({ seed: 33 }, fresh()));
+    check(`dev mode (no VE_BUILD, no marker): "dev:<pack fp>" (got ${dev.api.build()})`, /^dev:/.test(dev.api.build()));
+    const marked = await boot(Object.assign({ seed: 34, mark: "ve-build:123-456" }, fresh()));
+    check(`no VE_BUILD but the trailing marker: read lazily (got ${marked.api.build()})`, /^123-456:/.test(marked.api.build()));
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  // ---------------------------------------------------------------- [9] record size
+  console.log("\n[9] record size: draws kept as results, misses as recipes");
+  try {
+    for(const [btn, name] of [["tListen", "Listen"], ["tRecall", "Recall"], ["tSentences", "Sentences"]]){
+      const st = fresh();
+      const { api } = await boot(Object.assign({ seed: 40 }, st));
+      api.clickTab("test"); api.el(btn).click();
+      let max = 0, n = 0; const missed = new Set();
+      for(let i = 0; i < 300 && api.getD(); i++){
+        const v = st.ss.getItem(SKEY); if(v) max = Math.max(max, v.length);
+        const it = api.getCur(), first = !missed.has(it.key); missed.add(it.key);
+        answer(api, !first && it.kind !== "type" ? true : false); api.el("nx").click(); n++;
+        if(i === 5){
+          const b = snapOf(api), re = await boot(Object.assign({ seed: 41 }, st));
+          check(`Test ${name}: reload mid-way with misses and replayed items (${same(b, snapOf(re.api)).join(", ") || "all equal"})`, same(b, snapOf(re.api)).length === 0);
+          Object.assign(api, re.api);
+        }
+      }
+      check(`Test ${name}: largest record over ${n} answers (every item missed once) is under 20 KB (${(max / 1024).toFixed(1)} KB)`, max > 0 && max < 20 * 1024);
+    }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  // ---------------------------------------------------------------- [10] results screen
+  console.log("\n[10] results screen: voiceschanged leaves it, render() ends it");
+  try {
+    const st = fresh();
+    const b = await boot(Object.assign({ seed: 50 }, st));
+    const api = b.api;
+    api.clickTab("test"); api.el("tRecall").click(); finishDrill(api);
+    check("finished drill: results screen, its record saved", /id="ok"/.test(api.html("panel")) && !!sess(st.ss));
+    b.voices.splice(0, 1, { lang: "en-US", name: "e" }); b.ss.onvoiceschanged(); b.voices.splice(0, 1, { lang: "zh-CN", name: "x" }); b.ss.onvoiceschanged();
+    check("voiceschanged twice on the results screen: the results stay", /id="ok"/.test(api.html("panel")));
+    api.render(); api.hide();
+    check("render() over a results screen drops the finished drill's record (pagehide saves nothing)", !st.ss.getItem(SKEY));
+    const re = await boot(Object.assign({ seed: 51 }, st));
+    check("a reload then shows the Test screen, not the old results", !re.api.getD() && !/id="ok"/.test(re.api.html("panel")));
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  // ---------------------------------------------------------------- [11] voices after boot
+  console.log("\n[11] a hear item resumed before the voices load");
+  try {
+    const st = fresh();
+    let { api } = await boot(Object.assign({ seed: 60 }, st));
+    api.clickTab("test"); api.el("tListen").click(); play(api, [true, false]);
+    const a = snapOf(api), cur = api.getCur();
+    check("Test Listen: a hear item on screen", cur.html.includes("hear-stage") && !cur.needsNotice);
+    // Chrome can list other voices first and the pack's language later (an empty list counts
+    // as usable, so the case is a list without the language).
+    const b = await boot(Object.assign({ seed: 61, voices: [{ lang: "en-US", name: "e" }] }, st));
+    api = b.api;
+    const c0 = api.getCur();
+    check("reload before Chrome lists the language's voice: the item comes back as read with the no-voice notice, same options", c0.needsNotice === true && c0.key === cur.key && optsShown(api) === a.opts);
+    b.voices.push({ lang: "zh-CN", name: "x" }); b.spoken.length = 0; b.ss.onvoiceschanged();
+    const c1 = api.getCur(), D = api.getD();
+    check(`voices arrive: the item on screen is a hear item again, same key and option order, and it plays (${b.spoken.length} spoken)`, c1 !== c0 && c1.key === cur.key && c1.html.includes("hear-stage") && !c1.needsNotice && optsShown(api) === a.opts && b.spoken.length > 0);
+    check("voices arrive: no queued item keeps the notice; queue keys and counts unchanged", D.q.every(it => !it.needsNotice) && queueSig(api) === a.queue && D.seen === a.seen);
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
