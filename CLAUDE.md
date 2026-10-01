@@ -24,6 +24,7 @@ Shared engine for the Bannerless-Studio language trainers. End-user docs: README
                  -> <lang>/engine/build.sh pack index.html -> index.html + sw.js -> GitHub Pages
                  (engine = this repo as a git submodule at <lang>/engine)
  Browser:        progress in localStorage "vocab_<pack.key>" (+ _invalid/_pre_import/_reset backups);
+                 drill in progress in sessionStorage "vocab_<pack.key>_session" (session resume);
                  chinese migrates the old hsk_pinyin record once (core.js migrateLegacy)
  Tests:          tests/*.js boot core.js / a fake-DOM app.html against packs/zh, synthetic
                  fixtures and sibling ../<lang>/pack checkouts; goldens in tests/golden/
@@ -60,7 +61,8 @@ $NODE tests/validate_pack_audio_checks.js        # 30
 $NODE tests/validate_pack_characters_checks.js   # 78
 $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
-$NODE tests/typed_from_checks.js                 # 63 (pack.typedFrom / glossFocus; control vs ef44c6e)
+$NODE tests/typed_from_checks.js                 # 67 (pack.typedFrom / glossFocus; control vs ef44c6e)
+$NODE tests/session_resume_checks.js             # 46 (drill/passage resume after a tab switch or reload)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)

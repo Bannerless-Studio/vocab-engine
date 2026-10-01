@@ -4,7 +4,7 @@ The trainer itself. `build.sh` (repo root) inlines these files and one pack's ge
 
 | file | label |
 |---|---|
-| core.js | Logic with no DOM (`VocabCore`): progress model and storage key, plan builders (Today, Review, Recall, Test), typed-answer folding and collision guard, characters stage, script primer, passages and listening pass, legacy migration. Shared by the app and every tests/*.js suite. |
+| core.js | Logic with no DOM (`VocabCore`): progress model and storage key, plan builders (Today, Review, Recall, Test), typed-answer folding and collision guard, characters stage, script primer, passages and listening pass, session resume record rules, legacy migration. Shared by the app and every tests/*.js suite. |
 | app.html | UI shell for every tab and stage. Dev mode loads a pack's `.js` files directly (`?pack=zh`, `?packdir=`); build.sh replaces the `PACK-BEGIN`/`PACK-END` block and the `core.js` script tag with inlined code. |
 | sw.template.js | Service worker template. build.sh fills in the build id, page name and audio cache version and writes `sw.js` next to the page. |
 | sw.disable.js | Kill switch: copied over a published `sw.js` to delete this site's caches and unregister. |

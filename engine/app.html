@@ -346,7 +346,9 @@
 <script src="core.js"></script>
 <script>
 "use strict";
-const VC = window.VocabCore;
+// Own object over the shared VocabCore: session resume puts recording wrappers on it (rzLib),
+// leaving window.VocabCore as core.js built it.
+const VC = Object.create(window.VocabCore);
 const $ = id => document.getElementById(id);
 const shuffle = a => VC.shuffle(a);
 const pick = (a,n) => shuffle(a.slice()).slice(0,n);
@@ -695,7 +697,7 @@ function wordOptHtml(byKey, written){
   return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const p = e ? pronBeside(e) : ""; return `${d && d.isPron ? twReading(d.text) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
 }
 
-function drill(items, onDone, summary, onShown){ D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown }; dnext(); }
+function drill(items, onDone, summary, onShown){ D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown, rzo: rzOriginOf(onDone), rzs: summary && summary.rzs }; rzFin = null; dnext(); }
 function setScore(answered, total){
   const left = total ? Math.max(0, total - answered) : 0;
   $("score").textContent = (total && left > 0) ? `${left} left` : "";
@@ -763,21 +765,25 @@ function dnext(){
     setScore(0, 0);
     screenTop();
     P.innerHTML = `<div class="done"><h2>${right} / ${seen}</h2>${summary ? summary(miss) : ""}<button class="next" id="ok">Continue</button></div>`;
-    D = null; drillKeyHandler = null;
-    $("ok").onclick = onDone;
+    rzFin = D; D = null; drillKeyHandler = null;
+    $("ok").onclick = () => { rzFin = null; sessionClear(); onDone(); };
     if(onShown) onShown();
+    sessionSave(true);
     return;
   }
   setScore(D.seen, D.seen + D.q.length);
   screenTop();
   const it = D.q.shift();
+  D.cur = it; it.rzSeen = true;
   if(it.kind === "type") renderTypeItem(it); else renderMcItem(it);
+  sessionSave(true);
 }
 function renderMcItem(it){
   const P = $("panel");
   P.innerHTML = `<div class="drill-body"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>`;
   if(it.mount) it.mount();
-  const opts = shuffle(it.opts.slice());
+  const opts = rzOrderOf(it) || shuffle(it.opts.slice());
+  it.rzShown = opts;
   const container = $("o");
   let answered = false;
   opts.forEach((o,i)=>{
@@ -794,6 +800,7 @@ function renderMcItem(it){
       showReveal(revealHTML(it, it.reveal || ""));
       playReveal(it);
       showNext(); setScore(D.seen, D.seen + D.q.length);
+      D.cur = null; sessionSave(true);
     };
     b.dataset.v = o;
     container.appendChild(b);
@@ -811,7 +818,7 @@ function renderMcItem(it){
 // among the options; k stays "type" so the next review still asks for it typed.
 function typedRequeue(it){
   it.typedMisses = (it.typedMisses || 0) + 1;
-  return it.typedMisses >= 2 && it.choiceFallback ? it.choiceFallback() : it;
+  return it.typedMisses >= 2 && it.choiceFallback ? rzFallback(it) : it;
 }
 function renderTypeItem(it){
   const P = $("panel");
@@ -830,6 +837,7 @@ function renderTypeItem(it){
     showReveal(revealHTML(it, (ok ? "" : `<div class="diff">you typed: ${escapeHtml(input.value)}</div>`) + (it.feedback ? it.feedback(input.value) : "") + (it.reveal||"")));
     playReveal(it);
     showNext(); setScore(D.seen, D.seen + D.q.length);
+    D.cur = null; sessionSave(true);
   }
   $("submit").onclick = submit;
   $("nx").onclick = dnext;
@@ -861,7 +869,7 @@ document.addEventListener("keydown", e => {
   if(e.key === "Escape" && !tokOwns(e) && dismissGlosses()){ e.preventDefault(); return; }
   if(drillKeyHandler && !onShowWritten(e) && !tokOwns(e)) drillKeyHandler(e);
 });
-function quitDrill(){ D = null; drillKeyHandler = null; render(); }
+function quitDrill(){ D = null; drillKeyHandler = null; rzFin = null; sessionClear(); render(); }
 
 // Word taps inside sentences: no progress effect, never inside answer buttons. A tap speaks
 // the word only; the sentence is heard from its own speaker button. A multi-token word
@@ -1128,7 +1136,285 @@ function writtenPronTypeItem(entry){
   return Object.assign(pronTypeItem(entry), { html: kindTag(PRON_NOUN, TONES ? "tones optional" : "") + stimWritten(entry),
     choiceFallback: () => choice(VC.pronChoiceOpts(entry, learnedWords(), WORDS)) });
 }
-const TYPED_ITEM = { word: typeItem, pron: pronTypeItem, written: writtenTypeItem, writtenPron: writtenPronTypeItem,
+// typedFrom: meaning -> characters is a writing item; audio before the answer would say the
+// reading, so the card is silent and the reveal plays it as on every typed item (owner feedback
+// 2026-10-01). Packs without typedFrom keep writtenTypeItem's listen card.
+function silentWrittenTypeItem(entry){
+  return Object.assign(writtenTypeItem(entry), { html: `${kindTag("characters", "")}<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>`, mount: undefined });
+}
+// ------------------------------------------------------------------ session resume
+// The drill or passage in progress survives an app-tab switch and a reload (docs/PACK_SCHEMA.md
+// "Session resume"). The record only says where the learner is: every answer is already in
+// progress, so discarding the record never loses one. It lives in sessionStorage (this browser
+// tab; a reload keeps it, closing the tab drops it), else in memory. Not localStorage: two
+// open tabs of one site would overwrite each other's session.
+const SESSION_KEY = VC.sessionKey(PACK);
+const sessStore = (() => {
+  let mem = null, memSet = false;
+  const ss = () => { try { return typeof sessionStorage !== "undefined" && sessionStorage ? sessionStorage : null; } catch(e){ return null; } };
+  return {
+    get(){ if(memSet) return mem; try { const s = ss(); return s ? s.getItem(SESSION_KEY) : null; } catch(e){ return null; } },
+    set(v){ mem = v; memSet = true; try { const s = ss(); if(s){ if(v == null) s.removeItem(SESSION_KEY); else s.setItem(SESSION_KEY, v); } } catch(e){} }
+  };
+})();
+// build.sh writes the build id into VE_BUILD (a hash of engine + pack sources), so it is known
+// while the page is still parsing, when boot resumes. A page built without it falls back to
+// the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
+// fingerprint is added either way.
+const VE_BUILD = "__VE_SRC_BUILD__";
+const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
+let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
+function sessionBuild(){
+  if(!sessBuildMark) try { for(let n = document.lastChild; n; n = n.previousSibling) if(n.nodeType === 8 && /^ve-build:/.test(n.nodeValue)){ sessBuildMark = n.nodeValue.slice(9); break; } } catch(e){}
+  return (sessBuildMark || "dev") + ":" + SESSION_PACK_FP;
+}
+let sessBootFp = null;   // fingerprint of the progress string boot read, before normalizing
+let rzFin = null;        // a finished drill while its results screen shows
+// Item recipes: each item builder below is wrapped so its result carries the builder's name
+// and arguments (it.rz) and the Math.random draws it made (it.rzTape). A restored queue is
+// rebuilt from them; the item on screen and any item already shown replay their draws, so
+// they come back with the same options and blank. An item not yet shown draws afresh, which
+// the learner cannot tell. The draws pass through the current Math.random untouched, so
+// seeded runs (flag-off goldens) see the same sequence. A VC call that draws goes on the tape
+// as its result ({m, r}), not its draws: meaningOpts shuffles the whole word list (~2,000
+// draws, ~40 KB a record), its result is three word ids. Replay hands the result back.
+let rzDepth = 0, rzReplay = null, rzMemo = null;
+const RZW = {};
+function rzRun(f, self, args){
+  const orig = Math.random, tape = [], replay = rzReplay, outer = rzMemo; rzReplay = null;
+  const m = rzMemo = { tape, replay, side: null };
+  Math.random = () => { const x = replay && typeof replay[0] === "number" ? replay.shift() : orig(); (m.side || tape).push(x); return x; };
+  rzDepth++;
+  try { return { it: f.apply(self, args), tape }; } finally { rzDepth--; Math.random = orig; rzMemo = outer; }
+}
+// Kept as raw draws instead: a call that mutates an array argument (shuffle) or returns one,
+// since a replayed result could not redo that, and a result rzEnc cannot encode.
+function rzLib(name, f){
+  return function(...args){
+    const m = rzMemo; if(!m || m.side) return f.apply(this, args);
+    const r0 = m.replay && m.replay[0];
+    if(r0 && typeof r0 === "object" && r0.m === name){ m.replay.shift(); m.tape.push(r0); return rzDec(r0.r); }
+    const arrs = args.filter(Array.isArray).map(a => [a, a.slice()]);
+    m.side = [];
+    let v, side;
+    try { v = f.apply(this, args); } finally { side = m.side; m.side = null; }
+    if(!side.length) return v;
+    let e = null;
+    if(!args.includes(v) && arrs.every(([a, c]) => a.length === c.length && a.every((x, i) => x === c[i]))) try { e = { m: name, r: rzEnc(v) }; } catch(err){ e = null; }
+    if(e) m.tape.push(e); else m.tape.push(...side);
+    return v;
+  };
+}
+Object.keys(window.VocabCore).forEach(k => { const f = window.VocabCore[k]; if(typeof f === "function") VC[k] = rzLib(k, f); });
+// Only the outermost builder tags: hearItem built as readItem is a hear item. Only declared
+// parameters are kept: .map(hearItem) also passes the index and the whole list.
+function rzWrap(name, f){
+  return RZW[name] = function(...args){
+    if(rzDepth) return f.apply(this, args);
+    const r = rzRun(f, this, args);
+    if(r.it && typeof r.it === "object"){ r.it.rz = { b: name, a: args.slice(0, f.length), rq: r.it.reqKind }; r.it.rzTape = r.tape; }
+    return r.it;
+  };
+}
+hearItem = rzWrap("hear", hearItem); readItem = rzWrap("read", readItem); recallItem = rzWrap("recall", recallItem); typeItem = rzWrap("type", typeItem);
+pronTypeItem = rzWrap("typePron", pronTypeItem); writtenTypeItem = rzWrap("typeWritten", writtenTypeItem); silentWrittenTypeItem = rzWrap("typeWrittenSilent", silentWrittenTypeItem);
+writtenPronTypeItem = rzWrap("typeWrittenPron", writtenPronTypeItem); meaningTypeItem = rzWrap("typeMeaning", meaningTypeItem);
+readSentence = rzWrap("sRead", readSentence); hearSentence = rzWrap("sHear", hearSentence); gapSentence = rzWrap("sGap", gapSentence);
+charDrillItem = rzWrap("char", charDrillItem); scriptDrillItem = rzWrap("script", scriptDrillItem); lessonItem = rzWrap("lesson", lessonItem);
+// A choice counterpart (typedRequeue) is rebuilt from its typed parent.
+function rzFallback(it){
+  const r = rzRun(it.choiceFallback, it, []);
+  if(r.it && typeof r.it === "object"){ r.it.rz = { from: it, rq: r.it.reqKind }; r.it.rzTape = r.tape; }
+  return r.it;
+}
+const rzRefs = () => [["SUNITS", SUNITS], ["SCRIPT_BYID", SCRIPT_BYID], ["CHAR_LIST", CHAR_LIST], ["WORDS", WORDS], ["WORDS_BY_ID", WORDS_BY_ID], ["CHAR_CTX", CHAR_CTX]];
+let rzIdx = null;
+function rzIndex(){
+  if(rzIdx) return rzIdx;
+  const l = new Map(); LESSON_LIST.forEach((ls, li) => (ls.items || []).forEach((it, ii) => l.set(it, [li, ii])));
+  return rzIdx = { c: new Map(CHAR_LIST.map((u, i) => [u, i])), x: new Map(SUNITS.map((u, i) => [u, i])), l };
+}
+const rzFail = () => { throw new Error("session: not resumable"); };
+function rzEnc(a){
+  if(a === undefined) return { u: 1 };
+  if(a === null || typeof a === "string" || typeof a === "number" || typeof a === "boolean") return { v: a };
+  if(typeof a !== "object") rzFail();
+  const ref = rzRefs().find(r => r[1] === a); if(ref) return { r: ref[0] };
+  if(a.id != null && WORDS_BY_ID[a.id] === a) return { w: a.id };
+  if(SENT_INDEX.has(a)) return { s: SENT_INDEX.get(a) };
+  const ix = rzIndex();
+  if(ix.c.has(a)) return { c: ix.c.get(a) };
+  if(ix.x.has(a)) return { x: ix.x.get(a) };
+  if(ix.l.has(a)) return { l: ix.l.get(a) };
+  if(Array.isArray(a)) return { A: a.map(rzEnc) };
+  if(Object.getPrototypeOf(a) !== Object.prototype) rzFail();
+  const o = {}; Object.keys(a).forEach(k => { o[k] = rzEnc(a[k]); }); return { O: o };
+}
+const rzHas = x => x !== undefined ? x : rzFail();
+function rzDec(e){
+  if(!e || typeof e !== "object") rzFail();
+  if(e.u) return undefined;
+  if("v" in e) return e.v;
+  if(e.r){ const ref = rzRefs().find(r => r[0] === e.r); return ref ? ref[1] : rzFail(); }
+  if(e.w != null) return rzHas(WORDS_BY_ID[e.w]);
+  if(e.s != null) return rzHas(SENTENCES[e.s]);
+  if(e.c != null) return rzHas(CHAR_LIST[e.c]);
+  if(e.x != null) return rzHas(SUNITS[e.x]);
+  if(e.l) return rzHas(((LESSON_LIST[e.l[0]] || {}).items || [])[e.l[1]]);
+  if(e.A) return e.A.map(rzDec);
+  if(e.O){ const o = {}; Object.keys(e.O).forEach(k => { o[k] = rzDec(e.O[k]); }); return o; }
+  return rzFail();
+}
+function rzEncItem(it, withTape){
+  const r = it && it.rz; if(!r) rzFail();
+  const out = r.from ? { f: rzEncItem(r.from, withTape) } : { b: r.b, a: r.a.map(rzEnc) };
+  if(it.reqKind && it.reqKind !== r.rq) out.rq = it.reqKind;   // set after the build (withReq), not by it
+  if(it.typedMisses) out.tm = it.typedMisses;
+  if(withTape) out.t = it.rzTape || [];
+  return out;
+}
+function rzDecItem(e){
+  let it;
+  if(e.f){ const parent = rzDecItem(e.f); rzReplay = e.t ? e.t.slice() : null; it = rzFallback(parent); }
+  else { const f = RZW[e.b]; if(!f || !Array.isArray(e.a)) rzFail(); const args = e.a.map(rzDec); rzReplay = e.t ? e.t.slice() : null; it = f(...args); }
+  rzReplay = null;
+  if(!it || typeof it !== "object") rzFail();
+  if(e.rq) it.reqKind = e.rq;
+  if(e.tm) it.typedMisses = e.tm;
+  if(e.t) it.rzSeen = true;
+  return it;
+}
+// Chrome lists its voices after boot, so a session resumed at boot rebuilds a hear item as a
+// read item with the no-voice notice. Once a voice arrives, every such item not yet answered
+// is rebuilt from its recipe (same draws, so the same options); the one on screen is shown
+// again, now playing.
+function rzRehear(){
+  const again = it => { try { const n = rzDecItem(rzEncItem(it, !!it.rzSeen)); return n.needsNotice ? it : n; } catch(e){ rzReplay = null; return it; } };
+  D.q = D.q.map(it => it.needsNotice && it.rz ? again(it) : it);
+  const c = D.cur;
+  if(c && c.needsNotice && c.rz){
+    const n = again(c);
+    if(n !== c){ n.rzOrder = c.rzShown; D.q.unshift(n); D.cur = null; dnext(); }
+  }
+}
+// The options as last shown, once, when they are exactly this item's options.
+function rzOrderOf(it){
+  const o = it.rzOrder; it.rzOrder = null;
+  if(!Array.isArray(o) || !Array.isArray(it.opts) || o.length !== it.opts.length) return null;
+  const m = o.map(v => it.opts.find(x => String(x) === String(v)));
+  return m.every(x => x !== undefined) && new Set(m).size === m.length ? m : null;
+}
+// Where each drill goes when its results screen's Continue is pressed. Closures that carry
+// state are tagged (rzTag) by their factories; the plain render functions are matched as is.
+const rzTag = (o, f) => Object.assign(f, { rzo: o });
+const RZ_TAB = { today: "today", todayLearn: "today", test: "test", words: "words", wordsSet: "words", sounds: "sounds", lesson: "sounds" };
+function rzOriginOf(onDone){
+  if(onDone && onDone.rzo) return onDone.rzo;
+  return onDone === todayStep ? { o: "today" } : onDone === testRender ? { o: "test" } : onDone === wordsRender ? { o: "words" } : onDone === soundsRender ? { o: "sounds" } : null;
+}
+function rzDoneOf(o){
+  if(o.o === "today") return todayStep;
+  if(o.o === "todayLearn") return todayLearnDone(o.lv);
+  if(o.o === "test") return testRender;
+  if(o.o === "words") return wordsRender;
+  if(o.o === "wordsSet") return wordsSetDone(o.lv, o.set, o.ut);
+  if(o.o === "sounds") return soundsRender;
+  if(o.o === "lesson" && LESSON_LIST[o.i]) return lessonDone(o.i);
+  return rzFail();
+}
+function drillRec(d){
+  const items = (d.cur ? [d.cur] : []).concat(d.q);
+  return { o: d.rzo, cur: !!d.cur, ord: d.cur && d.cur.rzShown ? d.cur.rzShown : null,
+    q: items.map(it => rzEncItem(it, it === d.cur || !!it.rzSeen)), right: d.right, seen: d.seen,
+    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined };
+}
+// A miss is kept as its item's recipe, once per key (missSummary shows the first one): the
+// reveal markup with its example sentences is ~3 KB a miss.
+function rzEncMisses(miss){
+  const done = new Set();
+  return miss.map(m => {
+    if(m.key != null && done.has(m.key)) return { key: m.key };
+    done.add(m.key);
+    try { return { key: m.key, z: rzEncItem(m, true) }; } catch(e){ return { key: m.key, reveal: m.reveal || "" }; }
+  });
+}
+function rzDecMisses(miss){
+  if(!Array.isArray(miss)) rzFail();
+  return miss.map(m => {
+    if(!m.z) return { key: m.key, reveal: m.reveal || "" };
+    try { return Object.assign(rzDecItem(m.z), { key: m.key }); } catch(e){ rzReplay = null; return { key: m.key, reveal: "" }; }
+  });
+}
+function sessionRecord(){
+  const d = D || rzFin, rec = {};
+  if(d && d.rzo && RZ_TAB[d.rzo.o] === tab){ rec.tab = tab; rec.drill = drillRec(d); }
+  else if(d && !d.rzo) return null;
+  else if(RD && (RD.today ? "today" : "read") === tab){ rec.tab = tab; rec.rd = Object.assign({}, RD, { p: undefined, pid: RD.p.id, playing: false }); }
+  else if(tab === "today" && todayStepState && todayStepState.at != null) rec.tab = tab;
+  else return null;
+  if(rec.tab === "today"){
+    const t = todayStepState; if(!t || t.at == null) return null;
+    rec.today = { step: t.step, at: t.at, hasRead: "read" in t, read: t.read ? Object.assign({}, t.read, { p: t.read.p.id }) : null };
+  }
+  return Object.assign({ v: VC.SESSION_VERSION, build: sessionBuild(), t: Date.now(), fp: VC.sessionHash(JSON.stringify(prog)) }, rec);
+}
+// replace: this state starts or moves a session, so one it cannot record must not leave an
+// older session behind. Without it (tab switch, page hide) nothing recordable means no change.
+function sessionSave(replace){
+  let rec = null;
+  try { rec = sessionRecord(); } catch(e){ rec = null; }
+  if(rec) sessStore.set(JSON.stringify(rec));
+  else if(replace) sessStore.set(null);
+}
+function sessionPeek(){ try { return JSON.parse(sessStore.get() || "null"); } catch(e){ sessStore.set(null); return null; } }
+function sessionClear(forTab){
+  if(forTab){ const r = sessionPeek(); if(!r || r.tab !== forTab) return; }
+  sessStore.set(null);
+}
+const passageById = id => PASSAGE_LIST.find(p => p.id === id) || rzFail();
+const tabTitle = t => ({ today:"Today", sounds: SCRIPT_TAB ? SCFG.stages[0].label : "Sounds", words:"Words", read:"Read", test:"Test", progress:"Progress" })[t];
+// forTab: a tab was tapped, resume only that tab's session; null at boot: resume any. A stale
+// record (another build, over 12 h old, or progress changed since it was saved) is dropped.
+function sessionResume(forTab){
+  const rec = sessionPeek(); if(!rec) return false;
+  const fp = [VC.sessionHash(JSON.stringify(prog))]; if(sessBootFp) fp.push(sessBootFp);
+  if(VC.sessionStale(rec, { build: sessionBuild(), fp, now: Date.now() }) || !RZ_TAB_OK(rec.tab)){ sessStore.set(null); return false; }
+  if(forTab && rec.tab !== forTab) return false;
+  let today = null, items = null, onDone = null, rd = null, misses = null, results = null;
+  try {
+    if(rec.today){
+      const t = rec.today; today = { step: t.step, at: t.at };
+      if(t.hasRead) today.read = t.read ? Object.assign({}, t.read, { p: passageById(t.read.p) }) : null;
+    }
+    if(rec.drill){
+      if(rec.drill.o.o === "today" && !today) rzFail();
+      items = rec.drill.q.map(rzDecItem);
+      misses = rzDecMisses(rec.drill.miss);
+      results = rzResultsOf(rec.drill.sm);
+      if(rec.drill.cur && rec.drill.ord && items[0]) items[0].rzOrder = rec.drill.ord;
+      onDone = rzDoneOf(rec.drill.o);
+    } else if(rec.rd){
+      rd = Object.assign({}, rec.rd, { p: passageById(rec.rd.pid) }); delete rd.pid;
+      if(rd.today && !today) rzFail();
+    } else if(!today) rzFail();
+  } catch(e){ rzReplay = null; sessStore.set(null); return false; }
+  switchToTab(rec.tab, tabTitle(rec.tab));
+  stopSpeaking(); drillKeyHandler = null; rzFin = null;
+  todayStepState = today;
+  if(rec.drill){
+    const o = rec.drill.o;
+    if(o.o === "wordsSet"){ wordsQuery = ""; wordsLv = o.lv; wordsSet = o.set; }
+    if(o.o === "lesson") soundsSel = o.i;
+    D = { q: items, right: rec.drill.right, seen: rec.drill.seen, miss: misses, onDone, summary: results.summary, onShown: results.onShown, rzo: o, rzs: results.summary.rzs };
+    dnext();
+  } else if(rd){ D = null; RD = rd; readRender(); }
+  else { D = null; todayStepState.step = todayStepState.at; todayStep(); }
+  return true;
+}
+const RZ_TAB_OK = t => t === "today" || t === "test" || t === "words" || t === "sounds" || t === "read";
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden") sessionSave(); });
+if(typeof window.addEventListener === "function") window.addEventListener("pagehide", () => sessionSave());
+const TYPED_ITEM = { word: typeItem, pron: pronTypeItem, written: silentWrittenTypeItem, writtenPron: writtenPronTypeItem,
   writtenMeaning: e => meaningTypeItem(e, false), pronMeaning: e => meaningTypeItem(e, true) };
 function typedFromSlotItem(plan, i){
   const e = plan[i].word; const shown = !!e.w && !dispWord(e).isPron;
@@ -1382,19 +1668,26 @@ if(SCRIPT_TAB){
 }
 if(!HAS_PASSAGES) document.querySelector('#tabs button[data-t="read"]').hidden = true;
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{
+  // Leaving a tab keeps its drill or passage as the session (session resume) and coming back
+  // resumes it; tapping the tab already open still ends it, the one way out of a drill
+  // without a keyboard.
+  const same = b.dataset.t === tab;
+  if(same) sessionClear(tab); else sessionSave();
   document.querySelectorAll("#tabs button").forEach(x=>x.classList.remove("on"));
-  b.classList.add("on"); tab = b.dataset.t; D = null; drillKeyHandler = null;
+  b.classList.add("on"); tab = b.dataset.t; D = null; drillKeyHandler = null; rzFin = null;
   todayStepState = null; soundsSel = null; wordsSet = null; testSel = null;
-  // A Read-tab passage survives a tab switch; the Today Read stage belongs to the Today
-  // session, which a tab switch ends.
+  // A Read-tab passage survives a tab switch in memory; the Today Read stage comes back
+  // through the session record with the rest of the Today session.
   if(RD && RD.today) RD = null;
-  render();
+  if(same || !sessionResume(tab)) render();
 });
 // Re-entering a screen restores it, never restarts it (TODO.md "Engine follow-ups"). Left
-// as is: a drill item (speaks on mount), a Today session between steps (continuations live
-// in closures) and a placement run (render() would restart it from the intro).
+// as is: a drill item (speaks on mount) unless it was built for want of a voice (rzRehear), a
+// results screen (render() would drop it), a Today session between steps (continuations
+// live in closures) and a placement run (render() would restart it from the intro).
 function remountScreen(){
-  if(D) return;
+  if(D){ if(hasSpeech) rzRehear(); return; }
+  if(rzFin) return;
   if(RD && tab === (RD.today ? "today" : "read")){ readRender(); return; }
   if(tab === "today" && todayStepState) return;
   if(tab === "test" && testSel === "placement" && PL) return;
@@ -1402,6 +1695,7 @@ function remountScreen(){
 }
 function render(){
   stopSpeaking();
+  if(rzFin){ rzFin = null; sessionClear(); }
   D = null; drillKeyHandler = null; screenTop();
   $("htitle").textContent = { today:"Today", sounds: SCRIPT_TAB ? SCFG.stages[0].label : "Sounds", words:"Words", read:"Read", test:"Test", progress:"Progress" }[tab];
   setScore(0,0);
@@ -1530,6 +1824,9 @@ function enterFirstSoundsLessonFromToday(){
   const backToToday = () => { switchToTab("today", "Today"); soundsSel = null; todayRender(); };
   lessonTeach(LESSON_LIST[0], () => { prog.lessons[LESSON_LIST[0].id] = 1; store.save(); backToToday(); }, backToToday);
 }
+// nn.set is the first taught word's set; a leftover teach can close that set and the next, so
+// the counter is recounted from the records instead of set to nn.set+1.
+const todayLearnDone = lv => rzTag({ o: "todayLearn", lv }, () => { VC.settleSetCounter(prog, WORDS, PACK, lv); store.save(); todayStep(); });
 function todayStep(){
   stopSpeaking();
   const snap = HAS_STAGES ? (todayStepState.snap || (todayStepState.snap = takeSnapshot())) : null;
@@ -1539,6 +1836,7 @@ function todayStep(){
   const g = VC.todayGates(lw.length, snap ? snapLearns(snap) : !!nn, avail.length, scriptCount());
   const units = snap && snap.charsStarted ? CHAR_LIST : undefined;
   const s = todayStepState.step++;
+  todayStepState.at = s; sessionSave(true);
   if(s === 0){
     if(g.review && snap){
       const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord });
@@ -1560,12 +1858,7 @@ function todayStep(){
       vocabTeach(list, nn.lv, () => {
         const items = [];
         list.forEach(w => items.push(...learnPair(w)));
-        drill(items, () => {
-          // nn.set is the first taught word's set; a leftover teach can close that set and the
-          // next, so the counter is recounted from the records instead of set to nn.set+1.
-          VC.settleSetCounter(prog, WORDS, PACK, nn.lv);
-          store.save(); todayStep();
-        }, missSummary);
+        drill(items, todayLearnDone(nn.lv), missSummary);
       });
       return;
     }
@@ -1594,7 +1887,7 @@ function todayStep(){
   todayFinish();
 }
 function todayFinish(){
-  D = null; drillKeyHandler = null; setScore(0,0);
+  D = null; drillKeyHandler = null; setScore(0,0); sessionClear();
   prog.sessions = (prog.sessions||0) + 1; store.save();
   const P = $("panel");
   P.innerHTML = `<div class="done"><h2>Session done</h2><p class="q">${learnedWords().length} words learned so far.</p><button class="next" id="again">Back to Today</button></div>`;
@@ -1655,13 +1948,25 @@ function scriptTeach(ss, stage, onDrill){
 }
 function scriptLearn(snap, i){
   const ss = snap.ssets[i];
-  const more = i + 1 < snap.ssets.length;
+  const r = scriptMoreResults(snap, i);
   scriptTeach(ss, snap.stage, () => {
     const ctx = scriptCtx(ss.units);
-    drill(VC.learnScriptPlan(ss.units, PACK, scriptKindCtx()).map(p => scriptDrillItem(p.kind, p.unit, ctx)), todayStep,
-      more ? miss => `${missSummary(miss)}<button class="next" id="moreSet" style="margin-bottom:8px">One more set</button>` : missSummary,
-      more ? () => { $("moreSet").onclick = () => scriptLearn(snap, i + 1); } : undefined);
+    drill(VC.learnScriptPlan(ss.units, PACK, scriptKindCtx()).map(p => scriptDrillItem(p.kind, p.unit, ctx)), todayStep, r.summary, r.onShown);
   });
+}
+// The results screen of script set i; rzs names it for the session record, so a reload keeps
+// "One more set".
+function scriptMoreResults(snap, i){
+  if(i + 1 >= snap.ssets.length) return { summary: missSummary };
+  const summary = miss => `${missSummary(miss)}<button class="next" id="moreSet" style="margin-bottom:8px">One more set</button>`;
+  summary.rzs = { s: "scriptMore", snap: { stage: snap.stage, ssets: snap.ssets }, i };
+  return { summary, onShown: () => { $("moreSet").onclick = () => scriptLearn(snap, i + 1); } };
+}
+function rzResultsOf(e){
+  if(!e) return { summary: missSummary };
+  const s = rzDec(e);
+  if(s.s === "scriptMore" && s.snap && Array.isArray(s.snap.ssets) && s.snap.ssets[s.i + 1]) return scriptMoreResults(s.snap, s.i);
+  return rzFail();
 }
 // Lesson card `body` is trusted pack HTML (pack authors write it); everything else is escaped.
 function lessonTeach(lesson, onDone, onBack){
@@ -1692,6 +1997,7 @@ function lessonTeach(lesson, onDone, onBack){
   $("dr").onclick = () => drill(planned.map(x => lessonItem(x.it, VC.lessonItemKey(lesson.id, x.i), x.mode)), onDone, missSummary);
 }
 
+const lessonDone = i => rzTag({ o: "lesson", i }, () => { prog.lessons[LESSON_LIST[i].id] = 1; store.save(); soundsSel = null; soundsRender(); });
 function soundsRender(){
   stopSpeaking();
   setScore(0,0); screenTop();
@@ -1699,8 +2005,7 @@ function soundsRender(){
   if(SCRIPT_TAB){ scriptTabRender(); return; }
   if(soundsSel != null){
     const lesson = LESSON_LIST[soundsSel];
-    lessonTeach(lesson,
-      () => { prog.lessons[lesson.id] = 1; store.save(); soundsSel = null; soundsRender(); },
+    lessonTeach(lesson, lessonDone(soundsSel),
       () => { soundsSel = null; soundsRender(); });
     return;
   }
@@ -1786,6 +2091,15 @@ function wordListInto(wl, list){
     wl.appendChild(row);
   });
 }
+// The counter stops at the first set with an unrecorded word, so drilling ahead never makes the
+// bars skip a gap. `d` goes only on words untaught before the drill (untaught: their ids): on a
+// taught word it would hide the level's taught record and could flip the level back to the
+// counter-prefix fallback.
+const wordsSetDone = (lv, set, untaught) => rzTag({ o: "wordsSet", lv, set, ut: untaught }, () => {
+  if(wordsSet !== (prog.sets[wordsLv]||0)) untaught.forEach(id => { VC.ensureWordRec(prog, WORDS, PACK, id).d = 1; });
+  VC.settleSetCounter(prog, WORDS, PACK, wordsLv);
+  store.save(); wordsRender();
+});
 function renderWordBody(){
   const body = $("wbody");
   if(!body) return; // debounced search render may fire after the Words tab was left
@@ -1817,15 +2131,7 @@ function renderWordBody(){
   wordListInto($("wl"), set);
   $("dr").onclick = () => {
     const items = []; set.forEach(w => items.push(...learnPair(w)));
-    // The counter stops at the first set with an unrecorded word, so drilling ahead never makes
-    // the bars skip a gap. `d` goes only on words untaught before the drill: on a taught word it
-    // would hide the level's taught record and could flip the level back to the counter-prefix
-    // fallback.
-    drill(items, () => {
-      if(wordsSet !== (prog.sets[wordsLv]||0)) set.forEach(w => { if(!got.has(w.id)) VC.ensureWordRec(prog, WORDS, PACK, w.id).d = 1; });
-      VC.settleSetCounter(prog, WORDS, PACK, wordsLv);
-      store.save(); wordsRender();
-    }, missSummary);
+    drill(items, wordsSetDone(wordsLv, wordsSet, set.filter(w => !got.has(w.id)).map(w => w.id)), missSummary);
   };
   if(canReview) $("rev").onclick = () => drill(VC.buildReviewPlan(learnedWords(), prog, PACK, { canHear: canHearWord }).map(itemFromPlan), wordsRender, missSummary);
 }
@@ -2048,8 +2354,9 @@ function listenScreen(){
   };
   const leave = () => { rd.playing = false; stopSpeaking(); };
   if(RD.today) $("rskip").onclick = () => { leave(); RD = null; todayStep(); };
-  else $("rback").onclick = () => { leave(); RD = null; readRender(); };
+  else $("rback").onclick = () => { leave(); RD = null; sessionClear(); readRender(); };
   $("rdone").onclick = () => { leave(); RD.qi = 0; RD.shown = false; readQuestionScreen(); };
+  sessionSave(true);
 }
 function readPassageScreen(){
   setScore(0,0); screenTop();
@@ -2064,8 +2371,9 @@ function readPassageScreen(){
   wirePassage($("pbox"), $("gloss"));
   // Nothing is recorded, so the same passage is offered next session.
   if(RD.today) $("rskip").onclick = () => { RD = null; todayStep(); };
-  else $("rback").onclick = () => { RD = null; readRender(); };
+  else $("rback").onclick = () => { RD = null; sessionClear(); readRender(); };
   $("rdone").onclick = () => { RD.qi = 0; RD.shown = false; readQuestionScreen(); };
+  sessionSave(true);
 }
 function readQuestionScreen(){
   stopSpeaking(); // no-voice path: a still-playing clip (previous reveal, read-aloud) must not run into this question
@@ -2135,6 +2443,7 @@ function readQuestionScreen(){
       if(rec.ok !== null) return;
       rec.given = v; rec.ok = VC.gradeQuestion(q, v);
       reveal(true);
+      sessionSave(true);
     };
     box.appendChild(b);
   });
@@ -2148,6 +2457,7 @@ function readQuestionScreen(){
     if(e.key >= "1" && e.key <= String(order.length) && rec.ok === null) box.children[+e.key-1].click();
     else if(e.key === "Enter" && $("nx").style.display !== "none") $("nx").click();
   };
+  sessionSave(true);
 }
 function markPassageFinished(){
   const sc = RD.answers.filter(a => a && a.ok).length;
@@ -2182,6 +2492,7 @@ function readResults(){
       if(chosen.length){ VC.applyWeakWords(prog, chosen, WORDS, PACK); store.save(); }
       RD = null; todayStep();
     };
+    sessionSave(true);
     return;
   }
   if(anyWeak && !RD.added) $("addrev").onclick = () => {
@@ -2192,7 +2503,8 @@ function readResults(){
     const m = $("addmsg"); m.hidden = false; m.textContent = rd.added;
     bringIntoView(m);
   };
-  $("rlist").onclick = () => { RD = null; readRender(); };
+  $("rlist").onclick = () => { RD = null; sessionClear(); readRender(); };
+  sessionSave(true);
 }
 
 function testRender(){
@@ -2476,6 +2788,7 @@ function legacyFailHTML(why){
 }
 (async function(){
   const got = await store.load();
+  if(got.ok) sessBootFp = VC.sessionHash(got.value == null ? "" : got.value);
   // Only when this pack's own key read fine and holds nothing.
   const lm = (HAS_LEGACY && got.ok && (got.value == null || got.value === "")) ? await legacyBootMigration() : null;
   const mig = lm && lm.m;
@@ -2502,7 +2815,7 @@ function legacyFailHTML(why){
   prog = b.prog;
   applyTheme();
   booted = true;
-  render();
+  if(storeReadOnly || !sessionResume(null)) render();
 })();
 
 // build.sh writes sw.js next to the built page. Registration is a no-op on file:// and
