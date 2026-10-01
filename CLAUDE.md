@@ -43,21 +43,21 @@ Why it is built this way (one line each):
 
 ## Commands (pinned)
 
-Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-09-30, branch zh-typed-drills (main 9744ad1 merged).
+Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-01, branch zh-say (main 78d7511 merged).
 
 ```sh
 $NODE tests/engine_checks.js                     # 703 passed; includes the dist/zh.html + sw.js stale guard
 $NODE tests/pron_aids_checks.js                  # 156
 $NODE tests/migration_checks.js                  # 292 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
 $NODE tests/characters_checks.js                 # 134
-$NODE tests/characters_app_checks.js             # 179
+$NODE tests/characters_app_checks.js             # 188
 $NODE tests/script_checks.js                     # 128
 $NODE tests/script_app_checks.js                 # 212
-$NODE tests/audio_checks.js                      # 88 (app section needs ../persian)
+$NODE tests/audio_checks.js                      # 90 (app section needs ../persian)
 $NODE tests/passage_audio_checks.js              # 43
 $NODE tests/listen_mode_checks.js                # 78
 $NODE tests/validate_pack_audio_checks.js        # 30
-$NODE tests/validate_pack_characters_checks.js   # 71
+$NODE tests/validate_pack_characters_checks.js   # 78
 $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/typed_from_checks.js                 # 63 (pack.typedFrom / glossFocus; control vs ef44c6e)
