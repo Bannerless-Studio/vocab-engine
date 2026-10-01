@@ -124,7 +124,7 @@ const tick = () => new Promise(r => setTimeout(r, 0));
 async function boot(opts){
   const o = opts || {};
   const document = makeFakeDom();
-  const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(){} };
+  const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(u){ if(o.spoken) o.spoken.push(u.text); } };
   const window = { VocabCore: VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(){}, addEventListener(){} };
   const localStorage = o.storage || { getItem(){ return null; }, setItem(){} };
   const pack = o.pack || PACK;
@@ -142,6 +142,7 @@ return {
   enterStep: step => { todayStepState = { step }; todayStep(); },
   goto: t => { tab = t; testSel = null; RD = null; render(); },
   legacyNotice: () => legacyNotice, legacyFail: () => legacyFail, readOnly: () => storeReadOnly, getPrep: () => todayPrep,
+  sayWord, sayUnit, saySentence, typeItem, vocabTeach,
   rubyTextHTML, sentenceRowHTML, sentenceRevealBlock, readSentence, charDrillItem, passageSentenceHTML, hasChars: () => HAS_CHARACTERS,
   onShowWritten, gapSentence, recallItem, readItem, hearItem, revealBlock, wordRowHTML, glossHTML, passagePlainHTML, charTeach, revealWritten, pronFirst: () => PRON_FIRST,
   panelListeners: () => document.getElementById("panel")._listeners.click || [],
@@ -149,8 +150,10 @@ return {
 };`;
   const names = ["document","window","navigator","location","localStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","PACK","WORDS","SENTENCES","LESSONS","PASSAGES"];
   const args = [document, window, { userAgent:"CharsAppChecks/1.0" }, undefined, localStorage, () => ({ matches:false }), fn => setTimeout(fn, 0),
-    function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, pack, o.words || WORDS, o.sentences || SENTENCES, o.lessons || LESSONS, o.passages || PASSAGES];
+    function(){ const a = { src: "", pause(){}, play(){ if(o.played) o.played.push(a.src); return Promise.resolve(); } }; return a; }, () => true, () => {}, pack, o.words || WORDS, o.sentences || SENTENCES, o.lessons || LESSONS, o.passages || PASSAGES];
   if(o.chars !== false){ names.push("CHARACTERS"); args.push(o.units || CHARACTERS); }
+  // A recording utterance only when the caller collects speech, so other sections boot as before.
+  if(o.spoken){ names.push("SpeechSynthesisUtterance"); args.push(function(t){ this.text = t; }); }
   if(o.legacy){ names.push("LEGACY"); args.push(o.legacy === true ? LEGACY : o.legacy); }
   const api = new Function(...names, fnBody)(...args);
   await tick(); await tick();
@@ -976,6 +979,60 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
       check(`${name}: ${possible} of ${us.length} units have a sentence that can show them written; every such card does (${bad.length} bad${bad[0] ? ": " + bad.slice(0, 5).join(" ") : ""})`, possible > 0 && bad.length === 0);
     } catch(e){ check(`${name}: section threw: ${e.message}`, false); }
   }
+
+  // ---------------------------------------------------------------- say carriers
+  // words[].say / characters[].say (docs/PACK_SCHEMA.md words.json, docs/ZH_SAY.md): the TTS
+  // speaks the carrier (还 hái -> 孩, a lone 还 is read huán otherwise) and the page never shows it.
+  console.log("\n[say] TTS carriers for polyphonic words: spoken, never displayed");
+  try{
+    const HAI = WORDS.find(w => w.w === "还"), YI = WORDS.find(w => w.w === "一");
+    const HAI_U = CHARACTERS.find(u => u.words[0] === HAI.id);
+    check("pack: 还 carries say 孩 on its word and its character unit; 一 has none", HAI.say === "孩" && HAI_U.say === "孩" && !("say" in YI));
+    const spoken = [], played = [];
+    const b = await boot({ pack: PACK_ZH, spoken, played });
+    b.api.sayWord(HAI); b.api.sayWord(YI);
+    check("sayWord: 还 speaks the carrier 孩, 一 its written form", spoken.join() === "孩,一");
+    spoken.length = 0;
+    const h = b.api.hearItem(HAI); b.api.el("panel").innerHTML = h.html; h.mount();
+    check("hear item (Listen) for 还 speaks 孩", spoken.join() === "孩");
+    spoken.length = 0;
+    const cp = b.api.charDrillItem("charPick", HAI_U); b.api.el("panel").innerHTML = cp.html; cp.mount(); b.api.charDrillItem("charRead", HAI_U).onReveal();
+    check("character unit 还: charPick audio and the reveal speak 孩", spoken.join() === "孩,孩");
+    spoken.length = 0;
+    b.api.sayUnit({ unitId: HAI_U.id, wordId: null, t: HAI_U.t });
+    check("a unit with no word speaks its own say", spoken.join() === "孩");
+    spoken.length = 0;
+    const sent = SENTENCES.find(x => x.words.includes(HAI.id) && x.t.length > 1);
+    b.api.saySentence(sent);
+    check("sentence TTS is unchanged: a 还 sentence is spoken as written, read in context", spoken.join() === sent.t);
+    spoken.length = 0;
+    const clip = Object.assign({}, HAI, { audio: "audio/w/hai.opus" });
+    b.api.sayWord(clip);
+    check("a word with a recorded clip plays the clip, not the carrier", played.join() === "audio/w/hai.opus" && spoken.length === 0);
+    // Display audit: a marker carrier on every word and unit must appear in no rendered markup.
+    const MARK = "\u2603SAY";
+    const words = WORDS.map(w => Object.assign({}, w, { say: MARK }));
+    const units = CHARACTERS.map(u => Object.assign({}, u, { say: MARK }));
+    const mSpoken = [];
+    const m = await boot({ pack: PACK_ZH, words, units, spoken: mSpoken });
+    const out = [];
+    const MBY = Object.fromEntries(words.map(w => [w.id, w]));
+    const sample = [HAI, YI, ...WORDS.slice(0, 40)].map(w => MBY[w.id]);
+    sample.forEach(w => {
+      [m.api.hearItem(w), m.api.readItem(w), m.api.recallItem(w), m.api.typeItem(w)].forEach(it => out.push(it.html || "", it.reveal || ""));
+      out.push(m.api.revealBlock(w), m.api.wordRowHTML(w));
+    });
+    m.api.vocabTeach(sample.slice(0, 8), "1", () => {}); out.push(m.api.html("panel"));
+    const us = units.filter(u => sample.some(w => w.id === u.words[0])).slice(0, 10);
+    m.api.charTeach({ units: us, index: 0, total: 1 }, { label: "字" }, () => {}); out.push(m.api.html("panel"));
+    us.forEach(u => ["charRead", "charSound", "charPick", "charRecall"].forEach(k => { const it = m.api.charDrillItem(k, u); out.push(it.html || "", it.reveal || "", (it.opts || []).join()); }));
+    m.api.wordsSearch("还"); out.push(m.api.html("panel"));
+    m.api.goto("words"); out.push(m.api.html("panel"));
+    const leak = out.filter(x => String(x).includes(MARK)).length;
+    check(`say is never displayed: ${out.length} rendered blocks (word items, reveals, rows, teach cards, unit items, Words list) contain no carrier (${leak} leak)`, out.length > 100 && leak === 0 && out.some(x => String(x).includes("还")));
+    mSpoken.length = 0; m.api.sayWord(MBY[HAI.id]);
+    check("control: the same boot speaks the marker carrier", mSpoken.join() === MARK);
+  } catch(e){ check(`say section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- RTL rendering rules
   // charTeach and the character drill under pack.rtl (docs/PACK_SCHEMA.md "RTL rendering"):

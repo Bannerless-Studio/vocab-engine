@@ -617,7 +617,7 @@ const canListenPassage = p => !!(p && p.sentences && p.sentences.length) && p.se
 // Every site that speaks a pack word goes through sayWord, and every "can it be heard" gate
 // through canHearWord, so a word with a clip is playable with no voice (docs/AUDIO.md).
 const wordAudio = VC.wordAudio;
-const sayWord = (w, btn) => speak(w.w, btn, wordAudio(w));
+const sayWord = (w, btn) => speak(VC.wordSay(w), btn, wordAudio(w));
 const canHearWord = w => hasSpeech || !!wordAudio(w);
 const PACK_AUDIO = VC.packAudio(PACK);
 // Counted with the session's own canHearWord, so a pack with no voice and no clips never
@@ -1210,7 +1210,7 @@ function sentenceItemFor(s){
   return gapSentence(s, k === "gapType") || readSentence(s);
 }
 
-const sayUnit = (it, btn) => { const w = WORDS_BY_ID[it.wordId]; if(w) sayWord(w, btn); else speak(it.t, btn); };
+const sayUnit = (it, btn) => { const w = WORDS_BY_ID[it.wordId]; if(w) sayWord(w, btn); else { const u = CHAR_LIST.find(x => x.id === it.unitId); speak(VC.wordSay({ w: it.t, say: u && u.say }), btn); } };
 const canHearUnit = it => { const w = WORDS_BY_ID[it.wordId]; return w ? canHearWord(w) : hasSpeech; };
 function charRevealBlock(it){
   const tap = WORDS_BY_ID[it.wordId] && canHearWord(WORDS_BY_ID[it.wordId]);
