@@ -15,6 +15,7 @@ Node checks with no dependencies. Each suite `require`s `engine/core.js`, and th
 | audio_checks.js | Recorded audio: core.js clip lookup, app call sites and fallback order, build.sh audio version, sw.js audio cache. App part boots ../persian. |
 | passage_audio_checks.js | Passage questions spoken with Replay, source sentence on reveal, hidden question translation. |
 | listen_mode_checks.js | Listening pass on spaced re-reads; no-voice control byte-identical to pinned sha ea5dcbc. |
+| session_resume_checks.js | Session resume on zh: core key/fingerprint/staleness rules; reload mid-drill (same item, option order, queue, counts), tab switch and back, stale records dropped with no answer lost, Test and Words-tab drills, a typed item's choice counterpart, the Read flow and Today Read stage, storage keys. |
 | typed_from_checks.js | `pack.typedFrom` / `pack.glossFocus`: kind rotation and fallback, typed-meaning matcher and gloss formatter tables, stimulus leak checks and renderer on zh, every glossFocus render site; fix-round rules (reading notes off stimuli + 1193-gloss audit, truncated/lone-letter/"A or B" matcher rules, qualifier placement, characters -> pinyin choice fallback); control byte-identical to pinned engine sha ef44c6e with both fields absent. |
 | validate_pack_audio_checks.js | tools/validate_pack.py rules for `pack.audio` and clip fields. |
 | validate_pack_characters_checks.js | validate_pack/jsonify/build.sh handling of characters.json, ruby, legacy.json. |
