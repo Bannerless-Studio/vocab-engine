@@ -684,6 +684,24 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     }
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
+  // fb3-lag browser report F1: a finished flow left a recordable state, so the page-hide save
+  // re-parked it and every reopen replayed its completion (Today: "Session done", sessions + 1).
+  console.log("\n[13] a finished flow is never re-parked: hide and reopen replay no completion");
+  try {
+    const st = fresh(), s0 = seedPF().sessions;
+    let b = await boot(Object.assign({ seed: 60 }, st));
+    b.api.el("go").click(); finishTodayAll(b.api);
+    const done = /Session done/.test(b.api.html("panel")), s1 = JSON.parse(st.ls.getItem(KEY)).sessions;
+    b.api.hide();
+    check(`Today on "Session done", page hidden: no session record (${st.ls.getItem(SKEY) ? "a record" : "none"}), todayStepState cleared`, done && s1 === s0 + 1 && !(sess(st.ls) || {}).today && b.api.tss() === null);
+    const counts = [];
+    for(let i = 0; i < 2; i++){ b = await boot(Object.assign({ seed: 61 + i }, st)); counts.push(JSON.parse(st.ls.getItem(KEY)).sessions); b.api.hide(); }
+    check(`reopened twice: Today home, sessions stay ${s1} (${counts.join(", ")})`, counts.every(n => n === s1) && /id="go">Start today</.test(b.api.html("panel")) && !/Session done/.test(b.api.html("panel")));
+    b.api.clickTab("test"); b.api.el("tRecall").click(); finishDrill(b.api); b.api.el("ok").click(); b.api.hide();
+    const re = await boot(Object.assign({ seed: 63 }, st));
+    check("Test drill, results Continue, hidden, reopened: no drill, no results", !sess(st.ls) && !re.api.getD() && !/id="ok"/.test(re.api.html("panel")));
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);
 })();

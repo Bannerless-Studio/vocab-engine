@@ -2156,7 +2156,9 @@ function todayStep(){
   todayFinish();
 }
 function todayFinish(){
-  D = null; drillKeyHandler = null; setScore(0,0); sessionClear();
+  // Ended: a Today state left set would be re-parked by the page-hide save, and every reopen
+  // would replay this finish (sessions + 1; fb3-lag browser report F1).
+  D = null; rzFin = null; todayStepState = null; drillKeyHandler = null; setScore(0,0); sessionClear();
   prog.sessions = (prog.sessions||0) + 1; store.save();
   const P = $("panel");
   P.innerHTML = `<div class="done"><h2>Session done</h2><p class="q">${learnedWords().length} words learned so far.</p><button class="next" id="again">Back to Today</button></div>`;
