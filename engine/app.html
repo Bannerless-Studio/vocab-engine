@@ -824,10 +824,33 @@ const optLike = entry => { if(!OPTS_ONE_SCRIPT) return null; const a = dispWord(
 const OPTS_MIX = VC.optsMixOn(PACK);
 let learnNow = null;
 function withLearn(ids, f){ const o = learnNow; learnNow = new Set(ids); try { return f(); } finally { learnNow = o; } }
+// Learn order: a word's set is its position in its level's list over the set size, counted
+// through the levels in order (the sets Learn teaches); a unit's is its position in taught order
+// over characters.setSize: the stage order, or under learn "lag" (a unit is taught once its
+// first word is learned) its first word's learn position. The bucket of v for a new/weak
+// answer: 0 its set (the Learn set while one is built; for units also today's Learn set for the
+// rest of the session, kept across a reload by today.cu), 1 an adjacent set, 2 the rest.
+let mixSets = null;
+function mixSetOf(){
+  if(mixSets) return mixSets;
+  const w = new Map(), at = new Map(); let base = 0, n = 0;
+  LEVELS.forEach(lv => { const l = levelList(lv); l.forEach((x, i) => { w.set(x.id, base + Math.floor(i / SIZE)); at.set(x.id, n++); }); base += VC.nSets(l, SIZE); });
+  const u = new Map();
+  if(HAS_CHARACTERS){
+    let list = VC.charStageUnits(LEVELS, CHAR_LIST, PACK);
+    if(VC.lagOn(PACK)){ const pos = x => { const k = at.get((x.words || [])[0]); return k == null ? Infinity : k; }; list = list.map((x, i) => [pos(x), i, x]).sort((a, b) => (a[0] - b[0]) || (a[1] - b[1])).map(e => e[2]); }
+    list.forEach((x, i) => u.set(x.id, Math.floor(i / (CHAR_CFG.setSize || 10))));
+  }
+  return mixSets = { w, u };
+}
+const todayCharSet = () => { const t = todayStepState; return t && t.snap && t.snap.cset ? new Set(t.snap.cset.units.map(x => x.id)) : null; };
+const mixBucket = (sets, ln) => (a, v) => {
+  const x = sets.get(a.id), y = sets.get(v.id), d = x == null || y == null ? 2 : Math.min(2, Math.abs(x - y));
+  return ln && ln.has(a.id) ? (ln.has(v.id) ? 0 : Math.max(1, d)) : d; };
 function wordMix(){
   if(!OPTS_MIX) return undefined;
   const ids = new Set(learnedWords().map(w => w.id)), ln = learnNow;
-  return { stage: v => ln && ln.has(v.id) ? 0 : !ids.has(v.id) ? 2 : (((prog.w[v.id] || {}).s || 0) >= VC.WORD_MASTERED ? 1 : 0) };
+  return { stage: v => ln && ln.has(v.id) ? 0 : !ids.has(v.id) ? 2 : (((prog.w[v.id] || {}).s || 0) >= VC.WORD_MASTERED ? 1 : 0), bucket: mixBucket(mixSetOf().w, ln) };
 }
 function sentMix(){
   if(!OPTS_MIX) return undefined;
@@ -838,7 +861,8 @@ function charCtx(){
   if(!OPTS_MIX) return CHAR_CTX;
   const recs = VC.charRecs(prog), ln = learnNow;
   const unit = u => ln && ln.has(u.id) ? 0 : !(Object.prototype.hasOwnProperty.call(recs, u.id) && recs[u.id]) ? 2 : ((recs[u.id].s || 0) >= CHAR_CFG.mastered ? 1 : 0);
-  return Object.assign({}, CHAR_CTX, { mix: { word: wordMix().stage, unit } });
+  const wm = wordMix();
+  return Object.assign({}, CHAR_CTX, { mix: { word: wm.stage, wordBucket: wm.bucket, unit, unitBucket: mixBucket(mixSetOf().u, ln || todayCharSet()) } });
 }
 function optScript(entry, others){
   const mixed = () => others.some(v => dispWord(v).isPron !== dispWord(entry).isPron);

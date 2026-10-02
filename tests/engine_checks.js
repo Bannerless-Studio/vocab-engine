@@ -86,17 +86,21 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("zh spans leave cloze targets unchanged (gapMatch with vs without spans)", SENTENCES.every((s, i) =>
     s.words.every(id => util.isDeepStrictEqual(VC.gapMatch(s, BY_ID[id], BY_ID, PACK), VC.gapMatch(unstripped[i], BY_ID[id], BY_ID, PACK)))));
   // Generator drift: a hand edit to a generated packs/zh file (pauseNew sat in pack.json only,
-  // and a republish would have dropped it) must fail here. A fresh pack_from_hsk.py run over a
-  // copy of packs/zh (it then runs jsonify there) has to leave every file byte-equal.
+  // and a republish would have dropped it) must fail here. A fresh pack_from_hsk.py run into a
+  // dir holding only the files it does not write (packbuilder passages, gloss_display.json; it
+  // then runs jsonify there) has to produce every packs/zh file byte-equal, and nothing else.
   const HSK = path.join(ROOT, "..", "chinese");
   if(!fs.existsSync(path.join(HSK, "data", "hsk_vocab.json"))) console.log(`NOTE  ${HSK} absent: generator drift check skipped`);
   else {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "zhgen-"));
-    fs.readdirSync(ZH).forEach(f => fs.copyFileSync(path.join(ZH, f), path.join(tmp, f)));
+    const NOT_GENERATED = ["passages_src.json", "passages.json", "REPORT_passages.md", "gloss_display.json"];
+    NOT_GENERATED.forEach(f => { if(fs.existsSync(path.join(ZH, f))) fs.copyFileSync(path.join(ZH, f), path.join(tmp, f)); });
     const g = cp.spawnSync("python3", [path.join(ROOT, "tools", "pack_from_hsk.py"), HSK, "--out", tmp], { encoding: "utf8", maxBuffer: 1 << 26 });
-    const drift = fs.readdirSync(tmp).filter(f => f !== "ZH_GLOSS.md" && (!fs.existsSync(path.join(ZH, f)) || !fs.readFileSync(path.join(ZH, f)).equals(fs.readFileSync(path.join(tmp, f)))));
+    const names = [...new Set([...fs.readdirSync(ZH), ...fs.readdirSync(tmp).filter(f => f !== "ZH_GLOSS.md")])];
+    const drift = names.filter(f => !fs.existsSync(path.join(ZH, f)) || !fs.existsSync(path.join(tmp, f)) || !fs.readFileSync(path.join(ZH, f)).equals(fs.readFileSync(path.join(tmp, f))));
     const doc = fs.existsSync(path.join(tmp, "ZH_GLOSS.md")) && fs.readFileSync(path.join(tmp, "ZH_GLOSS.md")).equals(fs.readFileSync(path.join(ROOT, "docs", "ZH_GLOSS.md")));
-    check(`pack_from_hsk.py ${HSK} reproduces packs/zh (${fs.readdirSync(ZH).length} files incl. the jsonified .js) and docs/ZH_GLOSS.md byte for byte (drift: ${drift.join(", ") || "none"}${doc ? "" : ", ZH_GLOSS.md"}${g.status ? `, exit ${g.status}` : ""})`,
+    fs.rmSync(tmp, { recursive: true, force: true });
+    check(`pack_from_hsk.py ${HSK} reproduces packs/zh from an empty dir (${names.length} files incl. the jsonified .js; ${NOT_GENERATED.length} non-generated seeded) and docs/ZH_GLOSS.md byte for byte (drift: ${drift.join(", ") || "none"}${doc ? "" : ", ZH_GLOSS.md"}${g.status ? `, exit ${g.status}` : ""})`,
       g.status === 0 && drift.length === 0 && doc);
   }
 })();

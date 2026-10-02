@@ -325,9 +325,9 @@ def main(argv):
         # in characters among readings gave the answer away (docs/PACK_SCHEMA.md "optsOneScript";
         # owner browser check 2026-10-02).
         "optsOneScript": True,
-        # Wrong choices mix learned and not-yet-learned words, no level tiers: same-level ones
-        # near the end of a level let a new word be found by elimination (docs/PACK_SCHEMA.md
-        # "optsMix"; owner feedback 2026-10-02).
+        # Wrong choices from the answer's stage (new/weak by learn-order set, known, never
+        # taught last), no level tiers: same-level ones near the end of a level let a new word
+        # be found by elimination (docs/PACK_SCHEMA.md "optsMix"; owner feedback 2026-10-02).
         "optsMix": True,
         "showPron": True,
         "hasLessons": True,

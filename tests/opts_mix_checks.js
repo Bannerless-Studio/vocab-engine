@@ -192,13 +192,13 @@ const BY_GLOSS = groupBy(WORDS, w => VC.gloss(w)), BY_W = groupBy(WORDS, w => w.
 const BY_T = groupBy(CHARACTERS, u => String(u.t)), BY_READ = groupBy(CHARACTERS, u => nk(VC.unitReading(u, BY_ID)));
 const BY_EN = groupBy(SENTENCES, s => s.en);
 
-// The first n words in level order learned (streak 5, known; the last 10 streak 0, weak); the
+// The first n words in level order learned (streak 5, known; the last nWeak (10) streak 0, weak); the
 // units of the first share of them taught (streak CM, known; the last 10 streak 0, weak); 70% of
 // the sentences open to them seen.
-function shape(n, unitShare, unitStreak){
+function shape(n, unitShare, unitStreak, nWeak){
   const p = VC.normalizeProg({ placedOnce: true, soundsOpened: true, sessions: 30 }, PACK);
   const L = ORDER_W.slice(0, n);
-  L.forEach((w, i) => { p.w[w.id] = i >= n - 10 ? { r: 1, w: 0, s: 0 } : { r: 5, w: 0, s: 5 }; });
+  L.forEach((w, i) => { p.w[w.id] = i >= n - (nWeak || 10) ? { r: 1, w: 0, s: 0 } : { r: 5, w: 0, s: 5 }; });
   VC.levelIds(PACK).forEach(lv => VC.settleSetCounter(p, WORDS, PACK, lv));
   const tu = L.slice(0, Math.floor(n * (unitShare == null ? 0.7 : unitShare))).map(w => UNIT_OF.get(w.id)).filter(Boolean);
   tu.forEach((u, i) => { p.chars.c[u.id] = i >= tu.length - 10 ? { r: 1, w: 0, s: 0 } : { r: 4, w: 0, s: unitStreak ? unitStreak() : CM }; });
@@ -206,8 +206,17 @@ function shape(n, unitShare, unitStreak){
   avail.slice(0, Math.floor(avail.length * 0.7)).forEach(s => { p.s[s.id] = { r: 2, w: 0, s: 2 }; });
   return p;
 }
+// Learn-order sets and buckets as app.html mixSetOf / mixBucket build them.
+const WSET = new Map(); { let base = 0; VC.levelIds(PACK).forEach(lv => { const l = byLv[lv]; l.forEach((x, i) => WSET.set(x.id, base + Math.floor(i / VC.setSizeOf(PACK)))); base += VC.nSets(l, VC.setSizeOf(PACK)); }); }
+const WAT = new Map(VC.levelIds(PACK).flatMap(lv => byLv[lv]).map((w, i) => [w.id, i]));
+const USET = new Map(VC.charStageUnits(VC.levelIds(PACK), CHARACTERS, PACK).map((u, i) => [WAT.has((u.words || [])[0]) && VC.lagOn(PACK) ? WAT.get(u.words[0]) : Infinity, i, u])
+  .sort((a, b) => (a[0] - b[0]) || (a[1] - b[1])).map((e, i) => [e[2].id, Math.floor(i / (VC.charsConfig(PACK).setSize || 10))]));
+const mixBucket = (sets, ln) => (a, v) => {
+  const x = sets.get(a.id), y = sets.get(v.id), d = x == null || y == null ? 2 : Math.min(2, Math.abs(x - y));
+  return ln && ln.has(a.id) ? (ln.has(v.id) ? 0 : Math.max(1, d)) : d; };
 // The app's stage functions (app.html wordMix / sentMix / charCtx): 0 new/weak, 1 known, 2 never taught.
-function stages(p, learnW, learnU){
+// sessU: today's characters Learn set after its drill (app.html todayCharSet), buckets only.
+function stages(p, learnW, learnU, sessU){
   const ids = new Set(VC.learnedWords(WORDS, PACK, p).map(w => w.id)), recs = VC.charRecs(p), open = new Set(VC.availableSentences(SENTENCES, WORDS, PACK, p).map(s => s.id));
   const lw = learnW || new Set(), lu = learnU || new Set();
   return {
@@ -215,6 +224,7 @@ function stages(p, learnW, learnU){
     word: v => lw.has(v.id) ? 0 : !ids.has(v.id) ? 2 : ((p.w[v.id].s || 0) >= VC.WORD_MASTERED ? 1 : 0),
     unit: u => lu.has(u.id) ? 0 : !recs[u.id] ? 2 : ((recs[u.id].s || 0) >= CM ? 1 : 0),
     sent: s => p.s[s.id] ? 1 : open.has(s.id) ? 0 : 2,
+    bucket: { word: mixBucket(WSET, learnW), unit: mixBucket(USET, learnU || sessU) },
   };
 }
 // Answers. "new": the Learn set (next 10 untaught words / units; they join stage 0), else streak-0
@@ -290,7 +300,7 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
         const P = stages(p, learnW, learnU), fam = P[b.fam], guard = b.guard(p);
         const ansStage = a => { const s = b.wordOfUnit ? P.word(VC.unitWord(a, BY_ID)) : b.fam === "unit" ? P.unit(a) : b.fam === "sent" ? P.sent(a) : P.word(a); return s === 1 ? 1 : 0; };
         // Options of the answer's stage only (the answer kept): can that stage supply 3 after guards?
-        const sup = new Map(), supply = a => { if(!sup.has(a)){ const s = ansStage(a), keep = x => x === a || (b.wordOfUnit ? x === VC.unitWord(a, BY_ID) : false) || fam(x) === s; sup.set(a, b.run(a, p, P, { stage: fam }, keep).length); } return sup.get(a); };
+        const sup = new Map(), supply = a => { if(!sup.has(a)){ const s = ansStage(a), keep = x => x === a || (b.wordOfUnit ? x === VC.unitWord(a, BY_ID) : false) || fam(x) === s; sup.set(a, b.run(a, p, P, { stage: fam, bucket: P.bucket[b.fam] }, keep).length); } return sup.get(a); };
         const memoM = new Map(), memo = (a, f) => { if(!memoM.has(a)) memoM.set(a, f()); return memoM.get(a); };
         // Guess: 1 / (answer + options the learner cannot rule out).
         const guess = (a, os) => { const s = ansStage(a); return 1 / (1 + os.filter(o => labelItems(b, o).some(x => fam(x) === s)).length); };
@@ -299,7 +309,7 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
         for(let i = 0; i < N; i++){
           const a = as[i % as.length], all = () => true;
           const before = b.memo ? memo(a, () => b.run(a, p, P, undefined, all)) : b.run(a, p, P, undefined, all);
-          const after = b.run(a, p, P, { stage: fam }, all);
+          const after = b.run(a, p, P, { stage: fam, bucket: P.bucket[b.fam] }, all);
           st.cards++;
           if(!guard(a, after)) A.guardBad++;
           if(before.length === 3 && after.length < 3) A.short++;
@@ -331,6 +341,64 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
       A.guardBad === 0 && A.short === 0 && A.leak === 0);
   }
   check(`sentenceOpts length outliers (every other option >= 1.8x longer or shorter), owner shape: ${pct(sentOut.b, sentOut.n)} before, ${pct(sentOut.a, sentOut.n)} after (not above)`, sentOut.n > 0 && sentOut.a <= sentOut.b);
+
+  console.log("\n[1b] new answers by learn order: during the Learn drill and later in the session, wrong choices come from the answer's own set");
+  {
+    // owneru: HSK 1-3 learned with 80 weak words and every unit taught, so Learn teaches HSK 4 words.
+    const LSHAPES = [["fresh", 0, 1, 10], ["30 learned", 30, 1, 10], ["140/150 of HSK 1", 140, 1, 10], ["owner (lag)", 595, 0.7, 10], ["owneru (80 weak)", 595, 1, 80]];
+    const WB = BUILDERS.filter(b => ["meaningOpts", "wordOpts", "gapChoices", "pronChoiceOpts"].includes(b.name)), UB = BUILDERS.filter(b => ["charOpts", "charSoundOpts"].includes(b.name));
+    const NL = 1000, lrows = [], over = [], before = []; let cells = 0;
+    for(const [sname, n, us, nw] of LSHAPES){
+      // Units: with every eligible unit taught (unitShare 1) the shape lags them at 70% instead.
+      const pw = shape(n, us, null, nw), pu = VC.lagCharSet(PACK, WORDS, CHARACTERS, pw) ? pw : shape(n, 0.7, null, nw);
+      const Lw = ORDER_W.filter(w => stages(pw).word(w) === 2).slice(0, 10);
+      const cs = VC.lagCharSet(PACK, WORDS, CHARACTERS, pu), Lu = cs ? cs.units : [];
+      for(const [fam, L, bs] of [["word", Lw, WB], ["unit", Lu, UB]]){
+        const p = fam === "word" ? pw : pu, P0 = stages(p);
+        if(L.length < 10) { lrows.push(`${sname} | ${fam} | Learn set of ${L.length} (fewer than 10 eligible units)`); if(!L.length) continue; }
+        const Lids = new Set(L.map(x => x.id));
+        for(const when of ["Learn drill", "after Learn, same session"]){
+          let q = p, P;
+          if(when === "Learn drill") P = fam === "word" ? stages(p, Lids) : stages(p, null, Lids);
+          else { q = clone(p); L.forEach(x => { if(fam === "word") q.w[x.id] = { r: 1, w: 0, s: 1 }; else q.chars.c[x.id] = { r: 1, w: 0, s: 1 }; }); VC.levelIds(PACK).forEach(lv => VC.settleSetCounter(q, WORDS, PACK, lv)); P = stages(q, null, null, fam === "unit" ? Lids : null); }
+          for(const b of bs){
+            if(b.name === "pronChoiceOpts" && when === "Learn drill") continue; // "How is it said?" asks learned words only
+            const F = P[b.fam], mix = { stage: F, bucket: P.bucket[b.fam] };
+            // The answer's own set alone (the answer kept) after guards.
+            const sup = new Map(), supply = a => { if(!sup.has(a)) sup.set(a, b.run(a, q, P, mix, x => x === a || Lids.has(x.id)).length); return sup.get(a); };
+            const items = o => labelItems(b, o);
+            Math.random = mulberry32(n * 13 + cells);
+            const st = { cards: 0, el: 0, opts: 0, old: 0, g: 0, nel: 0, oldN: 0, optsN: 0 };
+            for(let i = 0; i < NL; i++){
+              const a = L[i % L.length], os = b.run(a, q, P, mix, () => true);
+              st.cards++;
+              // Learned before the answer's set: not a set-mate and taught before (stage 0/1 in the base progress).
+              const old = os.filter(o => items(o).every(x => !Lids.has(x.id)) && items(o).some(x => P0[b.fam](x) !== 2)).length;
+              if(supply(a) >= 3){ st.el++; st.opts += os.length; st.old += old;
+                // Learner: rules out never-taught, other-stage and anything not from the answer's set.
+                st.g += 1 / (1 + os.filter(o => items(o).some(x => Lids.has(x.id))).length); }
+              else { st.nel++; st.optsN += os.length; st.oldN += old; }
+            }
+            cells++;
+            if(st.el && st.old) before.push(`${sname}/${fam}/${when}/${b.name}: ${pct(st.old, st.opts)}`);
+            if(st.el && st.g / st.el > 0.27) over.push(`${sname}/${fam}/${when}/${b.name}: ${mean(st.g, st.el)}`);
+            lrows.push(`${sname} | ${fam} | ${when} | ${b.name} | ${st.cards} | ${st.el} | ${pct(st.old, st.opts)} | ${mean(st.g, st.el)} | ${st.nel ? `${st.nel}: ${pct(st.oldN, st.optsN)} learned before` : "-"}`);
+          }
+        }
+        // A later day: the set's words / units half mastered, half still weak; a weak answer's buckets.
+        {
+          const q = clone(p); L.forEach((x, i) => { const r = i % 2 ? { r: 4, w: 0, s: fam === "word" ? 3 : CM } : { r: 2, w: 1, s: 1 }; if(fam === "word") q.w[x.id] = r; else q.chars.c[x.id] = r; });
+          VC.levelIds(PACK).forEach(lv => VC.settleSetCounter(q, WORDS, PACK, lv));
+          const P = stages(q), F = P[fam], B = P.bucket[fam], b = bs[0], use = [0, 0, 0, 0, 0]; let tot = 0; Math.random = mulberry32(n + 77);
+          L.filter((x, i) => !(i % 2)).forEach(a => { for(let i = 0; i < 100; i++) b.run(a, q, P, { stage: F, bucket: B }, () => true).forEach(o => labelItems(b, o).slice(0, 1).forEach(v => { const s = F(v); use[s === 0 ? B(a, v) : s === 1 ? 3 : 4]++; tot++; })); });
+          lrows.push(`${sname} | ${fam} | later day, weak answer, set half mastered | ${b.name} | own set ${pct(use[0], tot)}, adjacent ${pct(use[1], tot)}, other weak ${pct(use[2], tot)}, known ${pct(use[3], tot)}, never taught ${pct(use[4], tot)}`);
+        }
+      }
+    }
+    if(TABLE){ console.log("TABLE1b shape | family | when | builder | cards | cards whose set supplies 3 | options learned before the set there | guess (rules out non-set-mates) | other cards"); lrows.forEach(r => console.log(`TABLE1b ${r}`)); }
+    check(`Learn drill and later in the session (5 shapes x words / units, ${cells} cells x ${NL} cards): no option learned before the answer's set wherever the set supplies 3 after guards${before.length ? "; " + before.join(", ") : ""}`, cells >= 20 && before.length === 0);
+    check(`a learner ruling out never-taught, other-stage and non-set-mate options guesses <= 0.27 there${over.length ? "; over: " + over.join(", ") : ""}`, over.length === 0);
+  }
 
   console.log("\n[2] app: every site by stage, a Learn drill, one script per set, placement as flag off, nothing written, answer position uniform");
   {
@@ -408,22 +476,32 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
     check(`answer position uniform over ${shown} rendered sets: ${pos.map(x => pct(x, shown)).join(" ")}`, shown >= 1000 && pos.every(x => Math.abs(x / shown - 0.25) < 0.04));
   }
   {
-    // A real Today Learn drill (units of the learned words all taught, so Learn teaches words).
-    const p0 = shape(140, 1);
-    const st = fresh(); st.ls.setItem(VC.storageKey(PACK), JSON.stringify(p0));
-    NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
-    const api = await boot(PACK, st, 3);
-    const before = new Set(Object.keys(api.getProg().w)); const sets = [];
-    api.today();
-    play(api, (pr, h) => { const it = api.getCur(); if(it && it.kind === "mc" && api.getD() && !sets.includes(it)) sets.push(it); return false; });
-    const after = api.getProg(), learnSet = new Set(Object.keys(after.w).filter(id => !before.has(id)));
-    let n = 0, never = 0, known = 0;
-    for(const it of sets){
-      const id = String(it.key).slice(2); if(!String(it.key).startsWith("w:") || !learnSet.has(id)) continue;
-      const others = it.opts.filter(o => o !== it.a).map(o => BY_ID[o] || (BY_GLOSS.get(o) || [])[0]).filter(Boolean);
-      n++; if(others.some(v => !before.has(v.id) && !learnSet.has(v.id))) never++; if(others.length === 3 && others.every(v => before.has(v.id) && (p0.w[v.id].s || 0) >= VC.WORD_MASTERED)) known++;
+    // Real Today Learn drills: words (140 of HSK 1 and owneru, units all taught) and characters (owner, lag).
+    for(const [name, p0, fam] of [["140 of HSK 1", shape(140, 1), "w"], ["owneru (80 weak)", shape(595, 1, null, 80), "w"], ["owner (lag)", shape(595, 0.7), "c"]]){
+      const st = fresh(); st.ls.setItem(VC.storageKey(PACK), JSON.stringify(p0));
+      NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
+      const api = await boot(PACK, st, 3);
+      const recsOf = pr => fam === "w" ? pr.w : (pr.chars && pr.chars.c) || {};
+      const before = new Set(Object.keys(recsOf(api.getProg()))), learnedBefore = new Set(VC.learnedWords(WORDS, PACK, api.getProg()).map(w => w.id)); const sets = [];
+      api.today();
+      play(api, () => { const it = api.getCur(); if(it && it.kind === "mc" && api.getD() && !sets.includes(it)) sets.push(it); return false; });
+      const learnSet = new Set(Object.keys(recsOf(api.getProg())).filter(id => !before.has(id)));
+      let n = 0, never = 0, allOld = 0, opts = 0, old = 0;
+      for(const it of sets){
+        const key = String(it.key), id = key.slice(2); if(!key.startsWith(fam + ":") || !learnSet.has(id)) continue;
+        const others = it.opts.filter(o => o !== it.a);
+        // Word items: options are word ids or glosses. Unit items: characters or readings (charRead's are its old word's meanings: skipped).
+        const lab = fam === "w" ? (o => [BY_ID[o] || (BY_GLOSS.get(o) || [])[0]].filter(Boolean)) : (o => BY_T.get(o) || BY_READ.get(nk(o)) || []);
+        if(fam === "c" && others.some(o => !BY_T.get(o) && !BY_READ.get(nk(o)))) continue;
+        n++;
+        const isOld = o => lab(o).length && lab(o).every(x => !learnSet.has(x.id) && (fam === "w" ? learnedBefore.has(x.id) : before.has(x.id)));
+        const isNever = o => lab(o).length && lab(o).every(x => !learnSet.has(x.id) && !(fam === "w" ? learnedBefore.has(x.id) : before.has(x.id)));
+        opts += others.length; old += others.filter(isOld).length;
+        if(others.some(isNever)) never++; if(others.every(isOld)) allOld++;
+      }
+      check(`Today Learn drill, ${name} (${learnSet.size} ${fam === "w" ? "words" : "units"} taught): ${n} sets on Learn items, ${never} with a never-taught option, ${allOld} with every option learned before the session, ${pct(old, opts)} of options learned before`,
+        learnSet.size === 10 && n >= 10 && never === 0 && allOld === 0 && old === 0);
     }
-    check(`Today Learn drill (140 of HSK 1, ${learnSet.size} words taught): ${n} sets on Learn words, ${never} with a never-taught option, ${known} with every option known`, learnSet.size === 10 && n >= 10 && never === 0 && known === 0);
   }
   {
     const shots = [];

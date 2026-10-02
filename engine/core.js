@@ -62,13 +62,17 @@ function typedSynHit(entry, byId, test){
 // instead. mix = { stage(x), rng? }: 0 new/weak (learned below mastered, or in the Learn set
 // being taught), 1 known (mastered), 2 never taught. The answer's stage first (a never-taught
 // answer is being taught: 0), then the other learned stage, then never taught; no level tiers.
+// A new/weak answer ranks its stage by mix.bucket(answer, v): 0 its own set (the Learn set
+// while one is drilled), 1 the adjacent sets, 2 the rest; weak words learned days ago beside
+// a word met today were told apart by when they were met (review round 2: guess 0.54).
 // rank(v) orders hard preferences ahead of the stage (one script, article agreement); near(v)
 // orders the class preference inside a stage (lower first). accept(strict) returns a fresh
 // guard that records what it lets through.
 function optsMixOn(pack){ return !!(pack && pack.optsMix === true); }
 function mixPick(ans, cands, mix, rank, near, accept, n){
   const r = mix.rng || Math.random, want = n || 3, as = mix.stage(ans) === 1 ? 1 : 0;
-  const key = v => { const st = mix.stage(v); return rank(v) * 1000 + (st === as ? 0 : st === 2 ? 2 : 1) * 100 + near(v); };
+  const bucket = as === 0 && mix.bucket ? v => mix.bucket(ans, v) : () => 0;
+  const key = v => { const st = mix.stage(v); return rank(v) * 1000 + (st === as ? bucket(v) : st === 2 ? 4 : 3) * 100 + near(v); };
   const keyed = cands.map(v => [key(v), v]);
   const ordered = [...new Set(keyed.map(x => x[0]))].sort((x, y) => x - y).flatMap(k => shuffle(keyed.filter(x => x[0] === k).map(x => x[1]), r));
   function run(strict){
@@ -2356,8 +2360,8 @@ function charItem(kind, unit, ctx){
   const w = unitWord(unit, byId), t = String(unit.t), reading = unitReading(unit, byId), g = unitGloss(unit, byId);
   const base = { kind, key: "c:" + unit.id, unitId: unit.id, wordId: w ? w.id : null, t, reading, gloss: g };
   let show, audio = false, answer, others;
-  // ctx.mix { word(w), unit(u), rng? } (pack.optsMix): word options by word stage, unit options by unit stage.
-  const wm = c.mix ? { stage: c.mix.word, rng: c.mix.rng } : undefined, um = c.mix ? { stage: c.mix.unit, rng: c.mix.rng } : undefined;
+  // ctx.mix { word(w), unit(u), wordBucket?, unitBucket?, rng? } (pack.optsMix): word options by word stage, unit options by unit stage.
+  const wm = c.mix ? { stage: c.mix.word, bucket: c.mix.wordBucket, rng: c.mix.rng } : undefined, um = c.mix ? { stage: c.mix.unit, bucket: c.mix.unitBucket, rng: c.mix.rng } : undefined;
   if(kind === "charRead"){ show = "t"; answer = g; others = charReadOpts(unit, c.words, byId, wm).map(gloss); }
   else if(kind === "charSound"){ show = "t"; answer = reading; others = charSoundOpts(unit, c.units, byId, um); }
   else if(kind === "charPick"){ show = "reading"; audio = true; answer = t; others = charOpts(unit, c.units, byId, um).map(v => String(v.t)); }
