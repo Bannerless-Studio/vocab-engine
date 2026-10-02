@@ -159,7 +159,7 @@ return {
 }
 const fresh = () => ({ ls: memStore(), ss: memStore() });
 async function bootWith(pack, prog, seed, opts){ const st = fresh(); if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog)); return { api: await boot(pack, st, seed || 1, opts), st }; }
-const charRows = h => { const m = h.match(/>Characters<\/p><table class="stats">([\s\S]*?)<\/table>/); return m ? [...m[1].matchAll(/<tr>[\s\S]*?<\/tr>/g)].map(r => stripTags(r[0].replace("</td><td>", " | "))) : []; };
+const charRows = h => { const m = h.match(/>Characters<\/p><table class="stats nw">([\s\S]*?)<\/table>/); return m ? [...m[1].matchAll(/<tr>[\s\S]*?<\/tr>/g)].map(r => stripTags(r[0].replace("</td><td>", " | "))) : []; };
 const stripTags = h => String(h).replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+>/g, "").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&");
 const typedAnswer = it => { const w = BY_ID[String(it.key).slice(2)]; return it.label === "Type the pinyin" ? w.pron : it.label === "Type the meaning" ? VC.gloss(w) : w.w; };
 function answer(api, right, typed){
@@ -375,7 +375,7 @@ try {
       const { api: ob } = await bootWith(PACK, p, 1, { html: prevHtml }); ob.goto("progress"); const o = oldRow(ob.html("panel"));
       check(`${name}: ${rows.length} rows, sums taught ${s.taught} / ${s.all}, mastered ${s.mastered}, bare ${s.bare} equal the ${PREV} row (${o.taught} / ${o.all}, ${o.mastered}, ${o.bare})`, rows.length === 4 && s.taught === o.taught && s.all === o.all && s.mastered === o.mastered && s.bare === o.bare && (!want || eq(rows, want)));
       check(`${name}: rows in level order, value text <= the longest word-row value (${longest})`, rows.every((r, i) => r.startsWith(`HSK ${i + 1} |`) && r.split(" | ")[1].length <= longest));
-      check(`${name}: everything outside the characters rows (word rows, controls) byte-identical to ${PREV}`, api.html("panel").replace(/<p class="q" style="margin-top:14px">Characters<\/p><table class="stats">[\s\S]*?<\/table>/, "") === ob.html("panel").replace(/<tr><td><bdi[^>]*>字<\/bdi><\/td><td>[^<]*<\/td><\/tr>/, ""));
+      check(`${name}: everything outside the characters rows (word rows, controls) byte-identical but the word table's nw class (nowrap values), to ${PREV}`, api.html("panel").replace(/<p class="q" style="margin-top:14px">Characters<\/p><table class="stats nw">[\s\S]*?<\/table>/, "").replace('<table class="stats nw">', '<table class="stats">') === ob.html("panel").replace(/<tr><td><bdi[^>]*>字<\/bdi><\/td><td>[^<]*<\/td><\/tr>/, ""));
       console.log(`  ${name}: before ${PREV}: ${(h => { const m = h.match(/<tr><td><bdi[^>]*>字<\/bdi><\/td><td>([^<]*)</); return m ? m[1] : ""; })(ob.html("panel"))}; after: ${rows.join("; ")}`);
     }
     { const w = ownerProg(ORDER.length); byLv["4"].forEach(x => { w.w[x.id] = { r: 5, w: 0, s: 5 }; }); ORDER.forEach(u => { w.chars.c[u.id] = { r: 8, w: 0, s: 8 }; });

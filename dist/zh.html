@@ -147,6 +147,7 @@
   table.stats{width:100%;border-collapse:collapse;font-size:15px}
   table.stats td{padding:8px 0;border-bottom:1px solid var(--line)}
   table.stats td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+  table.stats.nw td:last-child{white-space:nowrap}
   /* Today step names never wrap ("5. Sentences" at 390px); the description column wraps. */
   table.steps td:first-child{white-space:nowrap;padding-right:12px;vertical-align:top}
   .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;flex:1}
@@ -4914,7 +4915,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "3308329148-1824674";
+const VE_BUILD = "420410691-1824758";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6457,7 +6458,7 @@ function progressRender(){
   const cp = HAS_CHARACTERS ? charProgress() : null;
   const xp = HAS_SCRIPT ? scriptProgress() : null;
   P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound.</div>`}
-    <table class="stats">${xp ? xp.rows : ""}${rows}${cp ? cp.rows : ""}
+    <table class="stats${cp && cp.block ? " nw" : ""}">${xp ? xp.rows : ""}${rows}${cp ? cp.rows : ""}
       ${HAS_PASSAGES ? VC.readingStats(PASSAGE_LIST, PACK, prog).map(r => `<tr><td>${escapeHtml(levelLabel(r.lv))} reading</td><td>${r.done} / ${r.total} passages${r.avg != null ? ` · avg ${r.avg}%` : ""}</td></tr>`).join("") : ""}
       ${HAS_LESSONS ? `<tr><td>Sounds</td><td>${LESSON_LIST.filter(l=>prog.lessons[l.id]).length} / ${LESSON_LIST.length} lessons done</td></tr>` : ""}
       <tr><td>Sessions</td><td>${prog.sessions||0}</td></tr></table>${cp ? cp.block : ""}
@@ -6536,7 +6537,7 @@ function charProgress(){
   const unlocked = VC.charsUnlocked(PACK, WORDS, prog), started = VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU);
   // characters.learn "lag": no stages; its own block (a wider label would narrow the word rows' value column), one row per
   // level, a unit's level being its word's. Value text <= the longest word-row value (32 chars): bare shown drops "taught", then "mastered" -> "mast.".
-  const lag = () => `<p class="q" style="margin-top:14px">Characters</p><table class="stats">${LEVELS.map(lv => { const list = CHAR_LIST.filter(u => String(u.lv) === String(lv)); if(!list.length) return "";
+  const lag = () => `<p class="q" style="margin-top:14px">Characters</p><table class="stats nw">${LEVELS.map(lv => { const list = CHAR_LIST.filter(u => String(u.lv) === String(lv)); if(!list.length) return "";
     const rec = list.filter(u => recs[u.id]), bare = rec.filter(u => VC.charTier(streak(u), PACK) === "bare").length, mas = rec.filter(u => VC.charTier(streak(u), PACK) !== "pron").length;
     let v = `${rec.length} / ${list.length} taught · ${mas} mastered`;
     if(bare){ v = `${rec.length} / ${list.length} · ${mas} mastered · ${bare} bare`; if(v.length > 32) v = v.replace("mastered", "mast."); }
@@ -6686,4 +6687,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:4026314616-1823998-->
+<!--ve-build:3106599268-1824081-->
