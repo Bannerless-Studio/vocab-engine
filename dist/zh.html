@@ -1494,7 +1494,7 @@ function applyMissedKinds(plan, prog, pack, production, opts){
 // mastered unit was never refreshed. prog.day logs today's answers per item key ("w:", "c:",
 // "s:", "x:"): r the kinds answered right, c / m the drill ordinal of the last right answer /
 // miss. Records gain t, the day number of the last answer. Both are written only with the flag.
-const DAY_REFRESH_SHARE = 0.2, DAY_AGAIN_SHARE = 0.25;
+const DAY_REFRESH_SHARE = 0.2, DAY_AGAIN_SHARE = 0.25, DAY_CONSOLIDATE_SHARE = 0.15;
 function dayAwareOn(pack){ return !!(pack && pack.dayAware === true); }
 // A log from another day, or one an older engine or an import mangled, is a fresh day: the log
 // is never validated at boot, so it can never reset the progress record.
@@ -1517,9 +1517,11 @@ function noteDay(prog, pack, today, key, kind, ok){
   const d = prog.day = dayLog(prog, today);
   const e = isObj(d.a[key]) ? d.a[key] : (d.a[key] = {});
   // The in-drill retry right after a miss is not evidence the kind is known: it stays open.
+  // A right cloze on a blanked word ("gap") is logged but is no word drill: it neither counts
+  // as the word answered right today nor settles the word's miss.
   if(ok){
     if(kind && e.m !== d.n){ if(!Array.isArray(e.r)) e.r = []; if(!e.r.includes(kind)) e.r.push(kind); }
-    e.c = d.n;
+    if(!(kind === "gap" && String(key)[0] === "w")) e.c = d.n;
   } else e.m = d.n;
   const rec = dayRecOf(prog, key); const t = isoDayNumber(today);
   if(rec && isFinite(t)) rec.t = t;
@@ -1540,13 +1542,16 @@ function dayTier(c, d){
 const dayT = rec => rec && typeof rec.t === "number" && isFinite(rec.t) ? rec.t : -Infinity;
 const dayS = rec => (rec && rec.s) || 0;
 const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c === "number" ? e.c : 0; };
-// Priority: today's misses, a reserved share of mastered units unseen longest (refresh would
-// otherwise wait until every weak unit had its turn), weak units by lowest streak then oldest
-// last answer, a capped share of harder kinds for units already right today, the rest of the
-// refresh, and only then what was right today. Jitter (below 1) only breaks exact ties.
+// Priority: today's misses, a reserved share of character units between mastered and bare
+// (consolidating: weakScore gave them no Review/Recall slot at all, lead finding 2026-10-02), a
+// reserved share of mastered units unseen longest (refresh would otherwise wait until every
+// weak unit had its turn), weak units by lowest streak then oldest last answer, a capped share
+// of harder kinds for units already right today, the rest of the consolidating and refresh
+// units, and only then what was right today. Jitter (below 1) only breaks exact ties.
 function dayPick(cands, n, d, rng){
-  const r = rng || Math.random; const T = [[], [], [], [], []];
-  (cands || []).forEach(c => T[dayTier(c, d)].push(Object.assign({ j: r() }, c)));
+  const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
+  (cands || []).forEach(c => { const t = dayTier(c, d); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
+  C.sort((a, b) => dayT(a.rec) - dayT(b.rec) || dayS(a.rec) - dayS(b.rec) || a.j - b.j);
   const cmp = [
     (a, b) => weakScore(b.rec) - weakScore(a.rec),
     (a, b) => dayS(a.rec) - dayS(b.rec) || dayT(a.rec) - dayT(b.rec),
@@ -1557,8 +1562,8 @@ function dayPick(cands, n, d, rng){
   T.forEach((list, i) => list.sort((a, b) => cmp[i](a, b) || a.j - b.j));
   const out = [];
   const take = (list, k) => { for(let i = 0; i < k && list.length && out.length < n; i++) out.push(list.shift()); };
-  take(T[0], n); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
-  take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(T[2], n); take(T[3], n); take(T[4], n);
+  take(T[0], n); take(C, Math.ceil(n * DAY_CONSOLIDATE_SHARE)); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
+  take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[4], n);
   return out;
 }
 // The kinds a planner may ask a unit, production first (owner rule: a unit already met today
@@ -1592,7 +1597,7 @@ function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds){
   });
 }
 const dayWordCand = (prog, kinds) => w => ({ t: "w", x: w, key: "w:" + w.id, rec: (prog.w || {})[w.id], mastered: WORD_MASTERED, kinds });
-const dayCharCand = (prog, pack, kinds) => { const cfg = charsConfig(pack), recs = charRecs(prog); return u => ({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], mastered: cfg ? cfg.mastered : CHAR_MASTERED, kinds }); };
+const dayCharCand = (prog, pack, kinds) => { const cfg = charsConfig(pack), recs = charRecs(prog); return u => ({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], mastered: cfg ? cfg.mastered : CHAR_MASTERED, bare: cfg ? cfg.bare : CHAR_BARE, kinds }); };
 // For the app's own pickers (Listen, Sentences, Test): the n list entries to drill, by dayPick.
 // keyPrefix "w:" or "s:"; kinds: what the picker asks.
 function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng){
@@ -3467,7 +3472,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
-  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, dayAwareOn, dayLog, dayStart, noteDay, dayTier, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
+  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, dayAwareOn, dayLog, dayStart, noteDay, dayTier, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
@@ -4313,7 +4318,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1240681464-1740214";
+const VE_BUILD = "68347636-1740919";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -5992,4 +5997,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3123580806-1739538-->
+<!--ve-build:2801895746-1740241-->

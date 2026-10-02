@@ -204,7 +204,7 @@ function seedProg(pack, nWords, nUnits, seed){
 }
 
 // ------------------------------------------------------------------ one simulated day
-async function playDay(pack, seedP, sessions, seed){
+async function playDay(pack, seedP, sessions, seed, gapMs){
   const st = { ls: memStore(), ss: memStore() };
   st.ls.setItem(VC.storageKey(pack), JSON.stringify(seedP));
   const api = await boot(pack, st, seed);
@@ -212,7 +212,7 @@ async function playDay(pack, seedP, sessions, seed){
   const drilled = [];   // { sess, step, key, kind, ok }
   const learnNew = [];  // per session: new words/units first recorded
   for(let sn = 0; sn < sessions; sn++){
-    NOW += 60 * 60 * 1000;
+    NOW += gapMs || 60 * 60 * 1000;
     const before = api.getProg();
     const had = new Set([...Object.keys(before.w).map(k => "w:" + k), ...Object.keys((before.chars || {}).c || {}).map(k => "c:" + k)]);
     if(!/id="go"/.test(api.panel())) throw new Error(`session ${sn + 1}: no Start today button`);
@@ -269,7 +269,8 @@ function metrics(seedP, pack, day, K){
   const avail = recs.length + VC.availableSentences(SENTENCES, WORDS, pack, seedP).length;
   const s1 = per[0] ? per[0].units : new Set();
   const overlap = per.map(p => { let i = 0; p.units.forEach(u => { if(s1.has(u)) i++; }); return p.units.size ? i / p.units.size : 0; });
-  return { why, per, overlap, missKeys, lostMiss, weakStarved: weak.filter(k => !touched.has(k)), staleStarved: stale.filter(k => !touched.has(k)),
+  const lostDetail = lostMiss.map(k => drilled.filter(d => d.key === k).map(d => `${k} s${d.sess + 1}/${d.step} ${d.kind} ${d.ok ? "ok" : "MISS"}`).join(", "));
+  return { lostDetail, why, per, overlap, missKeys, lostMiss, weakStarved: weak.filter(k => !touched.has(k)), staleStarved: stale.filter(k => !touched.has(k)),
     touched: touched.size, avail, total: drilled.length,
     sameKindAll: per.slice(1).reduce((a, p) => a + p.sameKind, 0), itemsAfter1: per.slice(1).reduce((a, p) => a + p.n, 0) };
 }
@@ -277,10 +278,10 @@ const pct = (a, b) => b ? `${Math.round(100 * a / b)}%` : "-";
 function report(label, m, learnNew){
   console.log(`  ${label}: ${m.total} items, ${m.touched} units touched of ${m.avail} available`);
   if(!QUIET) m.per.forEach((p, i) => console.log(`    s${i + 1}: ${p.n} items, already right today: same kind ${pct(p.sameKind, p.n)}, any kind ${pct(p.anyKind, p.n)}; units ${p.units.size}, shared with s1 ${pct(m.overlap[i] * p.units.size, p.units.size)}; new ${learnNew[i]}`));
-  if(WHY) console.log("    same-kind repeats by stage:", JSON.stringify(m.why));
+  if(WHY) console.log("    same-kind repeats by stage:", JSON.stringify(m.why), "misses never back:", JSON.stringify(m.lostDetail));
   console.log(`    missed today (s1..s${N_SESSIONS - 1}): ${m.missKeys.length} units, never back: ${m.lostMiss.length}; due weak never drilled: ${m.weakStarved.length}/${K_DUE}; mastered-stale never drilled: ${m.staleStarved.length}/${K_DUE}`);
 }
-const K_DUE = 30;
+const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
 
 (async function main(){
   const PACK_OFF = Object.assign({}, PACK_ON); delete PACK_OFF.dayAware;
@@ -354,8 +355,9 @@ const K_DUE = 30;
       const seedP = seedProg(pack, sc.words, sc.units, 11);
       const day = await playDay(pack, seedP, N_SESSIONS, 5);
       const m = metrics(seedP, pack, day, K_DUE);
+      if(WHY && tag === "on") m.lostMiss.forEach(k => console.log("    lost", k, JSON.stringify(VC.dayLog(day.prog, DAY).a[k]), JSON.stringify(day.prog.w[k.slice(2)] || day.prog.s[k.slice(2)] || day.prog.chars.c[k.slice(2)]), "n", VC.dayLog(day.prog, DAY).n));
       report(tag === "off" ? "dayAware off (control)" : "dayAware on", m, day.learnNew);
-      res[tag] = { m, day };
+      res[tag] = { m, day, seed: seedP };
     }
     const on = res.on.m, onDay = res.on.day;
     check(`dayAware: same-kind repeats of items answered right earlier today <= 2% of sessions 2..${N_SESSIONS} (${on.sameKindAll}/${on.itemsAfter1})`, on.sameKindAll <= 0.02 * on.itemsAfter1);
@@ -379,6 +381,29 @@ const K_DUE = 30;
     check(`dayAware: same number of items as the control (${on.total} vs ${res.off.m.total})`, on.total === res.off.m.total);
     check(`dayAware: units touched >= control (${on.touched} vs ${res.off.m.touched})`, on.touched >= res.off.m.touched);
     check(`dayAware: new material every session at the control's pace (${onDay.learnNew.join(",")} vs ${res.off.day.learnNew.join(",")})`, onDay.learnNew.every((n, i) => n >= Math.min(res.off.day.learnNew[i], 10)));
+    // Lead finding 2026-10-02: weakScore ranking gave character units at streak 3-6 (pinyin
+    // hidden .. bare) probability 0 of a Review/Recall slot. They are mastered: tier 2's share.
+    const midUnits = Object.entries(res.on.seed.chars.c).filter(([, r]) => r.s >= 3 && r.s <= 5).map(([id]) => "c:" + id);
+    const midHit = tag => midUnits.filter(k => res[tag].day.drilled.some(d => d.key === k)).length;
+    check(`dayAware: character units at streak 3-5 reach Review/Recall within the day (${midHit("on")}/${midUnits.length}; control ${midHit("off")})`, midUnits.length > 0 && midHit("on") > 0);
+  }
+  console.log(`\n[rotation] scenario B, one Today session a day for ${ROT_DAYS} days: nothing eligible stays unseen without bound`);
+  for(const [tag, pack] of [["off", PACK_OFF], ["on", PACK_ON]]){
+    NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
+    const seedP = seedProg(pack, 595, 60, 11);
+    const run = await playDay(pack, seedP, ROT_DAYS, 5, 24 * 60 * 60 * 1000);
+    const touched = new Set(run.drilled.map(d => d.key));
+    const recs = [...Object.entries(seedP.w).map(([id, r]) => ["w:" + id, r]), ...Object.entries(seedP.chars.c).map(([id, r]) => ["c:" + id, r])];
+    const mast = recs.filter(x => x[1].s >= 3).sort((a, b) => (a[1].t - b[1].t) || (a[0] < b[0] ? -1 : 1));
+    const mid = recs.filter(x => x[0][0] === "c" && x[1].s >= 3 && x[1].s <= 5);
+    const oldest = mast.slice(0, ROT_K).filter(x => !touched.has(x[0])).length;
+    const midSeen = mid.filter(x => touched.has(x[0])).length;
+    const mastSeen = mast.filter(x => touched.has(x[0])).length;
+    console.log(`  ${tag}: mastered units drilled ${mastSeen}/${mast.length}; ${ROT_K} longest unseen at start never drilled: ${oldest}; character units at streak 3-5 drilled ${midSeen}/${mid.length}`);
+    if(tag === "on"){
+      check(`rotation: the ${ROT_K} mastered units unseen longest at the start are all drilled within ${ROT_DAYS} days`, oldest === 0);
+      check(`rotation: every character unit at streak 3-5 is drilled within ${ROT_DAYS} days (${midSeen}/${mid.length})`, mid.length > 0 && midSeen === mid.length);
+    }
   }
   console.log(`\n${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);
