@@ -2950,18 +2950,20 @@ function charProgress(){
     const bareN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) === "bare").length;
     return `<tr><td>${tf(st.label)}</td><td>${taught} / ${list.length} taught · ${st.recorded} recorded · ${masteredN} mastered · ${bareN} bare</td></tr>`;
   }).join("");
-  const defer = !!(prog.chars && prog.chars.defer === true);
+  const defer = !!(prog.chars && prog.chars.defer === true), order = VC.charOrder(PACK, prog);
   const deferred = VC.charStages(PACK, Object.assign({}, prog, { chars: Object.assign({}, prog.chars, { defer: true }) }));
   const top = deferred.length ? levelLabel(deferred[0].after) : "";
   const mix = !!(prog.chars && prog.chars.mix !== false);
   const showMix = started; // mixing changes nothing until characters have started
   const controls = (unlocked || showMix) ? `<div id="charCtl" style="margin-top:14px">${pathStrip()}
     ${showMix ? `<div class="row"><button class="chip ${mix ? "on" : ""}" id="toggleMix" aria-pressed="${mix}">Mix known characters into sentences</button></div>` : ""}
-    ${unlocked ? `<div class="row"><button class="chip ${defer ? "" : "on"}" id="ordBefore" aria-pressed="${!defer}">${CHAR_CFG.withWords ? "Characters: with words" : `Characters before ${escapeHtml(top)}`}</button><button class="chip ${defer ? "on" : ""}" id="ordAfter" aria-pressed="${defer}">${CHAR_CFG.withWords ? "Characters: later" : `Characters after ${escapeHtml(top)}`}</button></div>
+    ${unlocked && CHAR_CFG.withWords ? `<div class="row">${[["ordFirst", "first", "Characters: first"], ["ordBefore", "with", "Characters: with words"], ["ordAfter", "later", "Characters: later"]].map(([id, m, t]) => `<button class="chip ${order === m ? "on" : ""}" id="${id}" aria-pressed="${order === m}">${t}</button>`).join("")}</div>
+    <p class="q" style="margin-top:6px">Changes what Today's Learn step teaches next. Nothing you've learned is lost.</p>` : unlocked ? `<div class="row"><button class="chip ${defer ? "" : "on"}" id="ordBefore" aria-pressed="${!defer}">${CHAR_CFG.withWords ? "Characters: with words" : `Characters before ${escapeHtml(top)}`}</button><button class="chip ${defer ? "on" : ""}" id="ordAfter" aria-pressed="${defer}">${CHAR_CFG.withWords ? "Characters: later" : `Characters after ${escapeHtml(top)}`}</button></div>
     <p class="q" style="margin-top:6px">Changes what Today's Learn step teaches next. Nothing you've learned is lost.</p>` : ""}</div>` : "";
   const wire = () => {
     if(showMix) $("toggleMix").onclick = () => { VC.ensureChars(prog).mix = !mix; store.save(); progressRender(); };
-    if(unlocked){
+    if(unlocked && CHAR_CFG.withWords) [["ordFirst", "first"], ["ordBefore", "with"], ["ordAfter", "later"]].forEach(([id, m]) => { $(id).onclick = () => { VC.setCharMode(prog, m); store.save(); progressRender(); }; });
+    else if(unlocked){
       $("ordBefore").onclick = () => { VC.setCharOrder(prog, false); store.save(); progressRender(); };
       $("ordAfter").onclick = () => { VC.setCharOrder(prog, true); store.save(); progressRender(); };
     }

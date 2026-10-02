@@ -843,7 +843,7 @@ function storageKey(pack){ return `vocab_${pack.key}`; }
 function defaultProg(pack){
   const sets = {}; levelIds(pack).forEach(id=>{ sets[id] = 0; });
   const p = { v:PROG_VERSION, w:{}, s:{}, sets, lessons:{}, sessions:0, theme:null, showPron: pack.showPron !== false, placedOnce:false };
-  if(charsConfig(pack)) p.chars = defaultCharsProg(); // absent without pack.characters: flag-off shape unchanged
+  if(charsConfig(pack)) p.chars = seedCharOrder(defaultCharsProg(), pack); // absent without pack.characters: flag-off shape unchanged
   if(scriptConfig(pack)) p.script = defaultScriptProg(); // absent without pack.script: likewise
   return p;
 }
@@ -891,7 +891,7 @@ function normalizeProg(data, pack){
   const merged = Object.assign({}, base, data||{}, {v:PROG_VERSION});
   merged.sets = Object.assign({}, base.sets, (data && data.sets) || {});
   for(const k of ["w","s","lessons"]) if(!isObj(merged[k])) merged[k] = {};
-  if(charsConfig(pack)) merged.chars = normalizeCharsProg(data && data.chars);
+  if(charsConfig(pack)) merged.chars = seedCharOrder(normalizeCharsProg(data && data.chars), pack);
   if(scriptConfig(pack)) merged.script = normalizeScriptProg(data && data.script, data);
   merged.w = dropBadMissKinds(merged.w);
   return merged;
@@ -1912,6 +1912,21 @@ function answerCharChoice(prog, start){
 }
 // Flips the flag only: the path is re-derived from it, no record or set state is touched.
 function setCharOrder(prog, defer){ ensureChars(prog).defer = !!defer; return prog; }
+// characters.withWords order (docs/PACK_SCHEMA.md "withWords"; owner 2026-10-02: HSK 4 words
+// came before 字3 was finished). chars.order "first" | "with"; chars.defer true ("later") wins.
+// Fixed when progress loads: a learner with character records from before (the old single
+// stage, taught every session) keeps characters first, so nothing changes silently.
+const CHAR_ORDERS = ["first", "with"];
+function seedCharOrder(ch, pack){
+  const c = charsConfig(pack); if(!c || !c.withWords || CHAR_ORDERS.includes(ch.order)) return ch;
+  ch.order = Object.keys(isObj(ch.c) ? ch.c : {}).length ? "first" : "with"; return ch;
+}
+function charOrder(pack, prog){
+  const ch = prog && isObj(prog.chars) ? prog.chars : {};
+  return ch.defer === true ? "later" : ch.order === "first" ? "first" : "with";
+}
+// Re-derives the path from the flags only, like setCharOrder.
+function setCharMode(prog, mode){ const ch = ensureChars(prog); ch.defer = mode === "later"; if(CHAR_ORDERS.includes(mode)) ch.order = mode; return prog; }
 
 function unitWord(unit, byId){ return (byId || {})[((unit && unit.words) || [])[0]] || null; }
 function unitReading(unit, byId){
@@ -2003,6 +2018,7 @@ function nextStage(pack, words, units, prog, sunits){
   // (review 2026-10-02); without it, session parity.
   const w = path.find(s => s.kind === "words" && !s.done), c = pendingCharStage(path);
   if(!w || !c) return c || w || first;
+  if(charOrder(pack, prog) === "first") return c;
   const t = prog && isObj(prog.chars) ? prog.chars.turn : undefined;
   return (t === "c" || t === "w" ? t === "c" : (prog && prog.sessions || 0) % 2) ? c : w;
 }
@@ -3350,7 +3366,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
-  defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
+  defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
   charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem,

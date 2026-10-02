@@ -406,11 +406,11 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
         const g = (h.match(/<button class="ghost" id="(\w+)"/) || [])[1]; if(g){ api.el(g).click(); continue; } break; }
       const p = api.getProg(); const after = learnLine(api.panel());
       check(`mid HSK 2: a 字1 session records 10 units (${Object.keys(p.chars.c).length}), the next session's Learn is ${after}`, Object.keys(p.chars.c).length === 10 && p.sessions === 8 && /^HSK 2, set 3/.test(after)); }
-    // Progress chips: "with words" / "later"; later = characters after every word level, reversible.
+    // Progress chips: "first" / "with words" / "later" ([11]); later = characters after every word level, reversible.
     { const { api } = await bootWith(PACK, withS(mid, 7), 1); api.goto("progress");
       const ph = api.html("panel");
-      const chips = [...String(ph).matchAll(/id="ord(Before|After)"[^>]*>([^<]*)</g)].map(m => m[2]);
-      check(`Progress chips: ${chips.join(" / ") || "(not rendered)"}`, chips.join("|") === "Characters: with words|Characters: later");
+      const chips = [...String(ph).matchAll(/id="ord(First|Before|After)"[^>]*>([^<]*)</g)].map(m => m[2]);
+      check(`Progress chips: ${chips.join(" / ") || "(not rendered)"}`, chips.join("|") === "Characters: first|Characters: with words|Characters: later");
       const later = VC.setCharOrder(withS(mid, 7), true);
       const lt = await today(later);
       check(`"later": Learn ${lt.learn} every session, strip ${segs(lt.h).join(" | ")}`, /^HSK 2, set 3/.test(lt.learn) && segs(lt.h).join("|") === "HSK 1|HSK 2|HSK 3|HSK 4|字" && VC.nextStage(PACK, WORDS, CHARACTERS, withS(later, 8)).kind === "words");
@@ -642,6 +642,65 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
       for(const x of SENTENCES){ Math.random = mulberry32(gaps + 5); const g = api.gapSentence(x); if(!g || g.kind !== "mc") continue; gaps++; const ls = labelsOf(g); if(oddOne(ls)){ odd++; if(ex.length < 6) ex.push(`gap ${x.id}: ${ls.join(" | ")}`); } }
       check(`builders: ${sets} recall sets (every word, both tiers) + ${gaps} gap sets (every sentence): none odd-one-out${odd ? ` (${odd}: ${ex.join(" || ")})` : ""}; ${fb} written-tier recall sets fell back to readings`, sets > 2000 && gaps > 500 && odd === 0);
     }
+  }
+
+  console.log("\n[11] characters order (chars.order, R5): first / with words / later");
+  {
+    const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
+    const playSession = api => { const s0 = api.getProg().sessions; if(!api.getD()) api.el("go").click(); let guard = 0;
+      while(guard++ < 800 && api.getProg().sessions === s0){ const D = api.getD(); const h = api.panel();
+        if(D && api.getCur() && D.cur){ answer(api, true); api.el("nx").click(); continue; }
+        if(/id="again"/.test(h)) break;
+        const b = (h.match(/<button class="next" id="(\w+)"/) || [])[1]; if(b){ api.el(b).click(); continue; }
+        const g = (h.match(/<button class="ghost" id="(\w+)"/) || [])[1]; if(g){ api.el(g).click(); continue; } break; }
+      return api.getProg().sessions > s0; };
+    // Live-engine (3d66aea) shape: HSK 1-3 learned, mid the old single 字 stage (levels 1-3 in one
+    // list), 20 字3 units left, HSK 4 not started; no chars.order.
+    const old = { v: 1, w: {}, s: {}, sets: { "1": NS("1"), "2": NS("2"), "3": NS("3"), "4": 0 }, lessons: {}, sessions: 40, placedOnce: true, soundsOpened: true,
+      chars: { v: 1, c: {}, defer: false, choiceSeen: true, mix: true } };
+    ["1", "2", "3"].forEach(lv => byLv[lv].forEach(w => { old.w[w.id] = { r: 3, w: 0, s: 3 }; }));
+    const list = VC.charStageUnits(["1", "2", "3"], CHARACTERS, PACK); list.slice(0, list.length - 20).forEach(u => { old.chars.c[u.id] = { r: 2, w: 0, s: 3 }; });
+    const left3 = VC.charSets(["3"], CHARACTERS, PACK).filter(set => !VC.charSetTaught(set, old)).length;
+    const st = fresh(); st.ls.setItem(VC.storageKey(PACK), JSON.stringify(old));
+    const seq = []; let ok = true, order0 = null;
+    for(let d = 0; d < left3 + 2; d++){
+      NOW = new Date(2026, 10, 1 + d, 8, 0, 0).getTime();
+      const api = await boot(PACK, st, 1); if(d === 0) order0 = api.getProg().chars.order;
+      seq.push(learnLine(api.panel())); ok = playSession(api) && ok;
+    }
+    const want = [...Array(left3).fill("字3"), "HSK 4", "HSK 4"];
+    check(`old single-stage learner mid 字3 (${left3} sets left), HSK 4 unlearned: loads as "${order0}"; Learn ${seq.map(l => l.split(",")[0]).join(" | ")}`,
+      ok && order0 === "first" && left3 >= 2 && seq.every((l, i) => l.startsWith(want[i])));
+    const fin = JSON.parse(st.ls.getItem(VC.storageKey(PACK)));
+    check(`stored after those sessions: chars.order "first", 字3 fully recorded`, fin.chars.order === "first" && VC.charSets(["3"], CHARACTERS, PACK).every(set => VC.charSetTaught(set, fin)));
+    fin.sets["4"] = NS("4"); byLv["4"].forEach(w => { fin.w[w.id] = { r: 3, w: 0, s: 3 }; }); st.ls.setItem(VC.storageKey(PACK), JSON.stringify(fin));
+    const seq4 = [];
+    for(let d = 0; d < 2; d++){ NOW = new Date(2026, 10, 20 + d, 8, 0, 0).getTime(); const api = await boot(PACK, st, 1); seq4.push(learnLine(api.panel())); playSession(api); }
+    check(`HSK 4 learned: 字4 unlocked, Learn ${seq4.join(" | ")}`, seq4.every(l => /^字4/.test(l)));
+    // Fresh / mid-HSK 2 learner with no unit records: "with words", alternation ([9]).
+    const mid = { v: 1, w: {}, s: {}, sets: { "1": NS("1"), "2": 2 }, lessons: {}, sessions: 40, placedOnce: true, soundsOpened: true };
+    byLv["1"].forEach(w => { mid.w[w.id] = { r: 3, w: 0, s: 3 }; }); byLv["2"].slice(0, 20).forEach(w => { mid.w[w.id] = { r: 1, w: 0, s: 1 }; });
+    const sm = fresh(); sm.ls.setItem(VC.storageKey(PACK), JSON.stringify(mid)); const ms = [];
+    let api;
+    for(let d = 0; d < 4; d++){ NOW = new Date(2026, 11, 1 + d, 8, 0, 0).getTime(); api = await boot(PACK, sm, 1); ms.push(learnLine(api.panel())); playSession(api); }
+    const mk = ms.map(l => /^字/.test(l) ? "c" : "w");
+    check(`mid HSK 2, no unit records: "${api.getProg().chars.order}", Learn alternates (${ms.join(" | ")})`, api.getProg().chars.order === "with" && mk.every((k, i) => i === 0 || k !== mk[i - 1]));
+    // Chips: three, one on; each switch takes effect at the next Learn and is reversible.
+    NOW = new Date(2026, 11, 10, 8, 0, 0).getTime(); api = await boot(PACK, sm, 1); api.goto("progress");
+    const chips = h => [...String(h).matchAll(/class="chip ?( on|on)?" id="ord(First|Before|After)"[^>]*>([^<]*)</g)].map(m => (m[1] ? "*" : "") + m[3]);
+    const c0 = chips(api.html("panel"));
+    check(`Progress chips: ${c0.join(" / ")}`, c0.join("|") === "Characters: first|*Characters: with words|Characters: later");
+    const res = [];
+    for(const [id, m] of [["ordFirst", "first"], ["ordAfter", "later"], ["ordBefore", "with"], ["ordFirst", "first"]]){
+      api.goto("progress"); api.el(id).click(); const p = api.getProg(); const on = chips(api.html("panel")).filter(c => c[0] === "*").join("");
+      const nx = [0, 1].map(n => VC.nextStage(PACK, WORDS, CHARACTERS, Object.assign(clone(p), { sessions: n }, { chars: Object.assign({}, p.chars, { turn: n ? "c" : "w" }) })).kind);
+      const stored = JSON.parse(sm.ls.getItem(VC.storageKey(PACK))).chars;
+      api.today(); const ll = learnLine(api.panel());
+      res.push(`${id}: ${on} -> ${nx.join("/")} (${ll.split(",")[0]})`);
+      const want = m === "first" ? "chars/chars" : m === "later" ? "words/words" : "words/chars";
+      if(!(VC.charOrder(PACK, p) === m && stored.order === p.chars.order && stored.defer === (m === "later") && nx.join("/") === want && (m === "later" ? /^HSK 2/.test(ll) : m === "first" ? /^字1/.test(ll) : true))) res.push("BAD");
+    }
+    check(`chip switches, stored and applied at the next Learn: ${res.join("; ")}`, !res.includes("BAD"));
   }
 
   console.log(`\n[7] control: without the new fields the zh markup and progress match main ${MAIN}`);

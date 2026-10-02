@@ -139,10 +139,15 @@ check("C mid-HSK2: no card; even sessions HSK 2 set 3, odd 字1; skipped (later)
   !VC.showCharChoice(PACK, W, U, mig("C mid-HSK2"))
   && (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(mig("C mid-HSK2"), 2))) && isChars1(VC.nextStage(PACK, W, U, par(mig("C mid-HSK2"), 3)))
   && [2, 3].every(n => (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(VC.answerCharChoice(mig("C mid-HSK2"), false), n)))));
-check("HEAD (HSK 1-3 done, card unanswered): no card, 字1 and HSK 4 take turns", VC.showCharChoice(PACK, W, U, mig("HEAD")) === false
-  && isChars1(VC.nextStage(PACK, W, U, par(mig("HEAD"), 1))) && VC.nextStage(PACK, W, U, par(mig("HEAD"), 2)).lv === "4");
-check("D1 (answered start): no card, 字1 (its 25 units are HSK 1) and HSK 4 take turns", !VC.showCharChoice(PACK, W, U, mig("D1 chars started, card answered: start"))
-  && isChars1(VC.nextStage(PACK, W, U, par(mig("D1 chars started, card answered: start"), 1))) && VC.nextStage(PACK, W, U, par(mig("D1 chars started, card answered: start"), 0)).lv === "4");
+// R5 (owner 2026-10-02): a learner with character records (the old single stage, taught every
+// session) loads as chars.order "first": 字1 every session until done; "with" restores the turns.
+const withO = p => VC.setCharMode(p, "with");
+check("HEAD (HSK 1-3 done, card unanswered, records): no card, order first, 字1 every session; set to with words, 字1 and HSK 4 take turns", VC.showCharChoice(PACK, W, U, mig("HEAD")) === false
+  && mig("HEAD").chars.order === "first" && [1, 2].every(n => isChars1(VC.nextStage(PACK, W, U, par(mig("HEAD"), n))))
+  && isChars1(VC.nextStage(PACK, W, U, par(withO(mig("HEAD")), 1))) && VC.nextStage(PACK, W, U, par(withO(mig("HEAD")), 2)).lv === "4");
+check("D1 (answered start, records): no card, order first, 字1 every session; set to with words, 字1 and HSK 4 take turns", !VC.showCharChoice(PACK, W, U, mig("D1 chars started, card answered: start"))
+  && mig("D1 chars started, card answered: start").chars.order === "first" && [0, 1].every(n => isChars1(VC.nextStage(PACK, W, U, par(mig("D1 chars started, card answered: start"), n))))
+  && isChars1(VC.nextStage(PACK, W, U, par(withO(mig("D1 chars started, card answered: start")), 1))) && VC.nextStage(PACK, W, U, par(withO(mig("D1 chars started, card answered: start")), 0)).lv === "4");
 check("D2 (answered skip): no card, next stage is HSK 4", !VC.showCharChoice(PACK, W, U, mig("D2 chars started, card answered: skip"))
   && (s => s && s.kind === "words" && s.lv === "4")(VC.nextStage(PACK, W, U, mig("D2 chars started, card answered: skip"))));
 check("D3 (order flipped): one deferred characters stage 1-4 after HSK 4", (p => { const cs = VC.stagePath(PACK, W, U, p).filter(s => s.kind === "chars"); return cs.length === 1 && eq(cs[0].levels, ["1","2","3","4"]); })(mig("D3 learning order flipped from Progress")));
@@ -450,6 +455,38 @@ console.log("\n[turn] characters.withWords Learn turn (chars.turn, fb2-write2): 
     if(!eng){ skip(`engine ${sha} not in this checkout's history`); continue; }
     const ob = eng.bootProg(raw, PACK);
     check(`engine ${sha} boots progress with chars.turn: no backup, turn and unit records kept`, ob.backupRaw === null && ob.prog.chars.turn === "c" && eq(ob.prog.chars.c, JSON.parse(raw).chars.c));
+  }
+}
+
+console.log("\n[order] characters order chars.order (R5, fb2-write2): first / with words / later; default fixed at load");
+{
+  const OFF = (p => { const c = Object.assign({}, p.characters); delete c.withWords; return Object.assign({}, p, { characters: c }); })(PACK);
+  const recs = { [U[0].id]: { r: 1, w: 0, s: 1 } };
+  const raw = o => JSON.stringify(Object.assign({ v: 1, w: {}, s: {}, sets: {} }, o));
+  const ord = (o, pk) => VC.bootProg(raw(o), pk || PACK).prog.chars;
+  check("default: fresh (defaultProg) and no chars field -> \"with\"", VC.defaultProg(PACK).chars.order === "with" && ord({}).order === "with" && ord({ chars: { c: {} } }).order === "with");
+  check("default: unit records from before (old single stage) -> \"first\"", ord({ chars: { c: recs } }).order === "first" && mig("HEAD").chars.order === "first" && mig("C mid-HSK2").chars.order === "with");
+  check("stored \"with\" / \"first\" kept whatever the records; any other value re-derived", ord({ chars: { c: recs, order: "with" } }).order === "with" && ord({ chars: { c: {}, order: "first" } }).order === "first" && ord({ chars: { c: recs, order: 3 } }).order === "first");
+  check("defer: true stays \"later\" (wins over order); charOrder maps first / with / later", VC.charOrder(PACK, { chars: ord({ chars: { c: recs, defer: true } }) }) === "later"
+    && VC.charOrder(PACK, { chars: { order: "first" } }) === "first" && VC.charOrder(PACK, { chars: {} }) === "with");
+  const m = VC.setCharMode(VC.defaultProg(PACK), "later"); const m1 = m.chars.defer === true && m.chars.order === "with";
+  VC.setCharMode(m, "first"); const m2 = m.chars.defer === false && m.chars.order === "first"; VC.setCharMode(m, "with");
+  check("setCharMode: later sets defer only; first / with clear defer and set order", m1 && m2 && m.chars.order === "with" && m.chars.defer === false);
+  check("without withWords no order field (flag-off shape)", !("order" in VC.defaultProg(OFF).chars) && !("order" in ord({ chars: { c: recs } }, OFF)));
+  const nb = VC.bootProg(raw({ chars: { v: 1, c: recs, order: "first", turn: "w" } }), PACK);
+  check("boot: no backup", nb.backupRaw === null);
+  for(const sha of ["ea62a45", "3d66aea"]){
+    let eng = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const src = cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`engine ${sha} not in this checkout's history`); continue; }
+    for(const o of ["first", "with"]){
+      const r = raw({ chars: { v: 1, c: recs, order: o, turn: "c" } }), ob = eng.bootProg(r, PACK);
+      check(`engine ${sha} boots chars.order "${o}": no backup, order, turn and records kept`, ob.backupRaw === null && ob.prog.chars.order === o && ob.prog.chars.turn === "c" && eq(ob.prog.chars.c, recs));
+    }
   }
 }
 
