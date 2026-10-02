@@ -49,7 +49,7 @@ Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` belo
 ```sh
 $NODE tests/engine_checks.js                     # 703 passed; includes the dist/zh.html + sw.js stale guard
 $NODE tests/pron_aids_checks.js                  # 158
-$NODE tests/migration_checks.js                  # 379 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
+$NODE tests/migration_checks.js                  # 381 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
 $NODE tests/characters_checks.js                 # 134
 $NODE tests/characters_app_checks.js             # 202
 $NODE tests/script_checks.js                     # 128
@@ -64,9 +64,9 @@ $NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/typed_from_checks.js                 # 70 (pack.typedFrom / glossFocus; control vs ef44c6e)
 $NODE tests/typed_mastery_checks.js              # 77 (characters.bareBy typed credit/hold/floor, bareWords, per-level stages, withWords + Learn turn + order chips on a withWords pack, gloss fields; control vs 7fe35f7)
 $NODE tests/lag_checks.js                        # 25 (characters.learn "lag": core rule, owner shape before/after, app sessions, resume, control vs 590af86)
-$NODE tests/pause_checks.js                      # 48 (pack.pauseNew: flag-off / unpaused control vs 36aee02, chip, paused sessions teach nothing, Review +Learn items, toggling mid-session)
-$NODE tests/session_resume_checks.js             # 112 (drill/passage resume: tab switch, reload, relaunch, per-tab parking)
-$NODE tests/day_sim_checks.js                    # 65 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; before/after numbers; --why)
+$NODE tests/pause_checks.js                      # 49 (pack.pauseNew: flag-off / unpaused control vs 36aee02, chip, paused sessions teach nothing, Review +Learn items, toggling mid-session)
+$NODE tests/session_resume_checks.js             # 117 (drill/passage resume: tab switch, reload, relaunch, per-tab parking)
+$NODE tests/day_sim_checks.js                    # 67 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; before/after numbers; --why)
 $NODE tests/help_close_checks.js                 # 41 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
 $NODE tests/gloss_overlap_checks.js              # 74 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~5-14 min: 286 s on main 7fe35f7 idle, 151 s on fb2-write2 alone, 836 s under parallel load)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
