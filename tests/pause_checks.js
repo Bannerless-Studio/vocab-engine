@@ -15,6 +15,8 @@ const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "36aee02"; // main before pauseNew
+// Progress characters rows are per level since fb6-charrows (lag_checks [5] pins them); the rest of Progress still matches MAIN.
+const CHAR_ROWS = /<tr><td><bdi[^>]*>字[^<]*<\/bdi>[^<]*<\/td><td>[^<]*<\/td><\/tr>/g;
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
@@ -269,7 +271,7 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
         NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
         const api = await boot(pack, st, 1, { core, html }); const t = api.panel(); api.goto("progress"); const g = api.html("panel");
         api.today(); const s = playSession(api);
-        out.push({ t, g, s, prog: st.ls.getItem(VC.storageKey(pack)) });
+        out.push({ t, g: g.replace(CHAR_ROWS, ""), s, prog: st.ls.getItem(VC.storageKey(pack)) });
       }
       const sameProgress = label === "flag on, not paused" ? out[0].g.replace(/<div class="row" style="margin-top:14px"><button class="chip on" id="togglePause" aria-pressed="true">New material: on<\/button><\/div>/, "") === out[1].g && /id="togglePause"/.test(out[0].g) : out[0].g === out[1].g && !/togglePause/.test(out[0].g);
       check(`${name}, ${label}: Today and a whole session's progress byte-identical to ${MAIN}; Progress ${label === "flag on, not paused" ? "identical but the chip" : "identical, no chip"} (${out[0].t.length} chars, ${out[0].s ? out[0].s.items : 0} items)`,
