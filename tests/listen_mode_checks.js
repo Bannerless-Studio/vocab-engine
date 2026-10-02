@@ -18,6 +18,8 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // this suite is about listening, so it runs the zh pack with them off.
 const PACK = (p => { delete p.typedFrom; delete p.glossFocus; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
+// words[].syn / typedSyn / noTypedMeaning (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields.
+const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; return c; });
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -496,7 +498,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     }catch(e){}
     check(`base ${BASE_W7} engine/app.html + core.js loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseVC);
     if(baseHtml && baseVC){
-      const cur = await seededWalk({}), base = await seededWalk({ html: baseHtml, vc: baseVC });
+      const cur = await seededWalk({ words: WORDS_OFF }), base = await seededWalk({ html: baseHtml, vc: baseVC, words: WORDS_OFF });
       const diff = cur.findIndex((h, i) => h !== base[i]);
       check(`zh voice: Today steps 0-4 (plans, screens) + Test Listen/Recall/Sentences identical (${cur.length} captures)`,
         cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
