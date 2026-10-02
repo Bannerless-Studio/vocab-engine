@@ -4912,7 +4912,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1431233045-1823830";
+const VE_BUILD = "3899494527-1823880";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6532,10 +6532,10 @@ function charProgress(){
   const recs = VC.charRecs(prog);
   const streak = u => ((recs[u.id] || {}).s || 0);
   const unlocked = VC.charsUnlocked(PACK, WORDS, prog), started = VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU);
-  // characters.learn "lag": no stages, one line (taught of ready, ready = the word is learned).
-  const lag = () => { const lw = new Set(learnedWords().map(w => w.id)), rec = CHAR_LIST.filter(u => recs[u.id]);
-    const ready = CHAR_LIST.filter(u => recs[u.id] || lw.has(u.words[0])).length;
-    return `<tr><td>${tf(CHAR_CFG.label)}</td><td>${rec.length} / ${ready} taught · ${CHAR_LIST.length} in all · ${rec.filter(u => VC.charTier(streak(u), PACK) !== "pron").length} mastered · ${rec.filter(u => VC.charTier(streak(u), PACK) === "bare").length} bare</td></tr>`; };
+  // characters.learn "lag": no stages; one row per level (taught of the level's units), a unit's level is its word's.
+  const lag = () => LEVELS.map(lv => { const list = CHAR_LIST.filter(u => String(u.lv) === String(lv)); if(!list.length) return "";
+    const rec = list.filter(u => recs[u.id]), bare = rec.filter(u => VC.charTier(streak(u), PACK) === "bare").length;
+    return `<tr><td>${tf(CHAR_CFG.label)} ${escapeHtml(levelLabel(lv))}</td><td>${rec.length} / ${list.length} taught · ${rec.filter(u => VC.charTier(streak(u), PACK) !== "pron").length} mastered${bare ? ` · ${bare} bare` : ""}</td></tr>`; }).join("");
   const rows = !started ? "" : CHAR_CFG.learn === "lag" ? lag() : stages.map(st => {
     const list = VC.charStageUnits(st.levels, CHAR_LIST, PACK);
     const taught = VC.charSets(st.levels, CHAR_LIST, PACK).filter(set => VC.charSetTaught(set, prog)).reduce((n, set) => n + set.length, 0);
@@ -6680,4 +6680,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1001735738-1823154-->
+<!--ve-build:3919123921-1823204-->

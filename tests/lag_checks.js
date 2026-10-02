@@ -14,6 +14,7 @@ const util = require("util");
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
+const PREV = "68930bd"; // main before the per-level Progress rows
 const MAIN = "590af86"; // main before characters.learn (stage model: withWords, order chips, turn)
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
@@ -158,6 +159,7 @@ return {
 }
 const fresh = () => ({ ls: memStore(), ss: memStore() });
 async function bootWith(pack, prog, seed, opts){ const st = fresh(); if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog)); return { api: await boot(pack, st, seed || 1, opts), st }; }
+const charRows = h => [...h.matchAll(/<tr><td><bdi[^>]*>字<\/bdi> [^<]*<\/td><td>[^<]*<\/td><\/tr>/g)].map(m => stripTags(m[0].replace("</td><td>", " | ")));
 const stripTags = h => String(h).replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+>/g, "").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&");
 const typedAnswer = it => { const w = BY_ID[String(it.key).slice(2)]; return it.label === "Type the pinyin" ? w.pron : it.label === "Type the meaning" ? VC.gloss(w) : w.w; };
 function answer(api, right, typed){
@@ -290,13 +292,13 @@ try {
     const { api } = await bootWith(PACK, ownerProg(250), 1); const h = api.panel();
     check(`owner shape, Today: strip ${segs(h).join(" | ")}; Learn ${learnLine(h)}; no card`, segs(h).join("|") === "HSK 1|HSK 2|HSK 3|HSK 4" && /^字, set 26 of 120$/.test(learnLine(h)) && !/id="charChoice"/.test(h) && /id="go"/.test(h));
     api.goto("progress"); const ph = api.html("panel");
-    const row = stripTags((ph.match(/<tr><td><bdi[^>]*>字<\/bdi><\/td><td>[^<]*<\/td><\/tr>/) || [""])[0]);
-    check(`owner shape, Progress: "${row}"; no order chips; mix chip kept`, /^字250 \/ 595 taught · 1193 in all · 250 mastered · 0 bare$/.test(row) && !/id="ord(First|Before|After)"/.test(ph) && /id="toggleMix"/.test(ph));
+    const rows = charRows(ph), row = rows.join("; ");
+    check(`owner shape, Progress: "${row}"; no order chips; mix chip kept`, eq(rows, ["字 HSK 1 | 150 / 150 taught · 150 mastered", "字 HSK 2 | 100 / 147 taught · 100 mastered", "字 HSK 3 | 0 / 298 taught · 0 mastered", "字 HSK 4 | 0 / 598 taught · 0 mastered"]) && !/id="ord(First|Before|After)"/.test(ph) && /id="toggleMix"/.test(ph));
     if(OLD){
       const { api: ob } = await bootWith(WITH, ownerProg(250), 1, { core: OLD, html: cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 }) });
       const bh = ob.panel(); ob.goto("progress"); const bp = ob.html("panel");
-      const rows = [...bp.matchAll(/<tr><td><bdi[^>]*>(字\d)<\/bdi><\/td><td>([^<]*)<\/td><\/tr>/g)].map(m => m[1] + " " + m[2]);
-      console.log(`  owner shape before (${MAIN}): strip ${segs(bh).join(" | ")}; Learn ${learnLine(bh)}; Progress ${rows.join("; ")}; chips ${[...bp.matchAll(/id="ord\w+"[^>]*>([^<]*)</g)].map(m => m[1]).join(" / ")}`);
+      const brows = [...bp.matchAll(/<tr><td><bdi[^>]*>(字\d)<\/bdi><\/td><td>([^<]*)<\/td><\/tr>/g)].map(m => m[1] + " " + m[2]);
+      console.log(`  owner shape before (${MAIN}): strip ${segs(bh).join(" | ")}; Learn ${learnLine(bh)}; Progress ${brows.join("; ")}; chips ${[...bp.matchAll(/id="ord\w+"[^>]*>([^<]*)</g)].map(m => m[1]).join(" / ")}`);
       console.log(`  owner shape after: strip ${segs(h).join(" | ")}; Learn ${learnLine(h)}; Progress ${row}; no chips`);
     }
   }
@@ -354,6 +356,31 @@ try {
       }
       check(`withWords pack (no learn), ${name}: Today, Progress and a whole session's progress byte-identical to ${MAIN} (${out[0].t.length} + ${out[0].g.length} chars)`, out[0].t === out[1].t && out[0].g === out[1].g && out[0].prog === out[1].prog);
     }
+  }
+
+  console.log("\n[5] Progress: one characters row per level (control " + PREV + ")");
+  {
+    const prevHtml = cp.execSync(`git -C "${ROOT}" show ${PREV}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
+    const oldRow = h => { const m = (h.match(/<tr><td><bdi[^>]*>字<\/bdi><\/td><td>([^<]*)<\/td><\/tr>/) || [])[1]; return m ? (x => ({ taught: +x[1], ready: +x[2], all: +x[3], mastered: +x[4], bare: +x[5] }))(m.match(/^(\d+) \/ (\d+) taught · (\d+) in all · (\d+) mastered · (\d+) bare$/)) : null; };
+    const sum = rows => rows.reduce((a, r) => { const m = r.match(/\| (\d+) \/ (\d+) taught · (\d+) mastered(?: · (\d+) bare)?$/); return { taught: a.taught + +m[1], all: a.all + +m[2], mastered: a.mastered + +m[3], bare: a.bare + +(m[4] || 0) }; }, { taught: 0, all: 0, mastered: 0, bare: 0 });
+    const lvOk = CHARACTERS.every(u => String(u.lv) === String(BY_ID[u.words[0]].lv));
+    check("every unit's level equals its word's level", lvOk);
+    const longest = Math.max(...["learned", "available"].map(k => `595 / 595 ${k} · 500 mastered`.length));
+    const mid1 = (() => { const p = VC.normalizeProg({ sets: { "1": 3 }, placedOnce: true, soundsOpened: true, sessions: 5 }, PACK); byLv["1"].slice(0, 30).forEach(w => { p.w[w.id] = { r: 3, w: 0, s: 3 }; }); ORDER.slice(0, 20).forEach((u, i) => { p.chars.c[u.id] = { r: 4, w: 0, s: i < 5 ? 6 : i < 12 ? 3 : 1 }; }); Object.assign(p.chars, { choiceSeen: true, turn: "w" }); return p; })();
+    const allP = ownerProg(ORDER.length); byLv["4"].forEach(w => { allP.w[w.id] = { r: 5, w: 0, s: 5 }; });
+    const shapes = [["mid HSK 1", mid1, ["字 HSK 1 | 20 / 150 taught · 12 mastered · 5 bare", "字 HSK 2 | 0 / 147 taught · 0 mastered", "字 HSK 3 | 0 / 298 taught · 0 mastered", "字 HSK 4 | 0 / 598 taught · 0 mastered"]],
+      ["owner", ownerProg(250), null], ["all taught", allP, null]];
+    for(const [name, p, want] of shapes){
+      const { api } = await bootWith(PACK, p, 1); api.goto("progress"); const rows = charRows(api.html("panel")); const s = sum(rows);
+      const { api: ob } = await bootWith(PACK, p, 1, { html: prevHtml }); ob.goto("progress"); const o = oldRow(ob.html("panel"));
+      check(`${name}: ${rows.length} rows, sums taught ${s.taught} / ${s.all}, mastered ${s.mastered}, bare ${s.bare} equal the ${PREV} row (${o.taught} / ${o.all}, ${o.mastered}, ${o.bare})`, rows.length === 4 && s.taught === o.taught && s.all === o.all && s.mastered === o.mastered && s.bare === o.bare && (!want || eq(rows, want)));
+      check(`${name}: rows in level order, text <= longest word row (${longest}) unless bare shown`, rows.every((r, i) => r.startsWith(`字 HSK ${i + 1} |`) && (/bare/.test(r) || r.split(" | ")[1].length <= longest)));
+      console.log(`  ${name}: before ${PREV}: ${(h => { const m = h.match(/<tr><td><bdi[^>]*>字<\/bdi><\/td><td>([^<]*)</); return m ? m[1] : ""; })(ob.html("panel"))}; after: ${rows.join("; ")}`);
+    }
+    const fo = await bootWith(PACK, ownerProg(250), 1); fo.api.goto("progress");
+    const fresh0 = await bootWith(PACK, null, 1); fresh0.api.goto("progress");
+    check("fresh learner: no characters rows (not started)", charRows(fresh0.api.html("panel")).length === 0);
+    check("boot + Progress write nothing new: stored chars keys unchanged", Object.keys(JSON.parse(fo.st.ls.getItem(VC.storageKey(PACK))).chars).sort().join() === Object.keys(ownerProg(250).chars).sort().join());
   }
 
   console.log(`\n${passes} passed, ${fails} failed`);
