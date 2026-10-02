@@ -2866,7 +2866,8 @@ function typedKindOk(kind, word, shownWritten, amb){
   const a = amb || { written: new Set(), pron: new Set() };
   const hasW = !!(word && word.w), hasP = !!(word && word.pron), hasG = !!gloss(word);
   if(kind === "word") return hasW;
-  if(kind === "pron") return hasP;
+  // words[].pronInGloss: the meaning stimulus would spell the reading (北京 "Beijing").
+  if(kind === "pron") return hasP && !word.pronInGloss;
   if(kind === "written") return hasW && shownWritten;
   if(kind === "writtenMeaning") return hasW && shownWritten && hasG && !a.written.has(word.id) && !word.noTypedMeaning;
   if(kind === "writtenPron") return hasW && hasP && shownWritten && !a.written.has(word.id);

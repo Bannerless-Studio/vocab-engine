@@ -28,8 +28,8 @@ const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // dayAware post-dates main ef44c6e: the control strips it with the fields under test.
 const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; return p; })(Object.assign({}, PACK));
-// words[].syn / typedSyn / noTypedMeaning (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields too.
-const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; return c; });
+// words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields too.
+const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });
 
 let fails = 0, passes = 0;
 function check(name, cond){
@@ -189,7 +189,8 @@ function walk(api, stopAt){
       if(it.kind === "type"){
         seen.push({ where: it.key, kind: "type", it, html: P });
         const w = BY_ID[it.key.slice(2)];
-        api.el("tin").value = it.label === "Type the pinyin" ? w.pron : it.label === "Type the meaning" ? VC.gloss(w) : w.w; api.el("submit").click();
+        // A typed cloze (s:, typing object packs) is answered wrong: the walk only compares screens.
+        api.el("tin").value = !w ? "" : it.label === "Type the pinyin" ? w.pron : it.label === "Type the meaning" ? VC.gloss(w) : w.w; api.el("submit").click();
         seen.push({ where: it.key + " reveal", html: api.html("rv") }); api.el("nx").click(); continue;
       }
       const btns = api.el("o").children;

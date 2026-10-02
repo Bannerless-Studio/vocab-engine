@@ -9,7 +9,8 @@
 // [5] noTypedMeaning words never get a typed-meaning kind; [6] gloss caps and matcher rules
 // (copula, overrides); [7] validate_pack.py on the new fields; [8] review round 2: typed
 // groups, notTyped, the first-meaning rule, HSK core senses, option and note shortening;
-// [9] under dayAware routing. Fake DOM from
+// [9] under dayAware routing; [10] review round 3: register labels, the stimulus gate,
+// tools/zh_gloss_expect.json natural answers, pronInGloss. Fake DOM from
 // tests/typed_from_checks.js. Run: node tests/gloss_overlap_checks.js
 "use strict";
 const fs = require("fs");
@@ -31,9 +32,10 @@ const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 const BY_W = Object.fromEntries(WORDS.map(w => [w.w, w]));
-const strip = w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; return c; };
+const strip = w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; };
 const WORDS_OFF = WORDS.map(strip);
 const OV = JSON.parse(fs.readFileSync(ZG.OVERRIDES, "utf8"));
+OV.expect = JSON.parse(fs.readFileSync(ZG.EXPECT, "utf8"));
 
 let fails = 0, passes = 0;
 function check(name, cond){
@@ -159,7 +161,7 @@ return {
   typeItem, silentWrittenTypeItem: ${hook("silentWrittenTypeItem")}, writtenPronTypeItem: ${hook("writtenPronTypeItem")}, meaningTypeItem: ${hook("meaningTypeItem")}, meaningChoices,
   glossOut: ${hook("glossOut")}, optHtml: o => GLOSS_OPT ? GLOSS_OPT(o) : null, hearItem, typedFromSlotItem: ${hook("typedFromSlotItem")},
   itemFromPlan: ${hook("itemFromPlan")}, tokTap: ${hook("tokTap")}, onTok: ${hook("onTok")}, tokOwns: ${hook("tokOwns")}, docListeners: t => document._listeners[t] || [], soundsRefGroups: ${hook("soundsRefGroups")},
-  drill1: it => drill([it], () => {}, null),
+  drill1: it => drill([it], () => {}, null), dayWordCan: ${hook("dayWordCan")},
   wordsPage: (lv, set) => { tab = "words"; wordsQuery = ""; wordsLv = lv; wordsSet = set; render(); },
 };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","PACK","WORDS","SENTENCES","LESSONS","PASSAGES"];
@@ -204,9 +206,9 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     const bad = WORDS.filter(w => {
       const id = w.id, en = r.en[id] !== undefined ? r.en[id] : pre.find(x => x.id === id).en;
       return en !== w.en || JSON.stringify(r.syn[id]) !== JSON.stringify(w.syn) || JSON.stringify(r.typedSyn[id]) !== JSON.stringify(w.typedSyn)
-        || r.noTypedMeaning.includes(id) !== (w.noTypedMeaning === true);
+        || r.noTypedMeaning.includes(id) !== (w.noTypedMeaning === true) || r.pronInGloss.includes(id) !== (w.pronInGloss === true);
     }).map(w => w.w);
-    check(`words.json en / syn / typedSyn / noTypedMeaning match the build (stale: ${bad.slice(0, 10).join(" ")})`, bad.length === 0);
+    check(`words.json en / syn / typedSyn / noTypedMeaning / pronInGloss match the build (stale: ${bad.slice(0, 10).join(" ")})`, bad.length === 0);
     const doc = fs.readFileSync(path.join(ROOT, "docs", "ZH_GLOSS.md"), "utf8");
     check("docs/ZH_GLOSS.md is current (rerun tools/pack_from_hsk.py)", doc === ZG.report(pre, OV, r));
     check(`every gloss override applied (${Object.keys(OV.en).length}), each with a source`, Object.entries(OV.en).every(([w, o]) => BY_W[w] && BY_W[w].en === o.en && !!o.src));
@@ -223,10 +225,12 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
   const zj = BY_W["着急"], dx = BY_W["担心"], fn = BY_W["烦恼"];
   {
     console.log(`    着急 "${zj.en}"; 担心 "${dx.en}"; 烦恼 "${fn.en}"`);
-    const off = id => WORDS_OFF.find(w => w.id === id);
+    // Before: the hsk glosses (担心 "anxious; worried") and no syn.
+    const OFF0 = WORDS_OFF.map(w => OV.en[w.w] ? Object.assign({}, w, { en: OV.en[w.w].was }) : w);
+    const off = id => OFF0.find(w => w.id === id);
     const count = (words, f) => { let n = 0; for(let s = 1; s <= 300; s++){ Math.random = mulberry32(s); if(f(words).some(v => v.id === dx.id || v.id === fn.id)) n++; } Math.random = REAL_RANDOM; return n; };
-    const mo0 = count(WORDS_OFF, ws => VC.meaningOpts(off(zj.id), ws)), mo1 = count(WORDS, ws => VC.meaningOpts(zj, ws));
-    const wo0 = count(WORDS_OFF, ws => VC.wordOpts(off(zj.id), ws, e => e.pron, PACK)), wo1 = count(WORDS, ws => VC.wordOpts(zj, ws, e => e.pron, PACK));
+    const mo0 = count(OFF0, ws => VC.meaningOpts(off(zj.id), ws)), mo1 = count(WORDS, ws => VC.meaningOpts(zj, ws));
+    const wo0 = count(OFF0, ws => VC.wordOpts(off(zj.id), ws, e => e.pron, PACK)), wo1 = count(WORDS, ws => VC.wordOpts(zj, ws, e => e.pron, PACK));
     console.log(`    before: 担心/烦恼 among 着急's meaning options in ${mo0}/300 seeds, word options in ${wo0}/300; after: ${mo1}, ${wo1}`);
     check("before (syn absent) 担心 or 烦恼 is a 着急 distractor; after, never (300 seeds, meaning and word options)", mo0 > 0 && wo0 > 0 && mo1 === 0 && wo1 === 0);
     check("着急 syn / typedSyn hold 担心 and 烦恼", [dx.id, fn.id].every(x => zj.syn.includes(x) && zj.typedSyn.includes(x)));
@@ -296,7 +300,7 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     const marked = WORDS.filter(w => w.noTypedMeaning);
     console.log(`    marked: ${marked.map(lab).join(", ")}`);
     check("marked: first alternative an explanation (particles, classifiers, markers, 把 被) plus 地 -ly and 场",
-      marked.map(w => w.w).join(" ") === "个 了 吗 呢 本 件 吧 张 得 着 位 地 把 条 被 辆 之 分之 台 场 座 棵 篇 顿");
+      marked.map(w => w.w).join(" ") === "个 了 吗 呢 本 件 吧 张 得 正在 着 位 地 把 条 被 辆 之 分之 台 场 座 朵 棵 篇 顿");
     const MK = new Set(["writtenMeaning", "pronMeaning"]);
     let slots = 0, leaks = 0, none = 0;
     marked.forEach(w => [true, false].forEach(shown => {
@@ -401,7 +405,7 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     let proposed = 0; const unreviewed = [], outside = [];
     WORDS.forEach(t => { const f = first(t); if(!f.size) return; WORDS.forEach(x => {
       if(x.id === t.id || ![...f].some(k => KEYS.get(x.id).has(k))) return;
-      proposed++; if(!has(t.w, x.w) && !NT.has(t.w + "<-" + x.w)) unreviewed.push(t.w + "<-" + x.w); }); });
+      proposed++; if(!has(t.w, x.w) && !NT.has(t.w + "<-" + x.w) && !ZG.labelOnly(t.en, x.en)) unreviewed.push(t.w + "<-" + x.w); }); });
     const inGroup = new Set(groupPairs(true).map(p => p.join("<-")));
     WORDS.forEach(t => (t.typedSyn || []).forEach(id => { const x = BY_ID[id]; if(!inGroup.has(t.w + "<-" + x.w) && ![...first(t)].some(k => KEYS.get(x.id).has(k))) outside.push(t.w + "<-" + x.w); }));
     check(`first-meaning rule: ${proposed} proposed pairs, each accepted or on notTyped (unreviewed: ${unreviewed.slice(0, 8).join(" ")})`, unreviewed.length === 0 && proposed > 400);
@@ -425,7 +429,7 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     check(`option buttons: first alternatives only (容易 -> ${ry}), a long (...) explanation as (…) (${yx})`,
       ry === "easy; straightforward" && /impression <span class="dim">\(…\)<\/span>/.test(yx) && !/stays/.test(yx) && api.optHtml("(classifier for flat objects, sheets); to open").startsWith("(classifier for flat objects, sheets)"));
     const note = api.pronTypeItem(zj).feedback(dx.pron);
-    check(`"also right" note: the synonym's first meaning only (${note.replace(/<[^>]+>/g, "")})`, /also right/.test(note) && /anxious/.test(note) && !/worried/.test(note));
+    check(`"also right" note: the synonym's first meaning only (${note.replace(/<[^>]+>/g, "")})`, /also right/.test(note) && /to worry/.test(note) && !/anxious|worried/.test(note));
   }
 
   // ---------------------------------------------------------------- [9] with dayAware (zh)
@@ -452,6 +456,73 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     const peer = WORDS.find(w => w.lv === dx.lv && w.id !== dx.id && w.id !== zj.id), rec = id => JSON.stringify((p2.w || {})[id] || null);
     check(`着急's pinyin card answered ${dx.pron} (担心): right, streak on 着急 (${JSON.stringify(rz)}), day log right for w:${zj.id} (${JSON.stringify(dl["w:" + zj.id])}); 担心 not credited (${rec(dx.id)} = unasked ${peer.w} ${rec(peer.id)}), not logged`,
       api.getD().miss.length === 0 && rz.s >= 1 && !!dl["w:" + zj.id] && typeof dl["w:" + zj.id].c === "number" && !(dl["w:" + zj.id].mk || []).length && !dl["w:" + dx.id] && rec(dx.id) === rec(peer.id));
+  }
+
+  // ---------------------------------------------------------------- [10] review round 3
+  console.log("\n[10] review round 3: register labels, the stimulus gate, natural answers, pronInGloss");
+  {
+    const has = (t, x) => (BY_W[t].typedSyn || []).includes(BY_W[x].id);
+    const pre = WORDS.map(w => { const c = strip(w); const o = OV.en[w.w]; if(o && w.en === o.en) c.en = o.was; return c; });
+    const r = ZG.build(pre, OV);
+    // 你 "you (informal)" / 您 "you (courteous)": the label is the distinction. 爸爸 "(coll.) father; dad" / 父亲 "father" differ by more.
+    const lp = r.labelPairs.map(([t, x]) => t.w + "<-" + x.w).sort().join(" ");
+    check(`register label as the only difference is never a typed synonym: skipped ${lp}; 你/您 not accepted either way`, lp === "你<-您 您<-你" && !has("你", "您") && !has("您", "你"));
+    check("a label with more difference still is (爸爸 <-> 父亲)", has("爸爸", "父亲") && has("父亲", "爸爸"));
+    // Gate: independent of ZG.covers, the reviewer's identical-stimulus test (the shown text, qualifiers included).
+    const shown = w => VC.glossParts(VC.gloss(w)).pieces.map(p => p.t).join("").replace(/\s+/g, " ").trim().toLowerCase();
+    const bySh = new Map(); WORDS.forEach(w => { const k = shown(w); if(!bySh.has(k)) bySh.set(k, []); bySh.get(k).push(w); });
+    const same = [...bySh.values()].filter(l => l.length > 1), sameBad = same.filter(l => l.some(a => l.some(b => a !== b && !has(a.w, b.w))));
+    check(`identical stimuli accept each other both ways (${same.map(l => l.map(w => w.w).join("/")).join(", ")}; failing: ${sameBad.map(l => l.map(w => w.w).join("/")).join(", ")})`, sameBad.length === 0);
+    const gate = []; WORDS.forEach(t => WORDS.forEach(x => { if(t !== x && t.w !== x.w && ZG.covers(VC.gloss(t), VC.gloss(x)) && !has(t.w, x.w)) gate.push(t.w + "<-" + x.w); }));
+    check(`stimulus gate: every fully covered stimulus accepts the covering word (${gate.length} not: ${gate.slice(0, 8).join(" ")}); build reports no gate error`, gate.length === 0 && !r.errs.some(e => /^gate/.test(e)));
+    const ovBad = Object.assign({}, OV, { notTyped: [...OV.notTyped, { pair: ["母亲", "妈妈"], why: "test" }] });
+    check("the build fails when a reviewed reject blocks a covered stimulus (母亲 \"mother\" <- 妈妈 \"mother; mom\")", ZG.build(pre, ovBad).errs.some(e => /^gate: 母亲 /.test(e)));
+    const rev = [["提高", "增加"], ["增加", "提高"], ["经历", "经验"], ["经验", "经历"], ["两", "俩"], ["俩", "两"], ["收", "接受"], ["接受", "收"], ["降低", "减少"], ["重新", "再"], ["号码", "数字"]];
+    const revBad = rev.filter(([t, x]) => !has(t, x) && ZG.covers(BY_W[t].en, BY_W[x].en));
+    check(`review table 2 (提高/增加, 经历/经验, 两/俩, 收/接受, 降低<-减少, 重新<-再, 号码<-数字): each stimulus now tells the words apart or accepts (${revBad.map(p => p.join("<-")).join(" ")})`, revBad.length === 0);
+    // Owner calls.
+    const can = ["会", "能", "可以"].flatMap(a => ["会", "能", "可以"].filter(b => b !== a).map(b => [a, b])).filter(([a, b]) => !has(a, b));
+    const same1 = [["讲", "谈"], ["讲", "说话"], ["谈", "讲"], ["谈", "说话"], ["说话", "讲"], ["说话", "谈"], ["必须", "不得不"], ["不得不", "必须"]].filter(([a, b]) => !has(a, b));
+    const again = OV.notTyped.filter(n => ["再>又", "又>再"].includes(n.pair.join(">")));
+    check(`owner calls: 会/能/可以 mutual (${can.map(p => p.join("<-")).join(" ")}), 讲/谈/说话 and 必须<->不得不 accepted (${same1.map(p => p.join("<-")).join(" ")}), 二<->两 kept, 再/又 rejected with a reason and different first meanings ("${BY_W["再"].en.split(";")[0]}" / "${BY_W["又"].en.split(";")[0]}")`,
+      can.length === 0 && same1.length === 0 && has("二", "两") && has("两", "二") && again.length === 2 && again.every(n => n.why) && !has("再", "又") && !has("又", "再"));
+    // Natural answers: tools/zh_gloss_expect.json covers every HSK 1-3 word with a typed meaning; each answer is right.
+    const E = OV.expect, missing = WORDS.filter(w => +w.lv <= 3 && !w.noTypedMeaning && !(E[w.w] || []).length).map(w => w.w);
+    const wrong = []; Object.entries(E).forEach(([w, as]) => as.forEach(a => { if(!BY_W[w] || !VC.checkGlossTyped(a, BY_W[w].en, PACK)) wrong.push(`${w} ${a}`); }));
+    const n = Object.values(E).reduce((m, l) => m + l.length, 0);
+    check(`natural answers: ${Object.keys(E).length} words / ${n} answers in tools/zh_gloss_expect.json, every HSK 1-3 typed-meaning word listed (missing: ${missing.join(" ")}), all accepted (rejected: ${wrong.slice(0, 8).join(", ")})`, missing.length === 0 && wrong.length === 0 && Object.keys(E).length >= 595);
+    const named = [["检查", "check"], ["越", "the more"], ["看", "look"], ["无论", "no matter"], ["行", "okay"], ["次", "times"], ["遍", "times"], ["回", "times"], ["所以", "so"], ["快", "fast"], ["旅游", "travel"], ["牛奶", "milk"], ["元", "yuan"],
+      ["谢谢", "thank you"], ["好", "OK"], ["坐", "take"], ["运动", "sport"], ["关于", "about"], ["发现", "find"], ["发现", "discover"], ["宾馆", "hotel"], ["愿意", "willing"], ["饱", "full"], ["表演", "perform"], ["挺", "quite"], ["困难", "difficulty"],
+      ["从来", "never"], ["活动", "activity"], ["脾气", "temper"], ["优点", "advantage"], ["肯定", "definitely"], ["办法", "way"], ["成绩", "grades"], ["马上", "immediately"]].filter(([w, a]) => !VC.checkGlossTyped(a, BY_W[w].en, PACK));
+    const wrongSense = [["错", "bad"], ["在", "now"], ["在", "beat"]].filter(([w, a]) => VC.checkGlossTyped(a, BY_W[w].en, PACK));
+    check(`the review's named answers are right (${named.map(p => p.join(" ")).join(", ")}), its wrong-sense keys are not (${wrongSense.map(p => p.join(" ")).join(", ")})`, named.length === 0 && wrongSense.length === 0);
+    const lead = [["帮助", "to help"], ["解释", "to explain"], ["矮", "short (in height)"], ["米", "rice (uncooked)"], ["角", "0.1 yuan"]].filter(([w, a]) => BY_W[w].en.split(";")[0].trim() !== a);
+    check(`core sense first (帮助 解释 矮 米 角: ${lead.map(p => p[0]).join(" ")}); 正在 and 朵 marked noTypedMeaning; 帮忙<->帮助 and 说明<->解释 accepted both ways`,
+      lead.length === 0 && BY_W["正在"].noTypedMeaning && BY_W["朵"].noTypedMeaning && has("帮忙", "帮助") && has("帮助", "帮忙") && has("说明", "解释") && has("解释", "说明"));
+    // pronInGloss: the gloss spells the toneless reading.
+    const pig = WORDS.filter(w => w.pronInGloss).map(w => w.w).join(" ");
+    const pigRule = WORDS.filter(w => ZG.pronInGloss(w.en, w.pron)).map(w => w.w).join(" ");
+    const toneless = w => VC.glossKey(w.pron.normalize("NFKD").replace(/\p{M}/gu, ""));
+    const indep = WORDS.filter(w => VC.glossParts(w.en).pieces.map(p => p.t).join(" ").normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, "").includes(toneless(w)) && toneless(w).length >= 4).map(w => w.w).join(" ");
+    check(`pronInGloss on exactly the words whose gloss spells the reading: ${pig} (rule: ${pigRule}; substring scan, readings of 4+ letters (蓝 "lan" sits in "plant"): ${indep}); 角 "${BY_W["角"].en}" and 长江 "${BY_W["长江"].en}" no longer do`,
+      pig === pigRule && pig === "北京 元 人民币" && indep === pig && !BY_W["角"].pronInGloss && !BY_W["长江"].pronInGloss);
+    const leakKinds = WORDS.filter(w => w.pronInGloss).filter(w => VC.typedKindOk("pron", w, true, AMB) || !VC.typedKindOk("writtenMeaning", w, true, AMB) && !AMB.written.has(w.id));
+    check(`typedKindOk never gives them meaning -> pinyin; meaning -> characters stays (${leakKinds.map(w => w.w).join(" ")})`, leakKinds.length === 0 && VC.typedKindOk("written", BY_W["北京"], true, AMB));
+    const ovLeak = o => Object.assign({}, OV, { en: Object.assign({}, OV.en, { 长城: Object.assign({ was: BY_W["长城"].en, en: "Changcheng; the Great Wall", src: "test" }, o) }) });
+    const preHsk = pre.map(w => w.w === "长城" ? Object.assign({}, w, { en: BY_W["长城"].en }) : w);
+    check("the build rejects an override whose gloss spells the reading (长城 \"Changcheng\") unless it says why (pronInGloss)",
+      ZG.build(preHsk, ovLeak({})).errs.some(e => /长城: the gloss spells the reading "changcheng"/.test(e)) && !ZG.build(preHsk, ovLeak({ pronInGloss: "test" })).errs.some(e => /长城/.test(e)));
+    // App: shown by its reading, recall is the read item and never routed; shown written, options carry no reading.
+    const { api } = await boot({ seed: 5 });
+    const bj = BY_W["北京"], pm0 = allProg(); api.setProg(pm0);
+    const it0 = api.recallItem(bj), can0 = api.dayWordCan(bj);
+    const pm1 = tierProg([bj]); api.setProg(pm1);
+    const it1 = api.recallItem(bj), opt1 = it1.opts.map(o => it1.optHtml(o)).join("|"), can1 = api.dayWordCan(bj);
+    const tKinds = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => { api.setProg(pm0); return api.typedFromSlotItem(Array.from({ length: 9 }, () => ({ kind: "type", word: bj })), i).label; });
+    check(`北京 shown by its reading: recall is "${it0.label}", the day planner never routes recall (${can0.join(" ")}), typed slots never "Type the pinyin" (${[...new Set(tKinds)].join(" / ")}); written: recall "${it1.label}" with no reading on the options`,
+      it0.label === "What does it mean?" && !can0.includes("recall") && !tKinds.includes("Type the pinyin") && it1.label === "Which word is this?" && /北京/.test(opt1) && !/Běi|běi/.test(opt1) && can1.includes("recall"));
+    const plain = api.recallItem(BY_W["中国"]);
+    check("a word without pronInGloss keeps recall", plain.label === "Which word is this?");
   }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

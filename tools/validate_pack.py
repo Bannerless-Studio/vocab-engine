@@ -399,7 +399,7 @@ def check_words(words, levels, rep):
 
 
 def check_synonyms(words, by_id, rep):
-    """syn / typedSyn / noTypedMeaning (docs/PACK_SCHEMA.md "Synonyms"; zh: tools/zh_gloss.js).
+    """syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms"; zh: tools/zh_gloss.js).
     syn is symmetric (the engine reads either side, a one-sided list means a stale build);
     typedSyn is directed (this word's gloss fits the other) and always within syn."""
     for w in words:
@@ -427,8 +427,9 @@ def check_synonyms(words, by_id, rep):
             extra = sorted(set(w["typedSyn"]) - syn)
             if extra:
                 rep.err(f"{where}.typedSyn {extra} not in its syn")
-        if "noTypedMeaning" in w and w["noTypedMeaning"] is not True:
-            rep.err(f"{where}.noTypedMeaning must be true when present")
+        for f in ("noTypedMeaning", "pronInGloss"):
+            if f in w and w[f] is not True:
+                rep.err(f"{where}.{f} must be true when present")
 
 
 MIN_BUCKET_WORDS = 3  # placement draws up to 3 items per bucket (core.js placementItemCount)

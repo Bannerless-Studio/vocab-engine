@@ -65,7 +65,7 @@ $NODE tests/typed_from_checks.js                 # 70 (pack.typedFrom / glossFoc
 $NODE tests/session_resume_checks.js             # 109 (drill/passage resume: tab switch, reload, relaunch, per-tab parking)
 $NODE tests/day_sim_checks.js                    # 55 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; before/after numbers; --why)
 $NODE tests/help_close_checks.js                 # 41 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
-$NODE tests/gloss_overlap_checks.js              # 59 (words syn/typedSyn/noTypedMeaning; ~1.5 min)
+$NODE tests/gloss_overlap_checks.js              # 74 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~1.5 min)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)
@@ -121,7 +121,7 @@ Dev mode without a rebuild: open `engine/app.html?pack=zh` from `file://` (loads
 | packs/zh/*.json except passages_src.json, gloss_display.json | tools/pack_from_hsk.py (incl. attribution.json); passages.json + REPORT_passages.md by `packbuilder passages` |
 | tools/zh_hints.json | tools/zh_hints.py [../chinese] from the hsk vocabulary + .cache/makemeahanzi/dictionary.txt (`--fetch`) + tools/zh_hints_overrides.json; committed so pack_from_hsk.py needs no network (run it first when the hsk vocabulary gains characters) |
 | tools/zh_say.json, docs/ZH_SAY.md | tools/zh_say_scan.py --write (pypinyin + jieba venv; read by pack_from_hsk.py) |
-| docs/ZH_GLOSS.md, words.json `syn`/`typedSyn`/`noTypedMeaning` | tools/pack_from_hsk.py via tools/zh_gloss.js (from tools/zh_gloss_overrides.json) |
+| docs/ZH_GLOSS.md, words.json `syn`/`typedSyn`/`noTypedMeaning`/`pronInGloss` | tools/pack_from_hsk.py via tools/zh_gloss.js (from tools/zh_gloss_overrides.json, checked against tools/zh_gloss_expect.json) |
 | tests/golden/*.json | tests/flagoff_snapshot.js --capture |
 | <lang>/pack/*, index.html, sw.js, tools/REPORT.md | packbuilder, jsonify, build.sh in each language repo |
 

@@ -126,7 +126,7 @@ def js_literal_via_node(path, name):
 
 
 def apply_gloss(words):
-    """Gloss overrides, `syn` and `noTypedMeaning` from tools/zh_gloss.js (it reuses the
+    """Gloss overrides, `syn`, `typedSyn`, `noTypedMeaning` and `pronInGloss` from tools/zh_gloss.js (it reuses the
     engine's typed-meaning keys; docs/ZH_GLOSS.md is its report)."""
     out = subprocess.run([NODE, os.path.join(ROOT, "tools", "zh_gloss.js"), "--report", os.path.join(ROOT, "docs", "ZH_GLOSS.md")],
                          input=json.dumps(words, ensure_ascii=False).encode("utf-8"), capture_output=True)
@@ -134,7 +134,7 @@ def apply_gloss(words):
     if out.returncode:
         raise SystemExit("pack_from_hsk: tools/zh_gloss.js failed")
     g = json.loads(out.stdout.decode("utf-8"))
-    nt = set(g["noTypedMeaning"])
+    nt, pig = set(g["noTypedMeaning"]), set(g["pronInGloss"])
     for w in words:
         w["en"] = g["en"].get(w["id"], w["en"])
         if w["id"] in g["syn"]:
@@ -143,7 +143,9 @@ def apply_gloss(words):
             w["typedSyn"] = g["typedSyn"][w["id"]]
         if w["id"] in nt:
             w["noTypedMeaning"] = True
-    print(f"gloss overrides {len(g['en'])}  words with syn {len(g['syn'])}  typedSyn {len(g['typedSyn'])}  noTypedMeaning {len(nt)}")
+        if w["id"] in pig:
+            w["pronInGloss"] = True
+    print(f"gloss overrides {len(g['en'])}  words with syn {len(g['syn'])}  typedSyn {len(g['typedSyn'])}  noTypedMeaning {len(nt)}  pronInGloss {len(pig)}")
 
 
 def dump(path, data):
