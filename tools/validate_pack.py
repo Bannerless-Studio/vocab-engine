@@ -305,6 +305,8 @@ def check_characters_pack(pack, level_ids, rep):
         rep.err("pack.characters.bareWords must be a boolean")
     if "withWords" in ch and not is_bool(ch["withWords"]):
         rep.err("pack.characters.withWords must be a boolean")
+    if "learn" in ch and ch["learn"] != "lag":
+        rep.err('pack.characters.learn must be "lag"')
     return covered
 
 

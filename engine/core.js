@@ -1817,7 +1817,7 @@ function charsConfig(pack){
   const c = pack && pack.characters;
   if(!isObj(c)) return null;
   const kinds = (k, d) => { const f = Array.isArray(k) ? k.filter(x => CHAR_KINDS.includes(x)) : []; return f.length ? f : d; };
-  return {
+  return Object.assign({
     label: c.label != null ? String(c.label) : "",
     stages: (Array.isArray(c.stages) ? c.stages : []).filter(isObj)
       .map(st => Object.assign({ after: String(st.after), levels: (Array.isArray(st.levels) ? st.levels : []).map(String) }, typeof st.label === "string" && st.label ? { label: st.label } : {})),
@@ -1830,8 +1830,9 @@ function charsConfig(pack){
     compose: c.compose === true,
     bareBy: c.bareBy === "typed" ? "typed" : null,
     bareWords: c.bareWords === true,
-    withWords: c.withWords === true,
-  };
+    // characters.learn "lag" supersedes withWords: no turn, no order chips.
+    withWords: c.withWords === true && c.learn !== "lag",
+  }, c.learn === "lag" ? { learn: "lag" } : {});
 }
 // Default mix is the predecessor app's.
 const CHAR_TEST_KINDS = { charRead:40, charSound:30, charPick:30 };
@@ -1978,7 +1979,7 @@ function nextCharSet(levels, units, pack, prog){
   return null;
 }
 function charStages(pack, prog){
-  const cfg = charsConfig(pack); if(!cfg || !cfg.stages.length) return [];
+  const cfg = charsConfig(pack); if(!cfg || !cfg.stages.length || cfg.learn === "lag") return [];
   const ids = levelIds(pack), idx = levelIndexMap(pack);
   if(!ids.length) return [];
   const pos = a => idx[a] !== undefined ? idx[a] : ids.length - 1;
@@ -2011,6 +2012,7 @@ function stagePath(pack, words, units, prog, sunits){
 }
 function nextStage(pack, words, units, prog, sunits){
   const path = stagePath(pack, words, units, prog, sunits), first = path.find(s => !s.done) || null;
+  if(lagOn(pack) && !(first && first.kind === "script")) return lagStage(pack, words, units, prog, path);
   if(!charsWithWords(pack, prog) || !first || first.kind === "script") return first;
   // characters.withWords (docs/PACK_SCHEMA.md): an unlocked character stage (its level's words
   // learned) and the next word level take turns; oldest stage first. The turn flips when a Learn
@@ -2021,6 +2023,31 @@ function nextStage(pack, words, units, prog, sunits){
   if(charOrder(pack, prog) === "first") return c;
   const t = prog && isObj(prog.chars) ? prog.chars.turn : undefined;
   return (t === "c" || t === "w" ? t === "c" : (prog && prog.sessions || 0) % 2) ? c : w;
+}
+// characters.learn "lag" (docs/PACK_SCHEMA.md "learn"; owner 2026-10-02: "if character is lagging
+// behind teach character, if not teach words"). Units whose word is learned and that have no
+// record, oldest first; a full set of them (or any, once no new words remain) is what Learn
+// teaches. Nothing stored decides it, so chars.order / turn / defer / choiceSeen are never read.
+const lagOn = pack => { const c = charsConfig(pack); return !!(c && c.learn === "lag"); };
+function lagUnits(pack, words, units, prog){ return newCharUnits(units, learnedWords(words, pack, prog || {}), prog, pack, Infinity); }
+function lagStage(pack, words, units, prog, path){
+  const cfg = charsConfig(pack), n = lagUnits(pack, words, units, prog).length;
+  const w = (path || stagePath(pack, words, units, prog)).find(s => s.kind === "words" && !s.done) || null;
+  return n >= cfg.setSize || (n && !w) ? lagCharStage(pack) : w;
+}
+const lagCharStage = pack => ({ kind:"chars", key:"lag", lag:true, levels: levelIds(pack), label: charsConfig(pack).label, done:false });
+// Indexed by records taught so far: sets are dynamic, so "set k of n" counts tens of units.
+function lagCharSet(pack, words, units, prog, ids){
+  const cfg = charsConfig(pack), all = units || [], recs = charRecs(prog);
+  let list = lagUnits(pack, words, all, prog).slice(0, cfg.setSize);
+  if(ids){ const by = new Map(all.map(u => [u.id, u])); list = Array.isArray(ids) ? ids.map(id => by.get(id)) : []; if(!list.every(Boolean)) return null; }
+  if(!list.length) return null;
+  return { index: Math.floor(all.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), units: list, total: Math.ceil(all.length / cfg.setSize), ids: list.map(u => u.id) };
+}
+// Session resume: a Learn step planned on a lag set teaches the same units (sessionRecord today.cu).
+function lagResume(snap, pack, words, units, prog, ids){
+  const cset = snap && lagOn(pack) ? lagCharSet(pack, words, units, prog, ids) : null;
+  return cset ? Object.assign(snap, { stage: lagCharStage(pack), cset }) : snap;
 }
 const pendingCharStage = path => path.find(s => s.kind === "chars" && !s.done && path.some(x => x.kind === "words" && x.lv === s.after && x.done)) || null;
 // A Learn step taught kind ("words" or "chars"): the next Learn teaches the other one.
@@ -2313,7 +2340,7 @@ function unifiedRecallPlan(learned, ru, prog, pack, n, rng, opts){
 // changes neither what Learn teaches nor Review/Recall's mode.
 function todaySnapshot(pack, words, units, prog, sunits){
   const stage = nextStage(pack, words, units, prog, sunits);
-  const cset = stage && stage.kind === "chars" ? nextCharSet(stage.levels, units, pack, prog) : null;
+  const cset = stage && stage.kind === "chars" ? (stage.lag ? lagCharSet(pack, words, units, prog) : nextCharSet(stage.levels, units, pack, prog)) : null;
   const started = charsStarted(pack, words, units, prog, sunits);
   const snap = { stage, cset, charsStarted: started, reviewSize: started ? REVIEW_SIZE_CHARS : REVIEW_SIZE, choice: showCharChoice(pack, words, units, prog, sunits) };
   const scfg = scriptActive(pack, sunits) ? scriptConfig(pack) : null; // no units: the flag-off snapshot
@@ -3368,7 +3395,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
-  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
+  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,

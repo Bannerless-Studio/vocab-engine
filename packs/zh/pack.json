@@ -141,7 +141,7 @@
   "compose": true,
   "bareBy": "typed",
   "bareWords": true,
-  "withWords": true
+  "learn": "lag"
  },
  "legacy": {
   "key": "hsk_pinyin",
