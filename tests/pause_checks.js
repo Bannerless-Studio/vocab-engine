@@ -15,8 +15,8 @@ const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "36aee02"; // main before pauseNew
-// Progress characters rows are per level since fb6-charrows (lag_checks [5] pins them); the rest of Progress still matches MAIN.
-const CHAR_ROWS = /<tr><td><bdi[^>]*>字[^<]*<\/bdi>[^<]*<\/td><td>[^<]*<\/td><\/tr>/g;
+// Progress characters rows are a per-level block since fb6-charrows (lag_checks [5] pins them); the rest of Progress still matches MAIN.
+const CHAR_ROWS = /<tr><td><bdi[^>]*>字[^<]*<\/bdi>[^<]*<\/td><td>[^<]*<\/td><\/tr>|<p class="q" style="margin-top:14px">Characters<\/p><table class="stats">[\s\S]*?<\/table>/g;
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");

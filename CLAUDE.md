@@ -63,9 +63,9 @@ $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/typed_from_checks.js                 # 70 (pack.typedFrom / glossFocus; control vs ef44c6e)
 $NODE tests/typed_mastery_checks.js              # 77 (characters.bareBy typed credit/hold/floor, bareWords, per-level stages, withWords + Learn turn + order chips on a withWords pack, gloss fields; control vs 7fe35f7)
-$NODE tests/lag_checks.js                        # 34 (characters.learn "lag": core rule, owner shape before/after, app sessions, resume, per-level Progress rows vs 68930bd, control vs 590af86)
+$NODE tests/lag_checks.js                        # 38 (characters.learn "lag": core rule, owner shape before/after, app sessions, resume, per-level Progress rows vs 68930bd, control vs 590af86)
 $NODE tests/pause_checks.js                      # 49 (pack.pauseNew: flag-off / unpaused control vs 36aee02, chip, paused sessions teach nothing, Review +Learn items, toggling mid-session)
-$NODE tests/opts_mix_checks.js                  # 38 (pack.optsMix: same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
+$NODE tests/opts_mix_checks.js                  # 40 (pack.optsMix: length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
 $NODE tests/session_resume_checks.js             # 117 (drill/passage resume: tab switch, reload, relaunch, per-tab parking)
 $NODE tests/day_sim_checks.js                    # 67 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; before/after numbers; --why)
 $NODE tests/help_close_checks.js                 # 41 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)

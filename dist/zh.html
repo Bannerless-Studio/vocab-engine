@@ -4914,7 +4914,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "331098371-1824244";
+const VE_BUILD = "3308329148-1824674";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6460,7 +6460,7 @@ function progressRender(){
     <table class="stats">${xp ? xp.rows : ""}${rows}${cp ? cp.rows : ""}
       ${HAS_PASSAGES ? VC.readingStats(PASSAGE_LIST, PACK, prog).map(r => `<tr><td>${escapeHtml(levelLabel(r.lv))} reading</td><td>${r.done} / ${r.total} passages${r.avg != null ? ` · avg ${r.avg}%` : ""}</td></tr>`).join("") : ""}
       ${HAS_LESSONS ? `<tr><td>Sounds</td><td>${LESSON_LIST.filter(l=>prog.lessons[l.id]).length} / ${LESSON_LIST.length} lessons done</td></tr>` : ""}
-      <tr><td>Sessions</td><td>${prog.sessions||0}</td></tr></table>
+      <tr><td>Sessions</td><td>${prog.sessions||0}</td></tr></table>${cp ? cp.block : ""}
     ${PACK.showPron !== false ? `<div class="row" style="margin-top:14px"><button class="chip ${showPron()?'on':''}" id="togglePron" aria-pressed="${showPron()}">Show pronunciation</button></div>` : ""}${PAUSE_NEW ? `<div class="row" style="margin-top:14px"><button class="chip ${paused() ? "" : "on"}" id="togglePause" aria-pressed="${!paused()}">New material: ${paused() ? "paused" : "on"}</button></div>` : ""}${xp ? xp.controls : ""}${cp ? cp.controls : ""}
     <p class="q" style="margin-top:14px">${weak.length ? "Weakest words" : "No weak words yet — nice."}</p>
     ${weak.map(w=>`<div class="rowset">${wordRowHTML(w, "rowset")}</div>`).join("")}
@@ -6534,11 +6534,15 @@ function charProgress(){
   const recs = VC.charRecs(prog);
   const streak = u => ((recs[u.id] || {}).s || 0);
   const unlocked = VC.charsUnlocked(PACK, WORDS, prog), started = VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU);
-  // characters.learn "lag": no stages; one row per level (taught of the level's units), a unit's level is its word's.
-  const lag = () => LEVELS.map(lv => { const list = CHAR_LIST.filter(u => String(u.lv) === String(lv)); if(!list.length) return "";
-    const rec = list.filter(u => recs[u.id]), bare = rec.filter(u => VC.charTier(streak(u), PACK) === "bare").length;
-    return `<tr><td>${tf(CHAR_CFG.label)} ${escapeHtml(levelLabel(lv))}</td><td>${rec.length} / ${list.length} taught · ${rec.filter(u => VC.charTier(streak(u), PACK) !== "pron").length} mastered${bare ? ` · ${bare} bare` : ""}</td></tr>`; }).join("");
-  const rows = !started ? "" : CHAR_CFG.learn === "lag" ? lag() : stages.map(st => {
+  // characters.learn "lag": no stages; its own block (a wider label would narrow the word rows' value column), one row per
+  // level, a unit's level being its word's. Value text <= the longest word-row value (32 chars): bare shown drops "taught", then "mastered" -> "mast.".
+  const lag = () => `<p class="q" style="margin-top:14px">Characters</p><table class="stats">${LEVELS.map(lv => { const list = CHAR_LIST.filter(u => String(u.lv) === String(lv)); if(!list.length) return "";
+    const rec = list.filter(u => recs[u.id]), bare = rec.filter(u => VC.charTier(streak(u), PACK) === "bare").length, mas = rec.filter(u => VC.charTier(streak(u), PACK) !== "pron").length;
+    let v = `${rec.length} / ${list.length} taught · ${mas} mastered`;
+    if(bare){ v = `${rec.length} / ${list.length} · ${mas} mastered · ${bare} bare`; if(v.length > 32) v = v.replace("mastered", "mast."); }
+    return `<tr><td>${escapeHtml(levelLabel(lv))}</td><td>${v}</td></tr>`; }).join("")}</table>`;
+  const block = started && CHAR_CFG.learn === "lag" ? lag() : "";
+  const rows = !started || block ? "" : stages.map(st => {
     const list = VC.charStageUnits(st.levels, CHAR_LIST, PACK);
     const taught = VC.charSets(st.levels, CHAR_LIST, PACK).filter(set => VC.charSetTaught(set, prog)).reduce((n, set) => n + set.length, 0);
     const masteredN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) !== "pron").length;
@@ -6563,7 +6567,7 @@ function charProgress(){
       $("ordAfter").onclick = () => { VC.setCharOrder(prog, true); store.save(); progressRender(); };
     }
   };
-  return { rows, controls, wire };
+  return { rows, block, controls, wire };
 }
 function scriptProgress(){
   const recs = VC.scriptRecs(prog);
@@ -6682,4 +6686,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:579233659-1823567-->
+<!--ve-build:4026314616-1823998-->
