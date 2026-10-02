@@ -197,9 +197,9 @@ const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
 // Mid HSK 2 before any character stage: with one stage per level (fb2-write) that is a learner who
 // put characters after the words (chars.defer), else 字1 would come before HSK 2.
 const seedPF = () => VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PACK);
-// The Today walks of seedPF need a words Learn with no unit recorded: under characters.learn "lag"
-// (zh since fb3-lag) that learner gets 字 sets, so they run on the stage model (lag_checks.js).
-const STAGE_PACK = (p => { const c = Object.assign({}, p.characters); delete c.learn; return Object.assign({}, p, { characters: c }); })(PACK);
+// Under characters.learn "lag" (zh since fb3-lag) a words Learn needs the learned words' units
+// taught: recorded at streak 0, the pron tier, so words still show by their readings.
+const seedPFLag = () => { const p = seedPF(); const lw = new Set(VC.learnedWords(WORDS, PACK, p).map(w => w.id)); CHARACTERS.filter(u => lw.has(u.words[0])).forEach(u => { p.chars.c[u.id] = { r: 1, w: 1, s: 0 }; }); return p; };
 // Plays the active flow: answers every item right (mc: the answer option; type: the
 // word's pron), presses Continue / Drill / Next; records every screen, option and reveal.
 function walk(api, stopAt){
@@ -290,21 +290,24 @@ function walk(api, stopAt){
 
   console.log("\n[3] app: colouring on every screen, the typed-reading item");
   try {
-    const { api } = await boot({ seed: 7, pack: STAGE_PACK });
+    const { api } = await boot({ seed: 7 });
     check("CSS: .t1-.t5 use --t1..--t5, defined for light, dark (media) and data-theme dark",
       /\.t1\{color:var\(--t1\)\} \.t2\{color:var\(--t2\)\} \.t3\{color:var\(--t3\)\} \.t4\{color:var\(--t4\)\} \.t5\{color:var\(--t5\)\}/.test(appHtml)
       && (appHtml.match(/--t1:#[0-9A-F]{6};--t2:#[0-9A-F]{6};--t3:#[0-9A-F]{6};--t4:#[0-9A-F]{6};--t5:#[0-9A-F]{6};/g) || []).length === 3);
-    api.setProg(seedPF()); api.today();
+    api.setProg(seedPFLag()); api.today();
+    check(`seedPFLag on shipped zh: Learn is words (${VC.nextStage(PACK, WORDS, CHARACTERS, seedPFLag()).kind})`, VC.nextStage(PACK, WORDS, CHARACTERS, seedPFLag()).kind === "words");
     api.el("go").click();
     let seen = [], err = null;
     try{ seen = walk(api, /id="again"/); }catch(e){ err = e; }
-    const unc = seen.map(x => ({ where: x.where, u: uncoloured(x.html) })).filter(x => x.u.length);
+    // Unit items (c: keys) are character drills: written options, and the reveal's memory hints
+    // carry "(sound zhà)" notes outside the tone colouring (reported, fb3-lag review).
+    const unc = seen.filter(x => !/^c:/.test(x.where)).map(x => ({ where: x.where, u: uncoloured(x.html) })).filter(x => x.u.length);
     check(`Today walk (Review, Learn teach + drill, Listen, Recall, Sentences): every reading is coloured (${seen.length} screens/items; ${unc.length} with an uncoloured reading${unc[0] ? `: ${unc[0].where} ${JSON.stringify(unc[0].u.slice(0, 2))}` : ""})${err ? " ERROR " + err.message : ""}`,
       !err && unc.length === 0 && seen.filter(x => tspans(x.html)).length > seen.length / 2);
     const teach = seen.filter(x => x.where === "teach");
     check(`teach rows colour the reading (${teach.length} teach screens)`, teach.length > 0 && teach.every(x => tspans(x.html) >= 10));
     // Options: every word-choice option label (recall, gap) is coloured.
-    const wordOpts = seen.filter(x => x.kind === "mc" && /opts-w/.test(x.html)).flatMap(x => x.opts);
+    const wordOpts = seen.filter(x => x.kind === "mc" && !/^c:/.test(x.where) && /opts-w/.test(x.html)).flatMap(x => x.opts);
     check(`word-choice options are coloured readings (${wordOpts.length} labels)`, wordOpts.length > 0 && wordOpts.every(o => tspans(o) > 0 && !uncoloured(o).length));
     // Typed items reached the walk (the production slot) and played through: both kinds,
     // alternating in each plan (reading first), never a written blank.

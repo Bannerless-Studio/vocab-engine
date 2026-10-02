@@ -770,6 +770,7 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
   // Mid HSK 2 before any character stage: with one stage per level (fb2-write) that is a learner
   // who put characters after the words (chars.defer), else 字1 would come before HSK 2.
   const seedPF = () => VC.normalizeProg({ sets: { "1": NSZ("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PF_ZH);
+  const seedPFLag = () => { const p = seedPF(); const lw = new Set(VC.learnedWords(WORDS, PF_ZH, p).map(w => w.id)); CHARACTERS.filter(u => lw.has(u.words[0])).forEach(u => { p.chars.c[u.id] = { r: 1, w: 1, s: 0 }; }); return p; };
   check("zh pack.json ships pronFirst: true", PF_ZH.pronFirst === true);
   // Walks the active screen flow: answers every drill item right, presses Continue /
   // Drill / Next, and records every screen, option label and reveal.
@@ -793,20 +794,21 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     throw new Error("walk did not finish");
   }
   {
-    // A words Learn with no unit recorded: under characters.learn "lag" this learner gets 字 sets,
-    // so the walk runs on the stage model (lag_checks.js covers lag).
-    const { api } = await boot({ pack: (p => { const c = Object.assign({}, p.characters); delete c.learn; return Object.assign({}, p, { characters: c }); })(PF_ZH) });
+    // Shipped zh (characters.learn "lag"): a words Learn needs the learned words' units taught, so
+    // each is recorded at streak 0 (pron tier: its word still shows by its reading). The unit's
+    // own drill items (c: keys) show the written form by design and are left out below.
+    const { api } = await boot({ pack: PF_ZH });
     check("PRON_FIRST on for zh, show-written capture listener attached", api.pronFirst() && api.panelListeners().length === 2);
-    api.setProg(seedPF()); api.today();
+    api.setProg(seedPFLag()); api.today();
     // The plan's Read row names a passage by its title, which has no reading data here (reported residual).
     const todayH = api.html("panel").replace(/<tr><td>6\. Read<\/td><td>[\s\S]*?<\/td><\/tr>/, "");
     check(`Today: no written form besides the stage label and the Read row's passage title (${visHan(todayH)})`, onlyLabel(todayH));
     api.el("go").click();
     let seen = [], err = null;
     try{ seen = walk(api, /id="again"/); }catch(e){ err = e; }
-    const bad = seen.filter(x => visHan(x.html));
+    const bad = seen.filter(x => !/^c:/.test(x.where) && visHan(x.html));
     const kinds = new Set(seen.map(x => x.where.split(":")[0]));
-    check(`Today, no unit recorded: Review, Learn (teach + drill), Listen, Recall, Sentences show no hanzi (${seen.length} screens/items; ${bad.length} bad${bad[0] ? `: ${bad[0].where} ${visHan(bad[0].html)}` : ""})${err ? " " + err.message : ""}`,
+    check(`Today, units at the pron tier, Learn = words (${VC.nextStage(PF_ZH, WORDS, CHARACTERS, seedPFLag()).kind}): Review, Learn (teach + drill), Listen, Recall, Sentences show no hanzi (${seen.length} screens/items; ${bad.length} bad${bad[0] ? `: ${bad[0].where} ${visHan(bad[0].html)}` : ""})${err ? " " + err.message : ""}`,
       !err && bad.length === 0 && kinds.has("w") && kinds.has("s") && kinds.has("teach") && /id="again"/.test(api.html("panel")));
     const w0 = BY_ID["w0028"]; // 你 nǐ
     check("readItem: the stimulus is the reading, with a show-written tap carrying the written form",
