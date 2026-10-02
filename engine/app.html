@@ -497,7 +497,10 @@ let SENT_BY_ID_DAY = null;
 // kind fits, which falls back to recall) is swapped for the read item (recallItem).
 const pronLeakShown = w => !!(w && w.pronInGloss) && dispWord(w).isPron;
 const dayWordCan = w => { const c = VC.dayWordCan(PACK, canHearWord)(w); return pronLeakShown(w) ? c.filter(k => k !== "recall" && (k !== "type" || typedFits(w))) : c; };
-const daySentCan = s => VC.daySentenceCan(PACK, canHearSentence, WORDS_BY_ID)(s);
+// words[].pronInGloss: the English cue spells the reading of such a blank, so a word still
+// shown by its reading is never blanked; a sentence with no other blank is not a gap item.
+const gapIdxs = s => { const ix = VC.gapCandidateIndices(s, WORDS_BY_ID, PACK); return (s.words || []).some(id => pronLeakShown(WORDS_BY_ID[id])) ? ix.filter(i => !pronLeakShown(WORDS_BY_ID[s.words[i]])) : ix; };
+const daySentCan = s => { const c = VC.daySentenceCan(PACK, canHearSentence, WORDS_BY_ID)(s); return (s.words || []).some(id => pronLeakShown(WORDS_BY_ID[id])) && !gapIdxs(s).length ? c.filter(k => k !== "gap" && k !== "gapType") : c; };
 const dayCanOf = key => {
   const k = String(key), id = k.slice(2);
   if(k[0] === "w") return WORDS_BY_ID[id] ? dayWordCan(WORDS_BY_ID[id]) : undefined;
@@ -1181,11 +1184,14 @@ function hearItem(entry){
     };
 }
 // Built without Replay it still tries to play: a voice may have arrived since.
-// words[].pronInGloss: a reading stimulus spells the meaning, so such a word is read from its
-// written form alone, whatever its tier (docs/PACK_SCHEMA.md "pronInGloss").
+// words[].pronInGloss: a reading stimulus spells the meaning (docs/PACK_SCHEMA.md
+// "pronInGloss"). Such a word is read from its written form alone, whatever its tier; while it
+// still shows by its reading the read item is heard instead when a voice can say it, so a
+// learner who has met no characters sees none.
 const readStimHTML = entry => PRON_FIRST && entry.pronInGloss && entry.w ? `<div class="big wd"${TA}>${escapeHtml(entry.w)}</div>` : bigWordHTML(entry);
 function readItem(entry){
   const hear = canHearWord(entry);
+  if(hear && pronLeakShown(entry)) return Object.assign(hearItem(entry), { reqKind: "read" });
   return { kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero",
     html: readStimHTML(entry) + (hear ? REPLAY_STAGE : ""), opts: meaningChoices(entry), a: VC.gloss(entry), optHtml: GLOSS_OPT, reveal: revealBlock(entry),
     onAnswer(ok){ markWord(entry.id, ok, "read", this.reqKind); }, mount: () => { const b = hear ? $("rpa") : null; sayWord(entry, b || undefined); if(b) b.onclick = () => sayWord(entry, b); }, };
@@ -1197,10 +1203,10 @@ function recallItem(entry){
   if(pronLeakShown(entry)) return readItem(entry);
   const ds = VC.wordOpts(entry, WORDS, PRON_FIRST ? (e => dispWord(e).text) : null, PACK, optLike(entry)); // same word class as the answer; pronFirst: distinct displayed labels, no homophones
   // Keyed by word id so two options can never collapse into one key, whatever they display as.
-  const byId = {}; [entry, ...ds].forEach(e=>{ byId[e.id] = e; });
+  const byId = {}; [entry, ...ds].forEach(e=>{ byId[e.id] = e; }); const mode = optScript(entry, ds);
   return { kind:"mc", key:"w:"+entry.id, label:"Which word is this?", optsClass:"opts-hero opts-w",
     html: `<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>`,
-    opts: [entry.id, ...ds.map(d=>d.id)], a: entry.id, optHtml: wordOptHtml(byId, o => byId[o].w, !!entry.pronInGloss, optScript(entry, ds)), optsT: true, reveal: revealBlock(entry),
+    opts: [entry.id, ...ds.map(d=>d.id)], a: entry.id, optHtml: wordOptHtml(byId, o => byId[o].w, !!entry.pronInGloss, mode), optsT: true, reveal: revealBlock(entry),
     onAnswer(ok){ markWord(entry.id, ok, "recall", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
 // words[].typedSyn (docs/PACK_SCHEMA.md "Synonyms"): on a meaning stimulus another word's
@@ -1675,7 +1681,7 @@ function hearSentence(s){
 }
 // No audio before answering: hearing the sentence would give the blank away.
 function gapSentence(s, typed){
-  const idxs = VC.gapCandidateIndices(s, WORDS_BY_ID, PACK);
+  const idxs = gapIdxs(s);
   if(!idxs.length) return null;
   const entry = WORDS_BY_ID[s.words[idxs[Math.floor(Math.random()*idxs.length)]]];
   const match = VC.gapMatch(s, entry, WORDS_BY_ID, PACK);
