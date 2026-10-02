@@ -682,7 +682,21 @@ function glossOut(s, withNotes){
   const body = p.pieces.map(x => x.dim ? `<span class="dim">${ui(x.t)}</span>` : ui(x.t)).join("");
   return withNotes && p.notes.length ? `${body} <span class="dim">${ui(p.notes.join("; "))}</span>` : body;
 }
-const GLOSS_OPT = GLOSS_FOCUS ? (o => glossOut(o)) : undefined;
+// An option button or an "also right" note shows the first alternatives only (the reveal shows
+// the whole gloss) and a long (...) explanation beside a meaning as "(…)" (厉害, 容易).
+const GLOSS_SHORT_EXPL = 22;
+function glossShort(s, maxAlts, maxLen){
+  const out = []; let n = 0;
+  for(const a of VC.splitTopLevel(String(s == null ? "" : s), [";"]).map(x => x.trim()).filter(x => x && !VC.isPronNote(x))){
+    const ps = VC.glossParts(a).pieces, text = ps.some(x => !x.dim && x.t.trim());
+    const shown = ps.map(x => ({ t: x.dim && text && x.t.length > GLOSS_SHORT_EXPL ? "(…)" : x.t, dim: x.dim }));
+    const len = shown.reduce((m, x) => m + x.t.length, 0);
+    if(out.length && (out.length >= maxAlts || n + len > maxLen)) break;
+    out.push(shown.map(x => x.dim ? `<span class="dim">${ui(x.t)}</span>` : ui(x.t)).join("")); n += len;
+  }
+  return out.join("; ");
+}
+const GLOSS_OPT = GLOSS_FOCUS ? (o => glossShort(o, 2, 32)) : undefined;
 // Only used with pack.characters.compose; first unit in file order wins.
 const CHAR_READING = new Map();
 CHAR_LIST.forEach(u => { const t = String((u && u.t) || ""); if([...t].length === 1 && !CHAR_READING.has(t)){ const r = VC.unitReading(u, WORDS_BY_ID); if(r) CHAR_READING.set(t, r); } });
@@ -1069,7 +1083,7 @@ function recallItem(entry){
 function synTyped(entry, fit, show){
   const hit = val => fit(entry, val) ? null : VC.typedSynHit(entry, WORDS_BY_ID, s => fit(s, val));
   return { check: val => fit(entry, val) || !!hit(val),
-    note: val => { const s = hit(val); return s ? `<div class="diff">also right: ${show(s)} · ${glossOut(VC.gloss(s))}</div>` : ""; } };
+    note: val => { const s = hit(val); return s ? `<div class="diff">also right: ${show(s)} · ${glossShort(VC.gloss(s), 1, 0)}</div>` : ""; } };
 }
 function typeItem(entry){
   const syn = synTyped(entry, (e, val) => VC.acceptTyped(val, e, PACK, VC.affixAlts(e.w), WORDS), e => `<bdi${TA}>${escapeHtml(e.w)}</bdi>`);
@@ -1134,7 +1148,7 @@ function meaningTypeItem(entry, fromPron){
   const stim = fromPron ? stimPron(entry) : stimWritten(entry);
   return { kind:"type", key:"w:"+entry.id, label:"Type the meaning", html: kindTag("meaning", "any one") + stim,
     placeholder: "meaning…", inputTA: ' lang="en"',
-    check: val => VC.checkGlossTyped(val, VC.gloss(entry)), reveal: revealBlock(entry),
+    check: val => VC.checkGlossTyped(val, VC.gloss(entry), PACK), reveal: revealBlock(entry),
     onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
     choiceFallback: () => ({ kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero", html: stim,
       opts: meaningChoices(entry), a: VC.gloss(entry), optHtml: GLOSS_OPT, reveal: revealBlock(entry),

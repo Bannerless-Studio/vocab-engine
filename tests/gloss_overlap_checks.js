@@ -7,7 +7,8 @@
 // do (the check bites); [4] typed items with a meaning stimulus accept every typedSyn word
 // (pinyin and characters), a characters stimulus never does, flag off accepts none;
 // [5] noTypedMeaning words never get a typed-meaning kind; [6] gloss caps and matcher rules
-// (copula, overrides); [7] validate_pack.py on the new fields. Fake DOM from
+// (copula, overrides); [7] validate_pack.py on the new fields; [8] review round 2: typed
+// groups, notTyped, the first-meaning rule, HSK core senses, option and note shortening. Fake DOM from
 // tests/typed_from_checks.js. Run: node tests/gloss_overlap_checks.js
 "use strict";
 const fs = require("fs");
@@ -155,7 +156,7 @@ return {
   sentenceRowHTML, sentenceRevealBlock, readSentence, gapSentence, passageSentenceHTML, passagePlainHTML, glossHTML, revealBlock, recallItem, readItem, wordRowHTML, charTeach, charDrillItem,
   pronTypeItem: ${hook("pronTypeItem")}, writtenTypeItem: ${hook("writtenTypeItem")},
   typeItem, silentWrittenTypeItem: ${hook("silentWrittenTypeItem")}, writtenPronTypeItem: ${hook("writtenPronTypeItem")}, meaningTypeItem: ${hook("meaningTypeItem")}, meaningChoices,
-  glossOut: ${hook("glossOut")}, hearItem, typedFromSlotItem: ${hook("typedFromSlotItem")},
+  glossOut: ${hook("glossOut")}, optHtml: o => GLOSS_OPT ? GLOSS_OPT(o) : null, hearItem, typedFromSlotItem: ${hook("typedFromSlotItem")},
   itemFromPlan: ${hook("itemFromPlan")}, tokTap: ${hook("tokTap")}, onTok: ${hook("onTok")}, tokOwns: ${hook("tokOwns")}, docListeners: t => document._listeners[t] || [], soundsRefGroups: ${hook("soundsRefGroups")},
   drill1: it => drill([it], () => {}, null),
   wordsPage: (lv, set) => { tab = "words"; wordsQuery = ""; wordsLv = lv; wordsSet = set; render(); },
@@ -174,14 +175,14 @@ return {
 
 // ------------------------------------------------------------------ helpers
 const AMB = VC.typedAmbiguity(WORDS);
-const keysOf = w => new Set(ZG.altKeySets(VC.gloss(w)).flatMap(k => [...k]));
+const keysOf = w => VC.glossAltKeys(VC.gloss(w), PACK);
 const KEYS = new Map(WORDS.map(w => [w.id, keysOf(w)]));
 const REVIEWED = new Set();
 (OV.synonyms || []).forEach(g => g.words.forEach(a => g.words.forEach(b => { if(a !== b) REVIEWED.add(BY_W[a].id + "|" + BY_W[b].id); })));
 // A second right answer, judged from the glosses themselves (not from words[].syn).
 function conflict(a, b){
   if(a.id === b.id) return false;
-  if(REVIEWED.has(a.id + "|" + b.id)) return true;
+  if(REVIEWED.has(a.id + "|" + b.id) || (a.typedSyn || []).includes(b.id) || (b.typedSyn || []).includes(a.id)) return true;
   const kb = KEYS.get(b.id); for(const k of KEYS.get(a.id)) if(kb.has(k)) return true;
   return false;
 }
@@ -228,7 +229,7 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     console.log(`    before: 担心/烦恼 among 着急's meaning options in ${mo0}/300 seeds, word options in ${wo0}/300; after: ${mo1}, ${wo1}`);
     check("before (syn absent) 担心 or 烦恼 is a 着急 distractor; after, never (300 seeds, meaning and word options)", mo0 > 0 && wo0 > 0 && mo1 === 0 && wo1 === 0);
     check("着急 syn / typedSyn hold 担心 and 烦恼", [dx.id, fn.id].every(x => zj.syn.includes(x) && zj.typedSyn.includes(x)));
-    check("typed meaning for 着急: worry, to worry, feel anxious, anxious (copula), any one", ["worry", "to worry", "feel anxious", "anxious", "to worry; anxious"].every(v => VC.checkGlossTyped(v, zj.en)) && !VC.checkGlossTyped("worried", zj.en));
+    check("typed meaning for 着急: worry, to worry, feel anxious, anxious (copula), any one", ["worry", "to worry", "feel anxious", "anxious", "to worry; anxious"].every(v => VC.checkGlossTyped(v, zj.en, PACK)) && !VC.checkGlossTyped("worried", zj.en, PACK));
   }
 
   // ---------------------------------------------------------------- [3] option sets
@@ -293,7 +294,8 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
   {
     const marked = WORDS.filter(w => w.noTypedMeaning);
     console.log(`    marked: ${marked.map(lab).join(", ")}`);
-    check("marked: 个 了 吗 呢 吧 得 着 辆 分之 棵 (particles, classifiers, markers)", marked.map(w => w.w).join(" ") === "个 了 吗 呢 吧 得 着 辆 分之 棵");
+    check("marked: first alternative an explanation (particles, classifiers, markers, 把 被) plus 地 -ly and 场",
+      marked.map(w => w.w).join(" ") === "个 了 吗 呢 本 件 吧 张 得 着 位 地 把 条 被 辆 之 分之 台 场 座 棵 篇 顿");
     const MK = new Set(["writtenMeaning", "pronMeaning"]);
     let slots = 0, leaks = 0, none = 0;
     marked.forEach(w => [true, false].forEach(shown => {
@@ -319,6 +321,8 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
   console.log("\n[6] gloss caps and matcher rules");
   {
     check("no zh gloss is truncated (no …)", WORDS.every(w => !/…/.test(w.en)));
+    const han = WORDS.filter(w => /\p{Script=Han}/u.test(w.en)).map(w => w.w);
+    check(`no zh gloss holds characters (a meaning -> characters card would show the answer): ${han.join(" ")}`, han.length === 0);
     const long = WORDS.filter(w => w.en.length > 75 || VC.glossParts(w.en).primary.length > 64).map(w => w.w);
     check(`every zh gloss at most 75 characters, its primary at most 64 (${long.join(" ")})`, long.length === 0);
     const hard = WORDS.filter(w => !w.noTypedMeaning && Math.min(...[...VC.glossAltKeys(w.en)].map(k => k.length)) > 16).map(w => w.w);
@@ -329,13 +333,17 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     console.log(`    alternatives unreachable by their own text: ${unreach.join(", ") || "none"}`);
     check("every typed-meaning alternative is reachable by typing its text (bar the documented 的 ~'s)", unreach.join() === `的 "~'s"`);
     const T = [["careful", "to be careful; to take care", true], ["anxious", "to worry; to feel anxious", true], ["alive", "to be alive", true],
-      ["that", "to think that ...; to feel that ...", false], ["", "to be (followed by substantives only)", false], ["on summer vacation", "(to be on) summer vacation", true],
+      ["that", "to think that ...; to feel that ...", false], ["", "to be (followed by substantives only)", false], ["on summer vacation", "(to be on) summer vacation", false],
       ["summer vacation", "(to be on) summer vacation", true], ["chang jiang", "Yangtze River; Chang Jiang", true], ["chinese", "Chinese (language)", true],
       ["injection", "(to have) an injection; to give an injection", true], ["too late", "too late (to do sth); not enough time (to do sth)", true],
       ["business trip", "business trip; to go on a business trip (or official trip)", true]];
-    const tb = T.filter(([v, g, ok]) => VC.checkGlossTyped(v, g) !== ok);
+    T.push(["like", "to resemble; to be like", false], ["apart from", "to be apart from", false], ["able", "to be able to", false], ["away from", "to be away from", false],
+      ["followed by substantives only", "to be (followed by substantives only)", false], ["over", "to be over", false], ["left", "to be left", false], ["born", "to be born", true], ["sad", "to feel sad", true]);
+    const tb = T.filter(([v, g, ok]) => VC.checkGlossTyped(v, g, PACK) !== ok);
     check(`matcher: copula and override cases (${T.length}; wrong: ${JSON.stringify(tb)})`, tb.length === 0);
-    check("copula keys only with content after be/feel", VC.glossAltKeys("to be").size === 1 && !VC.glossAltKeys("to feel that ...").has("that"));
+    check("copula keys only with content after be/feel", VC.glossAltKeys("to be", PACK).size === 1 && !VC.glossAltKeys("to feel that ...", PACK).has("that"));
+    const other = { typing: "word" };
+    check("copula rule gated: a pack without typedFrom keeps its keys (no \"careful\" for \"to be careful\")", !VC.checkGlossTyped("careful", "to be careful") && !VC.checkGlossTyped("careful", "to be careful", other) && VC.checkGlossTyped("careful", "to be careful", PACK));
   }
 
   // ---------------------------------------------------------------- [7] validate_pack.py
@@ -368,6 +376,55 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     const z = cp.spawnSync(PY, [path.join(ROOT, "tools", "validate_pack.py"), ZH], { cwd: ROOT, encoding: "utf8" });
     check("packs/zh validates (0 errors)", z.status === 0 && / 0 errors/.test(z.stdout));
     tmp.forEach(d => fs.rmSync(d, { recursive: true, force: true }));
+  }
+
+  // ---------------------------------------------------------------- [8] review round 2
+  console.log("\n[8] typed groups, notTyped, first-meaning rule, HSK core senses, shortened glosses");
+  {
+    const has = (a, b) => (BY_W[a].typedSyn || []).includes(BY_W[b].id);
+    const groupPairs = (typed) => (OV.synonyms || []).filter(g => (g.typed === true) === typed).flatMap(g => g.words.flatMap(a => g.words.filter(b => b !== a).map(b => [a, b])));
+    const typedOk = groupPairs(true).every(([a, b]) => has(a, b));
+    check("typed groups: every pair accepted both ways (着急/担心/烦恼, 突然/忽然, 一定/肯定, 可能/也许 …)", typedOk && has("可能", "也许") && has("也许", "可能") && has("突然", "忽然"));
+    const synOnly = [["可能", "大概"], ["大概", "也许"], ["容易", "简单"], ["其他", "别人"], ["为", "因为"], ["以前", "原来"], ["情况", "环境"], ["印象", "回忆"], ["最后", "到底"], ["旁边", "一边"]];
+    check(`syn-only groups are no typed answers (${synOnly.map(p => p.join("/")).join(" ")}) but stay syn`, synOnly.every(([a, b]) => !has(a, b) && !has(b, a) && VC.isSyn(BY_W[a], BY_W[b])));
+    const reviewBad = [["真", "是"], ["朋友", "友好"], ["其他", "别人"], ["简单", "容易"], ["情况", "环境"], ["印象", "回忆"], ["最后", "到底"], ["以前", "原来"], ["因为", "为"], ["旁边", "一边"],
+      ["写", "做"], ["医生", "博士"], ["意思", "意见"], ["意见", "意思"], ["不但", "而且"], ["河", "水"], ["梦", "理想"], ["减肥", "瘦"], ["走", "行"], ["行", "走"], ["老师", "先生"],
+      ["晴", "明白"], ["灯", "轻"], ["时间", "次"], ["杯子", "碗"], ["课", "班"], ["喜欢", "一样"], ["赢", "在"]];
+    const acc = reviewBad.filter(([a, b]) => has(a, b));
+    check(`review false merges never typed answers (${reviewBad.length}; accepted: ${acc.map(p => p.join("<-")).join(" ")})`, acc.length === 0);
+    const blocked = (OV.notTyped || []).filter(n => has(n.pair[0], n.pair[1]));
+    check(`every notTyped pair (${(OV.notTyped || []).length}) stays rejected (${blocked.map(n => n.pair.join("<-")).join(" ")})`, blocked.length === 0 && OV.notTyped.every(n => n.why));
+    // Every pair the first-meaning rule proposes was reviewed: accepted (typedSyn) or rejected (notTyped).
+    const first = w => { const a = VC.splitTopLevel(VC.gloss(w), [";", ","]).map(x => x.trim()).filter(Boolean)[0]; return a && !ZG.explanatory(a) ? VC.glossAltKeys(a, PACK) : new Set(); };
+    const NT = new Set((OV.notTyped || []).map(n => n.pair.join("<-")));
+    let proposed = 0; const unreviewed = [], outside = [];
+    WORDS.forEach(t => { const f = first(t); if(!f.size) return; WORDS.forEach(x => {
+      if(x.id === t.id || ![...f].some(k => KEYS.get(x.id).has(k))) return;
+      proposed++; if(!has(t.w, x.w) && !NT.has(t.w + "<-" + x.w)) unreviewed.push(t.w + "<-" + x.w); }); });
+    const inGroup = new Set(groupPairs(true).map(p => p.join("<-")));
+    WORDS.forEach(t => (t.typedSyn || []).forEach(id => { const x = BY_ID[id]; if(!inGroup.has(t.w + "<-" + x.w) && ![...first(t)].some(k => KEYS.get(x.id).has(k))) outside.push(t.w + "<-" + x.w); }));
+    check(`first-meaning rule: ${proposed} proposed pairs, each accepted or on notTyped (unreviewed: ${unreviewed.slice(0, 8).join(" ")})`, unreviewed.length === 0 && proposed > 400);
+    check(`every typedSyn pair is a typed group or covers the stimulus's first meaning (outside: ${outside.slice(0, 8).join(" ")})`, outside.length === 0);
+    const sym = ["但是", "可是", "却", "不过"].flatMap(a => ["但是", "可是", "却", "不过"].filter(b => b !== a).map(b => [a, b])).filter(([a, b]) => !has(a, b));
+    check(`symmetric where the relation is: 但是/可是/却/不过 all accept each other (missing: ${sym.map(p => p.join("<-")).join(" ")})`, sym.length === 0);
+    const wrongOpt = [["吧", "右边"], ["不过", "却"], ["不过", "可是"], ["却", "可是"]].filter(([a, b]) => !VC.isSyn(BY_W[a], BY_W[b]));
+    check(`review option offenders are syn, never co-options (吧/右边, 不过/却/可是): ${wrongOpt.map(p => p.join("/")).join(" ")}`, wrongOpt.length === 0);
+    // HSK core sense first: the first alternative (typed key) of the words the review named.
+    const core = { 给: "to give", 才: "only then", 种: "kind", 次: "time", 遍: "time", 叫: "to be called", 意思: "meaning", 明白: "to understand", 不过: "but", 行: "OK",
+      双: "pair", 点: "o'clock", 让: "to let", 别: "don't", 过: "to cross", 上: "up", 下: "down", 在: "at", 想: "to think", 看: "to look at", 等: "to wait", 做: "to do", 会: "can", 就: "then", 还是: "or" };
+    const cbad = Object.entries(core).filter(([w, k]) => { const a = VC.splitTopLevel(BY_W[w].en, [";"])[0]; return !VC.glossAltKeys(a, PACK).has(VC.glossKey(k)); }).map(([w]) => `${w} "${BY_W[w].en}"`);
+    check(`HSK core sense first (${Object.keys(core).length} words: 给 才 种 次 遍 叫 意思 明白 不过 行 …) ${cbad.join("; ")}`, cbad.length === 0);
+    const clf = ["本", "张", "位", "把", "被", "件", "条"].filter(w => !BY_W[w].noTypedMeaning || !/classifier|marker/.test(VC.splitTopLevel(BY_W[w].en, [";"])[0]));
+    check(`classifier / marker core sense first and marked noTypedMeaning (本 张 位 把 被 件 条): ${clf.join(" ")}`, clf.length === 0);
+    const typedOkCases = [["dictionary", "字典"], ["grandfather", "爷爷"], ["call", "打电话"], ["to treat", "请客"], ["messy", "乱"], ["in advance", "提前"], ["regardless", "无论"], ["no matter what", "无论"]];
+    const tf = typedOkCases.filter(([v, w]) => !VC.checkGlossTyped(v, BY_W[w].en, PACK));
+    check(`gloss fixes accept the common answer (${typedOkCases.map(([v, w]) => w + " " + v).join(", ")}): ${JSON.stringify(tf)}`, tf.length === 0 && has("词典", "字典") && has("字典", "词典"));
+    const { api } = await boot({ seed: 3 });
+    const ry = api.optHtml(BY_W["容易"].en), yx = api.optHtml("impression (sth that stays in one's mind); a memory");
+    check(`option buttons: first alternatives only (容易 -> ${ry}), a long (...) explanation as (…) (${yx})`,
+      ry === "easy; straightforward" && /impression <span class="dim">\(…\)<\/span>/.test(yx) && !/stays/.test(yx) && api.optHtml("(classifier for flat objects, sheets); to open").startsWith("(classifier for flat objects, sheets)"));
+    const note = api.pronTypeItem(zj).feedback(dx.pron);
+    check(`"also right" note: the synonym's first meaning only (${note.replace(/<[^>]+>/g, "")})`, /also right/.test(note) && /anxious/.test(note) && !/worried/.test(note));
   }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

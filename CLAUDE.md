@@ -63,7 +63,7 @@ $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/typed_from_checks.js                 # 67 (pack.typedFrom / glossFocus; control vs ef44c6e)
 $NODE tests/session_resume_checks.js             # 46 (drill/passage resume after a tab switch or reload)
-$NODE tests/gloss_overlap_checks.js              # 41 (words syn/typedSyn/noTypedMeaning; ~1.5 min)
+$NODE tests/gloss_overlap_checks.js              # 55 (words syn/typedSyn/noTypedMeaning; ~1.5 min)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)

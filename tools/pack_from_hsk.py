@@ -48,7 +48,6 @@ Usage: python3 tools/pack_from_hsk.py [HSK_REPO_DIR]   (default: ../chinese besi
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 
@@ -114,8 +113,12 @@ def js_const_json(path, name):
     raise SystemExit(f"pack_from_hsk: const {name} not found in {path}")
 
 
+# The repo's pinned node (CLAUDE.md "Commands"); a bare `node` on PATH can be an nvm shim that hangs.
+NODE = os.environ.get("VE_NODE") or "/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node"
+
+
 def js_literal_via_node(path, name):
-    node = shutil.which("node") or "/opt/homebrew/bin/node"
+    node = NODE
     code = ("const fs=require('fs');const src=fs.readFileSync(process.argv[1],'utf8');"
             f"process.stdout.write(JSON.stringify(new Function(src+';return {name};')()));")
     out = subprocess.run([node, "-e", code, path], check=True, capture_output=True)
@@ -125,8 +128,7 @@ def js_literal_via_node(path, name):
 def apply_gloss(words):
     """Gloss overrides, `syn` and `noTypedMeaning` from tools/zh_gloss.js (it reuses the
     engine's typed-meaning keys; docs/ZH_GLOSS.md is its report)."""
-    node = shutil.which("node") or "/opt/homebrew/bin/node"
-    out = subprocess.run([node, os.path.join(ROOT, "tools", "zh_gloss.js"), "--report", os.path.join(ROOT, "docs", "ZH_GLOSS.md")],
+    out = subprocess.run([NODE, os.path.join(ROOT, "tools", "zh_gloss.js"), "--report", os.path.join(ROOT, "docs", "ZH_GLOSS.md")],
                          input=json.dumps(words, ensure_ascii=False).encode("utf-8"), capture_output=True)
     sys.stderr.write(out.stderr.decode("utf-8"))
     if out.returncode:

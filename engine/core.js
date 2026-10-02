@@ -2780,16 +2780,18 @@ function leftOfOr(alt){
   return "";
 }
 // "to be careful" / "to feel anxious" also take the bare adjective ("careful", "anxious"): a
-// learner names the quality, not the copula (owner feedback 2026-10-02, 着急).
+// learner names the quality, not the copula (owner feedback 2026-10-02, 着急). Only a one-word
+// adjective or participle: "to be like", "to be apart from", "to be able to" would key a wrong
+// sense. Typed-meaning packs only (typedFromOn); every other pack keeps its keys.
 const GLOSS_COPULA = new Set(["be", "feel"]);
+const GLOSS_COPULA_NOT = new Set(["about", "above", "across", "after", "against", "along", "among", "apart", "around", "at", "away", "before", "behind", "below", "beside", "between", "beyond", "by", "down", "for", "from", "here", "in", "inside", "into", "left", "like", "near", "not", "of", "off", "on", "onto", "out", "outside", "over", "past", "so", "there", "through", "to", "toward", "towards", "under", "up", "with", "within", "without", "able"]);
 function copulaFree(v){
   const toks = glossWords(v);
-  if(toks[0] !== "to" || !GLOSS_COPULA.has(toks[1])) return [];
-  const rest = toks.slice(2).join(" ");
-  return glossHasContent(rest) ? [rest] : [];
+  if(toks.length !== 3 || toks[0] !== "to" || !GLOSS_COPULA.has(toks[1]) || GLOSS_COPULA_NOT.has(toks[2]) || GLOSS_FUNC.has(toks[2])) return [];
+  return [toks[2]];
 }
-function glossAltKeys(en){
-  const keys = new Set();
+function glossAltKeys(en, pack){
+  const keys = new Set(), copula = typedFromOn(pack);
   const add = v => {
     const k = glossKey(v); if(!k) return;
     // A lone letter left by punctuation ("~'s" -> s) is not a meaning; a gloss "I" is.
@@ -2800,7 +2802,7 @@ function glossAltKeys(en){
     if(isPronNote(raw)) return;
     const alt = parenPieces(raw).filter(p => !(p.g && isPronNote(p.t))).map(p => p.t).join("");
     if(/(?:…|\.\.\.)\s*$/.test(alt) && !glossHasContent(parenGroups(alt).rest)) return;
-    glossAltVariants(alt).forEach(v => { add(v); copulaFree(v).forEach(add); });
+    glossAltVariants(alt).forEach(v => { add(v); if(copula) copulaFree(v).forEach(add); });
     const left = leftOfOr(alt);
     if(left) glossAltVariants(left).forEach(v => { if(glossHasContent(v)) add(v); });
   });
@@ -2829,8 +2831,8 @@ function pronChoiceOpts(entry, pool, all){
 }
 // One meaning is enough: the whole typed text, or every part of it split like the gloss, must
 // be one of the gloss's alternatives. Rules: docs/PACK_SCHEMA.md "Typed meaning".
-function checkGlossTyped(val, en){
-  const keys = glossAltKeys(en), v = String(val == null ? "" : val);
+function checkGlossTyped(val, en, pack){
+  const keys = glossAltKeys(en, pack), v = String(val == null ? "" : val);
   if(keys.has(glossKey(v))) return true;
   // The whole gloss typed as written is right, reading notes and fragments included.
   if(glossKey(v) && glossKey(v) === glossKey(en)) return true;

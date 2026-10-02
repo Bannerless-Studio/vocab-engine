@@ -492,7 +492,10 @@ function walk(api, stopAt){
       charRead: (it => it.opts.map(o => it.optHtml(o)).join("|") + it.reveal)(api.charDrillItem("charRead", unitOf(w))),
       charRecall: api.charDrillItem("charRecall", unitOf(w)).html,
     };
-    const badSites = Object.entries(sites).filter(([, h]) => !h.includes(want) || h.includes(raw));
+    // Option buttons (readOpts, hearOpts) show the first alternatives only (app.html glossShort), each focused the same way.
+    const wantOpt = api.readItem(w).optHtml(g), OPT = new Set(["readOpts", "hearOpts"]);
+    check(`option buttons: a focused prefix of the gloss (${wantOpt})`, !!wantOpt && want.startsWith(wantOpt));
+    const badSites = Object.entries(sites).filter(([k, h]) => !h.includes(OPT.has(k) ? wantOpt : want) || h.includes(raw));
     check(`focused gloss at every site (${Object.keys(sites).join(", ")}; bad: ${badSites.map(x => x[0]).join(", ") || "none"})`, badSites.length === 0);
     api.wordsPage(w.lv, 0);
     const wl = api.el("wl").children.map(c => c.innerHTML).join("|");

@@ -23,13 +23,11 @@
  {
   "id": "w0004",
   "w": "上",
-  "en": "first (of multiple parts); to climb; to get onto; to go up",
+  "en": "up; above; on; to go up; to get onto; last (month etc)",
   "lv": "1",
   "pron": "shàng",
   "syn": [
-   "w0164",
-   "w0256",
-   "w1184"
+   "w0928"
   ]
  },
  {
@@ -42,9 +40,13 @@
  {
   "id": "w0006",
   "w": "下",
-  "en": "down; downwards",
+  "en": "down; below; under; to go down; next (week etc)",
   "lv": "1",
-  "pron": "xià"
+  "pron": "xià",
+  "syn": [
+   "w0234",
+   "w0673"
+  ]
  },
  {
   "id": "w0007",
@@ -151,8 +153,10 @@
   "pron": "èr",
   "syn": [
    "w0154",
-   "w0365",
    "w0654"
+  ],
+  "typedSyn": [
+   "w0154"
   ]
  },
  {
@@ -169,6 +173,7 @@
   "lv": "1",
   "pron": "xiē",
   "syn": [
+   "w0037",
    "w0082"
   ]
  },
@@ -213,13 +218,20 @@
  {
   "id": "w0026",
   "w": "会",
-  "en": "can; to have the skill; to know how to",
+  "en": "can; to know how to; to be likely to; to meet; meeting",
   "lv": "1",
   "pron": "huì",
   "say": "汇",
   "syn": [
    "w0131",
-   "w0176"
+   "w0176",
+   "w0321",
+   "w0433",
+   "w0554",
+   "w0570"
+  ],
+  "typedSyn": [
+   "w0131"
   ]
  },
  {
@@ -240,18 +252,27 @@
   "pron": "nǐ",
   "syn": [
    "w0212"
+  ],
+  "typedSyn": [
+   "w0212"
   ]
  },
  {
   "id": "w0029",
   "w": "做",
-  "en": "to make; to produce; to write; to compose",
+  "en": "to do; to make; to produce; to cook",
   "lv": "1",
   "pron": "zuò",
   "syn": [
-   "w0035",
+   "w0268",
    "w0328",
-   "w0693"
+   "w0693",
+   "w0817",
+   "w0831"
+  ],
+  "typedSyn": [
+   "w0817",
+   "w0831"
   ]
  },
  {
@@ -264,11 +285,11 @@
  {
   "id": "w0031",
   "w": "先生",
-  "en": "teacher; gentleman; sir; mister (Mr.)",
+  "en": "Mr.; sir; gentleman; husband",
   "lv": "1",
   "pron": "xiānsheng",
   "syn": [
-   "w0130"
+   "w0152"
   ]
  },
  {
@@ -297,13 +318,7 @@
   "w": "写",
   "en": "to write",
   "lv": "1",
-  "pron": "xiě",
-  "syn": [
-   "w0029"
-  ],
-  "typedSyn": [
-   "w0029"
-  ]
+  "pron": "xiě"
  },
  {
   "id": "w0036",
@@ -318,12 +333,14 @@
  {
   "id": "w0037",
   "w": "几",
-  "en": "how much; how many",
+  "en": "how many; several; a few",
   "lv": "1",
   "pron": "jǐ",
   "say": "挤",
   "syn": [
-   "w0066"
+   "w0021",
+   "w0066",
+   "w0082"
   ],
   "typedSyn": [
    "w0066"
@@ -341,7 +358,13 @@
   "w": "分钟",
   "en": "minute",
   "lv": "1",
-  "pron": "fēnzhōng"
+  "pron": "fēnzhōng",
+  "syn": [
+   "w0347"
+  ],
+  "typedSyn": [
+   "w0347"
+  ]
  },
  {
   "id": "w0040",
@@ -364,11 +387,9 @@
   "lv": "1",
   "pron": "yīshēng",
   "syn": [
-   "w0704",
    "w0778"
   ],
   "typedSyn": [
-   "w0704",
    "w0778"
   ]
  },
@@ -402,9 +423,14 @@
  {
   "id": "w0046",
   "w": "叫",
-  "en": "to shout; to call",
+  "en": "to be called; to call; to shout; to ask (sb to do sth)",
   "lv": "1",
-  "pron": "jiào"
+  "pron": "jiào",
+  "syn": [
+   "w0093",
+   "w0138",
+   "w0287"
+  ]
  },
  {
   "id": "w0047",
@@ -416,7 +442,7 @@
  {
   "id": "w0048",
   "w": "同学",
-  "en": "to study at the same school; fellow student",
+  "en": "classmate; fellow student",
   "lv": "1",
   "pron": "tóngxué"
  },
@@ -430,9 +456,13 @@
  {
   "id": "w0050",
   "w": "后面",
-  "en": "the back; the rear; the last bit",
+  "en": "behind; at the back; the back; later",
   "lv": "1",
-  "pron": "hòumian"
+  "pron": "hòumian",
+  "syn": [
+   "w0320",
+   "w0742"
+  ]
  },
  {
   "id": "w0051",
@@ -465,15 +495,20 @@
   "pron": "hé",
   "say": "河",
   "syn": [
+   "w0564",
    "w0602",
    "w0822",
    "w1070"
+  ],
+  "typedSyn": [
+   "w0564",
+   "w0602"
   ]
  },
  {
   "id": "w0055",
   "w": "哪",
-  "en": "how; which",
+  "en": "which; how",
   "lv": "1",
   "pron": "nǎ",
   "syn": [
@@ -506,11 +541,6 @@
   "syn": [
    "w0117",
    "w0301",
-   "w0332",
-   "w0483"
-  ],
-  "typedSyn": [
-   "w0117",
    "w0483"
   ]
  },
@@ -535,20 +565,30 @@
  {
   "id": "w0061",
   "w": "回",
-  "en": "to circle; to go back",
+  "en": "to go back; to return; to reply; time (classifier for acts)",
   "lv": "1",
   "pron": "huí",
   "syn": [
-   "w0761"
+   "w0095",
+   "w0186",
+   "w0228",
+   "w0234",
+   "w0314",
+   "w0399",
+   "w1129",
+   "w1149"
   ]
  },
  {
   "id": "w0062",
   "w": "在",
-  "en": "to exist; to be alive; (of sb or sth) to be (located) at",
+  "en": "at; in; to be (located) at; (doing sth) now; to exist",
   "lv": "1",
   "pron": "zài",
   "syn": [
+   "w0121",
+   "w0145",
+   "w0672",
    "w0800",
    "w1125"
   ]
@@ -563,7 +603,7 @@
  {
   "id": "w0064",
   "w": "块",
-  "en": "lump; chunk; piece",
+  "en": "piece; lump; chunk; (coll.) yuan, classifier for money",
   "lv": "1",
   "pron": "kuài"
  },
@@ -575,6 +615,9 @@
   "pron": "duō",
   "syn": [
    "w1105"
+  ],
+  "typedSyn": [
+   "w1105"
   ]
  },
  {
@@ -584,9 +627,6 @@
   "lv": "1",
   "pron": "duōshao",
   "syn": [
-   "w0037"
-  ],
-  "typedSyn": [
    "w0037"
   ]
  },
@@ -607,9 +647,18 @@
  {
   "id": "w0069",
   "w": "太",
-  "en": "highest; greatest",
+  "en": "too (much); very; extremely",
   "lv": "1",
-  "pron": "tài"
+  "pron": "tài",
+  "syn": [
+   "w0087",
+   "w0291",
+   "w0456",
+   "w0485",
+   "w0702",
+   "w0938",
+   "w0951"
+  ]
  },
  {
   "id": "w0070",
@@ -645,12 +694,15 @@
  {
   "id": "w0074",
   "w": "字",
-  "en": "letter; symbol",
+  "en": "character; word; letter; symbol",
   "lv": "1",
   "pron": "zì",
   "syn": [
    "w0016",
-   "w0329"
+   "w0329",
+   "w0561",
+   "w0846",
+   "w1080"
   ]
  },
  {
@@ -677,7 +729,7 @@
  {
   "id": "w0078",
   "w": "家",
-  "en": "home; family",
+  "en": "home; family; (classifier for shops, companies)",
   "lv": "1",
   "pron": "jiā"
  },
@@ -700,7 +752,10 @@
   "w": "小姐",
   "en": "young lady; miss",
   "lv": "1",
-  "pron": "xiǎojie"
+  "pron": "xiǎojie",
+  "syn": [
+   "w0090"
+  ]
  },
  {
   "id": "w0082",
@@ -709,7 +764,8 @@
   "lv": "1",
   "pron": "shǎo",
   "syn": [
-   "w0021"
+   "w0021",
+   "w0037"
   ]
  },
  {
@@ -728,7 +784,10 @@
   "w": "工作",
   "en": "to work; (of a machine) to operate",
   "lv": "1",
-  "pron": "gōngzuò"
+  "pron": "gōngzuò",
+  "syn": [
+   "w0817"
+  ]
  },
  {
   "id": "w0085",
@@ -746,25 +805,40 @@
   "w": "开",
   "en": "to open (transitive or intransitive)",
   "lv": "1",
-  "pron": "kāi"
+  "pron": "kāi",
+  "syn": [
+   "w0207"
+  ]
  },
  {
   "id": "w0087",
   "w": "很",
-  "en": "(adverb of degree); quite",
+  "en": "very; quite; (adverb of degree)",
   "lv": "1",
-  "pron": "hěn"
+  "pron": "hěn",
+  "syn": [
+   "w0069",
+   "w0291",
+   "w0465",
+   "w0485",
+   "w0702"
+  ],
+  "typedSyn": [
+   "w0291",
+   "w0702"
+  ]
  },
  {
   "id": "w0088",
   "w": "怎么",
-  "en": "how?; what?",
+  "en": "how?; what?; why?",
   "lv": "1",
   "pron": "zěnme",
   "syn": [
    "w0023",
    "w0055",
    "w0089",
+   "w0311",
    "w0392"
   ]
  },
@@ -783,13 +857,17 @@
  {
   "id": "w0090",
   "w": "想",
-  "en": "to think (about); to think of; to devise",
+  "en": "to think; to want (to); to miss (sb); to think of",
   "lv": "1",
   "pron": "xiǎng",
   "syn": [
+   "w0081",
+   "w0266",
    "w0267",
    "w0318",
-   "w0557"
+   "w0422",
+   "w0557",
+   "w0581"
   ]
  },
  {
@@ -807,19 +885,25 @@
   "pron": "wǒmen",
   "syn": [
    "w0749"
+  ],
+  "typedSyn": [
+   "w0749"
   ]
  },
  {
   "id": "w0093",
   "w": "打电话",
-  "en": "to make a phone call; to telephone",
+  "en": "to make a phone call; to telephone; to call",
   "lv": "1",
-  "pron": "dǎdiànhuà"
+  "pron": "dǎdiànhuà",
+  "syn": [
+   "w0046"
+  ]
  },
  {
   "id": "w0094",
   "w": "日",
-  "en": "sun; day",
+  "en": "day; date; sun",
   "lv": "1",
   "pron": "rì",
   "syn": [
@@ -833,10 +917,16 @@
   "lv": "1",
   "pron": "shíhou",
   "syn": [
+   "w0061",
    "w0228",
+   "w0234",
    "w0314",
    "w0399",
-   "w1129"
+   "w1129",
+   "w1149"
+  ],
+  "typedSyn": [
+   "w0228"
   ]
  },
  {
@@ -863,25 +953,17 @@
  {
   "id": "w0099",
   "w": "是",
-  "en": "to be (followed by substantives only); correct; right; true",
+  "en": "to be; is; are; am; yes",
   "lv": "1",
   "pron": "shì",
   "syn": [
-   "w0178",
-   "w0248",
-   "w0800",
-   "w0834",
-   "w0950",
-   "w1014"
-  ],
-  "typedSyn": [
-   "w0248"
+   "w0834"
   ]
  },
  {
   "id": "w0100",
   "w": "月",
-  "en": "moon; month",
+  "en": "month; moon",
   "lv": "1",
   "pron": "yuè",
   "syn": [
@@ -903,20 +985,19 @@
   "w": "朋友",
   "en": "friend",
   "lv": "1",
-  "pron": "péngyou",
-  "syn": [
-   "w0717"
-  ],
-  "typedSyn": [
-   "w0717"
-  ]
+  "pron": "péngyou"
  },
  {
   "id": "w0103",
   "w": "本",
-  "en": "root; stem",
+  "en": "(classifier for books); this; root; origin",
   "lv": "1",
-  "pron": "běn"
+  "pron": "běn",
+  "syn": [
+   "w0142",
+   "w0712"
+  ],
+  "noTypedMeaning": true
  },
  {
   "id": "w0104",
@@ -955,12 +1036,9 @@
  {
   "id": "w0108",
   "w": "水",
-  "en": "water; river",
+  "en": "water; liquid",
   "lv": "1",
-  "pron": "shuǐ",
-  "syn": [
-   "w0467"
-  ]
+  "pron": "shuǐ"
  },
  {
   "id": "w0109",
@@ -1008,6 +1086,9 @@
   "pron": "piàoliang",
   "syn": [
    "w1063"
+  ],
+  "typedSyn": [
+   "w1063"
   ]
  },
  {
@@ -1020,16 +1101,23 @@
  {
   "id": "w0115",
   "w": "点",
-  "en": "point; dot",
+  "en": "o'clock; point; dot; a little; to order (dishes)",
   "lv": "1",
-  "pron": "diǎn"
+  "pron": "diǎn",
+  "syn": [
+   "w0347",
+   "w1175"
+  ]
  },
  {
   "id": "w0116",
   "w": "热",
-  "en": "to warm up; to heat up",
+  "en": "hot; to heat up; to warm up",
   "lv": "1",
-  "pron": "rè"
+  "pron": "rè",
+  "syn": [
+   "w1137"
+  ]
  },
  {
   "id": "w0117",
@@ -1040,7 +1128,6 @@
   "syn": [
    "w0058",
    "w0301",
-   "w0332",
    "w0483",
    "w0985"
   ]
@@ -1052,6 +1139,9 @@
   "lv": "1",
   "pron": "bàba",
   "syn": [
+   "w0986"
+  ],
+  "typedSyn": [
    "w0986"
   ]
  },
@@ -1076,7 +1166,8 @@
   "lv": "1",
   "pron": "xiànzài",
   "syn": [
-   "w0024"
+   "w0024",
+   "w0062"
   ]
  },
  {
@@ -1110,13 +1201,15 @@
  {
   "id": "w0126",
   "w": "看",
-  "en": "to see; to look at; to read",
+  "en": "to look at; to watch; to see; to read; to visit",
   "lv": "1",
   "pron": "kàn",
   "say": "瞰",
   "syn": [
    "w0127",
    "w0139",
+   "w1106",
+   "w1147",
    "w1162"
   ]
  },
@@ -1152,13 +1245,7 @@
   "w": "老师",
   "en": "teacher",
   "lv": "1",
-  "pron": "lǎoshī",
-  "syn": [
-   "w0031"
-  ],
-  "typedSyn": [
-   "w0031"
-  ]
+  "pron": "lǎoshī"
  },
  {
   "id": "w0131",
@@ -1167,6 +1254,10 @@
   "lv": "1",
   "pron": "néng",
   "syn": [
+   "w0026",
+   "w0176"
+  ],
+  "typedSyn": [
    "w0026",
    "w0176"
   ]
@@ -1223,11 +1314,13 @@
  {
   "id": "w0138",
   "w": "请",
-  "en": "to ask; to invite",
+  "en": "please; to ask; to invite; to treat (to a meal)",
   "lv": "1",
   "pron": "qǐng",
   "syn": [
+   "w0046",
    "w0287",
+   "w1117",
    "w1151"
   ]
  },
@@ -1257,6 +1350,9 @@
   "pron": "xièxie",
   "syn": [
    "w0855"
+  ],
+  "typedSyn": [
+   "w0855"
   ]
  },
  {
@@ -1264,7 +1360,10 @@
   "w": "这",
   "en": "(pronoun) this; these",
   "lv": "1",
-  "pron": "zhè"
+  "pron": "zhè",
+  "syn": [
+   "w0103"
+  ]
  },
  {
   "id": "w0143",
@@ -1282,20 +1381,30 @@
   "say": "兜",
   "syn": [
    "w0154",
+   "w0365",
    "w0654",
    "w0667",
-   "w0751",
    "w0790",
    "w0861",
-   "w0998"
+   "w0998",
+   "w1141"
   ]
  },
  {
   "id": "w0145",
   "w": "里",
-  "en": "lining; interior",
+  "en": "inside; in; interior; lining",
   "lv": "1",
-  "pron": "lǐ"
+  "pron": "lǐ",
+  "syn": [
+   "w0062",
+   "w0309",
+   "w0672",
+   "w0675"
+  ],
+  "typedSyn": [
+   "w0675"
+  ]
  },
  {
   "id": "w0146",
@@ -1334,6 +1443,9 @@
   "syn": [
    "w0211",
    "w0823"
+  ],
+  "typedSyn": [
+   "w0211"
   ]
  },
  {
@@ -1348,7 +1460,13 @@
   "w": "丈夫",
   "en": "husband",
   "lv": "2",
-  "pron": "zhàngfu"
+  "pron": "zhàngfu",
+  "syn": [
+   "w0031"
+  ],
+  "typedSyn": [
+   "w0031"
+  ]
  },
  {
   "id": "w0153",
@@ -1370,7 +1488,7 @@
    "w0654"
   ],
   "typedSyn": [
-   "w0654"
+   "w0019"
   ]
  },
  {
@@ -1385,9 +1503,6 @@
    "w0259",
    "w0310",
    "w0800"
-  ],
-  "typedSyn": [
-   "w0187"
   ]
  },
  {
@@ -1397,6 +1512,7 @@
   "lv": "2",
   "pron": "yě",
   "syn": [
+   "w0280",
    "w0364"
   ]
  },
@@ -1424,19 +1540,24 @@
   "lv": "2",
   "pron": "cóng",
   "syn": [
+   "w0253",
+   "w1001"
+  ],
+  "typedSyn": [
    "w1001"
   ]
  },
  {
   "id": "w0160",
   "w": "件",
-  "en": "item; component",
+  "en": "(classifier for clothes, events, things); item",
   "lv": "2",
   "pron": "jiàn",
   "syn": [
    "w0455",
    "w0535"
-  ]
+  ],
+  "noTypedMeaning": true
  },
  {
   "id": "w0161",
@@ -1452,11 +1573,14 @@
   "lv": "2",
   "pron": "dànshì",
   "syn": [
+   "w0601",
    "w0708",
    "w0732",
    "w0983"
   ],
   "typedSyn": [
+   "w0601",
+   "w0708",
    "w0732",
    "w0983"
   ]
@@ -1475,8 +1599,8 @@
   "lv": "2",
   "pron": "yuán",
   "syn": [
-   "w0004",
    "w0256",
+   "w0333",
    "w1184"
   ]
  },
@@ -1511,6 +1635,7 @@
   "lv": "2",
   "pron": "zài",
   "syn": [
+   "w0171",
    "w0234",
    "w0364",
    "w1155"
@@ -1519,9 +1644,12 @@
  {
   "id": "w0169",
   "w": "准备",
-  "en": "preparation; to prepare",
+  "en": "to prepare; to intend; preparation",
   "lv": "2",
-  "pron": "zhǔnbèi"
+  "pron": "zhǔnbèi",
+  "syn": [
+   "w0427"
+  ]
  },
  {
   "id": "w0170",
@@ -1533,12 +1661,14 @@
  {
   "id": "w0171",
   "w": "别",
-  "en": "to leave; to part (from); don't ...!",
+  "en": "don't ...!; other; another; to leave; to part",
   "lv": "2",
   "pron": "bié",
   "say": "蹩",
   "syn": [
+   "w0168",
    "w0253",
+   "w0340",
    "w0506",
    "w0640",
    "w1004",
@@ -1585,6 +1715,9 @@
   "syn": [
    "w0026",
    "w0131"
+  ],
+  "typedSyn": [
+   "w0131"
   ]
  },
  {
@@ -1598,8 +1731,7 @@
    "w0779"
   ],
   "typedSyn": [
-   "w0618",
-   "w0779"
+   "w0618"
   ]
  },
  {
@@ -1609,7 +1741,7 @@
   "lv": "2",
   "pron": "yòubian",
   "syn": [
-   "w0099",
+   "w0181",
    "w0800",
    "w0950"
   ]
@@ -1617,10 +1749,14 @@
  {
   "id": "w0179",
   "w": "号",
-  "en": "ordinal number; day of a month",
+  "en": "day of a month; number; ordinal number; size",
   "lv": "2",
   "pron": "hào",
-  "say": "灏"
+  "say": "灏",
+  "syn": [
+   "w0735",
+   "w0909"
+  ]
  },
  {
   "id": "w0180",
@@ -1639,6 +1775,11 @@
   "en": "(modal particle indicating suggestion or surmise); ...right?",
   "lv": "2",
   "pron": "ba",
+  "syn": [
+   "w0178",
+   "w0800",
+   "w0950"
+  ],
   "noTypedMeaning": true
  },
  {
@@ -1679,6 +1820,7 @@
   "lv": "2",
   "pron": "huídá",
   "syn": [
+   "w0061",
    "w0433",
    "w1042"
   ]
@@ -1691,9 +1833,6 @@
   "pron": "yīnwèi",
   "syn": [
    "w0155"
-  ],
-  "typedSyn": [
-   "w0155"
   ]
  },
  {
@@ -1703,6 +1842,7 @@
   "lv": "2",
   "pron": "wài",
   "syn": [
+   "w0280",
    "w0727"
   ]
  },
@@ -1711,10 +1851,7 @@
   "w": "大家",
   "en": "everyone; influential family",
   "lv": "2",
-  "pron": "dàjiā",
-  "syn": [
-   "w0751"
-  ]
+  "pron": "dàjiā"
  },
  {
   "id": "w0190",
@@ -1786,6 +1923,9 @@
   "pron": "wán",
   "syn": [
    "w0522"
+  ],
+  "typedSyn": [
+   "w0522"
   ]
  },
  {
@@ -1798,12 +1938,17 @@
  {
   "id": "w0200",
   "w": "就",
-  "en": "(after a suppositional clause) in that case; then",
+  "en": "then; at once; right away; just; only",
   "lv": "2",
   "pron": "jiù",
   "syn": [
+   "w0372",
+   "w0425",
    "w0477",
-   "w0836"
+   "w0590",
+   "w0601",
+   "w0836",
+   "w0947"
   ]
  },
  {
@@ -1811,10 +1956,7 @@
   "w": "左边",
   "en": "left; the left side",
   "lv": "2",
-  "pron": "zuǒbian",
-  "syn": [
-   "w0694"
-  ]
+  "pron": "zuǒbian"
  },
  {
   "id": "w0202",
@@ -1830,6 +1972,7 @@
   "lv": "2",
   "pron": "xīwàng",
   "syn": [
+   "w0213",
    "w0422",
    "w0505"
   ]
@@ -1861,12 +2004,14 @@
  {
   "id": "w0207",
   "w": "张",
-  "en": "to open up; to spread",
+  "en": "(classifier for flat objects, sheets); to open; to spread",
   "lv": "2",
   "pron": "zhāng",
   "syn": [
+   "w0086",
    "w0968"
-  ]
+  ],
+  "noTypedMeaning": true
  },
  {
   "id": "w0208",
@@ -1898,7 +2043,11 @@
   "pron": "kuàilè",
   "syn": [
    "w0150",
+   "w0448",
    "w0823"
+  ],
+  "typedSyn": [
+   "w0150"
   ]
  },
  {
@@ -1909,20 +2058,23 @@
   "pron": "nín",
   "syn": [
    "w0028"
+  ],
+  "typedSyn": [
+   "w0028"
   ]
  },
  {
   "id": "w0213",
   "w": "意思",
-  "en": "idea; opinion",
+  "en": "meaning; wish; interest; fun",
   "lv": "2",
   "pron": "yìsi",
   "syn": [
-   "w0613",
-   "w0851"
-  ],
-  "typedSyn": [
-   "w0851"
+   "w0203",
+   "w0339",
+   "w0422",
+   "w0483",
+   "w0505"
   ]
  },
  {
@@ -1940,9 +2092,12 @@
   "pron": "dǒng",
   "syn": [
    "w0316",
+   "w0447",
    "w0996"
   ],
   "typedSyn": [
+   "w0316",
+   "w0447",
    "w0996"
   ]
  },
@@ -2016,14 +2171,12 @@
  {
   "id": "w0225",
   "w": "旁边",
-  "en": "side; adjacent place",
+  "en": "beside; side; to the side",
   "lv": "2",
   "pron": "pángbiān",
   "syn": [
-   "w0304"
-  ],
-  "typedSyn": [
-   "w0304"
+   "w0304",
+   "w0918"
   ]
  },
  {
@@ -2051,10 +2204,16 @@
   "lv": "2",
   "pron": "shíjiān",
   "syn": [
+   "w0061",
    "w0095",
+   "w0234",
    "w0314",
    "w0399",
-   "w1129"
+   "w1129",
+   "w1149"
+  ],
+  "typedSyn": [
+   "w0095"
   ]
  },
  {
@@ -2100,11 +2259,24 @@
  {
   "id": "w0234",
   "w": "次",
-  "en": "next in sequence; second",
+  "en": "time (classifier for occurrences); next; second",
   "lv": "2",
   "pron": "cì",
   "syn": [
-   "w0168"
+   "w0006",
+   "w0061",
+   "w0095",
+   "w0168",
+   "w0228",
+   "w0314",
+   "w0399",
+   "w0673",
+   "w1129",
+   "w1149"
+  ],
+  "typedSyn": [
+   "w0061",
+   "w1149"
   ]
  },
  {
@@ -2138,13 +2310,10 @@
  {
   "id": "w0238",
   "w": "比",
-  "en": "to compare",
+  "en": "than (in comparisons); to compare; ratio",
   "lv": "2",
   "pron": "bǐ",
   "syn": [
-   "w0465"
-  ],
-  "typedSyn": [
    "w0465"
   ]
  },
@@ -2155,7 +2324,8 @@
   "lv": "2",
   "pron": "xǐ",
   "syn": [
-   "w0470"
+   "w0470",
+   "w0721"
   ]
  },
  {
@@ -2228,7 +2398,6 @@
   "lv": "2",
   "pron": "zhēn",
   "syn": [
-   "w0099",
    "w0291",
    "w0341",
    "w0791",
@@ -2237,7 +2406,8 @@
    "w1020"
   ],
   "typedSyn": [
-   "w0099"
+   "w0791",
+   "w1020"
   ]
  },
  {
@@ -2276,16 +2446,15 @@
  {
   "id": "w0253",
   "w": "离",
-  "en": "to leave; to part from",
+  "en": "from (in distances); to be away from; to leave",
   "lv": "2",
   "pron": "lí",
   "syn": [
+   "w0159",
    "w0171",
    "w0506",
+   "w1001",
    "w1004"
-  ],
-  "typedSyn": [
-   "w0171"
   ]
  },
  {
@@ -2315,8 +2484,8 @@
   "lv": "2",
   "pron": "dìyī",
   "syn": [
-   "w0004",
    "w0164",
+   "w0333",
    "w1184"
   ]
  },
@@ -2326,24 +2495,32 @@
   "en": "tired; weary",
   "lv": "2",
   "pron": "lèi",
-  "say": "泪"
+  "say": "泪",
+  "syn": [
+   "w0758"
+  ]
  },
  {
   "id": "w0258",
   "w": "红",
   "en": "red; popular",
   "lv": "2",
-  "pron": "hóng"
+  "pron": "hóng",
+  "syn": [
+   "w0968"
+  ]
  },
  {
   "id": "w0259",
   "w": "给",
-  "en": "to; for",
+  "en": "to give; to; for; for the benefit of",
   "lv": "2",
   "pron": "gěi",
   "syn": [
    "w0155",
+   "w0283",
    "w0310",
+   "w0602",
    "w0800",
    "w0837"
   ]
@@ -2398,8 +2575,12 @@
   "pron": "yào",
   "say": "药",
   "syn": [
+   "w0090",
    "w0422",
    "w0581"
+  ],
+  "typedSyn": [
+   "w0090"
   ]
  },
  {
@@ -2413,24 +2594,34 @@
    "w0318",
    "w0557",
    "w0854"
+  ],
+  "typedSyn": [
+   "w0557"
   ]
  },
  {
   "id": "w0268",
   "w": "让",
-  "en": "to yield; to permit",
+  "en": "to let; to allow; to make (sb do sth); to yield",
   "lv": "2",
   "pron": "ràng",
   "syn": [
-   "w0663"
+   "w0029",
+   "w0328",
+   "w0663",
+   "w0693"
   ]
  },
  {
   "id": "w0269",
   "w": "课",
-  "en": "subject; course",
+  "en": "class; lesson; subject; course",
   "lv": "2",
-  "pron": "kè"
+  "pron": "kè",
+  "syn": [
+   "w0487",
+   "w1041"
+  ]
  },
  {
   "id": "w0270",
@@ -2448,9 +2639,6 @@
   "syn": [
    "w0045",
    "w0837",
-   "w1091"
-  ],
-  "typedSyn": [
    "w1091"
   ]
  },
@@ -2518,6 +2706,7 @@
   "syn": [
    "w0435",
    "w0516",
+   "w0575",
    "w0698",
    "w0852",
    "w0964"
@@ -2533,11 +2722,21 @@
  {
   "id": "w0280",
   "w": "还",
-  "en": "still; still in progress",
+  "en": "still; also; in addition; yet; fairly",
   "lv": "2",
   "pron": "hái",
   "say": "孩",
   "syn": [
+   "w0156",
+   "w0188",
+   "w0364",
+   "w0567",
+   "w0631",
+   "w0708",
+   "w0727",
+   "w0983"
+  ],
+  "typedSyn": [
    "w0567",
    "w0631"
   ]
@@ -2545,12 +2744,9 @@
  {
   "id": "w0281",
   "w": "进",
-  "en": "to go forward; to advance",
+  "en": "to enter; to go in; to come in; to advance",
   "lv": "2",
-  "pron": "jìn",
-  "syn": [
-   "w1140"
-  ]
+  "pron": "jìn"
  },
  {
   "id": "w0282",
@@ -2566,19 +2762,21 @@
   "lv": "2",
   "pron": "sòng",
   "syn": [
+   "w0259",
    "w0602",
    "w0623",
+   "w0721",
    "w0796"
   ]
  },
  {
   "id": "w0284",
   "w": "错",
-  "en": "mistake; wrong",
+  "en": "wrong; mistake; bad",
   "lv": "2",
   "pron": "cuò",
   "syn": [
-   "w0408",
+   "w0387",
    "w1114"
   ]
  },
@@ -2604,6 +2802,7 @@
   "lv": "2",
   "pron": "wèn",
   "syn": [
+   "w0046",
    "w0138"
   ]
  },
@@ -2638,6 +2837,8 @@
   "lv": "2",
   "pron": "fēicháng",
   "syn": [
+   "w0069",
+   "w0087",
    "w0248",
    "w0341",
    "w0485",
@@ -2646,6 +2847,10 @@
    "w0939",
    "w1014",
    "w1020"
+  ],
+  "typedSyn": [
+   "w0087",
+   "w0702"
   ]
  },
  {
@@ -2700,6 +2905,7 @@
   "lv": "3",
   "pron": "yīhuìr",
   "syn": [
+   "w0304",
    "w0352"
   ]
  },
@@ -2717,6 +2923,7 @@
   "lv": "3",
   "pron": "yīdìng",
   "syn": [
+   "w0416",
    "w1076"
   ],
   "typedSyn": [
@@ -2732,44 +2939,46 @@
   "syn": [
    "w0058",
    "w0117",
-   "w0303",
-   "w0332",
    "w0483",
+   "w0498"
+  ],
+  "typedSyn": [
    "w0498"
   ]
  },
  {
   "id": "w0302",
   "w": "一直",
-  "en": "straight (in a straight line)",
+  "en": "always; continuously; straight (ahead); all the way",
   "lv": "3",
   "pron": "yīzhí",
   "syn": [
+   "w0420",
+   "w0524",
+   "w0632",
    "w0885"
   ]
  },
  {
   "id": "w0303",
   "w": "一般",
-  "en": "same; ordinary",
+  "en": "ordinary; common; general; generally; so-so",
   "lv": "3",
   "pron": "yībān",
   "syn": [
-   "w0301",
-   "w0498"
+   "w0669",
+   "w0924"
   ]
  },
  {
   "id": "w0304",
   "w": "一边",
-  "en": "one side; either side",
+  "en": "(doing) while; at the same time; one side",
   "lv": "3",
   "pron": "yībiān",
   "syn": [
-   "w0225"
-  ],
-  "typedSyn": [
-   "w0225"
+   "w0225",
+   "w0298"
   ]
  },
  {
@@ -2807,6 +3016,7 @@
   "lv": "3",
   "pron": "zhōngjiān",
   "syn": [
+   "w0145",
    "w0675"
   ]
  },
@@ -2820,6 +3030,9 @@
    "w0155",
    "w0259",
    "w0800"
+  ],
+  "typedSyn": [
+   "w0155"
   ]
  },
  {
@@ -2827,7 +3040,10 @@
   "w": "为什么",
   "en": "why?; for what reason?",
   "lv": "3",
-  "pron": "wèishénme"
+  "pron": "wèishénme",
+  "syn": [
+   "w0088"
+  ]
  },
  {
   "id": "w0312",
@@ -2847,6 +3063,9 @@
    "w0431",
    "w0614",
    "w0875"
+  ],
+  "typedSyn": [
+   "w0614"
   ]
  },
  {
@@ -2856,16 +3075,19 @@
   "lv": "3",
   "pron": "jiǔ",
   "syn": [
+   "w0061",
    "w0095",
    "w0228",
+   "w0234",
    "w0399",
-   "w1129"
+   "w1129",
+   "w1149"
   ]
  },
  {
   "id": "w0315",
   "w": "习惯",
-  "en": "habit; custom",
+  "en": "habit; custom; to be used to",
   "lv": "3",
   "pron": "xíguàn"
  },
@@ -2877,6 +3099,12 @@
   "pron": "liǎojiě",
   "syn": [
    "w0215",
+   "w0447",
+   "w0996"
+  ],
+  "typedSyn": [
+   "w0215",
+   "w0447",
    "w0996"
   ]
  },
@@ -2908,10 +3136,6 @@
   "syn": [
    "w0566",
    "w0713"
-  ],
-  "typedSyn": [
-   "w0566",
-   "w0713"
   ]
  },
  {
@@ -2921,6 +3145,7 @@
   "lv": "3",
   "pron": "yǐhòu",
   "syn": [
+   "w0050",
    "w0742"
   ]
  },
@@ -2929,7 +3154,10 @@
   "w": "会议",
   "en": "meeting; conference",
   "lv": "3",
-  "pron": "huìyì"
+  "pron": "huìyì",
+  "syn": [
+   "w0026"
+  ]
  },
  {
   "id": "w0322",
@@ -2941,9 +3169,15 @@
  {
   "id": "w0323",
   "w": "位",
-  "en": "position; location",
+  "en": "(polite classifier for people); place; position",
   "lv": "3",
-  "pron": "wèi"
+  "pron": "wèi",
+  "syn": [
+   "w0385",
+   "w0436",
+   "w0764"
+  ],
+  "noTypedMeaning": true
  },
  {
   "id": "w0324",
@@ -2972,9 +3206,13 @@
  {
   "id": "w0327",
   "w": "作用",
-  "en": "to act on; to affect",
+  "en": "effect; function; to act on; to affect",
   "lv": "3",
-  "pron": "zuòyòng"
+  "pron": "zuòyòng",
+  "syn": [
+   "w0417",
+   "w0905"
+  ]
  },
  {
   "id": "w0328",
@@ -2984,9 +3222,13 @@
   "pron": "shǐ",
   "syn": [
    "w0029",
+   "w0268",
    "w0693",
    "w0712",
    "w0832"
+  ],
+  "typedSyn": [
+   "w0268"
   ]
  },
  {
@@ -3020,20 +3262,23 @@
   "w": "像",
   "en": "to resemble; to be like",
   "lv": "3",
-  "pron": "xiàng",
-  "syn": [
-   "w0058",
-   "w0117",
-   "w0301",
-   "w0483"
-  ]
+  "pron": "xiàng"
  },
  {
   "id": "w0333",
   "w": "先",
-  "en": "early; prior",
+  "en": "first; early; prior; in advance",
   "lv": "3",
-  "pron": "xiān"
+  "pron": "xiān",
+  "syn": [
+   "w0164",
+   "w0256",
+   "w0892",
+   "w1184"
+  ],
+  "typedSyn": [
+   "w1184"
+  ]
  },
  {
   "id": "w0334",
@@ -3045,7 +3290,7 @@
  {
   "id": "w0335",
   "w": "关",
-  "en": "mountain pass; to close; to shut; to turn off",
+  "en": "to close; to shut; to turn off; mountain pass",
   "lv": "3",
   "pron": "guān"
  },
@@ -3068,14 +3313,21 @@
   "w": "关系",
   "en": "relation; relationship",
   "lv": "3",
-  "pron": "guānxi"
+  "pron": "guānxi",
+  "syn": [
+   "w1074"
+  ]
  },
  {
   "id": "w0339",
   "w": "兴趣",
   "en": "interest (desire to know about sth)",
   "lv": "3",
-  "pron": "xìngqù"
+  "pron": "xìngqù",
+  "syn": [
+   "w0213",
+   "w0483"
+  ]
  },
  {
   "id": "w0340",
@@ -3084,11 +3336,9 @@
   "lv": "3",
   "pron": "qítā",
   "syn": [
+   "w0171",
    "w0349",
    "w0743"
-  ],
-  "typedSyn": [
-   "w0349"
   ]
  },
  {
@@ -3103,7 +3353,8 @@
    "w0791",
    "w0939",
    "w1014",
-   "w1020"
+   "w1020",
+   "w1030"
   ]
  },
  {
@@ -3116,7 +3367,7 @@
  {
   "id": "w0343",
   "w": "冰箱",
-  "en": "icebox; freezer cabinet",
+  "en": "refrigerator; fridge; icebox",
   "lv": "3",
   "pron": "bīngxiāng"
  },
@@ -3138,6 +3389,9 @@
   "pron": "jīhū",
   "syn": [
    "w0813"
+  ],
+  "typedSyn": [
+   "w0813"
   ]
  },
  {
@@ -3150,17 +3404,27 @@
  {
   "id": "w0347",
   "w": "分",
-  "en": "to divide; to separate; to distribute; to allocate",
+  "en": "minute; cent (0.01 yuan); point (score); to divide; to separate",
   "lv": "3",
   "pron": "fēn",
-  "say": "纷"
+  "say": "纷",
+  "syn": [
+   "w0039",
+   "w0115"
+  ],
+  "typedSyn": [
+   "w0039"
+  ]
  },
  {
   "id": "w0348",
   "w": "刚才",
   "en": "just now; a moment ago",
   "lv": "3",
-  "pron": "gāngcái"
+  "pron": "gāngcái",
+  "syn": [
+   "w0425"
+  ]
  },
  {
   "id": "w0349",
@@ -3170,15 +3434,12 @@
   "pron": "biéren",
   "syn": [
    "w0340"
-  ],
-  "typedSyn": [
-   "w0340"
   ]
  },
  {
   "id": "w0350",
   "w": "刮",
-  "en": "to scrape; to blow",
+  "en": "to blow (of the wind); to scrape; to shave",
   "lv": "3",
   "pron": "guā"
  },
@@ -3217,6 +3478,9 @@
   "pron": "bànfǎ",
   "syn": [
    "w0917"
+  ],
+  "typedSyn": [
+   "w0917"
   ]
  },
  {
@@ -3236,11 +3500,11 @@
  {
   "id": "w0357",
   "w": "包",
-  "en": "to cover; to wrap",
+  "en": "bag; package; to wrap; to cover; to include",
   "lv": "3",
   "pron": "bāo",
   "syn": [
-   "w0549"
+   "w0700"
   ]
  },
  {
@@ -3294,17 +3558,18 @@
   "syn": [
    "w0156",
    "w0168",
+   "w0280",
    "w1155"
   ]
  },
  {
   "id": "w0365",
   "w": "双",
-  "en": "two; double",
+  "en": "pair; double; both",
   "lv": "3",
   "pron": "shuāng",
   "syn": [
-   "w0019",
+   "w0144",
    "w0154",
    "w0654"
   ]
@@ -3372,9 +3637,8 @@
   "pron": "zhǐ",
   "say": "止",
   "syn": [
-   "w0601"
-  ],
-  "typedSyn": [
+   "w0200",
+   "w0425",
    "w0601"
   ]
  },
@@ -3428,6 +3692,9 @@
   "pron": "a",
   "syn": [
    "w0746"
+  ],
+  "typedSyn": [
+   "w0746"
   ]
  },
  {
@@ -3456,7 +3723,8 @@
   "w": "地",
   "en": "-ly",
   "lv": "3",
-  "pron": "de"
+  "pron": "de",
+  "noTypedMeaning": true
  },
  {
   "id": "w0384",
@@ -3472,6 +3740,7 @@
   "lv": "3",
   "pron": "dìfang",
   "syn": [
+   "w0323",
    "w0436",
    "w0764"
   ]
@@ -3488,7 +3757,10 @@
   "w": "坏",
   "en": "bad; spoiled",
   "lv": "3",
-  "pron": "huài"
+  "pron": "huài",
+  "syn": [
+   "w0284"
+  ]
  },
  {
   "id": "w0388",
@@ -3543,9 +3815,6 @@
   "pron": "tàiyang",
   "syn": [
    "w0094"
-  ],
-  "typedSyn": [
-   "w0094"
   ]
  },
  {
@@ -3584,19 +3853,25 @@
   "pron": "zìdiǎn",
   "syn": [
    "w1108"
+  ],
+  "typedSyn": [
+   "w1108"
   ]
  },
  {
   "id": "w0399",
   "w": "季节",
-  "en": "time; season",
+  "en": "season; time; period",
   "lv": "3",
   "pron": "jìjié",
   "syn": [
+   "w0061",
    "w0095",
    "w0228",
+   "w0234",
    "w0314",
-   "w1129"
+   "w1129",
+   "w1149"
   ]
  },
  {
@@ -3638,10 +3913,8 @@
   "pron": "róngyì",
   "syn": [
    "w0513",
-   "w1133"
-  ],
-  "typedSyn": [
-   "w0513"
+   "w1133",
+   "w1134"
   ]
  },
  {
@@ -3664,27 +3937,38 @@
  {
   "id": "w0407",
   "w": "层",
-  "en": "to pile on top of one another; layer; stratum",
+  "en": "floor (of a building); layer; storey",
   "lv": "3",
-  "pron": "céng"
+  "pron": "céng",
+  "syn": [
+   "w0462"
+  ],
+  "typedSyn": [
+   "w0462"
+  ]
  },
  {
   "id": "w0408",
   "w": "差",
-  "en": "different; wrong; mistaken",
+  "en": "poor; not up to standard; to lack; short of; different",
   "lv": "3",
   "pron": "chà",
   "say": "诧",
   "syn": [
-   "w0284"
+   "w1031",
+   "w1059"
   ]
  },
  {
   "id": "w0409",
   "w": "带",
-  "en": "band; belt",
+  "en": "to bring; to take along; to carry; belt; zone",
   "lv": "3",
-  "pron": "dài"
+  "pron": "dài",
+  "syn": [
+   "w0431",
+   "w0875"
+  ]
  },
  {
   "id": "w0410",
@@ -3693,6 +3977,9 @@
   "lv": "3",
   "pron": "bāngmáng",
   "syn": [
+   "w0204"
+  ],
+  "typedSyn": [
    "w0204"
   ]
  },
@@ -3743,9 +4030,12 @@
  {
   "id": "w0416",
   "w": "当然",
-  "en": "only natural; as it should be",
+  "en": "of course; certainly; only natural",
   "lv": "3",
-  "pron": "dāngrán"
+  "pron": "dāngrán",
+  "syn": [
+   "w0300"
+  ]
  },
  {
   "id": "w0417",
@@ -3754,6 +4044,7 @@
   "lv": "3",
   "pron": "yǐngxiǎng",
   "syn": [
+   "w0327",
    "w0905"
   ]
  },
@@ -3782,10 +4073,7 @@
   "lv": "3",
   "pron": "zǒngshì",
   "syn": [
-   "w0524",
-   "w0632"
-  ],
-  "typedSyn": [
+   "w0302",
    "w0524",
    "w0632"
   ]
@@ -3807,7 +4095,9 @@
   "lv": "3",
   "pron": "yuànyì",
   "syn": [
+   "w0090",
    "w0203",
+   "w0213",
    "w0266",
    "w0505",
    "w0581"
@@ -3827,17 +4117,23 @@
   "lv": "3",
   "pron": "huòzhě",
   "syn": [
+   "w0567",
    "w0618",
-   "w0743"
+   "w0743",
+   "w0848"
   ]
  },
  {
   "id": "w0425",
   "w": "才",
-  "en": "ability; talent; sb of a certain type",
+  "en": "only then; just now; only; ability; talent",
   "lv": "3",
   "pron": "cái",
   "syn": [
+   "w0200",
+   "w0348",
+   "w0372",
+   "w0601",
    "w1077"
   ]
  },
@@ -3858,15 +4154,19 @@
   "lv": "3",
   "pron": "dǎsuàn",
   "syn": [
+   "w0169",
    "w0613",
    "w0789",
+   "w1101"
+  ],
+  "typedSyn": [
    "w1101"
   ]
  },
  {
   "id": "w0428",
   "w": "把",
-  "en": "to hold; to grasp",
+  "en": "(object marker, before the verb); to hold; (classifier: handles)",
   "lv": "3",
   "pron": "bǎ",
   "syn": [
@@ -3874,7 +4174,8 @@
    "w0431",
    "w0614",
    "w0875"
-  ]
+  ],
+  "noTypedMeaning": true
  },
  {
   "id": "w0429",
@@ -3901,14 +4202,19 @@
  {
   "id": "w0431",
   "w": "拿",
-  "en": "to hold; to seize",
+  "en": "to take; to hold; to carry",
   "lv": "3",
   "pron": "ná",
   "syn": [
    "w0313",
+   "w0409",
    "w0428",
    "w0614",
+   "w0724",
    "w0875"
+  ],
+  "typedSyn": [
+   "w0724"
   ]
  },
  {
@@ -3926,11 +4232,14 @@
  {
   "id": "w0433",
   "w": "接",
-  "en": "to receive; to answer (the phone)",
+  "en": "to pick up (sb); to meet (sb); to receive; to answer (the phone)",
   "lv": "3",
   "pron": "jiē",
   "syn": [
+   "w0026",
    "w0186",
+   "w0554",
+   "w0570",
    "w0726",
    "w0888",
    "w0898",
@@ -3949,9 +4258,6 @@
    "w0772",
    "w0773",
    "w0874"
-  ],
-  "typedSyn": [
-   "w0772"
   ]
  },
  {
@@ -3973,6 +4279,7 @@
   "lv": "3",
   "pron": "fàng",
   "syn": [
+   "w0323",
    "w0385",
    "w0764"
   ]
@@ -3999,9 +4306,7 @@
   "pron": "jiāo",
   "say": "交",
   "syn": [
-   "w0907"
-  ],
-  "typedSyn": [
+   "w0906",
    "w0907"
   ]
  },
@@ -4071,21 +4376,32 @@
  {
   "id": "w0447",
   "w": "明白",
-  "en": "clear; obvious",
+  "en": "to understand; to realize; clear; obvious",
   "lv": "3",
   "pron": "míngbai",
   "syn": [
+   "w0215",
    "w0230",
+   "w0316",
    "w0471",
-   "w0627"
+   "w0627",
+   "w0996"
+  ],
+  "typedSyn": [
+   "w0215",
+   "w0316",
+   "w0996"
   ]
  },
  {
   "id": "w0448",
   "w": "春",
-  "en": "spring (season); gay",
+  "en": "spring (season); joyful; youthful",
   "lv": "3",
-  "pron": "chūn"
+  "pron": "chūn",
+  "syn": [
+   "w0211"
+  ]
  },
  {
   "id": "w0449",
@@ -4116,9 +4432,6 @@
   "pron": "yuèliang",
   "syn": [
    "w0100"
-  ],
-  "typedSyn": [
-   "w0100"
   ]
  },
  {
@@ -4128,6 +4441,9 @@
   "lv": "3",
   "pron": "yǒumíng",
   "syn": [
+   "w1089"
+  ],
+  "typedSyn": [
    "w1089"
   ]
  },
@@ -4141,13 +4457,14 @@
  {
   "id": "w0455",
   "w": "条",
-  "en": "strip; item",
+  "en": "(classifier for long thin things); strip; item",
   "lv": "3",
   "pron": "tiáo",
   "syn": [
    "w0160",
    "w0535"
-  ]
+  ],
+  "noTypedMeaning": true
  },
  {
   "id": "w0456",
@@ -4156,6 +4473,11 @@
   "lv": "3",
   "pron": "jí",
   "syn": [
+   "w0069",
+   "w0938",
+   "w0951"
+  ],
+  "typedSyn": [
    "w0938"
   ]
  },
@@ -4191,12 +4513,15 @@
   "pron": "gēnjù",
   "syn": [
    "w0884"
+  ],
+  "typedSyn": [
+   "w0884"
   ]
  },
  {
   "id": "w0461",
   "w": "检查",
-  "en": "inspection; to examine",
+  "en": "to examine; to inspect; inspection",
   "lv": "3",
   "pron": "jiǎnchá"
  },
@@ -4205,7 +4530,10 @@
   "w": "楼",
   "en": "building (with more than one storey); floor",
   "lv": "3",
-  "pron": "lóu"
+  "pron": "lóu",
+  "syn": [
+   "w0407"
+  ]
  },
  {
   "id": "w0463",
@@ -4227,10 +4555,11 @@
  {
   "id": "w0465",
   "w": "比较",
-  "en": "to compare; to contrast",
+  "en": "relatively; comparatively; quite; to compare",
   "lv": "3",
   "pron": "bǐjiào",
   "syn": [
+   "w0087",
    "w0238"
   ]
  },
@@ -4249,13 +4578,7 @@
   "w": "河",
   "en": "river",
   "lv": "3",
-  "pron": "hé",
-  "syn": [
-   "w0108"
-  ],
-  "typedSyn": [
-   "w0108"
-  ]
+  "pron": "hé"
  },
  {
   "id": "w0468",
@@ -4291,6 +4614,9 @@
    "w0230",
    "w0447",
    "w0627"
+  ],
+  "typedSyn": [
+   "w0447"
   ]
  },
  {
@@ -4397,30 +4723,33 @@
  {
   "id": "w0483",
   "w": "爱好",
-  "en": "to like; to be fond of; to take pleasure in; to be keen on",
+  "en": "hobby; interest; to like; to be fond of",
   "lv": "3",
   "pron": "àihào",
   "syn": [
    "w0058",
    "w0117",
+   "w0213",
    "w0301",
-   "w0332"
+   "w0339"
   ]
  },
  {
   "id": "w0484",
   "w": "爷爷",
-  "en": "grandpa (paternal grandfather)",
+  "en": "grandpa; grandfather (paternal)",
   "lv": "3",
   "pron": "yéye"
  },
  {
   "id": "w0485",
   "w": "特别",
-  "en": "unusual; special; very; especially; particularly",
+  "en": "special; especially; particularly; unusual; very",
   "lv": "3",
   "pron": "tèbié",
   "syn": [
+   "w0069",
+   "w0087",
    "w0291",
    "w0702",
    "w0808"
@@ -4435,19 +4764,16 @@
   "syn": [
    "w0849",
    "w0935"
-  ],
-  "typedSyn": [
-   "w0849",
-   "w0935"
   ]
  },
  {
   "id": "w0487",
   "w": "班",
-  "en": "team; class; grade; (military) squad",
+  "en": "class; shift; team; grade",
   "lv": "3",
   "pron": "bān",
   "syn": [
+   "w0269",
    "w0413",
    "w1041"
   ]
@@ -4515,12 +4841,9 @@
  {
   "id": "w0495",
   "w": "瘦",
-  "en": "thin; to lose weight",
+  "en": "thin; lean; tight (clothing)",
   "lv": "3",
-  "pron": "shòu",
-  "syn": [
-   "w0683"
-  ]
+  "pron": "shòu"
  },
  {
   "id": "w0496",
@@ -4546,8 +4869,10 @@
   "lv": "3",
   "pron": "xiāngtóng",
   "syn": [
-   "w0301",
-   "w0303"
+   "w0301"
+  ],
+  "typedSyn": [
+   "w0301"
   ]
  },
  {
@@ -4618,6 +4943,7 @@
   "pron": "zhù",
   "syn": [
    "w0203",
+   "w0213",
    "w0422"
   ]
  },
@@ -4646,7 +4972,7 @@
  {
   "id": "w0508",
   "w": "种",
-  "en": "seed; species",
+  "en": "kind; type; sort; seed; species",
   "lv": "3",
   "pron": "zhǒng",
   "say": "肿"
@@ -4693,9 +5019,6 @@
   "pron": "jiǎndān",
   "syn": [
    "w0404"
-  ],
-  "typedSyn": [
-   "w0404"
   ]
  },
  {
@@ -4723,6 +5046,7 @@
   "pron": "liànxí",
   "syn": [
    "w0278",
+   "w0575",
    "w0792",
    "w0964"
   ]
@@ -4756,7 +5080,10 @@
   "w": "经过",
   "en": "to pass; to go through",
   "lv": "3",
-  "pron": "jīngguò"
+  "pron": "jīngguò",
+  "syn": [
+   "w1138"
+  ]
  },
  {
   "id": "w0521",
@@ -4768,10 +5095,14 @@
  {
   "id": "w0522",
   "w": "结束",
-  "en": "termination; to finish",
+  "en": "to finish; to end; to conclude",
   "lv": "3",
   "pron": "jiéshù",
   "syn": [
+   "w0198",
+   "w0847"
+  ],
+  "typedSyn": [
    "w0198"
   ]
  },
@@ -4790,6 +5121,7 @@
   "lv": "3",
   "pron": "lǎo",
   "syn": [
+   "w0302",
    "w0420",
    "w0446",
    "w0632"
@@ -4798,12 +5130,9 @@
  {
   "id": "w0525",
   "w": "而且",
-  "en": "(not only ...) but also; moreover",
+  "en": "moreover; furthermore; but also",
   "lv": "3",
-  "pron": "érqiě",
-  "syn": [
-   "w0598"
-  ]
+  "pron": "érqiě"
  },
  {
   "id": "w0526",
@@ -4891,11 +5220,12 @@
  {
   "id": "w0536",
   "w": "花",
-  "en": "flower; blossom",
+  "en": "flower; blossom; to spend (money, time)",
   "lv": "3",
   "pron": "huā",
   "syn": [
-   "w0932"
+   "w0932",
+   "w1138"
   ]
  },
  {
@@ -4942,6 +5272,9 @@
   "syn": [
    "w0707",
    "w0809"
+  ],
+  "typedSyn": [
+   "w0809"
   ]
  },
  {
@@ -4976,7 +5309,6 @@
    "w0276",
    "w0473",
    "w0547",
-   "w0721",
    "w0833",
    "w0878"
   ]
@@ -4989,7 +5321,9 @@
   "pron": "biǎoshì",
   "syn": [
    "w0546",
-   "w0721",
+   "w1094"
+  ],
+  "typedSyn": [
    "w1094"
   ]
  },
@@ -5003,13 +5337,11 @@
  {
   "id": "w0549",
   "w": "被",
-  "en": "quilt; to cover (with)",
+  "en": "(passive marker: by); quilt",
   "lv": "3",
   "pron": "bèi",
   "say": "备",
-  "syn": [
-   "w0357"
-  ]
+  "noTypedMeaning": true
  },
  {
   "id": "w0550",
@@ -5049,13 +5381,15 @@
   "lv": "3",
   "pron": "jiànmiàn",
   "syn": [
+   "w0026",
+   "w0433",
    "w0570"
   ]
  },
  {
   "id": "w0555",
   "w": "角",
-  "en": "angle; corner",
+  "en": "angle; corner; horn; jiao (0.1 yuan)",
   "lv": "3",
   "pron": "jiǎo",
   "say": "饺"
@@ -5083,14 +5417,20 @@
    "w0497",
    "w0854",
    "w1069"
+  ],
+  "typedSyn": [
+   "w0267"
   ]
  },
  {
   "id": "w0558",
   "w": "认真",
-  "en": "conscientious; earnest",
+  "en": "serious; earnest; conscientious",
   "lv": "3",
-  "pron": "rènzhēn"
+  "pron": "rènzhēn",
+  "syn": [
+   "w0608"
+  ]
  },
  {
   "id": "w0559",
@@ -5119,6 +5459,7 @@
   "lv": "3",
   "pron": "cíyǔ",
   "syn": [
+   "w0074",
    "w0935"
   ]
  },
@@ -5132,7 +5473,7 @@
  {
   "id": "w0563",
   "w": "越",
-  "en": "to exceed; to climb over",
+  "en": "the more... the more; to exceed; to climb over",
   "lv": "3",
   "pron": "yuè",
   "syn": [
@@ -5142,9 +5483,19 @@
  {
   "id": "w0564",
   "w": "跟",
-  "en": "heel; to follow closely",
+  "en": "with; and; to follow; heel",
   "lv": "3",
-  "pron": "gēn"
+  "pron": "gēn",
+  "syn": [
+   "w0054",
+   "w0602",
+   "w0822",
+   "w1001",
+   "w1070"
+  ],
+  "typedSyn": [
+   "w0054"
+  ]
  },
  {
   "id": "w0565",
@@ -5164,21 +5515,19 @@
    "w0319",
    "w0446",
    "w0713"
-  ],
-  "typedSyn": [
-   "w0319",
-   "w0713"
   ]
  },
  {
   "id": "w0567",
   "w": "还是",
-  "en": "still (as before); had better",
+  "en": "or (in questions); still; had better",
   "lv": "3",
   "pron": "háishi",
   "syn": [
    "w0280",
+   "w0424",
    "w0631",
+   "w0743",
    "w0929"
   ]
  },
@@ -5203,6 +5552,8 @@
   "lv": "3",
   "pron": "yùdào",
   "syn": [
+   "w0026",
+   "w0433",
    "w0554"
   ]
  },
@@ -5237,14 +5588,22 @@
  {
   "id": "w0575",
   "w": "锻炼",
-  "en": "to toughen; to temper",
+  "en": "to exercise; to work out; to toughen",
   "lv": "3",
-  "pron": "duànliàn"
+  "pron": "duànliàn",
+  "syn": [
+   "w0278",
+   "w0516",
+   "w0964"
+  ],
+  "typedSyn": [
+   "w0278"
+  ]
  },
  {
   "id": "w0576",
   "w": "阿姨",
-  "en": "maternal aunt; step-mother",
+  "en": "auntie; maternal aunt; nanny",
   "lv": "3",
   "pron": "āyí"
  },
@@ -5262,19 +5621,24 @@
   "lv": "3",
   "pron": "chúle",
   "syn": [
-   "w0822",
-   "w1130"
+   "w0822"
   ]
  },
  {
   "id": "w0579",
   "w": "难",
-  "en": "difficult (to...); problem",
+  "en": "difficult; hard; problem",
   "lv": "3",
   "pron": "nán",
   "say": "男",
   "syn": [
    "w0288",
+   "w0758",
+   "w0759",
+   "w1019",
+   "w1136"
+  ],
+  "typedSyn": [
    "w0759"
   ]
  },
@@ -5295,9 +5659,13 @@
   "lv": "3",
   "pron": "xūyào",
   "syn": [
+   "w0090",
    "w0266",
    "w0422",
    "w0553"
+  ],
+  "typedSyn": [
+   "w0266"
   ]
  },
  {
@@ -5364,7 +5732,10 @@
   "w": "马上",
   "en": "at once; right away",
   "lv": "3",
-  "pron": "mǎshàng"
+  "pron": "mǎshàng",
+  "syn": [
+   "w0200"
+  ]
  },
  {
   "id": "w0591",
@@ -5386,7 +5757,7 @@
  {
   "id": "w0593",
   "w": "黄",
-  "en": "yellow; pornographic",
+  "en": "yellow; to fall through",
   "lv": "3",
   "pron": "huáng"
  },
@@ -5427,13 +5798,7 @@
   "w": "不但",
   "en": "not only (... but also ...)",
   "lv": "4",
-  "pron": "bùdàn",
-  "syn": [
-   "w0525"
-  ],
-  "typedSyn": [
-   "w0525"
-  ]
+  "pron": "bùdàn"
  },
  {
   "id": "w0599",
@@ -5443,6 +5808,9 @@
   "pron": "bùdébù",
   "syn": [
    "w0418",
+   "w0728"
+  ],
+  "typedSyn": [
    "w0728"
   ]
  },
@@ -5456,14 +5824,23 @@
  {
   "id": "w0601",
   "w": "不过",
-  "en": "only; merely",
+  "en": "but; however; only; merely",
   "lv": "4",
   "pron": "bùguò",
   "syn": [
-   "w0372"
+   "w0162",
+   "w0200",
+   "w0372",
+   "w0425",
+   "w0708",
+   "w0732",
+   "w0983"
   ],
   "typedSyn": [
-   "w0372"
+   "w0162",
+   "w0708",
+   "w0732",
+   "w0983"
   ]
  },
  {
@@ -5475,9 +5852,15 @@
   "say": "宇",
   "syn": [
    "w0054",
+   "w0259",
    "w0283",
+   "w0564",
    "w0822",
    "w1070"
+  ],
+  "typedSyn": [
+   "w0054",
+   "w0564"
   ]
  },
  {
@@ -5524,7 +5907,10 @@
   "w": "严重",
   "en": "grave; serious",
   "lv": "4",
-  "pron": "yánzhòng"
+  "pron": "yánzhòng",
+  "syn": [
+   "w0558"
+  ]
  },
  {
   "id": "w0609",
@@ -5570,7 +5956,6 @@
   "lv": "4",
   "pron": "zhǔyi",
   "syn": [
-   "w0213",
    "w0427",
    "w0789",
    "w0851",
@@ -5589,6 +5974,9 @@
    "w0431",
    "w0875",
    "w1140"
+  ],
+  "typedSyn": [
+   "w0313"
   ]
  },
  {
@@ -5600,9 +5988,7 @@
   "syn": [
    "w0025"
   ],
-  "typedSyn": [
-   "w0025"
-  ]
+  "noTypedMeaning": true
  },
  {
   "id": "w0616",
@@ -5630,18 +6016,17 @@
   "syn": [
    "w0177",
    "w0424",
-   "w0779"
+   "w0779",
+   "w0848"
   ],
   "typedSyn": [
-   "w0177",
-   "w0424",
-   "w0779"
+   "w0177"
   ]
  },
  {
   "id": "w0619",
   "w": "乱",
-  "en": "in confusion or disorder; in a confused state of mind",
+  "en": "messy; in disorder; in confusion; random",
   "lv": "4",
   "pron": "luàn"
  },
@@ -5693,7 +6078,7 @@
  {
   "id": "w0625",
   "w": "交通",
-  "en": "to be connected; traffic",
+  "en": "traffic; transportation",
   "lv": "4",
   "pron": "jiāotōng"
  },
@@ -5749,6 +6134,10 @@
    "w0567",
    "w0708",
    "w0983"
+  ],
+  "typedSyn": [
+   "w0280",
+   "w0567"
   ]
  },
  {
@@ -5758,6 +6147,7 @@
   "lv": "4",
   "pron": "cónglái",
   "syn": [
+   "w0302",
    "w0420",
    "w0524"
   ]
@@ -5827,9 +6217,6 @@
   "syn": [
    "w0171",
    "w1152"
-  ],
-  "typedSyn": [
-   "w1152"
   ]
  },
  {
@@ -5839,9 +6226,6 @@
   "lv": "4",
   "pron": "yōudiǎn",
   "syn": [
-   "w0785"
-  ],
-  "typedSyn": [
    "w0785"
   ]
  },
@@ -5947,15 +6331,12 @@
    "w0144",
    "w0154",
    "w0365"
-  ],
-  "typedSyn": [
-   "w0154"
   ]
  },
  {
   "id": "w0655",
   "w": "修",
-  "en": "to decorate; to embellish",
+  "en": "to repair; to fix; to build; to decorate",
   "lv": "4",
   "pron": "xiū",
   "syn": [
@@ -6066,7 +6447,6 @@
   "pron": "quánbù",
   "syn": [
    "w0144",
-   "w0751",
    "w0790",
    "w0861"
   ]
@@ -6083,7 +6463,10 @@
   "w": "共同",
   "en": "common; joint",
   "lv": "4",
-  "pron": "gòngtóng"
+  "pron": "gòngtóng",
+  "syn": [
+   "w0303"
+  ]
  },
  {
   "id": "w0670",
@@ -6104,14 +6487,22 @@
   "w": "其中",
   "en": "among; in",
   "lv": "4",
-  "pron": "qízhōng"
+  "pron": "qízhōng",
+  "syn": [
+   "w0062",
+   "w0145"
+  ]
  },
  {
   "id": "w0673",
   "w": "其次",
   "en": "next; secondly",
   "lv": "4",
-  "pron": "qícì"
+  "pron": "qícì",
+  "syn": [
+   "w0006",
+   "w0234"
+  ]
  },
  {
   "id": "w0674",
@@ -6133,7 +6524,11 @@
   "lv": "4",
   "pron": "nèi",
   "syn": [
+   "w0145",
    "w0309"
+  ],
+  "typedSyn": [
+   "w0145"
   ]
  },
  {
@@ -6164,6 +6559,9 @@
   "lv": "4",
   "pron": "zhǔnshí",
   "syn": [
+   "w0883"
+  ],
+  "typedSyn": [
    "w0883"
   ]
  },
@@ -6196,13 +6594,7 @@
   "w": "减肥",
   "en": "to lose weight",
   "lv": "4",
-  "pron": "jiǎnféi",
-  "syn": [
-   "w0495"
-  ],
-  "typedSyn": [
-   "w0495"
-  ]
+  "pron": "jiǎnféi"
  },
  {
   "id": "w0684",
@@ -6262,9 +6654,6 @@
   "pron": "dàochù",
   "syn": [
    "w1149"
-  ],
-  "typedSyn": [
-   "w1149"
   ]
  },
  {
@@ -6276,9 +6665,6 @@
   "syn": [
    "w0517",
    "w0928"
-  ],
-  "typedSyn": [
-   "w0928"
   ]
  },
  {
@@ -6289,6 +6675,7 @@
   "pron": "zhìzào",
   "syn": [
    "w0029",
+   "w0268",
    "w0328"
   ]
  },
@@ -6297,10 +6684,7 @@
   "w": "剩",
   "en": "to remain; to be left",
   "lv": "4",
-  "pron": "shèng",
-  "syn": [
-   "w0201"
-  ]
+  "pron": "shèng"
  },
  {
   "id": "w0695",
@@ -6348,7 +6732,10 @@
   "w": "包括",
   "en": "to comprise; to include",
   "lv": "4",
-  "pron": "bāokuò"
+  "pron": "bāokuò",
+  "syn": [
+   "w0357"
+  ]
  },
  {
   "id": "w0701",
@@ -6364,27 +6751,29 @@
   "lv": "4",
   "pron": "shífēn",
   "syn": [
+   "w0069",
+   "w0087",
    "w0291",
    "w0485"
+  ],
+  "typedSyn": [
+   "w0087",
+   "w0291"
   ]
  },
  {
   "id": "w0703",
   "w": "千万",
-  "en": "ten million; countless",
+  "en": "be sure to; by all means; ten million; countless",
   "lv": "4",
   "pron": "qiānwàn"
  },
  {
   "id": "w0704",
   "w": "博士",
-  "en": "doctor; court academician (in feudal China)",
+  "en": "Ph.D.; doctorate holder",
   "lv": "4",
-  "pron": "bóshì",
-  "syn": [
-   "w0042",
-   "w0778"
-  ]
+  "pron": "bóshì"
  },
  {
   "id": "w0705",
@@ -6395,9 +6784,6 @@
   "syn": [
    "w0756",
    "w0854"
-  ],
-  "typedSyn": [
-   "w0756"
   ]
  },
  {
@@ -6425,18 +6811,23 @@
   "pron": "què",
   "syn": [
    "w0162",
+   "w0280",
+   "w0601",
    "w0631",
    "w0732",
    "w0983"
   ],
   "typedSyn": [
+   "w0162",
+   "w0601",
+   "w0732",
    "w0983"
   ]
  },
  {
   "id": "w0709",
   "w": "厉害",
-  "en": "terrible; awesome; amazing; severe (a very strong impression, good or bad)",
+  "en": "awesome; amazing; terrible; severe; fierce",
   "lv": "4",
   "pron": "lìhai"
  },
@@ -6464,6 +6855,7 @@
   "lv": "4",
   "pron": "yuányīn",
   "syn": [
+   "w0103",
    "w0328",
    "w0832"
   ]
@@ -6471,7 +6863,7 @@
  {
   "id": "w0713",
   "w": "原来",
-  "en": "original; former",
+  "en": "originally; so (it turns out); original; former",
   "lv": "4",
   "pron": "yuánlái",
   "syn": [
@@ -6481,8 +6873,7 @@
    "w0931"
   ],
   "typedSyn": [
-   "w0319",
-   "w0566"
+   "w0931"
   ]
  },
  {
@@ -6509,20 +6900,14 @@
  {
   "id": "w0717",
   "w": "友好",
-  "en": "friendly; amicable; close friend",
+  "en": "friendly; amicable",
   "lv": "4",
-  "pron": "yǒuhǎo",
-  "syn": [
-   "w0102"
-  ],
-  "typedSyn": [
-   "w0102"
-  ]
+  "pron": "yǒuhǎo"
  },
  {
   "id": "w0718",
   "w": "友谊",
-  "en": "companionship; fellowship",
+  "en": "friendship; companionship",
   "lv": "4",
   "pron": "yǒuyì"
  },
@@ -6546,12 +6931,13 @@
  {
   "id": "w0721",
   "w": "发",
-  "en": "to send out; to show (one's feeling)",
+  "en": "to send; to send out; to issue; to develop",
   "lv": "4",
   "pron": "fā",
   "syn": [
-   "w0546",
-   "w0547"
+   "w0239",
+   "w0283",
+   "w0796"
   ]
  },
  {
@@ -6575,7 +6961,11 @@
   "lv": "4",
   "pron": "qǔ",
   "syn": [
+   "w0431",
    "w1088"
+  ],
+  "typedSyn": [
+   "w0431"
   ]
  },
  {
@@ -6605,7 +6995,8 @@
   "lv": "4",
   "pron": "lìngwài",
   "syn": [
-   "w0188"
+   "w0188",
+   "w0280"
   ]
  },
  {
@@ -6616,6 +7007,9 @@
   "pron": "zhǐhǎo",
   "syn": [
    "w0418",
+   "w0599"
+  ],
+  "typedSyn": [
    "w0599"
   ]
  },
@@ -6648,22 +7042,30 @@
   "pron": "kěshì",
   "syn": [
    "w0162",
+   "w0601",
    "w0708",
    "w0983",
    "w1014",
    "w1020"
+  ],
+  "typedSyn": [
+   "w0162",
+   "w0601",
+   "w0708",
+   "w0983"
   ]
  },
  {
   "id": "w0733",
   "w": "台",
-  "en": "platform; stage",
+  "en": "(classifier for machines, TVs etc); platform; stage",
   "lv": "4",
   "pron": "tái",
   "say": "邰",
   "syn": [
    "w0764"
-  ]
+  ],
+  "noTypedMeaning": true
  },
  {
   "id": "w0734",
@@ -6680,7 +7082,14 @@
   "w": "号码",
   "en": "number",
   "lv": "4",
-  "pron": "hàomǎ"
+  "pron": "hàomǎ",
+  "syn": [
+   "w0179",
+   "w0909"
+  ],
+  "typedSyn": [
+   "w0179"
+  ]
  },
  {
   "id": "w0736",
@@ -6741,6 +7150,7 @@
   "lv": "4",
   "pron": "hòulái",
   "syn": [
+   "w0050",
    "w0320",
    "w0477"
   ]
@@ -6753,7 +7163,8 @@
   "pron": "fǒuzé",
   "syn": [
    "w0340",
-   "w0424"
+   "w0424",
+   "w0567"
   ]
  },
  {
@@ -6777,6 +7188,9 @@
   "lv": "4",
   "pron": "ya",
   "syn": [
+   "w0379"
+  ],
+  "typedSyn": [
    "w0379"
   ]
  },
@@ -6805,6 +7219,9 @@
   "pron": "zánmen",
   "syn": [
    "w0092"
+  ],
+  "typedSyn": [
+   "w0092"
   ]
  },
  {
@@ -6817,20 +7234,14 @@
  {
   "id": "w0751",
   "w": "咸",
-  "en": "all; everyone",
+  "en": "salty; salted",
   "lv": "4",
-  "pron": "xián",
-  "syn": [
-   "w0144",
-   "w0189",
-   "w0667",
-   "w0861"
-  ]
+  "pron": "xián"
  },
  {
   "id": "w0752",
   "w": "响",
-  "en": "echo; sound",
+  "en": "to ring; to sound; loud; noise; echo",
   "lv": "4",
   "pron": "xiǎng",
   "syn": [
@@ -6863,6 +7274,9 @@
   "pron": "zuǐ",
   "syn": [
    "w0370"
+  ],
+  "typedSyn": [
+   "w0370"
   ]
  },
  {
@@ -6872,9 +7286,6 @@
   "lv": "4",
   "pron": "huíyì",
   "syn": [
-   "w0705"
-  ],
-  "typedSyn": [
    "w0705"
   ]
  },
@@ -6887,17 +7298,19 @@
   "syn": [
    "w0217",
    "w0620"
-  ],
-  "typedSyn": [
-   "w0620"
   ]
  },
  {
   "id": "w0758",
   "w": "困",
-  "en": "to trap; to surround",
+  "en": "sleepy; tired; to trap; difficult",
   "lv": "4",
-  "pron": "kùn"
+  "pron": "kùn",
+  "syn": [
+   "w0257",
+   "w0579",
+   "w0759"
+  ]
  },
  {
   "id": "w0759",
@@ -6906,6 +7319,10 @@
   "lv": "4",
   "pron": "kùnnan",
   "syn": [
+   "w0579",
+   "w0758"
+  ],
+  "typedSyn": [
    "w0579"
   ]
  },
@@ -6921,10 +7338,7 @@
   "w": "圆",
   "en": "circle; round",
   "lv": "4",
-  "pron": "yuán",
-  "syn": [
-   "w0061"
-  ]
+  "pron": "yuán"
  },
  {
   "id": "w0762",
@@ -6948,10 +7362,12 @@
   "pron": "chǎng",
   "say": "氅",
   "syn": [
+   "w0323",
    "w0385",
    "w0436",
    "w0733"
-  ]
+  ],
+  "noTypedMeaning": true
  },
  {
   "id": "w0765",
@@ -6994,7 +7410,7 @@
  {
   "id": "w0770",
   "w": "填空",
-  "en": "to fill a job vacancy",
+  "en": "to fill in a blank; to fill a vacancy",
   "lv": "4",
   "pron": "tiánkòng"
  },
@@ -7016,9 +7432,6 @@
    "w0674",
    "w0773",
    "w0874"
-  ],
-  "typedSyn": [
-   "w0434"
   ]
  },
  {
@@ -7067,8 +7480,10 @@
   "lv": "4",
   "pron": "dàifu",
   "syn": [
-   "w0042",
-   "w0704"
+   "w0042"
+  ],
+  "typedSyn": [
+   "w0042"
   ]
  },
  {
@@ -7081,10 +7496,6 @@
    "w0177",
    "w0618",
    "w0780"
-  ],
-  "typedSyn": [
-   "w0177",
-   "w0618"
   ]
  },
  {
@@ -7118,7 +7529,7 @@
  {
   "id": "w0783",
   "w": "奖金",
-  "en": "premium; award money",
+  "en": "bonus; award money; premium",
   "lv": "4",
   "pron": "jiǎngjīn"
  },
@@ -7197,10 +7608,12 @@
    "w0341",
    "w0939",
    "w1014",
-   "w1020"
+   "w1020",
+   "w1030"
   ],
   "typedSyn": [
-   "w0341"
+   "w0248",
+   "w1020"
   ]
  },
  {
@@ -7242,7 +7655,8 @@
   "pron": "jì",
   "syn": [
    "w0283",
-   "w0329"
+   "w0329",
+   "w0721"
   ]
  },
  {
@@ -7277,12 +7691,15 @@
   "pron": "duì",
   "syn": [
    "w0062",
-   "w0099",
    "w0155",
    "w0178",
    "w0180",
+   "w0181",
    "w0259",
    "w0310",
+   "w0950"
+  ],
+  "typedSyn": [
    "w0950"
   ]
  },
@@ -7372,6 +7789,9 @@
   "pron": "jǐnguǎn",
   "syn": [
    "w0542"
+  ],
+  "typedSyn": [
+   "w0542"
   ]
  },
  {
@@ -7432,10 +7852,20 @@
  {
   "id": "w0817",
   "w": "干",
-  "en": "tree trunk; main part of sth",
+  "en": "to do; to work; to manage",
   "lv": "4",
   "pron": "gàn",
-  "say": "赣"
+  "say": "赣",
+  "syn": [
+   "w0029",
+   "w0084",
+   "w0831",
+   "w1045"
+  ],
+  "typedSyn": [
+   "w0029",
+   "w0831"
+  ]
  },
  {
   "id": "w0818",
@@ -7473,6 +7903,7 @@
   "pron": "bìngqiě",
   "syn": [
    "w0054",
+   "w0564",
    "w0578",
    "w0602",
    "w1070"
@@ -7499,7 +7930,7 @@
  {
   "id": "w0825",
   "w": "广告",
-  "en": "to advertise; a commercial",
+  "en": "advertisement; a commercial; to advertise",
   "lv": "4",
   "pron": "guǎnggào"
  },
@@ -7520,13 +7951,14 @@
  {
   "id": "w0828",
   "w": "座",
-  "en": "seat; base",
+  "en": "(classifier for buildings, mountains); seat; base",
   "lv": "4",
   "pron": "zuò",
   "syn": [
    "w0767",
    "w0829"
-  ]
+  ],
+  "noTypedMeaning": true
  },
  {
   "id": "w0829",
@@ -7535,9 +7967,6 @@
   "lv": "4",
   "pron": "zuòwèi",
   "syn": [
-   "w0828"
-  ],
-  "typedSyn": [
    "w0828"
   ]
  },
@@ -7555,7 +7984,13 @@
   "lv": "4",
   "pron": "nòng",
   "syn": [
+   "w0029",
+   "w0817",
    "w1045"
+  ],
+  "typedSyn": [
+   "w0029",
+   "w0817"
   ]
  },
  {
@@ -7677,7 +8112,7 @@
  {
   "id": "w0844",
   "w": "态度",
-  "en": "manner; bearing",
+  "en": "attitude; manner; bearing",
   "lv": "4",
   "pron": "tàidu",
   "syn": [
@@ -7694,10 +8129,12 @@
  {
   "id": "w0846",
   "w": "性格",
-  "en": "nature; disposition",
+  "en": "character; nature; disposition; temperament",
   "lv": "4",
   "pron": "xìnggé",
   "syn": [
+   "w0074",
+   "w1080",
    "w1081"
   ]
  },
@@ -7706,14 +8143,21 @@
   "w": "总结",
   "en": "to sum up; to conclude",
   "lv": "4",
-  "pron": "zǒngjié"
+  "pron": "zǒngjié",
+  "syn": [
+   "w0522"
+  ]
  },
  {
   "id": "w0848",
   "w": "恐怕",
-  "en": "fear; to dread",
+  "en": "I'm afraid (that); perhaps; to fear",
   "lv": "4",
-  "pron": "kǒngpà"
+  "pron": "kǒngpà",
+  "syn": [
+   "w0424",
+   "w0618"
+  ]
  },
  {
   "id": "w0849",
@@ -7722,10 +8166,6 @@
   "lv": "4",
   "pron": "qíngkuàng",
   "syn": [
-   "w0486",
-   "w0935"
-  ],
-  "typedSyn": [
    "w0486",
    "w0935"
   ]
@@ -7740,15 +8180,11 @@
  {
   "id": "w0851",
   "w": "意见",
-  "en": "idea; opinion",
+  "en": "opinion; idea; suggestion; complaint",
   "lv": "4",
   "pron": "yìjiàn",
   "syn": [
-   "w0213",
    "w0613"
-  ],
-  "typedSyn": [
-   "w0213"
   ]
  },
  {
@@ -7785,10 +8221,13 @@
  {
   "id": "w0855",
   "w": "感谢",
-  "en": "(express) thanks; gratitude",
+  "en": "to thank; thanks; gratitude; grateful",
   "lv": "4",
   "pron": "gǎnxiè",
   "syn": [
+   "w0141"
+  ],
+  "typedSyn": [
    "w0141"
   ]
  },
@@ -7841,14 +8280,13 @@
   "syn": [
    "w0101",
    "w0144",
-   "w0667",
-   "w0751"
+   "w0667"
   ]
  },
  {
   "id": "w0862",
   "w": "打印",
-  "en": "to affix a seal; to stamp",
+  "en": "to print (out); to stamp",
   "lv": "4",
   "pron": "dǎyìn"
  },
@@ -7952,6 +8390,7 @@
   "pron": "bào",
   "syn": [
    "w0313",
+   "w0409",
    "w0428",
    "w0431",
    "w0614"
@@ -8021,6 +8460,9 @@
   "pron": "ànshí",
   "syn": [
    "w0679"
+  ],
+  "typedSyn": [
+   "w0679"
   ]
  },
  {
@@ -8032,6 +8474,9 @@
   "syn": [
    "w0460",
    "w1039"
+  ],
+  "typedSyn": [
+   "w0460"
   ]
  },
  {
@@ -8072,9 +8517,6 @@
    "w0726",
    "w0898",
    "w1088"
-  ],
-  "typedSyn": [
-   "w0898"
   ]
  },
  {
@@ -8101,9 +8543,12 @@
  {
   "id": "w0892",
   "w": "提前",
-  "en": "to shift to an earlier date; to do sth ahead of time",
+  "en": "in advance; ahead of time; to bring forward (a date)",
   "lv": "4",
-  "pron": "tíqián"
+  "pron": "tíqián",
+  "syn": [
+   "w0333"
+  ]
  },
  {
   "id": "w0893",
@@ -8154,15 +8599,12 @@
    "w0726",
    "w0888",
    "w1088"
-  ],
-  "typedSyn": [
-   "w0888"
   ]
  },
  {
   "id": "w0899",
   "w": "收入",
-  "en": "to take in; income",
+  "en": "income; revenue; to take in",
   "lv": "4",
   "pron": "shōurù"
  },
@@ -8215,6 +8657,7 @@
   "lv": "4",
   "pron": "xiàoguǒ",
   "syn": [
+   "w0327",
    "w0417",
    "w1057"
   ]
@@ -8222,9 +8665,13 @@
  {
   "id": "w0906",
   "w": "教授",
-  "en": "professor; to instruct",
+  "en": "professor; to teach (at university)",
   "lv": "4",
-  "pron": "jiàoshòu"
+  "pron": "jiàoshòu",
+  "syn": [
+   "w0439",
+   "w0907"
+  ]
  },
  {
   "id": "w0907",
@@ -8233,7 +8680,8 @@
   "lv": "4",
   "pron": "jiàoyù",
   "syn": [
-   "w0439"
+   "w0439",
+   "w0906"
   ]
  },
  {
@@ -8246,9 +8694,14 @@
  {
   "id": "w0909",
   "w": "数字",
-  "en": "numeral; digit",
+  "en": "number; numeral; digit; figure",
   "lv": "4",
-  "pron": "shùzì"
+  "pron": "shùzì",
+  "syn": [
+   "w0179",
+   "w0735",
+   "w1044"
+  ]
  },
  {
   "id": "w0910",
@@ -8314,15 +8767,19 @@
   "pron": "fāngfǎ",
   "syn": [
    "w0354"
+  ],
+  "typedSyn": [
+   "w0354"
   ]
  },
  {
   "id": "w0918",
   "w": "方面",
-  "en": "respect; aspect",
+  "en": "aspect; respect; side; field",
   "lv": "4",
   "pron": "fāngmiàn",
   "syn": [
+   "w0225",
    "w0805",
    "w0860"
   ]
@@ -8347,7 +8804,7 @@
  {
   "id": "w0921",
   "w": "无论",
-  "en": "no matter what or how; regardless of whether...",
+  "en": "no matter what or how; regardless; regardless of whether...",
   "lv": "4",
   "pron": "wúlùn"
  },
@@ -8370,7 +8827,10 @@
   "w": "普遍",
   "en": "universal; general",
   "lv": "4",
-  "pron": "pǔbiàn"
+  "pron": "pǔbiàn",
+  "syn": [
+   "w0303"
+  ]
  },
  {
   "id": "w0925",
@@ -8394,6 +8854,9 @@
   "pron": "àn",
   "syn": [
    "w0297"
+  ],
+  "typedSyn": [
+   "w0297"
   ]
  },
  {
@@ -8403,9 +8866,7 @@
   "lv": "4",
   "pron": "zuìhòu",
   "syn": [
-   "w0692"
-  ],
-  "typedSyn": [
+   "w0004",
    "w0692"
   ]
  },
@@ -8433,6 +8894,9 @@
   "lv": "4",
   "pron": "běnlái",
   "syn": [
+   "w0713"
+  ],
+  "typedSyn": [
    "w0713"
   ]
  },
@@ -8470,10 +8934,6 @@
    "w0486",
    "w0561",
    "w0849"
-  ],
-  "typedSyn": [
-   "w0486",
-   "w0849"
   ]
  },
  {
@@ -8497,7 +8957,9 @@
   "lv": "4",
   "pron": "jíqí",
   "syn": [
-   "w0456"
+   "w0069",
+   "w0456",
+   "w0951"
   ],
   "typedSyn": [
    "w0456"
@@ -8550,13 +9012,7 @@
   "w": "梦",
   "en": "dream",
   "lv": "4",
-  "pron": "mèng",
-  "syn": [
-   "w0995"
-  ],
-  "typedSyn": [
-   "w0995"
-  ]
+  "pron": "mèng"
  },
  {
   "id": "w0944",
@@ -8585,7 +9041,10 @@
   "w": "正好",
   "en": "just (in time); just right",
   "lv": "4",
-  "pron": "zhènghǎo"
+  "pron": "zhènghǎo",
+  "syn": [
+   "w0200"
+  ]
  },
  {
   "id": "w0948",
@@ -8609,19 +9068,27 @@
   "pron": "zhèngquè",
   "syn": [
    "w0072",
-   "w0099",
    "w0178",
+   "w0181",
    "w0389",
    "w0752",
+   "w0800"
+  ],
+  "typedSyn": [
    "w0800"
   ]
  },
  {
   "id": "w0951",
   "w": "死",
-  "en": "to die; impassable",
+  "en": "to die; dead; extremely",
   "lv": "4",
-  "pron": "sǐ"
+  "pron": "sǐ",
+  "syn": [
+   "w0069",
+   "w0456",
+   "w0938"
+  ]
  },
  {
   "id": "w0952",
@@ -8720,7 +9187,8 @@
   "pron": "huódòng",
   "syn": [
    "w0278",
-   "w0516"
+   "w0516",
+   "w0575"
   ]
  },
  {
@@ -8750,11 +9218,12 @@
  {
   "id": "w0968",
   "w": "流行",
-  "en": "(of a contagious disease etc) to spread; to propagate",
+  "en": "popular; fashionable; to spread",
   "lv": "4",
   "pron": "liúxíng",
   "syn": [
-   "w0207"
+   "w0207",
+   "w0258"
   ]
  },
  {
@@ -8785,6 +9254,9 @@
   "lv": "4",
   "pron": "xiāoxi",
   "syn": [
+   "w0443"
+  ],
+  "typedSyn": [
    "w0443"
   ]
  },
@@ -8883,8 +9355,15 @@
   "pron": "rán'ér",
   "syn": [
    "w0162",
+   "w0280",
+   "w0601",
    "w0631",
    "w0708",
+   "w0732"
+  ],
+  "typedSyn": [
+   "w0162",
+   "w0601",
    "w0732"
   ]
  },
@@ -8912,6 +9391,9 @@
   "lv": "4",
   "pron": "fùqīn",
   "syn": [
+   "w0118"
+  ],
+  "typedSyn": [
    "w0118"
   ]
  },
@@ -8974,12 +9456,9 @@
  {
   "id": "w0995",
   "w": "理想",
-  "en": "an ideal; a dream",
+  "en": "ideal; perfect",
   "lv": "4",
-  "pron": "lǐxiǎng",
-  "syn": [
-   "w0943"
-  ]
+  "pron": "lǐxiǎng"
  },
  {
   "id": "w0996",
@@ -8989,10 +9468,13 @@
   "pron": "lǐjiě",
   "syn": [
    "w0215",
-   "w0316"
+   "w0316",
+   "w0447"
   ],
   "typedSyn": [
-   "w0215"
+   "w0215",
+   "w0316",
+   "w0447"
   ]
  },
  {
@@ -9009,7 +9491,8 @@
   "lv": "4",
   "pron": "shènzhì",
   "syn": [
-   "w0144"
+   "w0144",
+   "w1141"
   ]
  },
  {
@@ -9040,7 +9523,9 @@
   "lv": "4",
   "pron": "yóu",
   "syn": [
-   "w0159"
+   "w0159",
+   "w0253",
+   "w0564"
   ]
  },
  {
@@ -9146,7 +9631,6 @@
   "lv": "4",
   "pron": "zhēnzhèng",
   "syn": [
-   "w0099",
    "w0248",
    "w0291",
    "w0341",
@@ -9192,6 +9676,7 @@
   "pron": "yìng",
   "syn": [
    "w0166",
+   "w0579",
    "w1136"
   ]
  },
@@ -9208,9 +9693,6 @@
    "w0732",
    "w0791",
    "w0939",
-   "w1014"
-  ],
-  "typedSyn": [
    "w1014"
   ]
  },
@@ -9283,16 +9765,24 @@
  {
   "id": "w1030",
   "w": "究竟",
-  "en": "to go to the bottom of a matter; after all",
+  "en": "after all; actually; outcome",
   "lv": "4",
-  "pron": "jiūjìng"
+  "pron": "jiūjìng",
+  "syn": [
+   "w0341",
+   "w0791",
+   "w1057"
+  ]
  },
  {
   "id": "w1031",
   "w": "穷",
   "en": "poor; destitute",
   "lv": "4",
-  "pron": "qióng"
+  "pron": "qióng",
+  "syn": [
+   "w0408"
+  ]
  },
  {
   "id": "w1032",
@@ -9369,10 +9859,11 @@
  {
   "id": "w1041",
   "w": "等",
-  "en": "class; rank",
+  "en": "to wait (for); class; rank; etc.",
   "lv": "4",
   "pron": "děng",
   "syn": [
+   "w0269",
    "w0487"
   ]
  },
@@ -9399,7 +9890,10 @@
   "w": "算",
   "en": "to regard as; to figure",
   "lv": "4",
-  "pron": "suàn"
+  "pron": "suàn",
+  "syn": [
+   "w0909"
+  ]
  },
  {
   "id": "w1045",
@@ -9408,15 +9902,17 @@
   "lv": "4",
   "pron": "guǎnlǐ",
   "syn": [
+   "w0817",
    "w0831"
   ]
  },
  {
   "id": "w1046",
   "w": "篇",
-  "en": "sheet; piece of writing",
+  "en": "(classifier for articles, essays); piece of writing",
   "lv": "4",
-  "pron": "piān"
+  "pron": "piān",
+  "noTypedMeaning": true
  },
  {
   "id": "w1047",
@@ -9425,6 +9921,9 @@
   "lv": "4",
   "pron": "cūxīn",
   "syn": [
+   "w1187"
+  ],
+  "typedSyn": [
    "w1187"
   ]
  },
@@ -9482,9 +9981,6 @@
   "syn": [
    "w0807",
    "w1056"
-  ],
-  "typedSyn": [
-   "w1056"
   ]
  },
  {
@@ -9503,9 +9999,6 @@
   "syn": [
    "w0807",
    "w1054"
-  ],
-  "typedSyn": [
-   "w1054"
   ]
  },
  {
@@ -9515,7 +10008,8 @@
   "lv": "4",
   "pron": "jiéguǒ",
   "syn": [
-   "w0905"
+   "w0905",
+   "w1030"
   ]
  },
  {
@@ -9528,9 +10022,12 @@
  {
   "id": "w1059",
   "w": "缺少",
-  "en": "lack; shortage of",
+  "en": "to lack; to be short of; shortage",
   "lv": "4",
-  "pron": "quēshǎo"
+  "pron": "quēshǎo",
+  "syn": [
+   "w0408"
+  ]
  },
  {
   "id": "w1060",
@@ -9619,6 +10116,7 @@
   "pron": "ér",
   "syn": [
    "w0054",
+   "w0564",
    "w0602",
    "w0822"
   ]
@@ -9647,9 +10145,12 @@
  {
   "id": "w1074",
   "w": "联系",
-  "en": "connection; contact",
+  "en": "to contact; to get in touch with; connection; relation",
   "lv": "4",
-  "pron": "liánxì"
+  "pron": "liánxì",
+  "syn": [
+   "w0338"
+  ]
  },
  {
   "id": "w1075",
@@ -9704,7 +10205,11 @@
   "w": "脾气",
   "en": "character; temperament",
   "lv": "4",
-  "pron": "píqi"
+  "pron": "píqi",
+  "syn": [
+   "w0074",
+   "w0846"
+  ]
  },
  {
   "id": "w1081",
@@ -9745,6 +10250,9 @@
   "pron": "jiéyuē",
   "syn": [
    "w1012"
+  ],
+  "typedSyn": [
+   "w1012"
   ]
  },
  {
@@ -9783,6 +10291,9 @@
   "pron": "zhùmíng",
   "syn": [
    "w0453"
+  ],
+  "typedSyn": [
+   "w0453"
   ]
  },
  {
@@ -9796,7 +10307,7 @@
  {
   "id": "w1091",
   "w": "行",
-  "en": "to walk; to go",
+  "en": "OK; all right; capable; to go; to travel",
   "lv": "4",
   "pron": "xíng",
   "say": "形",
@@ -9804,9 +10315,6 @@
    "w0045",
    "w0271",
    "w0837"
-  ],
-  "typedSyn": [
-   "w0271"
   ]
  },
  {
@@ -9834,6 +10342,9 @@
   "lv": "4",
   "pron": "biǎodá",
   "syn": [
+   "w0547"
+  ],
+  "typedSyn": [
    "w0547"
   ]
  },
@@ -9893,6 +10404,9 @@
    "w0427",
    "w0613",
    "w0789"
+  ],
+  "typedSyn": [
+   "w0427"
   ]
  },
  {
@@ -9927,6 +10441,9 @@
   "pron": "xǔduō",
   "syn": [
    "w0065"
+  ],
+  "typedSyn": [
+   "w0065"
   ]
  },
  {
@@ -9936,13 +10453,14 @@
   "lv": "4",
   "pron": "fǎngwèn",
   "syn": [
+   "w0126",
    "w1147"
   ]
  },
  {
   "id": "w1107",
   "w": "证明",
-  "en": "proof; certificate",
+  "en": "to prove; proof; certificate",
   "lv": "4",
   "pron": "zhèngmíng"
  },
@@ -9953,6 +10471,9 @@
   "lv": "4",
   "pron": "cídiǎn",
   "syn": [
+   "w0398"
+  ],
+  "typedSyn": [
    "w0398"
   ]
  },
@@ -10013,6 +10534,9 @@
   "syn": [
    "w0560",
    "w1099"
+  ],
+  "typedSyn": [
+   "w1099"
   ]
  },
  {
@@ -10025,9 +10549,15 @@
  {
   "id": "w1117",
   "w": "请客",
-  "en": "to invite to dinner; to entertain guests; to give a dinner party",
+  "en": "to treat (to a meal); to invite to dinner; to entertain guests",
   "lv": "4",
-  "pron": "qǐngkè"
+  "pron": "qǐngkè",
+  "syn": [
+   "w0138"
+  ],
+  "typedSyn": [
+   "w0138"
+  ]
  },
  {
   "id": "w1118",
@@ -10130,11 +10660,14 @@
   "lv": "4",
   "pron": "tàng",
   "syn": [
+   "w0061",
    "w0095",
    "w0226",
    "w0228",
+   "w0234",
    "w0314",
-   "w0399"
+   "w0399",
+   "w1149"
   ]
  },
  {
@@ -10142,10 +10675,7 @@
   "w": "距离",
   "en": "distance; to be apart from",
   "lv": "4",
-  "pron": "jùlí",
-  "syn": [
-   "w0578"
-  ]
+  "pron": "jùlí"
  },
  {
   "id": "w1131",
@@ -10177,10 +10707,11 @@
  {
   "id": "w1134",
   "w": "轻松",
-  "en": "light; gentle",
+  "en": "relaxed; easy; light; gentle",
   "lv": "4",
   "pron": "qīngsōng",
   "syn": [
+   "w0404",
    "w0475",
    "w0664",
    "w1133"
@@ -10200,10 +10731,11 @@
  {
   "id": "w1136",
   "w": "辛苦",
-  "en": "exhausting; hard",
+  "en": "hard; exhausting; to work hard",
   "lv": "4",
   "pron": "xīnkǔ",
   "syn": [
+   "w0579",
    "w1019"
   ]
  },
@@ -10212,14 +10744,21 @@
   "w": "辣",
   "en": "hot (spicy); pungent",
   "lv": "4",
-  "pron": "là"
+  "pron": "là",
+  "syn": [
+   "w0116"
+  ]
  },
  {
   "id": "w1138",
   "w": "过",
-  "en": "to cross; to go over",
+  "en": "to cross; to pass (time); to spend (a holiday); (experienced action marker)",
   "lv": "4",
-  "pron": "guò"
+  "pron": "guò",
+  "syn": [
+   "w0520",
+   "w0536"
+  ]
  },
  {
   "id": "w1139",
@@ -10231,20 +10770,23 @@
  {
   "id": "w1140",
   "w": "进行",
-  "en": "to advance; to conduct",
+  "en": "to carry out; to conduct; to be in progress",
   "lv": "4",
   "pron": "jìnxíng",
   "syn": [
-   "w0281",
    "w0614"
   ]
  },
  {
   "id": "w1141",
   "w": "连",
-  "en": "to link; to join",
+  "en": "even; to link; to join",
   "lv": "4",
-  "pron": "lián"
+  "pron": "lián",
+  "syn": [
+   "w0144",
+   "w0998"
+  ]
  },
  {
   "id": "w1142",
@@ -10297,6 +10839,7 @@
   "lv": "4",
   "pron": "guàng",
   "syn": [
+   "w0126",
    "w1106"
   ]
  },
@@ -10310,11 +10853,22 @@
  {
   "id": "w1149",
   "w": "遍",
-  "en": "everywhere; all over",
+  "en": "time (once through, start to finish); everywhere; all over",
   "lv": "4",
   "pron": "biàn",
   "syn": [
-   "w0691"
+   "w0061",
+   "w0095",
+   "w0228",
+   "w0234",
+   "w0314",
+   "w0399",
+   "w0691",
+   "w1129"
+  ],
+  "typedSyn": [
+   "w0061",
+   "w0234"
   ]
  },
  {
@@ -10332,6 +10886,9 @@
   "pron": "yāoqǐng",
   "syn": [
    "w0138"
+  ],
+  "typedSyn": [
+   "w0138"
   ]
  },
  {
@@ -10342,9 +10899,6 @@
   "pron": "bùfen",
   "syn": [
    "w0171",
-   "w0640"
-  ],
-  "typedSyn": [
    "w0640"
   ]
  },
@@ -10371,9 +10925,6 @@
   "syn": [
    "w0168",
    "w0364"
-  ],
-  "typedSyn": [
-   "w0168"
   ]
  },
  {
@@ -10436,6 +10987,10 @@
   "syn": [
    "w0126",
    "w0139"
+  ],
+  "typedSyn": [
+   "w0126",
+   "w0139"
   ]
  },
  {
@@ -10494,6 +11049,9 @@
   "pron": "nánshòu",
   "syn": [
    "w0580"
+  ],
+  "typedSyn": [
+   "w0580"
   ]
  },
  {
@@ -10539,7 +11097,10 @@
   "w": "顺序",
   "en": "sequence; order",
   "lv": "4",
-  "pron": "shùnxù"
+  "pron": "shùnxù",
+  "syn": [
+   "w0115"
+  ]
  },
  {
   "id": "w1176",
@@ -10551,12 +11112,13 @@
  {
   "id": "w1177",
   "w": "顿",
-  "en": "to stop; to pause",
+  "en": "(classifier for meals); to pause; to stop",
   "lv": "4",
   "pron": "dùn",
   "syn": [
    "w0660"
-  ]
+  ],
+  "noTypedMeaning": true
  },
  {
   "id": "w1178",
@@ -10610,9 +11172,12 @@
   "lv": "4",
   "pron": "shǒuxiān",
   "syn": [
-   "w0004",
    "w0164",
-   "w0256"
+   "w0256",
+   "w0333"
+  ],
+  "typedSyn": [
+   "w0333"
   ]
  },
  {
@@ -10637,12 +11202,15 @@
   "pron": "mǎhu",
   "syn": [
    "w1047"
+  ],
+  "typedSyn": [
+   "w1047"
   ]
  },
  {
   "id": "w1188",
   "w": "骄傲",
-  "en": "pride; arrogance",
+  "en": "proud; arrogant; pride",
   "lv": "4",
   "pron": "jiāo'ào"
  },
