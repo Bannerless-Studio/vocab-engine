@@ -1140,6 +1140,9 @@ function applyMissedKinds(plan, prog, pack, production, opts){
 // than days?"): records and log entries keep u, the session of the last answer, so "longest
 // unseen" means something within one day of many sessions; the date is the tie-break.
 const DAY_REFRESH_SHARE = 0.2, DAY_AGAIN_SHARE = 0.25, DAY_CONSOLIDATE_SHARE = 0.15;
+// characters.bareBy "typed": units between mastered and bare move only by typed answers, so they
+// get a larger share (review 2026-10-02: at 0.15 they reached bare slower than by choice credit).
+const DAY_TYPED_CONSOLIDATE_SHARE = 0.25;
 // "Already right, ask another kind" covers today and the last DAY_RECENT_SESSIONS sessions, so the
 // first session after midnight does not replay the evening's items.
 const DAY_RECENT_SESSIONS = 2;
@@ -1165,8 +1168,9 @@ function dayCarry(d, sn){
     const e = d.a[k]; if(!isObj(e)) return;
     const mk = Array.isArray(e.mk) && !dayAged(e, sn) ? e.mk.filter(x => typeof x === "string") : [];
     const r = dayRecentU(e, sn) && Array.isArray(e.r) ? e.r.filter(x => typeof x === "string") : [];
-    if(!mk.length && !r.length) return;
-    const c = {}; if(mk.length){ c.mk = mk; if(typeof e.ms === "number") c.ms = e.ms; if(e.ma) c.ma = 1; } if(r.length){ c.r = r; c.u = e.u; }
+    const ag = String(k)[0] === "c" && dayAgedOut(e, sn);
+    if(!mk.length && !r.length && !ag) return;
+    const c = {}; if(mk.length){ c.mk = mk; if(typeof e.ms === "number") c.ms = e.ms; if(e.ma) c.ma = 1; } if(r.length){ c.r = r; c.u = e.u; } if(ag) c.ag = 1;
     out[k] = c;
   });
   return out;
@@ -1208,7 +1212,7 @@ function noteDay(prog, pack, today, key, kind, ok, can){
   if(ok){
     if(kind && e.m !== d.n){ if(!Array.isArray(e.r)) e.r = []; if(!e.r.includes(kind)) e.r.push(kind); }
     if(!(kind === "gap" && String(key)[0] === "w")){
-      e.c = d.n; if(daySn(prog)) e.u = daySn(prog);
+      e.c = d.n; if(daySn(prog)) e.u = daySn(prog); delete e.ag;
       if(e.m !== d.n && Array.isArray(e.mk)){ e.mk = e.mk.filter(m => !daySettlesAt(key, [m], kind, can)); if(!e.mk.length){ delete e.mk; delete e.ms; delete e.ma; } }
     }
   } else {
@@ -1245,6 +1249,9 @@ function daySettles(mk, kind, can){ const m = dayMissKinds(mk, can); return !m.l
 const daySettlesAt = (key, mk, kind, can) => (kind === "type" && String(key)[0] === "c") || daySettles(mk, kind, can);
 // Asked again after the miss (ma) and still pending DAY_MISS_MAX_SESSIONS sessions after it (ms).
 const dayAged = (e, sn) => !!e.ma && typeof e.ms === "number" && sn > 0 && sn - e.ms >= DAY_MISS_MAX_SESSIONS;
+// A unit whose miss aged out and that has not been answered right since: today's entry, or the
+// ag mark dayCarry leaves on a character unit's entry after midnight.
+const dayAgedOut = (e, sn) => isObj(e) && (e.ag === 1 || (Array.isArray(e.mk) && e.mk.length > 0 && dayAged(e, sn)));
 // The missed kinds still pending, [] for a pending miss logged without a kind, or null.
 function dayPending(e, sn){
   if(!isObj(e)) return null;
@@ -1258,13 +1265,11 @@ function dayPending(e, sn){
 // planner that asks production). sn: the current session ordinal (prog.sn).
 function dayTier(c, d, sn){
   const e = d.a[c.key];
-  // A typed unit (alias: its word) counts its word typed right recently as its own typed answer.
-  const at = c.alias && dayRight(d.a[c.alias], sn).includes("type") ? ["type"] : [];
-  const r = dayRight(e, sn).concat(at);
+  const r = dayRight(e, sn);
   const open = (c.kinds || []).some(k => !r.includes(k));
   const mk = dayPending(e, sn);
   if(mk) return (c.kinds || []).some(k => daySettlesAt(c.key, mk, k, c.can)) ? 0 : 4;
-  if(!dayRecent(e, sn) && !at.length) return ((c.rec && c.rec.s) || 0) >= c.mastered ? 2 : 1;
+  if(!dayRecent(e, sn)) return ((c.rec && c.rec.s) || 0) >= c.mastered ? 2 : 1;
   return open ? 3 : 4;
 }
 const dayT = rec => rec && typeof rec.t === "number" && isFinite(rec.t) ? rec.t : -Infinity;
@@ -1279,10 +1284,13 @@ const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c ===
 // weak unit had its turn), weak units by lowest streak then oldest last answer, a capped share
 // of harder kinds for units already right today, the rest of the consolidating and refresh
 // units, and only then what was right today. Jitter (below 1) only breaks exact ties.
-function dayPick(cands, n, d, rng, sn){
+// cshare (optional): the consolidating share, DAY_CONSOLIDATE_SHARE by default. A consolidating
+// unit whose miss aged out (dayAgedOut) comes first in it.
+function dayPick(cands, n, d, rng, sn, cshare){
   const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
   (cands || []).forEach(c => { const t = dayTier(c, d, sn); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
-  C.sort((a, b) => dayAge(a.rec, b.rec) || dayS(a.rec) - dayS(b.rec) || a.j - b.j);
+  const ag = c => dayAgedOut(d.a[c.key], sn) ? 0 : 1;
+  C.sort((a, b) => ag(a) - ag(b) || dayAge(a.rec, b.rec) || dayS(a.rec) - dayS(b.rec) || a.j - b.j);
   const cmp = [
     (a, b) => weakScore(b.rec) - weakScore(a.rec),
     (a, b) => dayS(a.rec) - dayS(b.rec) || dayAge(a.rec, b.rec),
@@ -1294,11 +1302,15 @@ function dayPick(cands, n, d, rng, sn){
   const out = [], seen = new Set();
   // A candidate with an alias (a typed character unit asked as its word) and that word's own
   // candidate are one item: the second one taken is passed over, and a word taken first is asked
-  // as the unit's typed item (tu).
+  // as the unit's typed item (tu). A word with a pending miss a typed answer cannot settle (hear,
+  // read) is never converted, and still gets its own item when its unit was taken first and a slot
+  // is left (review 2026-10-02).
+  const owns = c => { const mk = dayPending(d.a[c.key], sn); return !!(mk && mk.length && !daySettles(mk, "type", c.can)); };
   const take = (list, k) => { for(let i = 0; i < k && list.length && out.length < n;){ const c = list.shift();
-    if(c.alias && seen.has(c.alias)){ const w = out.find(o => o.key === c.alias); if(w && !w.tu && !dayRight(d.a[c.alias], sn).includes("type")) w.tu = c.x; continue; }
-    if(seen.has(c.key)) continue; seen.add(c.key); if(c.alias) seen.add(c.alias); out.push(c); i++; } };
-  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(C, Math.ceil(n * DAY_CONSOLIDATE_SHARE)); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
+    if(c.alias && seen.has(c.alias)){ const w = out.find(o => o.key === c.alias); if(w && !w.tu && !owns(w)) w.tu = c.x; continue; }
+    if(seen.has(c.key) && !(owns(c) && out.some(o => o.alias === c.key) && !out.some(o => o.key === c.key))) continue;
+    seen.add(c.key); if(c.alias) seen.add(c.alias); out.push(c); i++; } };
+  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(C, Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE))); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
   take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[0], n); take(T[4], n);
   return out;
 }
@@ -1377,7 +1389,7 @@ function dayReviewPlan(learned, prog, pack, n, o){
   const wc = dayWordCan(pack, o.canHear);
   const cands = [...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits)),
     ...rs.map(u => ({ t: "x", x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: scfg ? scfg.mastered : SCRIPT_MASTERED, kinds: scfg ? scfg.reviewKinds : [] }))];
-  const pool = shuffle(dayPick(cands, n, d, o.rng, daySn(prog)), o.rng);
+  const pool = shuffle(dayPick(cands, n, d, o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined), o.rng);
   const kinds = kindMix(pool.filter(c => c.t === "w").length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
   let wi = 0;
   const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {})
@@ -1389,7 +1401,7 @@ function dayRecallPlan(learned, prog, pack, n, o){
   const d = dayLog(prog, o.today); const typing = typingEnabled(pack);
   const wk = typing ? ["recall", "type"] : ["recall"], ck = ["charRecall", "charPick"];
   const ru = recordedUnits(o.units, prog, pack); const wc = dayWordCan(pack, o.canHear);
-  const pool = dayPick([...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits))], n, d, o.rng, daySn(prog));
+  const pool = dayPick([...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits))], n, d, o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined);
   const kinds = kindMix(pool.filter(c => c.t === "w").length, 1, typing, o.rng);
   let wi = 0;
   const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {}) : { kind: "charRecall", unit: c.x });
@@ -1805,6 +1817,7 @@ function charsConfig(pack){
     compose: c.compose === true,
     bareBy: c.bareBy === "typed" ? "typed" : null,
     bareWords: c.bareWords === true,
+    withWords: c.withWords === true,
   };
 }
 // Default mix is the predecessor app's.
@@ -1931,7 +1944,9 @@ function charSets(levels, units, pack){
 function charSetTaught(set, prog){ const r = charRecs(prog); return (set || []).every(u => hasCharRec(r, u.id)); }
 function nextCharSet(levels, units, pack, prog){
   const sets = charSets(levels, units, pack);
-  for(let i=0; i<sets.length; i++) if(!charSetTaught(sets[i], prog)) return { index:i, units:sets[i], total:sets.length };
+  // A set straddling an old stage boundary may hold recorded units: never teach those again.
+  const r = charRecs(prog);
+  for(let i=0; i<sets.length; i++) if(!charSetTaught(sets[i], prog)) return { index:i, units:sets[i].filter(u => !hasCharRec(r, u.id)), total:sets.length };
   return null;
 }
 function charStages(pack, prog){
@@ -1959,14 +1974,25 @@ function stagePath(pack, words, units, prog, sunits){
     cs.filter(st => st.after === lv).forEach(st => {
       const list = charStageUnits(st.levels, units, pack);
       const rec = list.filter(u => hasCharRec(recs, u.id)).length;
-      out.push({ kind:"chars", key: st.levels.join("+"), levels: st.levels, label: st.label, recorded: rec,
+      out.push({ kind:"chars", key: st.levels.join("+"), levels: st.levels, label: st.label, after: st.after, recorded: rec,
         nunits: list.length, nsets: Math.ceil(list.length / cfg.setSize), frac: list.length ? rec/list.length : 1, done: rec >= list.length });
     });
   });
   const sc = scriptStages(pack, sunits, p);
   return sc.length ? [...sc, ...out] : out;
 }
-function nextStage(pack, words, units, prog, sunits){ return stagePath(pack, words, units, prog, sunits).find(s => !s.done) || null; }
+function nextStage(pack, words, units, prog, sunits){
+  const path = stagePath(pack, words, units, prog, sunits), first = path.find(s => !s.done) || null;
+  if(!charsWithWords(pack, prog) || !first || first.kind === "script") return first;
+  // characters.withWords (docs/PACK_SCHEMA.md): an unlocked character stage (its level's words
+  // learned) and the next word level take turns by session parity; oldest stage first.
+  const w = path.find(s => s.kind === "words" && !s.done);
+  const c = path.find(s => s.kind === "chars" && !s.done && path.some(x => x.kind === "words" && x.lv === s.after && x.done));
+  if(!w || !c) return c || w || first;
+  return (prog && prog.sessions || 0) % 2 ? c : w;
+}
+// "Characters: with words" unless the learner chose "later" (chars.defer, the old after-HSK-4).
+const charsWithWords = (pack, prog) => { const c = charsConfig(pack); return !!(c && c.withWords) && !(prog && isObj(prog.chars) && prog.chars.defer === true); };
 // The point the learning-order switch becomes available.
 function charsUnlocked(pack, words, prog){
   const cfg = charsConfig(pack); if(!cfg || !cfg.stages.length) return false;
@@ -1984,7 +2010,7 @@ function charsStarted(pack, words, units, prog, sunits){
 // Shown only when deferring would actually put an incomplete later word level first;
 // otherwise the choice changes nothing.
 function showCharChoice(pack, words, units, prog, sunits){
-  const cfg = charsConfig(pack); if(!cfg || !cfg.stages.length) return false;
+  const cfg = charsConfig(pack); if(!cfg || !cfg.stages.length || cfg.withWords) return false;
   const ch = (prog && isObj(prog.chars)) ? prog.chars : {};
   if(ch.choiceSeen === true || ch.defer === true) return false;
   const path = stagePath(pack, words, units, prog, sunits);
@@ -3279,7 +3305,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
-  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
+  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
@@ -3287,7 +3313,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
-  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, charsUnlocked, charsStarted, showCharChoice,
+  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, charsWithWords, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,

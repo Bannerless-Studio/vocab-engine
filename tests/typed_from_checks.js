@@ -27,9 +27,9 @@ const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // dayAware post-dates main ef44c6e: the control strips it with the fields under test.
-// fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords;
+// fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
-const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; return Object.assign({}, p, { characters: c }); };
+const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; return Object.assign({}, p, { characters: c }); };
 const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; return p; })(preWrite(PACK));
 
 let fails = 0, passes = 0;

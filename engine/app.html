@@ -471,13 +471,19 @@ function markWord(id, ok, kind, reqKind){ VC.ensureWordRec(prog, WORDS, PACK, id
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
 function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
 function markSentence(id, ok, kind){ VC.markRec(prog.s, id, ok, false); dayNote("s:" + id, kind, ok); store.save(); }
-function markChar(unitId, ok, kind){ VC.markChar(prog, unitId, ok, PACK, !!(TYPED_UNITS && TYPED_UNITS.has(unitId))); dayNote("c:" + unitId, kind, ok); store.save(); }
+// Returns whether the answer can move the unit's streak (a held unit's right choice answer cannot).
+function markChar(unitId, ok, kind){
+  const held = !!(TYPED_UNITS && TYPED_UNITS.has(unitId)), rec = VC.charRecs(prog)[unitId];
+  const moves = !(held && rec && (rec.s || 0) >= CHAR_CFG.mastered);
+  VC.markChar(prog, unitId, ok, PACK, held); dayNote("c:" + unitId, kind, ok); store.save(); return moves;
+}
 // characters.bareBy "typed": a written-side typed answer also answers the word's unit. The in-drill
 // retry after a miss is no evidence (typedRequeue has already counted the miss being answered).
 function markUnitTyped(it, id, ok){
+  if(it) it.cueUnit = null;
   if(!TYPED_BARE || (it && it.typedMisses || 0) > (ok ? 0 : 1)) return;
   const u = VC.markUnitTyped(prog, CHAR_LIST, PACK, id, ok);
-  if(u){ dayNote("c:" + u.id, "type", ok); store.save(); }
+  if(u){ if(it) it.cueUnit = u.id; dayNote("c:" + u.id, "type", ok); store.save(); }
 }
 // docs/PACK_SCHEMA.md "dayAware": today's answers steer the day's later plans.
 const DAY_AWARE = VC.dayAwareOn(PACK);
@@ -829,12 +835,12 @@ function showReveal(html){
 // shows Replay. Reveal-time audio gets its button only once answered, so a gap item's
 // sentence audio never leaks the blank.
 const REVEAL_REPLAY = `<div class="rvsay"><button type="button" class="replay" id="rvp" aria-label="Replay">${REPLAY_SVG}</button></div>`;
-// characters.bareBy "typed": the unit's streak as dots on every word or unit reveal, read after
+// characters.bareBy "typed": the unit's streak as dots on the reveal of an answer that can move it, read after
 // the answer is marked, so the learner sees it move.
 function unitCue(it){
-  if(!TYPED_BARE || !it || typeof it.key !== "string") return "";
-  const id = it.key.slice(2), u = it.key[1] !== ":" ? null : it.key[0] === "c" ? CHAR_LIST.find(x => x.id === id) : it.key[0] === "w" ? VC.unitByWord(CHAR_LIST).get(id) : null;
-  const rec = u && VC.charRecs(prog)[u.id];
+  // Only after an answer that could move the streak (cueUnit: markUnitTyped, markChar).
+  if(!TYPED_BARE || !it || !it.cueUnit) return "";
+  const rec = VC.charRecs(prog)[it.cueUnit];
   if(!rec) return "";
   const n = CHAR_CFG.bare, k = Math.min(n, Math.max(0, rec.s || 0));
   return `<div class="q ucue" aria-label="${escapeHtml(CHAR_CFG.label)} ${k}/${n}" style="margin:0 0 4px;letter-spacing:2px"><span${TA}>${escapeHtml(CHAR_CFG.label)}</span> ${"\u25cf".repeat(k)}${"\u25cb".repeat(n - k)}</div>`;
@@ -1664,7 +1670,7 @@ function charRevealBlock(it, unit){
 function charDrillItem(kind, unit){
   const it = VC.charItem(kind, unit, CHAR_CTX);
   const base = { kind:"mc", key: it.key, opts: it.options, a: it.answer, reveal: charRevealBlock(it, unit),
-    onAnswer: ok => markChar(it.unitId, ok, kind), onReveal: b => sayUnit(it, b), revealHear: canHearUnit(it) };
+    onAnswer(ok){ this.cueUnit = markChar(it.unitId, ok, kind) ? it.unitId : null; }, onReveal: b => sayUnit(it, b), revealHear: canHearUnit(it) };
   const form = `<div class="big wd"${TA}>${escapeHtml(it.t)}</div>`;
   const formOpts = { optsClass:"opts-hero opts-w", optHtml: o => tw(o), optsT: true };
   if(kind === "charRead") return Object.assign(base, { label:"What does it mean?", optsClass:"opts-hero", html: form, optHtml: GLOSS_OPT });
@@ -2887,7 +2893,7 @@ function charProgress(){
   const showMix = started; // mixing changes nothing until characters have started
   const controls = (unlocked || showMix) ? `<div id="charCtl" style="margin-top:14px">${pathStrip()}
     ${showMix ? `<div class="row"><button class="chip ${mix ? "on" : ""}" id="toggleMix" aria-pressed="${mix}">Mix known characters into sentences</button></div>` : ""}
-    ${unlocked ? `<div class="row"><button class="chip ${defer ? "" : "on"}" id="ordBefore" aria-pressed="${!defer}">Characters before ${escapeHtml(top)}</button><button class="chip ${defer ? "on" : ""}" id="ordAfter" aria-pressed="${defer}">Characters after ${escapeHtml(top)}</button></div>
+    ${unlocked ? `<div class="row"><button class="chip ${defer ? "" : "on"}" id="ordBefore" aria-pressed="${!defer}">${CHAR_CFG.withWords ? "Characters: with words" : `Characters before ${escapeHtml(top)}`}</button><button class="chip ${defer ? "on" : ""}" id="ordAfter" aria-pressed="${defer}">${CHAR_CFG.withWords ? "Characters: later" : `Characters after ${escapeHtml(top)}`}</button></div>
     <p class="q" style="margin-top:6px">Changes what Today's Learn step teaches next. Nothing you've learned is lost.</p>` : ""}</div>` : "";
   const wire = () => {
     if(showMix) $("toggleMix").onclick = () => { VC.ensureChars(prog).mix = !mix; store.save(); progressRender(); };

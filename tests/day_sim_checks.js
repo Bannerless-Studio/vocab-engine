@@ -169,8 +169,9 @@ function kindOf(it){
 // unit metrics count it under the unit's key too (drilled entry `also`).
 const writtenSide = r => !!r && (r.b === "typeWrittenSilent" || r.b === "typeWritten" || r.b === "typeWrittenPron" || (r.b === "typeMeaning" && !r.a[1]));
 const UNIT_OF_WORD = new Map(CHARACTERS.map(u => [u.words[0], u]));
+// The in-drill retry after a typed miss (typedMisses) gives the unit nothing (app markUnitTyped).
 function unitAlso(it, prog, pack){
-  if(!VC.typedBareOn(pack) || !writtenSide(it.rz) || !String(it.key).startsWith("w:")) return undefined;
+  if(!VC.typedBareOn(pack) || !writtenSide(it.rz) || !String(it.key).startsWith("w:") || (it.typedMisses || 0) > 0) return undefined;
   const u = UNIT_OF_WORD.get(it.key.slice(2));
   return u && prog.chars && prog.chars.c[u.id] ? "c:" + u.id : undefined;
 }
@@ -540,7 +541,10 @@ function missesCarried(drilled0){
     const run = await playDay(PACK_ON, seedP, 4, 5, 24 * 60 * 60 * 1000);
     const s1 = run.drilled.filter(d => d.sess === 0);
     const steps = [...new Set(s1.map(d => d.step))];
-    const share = steps.map(st => { const ks = [...new Set(s1.filter(d => d.step === st).map(d => d.key))]; return { st, n: ks.length, miss: ks.filter(k => k in misses).length }; }).filter(x => x.n >= 5);
+    // A unit's typed item (also; its retries carry none) is planned for the unit: it counts as a
+    // carried miss when the unit's miss is carried, whatever its word's.
+    const isMiss = (k, ds) => { const u = ds.find(d => d.key === k && d.also); return u ? u.also in misses : k in misses; };
+    const share = steps.map(st => { const ds = s1.filter(d => d.step === st), ks = [...new Set(ds.map(d => d.key))]; return { st, n: ks.length, miss: ks.filter(k => isMiss(k, ds)).length }; }).filter(x => x.n >= 5);
     const back = keys.filter(k => withAlso(run.drilled).some(d => d.key === k && VC.daySettlesAt(k, [misses[k]], d.kind)));
     console.log(`  session 1 per stage (carried misses / items): ${share.map(x => `step ${x.st} ${x.miss}/${x.n}`).join(", ")}; carried misses asked in a settling kind within 4 sessions: ${back.length}/${keys.length}`);
     check(`backlog: every session-1 stage has >= 40% items that are not carried misses (${share.map(x => `${x.n - x.miss}/${x.n}`).join(", ")})`, share.length > 0 && share.every(x => x.n - x.miss >= 0.4 * x.n));
@@ -572,12 +576,14 @@ function missesCarried(drilled0){
   // characters.bareBy "typed" (owner feedback 2026-10-02: "it takes more than 3/6 attempts for
   // mastery"): from mastered only typed written-side answers move a unit, so they must come often
   // enough. Scenario B, a week of Today sessions; control: bareBy removed (choice answers credit).
-  for(const perDay of [1, 3]){
-    console.log(`\n[typed week] scenario B, ${perDay} Today session(s) a day for 7 days: character units at streak 3-5 reach bare (6)`);
+  // Both learner sizes of the review (2026-10-02): 150 words / 60 units and 595 / 300; the typed run
+  // must reach bare at least as often as the choice-credit control on the same seed.
+  for(const [NW, NU] of [[150, 60], [595, 300]]) for(const perDay of [1, 3]){
+    console.log(`\n[typed week] ${NW} words / ${NU} units, ${perDay} Today session(s) a day for 7 days: character units at streak 3-5 reach bare (6)`);
     const res = {};
     for(const [tag, pack] of [["choice credit (bareBy off)", (p => { const c = Object.assign({}, p.characters); delete c.bareBy; return Object.assign({}, p, { characters: c }); })(PACK_ON)], ["typed only (as shipped)", PACK_ON]]){
       NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
-      const seedP = seedProg(pack, 595, 60, 11);
+      const seedP = seedProg(pack, NW, NU, 11);
       const at = sn => new Date(2026, 9, 2 + Math.floor(sn / perDay), 7 + 3 * (sn % perDay), 0, 0).getTime();
       const run = await playDay(pack, seedP, 7 * perDay, 5, at);
       const mid = Object.entries(seedP.chars.c).filter(([, r]) => r.s >= 3 && r.s <= 5).map(([id]) => id);
@@ -586,9 +592,8 @@ function missesCarried(drilled0){
       console.log(`  ${tag}: ${reached}/${mid.length} reach bare; typed answers on them ${typedU}; items ${run.drilled.length}`);
       res[tag] = { reached, n: mid.length, typedU };
     }
-    const on = res["typed only (as shipped)"];
-    const want = perDay === 1 ? 0.5 : 0.8;
-    check(`typed week (${perDay}/day): >= ${want * 100}% of units at streak 3-5 reach bare by typed answers (${on.reached}/${on.n}, ${on.typedU} typed answers on them)`, on.n > 0 && on.reached >= want * on.n);
+    const on = res["typed only (as shipped)"], off = res["choice credit (bareBy off)"];
+    check(`typed week (${NW}/${NU}, ${perDay}/day): typed only reaches bare at least as often as choice credit (${on.reached}/${on.n} vs ${off.reached}/${off.n}; ${on.typedU} typed answers on them)`, on.n > 0 && on.reached >= off.reached);
   }
   console.log(`\n${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);

@@ -139,7 +139,8 @@
   },
   "compose": true,
   "bareBy": "typed",
-  "bareWords": true
+  "bareWords": true,
+  "withWords": true
  },
  "legacy": {
   "key": "hsk_pinyin",

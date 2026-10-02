@@ -27,11 +27,11 @@ function tryLoadConst(file, name){ try{ return loadConst(file, name); }catch(e){
 // BP2's pronunciation aids (tones, typing "pron", soundsReference) are left out here, so
 // these checks keep testing BP's markup; tests/pron_aids_checks.js checks the pack with them.
 const PACK_ZH = (p => { const q = Object.assign({}, p); delete q.tones; delete q.soundsReference; if(q.typing === "pron") q.typing = null; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
-// fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords;
+// fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // [1]-[13] keep the earlier stage layout (one stage after HSK 3 for 1-3, one after HSK 4) and choice
 // crediting: they test the stage machinery, which is unchanged for it. tests/typed_mastery_checks.js
 // checks the per-level layout and typed mastery as shipped.
-const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; return Object.assign({}, p, { characters: c }); };
+const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; return Object.assign({}, p, { characters: c }); };
 const PACK = preWrite(Object.assign({}, PACK_ZH, { pronFirst: false }));
 // The plan lines' order wording follows pack.dayAware (docs/PACK_SCHEMA.md "dayAware").
 const ORDER = PACK.dayAware ? "misses and due first" : "weakest first";

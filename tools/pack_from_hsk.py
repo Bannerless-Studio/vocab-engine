@@ -300,6 +300,9 @@ def main(argv):
             # without pinyin (docs/PACK_SCHEMA.md "bareBy").
             "bareBy": "typed",
             "bareWords": True,
+            # Character sets take turns with new words by session once a level's words are
+            # learned; no blocking choice card (review 2026-10-02, docs/PACK_SCHEMA.md "withWords").
+            "withWords": True,
         },
         "legacy": {"key": "hsk_pinyin", "format": "hsk-v2"},
         # Pronunciation first (docs/HSK_MERGE.md §8, 2026-09-25): a word is shown by its

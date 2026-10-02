@@ -130,14 +130,19 @@ console.log("\n[2] seed-specific derived state on the engine side");
 const W = WORDS, U = readJSON("characters.json");
 const mig = n => VC.migrateLegacy(PACK, LEGACY, clone(SEEDS[n])).prog;
 check("A empty: equals defaultProg plus the marker", eq(mig("A empty"), Object.assign(VC.defaultProg(PACK), { legacy: { key:"hsk_pinyin", format:"hsk-v2" } })));
-// One character stage per level (fb2-write): HSK 1 learned unlocks 字1 before HSK 2, behind the
-// choice card; skipping it (chars.defer) gives back HSK 2 set 3, the stage before the split.
-check("C mid-HSK2: next stage is 字1 behind the choice card; skipped, HSK 2 set 3",
-  (s => s && s.kind === "chars" && eq(s.levels, ["1"]))(VC.nextStage(PACK, W, U, mig("C mid-HSK2"))) && VC.showCharChoice(PACK, W, U, mig("C mid-HSK2"))
-  && (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, VC.answerCharChoice(mig("C mid-HSK2"), false))));
-check("HEAD (HSK 1-3 done, card unanswered): choice card shows", VC.showCharChoice(PACK, W, U, mig("HEAD")) === true);
-check("D1 (answered start): no card, next stage is 字1 (its 25 units are HSK 1)", !VC.showCharChoice(PACK, W, U, mig("D1 chars started, card answered: start"))
-  && (s => s && s.kind === "chars" && eq(s.levels, ["1"]))(VC.nextStage(PACK, W, U, mig("D1 chars started, card answered: start"))));
+// One character stage per level with characters.withWords (fb2-write): no choice card; an
+// unlocked 字 stage and the next word level take turns by prog.sessions parity; a stored
+// "after" (chars.defer) is "later": HSK 2 set 3, the stage before the split.
+const par = (p, n) => Object.assign(p, { sessions: n });
+const isChars1 = s => s && s.kind === "chars" && eq(s.levels, ["1"]);
+check("C mid-HSK2: no card; even sessions HSK 2 set 3, odd 字1; skipped (later), HSK 2 set 3 both",
+  !VC.showCharChoice(PACK, W, U, mig("C mid-HSK2"))
+  && (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(mig("C mid-HSK2"), 2))) && isChars1(VC.nextStage(PACK, W, U, par(mig("C mid-HSK2"), 3)))
+  && [2, 3].every(n => (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(VC.answerCharChoice(mig("C mid-HSK2"), false), n)))));
+check("HEAD (HSK 1-3 done, card unanswered): no card, 字1 and HSK 4 take turns", VC.showCharChoice(PACK, W, U, mig("HEAD")) === false
+  && isChars1(VC.nextStage(PACK, W, U, par(mig("HEAD"), 1))) && VC.nextStage(PACK, W, U, par(mig("HEAD"), 2)).lv === "4");
+check("D1 (answered start): no card, 字1 (its 25 units are HSK 1) and HSK 4 take turns", !VC.showCharChoice(PACK, W, U, mig("D1 chars started, card answered: start"))
+  && isChars1(VC.nextStage(PACK, W, U, par(mig("D1 chars started, card answered: start"), 1))) && VC.nextStage(PACK, W, U, par(mig("D1 chars started, card answered: start"), 0)).lv === "4");
 check("D2 (answered skip): no card, next stage is HSK 4", !VC.showCharChoice(PACK, W, U, mig("D2 chars started, card answered: skip"))
   && (s => s && s.kind === "words" && s.lv === "4")(VC.nextStage(PACK, W, U, mig("D2 chars started, card answered: skip"))));
 check("D3 (order flipped): one deferred characters stage 1-4 after HSK 4", (p => { const cs = VC.stagePath(PACK, W, U, p).filter(s => s.kind === "chars"); return cs.length === 1 && eq(cs[0].levels, ["1","2","3","4"]); })(mig("D3 learning order flipped from Progress")));
@@ -369,7 +374,7 @@ console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"
 console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write): stored progress keeps its meaning");
 {
   // The zh pack before fb2-write: one stage after HSK 3 for levels 1-3, no bareBy/bareWords.
-  const OLD = (p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; return Object.assign({}, p, { characters: c }); })(clone(PACK));
+  const OLD = (p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; return Object.assign({}, p, { characters: c }); })(clone(PACK));
   const labels = p => VC.stagePath(PACK, W, U, p).map(s => s.label).join(" ");
   const nextOf = (pk, p) => { const st = VC.nextStage(pk, W, U, p); const cs = st && st.kind === "chars" ? VC.nextCharSet(st.levels, U, pk, p) : null; return st ? `${st.kind}:${st.kind === "words" ? st.lv + "/" + st.set : st.levels.join("+")}${cs ? " " + cs.units[0].id : ""}` : "done"; };
   check("pack: one characters stage per level, labels 字1..字4, bareBy typed, bareWords", eq(VC.charsConfig(PACK).stages.map(st => st.levels.join()), ["1", "2", "3", "4"]) && VC.typedBareOn(PACK) && VC.charsConfig(PACK).bareWords === true && !VC.typedBareOn(OLD));
@@ -378,13 +383,19 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
   check(`(a) fresh: path ${labels(a)}; next HSK 1 set 0 (old pack the same)`, labels(a) === "HSK 1 字1 HSK 2 字2 HSK 3 字3 HSK 4 字4" && nextOf(PACK, a) === "words:1/0" && nextOf(OLD, a) === "words:1/0");
   // (b) mid HSK 2
   const b = mig("C mid-HSK2"), braw = JSON.stringify(b);
-  check(`(b) mid HSK 2: old pack ${nextOf(OLD, b)}; now ${nextOf(PACK, b)} behind the card (Today shows it, no Start until answered)`, nextOf(OLD, b) === "words:2/3" && nextOf(PACK, b) === "chars:1 c0001" && VC.showCharChoice(PACK, W, U, b) && !VC.showCharChoice(OLD, W, U, b));
-  check("(b) start: 字1 set 1; skip: HSK 2 set 3 and characters after HSK 4", nextOf(PACK, VC.answerCharChoice(VC.bootProg(braw, PACK).prog, true)) === "chars:1 c0001"
-    && (p => nextOf(PACK, p) === "words:2/3" && VC.stagePath(PACK, W, U, p).filter(s => s.kind === "chars").length === 1)(VC.answerCharChoice(VC.bootProg(braw, PACK).prog, false)));
+  const bs = n => Object.assign(clone(b), { sessions: n });
+  check(`(b) mid HSK 2: old pack ${nextOf(OLD, b)}; now no card, sessions alternate ${nextOf(PACK, bs(4))} / ${nextOf(PACK, bs(5))}`, nextOf(OLD, b) === "words:2/3" && nextOf(PACK, bs(4)) === "words:2/3" && nextOf(PACK, bs(5)) === "chars:1 c0001" && !VC.showCharChoice(PACK, W, U, b));
+  // Stored choice mapping: chars.defer true ("after") is "later"; anything else is "with words".
+  // The alternation reads prog.sessions only: no new field.
+  check("(b) stored choice: defer true -> later (HSK 2 set 3 every session, one 字 stage last); seen + defer false or unseen -> with words",
+    [4, 5].every(n => (p => nextOf(PACK, p) === "words:2/3" && VC.stagePath(PACK, W, U, p).filter(s => s.kind === "chars").length === 1)(VC.setCharOrder(bs(n), true)))
+    && nextOf(PACK, VC.answerCharChoice(bs(5), true)) === "chars:1 c0001" && nextOf(PACK, bs(5)) === "chars:1 c0001"
+    && !VC.charsWithWords(PACK, VC.setCharOrder(bs(5), true)) && VC.charsWithWords(PACK, bs(5)) && !VC.charsWithWords(OLD, bs(5)));
   // (c) in the characters stage
   const c = mig("D1 chars started, card answered: start"), craw = JSON.stringify(c);
   const recsBefore = JSON.stringify(c.chars.c);
-  check(`(c) in the characters stage: same next unit (${nextOf(OLD, c)} -> ${nextOf(PACK, c)}), no card`, nextOf(OLD, c).split(" ")[1] === nextOf(PACK, c).split(" ")[1] && !VC.showCharChoice(PACK, W, U, c));
+  const cs1 = Object.assign(clone(c), { sessions: 1 });
+  check(`(c) in the characters stage: same next unit on a character session (${nextOf(OLD, cs1)} -> ${nextOf(PACK, cs1)}), no card`, nextOf(OLD, cs1).split(" ")[1] === nextOf(PACK, cs1).split(" ")[1] && !VC.showCharChoice(PACK, W, U, c));
   // Storage: no new field or key; boot under the new pack reads exactly what the old pack read.
   for(const [label, raw] of [["(a)", JSON.stringify(a)], ["(b)", braw], ["(c)", craw]]){
     const nb = VC.bootProg(raw, PACK), ob = VC.bootProg(raw, OLD);
@@ -399,6 +410,10 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
   VC.dayStart(p, PACK, "2026-10-02", true);
   VC.markUnitTyped(p, U, PACK, u0.words[0], true); VC.noteDay(p, PACK, "2026-10-02", "c:" + U0, "type", true);
   check("typed credit: +1 on the existing record, day log c: entry right in \"type\"", p.chars.c[U0].s === 5 && p.chars.c[U0].r === 7 && eq(p.day.a["c:" + U0].r, ["type"]));
+  // Day log: a character unit whose miss aged out keeps { ag: 1 } over midnight (dayCarry).
+  const U1 = Object.keys(p.chars.c)[1]; p.day.a["c:" + U1] = { ag: 1 };
+  const nd = VC.dayLog(p, "2026-10-03");
+  check("day log: an aged-out mark { ag: 1 } is carried over midnight and nothing else changes", eq(nd.a["c:" + U1], { ag: 1 }) && eq(VC.bootProg(JSON.stringify(p), PACK).prog.day, p.day));
   let prev = null;
   try {
     const cp = require("child_process"), os = require("os");
@@ -408,7 +423,7 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
   if(!prev) skip("previous engine 8023572 not in this checkout's history");
   else {
     const pb = prev.bootProg(JSON.stringify(p), PACK);
-    check("previous engine 8023572 boots it (new pack fields present) with no backup, unit records and day log kept", pb.backupRaw === null && eq(pb.prog.chars.c, p.chars.c) && eq(pb.prog.day, p.day));
+    check("previous engine 8023572 boots it (new pack fields present, day log ag mark) with no backup, unit records and day log kept", pb.backupRaw === null && eq(pb.prog.chars.c, p.chars.c) && eq(pb.prog.day, p.day));
   }
 }
 

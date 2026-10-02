@@ -303,6 +303,8 @@ def check_characters_pack(pack, level_ids, rep):
         rep.warn("pack.characters.bareBy without pack.dayAware: units between mastered and bare get no guaranteed typed share")
     if "bareWords" in ch and not is_bool(ch["bareWords"]):
         rep.err("pack.characters.bareWords must be a boolean")
+    if "withWords" in ch and not is_bool(ch["withWords"]):
+        rep.err("pack.characters.withWords must be a boolean")
     return covered
 
 
