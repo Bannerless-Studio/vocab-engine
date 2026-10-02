@@ -2089,7 +2089,9 @@ return {
     const mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN_READ}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
     const mainBlocks = [...mainHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)], mainSrc = mainBlocks[mainBlocks.length - 1][1];
     const screensOf = async src => {
-      const x = await bootApp([{ lang:"zh-CN", name:"x" }], src ? { appSrc: src } : undefined);
+      // dayAware (plan-line wording) post-dates the control.
+      const noDay = Object.assign({}, PACK); delete noDay.dayAware;
+      const x = await bootApp([{ lang:"zh-CN", name:"x" }], src ? { appSrc: src, pack: noDay } : { pack: noDay });
       const out = [x.api.getHtml("panel")];
       const q = x.api.getProg(); q.sets[PACK.levels[0].id] = 3; x.api.today(); out.push(x.api.getHtml("panel"));
       x.api.enterTodayStep(5); out.push(x.api.getHtml("panel"));
