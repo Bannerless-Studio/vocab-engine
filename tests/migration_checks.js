@@ -247,8 +247,9 @@ console.log("\n[w.k] missed-kind marker");
 
 console.log("\n[session] session resume key (docs/PACK_SCHEMA.md \"Session resume\")");
 {
-  // A new key, never a new progress field: the record lives in sessionStorage beside the
-  // progress key and is never read by boot, migration, import or export.
+  // A new key, never a new progress field: the record lives in localStorage (sessionStorage
+  // before fb2-ui) beside the progress key and is never read by boot, migration, import or
+  // export. Its value is the latest record with other app tabs' records under `park`.
   const SK = VC.sessionKey(PACK);
   check(`session key ${SK} differs from the progress, legacy, legacy-backup and progress-backup keys`,
     SK === "vocab_zh_session" && new Set([SK, VC.storageKey(PACK), PACK.legacy.key, VC.legacyBackupKey(PACK), ...["invalid_backup", "pre_import_backup", "reset_backup"].map(x => `${VC.storageKey(PACK)}_${x}`)]).size === 7);
@@ -256,6 +257,91 @@ console.log("\n[session] session resume key (docs/PACK_SCHEMA.md \"Session resum
   const b = VC.bootProg(raw, PACK);
   check("migrated progress boots unchanged with no session field (the session record is never part of it)", b.backupRaw === null && eq(b.prog, VC.normalizeProg(p, PACK)) && !Object.keys(b.prog).some(k => /^session(?!s$)/.test(k)));
   check("a session record is not a legacy record", !VC.isLegacyRecord(PACK, LEGACY, { v: VC.SESSION_VERSION, build: "x", t: 0, fp: "0", tab: "today" }));
+  const parked = { v: VC.SESSION_VERSION, build: "x", t: 0, fp: "0", tab: "today", park: { test: { v: VC.SESSION_VERSION, build: "x", t: 0, fp: "0", tab: "test" } } };
+  check("a session value with parked records is not a legacy record", !VC.isLegacyRecord(PACK, LEGACY, parked));
+}
+
+console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"dayAware\")");
+{
+  const p = mig("C mid-HSK2");
+  const hasDayFields = x => "day" in x || [x.w, x.s, (x.chars || {}).c].some(m => Object.values(m || {}).some(r => "t" in r));
+  check("migrated legacy progress carries no day log and no t (both are written by drills only)", !hasDayFields(p));
+  if(!Object.keys(p.chars.c).length) p.chars.c[U[0].id] = { r: 1, w: 0, s: 1 };
+  if(!Object.keys(p.s).length) p.s.x1 = { r: 1, w: 0, s: 1 };
+  const W0 = Object.keys(p.w)[0], S0 = Object.keys(p.s)[0], C0 = Object.keys(p.chars.c)[0];
+  const today = "2026-10-02";
+  check("pack.dayAware is on for zh", VC.dayAwareOn(PACK) === true);
+  VC.dayStart(p, PACK, today);
+  VC.noteDay(p, PACK, today, "w:" + W0, "hear", true);
+  VC.noteDay(p, PACK, today, "s:" + S0, "gap", false);
+  VC.noteDay(p, PACK, today, "c:" + C0, "charRead", true);
+  const dn = Date.UTC(2026, 9, 2) / 864e5;
+  check("noteDay: additive only (day log + t on the answered records; r/w/s untouched by it)",
+    eq(p.day, { d: today, n: 1, a: { ["w:" + W0]: { r: ["hear"], c: 1 }, ["s:" + S0]: { m: 1, mk: ["gap"] }, ["c:" + C0]: { r: ["charRead"], c: 1 } } })
+    && p.w[W0].t === dn && p.s[S0].t === dn && p.chars.c[C0].t === dn);
+  const raw = JSON.stringify(p);
+  const b = VC.bootProg(raw, PACK);
+  check("progress with day + t survives a save/boot round trip", b.backupRaw === null && eq(b.prog.day, p.day) && eq(b.prog.w, p.w) && eq(b.prog.s, p.s) && eq(b.prog.chars.c, p.chars.c));
+  const i = VC.applyImport(null, raw, PACK);
+  check("progress with day + t survives export/import", i.ok && eq(i.prog.day, p.day) && eq(i.prog.w, p.w));
+  check("progress with day + t is native, not legacy", !VC.isLegacyRecord(PACK, LEGACY, p));
+  for(const [label, bad] of [["array", []], ["string", "x"], ["null", null], ["no a", { d: today, n: 1 }], ["n not an integer", { d: today, n: "1", a: {} }]]){
+    const r2 = JSON.stringify(Object.assign({}, p, { day: bad }));
+    const b2 = VC.bootProg(r2, PACK);
+    check(`malformed day (${label}) never invalidates progress; it reads as a fresh day`, b2.backupRaw === null && eq(b2.prog.w, p.w) && eq(VC.dayLog(b2.prog, today), { d: today, n: 0, a: {} }));
+  }
+  VC.dayStart(p, PACK, today);
+  VC.noteDay(p, PACK, today, "s:" + S0, "read", true);
+  check("a miss stays pending (mk) after a right answer in an easier kind", eq(p.day.a["s:" + S0].mk, ["gap"]) && VC.dayPending(p.day.a["s:" + S0]) !== null);
+  VC.noteDay(p, PACK, today, "s:" + S0, "gap", true);
+  check("a right answer in the missed kind settles it (mk removed)", !("mk" in p.day.a["s:" + S0]) && VC.dayPending(p.day.a["s:" + S0]) === null);
+  check("a day log from another date reads as a fresh day", eq(VC.dayLog(p, "2026-10-03"), { d: "2026-10-03", n: 0, a: {} }));
+  const off = Object.assign({}, PACK); delete off.dayAware;
+  const q = mig("C mid-HSK2"), before = JSON.stringify(q);
+  VC.dayStart(q, off, today); VC.noteDay(q, off, today, "w:" + Object.keys(q.w)[0], "hear", true);
+  check("without pack.dayAware, dayStart/noteDay write nothing", JSON.stringify(q) === before);
+  VC.daySessionStart(q, off); VC.dayStart(q, off, today, true);
+  check("without pack.dayAware, no session ordinal (prog.sn) is written", JSON.stringify(q) === before);
+
+  // Session clock: prog.sn, u on records and log entries, misses carried over midnight.
+  const z = mig("C mid-HSK2"); const ZW = Object.keys(z.w);
+  check("migrated legacy progress has no prog.sn and no u", !("sn" in z) && !Object.values(z.w).some(r => "u" in r));
+  for(const [label, bad] of [["string", "3"], ["negative", -2], ["fraction", 1.5]]){
+    const y = Object.assign(clone(z), { sn: bad }); VC.daySessionStart(y, PACK);
+    check(`malformed prog.sn (${label}) restarts at 1, progress untouched`, y.sn === 1 && eq(y.w, z.w));
+  }
+  VC.dayStart(z, PACK, today, true);
+  check("dayStart(newSession) counts one session; a Today step's drill (no newSession) does not", z.sn === 1 && (VC.dayStart(z, PACK, today), z.sn === 1) && z.day.n === 2);
+  VC.noteDay(z, PACK, today, "w:" + ZW[0], "recall", false);
+  VC.noteDay(z, PACK, today, "w:" + ZW[1], "hear", true);
+  VC.noteDay(z, PACK, today, "w:" + ZW[2], "gap", true);
+  check("noteDay: u (session ordinal) on the answered record and on the log entry of a right answer; a cloze leaves the word's t/u",
+    z.w[ZW[0]].u === 1 && z.w[ZW[1]].u === 1 && z.day.a["w:" + ZW[1]].u === 1 && !("u" in z.day.a["w:" + ZW[0]]) && !("u" in z.w[ZW[2]]) && !("t" in z.w[ZW[2]]));
+  const next = "2026-10-03";
+  check("next day: the unsettled miss and the last sessions' right kinds carry over; nothing else",
+    eq(VC.dayLog(z, next), { d: next, n: 0, a: { ["w:" + ZW[0]]: { mk: ["recall"] }, ["w:" + ZW[1]]: { r: ["hear"], u: 1 } } }));
+  z.sn = 1 + VC.DAY_RECENT_SESSIONS + 1;
+  check(`after ${VC.DAY_RECENT_SESSIONS} more sessions only the miss carries`, eq(VC.dayLog(z, next).a, { ["w:" + ZW[0]]: { mk: ["recall"] } }));
+  check("a miss carried for days stays tier 0 until settled", VC.dayTier({ key: "w:" + ZW[0], kinds: ["recall"] }, VC.dayLog(z, "2026-10-09"), z.sn) === 0);
+  VC.dayStart(z, PACK, "2026-10-09", true); VC.noteDay(z, PACK, "2026-10-09", "w:" + ZW[0], "hear", true);
+  check("an easier kind days later still does not settle it", eq(z.day.a["w:" + ZW[0]].mk, ["recall"]));
+  VC.noteDay(z, PACK, "2026-10-09", "w:" + ZW[0], "type", true);
+  check("a production kind settles a production miss days later", !("mk" in z.day.a["w:" + ZW[0]]));
+  const zraw = JSON.stringify(z), zb = VC.bootProg(zraw, PACK);
+  check("progress with sn + u survives a save/boot round trip and export/import", zb.backupRaw === null && zb.prog.sn === z.sn && eq(zb.prog.w, z.w) && eq(zb.prog.day, z.day) && (i2 => i2.ok && i2.prog.sn === z.sn)(VC.applyImport(null, zraw, PACK)));
+  // Rollback safety: the engine before dayAware (3d66aea, the live Chinese site) boots this
+  // progress with no backup and keeps day, sn and u untouched.
+  let old = null;
+  try {
+    const cp = require("child_process"), os = require("os");
+    const src = cp.execSync(`git -C "${ROOT}" show 3d66aea:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_3d66aea.js"); fs.writeFileSync(f, src); old = require(f);
+  } catch(e){ old = null; }
+  if(!old) skip("previous engine 3d66aea not in this checkout's history");
+  else {
+    const ob = old.bootProg(zraw, PACK);
+    check("previous engine 3d66aea boots day + sn + u progress with no backup, fields kept", ob.backupRaw === null && ob.prog.sn === z.sn && eq(ob.prog.day, z.day) && eq(ob.prog.w, z.w));
+  }
 }
 
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);

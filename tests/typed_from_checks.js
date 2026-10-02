@@ -26,7 +26,8 @@ const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
-const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; return p; })(Object.assign({}, PACK));
+// dayAware post-dates main ef44c6e: the control strips it with the fields under test.
+const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; return p; })(Object.assign({}, PACK));
 // words[].syn / typedSyn / noTypedMeaning (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields too.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; return c; });
 
@@ -417,7 +418,7 @@ function walk(api, stopAt){
     const r4 = run(0, "zzz not it");
     const rec = r4.prog.w[w.id];
     check(`renderer, a wrong meaning: 'you typed' shown, the miss is k="type" and the record keeps its shape (${JSON.stringify(rec)})`,
-      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov"].includes(k)));
+      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov", "t", "u"].includes(k)));
     // Second miss: the silent choice counterpart with the same stimulus.
     api.setProg(atTierProg([w]));
     const plan = typePlan(w, 7); const mi = api.itemFromPlan(plan[0], 0, plan);
@@ -552,6 +553,20 @@ function walk(api, stopAt){
       }
     }
   }
+
+  console.log("\n[6] typedFrom with pack.dayAware on (zh as shipped): two Today sessions in one day");
+  try {
+    const { api } = await boot({ seed: 9 });
+    api.setProg(seedPF()); api.today(); api.el("go").click();
+    const s1 = walk(api, /id="again"/); api.el("again").click(); api.el("go").click();
+    const s2 = walk(api, /id="again"/);
+    const typed = ss => ss.filter(x => x.kind === "type");
+    const done1 = new Set(typed(s1).map(x => x.where + "|" + x.it.label));
+    const rep = typed(s2).filter(x => done1.has(x.where + "|" + x.it.label));
+    const labels = new Set(typed(s2).map(x => x.it.label));
+    check(`session 2 still asks typed items from the target side (${[...labels].join(", ")}; ${typed(s1).length} / ${typed(s2).length} typed), none a word typed right in the same way in session 1 (${rep.length})`,
+      PACK.dayAware === true && typed(s1).length > 0 && typed(s2).length > 0 && rep.length === 0 && [...labels].some(l => l !== "Type the pinyin"));
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);

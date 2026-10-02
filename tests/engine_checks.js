@@ -1,6 +1,8 @@
 // Node checks for engine/core.js against the real zh pack plus synthetic packs.
 // Run: /opt/homebrew/bin/node tests/engine_checks.js     (no dependencies)
 "use strict";
+// zh sets pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): popovers end with its close button.
+const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
@@ -1823,8 +1825,10 @@ return {
     const g1 = api.gapSentence(one, false); g1.onAnswer(false);
     const afterMiss = JSON.stringify(pr.w[bid]);
     api.gapSentence(one, false).onAnswer(true);
+    // t: the day of the last answer, written under pack.dayAware (zh).
+    const noT = j => { const r = Object.assign({}, typeof j === "string" ? JSON.parse(j) : j); delete r.t; return JSON.stringify(r); };
     check(`cloze (choice) miss sets k=recall on the blank word ${bid}, r/w/s untouched; a gap pass clears it`,
-      afterMiss === JSON.stringify({ r:4, w:1, s:2, k:"recall" }) && JSON.stringify(pr.w[bid]) === JSON.stringify({ r:4, w:1, s:2 }) && pr.s[one.id] && pr.s[one.id].w === 1);
+      noT(afterMiss) === JSON.stringify({ r:4, w:1, s:2, k:"recall" }) && noT(pr.w[bid]) === JSON.stringify({ r:4, w:1, s:2 }) && pr.s[one.id] && pr.s[one.id].w === 1);
     const saved = pr.w[bid]; delete pr.w[bid]; api.gapSentence(one, false).onAnswer(false);
     check("cloze: a blank word with no record is not given one", !(bid in pr.w)); pr.w[bid] = saved;
     const typPack = Object.assign({}, PACK, { typing:{ caseSensitive:false, accents:"lenient", strictFromLevel:null }, typedFrom: undefined });
@@ -2087,7 +2091,9 @@ return {
     const mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN_READ}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
     const mainBlocks = [...mainHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)], mainSrc = mainBlocks[mainBlocks.length - 1][1];
     const screensOf = async src => {
-      const x = await bootApp([{ lang:"zh-CN", name:"x" }], src ? { appSrc: src } : undefined);
+      // dayAware (plan-line wording) post-dates the control.
+      const noDay = Object.assign({}, PACK); delete noDay.dayAware;
+      const x = await bootApp([{ lang:"zh-CN", name:"x" }], src ? { appSrc: src, pack: noDay } : { pack: noDay });
       const out = [x.api.getHtml("panel")];
       const q = x.api.getProg(); q.sets[PACK.levels[0].id] = 3; x.api.today(); out.push(x.api.getHtml("panel"));
       x.api.enterTodayStep(5); out.push(x.api.getHtml("panel"));
@@ -2119,7 +2125,7 @@ return {
       const target = { dataset: { pw: attrs["data-pw"], pg: attrs["data-pg"] }, classList: { add: c => cls.add(c), remove: c => cls.delete(c) } };
       target.closest = sel => sel === "[data-pw]" ? target : null;
       (document.getElementById("pbox")._listeners.click || []).forEach(f => f({ target }));
-      return { tag, pop: document.getElementById("gloss").innerHTML, live: api.getAnnounced(), on: cls.has("on") };
+      return { tag, pop: document.getElementById("gloss").innerHTML.replace(HELPX, ""), live: api.getAnnounced(), on: cls.has("on") };
     };
     const t1 = tapIn("p0003", 4, "w0115");
     check("span gloss: p0003 你下午几点回家？ 点 span carries data-pg", /data-pg="o&#39;clock; a little/.test(t1.tag) || /data-pg="o'clock; a little/.test(t1.tag));

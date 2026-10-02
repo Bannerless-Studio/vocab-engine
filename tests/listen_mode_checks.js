@@ -14,9 +14,11 @@ const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
-// typedFrom/glossFocus postdate the pinned control shas and change drill and gloss markup;
+// typedFrom/glossFocus/helpClose/readAnswerBlock postdate the pinned control shas and change markup;
 // this suite is about listening, so it runs the zh pack with them off.
-const PACK = (p => { delete p.typedFrom; delete p.glossFocus; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// dayAware (docs/PACK_SCHEMA.md) post-dates the pinned controls and is not what this suite checks.
+const PACK_DAY = loadConst(path.join(ZH, "pack.js"), "PACK");
+const PACK = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 // words[].syn / typedSyn / noTypedMeaning (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; return c; });
@@ -147,6 +149,7 @@ return {
   rerender: () => render(),
   dq: () => D ? D.q.map(it => [it.key, it.kind, it.label, !!it.needsNotice, /id="sp"/.test(it.html || "")]) : null,
   testTab: () => { tab = "test"; testSel = null; render(); },
+  cur: () => D && D.cur ? D.cur : null,
 };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"ListenModeChecks/1.0" }, undefined, localStorage, () => ({ matches:false }), fn => setTimeout(fn, 0),
@@ -577,6 +580,27 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     b.api.el("tListen").onclick({});
     const tl = b.api.dq() || [];
     check("Test Listen: every item a clipped word with the speaker", tl.length + 1 === Math.min(20, nClipped) && tl.every(x => x[4] && clipped.has(idOf(x[0]))));
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  console.log("\n[11] pack.dayAware on (zh as shipped): listening pass, no-voice plans, Test Sentences logs the kind it asks");
+  try{
+    const b = await boot({ pack: PACK_DAY });
+    b.api.setProg(rereadProg(PASSAGES, P)); b.api.today();
+    const lrow = planRow(b.api.html("panel"), "Listen");
+    b.api.enterTodayStep(5);
+    check("dayAware: a listenable re-read is still a listening pass (plan row and step 5)", PACK_DAY.dayAware === true && !!lrow && b.api.rd() && b.api.rd().mode === "listen");
+    const NV = [{ lang: "en-US", name: "en" }];
+    const nv = await boot({ pack: PACK_DAY, voices: NV });
+    const pr = sessionProg(); nv.api.setProg(pr);
+    nv.api.enterTodayStep(0);
+    const review = nv.api.dq() || [];
+    check("dayAware, no voice: Review plans no hear item and flags none", review.length > 0 && review.every(x => !x[3]) && !/no text-to-speech voice/.test(nv.api.html("panel")));
+    nv.api.testTab();
+    nv.api.el("tSentences").onclick({});
+    const it = nv.api.cur();
+    nv.api.el("o").children.find(x => x.dataset.v === String(it.a)).click();
+    const e = (nv.api.getProg().day || { a: {} }).a[it.key];
+    check(`dayAware, no voice: Test Sentences asks by sight and logs "read" (${JSON.stringify(e)}), nothing flagged`, !!e && JSON.stringify(e.r) === '["read"]' && (nv.api.dq() || []).every(x => !x[3]));
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);

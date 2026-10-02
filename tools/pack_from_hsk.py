@@ -303,6 +303,12 @@ def main(argv):
         # (docs/PACK_SCHEMA.md "typedFrom and glossFocus", TODO.md).
         "typedFrom": ["written", "pron"],
         "glossFocus": True,
+        # Help overlays (word popovers, audio toast) get a close button, tap-outside, Escape
+        # and an 8 s timer (docs/PACK_SCHEMA.md "helpClose"; owner feedback 2026-10-02).
+        "helpClose": True,
+        # Read questions: verdict and Next above the passage toggle (docs/PACK_SCHEMA.md
+        # "readAnswerBlock"; owner feedback 2026-10-02).
+        "readAnswerBlock": True,
         "showPron": True,
         "hasLessons": True,
         "spaced": False,
@@ -330,6 +336,8 @@ def main(argv):
         # by tone as hsk did, and a Reference card of every lesson sound in the Sounds tab.
         "tones": "pinyin",
         "soundsReference": True,
+        # Plans know what was drilled today (docs/PACK_SCHEMA.md "dayAware"; owner feedback 2026-10-02).
+        "dayAware": True,
     }
 
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).

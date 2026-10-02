@@ -24,7 +24,7 @@ Shared engine for the Bannerless-Studio language trainers. End-user docs: README
                  -> <lang>/engine/build.sh pack index.html -> index.html + sw.js -> GitHub Pages
                  (engine = this repo as a git submodule at <lang>/engine)
  Browser:        progress in localStorage "vocab_<pack.key>" (+ _invalid/_pre_import/_reset backups);
-                 drill in progress in sessionStorage "vocab_<pack.key>_session" (session resume);
+                 drill in progress in localStorage "vocab_<pack.key>_session" (session resume, one per app tab);
                  chinese migrates the old hsk_pinyin record once (core.js migrateLegacy)
  Tests:          tests/*.js boot core.js / a fake-DOM app.html against packs/zh, synthetic
                  fixtures and sibling ../<lang>/pack checkouts; goldens in tests/golden/
@@ -44,25 +44,27 @@ Why it is built this way (one line each):
 
 ## Commands (pinned)
 
-Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-01, branch zh-say (main 78d7511 merged).
+Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-02, branch fb2-sched (main ff590c8 merged).
 
 ```sh
 $NODE tests/engine_checks.js                     # 703 passed; includes the dist/zh.html + sw.js stale guard
-$NODE tests/pron_aids_checks.js                  # 156
-$NODE tests/migration_checks.js                  # 292 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
+$NODE tests/pron_aids_checks.js                  # 157
+$NODE tests/migration_checks.js                  # 325 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
 $NODE tests/characters_checks.js                 # 134
-$NODE tests/characters_app_checks.js             # 188
+$NODE tests/characters_app_checks.js             # 202
 $NODE tests/script_checks.js                     # 128
-$NODE tests/script_app_checks.js                 # 212
+$NODE tests/script_app_checks.js                 # 216
 $NODE tests/audio_checks.js                      # 90 (app section needs ../persian)
 $NODE tests/passage_audio_checks.js              # 43
-$NODE tests/listen_mode_checks.js                # 78
+$NODE tests/listen_mode_checks.js                # 81
 $NODE tests/validate_pack_audio_checks.js        # 30
-$NODE tests/validate_pack_characters_checks.js   # 78
+$NODE tests/validate_pack_characters_checks.js   # 83
 $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
-$NODE tests/typed_from_checks.js                 # 67 (pack.typedFrom / glossFocus; control vs ef44c6e)
-$NODE tests/session_resume_checks.js             # 46 (drill/passage resume after a tab switch or reload)
+$NODE tests/typed_from_checks.js                 # 69 (pack.typedFrom / glossFocus; control vs ef44c6e)
+$NODE tests/session_resume_checks.js             # 108 (drill/passage resume: tab switch, reload, relaunch, per-tab parking)
+$NODE tests/day_sim_checks.js                    # 48 (pack.dayAware: 8 sessions in one day, rollover, 14 days, resume never counts a session; before/after numbers; --why)
+$NODE tests/help_close_checks.js                 # 40 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
 $NODE tests/gloss_overlap_checks.js              # 55 (words syn/typedSyn/noTypedMeaning; ~1.5 min)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)

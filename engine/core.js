@@ -1078,6 +1078,7 @@ function kindMix(n, share, typing, rng){
 // word-only code runs unchanged, so the output is identical to a word-only plan.
 function buildReviewPlan(learned, prog, pack, opts){
   const o = opts || {}; const n = o.size || REVIEW_SIZE;
+  if(dayAwareOn(pack) && o.today) return dayReviewPlan(learned, prog, pack, n, o);
   const ru = recordedUnits(o.units, prog, pack);
   const rs = recordedScriptUnits(o.script, prog, pack);
   if(ru.length || rs.length) return hearableKinds(unifiedReviewPlan(learned, ru, prog, pack, n, o.rng, rs, Object.assign({ units: o.script }, o.scriptCtx || {}), o), o.canHear);
@@ -1090,6 +1091,7 @@ function buildReviewPlan(learned, prog, pack, opts){
 }
 function buildRecallPlan(learned, prog, pack, n, opts){
   const o = opts || {};
+  if(dayAwareOn(pack) && o.today) return dayRecallPlan(learned, prog, pack, n, o);
   const ru = recordedUnits(o.units, prog, pack);
   if(ru.length) return hearableKinds(unifiedRecallPlan(learned, ru, prog, pack, n, o.rng, o), o.canHear);
   const pool = weakFirst(learned, n, prog.w);
@@ -1139,6 +1141,215 @@ function applyMissedKinds(plan, prog, pack, production, opts){
   }
   return out;
 }
+// Day-aware planning (docs/PACK_SCHEMA.md "dayAware"; owner feedback 2026-10-02: with many
+// sessions a day the same items came back while important recalls never did). weakScore has
+// no notion of today or of time: every session ranked the same lifetime-weak units first and a
+// mastered unit was never refreshed. prog.day logs today's answers per item key ("w:", "c:",
+// "s:", "x:"): r the kinds answered right, c / m the drill ordinal of the last right answer /
+// miss. Records gain t, the day number of the last answer. Both are written only with the flag.
+// The planner's clock is the session ordinal prog.sn (owner 2026-10-02: "count by sessions rather
+// than days?"): records and log entries keep u, the session of the last answer, so "longest
+// unseen" means something within one day of many sessions; the date is the tie-break.
+const DAY_REFRESH_SHARE = 0.2, DAY_AGAIN_SHARE = 0.25, DAY_CONSOLIDATE_SHARE = 0.15;
+// "Already right, ask another kind" covers today and the last DAY_RECENT_SESSIONS sessions, so the
+// first session after midnight does not replay the evening's items.
+const DAY_RECENT_SESSIONS = 2;
+function dayAwareOn(pack){ return !!(pack && pack.dayAware === true); }
+// A log from another day, or one an older engine or an import mangled, is a fresh day: the log
+// is never validated at boot, so it can never reset the progress record.
+// A new day carries over every unsettled miss (it stays first however many days pass) and the
+// right kinds of the last sessions; nothing else.
+function dayLog(prog, today){
+  const d = prog && prog.day;
+  return isObj(d) && d.d === today && isObj(d.a) && Number.isInteger(d.n) ? d : { d: today, n: 0, a: dayCarry(d, daySn(prog)) };
+}
+function dayCarry(d, sn){
+  const out = {};
+  if(!isObj(d) || !isObj(d.a)) return out;
+  Object.keys(d.a).forEach(k => {
+    const e = d.a[k]; if(!isObj(e)) return;
+    const mk = Array.isArray(e.mk) ? e.mk.filter(x => typeof x === "string") : [];
+    const r = dayRecentU(e, sn) && Array.isArray(e.r) ? e.r.filter(x => typeof x === "string") : [];
+    if(!mk.length && !r.length) return;
+    const c = {}; if(mk.length) c.mk = mk; if(r.length){ c.r = r; c.u = e.u; }
+    out[k] = c;
+  });
+  return out;
+}
+function daySn(prog){ return prog && Number.isInteger(prog.sn) && prog.sn > 0 ? prog.sn : 0; }
+// A Today session counts once (app.html Start today), any other drill once; Today's own steps and
+// a resumed session never do.
+function daySessionStart(prog, pack){
+  if(!dayAwareOn(pack) || !prog) return false;
+  prog.sn = daySn(prog) + 1;
+  return true;
+}
+function dayStart(prog, pack, today, newSession){
+  if(!dayAwareOn(pack) || !prog) return false;
+  const d = prog.day = dayLog(prog, today); d.n++;
+  if(newSession) daySessionStart(prog, pack);
+  return true;
+}
+const dayRecentU = (e, sn) => typeof e.u === "number" && sn > 0 && e.u >= sn - DAY_RECENT_SESSIONS;
+// Right today (c), or right in the last sessions (u, carried over midnight).
+const dayRecent = (e, sn) => isObj(e) && (typeof e.c === "number" || dayRecentU(e, sn));
+const dayRight = (e, sn) => dayRecent(e, sn) && Array.isArray(e.r) ? e.r : [];
+function dayRecOf(prog, key){
+  const k = String(key), id = k.slice(2), p = prog || {};
+  const map = k[0] === "w" ? p.w : k[0] === "s" ? p.s : k[0] === "c" ? charRecs(p) : k[0] === "x" ? scriptRecs(p) : null;
+  return isObj(map) && isObj(map[id]) ? map[id] : null;
+}
+function noteDay(prog, pack, today, key, kind, ok){
+  if(!dayAwareOn(pack) || !prog) return false;
+  const d = prog.day = dayLog(prog, today);
+  const e = isObj(d.a[key]) ? d.a[key] : (d.a[key] = {});
+  // The in-drill retry right after a miss is not evidence the kind is known: it stays open and
+  // settles nothing. A right cloze on a blanked word ("gap") is logged but is no word drill: it
+  // neither counts as the word answered right today nor settles the word's miss. A miss keeps
+  // its kind in mk until a right answer that settles it (daySettles: an easier kind never does).
+  if(ok){
+    if(kind && e.m !== d.n){ if(!Array.isArray(e.r)) e.r = []; if(!e.r.includes(kind)) e.r.push(kind); }
+    if(!(kind === "gap" && String(key)[0] === "w")){
+      e.c = d.n; if(daySn(prog)) e.u = daySn(prog);
+      if(e.m !== d.n && Array.isArray(e.mk)){ e.mk = e.mk.filter(m => !daySettles([m], kind)); if(!e.mk.length) delete e.mk; }
+    }
+  } else {
+    e.m = d.n;
+    if(kind){ if(!Array.isArray(e.mk)) e.mk = []; if(!e.mk.includes(kind)) e.mk.push(kind); }
+  }
+  // A cloze is no word drill: the blanked word keeps its last-seen place in the refresh order.
+  const rec = kind === "gap" && String(key)[0] === "w" ? null : dayRecOf(prog, key); const t = isoDayNumber(today);
+  if(rec && isFinite(t)) rec.t = t;
+  if(rec && daySn(prog)) rec.u = daySn(prog);
+  return true;
+}
+// One partition for words, sentences and character units: production asks for the form
+// (recall, typed, cloze, written-form choice), recognition shows it (hear, read, charRead,
+// charSound). Typed variants are all logged as "type".
+const DAY_PRODUCTION = ["recall", "type", "charRecall", "charPick", "gap", "gapType"];
+const dayProd = k => DAY_PRODUCTION.includes(k);
+// A miss is settled by a right answer in its own kind, or in any production kind when it was a
+// production miss: never by an easier kind (review 2026-10-02: recall misses settled by ear).
+function daySettles(mk, kind){ return !mk.length || mk.includes(kind) || (dayProd(kind) && mk.some(dayProd)); }
+// The missed kinds still pending today, [] for a pending miss logged without a kind, or null.
+function dayPending(e){
+  if(!isObj(e)) return null;
+  if(Array.isArray(e.mk)) return e.mk.length ? e.mk : null;
+  return typeof e.m === "number" && !(typeof e.c === "number" && e.c > e.m) ? [] : null;
+}
+// 0 missed (today or earlier) and not yet settled, and this planner can ask a kind that settles it;
+// 1 due (unmastered, not right recently); 2 mastered, not right recently; 3 right recently (today
+// or the last DAY_RECENT_SESSIONS sessions), some kind this planner asks still open; 4 right
+// recently in every kind it asks, or a miss it cannot settle (a recall miss in Listen waits for a
+// planner that asks production). sn: the current session ordinal (prog.sn).
+function dayTier(c, d, sn){
+  const e = d.a[c.key];
+  const r = dayRight(e, sn);
+  const open = (c.kinds || []).some(k => !r.includes(k));
+  const mk = dayPending(e);
+  if(mk) return (c.kinds || []).some(k => daySettles(mk, k)) ? 0 : 4;
+  if(!dayRecent(e, sn)) return ((c.rec && c.rec.s) || 0) >= c.mastered ? 2 : 1;
+  return open ? 3 : 4;
+}
+const dayT = rec => rec && typeof rec.t === "number" && isFinite(rec.t) ? rec.t : -Infinity;
+const dayU = rec => rec && typeof rec.u === "number" && isFinite(rec.u) ? rec.u : -Infinity;
+// Longest unseen first: sessions since the last answer, then days.
+const dayAge = (a, b) => (dayU(a) - dayU(b)) || (dayT(a) - dayT(b));
+const dayS = rec => (rec && rec.s) || 0;
+const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c === "number" ? e.c : 0; };
+// Priority: today's misses, a reserved share of character units between mastered and bare
+// (consolidating: weakScore gave them no Review/Recall slot at all, lead finding 2026-10-02), a
+// reserved share of mastered units unseen longest (refresh would otherwise wait until every
+// weak unit had its turn), weak units by lowest streak then oldest last answer, a capped share
+// of harder kinds for units already right today, the rest of the consolidating and refresh
+// units, and only then what was right today. Jitter (below 1) only breaks exact ties.
+function dayPick(cands, n, d, rng, sn){
+  const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
+  (cands || []).forEach(c => { const t = dayTier(c, d, sn); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
+  C.sort((a, b) => dayAge(a.rec, b.rec) || dayS(a.rec) - dayS(b.rec) || a.j - b.j);
+  const cmp = [
+    (a, b) => weakScore(b.rec) - weakScore(a.rec),
+    (a, b) => dayS(a.rec) - dayS(b.rec) || dayAge(a.rec, b.rec),
+    (a, b) => dayAge(a.rec, b.rec) || dayS(a.rec) - dayS(b.rec),
+    (a, b) => dayC(a, d) - dayC(b, d) || dayS(a.rec) - dayS(b.rec),
+    (a, b) => dayC(a, d) - dayC(b, d),
+  ];
+  T.forEach((list, i) => list.sort((a, b) => cmp[i](a, b) || a.j - b.j));
+  const out = [];
+  const take = (list, k) => { for(let i = 0; i < k && list.length && out.length < n; i++) out.push(list.shift()); };
+  take(T[0], n); take(C, Math.ceil(n * DAY_CONSOLIDATE_SHARE)); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
+  take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[4], n);
+  return out;
+}
+// The kinds a planner may ask a unit, production first (owner rule: a unit already met today
+// comes back in a harder kind, recall/typed over recognition).
+function dayWordKinds(pack){ return typingEnabled(pack) ? ["recall", "type", "hear", "read"] : ["recall", "hear", "read"]; }
+function dayCharKinds(pack){ const cfg = charsConfig(pack); return ["charRecall", "charPick", ...((cfg && cfg.reviewKinds) || []).filter(k => k !== "charRecall" && k !== "charPick")]; }
+function daySentenceKinds(pack){ return [typingEnabled(pack) && !pronTypingOn(pack) ? "gapType" : "gap", "hear", "read"]; }
+// A unit already right today keeps its planned kind only when that kind is still open today
+// and production; otherwise the first open kind of `kinds` (production first). A pending miss
+// goes to a kind that settles it: the planned kind if it does, else its missed kind, else the
+// nearest production kind, preferring one not right today. Units not met today, and units with
+// every kind done, keep the planned kind. The one place a unit's kind is decided per day.
+function dayItemKind(prog, pack, today, key, planned, kinds){
+  if(!dayAwareOn(pack)) return planned;
+  const e = dayLog(prog, today).a[key];
+  if(!isObj(e)) return planned;
+  const r = dayRight(e, daySn(prog)), ks = kinds || [];
+  const mk = dayPending(e);
+  if(mk){
+    const fit = [planned, ...mk, ...ks.filter(dayProd), ...ks].filter(k => ks.includes(k) && daySettles(mk, k));
+    return fit.find(k => !r.includes(k)) || fit[0] || planned;
+  }
+  if(!r.length) return planned;
+  const open = ks.filter(k => !r.includes(k));
+  if(!open.length) return planned;
+  if(open.includes(planned) && dayProd(planned)) return planned;
+  return open.find(dayProd) || (open.includes(planned) ? planned : open[0]);
+}
+function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds){
+  return plan.map(it => {
+    if(it.word){ const k = dayItemKind(prog, pack, today, "w:" + it.word.id, it.kind, wordKinds); return k === it.kind ? it : Object.assign({}, it, { kind: k }); }
+    if(it.unit && CHAR_KINDS.includes(it.kind)){ const k = dayItemKind(prog, pack, today, "c:" + it.unit.id, it.kind, charKinds); return k === it.kind ? it : Object.assign({}, it, { kind: k }); }
+    return it;
+  });
+}
+const dayWordCand = (prog, kinds) => w => ({ t: "w", x: w, key: "w:" + w.id, rec: (prog.w || {})[w.id], mastered: WORD_MASTERED, kinds });
+const dayCharCand = (prog, pack, kinds) => { const cfg = charsConfig(pack), recs = charRecs(prog); return u => ({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], mastered: cfg ? cfg.mastered : CHAR_MASTERED, bare: cfg ? cfg.bare : CHAR_BARE, kinds }); };
+// For the app's own pickers (Listen, Sentences, Test): the n list entries to drill, by dayPick.
+// keyPrefix "w:" or "s:"; kinds: what the picker asks (or a function of the entry).
+function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng){
+  const d = dayLog(prog, today); const sent = keyPrefix === "s:";
+  const recs = (sent ? prog.s : prog.w) || {};
+  const cands = (list || []).map(x => ({ x, key: keyPrefix + x.id, rec: recs[x.id], mastered: sent ? SENTENCE_MASTERED : WORD_MASTERED, kinds: typeof kinds === "function" ? kinds(x) : kinds }));
+  return dayPick(cands, n, d, rng, daySn(prog)).map(c => c.x);
+}
+function dayReviewPlan(learned, prog, pack, n, o){
+  const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = o.rng || Math.random;
+  const d = dayLog(prog, o.today); const wk = dayWordKinds(pack), ck = dayCharKinds(pack);
+  const ru = recordedUnits(o.units, prog, pack), rs = recordedScriptUnits(o.script, prog, pack);
+  const srecs = scriptRecs(prog);
+  const cands = [...(learned || []).map(dayWordCand(prog, wk)), ...ru.map(dayCharCand(prog, pack, ck)),
+    ...rs.map(u => ({ t: "x", x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: scfg ? scfg.mastered : SCRIPT_MASTERED, kinds: scfg ? scfg.reviewKinds : [] }))];
+  const pool = shuffle(dayPick(cands, n, d, o.rng, daySn(prog)), o.rng);
+  const kinds = kindMix(pool.filter(c => c.t === "w").length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
+  let wi = 0;
+  const plan = pool.map(c => c.t === "w" ? { kind: kinds[wi++], word: c.x }
+    : c.t === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: c.x }
+    : { kind: pickScriptKind(scfg.reviewKinds, c.x, scfg, r, Object.assign({ units: o.script }, o.scriptCtx || {})), unit: c.x });
+  return hearableKinds(dayPlanKinds(applyMissedKinds(plan.filter(it => it.kind), prog, pack, false, o), prog, pack, o.today, wk, ck), o.canHear);
+}
+function dayRecallPlan(learned, prog, pack, n, o){
+  const d = dayLog(prog, o.today); const typing = typingEnabled(pack);
+  const wk = typing ? ["recall", "type"] : ["recall"], ck = ["charRecall", "charPick"];
+  const ru = recordedUnits(o.units, prog, pack);
+  const pool = dayPick([...(learned || []).map(dayWordCand(prog, wk)), ...ru.map(dayCharCand(prog, pack, ck))], n, d, o.rng, daySn(prog));
+  const kinds = kindMix(pool.filter(c => c.t === "w").length, 1, typing, o.rng);
+  let wi = 0;
+  const plan = pool.map(c => c.t === "w" ? { kind: kinds[wi++], word: c.x } : { kind: "charRecall", unit: c.x });
+  return hearableKinds(dayPlanKinds(applyMissedKinds(plan, prog, pack, true, o), prog, pack, o.today, wk, ck), o.canHear);
+}
+
 // A pack that types the reading (pronTypingOn) never gets gapType: the blank is written.
 function sentenceKind(pack, rng){
   const r = (rng || Math.random)();
@@ -1968,11 +2179,14 @@ function newCharUnits(units, learned, prog, pack, n){
   const ok = new Set((units || []).filter(u => ids.has((u.words || [])[0]) && !hasCharRec(recs, u.id)).map(u => u.id));
   return charStageUnits(levelIds(pack), (units || []).filter(u => ok.has(u.id)), pack).slice(0, n);
 }
-function charTestPlan(units, learned, prog, pack, n, rng){
+function charTestPlan(units, learned, prog, pack, n, rng, today){
   const cfg = charsConfig(pack); if(!cfg) return [];
-  const rec = weakFirst(recordedUnits(units, prog, pack), n, charRecs(prog), undefined, rng);
+  const day = dayAwareOn(pack) && today;
+  const rec = day ? dayPick(recordedUnits(units, prog, pack).map(dayCharCand(prog, pack, Object.keys(cfg.testKinds))), n, dayLog(prog, today), rng, daySn(prog)).map(c => c.x)
+    : weakFirst(recordedUnits(units, prog, pack), n, charRecs(prog), undefined, rng);
   const pool = rec.length >= n ? rec : rec.concat(newCharUnits(units, learned, prog, pack, n - rec.length));
-  return pool.map(unit => ({ kind: pickWeighted(cfg.testKinds, rng), unit }));
+  const plan = pool.map(unit => ({ kind: pickWeighted(cfg.testKinds, rng), unit }));
+  return day ? dayPlanKinds(plan, prog, pack, today, [], Object.keys(cfg.testKinds)) : plan;
 }
 
 // Script primer (docs/SCRIPT_PRIMER.md, docs/PACK_SCHEMA.md "Script primer"). Taught, done
@@ -2378,7 +2592,9 @@ function scriptReviewScore(rec, pack){
 function scriptTestPlan(units, prog, pack, n, rng, ctx){
   const cfg = scriptConfig(pack); if(!cfg) return [];
   const kctx = Object.assign({ units }, ctx || {});
-  const rec = weakFirst(recordedScriptUnits(units, prog, pack), n, scriptRecs(prog), undefined, rng);
+  const today = dayAwareOn(pack) && ctx && ctx.today; const srecs = scriptRecs(prog);
+  const rec = today ? dayPick(recordedScriptUnits(units, prog, pack).map(u => ({ x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: cfg.mastered, kinds: Object.keys(cfg.testKinds) })), n, dayLog(prog, today), rng, daySn(prog)).map(c => c.x)
+    : weakFirst(recordedScriptUnits(units, prog, pack), n, srecs, undefined, rng);
   const out = [];
   rec.forEach(unit => {
     const w = {}; Object.keys(cfg.testKinds).forEach(k => { const f = scriptKindFor(k, unit, cfg, kctx); if(f) w[f] = (w[f] || 0) + cfg.testKinds[k]; });
@@ -2840,6 +3056,10 @@ function checkGlossTyped(val, en, pack){
   return parts.length > 0 && parts.every(k => keys.has(k));
 }
 function glossFocusOn(pack){ return !!(pack && pack.glossFocus === true); }
+// pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): help overlays get explicit dismissal.
+function helpCloseOn(pack){ return !!(pack && pack.helpClose === true); }
+// pack.readAnswerBlock (docs/PACK_SCHEMA.md "readAnswerBlock"): Next sits under the verdict.
+function readAnswerBlockOn(pack){ return !!(pack && pack.readAnswerBlock === true); }
 function joinReadings(a, b, pack){
   if(!a) return b; if(!b) return a;
   return tonesOn(pack) && /^[aoe]/i.test(stripMarks(b)) && /[\p{L}]$/u.test(a) ? a + "'" + b : a + b;
@@ -2985,6 +3205,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
+  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
@@ -3001,7 +3222,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
   scriptOpts, scriptRomanOpts, scriptExamples, scriptWordOpts, scriptJoinedForms, scriptItem, learnScriptPlan, scriptReviewScore, scriptTestPlan,
   tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings,
-  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, composeSpanReading, spanReadingText,
+  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, helpCloseOn, readAnswerBlockOn, composeSpanReading, spanReadingText,
   LEGACY_DROPPED, legacyBackupKey, isLegacyRecord, migrateLegacy };
 if(typeof module!=="undefined" && module.exports) module.exports = API;
 if(root) root.VocabCore = API;

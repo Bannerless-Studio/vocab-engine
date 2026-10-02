@@ -11,6 +11,8 @@
 // + unit records (characters started).
 // Run: node tests/characters_app_checks.js
 "use strict";
+// zh sets pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): popovers end with its close button.
+const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
 
@@ -26,6 +28,8 @@ function tryLoadConst(file, name){ try{ return loadConst(file, name); }catch(e){
 // these checks keep testing BP's markup; tests/pron_aids_checks.js checks the pack with them.
 const PACK_ZH = (p => { const q = Object.assign({}, p); delete q.tones; delete q.soundsReference; if(q.typing === "pron") q.typing = null; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const PACK = Object.assign({}, PACK_ZH, { pronFirst: false });
+// The plan lines' order wording follows pack.dayAware (docs/PACK_SCHEMA.md "dayAware").
+const ORDER = PACK.dayAware ? "misses and due first" : "weakest first";
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = tryLoadConst(path.join(ZH, "sentences.js"), "PASSAGES") || [];
@@ -216,7 +220,7 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     h = api.html("panel");
     check("characters next: choiceSeen set, not deferred", api.getProg().chars.choiceSeen === true && api.getProg().chars.defer === false);
     check("after answering: card gone, Start today back", !/id="charChoice"/.test(h) && /id="go"/.test(h));
-    check("before any unit record: Review line is 20 items, words only (no unit in the plan yet)", /1\. Review<\/td><td>20 items, weakest first, words<\/td>/.test(h) && !api.getPrep().review.some(x => x.unit));
+    check("before any unit record: Review line is 20 items, words only (no unit in the plan yet)", new RegExp(`1\\. Review</td><td>20 items, ${ORDER}, words</td>`).test(h) && !api.getPrep().review.some(x => x.unit));
 
     // Start today: snapshot taken, Review (word-only: no records yet) is 20 items.
     api.el("go").click();
@@ -290,7 +294,7 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     const { api } = await boot();
     api.setProg(seedC()); api.today();
     const h = api.html("panel");
-    check("seed C: no choice card, Review line 20 items with units", !/id="charChoice"/.test(h) && /20 items, weakest first, words and 字/.test(h));
+    check("seed C: no choice card, Review line 20 items with units", !/id="charChoice"/.test(h) && new RegExp(`20 items, ${ORDER}, words and 字`).test(h));
     const prep = api.getPrep().review;
     api.el("go").click();
     const D = api.getD();
@@ -317,19 +321,27 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
   {
     // Characters started and units recorded, but every recorded unit is bare (well below
     // the learned words in the ranking): the plan holds no unit, so the line says "words".
-    const { api } = await boot();
+    // Without dayAware only: with it, mastered units unseen longest get the refresh share.
+    const noDay = Object.assign({}, PACK); delete noDay.dayAware;
+    const { api } = await boot({ pack: noDay });
     const q = seedB(); VC.answerCharChoice(q, true);
     VC.charStageUnits(["1","2","3"], CHARACTERS, PACK).slice(0, 40).forEach(u => { q.chars.c[u.id] = { r:9, w:0, s:9 }; });
     api.setProg(q); api.today();
     const h = api.html("panel"), prep = api.getPrep().review;
     check("units recorded but crowded out of the plan: Review line says words only", VC.recordedUnits(CHARACTERS, q, PACK).length === 40 && !prep.some(x => x.unit) && /1\. Review<\/td><td>20 items, weakest first, words<\/td>/.test(h));
+    if(PACK.dayAware){
+      const { api: a2 } = await boot();
+      a2.setProg(JSON.parse(JSON.stringify(q))); a2.today();
+      const p2 = a2.getPrep().review;
+      check(`dayAware: the same bare units take the refresh share (${p2.filter(x => x.unit).length} of ${p2.length}) and the line names them`, p2.filter(x => x.unit).length >= Math.ceil(p2.length * VC.DAY_REFRESH_SHARE) && /1\. Review<\/td><td>20 items, misses and due first, words and /.test(a2.html("panel")));
+    }
   }
   {
     // Snapshot keeps Review word-only when it was taken before characters started.
     const { api } = await boot();
     const p = VC.normalizeProg({ sets: { "1": 2 }, placedOnce: true }, PACK);
     api.setProg(p); api.today();
-    check("before characters: Review line is 15 items", /1\. Review<\/td><td>15 items, weakest first</.test(api.html("panel")));
+    check("before characters: Review line is 15 items", new RegExp(`1\\. Review</td><td>15 items, ${ORDER}<`).test(api.html("panel")));
     api.el("go").click();
     check("before characters: snapshot reviewSize 15, Review 15 word items",
       api.getState().snap.reviewSize === 15 && [api.getCur(), ...api.getD().q].length === 15 && [api.getCur(), ...api.getD().q].every(x => x.key.startsWith("w:")));
@@ -1041,7 +1053,7 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     const tw = shown[0], appended = [];
     const box = { querySelectorAll: () => [], querySelector: () => null, appendChild(c){ appended.push(c); return c; } };
     api.tokTap({ dataset: { tok: tw.id }, closest: sel => sel === "[data-tokbox]" ? box : null, classList: { add(){}, remove(){} } });
-    check(`sentence token tap on ${tw.w}: the popover carries the hint`, appended.length === 1 && appended[0].innerHTML === api.glossHTML(tw.id, "", null, true) && /class="chint"/.test(appended[0].innerHTML));
+    check(`sentence token tap on ${tw.w}: the popover carries the hint`, appended.length === 1 && appended[0].innerHTML.replace(HELPX, "") === api.glossHTML(tw.id, "", null, true) && /class="chint"/.test(appended[0].innerHTML));
     check("units without hint: popovers equal the plain gloss line", WORDS.every(w => b2.api.glossHTML(w.id, "", null, true) === b2.api.glossHTML(w.id, "", null)));
   } catch(e){ check(`hints section threw: ${e.stack}`, false); }
   // ---------------------------------------------------------------- say carriers

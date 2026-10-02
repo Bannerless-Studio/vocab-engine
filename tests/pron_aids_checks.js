@@ -8,6 +8,8 @@
 // DOM as tests/characters_app_checks.js (id registry + regex scan of innerHTML).
 // Run: node tests/pron_aids_checks.js
 "use strict";
+// zh sets pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): popovers end with its close button.
+const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
 const cp = require("child_process");
@@ -28,7 +30,7 @@ const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // The zh pack without typedFrom/glossFocus: the typed-slot rules and controls below predate them
 // (tests/typed_from_checks.js covers them).
-const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; return p; })(Object.assign({}, PACK));
+const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.helpClose; delete p.readAnswerBlock; return p; })(Object.assign({}, PACK));
 console.log(`Loaded zh pack: ${WORDS.length} words, ${SENTENCES.length} sentences, ${PASSAGES.length} passages, ${CHARACTERS.length} units`);
 
 let fails = 0, passes = 0;
@@ -510,7 +512,7 @@ function walk(api, stopAt){
     const progBefore = JSON.stringify(api.getProg()); spoken.length = 0;
     api.tokTap(tok);
     check(`tap on ${s0.t.slice(s0.ruby[4][0], s0.ruby[4][1])}: popover = the Read-tab popover of the word, inside the row, token marked on`,
-      appended.length === 1 && /gloss tokgloss/.test(appended[0].className) && appended[0].innerHTML === api.glossHTML(wid, "", null) && cls.has("on") && appended[0].hidden === false);
+      appended.length === 1 && /gloss tokgloss/.test(appended[0].className) && appended[0].innerHTML.replace(HELPX, "") === api.glossHTML(wid, "", null) && cls.has("on") && appended[0].hidden === false);
     check("the popover shows the coloured reading, the show-written tap and the gloss", tspans(appended[0].innerHTML) > 0 && /data-showw="学生"/.test(appended[0].innerHTML) && appended[0].innerHTML.includes(VC.escapeHtml(VC.gloss(tw0))));
     check(`the tap speaks the word only (${JSON.stringify(spoken)}), progress unchanged`, spoken.length === 1 && spoken[0] === tw0.w && JSON.stringify(api.getProg()) === progBefore);
     check("keyboard: one keydown listener on #panel (Enter/Space on a tap); drill shortcuts skip a focused tap",
@@ -905,7 +907,7 @@ function walk(api, stopAt){
     check(`main ${MAIN} engine loaded from git`, !!mainHtml && !!mainCore && typeof mainCore.sentencePieces === "function");
     // The fields BP2 gates on: pack.tones, typing "pron", soundsReference, sentence ruby (word
     // taps), and pronFirst (phrase-span readings in passages). Characters block kept.
-    const offPack = Object.assign({}, PACK_BASE, { typing: null }); delete offPack.tones; delete offPack.soundsReference; delete offPack.pronFirst;
+    const offPack = Object.assign({}, PACK_BASE, { typing: null }); delete offPack.tones; delete offPack.soundsReference; delete offPack.pronFirst; delete offPack.dayAware; // dayAware post-dates the control
     const offSent = SENTENCES.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; });
     const offPass = PASSAGES.map(p => Object.assign({}, p, { sentences: p.sentences.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; }) }));
     async function screens(html, core, pack, sents, passages, seed){
@@ -1042,6 +1044,19 @@ function walk(api, stopAt){
   }catch(e){ check(`dnext cancel section threw: ${e.stack}`, false); }
 
   Math.random = REAL_RANDOM;
+  console.log("\n[14] pack.dayAware on (zh as shipped): a second Today session the same day keeps colouring and typed readings");
+  try {
+    const { api } = await boot({ seed: 8 });
+    api.setProg(seedPF()); api.today(); api.el("go").click();
+    walk(api, /id="again"/); api.el("again").click(); api.el("go").click();
+    let seen = [], err = null;
+    try{ seen = walk(api, /id="again"/); }catch(e){ err = e; }
+    const unc = seen.filter(x => uncoloured(x.html).length);
+    const typed = seen.filter(x => x.kind === "type");
+    check(`session 2: every reading coloured (${seen.length} screens, ${unc.length} uncoloured), typed reading items present (${typed.length})${err ? " ERROR " + err.message : ""}`,
+      PACK.dayAware === true && !err && unc.length === 0 && typed.length > 0 && !!api.getProg().day);
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails === 0 ? 0 : 1);
 })().catch(e => { console.error(e); process.exit(1); });
