@@ -33,8 +33,9 @@ const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 const UNIT = Object.fromEntries(CHARACTERS.map(u => [u.id, u]));
 const UNIT_OF = new Map(CHARACTERS.map(u => [u.words[0], u]));
 // The zh pack before this branch: one stage after HSK 3 for 1-3, one after HSK 4, no bareBy/bareWords.
-const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; const o = Object.assign({}, p, { characters: c }); delete o.optsOneScript; return o; };
+const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; const o = Object.assign({}, p, { characters: c }); delete o.optsOneScript; return o; };
 const PACK_OFF = preWrite(PACK);
+const WITH = (p => { const c = Object.assign({}, p.characters, { withWords: true }); delete c.learn; return Object.assign({}, p, { characters: c }); })(PACK);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
 
@@ -202,7 +203,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
   console.log("\n[1] pack config and validation");
   {
     check("zh ships characters.bareBy \"typed\", bareWords, one stage per level labelled 字1..字4, dayAware",
-      CFG.bareBy === "typed" && CFG.bareWords === true && CFG.withWords === true && CFG.stages.map(st => st.after + ":" + st.levels.join() + ":" + st.label).join() === "1:1:字1,2:2:字2,3:3:字3,4:4:字4" && PACK.dayAware === true);
+      CFG.bareBy === "typed" && CFG.bareWords === true && CFG.learn === "lag" && CFG.withWords === false && CFG.stages.map(st => st.after + ":" + st.levels.join() + ":" + st.label).join() === "1:1:字1,2:2:字2,3:3:字3,4:4:字4" && PACK.dayAware === true);
     check("charsConfig: bareBy only \"typed\", bareWords only true, a stage label only a non-empty string",
       VC.charsConfig({ characters: { bareBy: "yes", bareWords: 1, stages: [{ after: "1", levels: ["1"], label: "" }] } }).bareBy === null
       && VC.charsConfig({ characters: { bareWords: 1 } }).bareWords === false && !("label" in VC.charsConfig({ characters: { stages: [{ after: "1", levels: ["1"], label: "" }] } }).stages[0]));
@@ -212,12 +213,12 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     const run = () => { try { return { code: 0, out: cp.execSync(`python3 tools/validate_pack.py "${dir}"`, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }) }; } catch(e){ return { code: e.status, out: String(e.stdout) + String(e.stderr) }; } };
     const ok = run();
     const pj = JSON.parse(fs.readFileSync(path.join(dir, "pack.json"), "utf8"));
-    pj.characters.bareBy = "choice"; pj.characters.bareWords = "yes"; pj.characters.withWords = 1; pj.characters.stages[0].label = "";
+    pj.characters.bareBy = "choice"; pj.characters.bareWords = "yes"; pj.characters.withWords = 1; pj.characters.learn = "first"; pj.characters.stages[0].label = "";
     fs.writeFileSync(path.join(dir, "pack.json"), JSON.stringify(pj));
     cp.execSync(`python3 tools/jsonify_pack.py "${dir}"`, { cwd: ROOT, stdio: "ignore" });
     const bad = run();
-    check(`validate_pack: zh passes (exit ${ok.code}); bad bareBy, bareWords, withWords and an empty stage label are errors (exit ${bad.code})`,
-      ok.code === 0 && bad.code === 1 && /bareBy must be "typed"/.test(bad.out) && /bareWords must be a boolean/.test(bad.out) && /withWords must be a boolean/.test(bad.out) && /stages\[0\]\.label must be a non-empty string/.test(bad.out));
+    check(`validate_pack: zh passes (exit ${ok.code}); bad bareBy, bareWords, withWords, learn and an empty stage label are errors (exit ${bad.code})`,
+      ok.code === 0 && bad.code === 1 && /bareBy must be "typed"/.test(bad.out) && /bareWords must be a boolean/.test(bad.out) && /withWords must be a boolean/.test(bad.out) && /learn must be "lag"/.test(bad.out) && /stages\[0\]\.label must be a non-empty string/.test(bad.out));
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 
@@ -374,7 +375,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
   }
 
   console.log("\n[5] stages per level, characters.withWords: Today for fresh, mid HSK 1, mid HSK 2, all words learned mid the old 字 stage, finished");
-  {
+  { const PACK = WITH; // the stage model (main 590af86); zh ships characters.learn "lag" (lag_checks.js)
     const segs = h => [...h.matchAll(/<div class="seg">[\s\S]*?<\/i><\/div>([\s\S]*?)<\/div>/g)].map(m => stripTags(m[1]));
     const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
     const withS = (p, n) => Object.assign(clone(p), { sessions: n });
@@ -488,7 +489,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
   }
 
   console.log("\n[9] withWords Learn turn (chars.turn): Today closed after Learn still alternates");
-  {
+  { const PACK = WITH; // the stage model (main 590af86); zh ships characters.learn "lag" (lag_checks.js)
     const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
     const reviewLine = h => (stripTags((h.match(/<tr><td>1\. Review<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^1\. Review/, ""));
     const mid = VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, soundsOpened: true, sessions: 40 }, PACK);
@@ -645,7 +646,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
   }
 
   console.log("\n[11] characters order (chars.order, R5): first / with words / later");
-  {
+  { const PACK = WITH; // the stage model (main 590af86); zh ships characters.learn "lag" (lag_checks.js)
     const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
     const playSession = api => { const s0 = api.getProg().sessions; if(!api.getD()) api.el("go").click(); let guard = 0;
       while(guard++ < 800 && api.getProg().sessions === s0){ const D = api.getD(); const h = api.panel();

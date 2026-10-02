@@ -15,7 +15,10 @@ const { diffMigration } = require(path.join(ROOT, "tools", "diff_hsk_migration.j
 const ZH = path.join(ROOT, "packs", "zh");
 const HSK = process.env.HSK_DIR || path.join(ROOT, "..", "chinese");
 const readJSON = f => JSON.parse(fs.readFileSync(path.join(ZH, f), "utf8"));
-const PACK = readJSON("pack.json"), WORDS = readJSON("words.json"), LEGACY = readJSON("legacy.json");
+// The sections before [lag] check the stage model (withWords, as on main 590af86); zh ships
+// characters.learn "lag" since fb3-lag, checked against the same records in [lag].
+const LAG_PACK = readJSON("pack.json"), WORDS = readJSON("words.json"), LEGACY = readJSON("legacy.json");
+const PACK = (p => { const c = Object.assign({}, p.characters, { withWords: true }); delete c.learn; return Object.assign({}, p, { characters: c }); })(LAG_PACK);
 const HSK_CORE = path.join(HSK, "src", "pinyin_core.js");
 const PC = fs.existsSync(HSK_CORE) ? require(HSK_CORE) : null;
 
@@ -379,7 +382,7 @@ console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"
 console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write): stored progress keeps its meaning");
 {
   // The zh pack before fb2-write: one stage after HSK 3 for levels 1-3, no bareBy/bareWords.
-  const OLD = (p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; return Object.assign({}, p, { characters: c }); })(clone(PACK));
+  const OLD = (p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); })(clone(PACK));
   const labels = p => VC.stagePath(PACK, W, U, p).map(s => s.label).join(" ");
   const nextOf = (pk, p) => { const st = VC.nextStage(pk, W, U, p); const cs = st && st.kind === "chars" ? VC.nextCharSet(st.levels, U, pk, p) : null; return st ? `${st.kind}:${st.kind === "words" ? st.lv + "/" + st.set : st.levels.join("+")}${cs ? " " + cs.units[0].id : ""}` : "done"; };
   check("pack: one characters stage per level, labels 字1..字4, bareBy typed, bareWords", eq(VC.charsConfig(PACK).stages.map(st => st.levels.join()), ["1", "2", "3", "4"]) && VC.typedBareOn(PACK) && VC.charsConfig(PACK).bareWords === true && !VC.typedBareOn(OLD));
@@ -487,6 +490,47 @@ console.log("\n[order] characters order chars.order (R5, fb2-write2): first / wi
       const r = raw({ chars: { v: 1, c: recs, order: o, turn: "c" } }), ob = eng.bootProg(r, PACK);
       check(`engine ${sha} boots chars.order "${o}": no backup, order, turn and records kept`, ob.backupRaw === null && ob.prog.chars.order === o && ob.prog.chars.turn === "c" && eq(ob.prog.chars.c, recs));
     }
+  }
+}
+
+console.log("\n[lag] characters.learn \"lag\" (fb3-lag): no stored field read or written; old order/turn/defer kept; older engines boot it");
+{
+  const LAG = LAG_PACK, OLDP = (p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); })(clone(LAG_PACK));
+  const cfg = VC.charsConfig(LAG);
+  check("pack: zh ships characters.learn \"lag\"; withWords off under it; the stage-model pack has no learn", cfg.learn === "lag" && cfg.withWords === false && !("learn" in VC.charsConfig(PACK)) && LAG.characters.withWords === undefined);
+  check("defaultProg: chars keys v,c,defer,choiceSeen,mix (no order, no turn: the flag-off shape)", eq(Object.keys(VC.defaultProg(LAG).chars), ["v", "c", "defer", "choiceSeen", "mix"]) && eq(VC.defaultProg(LAG).chars, VC.defaultProg(OLDP).chars));
+  const sig = p => { const st = VC.nextStage(LAG, W, U, p); const cs = st && st.kind === "chars" ? VC.lagCharSet(LAG, W, U, p) : null; return st ? st.kind + ":" + (st.kind === "words" ? st.lv + "/" + st.set : cs.units.map(u => u.id).join(",")) : "done"; };
+  // Stored fields of the stage model: every combination plans the same Learn, and boot keeps them.
+  for(const seed of ["C mid-HSK2", "HEAD", "D1 chars started, card answered: start", "D2 chars started, card answered: skip"]){
+    const base = mig(seed), want = sig(base);
+    const vars = [{ order: "with" }, { order: "first" }, { order: "first", turn: "c" }, { order: "with", turn: "w" }, { defer: true }, { defer: true, choiceSeen: true, order: "first" }, { choiceSeen: false, defer: false }];
+    const sigs = vars.map(v => sig(Object.assign(clone(base), { chars: Object.assign({}, base.chars, v) })));
+    const kept = vars.every(v => { const raw = JSON.stringify(Object.assign(clone(base), { chars: Object.assign({}, base.chars, v) })), b = VC.bootProg(raw, LAG); return b.backupRaw === null && JSON.stringify(b.prog.chars) === JSON.stringify(JSON.parse(raw).chars); });
+    check(`${seed}: Learn ${want.slice(0, 40)} whatever chars.order / turn / defer / choiceSeen (${vars.length} variants); boot keeps them byte-identical, no backup`, sigs.every(x => x === want) && kept);
+  }
+  const lt = VC.defaultProg(LAG);
+  check("learnTurnDone writes nothing under lag; showCharChoice / charsUnlocked false; no 字 stage in the path", !VC.learnTurnDone(lt, LAG, "words") && !("turn" in lt.chars) && !VC.showCharChoice(LAG, W, U, mig("C mid-HSK2")) && !VC.charsUnlocked(LAG, W, mig("HEAD")) && !VC.stagePath(LAG, W, U, mig("HEAD")).some(s => s.kind === "chars"));
+  // Progress this branch writes (records with holes, old fields kept) on older engines, and theirs here.
+  const mine = mig("HEAD"); mine.chars.order = "first"; mine.chars.turn = "c";
+  const ids = U.map(u => u.id); [3, 4, 5, 40, 41, 300].forEach(i => { delete mine.chars.c[ids[i]]; });
+  for(let s = 0; s < 3; s++){ const st = VC.nextStage(LAG, W, U, mine); if(st.kind !== "chars") break; VC.lagCharSet(LAG, W, U, mine).units.forEach(u => { mine.chars.c[u.id] = { r: 1, w: 0, s: 1 }; }); }
+  const mraw = JSON.stringify(mine);
+  for(const [sha, pk] of [["590af86", PACK], ["ea62a45", PACK], ["3d66aea", OLDP]]){
+    let eng = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const src = cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`engine ${sha} not in this checkout's history`); continue; }
+    const ob = eng.bootProg(mraw, pk), st = eng.nextStage(pk, W, U, ob.prog), cs = st && st.kind === "chars" ? eng.nextCharSet(st.levels, U, pk, ob.prog) : null;
+    // 3d66aea predates the recorded-unit filter in nextCharSet: a set with holes is taught whole there.
+    const re = cs ? cs.units.filter(u => mine.chars.c[u.id]).length : 0;
+    check(`engine ${sha} boots lag progress: no backup, records kept, next ${st ? st.kind : "done"}${cs ? `: ${cs.units.length - re} holes${re ? `, ${re} recorded (old set rule)` : ""}` : ""}`, ob.backupRaw === null && eq(ob.prog.chars.c, mine.chars.c) && !!st && (!cs || (cs.units.length > re && (re === 0 || sha === "3d66aea"))));
+    const theirs = eng.bootProg(JSON.stringify(mig("D1 chars started, card answered: start")), pk).prog;
+    if(eng.setCharMode) eng.setCharMode(theirs, "later");
+    const back = VC.bootProg(JSON.stringify(theirs), LAG), cs2 = VC.lagCharSet(LAG, W, U, back.prog);
+    check(`progress written by ${sha} boots here: no backup, records and fields kept; Learn ${sig(back.prog).slice(0, 30)}, nothing re-taught`, back.backupRaw === null && JSON.stringify(back.prog.chars) === JSON.stringify(theirs.chars) && (!cs2 || cs2.units.every(u => !theirs.chars.c[u.id])));
   }
 }
 

@@ -102,8 +102,8 @@ function derivedDiff(old, prog, P, hsk){
   // Accepted deviation (docs/HSK_MERGE.md §8, fb2-write 2026-10-02): zh has one characters stage
   // per level where hsk had one after HSK 3; the stage views are compared on hsk's layout, which
   // shows the migrated record keeps its position (the per-level layout: migration_checks [write]).
-  // hsk's layout and choice card: one stage after HSK 3, no withWords alternation (docs/HSK_MERGE.md §8).
-  const SP = P.pack.characters ? Object.assign({}, P.pack, { characters: Object.assign({}, P.pack.characters, { stages: HSK_STAGES, withWords: false }) }) : P.pack;
+  // hsk's layout and choice card: one stage after HSK 3, no withWords alternation, no learn "lag" (docs/HSK_MERGE.md §8).
+  const SP = P.pack.characters ? Object.assign({}, P.pack, { characters: Object.assign({}, P.pack.characters, { stages: HSK_STAGES, withWords: false, learn: undefined }) }) : P.pack;
   cmp("stage path (kind, levels, fraction, done)", PC.stagePath(hp, nsets, VOCAB).map(hStage), VC.stagePath(SP, P.words, P.units, prog).map(hStage));
   cmp("next stage", hStage(PC.nextStage(hp, nsets, VOCAB)), hStage(VC.nextStage(SP, P.words, P.units, prog)));
   cmp("characters started", PC.charsStarted(hp, nsets, VOCAB), VC.charsStarted(SP, P.words, P.units, prog));
