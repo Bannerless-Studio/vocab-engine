@@ -26,7 +26,7 @@ const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
-const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; return p; })(Object.assign({}, PACK));
+const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.helpClose; delete p.readAnswerBlock; return p; })(Object.assign({}, PACK));
 
 let fails = 0, passes = 0;
 function check(name, cond){

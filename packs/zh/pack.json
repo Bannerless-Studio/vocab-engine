@@ -65,6 +65,7 @@
  ],
  "glossFocus": true,
  "helpClose": true,
+ "readAnswerBlock": true,
  "showPron": true,
  "hasLessons": true,
  "spaced": false,

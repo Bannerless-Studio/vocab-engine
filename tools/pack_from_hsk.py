@@ -272,6 +272,9 @@ def main(argv):
         # Help overlays (word popovers, audio toast) get a close button, tap-outside, Escape
         # and an 8 s timer (docs/PACK_SCHEMA.md "helpClose"; owner feedback 2026-10-02).
         "helpClose": True,
+        # Read questions: verdict and Next above the passage toggle (docs/PACK_SCHEMA.md
+        # "readAnswerBlock"; owner feedback 2026-10-02).
+        "readAnswerBlock": True,
         "showPron": True,
         "hasLessons": True,
         "spaced": False,

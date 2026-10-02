@@ -683,6 +683,7 @@ const GLOSS_FOCUS = VC.glossFocusOn(PACK);
 // button, closes on a tap outside it and on Escape, and closes itself after HELP_MS unless a
 // pointer or finger is on it. One at a time: opening one closes the one before.
 const HELP_CLOSE = VC.helpCloseOn(PACK);
+const READ_BLOCK = VC.readAnswerBlockOn(PACK);
 const HELP_MS = 8000;
 const HELP_X = HELP_CLOSE ? `<button type="button" class="helpx" aria-label="Close">×</button>` : "";
 let helpCur = null;   // { el, close, ms, timer }
@@ -2476,14 +2477,15 @@ function readQuestionScreen(){
   const qText = () => `<div class="med wd"${TA}>${rubyTextOr(q.q, q.ruby)}</div>`;
   const qTr = () => q.en ? `<div id="qtrwrap">${view.trShown ? `<div class="q cue">${ui(q.en)}</div>` : `<button class="ghost" id="qtr" style="margin:8px 0">Show translation</button>`}</div>` : "";
   const qHidden = RD.mode === "listen" && hearQ && RD.audioOnly.indexOf(qi) >= 0 && !view.qOpen && rec.ok === null;
+  const nxBtn = `<button class="next" id="nx" style="display:none">${qi+1 < p.questions.length ? "Next" : "See results"}</button>`;
   P.innerHTML = `<div class="drill-body top"><p class="q">Question ${qi+1} / ${p.questions.length}</p>
     ${qHidden ? `<div id="qshwrap"><button class="ghost" id="qsh" style="margin:8px 0">Show question</button></div>${REPLAY_STAGE}` : `${qText()}${hearQ ? REPLAY_STAGE : ""}${qTr()}`}
     <div class="opts ${tf ? "" : "opts-w"}" id="o"></div>
-    <div id="qans"><div class="reveal" id="rv"></div><button class="next" id="nx" style="display:none">${qi+1 < p.questions.length ? "Next" : "See results"}</button></div>
+    ${READ_BLOCK ? `<div id="qans"><div class="reveal" id="rv"></div>${nxBtn}</div>` : `<div class="reveal" id="rv"></div>`}
     <button class="ghost" id="ptoggle" aria-expanded="${RD.shown}" style="margin-top:12px">${RD.shown ? "Hide passage" : "Show passage"}</button>
     ${glossBox()}
     <div class="passage" id="pbox"${RD.shown ? "" : " hidden"}>${passageHTML(-1)}</div>
-    </div>`;
+    </div>${READ_BLOCK ? "" : `<div class="actions">${nxBtn}</div>`}`;
   wirePassage($("pbox"), $("gloss"));
   // Spoken once per question: a re-mount, or a voice arriving after answering, only offers Replay.
   if(hearQ){
@@ -2517,9 +2519,11 @@ function readQuestionScreen(){
     // speak() cancels the question's TTS, so the source sentence never overlaps it.
     if(hearS){ const rb = $("rvp"); if(fresh) saySentence(s, rb); rb.onclick = () => saySentence(s, rb); }
     const hs = $("pbox").querySelector(`[data-si="${q.sentence}"]`); if(hs) hs.classList.add("hi");
-    // Verdict and Next stay together above the passage toggle, so an open passage never
-    // pushes them off screen (owner feedback 2026-10-02); scrolls only when they are off it.
-    $("nx").style.display = "block"; if(fresh) bringIntoView($("qans"));
+    // pack.readAnswerBlock: verdict and Next stay together above the passage toggle, so an
+    // open passage never pushes them off screen (owner feedback 2026-10-02). Without it Next
+    // sits below the passage, and an open passage brings the verdict into view instead.
+    if(READ_BLOCK){ $("nx").style.display = "block"; if(fresh) bringIntoView($("qans")); }
+    else if(RD.shown){ $("nx").style.display = "block"; if(fresh) bringIntoView($("rv")); } else showNext();
     setScore(qi+1, p.questions.length);
   };
   order.forEach((v, i) => {

@@ -184,6 +184,7 @@ async function onPassage(pack){
   console.log("\n[1] core.js helpCloseOn");
   check("helpCloseOn: true only for helpClose === true", VC.helpCloseOn({ helpClose: true }) && !VC.helpCloseOn({}) && !VC.helpCloseOn({ helpClose: "yes" }) && !VC.helpCloseOn(null));
   check("zh ships helpClose: true", PACK.helpClose === true);
+  check("readAnswerBlockOn: true only for readAnswerBlock === true; zh ships it", VC.readAnswerBlockOn({ readAnswerBlock: true }) && !VC.readAnswerBlockOn({}) && !VC.readAnswerBlockOn({ readAnswerBlock: 1 }) && PACK.readAnswerBlock === true);
 
   console.log("\n[2] validate_pack.py");
   {
@@ -198,9 +199,10 @@ async function onPassage(pack){
       fs.rmSync(dir, { recursive: true, force: true });
       return { status: r.status, out: (r.stdout || "") + (r.stderr || "") };
     };
-    const a = run({}), b = run({ helpClose: true }), c = run({ helpClose: false });
+    const a = run({}), b = run({ helpClose: true, readAnswerBlock: true }), c = run({ helpClose: false }), d = run({ readAnswerBlock: "yes" });
     check("absent or true: no helpClose error", a.status === 0 && b.status === 0 && !/helpClose/.test(a.out + b.out), a.out + b.out);
     check("false: error 'pack.helpClose must be true when present'", c.status === 1 && /pack\.helpClose must be true when present/.test(c.out), c.out);
+    check("readAnswerBlock not true: error", d.status === 1 && /pack\.readAnswerBlock must be true when present/.test(d.out), d.out);
   }
 
   console.log("\n[3] zh, flag on");
@@ -282,6 +284,16 @@ async function onPassage(pack){
       check(`passage open, answered ${right ? "right" : "wrong"}: verdict and Next brought into view together, no scroll to the bottom (scrolled: ${scrolled.join(", ")})`, scrolled.join() === "qans" && api.el("nx").style.display === "block" && /Right\.|Not quite\./.test(api.html("rv")));
       api.el("nx").click(); if(!api.rd().shown) api.el("ptoggle").click();
     }
+    // Flag off: Next in the bottom bar; an open passage brings the verdict into view.
+    const off = Object.assign({}, PACK); delete off.readAnswerBlock;
+    const o = await onPassage(off);
+    o.api.el("rdone").click();
+    const h2 = o.api.html("panel"), at2 = id => h2.indexOf(`id="${id}"`);
+    check("flag off: Next stays below the passage in the bottom bar", at2("rv") < at2("ptoggle") && at2("pbox") < at2("nx") && /<div class="actions"><button class="next" id="nx"/.test(h2));
+    o.api.el("ptoggle").click(); scrolled.length = 0; o.api.el("o").children[0].click();
+    check(`flag off, passage open: the verdict is brought into view, not Next (scrolled: ${scrolled.join(", ")})`, scrolled.join() === "rv");
+    o.api.el("nx").click(); scrolled.length = 0; o.api.el("o").children[0].click();
+    check(`flag off, passage closed: scrolls to Next as before (scrolled: ${scrolled.join(", ")})`, scrolled.join() === "nx");
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
