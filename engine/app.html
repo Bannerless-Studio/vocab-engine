@@ -1954,7 +1954,8 @@ function pathStrip(){
 // nor whether Review/Recall include units.
 const takeSnapshot = () => HAS_STAGES ? pauseSnap(VC.todaySnapshot(PACK, WORDS, CHAR_LIST, prog, SU)) : null;
 const snapLearns = snap => !!(snap.stage && (snap.stage.kind === "words" || snap.cset || (snap.stage.kind === "script" && snap.ssets && snap.ssets.length)));
-// Paused: the drill items the Learn step would have had go to Review (pauseNew).
+// Paused: the drill items the Learn step would have had go to Review (pauseNew), as far as the
+// pool supplies them without a same-day repeat (core.js dayReviewPlan extra).
 function learnDrillCount(snap){
   if(snap ? !snapLearns(snap) : !nextNewSet()) return 0;
   const st = snap && snap.stage;
@@ -1965,10 +1966,9 @@ function learnDrillCount(snap){
   return nn ? nn.words.reduce((n, w) => n + (canHearWord(w) ? 2 : 1), 0) : 0;
 }
 function pauseSnap(snap){
-  if(snap && paused()) snap.reviewSize += learnDrillCount(snap);
+  if(snap && paused()) snap.reviewExtra = learnDrillCount(snap);
   return snap;
 }
-const pausedReviewSize = () => VC.REVIEW_SIZE + learnDrillCount(null);
 function snapLearnLine(snap){
   const st = snap.stage;
   if(!st || !snapLearns(snap)) return "everything covered";
@@ -2019,10 +2019,10 @@ function todayRender(){
   const g = VC.todayGates(lw.length, !pz && (snap ? snapLearns(snap) : !!nn), availSent.length, scriptCount());
   // Start today runs exactly this plan, so the line names units only when the plan holds
   // some (a first character day has no unit records yet).
-  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedUnits: TYPED_UNITS }) : null } : null;
+  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedUnits: TYPED_UNITS }) : null } : null;
   const reviewLine = snap
-    ? `${snap.reviewSize} items, ${PLAN_ORDER}${reviewWhat(snap, todayPrep.review)}`
-    : `${pz ? pausedReviewSize() : VC.REVIEW_SIZE} items, ${PLAN_ORDER}`;
+    ? `${snap.reviewExtra && todayPrep.review ? todayPrep.review.length : snap.reviewSize} items, ${PLAN_ORDER}${reviewWhat(snap, todayPrep.review)}`
+    : `${pz && g.review ? VC.buildReviewPlan(lw, prog, PACK, { extra: learnDrillCount(null), canHear: canHearWord, today: dayToday(), rng: () => 0.5 }).length : VC.REVIEW_SIZE} items, ${PLAN_ORDER}`;
   const steps = [
     ["Review", g.review ? reviewLine : (snap && snap.stage && snap.stage.kind === "script" ? "skipped until a set is learned" : "skipped until 5+ words are learned")],
     ["Learn", snap ? snapLearnLine(snap) : (nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered")],
@@ -2106,11 +2106,11 @@ function todayStep(){
   todayStepState.at = s; sessionSave(true);
   if(s === 0){
     if(g.review && snap){
-      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedUnits: TYPED_UNITS });
+      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedUnits: TYPED_UNITS });
       todayStepState.review = null;
       drill(plan.map(planItem), todayStep, missSummary); return;
     }
-    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, { size: paused() ? pausedReviewSize() : undefined, canHear: canHearWord, today: dayToday() }).map(itemFromPlan), todayStep, missSummary); return; }
+    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, { extra: paused() ? learnDrillCount(null) : undefined, canHear: canHearWord, today: dayToday() }).map(itemFromPlan), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 1){
@@ -2749,6 +2749,8 @@ function readResults(){
   const p = RD.p, P = $("panel");
   const sc = RD.answers.filter(a => a && a.ok).length;
   const weak = VC.passageWeakWords(p, { tapped: RD.tapped, answers: RD.answers }, WORDS_BY_ID);
+  // pauseNew: Today's Read stage never gives an unlearned word a record (`d` would make it learned).
+  if(RD.today && paused()){ const lw = new Set(learnedWords().map(w => w.id)); weak.forEach(w => { if(!lw.has(w.id)) w.weight = 0; }); }
   // Weight-0 entries (looked back only) are information: never applied, no checkbox.
   const anyWeak = weak.some(w => w.weight > 0);
   // Without RD.added a re-mount would offer "Add to review" again and apply the same words twice.

@@ -126,7 +126,7 @@ class FakeDate extends Date {
   static now(){ return NOW; }
 }
 
-let VOICES = [{ lang:"zh-CN", name:"x" }], ACC = 0.85;
+let VOICES = [{ lang:"zh-CN", name:"x" }], ACC = 0.85, NO_EXTRA = false; // NO_EXTRA: paused Review at base size (control)
 async function boot(pack, st, seed){
   Math.random = mulberry32(seed);
   const document = makeFakeDom();
@@ -137,6 +137,7 @@ async function boot(pack, st, seed){
 let __cur = null; const __log = [];
 const __mc = renderMcItem; renderMcItem = function(it){ __cur = it; __log.push({ it, step: todayStepState && todayStepState.at }); return __mc(it); };
 const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; __log.push({ it, step: todayStepState && todayStepState.at }); return __ty(it); };
+${NO_EXTRA ? "learnDrillCount = () => 0;" : ""}
 return {
   el: id => document.getElementById(id), panel: () => document.getElementById("panel").innerHTML,
   getProg: () => prog, getD: () => D, getCur: () => __cur, log: __log, rd: () => RD,
@@ -510,9 +511,34 @@ function missesCarried(drilled0){
     const m = metrics(seedP, PACK_ON, day, K_DUE), rep = windowRepeats(day.drilled, () => 0), mc = missesCarried(day.drilled);
     const rv = [...new Set(day.drilled.map(d => d.sess))].map(sn => day.drilled.filter(d => d.sess === sn && d.step === 0).length);
     report(`${sc.name.slice(0, 1)} paused`, m, day.learnNew);
-    check(`pause ${sc.name.slice(0, 1)}: no new material in ${N_SESSIONS} sessions (${day.learnNew.join(",")}); Review items per session ${rv.join(",")}`, day.learnNew.every(n => n === 0) && rv.every(n => n >= 36));
+    check(`pause ${sc.name.slice(0, 1)}: no new material in ${N_SESSIONS} sessions (${day.learnNew.join(",")}); Review items per session ${rv.join(",")} (with retries; the extra shrinks as A's 210-item pool is used, M2)`, day.learnNew.every(n => n === 0) && rv.every(n => n >= (sc.words > 200 ? 36 : 20)));
     check(`pause ${sc.name.slice(0, 1)}: same-kind repeats of items right earlier today <= 2% of sessions 2..${N_SESSIONS} (${m.sameKindAll}/${m.itemsAfter1}); in the repeat window ${rep.length}/${day.drilled.length}`, m.sameKindAll <= 0.02 * m.itemsAfter1);
     check(`pause ${sc.name.slice(0, 1)}: every miss of sessions 1..${N_SESSIONS - 1} comes back the same day (${m.missKeys.length - m.lostMiss.length}/${m.missKeys.length}), production misses in production (${m.prodKeys.length - m.prodLost.length}/${m.prodKeys.length}), in a settling kind (${mc.n - mc.lost.length}/${mc.n})`, m.lostMiss.length === 0 && m.prodLost.length === 0 && mc.lost.length === 0 && mc.n > 0);
+  }
+  // Review M2 (fb4-pause review): a small pool must not pad the paused Review with same-day
+  // repeats. Review-step items whose key and kind were answered right earlier that day, per session.
+  console.log(`\n[pause small pool] mid HSK 1 (30 words, 25 units), 5 Today sessions in one day: paused vs paused at base size (control)`);
+  {
+    // As metrics(): the in-drill retry after a miss is neither a repeat nor "answered right".
+    const reviewRepeats = drilled => { const right = new Set(), missedIn = new Set(), out = [];
+      [...new Set(drilled.map(d => d.sess))].forEach(sn => { let n = 0, size = 0;
+        drilled.filter(d => d.sess === sn).forEach(d => { const did = d.sess + ":" + d.step, retry = missedIn.has(d.key + "@" + did);
+          if(d.step === 0 && !retry){ size++; if(right.has(d.key + "|" + d.kind)) n++; }
+          if(!d.ok) missedIn.add(d.key + "@" + did); else if(!retry) right.add(d.key + "|" + d.kind); });
+        out.push([n, size]); });
+      return out; };
+    const res = {};
+    for(const [tag, base] of [["control", true], ["paused", false]]){
+      NOW = new Date(2026, 9, 2, 7, 0, 0).getTime(); NO_EXTRA = base;
+      const seedP = Object.assign(seedProg(PACK_ON, 30, 25, 11), { pause: 1 });
+      res[tag] = reviewRepeats((await playDay(PACK_ON, seedP, 5, 5)).drilled); NO_EXTRA = false;
+      console.log(`  ${tag}: Review repeats / items per session ${res[tag].map(x => x.join("/")).join(", ")}`);
+    }
+    check(`pause small pool: paused Review same-day repeats <= the base-size control per session (${res.paused.map(x => x[0]).join(",")} vs ${res.control.map(x => x[0]).join(",")}), Review never smaller (${res.paused.map(x => x[1]).join(",")} vs ${res.control.map(x => x[1]).join(",")})`,
+      res.paused.every((x, i) => x[0] <= res.control[i][0] && x[1] >= res.control[i][1]));
+    NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
+    const own = await playDay(PACK_ON, Object.assign(seedProg(PACK_ON, 595, 250, 11), { pause: 1 }), 5, 5), ro = reviewRepeats(own.drilled);
+    check(`pause large pool (595 words, 250 units): Review keeps the Learn step's items, 5 sessions (${ro.map(x => x.join("/")).join(", ")} repeats/items)`, ro.every(x => x[1] === 40 && x[0] <= 1));
   }
   console.log(`\n[rollover] scenario A, sessions 1-4 on one evening, 5-8 the next morning`);
   {

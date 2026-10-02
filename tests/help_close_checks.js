@@ -212,15 +212,15 @@ async function onPassage(pack){
     tapWord();
     check("passage word tap: popover open with a close button", !gloss.hidden && /class="helpx"/.test(gloss.innerHTML) && gloss.classList.contains("hasx") && api.helpCur() && api.helpCur().el === gloss);
     clock.run(19900);
-    check("still open at 7.9 s", !gloss.hidden);
+    check("still open at 19.9 s", !gloss.hidden);
     clock.run(200);
     check("closes itself at 20 s", gloss.hidden && !api.helpCur());
     tapWord(); fire(gloss, "pointerenter", { pointerType: "mouse" }); clock.run(60000);
-    check("mouse over it: no auto-close (30 s)", !gloss.hidden);
+    check("mouse over it: no auto-close (60 s)", !gloss.hidden);
     fire(gloss, "pointerup", { pointerType: "mouse" }); clock.run(60000);
     check("mouse button released while still over it: still open", !gloss.hidden);
     fire(gloss, "pointerleave", { pointerType: "mouse" }); clock.run(19900);
-    check("pointer leaves: the timer restarts (open at 7.9 s)", !gloss.hidden);
+    check("pointer leaves: the timer restarts (open at 19.9 s)", !gloss.hidden);
     clock.run(200);
     check("then closes", gloss.hidden);
     tapWord(); fire(gloss, "pointerdown"); clock.run(60000);

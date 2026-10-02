@@ -202,7 +202,17 @@ const rows = h => [...String(h).matchAll(/<tr><td>(\d+)\. (\w+)<\/td><td>([\s\S]
 const reviewN = h => { const r = rows(h).find(x => x[0] === "Review"); const m = r && r[1].match(/^(\d+) items/); return m ? +m[1] : null; };
 const keysOf = p => ({ w: new Set(Object.keys(p.w)), c: new Set(Object.keys((p.chars || {}).c || {})) });
 // Plays the Today session on screen to its end (every answer right; passages skipped).
-function playSession(api){
+// The Read stage is played for real: every question answered with the first option, opts.tap word
+// ids added to the tapped list, then Continue (weak words as ticked by default).
+function playRead(api, tap){
+  const rd = api.rd(); (tap || []).forEach(id => rd.tapped.push(id));
+  if(/id="rdone"/.test(api.panel())) api.el("rdone").click();
+  for(let i = 0; i < 40 && api.rd() && !/id="rcont"/.test(api.panel()); i++){ api.el("o").children[0].click(); api.el("nx").click(); }
+  const weak = (api.panel().match(/<label class="wk"[\s\S]*?<\/label>/g) || []), html = api.panel();
+  api.el("rcont").click();
+  return { weak, html };
+}
+function playSession(api, tap){
   if(!/id="go"/.test(api.panel())) return null;
   const k0 = keysOf(api.getProg()), done0 = new Set(Object.keys((api.getProg().read || {}).done || {})), d0 = api.drills.length;
   const out = { items: 0, firstReads: 0, rereads: 0 };
@@ -211,7 +221,7 @@ function playSession(api){
     const D = api.getD(), h = api.panel();
     if(D && api.getCur() && D.cur){ out.items++; answer(api, true); api.el("nx").click(); continue; }
     if(/id="again"/.test(h)){ api.el("again").click(); break; }
-    const rd = api.rd(); if(rd){ if(done0.has(rd.p.id)) out.rereads++; else out.firstReads++; api.skipRead(); continue; }
+    const rd = api.rd(); if(rd){ if(done0.has(rd.p.id)) out.rereads++; else out.firstReads++; out.read = playRead(api, tap && tap(rd.p)); continue; }
     const b = (h.match(/<button class="next" id="(\w+)"/) || [])[1]; if(b){ api.el(b).click(); continue; }
     throw new Error("stuck: " + h.slice(0, 200));
   }
@@ -296,9 +306,9 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
       check(`fresh: the button turns new material on; Today as before pausing (Learn ${rows(h2).find(r => r[0] === "Learn")[1]})`, h2 === on && !("pause" in api.getProg()));
       continue;
     }
-    const pr = rows(h);
-    check(`${name}, paused: steps ${pr.map(r => r[0]).join(", ")} (on: ${onRows.join(", ")}); "Review only · new material paused"; Review ${reviewN(on)} -> ${reviewN(h)} items (+${extra}, the Learn step's drill items)`,
-      !pr.some(r => r[0] === "Learn") && onRows.includes("Learn") && /Review only · new material paused\./.test(h) && reviewN(h) === reviewN(on) + extra && !/1 passage: /.test(stripTags(h)));
+    const pr = rows(h), grow = name === "mid HSK 1" ? 0 : extra;
+    check(`${name}, paused: steps ${pr.map(r => r[0]).join(", ")} (on: ${onRows.join(", ")}); "Review only · new material paused"; Review ${reviewN(on)} -> ${reviewN(h)} items (Learn step's drill items ${extra}; mid HSK 1's 55-item pool gets none, M2)`,
+      !pr.some(r => r[0] === "Learn") && onRows.includes("Learn") && /Review only · new material paused\./.test(h) && reviewN(h) === reviewN(on) + grow && !/1 passage: /.test(stripTags(h)));
     if(name === "owner shape") check(`owner shape: unpaused Today plans a first read (${(rows(on).find(r => r[0] === "Read") || [])[1]}); paused a due re-read (${(pr.find(r => r[0] === "Read" || r[0] === "Listen" && /passage/.test(r[1])) || [])[1]})`, /1 passage: /.test(stripTags(on)) && /passage to (re-read|listen to)/.test(stripTags(h)));
     const res = [];
     for(let d = 0; d < 6; d++){ NOW = new Date(2026, 9, 2 + d, 8, 0, 0).getTime(); api.today(); res.push(playSession(api)); }
@@ -312,6 +322,24 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
     check(`${name}, unpaused: Learn exactly as before pausing (${ln}; ${learnAfter ? learnAfter.slice(0, 40) : "none"}...)`, learnAfter === learnBefore && !("pause" in api.getProg()) && (extra > 0 ? ln === (rows(on).find(r => r[0] === "Learn") || [])[1] : true));
     const s = playSession(api);
     check(`${name}, the next session teaches it (${s.newW} words, ${s.newC} units)`, extra === 0 ? s.newW + s.newC === 0 : (learnBefore[0] === "c" ? s.newC === 10 : s.newW === 10));
+  }
+
+  console.log("\n[4b] paused Today Read stage: weak words never give an unlearned word a record");
+  {
+    const p0 = ownerProg(), rr = VC.nextReadItem(PASSAGES, WORDS, PACK, p0, "2026-10-02", true).p;
+    const un = [...new Set(rr.sentences.flatMap(x => x.words || []))].filter(id => p0.w[id]).slice(-3);
+    un.forEach(id => { delete p0.w[id]; });
+    const lw0 = VC.learnedWords(WORDS, PACK, p0).length;
+    {
+      const st = fresh(); st.ls.setItem(VC.storageKey(PACK), JSON.stringify(Object.assign(clone(p0), { pause: 1 })));
+      NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
+      const api = await boot(PACK, st, 9);
+      const s1 = playSession(api, p => p.id === rr.id ? un : []);
+      const pr = api.getProg(), got = un.filter(id => pr.w[id]);
+      const listed = s1 && s1.read ? s1.read.weak.length : 0, boxes = s1 && s1.read ? s1.read.weak.filter(l => /type="checkbox"/.test(l)).length : -1;
+      // Without the gate a tapped word has weight 2 and is ticked: Continue would give it a `d` record.
+      check(`paused: re-read ${rr.id} with ${un.length} unlearned words tapped and every question answered with option 1 (${s1 && s1.read ? stripTags(s1.read.html.match(/<h2>[^<]*<\/h2>/)[0]) : "no read"}): ${got.length} records created, learned ${VC.learnedWords(WORDS, PACK, pr).length} (was ${lw0}), weak list ${listed} words, ${boxes} with a checkbox (learned ones), the unlearned shown without`, s1 && s1.read && got.length === 0 && VC.learnedWords(WORDS, PACK, pr).length === lw0 && listed - boxes >= un.length);
+    }
   }
 
   console.log("\n[5] toggling mid-session");

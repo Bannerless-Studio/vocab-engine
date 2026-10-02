@@ -1084,8 +1084,9 @@ function kindMix(n, share, typing, rng){
 // Character and script units join one ranking only when some are recorded. With none the
 // word-only code runs unchanged, so the output is identical to a word-only plan.
 function buildReviewPlan(learned, prog, pack, opts){
-  const o = opts || {}; const n = o.size || REVIEW_SIZE;
-  if(dayAwareOn(pack) && o.today) return dayReviewPlan(learned, prog, pack, n, o);
+  // o.extra (pauseNew): more items; day-aware plans take them only where no same-day repeat results.
+  const o = opts || {}; const day = dayAwareOn(pack) && o.today; const n = (o.size || REVIEW_SIZE) + (day ? 0 : o.extra || 0);
+  if(day) return dayReviewPlan(learned, prog, pack, n, o);
   const ru = recordedUnits(o.units, prog, pack);
   const rs = recordedScriptUnits(o.script, prog, pack);
   if(ru.length || rs.length) return hearableKinds(unifiedReviewPlan(learned, ru, prog, pack, n, o.rng, rs, Object.assign({ units: o.script }, o.scriptCtx || {}), o), o.canHear);
@@ -1304,7 +1305,9 @@ const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c ===
 // units, and only then what was right today. Jitter (below 1) only breaks exact ties.
 // cshare (optional): the consolidating share, DAY_CONSOLIDATE_SHARE by default. A consolidating
 // unit whose miss aged out (dayAgedOut) comes first in it.
-function dayPick(cands, n, d, rng, sn, cshare){
+// t4max (optional): tier 4 fills the plan only up to this many items.
+const DAY_EXTRA_POOL = 4;
+function dayPick(cands, n, d, rng, sn, cshare, t4max){
   const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
   (cands || []).forEach(c => { const t = dayTier(c, d, sn); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
   const ag = c => dayAgedOut(d.a[c.key], sn) ? 0 : 1;
@@ -1329,7 +1332,7 @@ function dayPick(cands, n, d, rng, sn, cshare){
     if(seen.has(c.key) && !(owns(c) && out.some(o => o.alias === c.key) && !out.some(o => o.key === c.key))) continue;
     seen.add(c.key); if(c.alias) seen.add(c.alias); out.push(c); i++; } };
   take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(C, Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE))); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
-  take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[0], n); take(T[4], n);
+  take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[0], n); take(T[4], t4max != null ? t4max - out.length : n);
   return out;
 }
 // The kinds a planner may ask a unit, production first (owner rule: a unit already met today
@@ -1407,7 +1410,12 @@ function dayReviewPlan(learned, prog, pack, n, o){
   const wc = dayWordCan(pack, o.canHear);
   const cands = [...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits)),
     ...rs.map(u => ({ t: "x", x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: scfg ? scfg.mastered : SCRIPT_MASTERED, kinds: scfg ? scfg.reviewKinds : [] }))];
-  const pool = shuffle(dayPick(cands, n, d, o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined), o.rng);
+  const share = typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined;
+  // o.extra (pauseNew): extra items never come from tier 4 (right recently in every kind), and the
+  // grown plan takes at most a quarter of the items not right recently (tiers 0-2), so a small pool
+  // gets no extra and later sessions of the day keep their share (fb4-pause review M2).
+  const x = o.extra > 0 ? Math.max(0, Math.min(o.extra, Math.floor(cands.filter(c => dayTier(c, d, daySn(prog)) < 3).length / DAY_EXTRA_POOL) - n)) : 0;
+  const pool = shuffle(dayPick(cands, n + x, d, o.rng, daySn(prog), share, x ? n : undefined), o.rng);
   const kinds = kindMix(pool.filter(c => c.t === "w").length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
   let wi = 0;
   const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {})

@@ -541,7 +541,8 @@ console.log("\n[pause] pack.pauseNew (fb4-pause): one additive field prog.pause 
   const here = VC.bootProg(raw, LAG);
   check("this engine: paused progress boots with no backup, pause 1 kept, byte-identical", LAG.pauseNew === true && here.backupRaw === null && VC.pauseOn(LAG, here.prog) && JSON.stringify(here.prog) === raw);
   check("defaultProg has no pause field (absent = new material on)", !("pause" in VC.defaultProg(LAG)) && !VC.pauseOn(LAG, VC.defaultProg(LAG)));
-  for(const [sha, pk] of [["590af86", PACK], ["ea62a45", PACK], ["3d66aea", OLDP]]){
+  // 36aee02: main before pauseNew (the lag rule, live next); the rest as in [lag].
+  for(const [sha, pk] of [["36aee02", LAG], ["590af86", PACK], ["ea62a45", PACK], ["3d66aea", OLDP]]){
     let eng = null;
     try {
       const cp = require("child_process"), os = require("os");
