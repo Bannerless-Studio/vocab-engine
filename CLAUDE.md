@@ -49,7 +49,7 @@ Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` belo
 ```sh
 $NODE tests/engine_checks.js                     # 703 passed; includes the dist/zh.html + sw.js stale guard
 $NODE tests/pron_aids_checks.js                  # 157
-$NODE tests/migration_checks.js                  # 347 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
+$NODE tests/migration_checks.js                  # 358 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
 $NODE tests/characters_checks.js                 # 134
 $NODE tests/characters_app_checks.js             # 202
 $NODE tests/script_checks.js                     # 128
@@ -62,7 +62,7 @@ $NODE tests/validate_pack_characters_checks.js   # 83
 $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/typed_from_checks.js                 # 70 (pack.typedFrom / glossFocus; control vs ef44c6e)
-$NODE tests/typed_mastery_checks.js              # 71 (characters.bareBy typed credit/hold/floor, bareWords, per-level stages, withWords + Learn turn, gloss fields; control vs 7fe35f7)
+$NODE tests/typed_mastery_checks.js              # 77 (characters.bareBy typed credit/hold/floor, bareWords, per-level stages, withWords + Learn turn + order chips, gloss fields; control vs 7fe35f7)
 $NODE tests/session_resume_checks.js             # 109 (drill/passage resume: tab switch, reload, relaunch, per-tab parking)
 $NODE tests/day_sim_checks.js                    # 59 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; before/after numbers; --why)
 $NODE tests/help_close_checks.js                 # 41 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
