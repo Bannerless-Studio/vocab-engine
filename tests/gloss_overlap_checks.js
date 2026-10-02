@@ -8,7 +8,8 @@
 // (pinyin and characters), a characters stimulus never does, flag off accepts none;
 // [5] noTypedMeaning words never get a typed-meaning kind; [6] gloss caps and matcher rules
 // (copula, overrides); [7] validate_pack.py on the new fields; [8] review round 2: typed
-// groups, notTyped, the first-meaning rule, HSK core senses, option and note shortening. Fake DOM from
+// groups, notTyped, the first-meaning rule, HSK core senses, option and note shortening;
+// [9] under dayAware routing. Fake DOM from
 // tests/typed_from_checks.js. Run: node tests/gloss_overlap_checks.js
 "use strict";
 const fs = require("fs");
@@ -425,6 +426,32 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
       ry === "easy; straightforward" && /impression <span class="dim">\(…\)<\/span>/.test(yx) && !/stays/.test(yx) && api.optHtml("(classifier for flat objects, sheets); to open").startsWith("(classifier for flat objects, sheets)"));
     const note = api.pronTypeItem(zj).feedback(dx.pron);
     check(`"also right" note: the synonym's first meaning only (${note.replace(/<[^>]+>/g, "")})`, /also right/.test(note) && /anxious/.test(note) && !/worried/.test(note));
+  }
+
+  // ---------------------------------------------------------------- [9] with dayAware (zh)
+  console.log("\n[9] dayAware routing keeps noTypedMeaning; a synonym answer is logged for the asked word");
+  {
+    const today = "2026-10-02", wk = VC.dayWordKinds(PACK), ck = VC.dayCharKinds(PACK);
+    check("zh pack is dayAware (the routing below is live)", VC.dayAwareOn(PACK));
+    const marked = WORDS.filter(w => w.noTypedMeaning);
+    const { api } = await boot({ seed: 7 });
+    const labels = new Set(); let routed = 0;
+    // Every day-log state that pulls a word to production: a pending miss in each word kind, then right in every other kind.
+    marked.forEach(w => [...wk.map(k => ({ mk: [k] })), { r: wk.filter(k => k !== "type"), c: 1 }].forEach(e => {
+      const pm = tierProg([w]); pm.day = { d: today, n: 1, a: { ["w:" + w.id]: e } };
+      api.setProg(pm);
+      const plan = VC.dayPlanKinds(Array.from({ length: 9 }, () => ({ kind: "recall", word: w })), pm, PACK, today, wk, ck);
+      plan.forEach((it, i) => { if(it.kind === "type"){ routed++; labels.add(api.typedFromSlotItem(plan, i).label); } });
+    }));
+    check(`dayItemKind routes marked words to "type" (${routed} items); the typed slot never asks the meaning (${[...labels].join(" / ")})`, routed > 0 && !labels.has("Type the meaning"));
+    // A typedSyn answer on a meaning stimulus: right, recorded on the asked word, logged right for it today.
+    const pm = tierProg([zj]); pm.day = { d: today, n: 1, a: {} }; api.setProg(pm);
+    api.drill1(api.pronTypeItem(zj)); api.el("tin").value = dx.pron; api.el("submit").click();
+    const p2 = api.getProg(), dl = (p2.day && p2.day.a) || {}, rz = (p2.w || {})[zj.id] || {};
+    // markWord pins the level's provisional records (ensureWordRec); 担心 must look like any other unasked word of its level.
+    const peer = WORDS.find(w => w.lv === dx.lv && w.id !== dx.id && w.id !== zj.id), rec = id => JSON.stringify((p2.w || {})[id] || null);
+    check(`着急's pinyin card answered ${dx.pron} (担心): right, streak on 着急 (${JSON.stringify(rz)}), day log right for w:${zj.id} (${JSON.stringify(dl["w:" + zj.id])}); 担心 not credited (${rec(dx.id)} = unasked ${peer.w} ${rec(peer.id)}), not logged`,
+      api.getD().miss.length === 0 && rz.s >= 1 && !!dl["w:" + zj.id] && typeof dl["w:" + zj.id].c === "number" && !(dl["w:" + zj.id].mk || []).length && !dl["w:" + dx.id] && rec(dx.id) === rec(peer.id));
   }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
