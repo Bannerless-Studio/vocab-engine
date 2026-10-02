@@ -476,9 +476,22 @@ function markChar(unitId, ok, kind){ VC.markChar(prog, unitId, ok); dayNote("c:"
 const DAY_AWARE = VC.dayAwareOn(PACK);
 const dayToday = () => DAY_AWARE ? todayISO() : undefined;
 const PLAN_ORDER = DAY_AWARE ? "misses and due first" : "weakest first";
-const dayNote = (key, kind, ok) => DAY_AWARE && VC.noteDay(prog, PACK, todayISO(), key, kind, ok);
-const pickHear = (list, n) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "w:", ["hear"]) : weakFirst(list, n);
-const pickSentences = (list, n, kinds) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "s:", kinds || VC.daySentenceKinds(PACK)) : weakFirstSentences(list, n);
+// The kinds a word / sentence can be shown in on this device: planners never route a miss to a
+// kind the item builder would swap out (no voice, no blank), and such a miss settles as
+// core.js daySettles says.
+let SENT_BY_ID_DAY = null;
+const dayWordCan = w => VC.dayWordCan(PACK, canHearWord)(w);
+const daySentCan = s => VC.daySentenceCan(PACK, canHearSentence, WORDS_BY_ID)(s);
+const dayCanOf = key => {
+  const k = String(key), id = k.slice(2);
+  if(k[0] === "w") return WORDS_BY_ID[id] ? dayWordCan(WORDS_BY_ID[id]) : undefined;
+  if(k[0] !== "s") return undefined;
+  if(!SENT_BY_ID_DAY){ SENT_BY_ID_DAY = {}; SENTENCES.forEach(x => { SENT_BY_ID_DAY[x.id] = x; }); }
+  return SENT_BY_ID_DAY[id] ? daySentCan(SENT_BY_ID_DAY[id]) : undefined;
+};
+const dayNote = (key, kind, ok) => DAY_AWARE && VC.noteDay(prog, PACK, todayISO(), key, kind, ok, dayCanOf(key));
+const pickHear = (list, n) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "w:", ["hear"], undefined, dayWordCan) : weakFirst(list, n);
+const pickSentences = (list, n, kinds) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "s:", kinds || daySentCan, undefined, daySentCan) : weakFirstSentences(list, n);
 const mastered = id => ((prog.w[id]||{}).s||0) >= VC.WORD_MASTERED;
 const sentenceMastered = id => ((prog.s[id]||{}).s||0) >= VC.SENTENCE_MASTERED;
 const weakFirst = (list, n) => VC.weakFirst(list, n, prog.w);
@@ -769,7 +782,8 @@ function wordOptHtml(byKey, written){
   return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const p = e ? pronBeside(e) : ""; return `${d && d.isPron ? twReading(d.text) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
 }
 
-function drill(items, onDone, summary, onShown){ if(DAY_AWARE && VC.dayStart(prog, PACK, todayISO(), !todayStepState)) store.save(); D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown, rzo: rzOriginOf(onDone), rzs: summary && summary.rzs }; rzFin = null; dnext(); }
+// A drill that touches no unit (Sounds lessons) is no session for the planner's clock.
+function drill(items, onDone, summary, onShown){ if(DAY_AWARE && VC.dayStart(prog, PACK, todayISO(), !todayStepState && items.some(it => /^[wscx]:/.test(String(it && it.key))))) store.save(); D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown, rzo: rzOriginOf(onDone), rzs: summary && summary.rzs }; rzFin = null; dnext(); }
 function setScore(answered, total){
   const left = total ? Math.max(0, total - answered) : 0;
   $("score").textContent = (total && left > 0) ? `${left} left` : "";
@@ -1626,7 +1640,7 @@ function gapSentence(s, typed){
 }
 const sentenceByEar = s => canHearSentence(s) ? hearSentence(s) : readSentence(s);
 function sentenceItemFor(s){
-  const k = DAY_AWARE ? VC.dayItemKind(prog, PACK, todayISO(), "s:" + s.id, VC.sentenceKind(PACK), VC.daySentenceKinds(PACK)) : VC.sentenceKind(PACK);
+  const k = DAY_AWARE ? VC.dayItemKind(prog, PACK, todayISO(), "s:" + s.id, VC.sentenceKind(PACK), daySentCan(s), daySentCan(s)) : VC.sentenceKind(PACK);
   if(k === "hear") return sentenceByEar(s);
   if(k === "read") return readSentence(s);
   return gapSentence(s, k === "gapType") || readSentence(s);
