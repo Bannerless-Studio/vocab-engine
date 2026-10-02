@@ -35,6 +35,10 @@ word's characters.json unit; docs/ZH_SAY.md has the table.
 `characters.json` mirrors words.json one-to-one (hsk teaches whole words, not
 glyphs: docs/HSK_MERGE.md §2.1), and `legacy.json`/`pack.legacy` carry the
 hsk_pinyin -> vocab_zh progress-migration id maps (docs/HSK_MERGE.md §4).
+tools/zh_gloss.js applies tools/zh_gloss_overrides.json to `en` and adds words.json `syn`
+(words sharing an accepted meaning), `typedSyn` (words the whole gloss also fits) and
+`noTypedMeaning` (docs/ZH_GLOSS.md).
+
 Each unit gets a `hint` list (one per character of `t`, null where none) from the
 committed tools/zh_hints.json (tools/zh_hints.py; Make Me a Hanzi, LGPL-3.0-or-later),
 credited in attribution.json.
@@ -66,6 +70,11 @@ ATTRIBUTION = {
         "url": "https://github.com/drkameleon/complete-hsk-vocabulary",
         "glosses": "the English `en` senses originate from CC-CEDICT (complete-hsk-vocabulary README, Sources: "
                    "\"Dictionary definitions: mdbg.net (CC-CEDICT)\"), licensed CC-BY-SA-4.0: https://cc-cedict.org/wiki/",
+    },
+    "gloss_overrides": {
+        "source": "tools/zh_gloss_overrides.json: zh glosses rewritten from the untruncated CC-CEDICT senses in "
+                  "complete-hsk-vocabulary complete.json (each entry cites its CC-CEDICT text); report docs/ZH_GLOSS.md",
+        "licence": "CC-BY-SA-4.0 (CC-CEDICT)",
     },
     "sentences": {"source": "hand-authored for this pack (chinese repo data/hsk_sentences.js)", "licence": "CC-BY-SA-4.0"},
     "character_hints": {
@@ -111,6 +120,28 @@ def js_literal_via_node(path, name):
             f"process.stdout.write(JSON.stringify(new Function(src+';return {name};')()));")
     out = subprocess.run([node, "-e", code, path], check=True, capture_output=True)
     return json.loads(out.stdout.decode("utf-8"))
+
+
+def apply_gloss(words):
+    """Gloss overrides, `syn` and `noTypedMeaning` from tools/zh_gloss.js (it reuses the
+    engine's typed-meaning keys; docs/ZH_GLOSS.md is its report)."""
+    node = shutil.which("node") or "/opt/homebrew/bin/node"
+    out = subprocess.run([node, os.path.join(ROOT, "tools", "zh_gloss.js"), "--report", os.path.join(ROOT, "docs", "ZH_GLOSS.md")],
+                         input=json.dumps(words, ensure_ascii=False).encode("utf-8"), capture_output=True)
+    sys.stderr.write(out.stderr.decode("utf-8"))
+    if out.returncode:
+        raise SystemExit("pack_from_hsk: tools/zh_gloss.js failed")
+    g = json.loads(out.stdout.decode("utf-8"))
+    nt = set(g["noTypedMeaning"])
+    for w in words:
+        w["en"] = g["en"].get(w["id"], w["en"])
+        if w["id"] in g["syn"]:
+            w["syn"] = g["syn"][w["id"]]
+        if w["id"] in g["typedSyn"]:
+            w["typedSyn"] = g["typedSyn"][w["id"]]
+        if w["id"] in nt:
+            w["noTypedMeaning"] = True
+    print(f"gloss overrides {len(g['en'])}  words with syn {len(g['syn'])}  typedSyn {len(g['typedSyn'])}  noTypedMeaning {len(nt)}")
 
 
 def dump(path, data):
@@ -169,6 +200,7 @@ def main(argv):
     for w in words:
         if w["w"] in say:
             w["say"] = say[w["w"]]
+    apply_gloss(words)
 
     def resolve(token):
         if token in id_of:

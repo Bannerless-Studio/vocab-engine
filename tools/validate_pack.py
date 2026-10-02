@@ -381,6 +381,7 @@ def check_words(words, levels, rep):
                     rep.warn(f"{where}.bare equals its w (redundant: w is already the gap label)")
                 elif not (ww.endswith(b) and len(ww) > len(b) and (ww[-len(b) - 1].isspace() or ww[-len(b) - 1] in "'\u2019\u02bc")):
                     rep.warn(f"{where}.bare {w['bare']!r} is not a trailing token of w (the engine ignores it)")
+    check_synonyms(words, by_id, rep)
     # same surface form twice in one level makes recall options ambiguous
     seen = {}
     for w in words:
@@ -390,6 +391,39 @@ def check_words(words, levels, rep):
                 rep.warn(f"words {seen[k]} and {w.get('id')} share surface form {w['w']!r} at level {w.get('lv')}")
             seen[k] = w.get("id")
     return by_id
+
+
+def check_synonyms(words, by_id, rep):
+    """syn / typedSyn / noTypedMeaning (docs/PACK_SCHEMA.md "Synonyms"; zh: tools/zh_gloss.js).
+    syn is symmetric (the engine reads either side, a one-sided list means a stale build);
+    typedSyn is directed (this word's gloss fits the other) and always within syn."""
+    for w in words:
+        if not (isinstance(w, dict) and is_str(w.get("id"))):
+            continue
+        where = f"word {w['id']}"
+        for f in ("syn", "typedSyn"):
+            if f not in w:
+                continue
+            v = w[f]
+            if not (isinstance(v, list) and v and all(is_str(x) for x in v)):
+                rep.err(f"{where}.{f} must be a non-empty list of word ids")
+                continue
+            bad = sorted({x for x in v if x not in by_id or x == w["id"]})
+            if bad:
+                rep.err(f"{where}.{f} has unknown or self ids {bad}")
+            if len(set(v)) != len(v):
+                rep.err(f"{where}.{f} repeats an id")
+        syn = set(w.get("syn") or []) if isinstance(w.get("syn"), list) else set()
+        for x in sorted(syn):
+            o = by_id.get(x)
+            if isinstance(o, dict) and w["id"] not in (o.get("syn") or []):
+                rep.err(f"{where}.syn lists {x} but {x}.syn does not list {w['id']} (syn is symmetric)")
+        if isinstance(w.get("typedSyn"), list):
+            extra = sorted(set(w["typedSyn"]) - syn)
+            if extra:
+                rep.err(f"{where}.typedSyn {extra} not in its syn")
+        if "noTypedMeaning" in w and w["noTypedMeaning"] is not True:
+            rep.err(f"{where}.noTypedMeaning must be true when present")
 
 
 MIN_BUCKET_WORDS = 3  # placement draws up to 3 items per bucket (core.js placementItemCount)

@@ -27,6 +27,8 @@ const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; return p; })(Object.assign({}, PACK));
+// words[].syn / typedSyn / noTypedMeaning (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields too.
+const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; return c; });
 
 let fails = 0, passes = 0;
 function check(name, cond){
@@ -299,7 +301,7 @@ function walk(api, stopAt){
     check(`glossParts table (${P.length} cases${pb.length ? `; wrong: ${JSON.stringify(pb.map(x => [x[0], VC.glossParts(x[0])]))}` : ""})`, pb.length === 0);
     check("every zh gloss accepts itself typed in full (reading notes and fragments included)", WORDS.every(w => VC.checkGlossTyped(VC.gloss(w), VC.gloss(w))));
     const noSelf = WORDS.filter(w => { const g = VC.gloss(w); return !VC.checkGlossTyped(VC.glossParts(g).primary, g); }).map(w => w.w);
-    check(`every zh gloss accepts its own primary, except a primary that differs from the gloss and holds a dropped alternative (的 "~'s", 相信 "to…"): ${noSelf.join(" ")}`, noSelf.join(" ") === "的 相信");
+    check(`every zh gloss accepts its own primary, except a primary that differs from the gloss and holds a dropped alternative (的 "~'s"; 相信 "to…" fixed by tools/zh_gloss_overrides.json): ${noSelf.join(" ")}`, noSelf.join(" ") === "的");
     // Fix round (docs/PACK_SCHEMA.md "Typed meaning" rules 1-5).
     const G = Object.fromEntries(WORDS.map(w => [w.w, VC.gloss(w)]));
     const NOTE_WORDS = ["知道", "母亲", "父亲", "谁", "那", "血"];
@@ -313,7 +315,7 @@ function walk(api, stopAt){
       ["to", G["相信"], false], ["to…", G["相信"], false], ["believe", G["相信"], true], ["be", G["只好"], false], ["to be", G["只好"], false], ["to have to", G["只好"], true],
       ["with", G["和"], true], ["him", G["他"], true],
       ["s", G["的"], false], ["'s", G["的"], false], ["of", G["的"], true], ["i", G["我"], true], ["I", G["我"], true], ["be", G["是"], true], ["the", "the", true], ["one", "one", true],
-      ["no matter what", G["无论"], true], ["how", G["无论"], false], ["we", G["咱们"], true], ["us", G["咱们"], false], ["in confusion", G["乱"], true], ["disorder", G["乱"], false],
+      ["no matter what", G["无论"], true], ["how", G["无论"], false], ["we", "we or us…", true], ["us", "we or us…", false], ["in confusion", G["乱"], true], ["disorder", G["乱"], false],
       ["hot", G["汤"], false], ["give", G["打针"], false], ["go on official", G["出差"], false], ["hang", G["挂"], true], ["deep", G["厚"], true], ["actor", G["演员"], true],
     ];
     const rb = R.filter(([v, g, want]) => VC.checkGlossTyped(v, g) !== want);
@@ -523,13 +525,13 @@ function walk(api, stopAt){
     }catch(e){ console.log("    cannot read main: " + e.message); }
     check(`main ${MAIN} engine loaded from git (a missing sha is a failure)`, !!mainHtml && !!mainCore);
     async function screens(html, core, pack, seed){
-      const { api } = await boot({ html, core, pack, seed });
+      const { api } = await boot({ html, core, pack, seed, words: WORDS_OFF });
       const out = {};
       api.setProg(seedPF()); api.today(); out.today = api.html("panel");
       api.el("go").click();
       let walked = []; try{ walked = walk(api, /id="again"/); }catch(e){ walked = [{ where: "ERR", html: e.message }]; }
       out.walk = walked.map(x => x.where + "\n" + x.html).join("\n----\n");
-      const ws = WORDS.filter(x => x.lv === "1").slice(0, 40);
+      const ws = WORDS_OFF.filter(x => x.lv === "1").slice(0, 40);
       api.setProg(atTierProg(ws.slice(0, 20)));
       out.items = ws.map(x => { const p = typePlan(x, 3); return p.map(api.itemFromPlan).map(it => it.label + it.html + it.reveal + (it.placeholder || "")).join("\n"); }).join("\n");
       out.reveals = ws.map(x => api.revealBlock(x) + api.wordRowHTML(x, "wl") + api.glossHTML(x.id, "", null)).join("\n");

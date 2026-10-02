@@ -63,6 +63,7 @@ $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/typed_from_checks.js                 # 67 (pack.typedFrom / glossFocus; control vs ef44c6e)
 $NODE tests/session_resume_checks.js             # 46 (drill/passage resume after a tab switch or reload)
+$NODE tests/gloss_overlap_checks.js              # 41 (words syn/typedSyn/noTypedMeaning; ~1.5 min)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)
@@ -118,6 +119,7 @@ Dev mode without a rebuild: open `engine/app.html?pack=zh` from `file://` (loads
 | packs/zh/*.json except passages_src.json, gloss_display.json | tools/pack_from_hsk.py (incl. attribution.json); passages.json + REPORT_passages.md by `packbuilder passages` |
 | tools/zh_hints.json | tools/zh_hints.py [../chinese] from the hsk vocabulary + .cache/makemeahanzi/dictionary.txt (`--fetch`) + tools/zh_hints_overrides.json; committed so pack_from_hsk.py needs no network (run it first when the hsk vocabulary gains characters) |
 | tools/zh_say.json, docs/ZH_SAY.md | tools/zh_say_scan.py --write (pypinyin + jieba venv; read by pack_from_hsk.py) |
+| docs/ZH_GLOSS.md, words.json `syn`/`typedSyn`/`noTypedMeaning` | tools/pack_from_hsk.py via tools/zh_gloss.js (from tools/zh_gloss_overrides.json) |
 | tests/golden/*.json | tests/flagoff_snapshot.js --capture |
 | <lang>/pack/*, index.html, sw.js, tools/REPORT.md | packbuilder, jsonify, build.sh in each language repo |
 

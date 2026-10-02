@@ -136,9 +136,11 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     delete pack.audio;
   }
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
+  // words[].syn / typedSyn / noTypedMeaning (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.
   const generated = u => typeof u === "string" && !/^[a-z][a-z0-9+.-]*:/i.test(u);
+  const NEW_WORD_FIELDS = ["audio", "say", "syn", "typedSyn", "noTypedMeaning"];
   const words = Array.isArray(wordsJson)
-    ? wordsJson.map(w => { if(!w || !("audio" in w || "say" in w)) return w; const c = Object.assign({}, w); delete c.audio; delete c.say; return c; })
+    ? wordsJson.map(w => { if(!w || !NEW_WORD_FIELDS.some(k => k in w)) return w; const c = Object.assign({}, w); NEW_WORD_FIELDS.forEach(k => delete c[k]); return c; })
     : wordsJson;
   const sentences = Array.isArray(sentencesJson)
     ? sentencesJson.map(s => { const c = Object.assign({}, s); delete c.ruby; if(generated(c.audio)) delete c.audio; return c; })
