@@ -365,7 +365,9 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
             if(b.name === "pronChoiceOpts" && when === "Learn drill") continue; // "How is it said?" asks learned words only
             const F = P[b.fam], mix = { stage: F, bucket: P.bucket[b.fam] };
             // The answer's own set alone (the answer kept) after guards.
-            const sup = new Map(), supply = a => { if(!sup.has(a)) sup.set(a, b.run(a, q, P, mix, x => x === a || Lids.has(x.id)).length); return sup.get(a); };
+            const NF = b.name === "charOpts" || b.name === "charSoundOpts" || b.name === "pronChoiceOpts", sylN = r => (VC.splitReading(r).filter(x => x.tone !== undefined).length || 1);
+            const sameLen = (a, x) => !NF || (b.name === "pronChoiceOpts" ? sylN(x.pron) === sylN(a.pron) : [...String(x.t)].length === [...String(a.t)].length); // nearFirst builders: the set-mate must also be of the answer's length
+            const sup = new Map(), supply = a => { if(!sup.has(a)) sup.set(a, b.run(a, q, P, mix, x => x === a || (Lids.has(x.id) && sameLen(a, x))).length); return sup.get(a); };
             const items = o => labelItems(b, o);
             Math.random = mulberry32(n * 13 + cells);
             const st = { cards: 0, el: 0, opts: 0, old: 0, g: 0, nel: 0, oldN: 0, optsN: 0 };
@@ -398,6 +400,43 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
     if(TABLE){ console.log("TABLE1b shape | family | when | builder | cards | cards whose set supplies 3 | options learned before the set there | guess (rules out non-set-mates) | other cards"); lrows.forEach(r => console.log(`TABLE1b ${r}`)); }
     check(`Learn drill and later in the session (5 shapes x words / units, ${cells} cells x ${NL} cards): no option learned before the answer's set wherever the set supplies 3 after guards${before.length ? "; " + before.join(", ") : ""}`, cells >= 20 && before.length === 0);
     check(`a learner ruling out never-taught, other-stage and non-set-mate options guesses <= 0.27 there${over.length ? "; over: " + over.join(", ") : ""}`, over.length === 0);
+  }
+
+  console.log("\n[1c] length-visible options (charPick / charRecall / charSound / pronChoice): the answer's length outranks the learn-order bucket");
+  {
+    // charOpts also builds charRecall's options (recallCharOpts); lengths: code points of the unit's form, syllables of a reading.
+    const NB = BUILDERS.filter(b => ["charOpts", "charSoundOpts", "pronChoiceOpts"].includes(b.name)), NC = 1000;
+    const cpl = t => [...String(t)].length, syl = r => (VC.splitReading(r).filter(x => x.tone !== undefined).length || 1);
+    const ownLen = (b, a) => b.name === "pronChoiceOpts" ? syl(a.pron) : cpl(a.t);
+    const optLens = (b, o) => b.name === "pronChoiceOpts" ? [syl(o)] : b.name === "charOpts" ? [cpl(o.t)] : labelItems(b, o).map(u => cpl(u.t));
+    const CSH = [["30 learned", shape(30)], ["140/150 of HSK 1", shape(140)], ["owner", shape(595)], ["owner, 80 weak units", shape(595, 0.7, null, 80)]];
+    const t1c = [], bad = [], over = []; let cells = 0, sets = 0, wrongSets = 0, noCell = 0;
+    for(const [sname, p] of CSH){
+      for(const which of ["new", "known"]) for(const b of NB){
+        const { as, learnW, learnU } = answersFor(b.kind, which, p);
+        if(!as.length){ t1c.push(`${sname} | ${which} | ${b.name} | no answers`); noCell++; continue; }
+        const P = stages(p, learnW, learnU), fam = P[b.fam], mix = { stage: fam, bucket: P.bucket[b.fam] };
+        const st1 = a => (fam(a) === 1 ? 1 : 0), stOf = a => b.name === "pronChoiceOpts" ? (fam(a) === 1 ? 1 : 0) : (P.unit(a) === 1 ? 1 : 0);
+        const sup = new Map(), supply = a => { if(!sup.has(a)){ const s = stOf(a), L = ownLen(b, a), ok = x => b.name === "pronChoiceOpts" ? syl(x.pron) === L && fam(x) === s : cpl(x.t) === L && fam(x) === s;
+          sup.set(a, b.run(a, p, P, mix, x => x === a || ok(x)).length); } return sup.get(a); };
+        Math.random = mulberry32(5000 + cells);
+        const c = { n: 0, el: 0, wrong: 0, g: 0, opts: 0, own: 0 };
+        for(let i = 0; i < NC; i++){
+          const a = as[i % as.length], os = b.run(a, p, P, mix, () => true); c.n++; sets++;
+          if(supply(a) < 3) continue;
+          c.el++; const L = ownLen(b, a), right = os.filter(o => optLens(b, o).every(l => l === L)).length;
+          if(right < os.length){ c.wrong++; wrongSets++; }
+          c.g += 1 / (1 + right); os.forEach(o => { c.opts++; if(mix.bucket(a, labelItems(b, o)[0]) === 0 && fam(labelItems(b, o)[0]) === fam(a)) c.own++; });
+        }
+        cells++;
+        if(c.wrong) bad.push(`${sname}/${which}/${b.name}: ${c.wrong}`);
+        if(c.el && c.g / c.el > 0.27) over.push(`${sname}/${which}/${b.name}: ${mean(c.g, c.el)}`);
+        t1c.push(`${sname} | ${which} (${as.length}) | ${b.name} | ${c.n} | ${c.el} | wrong-length sets ${c.wrong} | length guess ${mean(c.g, c.el)} | own-set share ${pct(c.own, c.opts)}`);
+      }
+    }
+    if(TABLE){ console.log("TABLE1c shape | answer | builder | sets | sets whose stage supplies 3 right-length | sets with a wrong-length option | guess by length elimination | own-set share of options"); t1c.forEach(r => console.log(`TABLE1c ${r}`)); }
+    check(`${cells} cells x ${NC} sets (${sets}): no wrong-length option wherever the answer's stage has 3 right-length candidates after guards${bad.length ? "; over: " + bad.join(", ") : ""}`, cells >= 20 && wrongSets === 0);
+    check(`guess by length elimination <= 0.27 there${over.length ? "; over: " + over.join(", ") : ""}`, over.length === 0);
   }
 
   console.log("\n[2] app: every site by stage, a Learn drill, one script per set, placement as flag off, nothing written, answer position uniform");
@@ -486,7 +525,7 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
       api.today();
       play(api, () => { const it = api.getCur(); if(it && it.kind === "mc" && api.getD() && !sets.includes(it)) sets.push(it); return false; });
       const learnSet = new Set(Object.keys(recsOf(api.getProg())).filter(id => !before.has(id)));
-      let n = 0, never = 0, allOld = 0, opts = 0, old = 0;
+      let n = 0, never = 0, allOld = 0, opts = 0, old = 0, viol = 0;
       for(const it of sets){
         const key = String(it.key), id = key.slice(2); if(!key.startsWith(fam + ":") || !learnSet.has(id)) continue;
         const others = it.opts.filter(o => o !== it.a);
@@ -496,11 +535,14 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
         n++;
         const isOld = o => lab(o).length && lab(o).every(x => !learnSet.has(x.id) && (fam === "w" ? learnedBefore.has(x.id) : before.has(x.id)));
         const isNever = o => lab(o).length && lab(o).every(x => !learnSet.has(x.id) && !(fam === "w" ? learnedBefore.has(x.id) : before.has(x.id)));
-        opts += others.length; old += others.filter(isOld).length;
+        // Unit options are length-first (nearFirst): a learned-before option is allowed only for the slots the set's same-length units cannot fill.
+                const mates = fam === "c" ? CHARACTERS.filter(u => learnSet.has(u.id) && u.id !== id && [...String(u.t)].length === [...String((CHARACTERS.find(x => x.id === id) || {}).t || "")].length).length : 0;
+        const nOld = others.filter(isOld).length; viol += Math.max(0, nOld - (fam === "c" ? Math.max(0, 3 - mates) : 0));
+        opts += others.length; old += nOld;
         if(others.some(isNever)) never++; if(others.every(isOld)) allOld++;
       }
       check(`Today Learn drill, ${name} (${learnSet.size} ${fam === "w" ? "words" : "units"} taught): ${n} sets on Learn items, ${never} with a never-taught option, ${allOld} with every option learned before the session, ${pct(old, opts)} of options learned before`,
-        learnSet.size === 10 && n >= 10 && never === 0 && allOld === 0 && old === 0);
+        learnSet.size === 10 && n >= 10 && never === 0 && viol === 0 && (fam === "c" || (allOld === 0 && old === 0)));
     }
   }
   {

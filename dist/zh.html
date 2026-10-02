@@ -431,10 +431,12 @@ function typedSynHit(entry, byId, test){
 // orders the class preference inside a stage (lower first). accept(strict) returns a fresh
 // guard that records what it lets through.
 function optsMixOn(pack){ return !!(pack && pack.optsMix === true); }
-function mixPick(ans, cands, mix, rank, near, accept, n){
+function mixPick(ans, cands, mix, rank, near, accept, n, nearFirst){
   const r = mix.rng || Math.random, want = n || 3, as = mix.stage(ans) === 1 ? 1 : 0;
   const bucket = as === 0 && mix.bucket ? v => mix.bucket(ans, v) : () => 0;
-  const key = v => { const st = mix.stage(v); return rank(v) * 1000 + (st === as ? bucket(v) : st === 2 ? 4 : 3) * 100 + near(v); };
+  // nearFirst: near is a length the learner can see (charPick/charRecall/charSound/pronChoice), so it outranks the learn-order bucket.
+  const key = nearFirst ? v => { const st = mix.stage(v); return rank(v) * 10000 + (st === as ? 0 : st === 2 ? 2 : 1) * 1000 + near(v) * 100 + (st === as ? bucket(v) : 0); }
+    : v => { const st = mix.stage(v); return rank(v) * 1000 + (st === as ? bucket(v) : st === 2 ? 4 : 3) * 100 + near(v); };
   const keyed = cands.map(v => [key(v), v]);
   const ordered = [...new Set(keyed.map(x => x[0]))].sort((x, y) => x - y).flatMap(k => shuffle(keyed.filter(x => x[0] === k).map(x => x[1]), r));
   function run(strict){
@@ -2666,7 +2668,7 @@ function charOpts(unit, units, byId, mix){
     return v => { const t = normKey(v.t), g = unitGloss(v, byId), gk = normKey(g), f2 = firstTwoWords(g);
       if(usedT.has(t) || usedG.has(gk) || (strict && f2 && usedF2.has(f2))) return false;
       usedT.add(t); usedG.add(gk); if(f2) usedF2.add(f2); return true; };
-  });
+  }, undefined, true);
   const t1 = cands.filter(v => v.lv === unit.lv && cpLen(v.t) === len);
   const t2 = cands.filter(v => v.lv === unit.lv && cpLen(v.t) !== len);
   const t3 = cands.filter(v => v.lv !== unit.lv);
@@ -2699,7 +2701,7 @@ function charSoundOpts(unit, units, byId, mix){
   if(mix) return mixPick(unit, cands, mix, () => 0, v => sameLen(v) ? 0 : 1, () => {
     const used = new Set(forbid);
     return v => { const k = normKey(unitReading(v, byId)); if(used.has(k)) return false; used.add(k); return true; };
-  }).map(v => unitReading(v, byId));
+  }, undefined, true).map(v => unitReading(v, byId));
   const ordered = [...shuffle(cands.filter(v => sameLv(v) && sameLen(v))), ...shuffle(cands.filter(v => !sameLv(v) && sameLen(v))),
     ...shuffle(cands.filter(v => sameLv(v) && !sameLen(v))), ...shuffle(cands.filter(v => !sameLv(v) && !sameLen(v)))];
   const out = []; const used = new Set(forbid);
@@ -3655,7 +3657,7 @@ function pronChoiceOpts(entry, pool, all, mix){
     return mixPick(entry, cands, mix, () => 0, v => { let k = PRON_SYL.get(v); if(k === undefined) PRON_SYL.set(v, k = syl(v.pron)); return k === n ? 0 : 1; }, () => {
       const u = new Set(used);
       return v => { const k = pronKey(v.pron); if(!k || u.has(k)) return false; u.add(k); return true; };
-    }).map(v => v.pron);
+    }, undefined, true).map(v => v.pron);
   }
   const hash = s => { let h = 2166136261; for(const c of s){ h ^= c.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
   const rank = list => list.filter(v => v && v.id !== entry.id && v.pron)
@@ -4912,7 +4914,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "3899494527-1823880";
+const VE_BUILD = "331098371-1824244";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6680,4 +6682,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3919123921-1823204-->
+<!--ve-build:579233659-1823567-->
