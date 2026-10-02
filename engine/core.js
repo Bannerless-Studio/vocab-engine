@@ -1158,26 +1158,48 @@ function noteDay(prog, pack, today, key, kind, ok){
   if(!dayAwareOn(pack) || !prog) return false;
   const d = prog.day = dayLog(prog, today);
   const e = isObj(d.a[key]) ? d.a[key] : (d.a[key] = {});
-  // The in-drill retry right after a miss is not evidence the kind is known: it stays open.
-  // A right cloze on a blanked word ("gap") is logged but is no word drill: it neither counts
-  // as the word answered right today nor settles the word's miss.
+  // The in-drill retry right after a miss is not evidence the kind is known: it stays open and
+  // settles nothing. A right cloze on a blanked word ("gap") is logged but is no word drill: it
+  // neither counts as the word answered right today nor settles the word's miss. A miss keeps
+  // its kind in mk until a right answer that settles it (daySettles: an easier kind never does).
   if(ok){
     if(kind && e.m !== d.n){ if(!Array.isArray(e.r)) e.r = []; if(!e.r.includes(kind)) e.r.push(kind); }
-    if(!(kind === "gap" && String(key)[0] === "w")) e.c = d.n;
-  } else e.m = d.n;
+    if(!(kind === "gap" && String(key)[0] === "w")){
+      e.c = d.n;
+      if(e.m !== d.n && Array.isArray(e.mk)){ e.mk = e.mk.filter(m => !daySettles([m], kind)); if(!e.mk.length) delete e.mk; }
+    }
+  } else {
+    e.m = d.n;
+    if(kind){ if(!Array.isArray(e.mk)) e.mk = []; if(!e.mk.includes(kind)) e.mk.push(kind); }
+  }
   const rec = dayRecOf(prog, key); const t = isoDayNumber(today);
   if(rec && isFinite(t)) rec.t = t;
   return true;
 }
-// 0 missed today and not yet right in a later drill; 1 due (unmastered, not right today);
-// 2 mastered, not right today; 3 right today, some kind this planner asks still open;
-// 4 right today in every kind this planner asks.
-// A miss this planner could only ask in a kind already right today waits for one that can.
+// One partition for words, sentences and character units: production asks for the form
+// (recall, typed, cloze, written-form choice), recognition shows it (hear, read, charRead,
+// charSound). Typed variants are all logged as "type".
+const DAY_PRODUCTION = ["recall", "type", "charRecall", "charPick", "gap", "gapType"];
+const dayProd = k => DAY_PRODUCTION.includes(k);
+// A miss is settled by a right answer in its own kind, or in any production kind when it was a
+// production miss: never by an easier kind (review 2026-10-02: recall misses settled by ear).
+function daySettles(mk, kind){ return !mk.length || mk.includes(kind) || (dayProd(kind) && mk.some(dayProd)); }
+// The missed kinds still pending today, [] for a pending miss logged without a kind, or null.
+function dayPending(e){
+  if(!isObj(e)) return null;
+  if(Array.isArray(e.mk)) return e.mk.length ? e.mk : null;
+  return typeof e.m === "number" && !(typeof e.c === "number" && e.c > e.m) ? [] : null;
+}
+// 0 missed today and not yet settled, and this planner can ask a kind that settles it;
+// 1 due (unmastered, not right today); 2 mastered, not right today; 3 right today, some kind
+// this planner asks still open; 4 right today in every kind it asks, or a miss it cannot settle
+// (a recall miss in Listen waits for a planner that asks production).
 function dayTier(c, d){
   const e = d.a[c.key];
   const r = isObj(e) && Array.isArray(e.r) ? e.r : [];
   const open = (c.kinds || []).some(k => !r.includes(k));
-  if(isObj(e) && typeof e.m === "number" && !(typeof e.c === "number" && e.c > e.m)) return open ? 0 : 4;
+  const mk = dayPending(e);
+  if(mk) return (c.kinds || []).some(k => daySettles(mk, k)) ? 0 : 4;
   if(!isObj(e) || typeof e.c !== "number") return ((c.rec && c.rec.s) || 0) >= c.mastered ? 2 : 1;
   return open ? 3 : 4;
 }
@@ -1213,23 +1235,26 @@ function dayPick(cands, n, d, rng){
 function dayWordKinds(pack){ return typingEnabled(pack) ? ["recall", "type", "hear", "read"] : ["recall", "hear", "read"]; }
 function dayCharKinds(pack){ const cfg = charsConfig(pack); return ["charRecall", "charPick", ...((cfg && cfg.reviewKinds) || []).filter(k => k !== "charRecall" && k !== "charPick")]; }
 function daySentenceKinds(pack){ return [typingEnabled(pack) && !pronTypingOn(pack) ? "gapType" : "gap", "hear", "read"]; }
-const DAY_PRODUCTION = ["recall", "type", "charRecall", "charPick", "gap", "gapType"];
 // A unit already right today keeps its planned kind only when that kind is still open today
 // and production; otherwise the first open kind of `kinds` (production first). A pending miss
-// keeps any open planned kind, else goes to its missed kind (k). Units not met today, and units
-// with every kind done, keep the planned kind.
+// goes to a kind that settles it: the planned kind if it does, else its missed kind, else the
+// nearest production kind, preferring one not right today. Units not met today, and units with
+// every kind done, keep the planned kind. The one place a unit's kind is decided per day.
 function dayItemKind(prog, pack, today, key, planned, kinds){
   if(!dayAwareOn(pack)) return planned;
   const e = dayLog(prog, today).a[key];
-  if(!isObj(e) || !Array.isArray(e.r) || !e.r.length) return planned;
-  const open = (kinds || []).filter(k => !e.r.includes(k));
+  if(!isObj(e)) return planned;
+  const r = Array.isArray(e.r) ? e.r : [], ks = kinds || [];
+  const mk = dayPending(e);
+  if(mk){
+    const fit = [planned, ...mk, ...ks.filter(dayProd), ...ks].filter(k => ks.includes(k) && daySettles(mk, k));
+    return fit.find(k => !r.includes(k)) || fit[0] || planned;
+  }
+  if(!r.length) return planned;
+  const open = ks.filter(k => !r.includes(k));
   if(!open.length) return planned;
-  const pending = typeof e.m === "number" && !(typeof e.c === "number" && e.c > e.m);
-  if(pending){
-    if(open.includes(planned)) return planned;
-    const rec = dayRecOf(prog, key); if(rec && open.includes(rec.k)) return rec.k;
-  } else if(open.includes(planned) && DAY_PRODUCTION.includes(planned)) return planned;
-  return open.find(k => DAY_PRODUCTION.includes(k)) || (open.includes(planned) ? planned : open[0]);
+  if(open.includes(planned) && dayProd(planned)) return planned;
+  return open.find(dayProd) || (open.includes(planned) ? planned : open[0]);
 }
 function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds){
   return plan.map(it => {
@@ -1241,11 +1266,11 @@ function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds){
 const dayWordCand = (prog, kinds) => w => ({ t: "w", x: w, key: "w:" + w.id, rec: (prog.w || {})[w.id], mastered: WORD_MASTERED, kinds });
 const dayCharCand = (prog, pack, kinds) => { const cfg = charsConfig(pack), recs = charRecs(prog); return u => ({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], mastered: cfg ? cfg.mastered : CHAR_MASTERED, bare: cfg ? cfg.bare : CHAR_BARE, kinds }); };
 // For the app's own pickers (Listen, Sentences, Test): the n list entries to drill, by dayPick.
-// keyPrefix "w:" or "s:"; kinds: what the picker asks.
+// keyPrefix "w:" or "s:"; kinds: what the picker asks (or a function of the entry).
 function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng){
   const d = dayLog(prog, today); const sent = keyPrefix === "s:";
   const recs = (sent ? prog.s : prog.w) || {};
-  const cands = (list || []).map(x => ({ x, key: keyPrefix + x.id, rec: recs[x.id], mastered: sent ? SENTENCE_MASTERED : WORD_MASTERED, kinds }));
+  const cands = (list || []).map(x => ({ x, key: keyPrefix + x.id, rec: recs[x.id], mastered: sent ? SENTENCE_MASTERED : WORD_MASTERED, kinds: typeof kinds === "function" ? kinds(x) : kinds }));
   return dayPick(cands, n, d, rng).map(c => c.x);
 }
 function dayReviewPlan(learned, prog, pack, n, o){
@@ -3114,7 +3139,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
-  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, dayAwareOn, dayLog, dayStart, noteDay, dayTier, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
+  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, dayAwareOn, dayLog, dayStart, noteDay, dayTier, DAY_PRODUCTION, daySettles, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,

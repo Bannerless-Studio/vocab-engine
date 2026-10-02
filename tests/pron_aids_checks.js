@@ -1040,6 +1040,19 @@ function walk(api, stopAt){
   }catch(e){ check(`dnext cancel section threw: ${e.stack}`, false); }
 
   Math.random = REAL_RANDOM;
+  console.log("\n[14] pack.dayAware on (zh as shipped): a second Today session the same day keeps colouring and typed readings");
+  try {
+    const { api } = await boot({ seed: 8 });
+    api.setProg(seedPF()); api.today(); api.el("go").click();
+    walk(api, /id="again"/); api.el("again").click(); api.el("go").click();
+    let seen = [], err = null;
+    try{ seen = walk(api, /id="again"/); }catch(e){ err = e; }
+    const unc = seen.filter(x => uncoloured(x.html).length);
+    const typed = seen.filter(x => x.kind === "type");
+    check(`session 2: every reading coloured (${seen.length} screens, ${unc.length} uncoloured), typed reading items present (${typed.length})${err ? " ERROR " + err.message : ""}`,
+      PACK.dayAware === true && !err && unc.length === 0 && typed.length > 0 && !!api.getProg().day);
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails === 0 ? 0 : 1);
 })().catch(e => { console.error(e); process.exit(1); });

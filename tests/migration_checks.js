@@ -274,7 +274,7 @@ console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"
   VC.noteDay(p, PACK, today, "c:" + C0, "charRead", true);
   const dn = Date.UTC(2026, 9, 2) / 864e5;
   check("noteDay: additive only (day log + t on the answered records; r/w/s untouched by it)",
-    eq(p.day, { d: today, n: 1, a: { ["w:" + W0]: { r: ["hear"], c: 1 }, ["s:" + S0]: { m: 1 }, ["c:" + C0]: { r: ["charRead"], c: 1 } } })
+    eq(p.day, { d: today, n: 1, a: { ["w:" + W0]: { r: ["hear"], c: 1 }, ["s:" + S0]: { m: 1, mk: ["gap"] }, ["c:" + C0]: { r: ["charRead"], c: 1 } } })
     && p.w[W0].t === dn && p.s[S0].t === dn && p.chars.c[C0].t === dn);
   const raw = JSON.stringify(p);
   const b = VC.bootProg(raw, PACK);
@@ -287,6 +287,11 @@ console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"
     const b2 = VC.bootProg(r2, PACK);
     check(`malformed day (${label}) never invalidates progress; it reads as a fresh day`, b2.backupRaw === null && eq(b2.prog.w, p.w) && eq(VC.dayLog(b2.prog, today), { d: today, n: 0, a: {} }));
   }
+  VC.dayStart(p, PACK, today);
+  VC.noteDay(p, PACK, today, "s:" + S0, "read", true);
+  check("a miss stays pending (mk) after a right answer in an easier kind", eq(p.day.a["s:" + S0].mk, ["gap"]) && VC.dayPending(p.day.a["s:" + S0]) !== null);
+  VC.noteDay(p, PACK, today, "s:" + S0, "gap", true);
+  check("a right answer in the missed kind settles it (mk removed)", !("mk" in p.day.a["s:" + S0]) && VC.dayPending(p.day.a["s:" + S0]) === null);
   check("a day log from another date reads as a fresh day", eq(VC.dayLog(p, "2026-10-03"), { d: "2026-10-03", n: 0, a: {} }));
   const off = Object.assign({}, PACK); delete off.dayAware;
   const q = mig("C mid-HSK2"), before = JSON.stringify(q);

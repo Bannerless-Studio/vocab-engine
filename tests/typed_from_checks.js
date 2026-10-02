@@ -549,6 +549,20 @@ function walk(api, stopAt){
     }
   }
 
+  console.log("\n[6] typedFrom with pack.dayAware on (zh as shipped): two Today sessions in one day");
+  try {
+    const { api } = await boot({ seed: 9 });
+    api.setProg(seedPF()); api.today(); api.el("go").click();
+    const s1 = walk(api, /id="again"/); api.el("again").click(); api.el("go").click();
+    const s2 = walk(api, /id="again"/);
+    const typed = ss => ss.filter(x => x.kind === "type");
+    const done1 = new Set(typed(s1).map(x => x.where + "|" + x.it.label));
+    const rep = typed(s2).filter(x => done1.has(x.where + "|" + x.it.label));
+    const labels = new Set(typed(s2).map(x => x.it.label));
+    check(`session 2 still asks typed items from the target side (${[...labels].join(", ")}; ${typed(s1).length} / ${typed(s2).length} typed), none a word typed right in the same way in session 1 (${rep.length})`,
+      PACK.dayAware === true && typed(s1).length > 0 && typed(s2).length > 0 && rep.length === 0 && [...labels].some(l => l !== "Type the pinyin"));
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);
 })();

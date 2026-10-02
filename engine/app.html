@@ -471,6 +471,7 @@ function markChar(unitId, ok, kind){ VC.markChar(prog, unitId, ok); dayNote("c:"
 // docs/PACK_SCHEMA.md "dayAware": today's answers steer the day's later plans.
 const DAY_AWARE = VC.dayAwareOn(PACK);
 const dayToday = () => DAY_AWARE ? todayISO() : undefined;
+const PLAN_ORDER = DAY_AWARE ? "misses and due first" : "weakest first";
 const dayNote = (key, kind, ok) => DAY_AWARE && VC.noteDay(prog, PACK, todayISO(), key, kind, ok);
 const pickHear = (list, n) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "w:", ["hear"]) : weakFirst(list, n);
 const pickSentences = (list, n, kinds) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "s:", kinds || VC.daySentenceKinds(PACK)) : weakFirstSentences(list, n);
@@ -1770,14 +1771,14 @@ function todayRender(){
   // some (a first character day has no unit records yet).
   todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday() }) : null } : null;
   const reviewLine = snap
-    ? `${snap.reviewSize} items, weakest first${reviewWhat(snap, todayPrep.review)}`
-    : `${VC.REVIEW_SIZE} items, weakest first`;
+    ? `${snap.reviewSize} items, ${PLAN_ORDER}${reviewWhat(snap, todayPrep.review)}`
+    : `${VC.REVIEW_SIZE} items, ${PLAN_ORDER}`;
   const steps = [
     ["Review", g.review ? reviewLine : (snap && snap.stage && snap.stage.kind === "script" ? "skipped until a set is learned" : "skipped until 5+ words are learned")],
     ["Learn", snap ? snapLearnLine(snap) : (nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered")],
     ["Listen", g.listen ? listenLine(lw) : "skipped until something is learned"],
-    ["Recall", g.recall ? "8 items" : "skipped until something is learned"],
-    ["Sentences", g.sentences ? "8 items, weakest first" : "skipped until 8+ sentences are available"]
+    ["Recall", g.recall ? (DAY_AWARE ? `8 items, ${PLAN_ORDER}` : "8 items") : "skipped until something is learned"],
+    ["Sentences", g.sentences ? `8 items, ${PLAN_ORDER}` : "skipped until 8+ sentences are available"]
   ];
   const showPlaceHint = !prog.placedOnce;
   const showSoundsHint = HAS_LESSONS && !prog.soundsOpened;
@@ -2548,7 +2549,7 @@ function testRender(){
     $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20, { missedKinds: false, canHear: canHearWord, today: dayToday() }).map(itemFromPlan), testRender, missSummary);
   }
   if(tg.sentences){
-    $("tSentences").onclick = () => drill(pickSentences(availSent,20,["hear"]).map(sentenceByEar), testRender, missSummary);
+    $("tSentences").onclick = () => drill(pickSentences(availSent,20,s => [canHearSentence(s) ? "hear" : "read"]).map(sentenceByEar), testRender, missSummary);
   }
   if(charN) $("tChars").onclick = () => drill(charPlan().map(planItem), testRender, missSummary);
 }

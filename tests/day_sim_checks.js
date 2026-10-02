@@ -269,8 +269,13 @@ function metrics(seedP, pack, day, K){
   const avail = recs.length + VC.availableSentences(SENTENCES, WORDS, pack, seedP).length;
   const s1 = per[0] ? per[0].units : new Set();
   const overlap = per.map(p => { let i = 0; p.units.forEach(u => { if(s1.has(u)) i++; }); return p.units.size ? i / p.units.size : 0; });
+  // Strict: a production miss must come back in a production kind (core.js DAY_PRODUCTION),
+  // not merely be seen again by ear or by sight.
+  const prodMiss = drilled.filter(d => !d.ok && d.sess < N_SESSIONS - 1 && VC.DAY_PRODUCTION.includes(d.kind));
+  const prodKeys = [...new Set(prodMiss.map(d => d.key))];
+  const prodLost = prodKeys.filter(k => { const last = Math.max(...prodMiss.filter(d => d.key === k).map(pos)); return !drilled.some(d => d.key === k && pos(d) > last && VC.DAY_PRODUCTION.includes(d.kind)); });
   const lostDetail = lostMiss.map(k => drilled.filter(d => d.key === k).map(d => `${k} s${d.sess + 1}/${d.step} ${d.kind} ${d.ok ? "ok" : "MISS"}`).join(", "));
-  return { lostDetail, why, per, overlap, missKeys, lostMiss, weakStarved: weak.filter(k => !touched.has(k)), staleStarved: stale.filter(k => !touched.has(k)),
+  return { prodKeys, prodLost, lostDetail, why, per, overlap, missKeys, lostMiss, weakStarved: weak.filter(k => !touched.has(k)), staleStarved: stale.filter(k => !touched.has(k)),
     touched: touched.size, avail, total: drilled.length,
     sameKindAll: per.slice(1).reduce((a, p) => a + p.sameKind, 0), itemsAfter1: per.slice(1).reduce((a, p) => a + p.n, 0) };
 }
@@ -279,6 +284,7 @@ function report(label, m, learnNew){
   console.log(`  ${label}: ${m.total} items, ${m.touched} units touched of ${m.avail} available`);
   if(!QUIET) m.per.forEach((p, i) => console.log(`    s${i + 1}: ${p.n} items, already right today: same kind ${pct(p.sameKind, p.n)}, any kind ${pct(p.anyKind, p.n)}; units ${p.units.size}, shared with s1 ${pct(m.overlap[i] * p.units.size, p.units.size)}; new ${learnNew[i]}`));
   if(WHY) console.log("    same-kind repeats by stage:", JSON.stringify(m.why), "misses never back:", JSON.stringify(m.lostDetail));
+  console.log(`    production misses (s1..s${N_SESSIONS - 1}): ${m.prodKeys.length} units, not back in production: ${m.prodLost.length}${WHY && m.prodLost.length ? " " + m.prodLost.join(",") : ""}`);
   console.log(`    missed today (s1..s${N_SESSIONS - 1}): ${m.missKeys.length} units, never back: ${m.lostMiss.length}; due weak never drilled: ${m.weakStarved.length}/${K_DUE}; mastered-stale never drilled: ${m.staleStarved.length}/${K_DUE}`);
 }
 const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
@@ -362,6 +368,7 @@ const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
     const on = res.on.m, onDay = res.on.day;
     check(`dayAware: same-kind repeats of items answered right earlier today <= 2% of sessions 2..${N_SESSIONS} (${on.sameKindAll}/${on.itemsAfter1})`, on.sameKindAll <= 0.02 * on.itemsAfter1);
     check(`dayAware: every unit missed in sessions 1..${N_SESSIONS - 1} comes back the same day (${on.missKeys.length - on.lostMiss.length}/${on.missKeys.length})`, on.lostMiss.length === 0);
+    check(`dayAware: every production miss of sessions 1..${N_SESSIONS - 1} comes back in a production kind the same day (${on.prodKeys.length - on.prodLost.length}/${on.prodKeys.length}; control ${res.off.m.prodKeys.length - res.off.m.prodLost.length}/${res.off.m.prodKeys.length})`, on.prodKeys.length > 0 && on.prodLost.length === 0);
     check(`dayAware: the ${K_DUE} weakest-oldest due units are all drilled (${K_DUE - on.weakStarved.length}/${K_DUE})`, on.weakStarved.length === 0);
     check(`dayAware: the ${K_DUE} mastered longest-unseen units are all drilled (${K_DUE - on.staleStarved.length}/${K_DUE})`, on.staleStarved.length === 0);
     // The other planners after the day: Test (Listen, Recall, Sentences, Characters), Words-tab Review.
