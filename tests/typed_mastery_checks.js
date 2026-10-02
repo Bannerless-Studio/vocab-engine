@@ -461,14 +461,71 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     const wordKinds = w => { const out = new Set(); for(let i = 0; i < 6; i++){ const pl = Array.from({ length: 6 }, () => ({ kind: "type", word: w })); out.add(kindOf(api.itemFromPlan(pl[i], i, pl))); } return [...out]; };
     const pk = pig.map(w => [w.w, wordKinds(w), unitKinds(w)]);
     check(`pronInGloss (${pig.map(w => w.w).join(" ")}): never meaning -> pinyin, as a word or a unit item (${[...new Set(pk.flatMap(x => x[1].concat(x[2])))].join(", ")})`, pig.length > 0 && pk.every(x => !x[1].includes("typePron") && !x[2].includes("typePron")));
-    // typedSyn: the meaning stimulus of the word accepts its synonym's characters; only the
-    // stimulus word's unit is credited.
+    // typedSyn: the meaning stimulus accepts the synonym's characters for the word record, but the
+    // learner wrote other characters: no unit moves, no c: answer, no dots (review 2026-10-02).
     const sw = WORDS.find(w => (w.typedSyn || []).length && UOW.has(w.id) && UOW.has(w.typedSyn[0]));
     const syw = BY_ID[sw.typedSyn[0]], us = UOW.get(sw.id).id, uy = UOW.get(syw.id).id;
     const q = api.getProg(); q.chars.c[us] = { r: 5, w: 0, s: 4 }; q.chars.c[uy] = { r: 5, w: 0, s: 4 };
-    const it = api.silentWrittenTypeItem(sw); api.drill1(it); answer(api, true, syw.w);
-    const after = api.getProg().chars.c;
-    check(`typedSyn: "${syw.w}" typed for ${sw.w}'s meaning is right; ${sw.w}'s unit 4 -> ${after[us].s}, ${syw.w}'s unit stays ${after[uy].s}`, after[us].s === 5 && after[uy].s === 4);
+    const wr0 = (q.w[sw.id] || {}).r || 0;
+    api.drill1(api.silentWrittenTypeItem(sw)); answer(api, true, syw.w);
+    let pg = api.getProg(), rv = api.html("rv");
+    const cEntry = pg.day && pg.day.a["c:" + us];
+    check(`typedSyn: "${syw.w}" typed for ${sw.w}'s meaning is right for the word (r ${wr0} -> ${pg.w[sw.id].r}); units stay ${pg.chars.c[us].s} / ${pg.chars.c[uy].s}, no c: answer (${JSON.stringify(cEntry || null)}), no dots`,
+      pg.w[sw.id].r === wr0 + 1 && pg.chars.c[us].s === 4 && pg.chars.c[uy].s === 4 && !(cEntry && (cEntry.r || []).includes("type")) && !/ucue/.test(rv) && /also right/.test(rv));
+    const cand = { key: "c:" + us, rec: pg.chars.c[us], mastered: M, bare: B, kinds: ["type"], alias: "w:" + sw.id };
+    check(`typedSyn: the unit's typed item stays open (tier ${VC.dayTier(cand, VC.dayLog(pg, DAY), VC.daySn(pg))}, not right today)`, VC.dayTier(cand, VC.dayLog(pg, DAY), VC.daySn(pg)) < 3);
+    api.drill1(api.silentWrittenTypeItem(sw)); answer(api, true);
+    check(`typedSyn control: ${sw.w} typed itself moves its unit 4 -> ${api.getProg().chars.c[us].s}`, api.getProg().chars.c[us].s === 5);
+    // Pinyin side: the synonym's reading typed for the meaning is never unit credit either.
+    const q2 = api.getProg(); q2.chars.c[us] = { r: 5, w: 0, s: 4 };
+    const pit = api.pronTypeItem(sw); const pok = pit.check(syw.pron);
+    api.drill1(api.pronTypeItem(sw)); answer(api, true, syw.pron);
+    check(`typedSyn, pinyin side: "${syw.pron}" for ${sw.w} is ${pok ? "right" : "wrong"}; units stay ${api.getProg().chars.c[us].s} / ${api.getProg().chars.c[uy].s}`, api.getProg().chars.c[us].s === 4 && api.getProg().chars.c[uy].s === 4);
+  }
+
+  console.log("\n[9] withWords Learn turn (chars.turn): Today closed after Learn still alternates");
+  {
+    const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
+    const reviewLine = h => (stripTags((h.match(/<tr><td>1\. Review<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^1\. Review/, ""));
+    const mid = VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, soundsOpened: true, sessions: 40 }, PACK);
+    byLv["1"].forEach(w => { mid.w[w.id] = { r: 3, w: 0, s: 3 }; }); byLv["2"].slice(0, 20).forEach(w => { mid.w[w.id] = { r: 1, w: 0, s: 1 }; });
+    // Plays Today until stop(prog) holds; the app is then closed without finishing.
+    const play = (api, stop) => { if(!api.getD()) api.el("go").click(); let guard = 0;
+      while(guard++ < 600 && !stop(api.getProg())){ const D = api.getD(); const h = api.panel();
+        if(D && api.getCur() && D.cur){ answer(api, true); api.el("nx").click(); continue; }
+        const b = (h.match(/<button class="next" id="(\w+)"/) || [])[1]; if(b){ api.el(b).click(); continue; }
+        const g = (h.match(/<button class="ghost" id="(\w+)"/) || [])[1]; if(g){ api.el(g).click(); continue; } break; }
+      return stop(api.getProg()); };
+    const kind = l => /^字/.test(l) ? "c" : /^HSK/.test(l) ? "w" : "?";
+    const st = fresh(); st.ls.setItem(VC.storageKey(PACK), JSON.stringify(mid));
+    const seq = [], rev = new Set(); let stopped = true;
+    for(let d = 0; d < 10; d++){
+      NOW = new Date(2026, 9, 3 + d, 8, 0, 0).getTime();
+      const api = await boot(PACK, st, 1); const h = api.panel();
+      seq.push(learnLine(h)); rev.add(reviewLine(h));
+      const t0 = (api.getProg().chars || {}).turn;
+      stopped = play(api, p => (p.chars || {}).turn !== t0 && p.chars.turn !== undefined) && stopped;
+    }
+    const ks = seq.map(kind);
+    check(`10 days, Today closed right after Learn each day: Learn alternates (${ks.join("")}; ${seq.slice(0, 4).join(" | ")} …), sessions unchanged`, stopped && ks.every((k, i) => k !== "?" && (i === 0 || k !== ks[i - 1])) && JSON.parse(st.ls.getItem(VC.storageKey(PACK))).sessions === 40);
+    const sizes = new Set([...rev].map(l => l.split(",")[0]));
+    check(`Review size the same whatever the turn (${[...sizes].join(" / ")})`, sizes.size === 1 && [...sizes][0] === "20 items");
+    // Abandoned before Learn completes: the next Today teaches the same kind.
+    NOW = new Date(2026, 9, 20, 8, 0, 0).getTime();
+    let api = await boot(PACK, st, 1); const l1 = learnLine(api.panel()); const t1 = api.getProg().chars.turn;
+    let n = 0; play(api, () => ++n > 3);
+    NOW = new Date(2026, 9, 21, 8, 0, 0).getTime();
+    api = await boot(PACK, st, 1); const l2 = learnLine(api.panel());
+    check(`closed during Review (before Learn): turn kept (${t1}), next Learn the same (${l1} | ${l2})`, api.getProg().chars.turn === t1 && kind(l1) === kind(l2) && l1 === l2);
+    // Reload mid-session (same day): the resumed session teaches the kind it was planned with, and
+    // completing that Learn flips the turn.
+    NOW = new Date(2026, 9, 22, 8, 0, 0).getTime();
+    api = await boot(PACK, st, 1); const l3 = learnLine(api.panel()), t3 = api.getProg().chars.turn;
+    n = 0; play(api, () => ++n > 3);
+    NOW += 60 * 1000; api = await boot(PACK, st, 2);
+    check(`reload mid-session: the drill resumes, turn still ${t3} (${api.getProg().chars.turn})`, !!api.getD() && api.getProg().chars.turn === t3);
+    play(api, p => p.chars.turn !== t3);
+    check(`resumed session completes its Learn (${l3}) and flips the turn (${t3} -> ${api.getProg().chars.turn})`, api.getProg().chars.turn === (kind(l3) === "w" ? "c" : "w"));
   }
 
   console.log(`\n[7] control: without the new fields the zh markup and progress match main ${MAIN}`);

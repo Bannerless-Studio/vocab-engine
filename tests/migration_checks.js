@@ -427,5 +427,31 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
   }
 }
 
+console.log("\n[turn] characters.withWords Learn turn (chars.turn, fb2-write2): additive, kept by older engines");
+{
+  const b = mig("C mid-HSK2"); const at = (p, n, t) => Object.assign(clone(p), { sessions: n }, { chars: Object.assign({}, p.chars, t === undefined ? {} : { turn: t }) });
+  const nx = p => (s => s ? s.kind : "done")(VC.nextStage(PACK, W, U, p));
+  check("absent: session parity (even words, odd characters); turn \"c\" / \"w\" overrides parity both ways; any other value is parity",
+    nx(at(b, 4)) === "words" && nx(at(b, 5)) === "chars" && nx(at(b, 4, "c")) === "chars" && nx(at(b, 5, "w")) === "words" && nx(at(b, 5, 7)) === "chars");
+  const q = at(b, 4);
+  check("learnTurnDone: words taught -> \"c\", characters taught -> \"w\"; not under \"later\" or without withWords",
+    VC.learnTurnDone(q, PACK, "words") && q.chars.turn === "c" && VC.learnTurnDone(q, PACK, "chars") && q.chars.turn === "w"
+    && !VC.learnTurnDone(VC.setCharOrder(at(b, 4), true), PACK, "words") && !VC.learnTurnDone(at(b, 4), (p => { const c = Object.assign({}, p.characters); delete c.withWords; return Object.assign({}, p, { characters: c }); })(PACK), "words"));
+  const raw = JSON.stringify(at(b, 4, "c"));
+  const nb = VC.bootProg(raw, PACK);
+  check("boot keeps chars.turn, no backup, nothing rewritten", nb.backupRaw === null && nb.prog.chars.turn === "c" && JSON.stringify(nb.prog.chars) === JSON.stringify(JSON.parse(raw).chars));
+  for(const sha of ["cc05012", "3d66aea"]){
+    let eng = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const src = cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`engine ${sha} not in this checkout's history`); continue; }
+    const ob = eng.bootProg(raw, PACK);
+    check(`engine ${sha} boots progress with chars.turn: no backup, turn and unit records kept`, ob.backupRaw === null && ob.prog.chars.turn === "c" && eq(ob.prog.chars.c, JSON.parse(raw).chars.c));
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

@@ -1996,11 +1996,19 @@ function nextStage(pack, words, units, prog, sunits){
   const path = stagePath(pack, words, units, prog, sunits), first = path.find(s => !s.done) || null;
   if(!charsWithWords(pack, prog) || !first || first.kind === "script") return first;
   // characters.withWords (docs/PACK_SCHEMA.md): an unlocked character stage (its level's words
-  // learned) and the next word level take turns by session parity; oldest stage first.
-  const w = path.find(s => s.kind === "words" && !s.done);
-  const c = path.find(s => s.kind === "chars" && !s.done && path.some(x => x.kind === "words" && x.lv === s.after && x.done));
+  // learned) and the next word level take turns; oldest stage first. The turn flips when a Learn
+  // step completes (chars.turn, learnTurnDone), so a Today closed after Learn still alternates
+  // (review 2026-10-02); without it, session parity.
+  const w = path.find(s => s.kind === "words" && !s.done), c = pendingCharStage(path);
   if(!w || !c) return c || w || first;
-  return (prog && prog.sessions || 0) % 2 ? c : w;
+  const t = prog && isObj(prog.chars) ? prog.chars.turn : undefined;
+  return (t === "c" || t === "w" ? t === "c" : (prog && prog.sessions || 0) % 2) ? c : w;
+}
+const pendingCharStage = path => path.find(s => s.kind === "chars" && !s.done && path.some(x => x.kind === "words" && x.lv === s.after && x.done)) || null;
+// A Learn step taught kind ("words" or "chars"): the next Learn teaches the other one.
+function learnTurnDone(prog, pack, kind){
+  if(!charsWithWords(pack, prog)) return false;
+  ensureChars(prog).turn = kind === "chars" ? "w" : "c"; return true;
 }
 // "Characters: with words" unless the learner chose "later" (chars.defer: after every word level).
 const charsWithWords = (pack, prog) => { const c = charsConfig(pack); return !!(c && c.withWords) && !(prog && isObj(prog.chars) && prog.chars.defer === true); };
@@ -2015,6 +2023,9 @@ function charsUnlocked(pack, words, prog){
 function charsStarted(pack, words, units, prog, sunits){
   if(!charsConfig(pack)) return false;
   if(Object.keys(charRecs(prog)).length) return true;
+  // withWords: started once a stage is pending, whichever kind this session's Learn teaches, so
+  // Review keeps one size (review 2026-10-02).
+  if(charsWithWords(pack, prog) && pendingCharStage(stagePath(pack, words, units, prog, sunits))) return true;
   const st = nextStage(pack, words, units, prog, sunits);
   return !!(st && st.kind === "chars");
 }
@@ -3336,7 +3347,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
-  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, charsWithWords, charsUnlocked, charsStarted, showCharChoice,
+  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,

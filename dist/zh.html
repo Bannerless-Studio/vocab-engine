@@ -2358,11 +2358,19 @@ function nextStage(pack, words, units, prog, sunits){
   const path = stagePath(pack, words, units, prog, sunits), first = path.find(s => !s.done) || null;
   if(!charsWithWords(pack, prog) || !first || first.kind === "script") return first;
   // characters.withWords (docs/PACK_SCHEMA.md): an unlocked character stage (its level's words
-  // learned) and the next word level take turns by session parity; oldest stage first.
-  const w = path.find(s => s.kind === "words" && !s.done);
-  const c = path.find(s => s.kind === "chars" && !s.done && path.some(x => x.kind === "words" && x.lv === s.after && x.done));
+  // learned) and the next word level take turns; oldest stage first. The turn flips when a Learn
+  // step completes (chars.turn, learnTurnDone), so a Today closed after Learn still alternates
+  // (review 2026-10-02); without it, session parity.
+  const w = path.find(s => s.kind === "words" && !s.done), c = pendingCharStage(path);
   if(!w || !c) return c || w || first;
-  return (prog && prog.sessions || 0) % 2 ? c : w;
+  const t = prog && isObj(prog.chars) ? prog.chars.turn : undefined;
+  return (t === "c" || t === "w" ? t === "c" : (prog && prog.sessions || 0) % 2) ? c : w;
+}
+const pendingCharStage = path => path.find(s => s.kind === "chars" && !s.done && path.some(x => x.kind === "words" && x.lv === s.after && x.done)) || null;
+// A Learn step taught kind ("words" or "chars"): the next Learn teaches the other one.
+function learnTurnDone(prog, pack, kind){
+  if(!charsWithWords(pack, prog)) return false;
+  ensureChars(prog).turn = kind === "chars" ? "w" : "c"; return true;
 }
 // "Characters: with words" unless the learner chose "later" (chars.defer: after every word level).
 const charsWithWords = (pack, prog) => { const c = charsConfig(pack); return !!(c && c.withWords) && !(prog && isObj(prog.chars) && prog.chars.defer === true); };
@@ -2377,6 +2385,9 @@ function charsUnlocked(pack, words, prog){
 function charsStarted(pack, words, units, prog, sunits){
   if(!charsConfig(pack)) return false;
   if(Object.keys(charRecs(prog)).length) return true;
+  // withWords: started once a stage is pending, whichever kind this session's Learn teaches, so
+  // Review keeps one size (review 2026-10-02).
+  if(charsWithWords(pack, prog) && pendingCharStage(stagePath(pack, words, units, prog, sunits))) return true;
   const st = nextStage(pack, words, units, prog, sunits);
   return !!(st && st.kind === "chars");
 }
@@ -3698,7 +3709,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
-  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, charsWithWords, charsUnlocked, charsStarted, showCharChoice,
+  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
@@ -4601,8 +4612,10 @@ function writtenTypeItem(entry){
     html: `${kindTag("characters", hear ? "listen" : "")}<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>${hear ? `<div class="listen-stage"><button class="replay" id="rp2" aria-label="Replay">${REPLAY_SVG}</button></div>` : ""}`,
     placeholder: "characters…",
     mount: () => { if(hear){ const b = $("rp2"); sayWord(entry, b); b.onclick = () => sayWord(entry, b); } },
-    check: syn.check, feedback: syn.note, reveal: revealBlock(entry),
-    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); markUnitTyped(this, entry.id, ok); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
+    // A synonym's characters (typedSyn) are right for the word, but the learner did not write this
+    // word's characters: no unit moves and no c: answer is logged (review 2026-10-02).
+    check(val){ const ok = syn.check(val); this.synHit = ok && !VC.acceptTyped(foldTyped(val), entry, PACK, VC.affixAlts(entry.w), WORDS); return ok; }, feedback: syn.note, reveal: revealBlock(entry),
+    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); if(this.synHit) this.cueUnit = null; else markUnitTyped(this, entry.id, ok); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
     choiceFallback: () => typedRecallFallback(entry) };
 }
 function pronSlotItem(entry, slot){
@@ -4695,7 +4708,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1887381949-1800904";
+const VE_BUILD = "923493815-1802505";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -4842,7 +4855,7 @@ function rzOrderOf(it){
 // Where each drill goes when its results screen's Continue is pressed. Closures that carry
 // state are tagged (rzTag) by their factories; the plain render functions are matched as is.
 const rzTag = (o, f) => Object.assign(f, { rzo: o });
-const RZ_TAB = { today: "today", todayLearn: "today", test: "test", words: "words", wordsSet: "words", sounds: "sounds", lesson: "sounds" };
+const RZ_TAB = { today: "today", todayLearn: "today", todayChars: "today", test: "test", words: "words", wordsSet: "words", sounds: "sounds", lesson: "sounds" };
 function rzOriginOf(onDone){
   if(onDone && onDone.rzo) return onDone.rzo;
   return onDone === todayStep ? { o: "today" } : onDone === testRender ? { o: "test" } : onDone === wordsRender ? { o: "words" } : onDone === soundsRender ? { o: "sounds" } : null;
@@ -4850,6 +4863,7 @@ function rzOriginOf(onDone){
 function rzDoneOf(o){
   if(o.o === "today") return todayStep;
   if(o.o === "todayLearn") return todayLearnDone(o.lv);
+  if(o.o === "todayChars") return todayCharsDone();
   if(o.o === "test") return testRender;
   if(o.o === "words") return wordsRender;
   if(o.o === "wordsSet") return wordsSetDone(o.lv, o.set, o.ut);
@@ -5400,7 +5414,9 @@ function enterFirstSoundsLessonFromToday(){
 }
 // nn.set is the first taught word's set; a leftover teach can close that set and the next, so
 // the counter is recounted from the records instead of set to nn.set+1.
-const todayLearnDone = lv => rzTag({ o: "todayLearn", lv }, () => { VC.settleSetCounter(prog, WORDS, PACK, lv); store.save(); todayStep(); });
+const todayLearnDone = lv => rzTag({ o: "todayLearn", lv }, () => { VC.settleSetCounter(prog, WORDS, PACK, lv); VC.learnTurnDone(prog, PACK, "words"); store.save(); todayStep(); });
+// characters.withWords: a character set taught flips the Learn turn (core.js learnTurnDone).
+const todayCharsDone = () => rzTag({ o: "todayChars" }, () => { if(VC.learnTurnDone(prog, PACK, "chars")) store.save(); todayStep(); });
 function todayStep(){
   stopSpeaking();
   const snap = HAS_STAGES ? (todayStepState.snap || (todayStepState.snap = takeSnapshot())) : null;
@@ -5424,7 +5440,7 @@ function todayStep(){
     if(g.learn && snap && snap.stage.kind === "script"){ scriptLearn(snap, 0); return; }
     if(g.learn && snap && snap.stage.kind === "chars"){
       const cs = snap.cset;
-      charTeach(cs, snap.stage, () => drill(VC.learnCharPlan(cs.units, PACK).map(planItem), todayStep, missSummary));
+      charTeach(cs, snap.stage, () => drill(VC.learnCharPlan(cs.units, PACK).map(planItem), VC.charsWithWords(PACK, prog) ? todayCharsDone() : todayStep, missSummary));
       return;
     }
     if(g.learn && nn){
@@ -6422,4 +6438,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2076489099-1800228-->
+<!--ve-build:2164700581-1801828-->
