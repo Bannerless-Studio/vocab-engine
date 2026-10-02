@@ -263,6 +263,8 @@ def check_characters_pack(pack, level_ids, rep):
                 rep.err(f"{where}.after {after!r} is out of pack.levels order (stages must be non-decreasing)")
             else:
                 last_idx = level_ids.index(after)
+            if "label" in st and not is_str(st["label"]):
+                rep.err(f"{where}.label must be a non-empty string")
             levels = st.get("levels")
             if not isinstance(levels, list) or not levels:
                 rep.err(f"{where}.levels must be a non-empty list of pack level ids")
@@ -295,6 +297,12 @@ def check_characters_pack(pack, level_ids, rep):
             rep.err(f"pack.characters.testKinds must be a non-empty object {{kind: positive weight}} with kinds from {CHAR_KINDS}")
     if "compose" in ch and not is_bool(ch["compose"]):
         rep.err("pack.characters.compose must be a boolean")
+    if "bareBy" in ch and ch["bareBy"] != "typed":
+        rep.err('pack.characters.bareBy must be "typed"')
+    elif "bareBy" in ch and not pack.get("dayAware"):
+        rep.warn("pack.characters.bareBy without pack.dayAware: units between mastered and bare get no guaranteed typed share")
+    if "bareWords" in ch and not is_bool(ch["bareWords"]):
+        rep.err("pack.characters.bareWords must be a boolean")
     return covered
 
 

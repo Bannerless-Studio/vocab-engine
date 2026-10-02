@@ -27,7 +27,10 @@ const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // dayAware post-dates main ef44c6e: the control strips it with the fields under test.
-const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; return p; })(Object.assign({}, PACK));
+// fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords;
+// checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
+const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; return Object.assign({}, p, { characters: c }); };
+const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; return p; })(preWrite(PACK));
 
 let fails = 0, passes = 0;
 function check(name, cond){
@@ -552,7 +555,9 @@ function walk(api, stopAt){
   console.log("\n[6] typedFrom with pack.dayAware on (zh as shipped): two Today sessions in one day");
   try {
     const { api } = await boot({ seed: 9 });
-    api.setProg(seedPF()); api.today(); api.el("go").click();
+    // Mid HSK 2 with characters put after the words: with one stage per level (fb2-write) 字1
+    // would otherwise come first, behind the choice card.
+    api.setProg(VC.normalizeProg(Object.assign(seedPF(), { chars: { choiceSeen: true, defer: true } }), PACK)); api.today(); api.el("go").click();
     const s1 = walk(api, /id="again"/); api.el("again").click(); api.el("go").click();
     const s2 = walk(api, /id="again"/);
     const typed = ss => ss.filter(x => x.kind === "type");

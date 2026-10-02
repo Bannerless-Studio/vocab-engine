@@ -471,7 +471,14 @@ function markWord(id, ok, kind, reqKind){ VC.ensureWordRec(prog, WORDS, PACK, id
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
 function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
 function markSentence(id, ok, kind){ VC.markRec(prog.s, id, ok, false); dayNote("s:" + id, kind, ok); store.save(); }
-function markChar(unitId, ok, kind){ VC.markChar(prog, unitId, ok); dayNote("c:" + unitId, kind, ok); store.save(); }
+function markChar(unitId, ok, kind){ VC.markChar(prog, unitId, ok, PACK, !!(TYPED_UNITS && TYPED_UNITS.has(unitId))); dayNote("c:" + unitId, kind, ok); store.save(); }
+// characters.bareBy "typed": a written-side typed answer also answers the word's unit. The in-drill
+// retry after a miss is no evidence (typedRequeue has already counted the miss being answered).
+function markUnitTyped(it, id, ok){
+  if(!TYPED_BARE || (it && it.typedMisses || 0) > (ok ? 0 : 1)) return;
+  const u = VC.markUnitTyped(prog, CHAR_LIST, PACK, id, ok);
+  if(u){ dayNote("c:" + u.id, "type", ok); store.save(); }
+}
 // docs/PACK_SCHEMA.md "dayAware": today's answers steer the day's later plans.
 const DAY_AWARE = VC.dayAwareOn(PACK);
 const dayToday = () => DAY_AWARE ? todayISO() : undefined;
@@ -676,6 +683,9 @@ const showWrittenBtn = written => `<button type="button" class="showw" data-show
 // tap false: no tap, for places that are themselves tap targets.
 function wordFormHTML(e, tap){ const d = dispWord(e); return d.isPron ? `${readingHTML(d.text)}${tap === false ? "" : showWrittenBtn(d.written)}` : escapeHtml(d.text); }
 const pronBeside = e => dispWord(e).isPron ? "" : pronOf(e);
+// characters.bareWords: a drill question shows a bare-tier word without its reading.
+const BARE_WORDS = HAS_CHARACTERS && CHAR_CFG.bareWords;
+const pronAsked = e => BARE_WORDS && VC.bareWord(e, CHAR_LIST, prog, PACK) ? "" : pronBeside(e);
 // Pronunciation aids (docs/PACK_SCHEMA.md "Pronunciation aids"): each is off unless the pack
 // sets its field, and then every helper below renders the markup it had before.
 const TONES = VC.tonesOn(PACK);
@@ -747,12 +757,12 @@ CHAR_LIST.forEach(u => { const t = String((u && u.t) || ""); if([...t].length ==
 const charReading = c => CHAR_READING.get(c) || "";
 const SOUNDS_REF = PACK.soundsReference === true && HAS_LESSONS;
 function bigWordHTML(entry){
-  const p = pronBeside(entry);
+  const p = pronAsked(entry);
   return `<div class="big wd"${TA}>${wordFormHTML(entry)}</div>${p ? `<div class="pron">${readingHTML(p)}</div>` : ""}`;
 }
 // Recall keys options by word id, so `written` gives the label for a value that is not one.
 function wordOptHtml(byKey, written){
-  return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const p = e ? pronBeside(e) : ""; return `${d && d.isPron ? twReading(d.text) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
+  return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const p = e ? pronAsked(e) : ""; return `${d && d.isPron ? twReading(d.text) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
 }
 
 function drill(items, onDone, summary, onShown){ if(DAY_AWARE && VC.dayStart(prog, PACK, todayISO(), !todayStepState)) store.save(); D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown, rzo: rzOriginOf(onDone), rzs: summary && summary.rzs }; rzFin = null; dnext(); }
@@ -805,7 +815,17 @@ function showReveal(html){
 // shows Replay. Reveal-time audio gets its button only once answered, so a gap item's
 // sentence audio never leaks the blank.
 const REVEAL_REPLAY = `<div class="rvsay"><button type="button" class="replay" id="rvp" aria-label="Replay">${REPLAY_SVG}</button></div>`;
-const revealHTML = (it, html) => it.onReveal && it.revealHear ? html + REVEAL_REPLAY : html;
+// characters.bareBy "typed": the unit's streak as dots on every word or unit reveal, read after
+// the answer is marked, so the learner sees it move.
+function unitCue(it){
+  if(!TYPED_BARE || !it || typeof it.key !== "string") return "";
+  const id = it.key.slice(2), u = it.key[1] !== ":" ? null : it.key[0] === "c" ? CHAR_LIST.find(x => x.id === id) : it.key[0] === "w" ? VC.unitByWord(CHAR_LIST).get(id) : null;
+  const rec = u && VC.charRecs(prog)[u.id];
+  if(!rec) return "";
+  const n = CHAR_CFG.bare, k = Math.min(n, Math.max(0, rec.s || 0));
+  return `<div class="q ucue" aria-label="${escapeHtml(CHAR_CFG.label)} ${k}/${n}" style="margin:0 0 4px;letter-spacing:2px"><span${TA}>${escapeHtml(CHAR_CFG.label)}</span> ${"\u25cf".repeat(k)}${"\u25cb".repeat(n - k)}</div>`;
+}
+const revealHTML = (it, html) => { const h = unitCue(it) + html; return it.onReveal && it.revealHear ? h + REVEAL_REPLAY : h; };
 function playReveal(it){
   if(!it.onReveal) return;
   const b = it.revealHear ? $("rvp") : null;
@@ -1164,7 +1184,7 @@ function writtenTypeItem(entry){
     placeholder: "characters…",
     mount: () => { if(hear){ const b = $("rp2"); sayWord(entry, b); b.onclick = () => sayWord(entry, b); } },
     check: val => VC.acceptTyped(foldTyped(val), entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
-    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
+    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); markUnitTyped(this, entry.id, ok); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
     choiceFallback: () => typedRecallFallback(entry) };
 }
 function pronSlotItem(entry, slot){
@@ -1178,6 +1198,9 @@ function pronSlotItem(entry, slot){
 // neither is a tap target. Audio comes with the reveal only.
 const TYPED_FROM = VC.typedFromOn(PACK);
 const TYPED_AMB = TYPED_FROM ? VC.typedAmbiguity(WORDS) : null;
+// characters.bareBy "typed" (docs/PACK_SCHEMA.md "bareBy"): units that advance past mastered by typing only.
+const TYPED_BARE = HAS_CHARACTERS && VC.typedBareOn(PACK);
+const TYPED_UNITS = TYPED_BARE ? VC.typedUnitWords(CHAR_LIST, WORDS, PACK, TYPED_AMB || undefined) : null;
 const stimWritten = e => `<div class="big wd"${TA}>${escapeHtml(e.w)}</div>`;
 const stimPron = e => `<div class="big wd"${TA}>${readingHTML(e.pron)}</div>`;
 function meaningTypeItem(entry, fromPron){
@@ -1185,7 +1208,7 @@ function meaningTypeItem(entry, fromPron){
   return { kind:"type", key:"w:"+entry.id, label:"Type the meaning", html: kindTag("meaning", "any one") + stim,
     placeholder: "meaning…", inputTA: ' lang="en"',
     check: val => VC.checkGlossTyped(val, VC.gloss(entry)), reveal: revealBlock(entry),
-    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
+    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); if(!fromPron) markUnitTyped(this, entry.id, ok); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
     choiceFallback: () => ({ kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero", html: stim,
       opts: meaningChoices(entry), a: VC.gloss(entry), optHtml: GLOSS_OPT, reveal: revealBlock(entry),
       onAnswer(ok){ markWord(entry.id, ok, typedFallbackKind(ok)); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) }) };
@@ -1196,6 +1219,7 @@ function writtenPronTypeItem(entry){
       opts: [entry.pron, ...opts], a: entry.pron, optHtml: o => `<bdi>${readingHTML(o)}</bdi>`, reveal: revealBlock(entry),
       onAnswer(ok){ markWord(entry.id, ok, typedFallbackKind(ok)); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
   return Object.assign(pronTypeItem(entry), { html: kindTag(PRON_NOUN, TONES ? "tones optional" : "") + stimWritten(entry),
+    onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); markUnitTyped(this, entry.id, ok); },
     choiceFallback: () => choice(VC.pronChoiceOpts(entry, learnedWords(), WORDS)) });
 }
 // typedFrom: meaning -> characters is a writing item; audio before the answer would say the
@@ -1522,13 +1546,13 @@ if(typeof window.addEventListener === "function") window.addEventListener("pageh
 const TYPED_ITEM = { word: typeItem, pron: pronTypeItem, written: silentWrittenTypeItem, writtenPron: writtenPronTypeItem,
   writtenMeaning: e => meaningTypeItem(e, false), pronMeaning: e => meaningTypeItem(e, true) };
 function typedFromSlotItem(plan, i){
-  const e = plan[i].word; const shown = !!e.w && !dispWord(e).isPron;
-  const k = VC.typedSlotKind(plan, i, prog, PACK, k => VC.typedKindOk(k, e, shown, TYPED_AMB));
+  const e = plan[i].word; const shown = !!e.w && !dispWord(e).isPron; const only = plan[i].tu ? VC.TYPED_WRITTEN_KINDS : null;
+  const k = VC.typedSlotKind(plan, i, prog, PACK, k => (!only || only.includes(k)) && VC.typedKindOk(k, e, shown, TYPED_AMB));
   return k ? TYPED_ITEM[k](e) : recallItem(e);
 }
 const withReq = (it, k) => Object.assign(it, { reqKind: it.reqKind || k });
 const WORD_ITEM = { hear: hearItem, read: readItem, recall: recallItem, type: (e, slot) => withReq(PRON_TYPING ? pronSlotItem(e, slot) : TYPING ? typeItem(e) : recallItem(e), "type") };
-const itemFromPlan = (p, i, plan) => withReq(TYPED_FROM && p.kind === "type" ? (plan && plan[i] === p ? typedFromSlotItem(plan, i) : typedFromSlotItem([p], 0)) : WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? VC.typeSlotKind(plan, i) : undefined), p.reqKind || p.kind);
+const itemFromPlan = (p, i, plan) => withReq(TYPED_FROM && p.kind === "type" ? (plan && plan[i] === p ? typedFromSlotItem(plan, i) : typedFromSlotItem([p], 0)) : WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? (p.tu ? "written" : VC.typeSlotKind(plan, i)) : undefined), p.reqKind || p.kind);
 function missSummary(miss){
   const u = VC.dedupeMisses(miss);
   return u.length ? `<p class="q">Missed:</p>${u.map(({item, count})=>`<div class="stmt rvb">${count > 1 ? `<div class="q" style="margin:0 0 4px">missed ${count}×</div>` : ""}${item.reveal}</div>`).join("")}` : "<p class='q'>Clean.</p>";
@@ -1858,10 +1882,11 @@ function scriptChoiceHTML(){
 const showScriptNotice = () => HAS_SCRIPT && VC.scriptNotice(PACK, prog) && VC.scriptSkipped(prog);
 function reviewWhat(snap, plan){
   const xs = !!(plan && plan.some(isScriptPlan));
-  if(!xs) return snap.charsStarted ? (plan && plan.some(x => x.unit) ? `, words and ${CHAR_CFG.label}` : ", words") : "";
+  // A typed unit item (tu, characters.bareBy) is a word item that practises the unit.
+  if(!xs) return snap.charsStarted ? (plan && plan.some(x => x.unit || x.tu) ? `, words and ${CHAR_CFG.label}` : ", words") : "";
   const parts = [];
   if(plan.some(x => x.word)) parts.push("words");
-  if(plan.some(x => x.unit && !isScriptPlan(x))) parts.push(CHAR_CFG.label);
+  if(plan.some(x => (x.unit && !isScriptPlan(x)) || x.tu)) parts.push(CHAR_CFG.label);
   parts.push("script");
   return ", " + (parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : parts[0]);
 }
@@ -1869,8 +1894,12 @@ function charChoiceHTML(){
   const path = VC.stagePath(PACK, WORDS, CHAR_LIST, prog, SU);
   const first = path.findIndex(s => s.kind === "chars");
   const next = path.slice(first + 1).find(s => s.kind === "words" && !s.done);
-  const L = tf(CHAR_CFG.label), N = ui(next ? next.label : "");
-  return `<div class="stmt" id="charChoice">${L} next: learn to recognise the written form of the words you already know. Or go on to ${N} first and do ${L} after it. You can change this later in Progress.<button class="next" id="choiceStart" style="margin-top:8px">Start ${L}</button><button class="ghost" id="choiceSkip" style="margin-top:8px">Skip to ${N}</button></div>`;
+  const L = tf(path[first].label), N = ui(next ? next.label : "");
+  // Skipping defers every character stage to after the last one's level (core.js charStages):
+  // with one stage per level that is not the next word level.
+  const deferred = VC.charStages(PACK, Object.assign({}, prog, { chars: Object.assign({}, prog.chars, { defer: true }) }));
+  const top = deferred.length && next && deferred[0].after !== next.lv ? levelLabel(deferred[0].after) : "";
+  return `<div class="stmt" id="charChoice">${L} next: learn to recognise the written form of the words you already know. Or go on to ${N} first and do ${L} after ${top ? ui(top) : "it"}. You can change this later in Progress.<button class="next" id="choiceStart" style="margin-top:8px">Start ${L}</button><button class="ghost" id="choiceSkip" style="margin-top:8px">Skip to ${N}</button></div>`;
 }
 function todayRender(){
   stopSpeaking();
@@ -1884,7 +1913,7 @@ function todayRender(){
   const g = VC.todayGates(lw.length, snap ? snapLearns(snap) : !!nn, availSent.length, scriptCount());
   // Start today runs exactly this plan, so the line names units only when the plan holds
   // some (a first character day has no unit records yet).
-  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday() }) : null } : null;
+  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedUnits: TYPED_UNITS }) : null } : null;
   const reviewLine = snap
     ? `${snap.reviewSize} items, ${PLAN_ORDER}${reviewWhat(snap, todayPrep.review)}`
     : `${VC.REVIEW_SIZE} items, ${PLAN_ORDER}`;
@@ -1963,7 +1992,7 @@ function todayStep(){
   todayStepState.at = s; sessionSave(true);
   if(s === 0){
     if(g.review && snap){
-      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday() });
+      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedUnits: TYPED_UNITS });
       todayStepState.review = null;
       drill(plan.map(planItem), todayStep, missSummary); return;
     }
@@ -1994,7 +2023,7 @@ function todayStep(){
     return todayStep();
   }
   if(s === 3){
-    if(g.recall && units){ drill(VC.buildRecallPlan(lw, prog, PACK, 8, { units, canHear: canHearWord, today: dayToday() }).map(planItem), todayStep, missSummary); return; }
+    if(g.recall && units){ drill(VC.buildRecallPlan(lw, prog, PACK, 8, { units, canHear: canHearWord, today: dayToday(), typedUnits: TYPED_UNITS }).map(planItem), todayStep, missSummary); return; }
     if(g.recall){ drill(VC.buildRecallPlan(lw, prog, PACK, 8, { canHear: canHearWord, today: dayToday() }).map(itemFromPlan), todayStep, missSummary); return; }
     return todayStep();
   }

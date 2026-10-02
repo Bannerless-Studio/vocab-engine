@@ -283,7 +283,9 @@ def main(argv):
         # (docs/HSK_MERGE.md §2.1): one-to-one with words.json, same order.
         "characters": {
             "label": "字",
-            "stages": [{"after": "3", "levels": ["1", "2", "3"]}, {"after": "4", "levels": ["4"]}],
+            # One stage per HSK level, unlocked once that level's words are learned (owner
+            # feedback 2026-10-02; was one stage after HSK 3 for levels 1-3).
+            "stages": [{"after": lv, "levels": [lv], "label": "字" + lv} for lv in ("1", "2", "3", "4")],
             "setSize": 10,
             "mastered": 3,
             "bare": 6,
@@ -293,6 +295,11 @@ def main(argv):
             # A hanzi's unit has one reading, so a passage span longer than its word may
             # read its other characters per character (docs/PACK_SCHEMA.md "characters").
             "compose": True,
+            # Writing scores more than choosing (owner feedback 2026-10-02): from mastered,
+            # only typed written-side answers take a unit to bare; bare words are asked
+            # without pinyin (docs/PACK_SCHEMA.md "bareBy").
+            "bareBy": "typed",
+            "bareWords": True,
         },
         "legacy": {"key": "hsk_pinyin", "format": "hsk-v2"},
         # Pronunciation first (docs/HSK_MERGE.md §8, 2026-09-25): a word is shown by its
@@ -302,6 +309,9 @@ def main(argv):
         # by tone as hsk did, and a Reference card of every lesson sound in the Sounds tab.
         "tones": "pinyin",
         "soundsReference": True,
+        # Plans know today and the session clock (docs/PACK_SCHEMA.md "dayAware"); hand-added
+        # to pack.json by fb2-sched, so a regeneration dropped it.
+        "dayAware": True,
     }
 
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).

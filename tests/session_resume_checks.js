@@ -160,7 +160,9 @@ return {
 // ------------------------------------------------------------------ helpers
 const byLv = VC.wordsByLevel(WORDS, PACK);
 const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
-const seedPF = () => VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5 }, PACK);
+// Mid HSK 2 before any character stage: with one stage per level (fb2-write) that is a learner who
+// put characters after the words (chars.defer), else 字1 would come before HSK 2.
+const seedPF = () => VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PACK);
 const KEY = VC.storageKey(PACK), SKEY = VC.sessionKey(PACK);
 function fresh(){ const ls = memStore(), ss = memStore(); ls.setItem(KEY, JSON.stringify(seedPF())); return { ls, ss }; }
 function typedAnswer(it){

@@ -19,6 +19,9 @@ const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "55c843e"; // BP merged: the engine before BP2
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
+// fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords;
+// checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
+const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; return Object.assign({}, p, { characters: c }); };
 const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
@@ -28,7 +31,7 @@ const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // The zh pack without typedFrom/glossFocus: the typed-slot rules and controls below predate them
 // (tests/typed_from_checks.js covers them).
-const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.helpClose; delete p.readAnswerBlock; return p; })(Object.assign({}, PACK));
+const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.helpClose; delete p.readAnswerBlock; return p; })(preWrite(PACK));
 console.log(`Loaded zh pack: ${WORDS.length} words, ${SENTENCES.length} sentences, ${PASSAGES.length} passages, ${CHARACTERS.length} units`);
 
 let fails = 0, passes = 0;
@@ -189,7 +192,9 @@ const tspans = h => (String(h).match(/<span class="t[1-5]">/g) || []).length;
 const syllables = t => VC.splitReading(t).filter(p => p.tone).reduce((n, p) => n + (/r$/i.test(VC.stripMarks(p.text)) && !/^er$/i.test(VC.stripMarks(p.text)) && !VC.splitSyllable(VC.stripMarks(p.text)) ? 2 : 1), 0);
 const byLv = VC.wordsByLevel(WORDS, PACK);
 const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
-const seedPF = () => VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5 }, PACK);
+// Mid HSK 2 before any character stage: with one stage per level (fb2-write) that is a learner who
+// put characters after the words (chars.defer), else 字1 would come before HSK 2.
+const seedPF = () => VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PACK);
 // Plays the active flow: answers every item right (mc: the answer option; type: the
 // word's pron), presses Continue / Drill / Next; records every screen, option and reveal.
 function walk(api, stopAt){

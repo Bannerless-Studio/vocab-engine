@@ -162,6 +162,18 @@ function kindOf(it){
   if(/^type/.test(r.b)) return "type";
   return r.b;
 }
+// characters.bareBy "typed": a written-side typed word item (meaning -> characters, characters ->
+// meaning or pinyin) also answers the word's recorded character unit (core.js markUnitTyped), so
+// unit metrics count it under the unit's key too (drilled entry `also`).
+const writtenSide = r => !!r && (r.b === "typeWrittenSilent" || r.b === "typeWritten" || r.b === "typeWrittenPron" || (r.b === "typeMeaning" && !r.a[1]));
+const UNIT_OF_WORD = new Map(CHARACTERS.map(u => [u.words[0], u]));
+function unitAlso(it, prog, pack){
+  if(!VC.typedBareOn(pack) || !writtenSide(it.rz) || !String(it.key).startsWith("w:")) return undefined;
+  const u = UNIT_OF_WORD.get(it.key.slice(2));
+  return u && prog.chars && prog.chars.c[u.id] ? "c:" + u.id : undefined;
+}
+// Each drilled entry, plus one under its unit's key for an entry that also answered a unit.
+const withAlso = drilled => drilled.flatMap(d => d.also ? [d, Object.assign({}, d, { key: d.also, kind: "type" })] : [d]);
 // Harder kinds after easier ones: an item is "harder" than what was done when its rank is higher.
 const typedAnswer = it => {
   const w = BY_ID[String(it.key).slice(2)];
@@ -224,7 +236,7 @@ async function playDay(pack, seedP, sessions, seed, gapMs){
       const D = api.getD();
       if(D && api.getCur() && D.cur){
         const it = api.getCur(); const ok = ans() < 0.85;
-        drilled.push({ sess: sn, step: api.log[api.log.length - 1].step, key: it.key, kind: kindOf(it), ok });
+        drilled.push({ sess: sn, step: api.log[api.log.length - 1].step, key: it.key, kind: kindOf(it), ok, also: unitAlso(it, api.getProg(), pack) });
         answer(api, ok); api.el("nx").click(); continue;
       }
       if(/id="again"/.test(html)){ api.el("again").click(); break; }
@@ -243,7 +255,7 @@ async function playDay(pack, seedP, sessions, seed, gapMs){
 // ------------------------------------------------------------------ metrics
 const unitOf = key => key;   // a word, a character unit and a sentence are each one unit
 function metrics(seedP, pack, day, K){
-  const { drilled } = day;
+  const { drilled } = day; const X = withAlso(drilled);
   const sessions = [...new Set(drilled.map(d => d.sess))].sort((a, b) => a - b);
   const okKind = new Set(), okAny = new Set();
   const per = sessions.map(() => ({ n: 0, sameKind: 0, anyKind: 0, units: new Set() }));
@@ -259,24 +271,24 @@ function metrics(seedP, pack, day, K){
   });
   // A miss "comes back" when the unit is drilled again in a later session or later step.
   const pos = d => d.sess * 10 + (d.step || 0);
-  const misses = drilled.filter(d => !d.ok && d.sess < N_SESSIONS - 1);
+  const misses = X.filter(d => !d.ok && d.sess < N_SESSIONS - 1);
   const missKeys = [...new Set(misses.map(d => d.key))];
-  const lostMiss = missKeys.filter(k => { const last = Math.max(...misses.filter(d => d.key === k).map(pos)); return !drilled.some(d => d.key === k && pos(d) > last); });
+  const lostMiss = missKeys.filter(k => { const last = Math.max(...misses.filter(d => d.key === k).map(pos)); return !X.some(d => d.key === k && pos(d) > last); });
   // Due at the day's start: weakest-oldest unmastered words/units, mastered longest unseen.
   const recs = [...Object.entries(seedP.w).map(([id, r]) => ["w:" + id, r, VC.WORD_MASTERED]),
     ...Object.entries(seedP.chars.c).map(([id, r]) => ["c:" + id, r, 3])];
   const weak = recs.filter(x => (x[1].s || 0) < x[2]).sort((a, b) => (a[1].s - b[1].s) || (a[1].t - b[1].t) || (a[0] < b[0] ? -1 : 1)).slice(0, K).map(x => x[0]);
   const stale = recs.filter(x => (x[1].s || 0) >= x[2]).sort((a, b) => (a[1].t - b[1].t) || (a[0] < b[0] ? -1 : 1)).slice(0, K).map(x => x[0]);
-  const touched = new Set(drilled.map(d => d.key));
+  const touched = new Set(X.map(d => d.key));
   const avail = recs.length + VC.availableSentences(SENTENCES, WORDS, pack, seedP).length;
   const s1 = per[0] ? per[0].units : new Set();
   const overlap = per.map(p => { let i = 0; p.units.forEach(u => { if(s1.has(u)) i++; }); return p.units.size ? i / p.units.size : 0; });
   // Strict: a production miss must come back in a production kind (core.js DAY_PRODUCTION),
   // not merely be seen again by ear or by sight.
-  const prodMiss = drilled.filter(d => !d.ok && d.sess < N_SESSIONS - 1 && VC.DAY_PRODUCTION.includes(d.kind));
+  const prodMiss = X.filter(d => !d.ok && d.sess < N_SESSIONS - 1 && VC.DAY_PRODUCTION.includes(d.kind));
   const prodKeys = [...new Set(prodMiss.map(d => d.key))];
-  const prodLost = prodKeys.filter(k => { const last = Math.max(...prodMiss.filter(d => d.key === k).map(pos)); return !drilled.some(d => d.key === k && pos(d) > last && VC.DAY_PRODUCTION.includes(d.kind)); });
-  const lostDetail = lostMiss.map(k => drilled.filter(d => d.key === k).map(d => `${k} s${d.sess + 1}/${d.step} ${d.kind} ${d.ok ? "ok" : "MISS"}`).join(", "));
+  const prodLost = prodKeys.filter(k => { const last = Math.max(...prodMiss.filter(d => d.key === k).map(pos)); return !X.some(d => d.key === k && pos(d) > last && VC.DAY_PRODUCTION.includes(d.kind)); });
+  const lostDetail = lostMiss.map(k => X.filter(d => d.key === k).map(d => `${k} s${d.sess + 1}/${d.step} ${d.kind} ${d.ok ? "ok" : "MISS"}`).join(", "));
   return { prodKeys, prodLost, lostDetail, why, per, overlap, missKeys, lostMiss, weakStarved: weak.filter(k => !touched.has(k)), staleStarved: stale.filter(k => !touched.has(k)),
     touched: touched.size, avail, total: drilled.length,
     sameKindAll: per.slice(1).reduce((a, p) => a + p.sameKind, 0), itemsAfter1: per.slice(1).reduce((a, p) => a + p.n, 0) };
@@ -293,10 +305,13 @@ const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
 // Session clock (core.js DAY_RECENT_SESSIONS): a drilled item repeats a kind already answered
 // right (not the in-drill retry) earlier the same day, or in one of the previous
 // DAY_RECENT_SESSIONS sessions, in another drill. dayOf: session index -> day index.
-function windowRepeats(drilled, dayOf){
+function windowRepeats(drilled0, dayOf){
+  const drilled = withAlso(drilled0);
   const right = new Map(), missedIn = new Set(); const ex = [];
   drilled.forEach(d => {
-    const did = d.sess + ":" + d.step, k = d.key + "|" + d.kind;
+    // Typing the characters (also: a written-side kind) is another ask than typing the pinyin, though
+    // the day log keeps both as "type".
+    const did = d.sess + ":" + d.step, k = d.key + "|" + (d.also ? "typeW" : d.kind);
     const prev = right.get(k) || [];
     if(prev.some(p => p.did !== did && (d.sess - p.sess <= VC.DAY_RECENT_SESSIONS || dayOf(p.sess) === dayOf(d.sess)))) ex.push(`${k} s${d.sess + 1}`);
     if(!d.ok) missedIn.add(d.key + "@" + did); else if(!missedIn.has(d.key + "@" + did)) right.set(k, prev.concat({ sess: d.sess, did }));
@@ -305,12 +320,13 @@ function windowRepeats(drilled, dayOf){
 }
 // Every miss before the last session comes back in a later drill, any day, in a kind that settles
 // it (core.js daySettles: its own kind, or production for a production miss).
-function missesCarried(drilled){
+function missesCarried(drilled0){
+  const drilled = withAlso(drilled0);
   const lastSess = Math.max(...drilled.map(d => d.sess));
   const pos = d => d.sess * 100 + (d.step || 0);
   const seen = new Map();
   drilled.filter(d => !d.ok && d.sess < lastSess).forEach(d => seen.set(d.key + "|" + d.kind, d));
-  const lost = [...seen.values()].filter(m => !drilled.some(d => pos(d) > pos(m) && d.key === m.key && VC.daySettles([m.kind], d.kind)));
+  const lost = [...seen.values()].filter(m => !drilled.some(d => pos(d) > pos(m) && d.key === m.key && VC.daySettlesAt(m.key, [m.kind], d.kind)));
   const prod = [...seen.values()].filter(m => VC.DAY_PRODUCTION.includes(m.kind));
   return { n: seen.size, lost: lost.map(m => `${m.key} ${m.kind} s${m.sess + 1}`), prodN: prod.length, prodLost: prod.filter(m => lost.includes(m)).length, sentN: [...seen.values()].filter(m => m.key[0] === "s").length };
 }
@@ -417,7 +433,9 @@ function missesCarried(drilled){
     check(`dayAware: the ${K_DUE} mastered longest-unseen units are all drilled (${K_DUE - on.staleStarved.length}/${K_DUE})`, on.staleStarved.length === 0);
     // The other planners after the day: Test (Listen, Recall, Sentences, Characters), Words-tab Review.
     const api = onDay.api, dl = VC.dayLog(api.getProg(), DAY);
-    const rightToday = it => { const e = dl.a[it.key]; return !!(e && Array.isArray(e.r) && e.r.includes(kindOf(it))); };
+    // A pending miss whose settling kinds this drill can ask are all right today is asked in one of
+    // them (core.js dayItemKind: misses first), which is no repeat.
+    const rightToday = it => { const e = dl.a[it.key]; const mk = VC.dayPending(e); return !!(e && Array.isArray(e.r) && e.r.includes(kindOf(it))) && !(mk && VC.daySettlesAt(it.key, mk, kindOf(it))); };
     for(const [tab, id] of [["test", "tListen"], ["test", "tRecall"], ["test", "tSentences"], ["test", "tChars"], ["words", "rev"]]){
       api.clickTab(tab);
       const shown = api.panel() + ((api.el("wbody") || {}).innerHTML || "");
@@ -435,7 +453,7 @@ function missesCarried(drilled){
     // Lead finding 2026-10-02: weakScore ranking gave character units at streak 3-6 (pinyin
     // hidden .. bare) probability 0 of a Review/Recall slot. They are mastered: tier 2's share.
     const midUnits = Object.entries(res.on.seed.chars.c).filter(([, r]) => r.s >= 3 && r.s <= 5).map(([id]) => "c:" + id);
-    const midHit = tag => midUnits.filter(k => res[tag].day.drilled.some(d => d.key === k)).length;
+    const midHit = tag => midUnits.filter(k => withAlso(res[tag].day.drilled).some(d => d.key === k)).length;
     check(`dayAware: character units at streak 3-5 reach Review/Recall within the day (${midHit("on")}/${midUnits.length}; control ${midHit("off")})`, midUnits.length > 0 && midHit("on") > 0);
   }
   console.log(`\n[rollover] scenario A, sessions 1-4 on one evening, 5-8 the next morning`);
@@ -463,7 +481,7 @@ function missesCarried(drilled){
     NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
     const seedP = seedProg(pack, 595, 60, 11);
     const run = await playDay(pack, seedP, ROT_DAYS, 5, 24 * 60 * 60 * 1000);
-    const touched = new Set(run.drilled.map(d => d.key));
+    const touched = new Set(withAlso(run.drilled).map(d => d.key));
     const recs = [...Object.entries(seedP.w).map(([id, r]) => ["w:" + id, r]), ...Object.entries(seedP.chars.c).map(([id, r]) => ["c:" + id, r])];
     const mast = recs.filter(x => x[1].s >= 3).sort((a, b) => (a[1].t - b[1].t) || (a[0] < b[0] ? -1 : 1));
     const mid = recs.filter(x => x[0][0] === "c" && x[1].s >= 3 && x[1].s <= 5);
@@ -473,12 +491,34 @@ function missesCarried(drilled){
     const mastSeen = mast.filter(x => touched.has(x[0])).length;
     console.log(`  ${tag}: mastered units drilled ${mastSeen}/${mast.length}; ${ROT_K} longest unseen at start never drilled: ${oldest}; character units at streak 3-5 drilled ${midSeen}/${mid.length}`);
     const rrep = windowRepeats(run.drilled, s => s);
+    if(WHY) console.log("    rotation repeats:", rrep.join("; "));
     console.log(`    same-kind repeats of an item right in the previous ${VC.DAY_RECENT_SESSIONS} sessions: ${rrep.length}/${run.drilled.length}`);
     if(tag === "on"){
       check(`rotation: no same-kind repeat of an item right in the previous ${VC.DAY_RECENT_SESSIONS} sessions (${rrep.length}/${run.drilled.length})`, rrep.length === 0);
       check(`rotation: the ${ROT_K} mastered units unseen longest at the start are all drilled within ${ROT_DAYS} days`, oldest === 0);
       check(`rotation: every character unit at streak 3-5 is drilled within ${ROT_DAYS} days (${midSeen}/${mid.length})`, mid.length > 0 && midSeen === mid.length);
     }
+  }
+  // characters.bareBy "typed" (owner feedback 2026-10-02: "it takes more than 3/6 attempts for
+  // mastery"): from mastered only typed written-side answers move a unit, so they must come often
+  // enough. Scenario B, a week of Today sessions; control: bareBy removed (choice answers credit).
+  for(const perDay of [1, 3]){
+    console.log(`\n[typed week] scenario B, ${perDay} Today session(s) a day for 7 days: character units at streak 3-5 reach bare (6)`);
+    const res = {};
+    for(const [tag, pack] of [["choice credit (bareBy off)", (p => { const c = Object.assign({}, p.characters); delete c.bareBy; return Object.assign({}, p, { characters: c }); })(PACK_ON)], ["typed only (as shipped)", PACK_ON]]){
+      NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
+      const seedP = seedProg(pack, 595, 60, 11);
+      const at = sn => new Date(2026, 9, 2 + Math.floor(sn / perDay), 7 + 3 * (sn % perDay), 0, 0).getTime();
+      const run = await playDay(pack, seedP, 7 * perDay, 5, at);
+      const mid = Object.entries(seedP.chars.c).filter(([, r]) => r.s >= 3 && r.s <= 5).map(([id]) => id);
+      const reached = mid.filter(id => (run.prog.chars.c[id] || {}).s >= 6).length;
+      const typedU = run.drilled.filter(d => d.also && mid.includes(d.also.slice(2))).length;
+      console.log(`  ${tag}: ${reached}/${mid.length} reach bare; typed answers on them ${typedU}; items ${run.drilled.length}`);
+      res[tag] = { reached, n: mid.length, typedU };
+    }
+    const on = res["typed only (as shipped)"];
+    const want = perDay === 1 ? 0.5 : 0.8;
+    check(`typed week (${perDay}/day): >= ${want * 100}% of units at streak 3-5 reach bare by typed answers (${on.reached}/${on.n}, ${on.typedU} typed answers on them)`, on.n > 0 && on.reached >= want * on.n);
   }
   console.log(`\n${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);

@@ -27,7 +27,12 @@ function tryLoadConst(file, name){ try{ return loadConst(file, name); }catch(e){
 // BP2's pronunciation aids (tones, typing "pron", soundsReference) are left out here, so
 // these checks keep testing BP's markup; tests/pron_aids_checks.js checks the pack with them.
 const PACK_ZH = (p => { const q = Object.assign({}, p); delete q.tones; delete q.soundsReference; if(q.typing === "pron") q.typing = null; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
-const PACK = Object.assign({}, PACK_ZH, { pronFirst: false });
+// fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords;
+// [1]-[13] keep the earlier stage layout (one stage after HSK 3 for 1-3, one after HSK 4) and choice
+// crediting: they test the stage machinery, which is unchanged for it. tests/typed_mastery_checks.js
+// checks the per-level layout and typed mastery as shipped.
+const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; return Object.assign({}, p, { characters: c }); };
+const PACK = preWrite(Object.assign({}, PACK_ZH, { pronFirst: false }));
 // The plan lines' order wording follows pack.dayAware (docs/PACK_SCHEMA.md "dayAware").
 const ORDER = PACK.dayAware ? "misses and due first" : "weakest first";
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
@@ -762,7 +767,9 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
   const onlyLabel = h => /^字*$/.test(visHan(h)); // the stage label 字 / 字4 (path strip, Progress rows)
   const PF_ZH = PACK_ZH;
   const NSZ = lv => VC.nSets(VC.wordsByLevel(WORDS, PF_ZH)[lv], VC.setSizeOf(PF_ZH));
-  const seedPF = () => VC.normalizeProg({ sets: { "1": NSZ("1"), "2": 2 }, placedOnce: true, sessions: 5 }, PF_ZH);
+  // Mid HSK 2 before any character stage: with one stage per level (fb2-write) that is a learner
+  // who put characters after the words (chars.defer), else 字1 would come before HSK 2.
+  const seedPF = () => VC.normalizeProg({ sets: { "1": NSZ("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PF_ZH);
   check("zh pack.json ships pronFirst: true", PF_ZH.pronFirst === true);
   // Walks the active screen flow: answers every drill item right, presses Continue /
   // Drill / Next, and records every screen, option label and reveal.
@@ -934,7 +941,7 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
   }
   {
     // Flag-off: a characters pack without pronFirst renders byte-identically to pronFirst:false.
-    const noKey = Object.assign({}, PF_ZH); delete noKey.pronFirst;
+    const noKey = preWrite(PF_ZH); delete noKey.pronFirst;
     const a = await boot({ pack: PACK }), b = await boot({ pack: noKey });
     a.api.setProg(seedC()); b.api.setProg(seedC());
     const pages = api => ["today","words","test","progress","read"].map(t => { api.goto(t); return api.html("panel") + (api.el("wl") ? api.el("wl").children.map(c => c.innerHTML).join("") : ""); });

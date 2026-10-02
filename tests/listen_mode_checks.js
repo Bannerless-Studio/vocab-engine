@@ -18,7 +18,10 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // this suite is about listening, so it runs the zh pack with them off.
 // dayAware (docs/PACK_SCHEMA.md) post-dates the pinned controls and is not what this suite checks.
 const PACK_DAY = loadConst(path.join(ZH, "pack.js"), "PACK");
-const PACK = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords;
+// checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
+const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; return Object.assign({}, p, { characters: c }); };
+const PACK = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; return p; })(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");

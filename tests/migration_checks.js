@@ -130,10 +130,14 @@ console.log("\n[2] seed-specific derived state on the engine side");
 const W = WORDS, U = readJSON("characters.json");
 const mig = n => VC.migrateLegacy(PACK, LEGACY, clone(SEEDS[n])).prog;
 check("A empty: equals defaultProg plus the marker", eq(mig("A empty"), Object.assign(VC.defaultProg(PACK), { legacy: { key:"hsk_pinyin", format:"hsk-v2" } })));
-check("C mid-HSK2: next stage is HSK 2 set 3", (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, mig("C mid-HSK2"))));
+// One character stage per level (fb2-write): HSK 1 learned unlocks 字1 before HSK 2, behind the
+// choice card; skipping it (chars.defer) gives back HSK 2 set 3, the stage before the split.
+check("C mid-HSK2: next stage is 字1 behind the choice card; skipped, HSK 2 set 3",
+  (s => s && s.kind === "chars" && eq(s.levels, ["1"]))(VC.nextStage(PACK, W, U, mig("C mid-HSK2"))) && VC.showCharChoice(PACK, W, U, mig("C mid-HSK2"))
+  && (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, VC.answerCharChoice(mig("C mid-HSK2"), false))));
 check("HEAD (HSK 1-3 done, card unanswered): choice card shows", VC.showCharChoice(PACK, W, U, mig("HEAD")) === true);
-check("D1 (answered start): no card, next stage is characters 1-3", !VC.showCharChoice(PACK, W, U, mig("D1 chars started, card answered: start"))
-  && (s => s && s.kind === "chars" && eq(s.levels, ["1","2","3"]))(VC.nextStage(PACK, W, U, mig("D1 chars started, card answered: start"))));
+check("D1 (answered start): no card, next stage is 字1 (its 25 units are HSK 1)", !VC.showCharChoice(PACK, W, U, mig("D1 chars started, card answered: start"))
+  && (s => s && s.kind === "chars" && eq(s.levels, ["1"]))(VC.nextStage(PACK, W, U, mig("D1 chars started, card answered: start"))));
 check("D2 (answered skip): no card, next stage is HSK 4", !VC.showCharChoice(PACK, W, U, mig("D2 chars started, card answered: skip"))
   && (s => s && s.kind === "words" && s.lv === "4")(VC.nextStage(PACK, W, U, mig("D2 chars started, card answered: skip"))));
 check("D3 (order flipped): one deferred characters stage 1-4 after HSK 4", (p => { const cs = VC.stagePath(PACK, W, U, p).filter(s => s.kind === "chars"); return cs.length === 1 && eq(cs[0].levels, ["1","2","3","4"]); })(mig("D3 learning order flipped from Progress")));
@@ -341,6 +345,52 @@ console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"
   else {
     const ob = old.bootProg(zraw, PACK);
     check("previous engine 3d66aea boots day + sn + u progress with no backup, fields kept", ob.backupRaw === null && ob.prog.sn === z.sn && eq(ob.prog.day, z.day) && eq(ob.prog.w, z.w));
+  }
+}
+
+console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write): stored progress keeps its meaning");
+{
+  // The zh pack before fb2-write: one stage after HSK 3 for levels 1-3, no bareBy/bareWords.
+  const OLD = (p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; return Object.assign({}, p, { characters: c }); })(clone(PACK));
+  const labels = p => VC.stagePath(PACK, W, U, p).map(s => s.label).join(" ");
+  const nextOf = (pk, p) => { const st = VC.nextStage(pk, W, U, p); const cs = st && st.kind === "chars" ? VC.nextCharSet(st.levels, U, pk, p) : null; return st ? `${st.kind}:${st.kind === "words" ? st.lv + "/" + st.set : st.levels.join("+")}${cs ? " " + cs.units[0].id : ""}` : "done"; };
+  check("pack: one characters stage per level, labels 字1..字4, bareBy typed, bareWords", eq(VC.charsConfig(PACK).stages.map(st => st.levels.join()), ["1", "2", "3", "4"]) && VC.typedBareOn(PACK) && VC.charsConfig(PACK).bareWords === true && !VC.typedBareOn(OLD));
+  // (a) fresh
+  const a = VC.defaultProg(PACK);
+  check(`(a) fresh: path ${labels(a)}; next HSK 1 set 0 (old pack the same)`, labels(a) === "HSK 1 字1 HSK 2 字2 HSK 3 字3 HSK 4 字4" && nextOf(PACK, a) === "words:1/0" && nextOf(OLD, a) === "words:1/0");
+  // (b) mid HSK 2
+  const b = mig("C mid-HSK2"), braw = JSON.stringify(b);
+  check(`(b) mid HSK 2: old pack ${nextOf(OLD, b)}; now ${nextOf(PACK, b)} behind the card (Today shows it, no Start until answered)`, nextOf(OLD, b) === "words:2/3" && nextOf(PACK, b) === "chars:1 c0001" && VC.showCharChoice(PACK, W, U, b) && !VC.showCharChoice(OLD, W, U, b));
+  check("(b) start: 字1 set 1; skip: HSK 2 set 3 and characters after HSK 4", nextOf(PACK, VC.answerCharChoice(VC.bootProg(braw, PACK).prog, true)) === "chars:1 c0001"
+    && (p => nextOf(PACK, p) === "words:2/3" && VC.stagePath(PACK, W, U, p).filter(s => s.kind === "chars").length === 1)(VC.answerCharChoice(VC.bootProg(braw, PACK).prog, false)));
+  // (c) in the characters stage
+  const c = mig("D1 chars started, card answered: start"), craw = JSON.stringify(c);
+  const recsBefore = JSON.stringify(c.chars.c);
+  check(`(c) in the characters stage: same next unit (${nextOf(OLD, c)} -> ${nextOf(PACK, c)}), no card`, nextOf(OLD, c).split(" ")[1] === nextOf(PACK, c).split(" ")[1] && !VC.showCharChoice(PACK, W, U, c));
+  // Storage: no new field or key; boot under the new pack reads exactly what the old pack read.
+  for(const [label, raw] of [["(a)", JSON.stringify(a)], ["(b)", braw], ["(c)", craw]]){
+    const nb = VC.bootProg(raw, PACK), ob = VC.bootProg(raw, OLD);
+    check(`${label} boot: no backup, progress identical under the old and new pack, nothing rewritten`, nb.backupRaw === null && ob.backupRaw === null && eq(nb.prog, ob.prog) && JSON.stringify(nb.prog.chars.c) === JSON.stringify(JSON.parse(raw).chars.c));
+  }
+  check("(c) unit records untouched by boot (streaks 3-5 stay, 6+ stay bare)", JSON.stringify(VC.bootProg(craw, PACK).prog.chars.c) === recsBefore);
+  // Typed credit, hold and floor write only r/w/s of an existing unit record and the day log
+  // (kind "type" on a c: key, a value w: keys already carry): the engine before (main 8023572)
+  // boots it with no backup.
+  const p = VC.bootProg(craw, PACK).prog, U0 = Object.keys(p.chars.c)[0], u0 = U.find(u => u.id === U0);
+  p.chars.c[U0] = { r: 6, w: 0, s: 4 };
+  VC.dayStart(p, PACK, "2026-10-02", true);
+  VC.markUnitTyped(p, U, PACK, u0.words[0], true); VC.noteDay(p, PACK, "2026-10-02", "c:" + U0, "type", true);
+  check("typed credit: +1 on the existing record, day log c: entry right in \"type\"", p.chars.c[U0].s === 5 && p.chars.c[U0].r === 7 && eq(p.day.a["c:" + U0].r, ["type"]));
+  let prev = null;
+  try {
+    const cp = require("child_process"), os = require("os");
+    const src = cp.execSync(`git -C "${ROOT}" show 8023572:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_8023572.js"); fs.writeFileSync(f, src); prev = require(f);
+  } catch(e){ prev = null; }
+  if(!prev) skip("previous engine 8023572 not in this checkout's history");
+  else {
+    const pb = prev.bootProg(JSON.stringify(p), PACK);
+    check("previous engine 8023572 boots it (new pack fields present) with no backup, unit records and day log kept", pb.backupRaw === null && eq(pb.prog.chars.c, p.chars.c) && eq(pb.prog.day, p.day));
   }
 }
 

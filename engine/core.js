@@ -1200,7 +1200,7 @@ function noteDay(prog, pack, today, key, kind, ok){
     if(kind && e.m !== d.n){ if(!Array.isArray(e.r)) e.r = []; if(!e.r.includes(kind)) e.r.push(kind); }
     if(!(kind === "gap" && String(key)[0] === "w")){
       e.c = d.n; if(daySn(prog)) e.u = daySn(prog);
-      if(e.m !== d.n && Array.isArray(e.mk)){ e.mk = e.mk.filter(m => !daySettles([m], kind)); if(!e.mk.length) delete e.mk; }
+      if(e.m !== d.n && Array.isArray(e.mk)){ e.mk = e.mk.filter(m => !daySettlesAt(key, [m], kind)); if(!e.mk.length) delete e.mk; }
     }
   } else {
     e.m = d.n;
@@ -1220,6 +1220,9 @@ const dayProd = k => DAY_PRODUCTION.includes(k);
 // A miss is settled by a right answer in its own kind, or in any production kind when it was a
 // production miss: never by an easier kind (review 2026-10-02: recall misses settled by ear).
 function daySettles(mk, kind){ return !mk.length || mk.includes(kind) || (dayProd(kind) && mk.some(dayProd)); }
+// characters.bareBy "typed": the word typed from its characters is the hardest ask a unit gets, so it
+// settles any miss of that unit. Units are logged in kind "type" only under that flag.
+const daySettlesAt = (key, mk, kind) => (kind === "type" && String(key)[0] === "c") || daySettles(mk, kind);
 // The missed kinds still pending today, [] for a pending miss logged without a kind, or null.
 function dayPending(e){
   if(!isObj(e)) return null;
@@ -1233,11 +1236,13 @@ function dayPending(e){
 // planner that asks production). sn: the current session ordinal (prog.sn).
 function dayTier(c, d, sn){
   const e = d.a[c.key];
-  const r = dayRight(e, sn);
+  // A typed unit (alias: its word) counts its word typed right recently as its own typed answer.
+  const at = c.alias && dayRight(d.a[c.alias], sn).includes("type") ? ["type"] : [];
+  const r = dayRight(e, sn).concat(at);
   const open = (c.kinds || []).some(k => !r.includes(k));
   const mk = dayPending(e);
-  if(mk) return (c.kinds || []).some(k => daySettles(mk, k)) ? 0 : 4;
-  if(!dayRecent(e, sn)) return ((c.rec && c.rec.s) || 0) >= c.mastered ? 2 : 1;
+  if(mk) return (c.kinds || []).some(k => daySettlesAt(c.key, mk, k)) ? 0 : 4;
+  if(!dayRecent(e, sn) && !at.length) return ((c.rec && c.rec.s) || 0) >= c.mastered ? 2 : 1;
   return open ? 3 : 4;
 }
 const dayT = rec => rec && typeof rec.t === "number" && isFinite(rec.t) ? rec.t : -Infinity;
@@ -1264,8 +1269,13 @@ function dayPick(cands, n, d, rng, sn){
     (a, b) => dayC(a, d) - dayC(b, d),
   ];
   T.forEach((list, i) => list.sort((a, b) => cmp[i](a, b) || a.j - b.j));
-  const out = [];
-  const take = (list, k) => { for(let i = 0; i < k && list.length && out.length < n; i++) out.push(list.shift()); };
+  const out = [], seen = new Set();
+  // A candidate with an alias (a typed character unit asked as its word) and that word's own
+  // candidate are one item: the second one taken is passed over, and a word taken first is asked
+  // as the unit's typed item (tu).
+  const take = (list, k) => { for(let i = 0; i < k && list.length && out.length < n;){ const c = list.shift();
+    if(c.alias && seen.has(c.alias)){ const w = out.find(o => o.key === c.alias); if(w && !w.tu && !dayRight(d.a[c.alias], sn).includes("type")) w.tu = c.x; continue; }
+    if(seen.has(c.key)) continue; seen.add(c.key); if(c.alias) seen.add(c.alias); out.push(c); i++; } };
   take(T[0], n); take(C, Math.ceil(n * DAY_CONSOLIDATE_SHARE)); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
   take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[4], n);
   return out;
@@ -1287,7 +1297,7 @@ function dayItemKind(prog, pack, today, key, planned, kinds){
   const r = dayRight(e, daySn(prog)), ks = kinds || [];
   const mk = dayPending(e);
   if(mk){
-    const fit = [planned, ...mk, ...ks.filter(dayProd), ...ks].filter(k => ks.includes(k) && daySettles(mk, k));
+    const fit = [planned, ...mk, ...ks.filter(dayProd), ...ks].filter(k => ks.includes(k) && daySettlesAt(key, mk, k));
     return fit.find(k => !r.includes(k)) || fit[0] || planned;
   }
   if(!r.length) return planned;
@@ -1296,15 +1306,28 @@ function dayItemKind(prog, pack, today, key, planned, kinds){
   if(open.includes(planned) && dayProd(planned)) return planned;
   return open.find(dayProd) || (open.includes(planned) ? planned : open[0]);
 }
-function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds){
+function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds, typedUnits){
   return plan.map(it => {
+    const tu = it.unit && CHAR_KINDS.includes(it.kind) ? it.unit : it.tuUnit;
+    if(tu && typedUnitDue(tu, prog, pack, typedUnits)) return { kind: "type", word: typedUnits.get(tu.id), tu: tu.id };
     if(it.word){ const k = dayItemKind(prog, pack, today, "w:" + it.word.id, it.kind, wordKinds); return k === it.kind ? it : Object.assign({}, it, { kind: k }); }
     if(it.unit && CHAR_KINDS.includes(it.kind)){ const k = dayItemKind(prog, pack, today, "c:" + it.unit.id, it.kind, charKinds); return k === it.kind ? it : Object.assign({}, it, { kind: k }); }
     return it;
   });
 }
+// characters.bareBy "typed" (docs/PACK_SCHEMA.md "bareBy"): a unit between mastered and bare that
+// can be typed is asked as its word, typed from the written side (plan item { kind: "type", word,
+// tu: unit id }); the app picks a written-side kind for it. typedUnits: typedUnitWords().
+function typedUnitDue(unit, prog, pack, typedUnits){
+  if(!(typedUnits instanceof Map) || !typedUnits.has(unit.id) || !typedBareOn(pack)) return false;
+  const cfg = charsConfig(pack), s = dayS(charRecs(prog)[unit.id]);
+  return s >= cfg.mastered && s < cfg.bare;
+}
+
 const dayWordCand = (prog, kinds) => w => ({ t: "w", x: w, key: "w:" + w.id, rec: (prog.w || {})[w.id], mastered: WORD_MASTERED, kinds });
-const dayCharCand = (prog, pack, kinds) => { const cfg = charsConfig(pack), recs = charRecs(prog); return u => ({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], mastered: cfg ? cfg.mastered : CHAR_MASTERED, bare: cfg ? cfg.bare : CHAR_BARE, kinds }); };
+const dayCharCand = (prog, pack, kinds, typedUnits) => { const cfg = charsConfig(pack), recs = charRecs(prog);
+  return u => Object.assign({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], mastered: cfg ? cfg.mastered : CHAR_MASTERED, bare: cfg ? cfg.bare : CHAR_BARE, kinds },
+    typedUnitDue(u, prog, pack, typedUnits) ? { kinds: ["type"], alias: "w:" + typedUnits.get(u.id).id } : {}); };
 // For the app's own pickers (Listen, Sentences, Test): the n list entries to drill, by dayPick.
 // keyPrefix "w:" or "s:"; kinds: what the picker asks (or a function of the entry).
 function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng){
@@ -1318,25 +1341,25 @@ function dayReviewPlan(learned, prog, pack, n, o){
   const d = dayLog(prog, o.today); const wk = dayWordKinds(pack), ck = dayCharKinds(pack);
   const ru = recordedUnits(o.units, prog, pack), rs = recordedScriptUnits(o.script, prog, pack);
   const srecs = scriptRecs(prog);
-  const cands = [...(learned || []).map(dayWordCand(prog, wk)), ...ru.map(dayCharCand(prog, pack, ck)),
+  const cands = [...(learned || []).map(dayWordCand(prog, wk)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits)),
     ...rs.map(u => ({ t: "x", x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: scfg ? scfg.mastered : SCRIPT_MASTERED, kinds: scfg ? scfg.reviewKinds : [] }))];
   const pool = shuffle(dayPick(cands, n, d, o.rng, daySn(prog)), o.rng);
   const kinds = kindMix(pool.filter(c => c.t === "w").length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
   let wi = 0;
-  const plan = pool.map(c => c.t === "w" ? { kind: kinds[wi++], word: c.x }
+  const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {})
     : c.t === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: c.x }
     : { kind: pickScriptKind(scfg.reviewKinds, c.x, scfg, r, Object.assign({ units: o.script }, o.scriptCtx || {})), unit: c.x });
-  return hearableKinds(dayPlanKinds(applyMissedKinds(plan.filter(it => it.kind), prog, pack, false, o), prog, pack, o.today, wk, ck), o.canHear);
+  return hearableKinds(dayPlanKinds(applyMissedKinds(plan.filter(it => it.kind), prog, pack, false, o), prog, pack, o.today, wk, ck, o.typedUnits), o.canHear);
 }
 function dayRecallPlan(learned, prog, pack, n, o){
   const d = dayLog(prog, o.today); const typing = typingEnabled(pack);
   const wk = typing ? ["recall", "type"] : ["recall"], ck = ["charRecall", "charPick"];
   const ru = recordedUnits(o.units, prog, pack);
-  const pool = dayPick([...(learned || []).map(dayWordCand(prog, wk)), ...ru.map(dayCharCand(prog, pack, ck))], n, d, o.rng, daySn(prog));
+  const pool = dayPick([...(learned || []).map(dayWordCand(prog, wk)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits))], n, d, o.rng, daySn(prog));
   const kinds = kindMix(pool.filter(c => c.t === "w").length, 1, typing, o.rng);
   let wi = 0;
-  const plan = pool.map(c => c.t === "w" ? { kind: kinds[wi++], word: c.x } : { kind: "charRecall", unit: c.x });
-  return hearableKinds(dayPlanKinds(applyMissedKinds(plan, prog, pack, true, o), prog, pack, o.today, wk, ck), o.canHear);
+  const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {}) : { kind: "charRecall", unit: c.x });
+  return hearableKinds(dayPlanKinds(applyMissedKinds(plan, prog, pack, true, o), prog, pack, o.today, wk, ck, o.typedUnits), o.canHear);
 }
 
 // A pack that types the reading (pronTypingOn) never gets gapType: the blank is written.
@@ -1738,7 +1761,7 @@ function charsConfig(pack){
   return {
     label: c.label != null ? String(c.label) : "",
     stages: (Array.isArray(c.stages) ? c.stages : []).filter(isObj)
-      .map(st => ({ after: String(st.after), levels: (Array.isArray(st.levels) ? st.levels : []).map(String) })),
+      .map(st => Object.assign({ after: String(st.after), levels: (Array.isArray(st.levels) ? st.levels : []).map(String) }, typeof st.label === "string" && st.label ? { label: st.label } : {})),
     setSize: Number.isInteger(c.setSize) && c.setSize > 0 ? c.setSize : CHAR_SET_SIZE,
     mastered: typeof c.mastered === "number" ? c.mastered : CHAR_MASTERED,
     bare: typeof c.bare === "number" ? c.bare : CHAR_BARE,
@@ -1746,6 +1769,8 @@ function charsConfig(pack){
     reviewKinds: kinds(c.reviewKinds, ["charRead","charSound"]),
     testKinds: testKinds(c.testKinds),
     compose: c.compose === true,
+    bareBy: c.bareBy === "typed" ? "typed" : null,
+    bareWords: c.bareWords === true,
   };
 }
 // Default mix is the predecessor app's.
@@ -1784,7 +1809,44 @@ function ensureChars(prog){
 }
 function charRecs(prog){ return (prog && isObj(prog.chars) && isObj(prog.chars.c)) ? prog.chars.c : {}; }
 const hasCharRec = (recs, id) => hasOwn(recs, id) && !!recs[id];
-function markChar(prog, unitId, ok){ return markRec(ensureChars(prog).c, unitId, ok, false); }
+// characters.bareBy "typed" (docs/PACK_SCHEMA.md "bareBy"; owner feedback 2026-10-02: writing
+// should score more than selection). From mastered, a miss drops the unit to mastered, not 0, so
+// its characters stay shown; a held unit (typedUnitWords) gains no streak from a right choice
+// answer: only typed answers (markUnitTyped) take it to bare.
+function markChar(prog, unitId, ok, pack, held){
+  const recs = ensureChars(prog).c, p = recs[unitId], m = typedBareOn(pack) ? charsConfig(pack).mastered : Infinity;
+  if(!isObj(p) || (p.s || 0) < m) return markRec(recs, unitId, ok, false);
+  if(ok){ p.r++; if(!held) p.s++; } else { p.w++; p.s = m; }
+  return p;
+}
+function typedBareOn(pack){ const c = charsConfig(pack); return !!(c && c.bareBy === "typed"); }
+const TYPED_WRITTEN_KINDS = ["written", "writtenMeaning", "writtenPron"];
+// Units whose word can be typed from the written side (some written-side kind of typedKinds passes
+// typedKindOk once the word is shown written), as unit id -> word. A unit outside it (a word no
+// written-side kind fits: shared spelling, no gloss) keeps choice crediting all the way to bare.
+function typedUnitWords(units, words, pack, amb){
+  const out = new Map(); if(!typedBareOn(pack)) return out;
+  const ks = typedKinds(pack).filter(k => TYPED_WRITTEN_KINDS.includes(k)); if(!ks.length) return out;
+  const a = amb || typedAmbiguity(words), byId = new Map((words || []).map(w => [w.id, w]));
+  (units || []).forEach(u => { const w = byId.get((u.words || [])[0]); if(w && ks.some(k => typedKindOk(k, w, true, a))) out.set(u.id, w); });
+  return out;
+}
+// A typed written-side answer (written, writtenMeaning, writtenPron) on a word is an answer for
+// its unit (words[0]); only a unit already recorded (taught) moves. Returns the unit, or null.
+function markUnitTyped(prog, units, pack, wordId, ok){
+  if(!typedBareOn(pack)) return null;
+  const u = unitByWord(units).get(wordId);
+  if(!u || !hasCharRec(charRecs(prog), u.id)) return null;
+  markChar(prog, u.id, ok, pack, false);
+  return u;
+}
+// characters.bareWords: a word whose unit is at the bare tier is asked without its reading
+// beside it (drill stimuli and options); reveals, rows and popovers keep it.
+function bareWord(word, units, prog, pack){
+  const c = charsConfig(pack); if(!c || !c.bareWords || !word) return false;
+  const u = unitByWord(units).get(word.id); const recs = charRecs(prog);
+  return !!u && hasCharRec(recs, u.id) && charTier(recs[u.id].s, pack) === "bare";
+}
 function answerCharChoice(prog, start){
   const ch = ensureChars(prog); ch.choiceSeen = true; if(!start) ch.defer = true; return prog;
 }
@@ -1849,7 +1911,7 @@ function charStages(pack, prog){
     return [{ after: ids[Math.max(...cfg.stages.map(st => pos(st.after)))], levels, label: cfg.label }];
   }
   return cfg.stages.map((st, i) => ({ after: ids[pos(st.after)], levels: st.levels,
-    label: i === 0 ? cfg.label : cfg.label + (st.levels.length ? st.levels[st.levels.length-1] : "") }));
+    label: st.label || (i === 0 ? cfg.label : cfg.label + (st.levels.length ? st.levels[st.levels.length-1] : "")) }));
 }
 // Without pack.characters this is exactly the level strip: one word stage per level.
 function stagePath(pack, words, units, prog, sunits){
@@ -3183,13 +3245,13 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
-  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
+  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
-  defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder,
+  defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
   charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem,

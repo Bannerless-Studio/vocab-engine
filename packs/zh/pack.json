@@ -93,18 +93,32 @@
   "label": "字",
   "stages": [
    {
+    "after": "1",
+    "levels": [
+     "1"
+    ],
+    "label": "字1"
+   },
+   {
+    "after": "2",
+    "levels": [
+     "2"
+    ],
+    "label": "字2"
+   },
+   {
     "after": "3",
     "levels": [
-     "1",
-     "2",
      "3"
-    ]
+    ],
+    "label": "字3"
    },
    {
     "after": "4",
     "levels": [
      "4"
-    ]
+    ],
+    "label": "字4"
    }
   ],
   "setSize": 10,
@@ -123,7 +137,9 @@
    "charSound": 30,
    "charPick": 30
   },
-  "compose": true
+  "compose": true,
+  "bareBy": "typed",
+  "bareWords": true
  },
  "legacy": {
   "key": "hsk_pinyin",
