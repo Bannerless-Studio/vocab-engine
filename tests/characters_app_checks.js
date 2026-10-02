@@ -11,6 +11,8 @@
 // + unit records (characters started).
 // Run: node tests/characters_app_checks.js
 "use strict";
+// zh sets pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): popovers end with its close button.
+const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
 
@@ -1051,7 +1053,7 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     const tw = shown[0], appended = [];
     const box = { querySelectorAll: () => [], querySelector: () => null, appendChild(c){ appended.push(c); return c; } };
     api.tokTap({ dataset: { tok: tw.id }, closest: sel => sel === "[data-tokbox]" ? box : null, classList: { add(){}, remove(){} } });
-    check(`sentence token tap on ${tw.w}: the popover carries the hint`, appended.length === 1 && appended[0].innerHTML === api.glossHTML(tw.id, "", null, true) && /class="chint"/.test(appended[0].innerHTML));
+    check(`sentence token tap on ${tw.w}: the popover carries the hint`, appended.length === 1 && appended[0].innerHTML.replace(HELPX, "") === api.glossHTML(tw.id, "", null, true) && /class="chint"/.test(appended[0].innerHTML));
     check("units without hint: popovers equal the plain gloss line", WORDS.every(w => b2.api.glossHTML(w.id, "", null, true) === b2.api.glossHTML(w.id, "", null)));
   } catch(e){ check(`hints section threw: ${e.stack}`, false); }
   // ---------------------------------------------------------------- say carriers

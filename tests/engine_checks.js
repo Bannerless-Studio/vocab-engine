@@ -1,6 +1,8 @@
 // Node checks for engine/core.js against the real zh pack plus synthetic packs.
 // Run: /opt/homebrew/bin/node tests/engine_checks.js     (no dependencies)
 "use strict";
+// zh sets pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): popovers end with its close button.
+const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
@@ -2123,7 +2125,7 @@ return {
       const target = { dataset: { pw: attrs["data-pw"], pg: attrs["data-pg"] }, classList: { add: c => cls.add(c), remove: c => cls.delete(c) } };
       target.closest = sel => sel === "[data-pw]" ? target : null;
       (document.getElementById("pbox")._listeners.click || []).forEach(f => f({ target }));
-      return { tag, pop: document.getElementById("gloss").innerHTML, live: api.getAnnounced(), on: cls.has("on") };
+      return { tag, pop: document.getElementById("gloss").innerHTML.replace(HELPX, ""), live: api.getAnnounced(), on: cls.has("on") };
     };
     const t1 = tapIn("p0003", 4, "w0115");
     check("span gloss: p0003 你下午几点回家？ 点 span carries data-pg", /data-pg="o&#39;clock; a little/.test(t1.tag) || /data-pg="o'clock; a little/.test(t1.tag));

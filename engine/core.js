@@ -3034,6 +3034,10 @@ function checkGlossTyped(val, en){
   return parts.length > 0 && parts.every(k => keys.has(k));
 }
 function glossFocusOn(pack){ return !!(pack && pack.glossFocus === true); }
+// pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): help overlays get explicit dismissal.
+function helpCloseOn(pack){ return !!(pack && pack.helpClose === true); }
+// pack.readAnswerBlock (docs/PACK_SCHEMA.md "readAnswerBlock"): Next sits under the verdict.
+function readAnswerBlockOn(pack){ return !!(pack && pack.readAnswerBlock === true); }
 function joinReadings(a, b, pack){
   if(!a) return b; if(!b) return a;
   return tonesOn(pack) && /^[aoe]/i.test(stripMarks(b)) && /[\p{L}]$/u.test(a) ? a + "'" + b : a + b;
@@ -3196,7 +3200,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
   scriptOpts, scriptRomanOpts, scriptExamples, scriptWordOpts, scriptJoinedForms, scriptItem, learnScriptPlan, scriptReviewScore, scriptTestPlan,
   tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings,
-  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, composeSpanReading, spanReadingText,
+  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, helpCloseOn, readAnswerBlockOn, composeSpanReading, spanReadingText,
   LEGACY_DROPPED, legacyBackupKey, isLegacyRecord, migrateLegacy };
 if(typeof module!=="undefined" && module.exports) module.exports = API;
 if(root) root.VocabCore = API;

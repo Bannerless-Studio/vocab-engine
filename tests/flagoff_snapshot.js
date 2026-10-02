@@ -127,6 +127,9 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     // Typed items from the target side and focused glosses (docs/PACK_SCHEMA.md "typedFrom
     // and glossFocus") are new, flag-on fields.
     delete pack.typedFrom; delete pack.glossFocus;
+    // Help overlay dismissal and the Read answer block (docs/PACK_SCHEMA.md "helpClose",
+    // "readAnswerBlock") are new, flag-on fields.
+    delete pack.helpClose; delete pack.readAnswerBlock;
     // Script primer (docs/SCRIPT_PRIMER.md): pack.script is new. script.json / script.js
     // need nothing here: only pack.json, words.json and sentences.json are hashed.
     delete pack.script;
@@ -403,7 +406,9 @@ async function captureBootGolden(seed, pack, words, sentences, lessons, passages
       boot.api.enterTodayStep(i);
       out.todaySteps.push({ step: i, label, html: boot.api.getHtml("panel") });
     });
-    out.savedProgressStrings = boot.setItemCalls.map(([k, v]) => ({ key: k, value: v }));
+    // The session-resume record (localStorage since fb2-ui) is not progress and carries a
+    // wall-clock save time; docs/PACK_SCHEMA.md "Session resume".
+    out.savedProgressStrings = boot.setItemCalls.filter(([k]) => !/_session$/.test(k)).map(([k, v]) => ({ key: k, value: v }));
     return out;
   });
 }

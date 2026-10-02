@@ -9,7 +9,11 @@
 // [7] the progress key is untouched (only vocab_<pack>_session is added, in sessionStorage),
 // [8] the build id is known at boot (built page), [9] record size (draws kept as results,
 // misses as recipes), [10] a results screen survives voiceschanged and render() ends it,
-// [11] a hear item resumed before the language's voice is listed becomes a hear item when it is.
+// [11] a hear item resumed before the language's voice is listed becomes a hear item when it is,
+// [12] every way out and back in (fb2-ui): a new browsing context (home-screen relaunch,
+// reopened tab: localStorage only), page hidden and shown again, a drill in each tab origin
+// parked while another tab runs its own, tab re-tap / Escape / ‹ passages then Resume, the
+// progress fingerprint across answer writes and housekeeping saves, a second tab, import.
 // Boots engine/app.html in the fake DOM of tests/typed_from_checks.js with storages that
 // survive a reboot (the reload).
 // Run: node tests/session_resume_checks.js
@@ -80,6 +84,7 @@ function makeFakeDom(){
     addEventListener(t,f){ (this._listeners[t]=this._listeners[t]||[]).push(f); }
     removeEventListener(){}
     appendChild(c){ this._children.push(c); return c; }
+    insertBefore(c){ this._children.unshift(c); return c; }
     remove(){}
     focus(){}
     click(){ if(this.onclick) this.onclick({}); (this._listeners.click||[]).forEach(f=>f({})); }
@@ -141,7 +146,8 @@ return {
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
   startPassage: p => { startPassage(p); },
   todayAt: s => { todayStepState = { step: s }; todayStep(); },
-  build: () => sessionBuild(), render: () => render(), hide: () => (document._listeners.visibilitychange || []).forEach(f => { document.visibilityState = "hidden"; f(); }),
+  build: () => sessionBuild(), render: () => render(), key: k => (document._listeners.keydown || []).forEach(f => f({ key: k, preventDefault(){}, target: null })),
+  hide: () => (document._listeners.visibilitychange || []).forEach(f => { document.visibilityState = "hidden"; f(); }),
 };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"SessionResumeChecks/1.0" }, undefined, o.ls, o.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
@@ -183,6 +189,17 @@ const same = (a, b) => ["tab", "cur", "opts", "queue", "seen", "right", "miss", 
 const sess = ss => { const v = ss.getItem(SKEY); return v ? JSON.parse(v) : null; };
 // Walks the drill on screen: answers by plan (true/false per step) and presses Next.
 function play(api, plan){ plan.forEach(ok => { answer(api, ok); api.el("nx").click(); }); }
+// Runs Today to "Session done": every drill answered right, Continue, the Read stage skipped.
+function finishTodayAll(api){
+  for(let i = 0; i < 40 && !/Session done/.test(api.html("panel")); i++){
+    if(api.getD()) finishDrill(api);
+    const h = api.html("panel");
+    if(/id="ok"/.test(h)) api.el("ok").click();
+    else if(/id="rskip"/.test(h)) api.el("rskip").click();
+    else if(/id="dr"/.test(h)) api.el("dr").click();
+    else if(/id="rcont"/.test(h)) api.el("rcont").click();
+  }
+}
 function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(api, true); api.el("nx").click(); } }
 
 (async function main(){
@@ -214,8 +231,8 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     // Move on to a choice item so its option order is checked, typed items are covered below.
     for(let i = 0; i < 20 && api.getCur().kind !== "mc"; i++) play(api, [true]);
     const before = snapOf(api);
-    const rec = sess(st.ss);
-    check(`session recorded in sessionStorage under ${SKEY}, not in localStorage (items: ${rec && rec.drill.q.length}; kinds in drill: ${[...kinds].join(", ")})`, !!rec && rec.tab === "today" && !!rec.drill && st.ls.getItem(SKEY) === null);
+    const rec = sess(st.ls);
+    check(`session recorded in localStorage under ${SKEY}, not in sessionStorage (items: ${rec && rec.drill.q.length}; kinds in drill: ${[...kinds].join(", ")})`, !!rec && rec.tab === "today" && !!rec.drill && st.ss.getItem(SKEY) === null);
     ({ api } = await boot(Object.assign({ seed: 99 }, st)));
     const after = snapOf(api);
     const diff = same(before, after);
@@ -268,10 +285,13 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     answer(api, false);
     api.clickTab("progress"); api.clickTab("today");
     check("answered, switched away before Next: back on the next item with the miss kept", api.getD() && api.getD().miss.length === a.miss.split(",").filter(Boolean).length + 1 && api.getD().seen === a.seen + 1);
+    const c = snapOf(api);
     api.clickTab("today");
-    check("tapping the open tab ends the drill: Today start screen, session dropped", !api.getD() && /id="go"/.test(api.html("panel")) && !st.ss.getItem(SKEY));
-    api.clickTab("words"); api.clickTab("today");
-    check("and it stays ended after a later switch", !api.getD() && /id="go"/.test(api.html("panel")));
+    check("tapping the open tab leaves the drill: Today start screen, its button resumes, the record is kept", !api.getD() && /id="go"/.test(api.html("panel")) && api.el("go").textContent === "Resume today" && !!st.ls.getItem(SKEY));
+    api.el("go").click();
+    check(`"Resume today" returns to the same item (${same(c, snapOf(api)).join(", ") || "all equal"})`, same(c, snapOf(api)).length === 0);
+    api.clickTab("today"); api.clickTab("words"); api.clickTab("today");
+    check("and a later switch back resumes it too", same(c, snapOf(api)).length === 0);
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- [4] stale records
@@ -285,12 +305,12 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       let { api } = await boot(Object.assign({ seed: 5 }, st));
       api.el("go").click(); play(api, [true, false]);
       const stored = st.ls.getItem(KEY);
-      const r = sess(st.ss); if(edit){ edit(r); st.ss.setItem(SKEY, JSON.stringify(r)); }
+      const r = sess(st.ls); if(edit){ edit(r); st.ls.setItem(SKEY, JSON.stringify(r)); }
       if(editLs) editLs(st.ls);
       ({ api } = await boot(Object.assign({ seed: 6 }, st)));
       const kept = JSON.parse(editLs ? st.ls.getItem(KEY) : stored);
       check(`${name}: reload shows the Today start screen, the record is removed, the two answers stay recorded`,
-        !api.getD() && /id="go"/.test(api.html("panel")) && !st.ss.getItem(SKEY) && JSON.stringify(api.getProg().w) === JSON.stringify(VC.normalizeProg(kept, PACK).w) && Object.keys(api.getProg().w).length > 0);
+        !api.getD() && /id="go"/.test(api.html("panel")) && !st.ls.getItem(SKEY) && JSON.stringify(api.getProg().w) === JSON.stringify(VC.normalizeProg(kept, PACK).w) && Object.keys(api.getProg().w).length > 0);
     }
     {
       const st = fresh();
@@ -299,12 +319,12 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       api.clickTab("progress");
       api.getProg().sessions += 1;
       api.clickTab("today");
-      check("in the open page: progress changed while away (another tab's work) -> Today start screen, record dropped", !api.getD() && /id="go"/.test(api.html("panel")) && !st.ss.getItem(SKEY));
+      check("in the open page: progress this page changed while away keeps the record (its own work)", !!api.getD() && !!st.ls.getItem(SKEY));
     }
     {
-      const st = fresh(); st.ss.setItem(SKEY, "{not json");
+      const st = fresh(); st.ls.setItem(SKEY, "{not json");
       const { api } = await boot(Object.assign({ seed: 5 }, st));
-      check("an unreadable record: normal boot, record removed", /id="go"/.test(api.html("panel")) && !st.ss.getItem(SKEY));
+      check("an unreadable record: normal boot, record removed", /id="go"/.test(api.html("panel")) && !st.ls.getItem(SKEY));
     }
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
@@ -320,7 +340,7 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       ({ api } = await boot(Object.assign({ seed: 12 }, st)));
       check(`Test Recall: reload resumes on the Test tab at the same item (${same(a, snapOf(api)).join(", ") || "all equal"})`, same(a, snapOf(api)).length === 0 && api.tab() === "test");
       finishDrill(api); api.el("ok").click();
-      check("Test Recall: Continue after the reload returns to the Test screen", /Placement finds where to start/.test(api.html("panel")) && !st.ss.getItem(SKEY));
+      check("Test Recall: Continue after the reload returns to the Test screen", /Placement finds where to start/.test(api.html("panel")) && !st.ls.getItem(SKEY));
     }
     {
       const st = fresh();
@@ -375,14 +395,16 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       api.clickTab("today");
       check("leaving Read mid-question keeps the passage (Today renders)", /id="go"/.test(api.html("panel")));
       ({ api } = await boot(Object.assign({ seed: 20 }, st)));
-      check(`reload mid-question: Read tab, question 2 unanswered, same option order (${order2}), answers and tapped words kept`,
+      check("reload after leaving for Today: the Today home (what was on screen)", api.tab() === "today" && !api.rd() && /id="go"/.test(api.html("panel")));
+      api.clickTab("read");
+      check(`then the Read tab: Read tab, question 2 unanswered, same option order (${order2}), answers and tapped words kept`,
         api.tab() === "read" && api.rd().qi === 1 && readOpts(api) === order2 && JSON.stringify(api.rd().answers) === ans && api.rd().tapped.includes(p.sentences[0].words[0]) && o1.length > 0);
       for(let i = 1; i < p.questions.length; i++){ api.el("o").children[0].click(); api.el("nx").click(); }
       const res = api.html("panel");
       ({ api } = await boot(Object.assign({ seed: 21 }, st)));
       check("reload on the results screen: the same results, passage recorded once", api.html("panel") === res && api.getProg().read.done[p.id] && /id="rlist"/.test(res));
       api.el("rlist").click();
-      check("Back to passages ends the session", !st.ss.getItem(SKEY) && !api.rd());
+      check("Back to passages ends the session", !st.ls.getItem(SKEY) && !api.rd());
     }
     {
       const st = fresh();
@@ -397,23 +419,23 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       check("Today Read stage: reload returns to question 1", api.rd() && api.rd().today && api.html("panel") === q1);
       for(let i = 0; i < api.rd().p.questions.length; i++){ api.el("o").children[0].click(); api.el("nx").click(); }
       api.el("rcont").click();
-      check("Today Read stage: Continue after the reload finishes the Today session", /Session done/.test(api.html("panel")) && !st.ss.getItem(SKEY));
+      check("Today Read stage: Continue after the reload finishes the Today session", /Session done/.test(api.html("panel")) && !st.ls.getItem(SKEY));
     }
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- [7] storage shape
-  console.log("\n[7] storage: progress key untouched, one new sessionStorage key");
+  console.log("\n[7] storage: progress key untouched, the session key in localStorage");
   try {
     const st = fresh();
     const { api } = await boot(Object.assign({ seed: 24 }, st));
     api.el("go").click(); play(api, [true, false, true]);
     const p = JSON.parse(st.ls.getItem(KEY));
-    check(`localStorage holds only the progress key (${st.ls.keys().join(", ")}); sessionStorage only ${SKEY} (${st.ss.keys().join(", ")})`,
-      st.ls.keys().join() === KEY && st.ss.keys().join() === SKEY);
+    check(`localStorage holds only the progress key and ${SKEY} (${st.ls.keys().join(", ")}); sessionStorage nothing (${st.ss.keys().join(", ")})`,
+      st.ls.keys().sort().join() === [KEY, SKEY].sort().join() && st.ss.keys().length === 0);
     const base = Object.keys(VC.normalizeProg(seedPF(), PACK));
     check(`progress keeps its top-level shape, no session fields (${Object.keys(p).sort().join(", ")}; read comes from the Read unlocks as before, day and sn from dayAware)`, Object.keys(p).every(k => base.includes(k) || k === "read" || k === "day" || k === "sn"));
-    const r = sess(st.ss);
-    check("record shape: v, build, t, fp, tab, today, drill (o, cur, ord, q, right, seen, miss)", JSON.stringify(Object.keys(r).sort()) === JSON.stringify(["build", "drill", "fp", "t", "tab", "today", "v"]) && JSON.stringify(Object.keys(r.drill).sort()) === JSON.stringify(["cur", "miss", "o", "ord", "q", "right", "seen"]));
+    const r = sess(st.ls);
+    check("record shape: v, build, t, fp, tab, today, drill (o, cur, ord, q, right, seen, miss), plus the stored value's view { tab, live }", JSON.stringify(Object.keys(r).sort()) === JSON.stringify(["build", "drill", "fp", "t", "tab", "today", "v", "view"]) && JSON.stringify(r.view) === '{"tab":"today","live":true}' && JSON.stringify(Object.keys(r.drill).sort()) === JSON.stringify(["cur", "miss", "o", "ord", "q", "right", "seen"]));
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- [8] build id
@@ -428,12 +450,12 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     check(`built page, no DOM marker yet (boot-time resume): sessionBuild() is "${id}:<pack fp>" (got ${api.build()})`, api.build().startsWith(id + ":") && !api.build().startsWith("dev:"));
     api.el("go").click(); play(api, [true]);
     const a = snapOf(api);
-    check("built page: the saved record carries that id", sess(st.ss).build === api.build());
+    check("built page: the saved record carries that id", sess(st.ls).build === api.build());
     ({ api } = await boot(Object.assign({ seed: 31, html: dist }, st)));
     check(`built page: a reload resumes the session (${same(a, snapOf(api)).join(", ") || "all equal"})`, same(a, snapOf(api)).length === 0);
     const other = dist.replace(`const VE_BUILD = "${id}"`, 'const VE_BUILD = "1-2"');
     ({ api } = await boot(Object.assign({ seed: 32, html: other }, st)));
-    check("an engine-only rebuild (another VE_BUILD, same pack) drops the old session", !api.getD() && !st.ss.getItem(SKEY));
+    check("an engine-only rebuild (another VE_BUILD, same pack) drops the old session", !api.getD() && !st.ls.getItem(SKEY));
     const dev = await boot(Object.assign({ seed: 33 }, fresh()));
     check(`dev mode (no VE_BUILD, no marker): "dev:<pack fp>" (got ${dev.api.build()})`, /^dev:/.test(dev.api.build()));
     const marked = await boot(Object.assign({ seed: 34, mark: "ve-build:123-456" }, fresh()));
@@ -449,7 +471,7 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       api.clickTab("test"); api.el(btn).click();
       let max = 0, n = 0; const missed = new Set();
       for(let i = 0; i < 300 && api.getD(); i++){
-        const v = st.ss.getItem(SKEY); if(v) max = Math.max(max, v.length);
+        const v = st.ls.getItem(SKEY); if(v) max = Math.max(max, v.length);
         const it = api.getCur(), first = !missed.has(it.key); missed.add(it.key);
         answer(api, !first && it.kind !== "type" ? true : false); api.el("nx").click(); n++;
         if(i === 5){
@@ -469,11 +491,11 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     const b = await boot(Object.assign({ seed: 50 }, st));
     const api = b.api;
     api.clickTab("test"); api.el("tRecall").click(); finishDrill(api);
-    check("finished drill: results screen, its record saved", /id="ok"/.test(api.html("panel")) && !!sess(st.ss));
+    check("finished drill: results screen, its record saved", /id="ok"/.test(api.html("panel")) && !!sess(st.ls));
     b.voices.splice(0, 1, { lang: "en-US", name: "e" }); b.ss.onvoiceschanged(); b.voices.splice(0, 1, { lang: "zh-CN", name: "x" }); b.ss.onvoiceschanged();
     check("voiceschanged twice on the results screen: the results stay", /id="ok"/.test(api.html("panel")));
     api.render(); api.hide();
-    check("render() over a results screen drops the finished drill's record (pagehide saves nothing)", !st.ss.getItem(SKEY));
+    check("render() over a results screen drops the finished drill's record (pagehide saves nothing)", !st.ls.getItem(SKEY));
     const re = await boot(Object.assign({ seed: 51 }, st));
     check("a reload then shows the Test screen, not the old results", !re.api.getD() && !/id="ok"/.test(re.api.html("panel")));
   } catch(e){ check(`section threw: ${e.stack}`, false); }
@@ -496,6 +518,166 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     const c1 = api.getCur(), D = api.getD();
     check(`voices arrive: the item on screen is a hear item again, same key and option order, and it plays (${b.spoken.length} spoken)`, c1 !== c0 && c1.key === cur.key && c1.html.includes("hear-stage") && !c1.needsNotice && optsShown(api) === a.opts && b.spoken.length > 0);
     check("voices arrive: no queued item keeps the notice; queue keys and counts unchanged", D.q.every(it => !it.needsNotice) && queueSig(api) === a.queue && D.seen === a.seen);
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  // ---------------------------------------------------------------- [12] every exit/return path
+  console.log("\n[12] every way out and back in");
+  try {
+    const rzRow = api => { const r = api.el("panel").children[0]; const m = r && /id="rzgo"[^>]*>([^<]*)</.exec(r.innerHTML); return m ? m[1] : null; };
+    const fpOk = st => { const v = st.ls.getItem(SKEY); if(!v) return true; const top = JSON.parse(v), h = VC.sessionHash(st.ls.getItem(KEY));
+      return [top, ...Object.values(top.park || {})].every(r => r.fp === h); };
+    {
+      const st = fresh();
+      let { api } = await boot(Object.assign({ seed: 40 }, st));
+      api.el("go").click(); play(api, [true, false]);
+      const a = snapOf(api);
+      ({ api } = await boot({ seed: 41, ls: st.ls, ss: memStore() }));
+      check(`new browsing context (home-screen relaunch, reopened tab: empty sessionStorage): same item (${same(a, snapOf(api)).join(", ") || "all equal"})`, same(a, snapOf(api)).length === 0);
+      ({ api } = await boot({ seed: 42, ls: st.ls, ss: undefined }));
+      check("no sessionStorage at all: still resumes", same(a, snapOf(api)).length === 0);
+      api.hide();
+      check("page hidden then shown again (app switch, bfcache restore): page state untouched, record saved", same(a, snapOf(api)).length === 0 && sess(st.ls).tab === "today");
+    }
+    {
+      const st = fresh();
+      const { api } = await boot(Object.assign({ seed: 43 }, st));
+      api.el("go").click(); play(api, [true]);
+      const today = snapOf(api);
+      api.clickTab("test"); api.el("tRecall").click(); play(api, [true, false]);
+      const test = snapOf(api);
+      api.clickTab("words"); api.el("nx").click(); api.el("dr").click(); play(api, [true]);
+      const words = snapOf(api);
+      api.clickTab("read"); api.startPassage(PASSAGES.find(x => x.lv === "1")); api.el("rdone").click();
+      const read = api.html("panel");
+      check("four sessions parked at once, one record per tab", (() => { const t = sess(st.ls); return ["today", "test", "words", "read"].every(k => t.tab === k || (t.park && t.park[k])); })());
+      check("every record's fingerprint is the stored progress after the answer writes", fpOk(st));
+      api.clickTab("today");
+      check(`Today drill resumes after Test, Words and Read drills ran in between (${same(today, snapOf(api)).join(", ") || "all equal"})`, same(today, snapOf(api)).length === 0);
+      api.clickTab("test");
+      check(`Test drill resumes (${same(test, snapOf(api)).join(", ") || "all equal"})`, same(test, snapOf(api)).length === 0);
+      api.clickTab("words");
+      check(`Words set drill resumes (${same(words, snapOf(api)).join(", ") || "all equal"})`, same(words, snapOf(api)).length === 0);
+      api.clickTab("read");
+      check("Read passage resumes at question 1", api.html("panel") === read);
+      api.clickTab("progress"); api.clickTab("today"); answer(api, true); api.el("nx").click();
+      check("an answer in Today keeps the parked records valid", fpOk(st));
+      const t2 = snapOf(api);
+      let b = await boot({ seed: 44, ls: st.ls, ss: memStore() });
+      check("reload: the latest session (Today) comes back", same(t2, snapOf(b.api)).length === 0);
+      b.api.clickTab("test");
+      check(`reload, then the Test tab: its parked drill resumes (${same(test, snapOf(b.api)).join(", ") || "all equal"})`, same(test, snapOf(b.api)).length === 0);
+    }
+    {
+      const st = fresh();
+      let { api } = await boot(Object.assign({ seed: 45 }, st));
+      api.clickTab("test"); api.el("tRecall").click(); play(api, [true]);
+      const a = snapOf(api);
+      api.clickTab("test");
+      check("Test tab re-tapped mid-drill: Test home with Resume drill", !api.getD() && /Placement finds where to start/.test(api.html("panel")) && rzRow(api) === "Resume drill");
+      api.el("rzgo").click();
+      check(`Resume drill: same item (${same(a, snapOf(api)).join(", ") || "all equal"})`, same(a, snapOf(api)).length === 0);
+      api.key("Escape");
+      check("Escape mid-drill: Test home, record kept", !api.getD() && !!st.ls.getItem(SKEY));
+      api.el("rzgo").click();
+      check("Resume after Escape: same item", same(a, snapOf(api)).length === 0);
+      api.clickTab("today"); api.el("go").click(); play(api, [true]);
+      api.clickTab("today");
+      check("Today re-tapped: Start reads Resume today", api.el("go").textContent === "Resume today");
+      api.clickTab("read"); api.startPassage(PASSAGES.find(x => x.lv === "1"));
+      const reading = api.html("panel");
+      api.el("rback").click();
+      check("‹ passages mid-passage: passage list with Resume passage", !api.rd() && rzRow(api) === "Resume passage");
+      api.el("rzgo").click();
+      check("Resume passage: the same passage screen", api.html("panel") === reading);
+    }
+    {
+      // Housekeeping at load: the stored string differs from its normalized form (boot fixes
+      // it up, e.g. after a day rollover), and a render-time save (Read unlocks) follows.
+      const st = fresh();
+      let { api } = await boot(Object.assign({ seed: 50 }, st));
+      api.el("go").click(); play(api, [true, false]); api.clickTab("words");
+      const a = (api.clickTab("today"), snapOf(api));
+      const raw = JSON.stringify(Object.assign({}, JSON.parse(st.ls.getItem(KEY)), { read: undefined }), null, 1);
+      st.ls.setItem(KEY, raw);
+      const top = sess(st.ls); [top, ...Object.values(top.park || {})].forEach(r => { r.fp = VC.sessionHash(raw); }); st.ls.setItem(SKEY, JSON.stringify(top));
+      ({ api } = await boot({ seed: 51, ls: st.ls, ss: memStore() }));
+      check(`stored progress normalized at boot (fingerprint of the raw string): resumes (${same(a, snapOf(api)).join(", ") || "all equal"})`, same(a, snapOf(api)).length === 0);
+      api.clickTab("read"); api.clickTab("today");
+      check("a housekeeping save while away (Read unlocks): back on Today resumes, fingerprints follow the stored progress", same(a, snapOf(api)).length === 0 && fpOk(st));
+      ({ api } = await boot({ seed: 52, ls: st.ls, ss: memStore() }));
+      check("and a reload after it resumes too", same(a, snapOf(api)).length === 0);
+    }
+    {
+      const st = fresh();
+      let { api } = await boot(Object.assign({ seed: 46 }, st));
+      api.el("go").click(); play(api, [true]);
+      const a = snapOf(api);
+      const two = await boot({ seed: 47, ls: st.ls, ss: memStore() });
+      check("a second tab opens on the same item", same(a, snapOf(two.api)).length === 0);
+      answer(two.api, true); two.api.el("nx").click();
+      const b2 = snapOf(two.api);
+      answer(api, true); api.el("nx").click(); answer(api, false); api.el("nx").click();
+      const b1 = snapOf(api);
+      ({ api } = await boot({ seed: 48, ls: st.ls, ss: memStore() }));
+      check("two tabs answering: no crash, the last writer's item comes back on reload", same(b1, snapOf(api)).length === 0 && b2.seen > 0);
+    }
+    {
+      // Boot restores what was on screen: a session the learner left stays parked.
+      const st = fresh();
+      let { api } = await boot(Object.assign({ seed: 60 }, st));
+      api.clickTab("test"); api.el("tRecall").click(); play(api, [true]);
+      const t = snapOf(api);
+      api.clickTab("test"); api.clickTab("today");
+      ({ api } = await boot({ seed: 61, ls: st.ls, ss: memStore() }));
+      check("Test drill left by a re-tap, then the Today home, reload: the Today home, not the Test drill", api.tab() === "today" && !api.getD() && /id="go"/.test(api.html("panel")));
+      api.clickTab("test");
+      check(`and the Test tab still resumes it (${same(t, snapOf(api)).join(", ") || "all equal"})`, same(t, snapOf(api)).length === 0);
+      api.clickTab("test"); api.clickTab("words");
+      ({ api } = await boot({ seed: 62, ls: st.ls, ss: memStore() }));
+      check("left for the Words home, reload: the Words home", api.tab() === "words" && !api.getD() && /Drill this set/.test(api.html("wbody")));
+      api.clickTab("today"); api.el("go").click(); finishTodayAll(api);
+      check("Today run to the end (Session done) with the Test drill parked", /Session done/.test(api.html("panel")));
+      ({ api } = await boot({ seed: 63, ls: st.ls, ss: memStore() }));
+      check("relaunch after Today is done: the Today home, not the parked Test drill", api.tab() === "today" && !api.getD() && /id="go"/.test(api.html("panel")));
+      api.clickTab("test"); api.key("Escape");
+      ({ api } = await boot({ seed: 64, ls: st.ls, ss: memStore() }));
+      check("Escape out of the drill, reload: the Test home with Resume drill", api.tab() === "test" && !api.getD() && rzRow(api) === "Resume drill");
+      api.clickTab("read"); api.startPassage(PASSAGES.find(x => x.lv === "1")); api.el("rback").click();
+      ({ api } = await boot({ seed: 65, ls: st.ls, ss: memStore() }));
+      check("‹ passages, reload: the passage list with Resume passage", api.tab() === "read" && !api.rd() && rzRow(api) === "Resume passage");
+      api.clickTab("test"); api.el("rzgo").click(); play(api, [true]);
+      const t2 = snapOf(api);
+      ({ api } = await boot({ seed: 66, ls: st.ls, ss: memStore() }));
+      check(`drill on screen, reload: the same item (${same(t2, snapOf(api)).join(", ") || "all equal"})`, same(t2, snapOf(api)).length === 0);
+    }
+    {
+      // A finished drill or passage ends on a re-tap of its tab.
+      const st = fresh();
+      const { api } = await boot(Object.assign({ seed: 67 }, st));
+      api.clickTab("test"); api.el("tRecall").click(); finishDrill(api);
+      check("Test drill finished: results screen", /id="ok"/.test(api.html("panel")));
+      api.clickTab("test");
+      check("re-tap on the results: Test home, no Resume drill, record gone", !rzRow(api) && !(sess(st.ls) && (sess(st.ls).tab === "test" || (sess(st.ls).park || {}).test)));
+      const p = PASSAGES.find(x => x.lv === "1");
+      api.clickTab("read"); api.startPassage(p); api.el("rdone").click();
+      for(let i = 0; i < p.questions.length; i++){ api.el("o").children[0].click(); api.el("nx").click(); }
+      check("Read passage finished: results screen", /id="rlist"/.test(api.html("panel")));
+      api.clickTab("read");
+      check("re-tap on the Read results: passage list, no Resume passage, record gone", !api.rd() && !rzRow(api) && !st.ls.getItem(SKEY));
+      api.clickTab("today"); api.el("go").click(); finishDrill(api);
+      api.clickTab("today");
+      check("re-tap on a Today drill's results: Today keeps its session (Resume today)", api.el("go").textContent === "Resume today");
+    }
+    {
+      const st = fresh();
+      const { api } = await boot(Object.assign({ seed: 49 }, st));
+      api.el("go").click(); play(api, [true]);
+      api.clickTab("progress");
+      api.el("imptxt").value = JSON.stringify(seedPF()); api.el("doimport").click(); await tick(); await tick();
+      check("import ran through the Progress tab's own path (pre-import backup written)", !!st.ls.getItem(KEY + "_pre_import_backup"));
+      api.clickTab("today");
+      check("import: every parked session is dropped", !api.getD() && !st.ls.getItem(SKEY) && /id="go"/.test(api.html("panel")) && api.el("go").textContent !== "Resume today");
+    }
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

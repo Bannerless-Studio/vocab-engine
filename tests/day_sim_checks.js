@@ -76,6 +76,8 @@ function makeFakeDom(){
     addEventListener(t,f){ (this._listeners[t]=this._listeners[t]||[]).push(f); }
     removeEventListener(){}
     appendChild(c){ this._children.push(c); return c; }
+    insertBefore(c){ this._children.unshift(c); return c; }
+    get firstChild(){ return this._children[0] || null; }
     remove(){}
     focus(){}
     click(){ if(this.onclick) this.onclick({}); (this._listeners.click||[]).forEach(f=>f({})); }
@@ -309,7 +311,8 @@ function missesCarried(drilled){
   const seen = new Map();
   drilled.filter(d => !d.ok && d.sess < lastSess).forEach(d => seen.set(d.key + "|" + d.kind, d));
   const lost = [...seen.values()].filter(m => !drilled.some(d => pos(d) > pos(m) && d.key === m.key && VC.daySettles([m.kind], d.kind)));
-  return { n: seen.size, lost: lost.map(m => `${m.key} ${m.kind} s${m.sess + 1}`) };
+  const prod = [...seen.values()].filter(m => VC.DAY_PRODUCTION.includes(m.kind));
+  return { n: seen.size, lost: lost.map(m => `${m.key} ${m.kind} s${m.sess + 1}`), prodN: prod.length, prodLost: prod.filter(m => lost.includes(m)).length, sentN: [...seen.values()].filter(m => m.key[0] === "s").length };
 }
 
 (async function main(){
@@ -372,6 +375,23 @@ function missesCarried(drilled){
     api = await boot(PACK_ON, st, 99);
     check(`reload: same queue, day log unchanged (drill ordinal ${api.getProg().day.n}, not counted again)`, !!api.getD() && qsig(api) === before.q && JSON.stringify(api.getProg().day) === before.day);
     check(`reload: session ordinal prog.sn unchanged (${before.sn} -> ${api.getProg().sn})`, before.sn === 1 && api.getProg().sn === 1);
+    // Another tab and back resumes; re-tapping Today parks it behind "Resume today".
+    const mid = { q: qsig(api), n: api.getProg().day.n };
+    api.clickTab("test"); api.clickTab("today");
+    check(`tab away and back: same queue, prog.sn and day.n not counted again (${api.getProg().sn}, ${api.getProg().day.n})`, !!api.getD() && qsig(api) === mid.q && api.getProg().sn === 1 && api.getProg().day.n === mid.n);
+    api.clickTab("today");
+    const label = api.el("go") ? api.el("go").textContent : "(no button)";
+    if(!api.getD() && api.el("go")) api.el("go").click();
+    check(`"${label}" button: same queue, prog.sn and day.n not counted again (${api.getProg().sn}, ${api.getProg().day.n})`, label === "Resume today" && !!api.getD() && qsig(api) === mid.q && api.getProg().sn === 1 && api.getProg().day.n === mid.n);
+    // A Test drill counts one session; its Resume drill button does not count another.
+    api.quit(); api.clickTab("test"); api.el("tRecall").click();
+    const t0 = { sn: api.getProg().sn, n: api.getProg().day.n };
+    answer(api, true); api.el("nx").click();
+    const tq = qsig(api);
+    api.clickTab("test");
+    const rz = /id="rzgo"/.test(api.panel()) || !!api.el("rzgo");
+    if(rz) api.el("rzgo").click();
+    check(`Test drill: +1 session (${t0.sn}); Resume drill restores it without counting again (${api.getProg().sn}, day.n ${api.getProg().day.n})`, t0.sn === 2 && rz && !!api.getD() && qsig(api) === tq && api.getProg().sn === 2 && api.getProg().day.n === t0.n);
   }
   const scenarios = [
     { name: "A: 150 words (HSK 1) + 60 character units, learning HSK 2 words", words: 150, units: 60 },
@@ -433,7 +453,7 @@ function missesCarried(drilled){
       if(WHY && tag === "on") console.log("    repeats:", rep.slice(0, 10).join("; "), "lost:", mc.lost.join("; "));
       if(tag === "on"){
         check(`rollover: prog.sn counts one per Today session (${run.prog.sn})`, run.prog.sn === N_SESSIONS);
-        check(`rollover: every miss of sessions 1-${N_SESSIONS - 1} comes back in a settling kind across midnight (${mc.n - mc.lost.length}/${mc.n})`, mc.n > 0 && mc.lost.length === 0);
+        check(`rollover: every miss of sessions 1-${N_SESSIONS - 1} comes back in a settling kind across midnight (${mc.n - mc.lost.length}/${mc.n}, sentences ${mc.sentN}; production misses back in production ${mc.prodN - mc.prodLost}/${mc.prodN})`, mc.n > 0 && mc.prodN > 0 && mc.sentN > 0 && mc.lost.length === 0);
         check(`rollover: no same-kind repeat of an item right earlier that day or in the previous ${VC.DAY_RECENT_SESSIONS} sessions (${rep.length}/${run.drilled.length}; session 5 ${cross}/${s5})`, rep.length === 0);
       }
     }
