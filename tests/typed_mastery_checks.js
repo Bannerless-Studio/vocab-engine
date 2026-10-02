@@ -273,6 +273,19 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     VC.markChar(r, fl, false, PACK, true); VC.noteDay(r, PACK, DAY, "c:" + fl, "charRead", false); VC.dayStart(r, PACK, DAY, true);
     const rp = VC.buildReviewPlan(lw, r, PACK, Object.assign({ rng: mulberry32(1) }, o));
     check(`a bare unit missed by choice drops to ${M} and comes back typed next drill (${fl} s=${r.chars.c[fl].s})`, r.chars.c[fl].s === M && rp.some(x => x.tu === fl));
+    // Miss floor: a floored unit never reaches the weak tier, so its pending miss must be settleable
+    // by the typed item, and after the miss ages out it must still get its consolidating share.
+    const cand = VC.dayLog(r, DAY).a["c:" + fl]; const cc = { key: "c:" + fl, rec: r.chars.c[fl], mastered: M, bare: B, kinds: ["type"], alias: "w:" + wordOfUnit(fl).id };
+    check(`floored unit with a pending charRead miss: tier 0 for its typed item (${VC.dayTier(cc, VC.dayLog(r, DAY), VC.daySn(r))})`, VC.dayTier(cc, VC.dayLog(r, DAY), VC.daySn(r)) === 0);
+    const ag = clone(r); const ae = ag.day.a["c:" + fl]; ae.ma = 1; ae.ms = VC.daySn(ag) - VC.DAY_MISS_MAX_SESSIONS;
+    const agTier = VC.dayTier(cc, VC.dayLog(ag, DAY), VC.daySn(ag)); let at = 0;
+    for(let k = 1; k <= 30 && !at; k++){
+      const pl = VC.buildReviewPlan(lw, ag, PACK, Object.assign({ rng: mulberry32(k) }, o)).filter(x => x.tu);
+      if(pl.some(x => x.tu === fl)) at = k;
+      pl.forEach(x => { VC.noteDay(ag, PACK, DAY, "c:" + x.tu, "type", true); VC.noteDay(ag, PACK, DAY, "w:" + x.word.id, "type", true); });
+      VC.dayStart(ag, PACK, DAY, true);
+    }
+    check(`after the miss ages out (${VC.DAY_MISS_MAX_SESSIONS} sessions): tier ${agTier} (consolidating), asked typed again in session ${at} (41 units in the band, longest unseen first)`, agTier === 2 && at > 0 && at <= 15);
   }
 
   console.log("\n[4] app (zh as shipped): typed credit, hold, fallback, reveal dots, bare words");
@@ -294,6 +307,9 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     check(`credit: written, writtenMeaning, writtenPron +1; pronMeaning, pron none (${results.map(r => `${r[0]} ${r[1]}->${r[2]}`).join("; ")})`,
       results.slice(0, 3).every(r => r[2] === r[1] + 1) && results.slice(3).every(r => r[2] === r[1]));
     check("day log: a typed credit logs the unit right in kind \"type\"", (api.getProg().day.a["c:" + band[0]].r || []).includes("type"));
+    // "type" under a c: key means typed from the written side only: a typed reading never logs it,
+    // so it cannot settle the unit's charRecall miss (scheduler review 2026-10-02).
+    check("day log: typed reading answers (pronMeaning, pron) log nothing under the unit", [band[3], band[4]].every(id => !((api.getProg().day.a["c:" + id] || {}).r || []).includes("type")));
     check(`reveal shows the unit's streak as dots after the answer (${stripTags(results[0][3]).slice(0, 14)})`, results[0][3].includes(`aria-label="字 5/6"`) && stripTags(results[0][3]).startsWith("字 ●●●●●○"));
     // Miss, in-drill retry, second-miss choice fallback.
     { const id = band[5]; const it = api.silentWrittenTypeItem(wordOfUnit(id)); api.drill1(it); answer(api, false);
