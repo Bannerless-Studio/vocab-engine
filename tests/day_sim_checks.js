@@ -126,10 +126,11 @@ class FakeDate extends Date {
   static now(){ return NOW; }
 }
 
+let VOICES = [{ lang:"zh-CN", name:"x" }], ACC = 0.85;
 async function boot(pack, st, seed){
   Math.random = mulberry32(seed);
   const document = makeFakeDom();
-  const voices = [{ lang:"zh-CN", name:"x" }];
+  const voices = VOICES;
   const ss = { getVoices: () => voices, onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
   const fnBody = scriptOf(appHtml) + `
@@ -140,6 +141,7 @@ return {
   el: id => document.getElementById(id), panel: () => document.getElementById("panel").innerHTML,
   getProg: () => prog, getD: () => D, getCur: () => __cur, log: __log, rd: () => RD,
   skipRead: () => { RD = null; todayStep(); },
+  lesson: i => { switchToTab("sounds", "Sounds"); soundsSel = i; soundsRender(); },
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(), quit: () => quitDrill(),
 };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
@@ -206,7 +208,7 @@ function seedProg(pack, nWords, nUnits, seed){
 }
 
 // ------------------------------------------------------------------ one simulated day
-async function playDay(pack, seedP, sessions, seed, gapMs){
+async function playDay(pack, seedP, sessions, seed, gapMs, onSession){
   const st = { ls: memStore(), ss: memStore() };
   st.ls.setItem(VC.storageKey(pack), JSON.stringify(seedP));
   const api = await boot(pack, st, seed);
@@ -223,7 +225,7 @@ async function playDay(pack, seedP, sessions, seed, gapMs){
       const html = api.panel();
       const D = api.getD();
       if(D && api.getCur() && D.cur){
-        const it = api.getCur(); const ok = ans() < 0.85;
+        const it = api.getCur(); const ok = ans() < ACC;
         drilled.push({ sess: sn, step: api.log[api.log.length - 1].step, key: it.key, kind: kindOf(it), ok });
         answer(api, ok); api.el("nx").click(); continue;
       }
@@ -236,6 +238,7 @@ async function playDay(pack, seedP, sessions, seed, gapMs){
     const after = api.getProg();
     const now = [...Object.keys(after.w).map(k => "w:" + k), ...Object.keys((after.chars || {}).c || {}).map(k => "c:" + k)];
     learnNew.push(now.filter(k => !had.has(k)).length);
+    if(onSession) onSession(sn, api);
   }
   return { drilled, learnNew, prog: api.getProg(), api };
 }
@@ -392,6 +395,9 @@ function missesCarried(drilled){
     const rz = /id="rzgo"/.test(api.panel()) || !!api.el("rzgo");
     if(rz) api.el("rzgo").click();
     check(`Test drill: +1 session (${t0.sn}); Resume drill restores it without counting again (${api.getProg().sn}, day.n ${api.getProg().day.n})`, t0.sn === 2 && rz && !!api.getD() && qsig(api) === tq && api.getProg().sn === 2 && api.getProg().day.n === t0.n);
+    // A drill that touches no unit (a Sounds lesson) is no session.
+    api.quit(); api.lesson(0); const snL = api.getProg().sn; api.el("dr").click();
+    check(`Sounds lesson drill: prog.sn unchanged (${snL} -> ${api.getProg().sn}), drill running`, !!api.getD() && api.getProg().sn === snL && /^l:/.test(String(api.getCur().key)));
   }
   const scenarios = [
     { name: "A: 150 words (HSK 1) + 60 character units, learning HSK 2 words", words: 150, units: 60 },
@@ -457,6 +463,47 @@ function missesCarried(drilled){
         check(`rollover: no same-kind repeat of an item right earlier that day or in the previous ${VC.DAY_RECENT_SESSIONS} sessions (${rep.length}/${run.drilled.length}; session 5 ${cross}/${s5})`, rep.length === 0);
       }
     }
+  }
+  // Carried misses seeded as yesterday's day log (core.js dayCarry): keys -> missed kind.
+  const seedCarried = (p, misses) => { p.sn = 3; p.day = { d: "2026-10-01", n: 3, a: {} }; Object.entries(misses).forEach(([k, kind]) => { p.day.a[k] = { mk: [kind], ms: 2 }; }); return p; };
+  const pendingOf = (api, keys) => { const pr = api.getProg(), d = pr.day; return keys.filter(k => d.a[k] && Array.isArray(d.a[k].mk) && d.a[k].mk.length); };
+  console.log(`\n[voiceless] scenario A with no zh voice: 6 word + 4 sentence hear misses carried, 10 days x 1 session, every answer right (a stuck miss cannot hide behind a new one)`);
+  {
+    VOICES = [{ lang: "en-US", name: "e" }]; ACC = 1;
+    NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
+    const seedP = seedProg(PACK_ON, 150, 60, 11);
+    const ws = Object.keys(seedP.w).slice(0, 6).map(id => "w:" + id);
+    const ss = VC.availableSentences(SENTENCES, WORDS, PACK_ON, seedP).slice(0, 4).map(x => "s:" + x.id);
+    const keys = [...ws, ...ss];
+    seedCarried(seedP, Object.fromEntries(keys.map(k => [k, "hear"])));
+    const pend = [];
+    const run = await playDay(PACK_ON, seedP, 10, 5, 24 * 60 * 60 * 1000, (sn, api) => { const p = pendingOf(api, keys); pend.push(p.length); if(WHY) p.forEach(k => console.log("    s" + (sn + 1), k, JSON.stringify(api.getProg().day.a[k]))); });
+    VOICES = [{ lang:"zh-CN", name:"x" }]; ACC = 0.85;
+    const perSess = keys.map(k => Math.max(...[...Array(10).keys()].map(sn => new Set(run.drilled.filter(d => d.sess === sn && d.key === k).map(d => d.step)).size)));
+    const heard = run.drilled.filter(d => d.kind === "hear").length;
+    console.log(`  pending carried misses after each session: ${pend.join(",")}; most stages one carried item appears in within a session: ${Math.max(...perSess)}; hear items shown: ${heard}`);
+    check(`voiceless: carried hear misses (words and sentences) settle within 2 sessions (${pend.slice(0, 2).join(",")})`, pend[1] === 0 && pend.every((n, i) => i < 2 || n === 0));
+    check(`voiceless: no carried item is asked in more than one stage of a session (max ${Math.max(...perSess)}) and no hear item is shown (${heard})`, Math.max(...perSess) <= 1 && heard === 0);
+  }
+  console.log(`\n[backlog] scenario A with 60 carried misses (40 word, 12 character, 8 sentence)`);
+  {
+    NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
+    const seedP = seedProg(PACK_ON, 150, 60, 11);
+    const wk = ["recall", "type", "hear", "read"];
+    const misses = {};
+    Object.keys(seedP.w).slice(0, 40).forEach((id, i) => { misses["w:" + id] = wk[i % 4]; });
+    Object.keys(seedP.chars.c).slice(0, 12).forEach((id, i) => { misses["c:" + id] = i % 2 ? "charRecall" : "charRead"; });
+    VC.availableSentences(SENTENCES, WORDS, PACK_ON, seedP).slice(0, 8).forEach((x, i) => { misses["s:" + x.id] = i % 2 ? "read" : "hear"; });
+    seedCarried(seedP, misses);
+    const keys = Object.keys(misses);
+    const run = await playDay(PACK_ON, seedP, 4, 5, 24 * 60 * 60 * 1000);
+    const s1 = run.drilled.filter(d => d.sess === 0);
+    const steps = [...new Set(s1.map(d => d.step))];
+    const share = steps.map(st => { const ks = [...new Set(s1.filter(d => d.step === st).map(d => d.key))]; return { st, n: ks.length, miss: ks.filter(k => k in misses).length }; }).filter(x => x.n >= 5);
+    const back = keys.filter(k => run.drilled.some(d => d.key === k && VC.daySettles([misses[k]], d.kind)));
+    console.log(`  session 1 per stage (carried misses / items): ${share.map(x => `step ${x.st} ${x.miss}/${x.n}`).join(", ")}; carried misses asked in a settling kind within 4 sessions: ${back.length}/${keys.length}`);
+    check(`backlog: every session-1 stage has >= 40% items that are not carried misses (${share.map(x => `${x.n - x.miss}/${x.n}`).join(", ")})`, share.length > 0 && share.every(x => x.n - x.miss >= 0.4 * x.n));
+    check(`backlog: every carried miss is asked in a settling kind within 4 sessions (${back.length}/${keys.length})`, back.length === keys.length);
   }
   console.log(`\n[rotation] scenario B, one Today session a day for ${ROT_DAYS} days: nothing eligible stays unseen without bound`);
   for(const [tag, pack] of [["off", PACK_OFF], ["on", PACK_ON]]){
