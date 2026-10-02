@@ -146,6 +146,7 @@ return {
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
   startPassage: p => { startPassage(p); },
   todayAt: s => { todayStepState = { step: s }; todayStep(); },
+  lesson: i => { switchToTab("sounds", "Sounds"); soundsSel = i; soundsRender(); },
   build: () => sessionBuild(), render: () => render(), key: k => (document._listeners.keydown || []).forEach(f => f({ key: k, preventDefault(){}, target: null })),
   hide: () => (document._listeners.visibilitychange || []).forEach(f => { document.visibilityState = "hidden"; f(); }),
 };`;
@@ -700,6 +701,45 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     b.api.clickTab("test"); b.api.el("tRecall").click(); finishDrill(b.api); b.api.el("ok").click(); b.api.hide();
     const re = await boot(Object.assign({ seed: 63 }, st));
     check("Test drill, results Continue, hidden, reopened: no drill, no results", !sess(st.ls) && !re.api.getD() && !/id="ok"/.test(re.api.html("panel")));
+    // Results screens resume can land on: hide + reload x3 shows them again and re-applies nothing.
+    const sig3 = p => JSON.stringify({ n: p.sessions, sn: p.sn, day: p.day && p.day.n, sets: p.sets, w: Object.keys(p.w).length, c: Object.keys(p.chars.c).length, cs: Object.values(p.chars.c).map(r => r.r + "/" + r.s).join(), ws: Object.values(p.w).map(r => r.r + "/" + r.s).join(), read: p.read, lessons: p.lessons });
+    const reload3 = async (st, seed, want) => { const out = []; let a = null; for(let i = 0; i < 3; i++){ a = (await boot(Object.assign({ seed: seed + i }, st))).api; out.push(sig3(JSON.parse(st.ls.getItem(KEY))) + "|" + want(a.html("panel"))); a.hide(); } return { a, same: out.every(x => x === out[0]) && /\|true$/.test(out[0]) }; };
+    {
+      // Today Learn results (zh lag: a words or a characters set).
+      const st2 = fresh(); let a = (await boot(Object.assign({ seed: 70 }, st2))).api; a.el("go").click();
+      for(let i = 0; i < 600 && !(a.tss() && a.tss().at === 1 && !a.getD() && /id="ok"/.test(a.html("panel"))); i++){ if(a.getD()) { answer(a, true); a.el("nx").click(); continue; } const h = a.html("panel"); const b2 = (h.match(/<button class="next" id="(\w+)"/) || [])[1]; if(b2) a.el(b2).click(); else break; }
+      const before = sig3(a.getProg()), k0 = Object.keys(a.getProg().w).length + Object.keys(a.getProg().chars.c).length; a.hide();
+      const r = await reload3(st2, 71, h => /id="ok"/.test(h));
+      check(`Today Learn results (zh lag: a 字 set): hide + 3 reloads show the results again, nothing re-applied`, r.same && sig3(JSON.parse(st2.ls.getItem(KEY))) === before);
+      r.a.el("ok").click(); finishTodayAll(r.a); const pf = r.a.getProg();
+      check(`then Continue to Session done: sessions +1 once (${pf.sessions}), the set recorded once (${Object.keys(pf.w).length + Object.keys(pf.chars.c).length - (k0 - 10)} new)`, pf.sessions === JSON.parse(before).n + 1 && /Session done/.test(r.a.html("panel")));
+    }
+    {
+      // Test drill results (before Continue).
+      const st5 = fresh(); const a = (await boot(Object.assign({ seed: 100 }, st5))).api; a.clickTab("test"); a.el("tRecall").click(); finishDrill(a);
+      const before = sig3(a.getProg()); a.hide();
+      const r = await reload3(st5, 101, h => /id="ok"/.test(h));
+      r.a.el("ok").click();
+      check("Test results: hide + 3 reloads show the results, nothing re-applied; Continue ends it", r.same && sig3(r.a.getProg()) === before && !sess(st5.ls));
+    }
+    {
+      // Read-tab passage results.
+      const p = PASSAGES.find(x => x.lv === "1" && x.questions.length >= 2), st3 = fresh();
+      const a = (await boot(Object.assign({ seed: 80 }, st3))).api; a.clickTab("read"); a.startPassage(p); a.el("rdone").click();
+      for(let i = 0; i < p.questions.length; i++){ a.el("o").children[0].click(); a.el("nx").click(); }
+      const x0 = JSON.stringify(a.getProg().read.done[p.id]); a.hide();
+      const r = await reload3(st3, 81, h => /id="rlist"/.test(h));
+      check(`Read passage results: hide + 3 reloads show the results, done record written once (${x0})`, r.same && JSON.stringify(JSON.parse(st3.ls.getItem(KEY)).read.done[p.id]) === x0);
+    }
+    {
+      // Sounds lesson drill results.
+      const st4 = fresh(); const a = (await boot(Object.assign({ seed: 90 }, st4))).api; a.lesson(0);
+      if(/id="dr"/.test(a.html("panel"))) a.el("dr").click(); finishDrill(a);
+      const on = /id="ok"/.test(a.html("panel")); a.hide();
+      const r = await reload3(st4, 91, h => /id="ok"/.test(h));
+      r.a.el("ok").click();
+      check(`Sounds lesson results: hide + 3 reloads show the results, nothing re-applied; Continue marks the lesson once (${JSON.stringify(r.a.getProg().lessons)})`, on && r.same && r.a.getProg().lessons[LESSONS[0].id] === 1);
+    }
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
