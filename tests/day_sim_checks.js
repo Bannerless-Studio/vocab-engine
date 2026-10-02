@@ -399,6 +399,29 @@ function missesCarried(drilled){
     api.quit(); api.lesson(0); const snL = api.getProg().sn; api.el("dr").click();
     check(`Sounds lesson drill: prog.sn unchanged (${snL} -> ${api.getProg().sn}), drill running`, !!api.getD() && api.getProg().sn === snL && /^l:/.test(String(api.getCur().key)));
   }
+  {
+    // A parked session survives the day-aware writes of another one (prog.day, sn, record t/u):
+    // each goes through store.save, which moves every parked record's fingerprint along.
+    NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
+    const st = { ls: memStore(), ss: memStore() };
+    st.ls.setItem(VC.storageKey(PACK_ON), JSON.stringify(seedProg(PACK_ON, 150, 60, 11)));
+    let api = await boot(PACK_ON, st, 3);
+    const qsig = a => { const D = a.getD(); return [D.cur, ...D.q].filter(Boolean).map(it => it.key + "|" + kindOf(it)).join(); };
+    api.el("go").click();
+    for(let i = 0; i < 2; i++){ answer(api, true); api.el("nx").click(); }
+    const parked = qsig(api);
+    api.clickTab("today");
+    api.clickTab("test"); api.el("tRecall").click();
+    const keys = []; for(let i = 0; i < 3; i++){ keys.push(api.getCur().key); answer(api, i !== 1); api.el("nx").click(); }
+    const p = api.getProg(), w = p.w[keys[0].slice(2)] || {};
+    const wrote = p.sn === 2 && p.day.n === 2 && w.u === 2 && typeof w.t === "number";
+    api.clickTab("today");
+    const label = api.el("go") ? api.el("go").textContent : "(no button)";
+    if(!api.getD() && api.el("go")) api.el("go").click();
+    check(`parked Today, a Test drill writes sn/day/u/t (${wrote}), "${label}": the same queue, nothing counted (sn ${api.getProg().sn}, day.n ${api.getProg().day.n})`, wrote && label === "Resume today" && !!api.getD() && qsig(api) === parked && api.getProg().sn === 2 && api.getProg().day.n === 2);
+    api = await boot(PACK_ON, st, 77);
+    check("reload after those writes: the session resumes (fingerprint followed them)", !!api.getD() && qsig(api) === parked && api.getProg().sn === 2);
+  }
   const scenarios = [
     { name: "A: 150 words (HSK 1) + 60 character units, learning HSK 2 words", words: 150, units: 60 },
     { name: "B: HSK 1-3 learned (595 words) + 60 character units, learning characters", words: 595, units: 60 },
