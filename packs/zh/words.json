@@ -351,7 +351,7 @@
  {
   "id": "w0038",
   "w": "出租车",
-  "en": "taxi; (Tw) rental car",
+  "en": "taxi",
   "lv": "1",
   "pron": "chūzūchē"
  },
@@ -378,7 +378,7 @@
  {
   "id": "w0041",
   "w": "北京",
-  "en": "Beijing, capital of the People's Republic of China",
+  "en": "Beijing; capital of China",
   "lv": "1",
   "pron": "Běijīng",
   "pronInGloss": true
@@ -936,12 +936,11 @@
  {
   "id": "w0094",
   "w": "日",
-  "en": "day; date; sun",
+  "en": "day; date",
   "lv": "1",
   "pron": "rì",
   "syn": [
    "w0179",
-   "w0393",
    "w1051"
   ]
  },
@@ -990,8 +989,7 @@
   "lv": "1",
   "pron": "shì",
   "syn": [
-   "w0005",
-   "w0834"
+   "w0005"
   ]
  },
  {
@@ -1388,6 +1386,9 @@
   "pron": "xièxie",
   "syn": [
    "w0855"
+  ],
+  "typedSyn": [
+   "w0855"
   ]
  },
  {
@@ -1783,7 +1784,7 @@
  {
   "id": "w0178",
   "w": "右边",
-  "en": "right side; right, to the right",
+  "en": "right (side); to the right",
   "lv": "2",
   "pron": "yòubian",
   "syn": [
@@ -2729,7 +2730,7 @@
  {
   "id": "w0272",
   "w": "起床",
-  "en": "to get out of bed; to get up",
+  "en": "to get up; to get out of bed",
   "lv": "2",
   "pron": "qǐchuáng",
   "syn": [
@@ -2880,7 +2881,7 @@
  {
   "id": "w0286",
   "w": "门",
-  "en": "gate; door",
+  "en": "door; gate",
   "lv": "2",
   "pron": "mén"
  },
@@ -3108,7 +3109,7 @@
  {
   "id": "w0308",
   "w": "东",
-  "en": "east; host (i.e. sitting on east side of guest)",
+  "en": "east",
   "lv": "3",
   "pron": "dōng"
  },
@@ -3637,7 +3638,7 @@
  {
   "id": "w0358",
   "w": "北方",
-  "en": "north; the northern part a country",
+  "en": "north; the northern part (of a country)",
   "lv": "3",
   "pron": "běifāng"
  },
@@ -3725,7 +3726,7 @@
  {
   "id": "w0368",
   "w": "叔叔",
-  "en": "father's younger brother; uncle",
+  "en": "uncle (father's younger brother)",
   "lv": "3",
   "pron": "shūshu"
  },
@@ -3785,7 +3786,7 @@
  {
   "id": "w0374",
   "w": "司机",
-  "en": "chauffeur; driver",
+  "en": "driver",
   "lv": "3",
   "pron": "sījī"
  },
@@ -3943,13 +3944,9 @@
  {
   "id": "w0393",
   "w": "太阳",
-  "en": "sun; sunlight; sunshine",
+  "en": "sun",
   "lv": "3",
-  "pron": "tàiyang",
-  "syn": [
-   "w0094",
-   "w1163"
-  ]
+  "pron": "tàiyang"
  },
  {
   "id": "w0394",
@@ -4426,7 +4423,7 @@
  {
   "id": "w0438",
   "w": "故事",
-  "en": "narrative; story; tale",
+  "en": "story; tale",
   "lv": "3",
   "pron": "gùshi"
  },
@@ -4996,7 +4993,7 @@
  {
   "id": "w0496",
   "w": "盘子",
-  "en": "tray; plate",
+  "en": "plate; tray",
   "lv": "3",
   "pron": "pánzi"
  },
@@ -5087,7 +5084,7 @@
  {
   "id": "w0505",
   "w": "祝",
-  "en": "to pray for; to wish (sb bon voyage, happy birthday etc)",
+  "en": "to wish (sb happy birthday etc)",
   "lv": "3",
   "pron": "zhù",
   "syn": [
@@ -5217,7 +5214,7 @@
  {
   "id": "w0518",
   "w": "经常",
-  "en": "frequently; constantly; regularly; often",
+  "en": "often; frequently; regularly",
   "lv": "3",
   "pron": "jīngcháng",
   "syn": [
@@ -5667,7 +5664,7 @@
  {
   "id": "w0565",
   "w": "辆",
-  "en": "classifier for vehicles",
+  "en": "(classifier for vehicles)",
   "lv": "3",
   "pron": "liàng",
   "noTypedMeaning": true
@@ -5914,7 +5911,7 @@
  {
   "id": "w0591",
   "w": "骑",
-  "en": "to sit astride; to ride (a horse, bike etc)",
+  "en": "to ride (a horse, bike etc)",
   "lv": "3",
   "pron": "qí",
   "syn": [
@@ -6131,7 +6128,7 @@
  {
   "id": "w0611",
   "w": "丰富",
-  "en": "to enrich; rich",
+  "en": "rich; abundant; to enrich",
   "lv": "4",
   "pron": "fēngfù",
   "syn": [
@@ -6148,7 +6145,7 @@
  {
   "id": "w0613",
   "w": "主意",
-  "en": "plan; idea",
+  "en": "idea; plan",
   "lv": "4",
   "pron": "zhǔyi",
   "syn": [
@@ -6660,7 +6657,7 @@
  {
   "id": "w0666",
   "w": "入口",
-  "en": "entrance; to import",
+  "en": "entrance",
   "lv": "4",
   "pron": "rùkǒu"
  },
@@ -6698,7 +6695,7 @@
  {
   "id": "w0670",
   "w": "关键",
-  "en": "key; crucial; crucial point; crux",
+  "en": "crucial; key; crux",
   "lv": "4",
   "pron": "guānjiàn",
   "syn": [
@@ -6820,7 +6817,7 @@
  {
   "id": "w0682",
   "w": "减少",
-  "en": "to lessen; to decrease; to reduce; to lower",
+  "en": "to reduce; to decrease; to lessen",
   "lv": "4",
   "pron": "jiǎnshǎo",
   "syn": [
@@ -6979,7 +6976,7 @@
  {
   "id": "w0700",
   "w": "包括",
-  "en": "to comprise; to include",
+  "en": "to include; to comprise",
   "lv": "4",
   "pron": "bāokuò",
   "syn": [
@@ -7345,12 +7342,9 @@
  {
   "id": "w0734",
   "w": "叶子",
-  "en": "leaf; (slang) marijuana",
+  "en": "leaf",
   "lv": "4",
-  "pron": "yèzi",
-  "syn": [
-   "w1172"
-  ]
+  "pron": "yèzi"
  },
  {
   "id": "w0735",
@@ -7390,7 +7384,7 @@
  {
   "id": "w0738",
   "w": "合格",
-  "en": "to meet the standard required; qualified",
+  "en": "qualified; up to standard",
   "lv": "4",
   "pron": "hégé"
  },
@@ -7421,7 +7415,7 @@
  {
   "id": "w0742",
   "w": "后来",
-  "en": "afterwards; later; newly arrived",
+  "en": "afterwards; later",
   "lv": "4",
   "pron": "hòulái",
   "syn": [
@@ -7637,7 +7631,7 @@
  {
   "id": "w0764",
   "w": "场",
-  "en": "place (for a specific purpose); stage; (classifier for games, shows)",
+  "en": "(classifier for games, shows); place; stage",
   "lv": "4",
   "pron": "chǎng",
   "say": "氅",
@@ -7670,6 +7664,7 @@
   "lv": "4",
   "pron": "jīchǔ",
   "syn": [
+   "w0827",
    "w0828"
   ]
  },
@@ -7840,7 +7835,7 @@
  {
   "id": "w0787",
   "w": "孤单",
-  "en": "lone; lonely",
+  "en": "lonely; alone",
   "lv": "4",
   "pron": "gūdān"
  },
@@ -7943,14 +7938,14 @@
  {
   "id": "w0797",
   "w": "密码",
-  "en": "cipher; secret code; password; PIN",
+  "en": "password; PIN; secret code",
   "lv": "4",
   "pron": "mìmǎ"
  },
  {
   "id": "w0798",
   "w": "富",
-  "en": "rich; abundant",
+  "en": "rich; wealthy; abundant",
   "lv": "4",
   "pron": "fù",
   "syn": [
@@ -8023,7 +8018,7 @@
  {
   "id": "w0805",
   "w": "尊重",
-  "en": "to esteem; to respect",
+  "en": "to respect; to esteem",
   "lv": "4",
   "pron": "zūnzhòng",
   "syn": [
@@ -8160,7 +8155,7 @@
  {
   "id": "w0819",
   "w": "干燥",
-  "en": "to dry (of weather, paint, cement etc); desiccation",
+  "en": "dry (weather, skin); arid",
   "lv": "4",
   "pron": "gānzào"
  },
@@ -8235,9 +8230,13 @@
  {
   "id": "w0827",
   "w": "底",
-  "en": "background; bottom",
+  "en": "bottom; base",
   "lv": "4",
-  "pron": "dǐ"
+  "pron": "dǐ",
+  "syn": [
+   "w0767",
+   "w0828"
+  ]
  },
  {
   "id": "w0828",
@@ -8247,7 +8246,8 @@
   "pron": "zuò",
   "syn": [
    "w0511",
-   "w0767"
+   "w0767",
+   "w0827"
   ],
   "noTypedMeaning": true
  },
@@ -8287,7 +8287,7 @@
  {
   "id": "w0832",
   "w": "引起",
-  "en": "to give rise to; to lead to; to cause; to arouse",
+  "en": "to cause; to give rise to; to lead to",
   "lv": "4",
   "pron": "yǐnqǐ",
   "syn": [
@@ -8298,7 +8298,7 @@
  {
   "id": "w0833",
   "w": "弹",
-  "en": "to pluck (a string); to play (a string instrument)",
+  "en": "to play (piano, guitar etc); to pluck (a string)",
   "lv": "4",
   "pron": "tán",
   "say": "谈",
@@ -8312,13 +8312,10 @@
  {
   "id": "w0834",
   "w": "当",
-  "en": "to be; to act as",
+  "en": "to act as; to work as; to serve as",
   "lv": "4",
   "pron": "dāng",
-  "say": "裆",
-  "syn": [
-   "w0099"
-  ]
+  "say": "裆"
  },
  {
   "id": "w0835",
@@ -8605,12 +8602,11 @@
  {
   "id": "w0863",
   "w": "打扮",
-  "en": "to dress up; to make up; to decorate",
+  "en": "to dress up; to decorate",
   "lv": "4",
   "pron": "dǎban",
   "syn": [
-   "w0655",
-   "w1052"
+   "w0655"
   ]
  },
  {
@@ -8764,7 +8760,7 @@
  {
   "id": "w0881",
   "w": "挂",
-  "en": "to hang or suspend (from a hook etc); to hang up (the phone)",
+  "en": "to hang; to hang up (the phone)",
   "lv": "4",
   "pron": "guà"
  },
@@ -8858,7 +8854,7 @@
  {
   "id": "w0889",
   "w": "推",
-  "en": "to push; to cut",
+  "en": "to push",
   "lv": "4",
   "pron": "tuī"
  },
@@ -8920,7 +8916,7 @@
  {
   "id": "w0897",
   "w": "支持",
-  "en": "to be in favor of; to support",
+  "en": "to support; to be in favor of",
   "lv": "4",
   "pron": "zhīchí"
  },
@@ -8971,7 +8967,7 @@
  {
   "id": "w0902",
   "w": "放弃",
-  "en": "to renounce; to abandon; to give up",
+  "en": "to give up; to abandon",
   "lv": "4",
   "pron": "fàngqì"
  },
@@ -9148,10 +9144,13 @@
  {
   "id": "w0921",
   "w": "无论",
-  "en": "no matter what or how; no matter; regardless (of)",
+  "en": "no matter; regardless (of); no matter what or how",
   "lv": "4",
   "pron": "wúlùn",
   "syn": [
+   "w0600"
+  ],
+  "typedSyn": [
    "w0600"
   ]
  },
@@ -9404,7 +9403,7 @@
  {
   "id": "w0948",
   "w": "正常",
-  "en": "regular; normal",
+  "en": "normal; regular",
   "lv": "4",
   "pron": "zhèngcháng"
  },
@@ -9495,7 +9494,7 @@
  {
   "id": "w0958",
   "w": "汗",
-  "en": "perspiration; sweat",
+  "en": "sweat",
   "lv": "4",
   "pron": "hàn",
   "say": "汉"
@@ -9807,7 +9806,7 @@
  {
   "id": "w0991",
   "w": "猪",
-  "en": "hog; pig",
+  "en": "pig",
   "lv": "4",
   "pron": "zhū"
  },
@@ -10378,7 +10377,6 @@
   "pron": "zǔchéng",
   "syn": [
    "w0674",
-   "w0863",
    "w1093"
   ]
  },
@@ -10464,7 +10462,7 @@
  {
   "id": "w1062",
   "w": "网站",
-  "en": "website; network station",
+  "en": "website",
   "lv": "4",
   "pron": "wǎngzhàn"
  },
@@ -10498,7 +10496,7 @@
  {
   "id": "w1066",
   "w": "羽毛球",
-  "en": "shuttlecock; badminton",
+  "en": "badminton; shuttlecock",
   "lv": "4",
   "pron": "yǔmáoqiú"
  },
@@ -11058,7 +11056,7 @@
  {
   "id": "w1125",
   "w": "赢",
-  "en": "to beat; to win",
+  "en": "to win; to beat",
   "lv": "4",
   "pron": "yíng"
  },
@@ -11202,7 +11200,7 @@
  {
   "id": "w1139",
   "w": "过程",
-  "en": "course of events; process",
+  "en": "process; course of events",
   "lv": "4",
   "pron": "guòchéng"
  },
@@ -11313,10 +11311,6 @@
    "w0234",
    "w0656",
    "w1129"
-  ],
-  "typedSyn": [
-   "w0061",
-   "w0234"
   ]
  },
  {
@@ -11386,7 +11380,7 @@
  {
   "id": "w1157",
   "w": "重视",
-  "en": "to attach importance to sth; to value",
+  "en": "to value; to attach importance to",
   "lv": "4",
   "pron": "zhòngshì"
  },
@@ -11444,10 +11438,7 @@
   "w": "阳光",
   "en": "sunshine; sunlight; upbeat (personality)",
   "lv": "4",
-  "pron": "yángguāng",
-  "syn": [
-   "w0393"
-  ]
+  "pron": "yángguāng"
  },
  {
   "id": "w1164",
@@ -11517,12 +11508,9 @@
  {
   "id": "w1172",
   "w": "页",
-  "en": "page; leaf",
+  "en": "page",
   "lv": "4",
-  "pron": "yè",
-  "syn": [
-   "w0734"
-  ]
+  "pron": "yè"
  },
  {
   "id": "w1173",
@@ -11586,7 +11574,7 @@
  {
   "id": "w1180",
   "w": "食品",
-  "en": "foodstuff; food; provisions",
+  "en": "food; foodstuff",
   "lv": "4",
   "pron": "shípǐn"
  },
