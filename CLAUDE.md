@@ -66,7 +66,7 @@ $NODE tests/typed_mastery_checks.js              # 56 (characters.bareBy typed c
 $NODE tests/session_resume_checks.js             # 109 (drill/passage resume: tab switch, reload, relaunch, per-tab parking)
 $NODE tests/day_sim_checks.js                    # 59 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; before/after numbers; --why)
 $NODE tests/help_close_checks.js                 # 41 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
-$NODE tests/gloss_overlap_checks.js              # 74 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~1.5 min)
+$NODE tests/gloss_overlap_checks.js              # 74 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~5 min: 286 s on main 7fe35f7, 370 s here under load)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)
