@@ -354,6 +354,8 @@ def main(argv):
         "soundsReference": True,
         # Plans know what was drilled today (docs/PACK_SCHEMA.md "dayAware"; owner feedback 2026-10-02).
         "dayAware": True,
+        # New material can be paused from Progress (docs/PACK_SCHEMA.md "pauseNew").
+        "pauseNew": True,
     }
 
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).
