@@ -24,6 +24,8 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; return Object.assign({}, p, { characters: c }); };
 const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
+// words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields.
+const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -914,7 +916,7 @@ function walk(api, stopAt){
     const offSent = SENTENCES.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; });
     const offPass = PASSAGES.map(p => Object.assign({}, p, { sentences: p.sentences.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; }) }));
     async function screens(html, core, pack, sents, passages, seed){
-      const { api } = await boot({ html, core, pack, sentences: sents, passages, seed });
+      const { api } = await boot({ html, core, pack, words: WORDS_OFF, sentences: sents, passages, seed });
       const out = {};
       api.setProg(seedPF()); api.today(); out.today = api.html("panel");
       api.el("go").click();

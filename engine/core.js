@@ -44,6 +44,17 @@ function textForms(e){
 function sharesSurface(a, b){ const s = new Set(surfaces(a)); return surfaces(b).some(x=>s.has(x)); }
 // Same pronunciation (when both carry pron): indistinguishable in a hear item.
 function samePron(a, b){ return !!(a && b && a.pron && b.pron) && normKey(a.pron) === normKey(b.pron); }
+// words[].syn / typedSyn (docs/PACK_SCHEMA.md "Synonyms"), generated at pack build. syn: the
+// words share an accepted meaning, so neither is ever a wrong option for the other (either side
+// listing the other is enough). typedSyn: words this word's whole gloss also fits, so a typed
+// answer naming one is right on its meaning stimulus.
+function synIds(e){ return Array.isArray(e && e.syn) ? e.syn : []; }
+function isSyn(a, b){ return !!(a && b) && (synIds(a).includes(b.id) || synIds(b).includes(a.id)); }
+// The first typedSyn word the typed answer fits (test(word) -> bool), else null.
+function typedSynHit(entry, byId, test){
+  for(const id of (Array.isArray(entry && entry.typedSyn) ? entry.typedSyn : [])){ const s = byId && byId[id]; if(s && test(s)) return s; }
+  return null;
+}
 // Never a homograph of the answer (the read stimulus would fit both), a homophone (the hear
 // stimulus would fit both) or a gloss sharing its first two words (a near-synonym). Prefers
 // same-part-of-speech distractors like wordOpts, falling back to any pos when the same-pos
@@ -54,7 +65,7 @@ function meaningOpts(entry, pool){
   const ansFirst2 = firstTwoWords(entry.en);
   const hasPos = !!entry.pos;
   const samePos = v => hasPos && v.pos === entry.pos;
-  const candidates = (pool||[]).filter(v=>v.id!==entry.id && normKey(v.en)!==ansKey && !sharesSurface(v, entry) && !samePron(v, entry));
+  const candidates = (pool||[]).filter(v=>v.id!==entry.id && normKey(v.en)!==ansKey && !sharesSurface(v, entry) && !samePron(v, entry) && !isSyn(v, entry));
   const t1 = candidates.filter(v=>v.lv===entry.lv && samePos(v));
   const t2 = candidates.filter(v=>v.lv===entry.lv && !samePos(v));
   const t3 = candidates.filter(v=>v.lv!==entry.lv && samePos(v));
@@ -89,7 +100,7 @@ function wordOpts(entry, pool, showOf, pack, prefer){
   const pf = pronFirstOn(pack); // pron display: no option may sound like another (pronClash)
   const cands = (pool||[]).filter(v =>
     v.id!==entry.id && !sharesSurface(v, entry) && normKey(v.en)!==ansGloss && !(ansF2 && firstTwoWords(v.en)===ansF2) &&
-    (ansFw || !fw.has(v.id)) && !(pf && pronClash(v, entry)));
+    (ansFw || !fw.has(v.id)) && !(pf && pronClash(v, entry)) && !isSyn(v, entry));
   const samePos = v => hasPos && v.pos===entry.pos;
   const t1 = cands.filter(v=>v.lv===entry.lv && samePos(v));
   const t2 = cands.filter(v=>v.lv===entry.lv && !samePos(v));
@@ -2170,7 +2181,7 @@ function charOpts(unit, units, byId){
     const g = unitGloss(v, byId), vw = unitWord(v, byId);
     if(normKey(g) === ansG || (ansF2 && firstTwoWords(g) === ansF2)) return false;
     if(ansR && normKey(unitReading(v, byId)) === ansR) return false;
-    return !(aw && vw && samePron(aw, vw));
+    return !(aw && vw && (samePron(aw, vw) || isSyn(aw, vw)));
   });
   const t1 = cands.filter(v => v.lv === unit.lv && cpLen(v.t) === len);
   const t2 = cands.filter(v => v.lv === unit.lv && cpLen(v.t) !== len);
@@ -2943,11 +2954,12 @@ function typedKindOk(kind, word, shownWritten, amb){
   const a = amb || { written: new Set(), pron: new Set() };
   const hasW = !!(word && word.w), hasP = !!(word && word.pron), hasG = !!gloss(word);
   if(kind === "word") return hasW;
-  if(kind === "pron") return hasP;
+  // words[].pronInGloss: the meaning stimulus would spell the reading (北京 "Beijing").
+  if(kind === "pron") return hasP && !word.pronInGloss;
   if(kind === "written") return hasW && shownWritten;
-  if(kind === "writtenMeaning") return hasW && shownWritten && hasG && !a.written.has(word.id);
+  if(kind === "writtenMeaning") return hasW && shownWritten && hasG && !a.written.has(word.id) && !word.noTypedMeaning;
   if(kind === "writtenPron") return hasW && hasP && shownWritten && !a.written.has(word.id);
-  if(kind === "pronMeaning") return hasP && hasG && !a.pron.has(word.id);
+  if(kind === "pronMeaning") return hasP && hasG && !a.pron.has(word.id) && !word.noTypedMeaning;
   return false;
 }
 // Slot order in the plan plus the word's recorded answers picks the start of the rotation: a
@@ -3106,8 +3118,19 @@ function leftOfOr(alt){
   }
   return "";
 }
-function glossAltKeys(en){
-  const keys = new Set();
+// "to be careful" / "to feel anxious" also take the bare adjective ("careful", "anxious"): a
+// learner names the quality, not the copula (owner feedback 2026-10-02, 着急). Only a one-word
+// adjective or participle: "to be like", "to be apart from", "to be able to" would key a wrong
+// sense. Typed-meaning packs only (typedFromOn); every other pack keeps its keys.
+const GLOSS_COPULA = new Set(["be", "feel"]);
+const GLOSS_COPULA_NOT = new Set(["about", "above", "across", "after", "against", "along", "among", "apart", "around", "at", "away", "before", "behind", "below", "beside", "between", "beyond", "by", "down", "for", "from", "here", "in", "inside", "into", "left", "like", "near", "not", "of", "off", "on", "onto", "out", "outside", "over", "past", "so", "there", "through", "to", "toward", "towards", "under", "up", "with", "within", "without", "able"]);
+function copulaFree(v){
+  const toks = glossWords(v);
+  if(toks.length !== 3 || toks[0] !== "to" || !GLOSS_COPULA.has(toks[1]) || GLOSS_COPULA_NOT.has(toks[2]) || GLOSS_FUNC.has(toks[2])) return [];
+  return [toks[2]];
+}
+function glossAltKeys(en, pack){
+  const keys = new Set(), copula = typedFromOn(pack);
   const add = v => {
     const k = glossKey(v); if(!k) return;
     // A lone letter left by punctuation ("~'s" -> s) is not a meaning; a gloss "I" is.
@@ -3118,7 +3141,7 @@ function glossAltKeys(en){
     if(isPronNote(raw)) return;
     const alt = parenPieces(raw).filter(p => !(p.g && isPronNote(p.t))).map(p => p.t).join("");
     if(/(?:…|\.\.\.)\s*$/.test(alt) && !glossHasContent(parenGroups(alt).rest)) return;
-    glossAltVariants(alt).forEach(add);
+    glossAltVariants(alt).forEach(v => { add(v); if(copula) copulaFree(v).forEach(add); });
     const left = leftOfOr(alt);
     if(left) glossAltVariants(left).forEach(v => { if(glossHasContent(v)) add(v); });
   });
@@ -3147,8 +3170,8 @@ function pronChoiceOpts(entry, pool, all){
 }
 // One meaning is enough: the whole typed text, or every part of it split like the gloss, must
 // be one of the gloss's alternatives. Rules: docs/PACK_SCHEMA.md "Typed meaning".
-function checkGlossTyped(val, en){
-  const keys = glossAltKeys(en), v = String(val == null ? "" : val);
+function checkGlossTyped(val, en, pack){
+  const keys = glossAltKeys(en, pack), v = String(val == null ? "" : val);
   if(keys.has(glossKey(v))) return true;
   // The whole gloss typed as written is right, reading notes and fragments included.
   if(glossKey(v) && glossKey(v) === glossKey(en)) return true;
@@ -3296,7 +3319,7 @@ function migrateLegacy(pack, legacyMap, oldRecord){
 // ------------------------------------------------------------------ export
 const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   levelIds, levelIndexMap, levelLabel, setSizeOf, wordsByLevel, nSets,
-  meaningOpts, wordOpts, gapOpts, sentenceOpts, bareForm, packArticles, articleCut, trailingCut, citationArticles, articleAgreement, visibleArticle, gapChoices, exampleSentences, unitExampleSentences, rubyCovers, highlightParts, searchWords, pronShown, audioSlot, TEST_MIN_WORDS, TEST_MIN_SENTENCES,
+  synIds, isSyn, typedSynHit, meaningOpts, wordOpts, gapOpts, sentenceOpts, bareForm, packArticles, articleCut, trailingCut, citationArticles, articleAgreement, visibleArticle, gapChoices, exampleSentences, unitExampleSentences, rubyCovers, highlightParts, searchWords, pronShown, audioSlot, TEST_MIN_WORDS, TEST_MIN_SENTENCES,
   targetLang, fontFamilyOf, fontStackOf, lineHeightOf, fontsHref, scriptDisplay, rtlRuns,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,

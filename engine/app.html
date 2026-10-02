@@ -493,7 +493,10 @@ const PLAN_ORDER = DAY_AWARE ? "misses and due first" : "weakest first";
 // kind the item builder would swap out (no voice, no blank), and such a miss settles as
 // core.js daySettles says.
 let SENT_BY_ID_DAY = null;
-const dayWordCan = w => VC.dayWordCan(PACK, canHearWord)(w);
+// words[].pronInGloss: while such a word shows by its reading, recall (and a type slot no typed
+// kind fits, which falls back to recall) is swapped for the read item (recallItem).
+const pronLeakShown = w => !!(w && w.pronInGloss) && dispWord(w).isPron;
+const dayWordCan = w => { const c = VC.dayWordCan(PACK, canHearWord)(w); return pronLeakShown(w) ? c.filter(k => k !== "recall" && (k !== "type" || typedFits(w))) : c; };
 const daySentCan = s => VC.daySentenceCan(PACK, canHearSentence, WORDS_BY_ID)(s);
 const dayCanOf = key => {
   const k = String(key), id = k.slice(2);
@@ -769,7 +772,21 @@ function glossOut(s, withNotes){
   const body = p.pieces.map(x => x.dim ? `<span class="dim">${ui(x.t)}</span>` : ui(x.t)).join("");
   return withNotes && p.notes.length ? `${body} <span class="dim">${ui(p.notes.join("; "))}</span>` : body;
 }
-const GLOSS_OPT = GLOSS_FOCUS ? (o => glossOut(o)) : undefined;
+// An option button or an "also right" note shows the first alternatives only (the reveal shows
+// the whole gloss) and a long (...) explanation beside a meaning as "(…)" (厉害, 容易).
+const GLOSS_SHORT_EXPL = 22;
+function glossShort(s, maxAlts, maxLen){
+  const out = []; let n = 0;
+  for(const a of VC.splitTopLevel(String(s == null ? "" : s), [";"]).map(x => x.trim()).filter(x => x && !VC.isPronNote(x))){
+    const ps = VC.glossParts(a).pieces, text = ps.some(x => !x.dim && x.t.trim());
+    const shown = ps.map(x => ({ t: x.dim && text && x.t.length > GLOSS_SHORT_EXPL ? "(…)" : x.t, dim: x.dim }));
+    const len = shown.reduce((m, x) => m + x.t.length, 0);
+    if(out.length && (out.length >= maxAlts || n + len > maxLen)) break;
+    out.push(shown.map(x => x.dim ? `<span class="dim">${ui(x.t)}</span>` : ui(x.t)).join("")); n += len;
+  }
+  return out.join("; ");
+}
+const GLOSS_OPT = GLOSS_FOCUS ? (o => glossShort(o, 2, 32)) : undefined;
 // Only used with pack.characters.compose; first unit in file order wins.
 const CHAR_READING = new Map();
 CHAR_LIST.forEach(u => { const t = String((u && u.t) || ""); if([...t].length === 1 && !CHAR_READING.has(t)){ const r = VC.unitReading(u, WORDS_BY_ID); if(r) CHAR_READING.set(t, r); } });
@@ -780,8 +797,8 @@ function bigWordHTML(entry){
   return `<div class="big wd"${TA}>${wordFormHTML(entry)}</div>${p ? `<div class="pron">${readingHTML(p)}</div>` : ""}`;
 }
 // Recall keys options by word id, so `written` gives the label for a value that is not one.
-function wordOptHtml(byKey, written){
-  return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const p = e ? pronAsked(e) : ""; return `${d && d.isPron ? twReading(d.text) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
+function wordOptHtml(byKey, written, noPron){
+  return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const p = e && !noPron ? pronAsked(e) : ""; return `${d && d.isPron ? twReading(d.text) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
 }
 
 // A drill that touches no unit (Sounds lessons) is no session for the planner's clock.
@@ -1156,19 +1173,32 @@ function readItem(entry){
     html: bigWordHTML(entry) + (hear ? REPLAY_STAGE : ""), opts: meaningChoices(entry), a: VC.gloss(entry), optHtml: GLOSS_OPT, reveal: revealBlock(entry),
     onAnswer(ok){ markWord(entry.id, ok, "read", this.reqKind); }, mount: () => { const b = hear ? $("rpa") : null; sayWord(entry, b || undefined); if(b) b.onclick = () => sayWord(entry, b); }, };
 }
+// words[].pronInGloss (docs/PACK_SCHEMA.md "pronInGloss"): the gloss spells the reading, so the
+// meaning stimulus never asks for it: a word still shown by its reading gets the read item, a
+// written one its options without readings.
 function recallItem(entry){
+  if(pronLeakShown(entry)) return readItem(entry);
   const ds = VC.wordOpts(entry, WORDS, PRON_FIRST ? (e => dispWord(e).text) : null, PACK); // same word class as the answer; pronFirst: distinct displayed labels, no homophones
   // Keyed by word id so two options can never collapse into one key, whatever they display as.
   const byId = {}; [entry, ...ds].forEach(e=>{ byId[e.id] = e; });
   return { kind:"mc", key:"w:"+entry.id, label:"Which word is this?", optsClass:"opts-hero opts-w",
     html: `<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>`,
-    opts: [entry.id, ...ds.map(d=>d.id)], a: entry.id, optHtml: wordOptHtml(byId, o => byId[o].w), optsT: true, reveal: revealBlock(entry),
+    opts: [entry.id, ...ds.map(d=>d.id)], a: entry.id, optHtml: wordOptHtml(byId, o => byId[o].w, !!entry.pronInGloss), optsT: true, reveal: revealBlock(entry),
     onAnswer(ok){ markWord(entry.id, ok, "recall", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
 }
+// words[].typedSyn (docs/PACK_SCHEMA.md "Synonyms"): on a meaning stimulus another word's
+// whole gloss also fits, typing that word is right too and the reveal names it. fit(word, val);
+// show(word) labels the match. A pack without typedSyn checks fit(entry) alone.
+function synTyped(entry, fit, show){
+  const hit = val => fit(entry, val) ? null : VC.typedSynHit(entry, WORDS_BY_ID, s => fit(s, val));
+  return { check: val => fit(entry, val) || !!hit(val),
+    note: val => { const s = hit(val); return s ? `<div class="diff">also right: ${show(s)} · ${glossShort(VC.gloss(s), 1, 0)}</div>` : ""; } };
+}
 function typeItem(entry){
+  const syn = synTyped(entry, (e, val) => VC.acceptTyped(val, e, PACK, VC.affixAlts(e.w), WORDS), e => `<bdi${TA}>${escapeHtml(e.w)}</bdi>`);
   return { kind:"type", key:"w:"+entry.id, label:"Type the word",
     html: `<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>`,
-    check: val => VC.acceptTyped(val, entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
+    check: syn.check, feedback: syn.note, reveal: revealBlock(entry),
     onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
     choiceFallback: () => typedRecallFallback(entry) };
 }
@@ -1185,12 +1215,14 @@ function typedRecallFallback(entry){
 const PRON_NOUN = TONES ? PACK.tones : "reading";
 const LATIN_PRON = /\p{Script=Latin}/u; // a Latin-script reading gets a Latin input; any other (e.g. kana) the target-language one
 const kindTag = (tag, sub) => `<div class="ktag"${UIA}><b>${escapeHtml(tag)}</b>${sub ? ` · ${escapeHtml(sub)}` : ""}</div>`;
+const pronFeedback = entry => val => { const v = VC.checkPronTyped(val, entry.pron, PACK); return v === "tones" || v === "tonesDiff" ? `<div class="diff">tones: <span class="tpron">${readingHTML(entry.pron)}</span></div>` : ""; };
 function pronTypeItem(entry){
+  const syn = synTyped(entry, (e, val) => !!e.pron && VC.checkPronTyped(val, e.pron, PACK) !== "wrong", e => `<span class="tpron">${readingHTML(e.pron)}</span>`), tones = pronFeedback(entry);
   return { kind:"type", key:"w:"+entry.id, label:`Type the ${PRON_NOUN}`,
     html: `${kindTag(PRON_NOUN, TONES ? "tones optional" : "")}<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>`,
     placeholder: TONES ? `${PRON_NOUN}, tones optional…` : `${PRON_NOUN}…`, inputTA: LATIN_PRON.test(entry.pron) ? ' lang="en"' : undefined,
-    check: val => VC.checkPronTyped(val, entry.pron, PACK) !== "wrong",
-    feedback: val => { const v = VC.checkPronTyped(val, entry.pron, PACK); return v === "tones" || v === "tonesDiff" ? `<div class="diff">tones: <span class="tpron">${readingHTML(entry.pron)}</span></div>` : ""; },
+    check: syn.check,
+    feedback: val => tones(val) + syn.note(val),
     reveal: revealBlock(entry), onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
     choiceFallback: () => typedRecallFallback(entry) };
 }
@@ -1199,18 +1231,19 @@ function writtenTypeItem(entry){
   // No-tones pron packs (ja) only: half-width kana and either affix tilde match the written
   // form (VC.writtenTypedFold). Latin and tones packs are untouched.
   const foldTyped = !TONES && !LATIN_PRON.test(entry.pron || "") ? VC.writtenTypedFold : (v => v);
+  const syn = synTyped(entry, (e, val) => VC.acceptTyped(foldTyped(val), e, PACK, VC.affixAlts(e.w), WORDS), e => `<bdi${TA}>${escapeHtml(e.w)}</bdi>`);
   return { kind:"type", key:"w:"+entry.id, label:"Type the characters",
     html: `${kindTag("characters", hear ? "listen" : "")}<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>${hear ? `<div class="listen-stage"><button class="replay" id="rp2" aria-label="Replay">${REPLAY_SVG}</button></div>` : ""}`,
     placeholder: "characters…",
     mount: () => { if(hear){ const b = $("rp2"); sayWord(entry, b); b.onclick = () => sayWord(entry, b); } },
-    check: val => VC.acceptTyped(foldTyped(val), entry, PACK, VC.affixAlts(entry.w), WORDS), reveal: revealBlock(entry),
+    check: syn.check, feedback: syn.note, reveal: revealBlock(entry),
     onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); markUnitTyped(this, entry.id, ok); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
     choiceFallback: () => typedRecallFallback(entry) };
 }
 function pronSlotItem(entry, slot){
   const shown = !!entry.w && !dispWord(entry).isPron;
   if(shown && (slot === "written" || !entry.pron)) return writtenTypeItem(entry);
-  return entry.pron ? pronTypeItem(entry) : recallItem(entry);
+  return entry.pron && !entry.pronInGloss ? pronTypeItem(entry) : recallItem(entry);
 }
 // pack.typedFrom (docs/PACK_SCHEMA.md "typedFrom and glossFocus"): typed items whose stimulus
 // is the word itself. The stimulus must not give the answer away: nothing plays before the
@@ -1227,7 +1260,7 @@ function meaningTypeItem(entry, fromPron){
   const stim = fromPron ? stimPron(entry) : stimWritten(entry);
   return { kind:"type", key:"w:"+entry.id, label:"Type the meaning", html: kindTag("meaning", "any one") + stim,
     placeholder: "meaning…", inputTA: ' lang="en"',
-    check: val => VC.checkGlossTyped(val, VC.gloss(entry)), reveal: revealBlock(entry),
+    check: val => VC.checkGlossTyped(val, VC.gloss(entry), PACK), reveal: revealBlock(entry),
     onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); if(!fromPron) markUnitTyped(this, entry.id, ok); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
     choiceFallback: () => ({ kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero", html: stim,
       opts: meaningChoices(entry), a: VC.gloss(entry), optHtml: GLOSS_OPT, reveal: revealBlock(entry),
@@ -1238,7 +1271,9 @@ function writtenPronTypeItem(entry){
   const choice = opts => opts.length < 3 ? typedRecallFallback(entry) : { kind:"mc", key:"w:"+entry.id, label:"How is it said?", optsClass:"opts-hero", html: stimWritten(entry),
       opts: [entry.pron, ...opts], a: entry.pron, optHtml: o => `<bdi>${readingHTML(o)}</bdi>`, reveal: revealBlock(entry),
       onAnswer(ok){ markWord(entry.id, ok, typedFallbackKind(ok)); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
+  // The characters stimulus is this word alone: no synonym fits it.
   return Object.assign(pronTypeItem(entry), { html: kindTag(PRON_NOUN, TONES ? "tones optional" : "") + stimWritten(entry),
+    check: val => VC.checkPronTyped(val, entry.pron, PACK) !== "wrong", feedback: pronFeedback(entry),
     onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); markUnitTyped(this, entry.id, ok); },
     choiceFallback: () => choice(VC.pronChoiceOpts(entry, learnedWords(), WORDS)) });
 }
@@ -1565,6 +1600,7 @@ document.addEventListener("visibilitychange", () => { if(document.visibilityStat
 if(typeof window.addEventListener === "function") window.addEventListener("pagehide", () => sessionSave());
 const TYPED_ITEM = { word: typeItem, pron: pronTypeItem, written: silentWrittenTypeItem, writtenPron: writtenPronTypeItem,
   writtenMeaning: e => meaningTypeItem(e, false), pronMeaning: e => meaningTypeItem(e, true) };
+const typedFits = e => !TYPED_FROM || VC.typedKinds(PACK).some(k => VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB));
 function typedFromSlotItem(plan, i){
   const e = plan[i].word; const shown = !!e.w && !dispWord(e).isPron; const only = plan[i].tu ? VC.TYPED_WRITTEN_KINDS : null;
   const k = VC.typedSlotKind(plan, i, prog, PACK, k => (!only || only.includes(k)) && VC.typedKindOk(k, e, shown, TYPED_AMB));

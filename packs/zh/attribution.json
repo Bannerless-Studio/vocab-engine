@@ -5,6 +5,10 @@
   "url": "https://github.com/drkameleon/complete-hsk-vocabulary",
   "glosses": "the English `en` senses originate from CC-CEDICT (complete-hsk-vocabulary README, Sources: \"Dictionary definitions: mdbg.net (CC-CEDICT)\"), licensed CC-BY-SA-4.0: https://cc-cedict.org/wiki/"
  },
+ "gloss_overrides": {
+  "source": "tools/zh_gloss_overrides.json: zh glosses rewritten from the untruncated CC-CEDICT senses in complete-hsk-vocabulary complete.json (each entry cites its CC-CEDICT text); report docs/ZH_GLOSS.md",
+  "licence": "CC-BY-SA-4.0 (CC-CEDICT)"
+ },
  "sentences": {
   "source": "hand-authored for this pack (chinese repo data/hsk_sentences.js)",
   "licence": "CC-BY-SA-4.0"

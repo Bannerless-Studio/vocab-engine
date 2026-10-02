@@ -35,6 +35,10 @@ word's characters.json unit; docs/ZH_SAY.md has the table.
 `characters.json` mirrors words.json one-to-one (hsk teaches whole words, not
 glyphs: docs/HSK_MERGE.md §2.1), and `legacy.json`/`pack.legacy` carry the
 hsk_pinyin -> vocab_zh progress-migration id maps (docs/HSK_MERGE.md §4).
+tools/zh_gloss.js applies tools/zh_gloss_overrides.json to `en` and adds words.json `syn`
+(words sharing an accepted meaning), `typedSyn` (words the whole gloss also fits) and
+`noTypedMeaning` (docs/ZH_GLOSS.md).
+
 Each unit gets a `hint` list (one per character of `t`, null where none) from the
 committed tools/zh_hints.json (tools/zh_hints.py; Make Me a Hanzi, LGPL-3.0-or-later),
 credited in attribution.json.
@@ -44,7 +48,6 @@ Usage: python3 tools/pack_from_hsk.py [HSK_REPO_DIR]   (default: ../chinese besi
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 
@@ -66,6 +69,11 @@ ATTRIBUTION = {
         "url": "https://github.com/drkameleon/complete-hsk-vocabulary",
         "glosses": "the English `en` senses originate from CC-CEDICT (complete-hsk-vocabulary README, Sources: "
                    "\"Dictionary definitions: mdbg.net (CC-CEDICT)\"), licensed CC-BY-SA-4.0: https://cc-cedict.org/wiki/",
+    },
+    "gloss_overrides": {
+        "source": "tools/zh_gloss_overrides.json: zh glosses rewritten from the untruncated CC-CEDICT senses in "
+                  "complete-hsk-vocabulary complete.json (each entry cites its CC-CEDICT text); report docs/ZH_GLOSS.md",
+        "licence": "CC-BY-SA-4.0 (CC-CEDICT)",
     },
     "sentences": {"source": "hand-authored for this pack (chinese repo data/hsk_sentences.js)", "licence": "CC-BY-SA-4.0"},
     "character_hints": {
@@ -105,12 +113,39 @@ def js_const_json(path, name):
     raise SystemExit(f"pack_from_hsk: const {name} not found in {path}")
 
 
+# The repo's pinned node (CLAUDE.md "Commands"); a bare `node` on PATH can be an nvm shim that hangs.
+NODE = os.environ.get("VE_NODE") or "/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node"
+
+
 def js_literal_via_node(path, name):
-    node = shutil.which("node") or "/opt/homebrew/bin/node"
+    node = NODE
     code = ("const fs=require('fs');const src=fs.readFileSync(process.argv[1],'utf8');"
             f"process.stdout.write(JSON.stringify(new Function(src+';return {name};')()));")
     out = subprocess.run([node, "-e", code, path], check=True, capture_output=True)
     return json.loads(out.stdout.decode("utf-8"))
+
+
+def apply_gloss(words):
+    """Gloss overrides, `syn`, `typedSyn`, `noTypedMeaning` and `pronInGloss` from tools/zh_gloss.js (it reuses the
+    engine's typed-meaning keys; docs/ZH_GLOSS.md is its report)."""
+    out = subprocess.run([NODE, os.path.join(ROOT, "tools", "zh_gloss.js"), "--report", os.path.join(ROOT, "docs", "ZH_GLOSS.md")],
+                         input=json.dumps(words, ensure_ascii=False).encode("utf-8"), capture_output=True)
+    sys.stderr.write(out.stderr.decode("utf-8"))
+    if out.returncode:
+        raise SystemExit("pack_from_hsk: tools/zh_gloss.js failed")
+    g = json.loads(out.stdout.decode("utf-8"))
+    nt, pig = set(g["noTypedMeaning"]), set(g["pronInGloss"])
+    for w in words:
+        w["en"] = g["en"].get(w["id"], w["en"])
+        if w["id"] in g["syn"]:
+            w["syn"] = g["syn"][w["id"]]
+        if w["id"] in g["typedSyn"]:
+            w["typedSyn"] = g["typedSyn"][w["id"]]
+        if w["id"] in nt:
+            w["noTypedMeaning"] = True
+        if w["id"] in pig:
+            w["pronInGloss"] = True
+    print(f"gloss overrides {len(g['en'])}  words with syn {len(g['syn'])}  typedSyn {len(g['typedSyn'])}  noTypedMeaning {len(nt)}  pronInGloss {len(pig)}")
 
 
 def dump(path, data):
@@ -169,6 +204,7 @@ def main(argv):
     for w in words:
         if w["w"] in say:
             w["say"] = say[w["w"]]
+    apply_gloss(words)
 
     def resolve(token):
         if token in id_of:
@@ -312,8 +348,7 @@ def main(argv):
         # by tone as hsk did, and a Reference card of every lesson sound in the Sounds tab.
         "tones": "pinyin",
         "soundsReference": True,
-        # Plans know today and the session clock (docs/PACK_SCHEMA.md "dayAware"); hand-added
-        # to pack.json by fb2-sched, so a regeneration dropped it.
+        # Plans know what was drilled today (docs/PACK_SCHEMA.md "dayAware"; owner feedback 2026-10-02).
         "dayAware": True,
     }
 

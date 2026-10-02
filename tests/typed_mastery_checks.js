@@ -7,7 +7,7 @@
 // characters.withWords: Today for fresh, mid HSK 1, mid HSK 2, all words learned mid the old 字
 // stage, finished; the Progress chips,
 // [6] session resume with typed unit items, [7] control: without the new fields the zh markup
-// and progress are byte-identical to main 8023572.
+// and progress are byte-identical to main 7fe35f7.
 // Run: node tests/typed_mastery_checks.js
 "use strict";
 const fs = require("fs");
@@ -18,7 +18,7 @@ const util = require("util");
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
-const MAIN = "8023572"; // main before typed mastery and per-level stages
+const MAIN = "7fe35f7"; // main before typed mastery and per-level stages (fb2-gloss merged)
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
@@ -167,9 +167,9 @@ const fresh = () => ({ ls: memStore(), ss: memStore() });
 async function bootWith(pack, prog, seed, opts){ const st = fresh(); if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog)); return { api: await boot(pack, st, seed || 1, opts), st }; }
 const stripTags = h => String(h).replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+>/g, "").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&");
 const typedAnswer = it => { const w = BY_ID[String(it.key).slice(2)]; return it.label === "Type the pinyin" ? w.pron : it.label === "Type the meaning" ? VC.gloss(w) : w.w; };
-function answer(api, right){
+function answer(api, right, typed){
   const it = api.getCur();
-  if(it.kind === "type"){ api.el("tin").value = right ? typedAnswer(it) : "zzz not it"; api.el("submit").click(); return; }
+  if(it.kind === "type"){ api.el("tin").value = typed != null ? typed : right ? typedAnswer(it) : "zzz not it"; api.el("submit").click(); return; }
   const btns = api.el("o").children;
   (right ? btns.find(b => b.dataset.v === String(it.a)) : btns.find(b => b.dataset.v !== String(it.a))).click();
 }
@@ -445,6 +445,30 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     check("reload: same queue (keys, labels, builders), unit records unchanged", !!api.getD() && qsig(api) === before.q && JSON.stringify(api.getProg().chars.c) === before.c);
     let guard = 0; while(api.getD() && api.getD().cur && guard++ < 60){ answer(api, true); api.el("nx").click(); }
     check("the resumed Review plays to its results screen", !api.getD() && /id="ok"/.test(api.panel()));
+  }
+
+  console.log("\n[8] words.noTypedMeaning / pronInGloss / typedSyn (fb2-gloss) in typed unit items");
+  {
+    const UOW = new Map(CHARACTERS.map(u => [u.words[0], u]));
+    const p = seedC(); const ntm = WORDS.filter(w => w.noTypedMeaning && UOW.has(w.id)), pig = WORDS.filter(w => w.pronInGloss && UOW.has(w.id));
+    [...ntm, ...pig].forEach(w => { p.chars.c[UOW.get(w.id).id] = { r: 5, w: 0, s: 4 }; });
+    const { api } = await bootWith(PACK, p, 4);
+    const kindOf = it => it.rz.b + (it.rz.b === "typeMeaning" ? (it.rz.a[1] ? ":pron" : ":written") : "");
+    // Each word asked as its unit's typed item over several slot positions and recorded answers.
+    const unitKinds = w => { const out = new Set(); for(let i = 0; i < 6; i++){ const pl = Array.from({ length: 6 }, (_, j) => ({ kind: "type", word: w, tu: UOW.get(w.id).id })); out.add(kindOf(api.itemFromPlan(pl[i], i, pl))); } return [...out]; };
+    const nk = ntm.map(w => [w.w, unitKinds(w)]);
+    check(`noTypedMeaning (${ntm.length} words with a unit): typed unit items never ask a typed meaning (${[...new Set(nk.flatMap(x => x[1]))].join(", ")}), all still typed units`, ntm.length > 0 && nk.every(x => !x[1].includes("typeMeaning:written") && !x[1].includes("typeMeaning:pron") && x[1].every(k => writtenSide({ rz: { b: k.split(":")[0], a: [null, k.endsWith(":pron")] } }))) && ntm.every(w => TU.has(UOW.get(w.id).id)));
+    const wordKinds = w => { const out = new Set(); for(let i = 0; i < 6; i++){ const pl = Array.from({ length: 6 }, () => ({ kind: "type", word: w })); out.add(kindOf(api.itemFromPlan(pl[i], i, pl))); } return [...out]; };
+    const pk = pig.map(w => [w.w, wordKinds(w), unitKinds(w)]);
+    check(`pronInGloss (${pig.map(w => w.w).join(" ")}): never meaning -> pinyin, as a word or a unit item (${[...new Set(pk.flatMap(x => x[1].concat(x[2])))].join(", ")})`, pig.length > 0 && pk.every(x => !x[1].includes("typePron") && !x[2].includes("typePron")));
+    // typedSyn: the meaning stimulus of the word accepts its synonym's characters; only the
+    // stimulus word's unit is credited.
+    const sw = WORDS.find(w => (w.typedSyn || []).length && UOW.has(w.id) && UOW.has(w.typedSyn[0]));
+    const syw = BY_ID[sw.typedSyn[0]], us = UOW.get(sw.id).id, uy = UOW.get(syw.id).id;
+    const q = api.getProg(); q.chars.c[us] = { r: 5, w: 0, s: 4 }; q.chars.c[uy] = { r: 5, w: 0, s: 4 };
+    const it = api.silentWrittenTypeItem(sw); api.drill1(it); answer(api, true, syw.w);
+    const after = api.getProg().chars.c;
+    check(`typedSyn: "${syw.w}" typed for ${sw.w}'s meaning is right; ${sw.w}'s unit 4 -> ${after[us].s}, ${syw.w}'s unit stays ${after[uy].s}`, after[us].s === 5 && after[uy].s === 4);
   }
 
   console.log(`\n[7] control: without the new fields the zh markup and progress match main ${MAIN}`);
