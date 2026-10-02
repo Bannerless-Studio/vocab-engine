@@ -207,6 +207,8 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
 (async function main(){
   // ---------------------------------------------------------------- [1] core rules
   console.log("\n[1] core.js: key, fingerprint, staleness");
+  // Every app check below runs with the day-aware planner on (its drills write prog.day / sn / u).
+  check("zh pack runs with dayAware on", PACK.dayAware === true);
   {
     check("sessionKey: vocab_<pack>_session beside the progress key", VC.sessionKey(PACK) === "vocab_zh_session" && VC.sessionKey({ key: "it" }) === "vocab_it_session");
     check("sessionHash: deterministic 8-hex fingerprint, differs on a one-char change", VC.sessionHash("abc") === VC.sessionHash("abc") && /^[0-9a-f]{8}$/.test(VC.sessionHash("abc")) && VC.sessionHash("abc") !== VC.sessionHash("abd") && VC.sessionHash(null) === VC.sessionHash(""));

@@ -206,6 +206,7 @@ async function onPassage(pack){
   }
 
   console.log("\n[3] zh, flag on");
+  check("zh pack runs with dayAware on as well", PACK.dayAware === true);
   try {
     const { api, gloss, docClick, tapWord, fire, esc } = await onPassage();
     tapWord();

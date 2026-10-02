@@ -323,14 +323,32 @@ console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"
     z.w[ZW[0]].u === 1 && z.w[ZW[1]].u === 1 && z.day.a["w:" + ZW[1]].u === 1 && !("u" in z.day.a["w:" + ZW[0]]) && !("u" in z.w[ZW[2]]) && !("t" in z.w[ZW[2]]));
   const next = "2026-10-03";
   check("next day: the unsettled miss and the last sessions' right kinds carry over; nothing else",
-    eq(VC.dayLog(z, next), { d: next, n: 0, a: { ["w:" + ZW[0]]: { mk: ["recall"] }, ["w:" + ZW[1]]: { r: ["hear"], u: 1 } } }));
+    eq(VC.dayLog(z, next), { d: next, n: 0, a: { ["w:" + ZW[0]]: { mk: ["recall"], ms: 1 }, ["w:" + ZW[1]]: { r: ["hear"], u: 1 } } }));
   z.sn = 1 + VC.DAY_RECENT_SESSIONS + 1;
-  check(`after ${VC.DAY_RECENT_SESSIONS} more sessions only the miss carries`, eq(VC.dayLog(z, next).a, { ["w:" + ZW[0]]: { mk: ["recall"] } }));
+  check(`after ${VC.DAY_RECENT_SESSIONS} more sessions only the miss carries`, eq(VC.dayLog(z, next).a, { ["w:" + ZW[0]]: { mk: ["recall"], ms: 1 } }));
   check("a miss carried for days stays tier 0 until settled", VC.dayTier({ key: "w:" + ZW[0], kinds: ["recall"] }, VC.dayLog(z, "2026-10-09"), z.sn) === 0);
   VC.dayStart(z, PACK, "2026-10-09", true); VC.noteDay(z, PACK, "2026-10-09", "w:" + ZW[0], "hear", true);
   check("an easier kind days later still does not settle it", eq(z.day.a["w:" + ZW[0]].mk, ["recall"]));
   VC.noteDay(z, PACK, "2026-10-09", "w:" + ZW[0], "type", true);
   check("a production kind settles a production miss days later", !("mk" in z.day.a["w:" + ZW[0]]));
+  // A miss in a kind this device cannot show (hear with no voice) settles in the nearest kind it can.
+  const D9 = "2026-10-09", noVoice = VC.dayWordKinds(PACK).filter(k => k !== "hear");
+  VC.noteDay(z, PACK, D9, "w:" + ZW[3], "hear", false);
+  check("a miss stores ms, the session of its first miss", eq(z.day.a["w:" + ZW[3]].mk, ["hear"]) && z.day.a["w:" + ZW[3]].ms === z.sn && !("ma" in z.day.a["w:" + ZW[3]]));
+  VC.dayStart(z, PACK, D9, true);
+  const y = clone(z);
+  VC.noteDay(y, PACK, D9, "w:" + ZW[3], "read", true);
+  check("with a voice, read does not settle a hear miss (ma marks the attempt)", eq(y.day.a["w:" + ZW[3]].mk, ["hear"]) && y.day.a["w:" + ZW[3]].ma === 1);
+  VC.noteDay(z, PACK, D9, "w:" + ZW[3], "read", true, noVoice);
+  check("without a voice, read settles it (mk, ms, ma removed)", !("mk" in z.day.a["w:" + ZW[3]]) && !("ms" in z.day.a["w:" + ZW[3]]) && !("ma" in z.day.a["w:" + ZW[3]]));
+  check("dayMissKinds: hear -> read (same partition), gap -> the first renderable kind when no production kind is left", eq(VC.dayMissKinds(["hear"], noVoice), ["read"]) && eq(VC.dayMissKinds(["gap"], ["hear", "read"]), ["hear"]) && eq(VC.dayMissKinds(["hear"]), ["hear"]));
+  // Age-out: asked again (ma) and still pending DAY_MISS_MAX_SESSIONS sessions after ms.
+  VC.noteDay(y, PACK, D9, "w:" + ZW[4], "recall", false); VC.noteDay(y, PACK, D9, "w:" + ZW[5], "recall", false);
+  VC.dayStart(y, PACK, D9, true); VC.noteDay(y, PACK, D9, "w:" + ZW[4], "read", true);
+  y.sn += VC.DAY_MISS_MAX_SESSIONS;
+  const yd = VC.dayLog(y, "2026-10-10");
+  check(`a miss asked again and pending ${VC.DAY_MISS_MAX_SESSIONS} sessions on is dropped (tier, carry); one never asked again stays`,
+    VC.dayTier({ key: "w:" + ZW[4], kinds: ["recall"] }, y.day, y.sn) !== 0 && !yd.a["w:" + ZW[4]] && VC.dayTier({ key: "w:" + ZW[5], kinds: ["recall"] }, yd, y.sn) === 0 && yd.a["w:" + ZW[5]].ms === y.sn - VC.DAY_MISS_MAX_SESSIONS - 1 && !("ma" in yd.a["w:" + ZW[5]]));
   const zraw = JSON.stringify(z), zb = VC.bootProg(zraw, PACK);
   check("progress with sn + u survives a save/boot round trip and export/import", zb.backupRaw === null && zb.prog.sn === z.sn && eq(zb.prog.w, z.w) && eq(zb.prog.day, z.day) && (i2 => i2.ok && i2.prog.sn === z.sn)(VC.applyImport(null, zraw, PACK)));
   // Rollback safety: the engine before dayAware (3d66aea, the live Chinese site) boots this
