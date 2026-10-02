@@ -62,7 +62,7 @@ $NODE tests/validate_pack_characters_checks.js   # 83
 $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/typed_from_checks.js                 # 69 (pack.typedFrom / glossFocus; control vs ef44c6e)
-$NODE tests/typed_mastery_checks.js              # 40 (characters.bareBy typed credit/hold/floor, bareWords, per-level stages; control vs 8023572)
+$NODE tests/typed_mastery_checks.js              # 43 (characters.bareBy typed credit/hold/floor, bareWords, per-level stages; control vs 8023572)
 $NODE tests/session_resume_checks.js             # 109 (drill/passage resume: tab switch, reload, relaunch, per-tab parking)
 $NODE tests/day_sim_checks.js                    # 57 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; before/after numbers; --why)
 $NODE tests/help_close_checks.js                 # 41 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
