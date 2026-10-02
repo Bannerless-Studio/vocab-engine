@@ -156,7 +156,7 @@ return {
   today: () => { tab = "today"; render(); }, goto: t => { tab = t; testSel = null; RD = null; soundsSel = null; render(); },
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
   readItem, recallItem, revealBlock, charDrillItem, wordRowHTML, itemFromPlan,
-  hearItem: ${hook("hearItem")}, learnPair: ${hook("learnPair")}, gapSentence: ${hook("gapSentence")}, readStimHTML: ${hook("readStimHTML")}, optScript: ${hook("optScript")}, wordOptHtml, placeSrc: String(${hook("placeVocabNext")}),
+  hearItem: ${hook("hearItem")}, learnPair: ${hook("learnPair")}, gapSentence: ${hook("gapSentence")}, readStimHTML: ${hook("readStimHTML")}, optScript: ${hook("optScript")}, wordOptHtml, placeSrc: String(${hook("placeVocabNext")}), dayWordCan: ${hook("dayWordCan")},
   meaningTypeItem: ${hook("meaningTypeItem")}, writtenPronTypeItem: ${hook("writtenPronTypeItem")}, silentWrittenTypeItem: ${hook("silentWrittenTypeItem")}, pronTypeItem: ${hook("pronTypeItem")},
   drill1: it => drill([it], () => {}, null), skipRead: () => { RD = null; todayStep(); }, rd: () => RD,
 };`;
@@ -578,6 +578,17 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
         }
       }
       check(`${voiced ? "voice" : "no voice"}: ${pig.map(w => w.w).join(" ")} x ${tiers.length} tiers x 200 seeds, ${n} items over every kind (${[...kinds].sort().join("; ")}): no reading <-> meaning giveaway${bad.length ? ` (${bad.length}: ${[...new Set(bad)].slice(0, 4).join(" || ")})` : ""}`, n > 0 && bad.length === 0);
+    }
+    {
+      // No voice, word still shown by its reading: the day plan still offers a kind, and its card leaks nothing.
+      const { api } = await bootWith(PACK, seedC(), 25, { voices: [] }); const got = [], bad = [];
+      for(const w of pig){
+        const u = UNIT_OF.get(w.id); if(u) api.getProg().chars.c[u.id] = { r: 2, w: 0, s: 1 };
+        const ks = api.dayWordCan ? api.dayWordCan(w) : [];
+        for(const k of ks){ const pl = [{ kind: k, word: w }]; Math.random = mulberry32(3); const it = api.itemFromPlan(pl[0], 0, pl); got.push(`${w.w}:${k}=${it ? it.label : "none"}`); if(!it || leak(it, w)) bad.push(`${w.w} ${k}`); }
+        if(!ks.length) bad.push(`${w.w}: no kind`);
+      }
+      check(`no voice, pron tier: every pronInGloss word gets a day card that leaks nothing (${got.join("; ")})${bad.length ? " BAD " + bad.join(", ") : ""}`, got.length > 0 && !bad.length);
     }
     {
       const { api } = await bootWith(PACK, seedC(), 22);
