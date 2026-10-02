@@ -500,6 +500,20 @@ function missesCarried(drilled0){
     const midHit = tag => midUnits.filter(k => withAlso(res[tag].day.drilled).some(d => d.key === k)).length;
     check(`dayAware: character units at streak 3-5 reach Review/Recall within the day (${midHit("on")}/${midUnits.length}; control ${midHit("off")})`, midUnits.length > 0 && midHit("on") > 0);
   }
+  // pack.pauseNew (docs/PACK_SCHEMA.md "pauseNew"): paused, the Learn step's items go to Review;
+  // the day rules must still hold over the larger plans.
+  console.log(`\n[pause] scenarios A and B paused (prog.pause 1), ${N_SESSIONS} Today sessions in one day`);
+  for(const sc of scenarios){
+    NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
+    const seedP = Object.assign(seedProg(PACK_ON, sc.words, sc.units, 11), { pause: 1 });
+    const day = await playDay(PACK_ON, seedP, N_SESSIONS, 5);
+    const m = metrics(seedP, PACK_ON, day, K_DUE), rep = windowRepeats(day.drilled, () => 0), mc = missesCarried(day.drilled);
+    const rv = [...new Set(day.drilled.map(d => d.sess))].map(sn => day.drilled.filter(d => d.sess === sn && d.step === 0).length);
+    report(`${sc.name.slice(0, 1)} paused`, m, day.learnNew);
+    check(`pause ${sc.name.slice(0, 1)}: no new material in ${N_SESSIONS} sessions (${day.learnNew.join(",")}); Review items per session ${rv.join(",")}`, day.learnNew.every(n => n === 0) && rv.every(n => n >= 36));
+    check(`pause ${sc.name.slice(0, 1)}: same-kind repeats of items right earlier today <= 2% of sessions 2..${N_SESSIONS} (${m.sameKindAll}/${m.itemsAfter1}); in the repeat window ${rep.length}/${day.drilled.length}`, m.sameKindAll <= 0.02 * m.itemsAfter1);
+    check(`pause ${sc.name.slice(0, 1)}: every miss of sessions 1..${N_SESSIONS - 1} comes back the same day (${m.missKeys.length - m.lostMiss.length}/${m.missKeys.length}), production misses in production (${m.prodKeys.length - m.prodLost.length}/${m.prodKeys.length}), in a settling kind (${mc.n - mc.lost.length}/${mc.n})`, m.lostMiss.length === 0 && m.prodLost.length === 0 && mc.lost.length === 0 && mc.n > 0);
+  }
   console.log(`\n[rollover] scenario A, sessions 1-4 on one evening, 5-8 the next morning`);
   {
     const t0 = new Date(2026, 9, 2, 18, 0, 0).getTime(), t1 = new Date(2026, 9, 3, 7, 0, 0).getTime();

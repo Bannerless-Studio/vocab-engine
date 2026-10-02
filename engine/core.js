@@ -1059,11 +1059,16 @@ function currentLevelIndex(words, pack, prog){
   const nn = nextNewSet(words, pack, prog);
   return nn ? levelIndexMap(pack)[nn.lv] : levelIds(pack).length;
 }
-function availableSentences(sentences, words, pack, prog){
+// known (pauseNew paused): only sentences of learned words, so no unlearned word is shown.
+function availableSentences(sentences, words, pack, prog, known){
   const lw = new Set(learnedWords(words, pack, prog).map(w=>w.id));
   const cur = currentLevelIndex(words, pack, prog); const idx = levelIndexMap(pack);
-  return (sentences||[]).filter(s => cur > idx[s.lv] || (s.words||[]).every(id=>lw.has(id)));
+  return (sentences||[]).filter(s => (!known && cur > idx[s.lv]) || (s.words||[]).every(id=>lw.has(id)));
 }
+// pack.pauseNew (docs/PACK_SCHEMA.md "pauseNew"; owner 2026-10-02: "stop progression"): with
+// prog.pause 1, Today teaches nothing new. Unpausing deletes the field, so the record is as before.
+const pauseOn = (pack, prog) => !!(pack && pack.pauseNew === true && prog && prog.pause === 1);
+function setPause(prog, on){ if(on) prog.pause = 1; else delete prog.pause; return prog; }
 
 // Plans live here, DOM-free, so composition rules are testable under Node.
 const PRODUCTION_KINDS = ["recall","type"];
@@ -1644,8 +1649,9 @@ function isoDayNumber(d){
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d == null ? "" : d));
   return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) / 864e5 : NaN;
 }
-function nextReadItem(passages, words, pack, prog, now){
-  const fresh = suggestPassage(passages, words, pack, prog);
+// reviewOnly (pauseNew paused): a spaced re-read only, never a first read.
+function nextReadItem(passages, words, pack, prog, now, reviewOnly){
+  const fresh = reviewOnly ? null : suggestPassage(passages, words, pack, prog);
   if(fresh) return { p: fresh, reason: "new" };
   const today = isoDayNumber(now);
   if(!isFinite(today)) return null;
@@ -3395,7 +3401,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
-  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
+  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,

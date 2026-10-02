@@ -520,6 +520,11 @@ const nSets = lv => VC.nSets(levelList(lv), SIZE);
 const learnedWords = () => VC.learnedWords(WORDS, PACK, prog);
 const nextNewSet = () => VC.nextNewSet(WORDS, PACK, prog);
 const availableSentences = () => VC.availableSentences(SENTENCES, WORDS, PACK, prog);
+// docs/PACK_SCHEMA.md "pauseNew": paused, Today teaches nothing new (no Learn, no first read,
+// no sentence with an unlearned word); manual teaching outside Today is unchanged.
+const PAUSE_NEW = PACK.pauseNew === true;
+const paused = () => VC.pauseOn(PACK, prog);
+const todaySentences = () => VC.availableSentences(SENTENCES, WORDS, PACK, prog, paused());
 const wordExampleSentences = (entry, n) => VC.exampleSentences(entry, SENTENCES, PACK, n);
 
 // Declared before the voice probe below: its onvoiceschanged re-render can run
@@ -1947,8 +1952,23 @@ function pathStrip(){
 }
 // Kept for the session, so finishing a stage mid-session changes neither what Learn teaches
 // nor whether Review/Recall include units.
-const takeSnapshot = () => HAS_STAGES ? VC.todaySnapshot(PACK, WORDS, CHAR_LIST, prog, SU) : null;
+const takeSnapshot = () => HAS_STAGES ? pauseSnap(VC.todaySnapshot(PACK, WORDS, CHAR_LIST, prog, SU)) : null;
 const snapLearns = snap => !!(snap.stage && (snap.stage.kind === "words" || snap.cset || (snap.stage.kind === "script" && snap.ssets && snap.ssets.length)));
+// Paused: the drill items the Learn step would have had go to Review (pauseNew).
+function learnDrillCount(snap){
+  if(snap ? !snapLearns(snap) : !nextNewSet()) return 0;
+  const st = snap && snap.stage;
+  if(st && st.kind === "chars") return VC.learnCharPlan(snap.cset.units, PACK).length;
+  if(st && st.kind === "script") return VC.learnScriptPlan(snap.ssets[0].units, PACK, scriptKindCtx()).length;
+  const nn = st ? VC.levelNewSet(WORDS, PACK, prog, st.lv) : nextNewSet();
+  // learnPair's item count; building the items would draw from Math.random.
+  return nn ? nn.words.reduce((n, w) => n + (canHearWord(w) ? 2 : 1), 0) : 0;
+}
+function pauseSnap(snap){
+  if(snap && paused()) snap.reviewSize += learnDrillCount(snap);
+  return snap;
+}
+const pausedReviewSize = () => VC.REVIEW_SIZE + learnDrillCount(null);
 function snapLearnLine(snap){
   const st = snap.stage;
   if(!st || !snapLearns(snap)) return "everything covered";
@@ -1993,15 +2013,16 @@ function todayRender(){
   setScore(0,0);
   const P = $("panel"); const lw = learnedWords(); const nn = nextNewSet();
   const n = (prog.sessions||0) + 1;
-  const availSent = availableSentences();
+  const pz = paused();
+  const availSent = todaySentences();
   const snap = takeSnapshot();
-  const g = VC.todayGates(lw.length, snap ? snapLearns(snap) : !!nn, availSent.length, scriptCount());
+  const g = VC.todayGates(lw.length, !pz && (snap ? snapLearns(snap) : !!nn), availSent.length, scriptCount());
   // Start today runs exactly this plan, so the line names units only when the plan holds
   // some (a first character day has no unit records yet).
   todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedUnits: TYPED_UNITS }) : null } : null;
   const reviewLine = snap
     ? `${snap.reviewSize} items, ${PLAN_ORDER}${reviewWhat(snap, todayPrep.review)}`
-    : `${VC.REVIEW_SIZE} items, ${PLAN_ORDER}`;
+    : `${pz ? pausedReviewSize() : VC.REVIEW_SIZE} items, ${PLAN_ORDER}`;
   const steps = [
     ["Review", g.review ? reviewLine : (snap && snap.stage && snap.stage.kind === "script" ? "skipped until a set is learned" : "skipped until 5+ words are learned")],
     ["Learn", snap ? snapLearnLine(snap) : (nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered")],
@@ -2009,20 +2030,24 @@ function todayRender(){
     ["Recall", g.recall ? (DAY_AWARE ? `8 items, ${PLAN_ORDER}` : "8 items") : "skipped until something is learned"],
     ["Sentences", g.sentences ? `8 items, ${PLAN_ORDER}` : "skipped until 8+ sentences are available"]
   ];
+  if(pz) steps.splice(1, 1);
   const showPlaceHint = !prog.placedOnce;
   const showSoundsHint = HAS_LESSONS && !prog.soundsOpened;
   const readNext = todayReadItem();
   if(readNext) steps.push([readNext.mode === "listen" ? "Listen" : "Read", null, readPlanLine(readNext)]);
-  const choice = !!(snap && snap.choice);
-  const xChoice = HAS_SCRIPT && !!(snap && snap.choice === "script");
+  // Paused: a choice of what Learn teaches next waits, so it cannot block review.
+  const choice = !pz && !!(snap && snap.choice);
+  const xChoice = !pz && HAS_SCRIPT && !!(snap && snap.choice === "script");
+  // Paused with nothing to review: no empty drill, one way back.
+  const idle = pz && !g.review && !g.listen && !g.recall && !g.sentences && !readNext && !sessStore.get("today");
   const xNotice = showScriptNotice();
   P.innerHTML = `<div class="drill-body top">${samsungNoticeHTML}${legacyNotice ? `<div class="stmt" id="legacyNotice">${legacyNotice}<button class="ghost" id="legacyOk" style="margin-top:8px">OK</button></div>` : ""}${legacyFail ? `<div class="stmt" id="legacyFail">${legacyFailHTML(legacyFail)}<button class="ghost" id="legacySkip" style="margin-top:8px">Start without it</button></div>` : ""}${xNotice ? `<div class="stmt" id="scriptNotice">A script primer is available. Turn it on in Progress.<button class="ghost" id="scriptNoticeOk" style="margin-top:8px">OK</button></div>` : ""}${pathStrip()}${xChoice ? scriptChoiceHTML() : ""}
     ${showPlaceHint ?`<div class="stmt">New here? Placement finds where to start.<button class="next" id="hintPlace" style="margin-top:8px">Take the placement test</button></div>` : ""}${choice && !xChoice ? charChoiceHTML() : ""}
     ${showSoundsHint ? `<div class="stmt">${PACK.soundsHint ? ui(PACK.soundsHint) : `A few short lessons explain how ${ui(PACK.name)} sounds and is written.`}<button class="next" id="hintSounds" style="margin-top:8px">Start the first lesson</button></div>` : ""}
     ${""}
-    <p class="q">Session ${n}, about 15 minutes.<br>${lw.length} words learned so far.</p>
-    <table class="stats steps">${steps.map((s,i)=>`<tr><td>${i+1}. ${s[0]}</td><td>${s[2] != null ? s[2] : ui(s[1])}</td></tr>`).join("")}</table>
-    </div>${choice ? "" : `<div class="actions"><button class="next" id="go">Start today</button></div>`}`;
+    ${idle ? `<p class="q">Nothing to review yet.</p>` : `<p class="q">Session ${n}, about 15 minutes.<br>${lw.length} words learned so far.${pz ? "<br>Review only · new material paused." : ""}</p>
+    <table class="stats steps">${steps.map((s,i)=>`<tr><td>${i+1}. ${s[0]}</td><td>${s[2] != null ? s[2] : ui(s[1])}</td></tr>`).join("")}</table>`}
+    </div>${choice ? "" : idle ? `<div class="actions"><button class="next" id="unpause">Turn new material on</button></div>` : `<div class="actions"><button class="next" id="go">Start today</button></div>`}`;
   if(legacyNotice) $("legacyOk").onclick = () => { legacyNotice = null; todayRender(); };
   if(legacyFail) $("legacySkip").onclick = () => { legacyFail = null; storeReadOnly = false; store.save(); todayRender(); };
   if(showPlaceHint) $("hintPlace").onclick = enterPlacementFromToday;
@@ -2039,6 +2064,7 @@ function todayRender(){
     $("choiceSkip").onclick = () => { VC.answerCharChoice(prog, false); store.save(); todayRender(); };
     return;
   }
+  if(idle){ $("unpause").onclick = () => { VC.setPause(prog, false); store.save(); todayRender(); }; return; }
   $("go").onclick = () => { todayStepState = HAS_STAGES ? (todayPrep ? { step:0, snap: todayPrep.snap, review: todayPrep.review } : { step:0, snap: takeSnapshot() }) : { step:0 }; todayStepState.read = readNext; todayPrep = null; if(VC.daySessionStart(prog, PACK)) store.save(); todayStep(); };
   // A parked Today session (Today re-tapped, Escape) is resumed, never restarted.
   if(sessStore.get("today")){ const start = $("go").onclick; $("go").textContent = "Resume today"; $("go").onclick = () => { if(!sessionResume("today")) start(); }; }
@@ -2046,7 +2072,7 @@ function todayRender(){
 function todayReadItem(){
   if(!HAS_PASSAGES) return null;
   refreshReadUnlocks();
-  const r = VC.nextReadItem(PASSAGE_LIST, WORDS, PACK, prog, todayISO());
+  const r = VC.nextReadItem(PASSAGE_LIST, WORDS, PACK, prog, todayISO(), paused());
   if(r) r.mode = VC.readPassMode(r, prog, canListenPassage(r.p));
   return r;
 }
@@ -2072,8 +2098,9 @@ function todayStep(){
   const snap = HAS_STAGES ? (todayStepState.snap || (todayStepState.snap = takeSnapshot())) : null;
   const lw = learnedWords();
   const nn = snap ? (snap.stage && snap.stage.kind === "words" ? VC.levelNewSet(WORDS, PACK, prog, snap.stage.lv) : null) : nextNewSet();
-  const avail = availableSentences();
-  const g = VC.todayGates(lw.length, snap ? snapLearns(snap) : !!nn, avail.length, scriptCount());
+  const avail = todaySentences();
+  // Read live, not from the snapshot: pausing mid-session stops a Learn step not yet started.
+  const g = VC.todayGates(lw.length, !paused() && (snap ? snapLearns(snap) : !!nn), avail.length, scriptCount());
   const units = snap && snap.charsStarted ? CHAR_LIST : undefined;
   const s = todayStepState.step++;
   todayStepState.at = s; sessionSave(true);
@@ -2083,7 +2110,7 @@ function todayStep(){
       todayStepState.review = null;
       drill(plan.map(planItem), todayStep, missSummary); return;
     }
-    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, { canHear: canHearWord, today: dayToday() }).map(itemFromPlan), todayStep, missSummary); return; }
+    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, { size: paused() ? pausedReviewSize() : undefined, canHear: canHearWord, today: dayToday() }).map(itemFromPlan), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 1){
@@ -2119,7 +2146,9 @@ function todayStep(){
     return todayStep();
   }
   if(s === 5){
-    const r = "read" in todayStepState ? todayStepState.read : todayReadItem();
+    let r = "read" in todayStepState ? todayStepState.read : todayReadItem();
+    // A first read planned before pausing is not started; a spaced re-read is offered instead.
+    if(r && r.reason !== "reread" && paused()) r = todayReadItem();
     // The voice can go between the plan and this step (voiceschanged): re-check it.
     if(r){ startPassage(r.p, true, r.mode === "listen" && canListenPassage(r.p) ? "listen" : "read"); return; }
     return todayStep();
@@ -2874,7 +2903,7 @@ function progressRender(){
       ${HAS_PASSAGES ? VC.readingStats(PASSAGE_LIST, PACK, prog).map(r => `<tr><td>${escapeHtml(levelLabel(r.lv))} reading</td><td>${r.done} / ${r.total} passages${r.avg != null ? ` · avg ${r.avg}%` : ""}</td></tr>`).join("") : ""}
       ${HAS_LESSONS ? `<tr><td>Sounds</td><td>${LESSON_LIST.filter(l=>prog.lessons[l.id]).length} / ${LESSON_LIST.length} lessons done</td></tr>` : ""}
       <tr><td>Sessions</td><td>${prog.sessions||0}</td></tr></table>
-    ${PACK.showPron !== false ? `<div class="row" style="margin-top:14px"><button class="chip ${showPron()?'on':''}" id="togglePron" aria-pressed="${showPron()}">Show pronunciation</button></div>` : ""}${xp ? xp.controls : ""}${cp ? cp.controls : ""}
+    ${PACK.showPron !== false ? `<div class="row" style="margin-top:14px"><button class="chip ${showPron()?'on':''}" id="togglePron" aria-pressed="${showPron()}">Show pronunciation</button></div>` : ""}${PAUSE_NEW ? `<div class="row" style="margin-top:14px"><button class="chip ${paused() ? "" : "on"}" id="togglePause" aria-pressed="${!paused()}">New material: ${paused() ? "paused" : "on"}</button></div>` : ""}${xp ? xp.controls : ""}${cp ? cp.controls : ""}
     <p class="q" style="margin-top:14px">${weak.length ? "Weakest words" : "No weak words yet — nice."}</p>
     ${weak.map(w=>`<div class="rowset">${wordRowHTML(w, "rowset")}</div>`).join("")}
     <div class="row" style="margin-top:16px">
@@ -2890,6 +2919,7 @@ function progressRender(){
     </div>
     <button class="ghost" id="reset" style="margin-top:16px;color:var(--bad);border-color:var(--bad)">Reset all progress</button>`;
   if(PACK.showPron !== false) $("togglePron").onclick = () => { prog.showPron = !showPron(); store.save(); progressRender(); };
+  if(PAUSE_NEW) $("togglePause").onclick = () => { VC.setPause(prog, !paused()); store.save(); progressRender(); };
   if(xp) xp.wire();
   if(cp) cp.wire();
   $("exp").onclick = () => {

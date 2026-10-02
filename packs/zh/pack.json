@@ -150,5 +150,6 @@
  "pronFirst": true,
  "tones": "pinyin",
  "soundsReference": true,
- "dayAware": true
+ "dayAware": true,
+ "pauseNew": true
 }

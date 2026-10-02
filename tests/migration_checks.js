@@ -534,5 +534,29 @@ console.log("\n[lag] characters.learn \"lag\" (fb3-lag): no stored field read or
   }
 }
 
+console.log("\n[pause] pack.pauseNew (fb4-pause): one additive field prog.pause 1; older engines keep it; theirs boots here unpaused");
+{
+  const LAG = LAG_PACK, OLDP = (p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); })(clone(LAG_PACK));
+  const mine = VC.setPause(mig("HEAD"), true), raw = JSON.stringify(mine);
+  const here = VC.bootProg(raw, LAG);
+  check("this engine: paused progress boots with no backup, pause 1 kept, byte-identical", LAG.pauseNew === true && here.backupRaw === null && VC.pauseOn(LAG, here.prog) && JSON.stringify(here.prog) === raw);
+  check("defaultProg has no pause field (absent = new material on)", !("pause" in VC.defaultProg(LAG)) && !VC.pauseOn(LAG, VC.defaultProg(LAG)));
+  for(const [sha, pk] of [["590af86", PACK], ["ea62a45", PACK], ["3d66aea", OLDP]]){
+    let eng = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const src = cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`engine ${sha} not in this checkout's history`); continue; }
+    const ob = eng.bootProg(raw, pk), ref = eng.bootProg(JSON.stringify(mig("HEAD")), pk);
+    const minus = p => { const q = clone(p); delete q.pause; return JSON.stringify(q); };
+    check(`engine ${sha} boots paused progress: no backup, pause 1 kept (ignored), the rest as it boots the same progress unpaused`, ob.backupRaw === null && ob.prog.pause === 1 && minus(ob.prog) === JSON.stringify(ref.prog));
+    const theirs = JSON.stringify(eng.bootProg(JSON.stringify(mig("D1 chars started, card answered: start")), pk).prog);
+    const back = VC.bootProg(theirs, LAG);
+    check(`progress written by ${sha} boots here unpaused, no backup, byte-equal (${theirs.length} chars)`, back.backupRaw === null && !VC.pauseOn(LAG, back.prog) && JSON.stringify(back.prog) === theirs);
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);
