@@ -49,7 +49,7 @@ Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` belo
 ```sh
 $NODE tests/engine_checks.js                     # 703 passed; includes the dist/zh.html + sw.js stale guard
 $NODE tests/pron_aids_checks.js                  # 157
-$NODE tests/migration_checks.js                  # 358 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
+$NODE tests/migration_checks.js                  # 371 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
 $NODE tests/characters_checks.js                 # 134
 $NODE tests/characters_app_checks.js             # 202
 $NODE tests/script_checks.js                     # 128
