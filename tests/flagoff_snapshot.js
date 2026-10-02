@@ -139,6 +139,8 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     delete pack.audio;
     // Day-aware planning (docs/PACK_SCHEMA.md "dayAware") is a new, flag-on field.
     delete pack.dayAware;
+    // New-material pause (docs/PACK_SCHEMA.md "pauseNew") is a new, flag-on field.
+    delete pack.pauseNew;
   }
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.
