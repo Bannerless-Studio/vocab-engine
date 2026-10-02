@@ -1991,7 +1991,7 @@ function nextStage(pack, words, units, prog, sunits){
   if(!w || !c) return c || w || first;
   return (prog && prog.sessions || 0) % 2 ? c : w;
 }
-// "Characters: with words" unless the learner chose "later" (chars.defer, the old after-HSK-4).
+// "Characters: with words" unless the learner chose "later" (chars.defer: after every word level).
 const charsWithWords = (pack, prog) => { const c = charsConfig(pack); return !!(c && c.withWords) && !(prog && isObj(prog.chars) && prog.chars.defer === true); };
 // The point the learning-order switch becomes available.
 function charsUnlocked(pack, words, prog){

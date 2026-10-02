@@ -2353,7 +2353,7 @@ function nextStage(pack, words, units, prog, sunits){
   if(!w || !c) return c || w || first;
   return (prog && prog.sessions || 0) % 2 ? c : w;
 }
-// "Characters: with words" unless the learner chose "later" (chars.defer, the old after-HSK-4).
+// "Characters: with words" unless the learner chose "later" (chars.defer: after every word level).
 const charsWithWords = (pack, prog) => { const c = charsConfig(pack); return !!(c && c.withWords) && !(prog && isObj(prog.chars) && prog.chars.defer === true); };
 // The point the learning-order switch becomes available.
 function charsUnlocked(pack, words, prog){
@@ -4637,7 +4637,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1058954576-1769262";
+const VE_BUILD = "3316352865-1769265";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6363,4 +6363,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:4075492214-1768586-->
+<!--ve-build:3510890016-1768589-->
