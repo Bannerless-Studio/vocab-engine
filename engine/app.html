@@ -267,8 +267,9 @@
   .tk.on{background:var(--ok-bg);border-bottom-color:var(--ok)}
   .gloss.tokgloss{position:static;margin:6px 0 2px;font-family:var(--font)}
   /* pack.helpClose: the close button sits in the overlay's top-right corner, clear of its text. */
-  .gloss.hasx{padding-right:44px} .gloss.tokgloss.hasx{position:relative} .swtoast.hasx{padding-right:44px}
+  .gloss.hasx{padding-right:44px} .gloss.tokgloss.hasx{position:relative} .swtoast.hasx{padding-right:40px}
   .helpx{position:absolute;top:2px;right:2px;width:40px;height:40px;border:0;background:transparent;color:inherit;font-size:22px;line-height:1;cursor:pointer;padding:0}
+  .swtoast .helpx{top:50%;right:4px;width:32px;height:32px;margin-top:-16px;font-size:18px;border-radius:50%} /* inside the ~39px pill */
   .ssay{width:32px;height:32px;margin:0 0 0 6px;vertical-align:middle;padding:0;display:inline-flex;align-items:center;justify-content:center}
   .refcard{margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--card)}
   .refcard summary{cursor:pointer;font-weight:500}
@@ -707,14 +708,23 @@ function helpOpen(el, ms, close){
   el.addEventListener("pointerup", e => { if(e.pointerType !== "mouse") hold(false); });
 }
 // Capture phase: a tap on a word opens its own popover (which closes this one), any other tap
-// outside closes it and still does what it taps.
-if(HELP_CLOSE) document.addEventListener("click", e => {
+// outside closes it and still does what it taps. pointerdown/touchstart too: iOS Safari fires
+// no click for a tap on a plain, non-clickable area.
+function helpOutside(e){
   const t = e.target, c = helpCur; if(!c) return;
-  const x = t && t.closest ? t.closest(".helpx") : null;
-  if(x){ if(c.el.contains && c.el.contains(x)){ e.preventDefault(); e.stopPropagation(); helpShut(); } return; }
-  if(t && t.closest && t.closest("[data-pw],[data-tok]")) return;
+  if(t && t.closest && t.closest(".helpx,[data-pw],[data-tok]")) return;
   if(!(c.el.contains && t && c.el.contains(t))) helpShut();
-}, true);
+}
+if(HELP_CLOSE){
+  document.addEventListener("click", e => {
+    const t = e.target, c = helpCur; if(!c) return;
+    const x = t && t.closest ? t.closest(".helpx") : null;
+    if(x){ if(c.el.contains && c.el.contains(x)){ e.preventDefault(); e.stopPropagation(); helpShut(); } return; }
+    helpOutside(e);
+  }, true);
+  document.addEventListener("pointerdown", helpOutside, true);
+  document.addEventListener("touchstart", helpOutside, { capture: true, passive: true });
+}
 // withNotes: reading notes ("also pr. [shuí]") are shown after the answer only; they would
 // give a reading away on a stimulus, an option or a Words row.
 function glossOut(s, withNotes){
@@ -1195,15 +1205,19 @@ function silentWrittenTypeItem(entry){
 // home-screen relaunch or a reopened tab. One record per app tab, so a drill started in one
 // tab never drops another tab's session: the stored value is the latest record, the other
 // tabs' records under `park`. Two open tabs of one site share it; the last writer wins.
+// `view` says what was on screen at the last change: { tab, live }, live when that tab's
+// session was showing. Boot restores only that (sessionBoot): a session the learner left
+// (tab re-tap, Escape, ‹ passages, switching away) comes back through its Resume button.
 const SESSION_KEY = VC.sessionKey(PACK);
 const sessStore = (() => {
   let map = null;   // app tab -> record; read once at boot (sessionLoad)
+  let view = null;
   const ls = () => { try { return typeof localStorage !== "undefined" && localStorage ? localStorage : null; } catch(e){ return null; } };
   const M = () => map || (map = {});
   function write(){
     const recs = Object.keys(M()).map(k => map[k]).sort((a, b) => b.t - a.t);
     let v = null;
-    if(recs.length){ const park = {}; recs.slice(1).forEach(r => { park[r.tab] = r; }); v = JSON.stringify(recs.length > 1 ? Object.assign({}, recs[0], { park }) : recs[0]); }
+    if(recs.length){ const park = {}; recs.slice(1).forEach(r => { park[r.tab] = r; }); v = JSON.stringify(Object.assign({}, recs[0], recs.length > 1 ? { park } : {}, view ? { view } : {})); }
     try { const s = ls(); if(s){ if(v == null) s.removeItem(SESSION_KEY); else s.setItem(SESSION_KEY, v); } } catch(e){}
   }
   return {
@@ -1212,13 +1226,16 @@ const sessStore = (() => {
       map = {}; let raw = null, all = [];
       try { const s = ls(); raw = s ? s.getItem(SESSION_KEY) : null; } catch(e){ raw = null; }
       if(raw == null) return;
-      try { const top = JSON.parse(raw); if(top && typeof top === "object"){ const park = top.park; all = [Object.assign({}, top, { park: undefined })]; if(park && typeof park === "object") Object.keys(park).forEach(k => all.push(park[k])); } } catch(e){ all = []; }
+      try { const top = JSON.parse(raw); if(top && typeof top === "object"){ const park = top.park, vw = top.view; all = [Object.assign({}, top, { park: undefined, view: undefined })];
+        if(vw && typeof vw.tab === "string") view = { tab: vw.tab, live: vw.live === true }; if(park && typeof park === "object") Object.keys(park).forEach(k => all.push(park[k])); } } catch(e){ all = []; }
       all.forEach(r => { let good = false; try { good = !!r && ok(r); } catch(e){} if(good && !(map[r.tab] && map[r.tab].t >= r.t)) map[r.tab] = r; });
       if(!all.length || Object.keys(map).length !== all.length) write();
     },
     get(t){ return t ? M()[t] || null : Object.keys(M()).map(k => map[k]).sort((a, b) => b.t - a.t)[0] || null; },
     set(t, rec){ if(rec) M()[t] = rec; else if(M()[t]) delete map[t]; else return; write(); },
-    clear(){ map = {}; write(); },
+    clear(){ map = {}; view = null; write(); },
+    view(){ return view; },
+    setView(v){ if(view && view.tab === v.tab && view.live === v.live) return; view = v; if(Object.keys(M()).length) write(); },
     // This page saved its progress: its records stay valid for it.
     refp(fp){ const ks = Object.keys(M()); if(!ks.length) return; ks.forEach(k => { map[k].fp = fp; }); write(); }
   };
@@ -1430,11 +1447,22 @@ function sessionRecord(){
 function sessionSave(replace){
   let rec = null;
   try { rec = sessionRecord(); } catch(e){ rec = null; }
-  if(rec) sessStore.set(rec.tab, rec);
+  if(rec){ if(rec.tab === tab) sessStore.setView({ tab, live: true }); sessStore.set(rec.tab, rec); }
   else if(replace) sessStore.set(tab, null);
 }
+// The learner leaves the session on screen for the tab's home: it stays resumable, but a
+// reload no longer lands in it.
+function sessionPark(){ sessionSave(); sessStore.setView({ tab, live: false }); }
 // The current tab's session ends (finished, or Today's last stage); other tabs keep theirs.
-function sessionClear(){ sessStore.set(tab, null); }
+function sessionClear(){ sessStore.setView({ tab, live: false }); sessStore.set(tab, null); }
+// Boot: the session that was on screen, else the tab home that was showing.
+function sessionBoot(){
+  const v = sessStore.view(); if(!v) return false;
+  if(v.live) return sessionResume(v.tab);
+  const b = document.querySelector(`#tabs button[data-t="${v.tab}"]`);
+  if(v.tab !== tab && b && !b.hidden && tabTitle(v.tab)) switchToTab(v.tab, tabTitle(v.tab));
+  return false;
+}
 // Boot: the records a reload, a relaunch or another tab left. Progress is checked here only:
 // afterwards every progress save by this page re-fingerprints its records (store.save).
 function sessionLoad(){
@@ -1742,7 +1770,10 @@ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{
   // coming back resumes it. Tapping the tab already open is the way out of a drill without a
   // keyboard: it shows the tab's home screen, which offers to resume (rzResumeRow).
   const same = b.dataset.t === tab;
-  sessionSave();
+  // A finished drill or passage (its results on screen) ends on a re-tap, as render() ends
+  // it; a Today drill's results are mid-session, so Today keeps them.
+  const fin = (rzFin && rzFin.rzo && RZ_TAB[rzFin.rzo.o] !== "today") || (RD && RD.resultsDone && !RD.today);
+  if(same && fin) sessionClear(); else sessionSave();
   document.querySelectorAll("#tabs button").forEach(x=>x.classList.remove("on"));
   b.classList.add("on"); tab = b.dataset.t; D = null; drillKeyHandler = null; rzFin = null;
   todayStepState = null; soundsSel = null; wordsSet = null; testSel = null;
@@ -1767,6 +1798,7 @@ function remountScreen(){
 function render(){
   stopSpeaking();
   if(rzFin){ rzFin = null; sessionClear(); }
+  sessStore.setView({ tab, live: false });
   D = null; drillKeyHandler = null; screenTop();
   $("htitle").textContent = { today:"Today", sounds: SCRIPT_TAB ? SCFG.stages[0].label : "Sounds", words:"Words", read:"Read", test:"Test", progress:"Progress" }[tab];
   setScore(0,0);
@@ -2440,7 +2472,7 @@ function listenScreen(){
   };
   const leave = () => { rd.playing = false; stopSpeaking(); };
   if(RD.today) $("rskip").onclick = () => { leave(); RD = null; todayStep(); };
-  else $("rback").onclick = () => { leave(); sessionSave(); RD = null; readRender(); rzResumeRow(); };
+  else $("rback").onclick = () => { leave(); sessionPark(); RD = null; readRender(); rzResumeRow(); };
   $("rdone").onclick = () => { leave(); RD.qi = 0; RD.shown = false; readQuestionScreen(); };
   sessionSave(true);
 }
@@ -2457,7 +2489,7 @@ function readPassageScreen(){
   wirePassage($("pbox"), $("gloss"));
   // Nothing is recorded, so the same passage is offered next session.
   if(RD.today) $("rskip").onclick = () => { RD = null; todayStep(); };
-  else $("rback").onclick = () => { sessionSave(); RD = null; readRender(); rzResumeRow(); };
+  else $("rback").onclick = () => { sessionPark(); RD = null; readRender(); rzResumeRow(); };
   $("rdone").onclick = () => { RD.qi = 0; RD.shown = false; readQuestionScreen(); };
   sessionSave(true);
 }
@@ -2908,7 +2940,7 @@ function legacyFailHTML(why){
   applyTheme();
   booted = true;
   sessionLoad();
-  if(storeReadOnly || !sessionResume(null)) render();
+  if(storeReadOnly || !sessionBoot()) render();
 })();
 
 // build.sh writes sw.js next to the built page. Registration is a no-op on file:// and
