@@ -13,7 +13,7 @@
   {
    "step": 0,
    "label": "Review",
-   "html": "<div class=\"drill-body\"><p class=\"q\">Which word is this?</p><div class=\"med\" style=\"text-align:center\">effect; function; to act on; to affect</div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">Which word is this?</p><div class=\"med\" style=\"text-align:center\">table tennis; ping-pong</div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   },
   {
    "step": 1,
@@ -28,7 +28,7 @@
   {
    "step": 3,
    "label": "Recall",
-   "html": "<div class=\"drill-body\"><p class=\"q\">Which word is this?</p><div class=\"med\" style=\"text-align:center\">afternoon; p.m.</div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">Which word is this?</p><div class=\"med\" style=\"text-align:center\">to do; to make; to produce; to cook</div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   },
   {
    "step": 4,
