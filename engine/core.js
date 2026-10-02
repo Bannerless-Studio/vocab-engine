@@ -55,17 +55,47 @@ function typedSynHit(entry, byId, test){
   for(const id of (Array.isArray(entry && entry.typedSyn) ? entry.typedSyn : [])){ const s = byId && byId[id]; if(s && test(s)) return s; }
   return null;
 }
+// pack.optsMix (docs/PACK_SCHEMA.md "optsMix"; owner 2026-10-02): same-level-first wrong
+// choices near the end of a level are all known words, so a new answer is found by
+// elimination; a learned/unlearned mix let the learner rule out the other familiarity class
+// (review 2026-10-02: guess success 0.40). Wrong choices come from the answer's own stage
+// instead. mix = { stage(x), rng? }: 0 new/weak (learned below mastered, or in the Learn set
+// being taught), 1 known (mastered), 2 never taught. The answer's stage first (a never-taught
+// answer is being taught: 0), then the other learned stage, then never taught; no level tiers.
+// rank(v) orders hard preferences ahead of the stage (one script, article agreement); near(v)
+// orders the class preference inside a stage (lower first). accept(strict) returns a fresh
+// guard that records what it lets through.
+function optsMixOn(pack){ return !!(pack && pack.optsMix === true); }
+function mixPick(ans, cands, mix, rank, near, accept, n){
+  const r = mix.rng || Math.random, want = n || 3, as = mix.stage(ans) === 1 ? 1 : 0;
+  const key = v => { const st = mix.stage(v); return rank(v) * 1000 + (st === as ? 0 : st === 2 ? 2 : 1) * 100 + near(v); };
+  const keyed = cands.map(v => [key(v), v]);
+  const ordered = [...new Set(keyed.map(x => x[0]))].sort((x, y) => x - y).flatMap(k => shuffle(keyed.filter(x => x[0] === k).map(x => x[1]), r));
+  function run(strict){
+    const ok = accept(strict), chosen = [];
+    for(const v of ordered){ if(chosen.length >= want) break; if(ok(v)) chosen.push(v); }
+    return chosen;
+  }
+  const chosen = run(true);
+  return chosen.length < want ? run(false) : chosen;
+}
 // Never a homograph of the answer (the read stimulus would fit both), a homophone (the hear
 // stimulus would fit both) or a gloss sharing its first two words (a near-synonym). Prefers
 // same-part-of-speech distractors like wordOpts, falling back to any pos when the same-pos
 // pool is smaller than needed (a verb answer never runs short of options just because the
 // level has only two other verbs).
-function meaningOpts(entry, pool){
+function meaningOpts(entry, pool, mix){
   const ansKey = normKey(entry.en);
   const ansFirst2 = firstTwoWords(entry.en);
   const hasPos = !!entry.pos;
   const samePos = v => hasPos && v.pos === entry.pos;
   const candidates = (pool||[]).filter(v=>v.id!==entry.id && normKey(v.en)!==ansKey && !sharesSurface(v, entry) && !samePron(v, entry) && !isSyn(v, entry));
+  if(mix) return mixPick(entry, candidates, mix, () => 0, v => samePos(v) ? 0 : 1, strict => {
+    const usedFirst2 = new Set(ansFirst2 ? [ansFirst2] : []), usedGloss = new Set([ansKey]);
+    return v => { const f2 = firstTwoWords(v.en), g = normKey(v.en);
+      if(usedGloss.has(g) || (strict && f2 && usedFirst2.has(f2))) return false;
+      usedGloss.add(g); if(f2) usedFirst2.add(f2); return true; };
+  });
   const t1 = candidates.filter(v=>v.lv===entry.lv && samePos(v));
   const t2 = candidates.filter(v=>v.lv===entry.lv && !samePos(v));
   const t3 = candidates.filter(v=>v.lv!==entry.lv && samePos(v));
@@ -91,7 +121,7 @@ function meaningOpts(entry, pool){
 // or first-two-gloss-words match. A content-word answer never gets a pack.functionWords
 // distractor: a learner rules those out on sight, and in a cloze one may even fit the blank.
 // prefer ranks matching candidates first (gapChoices article agreement).
-function wordOpts(entry, pool, showOf, pack, prefer){
+function wordOpts(entry, pool, showOf, pack, prefer, mix){
   const show = showOf || (e => e.w);
   const ansGloss = normKey(entry.en), ansF2 = firstTwoWords(entry.en);
   const hasPos = !!entry.pos;
@@ -102,6 +132,12 @@ function wordOpts(entry, pool, showOf, pack, prefer){
     v.id!==entry.id && !sharesSurface(v, entry) && normKey(v.en)!==ansGloss && !(ansF2 && firstTwoWords(v.en)===ansF2) &&
     (ansFw || !fw.has(v.id)) && !(pf && pronClash(v, entry)) && !isSyn(v, entry));
   const samePos = v => hasPos && v.pos===entry.pos;
+  if(mix) return mixPick(entry, cands, mix, v => prefer && !prefer(v) ? 1 : 0, v => (ansFw && !fw.has(v.id) ? 2 : 0) + (samePos(v) ? 0 : 1), strict => {
+    const usedW = new Set([...surfaces(entry), normKey(show(entry))]), usedF2 = new Set(), chosen = [];
+    return v => { const k = normKey(show(v)), f2 = firstTwoWords(v.en);
+      if(usedW.has(k) || (showOf && surfaces(v).some(x => usedW.has(x))) || (pf && chosen.some(c => pronClash(c, v))) || (strict && f2 && usedF2.has(f2))) return false;
+      chosen.push(v); usedW.add(k); if(showOf) surfaces(v).forEach(x => usedW.add(x)); if(f2) usedF2.add(f2); return true; };
+  });
   const t1 = cands.filter(v=>v.lv===entry.lv && samePos(v));
   const t2 = cands.filter(v=>v.lv===entry.lv && !samePos(v));
   const t3 = cands.filter(v=>v.lv!==entry.lv && samePos(v));
@@ -132,10 +168,16 @@ function wordOpts(entry, pool, showOf, pack, prefer){
 const gapOpts = wordOpts;
 
 // Sentences sharing a word id with the answer come first: a plausible near-miss.
-function sentenceOpts(sentence, pool){
+function sentenceOpts(sentence, pool, mix){
   const ansKey = normKey(sentence.en);
   const wordSet = new Set(sentence.words || []);
   const shares = s => (s.words||[]).some(w=>wordSet.has(w));
+  // optsMix: a translation far longer or shorter than the others stands out (review m1).
+  const ansLen = String(sentence.en || "").length || 1, lenNear = s => { const q = String(s.en || "").length / ansLen; return q >= 0.67 && q <= 1.5; };
+  if(mix) return mixPick(sentence, (pool || []).filter(s => s.id !== sentence.id && normKey(s.en) !== ansKey), mix, () => 0, s => (lenNear(s) ? 0 : 2) + (shares(s) ? 0 : 1), () => {
+    const seenEn = new Set([ansKey]);
+    return s => { const k = normKey(s.en); if(seenEn.has(k)) return false; seenEn.add(k); return true; };
+  });
   const candidates = (pool || []).filter(s => s.id !== sentence.id && s.lv === sentence.lv && normKey(s.en) !== ansKey);
   const chosen = []; const seenEn = new Set([ansKey]);
   function addFrom(list){
@@ -546,7 +588,7 @@ function articleAgreement(pack){
 // surface is the blanked text is never a distractor, since it fits literally: する blanked at
 // its form した must not offer 下 (w した).
 // like: an optional preference (pack.optsOneScript); with an article preference both must hold.
-function gapChoices(entry, match, pool, pack, like){
+function gapChoices(entry, match, pool, pack, like, mix){
   const arts = packArticles(pool);
   const show = e => bareForm(e, arts);
   const vis = match && match.article;
@@ -558,7 +600,7 @@ function gapChoices(entry, match, pool, pack, like){
   if(like) prefer = prefer ? (p => v => p(v) && like(v))(prefer) : like;
   const blank = match && match.text ? normKey(match.text) : "";
   const fits = v => !!blank && v !== entry && !(v.id != null && v.id === entry.id) && surfaces(v).includes(blank);
-  const ds = wordOpts(entry, blank ? (pool || []).filter(v => !fits(v)) : pool, show, pack, prefer);
+  const ds = wordOpts(entry, blank ? (pool || []).filter(v => !fits(v)) : pool, show, pack, prefer, mix);
   const byLabel = {}; [entry, ...ds].forEach(e => { byLabel[show(e)] = e; });
   return { opts: [show(entry), ...ds.map(show)], a: show(entry), byLabel };
 }
@@ -2241,7 +2283,7 @@ function sentenceDisplay(sentence, units, prog, pack, started, blank, written){
 
 // Never a second right answer: a homophone fits the pick stimulus, a same gloss fits the
 // recall stimulus.
-function charOpts(unit, units, byId){
+function charOpts(unit, units, byId, mix){
   const aw = unitWord(unit, byId);
   const ansG = normKey(unitGloss(unit, byId)), ansF2 = firstTwoWords(unitGloss(unit, byId)), ansR = normKey(unitReading(unit, byId));
   const ansForms = new Set([normKey(unit.t), ...(aw ? surfaces(aw) : [])]);
@@ -2252,6 +2294,12 @@ function charOpts(unit, units, byId){
     if(normKey(g) === ansG || (ansF2 && firstTwoWords(g) === ansF2)) return false;
     if(ansR && normKey(unitReading(v, byId)) === ansR) return false;
     return !(aw && vw && (samePron(aw, vw) || isSyn(aw, vw)));
+  });
+  if(mix) return mixPick(unit, cands, mix, () => 0, v => cpLen(v.t) === len ? 0 : 1, strict => {
+    const usedT = new Set(ansForms), usedG = new Set([ansG]), usedF2 = new Set();
+    return v => { const t = normKey(v.t), g = unitGloss(v, byId), gk = normKey(g), f2 = firstTwoWords(g);
+      if(usedT.has(t) || usedG.has(gk) || (strict && f2 && usedF2.has(f2))) return false;
+      usedT.add(t); usedG.add(gk); if(f2) usedF2.add(f2); return true; };
   });
   const t1 = cands.filter(v => v.lv === unit.lv && cpLen(v.t) === len);
   const t2 = cands.filter(v => v.lv === unit.lv && cpLen(v.t) !== len);
@@ -2272,9 +2320,9 @@ function charOpts(unit, units, byId){
   if(chosen.length < 3) chosen = pass(false);
   return chosen;
 }
-function recallCharOpts(unit, units, byId){ return [unit.t, ...charOpts(unit, units, byId).map(v => v.t)]; }
+function recallCharOpts(unit, units, byId, mix){ return [unit.t, ...charOpts(unit, units, byId, mix).map(v => v.t)]; }
 // Never a homophone, nor a reading the answer's form also has (a homograph unit or word).
-function charSoundOpts(unit, units, byId){
+function charSoundOpts(unit, units, byId, mix){
   const ansT = normKey(unit.t), ansR = normKey(unitReading(unit, byId));
   const forbid = new Set([ansR]);
   (units || []).forEach(v => { if(normKey(v.t) === ansT){ const r = normKey(unitReading(v, byId)); if(r) forbid.add(r); } });
@@ -2282,6 +2330,10 @@ function charSoundOpts(unit, units, byId){
   const len = cpLen(unit.t);
   const cands = (units || []).filter(v => v.id !== unit.id && normKey(v.t) !== ansT && unitReading(v, byId) && !forbid.has(normKey(unitReading(v, byId))));
   const sameLen = v => cpLen(v.t) === len, sameLv = v => v.lv === unit.lv;
+  if(mix) return mixPick(unit, cands, mix, () => 0, v => sameLen(v) ? 0 : 1, () => {
+    const used = new Set(forbid);
+    return v => { const k = normKey(unitReading(v, byId)); if(used.has(k)) return false; used.add(k); return true; };
+  }).map(v => unitReading(v, byId));
   const ordered = [...shuffle(cands.filter(v => sameLv(v) && sameLen(v))), ...shuffle(cands.filter(v => !sameLv(v) && sameLen(v))),
     ...shuffle(cands.filter(v => sameLv(v) && !sameLen(v))), ...shuffle(cands.filter(v => !sameLv(v) && !sameLen(v)))];
   const out = []; const used = new Set(forbid);
@@ -2294,20 +2346,22 @@ function charSoundOpts(unit, units, byId){
   return out;
 }
 // Every word the form could also be read as is removed from the pool.
-function charReadOpts(unit, words, byId){
+function charReadOpts(unit, words, byId, mix){
   const w = unitWord(unit, byId); if(!w) return [];
   const t = normKey(unit.t);
-  return meaningOpts(w, (words || []).filter(v => v.id === w.id || !surfaces(v).includes(t)));
+  return meaningOpts(w, (words || []).filter(v => v.id === w.id || !surfaces(v).includes(t)), mix);
 }
 function charItem(kind, unit, ctx){
   const c = ctx || {}; const byId = c.byId || Object.fromEntries((c.words || []).map(w => [w.id, w]));
   const w = unitWord(unit, byId), t = String(unit.t), reading = unitReading(unit, byId), g = unitGloss(unit, byId);
   const base = { kind, key: "c:" + unit.id, unitId: unit.id, wordId: w ? w.id : null, t, reading, gloss: g };
   let show, audio = false, answer, others;
-  if(kind === "charRead"){ show = "t"; answer = g; others = charReadOpts(unit, c.words, byId).map(gloss); }
-  else if(kind === "charSound"){ show = "t"; answer = reading; others = charSoundOpts(unit, c.units, byId); }
-  else if(kind === "charPick"){ show = "reading"; audio = true; answer = t; others = charOpts(unit, c.units, byId).map(v => String(v.t)); }
-  else if(kind === "charRecall"){ show = "gloss"; answer = t; others = charOpts(unit, c.units, byId).map(v => String(v.t)); }
+  // ctx.mix { word(w), unit(u), rng? } (pack.optsMix): word options by word stage, unit options by unit stage.
+  const wm = c.mix ? { stage: c.mix.word, rng: c.mix.rng } : undefined, um = c.mix ? { stage: c.mix.unit, rng: c.mix.rng } : undefined;
+  if(kind === "charRead"){ show = "t"; answer = g; others = charReadOpts(unit, c.words, byId, wm).map(gloss); }
+  else if(kind === "charSound"){ show = "t"; answer = reading; others = charSoundOpts(unit, c.units, byId, um); }
+  else if(kind === "charPick"){ show = "reading"; audio = true; answer = t; others = charOpts(unit, c.units, byId, um).map(v => String(v.t)); }
+  else if(kind === "charRecall"){ show = "gloss"; answer = t; others = charOpts(unit, c.units, byId, um).map(v => String(v.t)); }
   else throw new Error(`unknown character item kind ${kind}`);
   return Object.assign(base, { show, audio, answer, options: shuffle([answer, ...others], c.rng) });
 }
@@ -3223,11 +3277,20 @@ function glossAltKeys(en, pack){
 // readings from pool (the learned words), topped up from all, same syllable count first. Never
 // the answer's reading, a reading the answer's written form also has, or two alike. No rng: the
 // order within a tier is a hash of the two ids; the drill shuffles the shown order.
-function pronChoiceOpts(entry, pool, all){
+const PRON_SYL = new WeakMap(); // word -> syllable count; splitReading over every word per call cost ~10 ms
+function pronChoiceOpts(entry, pool, all, mix){
   if(!entry || !entry.pron) return [];
   const ansT = new Set(surfaces(entry)), used = new Set([pronKey(entry.pron)]);
   (all || []).forEach(v => { if(v && v.pron && surfaces(v).some(x => ansT.has(x))) used.add(pronKey(v.pron)); });
   const syl = s => splitReading(s).filter(x => x.tone !== undefined).length || 1, n = syl(entry.pron);
+  // pack.optsMix: by the answer's stage (mix.stage); draws (rng).
+  if(mix){
+    const ids = new Set(), cands = [...(pool || []), ...(all || [])].filter(v => v && v.id !== entry.id && v.pron && !ids.has(v.id) && ids.add(v.id));
+    return mixPick(entry, cands, mix, () => 0, v => { let k = PRON_SYL.get(v); if(k === undefined) PRON_SYL.set(v, k = syl(v.pron)); return k === n ? 0 : 1; }, () => {
+      const u = new Set(used);
+      return v => { const k = pronKey(v.pron); if(!k || u.has(k)) return false; u.add(k); return true; };
+    }).map(v => v.pron);
+  }
   const hash = s => { let h = 2166136261; for(const c of s){ h ^= c.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h; };
   const rank = list => list.filter(v => v && v.id !== entry.id && v.pron)
     .map(v => ({ v, t: syl(v.pron) === n ? 0 : 1, h: hash(entry.id + "|" + v.id) }))
@@ -3410,7 +3473,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
   charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
-  charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem,
+  charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
   defaultScriptProg, validateScriptShape, normalizeScriptProg, ensureScript, scriptRecs, scriptSkipped, setScriptSkipped, answerScriptChoice,

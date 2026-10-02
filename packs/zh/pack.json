@@ -67,6 +67,7 @@
  "helpClose": true,
  "readAnswerBlock": true,
  "optsOneScript": true,
+ "optsMix": true,
  "showPron": true,
  "hasLessons": true,
  "spaced": false,

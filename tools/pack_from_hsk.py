@@ -43,7 +43,8 @@ Each unit gets a `hint` list (one per character of `t`, null where none) from th
 committed tools/zh_hints.json (tools/zh_hints.py; Make Me a Hanzi, LGPL-3.0-or-later),
 credited in attribution.json.
 
-Usage: python3 tools/pack_from_hsk.py [HSK_REPO_DIR]   (default: ../chinese beside this repo, formerly ../hsk)
+Usage: python3 tools/pack_from_hsk.py [HSK_REPO_DIR] [--out DIR]   (default: ../chinese beside this repo, formerly ../hsk;
+--out writes the pack and the gloss report to DIR instead of packs/zh and docs/)
 """
 import json
 import os
@@ -61,6 +62,7 @@ EN_OVERRIDES = {
     "我们应该看自己的优点，也要改变缺点。": "We should look at our own strengths, and also change our weaknesses.",
 }
 OUT = os.path.join(ROOT, "packs", "zh")
+GLOSS_REPORT = os.path.join(ROOT, "docs", "ZH_GLOSS.md")
 HINTS = os.path.join(ROOT, "tools", "zh_hints.json")
 ATTRIBUTION = {
     "vocabulary": {
@@ -128,7 +130,7 @@ def js_literal_via_node(path, name):
 def apply_gloss(words):
     """Gloss overrides, `syn`, `typedSyn`, `noTypedMeaning` and `pronInGloss` from tools/zh_gloss.js (it reuses the
     engine's typed-meaning keys; docs/ZH_GLOSS.md is its report)."""
-    out = subprocess.run([NODE, os.path.join(ROOT, "tools", "zh_gloss.js"), "--report", os.path.join(ROOT, "docs", "ZH_GLOSS.md")],
+    out = subprocess.run([NODE, os.path.join(ROOT, "tools", "zh_gloss.js"), "--report", GLOSS_REPORT],
                          input=json.dumps(words, ensure_ascii=False).encode("utf-8"), capture_output=True)
     sys.stderr.write(out.stderr.decode("utf-8"))
     if out.returncode:
@@ -176,6 +178,14 @@ def attach_hints(units, hints):
 
 
 def main(argv):
+    # --out DIR: write the pack and the gloss report there instead (tests/engine_checks.js drift
+    # check: a fresh run must reproduce packs/zh byte for byte).
+    global OUT, GLOSS_REPORT
+    if "--out" in argv:
+        i = argv.index("--out")
+        OUT = os.path.abspath(argv[i + 1])
+        GLOSS_REPORT = os.path.join(OUT, "ZH_GLOSS.md")
+        argv = argv[:i] + argv[i + 2:]
     hsk = os.path.abspath(argv[0]) if argv else os.path.join(os.path.dirname(ROOT), "chinese")
     vocab = json.load(open(os.path.join(hsk, "data", "hsk_vocab.json"), encoding="utf-8"))
     sent_path = os.path.join(hsk, "data", "hsk_sentences.js")
@@ -315,6 +325,10 @@ def main(argv):
         # in characters among readings gave the answer away (docs/PACK_SCHEMA.md "optsOneScript";
         # owner browser check 2026-10-02).
         "optsOneScript": True,
+        # Wrong choices mix learned and not-yet-learned words, no level tiers: same-level ones
+        # near the end of a level let a new word be found by elimination (docs/PACK_SCHEMA.md
+        # "optsMix"; owner feedback 2026-10-02).
+        "optsMix": True,
         "showPron": True,
         "hasLessons": True,
         "spaced": False,

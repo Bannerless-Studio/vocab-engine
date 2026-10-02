@@ -33,7 +33,7 @@ const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 const UNIT = Object.fromEntries(CHARACTERS.map(u => [u.id, u]));
 const UNIT_OF = new Map(CHARACTERS.map(u => [u.words[0], u]));
 // The zh pack before this branch: one stage after HSK 3 for 1-3, one after HSK 4, no bareBy/bareWords.
-const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; const o = Object.assign({}, p, { characters: c }); delete o.optsOneScript; return o; };
+const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; const o = Object.assign({}, p, { characters: c }); delete o.optsOneScript; delete o.optsMix; return o; };
 const PACK_OFF = preWrite(PACK);
 const WITH = (p => { const c = Object.assign({}, p.characters, { withWords: true }); delete c.learn; return Object.assign({}, p, { characters: c }); })(PACK);
 const eq = util.isDeepStrictEqual;

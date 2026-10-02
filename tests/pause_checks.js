@@ -23,7 +23,9 @@ const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
-const OFF = (p => { const q = Object.assign({}, p); delete q.pauseNew; return q; })(PACK);
+// optsMix (docs/PACK_SCHEMA.md "optsMix") came after 36aee02: the controls drop it too.
+const NOMIX = (p => { const q = Object.assign({}, p); delete q.optsMix; return q; })(PACK);
+const OFF = (p => { const q = Object.assign({}, p); delete q.pauseNew; return q; })(NOMIX);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
 
@@ -259,7 +261,7 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
   console.log(`\n[2] flag off, and on but not paused: as on main ${MAIN}`);
   if(!OLD) console.log(`NOTE  engine ${MAIN} not in this checkout's history: control skipped`);
   else for(const [name, mk] of SCEN){
-    for(const [label, pack, pz] of [["flag off", OFF, false], ["flag off, stored pause 1", OFF, true], ["flag on, not paused", PACK, false]]){
+    for(const [label, pack, pz] of [["flag off", OFF, false], ["flag off, stored pause 1", OFF, true], ["flag on, not paused", NOMIX, false]]){
       const out = [];
       for(const [core, html] of [[VC, appHtml], [OLD, MAIN_HTML]]){
         const p = mk(); if(pz) p.pause = 1;

@@ -817,6 +817,29 @@ function wordOptHtml(byKey, written, noPron, mode){
 // in the written form (callers drop the readings beside it).
 const OPTS_ONE_SCRIPT = PRON_FIRST && VC.optsOneScriptOn(PACK);
 const optLike = entry => { if(!OPTS_ONE_SCRIPT) return null; const a = dispWord(entry).isPron; return v => dispWord(v).isPron === a; };
+// pack.optsMix (docs/PACK_SCHEMA.md "optsMix"): wrong choices from the answer's stage (core.js
+// mixPick): 0 new/weak, 1 known (mastered), 2 never taught. A Learn set's words and units have
+// no record until answered, so the drill being built names them (withLearn). Off, every
+// builder gets undefined and keeps its level tiers.
+const OPTS_MIX = VC.optsMixOn(PACK);
+let learnNow = null;
+function withLearn(ids, f){ const o = learnNow; learnNow = new Set(ids); try { return f(); } finally { learnNow = o; } }
+function wordMix(){
+  if(!OPTS_MIX) return undefined;
+  const ids = new Set(learnedWords().map(w => w.id)), ln = learnNow;
+  return { stage: v => ln && ln.has(v.id) ? 0 : !ids.has(v.id) ? 2 : (((prog.w[v.id] || {}).s || 0) >= VC.WORD_MASTERED ? 1 : 0) };
+}
+function sentMix(){
+  if(!OPTS_MIX) return undefined;
+  const open = new Set(availableSentences().map(s => s.id));
+  return { stage: s => prog.s[s.id] ? 1 : open.has(s.id) ? 0 : 2 };
+}
+function charCtx(){
+  if(!OPTS_MIX) return CHAR_CTX;
+  const recs = VC.charRecs(prog), ln = learnNow;
+  const unit = u => ln && ln.has(u.id) ? 0 : !(Object.prototype.hasOwnProperty.call(recs, u.id) && recs[u.id]) ? 2 : ((recs[u.id].s || 0) >= CHAR_CFG.mastered ? 1 : 0);
+  return Object.assign({}, CHAR_CTX, { mix: { word: wordMix().stage, unit } });
+}
 function optScript(entry, others){
   const mixed = () => others.some(v => dispWord(v).isPron !== dispWord(entry).isPron);
   if(pronLeakShown(entry) || OPTS_ONE_SCRIPT && entry.pronInGloss && mixed()) return "written";
@@ -1176,7 +1199,7 @@ function revealBlock(entry){
   const icon = hear ? ` <span style="color:var(--mute);vertical-align:middle">${TEACH_PLAY_SVG}</span>` : "";
   return `<div${hear ? ` data-wid="${escapeHtml(entry.id)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${wordFormHTML(entry)}${icon}</div>${p ? `<div class="rp">${readingHTML(p)}</div>` : ""}<div style="color:var(--mute)">${glossOut(VC.gloss(entry), true)}</div></div>${exampleSentencesHTML(entry)}`;
 }
-const meaningChoices = entry => [VC.gloss(entry), ...VC.meaningOpts(entry, WORDS).map(d=>VC.gloss(d))];
+const meaningChoices = entry => [VC.gloss(entry), ...VC.meaningOpts(entry, WORDS, wordMix()).map(d=>VC.gloss(d))];
 // Plans skip unplayable words (hearableKinds, learnPair); this fallback covers a voice lost
 // between planning and display, the one case the notice is for.
 function hearItem(entry){
@@ -1206,7 +1229,7 @@ function readItem(entry){
 // written one its options without readings.
 function recallItem(entry){
   if(pronLeakShown(entry)) return readItem(entry);
-  const ds = VC.wordOpts(entry, WORDS, PRON_FIRST ? (e => dispWord(e).text) : null, PACK, optLike(entry)); // same word class as the answer; pronFirst: distinct displayed labels, no homophones
+  const ds = VC.wordOpts(entry, WORDS, PRON_FIRST ? (e => dispWord(e).text) : null, PACK, optLike(entry), wordMix()); // same word class as the answer; pronFirst: distinct displayed labels, no homophones
   // Keyed by word id so two options can never collapse into one key, whatever they display as.
   const byId = {}; [entry, ...ds].forEach(e=>{ byId[e.id] = e; }); const mode = optScript(entry, ds);
   return { kind:"mc", key:"w:"+entry.id, label:"Which word is this?", optsClass:"opts-hero opts-w",
@@ -1305,7 +1328,7 @@ function writtenPronTypeItem(entry){
   return Object.assign(pronTypeItem(entry), { html: kindTag(PRON_NOUN, TONES ? "tones optional" : "") + stimWritten(entry),
     check: val => VC.checkPronTyped(val, entry.pron, PACK) !== "wrong", feedback: pronFeedback(entry),
     onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); markUnitTyped(this, entry.id, ok); },
-    choiceFallback: () => choice(VC.pronChoiceOpts(entry, learnedWords(), WORDS)) });
+    choiceFallback: () => choice(VC.pronChoiceOpts(entry, learnedWords(), WORDS, wordMix())) });
 }
 // typedFrom: meaning -> characters is a writing item; audio before the answer would say the
 // reading, so the card is silent and the reveal plays it as on every typed item (owner feedback
@@ -1663,7 +1686,7 @@ function sentenceRevealBlock(s){
   const icon = canHear ? ` <span style="color:var(--mute);vertical-align:middle">${TEACH_PLAY_SVG}</span>` : "";
   return `<div${canHear ? ` data-sent="${SENT_INDEX.get(s)}" style="cursor:pointer"` : ""}><div class="rw${rt ? " hasruby" : ""}"${TA}>${rt ? rubyTextHTML(s, rt) : escapeHtml(s.t)}${icon}</div>${p ? `<div class="rp">${readingHTML(p)}</div>` : ""}<div style="color:var(--mute)">${ui(s.en)}</div></div>`;
 }
-const sentenceChoices = s => [s.en, ...VC.sentenceOpts(s, SENTENCES).map(d=>d.en)];
+const sentenceChoices = s => [s.en, ...VC.sentenceOpts(s, SENTENCES, sentMix()).map(d=>d.en)];
 function readSentence(s){
   const hear = canHearSentence(s);
   const pf = pfSentence(s);
@@ -1701,7 +1724,7 @@ function gapSentence(s, typed){
   const gapKind = typed && TYPING ? "type" : "recall";
   const base = { key:"s:"+s.id, reveal: sentenceRevealBlock(s), onAnswer: ok=>{ markSentence(s.id, ok, gapKind === "type" ? "gapType" : "gap"); markGapWord(entry.id, ok, gapKind); },
     onReveal: b => saySentence(s, b), revealHear: canHearSentence(s) };
-  const choice = () => { const gc = VC.gapChoices(entry, match, WORDS, PACK, optLike(entry)); const m = optScript(entry, Object.values(gc.byLabel));
+  const choice = () => { const gc = VC.gapChoices(entry, match, WORDS, PACK, optLike(entry), wordMix()); const m = optScript(entry, Object.values(gc.byLabel));
     return { kind:"mc", label:"What's the missing word?", optsClass:"opts-hero opts-w", html, opts: gc.opts, a: gc.a, optHtml: wordOptHtml(gc.byLabel, null, !!entry.pronInGloss, m), optsT: true }; };
   if(typed && TYPING){
     return Object.assign(base, { kind:"type", label:"Type the missing word", html,
@@ -1738,7 +1761,7 @@ function charRevealBlock(it, unit){
   return `<div${tap ? ` data-wid="${escapeHtml(it.wordId)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${escapeHtml(it.t)}${icon}</div>${it.reading ? `<div class="rp">${readingHTML(it.reading)}</div>` : ""}<div style="color:var(--mute)">${glossOut(it.gloss, true)}</div>${charHintHTML(unit)}</div>`;
 }
 function charDrillItem(kind, unit){
-  const it = VC.charItem(kind, unit, CHAR_CTX);
+  const it = VC.charItem(kind, unit, charCtx());
   const base = { kind:"mc", key: it.key, opts: it.options, a: it.answer, reveal: charRevealBlock(it, unit),
     onAnswer(ok){ this.cueUnit = markChar(it.unitId, ok, kind) ? it.unitId : null; }, onReveal: b => sayUnit(it, b), revealHear: canHearUnit(it) };
   const form = `<div class="big wd"${TA}>${escapeHtml(it.t)}</div>`;
@@ -2117,14 +2140,14 @@ function todayStep(){
     if(g.learn && snap && snap.stage.kind === "script"){ scriptLearn(snap, 0); return; }
     if(g.learn && snap && snap.stage.kind === "chars"){
       const cs = snap.cset;
-      charTeach(cs, snap.stage, () => drill(VC.learnCharPlan(cs.units, PACK).map(planItem), VC.charsWithWords(PACK, prog) ? todayCharsDone() : todayStep, missSummary));
+      charTeach(cs, snap.stage, () => drill(withLearn(cs.units.map(u => u.id), () => VC.learnCharPlan(cs.units, PACK).map(planItem)), VC.charsWithWords(PACK, prog) ? todayCharsDone() : todayStep, missSummary));
       return;
     }
     if(g.learn && nn){
       const list = nn.words;
       vocabTeach(list, nn.lv, () => {
         const items = [];
-        list.forEach(w => items.push(...learnPair(w)));
+        withLearn(list.map(w => w.id), () => list.forEach(w => items.push(...learnPair(w))));
         drill(items, todayLearnDone(nn.lv), missSummary);
       });
       return;
@@ -2401,7 +2424,7 @@ function renderWordBody(){
   $("jump").onclick = () => { wordsSet = next; renderWordBody(); };
   wordListInto($("wl"), set);
   $("dr").onclick = () => {
-    const items = []; set.forEach(w => items.push(...learnPair(w)));
+    const items = []; withLearn(set.map(w => w.id), () => set.forEach(w => items.push(...learnPair(w))));
     drill(items, wordsSetDone(wordsLv, wordsSet, set.filter(w => !got.has(w.id)).map(w => w.id)), missSummary);
   };
   if(canReview) $("rev").onclick = () => drill(VC.buildReviewPlan(learnedWords(), prog, PACK, { canHear: canHearWord, today: dayToday() }).map(itemFromPlan), wordsRender, missSummary);
@@ -2852,7 +2875,7 @@ function placeVocabNext(){
   const P = $("panel"); const V = PL.vocab;
   if(V.i >= V.items.length){ placeResult(); return; }
   const it = V.items[V.i++]; const w = it.w; setScore(V.i - 1, V.items.length);
-  const opts = shuffle(meaningChoices(w));
+  const opts = shuffle([VC.gloss(w), ...VC.meaningOpts(w, WORDS).map(d => VC.gloss(d))]); // a measurement: level tiers, never optsMix (review M1)
   const asHear = canHearWord(w) && Math.random() < 0.5;
   P.innerHTML = `<p class="q">Words ${V.i} / ${V.items.length}</p>
     ${asHear ? `<div class="hear-stage"><button class="speaker" id="rp" aria-label="Replay">${SPEAKER_SVG}</button></div>` : readStimHTML(w)}

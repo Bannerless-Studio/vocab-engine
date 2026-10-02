@@ -200,10 +200,10 @@ TONE_SYSTEMS = ("pinyin",)
 
 
 def check_pron_aids_pack(pack, rep):
-    """pack.tones, pack.soundsReference, pack.helpClose, pack.readAnswerBlock, pack.optsOneScript (pack.typing "pron" is checked with typing)."""
+    """pack.tones, pack.soundsReference, pack.helpClose, pack.readAnswerBlock, pack.optsOneScript, pack.optsMix (pack.typing "pron" is checked with typing)."""
     if "tones" in pack and pack["tones"] not in TONE_SYSTEMS:
         rep.err(f"pack.tones must be one of {list(TONE_SYSTEMS)} (got {pack['tones']!r})")
-    for f in ("helpClose", "readAnswerBlock", "optsOneScript"):
+    for f in ("helpClose", "readAnswerBlock", "optsOneScript", "optsMix"):
         if f in pack and pack[f] is not True:
             rep.err(f"pack.{f} must be true when present")
     if "soundsReference" in pack:
