@@ -2479,11 +2479,11 @@ function readQuestionScreen(){
   P.innerHTML = `<div class="drill-body top"><p class="q">Question ${qi+1} / ${p.questions.length}</p>
     ${qHidden ? `<div id="qshwrap"><button class="ghost" id="qsh" style="margin:8px 0">Show question</button></div>${REPLAY_STAGE}` : `${qText()}${hearQ ? REPLAY_STAGE : ""}${qTr()}`}
     <div class="opts ${tf ? "" : "opts-w"}" id="o"></div>
-    <div class="reveal" id="rv"></div>
+    <div id="qans"><div class="reveal" id="rv"></div><button class="next" id="nx" style="display:none">${qi+1 < p.questions.length ? "Next" : "See results"}</button></div>
     <button class="ghost" id="ptoggle" aria-expanded="${RD.shown}" style="margin-top:12px">${RD.shown ? "Hide passage" : "Show passage"}</button>
     ${glossBox()}
     <div class="passage" id="pbox"${RD.shown ? "" : " hidden"}>${passageHTML(-1)}</div>
-    </div><div class="actions"><button class="next" id="nx" style="display:none">${qi+1 < p.questions.length ? "Next" : "See results"}</button></div>`;
+    </div>`;
   wirePassage($("pbox"), $("gloss"));
   // Spoken once per question: a re-mount, or a voice arriving after answering, only offers Replay.
   if(hearQ){
@@ -2517,9 +2517,9 @@ function readQuestionScreen(){
     // speak() cancels the question's TTS, so the source sentence never overlaps it.
     if(hearS){ const rb = $("rvp"); if(fresh) saySentence(s, rb); rb.onclick = () => saySentence(s, rb); }
     const hs = $("pbox").querySelector(`[data-si="${q.sentence}"]`); if(hs) hs.classList.add("hi");
-    // With the passage open, Next sits below it: scrolling there would carry the verdict off
-    // screen (owner feedback 2026-10-02), so the verdict is brought into view instead.
-    if(RD.shown){ $("nx").style.display = "block"; if(fresh) bringIntoView($("rv")); } else showNext();
+    // Verdict and Next stay together above the passage toggle, so an open passage never
+    // pushes them off screen (owner feedback 2026-10-02); scrolls only when they are off it.
+    $("nx").style.display = "block"; if(fresh) bringIntoView($("qans"));
     setScore(qi+1, p.questions.length);
   };
   order.forEach((v, i) => {

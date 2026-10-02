@@ -4,7 +4,7 @@
 // button, close on a tap outside, on Escape and after the timer (held while a pointer or
 // finger is on it), one at a time, [4] flag off (zh without the field): popover markup and
 // behaviour as before, [5] a Read question answered with the passage open brings the
-// verdict into view instead of scrolling to Next below the passage.
+// verdict and Next (one button, above the passage toggle) into view, never scrolling past the passage.
 // Boots engine/app.html in the fake DOM of tests/session_resume_checks.js with a fake clock.
 // Run: node tests/help_close_checks.js   (PYTHON3 overrides the interpreter)
 "use strict";
@@ -268,16 +268,20 @@ async function onPassage(pack){
     check("no timer, a tap outside leaves it open (as before)", !gloss.hidden);
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  console.log("\n[5] Read verdict with the passage open");
+  console.log("\n[5] Read question: verdict and Next above the passage toggle");
   try {
     const { api } = await onPassage();
-    api.el("rdone").click(); api.el("ptoggle").click();
-    scrolled.length = 0;
-    api.el("o").children[0].click();
-    check(`passage open, answered: the verdict is brought into view, Next is shown but not scrolled to (scrolled: ${scrolled.join(", ")})`, scrolled.includes("rv") && !scrolled.includes("nx") && api.el("nx").style.display === "block");
-    api.el("nx").click(); scrolled.length = 0;
-    api.el("o").children[0].click();
-    check(`passage closed, answered: scrolls to Next as before (scrolled: ${scrolled.join(", ")})`, scrolled.includes("nx") && !scrolled.includes("rv"));
+    api.el("rdone").click();
+    const h = api.html("panel"), at = id => h.indexOf(`id="${id}"`);
+    check("question screen order: options, verdict, Next, passage toggle, passage; one Next", at("o") < at("rv") && at("rv") < at("nx") && at("nx") < at("ptoggle") && at("ptoggle") < at("pbox") && h.split('id="nx"').length === 2);
+    api.el("ptoggle").click();
+    for(const right of [true, false]){
+      scrolled.length = 0;
+      const q = P1.questions[api.rd().qi], opts = api.el("o").children;
+      (right ? opts.find(b => b.dataset.v === String(q.answer)) : opts.find(b => b.dataset.v !== String(q.answer))).click();
+      check(`passage open, answered ${right ? "right" : "wrong"}: verdict and Next brought into view together, no scroll to the bottom (scrolled: ${scrolled.join(", ")})`, scrolled.join() === "qans" && api.el("nx").style.display === "block" && /Right\.|Not quite\./.test(api.html("rv")));
+      api.el("nx").click(); if(!api.rd().shown) api.el("ptoggle").click();
+    }
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

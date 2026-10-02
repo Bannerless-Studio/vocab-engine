@@ -4227,7 +4227,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2135369374-1735378";
+const VE_BUILD = "1331384653-1735342";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -5480,11 +5480,11 @@ function readQuestionScreen(){
   P.innerHTML = `<div class="drill-body top"><p class="q">Question ${qi+1} / ${p.questions.length}</p>
     ${qHidden ? `<div id="qshwrap"><button class="ghost" id="qsh" style="margin:8px 0">Show question</button></div>${REPLAY_STAGE}` : `${qText()}${hearQ ? REPLAY_STAGE : ""}${qTr()}`}
     <div class="opts ${tf ? "" : "opts-w"}" id="o"></div>
-    <div class="reveal" id="rv"></div>
+    <div id="qans"><div class="reveal" id="rv"></div><button class="next" id="nx" style="display:none">${qi+1 < p.questions.length ? "Next" : "See results"}</button></div>
     <button class="ghost" id="ptoggle" aria-expanded="${RD.shown}" style="margin-top:12px">${RD.shown ? "Hide passage" : "Show passage"}</button>
     ${glossBox()}
     <div class="passage" id="pbox"${RD.shown ? "" : " hidden"}>${passageHTML(-1)}</div>
-    </div><div class="actions"><button class="next" id="nx" style="display:none">${qi+1 < p.questions.length ? "Next" : "See results"}</button></div>`;
+    </div>`;
   wirePassage($("pbox"), $("gloss"));
   // Spoken once per question: a re-mount, or a voice arriving after answering, only offers Replay.
   if(hearQ){
@@ -5518,9 +5518,9 @@ function readQuestionScreen(){
     // speak() cancels the question's TTS, so the source sentence never overlaps it.
     if(hearS){ const rb = $("rvp"); if(fresh) saySentence(s, rb); rb.onclick = () => saySentence(s, rb); }
     const hs = $("pbox").querySelector(`[data-si="${q.sentence}"]`); if(hs) hs.classList.add("hi");
-    // With the passage open, Next sits below it: scrolling there would carry the verdict off
-    // screen (owner feedback 2026-10-02), so the verdict is brought into view instead.
-    if(RD.shown){ $("nx").style.display = "block"; if(fresh) bringIntoView($("rv")); } else showNext();
+    // Verdict and Next stay together above the passage toggle, so an open passage never
+    // pushes them off screen (owner feedback 2026-10-02); scrolls only when they are off it.
+    $("nx").style.display = "block"; if(fresh) bringIntoView($("qans"));
     setScore(qi+1, p.questions.length);
   };
   order.forEach((v, i) => {
@@ -5930,4 +5930,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2939461815-1734702-->
+<!--ve-build:532629411-1734666-->

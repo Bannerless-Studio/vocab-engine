@@ -63,7 +63,7 @@ $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/typed_from_checks.js                 # 67 (pack.typedFrom / glossFocus; control vs ef44c6e)
 $NODE tests/session_resume_checks.js             # 93 (drill/passage resume: tab switch, reload, relaunch, per-tab parking)
-$NODE tests/help_close_checks.js                 # 29 (pack.helpClose popover dismissal; Read verdict scroll)
+$NODE tests/help_close_checks.js                 # 30 (pack.helpClose popover dismissal; Read verdict + Next above the passage)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)
