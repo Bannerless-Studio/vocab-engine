@@ -2274,8 +2274,8 @@ function answerCharChoice(prog, start){
 }
 // Flips the flag only: the path is re-derived from it, no record or set state is touched.
 function setCharOrder(prog, defer){ ensureChars(prog).defer = !!defer; return prog; }
-// characters.withWords order (docs/PACK_SCHEMA.md "withWords"; owner 2026-10-02: HSK 4 words
-// came before 字3 was finished). chars.order "first" | "with"; chars.defer true ("later") wins.
+// characters.withWords order (docs/PACK_SCHEMA.md "withWords"; owner 2026-10-02: the next word
+// level came before the pending character stage was finished). chars.order "first" | "with"; chars.defer true ("later") wins.
 // Fixed when progress loads: a learner with character records from before (the old single
 // stage, taught every session) keeps characters first, so nothing changes silently.
 const CHAR_ORDERS = ["first", "with"];
@@ -4752,7 +4752,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2497026347-1806928";
+const VE_BUILD = "420245799-1806959";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6484,4 +6484,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2711176684-1806252-->
+<!--ve-build:201767736-1806282-->

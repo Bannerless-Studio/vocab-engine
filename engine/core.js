@@ -1912,8 +1912,8 @@ function answerCharChoice(prog, start){
 }
 // Flips the flag only: the path is re-derived from it, no record or set state is touched.
 function setCharOrder(prog, defer){ ensureChars(prog).defer = !!defer; return prog; }
-// characters.withWords order (docs/PACK_SCHEMA.md "withWords"; owner 2026-10-02: HSK 4 words
-// came before 字3 was finished). chars.order "first" | "with"; chars.defer true ("later") wins.
+// characters.withWords order (docs/PACK_SCHEMA.md "withWords"; owner 2026-10-02: the next word
+// level came before the pending character stage was finished). chars.order "first" | "with"; chars.defer true ("later") wins.
 // Fixed when progress loads: a learner with character records from before (the old single
 // stage, taught every session) keeps characters first, so nothing changes silently.
 const CHAR_ORDERS = ["first", "with"];
