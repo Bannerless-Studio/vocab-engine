@@ -541,7 +541,7 @@ function missesCarried(drilled0){
     const s1 = run.drilled.filter(d => d.sess === 0);
     const steps = [...new Set(s1.map(d => d.step))];
     const share = steps.map(st => { const ks = [...new Set(s1.filter(d => d.step === st).map(d => d.key))]; return { st, n: ks.length, miss: ks.filter(k => k in misses).length }; }).filter(x => x.n >= 5);
-    const back = keys.filter(k => run.drilled.some(d => d.key === k && VC.daySettles([misses[k]], d.kind)));
+    const back = keys.filter(k => withAlso(run.drilled).some(d => d.key === k && VC.daySettlesAt(k, [misses[k]], d.kind)));
     console.log(`  session 1 per stage (carried misses / items): ${share.map(x => `step ${x.st} ${x.miss}/${x.n}`).join(", ")}; carried misses asked in a settling kind within 4 sessions: ${back.length}/${keys.length}`);
     check(`backlog: every session-1 stage has >= 40% items that are not carried misses (${share.map(x => `${x.n - x.miss}/${x.n}`).join(", ")})`, share.length > 0 && share.every(x => x.n - x.miss >= 0.4 * x.n));
     check(`backlog: every carried miss is asked in a settling kind within 4 sessions (${back.length}/${keys.length})`, back.length === keys.length);
