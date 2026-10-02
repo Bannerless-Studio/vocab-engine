@@ -197,6 +197,9 @@ const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
 // Mid HSK 2 before any character stage: with one stage per level (fb2-write) that is a learner who
 // put characters after the words (chars.defer), else 字1 would come before HSK 2.
 const seedPF = () => VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PACK);
+// The Today walks of seedPF need a words Learn with no unit recorded: under characters.learn "lag"
+// (zh since fb3-lag) that learner gets 字 sets, so they run on the stage model (lag_checks.js).
+const STAGE_PACK = (p => { const c = Object.assign({}, p.characters); delete c.learn; return Object.assign({}, p, { characters: c }); })(PACK);
 // Plays the active flow: answers every item right (mc: the answer option; type: the
 // word's pron), presses Continue / Drill / Next; records every screen, option and reveal.
 function walk(api, stopAt){
@@ -287,7 +290,7 @@ function walk(api, stopAt){
 
   console.log("\n[3] app: colouring on every screen, the typed-reading item");
   try {
-    const { api } = await boot({ seed: 7 });
+    const { api } = await boot({ seed: 7, pack: STAGE_PACK });
     check("CSS: .t1-.t5 use --t1..--t5, defined for light, dark (media) and data-theme dark",
       /\.t1\{color:var\(--t1\)\} \.t2\{color:var\(--t2\)\} \.t3\{color:var\(--t3\)\} \.t4\{color:var\(--t4\)\} \.t5\{color:var\(--t5\)\}/.test(appHtml)
       && (appHtml.match(/--t1:#[0-9A-F]{6};--t2:#[0-9A-F]{6};--t3:#[0-9A-F]{6};--t4:#[0-9A-F]{6};--t5:#[0-9A-F]{6};/g) || []).length === 3);

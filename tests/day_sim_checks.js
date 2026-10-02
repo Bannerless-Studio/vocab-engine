@@ -328,8 +328,11 @@ function windowRepeats(drilled0, dayOf){
     // the day log keeps both as "type".
     const did = d.sess + ":" + d.step, k = d.key + "|" + (d.also ? "typeW" : d.kind);
     const prev = right.get(k) || [];
-    if(prev.some(p => p.did !== did && (d.sess - p.sess <= VC.DAY_RECENT_SESSIONS || dayOf(p.sess) === dayOf(d.sess)))) ex.push(`${k} s${d.sess + 1}`);
-    if(!d.ok) missedIn.add(d.key + "@" + did); else if(!missedIn.has(d.key + "@" + did)) right.set(k, prev.concat({ sess: d.sess, did }));
+    // The in-drill retry after a miss of the item or of its unit (a unit missed in charSound comes
+    // back as its word's typed item, d.also) is the drill's own re-ask: no repeat, no evidence.
+    const retry = [d.key, d.also].some(x => x && missedIn.has(x + "@" + did));
+    if(!retry && prev.some(p => p.did !== did && (d.sess - p.sess <= VC.DAY_RECENT_SESSIONS || dayOf(p.sess) === dayOf(d.sess)))) ex.push(`${k} s${d.sess + 1}`);
+    if(!d.ok) missedIn.add(d.key + "@" + did); else if(!retry) right.set(k, prev.concat({ sess: d.sess, did }));
   });
   return ex;
 }

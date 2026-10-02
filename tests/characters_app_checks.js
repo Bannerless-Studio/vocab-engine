@@ -793,7 +793,9 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
     throw new Error("walk did not finish");
   }
   {
-    const { api } = await boot({ pack: PF_ZH });
+    // A words Learn with no unit recorded: under characters.learn "lag" this learner gets 字 sets,
+    // so the walk runs on the stage model (lag_checks.js covers lag).
+    const { api } = await boot({ pack: (p => { const c = Object.assign({}, p.characters); delete c.learn; return Object.assign({}, p, { characters: c }); })(PF_ZH) });
     check("PRON_FIRST on for zh, show-written capture listener attached", api.pronFirst() && api.panelListeners().length === 2);
     api.setProg(seedPF()); api.today();
     // The plan's Read row names a passage by its title, which has no reading data here (reported residual).
