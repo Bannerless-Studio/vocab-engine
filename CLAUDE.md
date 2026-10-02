@@ -44,11 +44,11 @@ Why it is built this way (one line each):
 
 ## Commands (pinned)
 
-Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-02, branch fb2-write2 (on main 4093cc9).
+Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-02, branch fb3-lag (on main 590af86).
 
 ```sh
 $NODE tests/engine_checks.js                     # 703 passed; includes the dist/zh.html + sw.js stale guard
-$NODE tests/pron_aids_checks.js                  # 157
+$NODE tests/pron_aids_checks.js                  # 158
 $NODE tests/migration_checks.js                  # 371 (hsk_pinyin -> vocab_zh; uses ../chinese when present)
 $NODE tests/characters_checks.js                 # 134
 $NODE tests/characters_app_checks.js             # 202
