@@ -239,7 +239,7 @@ async function playDay(pack, seedP, sessions, seed, gapMs, onSession){
       const D = api.getD();
       if(D && api.getCur() && D.cur){
         const it = api.getCur(); const ok = ans() < ACC;
-        drilled.push({ sess: sn, step: api.log[api.log.length - 1].step, key: it.key, kind: kindOf(it), ok, also: unitAlso(it, api.getProg(), pack) });
+        drilled.push({ sess: sn, step: api.log[api.log.length - 1].step, key: it.key, kind: kindOf(it), ok, also: unitAlso(it, api.getProg(), pack), gw: gapWord(it) });
         answer(api, ok); api.el("nx").click(); continue;
       }
       if(/id="again"/.test(html)){ api.el("again").click(); break; }
@@ -309,10 +309,21 @@ const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
 // Session clock (core.js DAY_RECENT_SESSIONS): a drilled item repeats a kind already answered
 // right (not the in-drill retry) earlier the same day, or in one of the previous
 // DAY_RECENT_SESSIONS sessions, in another drill. dayOf: session index -> day index.
+// A gap item answers its blanked word too (markGapWord): the word key, so a gap miss counts as
+// that word's miss.
+const SENT_BY_KEY = new Map(SENTENCES.map(x => ["s:" + x.id, x]));
+function gapWord(it){
+  if(!it.rz || it.rz.b !== "sGap") return undefined;
+  const x = SENT_BY_KEY.get(String(it.key)); const id = x && (x.words || []).find(id => BY_ID[id] && BY_ID[id].w === String(it.a));
+  return id ? "w:" + id : undefined;
+}
 function windowRepeats(drilled0, dayOf){
   const drilled = withAlso(drilled0);
   const right = new Map(), missedIn = new Set(); const ex = [];
   drilled.forEach(d => {
+    // A word missed since (here or as a gap's blank) is asked again in a kind that settles the
+    // miss (core.js dayItemKind), which may be the kind it was right in: no repeat.
+    if(d.gw && !d.ok) [...right.keys()].filter(k => k.startsWith(d.gw + "|")).forEach(k => right.delete(k));
     // Typing the characters (also: a written-side kind) is another ask than typing the pinyin, though
     // the day log keeps both as "type".
     const did = d.sess + ":" + d.step, k = d.key + "|" + (d.also ? "typeW" : d.kind);
