@@ -212,7 +212,7 @@ async function playDay(pack, seedP, sessions, seed, gapMs){
   const drilled = [];   // { sess, step, key, kind, ok }
   const learnNew = [];  // per session: new words/units first recorded
   for(let sn = 0; sn < sessions; sn++){
-    NOW += gapMs || 60 * 60 * 1000;
+    NOW = typeof gapMs === "function" ? gapMs(sn) : NOW + (gapMs || 60 * 60 * 1000);
     const before = api.getProg();
     const had = new Set([...Object.keys(before.w).map(k => "w:" + k), ...Object.keys((before.chars || {}).c || {}).map(k => "c:" + k)]);
     if(!/id="go"/.test(api.panel())) throw new Error(`session ${sn + 1}: no Start today button`);
@@ -288,6 +288,29 @@ function report(label, m, learnNew){
   console.log(`    missed today (s1..s${N_SESSIONS - 1}): ${m.missKeys.length} units, never back: ${m.lostMiss.length}; due weak never drilled: ${m.weakStarved.length}/${K_DUE}; mastered-stale never drilled: ${m.staleStarved.length}/${K_DUE}`);
 }
 const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
+// Session clock (core.js DAY_RECENT_SESSIONS): a drilled item repeats a kind already answered
+// right (not the in-drill retry) earlier the same day, or in one of the previous
+// DAY_RECENT_SESSIONS sessions, in another drill. dayOf: session index -> day index.
+function windowRepeats(drilled, dayOf){
+  const right = new Map(), missedIn = new Set(); const ex = [];
+  drilled.forEach(d => {
+    const did = d.sess + ":" + d.step, k = d.key + "|" + d.kind;
+    const prev = right.get(k) || [];
+    if(prev.some(p => p.did !== did && (d.sess - p.sess <= VC.DAY_RECENT_SESSIONS || dayOf(p.sess) === dayOf(d.sess)))) ex.push(`${k} s${d.sess + 1}`);
+    if(!d.ok) missedIn.add(d.key + "@" + did); else if(!missedIn.has(d.key + "@" + did)) right.set(k, prev.concat({ sess: d.sess, did }));
+  });
+  return ex;
+}
+// Every miss before the last session comes back in a later drill, any day, in a kind that settles
+// it (core.js daySettles: its own kind, or production for a production miss).
+function missesCarried(drilled){
+  const lastSess = Math.max(...drilled.map(d => d.sess));
+  const pos = d => d.sess * 100 + (d.step || 0);
+  const seen = new Map();
+  drilled.filter(d => !d.ok && d.sess < lastSess).forEach(d => seen.set(d.key + "|" + d.kind, d));
+  const lost = [...seen.values()].filter(m => !drilled.some(d => pos(d) > pos(m) && d.key === m.key && VC.daySettles([m.kind], d.kind)));
+  return { n: seen.size, lost: lost.map(m => `${m.key} ${m.kind} s${m.sess + 1}`) };
+}
 
 (async function main(){
   const PACK_OFF = Object.assign({}, PACK_ON); delete PACK_OFF.dayAware;
@@ -345,9 +368,10 @@ const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
     api.el("go").click();
     for(let i = 0; i < 3; i++){ answer(api, i !== 1); api.el("nx").click(); }
     const qsig = a => { const D = a.getD(); return [D.cur, ...D.q].filter(Boolean).map(it => it.key + "|" + kindOf(it)).join(); };
-    const before = { q: qsig(api), day: JSON.stringify(api.getProg().day) };
+    const before = { q: qsig(api), day: JSON.stringify(api.getProg().day), sn: api.getProg().sn };
     api = await boot(PACK_ON, st, 99);
     check(`reload: same queue, day log unchanged (drill ordinal ${api.getProg().day.n}, not counted again)`, !!api.getD() && qsig(api) === before.q && JSON.stringify(api.getProg().day) === before.day);
+    check(`reload: session ordinal prog.sn unchanged (${before.sn} -> ${api.getProg().sn})`, before.sn === 1 && api.getProg().sn === 1);
   }
   const scenarios = [
     { name: "A: 150 words (HSK 1) + 60 character units, learning HSK 2 words", words: 150, units: 60 },
@@ -394,6 +418,26 @@ const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
     const midHit = tag => midUnits.filter(k => res[tag].day.drilled.some(d => d.key === k)).length;
     check(`dayAware: character units at streak 3-5 reach Review/Recall within the day (${midHit("on")}/${midUnits.length}; control ${midHit("off")})`, midUnits.length > 0 && midHit("on") > 0);
   }
+  console.log(`\n[rollover] scenario A, sessions 1-4 on one evening, 5-8 the next morning`);
+  {
+    const t0 = new Date(2026, 9, 2, 18, 0, 0).getTime(), t1 = new Date(2026, 9, 3, 7, 0, 0).getTime();
+    const at = sn => sn < 4 ? t0 + sn * 3600e3 : t1 + (sn - 4) * 3600e3;
+    for(const [tag, pack] of [["off", PACK_OFF], ["on", PACK_ON]]){
+      NOW = t0 - 3600e3;
+      const seedP = seedProg(pack, 150, 60, 11);
+      const run = await playDay(pack, seedP, N_SESSIONS, 5, at);
+      const rep = windowRepeats(run.drilled, s => s < 4 ? 0 : 1), mc = missesCarried(run.drilled);
+      const cross = rep.filter(x => +x.split(" s")[1] === 5).length;
+      const s5 = run.drilled.filter(d => d.sess === 4).length;
+      console.log(`  ${tag}: same-kind repeats in the window ${rep.length}/${run.drilled.length} (session 5, first after midnight: ${cross}/${s5}); misses carried back in a settling kind ${mc.n - mc.lost.length}/${mc.n}; prog.sn ${run.prog.sn}`);
+      if(WHY && tag === "on") console.log("    repeats:", rep.slice(0, 10).join("; "), "lost:", mc.lost.join("; "));
+      if(tag === "on"){
+        check(`rollover: prog.sn counts one per Today session (${run.prog.sn})`, run.prog.sn === N_SESSIONS);
+        check(`rollover: every miss of sessions 1-${N_SESSIONS - 1} comes back in a settling kind across midnight (${mc.n - mc.lost.length}/${mc.n})`, mc.n > 0 && mc.lost.length === 0);
+        check(`rollover: no same-kind repeat of an item right earlier that day or in the previous ${VC.DAY_RECENT_SESSIONS} sessions (${rep.length}/${run.drilled.length}; session 5 ${cross}/${s5})`, rep.length === 0);
+      }
+    }
+  }
   console.log(`\n[rotation] scenario B, one Today session a day for ${ROT_DAYS} days: nothing eligible stays unseen without bound`);
   for(const [tag, pack] of [["off", PACK_OFF], ["on", PACK_ON]]){
     NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
@@ -404,10 +448,14 @@ const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
     const mast = recs.filter(x => x[1].s >= 3).sort((a, b) => (a[1].t - b[1].t) || (a[0] < b[0] ? -1 : 1));
     const mid = recs.filter(x => x[0][0] === "c" && x[1].s >= 3 && x[1].s <= 5);
     const oldest = mast.slice(0, ROT_K).filter(x => !touched.has(x[0])).length;
+    if(WHY) mast.slice(0, ROT_K).filter(x => !touched.has(x[0])).forEach(x => { const id = x[0].slice(2), fp = run.prog; console.log("    unseen", x[0], JSON.stringify(x[1]), JSON.stringify(x[0][0] === "w" ? fp.w[id] : fp.chars.c[id]), "sn", fp.sn, "rank", mast.indexOf(x)); });
     const midSeen = mid.filter(x => touched.has(x[0])).length;
     const mastSeen = mast.filter(x => touched.has(x[0])).length;
     console.log(`  ${tag}: mastered units drilled ${mastSeen}/${mast.length}; ${ROT_K} longest unseen at start never drilled: ${oldest}; character units at streak 3-5 drilled ${midSeen}/${mid.length}`);
+    const rrep = windowRepeats(run.drilled, s => s);
+    console.log(`    same-kind repeats of an item right in the previous ${VC.DAY_RECENT_SESSIONS} sessions: ${rrep.length}/${run.drilled.length}`);
     if(tag === "on"){
+      check(`rotation: no same-kind repeat of an item right in the previous ${VC.DAY_RECENT_SESSIONS} sessions (${rrep.length}/${run.drilled.length})`, rrep.length === 0);
       check(`rotation: the ${ROT_K} mastered units unseen longest at the start are all drilled within ${ROT_DAYS} days`, oldest === 0);
       check(`rotation: every character unit at streak 3-5 is drilled within ${ROT_DAYS} days (${midSeen}/${mid.length})`, mid.length > 0 && midSeen === mid.length);
     }

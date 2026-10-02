@@ -1136,19 +1136,53 @@ function applyMissedKinds(plan, prog, pack, production, opts){
 // mastered unit was never refreshed. prog.day logs today's answers per item key ("w:", "c:",
 // "s:", "x:"): r the kinds answered right, c / m the drill ordinal of the last right answer /
 // miss. Records gain t, the day number of the last answer. Both are written only with the flag.
+// The planner's clock is the session ordinal prog.sn (owner 2026-10-02: "count by sessions rather
+// than days?"): records and log entries keep u, the session of the last answer, so "longest
+// unseen" means something within one day of many sessions; the date is the tie-break.
 const DAY_REFRESH_SHARE = 0.2, DAY_AGAIN_SHARE = 0.25, DAY_CONSOLIDATE_SHARE = 0.15;
+// "Already right, ask another kind" covers today and the last DAY_RECENT_SESSIONS sessions, so the
+// first session after midnight does not replay the evening's items.
+const DAY_RECENT_SESSIONS = 2;
 function dayAwareOn(pack){ return !!(pack && pack.dayAware === true); }
 // A log from another day, or one an older engine or an import mangled, is a fresh day: the log
 // is never validated at boot, so it can never reset the progress record.
+// A new day carries over every unsettled miss (it stays first however many days pass) and the
+// right kinds of the last sessions; nothing else.
 function dayLog(prog, today){
   const d = prog && prog.day;
-  return isObj(d) && d.d === today && isObj(d.a) && Number.isInteger(d.n) ? d : { d: today, n: 0, a: {} };
+  return isObj(d) && d.d === today && isObj(d.a) && Number.isInteger(d.n) ? d : { d: today, n: 0, a: dayCarry(d, daySn(prog)) };
 }
-function dayStart(prog, pack, today){
+function dayCarry(d, sn){
+  const out = {};
+  if(!isObj(d) || !isObj(d.a)) return out;
+  Object.keys(d.a).forEach(k => {
+    const e = d.a[k]; if(!isObj(e)) return;
+    const mk = Array.isArray(e.mk) ? e.mk.filter(x => typeof x === "string") : [];
+    const r = dayRecentU(e, sn) && Array.isArray(e.r) ? e.r.filter(x => typeof x === "string") : [];
+    if(!mk.length && !r.length) return;
+    const c = {}; if(mk.length) c.mk = mk; if(r.length){ c.r = r; c.u = e.u; }
+    out[k] = c;
+  });
+  return out;
+}
+function daySn(prog){ return prog && Number.isInteger(prog.sn) && prog.sn > 0 ? prog.sn : 0; }
+// A Today session counts once (app.html Start today), any other drill once; Today's own steps and
+// a resumed session never do.
+function daySessionStart(prog, pack){
   if(!dayAwareOn(pack) || !prog) return false;
-  const d = prog.day = dayLog(prog, today); d.n++;
+  prog.sn = daySn(prog) + 1;
   return true;
 }
+function dayStart(prog, pack, today, newSession){
+  if(!dayAwareOn(pack) || !prog) return false;
+  const d = prog.day = dayLog(prog, today); d.n++;
+  if(newSession) daySessionStart(prog, pack);
+  return true;
+}
+const dayRecentU = (e, sn) => typeof e.u === "number" && sn > 0 && e.u >= sn - DAY_RECENT_SESSIONS;
+// Right today (c), or right in the last sessions (u, carried over midnight).
+const dayRecent = (e, sn) => isObj(e) && (typeof e.c === "number" || dayRecentU(e, sn));
+const dayRight = (e, sn) => dayRecent(e, sn) && Array.isArray(e.r) ? e.r : [];
 function dayRecOf(prog, key){
   const k = String(key), id = k.slice(2), p = prog || {};
   const map = k[0] === "w" ? p.w : k[0] === "s" ? p.s : k[0] === "c" ? charRecs(p) : k[0] === "x" ? scriptRecs(p) : null;
@@ -1165,15 +1199,17 @@ function noteDay(prog, pack, today, key, kind, ok){
   if(ok){
     if(kind && e.m !== d.n){ if(!Array.isArray(e.r)) e.r = []; if(!e.r.includes(kind)) e.r.push(kind); }
     if(!(kind === "gap" && String(key)[0] === "w")){
-      e.c = d.n;
+      e.c = d.n; if(daySn(prog)) e.u = daySn(prog);
       if(e.m !== d.n && Array.isArray(e.mk)){ e.mk = e.mk.filter(m => !daySettles([m], kind)); if(!e.mk.length) delete e.mk; }
     }
   } else {
     e.m = d.n;
     if(kind){ if(!Array.isArray(e.mk)) e.mk = []; if(!e.mk.includes(kind)) e.mk.push(kind); }
   }
-  const rec = dayRecOf(prog, key); const t = isoDayNumber(today);
+  // A cloze is no word drill: the blanked word keeps its last-seen place in the refresh order.
+  const rec = kind === "gap" && String(key)[0] === "w" ? null : dayRecOf(prog, key); const t = isoDayNumber(today);
   if(rec && isFinite(t)) rec.t = t;
+  if(rec && daySn(prog)) rec.u = daySn(prog);
   return true;
 }
 // One partition for words, sentences and character units: production asks for the form
@@ -1190,20 +1226,24 @@ function dayPending(e){
   if(Array.isArray(e.mk)) return e.mk.length ? e.mk : null;
   return typeof e.m === "number" && !(typeof e.c === "number" && e.c > e.m) ? [] : null;
 }
-// 0 missed today and not yet settled, and this planner can ask a kind that settles it;
-// 1 due (unmastered, not right today); 2 mastered, not right today; 3 right today, some kind
-// this planner asks still open; 4 right today in every kind it asks, or a miss it cannot settle
-// (a recall miss in Listen waits for a planner that asks production).
-function dayTier(c, d){
+// 0 missed (today or earlier) and not yet settled, and this planner can ask a kind that settles it;
+// 1 due (unmastered, not right recently); 2 mastered, not right recently; 3 right recently (today
+// or the last DAY_RECENT_SESSIONS sessions), some kind this planner asks still open; 4 right
+// recently in every kind it asks, or a miss it cannot settle (a recall miss in Listen waits for a
+// planner that asks production). sn: the current session ordinal (prog.sn).
+function dayTier(c, d, sn){
   const e = d.a[c.key];
-  const r = isObj(e) && Array.isArray(e.r) ? e.r : [];
+  const r = dayRight(e, sn);
   const open = (c.kinds || []).some(k => !r.includes(k));
   const mk = dayPending(e);
   if(mk) return (c.kinds || []).some(k => daySettles(mk, k)) ? 0 : 4;
-  if(!isObj(e) || typeof e.c !== "number") return ((c.rec && c.rec.s) || 0) >= c.mastered ? 2 : 1;
+  if(!dayRecent(e, sn)) return ((c.rec && c.rec.s) || 0) >= c.mastered ? 2 : 1;
   return open ? 3 : 4;
 }
 const dayT = rec => rec && typeof rec.t === "number" && isFinite(rec.t) ? rec.t : -Infinity;
+const dayU = rec => rec && typeof rec.u === "number" && isFinite(rec.u) ? rec.u : -Infinity;
+// Longest unseen first: sessions since the last answer, then days.
+const dayAge = (a, b) => (dayU(a) - dayU(b)) || (dayT(a) - dayT(b));
 const dayS = rec => (rec && rec.s) || 0;
 const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c === "number" ? e.c : 0; };
 // Priority: today's misses, a reserved share of character units between mastered and bare
@@ -1212,14 +1252,14 @@ const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c ===
 // weak unit had its turn), weak units by lowest streak then oldest last answer, a capped share
 // of harder kinds for units already right today, the rest of the consolidating and refresh
 // units, and only then what was right today. Jitter (below 1) only breaks exact ties.
-function dayPick(cands, n, d, rng){
+function dayPick(cands, n, d, rng, sn){
   const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
-  (cands || []).forEach(c => { const t = dayTier(c, d); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
-  C.sort((a, b) => dayT(a.rec) - dayT(b.rec) || dayS(a.rec) - dayS(b.rec) || a.j - b.j);
+  (cands || []).forEach(c => { const t = dayTier(c, d, sn); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
+  C.sort((a, b) => dayAge(a.rec, b.rec) || dayS(a.rec) - dayS(b.rec) || a.j - b.j);
   const cmp = [
     (a, b) => weakScore(b.rec) - weakScore(a.rec),
-    (a, b) => dayS(a.rec) - dayS(b.rec) || dayT(a.rec) - dayT(b.rec),
-    (a, b) => dayT(a.rec) - dayT(b.rec) || dayS(a.rec) - dayS(b.rec),
+    (a, b) => dayS(a.rec) - dayS(b.rec) || dayAge(a.rec, b.rec),
+    (a, b) => dayAge(a.rec, b.rec) || dayS(a.rec) - dayS(b.rec),
     (a, b) => dayC(a, d) - dayC(b, d) || dayS(a.rec) - dayS(b.rec),
     (a, b) => dayC(a, d) - dayC(b, d),
   ];
@@ -1244,7 +1284,7 @@ function dayItemKind(prog, pack, today, key, planned, kinds){
   if(!dayAwareOn(pack)) return planned;
   const e = dayLog(prog, today).a[key];
   if(!isObj(e)) return planned;
-  const r = Array.isArray(e.r) ? e.r : [], ks = kinds || [];
+  const r = dayRight(e, daySn(prog)), ks = kinds || [];
   const mk = dayPending(e);
   if(mk){
     const fit = [planned, ...mk, ...ks.filter(dayProd), ...ks].filter(k => ks.includes(k) && daySettles(mk, k));
@@ -1271,7 +1311,7 @@ function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng){
   const d = dayLog(prog, today); const sent = keyPrefix === "s:";
   const recs = (sent ? prog.s : prog.w) || {};
   const cands = (list || []).map(x => ({ x, key: keyPrefix + x.id, rec: recs[x.id], mastered: sent ? SENTENCE_MASTERED : WORD_MASTERED, kinds: typeof kinds === "function" ? kinds(x) : kinds }));
-  return dayPick(cands, n, d, rng).map(c => c.x);
+  return dayPick(cands, n, d, rng, daySn(prog)).map(c => c.x);
 }
 function dayReviewPlan(learned, prog, pack, n, o){
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = o.rng || Math.random;
@@ -1280,7 +1320,7 @@ function dayReviewPlan(learned, prog, pack, n, o){
   const srecs = scriptRecs(prog);
   const cands = [...(learned || []).map(dayWordCand(prog, wk)), ...ru.map(dayCharCand(prog, pack, ck)),
     ...rs.map(u => ({ t: "x", x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: scfg ? scfg.mastered : SCRIPT_MASTERED, kinds: scfg ? scfg.reviewKinds : [] }))];
-  const pool = shuffle(dayPick(cands, n, d, o.rng), o.rng);
+  const pool = shuffle(dayPick(cands, n, d, o.rng, daySn(prog)), o.rng);
   const kinds = kindMix(pool.filter(c => c.t === "w").length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
   let wi = 0;
   const plan = pool.map(c => c.t === "w" ? { kind: kinds[wi++], word: c.x }
@@ -1292,7 +1332,7 @@ function dayRecallPlan(learned, prog, pack, n, o){
   const d = dayLog(prog, o.today); const typing = typingEnabled(pack);
   const wk = typing ? ["recall", "type"] : ["recall"], ck = ["charRecall", "charPick"];
   const ru = recordedUnits(o.units, prog, pack);
-  const pool = dayPick([...(learned || []).map(dayWordCand(prog, wk)), ...ru.map(dayCharCand(prog, pack, ck))], n, d, o.rng);
+  const pool = dayPick([...(learned || []).map(dayWordCand(prog, wk)), ...ru.map(dayCharCand(prog, pack, ck))], n, d, o.rng, daySn(prog));
   const kinds = kindMix(pool.filter(c => c.t === "w").length, 1, typing, o.rng);
   let wi = 0;
   const plan = pool.map(c => c.t === "w" ? { kind: kinds[wi++], word: c.x } : { kind: "charRecall", unit: c.x });
@@ -2131,7 +2171,7 @@ function newCharUnits(units, learned, prog, pack, n){
 function charTestPlan(units, learned, prog, pack, n, rng, today){
   const cfg = charsConfig(pack); if(!cfg) return [];
   const day = dayAwareOn(pack) && today;
-  const rec = day ? dayPick(recordedUnits(units, prog, pack).map(dayCharCand(prog, pack, Object.keys(cfg.testKinds))), n, dayLog(prog, today), rng).map(c => c.x)
+  const rec = day ? dayPick(recordedUnits(units, prog, pack).map(dayCharCand(prog, pack, Object.keys(cfg.testKinds))), n, dayLog(prog, today), rng, daySn(prog)).map(c => c.x)
     : weakFirst(recordedUnits(units, prog, pack), n, charRecs(prog), undefined, rng);
   const pool = rec.length >= n ? rec : rec.concat(newCharUnits(units, learned, prog, pack, n - rec.length));
   const plan = pool.map(unit => ({ kind: pickWeighted(cfg.testKinds, rng), unit }));
@@ -2542,7 +2582,7 @@ function scriptTestPlan(units, prog, pack, n, rng, ctx){
   const cfg = scriptConfig(pack); if(!cfg) return [];
   const kctx = Object.assign({ units }, ctx || {});
   const today = dayAwareOn(pack) && ctx && ctx.today; const srecs = scriptRecs(prog);
-  const rec = today ? dayPick(recordedScriptUnits(units, prog, pack).map(u => ({ x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: cfg.mastered, kinds: Object.keys(cfg.testKinds) })), n, dayLog(prog, today), rng).map(c => c.x)
+  const rec = today ? dayPick(recordedScriptUnits(units, prog, pack).map(u => ({ x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: cfg.mastered, kinds: Object.keys(cfg.testKinds) })), n, dayLog(prog, today), rng, daySn(prog)).map(c => c.x)
     : weakFirst(recordedScriptUnits(units, prog, pack), n, srecs, undefined, rng);
   const out = [];
   rec.forEach(unit => {
@@ -3139,7 +3179,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
-  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, dayAwareOn, dayLog, dayStart, noteDay, dayTier, DAY_PRODUCTION, daySettles, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
+  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,

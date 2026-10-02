@@ -704,7 +704,7 @@ function wordOptHtml(byKey, written){
   return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const p = e ? pronBeside(e) : ""; return `${d && d.isPron ? twReading(d.text) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
 }
 
-function drill(items, onDone, summary, onShown){ if(DAY_AWARE && VC.dayStart(prog, PACK, todayISO())) store.save(); D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown, rzo: rzOriginOf(onDone), rzs: summary && summary.rzs }; rzFin = null; dnext(); }
+function drill(items, onDone, summary, onShown){ if(DAY_AWARE && VC.dayStart(prog, PACK, todayISO(), !todayStepState)) store.save(); D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown, rzo: rzOriginOf(onDone), rzs: summary && summary.rzs }; rzFin = null; dnext(); }
 function setScore(answered, total){
   const left = total ? Math.max(0, total - answered) : 0;
   $("score").textContent = (total && left > 0) ? `${left} left` : "";
@@ -1810,7 +1810,7 @@ function todayRender(){
     $("choiceSkip").onclick = () => { VC.answerCharChoice(prog, false); store.save(); todayRender(); };
     return;
   }
-  $("go").onclick = () => { todayStepState = HAS_STAGES ? (todayPrep ? { step:0, snap: todayPrep.snap, review: todayPrep.review } : { step:0, snap: takeSnapshot() }) : { step:0 }; todayStepState.read = readNext; todayPrep = null; todayStep(); };
+  $("go").onclick = () => { todayStepState = HAS_STAGES ? (todayPrep ? { step:0, snap: todayPrep.snap, review: todayPrep.review } : { step:0, snap: takeSnapshot() }) : { step:0 }; todayStepState.read = readNext; todayPrep = null; if(VC.daySessionStart(prog, PACK)) store.save(); todayStep(); };
 }
 function todayReadItem(){
   if(!HAS_PASSAGES) return null;
