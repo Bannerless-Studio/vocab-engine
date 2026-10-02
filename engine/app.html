@@ -732,7 +732,7 @@ const GLOSS_FOCUS = VC.glossFocusOn(PACK);
 // pointer or finger is on it. One at a time: opening one closes the one before.
 const HELP_CLOSE = VC.helpCloseOn(PACK);
 const READ_BLOCK = VC.readAnswerBlockOn(PACK);
-const HELP_MS = 8000;
+const HELP_MS = 20000; // owner 2026-10-02: 20 s (was 8 s)
 const HELP_X = HELP_CLOSE ? `<button type="button" class="helpx" aria-label="Close">×</button>` : "";
 let helpCur = null;   // { el, close, ms, timer }
 function helpShut(){

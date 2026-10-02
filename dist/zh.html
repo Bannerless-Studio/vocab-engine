@@ -4162,7 +4162,7 @@ const GLOSS_FOCUS = VC.glossFocusOn(PACK);
 // pointer or finger is on it. One at a time: opening one closes the one before.
 const HELP_CLOSE = VC.helpCloseOn(PACK);
 const READ_BLOCK = VC.readAnswerBlockOn(PACK);
-const HELP_MS = 8000;
+const HELP_MS = 20000; // owner 2026-10-02: 20 s (was 8 s)
 const HELP_X = HELP_CLOSE ? `<button type="button" class="helpx" aria-label="Close">×</button>` : "";
 let helpCur = null;   // { el, close, ms, timer }
 function helpShut(){
@@ -4790,7 +4790,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "33101856-1813425";
+const VE_BUILD = "1317494550-1813462";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6554,4 +6554,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1778032828-1812747-->
+<!--ve-build:3966930606-1812786-->
