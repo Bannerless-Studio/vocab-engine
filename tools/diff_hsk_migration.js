@@ -37,6 +37,7 @@ function loadHsk(dir){
   const S = fs.existsSync(sf) ? new Function(fs.readFileSync(sf, "utf8") + "\nreturn { SENTENCES, SENTENCE_EXTRA };")() : null;
   return { PC: require(core), VOCAB: readJSON(vocab), SENTENCES: S && S.SENTENCES, SENTENCE_EXTRA: S && S.SENTENCE_EXTRA };
 }
+const HSK_STAGES = [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }];
 const invert = m => { const o = {}; for(const k of Object.keys(m || {})) o[m[k]] = k; return o; };
 const isObj = x => !!x && typeof x === "object" && !Array.isArray(x);
 
@@ -98,10 +99,14 @@ function derivedDiff(old, prog, P, hsk){
   const hRecs = {}; Object.keys(hp.w).forEach(k => { if(L.w[k]) hRecs[L.w[k]] = hp.w[k]; });
   cmp("learned / mastered per level", perLv(hL, hRecs), perLv(eL, prog.w));
   const hStage = s => s && (s.kind === "words" ? { kind:"words", lv:String(s.lv), frac:s.frac, done:s.done } : { kind:"chars", levels:s.levels.map(String), frac:s.frac, done:s.done });
-  cmp("stage path (kind, levels, fraction, done)", PC.stagePath(hp, nsets, VOCAB).map(hStage), VC.stagePath(P.pack, P.words, P.units, prog).map(hStage));
-  cmp("next stage", hStage(PC.nextStage(hp, nsets, VOCAB)), hStage(VC.nextStage(P.pack, P.words, P.units, prog)));
-  cmp("characters started", PC.charsStarted(hp, nsets, VOCAB), VC.charsStarted(P.pack, P.words, P.units, prog));
-  cmp("choice card shown", PC.showCharChoice(hp, nsets, VOCAB), VC.showCharChoice(P.pack, P.words, P.units, prog));
+  // Accepted deviation (docs/HSK_MERGE.md §8, fb2-write 2026-10-02): zh has one characters stage
+  // per level where hsk had one after HSK 3; the stage views are compared on hsk's layout, which
+  // shows the migrated record keeps its position (the per-level layout: migration_checks [write]).
+  const SP = P.pack.characters ? Object.assign({}, P.pack, { characters: Object.assign({}, P.pack.characters, { stages: HSK_STAGES }) }) : P.pack;
+  cmp("stage path (kind, levels, fraction, done)", PC.stagePath(hp, nsets, VOCAB).map(hStage), VC.stagePath(SP, P.words, P.units, prog).map(hStage));
+  cmp("next stage", hStage(PC.nextStage(hp, nsets, VOCAB)), hStage(VC.nextStage(SP, P.words, P.units, prog)));
+  cmp("characters started", PC.charsStarted(hp, nsets, VOCAB), VC.charsStarted(SP, P.words, P.units, prog));
+  cmp("choice card shown", PC.showCharChoice(hp, nsets, VOCAB), VC.showCharChoice(SP, P.words, P.units, prog));
   if(hsk.SENTENCES){
     // hsk pinyin_app.html availableSentences: every word learned (a SENTENCE_EXTRA compound
     // counts via its base) or the current level (first level with an untaught set, 5 when
