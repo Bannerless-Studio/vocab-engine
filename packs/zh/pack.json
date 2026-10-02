@@ -66,6 +66,7 @@
  "glossFocus": true,
  "helpClose": true,
  "readAnswerBlock": true,
+ "optsOneScript": true,
  "showPron": true,
  "hasLessons": true,
  "spaced": false,

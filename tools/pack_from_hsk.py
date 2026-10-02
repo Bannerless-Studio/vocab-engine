@@ -311,6 +311,10 @@ def main(argv):
         # Read questions: verdict and Next above the passage toggle (docs/PACK_SCHEMA.md
         # "readAnswerBlock"; owner feedback 2026-10-02).
         "readAnswerBlock": True,
+        # Word option sets labelled in one mode (all readings or all characters): one option
+        # in characters among readings gave the answer away (docs/PACK_SCHEMA.md "optsOneScript";
+        # owner browser check 2026-10-02).
+        "optsOneScript": True,
         "showPron": True,
         "hasLessons": True,
         "spaced": False,

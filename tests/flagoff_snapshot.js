@@ -127,9 +127,9 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     // Typed items from the target side and focused glosses (docs/PACK_SCHEMA.md "typedFrom
     // and glossFocus") are new, flag-on fields.
     delete pack.typedFrom; delete pack.glossFocus;
-    // Help overlay dismissal and the Read answer block (docs/PACK_SCHEMA.md "helpClose",
-    // "readAnswerBlock") are new, flag-on fields.
-    delete pack.helpClose; delete pack.readAnswerBlock;
+    // Help overlay dismissal, the Read answer block and one-mode option labels
+    // (docs/PACK_SCHEMA.md "helpClose", "readAnswerBlock", "optsOneScript") are new, flag-on fields.
+    delete pack.helpClose; delete pack.readAnswerBlock; delete pack.optsOneScript;
     // Script primer (docs/SCRIPT_PRIMER.md): pack.script is new. script.json / script.js
     // need nothing here: only pack.json, words.json and sentences.json are hashed.
     delete pack.script;

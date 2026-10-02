@@ -545,7 +545,8 @@ function articleAgreement(pack){
 // offering "la loi") and a bare/articled mix would give the answer away. A word whose own
 // surface is the blanked text is never a distractor, since it fits literally: する blanked at
 // its form した must not offer 下 (w した).
-function gapChoices(entry, match, pool, pack){
+// like: an optional preference (pack.optsOneScript); with an article preference both must hold.
+function gapChoices(entry, match, pool, pack, like){
   const arts = packArticles(pool);
   const show = e => bareForm(e, arts);
   const vis = match && match.article;
@@ -554,6 +555,7 @@ function gapChoices(entry, match, pool, pack){
     const ok = new Set(articleAgreement(pack)[vis] || [vis]);
     prefer = v => citationArticles(v, arts).some(a => ok.has(a));
   }
+  if(like) prefer = prefer ? (p => v => p(v) && like(v))(prefer) : like;
   const blank = match && match.text ? normKey(match.text) : "";
   const fits = v => !!blank && v !== entry && !(v.id != null && v.id === entry.id) && surfaces(v).includes(blank);
   const ds = wordOpts(entry, blank ? (pool || []).filter(v => !fits(v)) : pool, show, pack, prefer);
@@ -2965,12 +2967,14 @@ function typedKindOk(kind, word, shownWritten, amb){
   const a = amb || { written: new Set(), pron: new Set() };
   const hasW = !!(word && word.w), hasP = !!(word && word.pron), hasG = !!gloss(word);
   if(kind === "word") return hasW;
-  // words[].pronInGloss: the meaning stimulus would spell the reading (北京 "Beijing").
+  // words[].pronInGloss: the gloss spells the reading (北京 "Beijing"), so neither side may be
+  // the stimulus for the other: no meaning -> reading, no reading -> meaning. The written form
+  // and the audio stay allowed stimuli (docs/PACK_SCHEMA.md "pronInGloss").
   if(kind === "pron") return hasP && !word.pronInGloss;
   if(kind === "written") return hasW && shownWritten;
   if(kind === "writtenMeaning") return hasW && shownWritten && hasG && !a.written.has(word.id) && !word.noTypedMeaning;
   if(kind === "writtenPron") return hasW && hasP && shownWritten && !a.written.has(word.id);
-  if(kind === "pronMeaning") return hasP && hasG && !a.pron.has(word.id) && !word.noTypedMeaning;
+  if(kind === "pronMeaning") return hasP && hasG && !a.pron.has(word.id) && !word.noTypedMeaning && !word.pronInGloss;
   return false;
 }
 // Slot order in the plan plus the word's recorded answers picks the start of the rotation: a
@@ -3194,6 +3198,7 @@ function glossFocusOn(pack){ return !!(pack && pack.glossFocus === true); }
 function helpCloseOn(pack){ return !!(pack && pack.helpClose === true); }
 // pack.readAnswerBlock (docs/PACK_SCHEMA.md "readAnswerBlock"): Next sits under the verdict.
 function readAnswerBlockOn(pack){ return !!(pack && pack.readAnswerBlock === true); }
+function optsOneScriptOn(pack){ return !!(pack && pack.optsOneScript === true); }
 function joinReadings(a, b, pack){
   if(!a) return b; if(!b) return a;
   return tonesOn(pack) && /^[aoe]/i.test(stripMarks(b)) && /[\p{L}]$/u.test(a) ? a + "'" + b : a + b;
@@ -3356,7 +3361,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
   scriptOpts, scriptRomanOpts, scriptExamples, scriptWordOpts, scriptJoinedForms, scriptItem, learnScriptPlan, scriptReviewScore, scriptTestPlan,
   tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings,
-  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, helpCloseOn, readAnswerBlockOn, composeSpanReading, spanReadingText,
+  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, helpCloseOn, readAnswerBlockOn, optsOneScriptOn, composeSpanReading, spanReadingText,
   LEGACY_DROPPED, legacyBackupKey, isLegacyRecord, migrateLegacy };
 if(typeof module!=="undefined" && module.exports) module.exports = API;
 if(root) root.VocabCore = API;

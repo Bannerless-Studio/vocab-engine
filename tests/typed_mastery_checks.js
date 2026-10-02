@@ -7,7 +7,10 @@
 // characters.withWords: Today for fresh, mid HSK 1, mid HSK 2, all words learned mid the old 字
 // stage, finished; the Progress chips,
 // [6] session resume with typed unit items, [7] control: without the new fields the zh markup
-// and progress are byte-identical to main 7fe35f7.
+// and progress are byte-identical to main 7fe35f7, [8] gloss fields in typed unit items, [9] the
+// withWords Learn turn, [10] answer giveaways (browser check 2026-10-02): a pronInGloss word's
+// reading and meaning are never stimulus and answer for each other; pack.optsOneScript option
+// sets never have one option in another script.
 // Run: node tests/typed_mastery_checks.js
 "use strict";
 const fs = require("fs");
@@ -30,7 +33,7 @@ const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 const UNIT = Object.fromEntries(CHARACTERS.map(u => [u.id, u]));
 const UNIT_OF = new Map(CHARACTERS.map(u => [u.words[0], u]));
 // The zh pack before this branch: one stage after HSK 3 for 1-3, one after HSK 4, no bareBy/bareWords.
-const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; return Object.assign({}, p, { characters: c }); };
+const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; const o = Object.assign({}, p, { characters: c }); delete o.optsOneScript; return o; };
 const PACK_OFF = preWrite(PACK);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
@@ -139,7 +142,7 @@ async function boot(pack, st, seed, opts){
   const o = opts || {};
   Math.random = mulberry32(seed);
   const document = makeFakeDom();
-  const voices = [{ lang:"zh-CN", name:"x" }];
+  const voices = o.voices || [{ lang:"zh-CN", name:"x" }];
   const ss = { getVoices: () => voices, onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
   const hook = n => `typeof ${n} === "function" ? ${n} : null`;
@@ -153,6 +156,7 @@ return {
   today: () => { tab = "today"; render(); }, goto: t => { tab = t; testSel = null; RD = null; soundsSel = null; render(); },
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
   readItem, recallItem, revealBlock, charDrillItem, wordRowHTML, itemFromPlan,
+  hearItem: ${hook("hearItem")}, learnPair: ${hook("learnPair")}, gapSentence: ${hook("gapSentence")}, readStimHTML: ${hook("readStimHTML")}, optScript: ${hook("optScript")}, wordOptHtml, placeSrc: String(${hook("placeVocabNext")}),
   meaningTypeItem: ${hook("meaningTypeItem")}, writtenPronTypeItem: ${hook("writtenPronTypeItem")}, silentWrittenTypeItem: ${hook("silentWrittenTypeItem")}, pronTypeItem: ${hook("pronTypeItem")},
   drill1: it => drill([it], () => {}, null), skipRead: () => { RD = null; todayStep(); }, rd: () => RD,
 };`;
@@ -526,6 +530,107 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     check(`reload mid-session: the drill resumes, turn still ${t3} (${api.getProg().chars.turn})`, !!api.getD() && api.getProg().chars.turn === t3);
     play(api, p => p.chars.turn !== t3);
     check(`resumed session completes its Learn (${l3}) and flips the turn (${t3} -> ${api.getProg().chars.turn})`, api.getProg().chars.turn === (kind(l3) === "w" ? "c" : "w"));
+  }
+
+  console.log("\n[10] giveaways: pronInGloss reading <-> meaning, option sets in one script (pack.optsOneScript)");
+  {
+    const fold = x => String(x).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z]/g, "");
+    const HAN = /\p{Script=Han}/u, LATIN = /[A-Za-zÀ-ɏ]/;
+    const pig = WORDS.filter(w => w.pronInGloss);
+    const stimOf = it => stripTags(it.html || "");
+    const labelsOf = it => (it.opts || []).map(o => stripTags(it.optHtml ? it.optHtml(o) : o));
+    const isMeaningAns = it => it.kind === "mc" ? (it.opts || []).includes(VC.gloss(BY_ID[String(it.key).slice(2)])) && it.a === VC.gloss(BY_ID[String(it.key).slice(2)]) : it.label === "Type the meaning";
+    // A leak: meaning answer with the reading in the stimulus, or a gloss stimulus (recall, gap)
+    // with readings on the options or a typed reading answer.
+    const leak = (it, w) => {
+      if(!it) return null;
+      if(isMeaningAns(it) && fold(stimOf(it)).includes(fold(w.pron))) return "reading -> meaning: " + it.label + " / " + stimOf(it).replace(/\s+/g, " ").trim().slice(0, 40);
+      if(it.label === "Type the pinyin" && !HAN.test(stimOf(it))) return "meaning -> reading typed";
+      if(it.kind === "mc" && !isMeaningAns(it) && it.label !== "How is it said?" && labelsOf(it).some(l => LATIN.test(l.replace(/show written/g, "")))) return "meaning -> reading options: " + labelsOf(it).join(" | ");
+      return null;
+    };
+    const tiers = [["pron", 1], ["ruby", 4], ["bare", 6]];
+    const sentOf = w => SENTENCES.filter(x => (x.words || []).includes(w.id));
+    for(const voiced of [true, false]){
+      const { api } = await bootWith(PACK, seedC(), 21, voiced ? {} : { voices: [] });
+      const bad = [], kinds = new Set(); let n = 0;
+      for(const w of pig){
+        const u = UNIT_OF.get(w.id);
+        for(const [tn, st] of tiers){
+          if(u) api.getProg().chars.c[u.id] = { r: st + 1, w: 0, s: st };
+          for(let seed = 1; seed <= 200; seed++){
+            Math.random = mulberry32(seed * 7919 + st);
+            const items = [api.readItem(w), api.recallItem(w), api.hearItem(w), ...api.learnPair(w)];
+            for(const k of ["hear", "read", "recall", "type"]){
+              const pl = Array.from({ length: 6 }, () => ({ kind: k, word: w }));
+              items.push(api.itemFromPlan(pl[seed % 6], seed % 6, pl));
+              if(k === "type" && u){ const pu = Array.from({ length: 6 }, () => ({ kind: k, word: w, tu: u.id })); items.push(api.itemFromPlan(pu[seed % 6], seed % 6, pu)); }
+            }
+            const ss = sentOf(w); if(ss.length){ const g = api.gapSentence(ss[seed % ss.length]); if(g && g.kind === "mc" && g.a === w.w) items.push(Object.assign({}, g, { key: "w:" + w.id, gap: true })); }
+            items.slice().forEach(it => { if(it && typeof it.choiceFallback === "function") items.push(Object.assign(it.choiceFallback(), { fb: true })); });
+            for(const it of items){
+              n++; kinds.add((it.gap ? "gap:" : it.fb ? "fallback:" : "") + it.label + (it.rz ? "/" + it.rz.b + (it.rz.b === "typeMeaning" ? (it.rz.a[1] ? ":pron" : ":written") : "") : ""));
+              if(it.rz && it.rz.b === "typeMeaning" && it.rz.a[1]) bad.push(`${w.w} ${tn}: typed pinyin -> meaning`);
+              if(it.rz && it.rz.b === "typePron") bad.push(`${w.w} ${tn}: typed meaning -> pinyin`);
+              const l = leak(it, w); if(l) bad.push(`${w.w} ${tn}: ${l}`);
+            }
+          }
+        }
+      }
+      check(`${voiced ? "voice" : "no voice"}: ${pig.map(w => w.w).join(" ")} x ${tiers.length} tiers x 200 seeds, ${n} items over every kind (${[...kinds].sort().join("; ")}): no reading <-> meaning giveaway${bad.length ? ` (${bad.length}: ${[...new Set(bad)].slice(0, 4).join(" || ")})` : ""}`, n > 0 && bad.length === 0);
+    }
+    {
+      const { api } = await bootWith(PACK, seedC(), 22);
+      const w = BY_ID["w0041"]; const u = UNIT_OF.get(w.id); api.getProg().chars.c[u.id] = { r: 2, w: 0, s: 1 };
+      check(`placement shows a word through readStimHTML: ${w.w} shown by reading reads ${JSON.stringify(stripTags(api.readStimHTML(w)))}`, /readStimHTML\(w\)/.test(api.placeSrc) && !/bigWordHTML/.test(api.placeSrc) && stripTags(api.readStimHTML(w)) === w.w);
+    }
+    // Option sets in one script. Labelling layer (what recall and gap call: optScript, then
+    // wordOptHtml): every zh word as the answer at both tiers x 200 seeds, three distractors drawn
+    // at random from the whole pack (no same-script preference, the worst case) with every unit's
+    // streak random per seed. Builders: recall for every word at both tiers and gap for every
+    // sentence, one seed each (wordOpts scans the whole pack per set: ~16 ms).
+    const oddOne = labels => { const k = labels.filter(l => HAN.test(l)).length; return labels.length > 2 && (k === 1 || k === labels.length - 1); };
+    const labelSweep = async (pack, seeds) => {
+      const { api } = await bootWith(pack, seedC(), 23);
+      const c = api.getProg().chars.c; let sets = 0, odd = 0; const ex = [];
+      for(let seed = 1; seed <= seeds; seed++){
+        const r = mulberry32(seed * 104729); CHARACTERS.forEach(u => { const s = Math.floor(r() * 7); c[u.id] = { r: s + 1, w: 0, s }; });
+        for(const w of WORDS){
+          const u = UNIT_OF.get(w.id);
+          for(const st of [1, 6]){
+            if(u) c[u.id] = { r: st + 1, w: 0, s: st };
+            const ds = []; while(ds.length < 3){ const d = WORDS[Math.floor(r() * WORDS.length)]; if(d !== w && !ds.includes(d)) ds.push(d); }
+            const byId = {}; [w, ...ds].forEach(e => { byId[e.id] = e; });
+            const m = api.optScript ? api.optScript(w, ds) : null;
+            const h = m === undefined ? api.wordOptHtml(byId, o => byId[o].w, !!w.pronInGloss) : api.wordOptHtml(byId, o => byId[o].w, !!w.pronInGloss, m);
+            const ls = [w, ...ds].map(e => stripTags(h(e.id))); sets++;
+            if(oddOne(ls)){ odd++; if(ex.length < 2) ex.push(ls.join(" | ")); }
+          }
+        }
+      }
+      return { sets, odd, ex };
+    };
+    const on = await labelSweep(PACK, 200), off = await labelSweep(PACK_OFF, 3);
+    check(`optsOneScript labelling: ${on.sets} option sets (${WORDS.length} words x 2 tiers x 200 seeds, random distractors and unit streaks), none with exactly one option in another script${on.odd ? ` (${on.odd}: ${on.ex.join(" || ")})` : ""}`, on.sets === WORDS.length * 400 && on.odd === 0);
+    check(`detector: flag off, the same sets have odd-one-out labels (${off.odd} of ${off.sets}, e.g. ${off.ex[0] || "-"})`, off.odd > 0);
+    {
+      const { api } = await bootWith(PACK, seedC(), 24);
+      const c = api.getProg().chars.c; const r = mulberry32(99); CHARACTERS.forEach(u => { const s = Math.floor(r() * 7); c[u.id] = { r: s + 1, w: 0, s }; });
+      let sets = 0, odd = 0, gaps = 0, fb = 0; const ex = [];
+      for(const w of WORDS){
+        const u = UNIT_OF.get(w.id);
+        for(const st of [1, 6]){
+          if(u) c[u.id] = { r: st + 1, w: 0, s: st };
+          Math.random = mulberry32(w.id.length * 31 + st + sets);
+          const it = api.recallItem(w); if(it.label !== "Which word is this?") continue;
+          const ls = labelsOf(it); sets++; if(oddOne(ls)){ odd++; if(ex.length < 3) ex.push(`${w.w}: ${ls.join(" | ")}`); }
+          if(st === 6 && ls.every(l => !HAN.test(l))) fb++;
+        }
+        if(u) c[u.id] = { r: 1, w: 0, s: Math.floor(r() * 7) };
+      }
+      for(const x of SENTENCES){ Math.random = mulberry32(gaps + 5); const g = api.gapSentence(x); if(!g || g.kind !== "mc") continue; gaps++; const ls = labelsOf(g); if(oddOne(ls)){ odd++; if(ex.length < 6) ex.push(`gap ${x.id}: ${ls.join(" | ")}`); } }
+      check(`builders: ${sets} recall sets (every word, both tiers) + ${gaps} gap sets (every sentence): none odd-one-out${odd ? ` (${odd}: ${ex.join(" || ")})` : ""}; ${fb} written-tier recall sets fell back to readings`, sets > 2000 && gaps > 500 && odd === 0);
+    }
   }
 
   console.log(`\n[7] control: without the new fields the zh markup and progress match main ${MAIN}`);
