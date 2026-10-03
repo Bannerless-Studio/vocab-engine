@@ -18,7 +18,8 @@ function loadConst(file, name){
 }
 // The zh data as the typing-off baseline pack: the shipped pack's typing "pron" (typed
 // reading, brief BP2) is set back to null here; tests/pron_aids_checks.js checks it.
-const PACK = Object.assign({}, loadConst(path.join(ZH, "pack.js"), "PACK"), { typing: null });
+// readRotation (fb16) shuffles questions and picks by session; its checks are listen_mode_checks [14].
+const PACK = (p => { delete p.readRotation; return p; })(Object.assign({}, loadConst(path.join(ZH, "pack.js"), "PACK"), { typing: null }));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");

@@ -15,7 +15,8 @@ const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
-const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+// readRotation (fb16) shuffles questions and picks by session; its checks are listen_mode_checks [14].
+const PACK = (p => { delete p.readRotation; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
