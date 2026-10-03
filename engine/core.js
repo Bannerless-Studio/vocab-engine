@@ -1015,11 +1015,17 @@ function markRec(map, key, ok, isWord, kind, reqKind){
 // count the same as writing it). From WORD_HOLD a word moves up only by a typed answer (kind "type":
 // characters, reading or meaning typed); a right choice or ear answer holds it and a miss steps it
 // down one, the characters.bareBy rule for words. Below WORD_HOLD, and with the flag off, markRec.
+// o.typable false (no typed kind fits the word as shown: 北京 while shown by its reading): markRec,
+// as typedUnitWords exempts such units. o.retry (the word was missed earlier in this drill): no
+// streak credit, as markUnitTyped gives the in-drill retry none (review fb18 HIGH 1); the streak
+// is 1+ after that miss only when it stepped the word down from WORD_HOLD+, below it a miss resets to 0.
 const WORD_HOLD = 2;
 function wordsTypedOn(pack){ return !!(pack && pack.wordsBy === "typed"); }
-function markWordRec(map, key, ok, kind, reqKind, pack){
-  const p = map[key];
-  if(!wordsTypedOn(pack) || !isObj(p) || (p.s || 0) < WORD_HOLD) return markRec(map, key, ok, true, kind, reqKind);
+function markWordRec(map, key, ok, kind, reqKind, pack, o){
+  const p = map[key], x = o || {};
+  if(!wordsTypedOn(pack) || !isObj(p) || x.typable === false) return markRec(map, key, ok, true, kind, reqKind);
+  if(x.retry && (p.s || 0) >= 1){ if(ok) p.r++; else p.w++; return p; }
+  if((p.s || 0) < WORD_HOLD) return markRec(map, key, ok, true, kind, reqKind);
   if(ok){ p.r++; if(kind === "type") p.s++; } else { p.w++; p.s--; }
   if(p.prov && (p.s>=WORD_MASTERED || !ok)) delete p.prov;
   setMissKind(p, ok, kind, reqKind);
@@ -1377,8 +1383,13 @@ const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c ===
 // misses, consolidation and refresh; Recall gave them 0.5 of 8, fb8-weak-analysis). The floor leaves
 // consolidating units at least ⌈DAY_CONSOLIDATE_SHARE n⌉ slots: on a day of many unit misses it took
 // them all (fb10 review M1).
-const DAY_EXTRA_POOL = 4, DAY_WEAK_FLOOR = 0.4;
-function dayPick(cands, n, d, rng, sn, cshare, t4max){
+// pack.wordsBy "typed": held words that can be asked typed now (c.held, dayHeldMark) come right after
+// the misses, up to hshare of the plan: a held word moves only by one typed ask per session, and by the
+// weak floor alone (lowest streak first) the words at 2 piled up (fb18 review: 129 and rising). They
+// leave the refresh share its slots, taken next; every slot moved between the two trades held words
+// reaching known against mastered refresh (fb18 owner-export tuning, report table).
+const DAY_EXTRA_POOL = 4, DAY_WEAK_FLOOR = 0.4, DAY_HELD_SHARE_REVIEW = 0.2, DAY_HELD_SHARE_RECALL = 1;
+function dayPick(cands, n, d, rng, sn, cshare, t4max, hshare){
   const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
   (cands || []).forEach(c => { const t = dayTier(c, d, sn); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
   const ag = c => dayAgedOut(d.a[c.key], sn) ? 0 : 1;
@@ -1406,7 +1417,10 @@ function dayPick(cands, n, d, rng, sn, cshare, t4max){
     if(seen.has(c.key) && !(owns(c) && out.some(o => o.alias === c.key) && !out.some(o => o.key === c.key))) continue;
     seen.add(c.key); if(c.alias) seen.add(c.alias); out.push(c); i++; } };
   const isW = c => String(c.key).startsWith("w:");
-  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(T[1].filter(isW), Math.min(Math.round(n * DAY_WEAK_FLOOR) - out.filter(isW).length, n - out.length - Math.min(Math.ceil(n * DAY_CONSOLIDATE_SHARE), C.length))); take(C, Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE))); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
+  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE)));
+  if(hshare){ const rk = Math.min(Math.ceil(n * DAY_REFRESH_SHARE), T[2].length);
+    take([...T[1], ...T[3]].filter(c => c.held).sort((a, b) => dayAge(a.rec, b.rec) || a.j - b.j), Math.min(Math.round(n * hshare), n - out.length - rk)); take(T[2], rk); }
+  take(T[1].filter(isW), Math.min(Math.round(n * DAY_WEAK_FLOOR) - out.filter(isW).length, n - out.length - Math.min(Math.ceil(n * DAY_CONSOLIDATE_SHARE), C.length))); take(C, Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE))); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
   take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[0], n); take(T[4], t4max != null ? t4max - out.length : n);
   return out;
 }
@@ -1441,15 +1455,18 @@ function dayItemKind(prog, pack, today, key, planned, kinds, can){
 }
 // wordCan (optional): word -> the kinds it can be shown in here (dayWordCan).
 // typedOk (optional): word -> a typed kind fits it on this device (app: typedKindOk with the word's
-// shown side); default: one fits with the written form hidden.
-function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds, wordCan, typedUnits, typedOk){
+// shown side); default: one fits with the written form hidden. typedSeen (optional, pack.wordsBy):
+// word -> already asked typed in the running Today session (app.html typedSession).
+function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds, wordCan, typedUnits, typedOk, typedSeen){
+  const seen = w => !!w && wordsTypedOn(pack) && typeof typedSeen === "function" && !!typedSeen(w);
   return plan.map(it => {
     const tu = it.unit && CHAR_KINDS.includes(it.kind) ? it.unit : it.tuUnit;
-    if(tu && typedUnitDue(tu, prog, pack, typedUnits)) return { kind: "type", word: typedUnits.get(tu.id), tu: tu.id };
+    // wordsBy: a unit's typed item types its word, so a word typed this session is not its unit's typed item again (browser fb18 check 4).
+    if(tu && typedUnitDue(tu, prog, pack, typedUnits) && !seen(typedUnits.get(tu.id))) return { kind: "type", word: typedUnits.get(tu.id), tu: tu.id };
     if(it.word){ const can = wordCan ? wordCan(it.word) : undefined; const ks = can ? wordKinds.filter(x => can.includes(x)) : wordKinds;
-      let k = typedWordDue(it.word, prog, pack, today, ks, typedOk) ? "type" : dayItemKind(prog, pack, today, "w:" + it.word.id, it.kind, ks, can);
-      // wordsBy: no typed ask typedOk refuses (already typed this session, or no typed kind fits: the app shows recall then anyway).
-      if(k === "type" && wordsTypedOn(pack) && typeof typedOk === "function" && ks.includes("recall") && !typedOk(it.word)) k = "recall";
+      let k = typedWordDue(it.word, prog, pack, today, ks, typedOk, typedSeen) ? "type" : dayItemKind(prog, pack, today, "w:" + it.word.id, it.kind, ks, can);
+      // wordsBy: one typed ask per word per Today session, the miss replay included: recall settles the miss and holds the streak.
+      if(k === "type" && seen(it.word) && ks.includes("recall")) k = "recall";
       return k === it.kind ? it : Object.assign({}, it, { kind: k }); }
     // Script units ("x:") keep their drawn kind: a script miss waits for a draw of its kind.
     // Route them here before dayAware is set on a script pack (TODO.md).
@@ -1467,10 +1484,10 @@ function typedUnitDue(unit, prog, pack, typedUnits){
 }
 // pack.wordsBy "typed": a held word (WORD_HOLD <= s < WORD_MASTERED) moves on only by a typed answer,
 // so a planner that may ask "type" asks it typed, as typedUnitDue does for units. A word right typed
-// recently (it reached 2 by that answer) keeps the day rule: no same-kind repeat. typedOk also keeps
-// it to once per session (app.html typedWordFits: a typed miss that a choice took back to 2 waits).
-function typedWordDue(word, prog, pack, today, kinds, typedOk){
-  if(!wordsTypedOn(pack) || !dayAwareOn(pack) || !(kinds || []).includes("type")) return false;
+// recently (it reached 2 by that answer) keeps the day rule: no same-kind repeat; a word asked typed
+// in the running Today session (typedSeen) waits for the next one.
+function typedWordDue(word, prog, pack, today, kinds, typedOk, typedSeen){
+  if(!wordsTypedOn(pack) || !dayAwareOn(pack) || !(kinds || []).includes("type") || (typeof typedSeen === "function" && typedSeen(word))) return false;
   const s = dayS((prog.w || {})[word.id]);
   if(s < WORD_HOLD || s >= WORD_MASTERED || dayRight(dayLog(prog, today).a["w:" + word.id], daySn(prog)).includes("type")) return false;
   return typeof typedOk === "function" ? !!typedOk(word) : typedKinds(pack).some(k => typedKindOk(k, word, false));
@@ -1495,6 +1512,7 @@ function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng, can){
   const cands = (list || []).map(x => { const c = can ? can(x) : undefined; return { x, key: keyPrefix + x.id, rec: recs[x.id], mastered: sent ? SENTENCE_MASTERED : WORD_MASTERED, kinds: dayCanKinds(typeof kinds === "function" ? kinds(x) : kinds, c), can: c }; });
   return dayPick(cands, n, d, rng, daySn(prog)).map(c => c.x);
 }
+const dayHeldMark = (cands, prog, pack, o) => { if(wordsTypedOn(pack)) cands.forEach(c => { if(c.t === "w" && typedWordDue(c.x, prog, pack, o.today, c.kinds, o.typedOk, o.typedSeen)) c.held = true; }); return cands; };
 function dayReviewPlan(learned, prog, pack, n, o){
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = o.rng || Math.random;
   const d = dayLog(prog, o.today); const wk = dayWordKinds(pack), ck = dayCharKinds(pack);
@@ -1508,23 +1526,23 @@ function dayReviewPlan(learned, prog, pack, n, o){
   // grown plan takes at most a quarter of the items not right recently (tiers 0-2), so a small pool
   // gets no extra and later sessions of the day keep their share (fb4-pause review M2).
   const x = o.extra > 0 ? Math.max(0, Math.min(o.extra, Math.floor(cands.filter(c => dayTier(c, d, daySn(prog)) < 3).length / DAY_EXTRA_POOL) - n)) : 0;
-  const pool = shuffle(dayPick(cands, n + x, d, o.rng, daySn(prog), share, x ? n : undefined), o.rng);
+  const pool = shuffle(dayPick(dayHeldMark(cands, prog, pack, o), n + x, d, o.rng, daySn(prog), share, x ? n : undefined, wordsTypedOn(pack) ? DAY_HELD_SHARE_REVIEW : undefined), o.rng);
   const kinds = kindMix(pool.filter(c => c.t === "w").length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
   let wi = 0;
   const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {})
     : c.t === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: c.x }
     : { kind: pickScriptKind(scfg.reviewKinds, c.x, scfg, r, Object.assign({ units: o.script }, o.scriptCtx || {})), unit: c.x });
-  return hearableKinds(dayPlanKinds(applyMissedKinds(plan.filter(it => it.kind), prog, pack, false, o), prog, pack, o.today, wk, ck, wc, o.typedUnits, o.typedOk), o.canHear);
+  return hearableKinds(dayPlanKinds(applyMissedKinds(plan.filter(it => it.kind), prog, pack, false, o), prog, pack, o.today, wk, ck, wc, o.typedUnits, o.typedOk, o.typedSeen), o.canHear);
 }
 function dayRecallPlan(learned, prog, pack, n, o){
   const d = dayLog(prog, o.today); const typing = typingEnabled(pack);
   const wk = typing ? ["recall", "type"] : ["recall"], ck = ["charRecall", "charPick"];
   const ru = recordedUnits(o.units, prog, pack); const wc = dayWordCan(pack, o.canHear);
-  const pool = dayPick([...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits))], n, d, o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined);
+  const pool = dayPick(dayHeldMark([...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits))], prog, pack, o), n, d, o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined, undefined, wordsTypedOn(pack) ? DAY_HELD_SHARE_RECALL : undefined);
   const kinds = kindMix(pool.filter(c => c.t === "w").length, 1, typing, o.rng);
   let wi = 0;
   const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {}) : { kind: "charRecall", unit: c.x });
-  return hearableKinds(dayPlanKinds(applyMissedKinds(plan, prog, pack, true, o), prog, pack, o.today, wk, ck, wc, o.typedUnits, o.typedOk), o.canHear);
+  return hearableKinds(dayPlanKinds(applyMissedKinds(plan, prog, pack, true, o), prog, pack, o.today, wk, ck, wc, o.typedUnits, o.typedOk, o.typedSeen), o.canHear);
 }
 
 // A pack that types the reading (pronTypingOn) never gets gapType: the blank is written.
@@ -3581,7 +3599,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
-  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
+  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,

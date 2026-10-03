@@ -4,7 +4,10 @@
 // both outcomes, records byte-identical to a8e9c08's markRec; cloze untouched, [4] planner: a held word
 // (streak 2) is planned typed in Review/Recall, only with a fitting typed kind, not after a typed
 // right; flag-off plans equal a8e9c08's, [5] app on zh: held words asked typed, choice answers hold,
-// at most one typed ask per word per Today session; flag off a whole session byte-identical to a8e9c08.
+// at most one typed ask per word per Today session, [6] no streak credit for the in-drill retry after a
+// miss from 2+ (every requeue kind), [7] words no typed kind fits (北京, 元, 人民币) keep the old rule,
+// [8] the miss replay asks recall, the typed set survives a reload (session record today.tw);
+// flag off a whole session byte-identical to a8e9c08.
 // Run: node tests/words_typed_checks.js
 "use strict";
 const fs = require("fs");
@@ -74,7 +77,7 @@ class FakeDate extends Date { constructor(...a){ if(a.length) super(...a); else 
 async function boot(pack, prog, seed, opts){
   const o = opts || {};
   Math.random = mulberry32(seed);
-  const st = { ls: memStore(), ss: memStore() }; if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog));
+  const st = o.st || { ls: memStore(), ss: memStore() }; if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog));
   const document = makeFakeDom();
   const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
@@ -83,12 +86,14 @@ let __cur = null; const __log = [];
 const __mc = renderMcItem; renderMcItem = function(it){ __cur = it; __log.push({ key: it.key, kind: "mc", label: it.label, step: todayStepState && todayStepState.at }); return __mc(it); };
 const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; __log.push({ key: it.key, kind: "type", label: it.label, step: todayStepState && todayStepState.at }); return __ty(it); };
 return { el: id => document.getElementById(id), panel: () => document.getElementById("panel").innerHTML, getProg: () => prog, getD: () => D, getCur: () => __cur, log: __log,
-  rd: () => (typeof RD !== "undefined" ? RD : null), skipRead: () => { RD = null; todayStep(); } };`;
+  rd: () => (typeof RD !== "undefined" ? RD : null), skipRead: () => { RD = null; todayStep(); },
+  tss: () => todayStepState, fits: e => typedWordFits(e), mark: (id, ok, kind) => markWord(id, ok, kind), setD: d => { D = d; }, render: () => render() };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"WordsTypedChecks/1.0" }, undefined, st.ls, st.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
     function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, WORDS, SENTENCES, LESSONS, [], CHARACTERS];
   const api = new Function(...names, fnBody)(...args);
   await tick(); await tick();
+  api.st = st;
   return api;
 }
 function typedRight(it){
@@ -106,14 +111,16 @@ function answer(api, right){
   (right ? btns.find(b => b.dataset.v === String(it.a)) : btns.find(b => b.dataset.v !== String(it.a))).click();
 }
 // One Today session; okFn(item, rec before) decides each answer. Returns per-item rows.
-async function session(api, okFn){
-  const rows = [];
-  api.el("go").click();
+// o.cont: carry on a resumed session (no Go); o.stop(rows, item): leave before answering item.
+async function session(api, okFn, o){
+  const rows = [], x = o || {};
+  if(!x.cont) api.el("go").click();
   for(let guard = 0; guard < 600; guard++){
     const h = api.panel(), D = api.getD();
     if(D && D.cur){ const it = api.getCur(), key = String(it.key); const p = api.getProg();
+      if(x.stop && x.stop(rows, it)) break;
       const rec = key[0] === "w" ? p.w[key.slice(2)] : null; const s0 = rec ? rec.s || 0 : null; const r0 = rec ? rec.r : null;
-      const ok = okFn(it, rec); const lg = api.log[api.log.length - 1];
+      const lg = api.log[api.log.length - 1]; const ok = okFn(it, rec, rows, lg.step);
       answer(api, ok); const r1 = key[0] === "w" ? api.getProg().w[key.slice(2)] : null;
       rows.push({ key, kind: it.kind, label: it.label, step: lg.step, ok, s0, s1: r1 ? r1.s : null, r0, r1: r1 ? r1.r : null });
       api.el("nx").click(); continue; }
@@ -209,15 +216,36 @@ function seedW(){
     const on = plan(PACK), off = plan(PACK_OFF);
     const onW = on.filter(it => it.word), offW = off.filter(it => it.word);
     const heldOn = onW.filter(it => held.has(it.word.id));
-    check(`Review: the same words in the same order as flag off (${onW.length})`, onW.length === offW.length && onW.every((it, i) => it.word.id === offW[i].word.id));
-    check(`Review: every held word is asked typed (${heldOn.length} held of ${onW.length} words); the rest keep the flag-off kind`, heldOn.length > 0 && heldOn.every(it => it.kind === "type")
-      && onW.every((it, i) => held.has(it.word.id) || it.kind === offW[i].kind));
+    check(`Review: as many items as flag off (${on.length}); every held word is asked typed (${heldOn.length} held of ${onW.length} words)`, on.length === off.length && heldOn.length > 0 && heldOn.every(it => it.kind === "type"));
+    // Many words below 2: the weak floor (lowest streak first) alone leaves held words out.
+    const pS = clone(p); lw.filter(w => pS.w[w.id].s === 4).slice(0, 30).forEach(w => { pS.w[w.id].s = 1; });
+    const planS = (pack, o) => VC.buildReviewPlan(lw, clone(pS), pack, Object.assign({ today: TODAY, rng: mulberry32(5), size: 20 }, o || {}));
+    const hc = pl => pl.filter(it => it.word && held.has(it.word.id)), rf = pl => pl.filter(it => it.word && pS.w[it.word.id].s >= 3);
+    const sOn = planS(PACK), sOff = planS(PACK_OFF), want = Math.round(20 * VC.DAY_HELD_SHARE_REVIEW);
+    check(`Review, 30 more words at 1: held words still get ${want} slots (DAY_HELD_SHARE_REVIEW ${VC.DAY_HELD_SHARE_REVIEW}), all typed (${hc(sOn).length}; flag off ${hc(sOff).length}), and the refresh share keeps its ${Math.ceil(20 * VC.DAY_REFRESH_SHARE)} (${rf(sOn).length})`,
+      hc(sOn).length >= want && hc(sOn).length > hc(sOff).length && hc(sOn).every(it => it.kind === "type") && rf(sOn).length >= Math.ceil(20 * VC.DAY_REFRESH_SHARE));
     const pR = clone(p); Object.values(pR.w).forEach(r => { if(r.s === 1) r.s = 4; });
     const rc = VC.buildRecallPlan(lw, pR, PACK, 8, { today: TODAY, rng: mulberry32(9) }).filter(it => it.word && held.has(it.word.id));
-    check(`Recall: held words asked typed (${rc.length})`, rc.length > 0 && rc.every(it => it.kind === "type"));
+    const rk = Math.ceil(8 * VC.DAY_REFRESH_SHARE);
+    check(`Recall (DAY_HELD_SHARE_RECALL ${VC.DAY_HELD_SHARE_RECALL}): held words fill all but the ${rk} refresh slots, asked typed (${rc.length} of 8)`, rc.length >= 8 - rk && rc.every(it => it.kind === "type"));
     const none = plan(PACK, { typedOk: () => false });
-    check("typedOk false (no typed kind fits, or typed this session): the flag-off plan with recall for its typed asks", none.length === off.length && none.every((it, i) => (it.word && it.word.id) === (off[i].word && off[i].word.id) && it.kind === (it.word && off[i].kind === "type" ? "recall" : off[i].kind))
-      && off.some(it => it.word && it.kind === "type"));
+    check(`typedOk false (no typed kind fits): no held word is pulled forward or forced typed (${hc(none).length} held; flag off ${hc(off).length})`, hc(none).length <= hc(off).length && lw.filter(w => held.has(w.id)).every(w => !VC.typedWordDue(w, p, PACK, TODAY, ["type", "recall"], () => false)));
+    // LOW 3: the type -> recall downgrade is for words typed this session only.
+    {
+      const wk = VC.dayWordKinds(PACK), ck = VC.dayCharKinds(PACK);
+      const hw = lw.filter(w => held.has(w.id) && !w.pronInGloss), s1 = lw.find(w => p.w[w.id].s === 1), s4 = lw.find(w => p.w[w.id].s === 4);
+      const pl = [{ word: hw[0], kind: "type" }, { word: hw[1], kind: "type" }, { word: s1, kind: "type" }, { word: s4, kind: "type" }, { word: hw[2], kind: "read" }];
+      const seenIds = new Set([hw[0].id, hw[2].id]);
+      const k1 = VC.dayPlanKinds(pl, p, PACK, TODAY, wk, ck, undefined, undefined, () => true, w => seenIds.has(w.id)).map(it => it.kind);
+      const k0 = VC.dayPlanKinds(pl, p, PACK, TODAY, wk, ck, undefined, undefined, () => true, () => false).map(it => it.kind);
+      check(`typedSeen: a held word typed this session -> recall; words not typed this session are never downgraded (${k1.join(" ")} vs ${k0.join(" ")})`,
+        k1[0] === "recall" && k1[1] === "type" && k1[2] === k0[2] && k1[3] === k0[3] && k1[4] !== "type" && k0[0] === "type" && k0[1] === "type");
+      const SU = VC.charStageUnits(["1"], CHARACTERS, PACK), TU = VC.typedUnitWords(SU, WORDS, PACK);
+      const u = SU.find(x => TU.has(x.id) && VC.typedUnitDue(x, p, PACK, TU)), tw = u && TU.get(u.id);
+      const pk = seen => VC.dayPlanKinds([{ unit: u, kind: "charRecall" }], p, PACK, TODAY, wk, ck, undefined, TU, () => true, seen)[0];
+      const a = u ? pk(() => false) : null, b = u ? pk(w => w.id === tw.id) : null;
+      check(`a unit's typed item (tu) is not planned for a word typed this session (${u ? u.id + " -> " + tw.w : "none"}: ${a && a.kind}${a && a.tu ? "/tu" : ""}, then ${b && b.kind}${b && b.tu ? "/tu" : ""})`, !!u && a.tu === u.id && a.kind === "type" && !b.tu && b.kind !== "type");
+    }
     const pig = WORDS.find(w => w.pronInGloss && held.has(w.id));
     check(`default typedOk: a held pronInGloss word shown by its reading (${pig ? pig.w : "none"}) is not planned typed`, !!pig && !VC.typedWordDue(pig, p, PACK, TODAY, ["recall", "type"]) && VC.typedWordDue(BY_ID[[...held].find(id => !BY_ID[id].pronInGloss)], p, PACK, TODAY, ["recall", "type"]));
     const w0 = heldOn[0].word; const q = clone(p); VC.noteDay(q, PACK, TODAY, "w:" + w0.id, "type", true);
@@ -260,6 +288,86 @@ function seedW(){
     const t2 = rows2.filter(r => r.key[0] === "w" && r.kind === "type" && r.s0 === 2);
     check(`right typed answers at 2 make a word known (${t2.length})`, t2.length > 0 && t2.every(r => r.s1 === 3));
     check("no word at 3+ before the sessions lost known status by a right answer", Object.keys(pre).every(id => (pre[id].s || 0) < 3 || (api.getProg().w[id].s || 0) >= 3 || rows2.some(r => r.key === "w:" + id && !r.ok)));
+  }
+
+  console.log("\n[6] in-drill retry after a miss: no streak credit from 2+ (review HIGH 1, as markUnitTyped)");
+  {
+    NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
+    const p0 = seedW();
+    const api = await boot(PACK, p0, 5);
+    // First ask of a word in Review: typed from 2+ misses once (even id) or twice (odd id: the typed
+    // fallback), any other word once; in later stages only a choice first ask from 2+ misses once.
+    const misses = (it, s) => s >= 2 && it.kind === "type" ? 1 + (parseInt(String(it.key).slice(-1), 10) % 2) : 1;
+    const first = {};
+    const rows = await session(api, (it, rec, rs, step) => { const key = String(it.key); if(key[0] !== "w") return true;
+      const fk = step + "|" + key; if(!first[fk]) first[fk] = { s: rec ? rec.s || 0 : 0, kind: it.kind };
+      if(step !== 0 && !(first[fk].kind !== "type" && first[fk].s >= 2)) return true;
+      const n = rs.filter(r => r.key === key && r.step === step).length;
+      return n >= misses({ key, kind: first[fk].kind }, first[fk].s); });
+    const W = rows.filter(r => r.key[0] === "w");
+    const retries = W.filter(r => r.ok && W.some(m => m.key === r.key && m.step === r.step && !m.ok && W.indexOf(m) < W.indexOf(r))).map(r => Object.assign({ f: first[r.step + "|" + r.key] }, r));
+    const site = { typed: retries.filter(r => r.f.kind === "type" && r.kind === "type"), fallback: retries.filter(r => r.f.kind === "type" && r.kind !== "type"), choice: retries.filter(r => r.f.kind !== "type") };
+    const noCredit = rs => rs.filter(r => r.f.s >= 2).every(r => r.s1 === r.s0 && r.r1 === r.r0 + 1);
+    check(`typed requeue: a word missed typed from 2+ and retyped right in the drill stays stepped down (${site.typed.filter(r => r.f.s >= 2).length})`, site.typed.filter(r => r.f.s >= 2).length > 0 && noCredit(site.typed));
+    check(`typed fallback (typedRecallFallback, logged recall): right after two typed misses from 2+, no credit (${site.fallback.filter(r => r.f.s >= 2).length}; ${[...new Set(site.fallback.map(r => r.label))]})`, site.fallback.filter(r => r.f.s >= 2).length > 0 && noCredit(site.fallback));
+    const ck = [...new Set(site.choice.filter(r => r.f.s >= 2).map(r => r.label))];
+    check(`choice requeue (${ck.join(" / ")}): right on the retry after a miss from 2+, no credit (${site.choice.filter(r => r.f.s >= 2).length})`, site.choice.filter(r => r.f.s >= 2).length > 0 && noCredit(site.choice));
+    const low = retries.filter(r => r.f.s < 2);
+    check(`below 2 the retry still counts as before (miss -> 0, retry right -> 1) (${low.length})`, low.length > 0 && low.every(r => r.s1 === r.s0 + 1));
+    const later = W.filter(r => r.ok && r.step > 0 && W.some(m => m.key === r.key && m.step === 0 && !m.ok) && r.s0 < 2);
+    // Every requeue kind directly: a word stepped down 2 -> 1 in this drill (its miss in D.miss), right on the retry.
+    const w = byLv["2"].find(x => !x.pronInGloss), per = {};
+    for(const kind of ["recall", "read", "hear", "type"]){ for(const inDrill of [true, false]){
+      api.getProg().w[w.id] = { r: 3, w: 1, s: 1 }; api.setD({ miss: inDrill ? [{ key: "w:" + w.id }] : [] }); api.mark(w.id, true, kind);
+      per[kind + (inDrill ? "" : " (no miss)")] = api.getProg().w[w.id].s; } }
+    api.setD(null);
+    check(`retry right by recall / read / hear / type after a miss in the drill: no credit (${JSON.stringify(per)})`, ["recall", "read", "hear", "type"].every(k => per[k] === 1 && per[k + " (no miss)"] === 2));
+    check(`a right answer in a later drill of the session counts as usual (below 2: +1) (${later.length})`, later.length > 0 && later.every(r => r.s1 === r.s0 + 1));
+  }
+
+  console.log("\n[7] words no typed kind fits while the written form is hidden: the old rule (choice right advances)");
+  {
+    NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
+    const p0 = seedW(); const ids = ["北京", "元", "人民币"].map(w => WORDS.find(x => x.w === w).id);
+    // Their characters not yet mastered: the words show by their reading.
+    CHARACTERS.filter(c => /[北京元人民币]/.test(c.t)).forEach(c => { delete p0.chars.c[c.id]; });
+    const ctl = byLv["1"].find(w => !w.pronInGloss);
+    [...ids, ctl.id].forEach(id => { p0.w[id] = { r: 4, w: 1, s: 2, t: 20000, u: 1 }; });
+    const api = await boot(PACK, p0, 7);
+    const fits = ids.map(id => api.fits(BY_ID[id]));
+    check(`no typed kind fits ${["北京", "元", "人民币"].join(", ")} now (${fits}); the control ${ctl.w} fits`, fits.every(f => !f) && api.fits(ctl));
+    ids.forEach(id => api.mark(id, true, "recall")); api.mark(ctl.id, true, "recall");
+    check(`a right choice at 2 advances them to known (${ids.map(id => api.getProg().w[id].s)}); the control holds at ${api.getProg().w[ctl.id].s}`, ids.every(id => api.getProg().w[id].s === 3) && api.getProg().w[ctl.id].s === 2);
+    ids.forEach(id => api.mark(id, false, "read"));
+    check(`a miss at 3 goes to 0 as before (${ids.map(id => api.getProg().w[id].s)})`, ids.every(id => api.getProg().w[id].s === 0));
+    const m = { a: { r: 1, w: 0, s: 2 } }; VC.markWordRec(m, "a", true, "hear", undefined, PACK, { typable: false });
+    check("core: markWordRec typable false = markRec", m.a.s === 3);
+  }
+
+  console.log("\n[8] one typed ask per word per session: the miss replay asks recall; a reload keeps the typed set");
+  {
+    NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
+    const p0 = seedW(); const SK = VC.sessionKey(PACK);
+    const api = await boot(PACK, p0, 3);
+    const pol = (it, rec, rs) => !(rec && rec.s === 2 && it.kind === "type" && !rs.some(r => r.key === String(it.key)));
+    let tw0 = null;
+    const rowsA = await session(api, pol, { stop: (rs, it) => { const ty = rs.filter(r => r.kind === "type" && !r.ok); if(ty.length >= 3 && api.tss() && api.tss().at === 0 && !tw0){ tw0 = ty.map(r => r.key.slice(2)); return true; } return false; } });
+    const rec = JSON.parse(api.st.ss.getItem(SK) || api.st.ls.getItem(SK) || "null");
+    const tw = rec && rec.today && rec.today.tw;
+    check(`session record ${SK} carries today.tw, the words asked typed (${tw ? tw.length : "none"}; ${(tw0 || []).length} missed)`, Array.isArray(tw) && (tw0 || []).length >= 3 && tw0.every(id => tw.includes(id)));
+    check(`progress ${VC.storageKey(PACK)} gains no field (no "tw")`, !/"tw"/.test(api.st.ls.getItem(VC.storageKey(PACK))));
+    const api2 = await boot(PACK, null, 9, { st: api.st });
+    if(!api2.getCur() && api2.getD()) api2.render();
+    const resumed = !!(api2.getD() && api2.getD().cur && api2.tss() && api2.tss().at === 0);
+    check("reload mid-Review resumes the drill", resumed);
+    const rowsB = await session(api2, pol, { cont: true });
+    const tyB = rowsB.filter(r => r.kind === "type" && tw0.includes(r.key.slice(2)));
+    const again = tyB.filter(r => r.step > 0);
+    check(`after the reload, no word typed before it is asked typed again in a later stage (${again.length}; in-drill typed retries ${tyB.length - again.length})`, again.length === 0, again.map(r => r.key + "@" + r.step).join(" "));
+    const all = [...rowsA, ...rowsB].filter(r => r.key[0] === "w");
+    const missedT = new Set(all.filter(r => r.kind === "type" && !r.ok && r.step === 0).map(r => r.key));
+    const replay = all.filter(r => r.step > 0 && missedT.has(r.key));
+    check(`the miss replay of words missed typed asks recall, never type (${replay.length}: ${[...new Set(replay.map(r => r.label))]})`, replay.length > 0 && replay.every(r => r.kind !== "type" && r.label === "Which word is this?"));
   }
   if(!OLD || !mainHtml) skip(`flag-off app control vs ${MAIN}`);
   else {

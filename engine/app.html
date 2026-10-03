@@ -468,10 +468,12 @@ const store = {
   backup(suffix, raw){ return this.setRaw(`${STORE_KEY}_${suffix}`, raw); }
 };
 // reqKind: a pass on a fallback item (hear shown as read, type as recall) must still clear k.
-// pack.wordsBy "typed": words answered typed in the running Today session (typedWordFits). Not kept
-// across a reload: a resumed session may ask such a word typed once more.
+// pack.wordsBy "typed": words asked typed in the running Today session (typedWordSeen), kept in the
+// session record (today.tw) so a reload does not ask them typed again. A word missed earlier in this
+// drill is a retry (VC.markWordRec), and a word no typed kind fits as shown keeps the old rule.
 const WORDS_TYPED = VC.wordsTypedOn(PACK), typedSession = new Set();
-function markWord(id, ok, kind, reqKind){ VC.ensureWordRec(prog, WORDS, PACK, id); VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); dayNote("w:" + id, kind, ok); store.save(); }
+const wordRetry = (id, ok) => !!(D && Array.isArray(D.miss) && D.miss.filter(m => m && m.key === "w:" + id).length > (ok ? 0 : 1));
+function markWord(id, ok, kind, reqKind){ VC.ensureWordRec(prog, WORDS, PACK, id); VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, WORDS_TYPED ? { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) } : undefined); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); dayNote("w:" + id, kind, ok); store.save(); }
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
 function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
 function markSentence(id, ok, kind){ VC.markRec(prog.s, id, ok, false); dayNote("s:" + id, kind, ok); store.save(); }
@@ -1610,6 +1612,7 @@ function sessionRecord(){
     rec.today = { step: t.step, at: t.at, hasRead: "read" in t, read: t.read ? Object.assign({}, t.read, { p: t.read.p.id }) : null };
     // characters.learn "lag": sets are dynamic, so the set is kept by its unit ids.
     if(t.snap && t.snap.stage && t.snap.stage.lag && t.snap.cset) rec.today.cu = t.snap.cset.ids;
+    if(WORDS_TYPED && typedSession.size) rec.today.tw = [...typedSession];
   }
   return Object.assign({ v: VC.SESSION_VERSION, build: sessionBuild(), t: Date.now(), fp: sessProgFp || VC.sessionHash(JSON.stringify(prog)) }, rec);
 }
@@ -1655,6 +1658,7 @@ function sessionResume(forTab){
       const t = rec.today; today = { step: t.step, at: t.at };
       if(t.hasRead) today.read = t.read ? Object.assign({}, t.read, { p: passageById(t.read.p) }) : null;
       if(t.cu) today.snap = VC.lagResume(takeSnapshot(), PACK, WORDS, CHAR_LIST, prog, t.cu);
+      typedSession.clear(); if(WORDS_TYPED && Array.isArray(t.tw)) t.tw.forEach(id => { if(typeof id === "string") typedSession.add(id); });
     }
     if(rec.drill){
       if(rec.drill.o.o === "today" && !today) rzFail();
@@ -1688,9 +1692,9 @@ if(typeof window.addEventListener === "function") window.addEventListener("pageh
 const TYPED_ITEM = { word: typeItem, pron: pronTypeItem, written: silentWrittenTypeItem, writtenPron: writtenPronTypeItem,
   writtenMeaning: e => meaningTypeItem(e, false), pronMeaning: e => meaningTypeItem(e, true) };
 // pack.wordsBy "typed": a held word is planned typed only when some typed kind fits it as shown, and
-// once per Today session (a typed miss that a choice took back to 2 waits for the next session).
-const typedWordFits = e => VC.typedKinds(PACK).some(k => VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB || undefined))
-  && !(todayStepState && typedSession.has(e.id));
+// once per Today session.
+const typedWordFits = e => !!e && VC.typedKinds(PACK).some(k => VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB || undefined));
+const typedWordSeen = e => !!todayStepState && typedSession.has(e.id);
 const typedFits = e => !TYPED_FROM || VC.typedKinds(PACK).some(k => VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB));
 function typedFromSlotItem(plan, i){
   const e = plan[i].word; const shown = !!e.w && !dispWord(e).isPron; const only = plan[i].tu ? VC.TYPED_WRITTEN_KINDS : null;
@@ -2077,10 +2081,10 @@ function todayRender(){
   const g = VC.todayGates(lw.length, !pz && (snap ? snapLearns(snap) : !!nn), availSent.length, scriptCount());
   // Start today runs exactly this plan, so the line names units only when the plan holds
   // some (a first character day has no unit records yet).
-  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedUnits: TYPED_UNITS }) : null } : null;
+  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedUnits: TYPED_UNITS }) : null } : null;
   const reviewLine = snap
     ? `${snap.reviewExtra && todayPrep.review ? todayPrep.review.length : snap.reviewSize} items, ${PLAN_ORDER}${reviewWhat(snap, todayPrep.review)}`
-    : `${pz && g.review ? VC.buildReviewPlan(lw, prog, PACK, { extra: learnDrillCount(null), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, rng: () => 0.5 }).length : VC.REVIEW_SIZE} items, ${PLAN_ORDER}`;
+    : `${pz && g.review ? VC.buildReviewPlan(lw, prog, PACK, { extra: learnDrillCount(null), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, rng: () => 0.5 }).length : VC.REVIEW_SIZE} items, ${PLAN_ORDER}`;
   const steps = [
     ["Review", g.review ? reviewLine : (snap && snap.stage && snap.stage.kind === "script" ? "skipped until a set is learned" : "skipped until 5+ words are learned")],
     ["Learn", snap ? snapLearnLine(snap) : (nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered")],
@@ -2165,11 +2169,11 @@ function todayStep(){
   todayStepState.at = s; sessionSave(true);
   if(s === 0){
     if(g.review && snap){
-      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedUnits: TYPED_UNITS });
+      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedUnits: TYPED_UNITS });
       todayStepState.review = null;
       drill(plan.map(planItem), todayStep, missSummary); return;
     }
-    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, { extra: paused() ? learnDrillCount(null) : undefined, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits }).map(itemFromPlan), todayStep, missSummary); return; }
+    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, { extra: paused() ? learnDrillCount(null) : undefined, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen }).map(itemFromPlan), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 1){
@@ -2196,8 +2200,8 @@ function todayStep(){
     return todayStep();
   }
   if(s === 3){
-    if(g.recall && units){ drill(VC.buildRecallPlan(lw, prog, PACK, 8, { units, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedUnits: TYPED_UNITS }).map(planItem), todayStep, missSummary); return; }
-    if(g.recall){ drill(VC.buildRecallPlan(lw, prog, PACK, 8, { canHear: canHearWord, today: dayToday(), typedOk: typedWordFits }).map(itemFromPlan), todayStep, missSummary); return; }
+    if(g.recall && units){ drill(VC.buildRecallPlan(lw, prog, PACK, 8, { units, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedUnits: TYPED_UNITS }).map(planItem), todayStep, missSummary); return; }
+    if(g.recall){ drill(VC.buildRecallPlan(lw, prog, PACK, 8, { canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen }).map(itemFromPlan), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 4){
@@ -2463,7 +2467,7 @@ function renderWordBody(){
     const items = []; withLearn(set.map(w => w.id), () => set.forEach(w => items.push(...learnPair(w))));
     drill(items, wordsSetDone(wordsLv, wordsSet, set.filter(w => !got.has(w.id)).map(w => w.id)), missSummary);
   };
-  if(canReview) $("rev").onclick = () => drill(VC.buildReviewPlan(learnedWords(), prog, PACK, { canHear: canHearWord, today: dayToday(), typedOk: typedWordFits }).map(itemFromPlan), wordsRender, missSummary);
+  if(canReview) $("rev").onclick = () => drill(VC.buildReviewPlan(learnedWords(), prog, PACK, { canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen }).map(itemFromPlan), wordsRender, missSummary);
 }
 
 // RD holds everything a passage screen shows, so re-entering it (tab return, voiceschanged)
@@ -2908,7 +2912,7 @@ function testRender(){
   else $("pl").onclick = () => { testSel = "placement"; testRender(); };
   if(tg.words){
     if(hearN) $("tListen").onclick = () => drill(pickHear(hearLw,20).map(hearItem), testRender, missSummary);
-    $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20, { missedKinds: false, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits }).map(itemFromPlan), testRender, missSummary);
+    $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20, { missedKinds: false, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen }).map(itemFromPlan), testRender, missSummary);
   }
   if(tg.sentences){
     $("tSentences").onclick = () => drill(pickSentences(availSent,20,s => [canHearSentence(s) ? "hear" : "read"]).map(sentenceByEar), testRender, missSummary);
