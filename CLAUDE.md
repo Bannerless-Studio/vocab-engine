@@ -45,12 +45,12 @@ Why it is built this way (one line each):
 
 ## Commands (pinned)
 
-Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-04, branch fb18-words-typed (on main 2a76e72).
+Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-04, branch fb20-progress-map (on main a2f2426).
 
 ```sh
 $NODE tests/engine_checks.js                     # 704 passed; includes the dist/zh.html + sw.js stale guard and the packs/zh generator drift check from an empty dir (needs ../chinese)
 $NODE tests/pron_aids_checks.js                  # 158
-$NODE tests/migration_checks.js                  # 395 (hsk_pinyin -> vocab_zh; uses ../chinese when present; [bare5] zh bare 6 -> 5; [rotation-s] read.done s/ls; [wordsBy] records read on a8e9c08)
+$NODE tests/migration_checks.js                  # 400 (hsk_pinyin -> vocab_zh; uses ../chinese when present; [bare5] zh bare 6 -> 5; [rotation-s] read.done s/ls; [wordsBy] records read on a8e9c08; [progressMap] prog.pm both directions vs a2f2426)
 $NODE tests/characters_checks.js                 # 134
 $NODE tests/characters_app_checks.js             # 202
 $NODE tests/script_checks.js                     # 128
@@ -65,6 +65,7 @@ $NODE tests/validate_pack_spans_checks.js        # 13
 $NODE tests/typed_from_checks.js                 # 70 (pack.typedFrom / glossFocus; control vs ef44c6e)
 $NODE tests/typed_mastery_checks.js              # 81 (characters.bareBy typed credit/hold/miss step-down, bareWords, per-level stages, withWords + Learn turn + order chips on a withWords pack, gloss fields; control vs 7fe35f7, markChar vs 7a21ccd)
 $NODE tests/words_typed_checks.js                # 57 (pack.wordsBy typed: streak table, flag-off markRec + two-session app control vs a8e9c08, held words planned typed + held share, one typed ask per session (replay recall, session record today.tw across a reload), no in-drill retry credit, untypable words keep the old rule)
+$NODE tests/progress_map_checks.js              # 40 (pack.progressMap: position formula, prog.pm history cap 14, sessionsToGo cases, Today row text, session writes pm, flag-off control vs a2f2426)
 $NODE tests/lag_checks.js                        # 45 (characters.learn "lag": core rule, owner shape before/after, per-level set label (Today row + card header, straddling set, resume), app sessions, resume, per-level Progress rows vs 68930bd, control vs 590af86)
 $NODE tests/pause_checks.js                      # 49 (pack.pauseNew: flag-off / unpaused control vs 36aee02, chip, paused sessions teach nothing, Review +Learn items, toggling mid-session)
 $NODE tests/opts_mix_checks.js                  # 40 (pack.optsMix: length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
