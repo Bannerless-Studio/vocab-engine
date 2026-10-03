@@ -2018,6 +2018,7 @@ function pauseSnap(snap){
   if(snap && paused()) snap.reviewExtra = learnDrillCount(snap);
   return snap;
 }
+const csetLabel = (label, cs) => cs.lv !== undefined ? `${label} ${escapeHtml(levelLabel(cs.lv))}, set ${cs.lvIndex+1} of ${cs.lvTotal}` : `${label}, set ${cs.index+1} of ${cs.total}`;
 function snapLearnLine(snap){
   const st = snap.stage;
   if(!st || !snapLearns(snap)) return "everything covered";
@@ -2025,7 +2026,7 @@ function snapLearnLine(snap){
     const a = snap.ssets[0].index + 1, b = snap.ssets[snap.ssets.length - 1].index + 1;
     return `${st.label}, ${a === b ? `set ${a}` : `sets ${a}–${b}`} of ${snap.ssets[0].total}`;
   }
-  return st.kind === "words" ? `${levelLabel(st.lv)}, set ${st.set+1}` : `${st.label}, set ${snap.cset.index+1} of ${snap.cset.total}`;
+  return st.kind === "words" ? `${levelLabel(st.lv)}, set ${st.set+1}` : csetLabel(st.label, snap.cset);
 }
 const scriptCount = () => HAS_SCRIPT ? VC.recordedScriptUnits(SUNITS, prog, PACK).length : undefined;
 // docs/SCRIPT_PRIMER.md §1.
@@ -2253,7 +2254,7 @@ function charTeach(cs, stage, onDrill){
     const ex = VC.unitExampleSentences(u, w, SENTENCES, PACK, 1);
     return `<div class="charteach"><div class="chead"${tap ? ` data-wid="${escapeHtml(w.id)}" style="cursor:pointer"` : ""}><span class="cform"${TA}>${escapeHtml(u.t)}</span><span class="info">${reading ? `<span class="pr">${readingHTML(reading)}</span>` : ""}<span class="en">${glossOut(VC.unitGloss(u, WORDS_BY_ID))}</span>${charHintHTML(u, hinted)}</span>${tap ? `<span style="color:var(--mute);flex:0 0 auto">${TEACH_PLAY_SVG}</span>` : ""}</div>${ex.map(s => sentenceRowHTML(s, w, u.words)).join("")}</div>`;
   }).join("");
-  P.innerHTML = `<p class="q">${tf(stage.label)}, set ${cs.index+1} of ${cs.total}: the written form of words you already know.${hint}</p>
+  P.innerHTML = `<p class="q">${csetLabel(tf(stage.label), cs)}: the written form of words you already know.${hint}</p>
     <div id="ctl">${cards}</div><div class="actions"><button class="next" id="dr">Drill these</button></div>`;
   $("dr").onclick = onDrill;
 }

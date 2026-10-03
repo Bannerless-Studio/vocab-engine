@@ -2104,7 +2104,11 @@ function lagCharSet(pack, words, units, prog, ids){
   let list = lagUnits(pack, words, all, prog).slice(0, cfg.setSize);
   if(ids){ const by = new Map(all.map(u => [u.id, u])); list = Array.isArray(ids) ? ids.map(id => by.get(id)) : []; if(!list.every(Boolean)) return null; }
   if(!list.length) return null;
-  return { index: Math.floor(all.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), units: list, total: Math.ceil(all.length / cfg.setSize), ids: list.map(u => u.id) };
+  // lv/lvIndex/lvTotal: the same position counted inside the set's lowest level (owner 2026-10-03: "48 of 120" said nothing about where in the characters).
+  const idx = levelIndexMap(pack), at = u => idx[String(u.lv)] !== undefined ? idx[String(u.lv)] : Infinity;
+  const lv = list.reduce((m, u) => at(u) < at(m) ? u : m, list[0]).lv, inLv = all.filter(u => String(u.lv) === String(lv));
+  return { index: Math.floor(all.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), units: list, total: Math.ceil(all.length / cfg.setSize), ids: list.map(u => u.id),
+    lv, lvIndex: Math.floor(inLv.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), lvTotal: Math.ceil(inLv.length / cfg.setSize) };
 }
 // Session resume: a Learn step planned on a lag set teaches the same units (sessionRecord today.cu).
 function lagResume(snap, pack, words, units, prog, ids){

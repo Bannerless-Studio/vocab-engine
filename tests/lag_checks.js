@@ -290,10 +290,23 @@ try {
     check(`8 sessions: Learn ${lines.map(kind).join("")} (${lines.slice(0, 4).join(" | ")} ...); no card; ${nRec(pf)} units, none before its word`, lines.map(kind).join("") === "WCWCWCWC" && card === 0 && early === 0 && nRec(pf) === 40);
     check(`stored chars keys ${Object.keys(pf.chars).join(",")}: no order, no turn written`, !("order" in pf.chars) && !("turn" in pf.chars));
     const { api } = await bootWith(PACK, ownerProg(250), 1); const h = api.panel();
-    check(`owner shape, Today: strip ${segs(h).join(" | ")}; Learn ${learnLine(h)}; no card`, segs(h).join("|") === "HSK 1|HSK 2|HSK 3|HSK 4" && /^字, set 26 of 120$/.test(learnLine(h)) && !/id="charChoice"/.test(h) && /id="go"/.test(h));
+    check(`owner shape, Today: strip ${segs(h).join(" | ")}; Learn ${learnLine(h)}; no card`, segs(h).join("|") === "HSK 1|HSK 2|HSK 3|HSK 4" && /^字 HSK 2, set 11 of 15$/.test(learnLine(h)) && !/id="charChoice"/.test(h) && /id="go"/.test(h));
     api.goto("progress"); const ph = api.html("panel");
     const rows = charRows(ph), row = rows.join("; ");
     check(`owner shape, Progress: "${row}"; no order chips; mix chip kept`, eq(rows, ["HSK 1 | 150 / 150 taught · 150 mastered", "HSK 2 | 100 / 147 taught · 100 mastered", "HSK 3 | 0 / 298 taught · 0 mastered", "HSK 4 | 0 / 598 taught · 0 mastered"]) && !/id="ord(First|Before|After)"/.test(ph) && /id="toggleMix"/.test(ph));
+    { // per-level label: Today row and Learn card header agree with the per-level Progress counts
+      const pr = rows.map(r => { const m = r.match(/^(HSK \d) \| (\d+) \/ (\d+)/); return { lv: m[1], taught: +m[2], all: +m[3] }; });
+      const m = learnLine(h).match(/^字 (HSK \d), set (\d+) of (\d+)$/), r = m && pr.find(x => x.lv === m[1]);
+      check(`owner shape: Today "${learnLine(h)}" = Progress row ${r && r.lv}: set ${r && Math.floor(r.taught / 10) + 1} of ${r && Math.ceil(r.all / 10)}`, !!r && +m[2] === Math.floor(r.taught / 10) + 1 && +m[3] === Math.ceil(r.all / 10));
+      const cs = VC.lagCharSet(PACK, WORDS, CHARACTERS, ownerProg(250));
+      check("owner shape: lagCharSet keeps index/total (whole-pack counts) and adds lv/lvIndex/lvTotal", cs.index === 25 && cs.total === 120 && cs.lv === "2" && cs.lvIndex === 10 && cs.lvTotal === 15);
+      const lf = VC.lagCharSet(PACK, WORDS, CHARACTERS, (() => { const q = VC.normalizeProg({ sets: { "1": 0 }, placedOnce: true }, PACK); byLv["1"].slice(0, 10).forEach(w => { q.w[w.id] = { r: 1, w: 0, s: 1 }; }); return q; })());
+      check(`fresh learner first lag set: level ${lf.lv}, set ${lf.lvIndex + 1} of ${lf.lvTotal}`, lf.lv === "1" && lf.lvIndex === 0 && lf.lvTotal === 15);
+      const sp = ownerProg(145), sc = VC.lagCharSet(PACK, WORDS, CHARACTERS, sp);
+      check(`set straddling HSK 1/2 (145 taught of 150): shows the lower level (${sc.lv}, set ${sc.lvIndex + 1} of ${sc.lvTotal})`, sc.units.some(u => String(u.lv) === "2") && sc.lv === "1" && sc.lvIndex === 14);
+      const { api: sa } = await bootWith(PACK, sp, 1); const lh = learnLine(sa.panel());
+      check(`straddling set, Today: "${lh}"`, lh === "字 HSK 1, set 15 of 15");
+    }
     if(OLD){
       const { api: ob } = await bootWith(WITH, ownerProg(250), 1, { core: OLD, html: cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 }) });
       const bh = ob.panel(); ob.goto("progress"); const bp = ob.html("panel");
@@ -327,8 +340,11 @@ try {
     const shown = teachUnits(api.panel());
     const cu = (() => { for(const s of [st2.ls, st2.ss]) for(const k of s.keys()){ const m = String(s.getItem(k)).match(/"cu":(\[[^\]]*\])/); if(m) return JSON.parse(m[1]); } return null; })();
     check(`teach screen: ${shown.join("")}; session record today.cu holds their ids (${(cu || []).join(",")})`, shown.length === 10 && !!cu && eq(cu.map(id => CHARACTERS.find(u => u.id === id).t), shown));
+    const head = h => stripTags((String(h).match(/<p class="q">([\s\S]*?)<\/p>/) || [])[1] || "").replace(/:.*$/, "");
+    check(`teach card header: "${head(api.panel())}"`, head(api.panel()) === "字 HSK 1, set 1 of 15");
     NOW += 60 * 1000; api = await boot(PACK, st2, 2);
     const again = teachUnits(api.panel());
+    check(`after reload (cset rebuilt from today.cu): header "${head(api.panel())}"`, head(api.panel()) === "字 HSK 1, set 1 of 15");
     check(`reload on the teach screen: the same set (${again.join("")})`, eq(again, shown));
     play(api, (_, h) => !!api.getD() && !!api.getCur() && /c:/.test(String(api.getCur().key)));
     NOW += 60 * 1000; api = await boot(PACK, st2, 3);

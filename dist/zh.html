@@ -2467,7 +2467,11 @@ function lagCharSet(pack, words, units, prog, ids){
   let list = lagUnits(pack, words, all, prog).slice(0, cfg.setSize);
   if(ids){ const by = new Map(all.map(u => [u.id, u])); list = Array.isArray(ids) ? ids.map(id => by.get(id)) : []; if(!list.every(Boolean)) return null; }
   if(!list.length) return null;
-  return { index: Math.floor(all.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), units: list, total: Math.ceil(all.length / cfg.setSize), ids: list.map(u => u.id) };
+  // lv/lvIndex/lvTotal: the same position counted inside the set's lowest level (owner 2026-10-03: "48 of 120" said nothing about where in the characters).
+  const idx = levelIndexMap(pack), at = u => idx[String(u.lv)] !== undefined ? idx[String(u.lv)] : Infinity;
+  const lv = list.reduce((m, u) => at(u) < at(m) ? u : m, list[0]).lv, inLv = all.filter(u => String(u.lv) === String(lv));
+  return { index: Math.floor(all.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), units: list, total: Math.ceil(all.length / cfg.setSize), ids: list.map(u => u.id),
+    lv, lvIndex: Math.floor(inLv.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), lvTotal: Math.ceil(inLv.length / cfg.setSize) };
 }
 // Session resume: a Learn step planned on a lag set teaches the same units (sessionRecord today.cu).
 function lagResume(snap, pack, words, units, prog, ids){
@@ -4916,7 +4920,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1183487469-1824858";
+const VE_BUILD = "3507238667-1825522";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -5525,6 +5529,7 @@ function pauseSnap(snap){
   if(snap && paused()) snap.reviewExtra = learnDrillCount(snap);
   return snap;
 }
+const csetLabel = (label, cs) => cs.lv !== undefined ? `${label} ${escapeHtml(levelLabel(cs.lv))}, set ${cs.lvIndex+1} of ${cs.lvTotal}` : `${label}, set ${cs.index+1} of ${cs.total}`;
 function snapLearnLine(snap){
   const st = snap.stage;
   if(!st || !snapLearns(snap)) return "everything covered";
@@ -5532,7 +5537,7 @@ function snapLearnLine(snap){
     const a = snap.ssets[0].index + 1, b = snap.ssets[snap.ssets.length - 1].index + 1;
     return `${st.label}, ${a === b ? `set ${a}` : `sets ${a}–${b}`} of ${snap.ssets[0].total}`;
   }
-  return st.kind === "words" ? `${levelLabel(st.lv)}, set ${st.set+1}` : `${st.label}, set ${snap.cset.index+1} of ${snap.cset.total}`;
+  return st.kind === "words" ? `${levelLabel(st.lv)}, set ${st.set+1}` : csetLabel(st.label, snap.cset);
 }
 const scriptCount = () => HAS_SCRIPT ? VC.recordedScriptUnits(SUNITS, prog, PACK).length : undefined;
 // docs/SCRIPT_PRIMER.md §1.
@@ -5760,7 +5765,7 @@ function charTeach(cs, stage, onDrill){
     const ex = VC.unitExampleSentences(u, w, SENTENCES, PACK, 1);
     return `<div class="charteach"><div class="chead"${tap ? ` data-wid="${escapeHtml(w.id)}" style="cursor:pointer"` : ""}><span class="cform"${TA}>${escapeHtml(u.t)}</span><span class="info">${reading ? `<span class="pr">${readingHTML(reading)}</span>` : ""}<span class="en">${glossOut(VC.unitGloss(u, WORDS_BY_ID))}</span>${charHintHTML(u, hinted)}</span>${tap ? `<span style="color:var(--mute);flex:0 0 auto">${TEACH_PLAY_SVG}</span>` : ""}</div>${ex.map(s => sentenceRowHTML(s, w, u.words)).join("")}</div>`;
   }).join("");
-  P.innerHTML = `<p class="q">${tf(stage.label)}, set ${cs.index+1} of ${cs.total}: the written form of words you already know.${hint}</p>
+  P.innerHTML = `<p class="q">${csetLabel(tf(stage.label), cs)}: the written form of words you already know.${hint}</p>
     <div id="ctl">${cards}</div><div class="actions"><button class="next" id="dr">Drill these</button></div>`;
   $("dr").onclick = onDrill;
 }
@@ -6688,4 +6693,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1579087539-1824182-->
+<!--ve-build:1198684800-1824846-->
