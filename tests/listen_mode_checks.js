@@ -273,13 +273,12 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     const k = b.spoken.length;
     b.api.el("ls2").click();
     check("a play row speaks its sentence", b.spoken.slice(k).join() === P.sentences[2].t);
-    check("peekText false before Show text", b.api.rd().peekText === false);
     b.api.el("ltext").click();
     const shown = b.api.html("pbox");
-    check("Show text: the ordinary passage rows (tap-to-gloss) replace the play rows, peekText logged",
-      b.api.rd().peekText === true && /data-pw/.test(shown) && !/class="ghost lsay"/.test(shown) && (shown.match(/class="psent/g) || []).length === n && b.api.el("ltext").textContent === "Hide text");
+    check("Show text: the ordinary passage rows (tap-to-gloss) replace the play rows",
+      /data-pw/.test(shown) && !/class="ghost lsay"/.test(shown) && (shown.match(/class="psent/g) || []).length === n && b.api.el("ltext").textContent === "Hide text");
     b.api.el("ltext").click();
-    check("Hide text: play rows back, peekText stays logged", /class="ghost lsay"/.test(b.api.html("pbox")) && b.api.rd().peekText === true);
+    check("Hide text: play rows back", /class="ghost lsay"/.test(b.api.html("pbox")));
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log("\n[4] Play all: n sentences in order, each after the last ends; stops on Done listening");
@@ -398,7 +397,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("answering an audio-only question reveals its text + translation button (#qsh gone), qh not logged", lateOk);
     const res = b.api.html("panel");
     const lines = [...res.matchAll(/(?:✓|✗) Question (\d+)[^<]*/g)].map(m => m[0]);
-    check("results: 'Listening pass' alone even after Show text (peekText kept, not shown)", /id="lmode"[^>]*>Listening pass<\/p>/.test(res) && !/Text shown while listening|looked back/.test(res) && b.api.rd().peekText === true);
+    check("results: 'Listening pass' alone even after Show text", /id="lmode"[^>]*>Listening pass<\/p>/.test(res) && !/Text shown while listening|looked back/.test(res) && !("peekText" in b.api.rd()));
     check("results: ' · question shown' only on the tapped question's line", lines.length === n && lines.every((l, i) => l.includes("· question shown") === (i === tapIdx)));
     const rec = pr.read.done[P.id];
     check("done record: l:1, x counts on, full score", rec.l === 1 && rec.x === 2 && rec.sc === n && rec.n === n);
@@ -884,7 +883,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     let h = b.api.html("panel");
     check("listening pass question: button reads 'Replay passage', replay bar and passage hidden", />Replay passage</.test(h) && !/Show passage/.test(h) && /id="lkbar" hidden/.test(h) && /id="pbox" hidden/.test(h));
     b.api.el("ptoggle").click(); h = b.api.html("panel");
-    check("opening it: bar and list shown, button 'Hide passage', logged as looked back", b.api.el("lkbar").hidden === false && b.api.el("pbox").hidden === false && b.api.el("ptoggle").textContent === "Hide passage" && b.api.rd().answers[0].reopened === true);
+    check("opening it: bar and list shown, button 'Hide passage', nothing logged", b.api.el("lkbar").hidden === false && b.api.el("pbox").hidden === false && b.api.el("ptoggle").textContent === "Hide passage" && !("reopened" in b.api.rd().answers[0]));
     check("list: one play row per sentence, no written text, no tappable words", (h.match(/class="ghost lsay"/g) || []).length === P.sentences.length && !textRe(h) && !/data-pw/.test(h));
     const k = b.spoken.length; b.api.el("ls2").click(); await sleep(DEFER);
     check("a play row speaks its sentence", b.spoken.length === k + 1 && b.spoken[k] === P.sentences[2].t);
@@ -893,11 +892,10 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("Play all starts sentence 1 and becomes Stop", b.spoken.length === k2 + 1 && b.spoken[k2] === P.sentences[0].t && b.api.el("lplay").textContent === "Stop");
     b.api.el("lplay").click();
     check("Stop ends it", b.api.el("lplay").textContent === "Play all" && b.api.rd().playing === false);
-    check("no Show text yet: peekText still false", b.api.rd().peekText === false);
     b.api.el("ltext").click(); h = b.api.html("pbox");
-    check("Show text: written rows with tap-to-gloss, peekText logged, label Hide text", /data-pw/.test(h) && textRe(h) && b.api.rd().peekText === true && b.api.el("ltext").textContent === "Hide text");
+    check("Show text: written rows with tap-to-gloss, label Hide text, nothing logged", /data-pw/.test(h) && textRe(h) && !("peekText" in b.api.rd()) && b.api.el("ltext").textContent === "Hide text");
     const rdSaved = JSON.parse(JSON.stringify(Object.assign({}, b.api.rd(), { p: undefined })));
-    check("resume record carries the look-back state (shown, qv[0].lkText)", rdSaved.shown === true && rdSaved.qv[0].lkText === true);
+    check("resume record carries the UI state only (shown, qv[0].lkText)", rdSaved.shown === true && rdSaved.qv[0].lkText === true);
     flip(); await sleep(DEFER);
     check("re-render restores the open text list", !/id="pbox" hidden/.test(b.api.html("panel")) && /data-pw/.test(b.api.html("panel")) && !/id="lkbar" hidden/.test(b.api.html("panel")) && />Hide text</.test(b.api.html("panel")));
     b.api.el("ltext").click(); h = b.api.html("pbox");
@@ -911,17 +909,17 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("the stopped sentence's late end starts nothing", b.spoken.length === k4);
     b.api.el("o").children.find(x => x.dataset.v === String(P.questions[0].answer)).click();
     b.api.el("nx").click(); await sleep(DEFER);
-    // Show text after answering is a peek, not "text shown while listening".
+    // Looking back is not tracked: Show text after answering is a plain toggle.
     { const t = await boot({ pack: PACK_DAY_NR }); t.api.setProg(rereadProg(PASSAGES, P)); t.api.startPassage(P, true, "listen"); t.api.el("rdone").click();
       t.api.el("o").children.find(x => x.dataset.v === String(P.questions[0].answer)).click(); t.api.el("ptoggle").click(); t.api.el("ltext").click();
-      check("Show text after answering: shown, but peekText not logged; Stop label cleared by the verdict", /data-pw/.test(t.api.html("pbox")) && t.api.rd().peekText === false && t.api.rd().answers[0].reopened === false);
+      check("Show text after answering: a plain toggle, nothing logged", /data-pw/.test(t.api.html("pbox")) && !("peekText" in t.api.rd()) && !("reopened" in t.api.rd().answers[0]));
       const t2 = await boot({ pack: PACK_DAY_NR }); t2.api.setProg(rereadProg(PASSAGES, P)); t2.api.startPassage(P, true, "listen"); t2.api.el("rdone").click();
       t2.api.el("ptoggle").click(); t2.api.el("lplay").click(); t2.api.el("o").children.find(x => x.dataset.v === String(P.questions[0].answer)).click();
       check("answering during Play all clears Stop", t2.api.el("lplay").textContent === "Play all" && t2.api.rd().playing === false); }
     check("next question: look-back closed again", n < 2 || (b.api.rd().shown === false && /id="pbox" hidden/.test(b.api.html("panel")) && />Replay passage</.test(b.api.html("panel"))));
     answerAll(b.api, P, false);
     const res = b.api.html("panel");
-    check("results: no 'looked back' and no 'Text shown while listening', though question 1 was looked back and text was shown (flags kept)", !/looked back|Text shown while listening/.test(res) && /Listening pass<\/p>/.test(res) && b.api.rd().answers[0].reopened === true && b.api.rd().peekText === true);
+    check("results: no 'looked back' and no 'Text shown while listening' though the look-back was opened and text shown; no look-back flag in the record", !/looked back|Text shown while listening/.test(res) && /Listening pass<\/p>/.test(res) && b.api.rd().answers.every(a => !("reopened" in a)) && !("peekText" in b.api.rd()));
     const rd1 = await boot({ pack: PACK_DAY_NR }); rd1.api.setProg(rereadProg(PASSAGES, P));
     rd1.api.startPassage(P, true, "read"); rd1.api.el("rdone").click();
     const hr = rd1.api.html("panel");

@@ -2045,8 +2045,8 @@ function audioSlot(make){
 // prog.read.unlocked so it survives later changes. prog.read is absent until the learner
 // first meets a passage, so older stored progress needs no migration.
 const READ_UNLOCK = 0.7;
-// reopened 0: looking back never weakens a word (user 2026-09-28) and is not shown on the results screen (owner 2026-10-03).
-const READ_WEIGHT = { tapped: 2, wrong: 2, reopened: 0 };
+// Looking back is not tracked (owner 2026-10-03).
+const READ_WEIGHT = { tapped: 2, wrong: 2 };
 function readState(prog){
   if(!isObj(prog.read)) prog.read = {};
   if(!isObj(prog.read.unlocked)) prog.read.unlocked = {};
@@ -2233,8 +2233,8 @@ function gradeQuestion(q, answer){
   if(q.type === "tf") return typeof answer === "boolean" && answer === q.answer;
   return Number.isInteger(answer) && answer === q.answer;
 }
-// A word with several reasons takes the largest weight, never the sum. Reopened answers
-// weigh 0: listed as information only.
+// A word with several reasons takes the largest weight, never the sum. Looking back
+// is not a reason.
 function passageWeakWords(passage, log, wordsById){
   const out = new Map();
   const add = (id, why) => {
@@ -2249,7 +2249,6 @@ function passageWeakWords(passage, log, wordsById){
   ((log && log.answers) || []).forEach((a, i) => {
     if(!a || !qs[i]) return;
     if(!a.ok) (qs[i].words || []).forEach(id => add(id, "wrong"));
-    if(a.reopened) (qs[i].words || []).forEach(id => add(id, "reopened"));
   });
   return [...out.values()];
 }
@@ -4998,7 +4997,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2175756359-1923101";
+const VE_BUILD = "541528795-1922373";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6084,7 +6083,7 @@ function startPassage(p, today, mode){
   if(VC.readRotationOn(PACK)) RD.qx = qx;
   if(mode === "listen"){
     const prev = prog.read && prog.read.done && prog.read.done[p.id];
-    Object.assign(RD, { mode: "listen", peekText: false, textShown: false, playing: false,
+    Object.assign(RD, { mode: "listen", textShown: false, playing: false,
       audioOnly: VC.listenAudioOnly(p.id, (prev && prev.x) || 0, p.questions.length, PACK) });
   }
   readPassageScreen();
@@ -6262,7 +6261,6 @@ function listenScreen(){
   };
   $("ltext").onclick = () => {
     rd.textShown = !rd.textShown;
-    if(rd.textShown) rd.peekText = true;
     $("pbox").innerHTML = rd.textShown ? passageHTML(-1) : listenRowsHTML();
     $("gloss").hidden = true;
     $("ltext").textContent = rd.textShown ? "Hide text" : "Show text";
@@ -6296,7 +6294,7 @@ function readQuestionScreen(){
   stopSpeaking(); // no-voice path: a still-playing clip (previous reveal, read-aloud) must not run into this question
   screenTop();
   const p = RD.p, P = $("panel"), qi = RD.qi, q = p.questions[qi];
-  if(!RD.answers[qi]) RD.answers[qi] = { ok: null, reopened: false, given: null, tr: false };
+  if(!RD.answers[qi]) RD.answers[qi] = { ok: null, given: null, tr: false };
   const rec = RD.answers[qi];
   // RD.qv[qi] lets a re-mount (tab return, voiceschanged) restore the question silently.
   const tf = q.type === "tf";
@@ -6349,7 +6347,6 @@ function readQuestionScreen(){
     $("lplay").onclick = () => { if(rd.playing){ lkSet(false); stopSpeaking(); return; } lkSet(true); step(0); };
     $("ltext").onclick = () => {
       view.lkText = !view.lkText;
-      if(view.lkText && rec.ok === null) rd.peekText = true; // like reopened: a peek after answering is not text shown while listening
       $("pbox").innerHTML = view.lkText ? passageHTML(-1) : listenRowsHTML();
       $("gloss").hidden = true;
       $("ltext").textContent = view.lkText ? "Hide text" : "Show text";
@@ -6360,7 +6357,6 @@ function readQuestionScreen(){
   }
   $("ptoggle").onclick = () => {
     RD.shown = !RD.shown;
-    if(RD.shown && rec.ok === null) rec.reopened = true; // logged: looked back before answering
     if(LB && !RD.shown){ lkSet(false); stopSpeaking(); }
     $("pbox").hidden = !RD.shown;
     if(LB) $("lkbar").hidden = !RD.shown;
@@ -6422,8 +6418,7 @@ function readResults(){
   drillKeyHandler = null; setScore(0,0); screenTop();
   const p = RD.p, P = $("panel");
   const sc = RD.answers.filter(a => a && a.ok).length;
-  // Looking back is never shown on the results (owner 2026-10-03): a word listed only for it is dropped, its weight is 0 anyway.
-  const weak = VC.passageWeakWords(p, { tapped: RD.tapped, answers: RD.answers }, WORDS_BY_ID).map(w => Object.assign({}, w, { why: w.why.filter(x => x !== "reopened") })).filter(w => w.why.length);
+  const weak = VC.passageWeakWords(p, { tapped: RD.tapped, answers: RD.answers }, WORDS_BY_ID);
   // pauseNew: Today's Read stage never gives an unlearned word a record (`d` would make it learned).
   if(RD.today && paused()){ const lw = new Set(learnedWords().map(w => w.id)); weak.forEach(w => { if(!lw.has(w.id)) w.weight = 0; }); }
   // Weight-0 entries (paused, unlearned) are information: never applied, no checkbox.
@@ -6807,4 +6802,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2470629386-1922425-->
+<!--ve-build:2439318870-1921696-->

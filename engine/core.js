@@ -1682,8 +1682,8 @@ function audioSlot(make){
 // prog.read.unlocked so it survives later changes. prog.read is absent until the learner
 // first meets a passage, so older stored progress needs no migration.
 const READ_UNLOCK = 0.7;
-// reopened 0: looking back never weakens a word (user 2026-09-28) and is not shown on the results screen (owner 2026-10-03).
-const READ_WEIGHT = { tapped: 2, wrong: 2, reopened: 0 };
+// Looking back is not tracked (owner 2026-10-03).
+const READ_WEIGHT = { tapped: 2, wrong: 2 };
 function readState(prog){
   if(!isObj(prog.read)) prog.read = {};
   if(!isObj(prog.read.unlocked)) prog.read.unlocked = {};
@@ -1870,8 +1870,8 @@ function gradeQuestion(q, answer){
   if(q.type === "tf") return typeof answer === "boolean" && answer === q.answer;
   return Number.isInteger(answer) && answer === q.answer;
 }
-// A word with several reasons takes the largest weight, never the sum. Reopened answers
-// weigh 0: listed as information only.
+// A word with several reasons takes the largest weight, never the sum. Looking back
+// is not a reason.
 function passageWeakWords(passage, log, wordsById){
   const out = new Map();
   const add = (id, why) => {
@@ -1886,7 +1886,6 @@ function passageWeakWords(passage, log, wordsById){
   ((log && log.answers) || []).forEach((a, i) => {
     if(!a || !qs[i]) return;
     if(!a.ok) (qs[i].words || []).forEach(id => add(id, "wrong"));
-    if(a.reopened) (qs[i].words || []).forEach(id => add(id, "reopened"));
   });
   return [...out.values()];
 }

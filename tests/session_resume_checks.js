@@ -452,7 +452,14 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       check("listening look-back: reload restores the open 'Hide passage' play-row list", api.rd().shown === true && />Hide passage</.test(api.html("panel")) && !/id="lkbar" hidden/.test(api.html("panel")) && /class="ghost lsay"/.test(api.html("panel")));
       api.el("ltext").click();
       ({ api } = await boot(Object.assign({ seed: 27 }, st)));
-      check("listening look-back: reload restores the shown text with Hide text; peekText kept", api.rd().peekText === true && api.rd().qv[0].lkText === true && />Hide text</.test(api.html("panel")) && !/class="ghost lsay"/.test(api.html("panel")));
+      check("listening look-back: reload restores the shown text with Hide text", api.rd().qv[0].lkText === true && />Hide text</.test(api.html("panel")) && !/class="ghost lsay"/.test(api.html("panel")));
+      // A record from before look-back tracking was removed (a8e9c08) carries reopened/peekText: resumes, flags ignored.
+      { const rec = sess(st.ls); rec.rd.peekText = true; rec.rd.answers[0] = Object.assign({ ok: null, given: null, tr: false }, { reopened: true }); st.ls.setItem(SKEY, JSON.stringify(rec));
+        ({ api } = await boot(Object.assign({ seed: 28 }, st)));
+        check("old session record with reopened/peekText resumes on the same question and finishes without a weak word", !!api.rd() && api.rd().qi === 0 && api.rd().mode === "listen" && />Hide text</.test(api.html("panel")));
+        const q = api.rd().p.questions;
+        for(let i = 0; i < q.length; i++){ api.el("o").children.find(b => b.dataset.v === String(q[i].answer)).click(); api.el("nx").click(); }
+        check("... and its results list no weak words and no look-back text", /No weak words from this passage/.test(api.html("panel")) && !/looked back|Text shown while listening/.test(api.html("panel"))); }
     }
     {
       // A parked passage without rd.qx (a build before readRotation) resumes in pack order.

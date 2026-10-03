@@ -1286,14 +1286,14 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("gradeQuestion tf: bool compare, non-bool false",
     VC.gradeQuestion(P1.questions[1], true) && !VC.gradeQuestion(P1.questions[1], false) && !VC.gradeQuestion(P1.questions[1], 1) && VC.gradeQuestion(P2.questions[0], false));
 
-  // weak words: tapped a3 + a0; q0 wrong (a0: tapped and wrong -> 2, not 4); q1 right after reopening (a2 -> 0, listed only);
+  // weak words: tapped a3 + a0; q0 wrong (a0: tapped and wrong -> 2, not 4); q1 right (a2 not weak; a stale `reopened` flag from an older session record is ignored);
   // q2 right (a1 not weak). Unknown ids dropped.
   const log = { tapped:["a3","a0","zz"], answers:[{ ok:false, reopened:false }, { ok:true, reopened:true }, { ok:true, reopened:false }] };
   const weak = VC.passageWeakWords(P1, log, RB);
   const W = {}; weak.forEach(e => { W[e.id] = e; });
-  check("weak words = tapped ∪ wrong-question words ∪ reopened-question words", util.isDeepStrictEqual(weak.map(e => e.id), ["a3","a0","a2"]));
-  check("weights: tapped 2, tapped+wrong 2 (max, not sum), reopened only 0", W.a3.weight === 2 && W.a0.weight === 2 && W.a2.weight === 0 && util.isDeepStrictEqual(W.a2.why, ["reopened"]) && util.isDeepStrictEqual(W.a0.why, ["tapped","wrong"]));
-  check("wrong + reopened on the same question -> 2", VC.passageWeakWords(P1, { tapped:[], answers:[{ ok:false, reopened:true }] }, RB)[0].weight === 2);
+  check("weak words = tapped ∪ wrong-question words (a stale reopened flag adds nothing)", util.isDeepStrictEqual(weak.map(e => e.id), ["a3","a0"]));
+  check("weights: tapped 2, tapped+wrong 2 (max, not sum); READ_WEIGHT has no reopened", W.a3.weight === 2 && W.a0.weight === 2 && !W.a2 && !("reopened" in VC.READ_WEIGHT) && util.isDeepStrictEqual(W.a0.why, ["tapped","wrong"]));
+  check("a wrong answer is a miss whether or not the learner looked back -> 2", [true, false].every(r => VC.passageWeakWords(P1, { tapped:[], answers:[{ ok:false, reopened:r }] }, RB)[0].weight === 2));
   check("all right, nothing tapped or reopened -> no weak words", VC.passageWeakWords(P1, { tapped:[], answers:[{ok:true},{ok:true},{ok:true}] }, RB).length === 0);
 
   // apply to progress: learned word (a0) and unlearned words (a2 is in set 1: learned; a3 learned) — use a19 (unlearned) too.
@@ -1301,10 +1301,10 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   prog.w.a0 = { r:3, w:0, s:3, prov:1 };
   VC.applyWeakWords(prog, [...weak, { id:"a19", weight:2 }, { id:"a18", weight:0 }], RW, RP);
   check("applyWeakWords: misses += weight, streak reset, prov cleared", prog.w.a0.w === 2 && prog.w.a0.s === 0 && !prog.w.a0.prov && prog.w.a3.w === 2);
-  check("applyWeakWords: reopened-only entry (weight 0) leaves its record untouched", util.isDeepStrictEqual(prog.w.a2, before.w.a2));
+  check("applyWeakWords: a word that was not weak leaves its record untouched", util.isDeepStrictEqual(prog.w.a2, before.w.a2));
   { const p0 = JSON.parse(JSON.stringify(before)); const ro = VC.passageWeakWords(P1, { tapped:[], answers:[{ ok:true }, { ok:true, reopened:true }] }, RB);
     VC.applyWeakWords(p0, ro, RW, RP);
-    check("reopened-only passage: every entry weight 0 and applyWeakWords leaves prog unchanged", ro.length > 0 && ro.every(e => e.weight === 0) && util.isDeepStrictEqual(p0, before)); }
+    check("looked back but all right, nothing tapped: no weak words, prog unchanged", ro.length === 0 && util.isDeepStrictEqual(p0, before)); }
   check("applyWeakWords: unlearned word flagged d (joins review pool); learned word not flagged; weight 0 ignored",
     prog.w.a19.d === 1 && prog.w.a19.w === 2 && !prog.w.a0.d && !prog.w.a18 && before.w.a19 === undefined);
   check("weakScore ranks applied words above untouched ones", VC.weakScore(prog.w.a0) > 0 && VC.weakScore(prog.w.a3) > 0 && VC.weakScore(prog.w.a5) <= 0);
@@ -2173,23 +2173,23 @@ return {
     }
     // Results weak-word list: a word tapped at a glossed span lists the sense that was seen.
     tapIn("p0003", 4, "w0115");
-    const rd = api.getRD(); rd.answers = rd.p.questions.map(() => ({ ok: true, reopened: false, given: null })); rd.resultsDone = true;
+    const rd = api.getRD(); rd.answers = rd.p.questions.map(() => ({ ok: true, given: null })); rd.resultsDone = true;
     api.readResults();
     const weak = (document.getElementById("panel").innerHTML.match(/<div id="weak">[\s\S]*?<\/div>/) || [""])[0];
     check("span gloss: results weak-word list shows the tapped span's gloss for 点 (o'clock), not 'point; dot'",
       /点/.test(weak) && /o'clock/.test(text(weak)) && !/<span class="ge">point; dot<\/span>/.test(weak));
-    // Looked back only (weight 0): information without a checkbox, never applied; alone, no list or heading.
+    // Looking back is not tracked: a stale `reopened` on an answer (older session record) changes nothing on the results.
     { const qi = rd.p.questions.findIndex(q => (q.words || []).length && !(q.words || []).includes("w0115"));
       const roIds = rd.p.questions[qi].words;
       rd.answers = rd.p.questions.map((q, i) => ({ ok: true, reopened: i === qi, given: null }));
       const tapped0 = rd.tapped; rd.tapped = [];
       api.readResults(); const h1 = document.getElementById("panel").innerHTML;
-      check("results, looked back only: no weak-word list, heading or Add to review; no look-back marker anywhere (owner 2026-10-03)",
+      check("results, stale reopened flag only: no weak-word list, heading or Add to review; no look-back marker anywhere (owner 2026-10-03)",
         !/id="weak"|Weak words from this passage|id="addrev"|data-wi=/.test(h1) && /No weak words from this passage/.test(h1) && !/looked back/.test(h1));
       rd.tapped = tapped0; api.readResults(); const h2 = document.getElementById("panel").innerHTML;
       const wk = (h2.match(/<div id="weak">[\s\S]*?<\/div>/) || [""])[0];
       const boxes = (wk.match(/data-wi="\d+"/g) || []).length, rows = (wk.match(/<label class="wk"/g) || []).length;
-      check(`results, tapped + looked back: looked-back-only words (${roIds.join(",")}) not listed, no marker`, !/looked back/.test(h2) && rows === boxes && boxes >= 1 && /id="addrev"/.test(h2)); }
+      check(`results, tapped + stale reopened flag: those question words (${roIds.join(",")}) not listed, no marker`, !/looked back/.test(h2) && rows === boxes && boxes >= 1 && /id="addrev"/.test(h2)); }
     // A pack without span glosses renders exactly as the markup minus data-pg (no other change).
     let diff = 0, withPg = 0;
     PASSAGES.forEach(p => p.sentences.forEach((s, i) => {

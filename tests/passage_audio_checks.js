@@ -404,7 +404,7 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     check("tab return: same question, nothing spoken again", api.rd() && api.rd().qi === 0 && spoken.length === k);
     check("tab return: option order kept", optOrder(api) === ord);
     check("tab return: translation still shown, passage still open", api.html("panel").includes(VC.escapeHtml(q0.en)) && /id="pbox">/.test(api.html("panel")) && /Hide passage/.test(api.html("panel")));
-    check("tab return: the pre-answer logs are kept (tr, reopened)", api.rd().answers[0].tr === true && api.rd().answers[0].reopened === true);
+    check("tab return: the translation log is kept; looking back is not logged", api.rd().answers[0].tr === true && !("reopened" in api.rd().answers[0]));
     api.el("o").children.find(b => b.dataset.v !== String(q0.answer)).click();
     await sleep(DEFER);
     const k2 = spoken.length;

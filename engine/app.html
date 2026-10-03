@@ -2495,7 +2495,7 @@ function startPassage(p, today, mode){
   if(VC.readRotationOn(PACK)) RD.qx = qx;
   if(mode === "listen"){
     const prev = prog.read && prog.read.done && prog.read.done[p.id];
-    Object.assign(RD, { mode: "listen", peekText: false, textShown: false, playing: false,
+    Object.assign(RD, { mode: "listen", textShown: false, playing: false,
       audioOnly: VC.listenAudioOnly(p.id, (prev && prev.x) || 0, p.questions.length, PACK) });
   }
   readPassageScreen();
@@ -2673,7 +2673,6 @@ function listenScreen(){
   };
   $("ltext").onclick = () => {
     rd.textShown = !rd.textShown;
-    if(rd.textShown) rd.peekText = true;
     $("pbox").innerHTML = rd.textShown ? passageHTML(-1) : listenRowsHTML();
     $("gloss").hidden = true;
     $("ltext").textContent = rd.textShown ? "Hide text" : "Show text";
@@ -2707,7 +2706,7 @@ function readQuestionScreen(){
   stopSpeaking(); // no-voice path: a still-playing clip (previous reveal, read-aloud) must not run into this question
   screenTop();
   const p = RD.p, P = $("panel"), qi = RD.qi, q = p.questions[qi];
-  if(!RD.answers[qi]) RD.answers[qi] = { ok: null, reopened: false, given: null, tr: false };
+  if(!RD.answers[qi]) RD.answers[qi] = { ok: null, given: null, tr: false };
   const rec = RD.answers[qi];
   // RD.qv[qi] lets a re-mount (tab return, voiceschanged) restore the question silently.
   const tf = q.type === "tf";
@@ -2760,7 +2759,6 @@ function readQuestionScreen(){
     $("lplay").onclick = () => { if(rd.playing){ lkSet(false); stopSpeaking(); return; } lkSet(true); step(0); };
     $("ltext").onclick = () => {
       view.lkText = !view.lkText;
-      if(view.lkText && rec.ok === null) rd.peekText = true; // like reopened: a peek after answering is not text shown while listening
       $("pbox").innerHTML = view.lkText ? passageHTML(-1) : listenRowsHTML();
       $("gloss").hidden = true;
       $("ltext").textContent = view.lkText ? "Hide text" : "Show text";
@@ -2771,7 +2769,6 @@ function readQuestionScreen(){
   }
   $("ptoggle").onclick = () => {
     RD.shown = !RD.shown;
-    if(RD.shown && rec.ok === null) rec.reopened = true; // logged: looked back before answering
     if(LB && !RD.shown){ lkSet(false); stopSpeaking(); }
     $("pbox").hidden = !RD.shown;
     if(LB) $("lkbar").hidden = !RD.shown;
@@ -2833,8 +2830,7 @@ function readResults(){
   drillKeyHandler = null; setScore(0,0); screenTop();
   const p = RD.p, P = $("panel");
   const sc = RD.answers.filter(a => a && a.ok).length;
-  // Looking back is never shown on the results (owner 2026-10-03): a word listed only for it is dropped, its weight is 0 anyway.
-  const weak = VC.passageWeakWords(p, { tapped: RD.tapped, answers: RD.answers }, WORDS_BY_ID).map(w => Object.assign({}, w, { why: w.why.filter(x => x !== "reopened") })).filter(w => w.why.length);
+  const weak = VC.passageWeakWords(p, { tapped: RD.tapped, answers: RD.answers }, WORDS_BY_ID);
   // pauseNew: Today's Read stage never gives an unlearned word a record (`d` would make it learned).
   if(RD.today && paused()){ const lw = new Set(learnedWords().map(w => w.id)); weak.forEach(w => { if(!lw.has(w.id)) w.weight = 0; }); }
   // Weight-0 entries (paused, unlearned) are information: never applied, no checkbox.
