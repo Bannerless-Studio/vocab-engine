@@ -2092,6 +2092,7 @@ function nextReadItem(passages, words, pack, prog, now, reviewOnly){
   const open = new Set(readingLevels(passages, words, pack, prog).filter(l => l.unlocked).map(l => l.lv));
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
   // pack.rereadPerfectDays: a perfect passage returns after that many days, only when no imperfect one is due.
+  // A perfect passage read once and never listened to (x 1, no l) is due at READ_REREAD_DAYS like an imperfect one: a good read says little about listening.
   const perfDays = pack && Number.isInteger(pack.rereadPerfectDays) && pack.rereadPerfectDays > 0 ? pack.rereadPerfectDays : 0;
   let best = null, bestDay = Infinity, perf = null, perfDay = Infinity;
   (passages||[]).forEach(p => {
@@ -2099,7 +2100,7 @@ function nextReadItem(passages, words, pack, prog, now, reviewOnly){
     if(!open.has(p.lv) || !isObj(r) || typeof r.sc !== "number" || typeof r.n !== "number") return;
     const day = isoDayNumber(r.d);
     if(!isFinite(day)) return;
-    if(r.sc < r.n){
+    if(r.sc < r.n || (perfDays && r.x === 1 && !r.l)){
       if(today - day < READ_REREAD_DAYS || day >= bestDay) return;
       best = p; bestDay = day;
     } else if(perfDays && today - day >= perfDays && day < perfDay){
@@ -4944,7 +4945,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1488100429-1827793";
+const VE_BUILD = "2783621412-1827986";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6717,4 +6718,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:4261304518-1827117-->
+<!--ve-build:1907031811-1827310-->

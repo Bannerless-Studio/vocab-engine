@@ -37,8 +37,8 @@ const BASE = "ea5dcbc";
 const BASE_W7 = "4303f59";
 // [12] flag-off control for pack.listenQuestions: main before fb12-listen-all.
 const BASE_LQ = "7a21ccd";
-// [13] flag-off control for pack.rereadPerfectDays: main before fb13-reread-perfect.
-const BASE_RP = "6c067b4";
+// [13] flag-off control for pack.rereadPerfectDays (incl. the first listening pass): main before fb14-first-listen.
+const BASE_RP = "3790814";
 
 let fails = 0, passes = 0;
 function check(name, cond, detail){
@@ -683,11 +683,11 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     const PON = Object.assign({}, PACK, { rereadPerfectDays: 30 });
     const A = PASSAGES[0], B = PASSAGES[1], C = PASSAGES[2];
     const full = p => p.questions.length;
-    // Every passage done perfectly yesterday (not due) except the given [passage, score, days ago].
+    // Every passage done perfectly twice, yesterday (not due) except the given [passage, score, days ago].
     const mk = spec => {
       const pr = rereadProg(PASSAGES, A, { sc: full(A), d: daysAgo(1) });
-      PASSAGES.forEach(p => { pr.read.done[p.id] = { sc: full(p), n: full(p), d: daysAgo(1), x: 1 }; });
-      spec.forEach(([p, sc, ago, l]) => { pr.read.done[p.id] = Object.assign({ sc: sc === "full" ? full(p) : sc, n: full(p), d: daysAgo(ago), x: 1 }, l ? { l: 1 } : {}); });
+      PASSAGES.forEach(p => { pr.read.done[p.id] = { sc: full(p), n: full(p), d: daysAgo(1), x: 2 }; });
+      spec.forEach(([p, sc, ago, l, x]) => { pr.read.done[p.id] = Object.assign({ sc: sc === "full" ? full(p) : sc, n: full(p), d: daysAgo(ago), x: x || 2 }, l ? { l: 1 } : {}); });
       return pr;
     };
     const next = (pack, pr, paused) => VC.nextReadItem(PASSAGES, WORDS, pack, pr, daysAgo(0), paused);
@@ -701,6 +701,21 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("oldest perfect wins among perfect candidates", (next(PON, mk([[A, "full", 40], [B, "full", 90], [C, "full", 50]])) || {}).p.id === B.id);
     check("paused (reviewOnly) still offers the perfect re-read", (next(PON, mk([[A, "full", 31]]), true) || {}).p.id === A.id);
     check("a first read still wins over a perfect re-read", (() => { const pr = mk([[A, "full", 31]]); delete pr.read.done[C.id]; const r = next(PON, pr); return r && r.reason === "new" && r.p.id === C.id; })());
+    // First listening pass: perfect, read once (x 1), never listened.
+    check("perfect x=1 no l at 6 days -> nothing", next(PON, mk([[A, "full", 6, false, 1]])) === null);
+    const f7 = next(PON, mk([[A, "full", 7, false, 1]]));
+    check("perfect x=1 no l at 7 days -> reread", !!f7 && f7.p.id === A.id && f7.reason === "reread");
+    check("... and a listening pass with a voice", VC.readPassMode(f7, mk([[A, "full", 7, false, 1]]), true) === "listen");
+    check("... a reading pass without one", VC.readPassMode(f7, mk([[A, "full", 7, false, 1]]), false) === "read");
+    check("perfect x=1 with l at 7 days -> 30-day rule (nothing)", next(PON, mk([[A, "full", 7, true, 1]])) === null);
+    check("perfect x=1 with l at 30 days -> reread", (next(PON, mk([[A, "full", 30, true, 1]])) || {}).p.id === A.id);
+    check("perfect x=2 no l at 7 days -> nothing", next(PON, mk([[A, "full", 7, false, 2]])) === null);
+    check("perfect x=2 no l at 30 days -> reread", (next(PON, mk([[A, "full", 30, false, 2]])) || {}).p.id === A.id);
+    check("perfect x=1 at 7 days vs imperfect at 9: older d wins", (next(PON, mk([[A, "full", 7, false, 1], [B, 0, 9]])) || {}).p.id === B.id);
+    check("perfect x=1 at 9 days vs imperfect at 7: older d wins", (next(PON, mk([[A, "full", 9, false, 1], [B, 0, 7]])) || {}).p.id === A.id);
+    check("paused still offers the first listening pass", (next(PON, mk([[A, "full", 7, false, 1]]), true) || {}).p.id === A.id);
+    check("flagless pack: perfect x=1 at 7 days -> nothing", next(PACK, mk([[A, "full", 7, false, 1]])) === null);
+    check("a first read still wins over the first listening pass", (() => { const pr = mk([[A, "full", 9, false, 1]]); delete pr.read.done[C.id]; const r = next(PON, pr); return r && r.reason === "new" && r.p.id === C.id; })());
     for(const bad of [0, -1, 1.5, "30", null, true]) check(`rereadPerfectDays ${JSON.stringify(bad)} reads as off`, next(Object.assign({}, PACK, { rereadPerfectDays: bad }), mk([[A, "full", 90]])) === null);
     const pl = mk([[A, "full", 31]]), it = next(PON, pl);
     check("first attempt after a reading pass -> listening pass", VC.readPassMode(it, pl, true) === "listen");
@@ -716,8 +731,8 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     if(baseVC){
       const ago = [0, 1, 6, 7, 8, 29, 30, 31, 90];
       let same = true, n = 0;
-      for(const sc of [0, 1, "full"]) for(const a of ago) for(const b of ago) for(const paused of [false, true]){
-        const pr = mk([[A, sc, a], [B, "full", b], [C, 0, b]]);
+      for(const sc of [0, 1, "full"]) for(const x of [1, 2]) for(const a of ago) for(const b of ago) for(const paused of [false, true]){
+        const pr = mk([[A, sc, a, false, x], [B, "full", b, false, x], [C, 0, b]]);
         for(const pack of [PACK, Object.assign({}, PACK, { rereadPerfectDays: undefined })]){
           const w = baseVC.nextReadItem(PASSAGES, WORDS, PACK, pr, daysAgo(0), paused), g = VC.nextReadItem(PASSAGES, WORDS, pack, pr, daysAgo(0), paused);
           same = same && (w ? w.p.id + w.reason : null) === (g ? g.p.id + g.reason : null); n++;
