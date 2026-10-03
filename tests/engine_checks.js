@@ -2077,7 +2077,7 @@ return {
     // Everything done: a spaced re-read, then nothing.
     const today = new Date(), iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
     const old = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 8)), recent = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 2));
-    pr.read.done = Object.fromEntries(PASSAGES.map(p => [p.id, { sc: p.questions.length, n: p.questions.length, d: old, x: 1 }]));
+    pr.read.done = Object.fromEntries(PASSAGES.map(p => [p.id, { sc: p.questions.length, n: p.questions.length, d: old, x: 2 }]));
     b.api.today();
     check("all done, none missed: no Read row", !readRow(b.api.getHtml("panel")));
     pr.read.done[PASSAGES[2].id].sc = 0; pr.read.done[PASSAGES[2].id].d = recent;
