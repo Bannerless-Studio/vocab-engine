@@ -143,6 +143,8 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     delete pack.pauseNew;
     // Listening-pass question mode (docs/PACK_SCHEMA.md "Listening pass") is a new, flag-on field.
     delete pack.listenQuestions;
+    // Perfect-passage re-read (docs/PACK_SCHEMA.md "Today") is a new, flag-on field.
+    delete pack.rereadPerfectDays;
   }
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.

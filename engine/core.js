@@ -1728,14 +1728,22 @@ function nextReadItem(passages, words, pack, prog, now, reviewOnly){
   if(!isFinite(today)) return null;
   const open = new Set(readingLevels(passages, words, pack, prog).filter(l => l.unlocked).map(l => l.lv));
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
-  let best = null, bestDay = Infinity;
+  // pack.rereadPerfectDays: a perfect passage returns after that many days, only when no imperfect one is due.
+  const perfDays = pack && Number.isInteger(pack.rereadPerfectDays) && pack.rereadPerfectDays > 0 ? pack.rereadPerfectDays : 0;
+  let best = null, bestDay = Infinity, perf = null, perfDay = Infinity;
   (passages||[]).forEach(p => {
     const r = done[p.id];
-    if(!open.has(p.lv) || !isObj(r) || typeof r.sc !== "number" || typeof r.n !== "number" || !(r.sc < r.n)) return;
+    if(!open.has(p.lv) || !isObj(r) || typeof r.sc !== "number" || typeof r.n !== "number") return;
     const day = isoDayNumber(r.d);
-    if(!isFinite(day) || today - day < READ_REREAD_DAYS || day >= bestDay) return;
-    best = p; bestDay = day;
+    if(!isFinite(day)) return;
+    if(r.sc < r.n){
+      if(today - day < READ_REREAD_DAYS || day >= bestDay) return;
+      best = p; bestDay = day;
+    } else if(perfDays && today - day >= perfDays && day < perfDay){
+      perf = p; perfDay = day;
+    }
   });
+  if(!best) best = perf;
   return best ? { p: best, reason: "reread" } : null;
 }
 // Listen mode (docs/PACK_SCHEMA.md "passages.json", Listening pass). Only a spaced re-read

@@ -143,6 +143,8 @@ def check_pack(pack, rep):
         rep.err("pack.pauseNew must be a boolean")
     if "listenQuestions" in pack and pack["listenQuestions"] != "all":
         rep.err('pack.listenQuestions must be "all" when present')
+    if "rereadPerfectDays" in pack and not (isinstance(pack["rereadPerfectDays"], int) and not is_bool(pack["rereadPerfectDays"]) and pack["rereadPerfectDays"] > 0):
+        rep.err("pack.rereadPerfectDays must be a positive integer when present")
     if "pronFirst" in pack:
         if not is_bool(pack["pronFirst"]):
             rep.err("pack.pronFirst must be a boolean")

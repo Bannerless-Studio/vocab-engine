@@ -21,7 +21,7 @@ const PACK_DAY = loadConst(path.join(ZH, "pack.js"), "PACK");
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
 const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); };
-const PACK = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; delete p.optsOneScript; delete p.optsMix; delete p.listenQuestions; return p; })(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")));
+const PACK = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; delete p.optsOneScript; delete p.optsMix; delete p.listenQuestions; delete p.rereadPerfectDays; return p; })(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });
@@ -37,6 +37,8 @@ const BASE = "ea5dcbc";
 const BASE_W7 = "4303f59";
 // [12] flag-off control for pack.listenQuestions: main before fb12-listen-all.
 const BASE_LQ = "7a21ccd";
+// [13] flag-off control for pack.rereadPerfectDays: main before fb13-reread-perfect.
+const BASE_RP = "6c067b4";
 
 let fails = 0, passes = 0;
 function check(name, cond, detail){
@@ -674,6 +676,55 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     cv.api.setProg(rereadProg(PASSAGES, P)); cv.api.startPassage(PASSAGES.find(p => p.id === P.id), true, "listen");
     cv.api.el("rdone").click();
     check("zh with clips but no voice: still no audio-only question", !/id="qsh"/.test(cv.api.html("panel")) && /class="med wd"/.test(cv.api.html("panel")));
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  console.log(`\n[13] pack.rereadPerfectDays: a perfect passage re-reads after N days, imperfect first; flag off = ${BASE_RP}`);
+  try{
+    const PON = Object.assign({}, PACK, { rereadPerfectDays: 30 });
+    const A = PASSAGES[0], B = PASSAGES[1], C = PASSAGES[2];
+    const full = p => p.questions.length;
+    // Every passage done perfectly yesterday (not due) except the given [passage, score, days ago].
+    const mk = spec => {
+      const pr = rereadProg(PASSAGES, A, { sc: full(A), d: daysAgo(1) });
+      PASSAGES.forEach(p => { pr.read.done[p.id] = { sc: full(p), n: full(p), d: daysAgo(1), x: 1 }; });
+      spec.forEach(([p, sc, ago, l]) => { pr.read.done[p.id] = Object.assign({ sc: sc === "full" ? full(p) : sc, n: full(p), d: daysAgo(ago), x: 1 }, l ? { l: 1 } : {}); });
+      return pr;
+    };
+    const next = (pack, pr, paused) => VC.nextReadItem(PASSAGES, WORDS, pack, pr, daysAgo(0), paused);
+    check("perfect at 29 days -> nothing", next(PON, mk([[A, "full", 29]])) === null);
+    const r30 = next(PON, mk([[A, "full", 30]]));
+    check("perfect at 30 days -> reread", !!r30 && r30.p.id === A.id && r30.reason === "reread");
+    check("flagless pack: perfect at 60 days -> nothing", next(PACK, mk([[A, "full", 60]])) === null);
+    const mix = next(PON, mk([[A, "full", 60], [B, 0, 7]]));
+    check("imperfect at 7 days beats perfect at 60", !!mix && mix.p.id === B.id);
+    check("imperfect at 6 days is not due, perfect at 60 is", (next(PON, mk([[A, "full", 60], [B, 0, 6]])) || {}).p.id === A.id);
+    check("oldest perfect wins among perfect candidates", (next(PON, mk([[A, "full", 40], [B, "full", 90], [C, "full", 50]])) || {}).p.id === B.id);
+    check("paused (reviewOnly) still offers the perfect re-read", (next(PON, mk([[A, "full", 31]]), true) || {}).p.id === A.id);
+    check("a first read still wins over a perfect re-read", (() => { const pr = mk([[A, "full", 31]]); delete pr.read.done[C.id]; const r = next(PON, pr); return r && r.reason === "new" && r.p.id === C.id; })());
+    for(const bad of [0, -1, 1.5, "30", null, true]) check(`rereadPerfectDays ${JSON.stringify(bad)} reads as off`, next(Object.assign({}, PACK, { rereadPerfectDays: bad }), mk([[A, "full", 90]])) === null);
+    const pl = mk([[A, "full", 31]]), it = next(PON, pl);
+    check("first attempt after a reading pass -> listening pass", VC.readPassMode(it, pl, true) === "listen");
+    check("after a listening pass (l:1) -> reading pass", VC.readPassMode(it, mk([[A, "full", 31, true]]), true) === "read");
+    check("no way to listen -> reading pass", VC.readPassMode(it, pl, false) === "read");
+    check("zh as shipped sets rereadPerfectDays: 30; the suite's flag-off PACK does not", PACK_DAY.rereadPerfectDays === 30 && !("rereadPerfectDays" in PACK));
+    let baseVC = null;
+    try{
+      const src = cp.execSync(`git show ${BASE_RP}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseVC = m.exports;
+    }catch(e){}
+    check(`base ${BASE_RP} core.js loaded from git (a missing sha is a failure)`, !!baseVC);
+    if(baseVC){
+      const ago = [0, 1, 6, 7, 8, 29, 30, 31, 90];
+      let same = true, n = 0;
+      for(const sc of [0, 1, "full"]) for(const a of ago) for(const b of ago) for(const paused of [false, true]){
+        const pr = mk([[A, sc, a], [B, "full", b], [C, 0, b]]);
+        for(const pack of [PACK, Object.assign({}, PACK, { rereadPerfectDays: undefined })]){
+          const w = baseVC.nextReadItem(PASSAGES, WORDS, PACK, pr, daysAgo(0), paused), g = VC.nextReadItem(PASSAGES, WORDS, pack, pr, daysAgo(0), paused);
+          same = same && (w ? w.p.id + w.reason : null) === (g ? g.p.id + g.reason : null); n++;
+        }
+      }
+      check(`flag off: nextReadItem identical to base over ${n} progress shapes`, same);
+    }
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);

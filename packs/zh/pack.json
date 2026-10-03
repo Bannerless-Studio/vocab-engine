@@ -153,5 +153,6 @@
  "soundsReference": true,
  "dayAware": true,
  "pauseNew": true,
- "listenQuestions": "all"
+ "listenQuestions": "all",
+ "rereadPerfectDays": 30
 }
