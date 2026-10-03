@@ -799,7 +799,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       }
       sites.listenResults = la.html("panel");
       check("rtl pack listening pass: play rows, a hidden question, results lines rendered (audited below)",
-        /id="ls1"/.test(sites.listenScreen) && /id="qsh"/.test(sites.listenQHidden || "") && /Listening pass<br>Text shown while listening/.test(sites.listenResults) && /· question shown/.test(sites.listenResults));
+        /id="ls1"/.test(sites.listenScreen) && /id="qsh"/.test(sites.listenQHidden || "") && /Listening pass<\/p>/.test(sites.listenResults) && !/Text shown while listening/.test(sites.listenResults) && /· question shown/.test(sites.listenResults));
     }
     Object.keys(sites).forEach(k => { const bad = rtlAudit(sites[k]); check(`rtl audit: ${k} has no bidi/font violations (${bad.length})`, bad.length === 0, bad.slice(0, 4).join("; ")); });
     check("gloss popover box is an LTR line (dir=ltr), the word inside it an isolated dir=rtl span", /^<div class="gloss" id="gloss" dir="ltr" hidden>/.test(sites.glossBox) && /<span class="gw" data-tl lang="fa" dir="rtl">/.test(sites.gloss));

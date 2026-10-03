@@ -2184,12 +2184,12 @@ return {
       rd.answers = rd.p.questions.map((q, i) => ({ ok: true, reopened: i === qi, given: null }));
       const tapped0 = rd.tapped; rd.tapped = [];
       api.readResults(); const h1 = document.getElementById("panel").innerHTML;
-      check("results, looked back only: no weak-word list, heading or Add to review; question still marked looked back",
-        !/id="weak"|Weak words from this passage|id="addrev"|data-wi=/.test(h1) && /No weak words from this passage/.test(h1) && /· looked back/.test(h1));
+      check("results, looked back only: no weak-word list, heading or Add to review; no look-back marker anywhere (owner 2026-10-03)",
+        !/id="weak"|Weak words from this passage|id="addrev"|data-wi=/.test(h1) && /No weak words from this passage/.test(h1) && !/looked back/.test(h1));
       rd.tapped = tapped0; api.readResults(); const h2 = document.getElementById("panel").innerHTML;
       const wk = (h2.match(/<div id="weak">[\s\S]*?<\/div>/) || [""])[0];
       const boxes = (wk.match(/data-wi="\d+"/g) || []).length, rows = (wk.match(/<label class="wk"/g) || []).length;
-      check(`results, tapped + looked back: looked-back rows (${roIds.join(",")}) listed without a checkbox`, /looked back/.test(wk) && rows > boxes && boxes >= 1 && /id="addrev"/.test(h2)); }
+      check(`results, tapped + looked back: looked-back-only words (${roIds.join(",")}) not listed, no marker`, !/looked back/.test(h2) && rows === boxes && boxes >= 1 && /id="addrev"/.test(h2)); }
     // A pack without span glosses renders exactly as the markup minus data-pg (no other change).
     let diff = 0, withPg = 0;
     PASSAGES.forEach(p => p.sentences.forEach((s, i) => {

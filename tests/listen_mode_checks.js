@@ -398,7 +398,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("answering an audio-only question reveals its text + translation button (#qsh gone), qh not logged", lateOk);
     const res = b.api.html("panel");
     const lines = [...res.matchAll(/(?:✓|✗) Question (\d+)[^<]*/g)].map(m => m[0]);
-    check("results: 'Listening pass' and 'Text shown while listening'", /id="lmode"[^>]*>Listening pass<br>Text shown while listening</.test(res));
+    check("results: 'Listening pass' alone even after Show text (peekText kept, not shown)", /id="lmode"[^>]*>Listening pass<\/p>/.test(res) && !/Text shown while listening|looked back/.test(res) && b.api.rd().peekText === true);
     check("results: ' · question shown' only on the tapped question's line", lines.length === n && lines.every((l, i) => l.includes("· question shown") === (i === tapIdx)));
     const rec = pr.read.done[P.id];
     check("done record: l:1, x counts on, full score", rec.l === 1 && rec.x === 2 && rec.sc === n && rec.n === n);
@@ -921,7 +921,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("next question: look-back closed again", n < 2 || (b.api.rd().shown === false && /id="pbox" hidden/.test(b.api.html("panel")) && />Replay passage</.test(b.api.html("panel"))));
     answerAll(b.api, P, false);
     const res = b.api.html("panel");
-    check("results: question 1 ' · looked back', 'Text shown while listening' line", /Question 1 · looked back/.test(res) && /Listening pass<br>Text shown while listening/.test(res));
+    check("results: no 'looked back' and no 'Text shown while listening', though question 1 was looked back and text was shown (flags kept)", !/looked back|Text shown while listening/.test(res) && /Listening pass<\/p>/.test(res) && b.api.rd().answers[0].reopened === true && b.api.rd().peekText === true);
     const rd1 = await boot({ pack: PACK_DAY_NR }); rd1.api.setProg(rereadProg(PASSAGES, P));
     rd1.api.startPassage(P, true, "read"); rd1.api.el("rdone").click();
     const hr = rd1.api.html("panel");
@@ -936,17 +936,19 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     if(baseHtml && baseVC){
       const walk = async (o, mode) => {
         const t = await boot(o); t.api.setProg(rereadProg(PASSAGES, P)); t.api.startPassage(P, true, mode);
+        const norm = x => x.replace(/ · looked back/g, "").replace("<br>Text shown while listening", ""); // owner 2026-10-03: no look-back marker on results
         const out = [t.api.html("panel")]; t.api.el("rdone").click();
         for(let qi = 0; qi < n; qi++){
           out.push(t.api.html("panel")); t.api.el("ptoggle").click(); out.push(t.api.html("panel"), t.api.html("pbox"));
           t.api.el("o").children.find(x => x.dataset.v === String(P.questions[qi].answer)).click();
           out.push(t.api.html("panel")); t.api.el("nx").click(); await sleep(DEFER);
         }
-        out.push(t.api.html("panel")); return out;
+        out.push(t.api.html("panel")); return o.html ? out.map(norm) : out;
       };
       for(const [label, pk] of [["flag off, listening pass", PACK], ["flag off (readRotation only), listening pass", Object.assign({}, PACK, { readRotation: true })]]){
         const cur = await walk({ pack: pk }, "listen"), base = await walk({ pack: pk, html: baseHtml, vc: baseVC }, "listen");
         const diff = cur.findIndex((x, i) => x !== base[i]);
+        check(`${label}: no results screen mentions looking back (any pack)`, cur.every(x => !/looked back|Text shown while listening/.test(x)));
         check(`${label}: look-back walk byte-identical to base (${cur.length} captures)`, cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
       }
       const cur = await walk({ pack: PACK_DAY_NR }, "read"), base = await walk({ pack: PACK_DAY_NR, html: baseHtml, vc: baseVC }, "read");

@@ -1682,7 +1682,7 @@ function audioSlot(make){
 // prog.read.unlocked so it survives later changes. prog.read is absent until the learner
 // first meets a passage, so older stored progress needs no migration.
 const READ_UNLOCK = 0.7;
-// reopened 0: looking back is shown on the results screen but never weakens a word (user 2026-09-28).
+// reopened 0: looking back never weakens a word (user 2026-09-28) and is not shown on the results screen (owner 2026-10-03).
 const READ_WEIGHT = { tapped: 2, wrong: 2, reopened: 0 };
 function readState(prog){
   if(!isObj(prog.read)) prog.read = {};
