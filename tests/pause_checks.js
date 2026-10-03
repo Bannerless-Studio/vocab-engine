@@ -25,6 +25,7 @@ const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
+// The lag Learn row's set label changed after 36aee02 (per-level, fb9): both sides compared with it masked.
 // optsMix (docs/PACK_SCHEMA.md "optsMix") came after 36aee02: the controls drop it too.
 const NOMIX = (p => { const q = Object.assign({}, p); delete q.optsMix; return q; })(PACK);
 const OFF = (p => { const q = Object.assign({}, p); delete q.pauseNew; return q; })(NOMIX);
@@ -271,7 +272,7 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
         NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
         const api = await boot(pack, st, 1, { core, html }); const t = api.panel(); api.goto("progress"); const g = api.html("panel");
         api.today(); const s = playSession(api);
-        out.push({ t, g: g.replace(CHAR_ROWS, "").replace('<table class="stats nw">', '<table class="stats">'), s, prog: st.ls.getItem(VC.storageKey(pack)) });
+        out.push({ t: t.replace(/(<bdi[^>]*>字<\/bdi>|字)(?: [^,<]*)?, set \d+ of \d+/, "$1 SET"), g: g.replace(CHAR_ROWS, "").replace('<table class="stats nw">', '<table class="stats">'), s, prog: st.ls.getItem(VC.storageKey(pack)) });
       }
       const sameProgress = label === "flag on, not paused" ? out[0].g.replace(/<div class="row" style="margin-top:14px"><button class="chip on" id="togglePause" aria-pressed="true">New material: on<\/button><\/div>/, "") === out[1].g && /id="togglePause"/.test(out[0].g) : out[0].g === out[1].g && !/togglePause/.test(out[0].g);
       check(`${name}, ${label}: Today and a whole session's progress byte-identical to ${MAIN}; Progress ${label === "flag on, not paused" ? "identical but the chip" : "identical, no chip"} (${out[0].t.length} chars, ${out[0].s ? out[0].s.items : 0} items)`,
