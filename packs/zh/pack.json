@@ -154,5 +154,6 @@
  "dayAware": true,
  "pauseNew": true,
  "listenQuestions": "all",
- "readRotation": true
+ "readRotation": true,
+ "wordsBy": "typed"
 }

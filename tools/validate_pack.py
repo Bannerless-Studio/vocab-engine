@@ -149,6 +149,12 @@ def check_pack(pack, rep):
         rep.err("pack.readRotation must be a boolean")
     if pack.get("readRotation") is True and not pack.get("dayAware"):
         rep.err("pack.readRotation needs pack.dayAware (passes are counted by session)")
+    if "wordsBy" in pack and pack["wordsBy"] != "typed":
+        rep.err('pack.wordsBy must be "typed" when present')
+    elif pack.get("wordsBy") == "typed" and not pack.get("typing"):
+        rep.err("pack.wordsBy needs pack.typing (a held word moves up only by typed answers)")
+    elif pack.get("wordsBy") == "typed" and not pack.get("dayAware"):
+        rep.warn("pack.wordsBy without pack.dayAware: held words are not planned typed")
     if "pronFirst" in pack:
         if not is_bool(pack["pronFirst"]):
             rep.err("pack.pronFirst must be a boolean")

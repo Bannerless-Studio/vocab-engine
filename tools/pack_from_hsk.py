@@ -376,6 +376,9 @@ def main(argv):
         # Read stage alternates reading and listening passes by session, no day gates; questions
         # shuffled per pass (docs/PACK_SCHEMA.md "readRotation"; owner 2026-10-03). Replaces rereadPerfectDays.
         "readRotation": True,
+        # A word past streak 2 moves up only by typed answers; choice answers hold it
+        # (docs/PACK_SCHEMA.md "wordsBy"; owner 2026-10-03).
+        "wordsBy": "typed",
     }
 
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).
