@@ -371,6 +371,8 @@ def main(argv):
         "dayAware": True,
         # New material can be paused from Progress (docs/PACK_SCHEMA.md "pauseNew").
         "pauseNew": True,
+        # Every question of a listening pass is audio-only (docs/PACK_SCHEMA.md "Listening pass"; owner 2026-10-03).
+        "listenQuestions": "all",
     }
 
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).

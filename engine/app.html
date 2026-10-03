@@ -2490,7 +2490,7 @@ function startPassage(p, today, mode){
   if(mode === "listen"){
     const prev = prog.read && prog.read.done && prog.read.done[p.id];
     Object.assign(RD, { mode: "listen", peekText: false, textShown: false, playing: false,
-      audioOnly: VC.listenAudioOnly(p.id, (prev && prev.x) || 0, p.questions.length) });
+      audioOnly: VC.listenAudioOnly(p.id, (prev && prev.x) || 0, p.questions.length, PACK) });
   }
   readPassageScreen();
 }

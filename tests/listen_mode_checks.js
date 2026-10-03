@@ -21,7 +21,7 @@ const PACK_DAY = loadConst(path.join(ZH, "pack.js"), "PACK");
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
 const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); };
-const PACK = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; delete p.optsOneScript; delete p.optsMix; return p; })(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")));
+const PACK = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; delete p.optsOneScript; delete p.optsMix; delete p.listenQuestions; return p; })(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });
@@ -35,6 +35,8 @@ const BASE = "ea5dcbc";
 // [8] with-voice control for the no-voice planner (owner decision 2026-09-30, branch
 // engine-w7): main before it.
 const BASE_W7 = "4303f59";
+// [12] flag-off control for pack.listenQuestions: main before fb12-listen-all.
+const BASE_LQ = "7a21ccd";
 
 let fails = 0, passes = 0;
 function check(name, cond, detail){
@@ -604,6 +606,74 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     nv.api.el("o").children.find(x => x.dataset.v === String(it.a)).click();
     const e = (nv.api.getProg().day || { a: {} }).a[it.key];
     check(`dayAware, no voice: Test Sentences asks by sight and logs "read" (${JSON.stringify(e)}), nothing flagged`, !!e && JSON.stringify(e.r) === '["read"]' && (nv.api.dq() || []).every(x => !x[3]));
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  console.log(`\n[12] pack.listenQuestions "all": every question of a listening pass audio-only; flag off = ${BASE_LQ}`);
+  try{
+    for(const n of [0, 1, 2, 3, 4, 5, 6]){
+      const all = VC.listenAudioOnly("pz", 3, n, { listenQuestions: "all" });
+      check(`flag on: n=${n} -> all indexes 0..n-1`, JSON.stringify(all) === JSON.stringify(Array.from({ length: n }, (_, i) => i)));
+    }
+    check("flag on is independent of passage id and attempt count", JSON.stringify(VC.listenAudioOnly("a", 0, 4, { listenQuestions: "all" })) === JSON.stringify(VC.listenAudioOnly("b", 7, 4, { listenQuestions: "all" })));
+    check("zh as shipped sets listenQuestions: all; the suite's flag-off PACK does not", PACK_DAY.listenQuestions === "all" && !("listenQuestions" in PACK));
+    let baseHtml = null, baseVC = null;
+    try{
+      baseHtml = cp.execSync(`git show ${BASE_LQ}:engine/app.html`, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+      const src = cp.execSync(`git show ${BASE_LQ}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseVC = m.exports;
+    }catch(e){}
+    check(`base ${BASE_LQ} engine/app.html + core.js loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseVC);
+    if(baseHtml && baseVC){
+      let same = true;
+      for(const pid of ["p0006", "q", "x9"]) for(const n of [0, 1, 2, 3, 4, 5, 6]) for(const a of [0, 1, 2, 5, 9]){
+        const want = JSON.stringify(baseVC.listenAudioOnly(pid, a, n));
+        same = same && want === JSON.stringify(VC.listenAudioOnly(pid, a, n)) && want === JSON.stringify(VC.listenAudioOnly(pid, a, n, PACK)) && want === JSON.stringify(VC.listenAudioOnly(pid, a, n, { listenQuestions: undefined }));
+      }
+      check("flag off: listenAudioOnly identical to base for 3 ids x n=0..6 x 5 attempt counts (no pack, flagless pack)", same);
+      const walk = async o => {
+        const b = await boot(o); b.api.setProg(rereadProg(PASSAGES, P)); b.api.startPassage(P, true, "listen");
+        const out = [JSON.stringify(b.api.rd().audioOnly), b.api.html("panel")];
+        b.api.el("rdone").click();
+        for(let qi = 0; qi < P.questions.length; qi++){
+          out.push(b.api.html("panel"), b.spoken[b.spoken.length - 1]);
+          b.api.el("o").children.find(x => x.dataset.v === String(P.questions[qi].answer)).click();
+          out.push(b.api.html("panel")); b.api.el("nx").click(); await sleep(DEFER);
+        }
+        out.push(b.api.html("panel")); return out;
+      };
+      const cur = await walk({}), base = await walk({ html: baseHtml, vc: baseVC });
+      const diff = cur.findIndex((h, i) => h !== base[i]);
+      check(`flag off: listening pass walk (plan screen, each question before/after answering, results) byte-identical to base (${cur.length} captures)`, cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
+    }
+    const n = P.questions.length;
+    const b = await boot({ pack: PACK_DAY });
+    const pr = rereadProg(PASSAGES, P); b.api.setProg(pr);
+    b.api.startPassage(P, true, "listen");
+    check(`zh: audioOnly covers all ${n} questions`, JSON.stringify(b.api.rd().audioOnly) === JSON.stringify(Array.from({ length: n }, (_, i) => i)));
+    b.api.el("rdone").click();
+    const tapIdx = 0, lateIdx = n > 1 ? 1 : null;
+    let hiddenOk = true, spokeOk = true, tapOk = false, lateOk = lateIdx === null;
+    for(let qi = 0; qi < n; qi++){
+      const q = P.questions[qi], h = b.api.html("panel");
+      spokeOk = spokeOk && b.spoken[b.spoken.length - 1] === q.q;
+      hiddenOk = hiddenOk && /id="qsh"[^>]*>Show question</.test(h) && !/class="med wd"/.test(h) && !/id="qtr"/.test(h) && !(q.en && h.includes(VC.escapeHtml(q.en)));
+      if(qi === tapIdx){ b.api.el("qsh").click(); tapOk = b.api.rd().answers[qi].qh === true && /class="med wd"/.test(b.api.html("qshwrap")); }
+      b.api.el("o").children.find(x => x.dataset.v === String(q.answer)).click();
+      if(qi === lateIdx){ lateOk = !b.api.rd().answers[qi].qh && /class="med wd"/.test(b.api.html("qshwrap")) && !/id="qsh"/.test(b.api.html("qshwrap")); }
+      b.api.el("nx").click(); await sleep(DEFER);
+    }
+    check("zh: every question hides its text behind Show question until tapped or answered", hiddenOk);
+    check("zh: every question is spoken on mount", spokeOk);
+    check("zh: tapping Show question before answering logs qh on that question only; answering first logs none", tapOk && lateOk);
+    const res = b.api.html("panel");
+    const lines = [...res.matchAll(/(?:✓|✗) Question (\d+)[^<]*/g)].map(m => m[0]);
+    check("zh results: ' · question shown' only on the tapped question's line", lines.length === n && lines.every((l, i) => l.includes("· question shown") === (i === tapIdx)));
+    const rec = pr.read.done[P.id];
+    check("zh done record: l:1, same fields as before (no new keys)", rec.l === 1 && rec.sc === n && rec.n === n && JSON.stringify(Object.keys(rec).sort()) === JSON.stringify(["d", "l", "n", "sc", "x"]), JSON.stringify(rec));
+    const cv = await boot({ pack: PACK_DAY, voices: [{ lang: "en-US", name: "en" }], passages: PASSAGES.map(p => p.id === P.id ? Object.assign({}, P, { sentences: P.sentences.map((s, i) => Object.assign({}, s, { audio: `audio/p/${i}.mp3` })) }) : p) });
+    cv.api.setProg(rereadProg(PASSAGES, P)); cv.api.startPassage(PASSAGES.find(p => p.id === P.id), true, "listen");
+    cv.api.el("rdone").click();
+    check("zh with clips but no voice: still no audio-only question", !/id="qsh"/.test(cv.api.html("panel")) && /class="med wd"/.test(cv.api.html("panel")));
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);

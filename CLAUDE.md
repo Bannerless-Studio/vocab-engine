@@ -56,7 +56,7 @@ $NODE tests/script_checks.js                     # 128
 $NODE tests/script_app_checks.js                 # 216
 $NODE tests/audio_checks.js                      # 90 (app section needs ../persian)
 $NODE tests/passage_audio_checks.js              # 43
-$NODE tests/listen_mode_checks.js                # 81
+$NODE tests/listen_mode_checks.js                # 100 (adds [12] pack.listenQuestions "all": all questions audio-only, flag-off control vs 7a21ccd)
 $NODE tests/validate_pack_audio_checks.js        # 30
 $NODE tests/validate_pack_characters_checks.js   # 83
 $NODE tests/validate_pack_script_checks.js       # 56

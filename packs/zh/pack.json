@@ -152,5 +152,6 @@
  "tones": "pinyin",
  "soundsReference": true,
  "dayAware": true,
- "pauseNew": true
+ "pauseNew": true,
+ "listenQuestions": "all"
 }

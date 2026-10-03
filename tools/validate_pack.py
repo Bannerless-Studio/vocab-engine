@@ -141,6 +141,8 @@ def check_pack(pack, rep):
         rep.err("pack.dayAware must be a boolean")
     if "pauseNew" in pack and not is_bool(pack["pauseNew"]):
         rep.err("pack.pauseNew must be a boolean")
+    if "listenQuestions" in pack and pack["listenQuestions"] != "all":
+        rep.err('pack.listenQuestions must be "all" when present')
     if "pronFirst" in pack:
         if not is_bool(pack["pronFirst"]):
             rep.err("pack.pronFirst must be a boolean")
