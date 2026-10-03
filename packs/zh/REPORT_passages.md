@@ -8,25 +8,25 @@ a pack lemma can go unlinked when the tagger reads it with another POS).
 words = the builder's word count (the band rule: tokens after segmentation); ws_words =
 linked words, the count the app shows for an unspaced pack (report only).
 
-- **1**: 15 passages; words/passage 64-80 (median 75); ws_words 64-78; coverage min 1.000, median 1.000 (rule >= 0.95); linked min 1.000; questions mc 40, tf 31
-- **2**: 15 passages; words/passage 85-97 (median 92); ws_words 81-92; coverage min 1.000, median 1.000 (rule >= 0.95); linked min 1.000; questions mc 44, tf 31
-- **3**: 15 passages; words/passage 100-115 (median 107); ws_words 92-113; coverage min 0.962, median 1.000 (rule >= 0.95); linked min 0.962; questions mc 45, tf 30
-- **4**: 15 passages; words/passage 118-146 (median 133); ws_words 108-139; coverage min 0.992, median 1.000 (rule >= 0.93); linked min 0.992; questions mc 44, tf 31
+- **1**: 15 passages; words/passage 64-80 (median 75); ws_words 64-78; coverage min 1.000, median 1.000 (rule >= 0.95); linked min 1.000; questions mc 75, tf 45
+- **2**: 15 passages; words/passage 85-97 (median 92); ws_words 81-92; coverage min 1.000, median 1.000 (rule >= 0.95); linked min 1.000; questions mc 75, tf 45
+- **3**: 15 passages; words/passage 100-115 (median 107); ws_words 92-113; coverage min 0.962, median 1.000 (rule >= 0.95); linked min 0.962; questions mc 75, tf 45
+- **4**: 15 passages; words/passage 118-146 (median 133); ws_words 108-139; coverage min 0.992, median 1.000 (rule >= 0.93); linked min 0.992; questions mc 75, tf 45
 
 | id | lv | title | words | ws_words | coverage | linked | out-of-pack lemmas (reason) | higher-level lemmas |
 |---|---|---|---|---|---|---|---|---|
 | p0001 | 1 | 我的家 | 76 | 68 | 1.000 | 1.000 | - | - |
-| p0002 | 1 | 在饭馆 | 75 | 64 | 1.000 | 1.000 | - | 2: 服务员 |
+| p0002 | 1 | 在饭馆 | 75 | 64 | 1.000 | 1.000 | - | 2: 晚上, 服务员 |
 | p0003 | 1 | 天气冷了 | 64 | 64 | 1.000 | 1.000 | - | 2: 一起, 穿, 给 |
 | p0004 | 1 | 买衣服 | 72 | 71 | 1.000 | 1.000 | - | 2: 件, 贵, 问 |
 | p0005 | 1 | 明天看电影吗？ | 76 | 64 | 1.000 | 1.000 | - | 2: 一起, 也 |
 | p0006 | 1 | 你在哪儿？ | 79 | 78 | 1.000 | 1.000 | - | 2: 公共汽车, 船 |
-| p0007 | 1 | 我的中国同学 | 80 | 74 | 1.000 | 1.000 | - | 2: 慢 |
+| p0007 | 1 | 我的中国同学 | 80 | 74 | 1.000 | 1.000 | - | 2: 快, 慢 |
 | p0008 | 1 | 火车站的小商店 | 70 | 65 | 1.000 | 1.000 | - | 2: 从, 到, 晚上 |
 | p0009 | 1 | 去北京 | 75 | 71 | 1.000 | 1.000 | - | 2: 一起, 穿, 要 |
 | p0010 | 1 | 我的朋友 | 77 | 66 | 1.000 | 1.000 | - | 2: 好吃, 鱼 |
 | p0011 | 1 | 看医生 | 75 | 68 | 1.000 | 1.000 | - | 2: 再, 生病, 药 |
-| p0012 | 1 | 我的星期日 | 72 | 73 | 1.000 | 1.000 | - | 2: 近 |
+| p0012 | 1 | 我的星期日 | 72 | 73 | 1.000 | 1.000 | - | 2: 咖啡, 牛奶, 近 |
 | p0013 | 1 | 我学习汉语 | 72 | 64 | 1.000 | 1.000 | - | 2: 也 |
 | p0014 | 1 | 这个饭馆怎么样？ | 73 | 65 | 1.000 | 1.000 | - | 2: 也, 好吃, 张 |
 | p0015 | 1 | 我的房间 | 69 | 67 | 1.000 | 1.000 | - | 2: 也, 房间 |
@@ -51,7 +51,7 @@ linked words, the count the app shows for an unspaced pack (report only).
 | p0034 | 3 | 感冒了 | 105 | 96 | 1.000 | 1.000 | - | - |
 | p0035 | 3 | 图书馆的新要求 | 114 | 104 | 1.000 | 1.000 | - | - |
 | p0036 | 3 | 下班以后去超市 | 115 | 113 | 1.000 | 1.000 | - | 4: 取, 巧克力 |
-| p0037 | 3 | 西红柿鸡蛋面条 | 107 | 99 | 0.990 | 0.990 | 切 x1 (cut; the pack has no verb for cutting, needed in a recipe) | 4: 盐, 西红柿 |
+| p0037 | 3 | 西红柿鸡蛋面条 | 107 | 99 | 0.990 | 0.990 | 切 x1 (cut; the pack has no verb for cutting, needed in a recipe) | 4: 最后, 盐, 西红柿 |
 | p0038 | 3 | 在宾馆 | 112 | 102 | 1.000 | 1.000 | - | - |
 | p0039 | 3 | 我的城市 | 100 | 92 | 1.000 | 1.000 | - | 4: 最好 |
 | p0040 | 3 | 新同事 | 107 | 99 | 1.000 | 1.000 | - | 4: 从来, 修 |
@@ -88,9 +88,9 @@ the budget rule above is unchanged):
 - p0048: s2 '河里': jieba reads a proper noun (ns), linked as 河 + 里; declare it in names if it is one
 - p0060: s6 '太咸': jieba reads a proper noun (nr), linked as 太 + 咸; declare it in names if it is one; s6 '太辣': jieba reads a proper noun (nr), linked as 太 + 辣; declare it in names if it is one
 
-Readings (`ruby`, langs/zh.py passage_ruby): 6136 reading tokens over 577 sentences (6017 on a linked word, 119 without one: names, oop words, 过, 第), 4061 in titles, questions and options.
-pypinyin readings with no override: 435 characters, 44 distinct: 周 x27, 婷 x22, 上 x19, 海 x19, 娜 x18, 杰 x17, 王 x17, 陈 x17, 丽 x15, 何 x15, 李 x14, 林 x14, 刘 x13, 孙 x13, 明 x13, 浩 x13, 芳 x13, 静 x13, 强 x12, 赵 x12, 吴 x11, 磊 x11, 安 x10, 节 x9, 郑 x9, 文 x8, 国 x6, 春 x6, 迪 x6, 杨 x5 ....
-Override readings used (SURFACE_READINGS, CHAR_READINGS, 地 rule, aspect 过): 便宜 x10, 过 (aspect) x3, 草地 x2, 长大 x2, 切 x1.
+Readings (`ruby`, langs/zh.py passage_ruby): 6136 reading tokens over 577 sentences (6017 on a linked word, 119 without one: names, oop words, 过, 第), 6199 in titles, questions and options.
+pypinyin readings with no override: 564 characters, 45 distinct: 周 x35, 婷 x29, 王 x23, 上 x22, 娜 x22, 海 x22, 丽 x21, 刘 x21, 芳 x21, 何 x20, 杰 x19, 陈 x19, 孙 x18, 浩 x18, 明 x17, 李 x17, 林 x17, 静 x17, 强 x14, 赵 x14, 吴 x13, 安 x13, 磊 x13, 节 x12, 郑 x11, 国 x10, 文 x9, 法 x8, 玛 x8, 迪 x8 ....
+Override readings used (SURFACE_READINGS, CHAR_READINGS, 地 rule, aspect 过): 便宜 x13, 过 (aspect) x3, 草地 x2, 长大 x2, 切 x1.
 
 <!-- manual section: kept across runs -->
 

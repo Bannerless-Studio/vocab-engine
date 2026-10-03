@@ -43,8 +43,8 @@
    ]
   },
   "questions": [
-   4,
-   5
+   8,
+   8
   ]
  },
  "passages": [
@@ -169,6 +169,49 @@
       "水果"
      ],
      "sentence": 8
+    },
+    {
+     "q": "王明的家在哪儿？",
+     "en": "Where is Wang Ming's home?",
+     "type": "mc",
+     "options": [
+      "北京",
+      "医院",
+      "学校",
+      "商店"
+     ],
+     "answer": 0,
+     "words": [
+      "北京"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "王明家有几个人？",
+     "en": "How many people are in Wang Ming's family?",
+     "type": "mc",
+     "options": [
+      "三个人",
+      "两个人",
+      "四个人",
+      "五个人"
+     ],
+     "answer": 0,
+     "words": [
+      "人"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "星期六，他们在家。",
+     "en": "On Saturday they are at home.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "星期"
+     ],
+     "sentence": 6
     }
    ]
   },
@@ -282,6 +325,65 @@
       "请"
      ],
      "sentence": 9
+    },
+    {
+     "q": "他们什么时候去饭馆？",
+     "en": "When do they go to the restaurant?",
+     "type": "mc",
+     "options": [
+      "中午",
+      "晚上",
+      "上午",
+      "下午"
+     ],
+     "answer": 0,
+     "words": [
+      "中午"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "李文想吃米饭和什么？",
+     "en": "Li Wen wants rice and what?",
+     "type": "mc",
+     "options": [
+      "这个菜",
+      "茶",
+      "水果",
+      "苹果"
+     ],
+     "answer": 0,
+     "words": [
+      "米饭"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "饭馆的什么很好？",
+     "en": "What is good at the restaurant?",
+     "type": "mc",
+     "options": [
+      "茶",
+      "米饭",
+      "菜",
+      "水"
+     ],
+     "answer": 0,
+     "words": [
+      "茶"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "她们都不喜欢这些菜。",
+     "en": "They both dislike these dishes.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "喜欢"
+     ],
+     "sentence": 6
     }
    ]
   },
@@ -400,6 +502,49 @@
       "打电话"
      ],
      "sentence": 7
+    },
+    {
+     "q": "今天北京的天气怎么样？",
+     "en": "What is the weather like in Beijing today?",
+     "type": "mc",
+     "options": [
+      "很冷",
+      "很热",
+      "下雨",
+      "很好"
+     ],
+     "answer": 0,
+     "words": [
+      "冷"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "谁很想女儿？",
+     "en": "Who misses the daughter very much?",
+     "type": "mc",
+     "options": [
+      "爸爸和妈妈",
+      "爸爸",
+      "妈妈",
+      "老师和同学"
+     ],
+     "answer": 0,
+     "words": [
+      "想"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "女儿现在在学校。",
+     "en": "The daughter is at school now.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "学校"
+     ],
+     "sentence": 0
     }
    ]
   },
@@ -503,6 +648,65 @@
       "饭馆"
      ],
      "sentence": 8
+    },
+    {
+     "q": "刘芳喜欢她看见的那件衣服。",
+     "en": "Liu Fang likes the piece of clothing she saw.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "喜欢"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "刘芳喜欢的那件衣服多少钱？",
+     "en": "How much is the piece of clothing Liu Fang likes?",
+     "type": "mc",
+     "options": [
+      "三百八十块",
+      "一百九十块",
+      "二百八十块",
+      "一百八十块"
+     ],
+     "answer": 0,
+     "words": [
+      "块"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "刘芳想，那件衣服怎么样？",
+     "en": "What does Liu Fang think of that piece of clothing?",
+     "type": "mc",
+     "options": [
+      "太贵了",
+      "太小了",
+      "太冷了",
+      "太热了"
+     ],
+     "answer": 0,
+     "words": [
+      "贵"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "刘芳买了谁看见的衣服？",
+     "en": "Whose find of clothing did Liu Fang buy?",
+     "type": "mc",
+     "options": [
+      "妈妈",
+      "刘芳",
+      "同学",
+      "老师"
+     ],
+     "answer": 0,
+     "words": [
+      "买"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -620,6 +824,49 @@
       "五个人"
      ],
      "answer": 0,
+     "words": [
+      "人"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "那个电影怎么样？",
+     "en": "What is the film like?",
+     "type": "mc",
+     "options": [
+      "很多人喜欢",
+      "很少人喜欢",
+      "没有人喜欢",
+      "很多人不喜欢"
+     ],
+     "answer": 0,
+     "words": [
+      "电影"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "林娜请陈杰几点来她家？",
+     "en": "At what time does Lin Na ask Chen Jie to come to her home?",
+     "type": "mc",
+     "options": [
+      "一点",
+      "三点",
+      "四点",
+      "两点"
+     ],
+     "answer": 3,
+     "words": [
+      "点"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "他们四个人去看电影。",
+     "en": "Four of them go to see the film.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
      "words": [
       "人"
      ],
@@ -745,6 +992,49 @@
       "出租车"
      ],
      "sentence": 9
+    },
+    {
+     "q": "儿子几点回家？",
+     "en": "What time does the son go home?",
+     "type": "mc",
+     "options": [
+      "六点",
+      "五点",
+      "七点",
+      "八点"
+     ],
+     "answer": 0,
+     "words": [
+      "点"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "现在几点了？",
+     "en": "What time is it now?",
+     "type": "mc",
+     "options": [
+      "五点",
+      "四点",
+      "三点",
+      "七点"
+     ],
+     "answer": 0,
+     "words": [
+      "点"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "他们想在家吃。",
+     "en": "They want to eat at home.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "吃"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -869,6 +1159,49 @@
       "名字"
      ],
      "sentence": 7
+    },
+    {
+     "q": "安娜昨天认识了谁？",
+     "en": "Who did Anna meet yesterday?",
+     "type": "mc",
+     "options": [
+      "周婷",
+      "周婷的妈妈",
+      "医生",
+      "老师"
+     ],
+     "answer": 0,
+     "words": [
+      "认识"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "明天她们去做什么？",
+     "en": "What will they do tomorrow?",
+     "type": "mc",
+     "options": [
+      "看电影",
+      "喝茶",
+      "买衣服",
+      "学习汉语"
+     ],
+     "answer": 0,
+     "words": [
+      "电影"
+     ],
+     "sentence": 9
+    },
+    {
+     "q": "周婷说话很快。",
+     "en": "Zhou Ting speaks fast.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "说话"
+     ],
+     "sentence": 6
     }
    ]
   },
@@ -982,6 +1315,49 @@
       "衣服"
      ],
      "sentence": 5
+    },
+    {
+     "q": "在这个商店，你能做什么？",
+     "en": "In this shop, what can you do?",
+     "type": "mc",
+     "options": [
+      "喝茶",
+      "学习",
+      "看电影",
+      "买衣服"
+     ],
+     "answer": 0,
+     "words": [
+      "茶"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "商店晚上开到几点？",
+     "en": "Until what time in the evening is the shop open?",
+     "type": "mc",
+     "options": [
+      "九点",
+      "八点",
+      "十一点",
+      "十点"
+     ],
+     "answer": 3,
+     "words": [
+      "点"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "这个商店里有水。",
+     "en": "The shop has water.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "水"
+     ],
+     "sentence": 3
     }
    ]
   },
@@ -1081,6 +1457,65 @@
       "岁"
      ],
      "sentence": 5
+    },
+    {
+     "q": "他们什么时候去北京？",
+     "en": "When are they going to Beijing?",
+     "type": "mc",
+     "options": [
+      "下个月",
+      "明天",
+      "星期六",
+      "今天"
+     ],
+     "answer": 0,
+     "words": [
+      "月"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "他们的家在哪儿？",
+     "en": "Where is their home?",
+     "type": "mc",
+     "options": [
+      "上海",
+      "北京",
+      "学校",
+      "医院"
+     ],
+     "answer": 0,
+     "words": [
+      "家"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "我想和她一起去看北京的学校。",
+     "en": "I want to go with her to see Beijing's schools.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "学校"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "北京下个月怎么样？",
+     "en": "What will Beijing be like next month?",
+     "type": "mc",
+     "options": [
+      "很热",
+      "很好",
+      "下雨",
+      "很冷"
+     ],
+     "answer": 3,
+     "words": [
+      "冷"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -1200,6 +1635,49 @@
       "年"
      ],
      "sentence": 8
+    },
+    {
+     "q": "我喜欢什么？",
+     "en": "What do I like?",
+     "type": "mc",
+     "options": [
+      "猫",
+      "米饭",
+      "鱼",
+      "狗"
+     ],
+     "answer": 3,
+     "words": [
+      "狗"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "下午他们在赵强家做什么？",
+     "en": "What do they do at Zhao Qiang's home in the afternoon?",
+     "type": "mc",
+     "options": [
+      "吃菜",
+      "睡觉",
+      "学习汉语",
+      "看电影"
+     ],
+     "answer": 3,
+     "words": [
+      "电影"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "赵强做的中国菜很好吃。",
+     "en": "The Chinese dishes Zhao Qiang makes taste very good.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "好吃"
+     ],
+     "sentence": 4
     }
    ]
   },
@@ -1315,6 +1793,50 @@
       "再"
      ],
      "sentence": 7
+    },
+    {
+     "q": "医生请王丽回家多喝什么？",
+     "en": "What does the doctor ask Wang Li to drink more of at home?",
+     "type": "mc",
+     "options": [
+      "冷水",
+      "水果",
+      "茶",
+      "热水"
+     ],
+     "answer": 3,
+     "words": [
+      "热"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "王丽怎么了？",
+     "en": "What is wrong with Wang Li?",
+     "type": "mc",
+     "options": [
+      "很热",
+      "很漂亮",
+      "很高兴",
+      "很冷"
+     ],
+     "answer": 3,
+     "words": [
+      "冷"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "医生请王丽坐。",
+     "en": "The doctor asks Wang Li to sit.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "请",
+      "坐"
+     ],
+     "sentence": 1
     }
    ]
   },
@@ -1432,6 +1954,49 @@
       "后面"
      ],
      "sentence": 7
+    },
+    {
+     "q": "上午九点，我喝什么？",
+     "en": "What do I drink at nine in the morning?",
+     "type": "mc",
+     "options": [
+      "水",
+      "茶",
+      "咖啡",
+      "牛奶"
+     ],
+     "answer": 1,
+     "words": [
+      "茶"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "中午谁做菜？",
+     "en": "Who cooks at noon?",
+     "type": "mc",
+     "options": [
+      "我",
+      "同学",
+      "爸爸",
+      "妈妈"
+     ],
+     "answer": 3,
+     "words": [
+      "菜"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "星期日我不去学校。",
+     "en": "On Sunday I do not go to school.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "学校"
+     ],
+     "sentence": 0
     }
    ]
   },
@@ -1547,6 +2112,54 @@
       "想"
      ],
      "sentence": 8
+    },
+    {
+     "q": "安迪是什么人？",
+     "en": "What nationality is Andy?",
+     "type": "mc",
+     "options": [
+      "中国人",
+      "北京人",
+      "学生",
+      "美国人"
+     ],
+     "answer": 3,
+     "words": [
+      "人"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "安迪的老师说话怎么样？",
+     "en": "How does Andy's teacher speak?",
+     "type": "mc",
+     "options": [
+      "很大",
+      "不好听",
+      "很少",
+      "很好听"
+     ],
+     "answer": 3,
+     "words": [
+      "说话"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "汉语的字怎么样？",
+     "en": "What are Chinese characters like?",
+     "type": "mc",
+     "options": [
+      "很少",
+      "很大",
+      "很小",
+      "很多"
+     ],
+     "answer": 3,
+     "words": [
+      "字"
+     ],
+     "sentence": 2
     }
    ]
   },
@@ -1660,6 +2273,49 @@
       "茶"
      ],
      "sentence": 6
+    },
+    {
+     "q": "饭馆在什么前面？",
+     "en": "What is the restaurant in front of?",
+     "type": "mc",
+     "options": [
+      "学校",
+      "商店",
+      "医院",
+      "我家"
+     ],
+     "answer": 3,
+     "words": [
+      "前面"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "我很喜欢这里的什么？",
+     "en": "What do I like very much here?",
+     "type": "mc",
+     "options": [
+      "水果",
+      "茶",
+      "米饭",
+      "中国菜"
+     ],
+     "answer": 3,
+     "words": [
+      "喜欢"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "这个饭馆的米饭很好吃。",
+     "en": "The rice at this restaurant tastes very good.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "米饭"
+     ],
+     "sentence": 2
     }
    ]
   },
@@ -1765,6 +2421,65 @@
       "杯子"
      ],
      "sentence": 6
+    },
+    {
+     "q": "房间里有桌子、椅子和什么？",
+     "en": "The room has a table, a chair and what?",
+     "type": "mc",
+     "options": [
+      "电视",
+      "猫",
+      "苹果",
+      "电脑"
+     ],
+     "answer": 3,
+     "words": [
+      "电脑"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "杯子在哪儿？",
+     "en": "Where is the cup?",
+     "type": "mc",
+     "options": [
+      "电脑的前面",
+      "电脑的后面",
+      "桌子的前面",
+      "椅子的后面"
+     ],
+     "answer": 0,
+     "words": [
+      "杯子"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "我也在这里做什么？",
+     "en": "What else do I do here?",
+     "type": "mc",
+     "options": [
+      "做菜",
+      "打电话",
+      "工作",
+      "睡觉"
+     ],
+     "answer": 3,
+     "words": [
+      "睡觉"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "我在房间里写字。",
+     "en": "I write in the room.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "写"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -1890,6 +2605,50 @@
       "一起"
      ],
      "sentence": 7
+    },
+    {
+     "q": "早上，妈妈给妹妹做了什么？",
+     "en": "What did Mum make for my sister in the morning?",
+     "type": "mc",
+     "options": [
+      "鱼",
+      "羊肉",
+      "鸡蛋",
+      "蛋糕"
+     ],
+     "answer": 3,
+     "words": [
+      "蛋糕"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "妹妹的同学做什么？",
+     "en": "What do my sister's classmates do?",
+     "type": "mc",
+     "options": [
+      "游泳和跑步",
+      "打篮球",
+      "看电影",
+      "唱歌和跳舞"
+     ],
+     "answer": 3,
+     "words": [
+      "唱歌",
+      "跳舞"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "妹妹今天不高兴。",
+     "en": "My sister is not happy today.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "高兴"
+     ],
+     "sentence": 1
     }
    ]
   },
@@ -2017,6 +2776,49 @@
       "告诉"
      ],
      "sentence": 9
+    },
+    {
+     "q": "这个星期六上午，他们去做什么？",
+     "en": "What are they going to do this Saturday morning?",
+     "type": "mc",
+     "options": [
+      "游泳",
+      "打篮球",
+      "跑步",
+      "考试"
+     ],
+     "answer": 1,
+     "words": [
+      "打篮球"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "王老师请大家穿什么衣服？",
+     "en": "What clothes does Teacher Wang ask everyone to wear?",
+     "type": "mc",
+     "options": [
+      "黑衣服",
+      "红衣服",
+      "白衣服",
+      "新衣服"
+     ],
+     "answer": 2,
+     "words": [
+      "穿"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "星期六下雨，他们就不去打篮球了。",
+     "en": "If it rains on Saturday, they will not go to play basketball.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "下雨"
+     ],
+     "sentence": 8
     }
    ]
   },
@@ -2140,6 +2942,50 @@
       "回"
      ],
      "sentence": 8
+    },
+    {
+     "q": "孙浩七点吃什么？",
+     "en": "What does Sun Hao eat at seven?",
+     "type": "mc",
+     "options": [
+      "米饭和鱼",
+      "水果和咖啡",
+      "鸡蛋和牛奶",
+      "羊肉"
+     ],
+     "answer": 2,
+     "words": [
+      "鸡蛋",
+      "牛奶"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "孙浩几点起床？",
+     "en": "What time does Sun Hao get up?",
+     "type": "mc",
+     "options": [
+      "五点",
+      "六点",
+      "七点",
+      "八点"
+     ],
+     "answer": 1,
+     "words": [
+      "起床"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "孙浩的妻子没有做菜。",
+     "en": "Sun Hao's wife did not cook.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "菜"
+     ],
+     "sentence": 9
     }
    ]
   },
@@ -2275,6 +3121,50 @@
       "钱"
      ],
      "sentence": 11
+    },
+    {
+     "q": "何静想去哪儿？",
+     "en": "Where does He Jing want to go?",
+     "type": "mc",
+     "options": [
+      "机场",
+      "商店",
+      "火车站",
+      "学校"
+     ],
+     "answer": 2,
+     "words": [
+      "火车站"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "坐公共汽车，几站到火车站？",
+     "en": "How many stops by bus to the train station?",
+     "type": "mc",
+     "options": [
+      "三站",
+      "四站",
+      "六站",
+      "五站"
+     ],
+     "answer": 3,
+     "words": [
+      "站"
+     ],
+     "sentence": 9
+    },
+    {
+     "q": "前面有一个大商店。",
+     "en": "There is a big shop ahead.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "前面",
+      "商店"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -2396,6 +3286,49 @@
       "找"
      ],
      "sentence": 8
+    },
+    {
+     "q": "一共多少钱？",
+     "en": "How much is it altogether?",
+     "type": "mc",
+     "options": [
+      "十五块",
+      "三十块",
+      "二十七块",
+      "三十三块"
+     ],
+     "answer": 2,
+     "words": [
+      "一共"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "西瓜怎么样？",
+     "en": "What is the watermelon like?",
+     "type": "mc",
+     "options": [
+      "很冷",
+      "很小",
+      "很远",
+      "很好吃"
+     ],
+     "answer": 3,
+     "words": [
+      "好吃"
+     ],
+     "sentence": 9
+    },
+    {
+     "q": "我觉得西瓜很便宜。",
+     "en": "I think the watermelon is cheap.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "便宜"
+     ],
+     "sentence": 2
     }
    ]
   },
@@ -2519,6 +3452,50 @@
       "第一"
      ],
      "sentence": 9
+    },
+    {
+     "q": "考试在什么时候？",
+     "en": "When is the exam?",
+     "type": "mc",
+     "options": [
+      "今天",
+      "昨天",
+      "明天",
+      "星期五"
+     ],
+     "answer": 2,
+     "words": [
+      "考试"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "早上七点，他们去哪儿？",
+     "en": "Where do they go at seven in the morning?",
+     "type": "mc",
+     "options": [
+      "公司",
+      "医院",
+      "学校",
+      "教室"
+     ],
+     "answer": 3,
+     "words": [
+      "教室"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "我觉得我错了很多题。",
+     "en": "I think I got many questions wrong.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "错",
+      "题"
+     ],
+     "sentence": 8
     }
    ]
   },
@@ -2643,6 +3620,50 @@
       "椅子"
      ],
      "sentence": 8
+    },
+    {
+     "q": "谁问周婷在找什么？",
+     "en": "Who asks Zhou Ting what she is looking for?",
+     "type": "mc",
+     "options": [
+      "医生",
+      "老师",
+      "同学",
+      "服务员"
+     ],
+     "answer": 3,
+     "words": [
+      "服务员"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "周婷几点坐上飞机？",
+     "en": "What time does Zhou Ting board the plane?",
+     "type": "mc",
+     "options": [
+      "七点",
+      "九点",
+      "八点",
+      "十点"
+     ],
+     "answer": 2,
+     "words": [
+      "飞机"
+     ],
+     "sentence": 9
+    },
+    {
+     "q": "那个手机是白的。",
+     "en": "That phone is white.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "白",
+      "手机"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -2765,6 +3786,49 @@
       "休息"
      ],
      "sentence": 8
+    },
+    {
+     "q": "早上起床以后，可以做什么？",
+     "en": "What can you do after getting up in the morning?",
+     "type": "mc",
+     "options": [
+      "游泳",
+      "打篮球",
+      "唱歌",
+      "跑步"
+     ],
+     "answer": 3,
+     "words": [
+      "跑步"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "喜欢水的人可以做什么？",
+     "en": "What can people who like water do?",
+     "type": "mc",
+     "options": [
+      "跑步",
+      "跳舞",
+      "游泳",
+      "唱歌"
+     ],
+     "answer": 2,
+     "words": [
+      "游泳"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "晚上很忙的时候，可以出去走走。",
+     "en": "When you are very busy in the evening, you can go out for a walk.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "忙"
+     ],
+     "sentence": 6
     }
    ]
   },
@@ -2894,6 +3958,49 @@
       "最"
      ],
      "sentence": 8
+    },
+    {
+     "q": "杨欣的姐姐做什么工作？",
+     "en": "What does Yang Xin's older sister do?",
+     "type": "mc",
+     "options": [
+      "医生",
+      "学生",
+      "老师",
+      "服务员"
+     ],
+     "answer": 2,
+     "words": [
+      "老师"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "杨欣的哥哥多大？",
+     "en": "How old is Yang Xin's older brother?",
+     "type": "mc",
+     "options": [
+      "二十五岁",
+      "二十八岁",
+      "三十岁",
+      "十五岁"
+     ],
+     "answer": 1,
+     "words": [
+      "岁"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "星期日，哥哥和妻子回家。",
+     "en": "On Sunday, my older brother and his wife come home.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "回"
+     ],
+     "sentence": 10
     }
    ]
   },
@@ -3014,6 +4121,49 @@
       "热"
      ],
      "sentence": 6
+    },
+    {
+     "q": "明天上午北京的天气怎么样？",
+     "en": "What will the weather in Beijing be like tomorrow morning?",
+     "type": "mc",
+     "options": [
+      "很冷",
+      "很热",
+      "下雪",
+      "不太冷"
+     ],
+     "answer": 3,
+     "words": [
+      "冷"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "星期六和星期日，北京的天气怎么样？",
+     "en": "What will the weather in Beijing be like on Saturday and Sunday?",
+     "type": "mc",
+     "options": [
+      "很好",
+      "很冷",
+      "很热",
+      "下雨"
+     ],
+     "answer": 0,
+     "words": [
+      "天气"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "下雪的时候，走路要快一些。",
+     "en": "When it snows, you should walk faster.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "雪"
+     ],
+     "sentence": 4
     }
    ]
   },
@@ -3139,6 +4289,50 @@
       "分钟"
      ],
      "sentence": 9
+    },
+    {
+     "q": "什么不太好吃？",
+     "en": "What did not taste very good?",
+     "type": "mc",
+     "options": [
+      "羊肉",
+      "鱼",
+      "咖啡",
+      "米饭"
+     ],
+     "answer": 3,
+     "words": [
+      "米饭"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "他们星期几去的饭馆？",
+     "en": "On which day of the week did they go to the restaurant?",
+     "type": "mc",
+     "options": [
+      "星期五",
+      "星期六",
+      "星期日",
+      "星期一"
+     ],
+     "answer": 1,
+     "words": [
+      "星期"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "羊肉非常好吃，鱼也很新鲜。",
+     "en": "The lamb is very tasty and the fish is fresh.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "羊肉",
+      "好吃"
+     ],
+     "sentence": 5
     }
    ]
   },
@@ -3256,6 +4450,49 @@
       "睡觉"
      ],
      "sentence": 6
+    },
+    {
+     "q": "红的药什么时候吃？",
+     "en": "When do you take the red medicine?",
+     "type": "mc",
+     "options": [
+      "早上",
+      "中午",
+      "下午",
+      "晚上"
+     ],
+     "answer": 3,
+     "words": [
+      "药"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "星期五身体还不好，要做什么？",
+     "en": "What should you do on Friday if you are still not well?",
+     "type": "mc",
+     "options": [
+      "在家休息",
+      "去公司工作",
+      "再去医院",
+      "去游泳"
+     ],
+     "answer": 2,
+     "words": [
+      "再"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "白的药晚上不吃。",
+     "en": "You do not take the white medicine in the evening.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "药"
+     ],
+     "sentence": 1
     }
    ]
   },
@@ -3367,6 +4604,54 @@
       "元"
      ],
      "sentence": 6
+    },
+    {
+     "q": "何小姐每个星期送她什么？",
+     "en": "What does Ms He give her every week?",
+     "type": "mc",
+     "options": [
+      "咖啡",
+      "牛奶",
+      "鸡蛋",
+      "水果"
+     ],
+     "answer": 3,
+     "words": [
+      "水果"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "我已经住进哪儿了？",
+     "en": "Where have I moved into?",
+     "type": "mc",
+     "options": [
+      "学校",
+      "新房间",
+      "医院",
+      "公司"
+     ],
+     "answer": 1,
+     "words": [
+      "住"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "星期六和星期日，我在哪儿？",
+     "en": "Where am I on Saturday and Sunday?",
+     "type": "mc",
+     "options": [
+      "在公司",
+      "在学校",
+      "在家",
+      "在医院"
+     ],
+     "answer": 2,
+     "words": [
+      "家"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -3486,6 +4771,49 @@
       "旁边"
      ],
      "sentence": 8
+    },
+    {
+     "q": "晚上回家，谁告诉刘芳手表在哪儿？",
+     "en": "When she gets home in the evening, who tells Liu Fang where the watch is?",
+     "type": "mc",
+     "options": [
+      "丈夫",
+      "儿子",
+      "朋友",
+      "同学"
+     ],
+     "answer": 1,
+     "words": [
+      "告诉"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "刘芳觉得怎么样？",
+     "en": "How does Liu Fang feel?",
+     "type": "mc",
+     "options": [
+      "很高兴",
+      "很累",
+      "很难过",
+      "很快乐"
+     ],
+     "answer": 2,
+     "words": [
+      "觉得"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "刘芳问儿子看没看见手表。",
+     "en": "Liu Fang asks her son whether he has seen the watch.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "看见"
+     ],
+     "sentence": 3
     }
    ]
   },
@@ -3609,6 +4937,50 @@
       "星期"
      ],
      "sentence": 8
+    },
+    {
+     "q": "他们是什么时候去上海的？",
+     "en": "When did they go to Shanghai?",
+     "type": "mc",
+     "options": [
+      "上个月",
+      "去年",
+      "下个月",
+      "昨天"
+     ],
+     "answer": 1,
+     "words": [
+      "去年"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "妈妈在商店买了什么？",
+     "en": "What did Mum buy in the shops?",
+     "type": "mc",
+     "options": [
+      "书",
+      "水果",
+      "新衣服",
+      "手表"
+     ],
+     "answer": 2,
+     "words": [
+      "衣服"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "上海菜很甜，不好吃。",
+     "en": "Shanghai food is very sweet and does not taste good.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "甜",
+      "好吃"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -3726,6 +5098,50 @@
       "面包"
      ],
      "sentence": 8
+    },
+    {
+     "q": "妈妈在新厨房里做了什么？",
+     "en": "What did Mum cook in the new kitchen?",
+     "type": "mc",
+     "options": [
+      "面包",
+      "面条",
+      "蛋糕",
+      "鱼"
+     ],
+     "answer": 1,
+     "words": [
+      "面条",
+      "厨房"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "他们的新邻居是什么人？",
+     "en": "Who is their new neighbour?",
+     "type": "mc",
+     "options": [
+      "医生",
+      "老师",
+      "年轻人",
+      "老奶奶"
+     ],
+     "answer": 3,
+     "words": [
+      "邻居"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "爸爸一个人把冰箱搬上了楼。",
+     "en": "Dad carried the fridge upstairs by himself.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "冰箱"
+     ],
+     "sentence": 5
     }
    ]
   },
@@ -3845,6 +5261,49 @@
       "终于"
      ],
      "sentence": 7
+    },
+    {
+     "q": "这个周末，他和谁一起去爬山？",
+     "en": "Who does he go hiking with this weekend?",
+     "type": "mc",
+     "options": [
+      "家人",
+      "同事",
+      "同学",
+      "邻居"
+     ],
+     "answer": 1,
+     "words": [
+      "同事"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "他们在哪儿休息了一会儿？",
+     "en": "Where did they rest for a while?",
+     "type": "mc",
+     "options": [
+      "房间里",
+      "公园里",
+      "树下",
+      "地铁上"
+     ],
+     "answer": 2,
+     "words": [
+      "树"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "他们决定下个月不去爬山了。",
+     "en": "They decided not to go hiking next month.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "决定"
+     ],
+     "sentence": 8
     }
    ]
   },
@@ -3962,6 +5421,49 @@
       "参加"
      ],
      "sentence": 7
+    },
+    {
+     "q": "以前我玩游戏，一次玩多长时间？",
+     "en": "In the past, how long did I play games at a time?",
+     "type": "mc",
+     "options": [
+      "半个小时",
+      "十个小时",
+      "五六个小时",
+      "一两个小时"
+     ],
+     "answer": 2,
+     "words": [
+      "游戏"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "最近我对什么有了兴趣？",
+     "en": "What have I recently become interested in?",
+     "type": "mc",
+     "options": [
+      "音乐",
+      "体育",
+      "画画",
+      "游戏"
+     ],
+     "answer": 1,
+     "words": [
+      "兴趣"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "练习的时候，我非常认真。",
+     "en": "I am very serious when I practise.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "认真"
+     ],
+     "sentence": 8
     }
    ]
   },
@@ -4085,6 +5587,51 @@
       "终于"
      ],
      "sentence": 9
+    },
+    {
+     "q": "何静怎么了？",
+     "en": "What is wrong with He Jing?",
+     "type": "mc",
+     "options": [
+      "感冒了，还发烧",
+      "很饿，很渴",
+      "很累，想睡觉",
+      "眼睛不舒服"
+     ],
+     "answer": 0,
+     "words": [
+      "感冒",
+      "发烧"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "医生请何静最近别做什么？",
+     "en": "What does the doctor tell He Jing not to do lately?",
+     "type": "mc",
+     "options": [
+      "喝水",
+      "休息",
+      "锻炼",
+      "吃药"
+     ],
+     "answer": 2,
+     "words": [
+      "锻炼"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "如果还发烧，何静要马上回来。",
+     "en": "If she still has a fever, He Jing should come back right away.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "发烧",
+      "马上"
+     ],
+     "sentence": 6
     }
    ]
   },
@@ -4198,6 +5745,50 @@
       "上网"
      ],
      "sentence": 7
+    },
+    {
+     "q": "借书的时间是多长？",
+     "en": "How long is the loan period for books?",
+     "type": "mc",
+     "options": [
+      "半个月",
+      "一个月",
+      "两个月",
+      "一年"
+     ],
+     "answer": 1,
+     "words": [
+      "借"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "在图书馆里，手机的什么要关？",
+     "en": "In the library, what of the mobile phone must be turned off?",
+     "type": "mc",
+     "options": [
+      "灯",
+      "电脑",
+      "声音",
+      "手表"
+     ],
+     "answer": 2,
+     "words": [
+      "声音",
+      "关"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "新要求从明天开始。",
+     "en": "The new rules start tomorrow.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "开始"
+     ],
+     "sentence": 0
     }
    ]
   },
@@ -4327,6 +5918,50 @@
       "以前"
      ],
      "sentence": 11
+    },
+    {
+     "q": "妻子请丈夫买什么水果？",
+     "en": "What fruit does the wife ask the husband to buy?",
+     "type": "mc",
+     "options": [
+      "苹果和香蕉",
+      "葡萄和香蕉",
+      "苹果和葡萄",
+      "西瓜和葡萄"
+     ],
+     "answer": 1,
+     "words": [
+      "香蕉",
+      "葡萄"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "妻子在家做什么？",
+     "en": "What does the wife cook at home?",
+     "type": "mc",
+     "options": [
+      "鱼",
+      "羊肉",
+      "面条",
+      "米饭"
+     ],
+     "answer": 0,
+     "words": [
+      "鱼"
+     ],
+     "sentence": 10
+    },
+    {
+     "q": "冰箱里有很多东西。",
+     "en": "There is a lot of food in the fridge.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "冰箱"
+     ],
+     "sentence": 1
     }
    ]
   },
@@ -4446,6 +6081,49 @@
       "简单"
      ],
      "sentence": 8
+    },
+    {
+     "q": "鸡蛋要放在哪儿？",
+     "en": "Where should the eggs be put?",
+     "type": "mc",
+     "options": [
+      "盘子里",
+      "热水里",
+      "碗里",
+      "冰箱里"
+     ],
+     "answer": 2,
+     "words": [
+      "碗"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "先做什么？",
+     "en": "What do you cook first?",
+     "type": "mc",
+     "options": [
+      "西红柿",
+      "面条",
+      "鸡蛋",
+      "糖"
+     ],
+     "answer": 2,
+     "words": [
+      "鸡蛋"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "最后把西红柿鸡蛋和面条放在盘子里。",
+     "en": "Finally, put the tomato and egg and the noodles on a plate.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "碗"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -4573,6 +6251,50 @@
       "空调"
      ],
      "sentence": 8
+    },
+    {
+     "q": "服务员请李先生给她看什么？",
+     "en": "What does the receptionist ask Mr Li to show her?",
+     "type": "mc",
+     "options": [
+      "护照",
+      "手机",
+      "钱",
+      "名字"
+     ],
+     "answer": 0,
+     "words": [
+      "护照"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "半个小时以后，李先生做什么？",
+     "en": "What does Mr Li do half an hour later?",
+     "type": "mc",
+     "options": [
+      "去医院",
+      "打电话",
+      "去饭馆吃面条",
+      "看电视"
+     ],
+     "answer": 1,
+     "words": [
+      "打电话"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "服务员马上找人去检查空调。",
+     "en": "The receptionist immediately sends someone to check the air conditioner.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "马上",
+      "检查"
+     ],
+     "sentence": 9
     }
    ]
   },
@@ -4686,6 +6408,49 @@
       "季节"
      ],
      "sentence": 7
+    },
+    {
+     "q": "北方的冬天怎么样？",
+     "en": "What is winter like in the north?",
+     "type": "mc",
+     "options": [
+      "很热",
+      "非常冷",
+      "下雨",
+      "不冷也不热"
+     ],
+     "answer": 1,
+     "words": [
+      "冬"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "现在的街道和以前比，怎么样？",
+     "en": "How are the streets now compared with before?",
+     "type": "mc",
+     "options": [
+      "更旧",
+      "更小",
+      "更干净",
+      "更短"
+     ],
+     "answer": 2,
+     "words": [
+      "干净"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "城市里有很多新公园。",
+     "en": "The city has many new parks.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "公园"
+     ],
+     "sentence": 4
     }
    ]
   },
@@ -4805,6 +6570,50 @@
       "聪明"
      ],
      "sentence": 8
+    },
+    {
+     "q": "郑明觉得我的电脑问题怎么样？",
+     "en": "What does Zheng Ming think of my computer problem?",
+     "type": "mc",
+     "options": [
+      "很难",
+      "很简单",
+      "很大",
+      "很奇怪"
+     ],
+     "answer": 1,
+     "words": [
+      "简单"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "我的电脑坏了的时候，我觉得怎么样？",
+     "en": "How did I feel when my computer broke?",
+     "type": "mc",
+     "options": [
+      "很高兴",
+      "很累",
+      "很着急",
+      "很难过"
+     ],
+     "answer": 2,
+     "words": [
+      "着急"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "郑明总是第一个到办公室。",
+     "en": "Zheng Ming is always the first to arrive at the office.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "总是",
+      "办公室"
+     ],
+     "sentence": 3
     }
    ]
   },
@@ -4926,6 +6735,50 @@
       "照顾"
      ],
      "sentence": 8
+    },
+    {
+     "q": "回家以后，女儿给朋友看什么？",
+     "en": "After getting home, what does the daughter show her friends?",
+     "type": "mc",
+     "options": [
+      "礼物",
+      "书",
+      "电影",
+      "照片"
+     ],
+     "answer": 3,
+     "words": [
+      "照片"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "熊猫一般很爱做什么？",
+     "en": "What do pandas generally love to do?",
+     "type": "mc",
+     "options": [
+      "睡觉",
+      "游泳",
+      "跑步",
+      "唱歌"
+     ],
+     "answer": 0,
+     "words": [
+      "运动"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "有的熊猫在树上睡觉。",
+     "en": "Some pandas sleep in the trees.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "树",
+      "睡觉"
+     ],
+     "sentence": 2
     }
    ]
   },
@@ -5043,6 +6896,50 @@
       "结婚"
      ],
      "sentence": 7
+    },
+    {
+     "q": "很多年以前，奶奶家在哪儿？",
+     "en": "Many years ago, where was Grandma's home?",
+     "type": "mc",
+     "options": [
+      "学校旁边",
+      "河旁边",
+      "公园旁边",
+      "医院旁边"
+     ],
+     "answer": 1,
+     "words": [
+      "河"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "小的时候，奶奶经常给我做什么？",
+     "en": "When I was little, what did Grandma often do for me?",
+     "type": "mc",
+     "options": [
+      "做面包",
+      "买衣服",
+      "唱歌",
+      "讲故事"
+     ],
+     "answer": 3,
+     "words": [
+      "故事",
+      "讲"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "奶奶讲这个故事的时候，不太高兴。",
+     "en": "When Grandma tells this story, she is not very happy.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "高兴"
+     ],
+     "sentence": 8
     }
    ]
   },
@@ -5164,6 +7061,49 @@
       "换"
      ],
      "sentence": 6
+    },
+    {
+     "q": "这双鞋多少钱？",
+     "en": "How much are these shoes?",
+     "type": "mc",
+     "options": [
+      "八十块",
+      "一百五十块",
+      "一百块",
+      "两百块"
+     ],
+     "answer": 1,
+     "words": [
+      "块"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "这个商店离什么很近？",
+     "en": "What is the shop close to?",
+     "type": "mc",
+     "options": [
+      "银行",
+      "超市",
+      "地铁站",
+      "医院"
+     ],
+     "answer": 2,
+     "words": [
+      "地铁"
+     ],
+     "sentence": 9
+    },
+    {
+     "q": "现在这双鞋我穿着很舒服。",
+     "en": "Now these shoes feel very comfortable to wear.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "舒服"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -5281,6 +7221,50 @@
       "终于"
      ],
      "sentence": 8
+    },
+    {
+     "q": "爸爸检查了我的什么？",
+     "en": "What did Dad check?",
+     "type": "mc",
+     "options": [
+      "腿",
+      "脚",
+      "鼻子",
+      "眼睛"
+     ],
+     "answer": 0,
+     "words": [
+      "腿",
+      "检查"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "我为什么从自行车上掉了下来？",
+     "en": "Why did I fall off the bike?",
+     "type": "mc",
+     "options": [
+      "因为我很着急",
+      "因为自行车坏了",
+      "因为我很累",
+      "因为爸爸不帮助我"
+     ],
+     "answer": 0,
+     "words": [
+      "着急"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "爸爸一直在后面帮助我。",
+     "en": "Dad kept helping me from behind all the time.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "发现"
+     ],
+     "sentence": 2
     }
    ]
   },
@@ -5401,6 +7385,49 @@
       "月亮"
      ],
      "sentence": 8
+    },
+    {
+     "q": "中秋节一般在什么季节？",
+     "en": "In what season is the Mid-Autumn Festival usually?",
+     "type": "mc",
+     "options": [
+      "春天",
+      "夏天",
+      "秋天",
+      "冬天"
+     ],
+     "answer": 2,
+     "words": [
+      "秋"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "中秋节的晚上，月亮怎么样？",
+     "en": "What is the moon like on the night of the Mid-Autumn Festival?",
+     "type": "mc",
+     "options": [
+      "很大，也很圆",
+      "很小，也很黑",
+      "很高",
+      "很远"
+     ],
+     "answer": 0,
+     "words": [
+      "月亮"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "春节的时候，火车站的人特别少。",
+     "en": "During the Spring Festival, there are very few people at the train station.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "特别"
+     ],
+     "sentence": 3
     }
    ]
   },
@@ -5522,6 +7549,50 @@
       "网站"
      ],
      "sentence": 8
+    },
+    {
+     "q": "公司最好希望翻译有几年的工作经验？",
+     "en": "How many years of work experience does the company ideally want a translator to have?",
+     "type": "mc",
+     "options": [
+      "一年",
+      "两年",
+      "三年",
+      "五年"
+     ],
+     "answer": 1,
+     "words": [
+      "经验"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "公司希望售货员的性格怎么样？",
+     "en": "What kind of personality does the company want a sales assistant to have?",
+     "type": "mc",
+     "options": [
+      "安静、认真",
+      "聪明、可爱",
+      "热情、活泼",
+      "努力、年轻"
+     ],
+     "answer": 2,
+     "words": [
+      "热情",
+      "活泼"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "这个工作一般不用加班。",
+     "en": "This job usually does not need overtime.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "加班"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -5646,6 +7717,49 @@
       "至少"
      ],
      "sentence": 9
+    },
+    {
+     "q": "周经理觉得这个工作怎么样？",
+     "en": "What does Manager Zhou think of this job?",
+     "type": "mc",
+     "options": [
+      "压力很大",
+      "很轻松",
+      "工资很低",
+      "不用加班"
+     ],
+     "answer": 0,
+     "words": [
+      "压力"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "吴磊认为自己做事情怎么样？",
+     "en": "What does Wu Lei think of how he does his work?",
+     "type": "mc",
+     "options": [
+      "很慢",
+      "很认真",
+      "很累",
+      "很安静"
+     ],
+     "answer": 1,
+     "words": [
+      "认真"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "吴磊觉得自己能适应加班和出差。",
+     "en": "Wu Lei thinks he can adapt to overtime and business trips.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "适应"
+     ],
+     "sentence": 8
     }
    ]
   },
@@ -5767,6 +7881,49 @@
       "关键"
      ],
      "sentence": 8
+    },
+    {
+     "q": "很多城市的什么质量不好？",
+     "en": "The quality of what is bad in many cities?",
+     "type": "mc",
+     "options": [
+      "交通",
+      "食品",
+      "空气",
+      "学习"
+     ],
+     "answer": 2,
+     "words": [
+      "空气"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "如果每个人都从小事情开始，我们的地球会怎么样？",
+     "en": "If everyone starts with small things, what will our Earth become?",
+     "type": "mc",
+     "options": [
+      "更脏",
+      "更热",
+      "更小",
+      "更美丽"
+     ],
+     "answer": 3,
+     "words": [
+      "美丽"
+     ],
+     "sentence": 9
+    },
+    {
+     "q": "可以到处扔东西。",
+     "en": "You may throw things anywhere.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "扔"
+     ],
+     "sentence": 5
     }
    ]
   },
@@ -5888,6 +8045,49 @@
       "家具"
      ],
      "sentence": 9
+    },
+    {
+     "q": "看到沙发以后，作者觉得怎么样？",
+     "en": "How did the author feel after seeing the sofa?",
+     "type": "mc",
+     "options": [
+      "很满意",
+      "很失望",
+      "很高兴",
+      "很感动"
+     ],
+     "answer": 1,
+     "words": [
+      "失望"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "作者马上联系了谁？",
+     "en": "Whom did the author contact right away?",
+     "type": "mc",
+     "options": [
+      "同事",
+      "大夫",
+      "网站",
+      "经理"
+     ],
+     "answer": 2,
+     "words": [
+      "联系"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "作者觉得这个网站的态度不好。",
+     "en": "The author thinks the website's attitude is bad.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "态度"
+     ],
+     "sentence": 8
     }
    ]
   },
@@ -6017,6 +8217,50 @@
       "代替"
      ],
      "sentence": 6
+    },
+    {
+     "q": "剩下的材料在办公室的什么地方？",
+     "en": "Where in the office are the remaining materials?",
+     "type": "mc",
+     "options": [
+      "椅子上",
+      "桌子上",
+      "冰箱里",
+      "电脑里"
+     ],
+     "answer": 1,
+     "words": [
+      "材料",
+      "整理"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "孙浩星期几回来上班？",
+     "en": "On which day will Sun Hao come back to work?",
+     "type": "mc",
+     "options": [
+      "星期二",
+      "星期四",
+      "星期五",
+      "星期一"
+     ],
+     "answer": 3,
+     "words": [
+      "按时"
+     ],
+     "sentence": 9
+    },
+    {
+     "q": "有重要的事情，经理可以直接联系孙浩。",
+     "en": "If something important comes up, the manager can contact Sun Hao directly.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "联系"
+     ],
+     "sentence": 7
     }
    ]
   },
@@ -6128,6 +8372,50 @@
      "answer": 2,
      "words": [
       "父亲"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "最精彩的比赛在星期几？",
+     "en": "On which day was the most exciting match?",
+     "type": "mc",
+     "options": [
+      "星期六",
+      "星期日",
+      "星期五",
+      "星期一"
+     ],
+     "answer": 1,
+     "words": [
+      "精彩"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "记者想知道什么？",
+     "en": "What did the reporter want to know?",
+     "type": "mc",
+     "options": [
+      "他有什么感觉",
+      "他多大了",
+      "他叫什么名字",
+      "他为什么练习"
+     ],
+     "answer": 0,
+     "words": [
+      "记者",
+      "感觉"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "学生最感谢他的老师。",
+     "en": "The student thanks his teacher the most.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "感谢"
      ],
      "sentence": 7
     }
@@ -6251,6 +8539,50 @@
       "流利"
      ],
      "sentence": 7
+    },
+    {
+     "q": "后来，玛丽认识了谁？",
+     "en": "Later, whom did Mary get to know?",
+     "type": "mc",
+     "options": [
+      "林娜",
+      "老师",
+      "医生",
+      "同事"
+     ],
+     "answer": 0,
+     "words": [
+      "认识"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "玛丽给林娜介绍什么？",
+     "en": "What does Mary introduce to Lin Na?",
+     "type": "mc",
+     "options": [
+      "法国的菜",
+      "中国的文化",
+      "法国的文化",
+      "法国的音乐"
+     ],
+     "answer": 2,
+     "words": [
+      "介绍",
+      "文化"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "玛丽来中国以后一点困难也没有。",
+     "en": "Mary has had no difficulties at all since coming to China.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "困难"
+     ],
+     "sentence": 1
     }
    ]
   },
@@ -6378,6 +8710,49 @@
       "决定"
      ],
      "sentence": 10
+    },
+    {
+     "q": "这个房间怎么样？",
+     "en": "What is the room like?",
+     "type": "mc",
+     "options": [
+      "很大，但是不安静",
+      "不大，但是很安静",
+      "不大，也不安静",
+      "很大，也很安静"
+     ],
+     "answer": 1,
+     "words": [
+      "安静"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "陈杰为什么想要便宜一点？",
+     "en": "Why does Chen Jie want it a bit cheaper?",
+     "type": "mc",
+     "options": [
+      "房间太小",
+      "他是学生，收入不高",
+      "房间太旧",
+      "他没有家具"
+     ],
+     "answer": 1,
+     "words": [
+      "收入"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "厨房里有冰箱。",
+     "en": "There is a fridge in the kitchen.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "冰箱"
+     ],
+     "sentence": 3
     }
    ]
   },
@@ -6492,6 +8867,54 @@
       "提醒"
      ],
      "sentence": 7
+    },
+    {
+     "q": "现在城市里什么越来越多？",
+     "en": "What is increasing in the city?",
+     "type": "mc",
+     "options": [
+      "人",
+      "商店",
+      "车",
+      "公园"
+     ],
+     "answer": 2,
+     "words": [
+      "多"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "城市里的自行车怎么租？",
+     "en": "How do you rent a bike in the city?",
+     "type": "mc",
+     "options": [
+      "去银行",
+      "用手机",
+      "用护照",
+      "去商店"
+     ],
+     "answer": 1,
+     "words": [
+      "租"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "能坐地铁的时候，最好不要做什么？",
+     "en": "When you can take the metro, what is best not to do?",
+     "type": "mc",
+     "options": [
+      "骑自行车",
+      "走路",
+      "开车",
+      "坐公共汽车"
+     ],
+     "answer": 2,
+     "words": [
+      "地铁"
+     ],
+     "sentence": 8
     }
    ]
   },
@@ -6609,6 +9032,50 @@
       "流泪"
      ],
      "sentence": 7
+    },
+    {
+     "q": "父亲下班回到家，看见了谁？",
+     "en": "Whom did Father see when he got home from work?",
+     "type": "mc",
+     "options": [
+      "亲戚们",
+      "同事们",
+      "朋友们",
+      "邻居们"
+     ],
+     "answer": 0,
+     "words": [
+      "亲戚"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "父亲觉得这个生日怎么样？",
+     "en": "How did Father feel about this birthday?",
+     "type": "mc",
+     "options": [
+      "很累",
+      "很幸福",
+      "很贵",
+      "很忙"
+     ],
+     "answer": 1,
+     "words": [
+      "幸福"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "母亲做了饺子、鱼和汤。",
+     "en": "Mother made dumplings, fish and soup.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "饺子",
+      "鱼"
+     ],
+     "sentence": 6
     }
    ]
   },
@@ -6730,6 +9197,49 @@
       "精彩"
      ],
      "sentence": 8
+    },
+    {
+     "q": "京剧有多少年的历史了？",
+     "en": "How many years of history does Peking opera have?",
+     "type": "mc",
+     "options": [
+      "一百多年",
+      "两百多年",
+      "两千多年",
+      "三百多年"
+     ],
+     "answer": 1,
+     "words": [
+      "历史"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "演员的衣服怎么样？",
+     "en": "What are the actors' costumes like?",
+     "type": "mc",
+     "options": [
+      "很旧",
+      "很短",
+      "颜色很丰富",
+      "很大"
+     ],
+     "answer": 2,
+     "words": [
+      "丰富"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "票很便宜。",
+     "en": "The tickets are cheap.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "贵"
+     ],
+     "sentence": 9
     }
    ]
   },
@@ -6843,6 +9353,49 @@
       "了解"
      ],
      "sentence": 7
+    },
+    {
+     "q": "长城有多长？",
+     "en": "How long is the Great Wall?",
+     "type": "mc",
+     "options": [
+      "两千多公里",
+      "两万多公里",
+      "两百多公里",
+      "二十多公里"
+     ],
+     "answer": 1,
+     "words": [
+      "公里"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "长城已经有多少年的历史了？",
+     "en": "How many years of history does the Great Wall already have?",
+     "type": "mc",
+     "options": [
+      "两百多年",
+      "两万多年",
+      "两千多年",
+      "二十多年"
+     ],
+     "answer": 2,
+     "words": [
+      "历史"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "他们最后到了最高的地方。",
+     "en": "In the end they reached the highest place.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "终于"
+     ],
+     "sentence": 6
     }
    ]
   },
@@ -6964,6 +9517,51 @@
       "保证"
      ],
      "sentence": 8
+    },
+    {
+     "q": "很多学生的什么不太理想？",
+     "en": "What is not very good for many students?",
+     "type": "mc",
+     "options": [
+      "身体",
+      "成绩",
+      "环境",
+      "工作"
+     ],
+     "answer": 1,
+     "words": [
+      "成绩",
+      "理想"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "遇到困难的时候，不应该怎么样？",
+     "en": "What should you not do when you meet difficulties?",
+     "type": "mc",
+     "options": [
+      "问老师",
+      "问同学",
+      "放弃",
+      "坚持"
+     ],
+     "answer": 2,
+     "words": [
+      "放弃",
+      "困难"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "上课的时候不用回答老师的问题。",
+     "en": "In class you do not need to answer the teacher's questions.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "回答"
+     ],
+     "sentence": 3
     }
    ]
   },
@@ -7091,6 +9689,49 @@
       "接"
      ],
      "sentence": 10
+    },
+    {
+     "q": "周婷用什么联系了她的丈夫？",
+     "en": "What did Zhou Ting use to contact her husband?",
+     "type": "mc",
+     "options": [
+      "电脑",
+      "手机",
+      "电视",
+      "手表"
+     ],
+     "answer": 1,
+     "words": [
+      "联系"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "想换其他时间的航班，可以问谁？",
+     "en": "Whom can you ask if you want to change to a flight at another time?",
+     "type": "mc",
+     "options": [
+      "经理",
+      "警察",
+      "服务员",
+      "司机"
+     ],
+     "answer": 2,
+     "words": [
+      "服务员"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "周婷想自己坐出租车回家。",
+     "en": "Zhou Ting wants to take a taxi home by herself.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "出租车"
+     ],
+     "sentence": 9
     }
    ]
   },
@@ -7220,6 +9861,50 @@
       "着急"
      ],
      "sentence": 10
+    },
+    {
+     "q": "要少吃哪些东西？",
+     "en": "Which foods should you eat less of?",
+     "type": "mc",
+     "options": [
+      "新鲜的",
+      "甜的",
+      "热的",
+      "冷的"
+     ],
+     "answer": 1,
+     "words": [
+      "甜"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "可以多吃什么？",
+     "en": "What can you eat more of?",
+     "type": "mc",
+     "options": [
+      "巧克力和蛋糕",
+      "蛋糕和饼干",
+      "鱼和水果",
+      "饮料和巧克力"
+     ],
+     "answer": 2,
+     "words": [
+      "水果",
+      "鱼"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "医生认为减肥最重要的是少吃东西。",
+     "en": "The doctor thinks the most important thing in losing weight is eating less.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "健康"
+     ],
+     "sentence": 3
     }
    ]
   }
