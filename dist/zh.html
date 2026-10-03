@@ -1749,15 +1749,16 @@ const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c ===
 // pack.wordsBy "typed": held words that can be asked typed now (c.held, dayHeldMark) come right after
 // the misses, up to hshare of the plan: a held word moves only by one typed ask per session, and by the
 // weak floor alone (lowest streak first) the words at 2 piled up (fb18 review: 129 and rising). They
-// leave the consolidating units ⌈DAY_HELD_UNIT_SHARE n⌉ (the fb10 M1 cap; at cshare 0.35 the words at
-// 2 still rose, owner export); the floor then counts them with the word misses, as it counts misses
+// reserve only the consolidating units min(⌈DAY_HELD_UNIT_SHARE n⌉, units there) (the fb10 M1 cap; at
+// cshare 0.35 the words at 2 still rose, owner export; units may still fall to the floor cap on days
+// of many unit misses, as flag off); the floor then counts them with the word misses, as it counts misses
 // without the flag, and refresh is taken once after the units (fb18 review 2 M2, M3).
 const DAY_EXTRA_POOL = 4, DAY_WEAK_FLOOR = 0.4, DAY_HELD_SHARE_REVIEW = 0.3, DAY_HELD_SHARE_RECALL = 1, DAY_HELD_UNIT_SHARE = 0.25;
 // Today's Recall size. Under wordsBy a held word moves only by a typed ask, and after the misses and
 // the units' share Recall left it ~1 slot: the pile at 2 rose all week (fb18 review 2; the extra
 // production slots are what the typed rule costs, team decision 2026-10-04).
 const RECALL_SIZE = 8, RECALL_SIZE_HELD = 12;
-const recallSize = pack => wordsTypedOn(pack) ? RECALL_SIZE_HELD : RECALL_SIZE;
+const recallSize = pack => wordsTypedOn(pack) && dayAwareOn(pack) ? RECALL_SIZE_HELD : RECALL_SIZE;
 function dayPick(cands, n, d, rng, sn, cshare, t4max, hshare){
   const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
   (cands || []).forEach(c => { const t = dayTier(c, d, sn); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
@@ -5061,7 +5062,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2324454921-1929792";
+const VE_BUILD = "447700362-1929920";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6873,4 +6874,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:851204920-1929116-->
+<!--ve-build:2095466342-1929243-->

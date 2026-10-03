@@ -267,6 +267,7 @@ function seedW(){
     const p0 = seedW();
     const api = await boot(PACK, p0, 3);
     check(`Today plan: Recall ${VC.RECALL_SIZE_HELD} items under wordsBy (${VC.RECALL_SIZE} without; the typed rule's extra production slots)`, VC.recallSize(PACK) === 12 && VC.recallSize(PACK_OFF) === 8 && new RegExp(`${VC.RECALL_SIZE_HELD} items`).test(api.panel()));
+    check("Recall stays 8 for wordsBy without dayAware (held routing needs dayAware)", VC.recallSize(Object.assign({}, PACK, { dayAware: false })) === 8);
     // Held words: typed answers wrong, choice answers right; everything else right.
     const rows = await session(api, (it, rec) => !(rec && rec.s === 2 && it.kind === "type"));
     { const rq = rows.filter(r => r.step === 3), firsts = rq.filter((r, i) => rq.findIndex(x => x.key === r.key) === i).length; check(`Recall drill asks ${firsts} items (${VC.RECALL_SIZE_HELD} planned)`, firsts === VC.RECALL_SIZE_HELD); }

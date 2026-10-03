@@ -587,7 +587,8 @@ function missesCarried(drilled0){
       check(`after the day, ${tab} ${id}: no item in a kind already right today (${rep.length}/${items.length})`, items.length > 0 && rep.length === 0);
       api.quit();
     }
-    check(`dayAware: same number of items as the control (${on.total} vs ${res.off.m.total})`, on.total === res.off.m.total);
+    // Recall is 12 only with wordsBy and dayAware (core.js recallSize), so the control (dayAware off) asks fewer.
+    check(`dayAware: items = control + the wordsBy Recall extra (${on.total} vs ${res.off.m.total})`, on.total >= res.off.m.total && VC.recallSize(PACK_ON) > VC.recallSize(PACK_OFF));
     check(`dayAware: units touched >= control (${on.touched} vs ${res.off.m.touched})`, on.touched >= res.off.m.touched);
     check(`dayAware: new material every session at the control's pace (${onDay.learnNew.join(",")} vs ${res.off.day.learnNew.join(",")})`, onDay.learnNew.every((n, i) => n >= Math.min(res.off.day.learnNew[i], 10)));
     // Lead finding 2026-10-02: weakScore ranking gave character units at streak 3-6 (pinyin
