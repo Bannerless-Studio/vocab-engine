@@ -361,9 +361,11 @@ A passage span can be longer than its linked word: 这个 links 这, 越来越 l
   | a8e9c08 (flag off) | 108.3 | 73 → 56 (118) | 6.3 · 2.9 · 3.3 · 12.1 · 1.5 | 0.23 | 57% | 1.0 | 3.7 | 15.0 |
   | first version (retry credit, replay typed) | 69.7 | 73 → 100 (118) | 5.6 · 5.1 · 2.9 · 13.3 · 1.1 | 0.26 | 55% | 1.0 | 10.0 | 2.7 |
   | no retry credit, replay recall, no held share | 41.7 | 73 → 129 (130), rising | 5.9 · 3.4 · 3.5 · 12.9 · 1.2 | 0.22 | 55% | 1.0 | 6.3 | 5.3 |
-  | this (held share 0.2 / 1, refresh kept) | 87.0 | 73 → 78 (89), stable | 7.6 · 5.4 · 4.2 · 8.6 · 3.8 | 0.42 | 47% | 1.0 | 14.0 | 3.3 |
+  | held share 0.2 / 1, refresh reserved before the floor (b6a85cb) | 87.0 | 73 → 78 (89), stable | 7.6 · 5.4 · 4.2 · 8.6 · 3.8 | 0.42 | 47% | 1.0 | 14.0 | 3.3 |
+  | review 2 fixes (units cap, floor, one refresh take; Learn retry), share 0.2 | 46.3 | 73 → 124, rising | 5.8 · 3.8 · 3.5 · 12.7 · 1.4 | 0.23 | 56% | 1.3 | 4.7 | 6.3 |
+  | this (review 2 fixes, held share 0.3 / 1) | 64.3 | 73 → 102 (103), rising | 6.3 · 4.7 · 3.7 · 13.2 · 0.4 | 0.32 | 50% | 1.7 | 9.3 | 5.3 |
 
-  Mastered refresh misses the 50% target by 3 points: it comes mostly from units' typed items, which the held slots displace (Review units 12.1 → 8.6). Every slot moved from held words to refresh or units trades one for the other: the variants that reached 50–57% refresh (a units share kept in Recall, or a larger refresh share) left words at 2 rising to 102–115 and 59–69 words known in the week.
+  Words at 2 still rise (start of each day: 73 78 98 91 84 95 95 102): held words get the slots the pending misses (`DAY_MISS_SHARE`, up to 12 of 20 and 4 of 8 on the owner's days) and the consolidating units' ⌈0.35 n⌉ (7 of 20, 3 of 8) leave, about 2 a Review and 1 a Recall; a larger held share changes nothing (0.4, 0.6: same numbers). Mastered refresh comes mostly from units' typed items. Reserving the units at ⌈0.25 n⌉ instead keeps words at 2 stable (73 → 69) with 90 known, but refresh 44% and 2.3 same-kind repeats a week; at ⌈0.15 n⌉ 98 known, words at 2 falling to 56, refresh 35%.
 - **Storage**: no progress field. Word records keep `{r, w, s, k?, prov?, t?, u?}` and their range; only how `s` moves changed. Words already at 3+ stay known; a record written with the flag reads on an engine without it unchanged (tests/migration_checks.js [wordsBy]). The session record (`vocab_<key>_session`) gains the optional `today.tw` (word ids asked typed this Today session) and `drill.dn` (word ids a miss in the parked drill stepped down from 2+); another build drops the record anyway.
 
 ### pauseNew
