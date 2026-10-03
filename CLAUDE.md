@@ -57,7 +57,7 @@ $NODE tests/script_checks.js                     # 128
 $NODE tests/script_app_checks.js                 # 216
 $NODE tests/audio_checks.js                      # 90 (app section needs ../persian)
 $NODE tests/passage_audio_checks.js              # 43
-$NODE tests/listen_mode_checks.js                # 166 (adds [12] pack.listenQuestions "all": all questions audio-only, flag-off control vs 7a21ccd; [13] pack.rereadPerfectDays incl. first listening pass at 7 days (x 1, no l), nextReadItem control vs 3790814; [14] pack.readRotation: session alternation, random picks, shuffled questions, s/ls, control vs 491d470)
+$NODE tests/listen_mode_checks.js                # 169 (adds [12] pack.listenQuestions "all": all questions audio-only, flag-off control vs 7a21ccd; [13] pack.rereadPerfectDays incl. first listening pass at 7 days (x 1, no l), nextReadItem control vs 3790814; [14] pack.readRotation: session alternation, random picks, shuffled questions, s/ls, control vs 491d470)
 $NODE tests/validate_pack_audio_checks.js        # 30
 $NODE tests/validate_pack_characters_checks.js   # 83
 $NODE tests/validate_pack_script_checks.js       # 56

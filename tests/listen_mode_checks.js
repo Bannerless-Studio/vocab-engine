@@ -760,7 +760,8 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
       (spec || []).forEach(([p, sc, x, s, ls]) => { const r = { sc: sc === "full" ? full(p) : sc, n: full(p), d: daysAgo(1), x }; if(s != null) r.s = s; if(ls != null) r.ls = ls; pr.read.done[p.id] = r; });
       return pr; };
     const yes = () => true, no = () => false;
-    const nx = (pr, o) => VC.nextReadItem(PASSAGES, WORDS, (o && o.pack) || RON, pr, daysAgo(0), !!(o && o.paused), undefined, o && o.rng, o && o.listen === false ? no : yes);
+    // sn (session being planned) defaults to daySn + 1: the Today plan is made before Go.
+    const nx = (pr, o) => VC.nextReadItem(PASSAGES, WORDS, (o && o.pack) || RON, pr, daysAgo(0), !!(o && o.paused), o && o.sn, o && o.rng, o && o.listen === false ? no : yes);
     const tag = r => r ? (r.reason === "new" ? "new" : r.mode === "listen" ? "listen" : "reread") : "none";
     // One Today session: plan (before Go), Go (sn + 1), the pass, all answers right.
     const session = (pr, o) => { const r = nx(pr, o); VC.daySessionStart(pr, RON);
@@ -768,24 +769,26 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
       return r; };
     const run = (pr, k, o) => Array.from({ length: k }, () => session(pr, o));
     const pr8 = blank(), seq = run(pr8, 8, { rng: mulberry32(1) });
-    check(`8 sessions: new, new (only passage read last session), then listen/new alternate: ${seq.map(tag).join(",")}`,
-      seq.map(tag).join(",") === "new,new,listen,new,listen,new,listen,new");
-    check("listening picks never the previous session's passage", seq.every((r, i) => r.mode !== "listen" || (i > 0 && r.p.id !== seq[i - 1].p.id)));
+    check(`8 sessions: new, listen, new, listen ... (${seq.map(tag).join(",")})`, seq.map(tag).join(",") === "new,listen,new,listen,new,listen,new,listen");
+    check("session 2 listens to the passage read in session 1", seq[1].p.id === seq[0].p.id);
+    check("a listening turn picks the never-listened passage (session 4: the one read in session 3)", seq[3].p.id === seq[2].p.id);
     const ra = pr8.read.done[seq[0].p.id];
-    check(`s/ls written: first passage s 3, ls 3 after its listening pass (${JSON.stringify(ra)})`, ra.s === 3 && ra.ls === 3 && ra.l === 1 && ra.x === 2);
-    const rd = pr8.read.done[seq[7].p.id];
-    check(`reading pass: s only, no ls (${JSON.stringify(rd)})`, rd.s === 8 && !("ls" in rd) && !("l" in rd));
+    check(`s/ls written: first passage s 2, ls 2 after its listening pass (${JSON.stringify(ra)})`, ra.s === 2 && ra.ls === 2 && ra.l === 1 && ra.x === 2);
+    const rd = pr8.read.done[seq[6].p.id];
+    check(`session 7's new passage is session 8's listening pass (${JSON.stringify(rd)})`, seq[7].p.id === seq[6].p.id && rd.s === 8 && rd.ls === 8);
+    check("reading pass record before listening: no ls", (() => { const pr = blank(); session(pr, { rng: mulberry32(2) }); const r = Object.values(pr.read.done)[0]; return r.s === 1 && !("ls" in r) && !("l" in r); })());
     check("ls is kept across a later reading pass", (() => { const pr = allDone(4, [[A, 0, 2, 3, 2]]); VC.daySessionStart(pr, RON); VC.markPassageDone(pr, A.id, 1, full(A), daysAgo(0), false, RON); const r = pr.read.done[A.id]; return r.s === 5 && r.ls === 2 && !r.l; })());
     // Listening turn picks: latest pass a reading pass (s 5 > every ls).
-    const lt = spec => allDone(5, [[D4, "full", 1, 5]].concat(spec));
+    const lt = spec => allDone(5, [[D4, "full", 2, 5, 4]].concat(spec));
     const picks = (pr, o) => new Set(Array.from({ length: 40 }, (_, i) => (nx(pr, Object.assign({ rng: mulberry32(i + 1) }, o)) || { p: { id: "-" } }).p.id));
     const nev = picks(lt([[A, "full", 1, 2], [B, "full", 1, 3]]));
     check(`never-listened first: only A and B lack ls (${[...nev].join(",")})`, nev.size === 2 && nev.has(A.id) && nev.has(B.id));
     const old = picks((() => { const pr = lt([]); pr.read.done[B.id].ls = 0; pr.read.done[C.id].ls = 0; return pr; })());
     check(`then the smallest ls, ties random (${[...old].join(",")})`, old.size === 2 && old.has(B.id) && old.has(C.id));
     check("listening turn result: reason reread, mode listen", (() => { const r = nx(lt([[A, "full", 1, 2]])); return r && r.reason === "reread" && r.mode === "listen" && VC.readPassMode(r, lt([]), true, RON) === "listen"; })());
-    check("listening turn skips the latest session's passages (s === sn)", (() => { const pr = lt([]); Object.values(pr.read.done).forEach(r => { r.s = 5; delete r.ls; }); pr.read.done[A.id].s = 2; return [...picks(pr)].join() === A.id; })());
-    check("everything passed in the latest session: no Read stage", (() => { const pr = lt([]); Object.values(pr.read.done).forEach(r => { r.s = 5; }); return nx(pr) === null; })());
+    check("plan before Go (sn 6) may pick the previous session's passage", (() => { const pr = lt([]); Object.values(pr.read.done).forEach(r => { r.s = 5; delete r.ls; }); return picks(pr).size > 1; })());
+    check("replan inside session 5 (sn 5) never picks a passage passed in it", (() => { const pr = lt([]); Object.values(pr.read.done).forEach(r => { r.s = 5; delete r.ls; }); pr.read.done[A.id].s = 2; return [...picks(pr, { sn: 5 })].join() === A.id; })());
+    check("replan inside the session with everything passed in it: no Read stage", (() => { const pr = lt([]); Object.values(pr.read.done).forEach(r => { r.s = 5; }); return nx(pr, { sn: 5 }) === null; })());
     check("canListen false: listening turn becomes a reading turn", tag(nx(lt([[A, "full", 1, 2]]), { listen: false })) !== "listen" && VC.readPassMode(nx(lt([[A, "full", 1, 2]])), lt([]), false, RON) === "read");
     check("canListen false over 6 sessions: never a listening pass", run(blank(), 6, { listen: false, rng: mulberry32(3) }).every(r => r.mode === "read" && r.reason === "new"));
     // Reading turn with nothing new: imperfect first, fewest x, ties random; no day gate.

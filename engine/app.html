@@ -2083,7 +2083,7 @@ function todayRender(){
   if(pz) steps.splice(1, 1);
   const showPlaceHint = !prog.placedOnce;
   const showSoundsHint = HAS_LESSONS && !prog.soundsOpened;
-  const readNext = todayReadItem();
+  const readNext = todayReadItem(false);
   if(readNext) steps.push([readNext.mode === "listen" ? "Listen" : "Read", null, readPlanLine(readNext)]);
   // Paused: a choice of what Learn teaches next waits, so it cannot block review.
   const choice = !pz && !!(snap && snap.choice);
@@ -2119,10 +2119,11 @@ function todayRender(){
   // A parked Today session (Today re-tapped, Escape) is resumed, never restarted.
   if(sessStore.get("today")){ const start = $("go").onclick; $("go").textContent = "Resume today"; $("go").onclick = () => { if(!sessionResume("today")) start(); }; }
 }
-function todayReadItem(){
+// inSession: Go has started the session (prog.sn is its number); the home plan is for the next one.
+function todayReadItem(inSession){
   if(!HAS_PASSAGES) return null;
   refreshReadUnlocks();
-  const r = VC.nextReadItem(PASSAGE_LIST, WORDS, PACK, prog, todayISO(), paused(), undefined, undefined, canListenPassage);
+  const r = VC.nextReadItem(PASSAGE_LIST, WORDS, PACK, prog, todayISO(), paused(), VC.daySn(prog) + (inSession ? 0 : 1), undefined, canListenPassage);
   if(r) r.mode = VC.readPassMode(r, prog, canListenPassage(r.p), PACK);
   return r;
 }
@@ -2196,9 +2197,9 @@ function todayStep(){
     return todayStep();
   }
   if(s === 5){
-    let r = "read" in todayStepState ? todayStepState.read : todayReadItem();
+    let r = "read" in todayStepState ? todayStepState.read : todayReadItem(true);
     // A first read planned before pausing is not started; a spaced re-read is offered instead.
-    if(r && r.reason !== "reread" && paused()) r = todayReadItem();
+    if(r && r.reason !== "reread" && paused()) r = todayReadItem(true);
     // The voice can go between the plan and this step (voiceschanged): re-check it.
     if(r){ startPassage(r.p, true, r.mode === "listen" && canListenPassage(r.p) ? "listen" : "read"); return; }
     return todayStep();

@@ -1750,7 +1750,9 @@ function nextReadItem(passages, words, pack, prog, now, reviewOnly, sn, rng, can
 }
 // pack.readRotation (owner 2026-10-03): day gates say little when 60 passages can fit in one
 // day, so stages alternate by pass instead: after a reading pass a listening pass, after a
-// listening pass a reading one. Passages passed in the latest session (s === sn) wait one.
+// listening pass a reading one. sn is the session being planned: the Today plan is made before
+// Go starts it (daySn + 1), a replan inside the session uses daySn. A passage passed in that
+// session (a Read-tab pass before the stage) is not picked; the previous session's is.
 function readRotationOn(pack){ return !!(pack && pack.readRotation === true && dayAwareOn(pack)); }
 function randomMin(list, key, rng){
   if(!list.length) return null;
@@ -1759,7 +1761,7 @@ function randomMin(list, key, rng){
   return tied[Math.floor((rng || Math.random)() * tied.length)] || tied[0];
 }
 function nextReadRotation(passages, words, pack, prog, reviewOnly, sn, rng, canListen){
-  const now = Number.isInteger(sn) ? sn : daySn(prog);
+  const now = Number.isInteger(sn) ? sn : daySn(prog) + 1;
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
   const open = new Set(readingLevels(passages, words, pack, prog).filter(l => l.unlocked).map(l => l.lv));
   const cands = (passages||[]).filter(p => { const r = done[p.id];

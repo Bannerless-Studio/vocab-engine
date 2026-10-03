@@ -441,7 +441,7 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       api.el("go").onclick({});
       api.todayJump(5);
       const r0 = api.rd(), pid = r0 && r0.p.id, qs = r0 && r0.p.questions.map(q => q.q).join("|");
-      check(`readRotation: Today plans a listening pass of a passage not passed in session 5 (${pid})`, PACK.readRotation === true && row && !!r0 && r0.mode === "listen" && done.slice(0, 3).some(x => x.id === pid));
+      check(`readRotation: Today plans a listening pass of a done passage (${pid})`, PACK.readRotation === true && row && !!r0 && r0.mode === "listen" && done.some(x => x.id === pid));
       api.el("rdone").click();
       ({ api } = await boot(Object.assign({ seed: 25 }, st)));
       const r1 = api.rd();
