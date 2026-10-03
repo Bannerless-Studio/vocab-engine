@@ -2098,8 +2098,8 @@ function audioSlot(make){
 // prog.read.unlocked so it survives later changes. prog.read is absent until the learner
 // first meets a passage, so older stored progress needs no migration.
 const READ_UNLOCK = 0.7;
-// reopened 0: looking back is shown on the results screen but never weakens a word (user 2026-09-28).
-const READ_WEIGHT = { tapped: 2, wrong: 2, reopened: 0 };
+// Looking back is not tracked (owner 2026-10-03).
+const READ_WEIGHT = { tapped: 2, wrong: 2 };
 function readState(prog){
   if(!isObj(prog.read)) prog.read = {};
   if(!isObj(prog.read.unlocked)) prog.read.unlocked = {};
@@ -2286,8 +2286,8 @@ function gradeQuestion(q, answer){
   if(q.type === "tf") return typeof answer === "boolean" && answer === q.answer;
   return Number.isInteger(answer) && answer === q.answer;
 }
-// A word with several reasons takes the largest weight, never the sum. Reopened answers
-// weigh 0: listed as information only.
+// A word with several reasons takes the largest weight, never the sum. Looking back
+// is not a reason.
 function passageWeakWords(passage, log, wordsById){
   const out = new Map();
   const add = (id, why) => {
@@ -2302,7 +2302,6 @@ function passageWeakWords(passage, log, wordsById){
   ((log && log.answers) || []).forEach((a, i) => {
     if(!a || !qs[i]) return;
     if(!a.ok) (qs[i].words || []).forEach(id => add(id, "wrong"));
-    if(a.reopened) (qs[i].words || []).forEach(id => add(id, "reopened"));
   });
   return [...out.values()];
 }
@@ -5062,7 +5061,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1019704528-1928536";
+const VE_BUILD = "2324454921-1929792";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6155,7 +6154,7 @@ function startPassage(p, today, mode){
   if(VC.readRotationOn(PACK)) RD.qx = qx;
   if(mode === "listen"){
     const prev = prog.read && prog.read.done && prog.read.done[p.id];
-    Object.assign(RD, { mode: "listen", peekText: false, textShown: false, playing: false,
+    Object.assign(RD, { mode: "listen", textShown: false, playing: false,
       audioOnly: VC.listenAudioOnly(p.id, (prev && prev.x) || 0, p.questions.length, PACK) });
   }
   readPassageScreen();
@@ -6333,7 +6332,6 @@ function listenScreen(){
   };
   $("ltext").onclick = () => {
     rd.textShown = !rd.textShown;
-    if(rd.textShown) rd.peekText = true;
     $("pbox").innerHTML = rd.textShown ? passageHTML(-1) : listenRowsHTML();
     $("gloss").hidden = true;
     $("ltext").textContent = rd.textShown ? "Hide text" : "Show text";
@@ -6367,12 +6365,15 @@ function readQuestionScreen(){
   stopSpeaking(); // no-voice path: a still-playing clip (previous reveal, read-aloud) must not run into this question
   screenTop();
   const p = RD.p, P = $("panel"), qi = RD.qi, q = p.questions[qi];
-  if(!RD.answers[qi]) RD.answers[qi] = { ok: null, reopened: false, given: null, tr: false };
+  if(!RD.answers[qi]) RD.answers[qi] = { ok: null, given: null, tr: false };
   const rec = RD.answers[qi];
   // RD.qv[qi] lets a re-mount (tab return, voiceschanged) restore the question silently.
   const tf = q.type === "tf";
   const view = RD.qv[qi] || (RD.qv[qi] = { order: tf ? [true, false] : shuffle([0,1,2,3]), spoken: false, trShown: false, qOpen: false });
   const order = view.order;
+  // listenQuestions "all": a listening pass's look-back replays the sentences; text stays behind its own toggle.
+  const LB = RD.mode === "listen" && PACK.listenQuestions === "all";
+  RD.playing = false;
   setScore(qi, p.questions.length);
   // No per-question clip in the pack schema: TTS only, so it plays iff a voice is usable.
   const hearQ = hasSpeech;
@@ -6384,9 +6385,9 @@ function readQuestionScreen(){
     ${qHidden ? `<div id="qshwrap"><button class="ghost" id="qsh" style="margin:8px 0">Show question</button></div>${REPLAY_STAGE}` : `${qText()}${hearQ ? REPLAY_STAGE : ""}${qTr()}`}
     <div class="opts ${tf ? "" : "opts-w"}" id="o"></div>
     ${READ_BLOCK ? `<div id="qans"><div class="reveal" id="rv"></div>${nxBtn}</div>` : `<div class="reveal" id="rv"></div>`}
-    <button class="ghost" id="ptoggle" aria-expanded="${RD.shown}" style="margin-top:12px">${RD.shown ? "Hide passage" : "Show passage"}</button>
+    <button class="ghost" id="ptoggle" aria-expanded="${RD.shown}" style="margin-top:12px">${RD.shown ? "Hide passage" : LB ? "Replay passage" : "Show passage"}</button>${LB ? `<div class="row" id="lkbar"${RD.shown ? "" : " hidden"}><button id="lplay">Play all</button><button id="ltext" aria-expanded="${!!view.lkText}">${view.lkText ? "Hide text" : "Show text"}</button></div>` : ""}
     ${glossBox()}
-    <div class="passage" id="pbox"${RD.shown ? "" : " hidden"}>${passageHTML(-1)}</div>
+    <div class="passage" id="pbox"${RD.shown ? "" : " hidden"}>${LB && !view.lkText ? listenRowsHTML() : passageHTML(-1)}</div>
     </div>${READ_BLOCK ? "" : `<div class="actions">${nxBtn}</div>`}`;
   wirePassage($("pbox"), $("gloss"));
   // Spoken once per question: a re-mount, or a voice arriving after answering, only offers Replay.
@@ -6404,16 +6405,40 @@ function readQuestionScreen(){
   let qOpen = !qHidden;
   const revealQ = () => { view.qOpen = true; if(qOpen) return; qOpen = true; $("qshwrap").innerHTML = qText() + qTr(); wireTr(); };
   if(qHidden) $("qsh").onclick = () => { if(rec.ok === null) rec.qh = true; revealQ(); };
+  const rd = RD;
+  const lkSet = on => { rd.playing = on; const b = $("lplay"); if(b) b.textContent = on ? "Stop" : "Play all"; };
+  const lkRows = () => { if(view.lkText) return; p.sentences.forEach((s, i) => { const b = $("ls"+i); if(b) b.onclick = () => { lkSet(false); saySentence(s, b); }; }); };
+  if(LB){
+    lkRows();
+    const step = i => {
+      if(RD !== rd || rd.qi !== qi || !rd.playing) return;
+      if(i >= p.sentences.length){ lkSet(false); return; }
+      saySentence(p.sentences[i], view.lkText ? null : $("ls"+i), () => step(i+1));
+    };
+    $("lplay").onclick = () => { if(rd.playing){ lkSet(false); stopSpeaking(); return; } lkSet(true); step(0); };
+    $("ltext").onclick = () => {
+      view.lkText = !view.lkText;
+      $("pbox").innerHTML = view.lkText ? passageHTML(-1) : listenRowsHTML();
+      $("gloss").hidden = true;
+      $("ltext").textContent = view.lkText ? "Hide text" : "Show text";
+      $("ltext").setAttribute("aria-expanded", String(!!view.lkText));
+      lkRows();
+      sessionSave(true);
+    };
+  }
   $("ptoggle").onclick = () => {
     RD.shown = !RD.shown;
-    if(RD.shown && rec.ok === null) rec.reopened = true; // logged: looked back before answering
+    if(LB && !RD.shown){ lkSet(false); stopSpeaking(); }
     $("pbox").hidden = !RD.shown;
-    $("ptoggle").textContent = RD.shown ? "Hide passage" : "Show passage";
+    if(LB) $("lkbar").hidden = !RD.shown;
+    $("ptoggle").textContent = RD.shown ? "Hide passage" : LB ? "Replay passage" : "Show passage";
     $("ptoggle").setAttribute("aria-expanded", String(RD.shown));
+    if(LB) sessionSave(true);
   };
   const box = $("o");
   const reveal = fresh => {
     revealQ();
+    if(LB) lkSet(false);
     [...box.children].forEach(x => { x.disabled = true; if(x.dataset.v === String(q.answer)) x.classList.add("ok"); if(!rec.ok && x.dataset.v === String(rec.given)) x.classList.add("bad"); });
     const s = p.sentences[q.sentence];
     const hearS = canHearSentence(s);
@@ -6458,7 +6483,7 @@ function markPassageFinished(){
   VC.markPassageDone(prog, RD.p.id, sc, RD.p.questions.length, todayISO(), RD.mode === "listen", PACK);
   store.save();
 }
-const WHY_LABEL = { tapped: "tapped while reading", wrong: "missed question", reopened: "looked back" };
+const WHY_LABEL = { tapped: "tapped while reading", wrong: "missed question" };
 function readResults(){
   stopSpeaking();
   drillKeyHandler = null; setScore(0,0); screenTop();
@@ -6467,13 +6492,13 @@ function readResults(){
   const weak = VC.passageWeakWords(p, { tapped: RD.tapped, answers: RD.answers }, WORDS_BY_ID);
   // pauseNew: Today's Read stage never gives an unlearned word a record (`d` would make it learned).
   if(RD.today && paused()){ const lw = new Set(learnedWords().map(w => w.id)); weak.forEach(w => { if(!lw.has(w.id)) w.weight = 0; }); }
-  // Weight-0 entries (looked back only) are information: never applied, no checkbox.
+  // Weight-0 entries (paused, unlearned) are information: never applied, no checkbox.
   const anyWeak = weak.some(w => w.weight > 0);
   // Without RD.added a re-mount would offer "Add to review" again and apply the same words twice.
   P.innerHTML = `<div class="done"><h2>${sc} / ${p.questions.length}</h2>
-    ${RD.mode === "listen" ? `<p class="q" id="lmode" style="margin-bottom:4px">Listening pass${RD.peekText ? "<br>Text shown while listening" : ""}</p>` : ""}<p class="q"${TA} style="margin-bottom:8px">${rubyTextOr(p.title, p.titleRuby)}</p>
+    ${RD.mode === "listen" ? `<p class="q" id="lmode" style="margin-bottom:4px">Listening pass</p>` : ""}<p class="q"${TA} style="margin-bottom:8px">${rubyTextOr(p.title, p.titleRuby)}</p>
     ${p.questions.map((q, i) => { const a = RD.answers[i] || {}; const s = p.sentences[q.sentence]; const hearS = canHearSentence(s);
-      return `<div class="stmt"${TOKBOX}><div class="q" style="margin:0 0 4px;color:${a.ok ? "var(--ok)" : "var(--bad)"}">${a.ok ? "✓" : "✗"} Question ${i+1}${a.reopened ? " · looked back" : ""}${a.qh ? " · question shown" : ""}${a.tr ? " · translation shown" : ""}</div><div${TA}>${rubyTextOr(q.q, q.ruby)}</div><div style="margin-top:6px"${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:2px 0 0">${ui(s.en)}</div>${hearS ? `<button type="button" class="replay" id="rr${i}" aria-label="Replay">${REPLAY_SVG}</button>` : ""}</div>`; }).join("")}
+      return `<div class="stmt"${TOKBOX}><div class="q" style="margin:0 0 4px;color:${a.ok ? "var(--ok)" : "var(--bad)"}">${a.ok ? "✓" : "✗"} Question ${i+1}${a.qh ? " · question shown" : ""}${a.tr ? " · translation shown" : ""}</div><div${TA}>${rubyTextOr(q.q, q.ruby)}</div><div style="margin-top:6px"${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:2px 0 0">${ui(s.en)}</div>${hearS ? `<button type="button" class="replay" id="rr${i}" aria-label="Replay">${REPLAY_SVG}</button>` : ""}</div>`; }).join("")}
     ${anyWeak ? `<p class="q">Weak words from this passage${RD.today ? ". Ticked ones go to your next review." : ""}</p><div id="weak">${weak.map((w, i) => `<label class="wk"${DISP.rtl ? ' dir="rtl"' : ""}>${w.weight > 0 ? `<input type="checkbox" data-wi="${i}"${RD.unticked[i] ? "" : " checked"}${RD.added ? " disabled" : ""}> ` : ""}${glossHTML(w.id, RD.glosses && RD.glosses[w.id])} <span class="q"${UIA} style="margin:0;font-size:13px">${escapeHtml(w.why.map(x => WHY_LABEL[x]).join(", "))}</span></label>`).join("")}</div>
       ${RD.today ? "" : `<button class="next" id="addrev"${RD.added ? " disabled" : ""}>Add to review</button>`}` : `<p class="q">No weak words from this passage.</p>`}
     ${RD.today ? `<button class="next" id="rcont" style="margin-top:10px">Continue</button></div>` : `<div id="addmsg" class="q"${RD.added ? "" : " hidden"}>${RD.added ? escapeHtml(RD.added) : ""}</div>
@@ -6848,4 +6873,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:340789666-1927860-->
+<!--ve-build:851204920-1929116-->
