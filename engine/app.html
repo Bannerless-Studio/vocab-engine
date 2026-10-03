@@ -634,8 +634,8 @@ function audioHint(msg){
   const old = document.getElementById("audiohint"); if(old) old.remove();
   const t = document.createElement("div"); t.id = "audiohint"; t.className = "swtoast"; t.setAttribute("role", "status"); t.textContent = msg;
   document.body.appendChild(t);
-  if(HELP_CLOSE){ t.innerHTML = escapeHtml(msg) + HELP_X; helpOpen(t, 3500, () => { if(t.parentNode) t.remove(); }); return; }
-  setTimeout(() => { if(t.parentNode) t.remove(); }, 3500);
+  if(HELP_CLOSE){ t.innerHTML = escapeHtml(msg) + HELP_X; helpOpen(t, TOAST_MS, () => { if(t.parentNode) t.remove(); }); return; }
+  setTimeout(() => { if(t.parentNode) t.remove(); }, TOAST_MS);
 }
 // The voice is re-checked per utterance (VC.liveVoice): the list can change between calls.
 function speakTTS(text, btn, onEnd){
@@ -733,7 +733,8 @@ const GLOSS_FOCUS = VC.glossFocusOn(PACK);
 // pointer or finger is on it. One at a time: opening one closes the one before.
 const HELP_CLOSE = VC.helpCloseOn(PACK);
 const READ_BLOCK = VC.readAnswerBlockOn(PACK);
-const HELP_MS = 20000; // owner 2026-10-02: 20 s (was 8 s)
+const HELP_MS = 15000; // owner 2026-10-03: one 15 s for every popover (was 20 s, 8 s before)
+const TOAST_MS = 3500; // status flash, not help to read
 const HELP_X = HELP_CLOSE ? `<button type="button" class="helpx" aria-label="Close">×</button>` : "";
 let helpCur = null;   // { el, close, ms, timer }
 function helpShut(){
