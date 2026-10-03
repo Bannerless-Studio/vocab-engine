@@ -2111,7 +2111,7 @@ return {
     const mainBlocks = [...mainHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)], mainSrc = mainBlocks[mainBlocks.length - 1][1];
     const screensOf = async src => {
       // dayAware (plan-line wording) post-dates the control.
-      const noDay = Object.assign({}, PACK); delete noDay.dayAware;
+      const noDay = Object.assign({}, PACK); delete noDay.dayAware; delete noDay.wordsBy;
       const x = await bootApp([{ lang:"zh-CN", name:"x" }], src ? { appSrc: src, pack: noDay } : { pack: noDay });
       const out = [x.api.getHtml("panel")];
       const q = x.api.getProg(); q.sets[PACK.levels[0].id] = 3; x.api.today(); out.push(x.api.getHtml("panel"));
