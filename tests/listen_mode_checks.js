@@ -42,6 +42,8 @@ const BASE_LQ = "7a21ccd";
 const BASE_RP = "3790814";
 // [14] flag-off control for pack.readRotation: main before fb16-read-rotation.
 const BASE_RR = "491d470";
+// [15] flag-off control for the listening look-back: main before fb19-listen-lookback.
+const BASE_LB = "a8e9c08";
 
 let fails = 0, passes = 0;
 function check(name, cond, detail){
@@ -869,6 +871,81 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     }
     check("validateProgShape: numeric s/ls accepted, a string rejected", VC.validateProgShape({ v: VC.PROG_VERSION, sets: {}, read: { done: { a: { sc: 1, n: 2, d: "2026-10-03", x: 1, s: 3, ls: 2 } } } }, VC.levelIds(RON)).ok
       && !VC.validateProgShape({ v: VC.PROG_VERSION, sets: {}, read: { done: { a: { sc: 1, n: 2, d: "2026-10-03", x: 1, s: "3" } } } }, VC.levelIds(RON)).ok);
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  console.log(`\n[15] listenQuestions "all": a listening pass's look-back replays audio (text behind Show text); flag off = ${BASE_LB}`);
+  try{
+    const n = P.questions.length;
+    const textRe = h => /data-pw/.test(h) && /class="ptxt/.test(h);
+    const b = await boot({ pack: PACK_DAY_NR });
+    const flip = () => { b.ss.getVoices = () => [{ lang: "en-US", name: "en" }]; b.ss.onvoiceschanged(); b.ss.getVoices = () => [{ lang: "zh-CN", name: "x" }]; b.ss.onvoiceschanged(); };
+    const pr = rereadProg(PASSAGES, P); b.api.setProg(pr);
+    b.api.startPassage(P, true, "listen"); b.api.el("rdone").click();
+    let h = b.api.html("panel");
+    check("listening pass question: button reads 'Replay passage', replay bar and passage hidden", />Replay passage</.test(h) && !/Show passage/.test(h) && /id="lkbar" hidden/.test(h) && /id="pbox" hidden/.test(h));
+    b.api.el("ptoggle").click(); h = b.api.html("panel");
+    check("opening it: bar and list shown, button 'Hide passage', logged as looked back", b.api.el("lkbar").hidden === false && b.api.el("pbox").hidden === false && b.api.el("ptoggle").textContent === "Hide passage" && b.api.rd().answers[0].reopened === true);
+    check("list: one play row per sentence, no written text, no tappable words", (h.match(/class="ghost lsay"/g) || []).length === P.sentences.length && !textRe(h) && !/data-pw/.test(h));
+    const k = b.spoken.length; b.api.el("ls2").click(); await sleep(DEFER);
+    check("a play row speaks its sentence", b.spoken.length === k + 1 && b.spoken[k] === P.sentences[2].t);
+    fire(b.ss, b.utts[b.utts.length - 1]); await sleep(DEFER);
+    const k2 = b.spoken.length; b.api.el("lplay").click(); await sleep(DEFER);
+    check("Play all starts sentence 1 and becomes Stop", b.spoken.length === k2 + 1 && b.spoken[k2] === P.sentences[0].t && b.api.el("lplay").textContent === "Stop");
+    b.api.el("lplay").click();
+    check("Stop ends it", b.api.el("lplay").textContent === "Play all" && b.api.rd().playing === false);
+    check("no Show text yet: peekText still false", b.api.rd().peekText === false);
+    b.api.el("ltext").click(); h = b.api.html("pbox");
+    check("Show text: written rows with tap-to-gloss, peekText logged, label Hide text", /data-pw/.test(h) && textRe(h) && b.api.rd().peekText === true && b.api.el("ltext").textContent === "Hide text");
+    const rdSaved = JSON.parse(JSON.stringify(Object.assign({}, b.api.rd(), { p: undefined })));
+    check("resume record carries the look-back state (shown, qv[0].lkText)", rdSaved.shown === true && rdSaved.qv[0].lkText === true);
+    flip(); await sleep(DEFER);
+    check("re-render restores the open text list", !/id="pbox" hidden/.test(b.api.html("panel")) && /data-pw/.test(b.api.html("panel")) && !/id="lkbar" hidden/.test(b.api.html("panel")) && />Hide text</.test(b.api.html("panel")));
+    b.api.el("ltext").click(); h = b.api.html("pbox");
+    check("Hide text returns to play rows", !textRe(h) && (h.match(/class="ghost lsay"/g) || []).length === P.sentences.length);
+    flip(); await sleep(DEFER);
+    check("re-render restores the open play-row list", !/id="pbox" hidden/.test(b.api.html("panel")) && !textRe(b.api.html("panel")) && />Show text</.test(b.api.html("panel")));
+    const k3 = b.spoken.length, c3 = b.ss.cancels;
+    b.api.el("lplay").click(); await sleep(DEFER); b.api.el("ptoggle").click();
+    check("closing the look-back stops playing", b.api.rd().playing === false && b.ss.cancels > c3 && b.api.el("pbox").hidden === true && b.api.el("lkbar").hidden === true);
+    const k4 = b.spoken.length; fire(b.ss, b.utts[b.utts.length - 1]); await sleep(DEFER);
+    check("the stopped sentence's late end starts nothing", b.spoken.length === k4);
+    b.api.el("o").children.find(x => x.dataset.v === String(P.questions[0].answer)).click();
+    b.api.el("nx").click(); await sleep(DEFER);
+    check("next question: look-back closed again", n < 2 || (b.api.rd().shown === false && /id="pbox" hidden/.test(b.api.html("panel")) && />Replay passage</.test(b.api.html("panel"))));
+    answerAll(b.api, P, false);
+    const res = b.api.html("panel");
+    check("results: question 1 ' · looked back', 'Text shown while listening' line", /Question 1 · looked back/.test(res) && /Listening pass<br>Text shown while listening/.test(res));
+    const rd1 = await boot({ pack: PACK_DAY_NR }); rd1.api.setProg(rereadProg(PASSAGES, P));
+    rd1.api.startPassage(P, true, "read"); rd1.api.el("rdone").click();
+    const hr = rd1.api.html("panel");
+    check("reading pass unchanged: 'Show passage', no replay bar, passage is written text", />Show passage</.test(hr) && !/lkbar|Replay passage/.test(hr) && /data-pw/.test(hr));
+    let baseHtml = null, baseVC = null;
+    try{
+      baseHtml = cp.execSync(`git show ${BASE_LB}:engine/app.html`, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+      const src = cp.execSync(`git show ${BASE_LB}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseVC = m.exports;
+    }catch(e){}
+    check(`base ${BASE_LB} engine/app.html + core.js loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseVC);
+    if(baseHtml && baseVC){
+      const walk = async (o, mode) => {
+        const t = await boot(o); t.api.setProg(rereadProg(PASSAGES, P)); t.api.startPassage(P, true, mode);
+        const out = [t.api.html("panel")]; t.api.el("rdone").click();
+        for(let qi = 0; qi < n; qi++){
+          out.push(t.api.html("panel")); t.api.el("ptoggle").click(); out.push(t.api.html("panel"), t.api.html("pbox"));
+          t.api.el("o").children.find(x => x.dataset.v === String(P.questions[qi].answer)).click();
+          out.push(t.api.html("panel")); t.api.el("nx").click(); await sleep(DEFER);
+        }
+        out.push(t.api.html("panel")); return out;
+      };
+      for(const [label, pk] of [["flag off, listening pass", PACK], ["flag off (readRotation only), listening pass", Object.assign({}, PACK, { readRotation: true })]]){
+        const cur = await walk({ pack: pk }, "listen"), base = await walk({ pack: pk, html: baseHtml, vc: baseVC }, "listen");
+        const diff = cur.findIndex((x, i) => x !== base[i]);
+        check(`${label}: look-back walk byte-identical to base (${cur.length} captures)`, cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
+      }
+      const cur = await walk({ pack: PACK_DAY_NR }, "read"), base = await walk({ pack: PACK_DAY_NR, html: baseHtml, vc: baseVC }, "read");
+      const diff = cur.findIndex((x, i) => x !== base[i]);
+      check(`flag on, reading pass: look-back walk byte-identical to base (${cur.length} captures)`, cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
+    }
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);

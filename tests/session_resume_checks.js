@@ -446,6 +446,13 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       ({ api } = await boot(Object.assign({ seed: 25 }, st)));
       const r1 = api.rd();
       check("readRotation: reload keeps the passage, the listening mode and the question order", !!r1 && r1.p.id === pid && r1.mode === "listen" && r1.p.questions.map(q => q.q).join("|") === qs && r1.qi === 0);
+      // listenQuestions "all": the look-back replay list (and its text toggle) is part of the parked question.
+      api.el("ptoggle").click();;
+      ({ api } = await boot(Object.assign({ seed: 26 }, st)));
+      check("listening look-back: reload restores the open 'Hide passage' play-row list", api.rd().shown === true && />Hide passage</.test(api.html("panel")) && !/id="lkbar" hidden/.test(api.html("panel")) && /class="ghost lsay"/.test(api.html("panel")));
+      api.el("ltext").click();
+      ({ api } = await boot(Object.assign({ seed: 27 }, st)));
+      check("listening look-back: reload restores the shown text with Hide text; peekText kept", api.rd().peekText === true && api.rd().qv[0].lkText === true && />Hide text</.test(api.html("panel")) && !/class="ghost lsay"/.test(api.html("panel")));
     }
     {
       // A parked passage without rd.qx (a build before readRotation) resumes in pack order.

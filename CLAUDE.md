@@ -57,7 +57,7 @@ $NODE tests/script_checks.js                     # 128
 $NODE tests/script_app_checks.js                 # 216
 $NODE tests/audio_checks.js                      # 90 (app section needs ../persian)
 $NODE tests/passage_audio_checks.js              # 43
-$NODE tests/listen_mode_checks.js                # 169 (adds [12] pack.listenQuestions "all": all questions audio-only, flag-off control vs 7a21ccd; [13] pack.rereadPerfectDays incl. first listening pass at 7 days (x 1, no l), nextReadItem control vs 3790814; [14] pack.readRotation: session alternation, random picks, shuffled questions, s/ls, control vs 491d470)
+$NODE tests/listen_mode_checks.js                # 190 (adds [12] pack.listenQuestions "all": all questions audio-only, flag-off control vs 7a21ccd; [13] pack.rereadPerfectDays incl. first listening pass at 7 days (x 1, no l), nextReadItem control vs 3790814; [14] pack.readRotation: session alternation, random picks, shuffled questions, s/ls, control vs 491d470; [15] listening look-back "Replay passage": play rows, Show text/peekText, stop on close, flag-off + reading-pass walks vs a8e9c08)
 $NODE tests/validate_pack_audio_checks.js        # 30
 $NODE tests/validate_pack_characters_checks.js   # 83
 $NODE tests/validate_pack_script_checks.js       # 56
@@ -67,7 +67,7 @@ $NODE tests/typed_mastery_checks.js              # 81 (characters.bareBy typed c
 $NODE tests/lag_checks.js                        # 45 (characters.learn "lag": core rule, owner shape before/after, per-level set label (Today row + card header, straddling set, resume), app sessions, resume, per-level Progress rows vs 68930bd, control vs 590af86)
 $NODE tests/pause_checks.js                      # 49 (pack.pauseNew: flag-off / unpaused control vs 36aee02, chip, paused sessions teach nothing, Review +Learn items, toggling mid-session)
 $NODE tests/opts_mix_checks.js                  # 40 (pack.optsMix: length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
-$NODE tests/session_resume_checks.js             # 121 (drill/passage resume: tab switch, reload, relaunch, per-tab parking; readRotation Read pick + question order, rd without qx)
+$NODE tests/session_resume_checks.js             # 123 (drill/passage resume: tab switch, reload, relaunch, per-tab parking; readRotation Read pick + question order, rd without qx; listening look-back list + text state)
 $NODE tests/day_sim_checks.js                    # 76 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; weak-word floor + production settles, owner-shape before/after vs fb49c1b; --why)
 $NODE tests/help_close_checks.js                 # 42 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
 $NODE tests/gloss_overlap_checks.js              # 74 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~5-14 min: 286 s on main 7fe35f7 idle, 151 s on fb2-write2 alone, 836 s under parallel load)

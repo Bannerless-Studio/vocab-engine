@@ -4998,7 +4998,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1735442090-1921117";
+const VE_BUILD = "854739950-1922842";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6302,6 +6302,9 @@ function readQuestionScreen(){
   const tf = q.type === "tf";
   const view = RD.qv[qi] || (RD.qv[qi] = { order: tf ? [true, false] : shuffle([0,1,2,3]), spoken: false, trShown: false, qOpen: false });
   const order = view.order;
+  // listenQuestions "all": a listening pass's look-back replays the sentences; text stays behind its own toggle.
+  const LB = RD.mode === "listen" && PACK.listenQuestions === "all";
+  RD.playing = false;
   setScore(qi, p.questions.length);
   // No per-question clip in the pack schema: TTS only, so it plays iff a voice is usable.
   const hearQ = hasSpeech;
@@ -6313,9 +6316,9 @@ function readQuestionScreen(){
     ${qHidden ? `<div id="qshwrap"><button class="ghost" id="qsh" style="margin:8px 0">Show question</button></div>${REPLAY_STAGE}` : `${qText()}${hearQ ? REPLAY_STAGE : ""}${qTr()}`}
     <div class="opts ${tf ? "" : "opts-w"}" id="o"></div>
     ${READ_BLOCK ? `<div id="qans"><div class="reveal" id="rv"></div>${nxBtn}</div>` : `<div class="reveal" id="rv"></div>`}
-    <button class="ghost" id="ptoggle" aria-expanded="${RD.shown}" style="margin-top:12px">${RD.shown ? "Hide passage" : "Show passage"}</button>
+    <button class="ghost" id="ptoggle" aria-expanded="${RD.shown}" style="margin-top:12px">${RD.shown ? "Hide passage" : LB ? "Replay passage" : "Show passage"}</button>${LB ? `<div class="row" id="lkbar"${RD.shown ? "" : " hidden"}><button id="lplay">Play all</button><button id="ltext" aria-expanded="${!!view.lkText}">${view.lkText ? "Hide text" : "Show text"}</button></div>` : ""}
     ${glossBox()}
-    <div class="passage" id="pbox"${RD.shown ? "" : " hidden"}>${passageHTML(-1)}</div>
+    <div class="passage" id="pbox"${RD.shown ? "" : " hidden"}>${LB && !view.lkText ? listenRowsHTML() : passageHTML(-1)}</div>
     </div>${READ_BLOCK ? "" : `<div class="actions">${nxBtn}</div>`}`;
   wirePassage($("pbox"), $("gloss"));
   // Spoken once per question: a re-mount, or a voice arriving after answering, only offers Replay.
@@ -6333,12 +6336,37 @@ function readQuestionScreen(){
   let qOpen = !qHidden;
   const revealQ = () => { view.qOpen = true; if(qOpen) return; qOpen = true; $("qshwrap").innerHTML = qText() + qTr(); wireTr(); };
   if(qHidden) $("qsh").onclick = () => { if(rec.ok === null) rec.qh = true; revealQ(); };
+  const rd = RD;
+  const lkSet = on => { rd.playing = on; const b = $("lplay"); if(b) b.textContent = on ? "Stop" : "Play all"; };
+  const lkRows = () => { if(view.lkText) return; p.sentences.forEach((s, i) => { const b = $("ls"+i); if(b) b.onclick = () => { lkSet(false); saySentence(s, b); }; }); };
+  if(LB){
+    lkRows();
+    const step = i => {
+      if(RD !== rd || rd.qi !== qi || !rd.playing) return;
+      if(i >= p.sentences.length){ lkSet(false); return; }
+      saySentence(p.sentences[i], view.lkText ? null : $("ls"+i), () => step(i+1));
+    };
+    $("lplay").onclick = () => { if(rd.playing){ lkSet(false); stopSpeaking(); return; } lkSet(true); step(0); };
+    $("ltext").onclick = () => {
+      view.lkText = !view.lkText;
+      if(view.lkText) rd.peekText = true;
+      $("pbox").innerHTML = view.lkText ? passageHTML(-1) : listenRowsHTML();
+      $("gloss").hidden = true;
+      $("ltext").textContent = view.lkText ? "Hide text" : "Show text";
+      $("ltext").setAttribute("aria-expanded", String(!!view.lkText));
+      lkRows();
+      sessionSave(true);
+    };
+  }
   $("ptoggle").onclick = () => {
     RD.shown = !RD.shown;
     if(RD.shown && rec.ok === null) rec.reopened = true; // logged: looked back before answering
+    if(LB && !RD.shown){ lkSet(false); stopSpeaking(); }
     $("pbox").hidden = !RD.shown;
-    $("ptoggle").textContent = RD.shown ? "Hide passage" : "Show passage";
+    if(LB) $("lkbar").hidden = !RD.shown;
+    $("ptoggle").textContent = RD.shown ? "Hide passage" : LB ? "Replay passage" : "Show passage";
     $("ptoggle").setAttribute("aria-expanded", String(RD.shown));
+    if(LB) sessionSave(true);
   };
   const box = $("o");
   const reveal = fresh => {
@@ -6777,4 +6805,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:4287942796-1920441-->
+<!--ve-build:3671532062-1922165-->
