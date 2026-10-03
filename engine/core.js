@@ -1386,10 +1386,15 @@ const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c ===
 // pack.wordsBy "typed": held words that can be asked typed now (c.held, dayHeldMark) come right after
 // the misses, up to hshare of the plan: a held word moves only by one typed ask per session, and by the
 // weak floor alone (lowest streak first) the words at 2 piled up (fb18 review: 129 and rising). They
-// leave the consolidating units their share (the fb10 M1 cap); the floor then counts them with the
-// word misses, as it counts misses without the flag, and refresh is taken once after the units (fb18
-// review 2 M2, M3; a refresh reserve ahead of the floor left held words ~2 a Review, owner export).
-const DAY_EXTRA_POOL = 4, DAY_WEAK_FLOOR = 0.4, DAY_HELD_SHARE_REVIEW = 0.3, DAY_HELD_SHARE_RECALL = 1;
+// leave the consolidating units ⌈DAY_HELD_UNIT_SHARE n⌉ (the fb10 M1 cap; at cshare 0.35 the words at
+// 2 still rose, owner export); the floor then counts them with the word misses, as it counts misses
+// without the flag, and refresh is taken once after the units (fb18 review 2 M2, M3).
+const DAY_EXTRA_POOL = 4, DAY_WEAK_FLOOR = 0.4, DAY_HELD_SHARE_REVIEW = 0.3, DAY_HELD_SHARE_RECALL = 1, DAY_HELD_UNIT_SHARE = 0.25;
+// Today's Recall size. Under wordsBy a held word moves only by a typed ask, and after the misses and
+// the units' share Recall left it ~1 slot: the pile at 2 rose all week (fb18 review 2; the extra
+// production slots are what the typed rule costs, team decision 2026-10-04).
+const RECALL_SIZE = 8, RECALL_SIZE_HELD = 12;
+const recallSize = pack => wordsTypedOn(pack) ? RECALL_SIZE_HELD : RECALL_SIZE;
 function dayPick(cands, n, d, rng, sn, cshare, t4max, hshare){
   const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
   (cands || []).forEach(c => { const t = dayTier(c, d, sn); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
@@ -1419,7 +1424,7 @@ function dayPick(cands, n, d, rng, sn, cshare, t4max, hshare){
     seen.add(c.key); if(c.alias) seen.add(c.alias); out.push(c); i++; } };
   const isW = c => String(c.key).startsWith("w:");
   take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE)));
-  if(hshare) take([...T[1], ...T[3]].filter(c => c.held).sort((a, b) => dayAge(a.rec, b.rec) || a.j - b.j), Math.min(Math.round(n * hshare), n - out.length - Math.min(Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE)), C.length)));
+  if(hshare) take([...T[1], ...T[3]].filter(c => c.held).sort((a, b) => dayAge(a.rec, b.rec) || a.j - b.j), Math.min(Math.round(n * hshare), n - out.length - Math.min(Math.ceil(n * DAY_HELD_UNIT_SHARE), C.length)));
   take(T[1].filter(isW), Math.min(Math.round(n * DAY_WEAK_FLOOR) - out.filter(isW).length, n - out.length - Math.min(Math.ceil(n * DAY_CONSOLIDATE_SHARE), C.length))); take(C, Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE))); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
   take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[0], n); take(T[4], t4max != null ? t4max - out.length : n);
   return out;
@@ -3599,7 +3604,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
-  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
+  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,

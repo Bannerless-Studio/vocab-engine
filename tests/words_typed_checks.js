@@ -266,8 +266,10 @@ function seedW(){
     NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
     const p0 = seedW();
     const api = await boot(PACK, p0, 3);
+    check(`Today plan: Recall ${VC.RECALL_SIZE_HELD} items under wordsBy (${VC.RECALL_SIZE} without; the typed rule's extra production slots)`, VC.recallSize(PACK) === 12 && VC.recallSize(PACK_OFF) === 8 && new RegExp(`${VC.RECALL_SIZE_HELD} items`).test(api.panel()));
     // Held words: typed answers wrong, choice answers right; everything else right.
     const rows = await session(api, (it, rec) => !(rec && rec.s === 2 && it.kind === "type"));
+    { const rq = rows.filter(r => r.step === 3), firsts = rq.filter((r, i) => rq.findIndex(x => x.key === r.key) === i).length; check(`Recall drill asks ${firsts} items (${VC.RECALL_SIZE_HELD} planned)`, firsts === VC.RECALL_SIZE_HELD); }
     const W = rows.filter(r => r.key[0] === "w");
     const heldRv = W.filter(r => r.step === 0 && r.s0 === 2 && p0.w[r.key.slice(2)].s === 2);
     check(`Review: held words are asked typed first (${heldRv.filter(r => r.kind === "type").length} of ${new Set(heldRv.map(r => r.key)).size} held words)`, heldRv.length > 0 && heldRv.filter((r, i) => heldRv.findIndex(x => x.key === r.key) === i).every(r => r.kind === "type"));

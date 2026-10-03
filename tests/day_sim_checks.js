@@ -445,13 +445,13 @@ function missesCarried(drilled0){
       const oh = cls(pick(VC, heavy, dh)), ob = OLD ? cls(pick(OLD, heavy, dh)) : {};
       check(`B (review M1): 15 unit misses pending, Review 20: consolidating ${oh.cons} (>= 3), weak words ${oh.weak} (>= 5), misses ${oh.miss}, refresh ${oh.refresh} (before: ${ob.cons} / ${ob.weak} / ${ob.miss} / ${ob.refresh})`, oh.cons >= 3 && oh.weak >= 5 && oh.miss === 12);
       // The zh path (pack.wordsBy "typed": held words take hshare after the misses) keeps the cap too
-      // (fb18 review 2 M2), in Review and in Recall (share 1, bounded by the consolidating share).
+      // (fb18 review 2 M2: ⌈DAY_HELD_UNIT_SHARE n⌉), in Review and in its Recall of 12 (share 1, bounded by it).
       const held = Array.from({ length: 10 }, (_, i) => Object.assign(W(500 + i, 2, 2), { held: true }));
       const hz = cls(VC.dayPick([...heavy, ...held], 20, dh, mulberry32(5), 10, VC.DAY_TYPED_CONSOLIDATE_SHARE, undefined, VC.DAY_HELD_SHARE_REVIEW));
       const calm = [...heavy.slice(15), ...held];
-      const rz = VC.dayPick(calm, 8, { d: DAY, n: 1, a: {} }, mulberry32(5), 10, VC.DAY_TYPED_CONSOLIDATE_SHARE, undefined, VC.DAY_HELD_SHARE_RECALL);
-      const rzc = rz.filter(c => c.key[0] === "c").length, rzh = rz.filter(c => c.held).length, ck = Math.ceil(8 * VC.DAY_TYPED_CONSOLIDATE_SHARE);
-      check(`B (review M1, zh path with held words): Review consolidating ${hz.cons} (>= 3), weak words ${hz.weak} (>= 5), misses ${hz.miss}; Recall of 8: consolidating ${rzc} (>= ${ck}), held ${rzh}`, hz.cons >= 3 && hz.weak >= 5 && hz.miss === 12 && rzc >= ck && rzh > 0); }
+      const RN = VC.RECALL_SIZE_HELD, rz = VC.dayPick(calm, RN, { d: DAY, n: 1, a: {} }, mulberry32(5), 10, VC.DAY_TYPED_CONSOLIDATE_SHARE, undefined, VC.DAY_HELD_SHARE_RECALL);
+      const rzc = rz.filter(c => c.key[0] === "c").length, rzh = rz.filter(c => c.held).length, ck = Math.ceil(RN * VC.DAY_HELD_UNIT_SHARE);
+      check(`B (review M1, zh path with held words): Review consolidating ${hz.cons} (>= 3), weak words ${hz.weak} (>= 5), misses ${hz.miss}; Recall of ${RN}: consolidating ${rzc} (>= ${ck}), held ${rzh}`, hz.cons >= 3 && hz.weak >= 5 && hz.miss === 12 && rzc >= ck && rzh > 0); }
     // Owner shape (the 2026-10-03 export, scaled): 595 words, a fifth weak at streak 1-2; 300 units,
     // a quarter weak at 0-1 and the rest at 3; 6 pending hear misses on words, 4 charRecall misses.
     // Weak words: below mastered or with a pending miss (fb8-weak-analysis definition); a typed
