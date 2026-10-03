@@ -644,5 +644,30 @@ console.log("\n[wordsBy] pack.wordsBy \"typed\" (fb18): word streak semantics on
   }
 }
 
+console.log("\n[progressMap] pack.progressMap (fb20): one optional top-level prog.pm [{sn, p}] (last 14 sessions); main a2f2426 keeps it on boot, no backup");
+{
+  const seed = mig("HEAD"); const pm = Array.from({ length: 14 }, (_, i) => ({ sn: 30 + i, p: Math.round((0.1 + 0.01 * i) * 1000) / 1000 }));
+  check(`zh ships progressMap (${LAG_PACK.progressMap})`, LAG_PACK.progressMap === true && VC.progressMapOn(LAG_PACK));
+  const ob = VC.bootProg(JSON.stringify(seed), LAG_PACK);
+  check("old progress (no pm) boots here unchanged: no backup, no pm added", ob.backupRaw === null && !("pm" in ob.prog));
+  const p = clone(ob.prog); p.sn = 44; VC.recordProgressMap(p, LAG_PACK, [], [], []); p.pm = pm.slice();
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK), im = VC.applyImport(null, raw, LAG_PACK);
+  check("pm survives boot and export/import byte-identical", here.backupRaw === null && JSON.stringify(here.prog) === raw && im.ok && eq(im.prog.pm, pm));
+  let eng = null, oldPack = null;
+  try {
+    const cp = require("child_process"), os = require("os");
+    const src = cp.execSync(`git -C "${ROOT}" show a2f2426:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_a2f2426.js"); fs.writeFileSync(f, src); eng = require(f);
+    oldPack = JSON.parse(cp.execSync(`git -C "${ROOT}" show a2f2426:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+  } catch(e){ eng = null; }
+  if(!eng) skip("engine a2f2426 not in this checkout's history");
+  else {
+    const o = eng.bootProg(raw, oldPack);
+    check("engine a2f2426 (its zh pack, no progressMap) boots a record carrying pm: no backup, pm kept byte-equal", !("progressMap" in oldPack) && o.backupRaw === null && JSON.stringify(o.prog.pm) === JSON.stringify(pm) && JSON.stringify(o.prog) === raw);
+    const back = VC.bootProg(JSON.stringify(o.prog), LAG_PACK);
+    check("and back here: no backup, pm byte-equal", back.backupRaw === null && JSON.stringify(back.prog.pm) === JSON.stringify(pm));
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

@@ -930,6 +930,7 @@ function validateProgShape(data, levelIdList){
   if(data.soundsOpened !== undefined && typeof data.soundsOpened !== "boolean" && typeof data.soundsOpened !== "number") return {ok:false, reason:"soundsOpened must be a boolean or number"};
   if(data.theme !== undefined && data.theme !== null && data.theme !== "light" && data.theme !== "dark") return {ok:false, reason:"theme must be null, \"light\" or \"dark\""};
   if(data.read !== undefined){ const e = validateReadShape(data.read); if(e) return {ok:false, reason:e}; }
+  if(data.pm !== undefined && !(Array.isArray(data.pm) && data.pm.every(e => isObj(e) && typeof e.sn === "number" && typeof e.p === "number"))) return {ok:false, reason:"pm must be a list of {sn, p}"};
   if(data.chars !== undefined){ const e = validateCharsShape(data.chars); if(e) return {ok:false, reason:e}; }
   if(data.script !== undefined){ const e = validateScriptShape(data.script); if(e) return {ok:false, reason:e}; }
   return {ok:true, data};
@@ -1969,6 +1970,38 @@ function markPassageDone(prog, pid, sc, n, d, listen, pack){
     else if(prev && typeof prev.ls === "number") st.done[pid].ls = prev.ls;
   }
   return st.done[pid];
+}
+// pack.progressMap (owner 2026-10-04: the learner feels no progress): one 0..1 number toward
+// following a drama without pausing. An absent part's weight goes to words.
+const PM_KEEP = 14;
+function progressMapOn(pack){ return !!(pack && pack.progressMap === true && dayAwareOn(pack)); }
+function progressPosition(prog, pack, words, units, passages){
+  const ws = words || [], us = units || [], ps = passages || [];
+  const recs = (prog && isObj(prog.w)) ? prog.w : {};
+  const known = ws.filter(w => recs[w.id] && (recs[w.id].s || 0) >= WORD_MASTERED).length;
+  let wu = us.length ? 0.25 : 0, wp = ps.length ? 0.25 : 0;
+  const ww = 1 - wu - wp;
+  let x = ws.length ? ww * known / ws.length : 0;
+  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && charTier(cr[u.id].s, pack) === "bare").length / us.length; }
+  if(ps.length){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
+  return Math.max(0, Math.min(1, x));
+}
+// Optional prog.pm: older engines keep it on boot (validateProgShape ignores unknown top-level fields).
+function recordProgressMap(prog, pack, words, units, passages){
+  if(!progressMapOn(pack) || !prog) return false;
+  const e = { sn: daySn(prog), p: Math.round(progressPosition(prog, pack, words, units, passages) * 1000) / 1000 };
+  const pm = Array.isArray(prog.pm) ? prog.pm.filter(x => isObj(x) && x.sn !== e.sn) : [];
+  pm.push(e);
+  prog.pm = pm.slice(-PM_KEEP);
+  return true;
+}
+function sessionsToGo(prog){
+  const pm = prog && Array.isArray(prog.pm) ? prog.pm : [];
+  if(pm.length < PM_KEEP) return null;
+  const a = pm[0], z = pm[pm.length - 1];
+  const rate = (z.p - a.p) / (z.sn - a.sn);
+  if(!(rate > 0) || !isFinite(rate)) return null;
+  return Math.max(0, Math.ceil((1 - z.p) / rate - 1e-9));
 }
 function readingStats(passages, pack, prog){
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
@@ -3609,7 +3642,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressPosition, recordProgressMap, sessionsToGo, PM_KEEP,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,

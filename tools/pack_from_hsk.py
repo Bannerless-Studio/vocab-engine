@@ -379,6 +379,8 @@ def main(argv):
         # A word past streak 2 moves up only by typed answers; choice answers hold it
         # (docs/PACK_SCHEMA.md "wordsBy"; owner 2026-10-03).
         "wordsBy": "typed",
+        # Today row: position toward the goal + measured sessions to go (docs/PACK_SCHEMA.md "progressMap"; owner 2026-10-04).
+        "progressMap": True,
     }
 
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).

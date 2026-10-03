@@ -149,6 +149,8 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     delete pack.readRotation;
     // Words held at streak 2 until typed (docs/PACK_SCHEMA.md "wordsBy") is a new, flag-on field.
     delete pack.wordsBy;
+    // Today progress map (docs/PACK_SCHEMA.md "progressMap") is a new, flag-on field.
+    delete pack.progressMap;
   }
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.

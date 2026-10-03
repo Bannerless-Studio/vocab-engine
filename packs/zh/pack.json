@@ -155,5 +155,6 @@
  "pauseNew": true,
  "listenQuestions": "all",
  "readRotation": true,
- "wordsBy": "typed"
+ "wordsBy": "typed",
+ "progressMap": true
 }

@@ -149,6 +149,10 @@ def check_pack(pack, rep):
         rep.err("pack.readRotation must be a boolean")
     if pack.get("readRotation") is True and not pack.get("dayAware"):
         rep.err("pack.readRotation needs pack.dayAware (passes are counted by session)")
+    if "progressMap" in pack and not is_bool(pack["progressMap"]):
+        rep.err("pack.progressMap must be a boolean")
+    if pack.get("progressMap") is True and not pack.get("dayAware"):
+        rep.err("pack.progressMap needs pack.dayAware (the pace is counted in sessions)")
     if "wordsBy" in pack and pack["wordsBy"] != "typed":
         rep.err('pack.wordsBy must be "typed" when present')
     elif pack.get("wordsBy") == "typed" and pack.get("typing") in (None, False):

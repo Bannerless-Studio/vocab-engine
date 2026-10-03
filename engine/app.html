@@ -144,6 +144,9 @@
   .wl .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
   .wl .pr{font-size:15px;display:block}
   .wl .en{color:var(--mute);font-size:14px;text-align:left;display:block;margin:0}
+  .pmap{cursor:pointer;margin:0 0 10px;white-space:nowrap;overflow:hidden}
+  .pmap .pm1{font-size:12px;letter-spacing:0}
+  .pmap .pm2{font-size:13px;color:var(--mute);margin-top:2px}
   table.stats{width:100%;border-collapse:collapse;font-size:15px}
   table.stats td{padding:8px 0;border-bottom:1px solid var(--line)}
   table.stats td:last-child{text-align:right;font-variant-numeric:tabular-nums}
@@ -2075,6 +2078,13 @@ function charChoiceHTML(){
   const top = deferred.length && next && deferred[0].after !== next.lv ? levelLabel(deferred[0].after) : "";
   return `<div class="stmt" id="charChoice">${L} next: learn to recognise the written form of the words you already know. Or go on to ${N} first and do ${L} after ${top ? ui(top) : "it"}. You can change this later in Progress.<button class="next" id="choiceStart" style="margin-top:8px">Start ${L}</button><button class="ghost" id="choiceSkip" style="margin-top:8px">Skip to ${N}</button></div>`;
 }
+// pack.progressMap: one bar line and one pace line; tap opens Progress.
+function progressMapHTML(){
+  if(!VC.progressMapOn(PACK)) return "";
+  const p = VC.progressPosition(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST), f = Math.round(10 * p), n = VC.sessionsToGo(prog);
+  const aria = `${Math.round(p * 100)}% of the way to following a drama without pausing`;
+  return `<div class="pmap" id="pmap" role="button" tabindex="0" aria-label="${aria}"><div class="pm1">${ui("You ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸ follow a drama without pausing")}</div><div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div></div>`;
+}
 function todayRender(){
   stopSpeaking();
   todayStepState = null;
@@ -2114,11 +2124,12 @@ function todayRender(){
     ${showPlaceHint ?`<div class="stmt">New here? Placement finds where to start.<button class="next" id="hintPlace" style="margin-top:8px">Take the placement test</button></div>` : ""}${choice && !xChoice ? charChoiceHTML() : ""}
     ${showSoundsHint ? `<div class="stmt">${PACK.soundsHint ? ui(PACK.soundsHint) : `A few short lessons explain how ${ui(PACK.name)} sounds and is written.`}<button class="next" id="hintSounds" style="margin-top:8px">Start the first lesson</button></div>` : ""}
     ${""}
-    ${idle ? `<p class="q">Nothing to review yet.</p>` : `<p class="q">Session ${n}, about 15 minutes.<br>${lw.length} words learned so far.${pz ? "<br>Review only · new material paused." : ""}</p>
+    ${idle ? `<p class="q">Nothing to review yet.</p>` : `${progressMapHTML()}<p class="q">Session ${n}, about 15 minutes.<br>${lw.length} words learned so far.${pz ? "<br>Review only · new material paused." : ""}</p>
     <table class="stats steps">${steps.map((s,i)=>`<tr><td>${i+1}. ${s[0]}</td><td>${s[2] != null ? s[2] : ui(s[1])}</td></tr>`).join("")}</table>`}
     </div>${choice ? "" : idle ? `<div class="actions"><button class="next" id="unpause">Turn new material on</button></div>` : `<div class="actions"><button class="next" id="go">Start today</button></div>`}`;
   if(legacyNotice) $("legacyOk").onclick = () => { legacyNotice = null; todayRender(); };
   if(legacyFail) $("legacySkip").onclick = () => { legacyFail = null; storeReadOnly = false; store.save(); todayRender(); };
+  if($("pmap")){ const go = () => document.querySelector('#tabs button[data-t="progress"]').click(); $("pmap").onclick = go; $("pmap").onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } }; }
   if(showPlaceHint) $("hintPlace").onclick = enterPlacementFromToday;
   if(showSoundsHint) $("hintSounds").onclick = enterFirstSoundsLessonFromToday;
   if(xNotice) $("scriptNoticeOk").onclick = () => { VC.dismissScriptNotice(prog); store.save(); todayRender(); };
@@ -2229,7 +2240,7 @@ function todayFinish(){
   // Ended: a Today state left set would be re-parked by the page-hide save, and every reopen
   // would replay this finish (sessions + 1; fb3-lag browser report F1).
   D = null; rzFin = null; todayStepState = null; drillKeyHandler = null; setScore(0,0); sessionClear();
-  prog.sessions = (prog.sessions||0) + 1; store.save();
+  prog.sessions = (prog.sessions||0) + 1; VC.recordProgressMap(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST); store.save();
   const P = $("panel");
   P.innerHTML = `<div class="done"><h2>Session done</h2><p class="q">${learnedWords().length} words learned so far.</p><button class="next" id="again">Back to Today</button></div>`;
   $("again").onclick = todayRender;
