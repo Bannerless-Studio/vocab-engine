@@ -1208,8 +1208,10 @@ function applyMissedKinds(plan, prog, pack, production, opts){
 // unseen" means something within one day of many sessions; the date is the tie-break.
 const DAY_REFRESH_SHARE = 0.2, DAY_AGAIN_SHARE = 0.25, DAY_CONSOLIDATE_SHARE = 0.15;
 // characters.bareBy "typed": units between mastered and bare move only by typed answers, so they
-// get a larger share (review 2026-10-02: at 0.15 they reached bare slower than by choice credit).
-const DAY_TYPED_CONSOLIDATE_SHARE = 0.25;
+// get a larger share (review 2026-10-02: at 0.15 they reached bare slower than by choice credit;
+// owner 2026-10-03, readings not removed fast enough: 0.25 -> 0.35, with zh characters.bare 6 -> 5, took
+// 334 of 353 held units to bare in 4 weeks on the owner export against 18, fb8 reading-pace runs).
+const DAY_TYPED_CONSOLIDATE_SHARE = 0.35;
 // "Already right, ask another kind" covers today and the last DAY_RECENT_SESSIONS sessions, so the
 // first session after midnight does not replay the evening's items.
 const DAY_RECENT_SESSIONS = 2;

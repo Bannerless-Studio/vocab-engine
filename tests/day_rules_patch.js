@@ -1,7 +1,8 @@
 // fb10-weak-floor changed the dayAware planner on purpose (owner 2026-10-03: weak words were not
 // practised in production; docs/PACK_SCHEMA.md "dayAware" Kinds / Planning): a production answer
 // settles any miss, a weak-word floor right after the misses, misses pending longest first, a kind
-// that settles every pending kind first. Byte-identical controls against an older main (pause,
+// that settles every pending kind first, and the typed consolidating share 0.25 -> 0.35 (mains
+// before typed mastery have no such share). Byte-identical controls against an older main (pause,
 // lag, optsMix, typed mastery) run that main's core.js with these rules applied, so they still
 // prove everything else unchanged. Each rule must match exactly once, or this throws.
 "use strict";
@@ -21,7 +22,9 @@ const RULES = [
 ];
 // Mains before typed mastery (7fe35f7) have daySettles only.
 const settles = src => src.includes("const daySettlesAt") ? "daySettlesAt(key, [m], k, can)" : "daySettles([m], k, can)";
+const OPTIONAL = [["const DAY_TYPED_CONSOLIDATE_SHARE = 0.25;", `const DAY_TYPED_CONSOLIDATE_SHARE = ${VC.DAY_TYPED_CONSOLIDATE_SHARE};`]];
 module.exports = function withDayRules(src, sha){
+  src = OPTIONAL.reduce((s, [a, b]) => s.replace(a, () => b), src);
   return RULES.reduce((s, [a, b]) => {
     const n = s.split(a).length - 1;
     if(n !== 1) throw new Error(`day_rules_patch: ${n} matches in ${sha || "core.js"} for ${JSON.stringify(a.slice(0, 60))}`);

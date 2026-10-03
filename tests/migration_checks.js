@@ -559,5 +559,28 @@ console.log("\n[pause] pack.pauseNew (fb4-pause): one additive field prog.pause 
   }
 }
 
+console.log("\n[bare5] zh characters.bare 6 -> 5 (fb10-weak-floor; owner 2026-10-03: pinyin removed too slowly): no field change, units at streak 5 read as bare");
+{
+  let eng = null, oldPack = null;
+  try {
+    const cp = require("child_process"), os = require("os");
+    const src = cp.execSync(`git -C "${ROOT}" show 68930bd:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_68930bd.js"); fs.writeFileSync(f, src); eng = require(f);
+    oldPack = JSON.parse(cp.execSync(`git -C "${ROOT}" show 68930bd:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+  } catch(e){ eng = null; }
+  if(!eng) skip("engine 68930bd not in this checkout's history");
+  else {
+    const seed = mig("HEAD"); const ids = Object.keys(seed.chars.c).slice(0, 30);
+    ids.forEach((id, i) => { seed.chars.c[id] = { r: 7, w: 1, s: i < 14 ? 5 : 4 }; });
+    const theirs = JSON.stringify(eng.bootProg(JSON.stringify(seed), oldPack).prog);
+    const back = VC.bootProg(theirs, LAG_PACK);
+    const at5 = ids.slice(0, 14), at4 = ids.slice(14);
+    check(`pack bare ${LAG_PACK.characters.bare} here, ${oldPack.characters.bare} on 68930bd's pack`, LAG_PACK.characters.bare === 5 && oldPack.characters.bare === 6);
+    check(`progress written by 68930bd boots here: no backup, unit records byte-equal (${Object.keys(back.prog.chars.c).length} units)`, back.backupRaw === null && JSON.stringify(back.prog.chars.c) === JSON.stringify(JSON.parse(theirs).chars.c));
+    check("its 14 units at streak 5 are bare here (ruby on 68930bd); streak 4 stays ruby",
+      at5.every(id => VC.charTier(back.prog.chars.c[id].s, LAG_PACK) === "bare" && eng.charTier(5, oldPack) === "ruby") && at4.every(id => VC.charTier(back.prog.chars.c[id].s, LAG_PACK) === "ruby"));
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

@@ -342,7 +342,8 @@ def main(argv):
             "stages": [{"after": lv, "levels": [lv], "label": "字" + lv} for lv in ("1", "2", "3", "4")],
             "setSize": 10,
             "mastered": 3,
-            "bare": 6,
+            # Owner 2026-10-03 "pinyins not removed enough": bare at 5, not 6 (fb10-weak-floor).
+            "bare": 5,
             "learnKinds": ["charPick", "charRead"],
             "reviewKinds": ["charRead", "charSound"],
             "testKinds": {"charRead": 40, "charSound": 30, "charPick": 30},

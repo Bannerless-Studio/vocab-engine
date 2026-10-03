@@ -343,7 +343,8 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     // "type" under a c: key means typed from the written side only: a typed reading never logs it,
     // so it cannot settle the unit's charRecall miss (scheduler review 2026-10-02).
     check("day log: typed reading answers (pronMeaning, pron) log nothing under the unit", [band[3], band[4]].every(id => !((api.getProg().day.a["c:" + id] || {}).r || []).includes("type")));
-    check(`reveal shows the unit's streak as dots after the answer (${stripTags(results[0][3]).slice(0, 14)})`, results[0][3].includes(`aria-label="字 5/6"`) && stripTags(results[0][3]).startsWith("字 ●●●●●○"));
+    { const B = VC.charsConfig(PACK).bare, s = results[0][2];
+      check(`reveal shows the unit's streak as dots after the answer (${stripTags(results[0][3]).slice(0, 14)}; bare ${B} from the pack)`, results[0][3].includes(`aria-label="字 ${s}/${B}"`) && stripTags(results[0][3]).startsWith("字 " + "●".repeat(s) + "○".repeat(B - s))); }
     // Miss, in-drill retry, second-miss choice fallback.
     { const id = band[5]; const it = api.silentWrittenTypeItem(wordOfUnit(id)); api.drill1(it); answer(api, false);
       const floored = rec(id).s; api.el("nx").click(); answer(api, true);
