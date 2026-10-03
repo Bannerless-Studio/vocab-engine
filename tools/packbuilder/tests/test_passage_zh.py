@@ -255,6 +255,18 @@ class EndToEnd(unittest.TestCase):
             self.assertIn("1 may use <=1 2 lemmas and nothing above", report)
             self.assertIn("from `passages_src.json`", report)
 
+    def test_src_rules_override_question_count(self):
+        ps = [_passage("p1", "1", [["他们是我的朋友。", "They are my friends."]], ["他", "朋友"], n=5)]
+        for qrule, ok in (([4, 5], True), ([8, 8], False)):
+            with tempfile.TemporaryDirectory() as d:
+                d = self.make(d, ps)
+                src = json.loads((d / "passages_src.json").read_text())
+                src["rules"] = {**self.RULES, "questions": qrule}
+                (d / "passages_src.json").write_text(json.dumps(src, ensure_ascii=False))
+                rc, out = self.run_pack(d, check=True)
+                self.assertEqual(rc == 0, ok, out)
+                self.assertEqual("5 questions outside 8-8" in out, not ok, out)
+
     def test_flat_layout_gloss_display_and_self_checks(self):
         p = _passage("p1", "1", [["他们是我的朋友。", "They are my friends."], ["他开车去商店。", "He drives to the shop."]],
                      ["他"], n=3)

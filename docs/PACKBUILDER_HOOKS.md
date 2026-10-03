@@ -167,7 +167,7 @@ For a language whose pack has no packbuilder build context (no corpus, tagger or
 
 ### Chinese (zh) passages
 
-`packs/zh` is built by `tools/pack_from_hsk.py`, not by the packbuilder, so `langs/zh.py` is a passage-only spec whose `ZhLinker` segments with the pack itself. Levels are the HSK ids `"1"`..`"4"` (`rules` in `passages_src.json` uses them; budget: a level may use <=3 lemmas of the next level and none above; level 4 anything in the pack). Run from `vocab-engine/tools`:
+`packs/zh` is built by `tools/pack_from_hsk.py`, not by the packbuilder, so `langs/zh.py` is a passage-only spec whose `ZhLinker` segments with the pack itself. Levels are the HSK ids `"1"`..`"4"` (`rules` in `passages_src.json` uses them; budget: a level may use <=3 lemmas of the next level and none above; level 4 anything in the pack). `rules.questions` in `passages_src.json` is the (min, max) question count per passage; zh sets `[8, 8]` (5 mc + 3 tf each), every other language keeps the `DEFAULT_RULES` `[4, 5]`. Run from `vocab-engine/tools`:
 
 ```
 ../.venv/bin/python -m packbuilder passages ../packs/zh --check     # report only
