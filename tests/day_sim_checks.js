@@ -26,6 +26,14 @@ const argv = process.argv.slice(2);
 const N_SESSIONS = argv.includes("--sessions") ? +argv[argv.indexOf("--sessions") + 1] : 8;
 const QUIET = argv.includes("--quiet"), WHY = argv.includes("--why");
 
+// Control for the weak-word floor: main before it (fb10-weak-floor).
+const MAIN_PIN = "fb49c1b";
+let OLD = null;
+try {
+  const os = require("os"), cp = require("child_process");
+  const src = cp.execSync(`git -C "${ROOT}" show ${MAIN_PIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+  const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "daysim-")), `core_${MAIN_PIN}.js`); fs.writeFileSync(f, src); OLD = require(f);
+} catch(e){ OLD = null; }
 let fails = 0, passes = 0;
 function check(name, cond){
   if(cond){ passes++; console.log(`PASS  ${name}`); }
@@ -382,6 +390,69 @@ function missesCarried(drilled0){
     VC.dayStart(S, PACK_ON, DAY);
     check("nothing else eligible: a 20-word pool all right today still fills Review (15) and Recall (8)",
       VC.buildReviewPlan(slw, S, PACK_ON, { today: DAY, rng: mulberry32(1) }).length === 15 && VC.buildRecallPlan(slw, S, PACK_ON, 8, { today: DAY, rng: mulberry32(1) }).length === 8);
+  }
+  // Owner 2026-10-03 ("am I practising weak/faltered words enough?", fb8-weak-analysis): a word
+  // missed by ear never reached production, and weak words lost Review/Recall slots to unit
+  // misses, consolidation and refresh. (A) a production answer settles any miss; (B) a weak-word
+  // floor of DAY_WEAK_FLOOR of each plan. Before = main fb49c1b's core.
+  console.log(`\n[weak floor] daySettles by production (A), weak-word floor ${VC.DAY_WEAK_FLOOR} (B); before = ${MAIN_PIN}`);
+  {
+    const P = seedProg(PACK_ON, 150, 60, 11); const ids = Object.keys(P.w); const k1 = "w:" + ids[0], k2 = "w:" + ids[1];
+    VC.dayStart(P, PACK_ON, DAY); VC.noteDay(P, PACK_ON, DAY, k1, "hear", false); VC.noteDay(P, PACK_ON, DAY, k2, "recall", false);
+    const d0 = VC.dayLog(P, DAY), recallTier = (C, d) => C.dayTier({ key: k1, kinds: ["recall", "type"] }, d);
+    const tierBefore = OLD ? recallTier(OLD, d0) : "?", tierAfter = recallTier(VC, d0);
+    VC.dayStart(P, PACK_ON, DAY); VC.noteDay(P, PACK_ON, DAY, k1, "recall", true); VC.noteDay(P, PACK_ON, DAY, k2, "hear", true);
+    const d = VC.dayLog(P, DAY);
+    check(`A: a hear miss is tier 0 in Recall (before ${tierBefore}, now ${tierAfter}); a right recall in a later drill settles it`, tierAfter === 0 && tierBefore === 4 && VC.dayPending(d.a[k1]) === null);
+    check("A: a right hear never settles a recall miss", JSON.stringify(VC.dayPending(d.a[k2])) === '["recall"]' && !VC.daySettles(["recall"], "hear") && VC.daySettles(["hear"], "type") && VC.daySettles(["read"], "charPick"));
+    const P2 = seedProg(PACK_ON, 150, 60, 11); VC.dayStart(P2, PACK_ON, DAY);
+    VC.noteDay(P2, PACK_ON, DAY, k1, "hear", false); VC.noteDay(P2, PACK_ON, DAY, k1, "recall", false); VC.dayStart(P2, PACK_ON, DAY);
+    check("A: a word pending both a hear and a recall miss is asked in recall, the kind that settles both (planned hear)", VC.dayItemKind(P2, PACK_ON, DAY, k1, "hear", VC.dayWordKinds(PACK_ON)) === "recall");
+    // dayPick on synthetic candidates. Weak units sit lower and older than weak words, so without
+    // the floor tier 1 would give them the slots.
+    const W = (i, s, u) => ({ key: "w:f" + i, rec: { s, u, t: 0 }, mastered: 3, kinds: ["recall", "hear"] });
+    const U = (i, s, u) => ({ key: "c:f" + i, rec: { s, u, t: 0 }, mastered: 3, bare: 6, kinds: ["charRecall"] });
+    const S = (i, s, u) => ({ key: "s:f" + i, rec: { s, u, t: 0 }, mastered: 2, kinds: ["gap", "hear"] });
+    const pool = () => [...Array.from({ length: 12 }, (_, i) => W(i, 1 + i % 2, 5)), ...Array.from({ length: 20 }, (_, i) => U(i, 0, 1)),
+      ...Array.from({ length: 30 }, (_, i) => U(100 + i, 3 + i % 3, 2)), ...Array.from({ length: 20 }, (_, i) => W(100 + i, 4, 1))];
+    const weakW = out => out.filter(c => c.key[0] === "w" && c.rec.s < 3 && !/^w:m/.test(c.key)).length;
+    const pick = (C, cands, d) => C.dayPick(cands, 20, d || { d: DAY, n: 1, a: {} }, mulberry32(5), 10, VC.DAY_TYPED_CONSOLIDATE_SHARE);
+    const b0 = OLD ? weakW(pick(OLD, pool())) : "?", a0 = weakW(pick(VC, pool()));
+    check(`B: plan of 20, 12 weak words available, no misses: ${a0} weak words (before ${b0}; floor ${Math.round(20 * VC.DAY_WEAK_FLOOR)})`, a0 >= 8);
+    const dm = { d: DAY, n: 3, a: {} }; const misses = Array.from({ length: 5 }, (_, i) => ({ key: "w:m" + i, rec: { s: 4, u: 3, t: 0 }, mastered: 3, kinds: ["recall", "hear"] }));
+    misses.forEach(c => { dm.a[c.key] = { m: 1, mk: ["recall"], ms: 9 }; });
+    const om = pick(VC, [...misses, ...pool()], dm);
+    check(`B: with 5 word misses taken, ${weakW(om)} more weak words (>= 3); every miss taken (${om.filter(c => /^w:m/.test(c.key)).length}/5)`, weakW(om) >= 3 && om.filter(c => /^w:m/.test(c.key)).length === 5);
+    const few = [W(0, 1, 5), W(1, 2, 5), W(2, 0, 5), ...Array.from({ length: 20 }, (_, i) => U(i, 0, 1)), ...Array.from({ length: 20 }, (_, i) => U(100 + i, 3, 2))];
+    const of = pick(VC, few);
+    const sp = VC.dayPick([...Array.from({ length: 10 }, (_, i) => S(i, 0, 1)), ...Array.from({ length: 10 }, (_, i) => S(100 + i, 3, 1))], 10, { d: DAY, n: 1, a: {} }, mulberry32(5), 10);
+    check(`B: the floor never takes units or sentences (3 weak words, then ${of[3].key} at streak ${of[3].rec.s}: consolidating; sentences open with ${sp[0].key} at streak ${sp[0].rec.s}: refresh)`,
+      of.slice(0, 3).every(c => c.key[0] === "w") && of[3].key[0] === "c" && of[3].rec.s >= 3 && sp[0].rec.s >= 2);
+    // Owner shape (the 2026-10-03 export, scaled): 595 words, a fifth weak at streak 1-2; 300 units,
+    // a quarter weak at 0-1 and the rest at 3; 6 pending hear misses on words, 4 charRecall misses.
+    // Weak words: below mastered or with a pending miss (fb8-weak-analysis definition); a typed
+    // character-unit item (tu) is planned for its unit and not counted.
+    const owner = () => { const p = seedProg(PACK_ON, 595, 300, 11); p.sn = 9; p.day = { d: DAY, n: 4, a: {} };
+      Object.keys(p.w).forEach((id, i) => { p.w[id].s = i % 5 ? 3 + i % 7 : 1 + i % 2; });
+      Object.keys(p.chars.c).forEach((id, i) => { p.chars.c[id].s = i % 4 ? 3 : i % 8 ? 1 : 0; });
+      Object.keys(p.w).filter(id => p.w[id].s >= 3).slice(0, 6).forEach(id => { p.day.a["w:" + id] = { m: 2, mk: ["hear"], ms: 8 }; });
+      Object.keys(p.chars.c).filter(id => p.chars.c[id].s >= 3).slice(0, 4).forEach(id => { p.day.a["c:" + id] = { m: 2, mk: ["charRecall"], ms: 8 }; }); return p; };
+    const typedUnits = VC.typedUnitWords(CHARACTERS, WORDS, PACK_ON);
+    const count = (C, seed) => { const p = owner(), lw = C.learnedWords(WORDS, PACK_ON, p), heard = new Set(Object.keys(p.day.a));
+      const o = { units: CHARACTERS, canHear: () => true, today: DAY, typedUnits, rng: mulberry32(seed) };
+      const rv = C.buildReviewPlan(lw, p, PACK_ON, Object.assign({ size: 20 }, o)), rc = C.buildRecallPlan(lw, p, PACK_ON, 8, Object.assign({}, o, { rng: mulberry32(seed) }));
+      const weak = pl => pl.filter(it => it.word && !it.tu && (((p.w[it.word.id] || {}).s || 0) < 3 || heard.has("w:" + it.word.id))).length;
+      return { rv: weak(rv), rc: weak(rc), heard: rc.filter(it => it.word && !it.tu && heard.has("w:" + it.word.id)).length }; };
+    const avg = (C, f) => [1, 2, 3].reduce((a, sd) => a + count(C, sd)[f], 0) / 3;
+    const ob = OLD ? { rv: avg(OLD, "rv"), rc: avg(OLD, "rc"), heard: avg(OLD, "heard") } : {}, oa = { rv: avg(VC, "rv"), rc: avg(VC, "rc"), heard: avg(VC, "heard") };
+    console.log(`  before/after numbers, owner shape, mean of 3 seeds: Review weak words ${ob.rv.toFixed(1)} -> ${oa.rv.toFixed(1)} of 20; Recall weak words ${ob.rc.toFixed(1)} -> ${oa.rc.toFixed(1)} of 8; hear-missed words in Recall ${ob.heard.toFixed(1)} -> ${oa.heard.toFixed(1)} of 6`);
+    check(`B: owner shape: Review weak words above before (${oa.rv.toFixed(1)} vs ${ob.rv.toFixed(1)}), Recall >= 2.5 of 8 and above before (${oa.rc.toFixed(1)} vs ${ob.rc.toFixed(1)}); hear-missed words asked in Recall (${oa.heard.toFixed(1)}, before ${ob.heard.toFixed(1)})`,
+      !!OLD && oa.rv > ob.rv && oa.rc >= 2.5 && oa.rc > ob.rc && oa.heard > ob.heard);
+    // Flag off: Review / Recall plans identical to fb49c1b's.
+    const sig = pl => pl.map(x => x.kind + ":" + (x.word ? x.word.id : x.unit.id)).join();
+    const offSame = OLD && [1, 2, 3].every(sd => { const p = owner(), lw = VC.learnedWords(WORDS, PACK_OFF, p); const o = () => ({ units: CHARACTERS, canHear: () => true, today: DAY, rng: mulberry32(sd) });
+      return sig(VC.buildReviewPlan(lw, p, PACK_OFF, o())) === sig(OLD.buildReviewPlan(lw, owner(), PACK_OFF, o())) && sig(VC.buildRecallPlan(lw, p, PACK_OFF, 8, o())) === sig(OLD.buildRecallPlan(lw, owner(), PACK_OFF, 8, o())); });
+    check(`flag off (dayAware removed): Review and Recall plans identical to ${MAIN_PIN}'s, 3 seeds`, offSame);
   }
   console.log("\n[validate] tools/validate_pack.py");
   {

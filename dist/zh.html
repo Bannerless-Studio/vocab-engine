@@ -1663,8 +1663,10 @@ function noteDay(prog, pack, today, key, kind, ok, can){
 // charSound). Typed variants are all logged as "type".
 const DAY_PRODUCTION = ["recall", "type", "charRecall", "charPick", "gap", "gapType"];
 const dayProd = k => DAY_PRODUCTION.includes(k);
-// A miss is settled by a right answer in its own kind, or in any production kind when it was a
-// production miss: never by an easier kind (review 2026-10-02: recall misses settled by ear).
+// A miss is settled by a right answer in its own kind or in any production kind: never by an
+// easier kind (review 2026-10-02: recall misses settled by ear). A production answer settles a
+// recognition miss too (owner 2026-10-03: a word missed by ear went back to ear only and got no
+// production ask for the rest of the week in 89% of cases, fb8-weak-analysis).
 // can (optional): the kinds the unit can be shown in here. A missed kind it cannot be shown in (no
 // voice for hear, no blank for gap) counts as the nearest kind it can: the first of `can` in the
 // same partition, else the first of `can` (review 2026-10-02: hear misses on a voiceless device
@@ -1673,7 +1675,7 @@ function dayMissKinds(mk, can){
   if(!Array.isArray(can) || !can.length) return mk;
   return mk.map(m => can.includes(m) ? m : (can.find(k => dayProd(k) === dayProd(m)) || can[0]));
 }
-function daySettles(mk, kind, can){ const m = dayMissKinds(mk, can); return !m.length || m.includes(kind) || (dayProd(kind) && m.some(dayProd)); }
+function daySettles(mk, kind, can){ const m = dayMissKinds(mk, can); return !m.length || m.includes(kind) || dayProd(kind); }
 // characters.bareBy "typed": the word typed from its characters is the hardest ask a unit gets, so it
 // settles any miss of that unit. Units are logged in kind "type" only under that flag.
 const daySettlesAt = (key, mk, kind, can) => (kind === "type" && String(key)[0] === "c") || daySettles(mk, kind, can);
@@ -1708,7 +1710,7 @@ const dayU = rec => rec && typeof rec.u === "number" && isFinite(rec.u) ? rec.u 
 const dayAge = (a, b) => (dayU(a) - dayU(b)) || (dayT(a) - dayT(b));
 const dayS = rec => (rec && rec.s) || 0;
 const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c === "number" ? e.c : 0; };
-// Priority: today's misses, a reserved share of character units between mastered and bare
+// Priority: today's misses (pending longest first), a weak-word floor, a reserved share of character units between mastered and bare
 // (consolidating: weakScore gave them no Review/Recall slot at all, lead finding 2026-10-02), a
 // reserved share of mastered units unseen longest (refresh would otherwise wait until every
 // weak unit had its turn), weak units by lowest streak then oldest last answer, a capped share
@@ -1717,14 +1719,20 @@ const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c ===
 // cshare (optional): the consolidating share, DAY_CONSOLIDATE_SHARE by default. A consolidating
 // unit whose miss aged out (dayAgedOut) comes first in it.
 // t4max (optional): tier 4 fills the plan only up to this many items.
-const DAY_EXTRA_POOL = 4;
+// Right after the misses, words (keys "w:") below mastered fill the plan up to DAY_WEAK_FLOOR of
+// it, word misses already taken counting (owner 2026-10-03: weak words lost their slots to unit
+// misses, consolidation and refresh; Recall gave them 0.5 of 8, fb8-weak-analysis).
+const DAY_EXTRA_POOL = 4, DAY_WEAK_FLOOR = 0.4;
 function dayPick(cands, n, d, rng, sn, cshare, t4max){
   const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
   (cands || []).forEach(c => { const t = dayTier(c, d, sn); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
   const ag = c => dayAgedOut(d.a[c.key], sn) ? 0 : 1;
   C.sort((a, b) => ag(a) - ag(b) || dayAge(a.rec, b.rec) || dayS(a.rec) - dayS(b.rec) || a.j - b.j);
+  // Misses pending longest come first: by weakScore alone a strong word's miss waited behind every
+  // newer miss and could go unasked for days (fb10 day_sim backlog).
+  const ms = c => { const e = d.a[c.key]; return isObj(e) && typeof e.ms === "number" ? e.ms : Infinity; };
   const cmp = [
-    (a, b) => weakScore(b.rec) - weakScore(a.rec),
+    (a, b) => (ms(a) - ms(b)) || weakScore(b.rec) - weakScore(a.rec),
     (a, b) => dayS(a.rec) - dayS(b.rec) || dayAge(a.rec, b.rec),
     (a, b) => dayAge(a.rec, b.rec) || dayS(a.rec) - dayS(b.rec),
     (a, b) => dayC(a, d) - dayC(b, d) || dayS(a.rec) - dayS(b.rec),
@@ -1734,15 +1742,16 @@ function dayPick(cands, n, d, rng, sn, cshare, t4max){
   const out = [], seen = new Set();
   // A candidate with an alias (a typed character unit asked as its word) and that word's own
   // candidate are one item: the second one taken is passed over, and a word taken first is asked
-  // as the unit's typed item (tu). A word with a pending miss a typed answer cannot settle (hear,
-  // read) is never converted, and still gets its own item when its unit was taken first and a slot
-  // is left (review 2026-10-02).
+  // as the unit's typed item (tu). A word with a pending miss a typed answer cannot settle (none
+  // while every production answer settles any miss) is never converted, and still gets its own
+  // item when its unit was taken first and a slot is left (review 2026-10-02).
   const owns = c => { const mk = dayPending(d.a[c.key], sn); return !!(mk && mk.length && !daySettles(mk, "type", c.can)); };
   const take = (list, k) => { for(let i = 0; i < k && list.length && out.length < n;){ const c = list.shift();
     if(c.alias && seen.has(c.alias)){ const w = out.find(o => o.key === c.alias); if(w && !w.tu && !owns(w)) w.tu = c.x; continue; }
     if(seen.has(c.key) && !(owns(c) && out.some(o => o.alias === c.key) && !out.some(o => o.key === c.key))) continue;
     seen.add(c.key); if(c.alias) seen.add(c.alias); out.push(c); i++; } };
-  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(C, Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE))); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
+  const isW = c => String(c.key).startsWith("w:");
+  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(T[1].filter(isW), Math.round(n * DAY_WEAK_FLOOR) - out.filter(isW).length); take(C, Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE))); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
   take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[0], n); take(T[4], t4max != null ? t4max - out.length : n);
   return out;
 }
@@ -1754,7 +1763,8 @@ function daySentenceKinds(pack){ return [typingEnabled(pack) && !pronTypingOn(pa
 // A unit already right today keeps its planned kind only when that kind is still open today
 // and production; otherwise the first open kind of `kinds` (production first). A pending miss
 // goes to a kind that settles it: the planned kind if it does, else its missed kind, else the
-// nearest production kind, preferring one not right today. Units not met today, and units with
+// nearest production kind, preferring one that settles every pending kind (a hear and a recall
+// miss: recall, fb10 day_sim) and then one not right today. Units not met today, and units with
 // every kind done, keep the planned kind. The one place a unit's kind is decided per day.
 // can (optional): the kinds the unit can be shown in here (daySettles).
 function dayItemKind(prog, pack, today, key, planned, kinds, can){
@@ -1765,7 +1775,8 @@ function dayItemKind(prog, pack, today, key, planned, kinds, can){
   const mk = dayPending(e, daySn(prog));
   if(mk){
     const fit = [planned, ...dayMissKinds(mk, can), ...ks.filter(dayProd), ...ks].filter(k => ks.includes(k) && daySettlesAt(key, mk, k, can));
-    return fit.find(k => !r.includes(k)) || fit[0] || planned;
+    const all = fit.filter(k => mk.every(m => daySettlesAt(key, [m], k, can)));
+    return all.find(k => !r.includes(k)) || all[0] || fit.find(k => !r.includes(k)) || fit[0] || planned;
   }
   if(!r.length) return planned;
   const open = ks.filter(k => !r.includes(k));
@@ -3837,7 +3848,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
-  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
+  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
@@ -4920,7 +4931,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "3507238667-1825522";
+const VE_BUILD = "3811177846-1826728";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6693,4 +6704,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1198684800-1824846-->
+<!--ve-build:1743660179-1826052-->
