@@ -13,6 +13,7 @@ const util = require("util");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
+const withDayRules = require("./day_rules_patch.js"); // fb10-weak-floor planner rules on old cores
 const ZH = path.join(ROOT, "packs", "zh");
 const PREV = "68930bd"; // main before the per-level Progress rows
 const MAIN = "590af86"; // main before characters.learn (stage model: withWords, order chips, turn)
@@ -212,7 +213,7 @@ let OLD = null;
 try {
   const os = require("os");
   const src = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-  const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "lag-")), `core_${MAIN}.js`); fs.writeFileSync(f, src); OLD = require(f);
+  const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "lag-")), `core_${MAIN}.js`); fs.writeFileSync(f, withDayRules(src, MAIN)); OLD = require(f);
 } catch(e){ OLD = null; }
 
 (async function main(){

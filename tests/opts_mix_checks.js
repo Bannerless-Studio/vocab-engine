@@ -17,6 +17,7 @@ const util = require("util");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
+const withDayRules = require("./day_rules_patch.js"); // fb10-weak-floor planner rules on old cores
 const ZH = path.join(ROOT, "packs", "zh");
 const BASE = "68930bd"; // main before optsMix: level-tier options everywhere
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
@@ -177,7 +178,7 @@ let OLD = null, OLD_HTML = null;
 try {
   const os = require("os");
   const src = cp.execSync(`git -C "${ROOT}" show ${BASE}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-  const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "optsmix-")), `core_${BASE}.js`); fs.writeFileSync(f, src); OLD = require(f);
+  const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "optsmix-")), `core_${BASE}.js`); fs.writeFileSync(f, withDayRules(src, BASE)); OLD = require(f);
   OLD_HTML = cp.execSync(`git -C "${ROOT}" show ${BASE}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
 } catch(e){ OLD = null; OLD_HTML = null; }
 

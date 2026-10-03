@@ -13,6 +13,7 @@ const util = require("util");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
+const withDayRules = require("./day_rules_patch.js"); // fb10-weak-floor planner rules on old cores
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "36aee02"; // main before pauseNew
 // Progress characters rows are a per-level block since fb6-charrows (lag_checks [5] pins them); the rest of Progress still matches MAIN.
@@ -258,7 +259,7 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
     const os = require("os");
     MAIN_HTML = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
     const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "pause-")), `core_${MAIN}.js`);
-    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); OLD = require(f);
+    fs.writeFileSync(f, withDayRules(cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }), MAIN)); OLD = require(f);
   } catch(e){ OLD = null; }
 
   console.log(`\n[2] flag off, and on but not paused: as on main ${MAIN}`);

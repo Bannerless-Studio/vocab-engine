@@ -20,6 +20,7 @@ const util = require("util");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
+const withDayRules = require("./day_rules_patch.js"); // fb10-weak-floor planner rules on old cores
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "7fe35f7"; // main before typed mastery and per-level stages (fb2-gloss merged)
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
@@ -275,14 +276,15 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
       const ctl = VC.buildReviewPlan(lw, z, PACK, Object.assign({ rng: mulberry32(1) }, o)).filter(x => x.tu).map(x => x.tu);
       const kept = due.filter(id => again.includes(id)).length, kc = due.filter(id => ctl.includes(id)).length;
       check(`pinyin typed right today on the words of ${due.length} due units: ${kept} still planned typed (${kc} with nothing answered; the consolidating share is ${Math.ceil(20 * SH)}), records unchanged`, due.length > 0 && kept >= Math.min(kc, Math.ceil(20 * SH)) && JSON.stringify(q.chars.c) === JSON.stringify(p.chars.c)); }
-    // A word with a pending hear/read miss keeps its own item; its unit waits for the next plan.
+    // A word with a pending hear/read miss is asked in a kind that settles it: its own item, or the
+    // unit's typed item (since fb10-weak-floor a typed answer settles any miss).
     { const q = clone(p); VC.dayStart(q, PACK, DAY, true);
       const ids = unitsAt(q, 4).slice(0, 8);
       ids.forEach(id => VC.noteDay(q, PACK, DAY, "w:" + UNIT[id].words[0], "hear", false)); VC.dayStart(q, PACK, DAY, true);
       const pl = VC.buildReviewPlan(lw, q, PACK, Object.assign({ rng: mulberry32(3) }, o));
       const words = ids.map(id => UNIT[id].words[0]);
       const asTu = pl.filter(x => x.tu && words.includes(x.word.id)).length, own = pl.filter(x => x.word && !x.tu && words.includes(x.word.id));
-      check(`8 band units whose words have a pending hear miss: ${own.length} word items kept in the plan (kinds ${[...new Set(own.map(x => x.kind))].join(",")}), ${asTu} converted`, asTu === 0 && own.length === 8 && own.every(x => x.kind === "hear")); }
+      check(`8 band units whose words have a pending hear miss: all asked (${own.length} word items, kinds ${[...new Set(own.map(x => x.kind))].join(",")}; ${asTu} as the unit's typed item), each in a kind that settles it`, own.length + asTu === 8 && own.every(x => VC.daySettles(["hear"], x.kind))); }
     const noTU = VC.buildReviewPlan(lw, p, PACK, Object.assign({ rng: mulberry32(1) }, o, { typedUnits: undefined }));
     check("without opts.typedUnits the planner asks those units by choice, as before", !noTU.some(x => x.tu) && noTU.some(x => x.unit));
     // A unit typed right today is not asked again while others are due.
@@ -704,13 +706,13 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     check(`chip switches, stored and applied at the next Learn: ${res.join("; ")}`, !res.includes("BAD"));
   }
 
-  console.log(`\n[7] control: without the new fields the zh markup and progress match main ${MAIN}`);
+  console.log(`\n[7] control: without the new fields the zh markup and progress match main ${MAIN} (with the fb10 day rules, tests/day_rules_patch.js)`);
   {
     let mainHtml = null, mainCore = null;
     try {
       mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
       const src = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); mainCore = m.exports;
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", withDayRules(src, MAIN))(m, m.exports, undefined, {}); mainCore = m.exports;
     } catch(e){ console.log("    cannot read main: " + e.message); }
     check(`main ${MAIN} engine loaded from git (a missing sha is a failure)`, !!mainHtml && !!mainCore);
     async function run(html, core){
