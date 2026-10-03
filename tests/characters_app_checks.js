@@ -26,7 +26,7 @@ function tryLoadConst(file, name){ try{ return loadConst(file, name); }catch(e){
 // on the same data with pronFirst off; [14] checks the pack as shipped (PACK_ZH).
 // BP2's pronunciation aids (tones, typing "pron", soundsReference) are left out here, so
 // these checks keep testing BP's markup; tests/pron_aids_checks.js checks the pack with them.
-const PACK_ZH = (p => { const q = Object.assign({}, p); delete q.tones; delete q.soundsReference; if(q.typing === "pron") q.typing = null; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+const PACK_ZH = (p => { const q = Object.assign({}, p); delete q.tones; delete q.soundsReference; delete q.wordsBy; if(q.typing === "pron") q.typing = null; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // [1]-[13] keep the earlier stage layout (one stage after HSK 3 for 1-3, one after HSK 4) and choice
 // crediting: they test the stage machinery, which is unchanged for it. tests/typed_mastery_checks.js
