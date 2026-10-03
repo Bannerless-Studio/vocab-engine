@@ -447,6 +447,23 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       const r1 = api.rd();
       check("readRotation: reload keeps the passage, the listening mode and the question order", !!r1 && r1.p.id === pid && r1.mode === "listen" && r1.p.questions.map(q => q.q).join("|") === qs && r1.qi === 0);
     }
+    {
+      // A parked passage without rd.qx (a build before readRotation) resumes in pack order.
+      const p2 = PASSAGES.find(x => x.lv === "1" && x.questions.length >= 3 && VC.passageForPass(x, 0, PACK).questions.some((q, i) => q !== x.questions[i]));
+      const st = fresh();
+      let { api } = await boot(Object.assign({ seed: 26 }, st));
+      api.clickTab("read"); api.startPassage(p2);
+      const shuffled = api.rd().p.questions.some((q, i) => q !== p2.questions[i]) && api.rd().qx === 0;
+      api.el("rdone").click();
+      const stripQx = o => { if(o && typeof o === "object") Object.keys(o).forEach(k => { if(k === "rd" && o[k]) delete o[k].qx; else stripQx(o[k]); }); return o; };
+      st.ls.setItem(SKEY, JSON.stringify(stripQx(JSON.parse(st.ls.getItem(SKEY)))));
+      ({ api } = await boot(Object.assign({ seed: 27 }, st)));
+      const r = api.rd();
+      check("readRotation: a parked passage without qx resumes in pack order", shuffled && !!r && r.p.id === p2.id && r.p.questions.every((q, i) => q.q === p2.questions[i].q) && /Question 1 \//.test(api.html("panel")) && api.html("panel").includes(VC.escapeHtml(p2.questions[0].q)));
+      api.el("o").children.find(x => x.dataset.v === String(p2.questions[0].answer)).click(); api.el("nx").click();
+      check("... answers align with pack order (question 1 right, question 2 on screen)", api.rd().answers[0] && api.rd().answers[0].ok === true && api.rd().qi === 1 && api.html("panel").includes(VC.escapeHtml(p2.questions[1].q)));
+
+    }
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- [7] storage shape

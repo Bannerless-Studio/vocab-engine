@@ -4998,7 +4998,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1620333443-1832158";
+const VE_BUILD = "2208190041-1832289";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -5250,7 +5250,8 @@ function sessionResume(forTab){
       if(rec.drill.cur && rec.drill.ord && items[0]) items[0].rzOrder = rec.drill.ord;
       onDone = rzDoneOf(rec.drill.o);
     } else if(rec.rd){
-      rd = Object.assign({}, rec.rd, { p: VC.passageForPass(passageById(rec.rd.pid), rec.rd.qx, PACK) }); delete rd.pid;
+      // A record without qx (an older build, or the flag off) was asked in pack order.
+      rd = Object.assign({}, rec.rd, { p: "qx" in rec.rd ? VC.passageForPass(passageById(rec.rd.pid), rec.rd.qx, PACK) : passageById(rec.rd.pid) }); delete rd.pid;
       if(rd.today && !today) rzFail();
     } else if(!today) rzFail();
   } catch(e){ rzReplay = null; sessStore.set(rec.tab, null); return false; }
@@ -6776,4 +6777,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:4208349886-1831482-->
+<!--ve-build:688010625-1831613-->

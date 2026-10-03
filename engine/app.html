@@ -1661,7 +1661,8 @@ function sessionResume(forTab){
       if(rec.drill.cur && rec.drill.ord && items[0]) items[0].rzOrder = rec.drill.ord;
       onDone = rzDoneOf(rec.drill.o);
     } else if(rec.rd){
-      rd = Object.assign({}, rec.rd, { p: VC.passageForPass(passageById(rec.rd.pid), rec.rd.qx, PACK) }); delete rd.pid;
+      // A record without qx (an older build, or the flag off) was asked in pack order.
+      rd = Object.assign({}, rec.rd, { p: "qx" in rec.rd ? VC.passageForPass(passageById(rec.rd.pid), rec.rd.qx, PACK) : passageById(rec.rd.pid) }); delete rd.pid;
       if(rd.today && !today) rzFail();
     } else if(!today) rzFail();
   } catch(e){ rzReplay = null; sessStore.set(rec.tab, null); return false; }
