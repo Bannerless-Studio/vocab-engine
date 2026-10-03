@@ -327,7 +327,7 @@
      "sentence": 9
     },
     {
-     "q": "他们什么时候去饭馆？",
+     "q": "她们什么时候去饭馆？",
      "en": "When do they go to the restaurant?",
      "type": "mc",
      "options": [
@@ -354,7 +354,7 @@
      ],
      "answer": 0,
      "words": [
-      "米饭"
+      "菜"
      ],
      "sentence": 2
     },
@@ -365,7 +365,7 @@
      "options": [
       "茶",
       "米饭",
-      "菜",
+      "水果",
       "水"
      ],
      "answer": 0,
@@ -525,9 +525,9 @@
      "type": "mc",
      "options": [
       "爸爸和妈妈",
-      "爸爸",
-      "妈妈",
-      "老师和同学"
+      "老师和同学",
+      "朋友",
+      "医生"
      ],
      "answer": 0,
      "words": [
@@ -694,7 +694,7 @@
     },
     {
      "q": "刘芳买了谁看见的衣服？",
-     "en": "Whose find of clothing did Liu Fang buy?",
+     "en": "Whose choice of clothing did Liu Fang buy?",
      "type": "mc",
      "options": [
       "妈妈",
@@ -835,8 +835,8 @@
      "type": "mc",
      "options": [
       "很多人喜欢",
-      "很少人喜欢",
       "没有人喜欢",
+      "中国人不喜欢",
       "很多人不喜欢"
      ],
      "answer": 0,
@@ -862,15 +862,15 @@
      "sentence": 6
     },
     {
-     "q": "他们四个人去看电影。",
-     "en": "Four of them go to see the film.",
+     "q": "王丽是陈杰的同学。",
+     "en": "Wang Li is Chen Jie's classmate.",
      "type": "tf",
      "options": null,
-     "answer": false,
+     "answer": true,
      "words": [
-      "人"
+      "同学"
      ],
-     "sentence": 8
+     "sentence": 7
     }
    ]
   },
@@ -1491,8 +1491,8 @@
      "sentence": 1
     },
     {
-     "q": "我想和她一起去看北京的学校。",
-     "en": "I want to go with her to see Beijing's schools.",
+     "q": "我想和爸爸朋友的女儿一起去看北京的学校。",
+     "en": "I want to go with Dad's friend's daughter to see Beijing's schools.",
      "type": "tf",
      "options": null,
      "answer": true,
@@ -2120,7 +2120,7 @@
      "options": [
       "中国人",
       "北京人",
-      "学生",
+      "老师",
       "美国人"
      ],
      "answer": 3,
@@ -2134,7 +2134,7 @@
      "en": "How does Andy's teacher speak?",
      "type": "mc",
      "options": [
-      "很大",
+      "很慢",
       "不好听",
       "很少",
       "很好听"
@@ -2297,7 +2297,7 @@
      "options": [
       "水果",
       "茶",
-      "米饭",
+      "水",
       "中国菜"
      ],
      "answer": 3,
@@ -3140,7 +3140,7 @@
     },
     {
      "q": "坐公共汽车，几站到火车站？",
-     "en": "How many stops by bus to the train station?",
+     "en": "How many stops by bus to the railway station?",
      "type": "mc",
      "options": [
       "三站",
@@ -3476,7 +3476,7 @@
      "options": [
       "公司",
       "医院",
-      "学校",
+      "饭馆",
       "教室"
      ],
      "answer": 3,
@@ -3820,15 +3820,15 @@
      "sentence": 4
     },
     {
-     "q": "晚上很忙的时候，可以出去走走。",
-     "en": "When you are very busy in the evening, you can go out for a walk.",
+     "q": "运动的时候要少喝水。",
+     "en": "When you exercise, you should drink less water.",
      "type": "tf",
      "options": null,
      "answer": false,
      "words": [
-      "忙"
+      "喝"
      ],
-     "sentence": 6
+     "sentence": 7
     }
    ]
   },
@@ -4323,16 +4323,15 @@
      "sentence": 1
     },
     {
-     "q": "羊肉非常好吃，鱼也很新鲜。",
-     "en": "The lamb is very tasty and the fish is fresh.",
+     "q": "这个饭馆很干净。",
+     "en": "This restaurant is very clean.",
      "type": "tf",
      "options": null,
      "answer": true,
      "words": [
-      "羊肉",
-      "好吃"
+      "干净"
      ],
-     "sentence": 5
+     "sentence": 2
     }
    ]
   },
@@ -4606,8 +4605,8 @@
      "sentence": 6
     },
     {
-     "q": "何小姐每个星期送她什么？",
-     "en": "What does Ms He give her every week?",
+     "q": "何小姐每个星期送我什么？",
+     "en": "What does Ms He give me every week?",
      "type": "mc",
      "options": [
       "咖啡",
@@ -4789,8 +4788,8 @@
      "sentence": 7
     },
     {
-     "q": "刘芳觉得怎么样？",
-     "en": "How does Liu Fang feel?",
+     "q": "找不到手表，刘芳觉得怎么样？",
+     "en": "Unable to find her watch, how does Liu Fang feel?",
      "type": "mc",
      "options": [
       "很高兴",
@@ -4805,15 +4804,15 @@
      "sentence": 6
     },
     {
-     "q": "刘芳问儿子看没看见手表。",
-     "en": "Liu Fang asks her son whether he has seen the watch.",
+     "q": "丈夫看见了刘芳的手表。",
+     "en": "Her husband saw Liu Fang's watch.",
      "type": "tf",
      "options": null,
      "answer": false,
      "words": [
       "看见"
      ],
-     "sentence": 3
+     "sentence": 4
     }
    ]
   },
@@ -5263,8 +5262,8 @@
      "sentence": 7
     },
     {
-     "q": "这个周末，他和谁一起去爬山？",
-     "en": "Who does he go hiking with this weekend?",
+     "q": "这个周末，我和谁一起去爬山？",
+     "en": "Who do I go hiking with this weekend?",
      "type": "mc",
      "options": [
       "家人",
@@ -5780,8 +5779,8 @@
      "sentence": 5
     },
     {
-     "q": "新要求从明天开始。",
-     "en": "The new rules start tomorrow.",
+     "q": "新要求从下个星期五开始。",
+     "en": "The new rules start next Friday.",
      "type": "tf",
      "options": null,
      "answer": false,
@@ -6083,8 +6082,8 @@
      "sentence": 8
     },
     {
-     "q": "鸡蛋要放在哪儿？",
-     "en": "Where should the eggs be put?",
+     "q": "放盐的时候，鸡蛋在哪儿？",
+     "en": "Where are the eggs when you add the salt?",
      "type": "mc",
      "options": [
       "盘子里",
@@ -6094,21 +6093,22 @@
      ],
      "answer": 2,
      "words": [
-      "碗"
+      "碗",
+      "盐"
      ],
      "sentence": 3
     },
     {
-     "q": "先做什么？",
-     "en": "What do you cook first?",
+     "q": "西红柿和鸡蛋，先做哪个？",
+     "en": "Of the tomato and the egg, which do you cook first?",
      "type": "mc",
      "options": [
-      "西红柿",
-      "面条",
       "鸡蛋",
-      "糖"
+      "西红柿",
+      "一起做",
+      "都不做"
      ],
-     "answer": 2,
+     "answer": 0,
      "words": [
       "鸡蛋"
      ],
@@ -6253,8 +6253,8 @@
      "sentence": 8
     },
     {
-     "q": "服务员请李先生给她看什么？",
-     "en": "What does the receptionist ask Mr Li to show her?",
+     "q": "李先生要给服务员看什么？",
+     "en": "What does Mr Li have to show the receptionist?",
      "type": "mc",
      "options": [
       "护照",
@@ -6764,7 +6764,7 @@
      ],
      "answer": 0,
      "words": [
-      "运动"
+      "睡觉"
      ],
      "sentence": 6
     },
@@ -7262,7 +7262,7 @@
      "options": null,
      "answer": false,
      "words": [
-      "发现"
+      "后面"
      ],
      "sentence": 2
     }
@@ -7409,8 +7409,8 @@
      "options": [
       "很大，也很圆",
       "很小，也很黑",
-      "很高",
-      "很远"
+      "不太圆",
+      "很小"
      ],
      "answer": 0,
      "words": [
@@ -7419,15 +7419,15 @@
      "sentence": 7
     },
     {
-     "q": "春节的时候，火车站的人特别少。",
-     "en": "During the Spring Festival, there are very few people at the train station.",
+     "q": "春节是中国最重要的节日。",
+     "en": "The Spring Festival is China's most important festival.",
      "type": "tf",
      "options": null,
-     "answer": false,
+     "answer": true,
      "words": [
-      "特别"
+      "重要"
      ],
-     "sentence": 3
+     "sentence": 1
     }
    ]
   },
@@ -7551,8 +7551,8 @@
      "sentence": 8
     },
     {
-     "q": "公司最好希望翻译有几年的工作经验？",
-     "en": "How many years of work experience does the company ideally want a translator to have?",
+     "q": "公司希望翻译最好有几年的工作经验？",
+     "en": "How many years of work experience should a translator ideally have?",
      "type": "mc",
      "options": [
       "一年",
@@ -8230,8 +8230,7 @@
      ],
      "answer": 1,
      "words": [
-      "材料",
-      "整理"
+      "桌子"
      ],
      "sentence": 5
     },
@@ -8409,15 +8408,15 @@
      "sentence": 6
     },
     {
-     "q": "学生最感谢他的老师。",
-     "en": "The student thanks his teacher the most.",
+     "q": "这次比赛是一家公司组织的。",
+     "en": "This tournament was organised by one company.",
      "type": "tf",
      "options": null,
      "answer": false,
      "words": [
-      "感谢"
+      "组织"
      ],
-     "sentence": 7
+     "sentence": 1
     }
    ]
   },
@@ -8542,7 +8541,7 @@
     },
     {
      "q": "后来，玛丽认识了谁？",
-     "en": "Later, whom did Mary get to know?",
+     "en": "Later, whom did Marie get to know?",
      "type": "mc",
      "options": [
       "林娜",
@@ -8558,7 +8557,7 @@
     },
     {
      "q": "玛丽给林娜介绍什么？",
-     "en": "What does Mary introduce to Lin Na?",
+     "en": "What does Marie introduce to Lin Na?",
      "type": "mc",
      "options": [
       "法国的菜",
@@ -8575,7 +8574,7 @@
     },
     {
      "q": "玛丽来中国以后一点困难也没有。",
-     "en": "Mary has had no difficulties at all since coming to China.",
+     "en": "Marie has had no difficulties at all since coming to China.",
      "type": "tf",
      "options": null,
      "answer": false,
@@ -8744,15 +8743,16 @@
      "sentence": 8
     },
     {
-     "q": "厨房里有冰箱。",
-     "en": "There is a fridge in the kitchen.",
+     "q": "房间附近有超市和银行。",
+     "en": "There is a supermarket and a bank near the room.",
      "type": "tf",
      "options": null,
      "answer": true,
      "words": [
-      "冰箱"
+      "超市",
+      "银行"
      ],
-     "sentence": 3
+     "sentence": 5
     }
    ]
   },
@@ -8902,7 +8902,7 @@
     },
     {
      "q": "能坐地铁的时候，最好不要做什么？",
-     "en": "When you can take the metro, what is best not to do?",
+     "en": "When you can take the underground, what is best not to do?",
      "type": "mc",
      "options": [
       "骑自行车",

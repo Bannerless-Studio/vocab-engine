@@ -27,7 +27,7 @@ linked words, the count the app shows for an unspaced pack (report only).
 | p0010 | 1 | 我的朋友 | 77 | 66 | 1.000 | 1.000 | - | 2: 好吃, 鱼 |
 | p0011 | 1 | 看医生 | 75 | 68 | 1.000 | 1.000 | - | 2: 再, 生病, 药 |
 | p0012 | 1 | 我的星期日 | 72 | 73 | 1.000 | 1.000 | - | 2: 咖啡, 牛奶, 近 |
-| p0013 | 1 | 我学习汉语 | 72 | 64 | 1.000 | 1.000 | - | 2: 也 |
+| p0013 | 1 | 我学习汉语 | 72 | 64 | 1.000 | 1.000 | - | 2: 也, 慢 |
 | p0014 | 1 | 这个饭馆怎么样？ | 73 | 65 | 1.000 | 1.000 | - | 2: 也, 好吃, 张 |
 | p0015 | 1 | 我的房间 | 69 | 67 | 1.000 | 1.000 | - | 2: 也, 房间 |
 | p0016 | 2 | 妹妹的生日 | 95 | 92 | 1.000 | 1.000 | - | 3: 蛋糕 |
@@ -88,8 +88,8 @@ the budget rule above is unchanged):
 - p0048: s2 '河里': jieba reads a proper noun (ns), linked as 河 + 里; declare it in names if it is one
 - p0060: s6 '太咸': jieba reads a proper noun (nr), linked as 太 + 咸; declare it in names if it is one; s6 '太辣': jieba reads a proper noun (nr), linked as 太 + 辣; declare it in names if it is one
 
-Readings (`ruby`, langs/zh.py passage_ruby): 6136 reading tokens over 577 sentences (6017 on a linked word, 119 without one: names, oop words, 过, 第), 6199 in titles, questions and options.
-pypinyin readings with no override: 564 characters, 45 distinct: 周 x35, 婷 x29, 王 x23, 上 x22, 娜 x22, 海 x22, 丽 x21, 刘 x21, 芳 x21, 何 x20, 杰 x19, 陈 x19, 孙 x18, 浩 x18, 明 x17, 李 x17, 林 x17, 静 x17, 强 x14, 赵 x14, 吴 x13, 安 x13, 磊 x13, 节 x12, 郑 x11, 国 x10, 文 x9, 法 x8, 玛 x8, 迪 x8 ....
+Readings (`ruby`, langs/zh.py passage_ruby): 6136 reading tokens over 577 sentences (6017 on a linked word, 119 without one: names, oop words, 过, 第), 6213 in titles, questions and options.
+pypinyin readings with no override: 568 characters, 45 distinct: 周 x35, 婷 x29, 王 x24, 上 x22, 丽 x22, 娜 x22, 海 x22, 刘 x21, 芳 x21, 何 x20, 杰 x20, 陈 x20, 孙 x18, 浩 x18, 明 x17, 李 x17, 林 x17, 静 x17, 强 x14, 赵 x14, 吴 x13, 安 x13, 磊 x13, 节 x12, 郑 x11, 国 x10, 文 x9, 法 x8, 玛 x8, 迪 x8 ....
 Override readings used (SURFACE_READINGS, CHAR_READINGS, 地 rule, aspect 过): 便宜 x13, 过 (aspect) x3, 草地 x2, 长大 x2, 切 x1.
 
 <!-- manual section: kept across runs -->
