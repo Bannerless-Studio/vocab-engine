@@ -87,7 +87,7 @@ const __mc = renderMcItem; renderMcItem = function(it){ __cur = it; __log.push({
 const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; __log.push({ key: it.key, kind: "type", label: it.label, step: todayStepState && todayStepState.at }); return __ty(it); };
 return { el: id => document.getElementById(id), panel: () => document.getElementById("panel").innerHTML, getProg: () => prog, getD: () => D, getCur: () => __cur, log: __log,
   rd: () => (typeof RD !== "undefined" ? RD : null), skipRead: () => { RD = null; todayStep(); },
-  tss: () => todayStepState, fits: e => typedWordFits(e), mark: (id, ok, kind) => markWord(id, ok, kind), setD: d => { D = d; }, render: () => render() };`;
+  tss: () => todayStepState, fits: e => typedWordFits(e), mark: (id, ok, kind) => markWord(id, ok, kind), setD: d => { D = d; }, miss: (id, kind) => { D.miss.push({ key: "w:" + id }); markWord(id, false, kind); }, render: () => render() };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"WordsTypedChecks/1.0" }, undefined, st.ls, st.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
     function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, WORDS, SENTENCES, LESSONS, [], CHARACTERS];
@@ -315,16 +315,25 @@ function seedW(){
     const low = retries.filter(r => r.f.s < 2);
     check(`below 2 the retry still counts as before (miss -> 0, retry right -> 1) (${low.length})`, low.length > 0 && low.every(r => r.s1 === r.s0 + 1));
     const later = W.filter(r => r.ok && r.step > 0 && W.some(m => m.key === r.key && m.step === 0 && !m.ok) && r.s0 < 2);
-    // Every requeue kind directly: a word stepped down 2 -> 1 in this drill (its miss in D.miss), right on the retry.
+    // Every requeue kind directly: a miss in this drill steps the word 2 -> 1, then right on the retry;
+    // control: a fresh drill, the word at 1, right.
     const w = byLv["2"].find(x => !x.pronInGloss), per = {};
-    for(const kind of ["recall", "read", "hear", "type"]){ for(const inDrill of [true, false]){
-      api.getProg().w[w.id] = { r: 3, w: 1, s: 1 }; api.setD({ miss: inDrill ? [{ key: "w:" + w.id }] : [] }); api.mark(w.id, true, kind);
-      per[kind + (inDrill ? "" : " (no miss)")] = api.getProg().w[w.id].s; } }
-    api.getProg().w[w.id] = { r: 3, w: 1, s: 1, k: "type" }; api.setD({ miss: [{ key: "w:" + w.id }] }); api.mark(w.id, true, "type");
+    for(const kind of ["recall", "read", "hear", "type"]){
+      api.getProg().w[w.id] = { r: 3, w: 1, s: 2 }; api.setD({ miss: [] }); api.miss(w.id, kind); api.mark(w.id, true, kind); per[kind] = api.getProg().w[w.id].s;
+      api.getProg().w[w.id] = { r: 3, w: 1, s: 1 }; api.setD({ miss: [] }); api.mark(w.id, true, kind); per[kind + " (no miss)"] = api.getProg().w[w.id].s; }
+    api.getProg().w[w.id] = { r: 3, w: 1, s: 2 }; api.setD({ miss: [] }); api.miss(w.id, "type"); api.mark(w.id, true, "type");
     const kr = api.getProg().w[w.id];
+    api.getProg().w[w.id] = { r: 3, w: 1, s: 3 }; api.setD({ miss: [] }); api.miss(w.id, "type"); api.miss(w.id, "recall");
+    const k2 = api.getProg().w[w.id];
     api.setD(null);
-    check(`the typed retry right settles the missed kind k as before, streak held (${JSON.stringify(kr)})`, !("k" in kr) && kr.s === 1 && kr.r === 4);
+    check(`a missed retry after a step-down from 2+ adds w only (3 -> 2 -> 2: ${JSON.stringify(k2)})`, k2.s === 2 && k2.w === 3);
+    check(`the typed retry right settles the missed kind k as before, streak held (${JSON.stringify(kr)})`, !("k" in kr) && kr.s === 1 && kr.r === 4 && kr.w === 2);
     check(`retry right by recall / read / hear / type after a miss in the drill: no credit (${JSON.stringify(per)})`, ["recall", "read", "hear", "type"].every(k => per[k] === 1 && per[k + " (no miss)"] === 2));
+    // Review 2 M1: a Learn pair (hear + read per word): a new word missed once, then right twice, ends at 2 as without the flag.
+    const nw = byLv["4"].find(x => !x.pronInGloss), pair = [];
+    for(const pk of [PACK, PACK_OFF]){ const a2 = await boot(pk, seedW(), 5); a2.setD({ miss: [] }); delete a2.getProg().w[nw.id];
+      a2.miss(nw.id, "hear"); a2.mark(nw.id, true, "read"); a2.mark(nw.id, true, "hear"); pair.push(a2.getProg().w[nw.id].s); }
+    check(`Learn pair, a new word: miss, read right, retry right -> ${pair[0]} (flag off ${pair[1]})`, pair[0] === 2 && pair[1] === 2);
     check(`a right answer in a later drill of the session counts as usual (below 2: +1) (${later.length})`, later.length > 0 && later.every(r => r.s1 === r.s0 + 1));
   }
 
@@ -365,6 +374,8 @@ function seedW(){
     check("reload mid-Review resumes the drill", resumed);
     const rowsB = await session(api2, pol, { cont: true });
     const tyB = rowsB.filter(r => r.kind === "type" && tw0.includes(r.key.slice(2)));
+    const rt = tyB.filter(r => r.step === 0 && r.ok);
+    check(`a reload between a typed miss from 2 and its in-drill retry: the retry right still gets no credit (${rt.map(r => r.s0 + "->" + r.s1)})`, rt.length > 0 && rt.every(r => r.s0 === 1 && r.s1 === 1));
     const again = tyB.filter(r => r.step > 0);
     check(`after the reload, no word typed before it is asked typed again in a later stage (${again.length}; in-drill typed retries ${tyB.length - again.length})`, again.length === 0, again.map(r => r.key + "@" + r.step).join(" "));
     const all = [...rowsA, ...rowsB].filter(r => r.key[0] === "w");

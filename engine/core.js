@@ -1016,16 +1016,15 @@ function markRec(map, key, ok, isWord, kind, reqKind){
 // characters, reading or meaning typed); a right choice or ear answer holds it and a miss steps it
 // down one, the characters.bareBy rule for words. Below WORD_HOLD, and with the flag off, markRec.
 // o.typable false (no typed kind fits the word as shown: 北京 while shown by its reading): markRec,
-// as typedUnitWords exempts such units. o.retry (the word was missed earlier in this drill): no
-// streak credit, as markUnitTyped gives the in-drill retry none (review fb18 HIGH 1), but it settles
-// the missed kind k as markRec does (engine_checks typed-fallback drill); the streak
-// is 1+ after that miss only when it stepped the word down from WORD_HOLD+, below it a miss resets to 0.
+// as typedUnitWords exempts such units. o.retry (a miss earlier in this drill stepped the word down
+// from WORD_HOLD+; app.html wordRetry): no streak credit, as markUnitTyped gives the in-drill retry none
+// (review fb18 HIGH 1), but it settles the missed kind k as markRec does (engine_checks typed-fallback drill).
 const WORD_HOLD = 2;
 function wordsTypedOn(pack){ return !!(pack && pack.wordsBy === "typed"); }
 function markWordRec(map, key, ok, kind, reqKind, pack, o){
   const p = map[key], x = o || {};
   if(!wordsTypedOn(pack) || !isObj(p) || x.typable === false) return markRec(map, key, ok, true, kind, reqKind);
-  if(x.retry && (p.s || 0) >= 1){ if(ok) p.r++; else p.w++; setMissKind(p, ok, kind, reqKind); return p; }
+  if(x.retry){ if(ok) p.r++; else p.w++; setMissKind(p, ok, kind, reqKind); return p; }
   if((p.s || 0) < WORD_HOLD) return markRec(map, key, ok, true, kind, reqKind);
   if(ok){ p.r++; if(kind === "type") p.s++; } else { p.w++; p.s--; }
   if(p.prov && (p.s>=WORD_MASTERED || !ok)) delete p.prov;
@@ -1387,9 +1386,10 @@ const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c ===
 // pack.wordsBy "typed": held words that can be asked typed now (c.held, dayHeldMark) come right after
 // the misses, up to hshare of the plan: a held word moves only by one typed ask per session, and by the
 // weak floor alone (lowest streak first) the words at 2 piled up (fb18 review: 129 and rising). They
-// leave the refresh share its slots, taken next; every slot moved between the two trades held words
-// reaching known against mastered refresh (fb18 owner-export tuning, report table).
-const DAY_EXTRA_POOL = 4, DAY_WEAK_FLOOR = 0.4, DAY_HELD_SHARE_REVIEW = 0.2, DAY_HELD_SHARE_RECALL = 1;
+// leave the consolidating units their share (the fb10 M1 cap); the floor then counts them with the
+// word misses, as it counts misses without the flag, and refresh is taken once after the units (fb18
+// review 2 M2, M3; a refresh reserve ahead of the floor left held words ~2 a Review, owner export).
+const DAY_EXTRA_POOL = 4, DAY_WEAK_FLOOR = 0.4, DAY_HELD_SHARE_REVIEW = 0.3, DAY_HELD_SHARE_RECALL = 1;
 function dayPick(cands, n, d, rng, sn, cshare, t4max, hshare){
   const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
   (cands || []).forEach(c => { const t = dayTier(c, d, sn); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
@@ -1419,8 +1419,7 @@ function dayPick(cands, n, d, rng, sn, cshare, t4max, hshare){
     seen.add(c.key); if(c.alias) seen.add(c.alias); out.push(c); i++; } };
   const isW = c => String(c.key).startsWith("w:");
   take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE)));
-  if(hshare){ const rk = Math.min(Math.ceil(n * DAY_REFRESH_SHARE), T[2].length);
-    take([...T[1], ...T[3]].filter(c => c.held).sort((a, b) => dayAge(a.rec, b.rec) || a.j - b.j), Math.min(Math.round(n * hshare), n - out.length - rk)); take(T[2], rk); }
+  if(hshare) take([...T[1], ...T[3]].filter(c => c.held).sort((a, b) => dayAge(a.rec, b.rec) || a.j - b.j), Math.min(Math.round(n * hshare), n - out.length - Math.min(Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE)), C.length)));
   take(T[1].filter(isW), Math.min(Math.round(n * DAY_WEAK_FLOOR) - out.filter(isW).length, n - out.length - Math.min(Math.ceil(n * DAY_CONSOLIDATE_SHARE), C.length))); take(C, Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE))); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
   take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[0], n); take(T[4], t4max != null ? t4max - out.length : n);
   return out;

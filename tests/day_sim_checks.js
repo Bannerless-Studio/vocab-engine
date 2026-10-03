@@ -281,6 +281,9 @@ function metrics(seedP, pack, day, K){
     const drillId = d.sess + ":" + d.step;
     if(!d.ok) missedIn.add(d.key + "@" + drillId);
     else if(!missedIn.has(d.key + "@" + drillId)){ okKind.add(d.key + "|" + d.kind); okAny.add(d.key); }
+    // A word missed since is asked again in a kind that settles the miss, which may be the kind it was
+    // right in: no repeat (as windowRepeats; under wordsBy a typed miss is replayed as recall, fb18).
+    if(!d.ok && d.key[0] === "w") [...okKind].filter(x => x.startsWith(d.key + "|")).forEach(x => okKind.delete(x));
   });
   // A miss "comes back" when the unit is drilled again in a later session or later step.
   const pos = d => d.sess * 10 + (d.step || 0);
@@ -344,6 +347,9 @@ function windowRepeats(drilled0, dayOf){
     const retry = [d.key, d.also].some(x => x && missedIn.has(x + "@" + did));
     if(!retry && prev.some(p => p.did !== did && (d.sess - p.sess <= VC.DAY_RECENT_SESSIONS || dayOf(p.sess) === dayOf(d.sess)))) ex.push(`${k} s${d.sess + 1}`);
     if(!d.ok) missedIn.add(d.key + "@" + did); else if(!retry) right.set(k, prev.concat({ sess: d.sess, did }));
+    // A word missed here counts as missed since for its later drills: under wordsBy a typed miss is
+    // replayed as recall though recall was right earlier (fb18 browser check 4).
+    if(!d.ok && d.key[0] === "w") [...right.keys()].filter(x => x.startsWith(d.key + "|")).forEach(x => right.delete(x));
   });
   return ex;
 }
@@ -437,7 +443,15 @@ function missesCarried(drilled0){
       const heavy = [...um, ...Array.from({ length: 15 }, (_, i) => U(300 + i, 3 + i % 2, 2)), ...Array.from({ length: 15 }, (_, i) => W(300 + i, 4, 1)), ...Array.from({ length: 15 }, (_, i) => W(400 + i, 1, 3))];
       const cls = out => ({ miss: out.filter(c => dh.a[c.key]).length, weak: weakW(out), cons: out.filter(c => c.key[0] === "c" && !dh.a[c.key] && c.rec.s >= 3).length, refresh: out.filter(c => c.key[0] === "w" && c.rec.s >= 3).length });
       const oh = cls(pick(VC, heavy, dh)), ob = OLD ? cls(pick(OLD, heavy, dh)) : {};
-      check(`B (review M1): 15 unit misses pending, Review 20: consolidating ${oh.cons} (>= 3), weak words ${oh.weak} (>= 5), misses ${oh.miss}, refresh ${oh.refresh} (before: ${ob.cons} / ${ob.weak} / ${ob.miss} / ${ob.refresh})`, oh.cons >= 3 && oh.weak >= 5 && oh.miss === 12); }
+      check(`B (review M1): 15 unit misses pending, Review 20: consolidating ${oh.cons} (>= 3), weak words ${oh.weak} (>= 5), misses ${oh.miss}, refresh ${oh.refresh} (before: ${ob.cons} / ${ob.weak} / ${ob.miss} / ${ob.refresh})`, oh.cons >= 3 && oh.weak >= 5 && oh.miss === 12);
+      // The zh path (pack.wordsBy "typed": held words take hshare after the misses) keeps the cap too
+      // (fb18 review 2 M2), in Review and in Recall (share 1, bounded by the consolidating share).
+      const held = Array.from({ length: 10 }, (_, i) => Object.assign(W(500 + i, 2, 2), { held: true }));
+      const hz = cls(VC.dayPick([...heavy, ...held], 20, dh, mulberry32(5), 10, VC.DAY_TYPED_CONSOLIDATE_SHARE, undefined, VC.DAY_HELD_SHARE_REVIEW));
+      const calm = [...heavy.slice(15), ...held];
+      const rz = VC.dayPick(calm, 8, { d: DAY, n: 1, a: {} }, mulberry32(5), 10, VC.DAY_TYPED_CONSOLIDATE_SHARE, undefined, VC.DAY_HELD_SHARE_RECALL);
+      const rzc = rz.filter(c => c.key[0] === "c").length, rzh = rz.filter(c => c.held).length, ck = Math.ceil(8 * VC.DAY_TYPED_CONSOLIDATE_SHARE);
+      check(`B (review M1, zh path with held words): Review consolidating ${hz.cons} (>= 3), weak words ${hz.weak} (>= 5), misses ${hz.miss}; Recall of 8: consolidating ${rzc} (>= ${ck}), held ${rzh}`, hz.cons >= 3 && hz.weak >= 5 && hz.miss === 12 && rzc >= ck && rzh > 0); }
     // Owner shape (the 2026-10-03 export, scaled): 595 words, a fifth weak at streak 1-2; 300 units,
     // a quarter weak at 0-1 and the rest at 3; 6 pending hear misses on words, 4 charRecall misses.
     // Weak words: below mastered or with a pending miss (fb8-weak-analysis definition); a typed

@@ -472,7 +472,13 @@ const store = {
 // session record (today.tw) so a reload does not ask them typed again. A word missed earlier in this
 // drill is a retry (VC.markWordRec), and a word no typed kind fits as shown keeps the old rule.
 const WORDS_TYPED = VC.wordsTypedOn(PACK), typedSession = new Set();
-const wordRetry = (id, ok) => !!(D && Array.isArray(D.miss) && D.miss.filter(m => m && m.key === "w:" + id).length > (ok ? 0 : 1));
+// wordsBy: D.down holds the words a miss in this drill stepped down from WORD_HOLD+; their later answers
+// in the drill are the retry (no streak credit). A word below it keeps the old retry (fb18 review 2 M1: a
+// Learn pair's second item).
+function wordRetry(id, ok){
+  if(!D) return false; const dn = D.down || (D.down = []); if(dn.includes(id)) return true;
+  if(!ok && ((prog.w[id] || {}).s || 0) >= VC.WORD_HOLD) dn.push(id); return false;
+}
 function markWord(id, ok, kind, reqKind){ VC.ensureWordRec(prog, WORDS, PACK, id); VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, WORDS_TYPED ? { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) } : undefined); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); dayNote("w:" + id, kind, ok); store.save(); }
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
 function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
@@ -1581,7 +1587,7 @@ function drillRec(d){
   const items = (d.cur ? [d.cur] : []).concat(d.q);
   return { o: d.rzo, cur: !!d.cur, ord: d.cur && d.cur.rzShown ? d.cur.rzShown : null,
     q: items.map(it => rzEncItem(it, it === d.cur || !!it.rzSeen)), right: d.right, seen: d.seen,
-    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined };
+    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined, dn: d.down && d.down.length ? d.down.slice() : undefined };
 }
 // A miss is kept as its item's recipe, once per key (missSummary shows the first one): the
 // reveal markup with its example sentences is ~3 KB a miss.
@@ -1681,6 +1687,7 @@ function sessionResume(forTab){
     if(o.o === "wordsSet"){ wordsQuery = ""; wordsLv = o.lv; wordsSet = o.set; }
     if(o.o === "lesson") soundsSel = o.i;
     D = { q: items, right: rec.drill.right, seen: rec.drill.seen, miss: misses, onDone, summary: results.summary, onShown: results.onShown, rzo: o, rzs: results.summary.rzs };
+    if(WORDS_TYPED && Array.isArray(rec.drill.dn)) D.down = rec.drill.dn.filter(id => typeof id === "string");
     dnext();
   } else if(rd){ D = null; RD = rd; readRender(); }
   else { D = null; todayStepState.step = todayStepState.at; todayStep(); }
