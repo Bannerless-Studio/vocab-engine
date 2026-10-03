@@ -145,6 +145,10 @@ def check_pack(pack, rep):
         rep.err('pack.listenQuestions must be "all" when present')
     if "rereadPerfectDays" in pack and not (isinstance(pack["rereadPerfectDays"], int) and not is_bool(pack["rereadPerfectDays"]) and pack["rereadPerfectDays"] > 0):
         rep.err("pack.rereadPerfectDays must be a positive integer when present")
+    if "readRotation" in pack and not is_bool(pack["readRotation"]):
+        rep.err("pack.readRotation must be a boolean")
+    if pack.get("readRotation") is True and not pack.get("dayAware"):
+        rep.err("pack.readRotation needs pack.dayAware (passes are counted by session)")
     if "pronFirst" in pack:
         if not is_bool(pack["pronFirst"]):
             rep.err("pack.pronFirst must be a boolean")

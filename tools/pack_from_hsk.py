@@ -373,8 +373,9 @@ def main(argv):
         "pauseNew": True,
         # Every question of a listening pass is audio-only (docs/PACK_SCHEMA.md "Listening pass"; owner 2026-10-03).
         "listenQuestions": "all",
-        # A passage read with a perfect score comes back after 30 days (docs/PACK_SCHEMA.md "Today"; owner 2026-10-03).
-        "rereadPerfectDays": 30,
+        # Read stage alternates reading and listening passes by session, no day gates; questions
+        # shuffled per pass (docs/PACK_SCHEMA.md "readRotation"; owner 2026-10-03). Replaces rereadPerfectDays.
+        "readRotation": True,
     }
 
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).

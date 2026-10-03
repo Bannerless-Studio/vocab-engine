@@ -18,10 +18,11 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // this suite is about listening, so it runs the zh pack with them off.
 // dayAware (docs/PACK_SCHEMA.md) post-dates the pinned controls and is not what this suite checks.
 const PACK_DAY = loadConst(path.join(ZH, "pack.js"), "PACK");
+const PACK_DAY_NR = (p => { const q = Object.assign({}, p); delete q.readRotation; return q; })(PACK_DAY);
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
 const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); };
-const PACK = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; delete p.optsOneScript; delete p.optsMix; delete p.listenQuestions; delete p.rereadPerfectDays; return p; })(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")));
+const PACK = (p => { delete p.typedFrom; delete p.glossFocus; delete p.dayAware; delete p.helpClose; delete p.readAnswerBlock; delete p.optsOneScript; delete p.optsMix; delete p.listenQuestions; delete p.rereadPerfectDays; delete p.readRotation; return p; })(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });
@@ -39,6 +40,8 @@ const BASE_W7 = "4303f59";
 const BASE_LQ = "7a21ccd";
 // [13] flag-off control for pack.rereadPerfectDays (incl. the first listening pass): main before fb14-first-listen.
 const BASE_RP = "3790814";
+// [14] flag-off control for pack.readRotation: main before fb16-read-rotation.
+const BASE_RR = "491d470";
 
 let fails = 0, passes = 0;
 function check(name, cond, detail){
@@ -591,7 +594,8 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
 
   console.log("\n[11] pack.dayAware on (zh as shipped): listening pass, no-voice plans, Test Sentences logs the kind it asks");
   try{
-    const b = await boot({ pack: PACK_DAY });
+    // readRotation picks by session, not by day ([14]); this section is about dayAware alone.
+    const b = await boot({ pack: PACK_DAY_NR });
     b.api.setProg(rereadProg(PASSAGES, P)); b.api.today();
     const lrow = planRow(b.api.html("panel"), "Listen");
     b.api.enterTodayStep(5);
@@ -648,7 +652,8 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
       check(`flag off: listening pass walk (plan screen, each question before/after answering, results) byte-identical to base (${cur.length} captures)`, cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
     }
     const n = P.questions.length;
-    const b = await boot({ pack: PACK_DAY });
+    // Pack question order: readRotation's shuffle is checked in [14].
+    const b = await boot({ pack: PACK_DAY_NR });
     const pr = rereadProg(PASSAGES, P); b.api.setProg(pr);
     b.api.startPassage(P, true, "listen");
     check(`zh: audioOnly covers all ${n} questions`, JSON.stringify(b.api.rd().audioOnly) === JSON.stringify(Array.from({ length: n }, (_, i) => i)));
@@ -672,7 +677,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("zh results: ' · question shown' only on the tapped question's line", lines.length === n && lines.every((l, i) => l.includes("· question shown") === (i === tapIdx)));
     const rec = pr.read.done[P.id];
     check("zh done record: l:1, same fields as before (no new keys)", rec.l === 1 && rec.sc === n && rec.n === n && JSON.stringify(Object.keys(rec).sort()) === JSON.stringify(["d", "l", "n", "sc", "x"]), JSON.stringify(rec));
-    const cv = await boot({ pack: PACK_DAY, voices: [{ lang: "en-US", name: "en" }], passages: PASSAGES.map(p => p.id === P.id ? Object.assign({}, P, { sentences: P.sentences.map((s, i) => Object.assign({}, s, { audio: `audio/p/${i}.mp3` })) }) : p) });
+    const cv = await boot({ pack: PACK_DAY_NR, voices: [{ lang: "en-US", name: "en" }], passages: PASSAGES.map(p => p.id === P.id ? Object.assign({}, P, { sentences: P.sentences.map((s, i) => Object.assign({}, s, { audio: `audio/p/${i}.mp3` })) }) : p) });
     cv.api.setProg(rereadProg(PASSAGES, P)); cv.api.startPassage(PASSAGES.find(p => p.id === P.id), true, "listen");
     cv.api.el("rdone").click();
     check("zh with clips but no voice: still no audio-only question", !/id="qsh"/.test(cv.api.html("panel")) && /class="med wd"/.test(cv.api.html("panel")));
@@ -721,7 +726,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("first attempt after a reading pass -> listening pass", VC.readPassMode(it, pl, true) === "listen");
     check("after a listening pass (l:1) -> reading pass", VC.readPassMode(it, mk([[A, "full", 31, true]]), true) === "read");
     check("no way to listen -> reading pass", VC.readPassMode(it, pl, false) === "read");
-    check("zh as shipped sets rereadPerfectDays: 30; the suite's flag-off PACK does not", PACK_DAY.rereadPerfectDays === 30 && !("rereadPerfectDays" in PACK));
+    check("zh as shipped drops rereadPerfectDays for readRotation; the suite's flag-off PACK sets neither", !("rereadPerfectDays" in PACK_DAY) && PACK_DAY.readRotation === true && !("rereadPerfectDays" in PACK) && !("readRotation" in PACK));
     let baseVC = null;
     try{
       const src = cp.execSync(`git show ${BASE_RP}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
@@ -740,6 +745,127 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
       }
       check(`flag off: nextReadItem identical to base over ${n} progress shapes`, same);
     }
+  }catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  console.log(`\n[14] pack.readRotation: reading and listening passes alternate by session, random picks, shuffled questions; flag off = ${BASE_RR}`);
+  try{
+    const RON = PACK_DAY;
+    const A = PASSAGES[0], B = PASSAGES[1], C = PASSAGES[2], D4 = PASSAGES[3];
+    const full = p => p.questions.length;
+    const blank = () => { const pr = VC.normalizeProg({ sets: {}, placedOnce: true, sessions: 5 }, RON);
+      pr.read = { unlocked: Object.fromEntries(RON.levels.map(l => [l.id, 1])), done: {} }; return pr; };
+    // All passages done; spec [passage, sc, x, s, ls] overrides; sn is the latest session.
+    const allDone = (sn, spec) => { const pr = blank(); pr.sn = sn;
+      PASSAGES.forEach(p => { pr.read.done[p.id] = { sc: full(p), n: full(p), d: daysAgo(1), x: 2, s: 1, ls: 1 }; });
+      (spec || []).forEach(([p, sc, x, s, ls]) => { const r = { sc: sc === "full" ? full(p) : sc, n: full(p), d: daysAgo(1), x }; if(s != null) r.s = s; if(ls != null) r.ls = ls; pr.read.done[p.id] = r; });
+      return pr; };
+    const yes = () => true, no = () => false;
+    const nx = (pr, o) => VC.nextReadItem(PASSAGES, WORDS, (o && o.pack) || RON, pr, daysAgo(0), !!(o && o.paused), undefined, o && o.rng, o && o.listen === false ? no : yes);
+    const tag = r => r ? (r.reason === "new" ? "new" : r.mode === "listen" ? "listen" : "reread") : "none";
+    // One Today session: plan (before Go), Go (sn + 1), the pass, all answers right.
+    const session = (pr, o) => { const r = nx(pr, o); VC.daySessionStart(pr, RON);
+      if(r) VC.markPassageDone(pr, r.p.id, full(r.p), full(r.p), daysAgo(0), VC.readPassMode(r, pr, !(o && o.listen === false), RON) === "listen", RON);
+      return r; };
+    const run = (pr, k, o) => Array.from({ length: k }, () => session(pr, o));
+    const pr8 = blank(), seq = run(pr8, 8, { rng: mulberry32(1) });
+    check(`8 sessions: new, new (only passage read last session), then listen/new alternate: ${seq.map(tag).join(",")}`,
+      seq.map(tag).join(",") === "new,new,listen,new,listen,new,listen,new");
+    check("listening picks never the previous session's passage", seq.every((r, i) => r.mode !== "listen" || (i > 0 && r.p.id !== seq[i - 1].p.id)));
+    const ra = pr8.read.done[seq[0].p.id];
+    check(`s/ls written: first passage s 3, ls 3 after its listening pass (${JSON.stringify(ra)})`, ra.s === 3 && ra.ls === 3 && ra.l === 1 && ra.x === 2);
+    const rd = pr8.read.done[seq[7].p.id];
+    check(`reading pass: s only, no ls (${JSON.stringify(rd)})`, rd.s === 8 && !("ls" in rd) && !("l" in rd));
+    check("ls is kept across a later reading pass", (() => { const pr = allDone(4, [[A, 0, 2, 3, 2]]); VC.daySessionStart(pr, RON); VC.markPassageDone(pr, A.id, 1, full(A), daysAgo(0), false, RON); const r = pr.read.done[A.id]; return r.s === 5 && r.ls === 2 && !r.l; })());
+    // Listening turn picks: latest pass a reading pass (s 5 > every ls).
+    const lt = spec => allDone(5, [[D4, "full", 1, 5]].concat(spec));
+    const picks = (pr, o) => new Set(Array.from({ length: 40 }, (_, i) => (nx(pr, Object.assign({ rng: mulberry32(i + 1) }, o)) || { p: { id: "-" } }).p.id));
+    const nev = picks(lt([[A, "full", 1, 2], [B, "full", 1, 3]]));
+    check(`never-listened first: only A and B lack ls (${[...nev].join(",")})`, nev.size === 2 && nev.has(A.id) && nev.has(B.id));
+    const old = picks((() => { const pr = lt([]); pr.read.done[B.id].ls = 0; pr.read.done[C.id].ls = 0; return pr; })());
+    check(`then the smallest ls, ties random (${[...old].join(",")})`, old.size === 2 && old.has(B.id) && old.has(C.id));
+    check("listening turn result: reason reread, mode listen", (() => { const r = nx(lt([[A, "full", 1, 2]])); return r && r.reason === "reread" && r.mode === "listen" && VC.readPassMode(r, lt([]), true, RON) === "listen"; })());
+    check("listening turn skips the latest session's passages (s === sn)", (() => { const pr = lt([]); Object.values(pr.read.done).forEach(r => { r.s = 5; delete r.ls; }); pr.read.done[A.id].s = 2; return [...picks(pr)].join() === A.id; })());
+    check("everything passed in the latest session: no Read stage", (() => { const pr = lt([]); Object.values(pr.read.done).forEach(r => { r.s = 5; }); return nx(pr) === null; })());
+    check("canListen false: listening turn becomes a reading turn", tag(nx(lt([[A, "full", 1, 2]]), { listen: false })) !== "listen" && VC.readPassMode(nx(lt([[A, "full", 1, 2]])), lt([]), false, RON) === "read");
+    check("canListen false over 6 sessions: never a listening pass", run(blank(), 6, { listen: false, rng: mulberry32(3) }).every(r => r.mode === "read" && r.reason === "new"));
+    // Reading turn with nothing new: imperfect first, fewest x, ties random; no day gate.
+    const rt = spec => { const pr = allDone(5, spec); Object.values(pr.read.done).forEach(r => { r.ls = 5; }); return pr; };
+    const imp = picks(rt([[A, 0, 3, 2, 5], [B, 1, 2, 2, 5], [C, 0, 2, 2, 5]]));
+    check(`out of new passages: imperfect first, fewest x, ties random (${[...imp].join(",")})`, imp.size === 2 && imp.has(B.id) && imp.has(C.id));
+    check("re-read offered with every passage done today (no day gate)", (() => { const pr = rt([]); Object.values(pr.read.done).forEach(r => { r.d = daysAgo(0); }); const r = nx(pr); return r && r.reason === "reread" && r.mode === "read"; })());
+    check("perfect re-reads: fewest x among all", (() => { const pr = rt([]); pr.read.done[C.id].x = 1; return [...picks(pr)].join() === C.id; })());
+    check("a new passage wins the reading turn", (() => { const pr = rt([[A, 0, 1, 2, 5]]); delete pr.read.done[B.id]; const r = nx(pr); return tag(r) === "new" && r.p.id === B.id && r.mode === "read"; })());
+    // Paused: no new passage, the rest unchanged.
+    const pz = (() => { const pr = rt([[A, 0, 1, 2, 5]]); delete pr.read.done[B.id]; return pr; })();
+    check("paused, reading turn: a re-read, never the new passage", (() => { const r = nx(pz, { paused: true }); return r && r.reason === "reread" && r.p.id === A.id; })());
+    check("paused, listening turn: a listening pass", tag(nx(lt([[A, "full", 1, 2]]), { paused: true })) === "listen");
+    check("paused, nothing read: no Read stage", nx(blank(), { paused: true }) === null);
+    check("no rng given: the pick is stable across calls (plan re-renders)", (() => { const pr = lt([]); pr.read.done[A.id].ls = 0; pr.read.done[B.id].ls = 0; pr.read.done[C.id].ls = 0; const a = nx(pr), b = nx(pr); return a && b && a.p.id === b.p.id; })());
+    check("readRotation without dayAware is off (day-gated path)", (() => { const p = Object.assign({}, RON); delete p.dayAware; return !VC.readRotationOn(p) && VC.readRotationOn(RON) && !VC.readRotationOn(Object.assign({}, RON, { readRotation: 1 })); })());
+    // Question order.
+    const P4 = PASSAGES.find(p => p.questions.length >= 4);
+    const ord = x => VC.passageForPass(P4, x, RON).questions.map(q => P4.questions.indexOf(q)).join();
+    check(`question order: a permutation, stable for the same attempt count (${ord(0)})`, ord(0) === ord(0) && ord(0).split(",").map(Number).sort((a, b) => a - b).join() === P4.questions.map((_, i) => i).join());
+    check(`question order changes between attempts (${[0, 1, 2, 3].map(ord).join(" | ")})`, new Set([0, 1, 2, 3].map(ord)).size > 1);
+    check("flag off: passageForPass returns the passage itself", VC.passageForPass(P4, 2, PACK) === P4 && VC.passageForPass(P4, 2, PACK_DAY_NR) === P4);
+    // App: the pass runs in the shuffled order; answers, weak words, done record follow it.
+    {
+      const b = await boot({ pack: RON });
+      const pr = allDone(5, [[P4, "full", 2, 4, 4]]); b.api.setProg(pr);
+      b.api.startPassage(P4, true, "read");
+      const RP = b.api.rd().p, want = VC.passageForPass(P4, 2, RON);
+      check("app: RD.p carries the shuffled questions, qx the attempt count", RP.questions.map(q => q.q).join("|") === want.questions.map(q => q.q).join("|") && b.api.rd().qx === 2 && RP !== P4);
+      b.api.el("rdone") ? b.api.el("rdone").click() : b.api.el("rgo").click();
+      const shown = [];
+      for(let qi = 0; qi < RP.questions.length; qi++){
+        const q = RP.questions[qi]; shown.push(b.api.html("panel").includes(VC.escapeHtml(q.q)));
+        const os = b.api.el("o").children; (qi === 0 ? os.find(x => x.dataset.v !== String(q.answer)) : os.find(x => x.dataset.v === String(q.answer))).click();
+        b.api.el("nx").click(); await sleep(DEFER);
+      }
+      check("app: question i shows RD.p.questions[i]", shown.every(Boolean));
+      const rec = pr.read.done[P4.id];
+      check(`app: done record sc n-1 (first shown question missed), s 5 (${JSON.stringify(rec)})`, rec.sc === full(P4) - 1 && rec.n === full(P4) && rec.x === 3 && rec.s === 5 && rec.ls === 4 && !rec.l);
+      const ww = VC.passageWeakWords(RP, { tapped: [], answers: b.api.rd().answers }, Object.fromEntries(WORDS.map(w => [w.id, w])));
+      const wantW = (RP.questions[0].words || []).filter(id => WORDS.some(w => w.id === id));
+      check("app: weak words are the missed question's words", JSON.stringify(ww.map(e => e.id).sort()) === JSON.stringify([...new Set(wantW)].sort()));
+    }
+    {
+      const b = await boot({ pack: RON });
+      b.api.setProg(lt([[A, "full", 1, 2]])); b.api.today();
+      const lrow = planRow(b.api.html("panel"), "Listen");
+      b.api.today();
+      check("app: Today plan shows the listening turn, same row after a re-render", !!lrow && lrow === planRow(b.api.html("panel"), "Listen"));
+    }
+    let baseVC = null;
+    try{
+      const src = cp.execSync(`git show ${BASE_RR}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseVC = m.exports;
+    }catch(e){}
+    check(`base ${BASE_RR} core.js loaded from git (a missing sha is a failure)`, !!baseVC);
+    if(baseVC){
+      const PON = Object.assign({}, PACK, { rereadPerfectDays: 30 });
+      const ago = [0, 1, 6, 7, 8, 29, 30, 31, 90];
+      let same = true, n = 0;
+      for(const pk of [PACK, PON, PACK_DAY_NR, Object.assign({}, RON, { dayAware: false }), Object.assign({}, RON, { readRotation: false })])
+      for(const sc of [0, 1, "full"]) for(const x of [1, 2]) for(const a of ago) for(const bb of ago) for(const paused of [false, true]){
+        const pr = rereadProg(PASSAGES, A, { sc: full(A), d: daysAgo(1) });
+        PASSAGES.forEach(p => { pr.read.done[p.id] = { sc: full(p), n: full(p), d: daysAgo(1), x: 2, s: 3 }; });
+        pr.read.done[A.id] = { sc: sc === "full" ? full(A) : sc, n: full(A), d: daysAgo(a), x, s: 2, ls: 1 };
+        pr.read.done[B.id] = { sc: full(B), n: full(B), d: daysAgo(bb), x };
+        pr.read.done[C.id] = { sc: 0, n: full(C), d: daysAgo(bb), x: 1, l: 1 };
+        const w = baseVC.nextReadItem(PASSAGES, WORDS, pk, pr, daysAgo(0), paused), g = VC.nextReadItem(PASSAGES, WORDS, pk, pr, daysAgo(0), paused, 3, Math.random, yes);
+        const wm = w && baseVC.readPassMode(w, pr, true), gm = g && VC.readPassMode(g, pr, true, pk);
+        same = same && (w ? w.p.id + w.reason + wm : null) === (g ? g.p.id + g.reason + gm : null); n++;
+      }
+      check(`flag off (absent, false, or no dayAware): nextReadItem + readPassMode identical to base over ${n} progress shapes`, same);
+      const recs = [PACK, PACK_DAY_NR, undefined].map(pk => { const a = rereadProg(PASSAGES, A), bp = rereadProg(PASSAGES, A); a.sn = bp.sn = 4;
+        VC.markPassageDone(a, A.id, 1, 2, "2026-10-03", true, pk); baseVC.markPassageDone(bp, A.id, 1, 2, "2026-10-03", true);
+        VC.markPassageDone(a, B.id, 2, 2, "2026-10-03", false, pk); baseVC.markPassageDone(bp, B.id, 2, 2, "2026-10-03", false);
+        return JSON.stringify(a) === JSON.stringify(bp); });
+      check("flag off: markPassageDone writes the base record (no s/ls)", recs.every(Boolean));
+    }
+    check("validateProgShape: numeric s/ls accepted, a string rejected", VC.validateProgShape({ v: VC.PROG_VERSION, sets: {}, read: { done: { a: { sc: 1, n: 2, d: "2026-10-03", x: 1, s: 3, ls: 2 } } } }, VC.levelIds(RON)).ok
+      && !VC.validateProgShape({ v: VC.PROG_VERSION, sets: {}, read: { done: { a: { sc: 1, n: 2, d: "2026-10-03", x: 1, s: "3" } } } }, VC.levelIds(RON)).ok);
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);

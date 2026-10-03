@@ -39,6 +39,7 @@ Why it is built this way (one line each):
 - **Stale-dist guard:** engine_checks rebuilds dist into a scratch file and byte-compares; tools/check_site.sh does the same for a language repo's index.html + sw.js, because a stale sw.js keeps serving an old page.
 - **Lenient-fold collision guard:** an answer that matches only after lenient folding is wrong when it spells another pack word (`si` for `sí`, ما for ماء); covers every lenient fold (docs/PACK_SCHEMA.md "Collision guard").
 - **Read stage in Today:** passage reading is a skippable Today stage (first not-done passage at an unlocked level, else a spaced re-read) so reading happens without visiting a tab.
+- **Read rotation (`readRotation`, zh):** no day gates; reading and listening passes alternate by pass with random picks and shuffled questions, because 60 passages can fit in one day (owner 2026-10-03).
 - **Listening pass:** a spaced re-read becomes a listening pass (text hidden, half the questions audio-only, done record gains `l:1`) only when every sentence is playable on this device.
 - **Pack-gated features:** characters, script primer, tones, audio, typing modes switch on from pack fields only; a pack without them must render byte-identically (flag-off proof).
 

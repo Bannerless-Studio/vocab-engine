@@ -582,5 +582,38 @@ console.log("\n[bare5] zh characters.bare 6 -> 5 (fb10-weak-floor; owner 2026-10
   }
 }
 
+console.log("\n[rotation-s] pack.readRotation (fb16): optional read.done s / ls (session of the latest pass / listening pass); older engines keep them; old records load");
+{
+  const RR = LAG_PACK;
+  const old = { unlocked: { "1": 1 }, done: { p0001: { sc: 3, n: 5, d: "2026-09-01", x: 1 }, p0002: { sc: 5, n: 5, d: "2026-09-02", x: 2, l: 1 } } };
+  const base = Object.assign(mig("HEAD"), { read: clone(old), sn: 6 });
+  const bo = VC.bootProg(JSON.stringify(base), RR);
+  check("records without s/ls boot unchanged here (no backup, nothing added)", RR.readRotation === true && bo.backupRaw === null && eq(bo.prog.read, old));
+  const p = clone(bo.prog);
+  VC.markPassageDone(p, "p0001", 4, 5, "2026-10-03", true, RR);
+  VC.markPassageDone(p, "p0002", 5, 5, "2026-10-03", false, RR);
+  check("this build writes s (and ls on a listening pass)", eq(p.read.done.p0001, { sc: 4, n: 5, d: "2026-10-03", x: 2, l: 1, s: 6, ls: 6 }) && eq(p.read.done.p0002, { sc: 5, n: 5, d: "2026-10-03", x: 3, s: 6 }));
+  const raw = JSON.stringify(p);
+  const here = VC.bootProg(raw, RR), im = VC.applyImport(null, raw, RR);
+  check("s/ls survive boot and export/import byte-identical", here.backupRaw === null && JSON.stringify(here.prog) === raw && im.ok && eq(im.prog.read, p.read));
+  const bad = JSON.stringify(Object.assign(clone(p), { read: { done: { p0001: { sc: 1, n: 5, d: "2026-09-27", x: 1, ls: "6" } } } }));
+  check("a non-number ls is rejected by validation (boot keeps a backup)", VC.bootProg(bad, RR).backupRaw === bad);
+  let eng = null, oldPack = null;
+  try {
+    const cp = require("child_process"), os = require("os");
+    const src = cp.execSync(`git -C "${ROOT}" show 491d470:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_491d470.js"); fs.writeFileSync(f, src); eng = require(f);
+    oldPack = JSON.parse(cp.execSync(`git -C "${ROOT}" show 491d470:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+  } catch(e){ eng = null; }
+  if(!eng) skip("engine 491d470 not in this checkout's history");
+  else {
+    const ob = eng.bootProg(raw, oldPack);
+    check("engine 491d470 (its zh pack) boots progress with s/ls: no backup, read records byte-equal", ob.backupRaw === null && JSON.stringify(ob.prog.read) === JSON.stringify(p.read));
+    const q = clone(ob.prog); eng.markPassageDone(q, "p0001", 5, 5, "2026-10-04", false);
+    const back = VC.bootProg(JSON.stringify(q), RR);
+    check("a pass on 491d470 drops s/ls from that record only; it boots here (no backup)", back.backupRaw === null && !("s" in back.prog.read.done.p0001) && !("ls" in back.prog.read.done.p0001) && back.prog.read.done.p0002.s === 6);
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

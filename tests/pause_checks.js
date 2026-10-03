@@ -27,8 +27,8 @@ const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // The lag Learn row's set label changed after 36aee02 (per-level, fb9): both sides compared with it masked.
-// optsMix (docs/PACK_SCHEMA.md "optsMix") came after 36aee02: the controls drop it too.
-const NOMIX = (p => { const q = Object.assign({}, p); delete q.optsMix; return q; })(PACK);
+// optsMix (docs/PACK_SCHEMA.md "optsMix") and readRotation came after 36aee02: the controls drop them too.
+const NOMIX = (p => { const q = Object.assign({}, p); delete q.optsMix; delete q.readRotation; return q; })(PACK);
 const OFF = (p => { const q = Object.assign({}, p); delete q.pauseNew; return q; })(NOMIX);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));

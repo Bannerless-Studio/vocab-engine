@@ -146,6 +146,7 @@ return {
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
   startPassage: p => { startPassage(p); },
   todayAt: s => { todayStepState = { step: s }; todayStep(); },
+  todayJump: s => { D = null; todayStepState.step = s; todayStep(); },
   lesson: i => { switchToTab("sounds", "Sounds"); soundsSel = i; soundsRender(); },
   build: () => sessionBuild(), render: () => render(), key: k => (document._listeners.keydown || []).forEach(f => f({ key: k, preventDefault(){}, target: null })),
   hide: () => (document._listeners.visibilitychange || []).forEach(f => { document.visibilityState = "hidden"; f(); }),
@@ -425,6 +426,26 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       for(let i = 0; i < api.rd().p.questions.length; i++){ api.el("o").children[0].click(); api.el("nx").click(); }
       api.el("rcont").click();
       check("Today Read stage: Continue after the reload finishes the Today session", /Session done/.test(api.html("panel")) && !st.ls.getItem(SKEY));
+    }
+    {
+      // pack.readRotation (fb16): the Today Read pick (listening turn, random) and its shuffled
+      // question order survive a reload; the pick is made before Go, so Go cannot re-roll it.
+      const st = fresh(), pr = JSON.parse(st.ls.getItem(KEY));
+      const done = PASSAGES.filter(x => x.lv === "1").slice(0, 4);
+      pr.sn = 5; pr.read = Object.assign(pr.read || {}, { unlocked: { "1": 1 }, done: {} });
+      done.forEach((x, i) => { pr.read.done[x.id] = { sc: x.questions.length, n: x.questions.length, d: "2026-10-01", x: 1, s: i === 3 ? 5 : 2 }; });
+      st.ls.setItem(KEY, JSON.stringify(pr));
+      let { api } = await boot(Object.assign({ seed: 24 }, st));
+      api.clickTab("today");
+      const row = /Listen<\/td>/.test(api.html("panel"));
+      api.el("go").onclick({});
+      api.todayJump(5);
+      const r0 = api.rd(), pid = r0 && r0.p.id, qs = r0 && r0.p.questions.map(q => q.q).join("|");
+      check(`readRotation: Today plans a listening pass of a passage not passed in session 5 (${pid})`, PACK.readRotation === true && row && !!r0 && r0.mode === "listen" && done.slice(0, 3).some(x => x.id === pid));
+      api.el("rdone").click();
+      ({ api } = await boot(Object.assign({ seed: 25 }, st)));
+      const r1 = api.rd();
+      check("readRotation: reload keeps the passage, the listening mode and the question order", !!r1 && r1.p.id === pid && r1.mode === "listen" && r1.p.questions.map(q => q.q).join("|") === qs && r1.qi === 0);
     }
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 

@@ -154,5 +154,5 @@
  "dayAware": true,
  "pauseNew": true,
  "listenQuestions": "all",
- "rereadPerfectDays": 30
+ "readRotation": true
 }

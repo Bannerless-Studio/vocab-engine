@@ -1721,7 +1721,8 @@ function isoDayNumber(d){
   return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) / 864e5 : NaN;
 }
 // reviewOnly (pauseNew paused): a spaced re-read only, never a first read.
-function nextReadItem(passages, words, pack, prog, now, reviewOnly){
+function nextReadItem(passages, words, pack, prog, now, reviewOnly, sn, rng, canListen){
+  if(readRotationOn(pack)) return nextReadRotation(passages, words, pack, prog, reviewOnly, sn, rng, canListen);
   const fresh = reviewOnly ? null : suggestPassage(passages, words, pack, prog);
   if(fresh) return { p: fresh, reason: "new" };
   const today = isoDayNumber(now);
@@ -1747,9 +1748,45 @@ function nextReadItem(passages, words, pack, prog, now, reviewOnly){
   if(!best) best = perf;
   return best ? { p: best, reason: "reread" } : null;
 }
+// pack.readRotation (owner 2026-10-03): day gates say little when 60 passages can fit in one
+// day, so stages alternate by pass instead: after a reading pass a listening pass, after a
+// listening pass a reading one. Passages passed in the latest session (s === sn) wait one.
+function readRotationOn(pack){ return !!(pack && pack.readRotation === true && dayAwareOn(pack)); }
+function randomMin(list, key, rng){
+  if(!list.length) return null;
+  const k = Math.min(...list.map(key));
+  const tied = list.filter(x => key(x) === k);
+  return tied[Math.floor((rng || Math.random)() * tied.length)] || tied[0];
+}
+function nextReadRotation(passages, words, pack, prog, reviewOnly, sn, rng, canListen){
+  const now = Number.isInteger(sn) ? sn : daySn(prog);
+  const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
+  const open = new Set(readingLevels(passages, words, pack, prog).filter(l => l.unlocked).map(l => l.lv));
+  const cands = (passages||[]).filter(p => { const r = done[p.id];
+    return open.has(p.lv) && isObj(r) && typeof r.sc === "number" && typeof r.n === "number" && r.s !== now; });
+  // Seeded by the session and the pass count when the caller gives no rng: the Today plan
+  // re-renders, and its pick must not change until a pass is made.
+  if(typeof rng !== "function") rng = seededRng(hashSeed("read:" + now + ":" + Object.keys(done).reduce((a, k) => a + ((isObj(done[k]) && done[k].x) || 0), 0)));
+  let lastS = -Infinity, lastLs = -Infinity;
+  Object.keys(done).forEach(k => { const r = done[k]; if(!isObj(r)) return;
+    if(typeof r.s === "number" && r.s > lastS) lastS = r.s;
+    if(typeof r.ls === "number" && r.ls > lastLs) lastLs = r.ls; });
+  if(lastS > -Infinity && lastLs < lastS){
+    const hear = cands.filter(p => typeof canListen === "function" && canListen(p));
+    const never = hear.filter(p => typeof done[p.id].ls !== "number");
+    const p = never.length ? randomMin(never, () => 0, rng) : randomMin(hear, q => done[q.id].ls, rng);
+    if(p) return { p, reason: "reread", mode: "listen" };
+  }
+  const fresh = reviewOnly ? null : suggestPassage(passages, words, pack, prog);
+  if(fresh) return { p: fresh, reason: "new", mode: "read" };
+  const weak = cands.filter(p => done[p.id].sc < done[p.id].n);
+  const p = randomMin(weak.length ? weak : cands, q => done[q.id].x || 0, rng);
+  return p ? { p, reason: "reread", mode: "read" } : null;
+}
 // Listen mode (docs/PACK_SCHEMA.md "passages.json", Listening pass). Only a spaced re-read
 // whose latest attempt was not a listening pass, so re-reads alternate listen, read, listen.
-function readPassMode(r, prog, canListen){
+function readPassMode(r, prog, canListen, pack){
+  if(r && readRotationOn(pack)) return r.mode === "listen" && canListen ? "listen" : "read";
   if(!r || !r.p || r.reason !== "reread" || !canListen) return "read";
   const done = (isObj(prog && prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
   const rec = done[r.p.id];
@@ -1773,6 +1810,13 @@ function listenAudioOnly(pid, attempts, n, pack){
   const idx = shuffle(Array.from({ length: n }, (_, i) => i), seededRng(hashSeed(String(pid))));
   const r = (((attempts || 0) % n) + n) % n;
   return idx.slice(r).concat(idx.slice(0, r)).slice(0, k).sort((a, b) => a - b);
+}
+// pack.readRotation: each pass asks the questions in a new order, stable within the pass
+// (seeded by the passage id and the attempt count, as listenAudioOnly).
+function passageForPass(p, attempts, pack){
+  if(!p || !readRotationOn(pack) || !Array.isArray(p.questions) || p.questions.length < 2) return p;
+  const qs = shuffle(p.questions.slice(), seededRng(hashSeed(String(p.id) + ":" + (attempts || 0))));
+  return Object.assign({}, p, { questions: qs });
 }
 function passageLength(p, pack){
   if(!pack || pack.spaced !== false) return String((p && p.text) || "").trim().split(/\s+/).filter(Boolean).length;
@@ -1858,10 +1902,17 @@ function applyWeakWords(prog, entries, words, pack){
   return prog;
 }
 // l is absent for a reading pass, so reading-only records are unchanged.
-function markPassageDone(prog, pid, sc, n, d, listen){
+// pack.readRotation adds s (session of the latest pass) and ls (of the latest listening pass).
+function markPassageDone(prog, pid, sc, n, d, listen, pack){
   const st = readState(prog); const prev = st.done[pid];
   st.done[pid] = { sc, n, d: String(d), x: ((prev && prev.x) || 0) + 1 };
   if(listen) st.done[pid].l = 1;
+  if(readRotationOn(pack)){
+    const sn = daySn(prog);
+    st.done[pid].s = sn;
+    if(listen) st.done[pid].ls = sn;
+    else if(prev && typeof prev.ls === "number") st.done[pid].ls = prev.ls;
+  }
   return st.done[pid];
 }
 function readingStats(passages, pack, prog){
@@ -1884,7 +1935,7 @@ function validateReadShape(r){
     for(const k of Object.keys(r.done)){
       const p = r.done[k];
       if(!isObj(p)) return `read.done.${k} must be an object`;
-      for(const f of ["sc","n","x","l"]) if(p[f] !== undefined && typeof p[f] !== "number") return `read.done.${k}.${f} must be a number`;
+      for(const f of ["sc","n","x","l","s","ls"]) if(p[f] !== undefined && typeof p[f] !== "number") return `read.done.${k}.${f} must be a number`;
       if(p.d !== undefined && typeof p.d !== "string") return `read.done.${k}.d must be a string`;
     }
   }
@@ -3502,7 +3553,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
-  READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, listenAudioOnly, passageLength, passageSegments,
+  READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,

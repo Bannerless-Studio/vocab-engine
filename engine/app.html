@@ -1661,7 +1661,7 @@ function sessionResume(forTab){
       if(rec.drill.cur && rec.drill.ord && items[0]) items[0].rzOrder = rec.drill.ord;
       onDone = rzDoneOf(rec.drill.o);
     } else if(rec.rd){
-      rd = Object.assign({}, rec.rd, { p: passageById(rec.rd.pid) }); delete rd.pid;
+      rd = Object.assign({}, rec.rd, { p: VC.passageForPass(passageById(rec.rd.pid), rec.rd.qx, PACK) }); delete rd.pid;
       if(rd.today && !today) rzFail();
     } else if(!today) rzFail();
   } catch(e){ rzReplay = null; sessStore.set(rec.tab, null); return false; }
@@ -2122,8 +2122,8 @@ function todayRender(){
 function todayReadItem(){
   if(!HAS_PASSAGES) return null;
   refreshReadUnlocks();
-  const r = VC.nextReadItem(PASSAGE_LIST, WORDS, PACK, prog, todayISO(), paused());
-  if(r) r.mode = VC.readPassMode(r, prog, canListenPassage(r.p));
+  const r = VC.nextReadItem(PASSAGE_LIST, WORDS, PACK, prog, todayISO(), paused(), undefined, undefined, canListenPassage);
+  if(r) r.mode = VC.readPassMode(r, prog, canListenPassage(r.p), PACK);
   return r;
 }
 function readPlanLine(r){
@@ -2486,7 +2486,11 @@ function readRender(){
 }
 function startPassage(p, today, mode){
   if(!p) return;
+  const qx = (prog.read && prog.read.done && prog.read.done[p.id] && prog.read.done[p.id].x) || 0;
+  p = VC.passageForPass(p, qx, PACK);
   RD = { p, tapped: [], glosses: {}, answers: [], qv: [], qi: null, shown: false, resultsDone: false, today: !!today, unticked: {}, added: null };
+  // pack.readRotation: the attempt count that seeded the question order, so a resume after the pass is marked done keeps it.
+  if(VC.readRotationOn(PACK)) RD.qx = qx;
   if(mode === "listen"){
     const prev = prog.read && prog.read.done && prog.read.done[p.id];
     Object.assign(RD, { mode: "listen", peekText: false, textShown: false, playing: false,
@@ -2789,7 +2793,7 @@ function readQuestionScreen(){
 }
 function markPassageFinished(){
   const sc = RD.answers.filter(a => a && a.ok).length;
-  VC.markPassageDone(prog, RD.p.id, sc, RD.p.questions.length, todayISO(), RD.mode === "listen");
+  VC.markPassageDone(prog, RD.p.id, sc, RD.p.questions.length, todayISO(), RD.mode === "listen", PACK);
   store.save();
 }
 const WHY_LABEL = { tapped: "tapped while reading", wrong: "missed question", reopened: "looked back" };
