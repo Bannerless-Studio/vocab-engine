@@ -231,12 +231,20 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     check("hold: a held unit at 4 gains no streak from a right choice answer (r +1); below mastered it climbs as before (1 -> 2, 2 -> 3)",
       eq(after(4, p => VC.markChar(p, u.id, true, PACK, true)), { r: 6, w: 0, s: 4 }) && after(1, p => VC.markChar(p, u.id, true, PACK, true)).s === 2 && after(2, p => VC.markChar(p, u.id, true, PACK, true)).s === 3);
     check("exempt (not held): a right choice answer still climbs to bare (5 -> 6)", after(5, p => VC.markChar(p, u.id, true, PACK, false)).s === 6);
-    check(`miss floor: from mastered a miss drops to ${M} (5, 7 -> ${M}; held or not), below mastered to 0 (2 -> 0)`,
-      eq(after(5, p => VC.markChar(p, u.id, false, PACK, true)), { r: 6, w: 1, s: M }) && after(7, p => VC.markChar(p, u.id, false, PACK, false)).s === M && after(2, p => VC.markChar(p, u.id, false, PACK, true)).s === 0);
+    check(`miss step: from mastered a miss steps the streak down by one, never below ${M} (5 -> ${B - 1}, ${B - 1} -> ${M}, ${M} -> ${M}, 7 -> 6; held or not), below mastered to 0 (2 -> 0)`,
+      eq(after(5, p => VC.markChar(p, u.id, false, PACK, true)), { r: 6, w: 1, s: 4 }) && after(4, p => VC.markChar(p, u.id, false, PACK, false)).s === M && after(M, p => VC.markChar(p, u.id, false, PACK, true)).s === M
+      && after(7, p => VC.markChar(p, u.id, false, PACK, false)).s === 6 && after(2, p => VC.markChar(p, u.id, false, PACK, true)).s === 0);
+    { const wb = BY_ID[u.words[0]]; const tok = s0 => { const p = at(s0); return [VC.charTier(p.chars.c[u.id].s, PACK), VC.bareWord(wb, CHARACTERS, p, PACK)]; };
+      const p5 = at(B); VC.markUnitTyped(p5, CHARACTERS, PACK, wb.id, false); const t5 = [VC.charTier(p5.chars.c[u.id].s, PACK), VC.bareWord(wb, CHARACTERS, p5, PACK)];
+      check(`miss at bare ${B} -> ${B - 1}: the token renders ruby (tier ${t5[0]}), not bare, not reading; the word is no longer bare (${t5[1]}); control: at ${B} it was bare (${tok(B)})`,
+        p5.chars.c[u.id].s === B - 1 && t5[0] === "ruby" && t5[1] === false && tok(B)[0] === "bare" && tok(B)[1] === true); }
+    { const lad = []; let p = at(B); for(let i = 0; i < 4; i++){ VC.markUnitTyped(p, CHARACTERS, PACK, w.id, false); lad.push(p.chars.c[u.id].s); }
+      check(`repeated typed misses from ${B}: ${lad.join(" -> ")} (floor ${M}); a flag-off pack resets to 0 at every streak (${[3, 4, 5, 6].map(x => after(x, q => VC.markChar(q, u.id, false, PACK_OFF), PACK_OFF).s).join(",")})`,
+        lad.join() === [B - 1, M, M, M].join() && [3, 4, 5, 6].every(x => after(x, q => VC.markChar(q, u.id, false, PACK_OFF), PACK_OFF).s === 0)); }
     check("flag off (bareBy absent, or no pack): markChar is markRec (5 right -> 6, 5 miss -> 0), held ignored",
       after(5, p => VC.markChar(p, u.id, true, PACK_OFF, true), PACK_OFF).s === 6 && after(5, p => VC.markChar(p, u.id, false, PACK_OFF, true), PACK_OFF).s === 0 && after(5, p => VC.markChar(p, u.id, false)).s === 0);
-    check("credit: markUnitTyped +1 on the word's recorded unit (4 -> 5, 5 -> 6), a miss floors (5 -> 3)",
-      after(4, p => VC.markUnitTyped(p, CHARACTERS, PACK, w.id, true)).s === 5 && after(5, p => VC.markUnitTyped(p, CHARACTERS, PACK, w.id, true)).s === 6 && after(5, p => VC.markUnitTyped(p, CHARACTERS, PACK, w.id, false)).s === M);
+    check("credit: markUnitTyped +1 on the word's recorded unit (4 -> 5, 5 -> 6), a miss steps down (5 -> 4)",
+      after(4, p => VC.markUnitTyped(p, CHARACTERS, PACK, w.id, true)).s === 5 && after(5, p => VC.markUnitTyped(p, CHARACTERS, PACK, w.id, true)).s === 6 && after(5, p => VC.markUnitTyped(p, CHARACTERS, PACK, w.id, false)).s === B - 1);
     { const p = VC.normalizeProg({}, PACK); const r = VC.markUnitTyped(p, CHARACTERS, PACK, w.id, true);
       check("credit: no record is created for an untaught unit; flag off credits nothing", r === null && !(u.id in p.chars.c) && VC.markUnitTyped(at(4, PACK_OFF), CHARACTERS, PACK_OFF, w.id, true) === null); }
     const exempt = CHARACTERS.filter(x => !TU.has(x.id));
@@ -295,10 +303,10 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     const second = VC.buildReviewPlan(lw, q, PACK, Object.assign({ rng: mulberry32(1) }, o)).filter(x => x.tu).map(x => x.tu);
     check(`next session: units typed right are not asked again (${first.join(" ")} | ${second.join(" ")})`, first.length > 0 && second.length > 0 && !second.some(id => first.includes(id)));
     // A floored unit (missed today) comes first, typed.
-    const r = clone(p); VC.dayStart(r, PACK, DAY, true); const fl = unitsAt(r, 6)[0];
+    const r = clone(p); VC.dayStart(r, PACK, DAY, true); const fl = unitsAt(r, 6)[0]; r.chars.c[fl].s = B;
     VC.markChar(r, fl, false, PACK, true); VC.noteDay(r, PACK, DAY, "c:" + fl, "charRead", false); VC.dayStart(r, PACK, DAY, true);
     const rp = VC.buildReviewPlan(lw, r, PACK, Object.assign({ rng: mulberry32(1) }, o));
-    check(`a bare unit missed by choice drops to ${M} and comes back typed next drill (${fl} s=${r.chars.c[fl].s})`, r.chars.c[fl].s === M && rp.some(x => x.tu === fl));
+    check(`a bare unit (${B}) missed by choice steps down to ${B - 1} and comes back typed next drill (${fl} s=${r.chars.c[fl].s})`, r.chars.c[fl].s === B - 1 && rp.some(x => x.tu === fl));
     // Miss floor: a floored unit never reaches the weak tier, so its pending miss must be settleable
     // by the typed item, and after the miss ages out it must still get its consolidating share.
     const cand = VC.dayLog(r, DAY).a["c:" + fl]; const cc = { key: "c:" + fl, rec: r.chars.c[fl], mastered: M, bare: B, kinds: ["type"], alias: "w:" + wordOfUnit(fl).id };
@@ -349,6 +357,11 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     { const id = band[5]; const it = api.silentWrittenTypeItem(wordOfUnit(id)); api.drill1(it); answer(api, false);
       const floored = rec(id).s; api.el("nx").click(); answer(api, true);
       check(`typed miss on a unit at 4 floors it to ${M}; the in-drill retry right gives no credit (${floored} -> ${rec(id).s})`, floored === M && rec(id).s === M); }
+    // Each miss steps down one: bare B -> B-1 (ruby again, pinyin back beside the word), B-1 -> M; the reveal shows the dots.
+    { const id = bare[1], wd = wordOfUnit(id); api.getProg().chars.c[id].s = B; const seen = [];
+      for(let i = 0; i < 3; i++){ api.drill1(api.silentWrittenTypeItem(wd)); answer(api, false); seen.push([rec(id).s, api.html("rv").includes(`aria-label="字 ${rec(id).s}/${B}"`)]); }
+      check(`typed misses from bare ${B}: streak ${seen.map(x => x[0]).join(" -> ")}, reveal dots match (${seen.map(x => x[1]).join(",")}); the word shows its pinyin again once ruby (${stripTags(api.readItem(wd).html).includes(wd.pron)})`,
+        seen.map(x => x[0]).join() === [B - 1, M, M].join() && seen.every(x => x[1]) && stripTags(api.readItem(wd).html).includes(wd.pron)); }
     { const id = band[6]; const it = api.meaningTypeItem(wordOfUnit(id), false); api.drill1(it); answer(api, false); api.el("nx").click(); answer(api, false); api.el("nx").click();
       const fb = api.getCur(); const s0 = rec(id).s; const w0 = Object.assign({}, api.getProg().w[wordOfUnit(id).id]); answer(api, true);
       check(`second miss: the choice fallback (${fb.kind}, "${fb.label}") gives the unit nothing (${s0} -> ${rec(id).s}); the word record still counts it (r ${w0.r} -> ${api.getProg().w[wordOfUnit(id).id].r})`,
@@ -716,6 +729,14 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
       const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", withDayRules(src, MAIN))(m, m.exports, undefined, {}); mainCore = m.exports;
     } catch(e){ console.log("    cannot read main: " + e.message); }
     check(`main ${MAIN} engine loaded from git (a missing sha is a failure)`, !!mainHtml && !!mainCore);
+    // fb11 control: markChar on a non-typed pack, and on the zh pack below mastered or on a right answer, is unchanged from 7a21ccd.
+    { let c11 = null; try { const src = cp.execSync(`git -C "${ROOT}" show 7a21ccd:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 }); const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); c11 = m.exports; } catch(e){ console.log("    cannot read 7a21ccd: " + e.message); }
+      const u0 = CHARACTERS[0], run = (core, pk, s0, ok, held) => { const p = core.normalizeProg({}, pk); p.chars.c[u0.id] = { r: s0 + 1, w: 0, s: s0 }; core.markChar(p, u0.id, ok, pk, held); return JSON.stringify(p.chars.c[u0.id]); };
+      let same = 0, n = 0, diff = [];
+      for(const [pk, name] of [[PACK_OFF, "off"], [PACK, "zh"]]) for(let s0 = 0; s0 <= 8; s0++) for(const ok of [true, false]) for(const held of [false, true]){
+        n++; if(run(c11, pk, s0, ok, held) === run(VC, pk, s0, ok, held)) same++; else diff.push(`${name} s${s0} ${ok ? "right" : "miss"}`); }
+      check(`markChar vs 7a21ccd over ${n} cases (2 packs x streak 0-8 x right/miss x held): only zh misses at streak >= ${M + 2} differ (at ${M + 1} the step lands on ${M} as before) (${diff.length}: ${[...new Set(diff.map(d => d.replace(/ s\d+/, "")))].join(", ")})`,
+        !!c11 && diff.every(d => d.startsWith("zh s") && d.endsWith("miss") && +d.match(/s(\d+)/)[1] > M + 1) && diff.length === 2 * (8 - M - 1)); }
     async function run(html, core){
       NOW = new Date(2026, 9, 2, 9, 0, 0).getTime();
       const st = fresh(); st.ls.setItem(VC.storageKey(PACK_OFF), JSON.stringify(seedC()));

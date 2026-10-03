@@ -1948,13 +1948,13 @@ function ensureChars(prog){
 function charRecs(prog){ return (prog && isObj(prog.chars) && isObj(prog.chars.c)) ? prog.chars.c : {}; }
 const hasCharRec = (recs, id) => hasOwn(recs, id) && !!recs[id];
 // characters.bareBy "typed" (docs/PACK_SCHEMA.md "bareBy"; owner feedback 2026-10-02: writing
-// should score more than selection). From mastered, a miss drops the unit to mastered, not 0, so
-// its characters stay shown; a held unit (typedUnitWords) gains no streak from a right choice
+// should score more than selection). From mastered, a miss steps the streak down by one (never below mastered,
+// not to 0), so its characters stay shown; a held unit (typedUnitWords) gains no streak from a right choice
 // answer: only typed answers (markUnitTyped) take it to bare.
 function markChar(prog, unitId, ok, pack, held){
   const recs = ensureChars(prog).c, p = recs[unitId], m = typedBareOn(pack) ? charsConfig(pack).mastered : Infinity;
   if(!isObj(p) || (p.s || 0) < m) return markRec(recs, unitId, ok, false);
-  if(ok){ p.r++; if(!held) p.s++; } else { p.w++; p.s = m; }
+  if(ok){ p.r++; if(!held) p.s++; } else { p.w++; p.s = Math.max(m, p.s - 1); }
   return p;
 }
 function typedBareOn(pack){ const c = charsConfig(pack); return !!(c && c.bareBy === "typed"); }
