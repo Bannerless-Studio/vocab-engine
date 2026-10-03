@@ -430,6 +430,14 @@ function missesCarried(drilled0){
     const sp = VC.dayPick([...Array.from({ length: 10 }, (_, i) => S(i, 0, 1)), ...Array.from({ length: 10 }, (_, i) => S(100 + i, 3, 1))], 10, { d: DAY, n: 1, a: {} }, mulberry32(5), 10);
     check(`B: the floor never takes units or sentences (3 weak words, then ${of[3].key} at streak ${of[3].rec.s}: consolidating; sentences open with ${sp[0].key} at streak ${sp[0].rec.s}: refresh)`,
       of.slice(0, 3).every(c => c.key[0] === "w") && of[3].key[0] === "c" && of[3].rec.s >= 3 && sp[0].rec.s >= 2);
+    // Review M1: a day of many unit misses. The floor must leave consolidating units their
+    // ⌈0.15 n⌉: 15 pending unit misses, 15 consolidating units, 15 mastered words, 15 weak words.
+    { const dh = { d: DAY, n: 3, a: {} };
+      const um = Array.from({ length: 15 }, (_, i) => U(200 + i, 1, 2)); um.forEach(c => { dh.a[c.key] = { m: 1, mk: ["charRecall"], ms: 9 }; });
+      const heavy = [...um, ...Array.from({ length: 15 }, (_, i) => U(300 + i, 3 + i % 2, 2)), ...Array.from({ length: 15 }, (_, i) => W(300 + i, 4, 1)), ...Array.from({ length: 15 }, (_, i) => W(400 + i, 1, 3))];
+      const cls = out => ({ miss: out.filter(c => dh.a[c.key]).length, weak: weakW(out), cons: out.filter(c => c.key[0] === "c" && !dh.a[c.key] && c.rec.s >= 3).length, refresh: out.filter(c => c.key[0] === "w" && c.rec.s >= 3).length });
+      const oh = cls(pick(VC, heavy, dh)), ob = OLD ? cls(pick(OLD, heavy, dh)) : {};
+      check(`B (review M1): 15 unit misses pending, Review 20: consolidating ${oh.cons} (>= 3), weak words ${oh.weak} (>= 5), misses ${oh.miss}, refresh ${oh.refresh} (before: ${ob.cons} / ${ob.weak} / ${ob.miss} / ${ob.refresh})`, oh.cons >= 3 && oh.weak >= 5 && oh.miss === 12); }
     // Owner shape (the 2026-10-03 export, scaled): 595 words, a fifth weak at streak 1-2; 300 units,
     // a quarter weak at 0-1 and the rest at 3; 6 pending hear misses on words, 4 charRecall misses.
     // Weak words: below mastered or with a pending miss (fb8-weak-analysis definition); a typed

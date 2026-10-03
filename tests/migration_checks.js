@@ -409,7 +409,7 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
     const nb = VC.bootProg(raw, PACK), ob = VC.bootProg(raw, OLD);
     check(`${label} boot: no backup, progress identical under the old and new pack, nothing rewritten`, nb.backupRaw === null && ob.backupRaw === null && eq(nb.prog, ob.prog) && JSON.stringify(nb.prog.chars.c) === JSON.stringify(JSON.parse(raw).chars.c));
   }
-  check("(c) unit records untouched by boot (streaks 3-5 stay, 6+ stay bare)", JSON.stringify(VC.bootProg(craw, PACK).prog.chars.c) === recsBefore);
+  check(`(c) unit records untouched by boot (streaks 3-${PACK.characters.bare - 1} stay, at or above bare ${PACK.characters.bare} stay bare)`, JSON.stringify(VC.bootProg(craw, PACK).prog.chars.c) === recsBefore);
   // Typed credit, hold and floor write only r/w/s of an existing unit record and the day log
   // (kind "type" on a c: key, a value w: keys already carry): the engine before (main 8023572)
   // boots it with no backup.

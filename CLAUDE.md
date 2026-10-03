@@ -67,7 +67,7 @@ $NODE tests/lag_checks.js                        # 45 (characters.learn "lag": c
 $NODE tests/pause_checks.js                      # 49 (pack.pauseNew: flag-off / unpaused control vs 36aee02, chip, paused sessions teach nothing, Review +Learn items, toggling mid-session)
 $NODE tests/opts_mix_checks.js                  # 40 (pack.optsMix: length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
 $NODE tests/session_resume_checks.js             # 117 (drill/passage resume: tab switch, reload, relaunch, per-tab parking)
-$NODE tests/day_sim_checks.js                    # 75 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; weak-word floor + production settles, owner-shape before/after vs fb49c1b; --why)
+$NODE tests/day_sim_checks.js                    # 76 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; weak-word floor + production settles, owner-shape before/after vs fb49c1b; --why)
 $NODE tests/help_close_checks.js                 # 42 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
 $NODE tests/gloss_overlap_checks.js              # 74 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~5-14 min: 286 s on main 7fe35f7 idle, 151 s on fb2-write2 alone, 836 s under parallel load)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)

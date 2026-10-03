@@ -1210,7 +1210,7 @@ const DAY_REFRESH_SHARE = 0.2, DAY_AGAIN_SHARE = 0.25, DAY_CONSOLIDATE_SHARE = 0
 // characters.bareBy "typed": units between mastered and bare move only by typed answers, so they
 // get a larger share (review 2026-10-02: at 0.15 they reached bare slower than by choice credit;
 // owner 2026-10-03, readings not removed fast enough: 0.25 -> 0.35, with zh characters.bare 6 -> 5, took
-// 334 of 353 held units to bare in 4 weeks on the owner export against 18, fb8 reading-pace runs).
+// 347 of 353 held units to bare in 4 weeks on the owner export against 12, fb8 reading-pace runs).
 const DAY_TYPED_CONSOLIDATE_SHARE = 0.35;
 // "Already right, ask another kind" covers today and the last DAY_RECENT_SESSIONS sessions, so the
 // first session after midnight does not replay the evening's items.
@@ -1360,7 +1360,9 @@ const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c ===
 // t4max (optional): tier 4 fills the plan only up to this many items.
 // Right after the misses, words (keys "w:") below mastered fill the plan up to DAY_WEAK_FLOOR of
 // it, word misses already taken counting (owner 2026-10-03: weak words lost their slots to unit
-// misses, consolidation and refresh; Recall gave them 0.5 of 8, fb8-weak-analysis).
+// misses, consolidation and refresh; Recall gave them 0.5 of 8, fb8-weak-analysis). The floor leaves
+// consolidating units at least ⌈DAY_CONSOLIDATE_SHARE n⌉ slots: on a day of many unit misses it took
+// them all (fb10 review M1).
 const DAY_EXTRA_POOL = 4, DAY_WEAK_FLOOR = 0.4;
 function dayPick(cands, n, d, rng, sn, cshare, t4max){
   const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
@@ -1390,7 +1392,7 @@ function dayPick(cands, n, d, rng, sn, cshare, t4max){
     if(seen.has(c.key) && !(owns(c) && out.some(o => o.alias === c.key) && !out.some(o => o.key === c.key))) continue;
     seen.add(c.key); if(c.alias) seen.add(c.alias); out.push(c); i++; } };
   const isW = c => String(c.key).startsWith("w:");
-  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(T[1].filter(isW), Math.round(n * DAY_WEAK_FLOOR) - out.filter(isW).length); take(C, Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE))); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
+  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(T[1].filter(isW), Math.min(Math.round(n * DAY_WEAK_FLOOR) - out.filter(isW).length, n - out.length - Math.min(Math.ceil(n * DAY_CONSOLIDATE_SHARE), C.length))); take(C, Math.ceil(n * (cshare || DAY_CONSOLIDATE_SHARE))); take(T[2], Math.ceil(n * DAY_REFRESH_SHARE)); take(T[1], n);
   take(T[3], Math.ceil(n * DAY_AGAIN_SHARE)); take(C, n); take(T[2], n); take(T[3], n); take(T[0], n); take(T[4], t4max != null ? t4max - out.length : n);
   return out;
 }

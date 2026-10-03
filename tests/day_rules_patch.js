@@ -14,7 +14,7 @@ const RULES = [
   ["return !m.length || m.includes(kind) || (dayProd(kind) && m.some(dayProd)); }",
    "return !m.length || m.includes(kind) || dayProd(kind); }"],
   ["  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(C,",
-   `  const isW = c => String(c.key).startsWith("w:");\n  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(T[1].filter(isW), Math.round(n * ${VC.DAY_WEAK_FLOOR}) - out.filter(isW).length); take(C,`],
+   `  const isW = c => String(c.key).startsWith("w:");\n  take(T[0], Math.max(1, Math.floor(n * DAY_MISS_SHARE))); take(T[1].filter(isW), Math.min(Math.round(n * ${VC.DAY_WEAK_FLOOR}) - out.filter(isW).length, n - out.length - Math.min(Math.ceil(n * DAY_CONSOLIDATE_SHARE), C.length))); take(C,`],
   ["\n    (a, b) => weakScore(b.rec) - weakScore(a.rec),\n",
    `\n    (a, b) => (${MS}(a) - ${MS}(b)) || weakScore(b.rec) - weakScore(a.rec),\n`],
   ["    return fit.find(k => !r.includes(k)) || fit[0] || planned;",
