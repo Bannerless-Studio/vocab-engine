@@ -45,7 +45,7 @@ Why it is built this way (one line each):
 
 ## Commands (pinned)
 
-Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-03, branch fb16-read-rotation (on main 491d470).
+Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-03, branch fb19-listen-lookback (on main a8e9c08).
 
 ```sh
 $NODE tests/engine_checks.js                     # 704 passed; includes the dist/zh.html + sw.js stale guard and the packs/zh generator drift check from an empty dir (needs ../chinese)
@@ -57,7 +57,7 @@ $NODE tests/script_checks.js                     # 128
 $NODE tests/script_app_checks.js                 # 216
 $NODE tests/audio_checks.js                      # 90 (app section needs ../persian)
 $NODE tests/passage_audio_checks.js              # 43
-$NODE tests/listen_mode_checks.js                # 190 (adds [12] pack.listenQuestions "all": all questions audio-only, flag-off control vs 7a21ccd; [13] pack.rereadPerfectDays incl. first listening pass at 7 days (x 1, no l), nextReadItem control vs 3790814; [14] pack.readRotation: session alternation, random picks, shuffled questions, s/ls, control vs 491d470; [15] listening look-back "Replay passage": play rows, Show text/peekText, stop on close, flag-off + reading-pass walks vs a8e9c08)
+$NODE tests/listen_mode_checks.js                # 192 (adds [12] pack.listenQuestions "all": all questions audio-only, flag-off control vs 7a21ccd; [13] pack.rereadPerfectDays incl. first listening pass at 7 days (x 1, no l), nextReadItem control vs 3790814; [14] pack.readRotation: session alternation, random picks, shuffled questions, s/ls, control vs 491d470; [15] listening look-back "Replay passage": play rows, Show text/peekText, stop on close, flag-off + reading-pass walks vs a8e9c08)
 $NODE tests/validate_pack_audio_checks.js        # 30
 $NODE tests/validate_pack_characters_checks.js   # 83
 $NODE tests/validate_pack_script_checks.js       # 56

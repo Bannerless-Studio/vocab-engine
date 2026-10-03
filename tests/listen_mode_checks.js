@@ -911,6 +911,13 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("the stopped sentence's late end starts nothing", b.spoken.length === k4);
     b.api.el("o").children.find(x => x.dataset.v === String(P.questions[0].answer)).click();
     b.api.el("nx").click(); await sleep(DEFER);
+    // Show text after answering is a peek, not "text shown while listening".
+    { const t = await boot({ pack: PACK_DAY_NR }); t.api.setProg(rereadProg(PASSAGES, P)); t.api.startPassage(P, true, "listen"); t.api.el("rdone").click();
+      t.api.el("o").children.find(x => x.dataset.v === String(P.questions[0].answer)).click(); t.api.el("ptoggle").click(); t.api.el("ltext").click();
+      check("Show text after answering: shown, but peekText not logged; Stop label cleared by the verdict", /data-pw/.test(t.api.html("pbox")) && t.api.rd().peekText === false && t.api.rd().answers[0].reopened === false);
+      const t2 = await boot({ pack: PACK_DAY_NR }); t2.api.setProg(rereadProg(PASSAGES, P)); t2.api.startPassage(P, true, "listen"); t2.api.el("rdone").click();
+      t2.api.el("ptoggle").click(); t2.api.el("lplay").click(); t2.api.el("o").children.find(x => x.dataset.v === String(P.questions[0].answer)).click();
+      check("answering during Play all clears Stop", t2.api.el("lplay").textContent === "Play all" && t2.api.rd().playing === false); }
     check("next question: look-back closed again", n < 2 || (b.api.rd().shown === false && /id="pbox" hidden/.test(b.api.html("panel")) && />Replay passage</.test(b.api.html("panel"))));
     answerAll(b.api, P, false);
     const res = b.api.html("panel");

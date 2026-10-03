@@ -2760,7 +2760,7 @@ function readQuestionScreen(){
     $("lplay").onclick = () => { if(rd.playing){ lkSet(false); stopSpeaking(); return; } lkSet(true); step(0); };
     $("ltext").onclick = () => {
       view.lkText = !view.lkText;
-      if(view.lkText) rd.peekText = true;
+      if(view.lkText && rec.ok === null) rd.peekText = true; // like reopened: a peek after answering is not text shown while listening
       $("pbox").innerHTML = view.lkText ? passageHTML(-1) : listenRowsHTML();
       $("gloss").hidden = true;
       $("ltext").textContent = view.lkText ? "Hide text" : "Show text";
@@ -2782,6 +2782,7 @@ function readQuestionScreen(){
   const box = $("o");
   const reveal = fresh => {
     revealQ();
+    if(LB) lkSet(false);
     [...box.children].forEach(x => { x.disabled = true; if(x.dataset.v === String(q.answer)) x.classList.add("ok"); if(!rec.ok && x.dataset.v === String(rec.given)) x.classList.add("bad"); });
     const s = p.sentences[q.sentence];
     const hearS = canHearSentence(s);

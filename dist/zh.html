@@ -4998,7 +4998,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "854739950-1922842";
+const VE_BUILD = "3875721581-1922961";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6349,7 +6349,7 @@ function readQuestionScreen(){
     $("lplay").onclick = () => { if(rd.playing){ lkSet(false); stopSpeaking(); return; } lkSet(true); step(0); };
     $("ltext").onclick = () => {
       view.lkText = !view.lkText;
-      if(view.lkText) rd.peekText = true;
+      if(view.lkText && rec.ok === null) rd.peekText = true; // like reopened: a peek after answering is not text shown while listening
       $("pbox").innerHTML = view.lkText ? passageHTML(-1) : listenRowsHTML();
       $("gloss").hidden = true;
       $("ltext").textContent = view.lkText ? "Hide text" : "Show text";
@@ -6371,6 +6371,7 @@ function readQuestionScreen(){
   const box = $("o");
   const reveal = fresh => {
     revealQ();
+    if(LB) lkSet(false);
     [...box.children].forEach(x => { x.disabled = true; if(x.dataset.v === String(q.answer)) x.classList.add("ok"); if(!rec.ok && x.dataset.v === String(rec.given)) x.classList.add("bad"); });
     const s = p.sentences[q.sentence];
     const hearS = canHearSentence(s);
@@ -6805,4 +6806,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3671532062-1922165-->
+<!--ve-build:392512042-1922285-->
