@@ -361,9 +361,9 @@ A passage span can be longer than its linked word: 这个 links 这, 越来越 l
   | a8e9c08 (flag off) | 108.3 | 73 → 56 (118) | 6.3 · 2.9 · 3.3 · 12.1 · 1.5 | 0.23 | 57% | 1.0 | 3.7 | 15.0 |
   | first version (retry credit, replay typed) | 69.7 | 73 → 100 (118) | 5.6 · 5.1 · 2.9 · 13.3 · 1.1 | 0.26 | 55% | 1.0 | 10.0 | 2.7 |
   | no retry credit, replay recall, no held share | 41.7 | 73 → 129 (130), rising | 5.9 · 3.4 · 3.5 · 12.9 · 1.2 | 0.22 | 55% | 1.0 | 6.3 | 5.3 |
-  | this (held share 0.2 / 1, refresh kept) | 85.3 | 73 → 75 (89), stable | 7.1 · 5.3 · 3.9 · 8.9 · 4.0 | 0.40 | 48% | 0.3 | 11.3 | 4.3 |
+  | this (held share 0.2 / 1, refresh kept) | 87.0 | 73 → 78 (89), stable | 7.6 · 5.4 · 4.2 · 8.6 · 3.8 | 0.42 | 47% | 1.0 | 14.0 | 3.3 |
 
-  Mastered refresh misses the 50% target by 2 points: it comes mostly from units' typed items, which the held slots displace (Review units 12.1 → 8.9). Every slot moved from held words to refresh or units trades one for the other: the variants that reached 50–57% refresh (a units share kept in Recall, or a larger refresh share) left words at 2 rising to 102–115 and 59–69 words known in the week.
+  Mastered refresh misses the 50% target by 3 points: it comes mostly from units' typed items, which the held slots displace (Review units 12.1 → 8.6). Every slot moved from held words to refresh or units trades one for the other: the variants that reached 50–57% refresh (a units share kept in Recall, or a larger refresh share) left words at 2 rising to 102–115 and 59–69 words known in the week.
 - **Storage**: no progress field. Word records keep `{r, w, s, k?, prov?, t?, u?}` and their range; only how `s` moves changed. Words already at 3+ stay known; a record written with the flag reads on an engine without it unchanged (tests/migration_checks.js [wordsBy]). The session record (`vocab_<key>_session`) gains the optional `today.tw` (word ids asked typed this Today session; another build drops the record anyway).
 
 ### pauseNew
