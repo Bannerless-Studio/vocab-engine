@@ -1447,7 +1447,10 @@ function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds, wordCan, ty
     const tu = it.unit && CHAR_KINDS.includes(it.kind) ? it.unit : it.tuUnit;
     if(tu && typedUnitDue(tu, prog, pack, typedUnits)) return { kind: "type", word: typedUnits.get(tu.id), tu: tu.id };
     if(it.word){ const can = wordCan ? wordCan(it.word) : undefined; const ks = can ? wordKinds.filter(x => can.includes(x)) : wordKinds;
-      const k = typedWordDue(it.word, prog, pack, ks, typedOk) ? "type" : dayItemKind(prog, pack, today, "w:" + it.word.id, it.kind, ks, can); return k === it.kind ? it : Object.assign({}, it, { kind: k }); }
+      let k = typedWordDue(it.word, prog, pack, today, ks, typedOk) ? "type" : dayItemKind(prog, pack, today, "w:" + it.word.id, it.kind, ks, can);
+      // wordsBy: no typed ask typedOk refuses (already typed this session, or no typed kind fits: the app shows recall then anyway).
+      if(k === "type" && wordsTypedOn(pack) && typeof typedOk === "function" && ks.includes("recall") && !typedOk(it.word)) k = "recall";
+      return k === it.kind ? it : Object.assign({}, it, { kind: k }); }
     // Script units ("x:") keep their drawn kind: a script miss waits for a draw of its kind.
     // Route them here before dayAware is set on a script pack (TODO.md).
     if(it.unit && CHAR_KINDS.includes(it.kind)){ const k = dayItemKind(prog, pack, today, "c:" + it.unit.id, it.kind, charKinds); return k === it.kind ? it : Object.assign({}, it, { kind: k }); }
@@ -1463,13 +1466,13 @@ function typedUnitDue(unit, prog, pack, typedUnits){
   return s >= cfg.mastered && s < cfg.bare;
 }
 // pack.wordsBy "typed": a held word (WORD_HOLD <= s < WORD_MASTERED) moves on only by a typed answer,
-// so a planner that may ask "type" asks it typed, as typedUnitDue does for units. typedOk also keeps
-// it to once per session (app.html typedWordFits: a word already answered in the running Today session
-// keeps the day rule, so a typed miss that a choice took back to 2 is not asked typed again).
-function typedWordDue(word, prog, pack, kinds, typedOk){
+// so a planner that may ask "type" asks it typed, as typedUnitDue does for units. A word right typed
+// recently (it reached 2 by that answer) keeps the day rule: no same-kind repeat. typedOk also keeps
+// it to once per session (app.html typedWordFits: a typed miss that a choice took back to 2 waits).
+function typedWordDue(word, prog, pack, today, kinds, typedOk){
   if(!wordsTypedOn(pack) || !dayAwareOn(pack) || !(kinds || []).includes("type")) return false;
   const s = dayS((prog.w || {})[word.id]);
-  if(s < WORD_HOLD || s >= WORD_MASTERED) return false;
+  if(s < WORD_HOLD || s >= WORD_MASTERED || dayRight(dayLog(prog, today).a["w:" + word.id], daySn(prog)).includes("type")) return false;
   return typeof typedOk === "function" ? !!typedOk(word) : typedKinds(pack).some(k => typedKindOk(k, word, false));
 }
 

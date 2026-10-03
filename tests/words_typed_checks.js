@@ -1,0 +1,285 @@
+// pack.wordsBy "typed" (docs/PACK_SCHEMA.md "wordsBy"; owner 2026-10-03: "Does selecting a word count
+// the same as writing the meaning?" -> no, the characters rule for words): [1] config and validation,
+// [2] core streak table (kind x streak x outcome) with the flag, [3] flag-off control: every word kind,
+// both outcomes, records byte-identical to a8e9c08's markRec; cloze untouched, [4] planner: a held word
+// (streak 2) is planned typed in Review/Recall, only with a fitting typed kind, not after a typed
+// right; flag-off plans equal a8e9c08's, [5] app on zh: held words asked typed, choice answers hold,
+// at most one typed ask per word per Today session; flag off a whole session byte-identical to a8e9c08.
+// Run: node tests/words_typed_checks.js
+"use strict";
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
+const cp = require("child_process");
+
+const ROOT = path.join(__dirname, "..");
+const VC = require(path.join(ROOT, "engine", "core.js"));
+const ZH = path.join(ROOT, "packs", "zh");
+const MAIN = "a8e9c08"; // main before wordsBy
+const PY = process.env.PYTHON3 || "python3";
+function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
+const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.wordsBy; return q; })(PACK);
+const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
+const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
+const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
+const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
+const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
+const clone = x => JSON.parse(JSON.stringify(x));
+let passes = 0, fails = 0, skips = 0;
+function check(name, cond, extra){
+  if(cond){ passes++; console.log(`PASS  ${name}`); }
+  else { fails++; console.log(`FAIL  ${name}`); if(extra) console.log("    " + String(extra).replace(/\n/g, "\n    ")); }
+}
+function skip(name){ skips++; console.log(`SKIP  ${name}`); }
+const git = (sha, f) => { try { return cp.execSync(`git -C "${ROOT}" show ${sha}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }); } catch(e){ return null; } };
+const mainCoreSrc = git(MAIN, "engine/core.js"), mainHtml = git(MAIN, "engine/app.html");
+const OLD = mainCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "wt-")), `core_${MAIN}.js`); fs.writeFileSync(f, mainCoreSrc); return require(f); })() : null;
+
+// ------------------------------------------------------------------ fake DOM (copied from typed_mastery_checks.js)
+const appHtml = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
+const scriptOf = html => { const b = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]; return b[b.length - 1][1]; };
+function extractAttrs(tag){ const attrs = {}; const re = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)(?:\s*=\s*"([^"]*)")?/g; let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; } return attrs; }
+function makeFakeDom(){
+  const registry = new Map(); const tabButtons = [];
+  class El {
+    constructor(tag, attrs){ this.tagName = (tag||"div").toUpperCase(); this._attrs = Object.assign({}, attrs); this._classes = new Set((this._attrs.class||"").split(/\s+/).filter(Boolean));
+      this._html = ""; this._text = ""; this.style = { setProperty(k,v){ this[k]=v; } }; this.hidden = false; this.disabled = false; this.value = "";
+      this.onclick = null; this.oninput = null; this.onchange = null; this._listeners = {}; this._children = []; if(this._attrs.id) registry.set(this._attrs.id, this); }
+    get id(){ return this._attrs.id || ""; } set id(v){ this._attrs.id = v; registry.set(v, this); }
+    get classList(){ const s = this._classes; return { add:(...c)=>c.forEach(x=>s.add(x)), remove:(...c)=>c.forEach(x=>s.delete(x)), toggle:(c,f)=>{ if(f===undefined){ s.has(c)?s.delete(c):s.add(c); } else { f?s.add(c):s.delete(c); } }, contains:c=>s.has(c) }; }
+    get dataset(){ const attrs = this._attrs; const toKebab = k => k.replace(/[A-Z]/g, m => "-" + m.toLowerCase()); return new Proxy({}, { get(_, k){ return attrs["data-" + toKebab(String(k))]; }, set(_, k, v){ attrs["data-" + toKebab(String(k))] = String(v); return true; } }); }
+    get children(){ return this._children; } get innerHTML(){ return this._html; } set innerHTML(h){ this._html = h; this._children = []; registerIdsFromHtml(h); }
+    get textContent(){ return this._text; } set textContent(t){ this._text = String(t); this._html = String(t); }
+    setAttribute(k,v){ this._attrs[k]=String(v); if(k==="id") registry.set(v,this); } getAttribute(k){ return this._attrs[k]; }
+    addEventListener(t,f){ (this._listeners[t]=this._listeners[t]||[]).push(f); } removeEventListener(){}
+    appendChild(c){ this._children.push(c); return c; } insertBefore(c){ this._children.unshift(c); return c; } get firstChild(){ return this._children[0] || null; }
+    remove(){} focus(){} click(){ if(this.onclick) this.onclick({}); (this._listeners.click||[]).forEach(f=>f({})); } closest(){ return null; } querySelector(){ return null; } querySelectorAll(){ return []; }
+  }
+  function registerIdsFromHtml(html){ const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g; let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); } }
+  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/); const btnRe = /<button([^>]*)>/g;
+  let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
+  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  return { title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
+    write(){}, createElement(tag){ return new El(tag, {}); }, getElementById(id){ return registry.get(id) || null; },
+    querySelector(sel){ return this.querySelectorAll(sel)[0] || null; },
+    querySelectorAll(sel){ const m = sel.match(/^#tabs\s+button(?:\[data-t="([^"]+)"\])?$/); if(m) return m[1] ? tabButtons.filter(b=>b.dataset.t===m[1]) : tabButtons.slice(); return []; },
+    _listeners: {}, addEventListener(t,f){ (this._listeners[t]=this._listeners[t]||[]).push(f); } };
+}
+const tick = () => new Promise(r => setTimeout(r, 0));
+function mulberry32(seed){ let a = seed >>> 0; return function(){ a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function memStore(){ const m = new Map(); return { getItem: k => m.has(k) ? m.get(k) : null, setItem: (k, v) => { m.set(k, String(v)); }, removeItem: k => { m.delete(k); }, keys: () => [...m.keys()] }; }
+let NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
+class FakeDate extends Date { constructor(...a){ if(a.length) super(...a); else super(NOW); } static now(){ return NOW; } }
+async function boot(pack, prog, seed, opts){
+  const o = opts || {};
+  Math.random = mulberry32(seed);
+  const st = { ls: memStore(), ss: memStore() }; if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog));
+  const document = makeFakeDom();
+  const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(){} };
+  const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
+  const fnBody = scriptOf(o.html || appHtml) + `
+let __cur = null; const __log = [];
+const __mc = renderMcItem; renderMcItem = function(it){ __cur = it; __log.push({ key: it.key, kind: "mc", label: it.label, step: todayStepState && todayStepState.at }); return __mc(it); };
+const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; __log.push({ key: it.key, kind: "type", label: it.label, step: todayStepState && todayStepState.at }); return __ty(it); };
+return { el: id => document.getElementById(id), panel: () => document.getElementById("panel").innerHTML, getProg: () => prog, getD: () => D, getCur: () => __cur, log: __log,
+  rd: () => (typeof RD !== "undefined" ? RD : null), skipRead: () => { RD = null; todayStep(); } };`;
+  const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
+  const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"WordsTypedChecks/1.0" }, undefined, st.ls, st.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
+    function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, WORDS, SENTENCES, LESSONS, [], CHARACTERS];
+  const api = new Function(...names, fnBody)(...args);
+  await tick(); await tick();
+  return api;
+}
+function typedRight(it){
+  const w = BY_ID[String(it.key).slice(2)];
+  if(typeof it.check === "function" && w){
+    const cands = [w.w, w.pron, VC.gloss(w), ...(w.alt || []), ...String(VC.gloss(w)).split(/[;,/]| or /).map(s => s.trim())].filter(Boolean);
+    for(const c of cands){ try { if(it.check(c)) return c; } catch(e){} }
+  }
+  return w ? w.w : "";
+}
+function answer(api, right){
+  const it = api.getCur();
+  if(it.kind === "type"){ api.el("tin").value = right ? typedRight(it) : "zzz not it"; api.el("submit").click(); return; }
+  const btns = api.el("o").children;
+  (right ? btns.find(b => b.dataset.v === String(it.a)) : btns.find(b => b.dataset.v !== String(it.a))).click();
+}
+// One Today session; okFn(item, rec before) decides each answer. Returns per-item rows.
+async function session(api, okFn){
+  const rows = [];
+  api.el("go").click();
+  for(let guard = 0; guard < 600; guard++){
+    const h = api.panel(), D = api.getD();
+    if(D && D.cur){ const it = api.getCur(), key = String(it.key); const p = api.getProg();
+      const rec = key[0] === "w" ? p.w[key.slice(2)] : null; const s0 = rec ? rec.s || 0 : null; const r0 = rec ? rec.r : null;
+      const ok = okFn(it, rec); const lg = api.log[api.log.length - 1];
+      answer(api, ok); const r1 = key[0] === "w" ? api.getProg().w[key.slice(2)] : null;
+      rows.push({ key, kind: it.kind, label: it.label, step: lg.step, ok, s0, s1: r1 ? r1.s : null, r0, r1: r1 ? r1.r : null });
+      api.el("nx").click(); continue; }
+    if(api.rd()){ api.skipRead(); continue; }
+    if(/id="again"/.test(h)) break;
+    if(/id="ok"/.test(h)){ api.el("ok").click(); continue; }
+    if(/id="dr"/.test(h)){ api.el("dr").click(); continue; }
+    break;
+  }
+  return rows;
+}
+// HSK 1-3 learned; HSK 1 words at streak 2 (held), the next 6 at 1, the rest at 4; 60 units recorded.
+const byLv = VC.wordsByLevel(WORDS, PACK);
+const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
+function seedW(){
+  const p = VC.normalizeProg({ sets: { "1": NS("1"), "2": NS("2"), "3": NS("3"), "4": 0 }, placedOnce: true, soundsOpened: true, sessions: 40 }, PACK);
+  let i = 0; ["1", "2", "3"].forEach(lv => byLv[lv].forEach(w => { const s = lv === "1" ? 2 : i++ < 6 ? 1 : 4; p.w[w.id] = { r: s + 2, w: 1, s, t: 20000, u: 1 }; }));
+  VC.answerCharChoice(p, true);
+  VC.charStageUnits(["1"], CHARACTERS, PACK).slice(0, 60).forEach((u, j) => { const s = j < 20 ? 4 : 6; p.chars.c[u.id] = { r: s + 1, w: 0, s }; });
+  return p;
+}
+
+(async function main(){
+  console.log("[1] config and validation");
+  check(`zh ships wordsBy "typed"; WORD_HOLD ${VC.WORD_HOLD}, WORD_MASTERED ${VC.WORD_MASTERED}`, PACK.wordsBy === "typed" && VC.wordsTypedOn(PACK) && VC.WORD_HOLD === 2 && VC.WORD_MASTERED === 3);
+  check("off without the field or with another value", !VC.wordsTypedOn(PACK_OFF) && !VC.wordsTypedOn(Object.assign({}, PACK, { wordsBy: "choice" })) && !VC.wordsTypedOn(null));
+  {
+    const base = { key: "synthwb", name: "Synth", tts: "en-US", levels: [{ id: "1", label: "One" }], placement: [["1", 1]], showPron: false, hasLessons: false, typing: {}, dayAware: true };
+    const words = Array.from({ length: 12 }, (_, i) => ({ id: `w${i + 1}`, w: `word${i + 1}`, en: `gloss${i + 1}`, lv: "1" }));
+    const run = pack => { const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ve_wordsby_"));
+      fs.writeFileSync(path.join(dir, "pack.json"), JSON.stringify(pack)); fs.writeFileSync(path.join(dir, "words.json"), JSON.stringify(words)); fs.writeFileSync(path.join(dir, "sentences.json"), "[]");
+      cp.spawnSync(PY, [path.join(ROOT, "tools", "jsonify_pack.py"), dir], { cwd: ROOT });
+      const r = cp.spawnSync(PY, [path.join(ROOT, "tools", "validate_pack.py"), dir], { cwd: ROOT, encoding: "utf8" }); return { status: r.status, out: (r.stdout || "") + (r.stderr || "") }; };
+    const ok = run(Object.assign({}, base, { wordsBy: "typed" }));
+    check("validator: wordsBy \"typed\" with typing and dayAware passes", ok.status === 0 && !/wordsBy/.test(ok.out), ok.out);
+    const bad = run(Object.assign({}, base, { wordsBy: "choice" }));
+    check("validator: another wordsBy value is an error", bad.status !== 0 && /pack\.wordsBy must be "typed"/.test(bad.out), bad.out);
+    const nt = Object.assign({}, base, { wordsBy: "typed" }); delete nt.typing;
+    const r2 = run(nt);
+    check("validator: wordsBy without typing is an error (a held word could never move up)", r2.status !== 0 && /wordsBy needs pack\.typing/.test(r2.out), r2.out);
+    const nd = Object.assign({}, base, { wordsBy: "typed" }); delete nd.dayAware;
+    const r3 = run(nd);
+    check("validator: wordsBy without dayAware warns", r3.status === 0 && /wordsBy without pack\.dayAware/.test(r3.out), r3.out);
+  }
+
+  console.log("\n[2] streak table with the flag (kind x streak -> new streak; r/w counts; prov)");
+  {
+    const KINDS = ["recall", "read", "hear", "type"];
+    const rows = [], bad = [];
+    for(const kind of KINDS) for(let s = 0; s <= 5; s++) for(const ok of [true, false]){
+      const m = { x: { r: 5, w: 1, s } }; VC.markWordRec(m, "x", ok, kind, undefined, PACK);
+      const want = s < VC.WORD_HOLD ? (ok ? s + 1 : 0) : ok ? (kind === "type" ? s + 1 : s) : s - 1;
+      rows.push(`${kind} s${s} ${ok ? "right" : "miss"} -> ${m.x.s}`);
+      if(m.x.s !== want || m.x.r !== 5 + (ok ? 1 : 0) || m.x.w !== 1 + (ok ? 0 : 1)) bad.push(rows[rows.length - 1] + ` (want ${want})`);
+    }
+    check(`${rows.length} cases: below 2 +1 / miss 0; from 2 typed +1, choice/ear hold, miss -1 (3 -> 2, 2 -> 1); r/w count every answer`, bad.length === 0, bad.join("\n"));
+    console.log("    " + ["recall", "type"].map(k => [0, 1, 2, 3, 4].map(s => `${k} ${s}: ${[true, false].map(ok => { const m = { x: { r: 1, w: 0, s } }; VC.markWordRec(m, "x", ok, k, undefined, PACK); return m.x.s; }).join("/")}`).join(", ")).join("\n    "));
+    const kOf = (rec, ok, kind, req) => { const a = { x: clone(rec) }, b = { x: clone(rec) }; VC.markWordRec(a, "x", ok, kind, req, PACK); VC.markRec(b, "x", ok, true, kind, req); return [a.x.k, b.x.k]; };
+    const kCases = [[{ r: 3, w: 1, s: 2 }, false, "hear"], [{ r: 3, w: 1, s: 2, k: "hear" }, true, "hear"], [{ r: 3, w: 1, s: 3, k: "recall" }, true, "read", "recall"], [{ r: 3, w: 1, s: 4, k: "type" }, true, "recall"], [{ r: 3, w: 1, s: 2, k: "read" }, false, "type"]];
+    check("missed kind k is set and cleared as markRec does", kCases.every(([rec, ok, kind, req]) => { const [a, b] = kOf(rec, ok, kind, req); return a === b; }));
+    const pv = (s, ok, kind) => { const m = { x: { r: 2, w: 0, s, prov: 1 } }; VC.markWordRec(m, "x", ok, kind, undefined, PACK); return "prov" in m.x; };
+    check("prov: kept on a hold at 2, cleared at 3 (typed right) and on any miss", pv(2, true, "recall") && !pv(2, true, "type") && !pv(2, false, "recall") && !pv(1, false, "type") && pv(1, true, "read"));
+    check("a known word (3+) stays known after a choice answer and after one miss from 4+", (() => { const m = { a: { r: 9, w: 0, s: 3 }, b: { r: 9, w: 0, s: 7 } }; VC.markWordRec(m, "a", true, "hear", undefined, PACK); VC.markWordRec(m, "b", false, "read", undefined, PACK); return m.a.s === 3 && m.b.s === 6; })());
+    check("a word without a record yet is created as markRec does", (() => { const a = {}, b = {}; VC.markWordRec(a, "x", true, "recall", undefined, PACK); VC.markRec(b, "x", true, true, "recall"); return JSON.stringify(a) === JSON.stringify(b); })());
+  }
+
+  console.log(`\n[3] flag-off control: markWordRec vs ${MAIN} markRec, every word kind, both outcomes`);
+  if(!OLD) skip(`${MAIN} not in this checkout's history`);
+  else {
+    const KINDS = ["recall", "read", "hear", "type", "gap", "gapType", undefined];
+    let n = 0; const diff = [];
+    for(const kind of KINDS) for(let s = 0; s <= 5; s++) for(const ok of [true, false]) for(const extra of [{}, { prov: 1 }, { k: "recall" }, { k: "type", t: 20001, u: 3 }]) for(const req of [undefined, "type", "recall"]){
+      const rec = Object.assign({ r: 4, w: 2, s }, extra);
+      const a = { x: clone(rec) }, b = { x: clone(rec) }, c = { x: clone(rec) };
+      OLD.markRec(a, "x", ok, true, kind, req); VC.markWordRec(b, "x", ok, kind, req, PACK_OFF); VC.markRec(c, "x", ok, true, kind, req); n++;
+      if(JSON.stringify(a) !== JSON.stringify(b) || JSON.stringify(a) !== JSON.stringify(c)) diff.push(`${kind} s${s} ${ok} ${JSON.stringify(extra)} ${req}: ${JSON.stringify(a.x)} vs ${JSON.stringify(b.x)}`);
+    }
+    check(`${n} cases byte-identical (flag off, and markRec itself)`, diff.length === 0, diff.slice(0, 5).join("\n"));
+    let n2 = 0; const d2 = [];
+    for(const kind of KINDS) for(let s = 0; s < VC.WORD_HOLD; s++) for(const ok of [true, false]){ const a = { x: { r: 1, w: 0, s } }, b = { x: { r: 1, w: 0, s } }; OLD.markRec(a, "x", ok, true, kind); VC.markWordRec(b, "x", ok, kind, undefined, PACK); n2++; if(JSON.stringify(a) !== JSON.stringify(b)) d2.push(`${kind} s${s} ${ok}`); }
+    check(`flag on, below WORD_HOLD: ${n2} cases byte-identical to ${MAIN}`, d2.length === 0, d2.join("\n"));
+    const gapLine = h => (h.match(/^function markGapWord\(.*$/m) || [""])[0];
+    check("cloze (markGapWord) unchanged: a blanked word's streak never moves, flag on or off", !!mainHtml && gapLine(appHtml) === gapLine(mainHtml) && !/markRec|markWordRec/.test(gapLine(appHtml)));
+  }
+
+  console.log("\n[4] planner: held words planned typed");
+  {
+    const p = seedW(); const TODAY = "2026-10-04";
+    VC.dayStart(p, PACK, TODAY, true);
+    const lw = VC.learnedWords(WORDS, PACK, p);
+    const held = new Set(lw.filter(w => p.w[w.id].s === 2).map(w => w.id));
+    const plan = (pack, o, core) => (core || VC).buildReviewPlan(lw, clone(p), pack, Object.assign({ today: TODAY, rng: mulberry32(5), size: 20 }, o || {}));
+    const on = plan(PACK), off = plan(PACK_OFF);
+    const onW = on.filter(it => it.word), offW = off.filter(it => it.word);
+    const heldOn = onW.filter(it => held.has(it.word.id));
+    check(`Review: the same words in the same order as flag off (${onW.length})`, onW.length === offW.length && onW.every((it, i) => it.word.id === offW[i].word.id));
+    check(`Review: every held word is asked typed (${heldOn.length} held of ${onW.length} words); the rest keep the flag-off kind`, heldOn.length > 0 && heldOn.every(it => it.kind === "type")
+      && onW.every((it, i) => held.has(it.word.id) || it.kind === offW[i].kind));
+    const pR = clone(p); Object.values(pR.w).forEach(r => { if(r.s === 1) r.s = 4; });
+    const rc = VC.buildRecallPlan(lw, pR, PACK, 8, { today: TODAY, rng: mulberry32(9) }).filter(it => it.word && held.has(it.word.id));
+    check(`Recall: held words asked typed (${rc.length})`, rc.length > 0 && rc.every(it => it.kind === "type"));
+    const none = plan(PACK, { typedOk: () => false });
+    check("typedOk false (no typed kind fits, or typed this session): the flag-off plan with recall for its typed asks", none.length === off.length && none.every((it, i) => (it.word && it.word.id) === (off[i].word && off[i].word.id) && it.kind === (it.word && off[i].kind === "type" ? "recall" : off[i].kind))
+      && off.some(it => it.word && it.kind === "type"));
+    const pig = WORDS.find(w => w.pronInGloss && held.has(w.id));
+    check(`default typedOk: a held pronInGloss word shown by its reading (${pig ? pig.w : "none"}) is not planned typed`, !!pig && !VC.typedWordDue(pig, p, PACK, TODAY, ["recall", "type"]) && VC.typedWordDue(BY_ID[[...held].find(id => !BY_ID[id].pronInGloss)], p, PACK, TODAY, ["recall", "type"]));
+    const w0 = heldOn[0].word; const q = clone(p); VC.noteDay(q, PACK, TODAY, "w:" + w0.id, "type", true);
+    check("a word right typed recently (reached 2 by it) keeps the day rule: no same-kind repeat", VC.typedWordDue(w0, p, PACK, TODAY, ["type"]) && !VC.typedWordDue(w0, q, PACK, TODAY, ["type"]));
+    check("streak 1 and streak 3 words, a planner without \"type\" (Listen), and dayAware off are never forced",
+      !VC.typedWordDue(BY_ID[Object.keys(p.w).find(id => p.w[id].s === 1)], p, PACK, TODAY, ["type"]) && !VC.typedWordDue(BY_ID[Object.keys(p.w).find(id => p.w[id].s === 4)], p, PACK, TODAY, ["type"])
+      && !VC.typedWordDue(w0, p, PACK, TODAY, ["hear"]) && !VC.typedWordDue(w0, p, Object.assign({}, PACK, { dayAware: false }), TODAY, ["type"]));
+    if(!OLD) skip(`${MAIN} plan control`);
+    else {
+      const o1 = plan(PACK_OFF, {}, OLD), o2 = VC.buildRecallPlan(lw, clone(p), PACK_OFF, 8, { today: TODAY, rng: mulberry32(9) }), o3 = OLD.buildRecallPlan(lw, clone(p), PACK_OFF, 8, { today: TODAY, rng: mulberry32(9) });
+      const sig = pl => JSON.stringify(pl.map(it => [it.word && it.word.id, it.unit && it.unit.id, it.kind, it.tu]));
+      check(`flag off: Review and Recall plans identical to ${MAIN}`, sig(o1) === sig(off) && sig(o2) === sig(o3));
+    }
+  }
+
+  console.log("\n[5] app on zh: one Today session");
+  {
+    NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
+    const p0 = seedW();
+    const api = await boot(PACK, p0, 3);
+    // Held words: typed answers wrong, choice answers right; everything else right.
+    const rows = await session(api, (it, rec) => !(rec && rec.s === 2 && it.kind === "type"));
+    const W = rows.filter(r => r.key[0] === "w");
+    const heldRv = W.filter(r => r.step === 0 && r.s0 === 2 && p0.w[r.key.slice(2)].s === 2);
+    check(`Review: held words are asked typed first (${heldRv.filter(r => r.kind === "type").length} of ${new Set(heldRv.map(r => r.key)).size} held words)`, heldRv.length > 0 && heldRv.filter((r, i) => heldRv.findIndex(x => x.key === r.key) === i).every(r => r.kind === "type"));
+    const choiceHeld = W.filter(r => r.s0 >= 2 && r.kind !== "type" && r.ok);
+    check(`right choice/ear answers at 2+ hold the streak, r +1 (${choiceHeld.length})`, choiceHeld.length > 0 && choiceHeld.every(r => r.s1 === r.s0 && r.r1 === r.r0 + 1));
+    const missHeld = W.filter(r => r.s0 >= 2 && !r.ok);
+    check(`misses at 2+ step down one (${missHeld.length})`, missHeld.length > 0 && missHeld.every(r => r.s1 === r.s0 - 1));
+    const typedBy = {}; W.filter(r => r.kind === "type").forEach(r => { (typedBy[r.key] = typedBy[r.key] || new Set()).add(r.step); });
+    const twice = Object.entries(typedBy).filter(([k, st]) => st.size > 1 && p0.w[k.slice(2)].s === 2);
+    check(`at most one typed drill per held word in the session (${Object.keys(typedBy).length} words typed; ${twice.length} twice)`, twice.length === 0, twice.slice(0, 5).map(([k, st]) => k + " steps " + [...st]).join("\n"));
+    const back = W.filter(r => r.s0 === 1 && r.s1 === 2 && p0.w[r.key.slice(2)].s === 2).map(r => r.key);
+    check(`held words missed typed and taken back to 2 by a choice in the session (${new Set(back).size}) get no second typed drill`, back.length > 0 && back.every(k => !typedBy[k] || typedBy[k].size === 1));
+    // Second session: typed answers right take held words to known.
+    NOW = new Date(2026, 9, 4, 13, 0, 0).getTime();
+    api.el("go") || null;
+    const pre = clone(api.getProg().w);
+    const rows2 = await session(api, () => true);
+    const t2 = rows2.filter(r => r.key[0] === "w" && r.kind === "type" && r.s0 === 2);
+    check(`right typed answers at 2 make a word known (${t2.length})`, t2.length > 0 && t2.every(r => r.s1 === 3));
+    check("no word at 3+ before the sessions lost known status by a right answer", Object.keys(pre).every(id => (pre[id].s || 0) < 3 || (api.getProg().w[id].s || 0) >= 3 || rows2.some(r => r.key === "w:" + id && !r.ok)));
+  }
+  if(!OLD || !mainHtml) skip(`flag-off app control vs ${MAIN}`);
+  else {
+    const run = async (html, core) => {
+      NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
+      const api = await boot(PACK_OFF, seedW(), 11, { html, core });
+      const out = { today: api.panel() }; const ans = mulberry32(7);
+      const rows = await session(api, () => ans() < 0.75);
+      out.walk = JSON.stringify(rows.map(r => [r.key, r.kind, r.label, r.ok]));
+      NOW = new Date(2026, 9, 4, 13, 0, 0).getTime();
+      const rows2 = await session(api, () => ans() < 0.75);
+      out.walk2 = JSON.stringify(rows2.map(r => [r.key, r.kind, r.label, r.ok]));
+      const p = api.getProg(); out.prog = JSON.stringify({ w: p.w, c: p.chars.c, s: p.s, day: p.day });
+      return out;
+    };
+    const a = await run(mainHtml, OLD), b = await run(undefined, undefined);
+    for(const k of Object.keys(a)){ let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
+      check(`flag off, two sessions: ${k} byte-identical to ${MAIN} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}`}`, a[k] === b[k] && a[k].length > 100); }
+  }
+
+  console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
+  process.exit(fails ? 1 : 0);
+})().catch(e => { console.error(e); process.exit(1); });

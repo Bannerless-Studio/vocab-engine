@@ -24,8 +24,8 @@ const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
-// The zh pack on main 590af86: characters.withWords, no learn (and no pauseNew / optsMix, added after it).
-const WITH = (p => { const c = Object.assign({}, p.characters, { withWords: true }); delete c.learn; const q = Object.assign({}, p, { characters: c }); delete q.pauseNew; delete q.optsMix; return q; })(PACK);
+// The zh pack on main 590af86: characters.withWords, no learn (and no pauseNew / optsMix / wordsBy, added after it).
+const WITH = (p => { const c = Object.assign({}, p.characters, { withWords: true }); delete c.learn; const q = Object.assign({}, p, { characters: c }); delete q.pauseNew; delete q.optsMix; delete q.wordsBy; return q; })(PACK);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
 

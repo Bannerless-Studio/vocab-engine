@@ -615,5 +615,34 @@ console.log("\n[rotation-s] pack.readRotation (fb16): optional read.done s / ls 
   }
 }
 
+console.log("\n[wordsBy] pack.wordsBy \"typed\" (fb18): word streak semantics only, no field added; records read on a8e9c08 unchanged; words at 3+ stay known");
+{
+  check(`zh ships wordsBy "typed" (${LAG_PACK.wordsBy})`, LAG_PACK.wordsBy === "typed" && VC.wordsTypedOn(LAG_PACK));
+  const seed = mig("HEAD"); const ids = Object.keys(seed.w);
+  const known0 = ids.filter(id => (seed.w[id].s || 0) >= VC.WORD_MASTERED);
+  const ownerBoot = VC.bootProg(JSON.stringify(seed), LAG_PACK);
+  check(`old progress boots here unchanged (no backup); its ${known0.length} words at streak 3+ stay known`, ownerBoot.backupRaw === null && JSON.stringify(ownerBoot.prog.w) === JSON.stringify(seed.w)
+    && known0.every(id => ownerBoot.prog.w[id].s >= VC.WORD_MASTERED));
+  const p = clone(ownerBoot.prog); const before = clone(p.w);
+  const KINDS = ["recall", "read", "hear", "type"];
+  ids.slice(0, 40).forEach((id, i) => { p.w[id].s = i % 6; if(i % 5 === 0) p.w[id].prov = 1; VC.markWordRec(p.w, id, i % 3 !== 0, KINDS[i % 4], undefined, LAG_PACK); VC.markWordRec(p.w, id, i % 4 !== 1, KINDS[(i + 1) % 4], undefined, LAG_PACK); });
+  const keysOk = ids.every(id => Object.keys(p.w[id]).every(k => k in before[id] || k === "k" || k === "prov"));
+  check("records written by this build keep the old fields and value ranges (r, w, s >= 0 integers; no new key)", keysOk && ids.every(id => ["r", "w", "s"].every(k => Number.isInteger(p.w[id][k]) && p.w[id][k] >= 0)) && VC.validateProgShape(p, Object.keys(p.sets)).ok);
+  let eng = null, oldPack = null;
+  try {
+    const cp = require("child_process"), os = require("os");
+    const src = cp.execSync(`git -C "${ROOT}" show a8e9c08:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_a8e9c08.js"); fs.writeFileSync(f, src); eng = require(f);
+    oldPack = JSON.parse(cp.execSync(`git -C "${ROOT}" show a8e9c08:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+  } catch(e){ eng = null; }
+  if(!eng) skip("engine a8e9c08 not in this checkout's history");
+  else {
+    const raw = JSON.stringify(p), ob = eng.bootProg(raw, oldPack);
+    check("engine a8e9c08 (its zh pack, no wordsBy) boots it: no backup, word records byte-equal", !("wordsBy" in oldPack) && ob.backupRaw === null && JSON.stringify(ob.prog.w) === JSON.stringify(p.w));
+    const back = VC.bootProg(JSON.stringify(ob.prog), LAG_PACK);
+    check("and back here: no backup, word records byte-equal", back.backupRaw === null && JSON.stringify(back.prog.w) === JSON.stringify(p.w));
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);
