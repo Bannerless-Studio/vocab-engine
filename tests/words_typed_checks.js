@@ -320,7 +320,10 @@ function seedW(){
     for(const kind of ["recall", "read", "hear", "type"]){ for(const inDrill of [true, false]){
       api.getProg().w[w.id] = { r: 3, w: 1, s: 1 }; api.setD({ miss: inDrill ? [{ key: "w:" + w.id }] : [] }); api.mark(w.id, true, kind);
       per[kind + (inDrill ? "" : " (no miss)")] = api.getProg().w[w.id].s; } }
+    api.getProg().w[w.id] = { r: 3, w: 1, s: 1, k: "type" }; api.setD({ miss: [{ key: "w:" + w.id }] }); api.mark(w.id, true, "type");
+    const kr = api.getProg().w[w.id];
     api.setD(null);
+    check(`the typed retry right settles the missed kind k as before, streak held (${JSON.stringify(kr)})`, !("k" in kr) && kr.s === 1 && kr.r === 4);
     check(`retry right by recall / read / hear / type after a miss in the drill: no credit (${JSON.stringify(per)})`, ["recall", "read", "hear", "type"].every(k => per[k] === 1 && per[k + " (no miss)"] === 2));
     check(`a right answer in a later drill of the session counts as usual (below 2: +1) (${later.length})`, later.length > 0 && later.every(r => r.s1 === r.s0 + 1));
   }

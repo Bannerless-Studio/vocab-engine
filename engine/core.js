@@ -1017,14 +1017,15 @@ function markRec(map, key, ok, isWord, kind, reqKind){
 // down one, the characters.bareBy rule for words. Below WORD_HOLD, and with the flag off, markRec.
 // o.typable false (no typed kind fits the word as shown: 北京 while shown by its reading): markRec,
 // as typedUnitWords exempts such units. o.retry (the word was missed earlier in this drill): no
-// streak credit, as markUnitTyped gives the in-drill retry none (review fb18 HIGH 1); the streak
+// streak credit, as markUnitTyped gives the in-drill retry none (review fb18 HIGH 1), but it settles
+// the missed kind k as markRec does (engine_checks typed-fallback drill); the streak
 // is 1+ after that miss only when it stepped the word down from WORD_HOLD+, below it a miss resets to 0.
 const WORD_HOLD = 2;
 function wordsTypedOn(pack){ return !!(pack && pack.wordsBy === "typed"); }
 function markWordRec(map, key, ok, kind, reqKind, pack, o){
   const p = map[key], x = o || {};
   if(!wordsTypedOn(pack) || !isObj(p) || x.typable === false) return markRec(map, key, ok, true, kind, reqKind);
-  if(x.retry && (p.s || 0) >= 1){ if(ok) p.r++; else p.w++; return p; }
+  if(x.retry && (p.s || 0) >= 1){ if(ok) p.r++; else p.w++; setMissKind(p, ok, kind, reqKind); return p; }
   if((p.s || 0) < WORD_HOLD) return markRec(map, key, ok, true, kind, reqKind);
   if(ok){ p.r++; if(kind === "type") p.s++; } else { p.w++; p.s--; }
   if(p.prov && (p.s>=WORD_MASTERED || !ok)) delete p.prov;
