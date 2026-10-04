@@ -2087,7 +2087,7 @@ function progressMapHTML(){
   if(cg){
     const f = Math.min(10, Math.round(10 * cg.p)), n = VC.sessionsToGo(prog, cg.i, cg.n), pc = Math.round(cg.p * 100);
     const head = cg.all ? "All goals" : `Goal ${cg.i + 1} of ${cg.n}`;
-    return `<div class="pmap pmg" id="pmap" role="button" tabindex="0" aria-label="${pc}% of ${cg.all ? "all goals" : `goal ${cg.i + 1} of ${cg.n}`}: ${escapeHtml(cg.goal.label)}"><div class="pm1"><span class="pmh">${ui(head + " ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸")}</span> ${ui(cg.goal.label)}</div><div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div></div>`;
+    return `<div class="pmap pmg" id="pmap" role="button" tabindex="0" aria-label="${pc}% of ${cg.all ? "all goals" : `goal ${cg.i + 1} of ${cg.n}`}: ${escapeHtml(cg.goal.label)}"><div class="pm1"><span class="pmh">${ui(head + " ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸")}</span> ${ui(cg.goal.label)}</div>${cg.all ? "" : `<div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div>`}</div>`;
   }
   const p = VC.progressPosition(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST), f = Math.round(10 * p), n = VC.sessionsToGo(prog);
   const aria = `${Math.round(p * 100)}% of the way to following a drama without pausing`;

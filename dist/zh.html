@@ -2399,6 +2399,7 @@ function recordProgressMap(prog, pack, words, units, passages){
   return true;
 }
 // g/n (goal packs): only entries of goal g count; entries without g count for goal 0 when the pack has <= 1 goal.
+// Goal packs pace to GOAL_DONE (where the goal switches); the whole-pack bar paces to 1.
 function sessionsToGo(prog, g, n){
   let pm = prog && Array.isArray(prog.pm) ? prog.pm : [];
   if(g !== undefined) pm = pm.filter(e => e.g === g || (e.g === undefined && g === 0 && n <= 1));
@@ -2406,7 +2407,7 @@ function sessionsToGo(prog, g, n){
   const a = pm[0], z = pm[pm.length - 1];
   const rate = (z.p - a.p) / (z.sn - a.sn);
   if(!(rate > 0) || !isFinite(rate)) return null;
-  return Math.max(0, Math.ceil((1 - z.p) / rate - 1e-9));
+  return Math.max(0, Math.ceil(((g !== undefined ? GOAL_DONE : 1) - z.p) / rate - 1e-9));
 }
 function readingStats(passages, pack, prog){
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
@@ -5137,7 +5138,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "3467676012-1937339";
+const VE_BUILD = "847348977-1937480";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -5799,7 +5800,7 @@ function progressMapHTML(){
   if(cg){
     const f = Math.min(10, Math.round(10 * cg.p)), n = VC.sessionsToGo(prog, cg.i, cg.n), pc = Math.round(cg.p * 100);
     const head = cg.all ? "All goals" : `Goal ${cg.i + 1} of ${cg.n}`;
-    return `<div class="pmap pmg" id="pmap" role="button" tabindex="0" aria-label="${pc}% of ${cg.all ? "all goals" : `goal ${cg.i + 1} of ${cg.n}`}: ${escapeHtml(cg.goal.label)}"><div class="pm1"><span class="pmh">${ui(head + " ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸")}</span> ${ui(cg.goal.label)}</div><div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div></div>`;
+    return `<div class="pmap pmg" id="pmap" role="button" tabindex="0" aria-label="${pc}% of ${cg.all ? "all goals" : `goal ${cg.i + 1} of ${cg.n}`}: ${escapeHtml(cg.goal.label)}"><div class="pm1"><span class="pmh">${ui(head + " ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸")}</span> ${ui(cg.goal.label)}</div>${cg.all ? "" : `<div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div>`}</div>`;
   }
   const p = VC.progressPosition(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST), f = Math.round(10 * p), n = VC.sessionsToGo(prog);
   const aria = `${Math.round(p * 100)}% of the way to following a drama without pausing`;
@@ -6970,4 +6971,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1203916244-1936663-->
+<!--ve-build:257463149-1936803-->

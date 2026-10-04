@@ -2031,6 +2031,7 @@ function recordProgressMap(prog, pack, words, units, passages){
   return true;
 }
 // g/n (goal packs): only entries of goal g count; entries without g count for goal 0 when the pack has <= 1 goal.
+// Goal packs pace to GOAL_DONE (where the goal switches); the whole-pack bar paces to 1.
 function sessionsToGo(prog, g, n){
   let pm = prog && Array.isArray(prog.pm) ? prog.pm : [];
   if(g !== undefined) pm = pm.filter(e => e.g === g || (e.g === undefined && g === 0 && n <= 1));
@@ -2038,7 +2039,7 @@ function sessionsToGo(prog, g, n){
   const a = pm[0], z = pm[pm.length - 1];
   const rate = (z.p - a.p) / (z.sn - a.sn);
   if(!(rate > 0) || !isFinite(rate)) return null;
-  return Math.max(0, Math.ceil((1 - z.p) / rate - 1e-9));
+  return Math.max(0, Math.ceil(((g !== undefined ? GOAL_DONE : 1) - z.p) / rate - 1e-9));
 }
 function readingStats(passages, pack, prog){
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};

@@ -407,12 +407,14 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
     check("progressMap: true still writes { sn, p } only", eq(Object.keys(q.pm[0]), ["sn", "p"]));
     const mk = (n, g, p0) => Array.from({ length: n }, (_, i) => Object.assign({ sn: 20 + i, p: Math.round((p0 + 0.01 * i) * 1000) / 1000 }, g === undefined ? {} : { g }));
     const s2g = (pm, g, n) => VC.sessionsToGo({ pm }, g, n);
-    check("14 entries of goal 0: goal 0 has a pace (ceil(0.77/0.01) = 77); goal 1 restarts (null)", s2g(mk(14, 0, 0.1), 0, 3) === 77 && s2g(mk(14, 0, 0.1), 1, 3) === null);
+    check("14 entries of goal 0: goal 0 has a pace (ceil((0.9 - 0.23)/0.01) = 67); goal 1 restarts (null)", s2g(mk(14, 0, 0.1), 0, 3) === 67 && s2g(mk(14, 0, 0.1), 1, 3) === null);
     check("7 of goal 0 then 7 of goal 1: neither has 14 -> null (a switch restarts the window)", (() => { const pm = mk(7, 0, 0.5).concat(mk(7, 1, 0.1).map(e => Object.assign(e, { sn: e.sn + 7 }))); return s2g(pm, 0, 3) === null && s2g(pm, 1, 3) === null; })());
     check("old entries without g are ignored for a 3-goal pack", s2g(mk(14, undefined, 0.1), 0, 3) === null && s2g(mk(14, undefined, 0.1), 1, 3) === null);
-    check("old entries without g count for goal 0 when the pack has <= 1 goal", s2g(mk(14, undefined, 0.1), 0, 1) === 77 && s2g(mk(14, undefined, 0.1), 1, 1) === null);
+    check("old entries without g count for goal 0 when the pack has <= 1 goal", s2g(mk(14, undefined, 0.1), 0, 1) === 67 && s2g(mk(14, undefined, 0.1), 1, 1) === null);
+    check("goal pace targets 0.9, not 1: rising 0.01/session to p 0.23 -> ceil(0.67/0.01) = 67; whole-pack bar (no g) -> 77", s2g(mk(14, 0, 0.1), 0, 3) === 67 && VC.sessionsToGo({ pm: mk(14, 0, 0.1) }) === 77);
+    check("a goal already at 0.9 with a rising history: 0, never negative", s2g(mk(14, 2, 0.8), 2, 3) === 0);
     check("sessionsToGo(prog) without g is the old behaviour (all entries)", VC.sessionsToGo({ pm: mk(14, 0, 0.1) }) === 77 && VC.sessionsToGo({ pm: mk(14, undefined, 0.1) }) === 77);
-    check("a mixed list: 4 entries without g + 10 of goal 1 -> null; 14 of goal 1 -> pace 67", s2g(mk(4, undefined, 0.2).concat(mk(10, 1, 0.2).map(e => Object.assign(e, { sn: e.sn + 4 }))), 1, 3) === null && s2g(mk(14, 1, 0.2), 1, 3) === 67);
+    check("a mixed list: 4 entries without g + 10 of goal 1 -> null; 14 of goal 1 -> pace 57", s2g(mk(4, undefined, 0.2).concat(mk(10, 1, 0.2).map(e => Object.assign(e, { sn: e.sn + 4 }))), 1, 3) === null && s2g(mk(14, 1, 0.2), 1, 3) === 57);
     const ks = Object.keys(p.sets);
     check("validateProgShape: g number accepted, g string rejected, no g accepted", VC.validateProgShape(p, ks).ok && VC.validateProgShape(Object.assign(clone(p), { pm: [{ sn: 1, p: 0, g: "0" }] }), ks).ok === false && VC.validateProgShape(Object.assign(clone(p), { pm: [{ sn: 1, p: 0 }] }), ks).ok);
     const r = allProg(); r.sn = 1; for(let i = 1; i <= 20; i++){ r.sn = i; VC.recordProgressMap(r, PACK, WORDS, CHARACTERS, PASSAGES); }
@@ -431,10 +433,12 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
       check(`${label}: "${t && t.head} ${t && t.line1.slice((t.head || "").length)}" / "${t && t.line2}"`, !!t && t.head === `Goal ${cg.i + 1} of 3 ▸ [${cells(cg.p)}] ▸` && t.line1 === `${t.head} ${G[cg.i].label}` && t.line2 === (n == null ? "pace: — (after 14 sessions)" : `≈ ${n} sessions to go`));
       check(`${label}: above the plan rows; bar and "Goal k of 3" in one nowrap span (${t.head.length} chars); aria carries percent and label`, h.indexOf('class="pmap pmg"') < h.indexOf('<table class="stats steps">') && t.head.length <= 36 && new RegExp(`aria-label="${Math.round(cg.p * 100)}% of goal ${cg.i + 1} of 3: `).test(h) && /\.pmap \.pmh\{white-space:nowrap\}/.test(appHtml));
     }
-    check("goal 2 of an HSK 1-2 record, pace from the g=1 entries: a number", (() => { const pr = hsk12(); pr.pm = Array.from({ length: 14 }, (_, i) => ({ sn: 20 + i, p: 0.1 + 0.01 * i, g: 1 })); return VC.sessionsToGo(pr, 1, 3) === 77; })());
+    check("goal 2 of an HSK 1-2 record, pace from the g=1 entries: a number", (() => { const pr = hsk12(); pr.pm = Array.from({ length: 14 }, (_, i) => ({ sn: 20 + i, p: 0.1 + 0.01 * i, g: 1 })); return VC.sessionsToGo(pr, 1, 3) === 67; })());
     const done = base({ sets: Object.fromEntries(VC.levelIds(PACK).map(lv => [lv, NS(lv)])) }); WORDS.forEach(w => { done.w[w.id] = { r: 3, w: 0, s: 3 }; }); CHARACTERS.forEach(u => { done.chars.c[u.id] = { r: 5, w: 0, s: 3 }; }); done.read = { done: Object.fromEntries(PASSAGES.map(x => [x.id, { sc: 4, n: 4, d: "2026-10-01", x: 1, l: 1 }])) };
-    { const { api } = await bootWith(PACK, done, 1); const t = goalText(api.panel());
-      check(`all goals passed: "${t && t.line1}"`, !!t && t.head === `All goals ▸ [${cells(1)}] ▸` && t.line1 === `${t.head} ${G[2].label}` && /aria-label="100% of all goals/.test(api.panel())); }
+    { const { api } = await bootWith(PACK, done, 1), h = api.panel(), m = h.match(/<div class="pmap pmg"[\s\S]*?<\/div><\/div>/), l1 = stripTags((m[0].match(/<div class="pm1">([\s\S]*?)<\/div>/) || [])[1] || "");
+      check(`all goals passed: "${l1}", no pace line`, l1 === `All goals ▸ [${cells(1)}] ▸ ${G[2].label}` && !/pm2/.test(m[0]) && /aria-label="100% of all goals/.test(h)); }
+    { const d2 = clone(done); d2.pm = Array.from({ length: 14 }, (_, i) => ({ sn: 20 + i, p: 0.9 + 0.005 * i, g: 2 })); const { api } = await bootWith(PACK, d2, 1);
+      check("all goals passed with a rising history: still no pace line", /class="pmap pmg"/.test(api.panel()) && !/pm2/.test(api.panel().match(/<div class="pmap pmg"[\s\S]*?<\/div><\/div>/)[0])); }
     const { api } = await bootWith(PACK, hsk12(), 1);
     api.el("pmap").click();
     const g = stripTags(api.panel()), gb = (api.panel().match(/<p class="q">Goals<\/p><table class="stats">([\s\S]*?)<\/table>/) || [])[1] || "", gr = [...gb.matchAll(/<tr><td>(Goal \d)<\/td><td>(\d+)% · ([^<]*)<\/td><\/tr>/g)];
