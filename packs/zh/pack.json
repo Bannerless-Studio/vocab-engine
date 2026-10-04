@@ -156,5 +156,20 @@
  "listenQuestions": "all",
  "readRotation": true,
  "wordsBy": "typed",
- "progressMap": true
+ "progressMap": {
+  "goals": [
+   {
+    "upTo": "2",
+    "label": "survive a trip: greet, order, count, buy"
+   },
+   {
+    "upTo": "3",
+    "label": "daily life: directions, simple chat, short notices"
+   },
+   {
+    "upTo": "4",
+    "label": "follow a slow drama with subtitles"
+   }
+  ]
+ }
 }

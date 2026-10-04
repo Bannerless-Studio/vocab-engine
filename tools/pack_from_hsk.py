@@ -380,7 +380,12 @@ def main(argv):
         # (docs/PACK_SCHEMA.md "wordsBy"; owner 2026-10-03).
         "wordsBy": "typed",
         # Today row: position toward the goal + measured sessions to go (docs/PACK_SCHEMA.md "progressMap"; owner 2026-10-04).
-        "progressMap": True,
+        # Ladder of goals, one shown at a time, each scoped to levels <= upTo (a level id); switches at 90%.
+        "progressMap": {"goals": [
+            {"upTo": "2", "label": "survive a trip: greet, order, count, buy"},
+            {"upTo": "3", "label": "daily life: directions, simple chat, short notices"},
+            {"upTo": "4", "label": "follow a slow drama with subtitles"},
+        ]},
     }
 
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).

@@ -146,6 +146,8 @@
   .wl .en{color:var(--mute);font-size:14px;text-align:left;display:block;margin:0}
   .pmap{cursor:pointer;margin:0 0 10px;white-space:nowrap;overflow:hidden}
   .pmap .pm1{font-size:12px;letter-spacing:0}
+  .pmap.pmg{white-space:normal}
+  .pmap .pmh{white-space:nowrap}
   .pmap .pm2{font-size:13px;color:var(--mute);margin-top:2px}
   table.stats{width:100%;border-collapse:collapse;font-size:15px}
   table.stats td{padding:8px 0;border-bottom:1px solid var(--line)}
@@ -2081,9 +2083,22 @@ function charChoiceHTML(){
 // pack.progressMap: one bar line and one pace line; tap opens Progress.
 function progressMapHTML(){
   if(!VC.progressMapOn(PACK)) return "";
+  const cg = VC.currentGoal(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST);
+  if(cg){
+    const f = Math.min(10, Math.round(10 * cg.p)), n = VC.sessionsToGo(prog, cg.i, cg.n), pc = Math.round(cg.p * 100);
+    const head = cg.all ? "All goals" : `Goal ${cg.i + 1} of ${cg.n}`;
+    return `<div class="pmap pmg" id="pmap" role="button" tabindex="0" aria-label="${pc}% of ${cg.all ? "all goals" : `goal ${cg.i + 1} of ${cg.n}`}: ${escapeHtml(cg.goal.label)}"><div class="pm1"><span class="pmh">${ui(head + " ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸")}</span> ${ui(cg.goal.label)}</div><div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div></div>`;
+  }
   const p = VC.progressPosition(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST), f = Math.round(10 * p), n = VC.sessionsToGo(prog);
   const aria = `${Math.round(p * 100)}% of the way to following a drama without pausing`;
   return `<div class="pmap" id="pmap" role="button" tabindex="0" aria-label="${aria}"><div class="pm1">${ui("You ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸ follow a drama without pausing")}</div><div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div></div>`;
+}
+// Progress tab: every goal, one row each.
+function goalsBlockHTML(){
+  const gs = VC.progressMapGoals(PACK);
+  if(!VC.progressMapOn(PACK) || !gs.length) return "";
+  const ps = VC.goalPositions(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST);
+  return `<p class="q">Goals</p><table class="stats">${gs.map((g, i) => `<tr><td>Goal ${i + 1}</td><td>${Math.round(ps[i] * 100)}% · ${escapeHtml(g.label)}</td></tr>`).join("")}</table>`;
 }
 function todayRender(){
   stopSpeaking();
@@ -3013,7 +3028,7 @@ function progressRender(){
   const weak = weakFirst(lwAll.filter(w=>VC.weakScore(prog.w[w.id])>0), 10);
   const cp = HAS_CHARACTERS ? charProgress() : null;
   const xp = HAS_SCRIPT ? scriptProgress() : null;
-  P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound.</div>`}
+  P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound.</div>`}${goalsBlockHTML()}
     <table class="stats${cp && cp.block ? " nw" : ""}">${xp ? xp.rows : ""}${rows}${cp ? cp.rows : ""}
       ${HAS_PASSAGES ? VC.readingStats(PASSAGE_LIST, PACK, prog).map(r => `<tr><td>${escapeHtml(levelLabel(r.lv))} reading</td><td>${r.done} / ${r.total} passages${r.avg != null ? ` · avg ${r.avg}%` : ""}</td></tr>`).join("") : ""}
       ${HAS_LESSONS ? `<tr><td>Sounds</td><td>${LESSON_LIST.filter(l=>prog.lessons[l.id]).length} / ${LESSON_LIST.length} lessons done</td></tr>` : ""}

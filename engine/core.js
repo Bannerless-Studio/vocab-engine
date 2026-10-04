@@ -930,7 +930,7 @@ function validateProgShape(data, levelIdList){
   if(data.soundsOpened !== undefined && typeof data.soundsOpened !== "boolean" && typeof data.soundsOpened !== "number") return {ok:false, reason:"soundsOpened must be a boolean or number"};
   if(data.theme !== undefined && data.theme !== null && data.theme !== "light" && data.theme !== "dark") return {ok:false, reason:"theme must be null, \"light\" or \"dark\""};
   if(data.read !== undefined){ const e = validateReadShape(data.read); if(e) return {ok:false, reason:e}; }
-  if(data.pm !== undefined && !(Array.isArray(data.pm) && data.pm.every(e => isObj(e) && typeof e.sn === "number" && typeof e.p === "number"))) return {ok:false, reason:"pm must be a list of {sn, p}"};
+  if(data.pm !== undefined && !(Array.isArray(data.pm) && data.pm.every(e => isObj(e) && typeof e.sn === "number" && typeof e.p === "number" && (e.g === undefined || typeof e.g === "number")))) return {ok:false, reason:"pm must be a list of {sn, p, g?}"};
   if(data.chars !== undefined){ const e = validateCharsShape(data.chars); if(e) return {ok:false, reason:e}; }
   if(data.script !== undefined){ const e = validateScriptShape(data.script); if(e) return {ok:false, reason:e}; }
   return {ok:true, data};
@@ -1974,7 +1974,8 @@ function markPassageDone(prog, pid, sc, n, d, listen, pack){
 // pack.progressMap (owner 2026-10-04: the learner feels no progress): one 0..1 number toward
 // following a drama without pausing. An absent part's weight goes to words.
 const PM_KEEP = 14;
-function progressMapOn(pack){ return !!(pack && pack.progressMap === true && dayAwareOn(pack)); }
+function progressMapGoals(pack){ const m = pack && pack.progressMap; return (m && typeof m === "object" && Array.isArray(m.goals)) ? m.goals : []; }
+function progressMapOn(pack){ return !!(pack && (pack.progressMap === true || progressMapGoals(pack).length > 0) && dayAwareOn(pack)); }
 function progressPosition(prog, pack, words, units, passages){
   const ws = words || [], us = units || [], ps = passages || [];
   const recs = (prog && isObj(prog.w)) ? prog.w : {};
@@ -1986,17 +1987,53 @@ function progressPosition(prog, pack, words, units, passages){
   if(ps.length){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
   return Math.max(0, Math.min(1, x));
 }
+// Goal ladder (owner 2026-10-04: the whole-pack bar read 2/10): one goal scoped to levels <= goal.upTo.
+// A unit's level is its own lv, else the level of its first word.
+function goalPosition(prog, pack, goal, words, units, passages){
+  const idx = levelIndexMap(pack), top = idx[String(goal && goal.upTo)];
+  if(top === undefined) return 0;
+  const inR = lv => idx[String(lv)] !== undefined && idx[String(lv)] <= top;
+  const ws = (words || []).filter(w => inR(w.lv));
+  const byId = {}; for(const w of (words || [])) byId[w.id] = w;
+  const us = (units || []).filter(u => inR(u.lv !== undefined ? u.lv : (byId[(u.words || [])[0]] || {}).lv));
+  const ps = (passages || []).filter(p => inR(p.lv));
+  const recs = (prog && isObj(prog.w)) ? prog.w : {};
+  const known = ws.filter(w => recs[w.id] && (recs[w.id].s || 0) >= WORD_MASTERED).length;
+  const wu = us.length ? 0.2 : 0, wp = ps.length ? 0.2 : 0;
+  let x = ws.length ? (1 - wu - wp) * known / ws.length : 0;
+  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && charTier(cr[u.id].s, pack) !== "pron").length / us.length; }
+  if(ps.length){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
+  return Math.max(0, Math.min(1, x));
+}
+const GOAL_DONE = 0.9;
+function currentGoal(prog, pack, words, units, passages){
+  const gs = progressMapGoals(pack); if(!gs.length) return null;
+  let last = null;
+  for(let i = 0; i < gs.length; i++){
+    last = { i, n: gs.length, goal: gs[i], p: goalPosition(prog, pack, gs[i], words, units, passages) };
+    if(last.p < GOAL_DONE) return Object.assign(last, { all: false });
+  }
+  return Object.assign(last, { all: true });
+}
+function goalPositions(prog, pack, words, units, passages){
+  return progressMapGoals(pack).map(g => goalPosition(prog, pack, g, words, units, passages));
+}
 // Optional prog.pm: older engines keep it on boot (validateProgShape ignores unknown top-level fields).
+// Goal packs add g (goal index) per entry, also optional.
 function recordProgressMap(prog, pack, words, units, passages){
   if(!progressMapOn(pack) || !prog) return false;
-  const e = { sn: daySn(prog), p: Math.round(progressPosition(prog, pack, words, units, passages) * 1000) / 1000 };
+  const cg = currentGoal(prog, pack, words, units, passages);
+  const e = cg ? { sn: daySn(prog), p: Math.round(cg.p * 1000) / 1000, g: cg.i }
+    : { sn: daySn(prog), p: Math.round(progressPosition(prog, pack, words, units, passages) * 1000) / 1000 };
   const pm = Array.isArray(prog.pm) ? prog.pm.filter(x => isObj(x) && x.sn !== e.sn) : [];
   pm.push(e);
   prog.pm = pm.slice(-PM_KEEP);
   return true;
 }
-function sessionsToGo(prog){
-  const pm = prog && Array.isArray(prog.pm) ? prog.pm : [];
+// g/n (goal packs): only entries of goal g count; entries without g count for goal 0 when the pack has <= 1 goal.
+function sessionsToGo(prog, g, n){
+  let pm = prog && Array.isArray(prog.pm) ? prog.pm : [];
+  if(g !== undefined) pm = pm.filter(e => e.g === g || (e.g === undefined && g === 0 && n <= 1));
   if(pm.length < PM_KEEP) return null;
   const a = pm[0], z = pm[pm.length - 1];
   const rate = (z.p - a.p) / (z.sn - a.sn);
@@ -3642,7 +3679,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressPosition, recordProgressMap, sessionsToGo, PM_KEEP,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,

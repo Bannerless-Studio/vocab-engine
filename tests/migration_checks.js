@@ -647,7 +647,7 @@ console.log("\n[wordsBy] pack.wordsBy \"typed\" (fb18): word streak semantics on
 console.log("\n[progressMap] pack.progressMap (fb20): one optional top-level prog.pm [{sn, p}] (last 14 sessions); main a2f2426 keeps it on boot, no backup");
 {
   const seed = mig("HEAD"); const pm = Array.from({ length: 14 }, (_, i) => ({ sn: 30 + i, p: Math.round((0.1 + 0.01 * i) * 1000) / 1000 }));
-  check(`zh ships progressMap (${LAG_PACK.progressMap})`, LAG_PACK.progressMap === true && VC.progressMapOn(LAG_PACK));
+  check(`zh ships a progressMap goals ladder (${VC.progressMapGoals(LAG_PACK).length} goals)`, VC.progressMapGoals(LAG_PACK).length === 3 && VC.progressMapOn(LAG_PACK));
   const ob = VC.bootProg(JSON.stringify(seed), LAG_PACK);
   check("old progress (no pm) boots here unchanged: no backup, no pm added", ob.backupRaw === null && !("pm" in ob.prog));
   const p = clone(ob.prog); p.sn = 44; VC.recordProgressMap(p, LAG_PACK, [], [], []); p.pm = pm.slice();
@@ -666,6 +666,25 @@ console.log("\n[progressMap] pack.progressMap (fb20): one optional top-level pro
     check("engine a2f2426 (its zh pack, no progressMap) boots a record carrying pm: no backup, pm kept byte-equal", !("progressMap" in oldPack) && o.backupRaw === null && JSON.stringify(o.prog.pm) === JSON.stringify(pm) && JSON.stringify(o.prog) === raw);
     const back = VC.bootProg(JSON.stringify(o.prog), LAG_PACK);
     check("and back here: no backup, pm byte-equal", back.backupRaw === null && JSON.stringify(back.prog.pm) === JSON.stringify(pm));
+  }
+  // fb22: entries gain an optional g (goal index).
+  const pmg = pm.map((e, i) => Object.assign({}, e, { g: i < 7 ? 0 : 1 })), pg = clone(p); pg.pm = pmg;
+  const rawg = JSON.stringify(pg), hg = VC.bootProg(rawg, LAG_PACK), img = VC.applyImport(null, rawg, LAG_PACK);
+  check("fb22: pm entries with g survive boot and export/import byte-identical", hg.backupRaw === null && JSON.stringify(hg.prog) === rawg && img.ok && eq(img.prog.pm, pmg));
+  check("fb22: an fb20 record (pm without g) boots here with no backup, entries unchanged", (b => b.backupRaw === null && eq(b.prog.pm, pm))(VC.bootProg(raw, LAG_PACK)));
+  for(const sha of ["a2f2426", "2412992"]){
+    let e2 = null, op2 = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); e2 = require(f);
+      op2 = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    } catch(e){ e2 = null; }
+    if(!e2) { skip(`engine ${sha} not in this checkout's history`); continue; }
+    const o = e2.bootProg(rawg, op2);
+    check(`fb22: engine ${sha} boots a record whose pm entries carry g: no backup, record byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === rawg);
+    const back = VC.bootProg(JSON.stringify(o.prog), LAG_PACK);
+    check(`fb22: and back here from ${sha}: no backup, pm byte-equal`, back.backupRaw === null && JSON.stringify(back.prog.pm) === JSON.stringify(pmg));
   }
 }
 
