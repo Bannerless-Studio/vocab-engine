@@ -62,6 +62,7 @@ The `.js` files are generated with `python3 tools/jsonify_pack.py <packdir>`. Th
 | `rereadPerfectDays` | positive int | no (off) | A passage read with every question right returns as a re-read after this many days, behind any missed-passage re-read; a perfect passage read once and never listened to (`x` 1, no `l`) returns after 7 days, ranked with the missed ones, as its first listening pass; see "passages.json", Today. Absent or a positive integer. Ignored under `readRotation`. No pack sets it since fb16 (zh dropped it for `readRotation`); still supported. |
 | `readRotation` | bool | no (off) | Today Read stage without day gates: reading and listening passes alternate by pass, picks are random, and every pass shuffles the question order; see "passages.json", Today ("Rotation"). Needs `dayAware` (passes are counted by session; without it the flag reads as off and the validator errors). Adds `s` / `ls` to `prog.read.done` records. Only zh sets it (owner 2026-10-03). |
 | `wordsBy` | `"typed"` | no (off) | From streak 2 a word moves up only by a typed answer: right choice and ear answers hold it, a miss steps it down one; held words are planned typed. Needs `typing` (validator error) and `dayAware` (warning). See "wordsBy" below. Only zh sets it. |
+| `pairs` | bool | no (off) | Review, Recall, Listen and the Test Characters pool pick by pair (written↔meaning, sound↔meaning, written↔sound), lowest pair streak first, then asked longest ago, instead of the day planner's tiers; a pair past 2 only by a production answer. Needs `dayAware`; not with `script` (validator errors). Adds the optional record field `p`. See "pairs". Only zh sets it (owner 2026-10-05). |
 | `progressMap` | `{goals: [{upTo, label}]}` or bool | no (off) | Today row above the plan: a ladder of goals, one shown at a time, each scoped to levels <= `upTo` (a level id), with a 10-cell bar and "≈ N sessions to go" from the measured pace; `true` is the old whole-pack bar. See "progressMap". Needs `dayAware` (sessions are counted by `prog.sn`; the validator errors without it). Adds the optional top-level `prog.pm`. Only zh sets it (owner 2026-10-04). |
 | `tones` | `"pinyin"` | no | Readings carry tone marks: every displayed reading is coloured per syllable by tone; see "Pronunciation aids" below. The only accepted value is `"pinyin"`. |
 | `soundsReference` | `true` | no | The Sounds tab gets a Reference card built from the lesson rows; see "Pronunciation aids" below. Needs `hasLessons` (validator warning). |
@@ -370,6 +371,55 @@ A passage span can be longer than its linked word: 这个 links 这, 越来越 l
 
   Words at 2 at the start of each day: 73 69 78 71 60 65 60 62. With Recall at 8 the held words got only the slots the pending misses (`DAY_MISS_SHARE`, up to 12 of 20 and 4 of 8 on the owner's days) and the units' ⌈0.35 n⌉ left, about 2 a Review and 1 a Recall, and the words at 2 rose to 102 whatever the held share. Under the flag Recall has 12 items (core.js `RECALL_SIZE_HELD`, `recallSize`; without it 8): the extra production slots are what the typed rule costs (team decision 2026-10-04). Measured alternatives: Recall 12 with units ⌈0.35 n⌉: 66.7 known, words at 2 73 → 101 (rising), refresh 57%; Recall 14 with ⌈0.35 n⌉: 76.3, 73 → 90 (rising), refresh 57%; Recall 8 with ⌈0.25 n⌉: 89.7, 73 → 69, refresh 44%, 2.3 same-kind repeats a week.
 - **Storage**: no progress field. Word records keep `{r, w, s, k?, prov?, t?, u?}` and their range; only how `s` moves changed. Words already at 3+ stay known; a record written with the flag reads on an engine without it unchanged (tests/migration_checks.js [wordsBy]). The session record (`vocab_<key>_session`) gains the optional `today.tw` (word ids asked typed this Today session) and `drill.dn` (word ids a miss in the parked drill stepped down from 2+); another build drops the record anyway.
+
+### pairs
+
+`"pairs": true` (zh only; owner 2026-10-05: "I am not getting enough practice with the characters I have already missed; rather I am getting more characters from long past", and "why not treat every pair equally"). Needs `dayAware` (validator error; without it the flag reads as off); not allowed with `script` (validator error). Replaces dayPick's tier and share ladder (misses, held, weak floor, consolidate, refresh) in Today and Words-tab Review, Today and Test Recall, Listen, and the Test Characters pool with one rule. Learn, pause, the Read stage, and every planner without the flag are unchanged (tests/pairs_checks.js [6] flag-off control vs 3901e2e).
+
+- **Pairs.** A word and a character unit each have three: `wm` written ↔ meaning, `sm` sound ↔ meaning, `ws` written ↔ sound (a unit's reading is its sound). Kind → pair (core.js `PAIR_OF_KIND`, `PAIR_OF_TYPED`); production answers are the ones that can take a pair from 2 to 3:
+
+  | kind | pair | direction | production |
+  |---|---|---|---|
+  | `read` (word) | wm | W → M | no |
+  | `recall` (word) | wm | M → W | when no typed kind of wm fits the word |
+  | `gap`, `gapType` (cloze, blank word) | wm | M → W in context | a miss resets wm; a right gap answer gives no pair credit |
+  | `hear` (word) | sm | S → M by ear | when no typed kind of sm fits |
+  | `type`: `written` / `word` (meaning → characters) | wm | M → W | yes |
+  | `type`: `writtenMeaning` (characters → meaning) | wm | W → M | yes |
+  | `type`: `pron` (meaning → pinyin) | sm | M → S | yes |
+  | `type`: `pronMeaning` (sound → meaning) | sm | S → M | yes |
+  | `type`: `writtenPron` (characters → pinyin) | ws | W → S | yes |
+  | `charRead` (unit) | wm | W → M | no |
+  | `charRecall` (unit) | wm | M → W | when the unit is not due typed (below mastered or at bare) |
+  | `charSound` (unit) | ws | W → S | no |
+  | `charPick` (unit) | ws | S → W | yes (ws has no typed form for a unit) |
+  | `type` with `tu` (held unit typed as its word, `bareBy`) | wm | M → W | yes |
+
+  A typed answer's pair is its typed kind's (the session's recipe `rz`; a choice fallback after a typed miss counts in the same pair, never as production). "How is it said?" options are the `pron` typed kind's choice fallback (sm). A pair the item cannot be asked in (no audio for `hear`, no fitting kind) is absent for it.
+- **Pair streak** (core.js `notePair`, called from app.html `markWord`, `markChar`, `markUnitTyped`, `markGapWord`): a right answer adds 1 up to `PAIR_HOLD` (2); from 2 only a production answer adds 1; `PAIR_KNOWN` (3) is a known pair and the streak keeps counting. A miss sets the pair to 0; other pairs untouched. A pair answered a second time in the same session (the in-drill retry) gains nothing; a miss still sets 0.
+- **Scheduling** (core.js `pairPick`, `pairPlan`; app.html passes `sn: planSn()`, the session the plan is for, because Today builds plans before `sn` advances): candidates are every (item, pair) the planner can ask; a pair answered (right or wrong) this session is skipped. Below 3: lowest pair streak first, then typed asks first, then words before units, then oldest last answer, then jitter. A refresh share `PAIR_REFRESH` (0.1, ⌈n × 0.1⌉ slots, at most the known items there are) goes to pairs at 3+, oldest first; leftover slots go back to the low list. One pair per item per plan; a unit typed as its word takes that word's slot too. Kind: at 1+ the production direction (`"type"` when a typed kind of the pair fits, else the hard choice: `recall`, `hear`, `charRecall`, `charPick`); at 0 the kind it was missed in (day log pending) when it belongs to the pair, else the easy choice. One typed ask per word per Today session stays (`today.tw`). pauseNew's extra items use the same pool formula as dayReviewPlan. A pair missed in session n is at 0 and comes back in n + 1, then at 1, 2, until a production answer takes it to 3.
+- **Bootstrap** (core.js `pairBoot`, `pairState`): a pair never answered under the flag starts from the record's legacy streak: a word `min(s, 2)`, or 3 when `s ≥ 3`; a unit the same, except a unit held below bare (`s` = bare − 1, 4 on zh) starts at `PAIR_HOLD` 2 so it is asked typed. Its age is the record's `u` (last answered session), else 0. Nothing is written until the pair is answered; the first answer starts from the boot streak.
+- **Storage**: new optional field `p` on word records (`prog.w[id].p`) and unit records (`prog.chars.c[id].p`): `{wm: [s, a], sm: [s, a], ws: [s, a]}`, s the pair streak (int ≥ 0), a the session ordinal (`prog.sn`) it was last answered; absent pairs absent. Written only with the flag on, only for a pair answered. The legacy streak `s`, `r`, `w`, `f`, `u` and the day log are written exactly as without the flag: Progress, known, goals, `progressMap`, `wordsBy` / `bareBy` holds and `optsMix` stages read them unchanged; pair data drives scheduling only. A record with `p` boots on 2412992 and 3901e2e unchanged with no backup key (tests/migration_checks.js [pairs]).
+- **Measured** (owner export a48ee4d3 at sn 19, 604 words, 494 units; 7 days × 3 Today sessions × 3 seeds; choice right 95 %, typed 86 %, each × a per-item ease 0.9–1.0; scratchpad fb23 harness on day_sim's app boot). Mean (seeds 1/2/3):
+
+  | metric | main 3901e2e | pairs |
+  |---|---|---|
+  | unit miss → next ask, sessions: median / p90 | 1 / 1 | 1 / 1 |
+  | unit misses never asked again in the week | 12.3 (15/6/16) | 0 |
+  | asks of a missed unit in the next 6 sessions | 1.16 | 4.11 |
+  | Review share last answered > 30 sessions ago | 0.086 | 0.027 |
+  | Review units share last answered > 30 sessions ago | 0.434 | 0.177 |
+  | Review share last answered > 10 sessions ago | 0.636 | 0.237 |
+  | words reaching known in the week (distinct) | 167.7 (172/168/163) | 166.3 (168/167/164) |
+  | words known, net change in the week | 140.7 | 146.3 |
+  | units reaching bare in the week (distinct) | 274.7 | 307.0 |
+  | units bare, net change in the week | 271.7 | 304.7 |
+  | production asks per weak word per day | 0.73 | 2.34 |
+  | same item, same pair, twice in a session | 58.0 | 0 |
+  | Review by pair wm / sm / ws | 64 / 19 / 17 % | 32 / 34 / 34 % |
+  | Review by pair streak 0 / 1 / 2 / 3+ | 0 / 4 / 36 / 60 % | 24 / 21 / 30 / 25 % |
+
+  Tuning: `PAIR_REFRESH` 0.2 (the first value) gave words net known below main; 0.1 restored it. A unit bootstrap of min(s, 3) for every unit left held units (s 4) in the refresh share and bare fell to 122–221; holding every unit below bare at 2 starved words (known 88–107); holding only the units at bare − 1 plus the typed-first and words-first ties gives the row above. `PAIR_HOLD` stays 2. Words reaching known in the week is 1.4 below main on the mean and inside the seed spread (main 163–172, pairs 164–168); net known is 5.6 above.
 
 ### progressMap
 

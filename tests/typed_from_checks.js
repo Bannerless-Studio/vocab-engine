@@ -19,7 +19,8 @@ const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "ef44c6e"; // main before typedFrom/glossFocus
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
-const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+// pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
+const PACK = (p => { delete p.pairs; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");

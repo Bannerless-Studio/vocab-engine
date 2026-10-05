@@ -24,7 +24,8 @@ const withDayRules = require("./day_rules_patch.js"); // fb10-weak-floor planner
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "7fe35f7"; // main before typed mastery and per-level stages (fb2-gloss merged)
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
-const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+// pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
+const PACK = (p => { delete p.pairs; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");

@@ -18,7 +18,8 @@ const ZH = path.join(ROOT, "packs", "zh");
 const PREV = "68930bd"; // main before the per-level Progress rows
 const MAIN = "590af86"; // main before characters.learn (stage model: withWords, order chips, turn)
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
-const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+// pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
+const PACK = (p => { delete p.pairs; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");

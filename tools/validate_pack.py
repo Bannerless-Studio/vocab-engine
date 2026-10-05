@@ -176,6 +176,12 @@ def check_pack(pack, rep):
         rep.err("pack.wordsBy needs pack.typing (a held word moves up only by typed answers)")
     elif pack.get("wordsBy") == "typed" and not pack.get("dayAware"):
         rep.warn("pack.wordsBy without pack.dayAware: held words are not planned typed")
+    if "pairs" in pack and not is_bool(pack["pairs"]):
+        rep.err("pack.pairs must be a boolean")
+    elif pack.get("pairs") is True and not pack.get("dayAware"):
+        rep.err("pack.pairs needs pack.dayAware (pairs are scheduled by session)")
+    elif pack.get("pairs") is True and "script" in pack:
+        rep.err("pack.pairs with pack.script: script units have no pairs yet")
     if "pronFirst" in pack:
         if not is_bool(pack["pronFirst"]):
             rep.err("pack.pronFirst must be a boolean")

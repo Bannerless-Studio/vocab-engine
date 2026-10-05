@@ -1535,14 +1535,18 @@ const dayCharCand = (prog, pack, kinds, typedUnits) => { const cfg = charsConfig
 // For the app's own pickers (Listen, Sentences, Test): the n list entries to drill, by dayPick.
 // keyPrefix "w:" or "s:"; kinds: what the picker asks (or a function of the entry).
 // can (optional): entry -> the kinds it can be shown in here (dayWordCan / daySentenceCan).
-function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng, can){
+// o (optional, pack.pairs): pairPick's options (sn).
+function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng, can, o){
   const d = dayLog(prog, today); const sent = keyPrefix === "s:";
+  // pack.pairs: words by their pairs (Listen: sound <-> meaning); sentences keep dayPick.
+  if(pairsOn(pack) && keyPrefix === "w:") return pairPick((list || []).map(x => pairWordCand(prog, typeof kinds === "function" ? kinds(x) : kinds, can)(x)), n, d, rng, daySn(prog), pack, o || {}).map(e => e.c.x);
   const recs = (sent ? prog.s : prog.w) || {};
   const cands = (list || []).map(x => { const c = can ? can(x) : undefined; return { x, key: keyPrefix + x.id, rec: recs[x.id], mastered: sent ? SENTENCE_MASTERED : WORD_MASTERED, kinds: dayCanKinds(typeof kinds === "function" ? kinds(x) : kinds, c), can: c }; });
   return dayPick(cands, n, d, rng, daySn(prog)).map(c => c.x);
 }
 const dayHeldMark = (cands, prog, pack, o) => { if(wordsTypedOn(pack)) cands.forEach(c => { if(c.t === "w" && typedWordDue(c.x, prog, pack, o.today, c.kinds, o.typedOk, o.typedSeen)) c.held = true; }); return cands; };
 function dayReviewPlan(learned, prog, pack, n, o){
+  if(pairsOn(pack)) return pairPlan(learned, prog, pack, n, o, dayWordKinds(pack), dayCharKinds(pack));
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = o.rng || Math.random;
   const d = dayLog(prog, o.today); const wk = dayWordKinds(pack), ck = dayCharKinds(pack);
   const ru = recordedUnits(o.units, prog, pack), rs = recordedScriptUnits(o.script, prog, pack);
@@ -1564,6 +1568,7 @@ function dayReviewPlan(learned, prog, pack, n, o){
   return hearableKinds(dayPlanKinds(applyMissedKinds(plan.filter(it => it.kind), prog, pack, false, o), prog, pack, o.today, wk, ck, wc, o.typedUnits, o.typedOk, o.typedSeen), o.canHear);
 }
 function dayRecallPlan(learned, prog, pack, n, o){
+  if(pairsOn(pack)) return pairPlan(learned, prog, pack, n, o, typingEnabled(pack) ? ["recall", "type"] : ["recall"], ["charRecall", "charPick"]);
   const d = dayLog(prog, o.today); const typing = typingEnabled(pack);
   const wk = typing ? ["recall", "type"] : ["recall"], ck = ["charRecall", "charPick"];
   const ru = recordedUnits(o.units, prog, pack); const wc = dayWordCan(pack, o.canHear);
@@ -1572,6 +1577,129 @@ function dayRecallPlan(learned, prog, pack, n, o){
   let wi = 0;
   const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {}) : { kind: "charRecall", unit: c.x });
   return hearableKinds(dayPlanKinds(applyMissedKinds(plan, prog, pack, true, o), prog, pack, o.today, wk, ck, wc, o.typedUnits, o.typedOk, o.typedSeen), o.canHear);
+}
+
+// ------------------------------------------------------------------ pairs
+// pack.pairs (docs/PACK_SCHEMA.md "pairs"; owner 2026-10-05: missed characters did not come back
+// enough while long-past ones did, and "why not treat every pair equally"). An item is asked in
+// pairs: wm written<->meaning, sm sound<->meaning, ws written<->sound. Each pair keeps its own
+// streak and last session in the record (p: {wm: [s, a], ...}); Review, Recall, Listen and the
+// characters Test pick the lowest pair streak first, then the pair asked longest ago. The pair data
+// drives scheduling only: the record's streak s and everything that reads it are unchanged.
+const PAIRS = ["wm", "sm", "ws"];
+// PAIR_HOLD: a choice answer takes a pair to 2 at most; PAIR_KNOWN only a production answer reaches
+// (owner-confirmed 2026-10-05). PAIR_REFRESH: the plan's share for known pairs, oldest first; 0.1, not
+// the 0.2 first planned: at 0.2 words reaching known per week fell below main (fb23 measure, owner export).
+const PAIR_KNOWN = 3, PAIR_HOLD = 2, PAIR_REFRESH = 0.1;
+function pairsOn(pack){ return !!(pack && pack.pairs === true) && dayAwareOn(pack); }
+// A cloze ("gap", "gapType") asks its blanked word meaning -> written.
+const PAIR_OF_KIND = { read: "wm", recall: "wm", hear: "sm", gap: "wm", gapType: "wm", charRead: "wm", charRecall: "wm", charSound: "ws", charPick: "ws" };
+const PAIR_OF_TYPED = { word: "wm", written: "wm", writtenMeaning: "wm", pron: "sm", pronMeaning: "sm", writtenPron: "ws" };
+// The harder choice direction of a pair: the production answer of a pair no typed kind fits.
+const PAIR_HARD = ["recall", "hear", "charRecall", "charPick"];
+function pairTypedKinds(pack, pair){ return [...new Set(typedKinds(pack))].filter(k => PAIR_OF_TYPED[k] === pair); }
+const pairEntry = v => Array.isArray(v) && v.length === 2 && Number.isInteger(v[0]) && v[0] >= 0 && typeof v[1] === "number" && isFinite(v[1]) ? v : null;
+// A pair never answered under the flag starts from the record's streak and its last answer (u, else
+// 0); boot marks it. Nothing is written until the pair is answered. A streak from PAIR_KNOWN starts
+// known, except held: a character unit one answer short of bare (characters.bare - 1, pairUnitHeld)
+// starts at PAIR_HOLD, so the production ask that takes it to bare comes in the lowest-first order
+// instead of the refresh share (fb23 measure, owner export: with every unit from mastered started
+// known, units reaching bare per week fell 274 -> 125; with every unit below bare held, words
+// reaching known fell 168 -> 107).
+const pairUnitHeld = pack => { const c = charsConfig(pack); return c && c.bare - 1 >= PAIR_KNOWN ? c.bare - 1 : undefined; };
+const pairBoot = (s, held) => { const x = Math.max(0, Math.floor(s || 0)); return x === held ? PAIR_HOLD : x >= PAIR_KNOWN ? PAIR_KNOWN : Math.min(x, PAIR_HOLD); };
+function pairState(rec, pair, held){
+  const e = rec && isObj(rec.p) ? pairEntry(rec.p[pair]) : null;
+  if(e) return { s: e[0], a: e[1] };
+  return { s: pairBoot(dayS(rec), held), a: rec && typeof rec.u === "number" && isFinite(rec.u) ? rec.u : 0, boot: true };
+}
+// One answer in a pair. s0: the record's streak before this answer, held as pairState (the start of
+// a pair never answered). A miss sets the pair to 0; a right answer adds one, a choice answer only up
+// to PAIR_HOLD; a pair already answered this session (sn) gains nothing more (the in-drill retry).
+function notePair(rec, pair, ok, prod, sn, s0, held){
+  if(!isObj(rec) || !PAIRS.includes(pair)) return false;
+  const e = isObj(rec.p) ? pairEntry(rec.p[pair]) : null;
+  const s = e ? e[0] : pairBoot(typeof s0 === "number" ? s0 : 0, held);
+  const again = !!e && sn > 0 && e[1] === sn;
+  const ns = !ok ? 0 : !again && (prod || s < PAIR_HOLD) ? s + 1 : s;
+  if(!isObj(rec.p)) rec.p = {};
+  rec.p[pair] = [ns, sn > 0 ? sn : 0];
+  return true;
+}
+// The pairs a candidate can be asked in here: its planner kinds (c.kinds, cut to what the device can
+// show) grouped by pair; "type" joins every pair one of its typed kinds fits (c.tw: the word typed;
+// o.typedKindFits(word, kind), else the written form taken as hidden). A word typed this Today session
+// (o.typedSeen) gets no typed kind. A unit typed as its word answers the word's pair too: not when
+// the word's pair was answered in the plan's session (psn). Script units have no pairs
+// (validate_pack.py refuses pairs with script).
+function pairOpts(c, pack, o, psn){
+  const out = {}, ks = c.kinds || [];
+  const add = (p, k, typed) => { const e = out[p] || (out[p] = { choice: [], typed: [] }); (typed ? e.typed : e.choice).push(k); };
+  ks.forEach(k => { if(k !== "type" && PAIR_OF_KIND[k]) add(PAIR_OF_KIND[k], k, false); });
+  if(ks.includes("type") && c.tw && !(typeof o.typedSeen === "function" && o.typedSeen(c.tw))){
+    const fits = typeof o.typedKindFits === "function" ? k => !!o.typedKindFits(c.tw, k) : k => typedKindOk(k, c.tw, false);
+    [...new Set(typedKinds(pack))].forEach(k => { const p = PAIR_OF_TYPED[k]; if(p && (!c.typedOnly || c.typedOnly.includes(k)) && !(c.twRec && psn > 0 && (pairEntry(isObj(c.twRec.p) ? c.twRec.p[p] : null) || [])[1] === psn) && fits(k)) add(p, k, true); });
+  }
+  return out;
+}
+// The kind a pair is asked in: from 1 up the production direction (typed when a typed kind fits, else
+// the harder choice); at 0 the missed kind when it is this pair's (pending in the day log), else
+// the easier choice.
+function pairKind(po, s, mk){
+  const prod = po.typed.length ? "type" : po.choice.find(k => PAIR_HARD.includes(k));
+  if(s >= 1) return prod || po.choice[0];
+  const m = (mk || []).find(k => po.choice.includes(k) || (k === "type" && po.typed.length));
+  return m || po.choice.find(k => !PAIR_HARD.includes(k)) || po.choice[0] || prod;
+}
+// cands: as dayPick's, plus t ("w" word, "c" unit) and tw (the word a typed ask
+// types). One pair per item per plan; a unit typed as its word takes the word too. A pair answered
+// in the session the plan runs in (o.sn; default sn, the running session: a plan built before its
+// session starts, as Today's shown plan or a Words-tab Review, passes sn + 1) is not asked again in
+// it. Order: lowest pair streak; at equal streak typed asks first, then words before character units
+// (a typed answer on a unit's word moves both records, and is the only way a held word or unit moves
+// on; by streak and age alone words reaching known per week fell 168 -> 107, fb23 measure); then
+// asked longest ago, then jitter. A PAIR_REFRESH share goes to known pairs (s >= PAIR_KNOWN),
+// oldest first. Returns [{ c, pair, kind }].
+function pairPick(cands, n, d, rng, sn, pack, o){
+  const r = rng || Math.random, opt = o || {}, lo = [], hi = [], psn = Number.isInteger(opt.sn) ? opt.sn : sn;
+  (cands || []).forEach(c => {
+    const po = pairOpts(c, pack, opt, psn), mk = dayPending(d.a[c.key], sn) || [];
+    Object.keys(po).forEach(pair => {
+      const st = pairState(c.rec, pair, c.held);
+      if(!st.boot && psn > 0 && st.a === psn) return;
+      const kind = pairKind(po[pair], st.s, mk); if(!kind) return;
+      (st.s >= PAIR_KNOWN ? hi : lo).push({ c, pair, kind, s: st.s, a: st.a, j: r() });
+    });
+  });
+  lo.sort((x, y) => x.s - y.s || (y.kind === "type") - (x.kind === "type") || (x.c.t === "c") - (y.c.t === "c") || x.a - y.a || x.j - y.j);
+  hi.sort((x, y) => x.a - y.a || x.j - y.j);
+  const out = [], seen = new Set();
+  const alias = e => e.kind === "type" && e.c.t === "c" && e.c.tw ? "w:" + e.c.tw.id : null;
+  const take = (list, upto) => { for(let i = 0; i < list.length && out.length < upto; i++){ const e = list[i]; if(!e) continue;
+    const al = alias(e); if(seen.has(e.c.key) || (al && seen.has(al))) continue;
+    seen.add(e.c.key); if(al) seen.add(al); out.push(e); list[i] = null; } };
+  const rk = Math.min(Math.ceil(n * PAIR_REFRESH), new Set(hi.map(e => e.c.key)).size);
+  take(lo, n - rk); take(hi, n); take(lo, n);
+  return out;
+}
+const pairWordCand = (prog, kinds, wordCan) => w => { const can = wordCan ? wordCan(w) : undefined; return { t: "w", x: w, key: "w:" + w.id, rec: (prog.w || {})[w.id], kinds: dayCanKinds(kinds, can), can, tw: w }; };
+// A unit is typed (as its word, written-side kinds) only while typedUnitDue: from mastered to bare.
+const pairCharCand = (prog, pack, kinds, typedUnits) => { const recs = charRecs(prog);
+  const held = pairUnitHeld(pack);
+  return u => { const tw = typedUnitDue(u, prog, pack, typedUnits) ? typedUnits.get(u.id) : null;
+    return Object.assign({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], kinds, held }, tw ? { kinds: [...kinds, "type"], tw, twRec: (prog.w || {})[tw.id], typedOnly: TYPED_WRITTEN_KINDS } : {}); }; };
+// A unit's typed ask types its word (tu); pair tells the app which typed kinds belong to the item.
+const pairPlanItem = e => e.c.t === "w" ? { kind: e.kind, word: e.c.x, pair: e.pair }
+  : e.kind === "type" ? { kind: "type", word: e.c.tw, tu: e.c.x.id, pair: e.pair } : { kind: e.kind, unit: e.c.x, pair: e.pair };
+// Review and Recall under pack.pairs. o.extra (pauseNew): extra items up to a quarter of the items
+// not answered in the last DAY_RECENT_SESSIONS sessions, as dayReviewPlan.
+function pairPlan(learned, prog, pack, n, o, wk, ck){
+  const d = dayLog(prog, o.today), sn = daySn(prog), wc = dayWordCan(pack, o.canHear);
+  const cands = [...(learned || []).map(pairWordCand(prog, wk, wc)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
+  const fresh = cands.filter(c => !(sn > 0 && dayU(c.rec) >= sn - DAY_RECENT_SESSIONS)).length;
+  const x = o.extra > 0 ? Math.max(0, Math.min(o.extra, Math.floor(fresh / DAY_EXTRA_POOL) - n)) : 0;
+  const pool = shuffle(pairPick(cands, n + x, d, o.rng, sn, pack, o), o.rng);
+  return hearableKinds(pool.map(pairPlanItem), o.canHear);
 }
 
 // A pack that types the reading (pronTypingOn) never gets gapType: the blank is written.
@@ -2662,9 +2790,14 @@ function newCharUnits(units, learned, prog, pack, n){
   const ok = new Set((units || []).filter(u => ids.has((u.words || [])[0]) && !hasCharRec(recs, u.id)).map(u => u.id));
   return charStageUnits(levelIds(pack), (units || []).filter(u => ok.has(u.id)), pack).slice(0, n);
 }
-function charTestPlan(units, learned, prog, pack, n, rng, today){
+function charTestPlan(units, learned, prog, pack, n, rng, today, o){
   const cfg = charsConfig(pack); if(!cfg) return [];
   const day = dayAwareOn(pack) && today;
+  // pack.pairs: each unit asked in the kind its weakest pair picks.
+  if(day && pairsOn(pack)){
+    const picked = pairPick(recordedUnits(units, prog, pack).map(pairCharCand(prog, pack, Object.keys(cfg.testKinds))), n, dayLog(prog, today), rng, daySn(prog), pack, o || {});
+    return picked.map(e => ({ kind: e.kind, unit: e.c.x, pair: e.pair })).concat(newCharUnits(units, learned, prog, pack, n - picked.length).map(unit => ({ kind: pickWeighted(cfg.testKinds, rng), unit })));
+  }
   const rec = day ? dayPick(recordedUnits(units, prog, pack).map(dayCharCand(prog, pack, Object.keys(cfg.testKinds))), n, dayLog(prog, today), rng, daySn(prog)).map(c => c.x)
     : weakFirst(recordedUnits(units, prog, pack), n, charRecs(prog), undefined, rng);
   const pool = rec.length >= n ? rec : rec.concat(newCharUnits(units, learned, prog, pack, n - rec.length));
@@ -3701,6 +3834,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
+  PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairsOn, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,

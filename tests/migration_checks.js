@@ -716,5 +716,35 @@ console.log("\n[optsF] pack.optsMix (fb21): optional record field f = session or
   }
 }
 
+console.log("\n[pairs] pack.pairs (fb23): optional record field p = {wm|sm|ws: [pair streak, session]} on word and unit records; 2412992 and 3901e2e keep it on boot and on a mark, no backup");
+{
+  const seed = mig("HEAD"); const ob0 = VC.bootProg(JSON.stringify(seed), LAG_PACK);
+  check("[pairs] old progress (no p) boots here unchanged: no backup, no p added", ob0.backupRaw === null && Object.values(ob0.prog.w).every(r => !("p" in r)) && Object.values((ob0.prog.chars || {}).c || {}).every(r => !("p" in r)));
+  const p = clone(ob0.prog); p.sn = 41;
+  p.w.w9998 = { r: 3, w: 1, s: 2, u: 40, p: { wm: [0, 41], sm: [2, 39] } }; p.w.w9999 = { r: 2, w: 0, s: 2, f: 30, p: { ws: [3, 40] } };
+  p.chars = p.chars || {}; p.chars.c = p.chars.c || {}; p.chars.c.c9998 = { r: 4, w: 0, s: 4, u: 41, p: { wm: [2, 41], ws: [1, 40] } };
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK), im = VC.applyImport(null, raw, LAG_PACK);
+  check("[pairs] records with p survive boot and export/import byte-identical; validateProgShape accepts p", here.backupRaw === null && eq(here.prog.w, p.w) && eq(here.prog.chars.c, p.chars.c) && im.ok && eq(im.prog.w, p.w) && VC.validateProgShape(p, Object.keys(p.sets)).ok);
+  const odd = clone(p); odd.w.w9998.p = "x"; odd.chars.c.c9998.p = { wm: ["2", 1], zz: 4 };
+  const ob = VC.bootProg(JSON.stringify(odd), LAG_PACK);
+  check("[pairs] a malformed p never resets progress (no backup) and reads as no pair", ob.backupRaw === null && ob.prog.w.w9998.p === "x" && VC.pairState(ob.prog.w.w9998, "wm").boot && VC.pairState(ob.prog.chars.c.c9998, "wm").boot);
+  for(const sha of ["2412992", "3901e2e"]){
+    let eng = null, op = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
+      op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`[pairs] engine ${sha} not in this checkout's history`); continue; }
+    const o = eng.bootProg(raw, op);
+    check(`[pairs] engine ${sha} (its zh pack) boots records carrying p: no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw);
+    const q = clone(o.prog); eng.markRec(q.w, "w9998", true, true); eng.markChar(q, "c9998", false, op, false);
+    check(`[pairs] a mark on ${sha} keeps p on the record`, eq(q.w.w9998.p, p.w.w9998.p) && q.w.w9998.r === 4 && eq(q.chars.c.c9998.p, p.chars.c.c9998.p) && q.chars.c.c9998.w === 1);
+    const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
+    check(`[pairs] and back here from ${sha}: no backup, p byte-equal`, back.backupRaw === null && eq(back.prog.w.w9998.p, p.w.w9998.p) && eq(back.prog.chars.c.c9998.p, p.chars.c.c9998.p));
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

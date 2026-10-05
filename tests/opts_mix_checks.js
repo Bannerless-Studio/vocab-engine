@@ -672,7 +672,8 @@ async function sec4(){
       check(`core, ${sname}: 300 words x 8 builders + 300 sentences without mix, results and the draw after them identical to ${BASE}`, outs[0] === outs[1]);
     }
     // wordsBy (docs/PACK_SCHEMA.md "wordsBy") came after 68930bd: this control drops it too.
-    const PACK_CTL = (q => { delete q.wordsBy; delete q.progressMap; return q; })(Object.assign({}, PACK_OFF));
+    // pack.pairs (fb23) replaces the day planner this control walks; tests/pairs_checks.js covers it.
+    const PACK_CTL = (q => { delete q.wordsBy; delete q.progressMap; delete q.pairs; return q; })(Object.assign({}, PACK_OFF));
     for(const [name, p] of [["fresh", null], ["HSK 1-3", shape(595)]]){
       const out = [];
       for(const [core, html] of [[VC, appHtml], [OLD, OLD_HTML]]){

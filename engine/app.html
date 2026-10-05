@@ -484,29 +484,55 @@ function wordRetry(id, ok){
   if(!D) return false; const dn = D.down || (D.down = []); if(dn.includes(id)) return true;
   if(!ok && ((prog.w[id] || {}).s || 0) >= VC.WORD_HOLD) dn.push(id); return false;
 }
-function markWord(id, ok, kind, reqKind){ const fresh = !prog.w[id]; VC.ensureWordRec(prog, WORDS, PACK, id); if(fresh && OPTS_MIX && VC.daySn(prog)) prog.w[id].f = VC.daySn(prog); VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, WORDS_TYPED ? { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) } : undefined); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); dayNote("w:" + id, kind, ok); store.save(); }
+function markWord(id, ok, kind, reqKind){ const fresh = !prog.w[id]; VC.ensureWordRec(prog, WORDS, PACK, id); if(fresh && OPTS_MIX && VC.daySn(prog)) prog.w[id].f = VC.daySn(prog); const s0 = prog.w[id].s; VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, WORDS_TYPED ? { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) } : undefined); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); if(PAIRS_ON) pairNoteWord(id, ok, kind, s0); dayNote("w:" + id, kind, ok); store.save(); }
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
-function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
+// pack.pairs: a cloze miss is a miss of the word's meaning -> written pair; a right cloze moves no pair.
+function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(PAIRS_ON && !ok && prog.w[id]) VC.notePair(prog.w[id], "wm", false, false, VC.daySn(prog)); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
 function markSentence(id, ok, kind){ VC.markRec(prog.s, id, ok, false); dayNote("s:" + id, kind, ok); store.save(); }
 // Returns whether the answer can move the unit's streak (a held unit's right choice answer cannot).
 function markChar(unitId, ok, kind){
   const held = !!(TYPED_UNITS && TYPED_UNITS.has(unitId)), rec = VC.charRecs(prog)[unitId];
   const moves = !(held && rec && (rec.s || 0) >= CHAR_CFG.mastered);
   if(OPTS_MIX && VC.daySn(prog) && !VC.charRecs(prog)[unitId]) VC.ensureChars(prog).c[unitId] = {r:0,w:0,s:0,f:VC.daySn(prog)};
-  VC.markChar(prog, unitId, ok, PACK, held); dayNote("c:" + unitId, kind, ok); store.save(); return moves;
+  const s0 = rec ? rec.s : 0, due = held && !!rec && (rec.s || 0) >= CHAR_CFG.mastered && (rec.s || 0) < CHAR_CFG.bare;
+  VC.markChar(prog, unitId, ok, PACK, held);
+  // pack.pairs: a hard choice is the production answer of a pair the unit cannot be typed in now.
+  const pr = PAIRS_ON && VC.PAIR_OF_KIND[kind];
+  if(pr) VC.notePair(VC.charRecs(prog)[unitId], pr, ok, VC.PAIR_HARD.includes(kind) && !(due && VC.pairTypedKinds(PACK, pr).some(k => VC.TYPED_WRITTEN_KINDS.includes(k) && typedKindFits(TYPED_UNITS.get(unitId), k))), VC.daySn(prog), s0, VC.pairUnitHeld(PACK));
+  dayNote("c:" + unitId, kind, ok); store.save(); return moves;
 }
 // characters.bareBy "typed": a written-side typed answer also answers the word's unit. The in-drill
 // retry after a miss is no evidence (typedRequeue has already counted the miss being answered).
 function markUnitTyped(it, id, ok){
   if(it) it.cueUnit = null;
   if(!TYPED_BARE || (it && it.typedMisses || 0) > (ok ? 0 : 1)) return;
+  const u0 = PAIRS_ON ? VC.unitByWord(CHAR_LIST).get(id) : null, s0 = u0 ? (VC.charRecs(prog)[u0.id] || {}).s : 0;
   const u = VC.markUnitTyped(prog, CHAR_LIST, PACK, id, ok);
-  if(u){ if(it) it.cueUnit = u.id; dayNote("c:" + u.id, "type", ok); store.save(); }
+  const up = typedPairOf(it && it.rz) || "wm";
+  if(u){ if(it) it.cueUnit = u.id; if(PAIRS_ON) VC.notePair(VC.charRecs(prog)[u.id], up, ok, true, VC.daySn(prog), s0, VC.pairUnitHeld(PACK)); dayNote("c:" + u.id, "type", ok); store.save(); }
 }
 // docs/PACK_SCHEMA.md "dayAware": today's answers steer the day's later plans.
 const DAY_AWARE = VC.dayAwareOn(PACK);
 const dayToday = () => DAY_AWARE ? todayISO() : undefined;
 const PLAN_ORDER = DAY_AWARE ? "misses and due first" : "weakest first";
+// pack.pairs (docs/PACK_SCHEMA.md "pairs"): every answer moves its pair's streak; Review, Recall,
+// Listen and the characters Test ask the weakest pairs first.
+const PAIRS_ON = VC.pairsOn(PACK), PAIR_ORDER = PAIRS_ON ? "weakest pairs first" : PLAN_ORDER;
+// The session a plan built now runs in: a plan built outside a Today session starts its own.
+const planSn = () => VC.daySn(prog) + (todayStepState ? 0 : 1);
+// The answer being marked (the drill runner sets it around onAnswer): its builder names the typed
+// pair; a typed item's choice counterpart (rz.from) answers the same pair by choice.
+let ANS_IT = null;
+const RZ_TYPED_PAIR = { type: "wm", typeWritten: "wm", typeWrittenSilent: "wm", typePron: "sm", typeWrittenPron: "ws" };
+const typedPairOf = r => !r ? null : r.from ? typedPairOf(r.from.rz) : r.b === "typeMeaning" ? (r.a[1] ? "sm" : "wm") : RZ_TYPED_PAIR[r.b] || null;
+// A hard choice (recall, hear) is the production answer of a pair no typed kind fits the word in now.
+function pairNoteWord(id, ok, kind, s0){
+  const r = ANS_IT && ANS_IT.rz, fb = !!(r && r.from), tp = typedPairOf(r), w = WORDS_BY_ID[id];
+  const pair = tp && (kind === "type" || fb) ? tp : VC.PAIR_OF_KIND[kind] || (kind === "type" ? "wm" : null);
+  if(!pair || !prog.w[id]) return;
+  const prod = tp && (kind === "type" || fb) ? !fb : kind === "type" || (VC.PAIR_HARD.includes(kind) && !(TYPING || PRON_TYPING ? VC.pairTypedKinds(PACK, pair).some(k => typedKindFits(w, k)) : false));
+  VC.notePair(prog.w[id], pair, ok, prod, VC.daySn(prog), s0);
+}
 // The kinds a word / sentence can be shown in on this device: planners never route a miss to a
 // kind the item builder would swap out (no voice, no blank), and such a miss settles as
 // core.js daySettles says.
@@ -527,7 +553,7 @@ const dayCanOf = key => {
   return SENT_BY_ID_DAY[id] ? daySentCan(SENT_BY_ID_DAY[id]) : undefined;
 };
 const dayNote = (key, kind, ok) => DAY_AWARE && VC.noteDay(prog, PACK, todayISO(), key, kind, ok, dayCanOf(key));
-const pickHear = (list, n) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "w:", ["hear"], undefined, dayWordCan) : weakFirst(list, n);
+const pickHear = (list, n) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "w:", ["hear"], undefined, dayWordCan, PAIRS_ON ? { sn: planSn() } : undefined) : weakFirst(list, n);
 const pickSentences = (list, n, kinds) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "s:", kinds || daySentCan, undefined, daySentCan) : weakFirstSentences(list, n);
 const mastered = id => ((prog.w[id]||{}).s||0) >= VC.WORD_MASTERED;
 const sentenceMastered = id => ((prog.s[id]||{}).s||0) >= VC.SENTENCE_MASTERED;
@@ -1009,7 +1035,7 @@ function renderMcItem(it){
       const ok = o === it.a;
       if(!ok) b.classList.add("bad");
       D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(it); }
-      if(it.onAnswer) it.onAnswer(ok);
+      ANS_IT = it; try { if(it.onAnswer) it.onAnswer(ok); } finally { ANS_IT = null; }
       showReveal(revealHTML(it, it.reveal || ""));
       playReveal(it);
       showNext(); setScore(D.seen, D.seen + D.q.length);
@@ -1046,7 +1072,7 @@ function renderTypeItem(it){
     answered = true; input.disabled = true; $("submit").style.display = "none";
     const ok = it.check(input.value);
     D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(typedRequeue(it)); }
-    if(it.onAnswer) it.onAnswer(ok);
+    ANS_IT = it; try { if(it.onAnswer) it.onAnswer(ok); } finally { ANS_IT = null; }
     showReveal(revealHTML(it, (ok ? "" : `<div class="diff">you typed: ${escapeHtml(input.value)}</div>`) + (it.feedback ? it.feedback(input.value) : "") + (it.reveal||"")));
     playReveal(it);
     showNext(); setScore(D.seen, D.seen + D.q.length);
@@ -1718,15 +1744,16 @@ const TYPED_ITEM = { word: typeItem, pron: pronTypeItem, written: silentWrittenT
 // once per Today session.
 const typedWordFits = e => !!e && VC.typedKinds(PACK).some(k => VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB || undefined));
 const typedWordSeen = e => !!todayStepState && typedSession.has(e.id);
+const typedKindFits = (e, k) => !!e && VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB || undefined);
 const typedFits = e => !TYPED_FROM || VC.typedKinds(PACK).some(k => VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB));
 function typedFromSlotItem(plan, i){
-  const e = plan[i].word; const shown = !!e.w && !dispWord(e).isPron; const only = plan[i].tu ? VC.TYPED_WRITTEN_KINDS : null;
-  const k = VC.typedSlotKind(plan, i, prog, PACK, k => (!only || only.includes(k)) && VC.typedKindOk(k, e, shown, TYPED_AMB));
+  const e = plan[i].word; const shown = !!e.w && !dispWord(e).isPron; const only = plan[i].tu ? VC.TYPED_WRITTEN_KINDS : null, pair = plan[i].pair;
+  const k = VC.typedSlotKind(plan, i, prog, PACK, k => (!only || only.includes(k)) && (!pair || VC.PAIR_OF_TYPED[k] === pair) && VC.typedKindOk(k, e, shown, TYPED_AMB));
   return k ? TYPED_ITEM[k](e) : recallItem(e);
 }
 const withReq = (it, k) => Object.assign(it, { reqKind: it.reqKind || k });
 const WORD_ITEM = { hear: hearItem, read: readItem, recall: recallItem, type: (e, slot) => withReq(PRON_TYPING ? pronSlotItem(e, slot) : TYPING ? typeItem(e) : recallItem(e), "type") };
-const itemFromPlan = (p, i, plan) => withReq(TYPED_FROM && p.kind === "type" ? (plan && plan[i] === p ? typedFromSlotItem(plan, i) : typedFromSlotItem([p], 0)) : WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? (p.tu ? "written" : VC.typeSlotKind(plan, i)) : undefined), p.reqKind || p.kind);
+const itemFromPlan = (p, i, plan) => withReq(TYPED_FROM && p.kind === "type" ? (plan && plan[i] === p ? typedFromSlotItem(plan, i) : typedFromSlotItem([p], 0)) : WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? (p.tu || (p.pair && p.pair !== "sm") ? "written" : p.pair ? "pron" : VC.typeSlotKind(plan, i)) : undefined), p.reqKind || p.kind);
 function missSummary(miss){
   const u = VC.dedupeMisses(miss);
   return u.length ? `<p class="q">Missed:</p>${u.map(({item, count})=>`<div class="stmt rvb">${count > 1 ? `<div class="q" style="margin:0 0 4px">missed ${count}×</div>` : ""}${item.reveal}</div>`).join("")}` : "<p class='q'>Clean.</p>";
@@ -2131,15 +2158,15 @@ function todayRender(){
   const g = VC.todayGates(lw.length, !pz && (snap ? snapLearns(snap) : !!nn), availSent.length, scriptCount());
   // Start today runs exactly this plan, so the line names units only when the plan holds
   // some (a first character day has no unit records yet).
-  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedUnits: TYPED_UNITS }) : null } : null;
+  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), typedUnits: TYPED_UNITS }) : null } : null;
   const reviewLine = snap
-    ? `${snap.reviewExtra && todayPrep.review ? todayPrep.review.length : snap.reviewSize} items, ${PLAN_ORDER}${reviewWhat(snap, todayPrep.review)}`
-    : `${pz && g.review ? VC.buildReviewPlan(lw, prog, PACK, { extra: learnDrillCount(null), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, rng: () => 0.5 }).length : VC.REVIEW_SIZE} items, ${PLAN_ORDER}`;
+    ? `${snap.reviewExtra && todayPrep.review ? todayPrep.review.length : snap.reviewSize} items, ${PAIR_ORDER}${reviewWhat(snap, todayPrep.review)}`
+    : `${pz && g.review ? VC.buildReviewPlan(lw, prog, PACK, { extra: learnDrillCount(null), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), rng: () => 0.5 }).length : VC.REVIEW_SIZE} items, ${PAIR_ORDER}`;
   const steps = [
     ["Review", g.review ? reviewLine : (snap && snap.stage && snap.stage.kind === "script" ? "skipped until a set is learned" : "skipped until 5+ words are learned")],
     ["Learn", snap ? snapLearnLine(snap) : (nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered")],
     ["Listen", g.listen ? listenLine(lw) : "skipped until something is learned"],
-    ["Recall", g.recall ? (DAY_AWARE ? `${RECALL_N} items, ${PLAN_ORDER}` : `${RECALL_N} items`) : "skipped until something is learned"],
+    ["Recall", g.recall ? (DAY_AWARE ? `${RECALL_N} items, ${PAIR_ORDER}` : `${RECALL_N} items`) : "skipped until something is learned"],
     ["Sentences", g.sentences ? `8 items, ${PLAN_ORDER}` : "skipped until 8+ sentences are available"]
   ];
   if(pz) steps.splice(1, 1);
@@ -2220,11 +2247,11 @@ function todayStep(){
   todayStepState.at = s; sessionSave(true);
   if(s === 0){
     if(g.review && snap){
-      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedUnits: TYPED_UNITS });
+      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), typedUnits: TYPED_UNITS });
       todayStepState.review = null;
       drill(plan.map(planItem), todayStep, missSummary); return;
     }
-    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, { extra: paused() ? learnDrillCount(null) : undefined, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen }).map(itemFromPlan), todayStep, missSummary); return; }
+    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, { extra: paused() ? learnDrillCount(null) : undefined, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn() }).map(itemFromPlan), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 1){
@@ -2251,8 +2278,8 @@ function todayStep(){
     return todayStep();
   }
   if(s === 3){
-    if(g.recall && units){ drill(VC.buildRecallPlan(lw, prog, PACK, RECALL_N, { units, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedUnits: TYPED_UNITS }).map(planItem), todayStep, missSummary); return; }
-    if(g.recall){ drill(VC.buildRecallPlan(lw, prog, PACK, RECALL_N, { canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen }).map(itemFromPlan), todayStep, missSummary); return; }
+    if(g.recall && units){ drill(VC.buildRecallPlan(lw, prog, PACK, RECALL_N, { units, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), typedUnits: TYPED_UNITS }).map(planItem), todayStep, missSummary); return; }
+    if(g.recall){ drill(VC.buildRecallPlan(lw, prog, PACK, RECALL_N, { canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn() }).map(itemFromPlan), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 4){
@@ -2518,7 +2545,7 @@ function renderWordBody(){
     const items = []; withLearn(set.map(w => w.id), () => set.forEach(w => items.push(...learnPair(w))));
     drill(items, wordsSetDone(wordsLv, wordsSet, set.filter(w => !got.has(w.id)).map(w => w.id)), missSummary);
   };
-  if(canReview) $("rev").onclick = () => drill(VC.buildReviewPlan(learnedWords(), prog, PACK, { canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen }).map(itemFromPlan), wordsRender, missSummary);
+  if(canReview) $("rev").onclick = () => drill(VC.buildReviewPlan(learnedWords(), prog, PACK, { canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn() }).map(itemFromPlan), wordsRender, missSummary);
 }
 
 // RD holds everything a passage screen shows, so re-entering it (tab return, voiceschanged)
@@ -2943,7 +2970,7 @@ function testRender(){
   const hearLw = lw.filter(canHearWord), hearN = Math.min(20, hearLw.length);
   const n20 = Math.min(20, lw.length), sentN = Math.min(20, availSent.length);
   // Predecessor-app parity. Shown once characters have started, not only once a record exists.
-  const charPlan = () => VC.charTestPlan(CHAR_LIST, learnedWords(), prog, PACK, 20, undefined, dayToday());
+  const charPlan = () => VC.charTestPlan(CHAR_LIST, learnedWords(), prog, PACK, 20, undefined, dayToday(), PAIRS_ON ? { sn: planSn() } : undefined);
   const charsOn = HAS_CHARACTERS && VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU);
   const charN = charsOn ? charPlan().length : 0;
   const lockNote = (id, text) => `<p class="q" id="${id}" style="margin:8px 0 0">${text}</p>`;
@@ -2963,7 +2990,7 @@ function testRender(){
   else $("pl").onclick = () => { testSel = "placement"; testRender(); };
   if(tg.words){
     if(hearN) $("tListen").onclick = () => drill(pickHear(hearLw,20).map(hearItem), testRender, missSummary);
-    $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20, { missedKinds: false, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen }).map(itemFromPlan), testRender, missSummary);
+    $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20, { missedKinds: false, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn() }).map(itemFromPlan), testRender, missSummary);
   }
   if(tg.sentences){
     $("tSentences").onclick = () => drill(pickSentences(availSent,20,s => [canHearSentence(s) ? "hear" : "read"]).map(sentenceByEar), testRender, missSummary);

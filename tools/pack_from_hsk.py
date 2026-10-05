@@ -386,6 +386,9 @@ def main(argv):
             {"upTo": "3", "label": "daily life: directions, simple chat, short notices"},
             {"upTo": "4", "label": "follow a slow drama with subtitles"},
         ]},
+        # Review, Recall, Listen and the characters Test ask each item's weakest pair first (written,
+        # sound, meaning; docs/PACK_SCHEMA.md "pairs"; owner 2026-10-05).
+        "pairs": True,
     }
 
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).

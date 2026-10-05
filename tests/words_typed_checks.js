@@ -21,7 +21,8 @@ const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "a8e9c08"; // main before wordsBy
 const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
-const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+// pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
+const PACK = (p => { delete p.pairs; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.wordsBy; delete q.progressMap; delete q.optsMix; return q; })(PACK);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
@@ -203,7 +204,9 @@ function seedW(){
     for(const kind of KINDS) for(let s = 0; s < VC.WORD_HOLD; s++) for(const ok of [true, false]){ const a = { x: { r: 1, w: 0, s } }, b = { x: { r: 1, w: 0, s } }; OLD.markRec(a, "x", ok, true, kind); VC.markWordRec(b, "x", ok, kind, undefined, PACK); n2++; if(JSON.stringify(a) !== JSON.stringify(b)) d2.push(`${kind} s${s} ${ok}`); }
     check(`flag on, below WORD_HOLD: ${n2} cases byte-identical to ${MAIN}`, d2.length === 0, d2.join("\n"));
     const gapLine = h => (h.match(/^function markGapWord\(.*$/m) || [""])[0];
-    check("cloze (markGapWord) unchanged: a blanked word's streak never moves, flag on or off", !!mainHtml && gapLine(appHtml) === gapLine(mainHtml) && !/markRec|markWordRec/.test(gapLine(appHtml)));
+    // pack.pairs (fb23) adds a pair note for a cloze miss; the streak line is otherwise main's.
+    const noPairs = l => l.replace(' if(PAIRS_ON && !ok && prog.w[id]) VC.notePair(prog.w[id], "wm", false, false, VC.daySn(prog));', "");
+    check("cloze (markGapWord) unchanged: a blanked word's streak never moves, flag on or off", !!mainHtml && noPairs(gapLine(appHtml)) === gapLine(mainHtml) && !/markRec|markWordRec/.test(gapLine(appHtml)));
   }
 
   console.log("\n[4] planner: held words planned typed");
