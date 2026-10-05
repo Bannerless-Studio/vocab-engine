@@ -27,6 +27,8 @@ const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 function clone0(x){ return JSON.parse(JSON.stringify(x)); }
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 const LEG = Object.assign(clone0(PACK), { progressMap: true });
+// fb21 changes optsMix picks (and stamps f), which the flag-off controls vs older shas do not measure: they run without it.
+const noMix = p => { const q = Object.assign({}, p); delete q.optsMix; return q; };
 const OFF = (p => { const q = Object.assign({}, p); delete q.progressMap; return q; })(PACK);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
@@ -341,7 +343,7 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
     for(const [core, html] of [[VC, appHtml], [OLD, MAIN_HTML]]){
       const stt = fresh(); stt.ls.setItem(VC.storageKey(OFF), JSON.stringify(mk()));
       NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
-      const a = await boot(OFF, stt, 1, { core, html }); const t = a.panel(); a.goto("progress"); const g = a.html("panel");
+      const a = await boot(noMix(OFF), stt, 1, { core, html }); const t = a.panel(); a.goto("progress"); const g = a.html("panel");
       a.today(); const s = playSession(a);
       out.push({ t, g, s, prog: stt.ls.getItem(VC.storageKey(OFF)), after: a.panel() });
     }
@@ -468,7 +470,7 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
       for(const [core, html] of [[VC, appHtml], [OLD2, MAIN_HTML2]]){
         const stt = fresh(); stt.ls.setItem(VC.storageKey(LEG), JSON.stringify(mk()));
         NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
-        const a = await boot(LEG, stt, 1, { core, html }); const t = a.panel(); a.goto("progress"); const g = a.html("panel");
+        const a = await boot(noMix(LEG), stt, 1, { core, html }); const t = a.panel(); a.goto("progress"); const g = a.html("panel");
         a.today(); const s = playSession(a);
         out.push({ t, g, s, prog: stt.ls.getItem(VC.storageKey(LEG)), after: a.panel() });
       }

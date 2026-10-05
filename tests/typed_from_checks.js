@@ -422,7 +422,7 @@ function walk(api, stopAt){
     const r4 = run(0, "zzz not it");
     const rec = r4.prog.w[w.id];
     check(`renderer, a wrong meaning: 'you typed' shown, the miss is k="type" and the record keeps its shape (${JSON.stringify(rec)})`,
-      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov", "t", "u"].includes(k)));
+      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov", "t", "u", "f"].includes(k)));
     // Second miss: the silent choice counterpart with the same stimulus.
     api.setProg(atTierProg([w]));
     const plan = typePlan(w, 7); const mi = api.itemFromPlan(plan[0], 0, plan);

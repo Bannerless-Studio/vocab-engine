@@ -361,7 +361,8 @@ function missesCarried(drilled0){
   const pos = d => d.sess * 100 + (d.step || 0);
   const seen = new Map();
   drilled.filter(d => !d.ok && d.sess < lastSess).forEach(d => seen.set(d.key + "|" + d.kind, d));
-  const lost = [...seen.values()].filter(m => !drilled.some(d => pos(d) > pos(m) && d.key === m.key && VC.daySettlesAt(m.key, [m.kind], d.kind)));
+  const at = new Map(drilled.map((d, i) => [d, i])); // a right retry inside the same drill (same pos, later in the log) settles too
+  const lost = [...seen.values()].filter(m => !drilled.some(d => (pos(d) > pos(m) || (pos(d) === pos(m) && at.get(d) > at.get(m))) && d.key === m.key && VC.daySettlesAt(m.key, [m.kind], d.kind)));
   const prod = [...seen.values()].filter(m => VC.DAY_PRODUCTION.includes(m.kind));
   return { n: seen.size, lost: lost.map(m => `${m.key} ${m.kind} s${m.sess + 1}`), prodN: prod.length, prodLost: prod.filter(m => lost.includes(m)).length, sentN: [...seen.values()].filter(m => m.key[0] === "s").length };
 }
