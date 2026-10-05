@@ -2012,12 +2012,13 @@ function pairOpts(c, pack, o, psn){
 }
 // The kind a pair is asked in: from 1 up the production direction (typed when a typed kind fits, else
 // the harder choice); at 0 the missed kind when it is this pair's (pending in the day log), else
-// the easier choice.
+// the production direction too: a retry that answered right clears the log's mk, and an easier kind
+// would let a miss come back as a recognition ask; the hard direction subsumes the missed one.
 function pairKind(po, s, mk){
   const prod = po.typed.length ? "type" : po.choice.find(k => PAIR_HARD.includes(k));
   if(s >= 1) return prod || po.choice[0];
   const m = (mk || []).find(k => po.choice.includes(k) || (k === "type" && po.typed.length));
-  return m || po.choice.find(k => !PAIR_HARD.includes(k)) || po.choice[0] || prod;
+  return m || prod || po.choice[0];
 }
 // cands: as dayPick's, plus t ("w" word, "c" unit) and tw (the word a typed ask
 // types). One pair per item per plan; a unit typed as its word takes the word too. A pair answered
@@ -5334,7 +5335,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1156365439-1955305";
+const VE_BUILD = "1819630182-1955433";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -7175,4 +7176,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3974500907-1954629-->
+<!--ve-build:665877208-1954757-->

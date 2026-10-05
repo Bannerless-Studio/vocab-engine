@@ -1644,12 +1644,13 @@ function pairOpts(c, pack, o, psn){
 }
 // The kind a pair is asked in: from 1 up the production direction (typed when a typed kind fits, else
 // the harder choice); at 0 the missed kind when it is this pair's (pending in the day log), else
-// the easier choice.
+// the production direction too: a retry that answered right clears the log's mk, and an easier kind
+// would let a miss come back as a recognition ask; the hard direction subsumes the missed one.
 function pairKind(po, s, mk){
   const prod = po.typed.length ? "type" : po.choice.find(k => PAIR_HARD.includes(k));
   if(s >= 1) return prod || po.choice[0];
   const m = (mk || []).find(k => po.choice.includes(k) || (k === "type" && po.typed.length));
-  return m || po.choice.find(k => !PAIR_HARD.includes(k)) || po.choice[0] || prod;
+  return m || prod || po.choice[0];
 }
 // cands: as dayPick's, plus t ("w" word, "c" unit) and tw (the word a typed ask
 // types). One pair per item per plan; a unit typed as its word takes the word too. A pair answered

@@ -239,7 +239,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     let p = mk(); p.w[X].p.wm = [0, 5];
     const plan = VC.buildReviewPlan(lwOf(p), p, PACK, Object.assign(planOpts(1), { size: 10 }));
     const x = plan.find(it => it.word && it.word.id === X);
-    check(`a pair missed in session 5 is asked in session 6, first, in its pair (${x && x.kind}/${x && x.pair})`, !!x && x.pair === "wm" && ["read", "recall"].includes(x.kind));
+    check(`a pair missed in session 5 is asked in session 6, first, in its pair (${x && x.kind}/${x && x.pair})`, !!x && x.pair === "wm" && ["type", "recall"].includes(x.kind));
     check("in the session it was missed it is not asked again", !VC.buildReviewPlan(lwOf(p), p, PACK, Object.assign(planOpts(1), { size: 10, sn: 5 })).some(it => it.word && it.word.id === X && it.pair === "wm"));
     // Keeps coming while below PAIR_KNOWN: answer every planned item right, session after session.
     p = mk(); p.w[X].p.wm = [0, 5]; const seen = [];
@@ -250,7 +250,12 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     }
     console.log(`    missed wm pair of ${X}, sessions 6..16: ${seen.join(" ")}`);
     check("the missed pair comes back in the next two sessions (0 -> 1 -> 2), lowest first; at 2 it takes its turn by age with the other pairs at 2 and reaches known", seen[0] !== "-" && seen[1] !== "-" && p.w[X].p.wm[0] >= VC.PAIR_KNOWN);
-    check("at 0 the easier choice (no missed kind logged), from 1 up the production direction (typed when a typed kind fits)", seen[0] === "read:0" && seen[1] === "type:1" && seen.filter(v => v !== "-").slice(2).every(v => v === "type:2"));
+    check("at 0 (no missed kind logged) and from 1 up the production direction, typed when a typed kind fits, never an easier kind", seen[0] === "type:0" && seen[1] === "type:1" && seen.filter(v => v !== "-").slice(2).every(v => v === "type:2"));
+    // A miss whose in-drill retry cleared the day log's mk still comes back in the hard direction.
+    const hardOk = k => k === "type" || VC.PAIR_HARD.includes(k);
+    const unitPo = { typed: [], choice: ["charRead", "charRecall", "charPick"] }, wordPo = { typed: ["type"], choice: ["read", "recall"] };
+    check("a unit pair at 0 with its missed kind cleared is asked charRecall or charPick, never charRead", hardOk(VC.pairKind(unitPo, 0, [])) && hardOk(VC.pairKind(unitPo, 0, undefined)) && VC.pairKind(unitPo, 0, ["charRecall"]) === "charRecall");
+    check("a word pair at 0 with its missed kind cleared is asked type or recall, never read", hardOk(VC.pairKind(wordPo, 0, [])) && VC.pairKind({ typed: [], choice: ["read", "recall"] }, 0, []) === "recall");
     p = mk(); p.w[X].p.wm = [1, 5]; p.sn = 6;
     const nt = VC.buildReviewPlan(lwOf(p), p, PACK, Object.assign(planOpts(6), { size: 10 })).find(q => q.word && q.word.id === X);
     check(`no typed kind fits the pair (characters hidden): its harder choice is the production ask (${nt && nt.kind})`, !!nt && nt.kind === "recall");
@@ -277,7 +282,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const C = synth(20, 4, 4, 8); C.chars.c = {}; const units = CHARACTERS.filter(u => C.w[u.words[0]]).slice(0, 12);
     units.forEach((u, i) => { C.chars.c[u.id] = { r: 5, w: 0, s: 5, u: 4, p: { wm: [3, 4], ws: [i < 3 ? 0 : 3, 4] } }; });
     const ct = VC.charTestPlan(CHARACTERS, lwOf(C), C, PACK, 10, mulberry32(2), TODAY);
-    check(`characters Test: the 3 units with ws at 0 first, asked in their easier ws kind (${ct.slice(0, 3).map(x => x.kind).join(",")})`, ct.length === 10 && ct.slice(0, 3).every(x => units.slice(0, 3).includes(x.unit) && x.kind === "charSound"));
+    check(`characters Test: the 3 units with ws at 0 first, asked in the ws production kind (${ct.slice(0, 3).map(x => x.kind).join(",")})`, ct.length === 10 && ct.slice(0, 3).every(x => units.slice(0, 3).includes(x.unit) && VC.PAIR_HARD.includes(x.kind)));
     // A unit one answer short of bare is asked typed as its word; its word is not asked as well.
     const T = synth(20, 4, 4, 8); T.chars.c = {}; const tu = CHARACTERS.filter(u => T.w[u.words[0]]).slice(0, 8);
     tu.forEach(u => { T.chars.c[u.id] = { r: 5, w: 0, s: 4, u: 2 }; });
@@ -341,8 +346,10 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check(`every word and unit answer notes its pair (${answered.length} of ${all.filter(r => !r.key.startsWith("s:")).length} word/unit answers; cloze misses too)`, all.filter(r => !r.key.startsWith("s:")).every(r => r.pairs.length >= 1));
     const recs = [...Object.values(p.w), ...Object.values(p.chars.c)].filter(r => r.p);
     check(`records gain p only for answered pairs, each [s, session] (${recs.length} records)`, recs.length > 0 && recs.every(r => Object.keys(r.p).every(k => VC.PAIRS.includes(k) && Array.isArray(r.p[k]) && r.p[k].length === 2 && Number.isInteger(r.p[k][0]) && r.p[k][1] >= 1)));
-    const untouched = Object.keys(p0.w).filter(id => !all.some(r => r.key === "w:" + id) && !all.some(r => r.pairs.length && r.key === "w:" + id));
-    check("a word never answered keeps its record byte-identical (no p written)", untouched.length > 0 && untouched.every(id => JSON.stringify(p.w[id]) === JSON.stringify(p0.w[id])));
+    // A cloze miss notes the blanked word's pair, so such a word gains p (one entry per cloze answer at most) and nothing else; every other unanswered word is byte-identical.
+    const untouched = Object.keys(p0.w).filter(id => !all.some(r => r.key === "w:" + id));
+    const gained = untouched.filter(id => JSON.stringify(p.w[id]) !== JSON.stringify(p0.w[id]));
+    check(`an unanswered word keeps its record byte-identical, but for the pair a cloze miss noted (${gained.length} gained p, ${all.filter(r => r.key.startsWith("s:") && r.pairs.length).length} cloze answers noted a pair)`, untouched.length > 0 && gained.length <= all.filter(r => r.key.startsWith("s:") && r.pairs.length).length && gained.every(id => JSON.stringify(Object.assign({}, p.w[id], { p: p0.w[id].p })) === JSON.stringify(p0.w[id])));
     // Same (item, pair) twice in one session, the in-drill retry excepted.
     const seen = new Map(); let rep = 0; const repl = [];
     all.filter(r => !r.retry && !r.key.startsWith("s:")).forEach(r => r.pairs.forEach(x => { const k = `${r.sn}|${r.key}|${x.pair}|${x === r.pairs[0] ? "" : "unit"}`; if(seen.has(k)){ rep++; repl.push(k + " " + seen.get(k) + " / " + r.label); } else seen.set(k, r.label); }));
