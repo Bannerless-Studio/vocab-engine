@@ -688,5 +688,33 @@ console.log("\n[progressMap] pack.progressMap (fb20): one optional top-level pro
   }
 }
 
+console.log("\n[optsF] pack.optsMix (fb21): optional record field f = session ordinal on word and unit records; main 2412992 keeps it on boot and on a mark, no backup");
+{
+  const seed = mig("HEAD"); const ob0 = VC.bootProg(JSON.stringify(seed), LAG_PACK);
+  check("old progress (no f) boots here unchanged: no backup, no f added", ob0.backupRaw === null && Object.values(ob0.prog.w).every(r => !("f" in r)) && Object.values((ob0.prog.chars || {}).c || {}).every(r => !("f" in r)));
+  const p = clone(ob0.prog); p.sn = 41; const wid = Object.keys(p.w)[0];
+  p.w.w9998 = { r: 1, w: 0, s: 1, f: 40 }; p.w.w9999 = { r: 2, w: 1, s: 0, f: 41, k: "read" }; p.chars = p.chars || {}; p.chars.c = p.chars.c || {}; p.chars.c.c9998 = { r: 1, w: 0, s: 1, f: 40 }; p.chars.c.c9999 = { r: 0, w: 1, s: 0, f: 41 };
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK), im = VC.applyImport(null, raw, LAG_PACK);
+  check("records with f survive boot and export/import byte-identical", here.backupRaw === null && JSON.stringify(here.prog.w.w9998) === JSON.stringify(p.w.w9998) && JSON.stringify(here.prog.chars.c.c9999) === JSON.stringify(p.chars.c.c9999) && im.ok && eq(im.prog.w, p.w) && eq(im.prog.chars.c, p.chars.c));
+  const badW = clone(p); badW.w.w9998.f = "40"; const badC = clone(p); badC.chars.c.c9998.f = null;
+  check("validation: f must be a number on word and unit records", !VC.validateProgShape(badW, Object.keys(p.sets)).ok && !VC.validateProgShape(badC, Object.keys(p.sets)).ok && VC.validateProgShape(p, Object.keys(p.sets)).ok);
+  let eng = null, oldPack = null;
+  try {
+    const cp = require("child_process"), os = require("os");
+    const src = cp.execSync(`git -C "${ROOT}" show 2412992:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_2412992.js"); fs.writeFileSync(f, src); eng = require(f);
+    oldPack = JSON.parse(cp.execSync(`git -C "${ROOT}" show 2412992:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+  } catch(e){ eng = null; }
+  if(!eng) skip("engine 2412992 not in this checkout's history");
+  else {
+    const o = eng.bootProg(raw, oldPack);
+    check("engine 2412992 (its zh pack) boots records carrying f: no backup, progress byte-equal", o.backupRaw === null && JSON.stringify(o.prog) === raw);
+    const q = clone(o.prog); eng.markRec(q.w, "w9998", true, true); eng.markChar(q, "c9998", false, oldPack, false);
+    check("a mark on 2412992 keeps f on the record", q.w.w9998.f === 40 && q.w.w9998.r === 2 && q.chars.c.c9998.f === 40 && q.chars.c.c9998.w === 1);
+    const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
+    check("and back here: no backup, f byte-equal", back.backupRaw === null && back.prog.w.w9998.f === 40 && back.prog.chars.c.c9998.f === 40);
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

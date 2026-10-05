@@ -437,6 +437,18 @@ function typedSynHit(entry, byId, test){
 // orders the class preference inside a stage (lower first). accept(strict) returns a fresh
 // guard that records what it lets through.
 function optsMixOn(pack){ return !!(pack && pack.optsMix === true); }
+// The idx-th k-combination of 0..m-1 in lexicographic order.
+function nthCombination(m, k, idx){
+  const out = []; let x = 0;
+  for(let left = k; left > 0; left--){ for(;; x++){ let c = 1; for(let i = 1; i <= left - 1; i++) c = c * (m - x - 1 - (i - 1)) / i; if(idx < c){ out.push(x++); break; } idx -= c; } }
+  return out;
+}
+const comboCount = (m, k) => { let c = 1; for(let i = 1; i <= k; i++) c = c * (m - k + i) / i; return Math.round(c); };
+// t-th pick of a walk with a stride coprime to the number of combinations, so consecutive sessions differ in most members.
+function comboStep(t, m, k){
+  const n = comboCount(m, k), gcd = (a, b) => b ? gcd(b, a % b) : a, st = [7, 11, 13, 17, 5, 3, 1].find(p => gcd(p, n) === 1) || 1;
+  return (t * st) % n;
+}
 function mixPick(ans, cands, mix, rank, near, accept, n, nearFirst){
   const r = mix.rng || Math.random, want = n || 3, as = mix.stage(ans) === 1 ? 1 : 0;
   const bucket = as === 0 && mix.bucket ? v => mix.bucket(ans, v) : () => 0;
@@ -444,7 +456,17 @@ function mixPick(ans, cands, mix, rank, near, accept, n, nearFirst){
   const key = nearFirst ? v => { const st = mix.stage(v); return rank(v) * 10000 + (st === as ? 0 : st === 2 ? 2 : 1) * 1000 + near(v) * 100 + (st === as ? bucket(v) : 0); }
     : v => { const st = mix.stage(v); return rank(v) * 1000 + (st === as ? bucket(v) : st === 2 ? 4 : 3) * 100 + near(v); };
   const keyed = cands.map(v => [key(v), v]);
-  const ordered = [...new Set(keyed.map(x => x[0]))].sort((x, y) => x - y).flatMap(k => shuffle(keyed.filter(x => x[0] === k).map(x => x[1]), r));
+  // mix.rot (session ordinal, new/weak answers): the group that fills the last slots supplies a different subset each session
+  // (a stepped walk over its combinations) instead of a random draw, so a small closed set does not show the same three again.
+  const rot = as === 0 && mix.bucket && mix.rot > 0 ? mix.rot : 0;
+  const groups = [...new Set(keyed.map(x => x[0]))].sort((x, y) => x - y).map(k => keyed.filter(x => x[0] === k).map(x => x[1]));
+  let before = 0;
+  const ordered = groups.flatMap(g => {
+    const need = want - before; before += g.length;
+    if(!rot || need <= 0 || need >= g.length) return shuffle(g, r);
+    const q = g.slice().sort((x, y) => (String(x.id) < String(y.id) ? -1 : 1)), pick = nthCombination(q.length, need, comboStep(rot + [...String(ans.id)].reduce((h, c) => h + c.charCodeAt(0), 0), q.length, need));
+    return [...pick.map(i => q[i]), ...shuffle(q.filter((x, i) => !pick.includes(i)), r)];
+  });
   function run(strict){
     const ok = accept(strict), chosen = [];
     for(const v of ordered){ if(chosen.length >= want) break; if(ok(v)) chosen.push(v); }
@@ -1269,7 +1291,7 @@ function validateRecMap(m, name, allowWordFlags){
   for(const k of Object.keys(m)){
     const p = m[k];
     if(!isObj(p)) return `${name}.${k} must be an object`;
-    for(const f of ["r","w","s"]) if(p[f] !== undefined && typeof p[f] !== "number") return `${name}.${k}.${f} must be a number`;
+    for(const f of ["r","w","s","f"]) if(p[f] !== undefined && typeof p[f] !== "number") return `${name}.${k}.${f} must be a number`;
     if(allowWordFlags){
       for(const f of ["prov","d"]) if(p[f] !== undefined && typeof p[f] !== "number" && typeof p[f] !== "boolean") return `${name}.${k}.${f} must be a number or boolean`;
     }
@@ -2902,6 +2924,7 @@ function charOpts(unit, units, byId, mix){
 }
 function recallCharOpts(unit, units, byId, mix){ return [unit.t, ...charOpts(unit, units, byId, mix).map(v => v.t)]; }
 // Never a homophone, nor a reading the answer's form also has (a homograph unit or word).
+const UNIT_SYL = new WeakMap(); // unit -> syllable count of its reading
 function charSoundOpts(unit, units, byId, mix){
   const ansT = normKey(unit.t), ansR = normKey(unitReading(unit, byId));
   const forbid = new Set([ansR]);
@@ -2910,7 +2933,9 @@ function charSoundOpts(unit, units, byId, mix){
   const len = cpLen(unit.t);
   const cands = (units || []).filter(v => v.id !== unit.id && normKey(v.t) !== ansT && unitReading(v, byId) && !forbid.has(normKey(unitReading(v, byId))));
   const sameLen = v => cpLen(v.t) === len, sameLv = v => v.lv === unit.lv;
-  if(mix) return mixPick(unit, cands, mix, () => 0, v => sameLen(v) ? 0 : 1, () => {
+  // optsMix: the shown reading's syllable count (一会儿 yīhuìr is 2), not the characters, is what the learner can see.
+  const syl = v => { let k = UNIT_SYL.get(v); if(k === undefined) UNIT_SYL.set(v, k = splitReading(unitReading(v, byId)).filter(x => x.tone !== undefined).length || 1); return k; }, ansSyl = syl(unit);
+  if(mix) return mixPick(unit, cands, mix, () => 0, v => syl(v) === ansSyl ? 0 : 1, () => {
     const used = new Set(forbid);
     return v => { const k = normKey(unitReading(v, byId)); if(used.has(k)) return false; used.add(k); return true; };
   }, undefined, true).map(v => unitReading(v, byId));
@@ -2937,7 +2962,7 @@ function charItem(kind, unit, ctx){
   const base = { kind, key: "c:" + unit.id, unitId: unit.id, wordId: w ? w.id : null, t, reading, gloss: g };
   let show, audio = false, answer, others;
   // ctx.mix { word(w), unit(u), wordBucket?, unitBucket?, rng? } (pack.optsMix): word options by word stage, unit options by unit stage.
-  const wm = c.mix ? { stage: c.mix.word, bucket: c.mix.wordBucket, rng: c.mix.rng } : undefined, um = c.mix ? { stage: c.mix.unit, bucket: c.mix.unitBucket, rng: c.mix.rng } : undefined;
+  const wm = c.mix ? { stage: c.mix.word, bucket: c.mix.wordBucket, rng: c.mix.rng, rot: c.mix.rot } : undefined, um = c.mix ? { stage: c.mix.unit, bucket: c.mix.unitBucket, rng: c.mix.rng, rot: c.mix.rot } : undefined;
   if(kind === "charRead"){ show = "t"; answer = g; others = charReadOpts(unit, c.words, byId, wm).map(gloss); }
   else if(kind === "charSound"){ show = "t"; answer = reading; others = charSoundOpts(unit, c.units, byId, um); }
   else if(kind === "charPick"){ show = "reading"; audio = true; answer = t; others = charOpts(unit, c.units, byId, um).map(v => String(v.t)); }
@@ -4197,7 +4222,7 @@ function wordRetry(id, ok){
   if(!D) return false; const dn = D.down || (D.down = []); if(dn.includes(id)) return true;
   if(!ok && ((prog.w[id] || {}).s || 0) >= VC.WORD_HOLD) dn.push(id); return false;
 }
-function markWord(id, ok, kind, reqKind){ VC.ensureWordRec(prog, WORDS, PACK, id); VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, WORDS_TYPED ? { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) } : undefined); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); dayNote("w:" + id, kind, ok); store.save(); }
+function markWord(id, ok, kind, reqKind){ const fresh = !prog.w[id]; VC.ensureWordRec(prog, WORDS, PACK, id); if(fresh && OPTS_MIX && VC.daySn(prog)) prog.w[id].f = VC.daySn(prog); VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, WORDS_TYPED ? { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) } : undefined); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); dayNote("w:" + id, kind, ok); store.save(); }
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
 function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
 function markSentence(id, ok, kind){ VC.markRec(prog.s, id, ok, false); dayNote("s:" + id, kind, ok); store.save(); }
@@ -4205,6 +4230,7 @@ function markSentence(id, ok, kind){ VC.markRec(prog.s, id, ok, false); dayNote(
 function markChar(unitId, ok, kind){
   const held = !!(TYPED_UNITS && TYPED_UNITS.has(unitId)), rec = VC.charRecs(prog)[unitId];
   const moves = !(held && rec && (rec.s || 0) >= CHAR_CFG.mastered);
+  if(OPTS_MIX && VC.daySn(prog) && !VC.charRecs(prog)[unitId]) VC.ensureChars(prog).c[unitId] = {r:0,w:0,s:0,f:VC.daySn(prog)};
   VC.markChar(prog, unitId, ok, PACK, held); dayNote("c:" + unitId, kind, ok); store.save(); return moves;
 }
 // characters.bareBy "typed": a written-side typed answer also answers the word's unit. The in-drill
@@ -4555,33 +4581,43 @@ const optLike = entry => { if(!OPTS_ONE_SCRIPT) return null; const a = dispWord(
 const OPTS_MIX = VC.optsMixOn(PACK);
 let learnNow = null;
 function withLearn(ids, f){ const o = learnNow; learnNow = new Set(ids); try { return f(); } finally { learnNow = o; } }
-// Learn order: a word's set is its position in its level's list over the set size, counted
-// through the levels in order (the sets Learn teaches); a unit's is its position in taught order
-// over characters.setSize: the stage order, or under learn "lag" (a unit is taught once its
-// first word is learned) its first word's learn position. The bucket of v for a new/weak
-// answer: 0 its set (the Learn set while one is built; for units also today's Learn set for the
-// rest of the session, kept across a reload by today.cu), 1 an adjacent set, 2 the rest.
+// Learn order. A record made under optsMix carries f, the session ordinal it was learned in
+// (prog.sn), so "own set" means taught together wherever and whenever it is asked: bucket 0 the
+// same f, 1 the adjacent learn session (the next distinct f, review sessions between do not
+// count), 2 the rest; against a record without f (older, seeded, flagged d) 1 for the earliest stamped session, else 2. Two records without f fall back to position: a
+// word's set is its position in its level's list over the set size, counted through the levels
+// in order; a unit's is its position in taught order over characters.setSize. While a Learn
+// drill is built its words and units have no record yet and count as learned this session (ln).
 let mixSets = null;
 function mixSetOf(){
   if(mixSets) return mixSets;
-  const w = new Map(), at = new Map(); let base = 0, n = 0;
-  LEVELS.forEach(lv => { const l = levelList(lv); l.forEach((x, i) => { w.set(x.id, base + Math.floor(i / SIZE)); at.set(x.id, n++); }); base += VC.nSets(l, SIZE); });
+  const w = new Map(); let base = 0;
+  LEVELS.forEach(lv => { const l = levelList(lv); l.forEach((x, i) => w.set(x.id, base + Math.floor(i / SIZE))); base += VC.nSets(l, SIZE); });
   const u = new Map();
   if(HAS_CHARACTERS){
     let list = VC.charStageUnits(LEVELS, CHAR_LIST, PACK);
-    if(VC.lagOn(PACK)){ const pos = x => { const k = at.get((x.words || [])[0]); return k == null ? Infinity : k; }; list = list.map((x, i) => [pos(x), i, x]).sort((a, b) => (a[0] - b[0]) || (a[1] - b[1])).map(e => e[2]); }
     list.forEach((x, i) => u.set(x.id, Math.floor(i / (CHAR_CFG.setSize || 10))));
   }
   return mixSets = { w, u };
 }
-const todayCharSet = () => { const t = todayStepState; return t && t.snap && t.snap.cset ? new Set(t.snap.cset.units.map(x => x.id)) : null; };
-const mixBucket = (sets, ln) => (a, v) => {
-  const x = sets.get(a.id), y = sets.get(v.id), d = x == null || y == null ? 2 : Math.min(2, Math.abs(x - y));
-  return ln && ln.has(a.id) ? (ln.has(v.id) ? 0 : Math.max(1, d)) : d; };
+const learnRank = () => {
+  const fs = new Set(); [prog.w, VC.charRecs(prog)].forEach(m => Object.keys(m || {}).forEach(k => { const f = m[k] && m[k].f; if(typeof f === "number") fs.add(f); }));
+  if(learnNow && VC.daySn(prog)) fs.add(VC.daySn(prog));
+  return new Map([...fs].sort((x, y) => x - y).map((f, i) => [f, i]));
+};
+const mixBucket = (sets, ln, recs) => { const rk = learnRank(), sn = VC.daySn(prog);
+  const fOf = x => ln && ln.has(x.id) && sn ? sn : recs && recs[x.id] && typeof recs[x.id].f === "number" ? recs[x.id].f : null;
+  return (a, v) => {
+    const fa = fOf(a), fv = fOf(v);
+    if(fa != null && fv != null && rk.has(fa) && rk.has(fv)) return Math.min(2, Math.abs(rk.get(fa) - rk.get(fv)));
+    // a record without f predates every stamped one: it can only be adjacent to the earliest stamped session
+    if((fa != null) !== (fv != null)){ const f = fa != null ? fa : fv; return rk.has(f) ? Math.min(2, rk.get(f) + 1) : 2; }
+    const x = sets.get(a.id), y = sets.get(v.id), d = x == null || y == null ? 2 : Math.min(2, Math.abs(x - y));
+    return ln && ln.has(a.id) ? (ln.has(v.id) ? 0 : Math.max(1, d)) : d; }; };
 function wordMix(){
   if(!OPTS_MIX) return undefined;
   const ids = new Set(learnedWords().map(w => w.id)), ln = learnNow;
-  return { stage: v => ln && ln.has(v.id) ? 0 : !ids.has(v.id) ? 2 : (((prog.w[v.id] || {}).s || 0) >= VC.WORD_MASTERED ? 1 : 0), bucket: mixBucket(mixSetOf().w, ln) };
+  return { stage: v => ln && ln.has(v.id) ? 0 : !ids.has(v.id) ? 2 : (((prog.w[v.id] || {}).s || 0) >= VC.WORD_MASTERED ? 1 : 0), bucket: mixBucket(mixSetOf().w, ln, prog.w), rot: VC.daySn(prog) };
 }
 function sentMix(){
   if(!OPTS_MIX) return undefined;
@@ -4593,7 +4629,7 @@ function charCtx(){
   const recs = VC.charRecs(prog), ln = learnNow;
   const unit = u => ln && ln.has(u.id) ? 0 : !(Object.prototype.hasOwnProperty.call(recs, u.id) && recs[u.id]) ? 2 : ((recs[u.id].s || 0) >= CHAR_CFG.mastered ? 1 : 0);
   const wm = wordMix();
-  return Object.assign({}, CHAR_CTX, { mix: { word: wm.stage, wordBucket: wm.bucket, unit, unitBucket: mixBucket(mixSetOf().u, ln || todayCharSet()) } });
+  return Object.assign({}, CHAR_CTX, { mix: { word: wm.stage, wordBucket: wm.bucket, rot: wm.rot, unit, unitBucket: mixBucket(mixSetOf().u, ln, recs) } });
 }
 function optScript(entry, others){
   const mixed = () => others.some(v => dispWord(v).isPron !== dispWord(entry).isPron);
@@ -5138,7 +5174,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "847348977-1937480";
+const VE_BUILD = "657590939-1940945";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -5515,7 +5551,14 @@ function charHintHTML(u, skip){
   if(skip) hs.forEach(x => skip.add(x.c));
   if(!hs.length) return "";
   const multi = [...String(u.t)].length > 1;
-  const line = h => escapeHtml(h).replace(/\p{Script=Han}+/gu, m => `<span${TA}>${m}</span>`);
+  const line = h => { if(!TONES) return escapeHtml(h).replace(/\p{Script=Han}+/gu, m => `<span${TA}>${m}</span>`);
+    // pack.tones: a marked syllable in the hint ("sound cǐ") takes the word path's tone colours (toneHTML).
+    let out = "", pos = 0;
+    for(const m of h.matchAll(/\p{Script=Han}+|[\p{Script=Latin}\u0300-\u036f]+/gu)){
+      out += escapeHtml(h.slice(pos, m.index)); pos = m.index + m[0].length;
+      out += /^\p{Script=Han}/u.test(m[0]) ? `<span${TA}>${m[0]}</span>` : VC.splitReading(m[0]).some(x => x.tone && x.tone !== 5) ? VC.toneHTML(m[0]) : escapeHtml(m[0]);
+    }
+    return out + escapeHtml(h.slice(pos)); };
   return `<span class="chint">${hs.map(x => `<span>${multi ? `<span class="hc"${TA}>${escapeHtml(x.c)}</span> ` : ""}${line(x.hint)}</span>`).join("")}</span>`;
 }
 function charRevealBlock(it, unit){
@@ -6971,4 +7014,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:257463149-1936803-->
+<!--ve-build:352079373-1940268-->

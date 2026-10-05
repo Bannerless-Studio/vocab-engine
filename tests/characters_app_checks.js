@@ -199,6 +199,9 @@ function playDrill(api, maxItems){
 }
 const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+>/g, "").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&");
 
+// Seeded like flagoff_snapshot.js: the Placement walk's option order was random (one flake in 202, 2026-10-03).
+function mulberry32(seed){ let a = seed >>> 0; return function(){ a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+Math.random = mulberry32(20261004);
 (async function main(){
   console.log("\n[1] path strip uses stagePath");
   {
@@ -1002,6 +1005,25 @@ const stripTags = h => h.replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+
       check(`${name}: ${possible} of ${us.length} units have a sentence that can show them written; every such card does (${bad.length} bad${bad[0] ? ": " + bad.slice(0, 5).join(" ") : ""})`, possible > 0 && bad.length === 0);
     } catch(e){ check(`${name}: section threw: ${e.message}`, false); }
   }
+
+  // ---------------------------------------------------------------- hint pinyin tone colours (fb21)
+  console.log("\n[hint-tones] pack.tones: hint pinyin takes the word path's per-syllable tone colours");
+  try{
+    const ZTONES = loadConst(path.join(ZH, "pack.js"), "PACK").tones;
+    const mk = pk => boot({ pack: pk });
+    const on = (await mk(Object.assign({}, PACK, { tones: ZTONES }))).api, off = (await mk(PACK)).api;
+    on.setProg(seedC()); off.setProg(seedC());
+    const teach = (api, us) => { api.charTeach({ units: us, index: 0, total: 1 }, { label: "字" }, () => {}); return api.html("panel"); };
+    const sounds = u => VC.unitHints(u).flatMap(x => [...x.hint.matchAll(/sound ([\p{Script=Latin}̀-ͯ]+)\)/gu)].map(m => m[1]));
+    const withSound = CHARACTERS.filter(u => sounds(u).length).slice(0, 40);
+    const bad = withSound.filter(u => { const h = teach(on, [u]); return !sounds(u).every(py => h.includes(VC.toneHTML(py)) && /<span class="t[1-4]">/.test(VC.toneHTML(py))); });
+    check(`tones on: ${withSound.length} units, every "sound <pinyin>" in the hint is VocabCore.toneHTML markup (${bad.length} bad: ${bad.map(u => u.t + " " + sounds(u)).join(" ")})`, withSound.length > 20 && bad.length === 0);
+    const ma = CHARACTERS.find(u => u.t === "妈妈"), hOn = teach(on, [ma]);
+    const wordPy = on.revealBlock(WORDS.find(w => w.pron === "mǎ"));
+    check("妈妈: hint syllable mǎ has the class markup the word's pinyin uses for the same syllable", hOn.includes('<span class="t3">mǎ</span>') && wordPy.includes('<span class="t3">mǎ</span>'));
+    check("hint text outside pinyin (English, Han) is unchanged: no tone class on 'sound' or the parts", !/<span class="t\d">(sound|a|with)<\/span>/.test(hOn) && /<span data-tl lang="zh">/.test(hOn));
+    check("tones off: no tone classes in the hint", !/class="t[1-5]"/.test((teach(off, [ma]).match(/<span class="chint">[\s\S]*$/) || [""])[0]));
+  }catch(e){ check(`[hint-tones] threw ${e.message}`, false); }
 
   // ---------------------------------------------------------------- memory hints (brief zh-hints)
   // characters.json `hint`: teach cards and reveals show it; no stimulus or option does

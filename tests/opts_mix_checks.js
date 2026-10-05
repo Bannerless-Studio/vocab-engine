@@ -209,9 +209,7 @@ function shape(n, unitShare, unitStreak, nWeak){
 }
 // Learn-order sets and buckets as app.html mixSetOf / mixBucket build them.
 const WSET = new Map(); { let base = 0; VC.levelIds(PACK).forEach(lv => { const l = byLv[lv]; l.forEach((x, i) => WSET.set(x.id, base + Math.floor(i / VC.setSizeOf(PACK)))); base += VC.nSets(l, VC.setSizeOf(PACK)); }); }
-const WAT = new Map(VC.levelIds(PACK).flatMap(lv => byLv[lv]).map((w, i) => [w.id, i]));
-const USET = new Map(VC.charStageUnits(VC.levelIds(PACK), CHARACTERS, PACK).map((u, i) => [WAT.has((u.words || [])[0]) && VC.lagOn(PACK) ? WAT.get(u.words[0]) : Infinity, i, u])
-  .sort((a, b) => (a[0] - b[0]) || (a[1] - b[1])).map((e, i) => [e[2].id, Math.floor(i / (VC.charsConfig(PACK).setSize || 10))]));
+const USET = new Map(VC.charStageUnits(VC.levelIds(PACK), CHARACTERS, PACK).map((u, i) => [u.id, Math.floor(i / (VC.charsConfig(PACK).setSize || 10))]));
 const mixBucket = (sets, ln) => (a, v) => {
   const x = sets.get(a.id), y = sets.get(v.id), d = x == null || y == null ? 2 : Math.min(2, Math.abs(x - y));
   return ln && ln.has(a.id) ? (ln.has(v.id) ? 0 : Math.max(1, d)) : d; };
@@ -280,7 +278,105 @@ const pct = (n, d) => d ? `${(100 * n / d).toFixed(1)}%` : "-";
 const mean = (s, n) => n ? (s / n).toFixed(3) : "-";
 const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.length === 3 && os.every(s => { const q = String(s.en).length / L; return q >= 1.8 || q <= 1 / 1.8; }); };
 
+async function sec4(){
+  const REPEAT_BOUND = 0.20; // fb21 (b): 23-26% of presentations repeated a set before mix.rot (small closed sets), 2-4% after
+  console.log("\n[4] fb21 R3-M1: records carry f (session learned); a lag learner's sets are not on 10-boundaries; Test Characters after the session and on later days");
+  {
+    // Learner of shape(30, 0.3): 30 words, 9 units (a 9-unit lag set). Seven Today sessions, a day apart; after each, the options of the
+    // session-1 cohort (new, then weak) are built as Test does and a learner who knows the true taught sets rules out never-taught,
+    // other-stage and not-taught-together options (the R2-M1 measure; 0.25 is the floor with four options).
+    const KINDS = [["charPick", "u"], ["charRecall", "u"], ["charSound", "u"], ["read", "w"]];
+    const cpl = t => [...String(t)].length, syl = r => (VC.splitReading(r).filter(x => x.tone !== undefined).length || 1);
+    const unitLab = (k, o) => k === "charSound" ? (BY_READ.get(nk(o)) || []) : (BY_T.get(o) || []);
+    async function lagWeek(core, html, pack, seed, mkShape){
+      NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
+      const st = fresh(); st.ls.setItem(VC.storageKey(pack), JSON.stringify((mkShape || (() => shape(30, 0.3)))()));
+      const api = await boot(pack, st, seed, { core, html });
+      const sess = new Map(), seenSets = new Map(); let known = { w: new Set(Object.keys(api.getProg().w)), c: new Set(Object.keys(api.getProg().chars.c)) };
+      const cells = [], fvals = [];
+      for(let day = 1; day <= 7; day++){
+        if(day > 1){ NOW += 24 * 3600 * 1000; api.today(); }
+        api.today(); play(api); const pr = api.getProg();
+        Object.keys(pr.w).filter(id => !known.w.has(id)).forEach(id => { sess.set(id, day); fvals.push(["w", id, pr.w[id].f, pr.sn]); }); Object.keys(pr.chars.c).filter(id => !known.c.has(id)).forEach(id => { sess.set(id, day); fvals.push(["c", id, pr.chars.c[id].f, pr.sn]); });
+        known = { w: new Set(Object.keys(pr.w)), c: new Set(Object.keys(pr.chars.c)) };
+        const stageOf = (id, isU) => { const r = isU ? pr.chars.c[id] : pr.w[id]; return r ? ((r.s || 0) >= (isU ? CM : VC.WORD_MASTERED) ? 1 : 0) : 2; };
+        for(const [kind, fam] of KINDS){
+          const ids = [...sess.keys()].filter(id => fam === "u" ? id[0] === "c" : id[0] === "w"); if(!ids.length) continue;
+          const c0 = Math.min(...ids.map(id => sess.get(id)));
+          // a cohort reaches known within a session or two: measure it as missed (weak), the later-day case of the R2-M1 measure
+          ids.filter(id => sess.get(id) === c0).forEach(id => { const r = fam === "w" ? pr.w[id] : pr.chars.c[id]; if(r.s > 1) r.s = 1; });
+          const cohort = ids.filter(id => sess.get(id) === c0 && stageOf(id, fam === "u") === 0);
+          const lenOf = o => kind === "charSound" ? syl(o) : cpl(o);
+          let n = 0, g = 0, learnedBefore = 0, opts = 0, same = 0, el = 0, ge = 0;
+          for(const id of cohort){
+            const a = fam === "u" ? CHARACTERS.find(x => x.id === id) : BY_ID[id];
+            const mates = cohort.filter(m => m !== id && (fam === "w" || (kind === "charSound" ? syl(VC.unitReading(CHARACTERS.find(x => x.id === m), BY_ID)) === syl(VC.unitReading(a, BY_ID)) : cpl(CHARACTERS.find(x => x.id === m).t) === cpl(a.t)))).length;
+            for(let rep = 0; rep < 3; rep++){
+              const it = fam === "u" ? api.charDrillItem(kind, a) : api.readItem(a);
+              const others = it.opts.filter(o => o !== it.a); if(others.length !== 3) continue;
+              const lab = o => fam === "u" ? unitLab(kind, o) : (BY_GLOSS.get(o) || []);
+              let right = 0;
+              others.forEach(o => { const L = lab(o); opts++;
+                if(L.some(x => (sess.get(x.id) || 0) < c0)) learnedBefore++;
+                if(L.some(x => sess.get(x.id) === c0 && stageOf(x.id, fam === "u") === 0)){ right++; same++; } });
+              n++; g += 1 / (1 + right); if(mates >= 3){ el++; ge += 1 / (1 + right); }
+              const key = `${kind}|${id}`; const ks = others.map(String).sort().join(","); const arr = seenSets.get(key) || [];
+              if(rep === 0){ arr.push({ day, ks }); seenSets.set(key, arr); }
+            }
+          }
+          if(day - c0 <= 2) cells.push({ day: day - c0 + 1, kind, n, guess: n ? g / n : NaN, el, ge: el ? ge / el : NaN, before: opts ? learnedBefore / opts : NaN, together: opts ? same / opts : NaN });
+        }
+      }
+      let rep = { u: [0, 0], w: [0, 0] };
+      for(const [key, arr] of seenSets){ const f = key.includes("|c") ? "u" : "w"; if(key.startsWith("charPick|") || key.startsWith("read|")) for(let i = 1; i < arr.length; i++){ rep[f][1]++; if(arr.slice(0, i).some(x => x.ks === arr[i].ks)) rep[f][0]++; } }
+      return { cells: cells.filter(c => c.day), fvals, rep, prog: st.ls.getItem(VC.storageKey(pack)), pr: api.getProg() };
+    }
+    const OLDX = (() => { try { const os = require("os"); const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "optsmix-")), "core_main.js"); fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ac891e3:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); return { core: require(f), html: cp.execSync(`git -C "${ROOT}" show ac891e3:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }) }; } catch(e){ return null; } })();
+    const SHAPES4 = [["30 words, 9 units (a 9-unit lag set)", () => shape(30, 0.3), true], ["owner: 595 words, 70% of their units", () => shape(595, 0.7), false]];
+    const fmt = x => isNaN(x) ? "-" : x.toFixed(3);
+    // card-weighted mean over seeds: all cards (guess), or only cards whose cohort supplies 3 same-length set-mates (ge, weight el)
+    const agg = (rs, kinds, day, elig) => { let num = 0, den = 0; rs.forEach(r => r.cells.filter(c => (day == null || c.day === day) && kinds.includes(c.kind)).forEach(c => { const w = elig ? c.el : c.n, v = elig ? c.ge : c.guess; if(w && !isNaN(v)){ num += v * w; den += w; } })); return den ? num / den : NaN; };
+    const cnt = (rs, kinds, day) => rs.reduce((a, r) => a + r.cells.filter(c => (day == null || c.day === day) && kinds.includes(c.kind)).reduce((s, c) => s + c.n, 0), 0);
+    const UK = ["charPick", "charRecall", "charSound"], WK = ["read"];
+    const keep = [];
+    if(TABLE) console.log("TABLE4 shape | cohort | when | cards | guess before (ac891e3) | guess after (f) | before / after, cards whose cohort supplies 3 same-length set-mates");
+    for(const [sname, mkShape, withWords] of SHAPES4){
+      const after = [], before = [];
+      for(const sd of [5, 6, 7]){ after.push(await lagWeek(VC, appHtml, PACK, sd, mkShape)); if(OLDX) before.push(await lagWeek(OLDX.core, OLDX.html, PACK, sd, mkShape)); }
+      keep.push(after);
+      if(TABLE) for(const [label, kinds] of [["units", UK], ["words", WK]]){
+        if(label === "words" && !withWords) continue;
+        for(const day of [1, 2, 3]) console.log(`TABLE4 ${sname} | ${label} | ${day === 1 ? "same day, after the session" : day === 2 ? "next day" : "two days later"} | ${cnt(after, kinds, day)} | ${fmt(agg(before, kinds, day))} | ${fmt(agg(after, kinds, day))} | ${fmt(agg(before, kinds, day, true))} / ${fmt(agg(after, kinds, day, true))}`);
+      }
+      const uA = agg(after, UK), uAe = agg(after, UK, null, true), wA = agg(after, WK), wAe = agg(after, WK, null, true), uB = agg(before, UK), wB = agg(before, WK);
+      check(`lag learner, ${sname} (3 seeds x 7 sessions, Test options of the first cohort over three days, a learner who knows taught sets, stages and lengths): guess units ${fmt(uA)} (ac891e3 ${fmt(uB)})${withWords ? `, words ${fmt(wA)} (ac891e3 ${fmt(wB)})` : ""}; where the cohort supplies 3 set-mates: units ${fmt(uAe)}${withWords ? `, words ${fmt(wAe)}` : ""} (floor 0.25)`,
+        cnt(after, UK) > 100 && uAe <= 0.27 && (isNaN(uB) || uA <= uB) && (!withWords || (cnt(after, WK) > 30 && wAe <= 0.27 && (isNaN(wB) || wA <= wB + 0.001))));
+      for(const day of [1, 2]) { const v = agg(after, UK, day, true); check(`  ${sname}: units ${day === 1 ? "taught today, after the session" : "the next day"}, cohorts with 3 same-length set-mates: ${fmt(v)}`, v <= 0.27); }
+    }
+    const after = keep[0];
+    const fb = keep.flat().flatMap(r => r.fvals);
+    check(`every record created under optsMix carries f = the session ordinal (${fb.length} records, ${fb.filter(x => x[2] === x[3] && x[3] > 0).length} right); records of the old shape carry none`,
+      fb.length > 60 && fb.every(x => x[2] === x[3] && x[3] > 0) && keep.flat().every(r => Object.values(r.pr.w).filter(v => v.f === undefined).length >= 30 && Object.values(r.pr.chars.c).filter(v => v.f === undefined).length >= 9));
+    {
+      // (c) charSound ranks by syllables of the shown reading: 一会儿 (3 characters, yīhuìr, 2 syllables) among 2-syllable readings
+      const u = CHARACTERS.find(x => x.t === "一会儿"), p = shape(595, 0.7);
+      const P = stages(p), mix = { stage: P.unit, bucket: P.bucket.unit }, S = r => VC.splitReading(r).filter(x => x.tone !== undefined).length;
+      Math.random = mulberry32(99); let n = 0, bad = 0, badOld = 0;
+      for(let i = 0; i < 300; i++){ const os = VC.charSoundOpts(u, CHARACTERS, BY_ID, mix); n++; if(!os.every(r => S(r) === 2)) bad++; }
+      if(OLDX) for(let i = 0; i < 300; i++){ const os = OLDX.core.charSoundOpts(u, CHARACTERS, BY_ID, { stage: P.unit, bucket: P.bucket.unit }); if(!os.every(r => S(r) === 2)) badOld++; }
+      check(`charSound for 一会儿 (${S(VC.unitReading(u, BY_ID))} syllables): ${n} sets, every wrong reading 2 syllables (${bad} off); ac891e3's character-count rule drew another length in ${badOld} of 300`, S(VC.unitReading(u, BY_ID)) === 2 && bad === 0 && (!OLDX || badOld > 0));
+    }
+    const sum = rs => rs.reduce((a, r) => [a[0] + r.rep.u[0], a[1] + r.rep.u[1], a[2] + r.rep.w[0], a[3] + r.rep.w[1]], [0, 0, 0, 0]);
+    const rp = keep.map(sum);
+    console.log(`NOTE  identical wrong-choice set seen again within a week (cohort, one draw per session): ${SHAPES4.map(([n], i) => `${n}: units ${pct(rp[i][0], rp[i][1])}${rp[i][3] ? `, words ${pct(rp[i][2], rp[i][3])}` : ""}`).join("; ")}`);
+    check(`weak units seeing the same three wrong choices again across sessions: ${rp.map(r => pct(r[0], r[1])).join(" / ")}; words ${pct(rp[0][2], rp[0][3])}`, rp.every(r => r[1] > 10) && rp[0][3] > 10 && rp.every(r => r[0] / r[1] <= REPEAT_BOUND) && rp[0][2] / rp[0][3] <= REPEAT_BOUND);
+    const offRun = await lagWeek(VC, appHtml, PACK_OFF, 5);
+    check(`flag off: no record ever gets f over 7 sessions (${Object.keys(offRun.pr.w).length} word, ${Object.keys(offRun.pr.chars.c).length} unit records)`,
+      Object.values(offRun.pr.w).every(v => v.f === undefined) && Object.values(offRun.pr.chars.c).every(v => v.f === undefined) && !/"f":/.test(offRun.prog));
+  }
+}
 (async function main(){
+  if(process.argv.includes("--only4")){ await sec4(); console.log(`\n${passes} passed, ${fails} failed`); process.exit(fails ? 1 : 0); }
   // fresh: nothing learned, the first set being taught; reported, not held to the bound.
   const SHAPES = [["fresh, first set", 0, false], ["30 learned", 30, false], ["140/150 of HSK 1", 140, true], ["HSK 1-3 (owner)", 595, true], ["all learned", WORDS.length, true]];
   const N = 2000;
@@ -408,8 +504,8 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
     // charOpts also builds charRecall's options (recallCharOpts); lengths: code points of the unit's form, syllables of a reading.
     const NB = BUILDERS.filter(b => ["charOpts", "charSoundOpts", "pronChoiceOpts"].includes(b.name)), NC = 1000;
     const cpl = t => [...String(t)].length, syl = r => (VC.splitReading(r).filter(x => x.tone !== undefined).length || 1);
-    const ownLen = (b, a) => b.name === "pronChoiceOpts" ? syl(a.pron) : cpl(a.t);
-    const optLens = (b, o) => b.name === "pronChoiceOpts" ? [syl(o)] : b.name === "charOpts" ? [cpl(o.t)] : labelItems(b, o).map(u => cpl(u.t));
+    const ownLen = (b, a) => b.name === "pronChoiceOpts" ? syl(a.pron) : b.name === "charSoundOpts" ? syl(VC.unitReading(a, BY_ID)) : cpl(a.t);
+    const optLens = (b, o) => b.name === "pronChoiceOpts" ? [syl(o)] : b.name === "charOpts" ? [cpl(o.t)] : b.name === "charSoundOpts" ? labelItems(b, o).map(u => syl(VC.unitReading(u, BY_ID))) : labelItems(b, o).map(u => cpl(u.t));
     const CSH = [["30 learned", shape(30)], ["140/150 of HSK 1", shape(140)], ["owner", shape(595)], ["owner, 80 weak units", shape(595, 0.7, null, 80)]];
     const t1c = [], bad = [], over = []; let cells = 0, sets = 0, wrongSets = 0, noCell = 0;
     for(const [sname, p] of CSH){
@@ -418,7 +514,7 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
         if(!as.length){ t1c.push(`${sname} | ${which} | ${b.name} | no answers`); noCell++; continue; }
         const P = stages(p, learnW, learnU), fam = P[b.fam], mix = { stage: fam, bucket: P.bucket[b.fam] };
         const st1 = a => (fam(a) === 1 ? 1 : 0), stOf = a => b.name === "pronChoiceOpts" ? (fam(a) === 1 ? 1 : 0) : (P.unit(a) === 1 ? 1 : 0);
-        const sup = new Map(), supply = a => { if(!sup.has(a)){ const s = stOf(a), L = ownLen(b, a), ok = x => b.name === "pronChoiceOpts" ? syl(x.pron) === L && fam(x) === s : cpl(x.t) === L && fam(x) === s;
+        const sup = new Map(), supply = a => { if(!sup.has(a)){ const s = stOf(a), L = ownLen(b, a), ok = x => (b.name === "pronChoiceOpts" ? syl(x.pron) === L : b.name === "charSoundOpts" ? syl(VC.unitReading(x, BY_ID)) === L : cpl(x.t) === L) && fam(x) === s;
           sup.set(a, b.run(a, p, P, mix, x => x === a || ok(x)).length); } return sup.get(a); };
         Math.random = mulberry32(5000 + cells);
         const c = { n: 0, el: 0, wrong: 0, g: 0, opts: 0, own: 0 };
@@ -594,6 +690,8 @@ const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.le
         out[0].items === out[1].items && out[0].t === out[1].t && out[0].end === out[1].end && out[0].prog === out[1].prog);
     }
   }
+
+  await sec4();
 
   console.log(`\n${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);

@@ -760,6 +760,9 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     }
     if(mainHtml && mainCore){
       const a = await run(mainHtml, mainCore), b = await run(undefined, undefined);
+      // fb21 (d): the unit hint's pinyin takes the tone colours; main plain-escapes it. Strip the tone spans inside every hint block, nothing else.
+      const flatHints = s => { let out = "", i = 0; for(;;){ const j = s.indexOf('<span class="chint">', i); if(j < 0) return out + s.slice(i); let d = 0, k = j; for(const m of s.slice(j).matchAll(/<(\/?)span\b/g)){ d += m[1] ? -1 : 1; if(!d){ k = j + m.index + 7; break; } } out += s.slice(i, j) + s.slice(j, k).replace(/<span class="t\d">([^<]*)<\/span>/g, "$1"); i = k; } };
+      a.walk = flatHints(a.walk); b.walk = flatHints(b.walk);
       for(const k of Object.keys(a)){
         let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
         check(`${k} byte-identical to main (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: main ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);

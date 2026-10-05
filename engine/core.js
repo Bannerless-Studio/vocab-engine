@@ -69,6 +69,18 @@ function typedSynHit(entry, byId, test){
 // orders the class preference inside a stage (lower first). accept(strict) returns a fresh
 // guard that records what it lets through.
 function optsMixOn(pack){ return !!(pack && pack.optsMix === true); }
+// The idx-th k-combination of 0..m-1 in lexicographic order.
+function nthCombination(m, k, idx){
+  const out = []; let x = 0;
+  for(let left = k; left > 0; left--){ for(;; x++){ let c = 1; for(let i = 1; i <= left - 1; i++) c = c * (m - x - 1 - (i - 1)) / i; if(idx < c){ out.push(x++); break; } idx -= c; } }
+  return out;
+}
+const comboCount = (m, k) => { let c = 1; for(let i = 1; i <= k; i++) c = c * (m - k + i) / i; return Math.round(c); };
+// t-th pick of a walk with a stride coprime to the number of combinations, so consecutive sessions differ in most members.
+function comboStep(t, m, k){
+  const n = comboCount(m, k), gcd = (a, b) => b ? gcd(b, a % b) : a, st = [7, 11, 13, 17, 5, 3, 1].find(p => gcd(p, n) === 1) || 1;
+  return (t * st) % n;
+}
 function mixPick(ans, cands, mix, rank, near, accept, n, nearFirst){
   const r = mix.rng || Math.random, want = n || 3, as = mix.stage(ans) === 1 ? 1 : 0;
   const bucket = as === 0 && mix.bucket ? v => mix.bucket(ans, v) : () => 0;
@@ -76,7 +88,17 @@ function mixPick(ans, cands, mix, rank, near, accept, n, nearFirst){
   const key = nearFirst ? v => { const st = mix.stage(v); return rank(v) * 10000 + (st === as ? 0 : st === 2 ? 2 : 1) * 1000 + near(v) * 100 + (st === as ? bucket(v) : 0); }
     : v => { const st = mix.stage(v); return rank(v) * 1000 + (st === as ? bucket(v) : st === 2 ? 4 : 3) * 100 + near(v); };
   const keyed = cands.map(v => [key(v), v]);
-  const ordered = [...new Set(keyed.map(x => x[0]))].sort((x, y) => x - y).flatMap(k => shuffle(keyed.filter(x => x[0] === k).map(x => x[1]), r));
+  // mix.rot (session ordinal, new/weak answers): the group that fills the last slots supplies a different subset each session
+  // (a stepped walk over its combinations) instead of a random draw, so a small closed set does not show the same three again.
+  const rot = as === 0 && mix.bucket && mix.rot > 0 ? mix.rot : 0;
+  const groups = [...new Set(keyed.map(x => x[0]))].sort((x, y) => x - y).map(k => keyed.filter(x => x[0] === k).map(x => x[1]));
+  let before = 0;
+  const ordered = groups.flatMap(g => {
+    const need = want - before; before += g.length;
+    if(!rot || need <= 0 || need >= g.length) return shuffle(g, r);
+    const q = g.slice().sort((x, y) => (String(x.id) < String(y.id) ? -1 : 1)), pick = nthCombination(q.length, need, comboStep(rot + [...String(ans.id)].reduce((h, c) => h + c.charCodeAt(0), 0), q.length, need));
+    return [...pick.map(i => q[i]), ...shuffle(q.filter((x, i) => !pick.includes(i)), r)];
+  });
   function run(strict){
     const ok = accept(strict), chosen = [];
     for(const v of ordered){ if(chosen.length >= want) break; if(ok(v)) chosen.push(v); }
@@ -901,7 +923,7 @@ function validateRecMap(m, name, allowWordFlags){
   for(const k of Object.keys(m)){
     const p = m[k];
     if(!isObj(p)) return `${name}.${k} must be an object`;
-    for(const f of ["r","w","s"]) if(p[f] !== undefined && typeof p[f] !== "number") return `${name}.${k}.${f} must be a number`;
+    for(const f of ["r","w","s","f"]) if(p[f] !== undefined && typeof p[f] !== "number") return `${name}.${k}.${f} must be a number`;
     if(allowWordFlags){
       for(const f of ["prov","d"]) if(p[f] !== undefined && typeof p[f] !== "number" && typeof p[f] !== "boolean") return `${name}.${k}.${f} must be a number or boolean`;
     }
@@ -2534,6 +2556,7 @@ function charOpts(unit, units, byId, mix){
 }
 function recallCharOpts(unit, units, byId, mix){ return [unit.t, ...charOpts(unit, units, byId, mix).map(v => v.t)]; }
 // Never a homophone, nor a reading the answer's form also has (a homograph unit or word).
+const UNIT_SYL = new WeakMap(); // unit -> syllable count of its reading
 function charSoundOpts(unit, units, byId, mix){
   const ansT = normKey(unit.t), ansR = normKey(unitReading(unit, byId));
   const forbid = new Set([ansR]);
@@ -2542,7 +2565,9 @@ function charSoundOpts(unit, units, byId, mix){
   const len = cpLen(unit.t);
   const cands = (units || []).filter(v => v.id !== unit.id && normKey(v.t) !== ansT && unitReading(v, byId) && !forbid.has(normKey(unitReading(v, byId))));
   const sameLen = v => cpLen(v.t) === len, sameLv = v => v.lv === unit.lv;
-  if(mix) return mixPick(unit, cands, mix, () => 0, v => sameLen(v) ? 0 : 1, () => {
+  // optsMix: the shown reading's syllable count (一会儿 yīhuìr is 2), not the characters, is what the learner can see.
+  const syl = v => { let k = UNIT_SYL.get(v); if(k === undefined) UNIT_SYL.set(v, k = splitReading(unitReading(v, byId)).filter(x => x.tone !== undefined).length || 1); return k; }, ansSyl = syl(unit);
+  if(mix) return mixPick(unit, cands, mix, () => 0, v => syl(v) === ansSyl ? 0 : 1, () => {
     const used = new Set(forbid);
     return v => { const k = normKey(unitReading(v, byId)); if(used.has(k)) return false; used.add(k); return true; };
   }, undefined, true).map(v => unitReading(v, byId));
@@ -2569,7 +2594,7 @@ function charItem(kind, unit, ctx){
   const base = { kind, key: "c:" + unit.id, unitId: unit.id, wordId: w ? w.id : null, t, reading, gloss: g };
   let show, audio = false, answer, others;
   // ctx.mix { word(w), unit(u), wordBucket?, unitBucket?, rng? } (pack.optsMix): word options by word stage, unit options by unit stage.
-  const wm = c.mix ? { stage: c.mix.word, bucket: c.mix.wordBucket, rng: c.mix.rng } : undefined, um = c.mix ? { stage: c.mix.unit, bucket: c.mix.unitBucket, rng: c.mix.rng } : undefined;
+  const wm = c.mix ? { stage: c.mix.word, bucket: c.mix.wordBucket, rng: c.mix.rng, rot: c.mix.rot } : undefined, um = c.mix ? { stage: c.mix.unit, bucket: c.mix.unitBucket, rng: c.mix.rng, rot: c.mix.rot } : undefined;
   if(kind === "charRead"){ show = "t"; answer = g; others = charReadOpts(unit, c.words, byId, wm).map(gloss); }
   else if(kind === "charSound"){ show = "t"; answer = reading; others = charSoundOpts(unit, c.units, byId, um); }
   else if(kind === "charPick"){ show = "reading"; audio = true; answer = t; others = charOpts(unit, c.units, byId, um).map(v => String(v.t)); }

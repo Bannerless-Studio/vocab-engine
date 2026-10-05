@@ -484,7 +484,7 @@ function wordRetry(id, ok){
   if(!D) return false; const dn = D.down || (D.down = []); if(dn.includes(id)) return true;
   if(!ok && ((prog.w[id] || {}).s || 0) >= VC.WORD_HOLD) dn.push(id); return false;
 }
-function markWord(id, ok, kind, reqKind){ VC.ensureWordRec(prog, WORDS, PACK, id); VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, WORDS_TYPED ? { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) } : undefined); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); dayNote("w:" + id, kind, ok); store.save(); }
+function markWord(id, ok, kind, reqKind){ const fresh = !prog.w[id]; VC.ensureWordRec(prog, WORDS, PACK, id); if(fresh && OPTS_MIX && VC.daySn(prog)) prog.w[id].f = VC.daySn(prog); VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, WORDS_TYPED ? { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) } : undefined); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); dayNote("w:" + id, kind, ok); store.save(); }
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
 function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
 function markSentence(id, ok, kind){ VC.markRec(prog.s, id, ok, false); dayNote("s:" + id, kind, ok); store.save(); }
@@ -492,6 +492,7 @@ function markSentence(id, ok, kind){ VC.markRec(prog.s, id, ok, false); dayNote(
 function markChar(unitId, ok, kind){
   const held = !!(TYPED_UNITS && TYPED_UNITS.has(unitId)), rec = VC.charRecs(prog)[unitId];
   const moves = !(held && rec && (rec.s || 0) >= CHAR_CFG.mastered);
+  if(OPTS_MIX && VC.daySn(prog) && !VC.charRecs(prog)[unitId]) VC.ensureChars(prog).c[unitId] = {r:0,w:0,s:0,f:VC.daySn(prog)};
   VC.markChar(prog, unitId, ok, PACK, held); dayNote("c:" + unitId, kind, ok); store.save(); return moves;
 }
 // characters.bareBy "typed": a written-side typed answer also answers the word's unit. The in-drill
@@ -842,33 +843,43 @@ const optLike = entry => { if(!OPTS_ONE_SCRIPT) return null; const a = dispWord(
 const OPTS_MIX = VC.optsMixOn(PACK);
 let learnNow = null;
 function withLearn(ids, f){ const o = learnNow; learnNow = new Set(ids); try { return f(); } finally { learnNow = o; } }
-// Learn order: a word's set is its position in its level's list over the set size, counted
-// through the levels in order (the sets Learn teaches); a unit's is its position in taught order
-// over characters.setSize: the stage order, or under learn "lag" (a unit is taught once its
-// first word is learned) its first word's learn position. The bucket of v for a new/weak
-// answer: 0 its set (the Learn set while one is built; for units also today's Learn set for the
-// rest of the session, kept across a reload by today.cu), 1 an adjacent set, 2 the rest.
+// Learn order. A record made under optsMix carries f, the session ordinal it was learned in
+// (prog.sn), so "own set" means taught together wherever and whenever it is asked: bucket 0 the
+// same f, 1 the adjacent learn session (the next distinct f, review sessions between do not
+// count), 2 the rest; against a record without f (older, seeded, flagged d) 1 for the earliest stamped session, else 2. Two records without f fall back to position: a
+// word's set is its position in its level's list over the set size, counted through the levels
+// in order; a unit's is its position in taught order over characters.setSize. While a Learn
+// drill is built its words and units have no record yet and count as learned this session (ln).
 let mixSets = null;
 function mixSetOf(){
   if(mixSets) return mixSets;
-  const w = new Map(), at = new Map(); let base = 0, n = 0;
-  LEVELS.forEach(lv => { const l = levelList(lv); l.forEach((x, i) => { w.set(x.id, base + Math.floor(i / SIZE)); at.set(x.id, n++); }); base += VC.nSets(l, SIZE); });
+  const w = new Map(); let base = 0;
+  LEVELS.forEach(lv => { const l = levelList(lv); l.forEach((x, i) => w.set(x.id, base + Math.floor(i / SIZE))); base += VC.nSets(l, SIZE); });
   const u = new Map();
   if(HAS_CHARACTERS){
     let list = VC.charStageUnits(LEVELS, CHAR_LIST, PACK);
-    if(VC.lagOn(PACK)){ const pos = x => { const k = at.get((x.words || [])[0]); return k == null ? Infinity : k; }; list = list.map((x, i) => [pos(x), i, x]).sort((a, b) => (a[0] - b[0]) || (a[1] - b[1])).map(e => e[2]); }
     list.forEach((x, i) => u.set(x.id, Math.floor(i / (CHAR_CFG.setSize || 10))));
   }
   return mixSets = { w, u };
 }
-const todayCharSet = () => { const t = todayStepState; return t && t.snap && t.snap.cset ? new Set(t.snap.cset.units.map(x => x.id)) : null; };
-const mixBucket = (sets, ln) => (a, v) => {
-  const x = sets.get(a.id), y = sets.get(v.id), d = x == null || y == null ? 2 : Math.min(2, Math.abs(x - y));
-  return ln && ln.has(a.id) ? (ln.has(v.id) ? 0 : Math.max(1, d)) : d; };
+const learnRank = () => {
+  const fs = new Set(); [prog.w, VC.charRecs(prog)].forEach(m => Object.keys(m || {}).forEach(k => { const f = m[k] && m[k].f; if(typeof f === "number") fs.add(f); }));
+  if(learnNow && VC.daySn(prog)) fs.add(VC.daySn(prog));
+  return new Map([...fs].sort((x, y) => x - y).map((f, i) => [f, i]));
+};
+const mixBucket = (sets, ln, recs) => { const rk = learnRank(), sn = VC.daySn(prog);
+  const fOf = x => ln && ln.has(x.id) && sn ? sn : recs && recs[x.id] && typeof recs[x.id].f === "number" ? recs[x.id].f : null;
+  return (a, v) => {
+    const fa = fOf(a), fv = fOf(v);
+    if(fa != null && fv != null && rk.has(fa) && rk.has(fv)) return Math.min(2, Math.abs(rk.get(fa) - rk.get(fv)));
+    // a record without f predates every stamped one: it can only be adjacent to the earliest stamped session
+    if((fa != null) !== (fv != null)){ const f = fa != null ? fa : fv; return rk.has(f) ? Math.min(2, rk.get(f) + 1) : 2; }
+    const x = sets.get(a.id), y = sets.get(v.id), d = x == null || y == null ? 2 : Math.min(2, Math.abs(x - y));
+    return ln && ln.has(a.id) ? (ln.has(v.id) ? 0 : Math.max(1, d)) : d; }; };
 function wordMix(){
   if(!OPTS_MIX) return undefined;
   const ids = new Set(learnedWords().map(w => w.id)), ln = learnNow;
-  return { stage: v => ln && ln.has(v.id) ? 0 : !ids.has(v.id) ? 2 : (((prog.w[v.id] || {}).s || 0) >= VC.WORD_MASTERED ? 1 : 0), bucket: mixBucket(mixSetOf().w, ln) };
+  return { stage: v => ln && ln.has(v.id) ? 0 : !ids.has(v.id) ? 2 : (((prog.w[v.id] || {}).s || 0) >= VC.WORD_MASTERED ? 1 : 0), bucket: mixBucket(mixSetOf().w, ln, prog.w), rot: VC.daySn(prog) };
 }
 function sentMix(){
   if(!OPTS_MIX) return undefined;
@@ -880,7 +891,7 @@ function charCtx(){
   const recs = VC.charRecs(prog), ln = learnNow;
   const unit = u => ln && ln.has(u.id) ? 0 : !(Object.prototype.hasOwnProperty.call(recs, u.id) && recs[u.id]) ? 2 : ((recs[u.id].s || 0) >= CHAR_CFG.mastered ? 1 : 0);
   const wm = wordMix();
-  return Object.assign({}, CHAR_CTX, { mix: { word: wm.stage, wordBucket: wm.bucket, unit, unitBucket: mixBucket(mixSetOf().u, ln || todayCharSet()) } });
+  return Object.assign({}, CHAR_CTX, { mix: { word: wm.stage, wordBucket: wm.bucket, rot: wm.rot, unit, unitBucket: mixBucket(mixSetOf().u, ln, recs) } });
 }
 function optScript(entry, others){
   const mixed = () => others.some(v => dispWord(v).isPron !== dispWord(entry).isPron);
@@ -1802,7 +1813,14 @@ function charHintHTML(u, skip){
   if(skip) hs.forEach(x => skip.add(x.c));
   if(!hs.length) return "";
   const multi = [...String(u.t)].length > 1;
-  const line = h => escapeHtml(h).replace(/\p{Script=Han}+/gu, m => `<span${TA}>${m}</span>`);
+  const line = h => { if(!TONES) return escapeHtml(h).replace(/\p{Script=Han}+/gu, m => `<span${TA}>${m}</span>`);
+    // pack.tones: a marked syllable in the hint ("sound cǐ") takes the word path's tone colours (toneHTML).
+    let out = "", pos = 0;
+    for(const m of h.matchAll(/\p{Script=Han}+|[\p{Script=Latin}\u0300-\u036f]+/gu)){
+      out += escapeHtml(h.slice(pos, m.index)); pos = m.index + m[0].length;
+      out += /^\p{Script=Han}/u.test(m[0]) ? `<span${TA}>${m[0]}</span>` : VC.splitReading(m[0]).some(x => x.tone && x.tone !== 5) ? VC.toneHTML(m[0]) : escapeHtml(m[0]);
+    }
+    return out + escapeHtml(h.slice(pos)); };
   return `<span class="chint">${hs.map(x => `<span>${multi ? `<span class="hc"${TA}>${escapeHtml(x.c)}</span> ` : ""}${line(x.hint)}</span>`).join("")}</span>`;
 }
 function charRevealBlock(it, unit){
