@@ -52,7 +52,7 @@ $NODE tests/engine_checks.js                     # 704 passed; includes the dist
 $NODE tests/pron_aids_checks.js                  # 158
 $NODE tests/migration_checks.js                  # 421 (hsk_pinyin -> vocab_zh; uses ../chinese when present; [bare5] zh bare 6 -> 5; [rotation-s] read.done s/ls; [wordsBy] records read on a8e9c08; [progressMap] prog.pm both directions vs a2f2426; fb22 entries with g vs a2f2426 and 2412992; [f] records with f boot on 2412992 unchanged and back; [pairs] records with p boot on 2412992 and 3901e2e unchanged)
 $NODE tests/characters_checks.js                 # 134
-$NODE tests/characters_app_checks.js             # 210 (Math.random seeded: Placement walk deterministic; hint pinyin tone colours)
+$NODE tests/characters_app_checks.js             # 211 (Math.random seeded: Placement walk deterministic; hint pinyin tone colours)
 $NODE tests/script_checks.js                     # 128
 $NODE tests/script_app_checks.js                 # 216
 $NODE tests/audio_checks.js                      # 90 (app section needs ../persian)
