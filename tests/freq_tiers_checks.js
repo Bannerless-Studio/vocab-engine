@@ -445,6 +445,27 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check(`Progress level rows count known by the tier rule (${lvRows.join(" / ")})`, VC.levelIds(PACK).every((lv, i) => +lvRows[i] === VC.learnedWords(WORDS, PACK, prog).filter(w => w.lv === lv && VC.wordKnown(prog.w[w.id], w, PACK)).length)); check("nothing new stored: records carry only fields older engines know (r w s k t u f d prov p)", Object.values(prog.w).every(r => Object.keys(r).every(k => ["r", "w", "s", "k", "t", "u", "f", "d", "prov", "p"].includes(k))));
   }
 
+  console.log("\n[11] Words tab numbers sets by count (as Today) for a learner taught in the earlier order");
+  {
+    NOW = new Date(2026, 9, 6, 8, 0, 0).getTime();
+    const idOrd = byLv["1"].slice().sort((a, b) => a.id < b.id ? -1 : 1).slice(0, 35);
+    const mk = () => { const p = VC.normalizeProg({ placedOnce: true, soundsOpened: true, sessions: 10 }, PACK); p.sets = { "1": 3, "2": 0, "3": 0, "4": 0 }; p.sn = 6;
+      idOrd.forEach(w => { p.w[w.id] = { r: 1, w: 0, s: 1 }; }); return p; };
+    for(const [label, pk] of [["flag on", PACK], ["flag off", PACK_OFF]]){
+      const p0 = mk(), api = await boot(pk, clone(p0), 7); api.goto("words");
+      const nn = VC.nextNewSet(WORDS, pk, p0), btn = (api.el("wbody").innerHTML.match(/<button class="on">Set (\d+) \/ (\d+)/) || []);
+      const rows = (api.el("wl") ? api.el("wl").children : []).map(c => c.innerHTML), learned = new Set(idOrd.map(w => w.id));
+      if(pk === PACK){
+        check(`${label}: Words tab opens on Today's set number (${btn[1]} vs ${nn.set + 1})`, +btn[1] === nn.set + 1 && nn.set === 3);
+        check(`${label}: the shown set is the next Learn set, so Drill this set marks no learned word`, rows.length === nn.words.length && nn.words.every((w, i) => rows[i].includes(w.w)) && nn.words.every(w => !learned.has(w.id)));
+        api.el("nx").click(); api.el("jump").click();
+        check(`${label}: "next new" returns to the same set`, +(api.el("wbody").innerHTML.match(/<button class="on">Set (\d+)/) || [])[1] === nn.set + 1);
+      } else {
+        check(`${label}: Words tab keeps the position numbering (set ${btn[1]}, first unrecorded word's slice)`, +btn[1] === Math.floor(byLv["1"].findIndex(w => !learned.has(w.id)) / 10) + 1);
+      }
+    }
+  }
+
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
   process.exit(fails ? 1 : 0);
 })().catch(e => { console.log("FAIL  threw: " + (e && e.stack || e)); process.exit(1); });

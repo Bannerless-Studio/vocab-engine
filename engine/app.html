@@ -2513,7 +2513,8 @@ function wordListInto(wl, list){
 // taught word it would hide the level's taught record and could flip the level back to the
 // counter-prefix fallback.
 const wordsSetDone = (lv, set, untaught) => rzTag({ o: "wordsSet", lv, set, ut: untaught }, () => {
-  if(wordsSet !== (prog.sets[wordsLv]||0)) untaught.forEach(id => { VC.ensureWordRec(prog, WORDS, PACK, id).d = 1; });
+  const cur = FREQ_TIERS ? (nn => nn ? nn.set : -1)(VC.levelNewSet(WORDS, PACK, prog, wordsLv)) : (prog.sets[wordsLv]||0);
+  if(wordsSet !== cur) untaught.forEach(id => { VC.ensureWordRec(prog, WORDS, PACK, id).d = 1; });
   VC.settleSetCounter(prog, WORDS, PACK, wordsLv);
   store.save(); wordsRender();
 });
@@ -2528,10 +2529,15 @@ function renderWordBody(){
     wordListInto($("wl"), matches.slice(0,150));
     return;
   }
-  // Browsing slices stay fixed rank order so a set's words don't move as the learner progresses;
+  // Browsing slices stay fixed rank order (but see freqTiers below) so a set's words don't move as the learner progresses;
   // done-ness comes from records because a republish can shift the counter prefix.
-  const list = levelList(wordsLv); const total = nSets(wordsLv);
+  let list = levelList(wordsLv); const total = nSets(wordsLv);
   const lwAll = learnedWords(); const got = new Set(lwAll.map(w => w.id));
+  // freqTiers: learned words sit anywhere in the frequency order (taught under the earlier one), so
+  // sets are numbered by count as on Today (VC.levelNewSet): the learned sets first, then the unlearned
+  // words in rank order (the next set = what Learn teaches), the leftover learned words last.
+  if(FREQ_TIERS){ const lrn = list.filter(w => got.has(w.id)), cut = Math.floor(lrn.length / SIZE) * SIZE;
+    list = lrn.slice(0, cut).concat(list.filter(w => !got.has(w.id)), lrn.slice(cut)); }
   const firstNew = list.findIndex(w => !got.has(w.id));
   const next = Math.max(0, Math.min(firstNew < 0 ? total : Math.floor(firstNew/SIZE), total-1));
   if(wordsSet == null) wordsSet = next;
@@ -3169,8 +3175,8 @@ function charProgress(){
     const list = VC.charStageUnits(st.levels, CHAR_LIST, PACK);
     const taught = VC.charSets(st.levels, CHAR_LIST, PACK).filter(set => VC.charSetTaught(set, prog)).reduce((n, set) => n + set.length, 0);
     const masteredN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) !== "pron").length;
-    const bareN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) === "bare").length;
-    return `<tr><td>${tf(st.label)}</td><td>${taught} / ${list.length} taught · ${st.recorded} recorded · ${masteredN} mastered · ${bareN} bare</td></tr>`;
+    const bareN = list.filter(u => recs[u.id] && (FREQ_TIERS ? VC.unitDone(recs[u.id], u, PACK) : VC.charTier(streak(u), PACK) === "bare")).length;
+    return `<tr><td>${tf(st.label)}</td><td>${taught} / ${list.length} taught · ${st.recorded} recorded · ${masteredN} mastered · ${bareN} ${FREQ_TIERS ? "done" : "bare"}</td></tr>`;
   }).join("");
   const defer = !!(prog.chars && prog.chars.defer === true), order = VC.charOrder(PACK, prog);
   const deferred = VC.charStages(PACK, Object.assign({}, prog, { chars: Object.assign({}, prog.chars, { defer: true }) }));

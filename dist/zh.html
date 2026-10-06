@@ -2577,7 +2577,7 @@ function progressPosition(prog, pack, words, units, passages){
   let wu = us.length ? 0.25 : 0, wp = ps.length ? 0.25 : 0;
   const ww = 1 - wu - wp;
   let x = ws.length ? ww * known / ws.length : 0;
-  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && charTier(cr[u.id].s, pack) === "bare").length / us.length; }
+  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (freqTiersOn(pack) ? unitDone(cr[u.id], u, pack) : charTier(cr[u.id].s, pack) === "bare")).length / us.length; }
   if(ps.length){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
   return Math.max(0, Math.min(1, x));
 }
@@ -5441,7 +5441,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "208120235-1980770";
+const VE_BUILD = "2031671573-1981523";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6487,7 +6487,8 @@ function wordListInto(wl, list){
 // taught word it would hide the level's taught record and could flip the level back to the
 // counter-prefix fallback.
 const wordsSetDone = (lv, set, untaught) => rzTag({ o: "wordsSet", lv, set, ut: untaught }, () => {
-  if(wordsSet !== (prog.sets[wordsLv]||0)) untaught.forEach(id => { VC.ensureWordRec(prog, WORDS, PACK, id).d = 1; });
+  const cur = FREQ_TIERS ? (nn => nn ? nn.set : -1)(VC.levelNewSet(WORDS, PACK, prog, wordsLv)) : (prog.sets[wordsLv]||0);
+  if(wordsSet !== cur) untaught.forEach(id => { VC.ensureWordRec(prog, WORDS, PACK, id).d = 1; });
   VC.settleSetCounter(prog, WORDS, PACK, wordsLv);
   store.save(); wordsRender();
 });
@@ -6502,10 +6503,15 @@ function renderWordBody(){
     wordListInto($("wl"), matches.slice(0,150));
     return;
   }
-  // Browsing slices stay fixed rank order so a set's words don't move as the learner progresses;
+  // Browsing slices stay fixed rank order (but see freqTiers below) so a set's words don't move as the learner progresses;
   // done-ness comes from records because a republish can shift the counter prefix.
-  const list = levelList(wordsLv); const total = nSets(wordsLv);
+  let list = levelList(wordsLv); const total = nSets(wordsLv);
   const lwAll = learnedWords(); const got = new Set(lwAll.map(w => w.id));
+  // freqTiers: learned words sit anywhere in the frequency order (taught under the earlier one), so
+  // sets are numbered by count as on Today (VC.levelNewSet): the learned sets first, then the unlearned
+  // words in rank order (the next set = what Learn teaches), the leftover learned words last.
+  if(FREQ_TIERS){ const lrn = list.filter(w => got.has(w.id)), cut = Math.floor(lrn.length / SIZE) * SIZE;
+    list = lrn.slice(0, cut).concat(list.filter(w => !got.has(w.id)), lrn.slice(cut)); }
   const firstNew = list.findIndex(w => !got.has(w.id));
   const next = Math.max(0, Math.min(firstNew < 0 ? total : Math.floor(firstNew/SIZE), total-1));
   if(wordsSet == null) wordsSet = next;
@@ -7143,8 +7149,8 @@ function charProgress(){
     const list = VC.charStageUnits(st.levels, CHAR_LIST, PACK);
     const taught = VC.charSets(st.levels, CHAR_LIST, PACK).filter(set => VC.charSetTaught(set, prog)).reduce((n, set) => n + set.length, 0);
     const masteredN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) !== "pron").length;
-    const bareN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) === "bare").length;
-    return `<tr><td>${tf(st.label)}</td><td>${taught} / ${list.length} taught · ${st.recorded} recorded · ${masteredN} mastered · ${bareN} bare</td></tr>`;
+    const bareN = list.filter(u => recs[u.id] && (FREQ_TIERS ? VC.unitDone(recs[u.id], u, PACK) : VC.charTier(streak(u), PACK) === "bare")).length;
+    return `<tr><td>${tf(st.label)}</td><td>${taught} / ${list.length} taught · ${st.recorded} recorded · ${masteredN} mastered · ${bareN} ${FREQ_TIERS ? "done" : "bare"}</td></tr>`;
   }).join("");
   const defer = !!(prog.chars && prog.chars.defer === true), order = VC.charOrder(PACK, prog);
   const deferred = VC.charStages(PACK, Object.assign({}, prog, { chars: Object.assign({}, prog.chars, { defer: true }) }));
@@ -7283,4 +7289,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:4088382948-1980093-->
+<!--ve-build:458522817-1980847-->

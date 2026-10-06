@@ -2209,7 +2209,7 @@ function progressPosition(prog, pack, words, units, passages){
   let wu = us.length ? 0.25 : 0, wp = ps.length ? 0.25 : 0;
   const ww = 1 - wu - wp;
   let x = ws.length ? ww * known / ws.length : 0;
-  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && charTier(cr[u.id].s, pack) === "bare").length / us.length; }
+  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (freqTiersOn(pack) ? unitDone(cr[u.id], u, pack) : charTier(cr[u.id].s, pack) === "bare")).length / us.length; }
   if(ps.length){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
   return Math.max(0, Math.min(1, x));
 }
