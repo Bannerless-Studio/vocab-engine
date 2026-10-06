@@ -280,7 +280,7 @@ const mean = (s, n) => n ? (s / n).toFixed(3) : "-";
 const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.length === 3 && os.every(s => { const q = String(s.en).length / L; return q >= 1.8 || q <= 1 / 1.8; }); };
 
 async function sec4(){
-  const REPEAT_BOUND = 0.20; // fb21 (b): 23-26% of presentations repeated a set before mix.rot (small closed sets), 2-4% after. fb28: answers whose same-length weak pool has <= 3 others (e.g. the four 2-character units 自己 认为 需要 必须) have no alternative, so their repeats are skipped (counted in the NOTE); a different-length filler would be a length giveaway
+  const REPEAT_BOUND = 0.20; // fb21 (b): 23-26% of presentations repeated a set before mix.rot (small closed sets), 2-4% after. fb28: repeats are skipped when forced: the answer's same-length weak pool P has <= 3 others (e.g. the four 2-character units 自己 认为 需要 必须), or C(P,3) <= its prior draws (every 3-subset already shown) (counted in the NOTE); a different-length filler would be a length giveaway
   console.log("\n[4] fb21 R3-M1: records carry f (session learned); a lag learner's sets are not on 10-boundaries; Test Characters after the session and on later days");
   {
     // Learner of shape(30, 0.3): 30 words, 9 units (a 9-unit lag set). Seven Today sessions, a day apart; after each, the options of the
@@ -326,14 +326,14 @@ async function sec4(){
               n++; g += 1 / (1 + right); if(mates >= 3){ el++; ge += 1 / (1 + right); }
               const key = `${kind}|${id}`; const ks = others.map(String).sort().join(","); const arr = seenSets.get(key) || [];
               // alternatives: same-length, same-stage (weak) answers other than this one; <= 3 means the same three wrong choices are the only ones offered, a closed pool no rotation can change
-              if(rep === 0){ arr.push({ day, ks, open: pool(fam, a, pr) > 3 }); seenSets.set(key, arr); }
+              if(rep === 0){ arr.push({ day, ks, pool: pool(fam, a, pr) }); seenSets.set(key, arr); }
             }
           }
           if(day - c0 <= 2) cells.push({ day: day - c0 + 1, kind, n, guess: n ? g / n : NaN, el, ge: el ? ge / el : NaN, before: opts ? learnedBefore / opts : NaN, together: opts ? same / opts : NaN });
         }
       }
       let rep = { u: [0, 0, 0], w: [0, 0, 0] };
-      for(const [key, arr] of seenSets){ const f = key.includes("|c") ? "u" : "w"; if(key.startsWith("charPick|") || key.startsWith("read|")) for(let i = 1; i < arr.length; i++){ if(!arr[i].open){ rep[f][2]++; continue; } rep[f][1]++; if(arr.slice(0, i).some(x => x.ks === arr[i].ks)) rep[f][0]++; } }
+      for(const [key, arr] of seenSets){ const f = key.includes("|c") ? "u" : "w"; if(key.startsWith("charPick|") || key.startsWith("read|")) for(let i = 1; i < arr.length; i++){ const P = arr[i].pool; if(P <= 3 || P * (P - 1) * (P - 2) / 6 <= i){ rep[f][2]++; continue; } rep[f][1]++; if(arr.slice(0, i).some(x => x.ks === arr[i].ks)) rep[f][0]++; } }
       return { cells: cells.filter(c => c.day), fvals, rep, prog: st.ls.getItem(VC.storageKey(pack)), pr: api.getProg() };
     }
     const OLDX = (() => { try { const os = require("os"); const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "optsmix-")), "core_main.js"); fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ac891e3:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); return { core: require(f), html: cp.execSync(`git -C "${ROOT}" show ac891e3:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }) }; } catch(e){ return null; } })();
@@ -373,7 +373,7 @@ async function sec4(){
     }
     const sum = rs => rs.reduce((a, r) => [a[0] + r.rep.u[0], a[1] + r.rep.u[1], a[2] + r.rep.w[0], a[3] + r.rep.w[1], a[4] + r.rep.u[2], a[5] + r.rep.w[2]], [0, 0, 0, 0, 0, 0]);
     const rp = keep.map(sum);
-    console.log(`NOTE  identical wrong-choice set seen again within a week (cohort, one draw per session): ${SHAPES4.map(([n], i) => `${n}: units ${pct(rp[i][0], rp[i][1])}${rp[i][3] ? `, words ${pct(rp[i][2], rp[i][3])}` : ""} (skipped as closed pool: ${rp[i][4]} units, ${rp[i][5]} words)`).join("; ")}`);
+    console.log(`NOTE  identical wrong-choice set seen again within a week (cohort, one draw per session): ${SHAPES4.map(([n], i) => `${n}: units ${pct(rp[i][0], rp[i][1])}${rp[i][3] ? `, words ${pct(rp[i][2], rp[i][3])}` : ""} (skipped as forced: ${rp[i][4]} units, ${rp[i][5]} words)`).join("; ")}`);
     check(`weak units seeing the same three wrong choices again across sessions: ${rp.map(r => pct(r[0], r[1])).join(" / ")}; words ${pct(rp[0][2], rp[0][3])}`, rp.every(r => r[1] > 10) && rp[0][3] > 10 && rp.every(r => r[0] / r[1] <= REPEAT_BOUND) && rp[0][2] / rp[0][3] <= REPEAT_BOUND);
     const offRun = await lagWeek(VC, appHtml, PACK_OFF, 5);
     check(`flag off: no record ever gets f over 7 sessions (${Object.keys(offRun.pr.w).length} word, ${Object.keys(offRun.pr.chars.c).length} unit records)`,
