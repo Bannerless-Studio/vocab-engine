@@ -1692,13 +1692,14 @@ const pairCharCand = (prog, pack, kinds, typedUnits) => { const recs = charRecs(
 // A unit's typed ask types its word (tu); pair tells the app which typed kinds belong to the item.
 const pairPlanItem = e => e.c.t === "w" ? { kind: e.kind, word: e.c.x, pair: e.pair }
   : e.kind === "type" ? { kind: "type", word: e.c.tw, tu: e.c.x.id, pair: e.pair } : { kind: e.kind, unit: e.c.x, pair: e.pair };
-// Review and Recall under pack.pairs. o.extra (pauseNew): extra items up to a quarter of the items
-// not answered in the last DAY_RECENT_SESSIONS sessions, as dayReviewPlan.
+// Review and Recall under pack.pairs. o.extra (pauseNew) is ignored: a paused Review stays at n items.
 function pairPlan(learned, prog, pack, n, o, wk, ck){
   const d = dayLog(prog, o.today), sn = daySn(prog), wc = dayWordCan(pack, o.canHear);
   const cands = [...(learned || []).map(pairWordCand(prog, wk, wc)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
   const fresh = cands.filter(c => !(sn > 0 && dayU(c.rec) >= sn - DAY_RECENT_SESSIONS)).length;
-  const x = o.extra > 0 ? Math.max(0, Math.min(o.extra, Math.floor(fresh / DAY_EXTRA_POOL) - n)) : 0;
+  // Owner 2026-10-06: a paused session's 40-item Review is too long to keep focus and remember mistakes,
+  // so under pairs the pauseNew growth (o.extra) is ignored and Review keeps its normal size.
+  const x = 0;
   const pool = shuffle(pairPick(cands, n + x, d, o.rng, sn, pack, o), o.rng);
   return hearableKinds(pool.map(pairPlanItem), o.canHear);
 }

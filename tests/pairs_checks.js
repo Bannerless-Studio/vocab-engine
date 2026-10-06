@@ -294,6 +294,12 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const tp2 = VC.buildReviewPlan(lwOf(T2), T2, PACK, Object.assign(planOpts(4), { size: 20, units: CHARACTERS, typedUnits: TU, typedKindFits: (w, k) => VC.typedKindOk(k, w, true) }));
     check("a unit is not typed as its word when that word's pair was answered this session", !tp2.some(it => it.tu && typedU.some(u => u.tu === it.tu && u.pair === it.pair)));
     check("typedSeen: a word typed this Today session gets no typed ask", !VC.buildReviewPlan(lwOf(r), r, PACK, Object.assign(planOpts(5), { size: 20, sn: 7, typedSeen: () => true })).some(it => it.kind === "type"));
+    { // fb25: owner 2026-10-06, a paused session's Review stays at 20 under pairs; flag off still grows (pause_checks)
+      const big = synth(220, 2, 4, 6), po = x => Object.assign(planOpts(3), { size: 20, units: CHARACTERS, sn: 7 }, x);
+      const on = VC.buildReviewPlan(lwOf(big), JSON.parse(JSON.stringify(big)), PACK, po({ extra: 20 }));
+      const off = VC.buildReviewPlan(VC.learnedWords(WORDS, PACK_OFF, big), JSON.parse(JSON.stringify(big)), PACK_OFF, po({ extra: 20 }));
+      check(`pairs: a paused Review (extra 20) stays at 20 items (${on.length}); flag off grows (${off.length})`, on.length === 20 && off.length > 20);
+    }
   }
 
   console.log(`\n[6] flag-off control: plans byte-identical to ${MAIN}`);
