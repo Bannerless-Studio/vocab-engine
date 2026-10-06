@@ -2064,11 +2064,9 @@ const pairPlanItem = e => e.c.t === "w" ? { kind: e.kind, word: e.c.x, pair: e.p
 function pairPlan(learned, prog, pack, n, o, wk, ck){
   const d = dayLog(prog, o.today), sn = daySn(prog), wc = dayWordCan(pack, o.canHear);
   const cands = [...(learned || []).map(pairWordCand(prog, wk, wc)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
-  const fresh = cands.filter(c => !(sn > 0 && dayU(c.rec) >= sn - DAY_RECENT_SESSIONS)).length;
   // Owner 2026-10-06: a paused session's 40-item Review is too long to keep focus and remember mistakes,
   // so under pairs the pauseNew growth (o.extra) is ignored and Review keeps its normal size.
-  const x = 0;
-  const pool = shuffle(pairPick(cands, n + x, d, o.rng, sn, pack, o), o.rng);
+  const pool = shuffle(pairPick(cands, n, d, o.rng, sn, pack, o), o.rng);
   return hearableKinds(pool.map(pairPlanItem), o.canHear);
 }
 
@@ -5336,7 +5334,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2560993954-1955475";
+const VE_BUILD = "3824552733-1955360";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -7177,4 +7175,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2961053820-1954799-->
+<!--ve-build:1628810542-1954684-->

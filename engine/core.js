@@ -1696,11 +1696,9 @@ const pairPlanItem = e => e.c.t === "w" ? { kind: e.kind, word: e.c.x, pair: e.p
 function pairPlan(learned, prog, pack, n, o, wk, ck){
   const d = dayLog(prog, o.today), sn = daySn(prog), wc = dayWordCan(pack, o.canHear);
   const cands = [...(learned || []).map(pairWordCand(prog, wk, wc)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
-  const fresh = cands.filter(c => !(sn > 0 && dayU(c.rec) >= sn - DAY_RECENT_SESSIONS)).length;
   // Owner 2026-10-06: a paused session's 40-item Review is too long to keep focus and remember mistakes,
   // so under pairs the pauseNew growth (o.extra) is ignored and Review keeps its normal size.
-  const x = 0;
-  const pool = shuffle(pairPick(cands, n + x, d, o.rng, sn, pack, o), o.rng);
+  const pool = shuffle(pairPick(cands, n, d, o.rng, sn, pack, o), o.rng);
   return hearableKinds(pool.map(pairPlanItem), o.canHear);
 }
 
