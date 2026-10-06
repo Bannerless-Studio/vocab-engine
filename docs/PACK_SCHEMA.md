@@ -436,7 +436,7 @@ Pair and unit mechanics are the same in every tier (pair 2 → 3 by production, 
 | pair streak, typed asks, unit to bare | as `pairs` / `bareBy` | same | same |
 | at equal pair streak (pairPick) | typed asks first | typed asks first | no typed-first priority: a typed ask only when the pair is drawn by streak and age |
 | held unit boot (bare − 1 → pair 2) | yes | yes | no: boots from the legacy streak like a word (3 at 3+) |
-| refresh share | excluded (sentences and passages cover it) | as `pairs` | age counts half when ranking refresh candidates; peripheral refresh: one slot per plan (when the share has a slot and a known peripheral pair exists, the oldest one by halved age takes it; the rest fills as before) |
+| refresh share | excluded (sentences and passages cover it) | as `pairs` | age counts half when ranking refresh candidates; peripheral refresh: one slot every other plan (on an odd session ordinal, when the share has a slot and a known peripheral pair exists, the oldest one by halved age takes it; the rest fills as before; even plans fill by age alone; nothing stored) |
 | word counts as known | every askable pair at 3 | same | every askable pair at 2 (3 reachable, not required) |
 | its character unit counts as done (Progress, goals) | at bare | same | at mastered (it still reaches bare by a typed right answer) |
 

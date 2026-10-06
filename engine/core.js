@@ -1608,7 +1608,7 @@ function pairsOn(pack){ return !!(pack && pack.pairs === true) && dayAwareOn(pac
 // and unit mechanics are the same for every tier. Ambient (0, the pack's ~100 commonest words): every
 // sentence and passage rehearses them, so a known pair gets no refresh ask. Core (1): the pairs rules.
 // Peripheral (2): no typed-first priority at equal streak, no held boot, refresh age counts half (one
-// refresh slot per plan reserved for the oldest known peripheral pair), known
+// refresh slot every other plan, odd session ordinal, for the oldest known peripheral pair), known
 // at PAIR_HOLD, its unit done for Progress at mastered (it still reaches bare by typed credit).
 const FT_AMBIENT = 0, FT_CORE = 1, FT_PERIPHERAL = 2;
 const ftOf = v => v === FT_AMBIENT || v === FT_CORE || v === FT_PERIPHERAL ? v : FT_CORE;
@@ -1751,9 +1751,10 @@ function pairPick(cands, n, d, rng, sn, pack, o){
     seen.add(e.c.key); if(al) seen.add(al); out.push(e); list[i] = null; } };
   const rk = Math.min(Math.ceil(n * PAIR_REFRESH), new Set(hi.map(e => e.c.key)).size);
   take(lo, n - rk);
-  // freqTiers (owner 2026-10-06): one refresh slot per plan goes to the oldest known peripheral pair
-  // (halved age), so peripheral items keep a trickle while older core pairs fill the rest of the share.
-  if(rk >= 1){ const i = hi.findIndex(e => e && e.c.tier === FT_PERIPHERAL && !seen.has(e.c.key) && !(alias(e) && seen.has(alias(e))));
+  // freqTiers (owner 2026-10-06/07): on every other plan (odd session ordinal; no storage) one refresh
+  // slot goes to the oldest known peripheral pair (halved age), so peripheral items keep a trickle while
+  // older core pairs fill the rest of the share; on even plans the share fills by age alone.
+  if(rk >= 1 && psn % 2 === 1){ const i = hi.findIndex(e => e && e.c.tier === FT_PERIPHERAL && !seen.has(e.c.key) && !(alias(e) && seen.has(alias(e))));
     if(i > 0) hi.unshift(hi.splice(i, 1)[0]); }
   take(hi, n); take(lo, n);
   return out;

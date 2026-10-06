@@ -283,16 +283,18 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const pick = cs => VC.pairPick(cs, 10, { a: {} }, mulberry32(1), 40, PACK, {}).map(e => e.c.key);
     // Pairs below 3 fill the plan except its refresh share (n = 20: 2 slots; n = 10: 1).
     const low = k => Array.from({ length: k }, (_, i) => ({ t: "w", x: { id: "l" + i }, key: "w:l" + i, rec: { s: 1, p: { wm: [1, 30] } }, kinds: ["read"], tier: 1, tw: { id: "l" + i } }));
-    const ref = (cs, n, pk) => VC.pairPick(cs, n, { a: {} }, mulberry32(1), 40, pk || PACK, {}).map(e => e.c.key).filter(k => !k.startsWith("w:l"));
+    const ref = (cs, n, pk, sn) => VC.pairPick(cs, n, { a: {} }, mulberry32(1), sn || 41, pk || PACK, {}).map(e => e.c.key).filter(k => !k.startsWith("w:l"));
     // Second slot by halved age: peripheral 10 ago ranks at 25, so core 20 ago comes first, core 26 ago after it.
     const r1 = ref([...low(18), cand(2, 0, "pa"), cand(2, 10, "pb"), cand(1, 20, "c")], 20), r2 = ref([...low(18), cand(2, 0, "pa"), cand(2, 10, "pb"), cand(1, 26, "c")], 20);
     check(`peripheral age counts half: after the reserved slot (pa), core 20 ago before peripheral 10 ago (${r1.join(" ")}); core 26 ago after it (${r2.join(" ")})`,
       r1.join() === "w:pa,w:c" && r2.join() === "w:pa,w:pb");
     {
-      // One refresh slot per plan for the oldest known peripheral pair, though ten core known pairs are older.
+      // Odd session ordinal: one refresh slot for the oldest known peripheral pair, though ten core known pairs are older.
       const cs = [...low(9), ...Array.from({ length: 10 }, (_, i) => cand(1, i, "c" + i)), cand(2, 30, "p1"), cand(2, 25, "p2")];
       const got = ref(cs, 10);
-      check(`peripheral refresh: one slot per plan, the oldest known peripheral pair (${got.join(" ")})`, got.join() === "w:p2");
+      check(`peripheral refresh, odd plan (sn 41): the slot goes to the oldest known peripheral pair (${got.join(" ")})`, got.join() === "w:p2");
+      const ev = ref(cs, 10, PACK, 40), ev2 = ref(cs, 10, PACK, 42), od = ref(cs, 10, PACK, 43);
+      check(`peripheral refresh, even plans (sn 40, 42): no reserved slot, oldest by age (${ev.join(" ")} / ${ev2.join(" ")}); sn 43 reserves again (${od.join(" ")})`, ev.join() === "w:c0" && ev2.join() === "w:c0" && od.join() === "w:p2");
       const n20 = ref([...low(18), ...cs.slice(9)], 20);
       check(`two refresh slots: the peripheral pair, then the oldest core (${n20.join(" ")})`, n20.join() === "w:p2,w:c0");
       const off = ref(cs.map(c => Object.assign({}, c, { tier: undefined })), 10, PACK_OFF);
