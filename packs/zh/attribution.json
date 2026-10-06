@@ -27,6 +27,11 @@
  },
  "not_used": {
   "Wiktionary via kaikki.org": "no zh input reads kaikki; zh glosses come from CC-CEDICT via complete-hsk-vocabulary (Wiktionary itself is cited only by two hint overrides, see character_hint_overrides)",
-  "hermitdave/FrequencyWords": "zh word order and levels come from the HSK lists, not a frequency list"
+  "hermitdave/FrequencyWords": "zh levels come from the HSK lists; word order within a level and frequency tiers from wordfreq"
+ },
+ "frequency": {
+  "source": "wordfreq 3.1.1 zipf_frequency(word, \"zh\") via tools/zh_freq.py -> tools/zh_freq.json: word order within an HSK level and words.json `ft` (docs/ZH_TIERS.md)",
+  "licence": "CC-BY-SA-4.0 (wordfreq data); Apache-2.0 (wordfreq code, not shipped)",
+  "url": "https://github.com/rspeer/wordfreq"
  }
 }

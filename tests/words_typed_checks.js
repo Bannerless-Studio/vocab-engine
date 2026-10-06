@@ -219,7 +219,10 @@ function seedW(){
     const on = plan(PACK), off = plan(PACK_OFF);
     const onW = on.filter(it => it.word), offW = off.filter(it => it.word);
     const heldOn = onW.filter(it => held.has(it.word.id));
-    check(`Review: as many items as flag off (${on.length}); every held word is asked typed (${heldOn.length} held of ${onW.length} words)`, on.length === off.length && heldOn.length > 0 && heldOn.every(it => it.kind === "type"));
+    // A held word no typed kind fits (北京, pronInGloss, while shown by its reading) keeps the old rule; fb26's
+    // frequency order put it in this seed's plan.
+    const typable = w => VC.typedKinds(PACK).some(k => VC.typedKindOk(k, w, false));
+    check(`Review: as many items as flag off (${on.length}); every typable held word is asked typed (${heldOn.length} held of ${onW.length} words)`, on.length === off.length && heldOn.length > 0 && heldOn.filter(it => typable(it.word)).every(it => it.kind === "type"));
     // Many words below 2: the weak floor (lowest streak first) alone leaves held words out.
     const pS = clone(p); lw.filter(w => pS.w[w.id].s === 4).slice(0, 30).forEach(w => { pS.w[w.id].s = 1; });
     const planS = (pack, o) => VC.buildReviewPlan(lw, clone(pS), pack, Object.assign({ today: TODAY, rng: mulberry32(5), size: 20 }, o || {}));

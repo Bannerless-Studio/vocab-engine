@@ -98,12 +98,13 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     const NOT_GENERATED = ["passages_src.json", "passages.json", "REPORT_passages.md", "gloss_display.json"];
     NOT_GENERATED.forEach(f => { if(fs.existsSync(path.join(ZH, f))) fs.copyFileSync(path.join(ZH, f), path.join(tmp, f)); });
     const g = cp.spawnSync("python3", [path.join(ROOT, "tools", "pack_from_hsk.py"), HSK, "--out", tmp], { encoding: "utf8", maxBuffer: 1 << 26 });
-    const names = [...new Set([...fs.readdirSync(ZH), ...fs.readdirSync(tmp).filter(f => f !== "ZH_GLOSS.md")])];
+    const DOCS = ["ZH_GLOSS.md", "ZH_TIERS.md"];
+    const names = [...new Set([...fs.readdirSync(ZH), ...fs.readdirSync(tmp).filter(f => !DOCS.includes(f))])];
     const drift = names.filter(f => !fs.existsSync(path.join(ZH, f)) || !fs.existsSync(path.join(tmp, f)) || !fs.readFileSync(path.join(ZH, f)).equals(fs.readFileSync(path.join(tmp, f))));
-    const doc = fs.existsSync(path.join(tmp, "ZH_GLOSS.md")) && fs.readFileSync(path.join(tmp, "ZH_GLOSS.md")).equals(fs.readFileSync(path.join(ROOT, "docs", "ZH_GLOSS.md")));
+    const docDrift = DOCS.filter(d => !(fs.existsSync(path.join(tmp, d)) && fs.readFileSync(path.join(tmp, d)).equals(fs.readFileSync(path.join(ROOT, "docs", d)))));
     fs.rmSync(tmp, { recursive: true, force: true });
-    check(`pack_from_hsk.py ${HSK} reproduces packs/zh from an empty dir (${names.length} files incl. the jsonified .js; ${NOT_GENERATED.length} non-generated seeded) and docs/ZH_GLOSS.md byte for byte (drift: ${drift.join(", ") || "none"}${doc ? "" : ", ZH_GLOSS.md"}${g.status ? `, exit ${g.status}` : ""})`,
-      g.status === 0 && drift.length === 0 && doc);
+    check(`pack_from_hsk.py ${HSK} reproduces packs/zh from an empty dir (${names.length} files incl. the jsonified .js; ${NOT_GENERATED.length} non-generated seeded) and docs/ZH_GLOSS.md + docs/ZH_TIERS.md byte for byte (drift: ${[...drift, ...docDrift].join(", ") || "none"}${g.status ? `, exit ${g.status}` : ""})`,
+      g.status === 0 && drift.length === 0 && docDrift.length === 0);
   }
 })();
 

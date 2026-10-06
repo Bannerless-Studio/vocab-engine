@@ -153,14 +153,22 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     delete pack.progressMap;
     // Pair scheduling (docs/PACK_SCHEMA.md "pairs") is a new, flag-on field.
     delete pack.pairs;
+    // Frequency tiers (docs/PACK_SCHEMA.md "freqTiers") are a new, flag-on field.
+    delete pack.freqTiers;
   }
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.
   const generated = u => typeof u === "string" && !/^[a-z][a-z0-9+.-]*:/i.test(u);
-  const NEW_WORD_FIELDS = ["audio", "say", "syn", "typedSyn", "noTypedMeaning", "pronInGloss"];
-  const words = Array.isArray(wordsJson)
+  // words[].ft (docs/PACK_SCHEMA.md "freqTiers") is new, flag-on; a freqTiers pack's levels are in
+  // frequency order, and its word ids were assigned in the earlier file order (tools/pack_from_hsk.py:
+  // hsk order; ids are append-only), so id order restores the pre-freqTiers file order.
+  const NEW_WORD_FIELDS = ["audio", "say", "syn", "typedSyn", "noTypedMeaning", "pronInGloss", "ft"];
+  const stripped = Array.isArray(wordsJson)
     ? wordsJson.map(w => { if(!w || !NEW_WORD_FIELDS.some(k => k in w)) return w; const c = Object.assign({}, w); NEW_WORD_FIELDS.forEach(k => delete c[k]); return c; })
     : wordsJson;
+  const words = Array.isArray(stripped) && packJson && packJson.freqTiers !== undefined
+    ? stripped.map((w, i) => [w, i]).sort((a, b) => (a[0].id < b[0].id ? -1 : a[0].id > b[0].id ? 1 : a[1] - b[1])).map(x => x[0])
+    : stripped;
   const sentences = Array.isArray(sentencesJson)
     ? sentencesJson.map(s => { const c = Object.assign({}, s); delete c.ruby; if(generated(c.audio)) delete c.audio; return c; })
     : sentencesJson;

@@ -391,13 +391,15 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
   check(`(a) fresh: path ${labels(a)}; next HSK 1 set 0 (old pack the same)`, labels(a) === "HSK 1 字1 HSK 2 字2 HSK 3 字3 HSK 4 字4" && nextOf(PACK, a) === "words:1/0" && nextOf(OLD, a) === "words:1/0");
   // (b) mid HSK 2
   const b = mig("C mid-HSK2"), braw = JSON.stringify(b);
+  // The first HSK 1 unit in pack order (c0001 before fb26 put each level in frequency order).
+  const C1 = "chars:1 " + VC.charStageUnits(["1"], U, PACK)[0].id;
   const bs = n => Object.assign(clone(b), { sessions: n });
-  check(`(b) mid HSK 2: old pack ${nextOf(OLD, b)}; now no card, sessions alternate ${nextOf(PACK, bs(4))} / ${nextOf(PACK, bs(5))}`, nextOf(OLD, b) === "words:2/3" && nextOf(PACK, bs(4)) === "words:2/3" && nextOf(PACK, bs(5)) === "chars:1 c0001" && !VC.showCharChoice(PACK, W, U, b));
+  check(`(b) mid HSK 2: old pack ${nextOf(OLD, b)}; now no card, sessions alternate ${nextOf(PACK, bs(4))} / ${nextOf(PACK, bs(5))}`, nextOf(OLD, b) === "words:2/3" && nextOf(PACK, bs(4)) === "words:2/3" && nextOf(PACK, bs(5)) === C1 && !VC.showCharChoice(PACK, W, U, b));
   // Stored choice mapping: chars.defer true ("after") is "later"; anything else is "with words".
   // The alternation reads prog.sessions only: no new field.
   check("(b) stored choice: defer true -> later (HSK 2 set 3 every session, one 字 stage last); seen + defer false or unseen -> with words",
     [4, 5].every(n => (p => nextOf(PACK, p) === "words:2/3" && VC.stagePath(PACK, W, U, p).filter(s => s.kind === "chars").length === 1)(VC.setCharOrder(bs(n), true)))
-    && nextOf(PACK, VC.answerCharChoice(bs(5), true)) === "chars:1 c0001" && nextOf(PACK, bs(5)) === "chars:1 c0001"
+    && nextOf(PACK, VC.answerCharChoice(bs(5), true)) === C1 && nextOf(PACK, bs(5)) === C1
     && !VC.charsWithWords(PACK, VC.setCharOrder(bs(5), true)) && VC.charsWithWords(PACK, bs(5)) && !VC.charsWithWords(OLD, bs(5)));
   // (c) in the characters stage
   const c = mig("D1 chars started, card answered: start"), craw = JSON.stringify(c);

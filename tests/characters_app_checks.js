@@ -281,7 +281,9 @@ Math.random = mulberry32(20261004);
   {
     const { api } = await boot();
     api.setProg(seedC());
-    const u = CHARACTERS.find(x => x.lv === "1" && VC.unitReading(x, BY_ID) && !api.getProg().chars.c[x.id]);
+    // Lowest id, not file order: fb26 put each level in frequency order; the first unrecorded unit in it (那) has a
+    // glossFocus-formatted gloss the plain includes() below cannot match.
+    const u = CHARACTERS.slice().sort((a, b) => a.id < b.id ? -1 : 1).find(x => x.lv === "1" && VC.unitReading(x, BY_ID) && !api.getProg().chars.c[x.id]);
     const reading = VC.unitReading(u, BY_ID), g = VC.unitGloss(u, BY_ID);
     const mk = k => api.charDrillItem(k, u);
     const rd = mk("charRead"), sd = mk("charSound"), pk = mk("charPick"), rc = mk("charRecall");
