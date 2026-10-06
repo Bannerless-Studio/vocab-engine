@@ -21,7 +21,8 @@ const withDayRules = require("./day_rules_patch.js"); // fb10-weak-floor planner
 const ZH = path.join(ROOT, "packs", "zh");
 const BASE = "68930bd"; // main before optsMix: level-tier options everywhere
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
-const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+// fb27: the fresh-learner scenarios and the control predate characters.start / ramp (sets of 10 from the first Learn).
+const PACK = (p => { delete p.characters.start; delete p.characters.ramp; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");

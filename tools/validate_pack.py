@@ -350,6 +350,15 @@ def check_characters_pack(pack, level_ids, rep):
         rep.err("pack.characters.withWords must be a boolean")
     if "learn" in ch and ch["learn"] != "lag":
         rep.err('pack.characters.learn must be "lag"')
+    for f in ("start", "ramp"):
+        if f in ch and ch.get("learn") != "lag":
+            rep.err(f'pack.characters.{f} needs learn "lag"')
+    if "start" in ch and not (isinstance(ch["start"], int) and not is_bool(ch["start"]) and ch["start"] >= 0):
+        rep.err("pack.characters.start must be an integer >= 0")
+    if "ramp" in ch:
+        r, sz = ch["ramp"], ch.get("setSize", 10)
+        if not (isinstance(r, list) and r and all(isinstance(x, int) and not is_bool(x) and 1 <= x <= sz for x in r) and r == sorted(r)):
+            rep.err("pack.characters.ramp must be a non-empty ascending list of integers 1..setSize")
     return covered
 
 

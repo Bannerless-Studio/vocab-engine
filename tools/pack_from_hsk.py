@@ -358,6 +358,9 @@ def main(argv):
             # Learn teaches characters when a full set of learned words' units is untaught,
             # else new words (owner 2026-10-02, docs/PACK_SCHEMA.md "learn"); stages unused.
             "learn": "lag",
+            # No characters before 60 learned words, then sets of 3, 5, 8, then setSize (owner 2026-10-06).
+            "start": 60,
+            "ramp": [3, 5, 8],
         },
         "legacy": {"key": "hsk_pinyin", "format": "hsk-v2"},
         # Pronunciation first (docs/HSK_MERGE.md §8, 2026-09-25): a word is shown by its

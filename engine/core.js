@@ -2246,8 +2246,24 @@ function charsConfig(pack){
     bareWords: c.bareWords === true,
     // characters.learn "lag" supersedes withWords: no turn, no order chips.
     withWords: c.withWords === true && c.learn !== "lag",
-  }, c.learn === "lag" ? { learn: "lag" } : {});
+  }, c.learn === "lag" ? Object.assign({ learn: "lag" }, lagRamp(c, Number.isInteger(c.setSize) && c.setSize > 0 ? c.setSize : CHAR_SET_SIZE)) : {});
 }
+// characters.start / ramp (fb27): only under learn "lag"; invalid values are ignored like the other fields.
+function lagRamp(c, size){
+  const o = {};
+  if(Number.isInteger(c.start) && c.start > 0) o.start = c.start;
+  if(Array.isArray(c.ramp) && c.ramp.length && c.ramp.every((x, i) => Number.isInteger(x) && x >= 1 && x <= size && (!i || x >= c.ramp[i - 1]))) o.ramp = c.ramp.slice();
+  return o;
+}
+// Ramp position by units taught so far (no counter stored): sets are ramp[0], ramp[1], ..., then setSize.
+function rampSetOf(cfg, taught){
+  if(!cfg.ramp) return Math.floor(taught / cfg.setSize);
+  let sum = 0;
+  for(let k = 0; k < cfg.ramp.length; k++){ sum += cfg.ramp[k]; if(taught < sum) return k; }
+  return cfg.ramp.length + Math.floor((taught - sum) / cfg.setSize);
+}
+const rampSizeAt = (cfg, taught) => cfg.ramp ? (rampSetOf(cfg, taught) < cfg.ramp.length ? cfg.ramp[rampSetOf(cfg, taught)] : cfg.setSize) : cfg.setSize;
+const rampSetsFor = (cfg, n) => cfg.ramp ? (n <= 0 ? 0 : rampSetOf(cfg, n - 1) + 1) : Math.ceil(n / cfg.setSize);
 // Default mix is the predecessor app's.
 const CHAR_TEST_KINDS = { charRead:40, charSound:30, charPick:30 };
 function testKinds(tk, kinds, def){
@@ -2447,18 +2463,27 @@ function lagUnits(pack, words, units, prog){ return newCharUnits(units, learnedW
 function lagStage(pack, words, units, prog, path){
   const cfg = charsConfig(pack), n = lagUnits(pack, words, units, prog).length;
   const w = (path || stagePath(pack, words, units, prog)).find(s => s.kind === "words" && !s.done) || null;
-  return n >= cfg.setSize || (n && !w) ? lagCharStage(pack) : w;
+  if(cfg.start && w && learnedWords(words, pack, prog || {}).length < cfg.start) return w;
+  return n >= lagSize(cfg, units, prog) || (n && !w) ? lagCharStage(pack) : w;
 }
 const lagCharStage = pack => ({ kind:"chars", key:"lag", lag:true, levels: levelIds(pack), label: charsConfig(pack).label, done:false });
 // Indexed by records taught so far: sets are dynamic, so "set k of n" counts tens of units.
+const lagTaught = (units, prog) => { const r = charRecs(prog); return (units || []).filter(u => hasCharRec(r, u.id)).length; };
+const lagSize = (cfg, units, prog) => cfg.ramp ? rampSizeAt(cfg, lagTaught(units, prog)) : cfg.setSize;
 function lagCharSet(pack, words, units, prog, ids){
   const cfg = charsConfig(pack), all = units || [], recs = charRecs(prog);
-  let list = lagUnits(pack, words, all, prog).slice(0, cfg.setSize);
+  let list = lagUnits(pack, words, all, prog).slice(0, lagSize(cfg, all, prog));
   if(ids){ const by = new Map(all.map(u => [u.id, u])); list = Array.isArray(ids) ? ids.map(id => by.get(id)) : []; if(!list.every(Boolean)) return null; }
   if(!list.length) return null;
   // lv/lvIndex/lvTotal: the same position counted inside the set's lowest level (owner 2026-10-03: "48 of 120" said nothing about where in the characters).
   const idx = levelIndexMap(pack), at = u => idx[String(u.lv)] !== undefined ? idx[String(u.lv)] : Infinity;
   const lv = list.reduce((m, u) => at(u) < at(m) ? u : m, list[0]).lv, inLv = all.filter(u => String(u.lv) === String(lv));
+  if(cfg.ramp){
+    // Level positions walk the same ramp: lower levels' units come first, so a later level never restarts at 3.
+    const below = all.filter(u => at(u) < at({ lv })).length, tIn = inLv.filter(u => hasCharRec(recs, u.id)).length;
+    return { index: rampSetOf(cfg, lagTaught(all, prog)), units: list, total: rampSetsFor(cfg, all.length), ids: list.map(u => u.id),
+      lv, lvIndex: Math.max(0, rampSetsFor(cfg, below + tIn) - rampSetsFor(cfg, below)), lvTotal: rampSetsFor(cfg, below + inLv.length) - rampSetsFor(cfg, below) };
+  }
   return { index: Math.floor(all.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), units: list, total: Math.ceil(all.length / cfg.setSize), ids: list.map(u => u.id),
     lv, lvIndex: Math.floor(inLv.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), lvTotal: Math.ceil(inLv.length / cfg.setSize) };
 }
@@ -3843,7 +3868,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
-  charStageUnits, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
+  charStageUnits, rampSetOf, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,

@@ -142,7 +142,13 @@
   "compose": true,
   "bareBy": "typed",
   "bareWords": true,
-  "learn": "lag"
+  "learn": "lag",
+  "start": 60,
+  "ramp": [
+   3,
+   5,
+   8
+  ]
  },
  "legacy": {
   "key": "hsk_pinyin",
