@@ -17,9 +17,12 @@ const withDayRules = require("./day_rules_patch.js"); // fb10-weak-floor planner
 const ZH = path.join(ROOT, "packs", "zh");
 const PREV = "68930bd"; // main before the per-level Progress rows
 const MAIN = "590af86"; // main before characters.learn (stage model: withWords, order chips, turn)
+const clone0 = x => JSON.parse(JSON.stringify(x));
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
-const PACK = (p => { delete p.pairs; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// fb27: PACK is zh without characters.start / ramp (the rule of sections 1-4 and the control); PACKR is zh as shipped.
+const PACKR = (p => { delete p.pairs; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+const PACK = (p => { delete p.characters.start; delete p.characters.ramp; return p; })(clone0(PACKR));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -403,6 +406,47 @@ try {
     const fresh0 = await bootWith(PACK, null, 1); fresh0.api.goto("progress");
     check("fresh learner: no characters rows (not started)", charRows(fresh0.api.html("panel")).length === 0);
     check("boot + Progress write nothing new: stored chars keys unchanged", Object.keys(JSON.parse(fo.st.ls.getItem(VC.storageKey(PACK))).chars).sort().join() === Object.keys(ownerProg(250).chars).sort().join());
+  }
+
+  console.log("\n[6] characters.start / ramp (fb27)");
+  {
+    const cfg = VC.charsConfig(PACKR);
+    check(`zh ships start ${cfg.start}, ramp ${cfg.ramp}; the stripped pack has neither`, cfg.start === 60 && eq(cfg.ramp, [3, 5, 8]) && VC.charsConfig(PACK).start === undefined && VC.charsConfig(PACK).ramp === undefined);
+    const bad = (k, v) => { const q = clone0(PACKR); q.characters[k] = v; return VC.charsConfig(q); };
+    check("invalid start / ramp are ignored (descending, > setSize, empty, non-integer)", bad("ramp", [5, 3]).ramp === undefined && bad("ramp", [3, 11]).ramp === undefined && bad("ramp", []).ramp === undefined && bad("start", 2.5).start === undefined);
+    check("without learn lag neither is read", (q => { delete q.characters.learn; const c = VC.charsConfig(q); return c.start === undefined && c.ramp === undefined; })(clone0(PACKR)));
+    // Fresh learner: words until 60 learned, then sets of 3, 5, 8, 10, 10 (the lag rule: one current-size set of untaught units).
+    const f = simulate(VC, PACKR, VC.defaultProg(PACKR), 24, true), seq = f.seq;
+    check(`fresh, 24 Learn steps: ${rle(seq)}`, /^W{6}/.test(seq.join("")) && seq[6] === "C");
+    const units = Object.keys(f.prog.chars.c);
+    check(`fresh: chars taught after the sixth words set, ${units.length} units after 24 steps, first in pack order`, eq(units, ORDER.slice(0, units.length).map(u => u.id)));
+    // Set sizes in order, from the simulated records' f is not stored: replay and read each characters step.
+    const q = clone0(VC.defaultProg(PACKR)), got = [];
+    for(let i = 0; i < 24; i++){
+      const st = VC.nextStage(PACKR, WORDS, CHARACTERS, q);
+      if(st.kind === "chars"){ const cs = VC.lagCharSet(PACKR, WORDS, CHARACTERS, q); got.push(cs.units.length); cs.units.forEach(u => { q.chars.c[u.id] = { r: 4, w: 0, s: 3 }; }); }
+      else { const ns = VC.levelNewSet(WORDS, PACKR, q, st.lv); ns.words.forEach(w => { q.w[w.id] = { r: 1, w: 0, s: 1 }; }); VC.settleSetCounter(q, WORDS, PACKR, st.lv); }
+    }
+    check(`character set sizes in order: ${got.join(",")}`, got.slice(0, 4).join() === "3,5,8,10" && got.slice(4).every(n => n === 10 || n > 0));
+    // Mid-ramp learner: 4 taught units continue at a set of 5.
+    const mid = clone0(VC.defaultProg(PACKR)); ["1"].forEach(lv => byLv[lv].slice(0, 70).forEach(w => { mid.w[w.id] = { r: 5, w: 0, s: 5 }; })); mid.sets["1"] = 7;
+    ORDER.slice(0, 4).forEach(u => { mid.chars.c[u.id] = { r: 4, w: 0, s: 3 }; });
+    const ms = VC.lagCharSet(PACKR, WORDS, CHARACTERS, mid);
+    check(`mid-ramp (4 taught): next set has 5 units, labelled set ${ms.index + 1} of ${ms.total}`, ms.units.length === 5 && ms.index === 1);
+    // Below start: words even with a full untaught set.
+    const lo = clone0(VC.defaultProg(PACKR)); byLv["1"].slice(0, 50).forEach(w => { lo.w[w.id] = { r: 5, w: 0, s: 5 }; }); lo.sets["1"] = 5;
+    check("50 words learned, 50 untaught units: Learn teaches words (start 60)", VC.nextStage(PACKR, WORDS, CHARACTERS, lo).kind === "words");
+    // Owner export: first Learn decision identical with and without the ramp.
+    const EXP = "/Users/ishmum/.claude/uploads/9e41e879-e4d7-4530-b040-c9be1286edd7/a48ee4d3-vocab_zh_progress_8.json";
+    if(fs.existsSync(EXP)){
+      const raw = JSON.parse(fs.readFileSync(EXP, "utf8")), pr = VC.normalizeProg(raw, PACKR), pr0 = VC.normalizeProg(raw, PACK);
+      const a = VC.nextStage(PACKR, WORDS, CHARACTERS, pr), b = VC.nextStage(PACK, WORDS, CHARACTERS, pr0);
+      const ca = a.kind === "chars" ? VC.lagCharSet(PACKR, WORDS, CHARACTERS, pr) : null, cb = b.kind === "chars" ? VC.lagCharSet(PACK, WORDS, CHARACTERS, pr0) : null;
+      check(`owner export (${Object.keys(pr.w).length} word records, ${Object.keys(pr.chars.c).length} units): first Learn ${a.kind}, same units with and without the ramp (label: set ${ca && cb ? `${cb.lvIndex + 1} of ${cb.lvTotal} -> ${ca.lvIndex + 1} of ${ca.lvTotal}` : "-"})`,
+        a.kind === b.kind && (!ca || eq(ca.ids, cb.ids)));
+    } else console.log("  skip: owner export not found");
+    // Set label under the ramp: whole-pack total counts 3, 5, 8, then tens.
+    check(`label total: ${VC.lagCharSet(PACKR, WORDS, CHARACTERS, mid).total} sets (3+5+8 then tens over ${CHARACTERS.length} units)`, VC.lagCharSet(PACKR, WORDS, CHARACTERS, mid).total === 3 + Math.ceil((CHARACTERS.length - 16) / 10));
   }
 
   console.log(`\n${passes} passed, ${fails} failed`);

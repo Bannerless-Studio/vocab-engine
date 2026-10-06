@@ -189,7 +189,9 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
   check("爬山 is peripheral, 虽然 core", tierOf(BY_W["爬山"]) === 2 && tierOf(BY_W["虽然"]) === 1);
   check("every word has ft 0/1/2 and its zipf in tools/zh_freq.json", WORDS.every(w => [0, 1, 2].includes(w.ft) && typeof ZIPF[w.w] === "number"));
   check("each level in zipf order, descending", VC.levelIds(PACK).every(lv => byLv[lv].every((w, i, l) => !i || ZIPF[l[i - 1].w] >= ZIPF[w.w])));
-  check("peripheral words are the lowest-zipf non-ambient words of their level", VC.levelIds(PACK).every(lv => { const l = byLv[lv]; const p = l.filter(w => tierOf(w) === 2), c = l.filter(w => tierOf(w) === 1); return !p.length || !c.length || Math.max(...p.map(w => ZIPF[w.w])) <= Math.min(...c.map(w => ZIPF[w.w])); }));
+  const OVR = JSON.parse(fs.readFileSync(path.join(ROOT, "tools", "zh_tiers_overrides.json"), "utf8")).tiers || {}, TN = { ambient: 0, core: 1, peripheral: 2 };
+  check(`overrides applied (${Object.entries(OVR).map(([w, t]) => w + " " + t).join(", ")})`, Object.entries(OVR).every(([w, t]) => BY_W[w] && tierOf(BY_W[w]) === TN[t]));
+  check("peripheral words are the lowest-zipf non-ambient words of their level (overridden words aside)", VC.levelIds(PACK).every(lv => { const l = byLv[lv].filter(w => !(w.w in OVR)); const p = l.filter(w => tierOf(w) === 2), c = l.filter(w => tierOf(w) === 1); return !p.length || !c.length || Math.max(...p.map(w => ZIPF[w.w])) <= Math.min(...c.map(w => ZIPF[w.w])); }));
   if(!OLD_WORDS) skip(`packs/zh/words.js at ${MAIN} not in this checkout's history`);
   else {
     const ow = Object.fromEntries(OLD_WORDS.map(w => [w.id, w]));
