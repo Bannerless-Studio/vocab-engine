@@ -1083,16 +1083,22 @@ function provPick(list, n, wrecs){
 // exports and seeds carry sets without word records, and `d` (drilled ahead of the counter)
 // says nothing about the counter's own prefix.
 const taughtRec = (r, w) => !!(r[w.id] && !r[w.id].d);
-function levelLearned(list, sets, size, recs){
+// pack.freqTiers reorders each level by frequency, but every stored counter was written against
+// the earlier order, which is id order (ids are append-only and were assigned in it), so a
+// counter prefix is read in id order (docs/PACK_SCHEMA.md "freqTiers").
+function counterOrder(list, pack){
+  return freqTiersOn(pack) ? list.slice().sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0) : list;
+}
+function levelLearned(list, sets, size, recs, pack){
   const r = recs || {};
   if(list.some(w => taughtRec(r, w))) return list.filter(w => r[w.id]);
-  const pre = list.slice(0, (sets||0)*size); const seen = new Set(pre.map(w => w.id));
+  const pre = counterOrder(list, pack).slice(0, (sets||0)*size); const seen = new Set(pre.map(w => w.id));
   return pre.concat(list.filter(w => !seen.has(w.id) && r[w.id]));
 }
 function learnedWords(words, pack, prog){
   const size = setSizeOf(pack); const byLv = wordsByLevel(words, pack);
   const out = [];
-  levelIds(pack).forEach(lv=>{ out.push(...levelLearned(byLv[lv], (prog.sets||{})[lv], size, prog.w)); });
+  levelIds(pack).forEach(lv=>{ out.push(...levelLearned(byLv[lv], (prog.sets||{})[lv], size, prog.w, pack)); });
   return out;
 }
 // `set` names the set that holds fresh[0] by its position in the level's list (rank order),
@@ -1101,9 +1107,12 @@ function learnedWords(words, pack, prog){
 function levelNewSet(words, pack, prog, lv){
   const size = setSizeOf(pack); const list = wordsByLevel(words, pack)[lv] || [];
   const done = (prog.sets||{})[lv]||0;
-  const got = new Set(levelLearned(list, done, size, prog.w).map(w => w.id));
+  const got = new Set(levelLearned(list, done, size, prog.w, pack).map(w => w.id));
   const fresh = list.filter(w => !got.has(w.id)).slice(0, size);
   if(!fresh.length) return null;
+  // Under pack.freqTiers learned words sit anywhere in the frequency order (taught under the
+  // earlier order), so the set is the count of sets already learned.
+  if(freqTiersOn(pack)) return { lv, set: Math.min(Math.floor(got.size / size), nSets(list, size) - 1), words: fresh };
   const idx = list.findIndex(w => w.id === fresh[0].id);
   return { lv, set: Math.floor((idx < 0 ? 0 : idx) / size), words: fresh };
 }
@@ -1116,7 +1125,8 @@ function settleSetCounter(prog, words, pack, lv){
   if(!levelNewSet(words, pack, prog, lv)) return (prog.sets[lv] = n);
   const r = prog.w || {};
   let lead = 0;
-  while(lead < n && list.slice(lead*size, (lead+1)*size).every(w => r[w.id])) lead++;
+  if(freqTiersOn(pack)) lead = Math.min(n, Math.floor(list.filter(w => r[w.id]).length / size));
+  else while(lead < n && list.slice(lead*size, (lead+1)*size).every(w => r[w.id])) lead++;
   return (prog.sets[lv] = Math.max(Math.min(prog.sets[lv] || 0, n), lead));
 }
 function nextNewSet(words, pack, prog){
@@ -1134,7 +1144,7 @@ function pinPrefixRecords(prog, words, pack, lv, counters){
   (lv === undefined ? levelIds(pack) : [String(lv)]).forEach(id => {
     const list = byLv[id] || [];
     if(list.some(w => taughtRec(prog.w, w))) return;
-    list.slice(0, (sets[id]||0)*size).forEach(w => { if(!prog.w[w.id]) prog.w[w.id] = {r:1,w:0,s:1,prov:1}; });
+    counterOrder(list, pack).slice(0, (sets[id]||0)*size).forEach(w => { if(!prog.w[w.id]) prog.w[w.id] = {r:1,w:0,s:1,prov:1}; });
   });
   return prog;
 }
@@ -1539,7 +1549,7 @@ const dayCharCand = (prog, pack, kinds, typedUnits) => { const cfg = charsConfig
 function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng, can, o){
   const d = dayLog(prog, today); const sent = keyPrefix === "s:";
   // pack.pairs: words by their pairs (Listen: sound <-> meaning); sentences keep dayPick.
-  if(pairsOn(pack) && keyPrefix === "w:") return pairPick((list || []).map(x => pairWordCand(prog, typeof kinds === "function" ? kinds(x) : kinds, can)(x)), n, d, rng, daySn(prog), pack, o || {}).map(e => e.c.x);
+  if(pairsOn(pack) && keyPrefix === "w:") return pairPick((list || []).map(x => pairWordCand(prog, typeof kinds === "function" ? kinds(x) : kinds, can, pack)(x)), n, d, rng, daySn(prog), pack, o || {}).map(e => e.c.x);
   const recs = (sent ? prog.s : prog.w) || {};
   const cands = (list || []).map(x => { const c = can ? can(x) : undefined; return { x, key: keyPrefix + x.id, rec: recs[x.id], mastered: sent ? SENTENCE_MASTERED : WORD_MASTERED, kinds: dayCanKinds(typeof kinds === "function" ? kinds(x) : kinds, c), can: c }; });
   return dayPick(cands, n, d, rng, daySn(prog)).map(c => c.x);
@@ -1592,6 +1602,28 @@ const PAIRS = ["wm", "sm", "ws"];
 // the 0.2 first planned: at 0.2 words reaching known per week fell below main (fb23 measure, owner export).
 const PAIR_KNOWN = 3, PAIR_HOLD = 2, PAIR_REFRESH = 0.1;
 function pairsOn(pack){ return !!(pack && pack.pairs === true) && dayAwareOn(pack); }
+// pack.freqTiers (docs/PACK_SCHEMA.md "freqTiers"; owner 2026-10-06: "give more priority to words that
+// come up more in real life and the exam ... mastery requirements as well", then "why not typed asks
+// but much less frequent?"): words.json ft sets how often a word is practised and its known bar; pair
+// and unit mechanics are the same for every tier. Ambient (0, the pack's ~100 commonest words): every
+// sentence and passage rehearses them, so a known pair gets no refresh ask. Core (1): the pairs rules.
+// Peripheral (2): no typed-first priority at equal streak, no held boot, refresh age counts half (one
+// refresh slot every other plan, odd session ordinal, for the oldest known peripheral pair), known
+// at PAIR_HOLD, its unit done for Progress at mastered (it still reaches bare by typed credit).
+const FT_AMBIENT = 0, FT_CORE = 1, FT_PERIPHERAL = 2;
+const ftOf = v => v === FT_AMBIENT || v === FT_CORE || v === FT_PERIPHERAL ? v : FT_CORE;
+function freqTiersOn(pack){ return !!(pack && pack.freqTiers === true) && pairsOn(pack); }
+function wordTier(word, pack){ return freqTiersOn(pack) && word ? ftOf(word.ft) : FT_CORE; }
+// A unit shared by words of different tiers takes the highest-demand one (lowest ft). words: a Map,
+// an array or an object by id; without it the unit's own ft (the generator writes that minimum, so
+// planners need no word lookup).
+function unitTier(unit, words, pack){
+  if(!freqTiersOn(pack) || !unit) return FT_CORE;
+  const look = id => words instanceof Map ? words.get(id) : Array.isArray(words) ? words.find(w => w && w.id === id) : words ? words[id] : undefined;
+  const ts = words ? (unit.words || []).map(look).filter(Boolean).map(w => wordTier(w, pack)) : [];
+  return ts.length ? Math.min(...ts) : ftOf(unit.ft);
+}
+const knownBarAt = tier => tier === FT_PERIPHERAL ? PAIR_HOLD : PAIR_KNOWN;
 // A cloze ("gap", "gapType") asks its blanked word meaning -> written.
 const PAIR_OF_KIND = { read: "wm", recall: "wm", hear: "sm", gap: "wm", gapType: "wm", charRead: "wm", charRecall: "wm", charSound: "ws", charPick: "ws" };
 const PAIR_OF_TYPED = { word: "wm", written: "wm", writtenMeaning: "wm", pron: "sm", pronMeaning: "sm", writtenPron: "ws" };
@@ -1616,7 +1648,9 @@ function pairState(rec, pair, held){
 // One answer in a pair. s0: the record's streak before this answer, held as pairState (the start of
 // a pair never answered). A miss sets the pair to 0; a right answer adds one, a choice answer only up
 // to PAIR_HOLD; a pair already answered this session (sn) gains nothing more (the in-drill retry).
-function notePair(rec, pair, ok, prod, sn, s0, held){
+// tier (freqTiers): a peripheral unit boots without the held exception, as pairCharCand plans it.
+function notePair(rec, pair, ok, prod, sn, s0, held, tier){
+  if(tier === FT_PERIPHERAL) held = undefined;
   if(!isObj(rec) || !PAIRS.includes(pair)) return false;
   const e = isObj(rec.p) ? pairEntry(rec.p[pair]) : null;
   const s = e ? e[0] : pairBoot(typeof s0 === "number" ? s0 : 0, held);
@@ -1625,6 +1659,38 @@ function notePair(rec, pair, ok, prod, sn, s0, held){
   if(!isObj(rec.p)) rec.p = {};
   rec.p[pair] = [ns, sn > 0 ? sn : 0];
   return true;
+}
+// freqTiers: the pairs a word's "known" reads, device-independent: wm always; sm when the pack can
+// voice the word (TTS or a clip); ws when a typed kind of ws fits the written word (a typed written ->
+// reading kind; a word has no ws choice kind). A pair never answered reads its boot (the
+// legacy streak), as the scheduler does, so a word at legacy WORD_MASTERED+ stays known until a miss.
+function wordPairs(word, pack){
+  const out = ["wm"];
+  if(word && (pack.tts || pack.audio || word.audio)) out.push("sm");
+  if(word && pairTypedKinds(pack, "ws").some(k => typedKindOk(k, word, true))) out.push("ws");
+  return out;
+}
+// "Known" (Progress, goals, progress map, prov): without freqTiers the legacy streak; with it every
+// pair of wordPairs at its tier's bar (knownBarAt: peripheral 2, else PAIR_KNOWN). wordsBy holds and optsMix stages keep the
+// legacy streak.
+function wordKnown(rec, word, pack){
+  if(!freqTiersOn(pack)) return !!rec && (rec.s || 0) >= WORD_MASTERED;
+  if(!isObj(rec)) return false;
+  const k = knownBarAt(wordTier(word, pack));
+  return wordPairs(word, pack).every(p => pairState(rec, p).s >= k);
+}
+// A placement word stays provisional (kept in review) until known; markRec drops prov at the legacy
+// streak, this drops it at known under freqTiers (app.html markWord, after the pair is noted).
+function settleProv(rec, word, pack){
+  if(!freqTiersOn(pack) || !isObj(rec) || !rec.prov || !wordKnown(rec, word, pack)) return false;
+  delete rec.prov; return true;
+}
+// A unit counts as done at bare; under freqTiers a peripheral unit at mastered (it still reaches bare
+// by the same typed credit, only less often asked).
+function unitDone(rec, unit, pack, words){
+  if(!isObj(rec)) return false;
+  const t = charTier(rec.s || 0, pack);
+  return unitTier(unit, words, pack) === FT_PERIPHERAL ? t !== "pron" : t === "bare";
 }
 // The pairs a candidate can be asked in here: its planner kinds (c.kinds, cut to what the device can
 // show) grouped by pair; "type" joins every pair one of its typed kinds fits (c.tw: the word typed;
@@ -1669,33 +1735,43 @@ function pairPick(cands, n, d, rng, sn, pack, o){
       const st = pairState(c.rec, pair, c.held);
       if(!st.boot && psn > 0 && st.a === psn) return;
       const kind = pairKind(po[pair], st.s, mk); if(!kind) return;
-      (st.s >= PAIR_KNOWN ? hi : lo).push({ c, pair, kind, s: st.s, a: st.a, j: r() });
+      // freqTiers: a known pair of an ambient item gets no refresh ask; a peripheral one's age counts half.
+      const known = st.s >= PAIR_KNOWN; if(known && c.tier === FT_AMBIENT) return;
+      (known ? hi : lo).push({ c, pair, kind, s: st.s, a: st.a, ra: c.tier === FT_PERIPHERAL ? (st.a + sn) / 2 : st.a, j: r() });
     });
   });
-  lo.sort((x, y) => x.s - y.s || (y.kind === "type") - (x.kind === "type") || (x.c.t === "c") - (y.c.t === "c") || x.a - y.a || x.j - y.j);
-  hi.sort((x, y) => x.a - y.a || x.j - y.j);
+  // freqTiers: a peripheral typed ask gets no typed-first priority (asked typed only when drawn anyway).
+  const tf = e => e.kind === "type" && e.c.tier !== FT_PERIPHERAL;
+  lo.sort((x, y) => x.s - y.s || tf(y) - tf(x) || (x.c.t === "c") - (y.c.t === "c") || x.a - y.a || x.j - y.j);
+  hi.sort((x, y) => x.ra - y.ra || x.j - y.j);
   const out = [], seen = new Set();
   const alias = e => e.kind === "type" && e.c.t === "c" && e.c.tw ? "w:" + e.c.tw.id : null;
   const take = (list, upto) => { for(let i = 0; i < list.length && out.length < upto; i++){ const e = list[i]; if(!e) continue;
     const al = alias(e); if(seen.has(e.c.key) || (al && seen.has(al))) continue;
     seen.add(e.c.key); if(al) seen.add(al); out.push(e); list[i] = null; } };
   const rk = Math.min(Math.ceil(n * PAIR_REFRESH), new Set(hi.map(e => e.c.key)).size);
-  take(lo, n - rk); take(hi, n); take(lo, n);
+  take(lo, n - rk);
+  // freqTiers (owner 2026-10-06/07): on every other plan (odd session ordinal; no storage) one refresh
+  // slot goes to the oldest known peripheral pair (halved age), so peripheral items keep a trickle while
+  // older core pairs fill the rest of the share; on even plans the share fills by age alone.
+  if(rk >= 1 && psn % 2 === 1){ const i = hi.findIndex(e => e && e.c.tier === FT_PERIPHERAL && !seen.has(e.c.key) && !(alias(e) && seen.has(alias(e))));
+    if(i > 0) hi.unshift(hi.splice(i, 1)[0]); }
+  take(hi, n); take(lo, n);
   return out;
 }
-const pairWordCand = (prog, kinds, wordCan) => w => { const can = wordCan ? wordCan(w) : undefined; return { t: "w", x: w, key: "w:" + w.id, rec: (prog.w || {})[w.id], kinds: dayCanKinds(kinds, can), can, tw: w }; };
+const pairWordCand = (prog, kinds, wordCan, pack) => w => { const can = wordCan ? wordCan(w) : undefined; return { t: "w", x: w, key: "w:" + w.id, rec: (prog.w || {})[w.id], kinds: dayCanKinds(kinds, can), can, tw: w, tier: wordTier(w, pack) }; };
 // A unit is typed (as its word, written-side kinds) only while typedUnitDue: from mastered to bare.
 const pairCharCand = (prog, pack, kinds, typedUnits) => { const recs = charRecs(prog);
-  const held = pairUnitHeld(pack);
-  return u => { const tw = typedUnitDue(u, prog, pack, typedUnits) ? typedUnits.get(u.id) : null;
-    return Object.assign({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], kinds, held }, tw ? { kinds: [...kinds, "type"], tw, twRec: (prog.w || {})[tw.id], typedOnly: TYPED_WRITTEN_KINDS } : {}); }; };
+  const hd = pairUnitHeld(pack);
+  return u => { const tw = typedUnitDue(u, prog, pack, typedUnits) ? typedUnits.get(u.id) : null, tier = unitTier(u, null, pack);
+    return Object.assign({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], kinds, held: tier === FT_PERIPHERAL ? undefined : hd, tier }, tw ? { kinds: [...kinds, "type"], tw, twRec: (prog.w || {})[tw.id], typedOnly: TYPED_WRITTEN_KINDS } : {}); }; };
 // A unit's typed ask types its word (tu); pair tells the app which typed kinds belong to the item.
 const pairPlanItem = e => e.c.t === "w" ? { kind: e.kind, word: e.c.x, pair: e.pair }
   : e.kind === "type" ? { kind: "type", word: e.c.tw, tu: e.c.x.id, pair: e.pair } : { kind: e.kind, unit: e.c.x, pair: e.pair };
 // Review and Recall under pack.pairs. o.extra (pauseNew) is ignored: a paused Review stays at n items.
 function pairPlan(learned, prog, pack, n, o, wk, ck){
   const d = dayLog(prog, o.today), sn = daySn(prog), wc = dayWordCan(pack, o.canHear);
-  const cands = [...(learned || []).map(pairWordCand(prog, wk, wc)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
+  const cands = [...(learned || []).map(pairWordCand(prog, wk, wc, pack)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
   // Owner 2026-10-06: a paused session's 40-item Review is too long to keep focus and remember mistakes,
   // so under pairs the pauseNew growth (o.extra) is ignored and Review keeps its normal size.
   const pool = shuffle(pairPick(cands, n, d, o.rng, sn, pack, o), o.rng);
@@ -2129,11 +2205,11 @@ function progressMapOn(pack){ return !!(pack && (pack.progressMap === true || pr
 function progressPosition(prog, pack, words, units, passages){
   const ws = words || [], us = units || [], ps = passages || [];
   const recs = (prog && isObj(prog.w)) ? prog.w : {};
-  const known = ws.filter(w => recs[w.id] && (recs[w.id].s || 0) >= WORD_MASTERED).length;
+  const known = ws.filter(w => wordKnown(recs[w.id], w, pack)).length;
   let wu = us.length ? 0.25 : 0, wp = ps.length ? 0.25 : 0;
   const ww = 1 - wu - wp;
   let x = ws.length ? ww * known / ws.length : 0;
-  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && charTier(cr[u.id].s, pack) === "bare").length / us.length; }
+  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (freqTiersOn(pack) ? unitDone(cr[u.id], u, pack) : charTier(cr[u.id].s, pack) === "bare")).length / us.length; }
   if(ps.length){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
   return Math.max(0, Math.min(1, x));
 }
@@ -2148,7 +2224,7 @@ function goalPosition(prog, pack, goal, words, units, passages){
   const us = (units || []).filter(u => inR(u.lv !== undefined ? u.lv : (byId[(u.words || [])[0]] || {}).lv));
   const ps = (passages || []).filter(p => inR(p.lv));
   const recs = (prog && isObj(prog.w)) ? prog.w : {};
-  const known = ws.filter(w => recs[w.id] && (recs[w.id].s || 0) >= WORD_MASTERED).length;
+  const known = ws.filter(w => wordKnown(recs[w.id], w, pack)).length;
   const wu = us.length ? 0.2 : 0, wp = ps.length ? 0.2 : 0;
   let x = ws.length ? (1 - wu - wp) * known / ws.length : 0;
   if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && charTier(cr[u.id].s, pack) !== "pron").length / us.length; }
@@ -2255,15 +2331,41 @@ function lagRamp(c, size){
   if(Array.isArray(c.ramp) && c.ramp.length && c.ramp.every((x, i) => Number.isInteger(x) && x >= 1 && x <= size && (!i || x >= c.ramp[i - 1]))) o.ramp = c.ramp.slice();
   return o;
 }
-// Ramp position by units taught so far (no counter stored): sets are ramp[0], ramp[1], ..., then setSize.
+// Ramp (fb27). Sets never straddle a level: the ramp walks the learner's global unit count only until
+// it is finished (rampSetOf / rampEnd); inside a level, sets are chunks of the level's units in pack
+// order, the last one possibly short. A level that starts at or after the ramp end is plain setSize chunks.
 function rampSetOf(cfg, taught){
   if(!cfg.ramp) return Math.floor(taught / cfg.setSize);
   let sum = 0;
   for(let k = 0; k < cfg.ramp.length; k++){ sum += cfg.ramp[k]; if(taught < sum) return k; }
   return cfg.ramp.length + Math.floor((taught - sum) / cfg.setSize);
 }
-const rampSizeAt = (cfg, taught) => cfg.ramp ? (rampSetOf(cfg, taught) < cfg.ramp.length ? cfg.ramp[rampSetOf(cfg, taught)] : cfg.setSize) : cfg.setSize;
-const rampSetsFor = (cfg, n) => cfg.ramp ? (n <= 0 ? 0 : rampSetOf(cfg, n - 1) + 1) : Math.ceil(n / cfg.setSize);
+const rampEnd = cfg => cfg.ramp.reduce((a, b) => a + b, 0);
+// Chunk sizes of one level with `below` units before it and `n` of its own; they sum to n.
+function levelChunks(cfg, below, n){
+  const sizes = []; let pos = 0, g = below, end = 0;
+  for(let k = 0; k < cfg.ramp.length && pos < n; k++){
+    end += cfg.ramp[k];
+    if(end > g){ const sz = Math.min(end - g, n - pos); sizes.push(sz); pos += sz; g += sz; }
+  }
+  while(pos < n){ const sz = Math.min(cfg.setSize, n - pos); sizes.push(sz); pos += sz; }
+  return sizes;
+}
+// Per level (pack order) { lv, below, n, sizes }, plus the number of sets before each.
+function rampPlan(cfg, pack, units){
+  const idx = levelIndexMap(pack), by = new Map();
+  (units || []).forEach(u => by.set(String(u.lv), (by.get(String(u.lv)) || 0) + 1));
+  const lvs = [...by.keys()].sort((x, y) => (idx[x] !== undefined ? idx[x] : Infinity) - (idx[y] !== undefined ? idx[y] : Infinity));
+  let below = 0, sets = 0;
+  const plan = lvs.map(lv => { const n = by.get(lv), sizes = levelChunks(cfg, below, n), o = { lv, below, n, sizes, setsBefore: sets }; below += n; sets += sizes.length; return o; });
+  return { plan, total: sets };
+}
+// Set containing local position `taught` of a level: { k, size } (size capped by what is left), or null when the level is done.
+function chunkAt(sizes, taught){
+  let c = 0;
+  for(let k = 0; k < sizes.length; k++){ c += sizes[k]; if(taught < c) return { k, size: sizes[k] }; }
+  return null;
+}
 // Default mix is the predecessor app's.
 const CHAR_TEST_KINDS = { charRead:40, charSound:30, charPick:30 };
 function testKinds(tk, kinds, def){
@@ -2461,28 +2563,50 @@ function nextStage(pack, words, units, prog, sunits){
 const lagOn = pack => { const c = charsConfig(pack); return !!(c && c.learn === "lag"); };
 function lagUnits(pack, words, units, prog){ return newCharUnits(units, learnedWords(words, pack, prog || {}), prog, pack, Infinity); }
 function lagStage(pack, words, units, prog, path){
-  const cfg = charsConfig(pack), n = lagUnits(pack, words, units, prog).length;
+  const cfg = charsConfig(pack), el = lagUnits(pack, words, units, prog);
   const w = (path || stagePath(pack, words, units, prog)).find(s => s.kind === "words" && !s.done) || null;
   if(cfg.start && w && learnedWords(words, pack, prog || {}).length < cfg.start) return w;
-  return n >= lagSize(cfg, units, prog) || (n && !w) ? lagCharStage(pack) : w;
+  const n = cfg.ramp ? lagLevelUnits(pack, el).length : el.length;
+  return n >= lagSize(cfg, units, prog, pack, el) || (n && !w) ? lagCharStage(pack) : w;
 }
 const lagCharStage = pack => ({ kind:"chars", key:"lag", lag:true, levels: levelIds(pack), label: charsConfig(pack).label, done:false });
 // Indexed by records taught so far: sets are dynamic, so "set k of n" counts tens of units.
 const lagTaught = (units, prog) => { const r = charRecs(prog); return (units || []).filter(u => hasCharRec(r, u.id)).length; };
-const lagSize = (cfg, units, prog) => cfg.ramp ? rampSizeAt(cfg, lagTaught(units, prog)) : cfg.setSize;
+// Under a ramp the eligible units of the lowest level only (a set never straddles a level).
+function lagLevelUnits(pack, el){
+  if(!el.length) return el;
+  const idx = levelIndexMap(pack), at = u => idx[String(u.lv)] !== undefined ? idx[String(u.lv)] : Infinity;
+  const lv = el.reduce((m, u) => at(u) < at(m) ? u : m, el[0]).lv;
+  return el.filter(u => String(u.lv) === String(lv));
+}
+// Where the next ramp set sits: its level, level-local set number, size, and the plan.
+function lagRampPos(cfg, pack, units, prog, el){
+  const first = lagLevelUnits(pack, el);
+  if(!first.length) return null;
+  const lv = String(first[0].lv), rp = rampPlan(cfg, pack, units), lp = rp.plan.find(x => x.lv === lv), recs = charRecs(prog);
+  const tIn = (units || []).filter(u => String(u.lv) === lv && hasCharRec(recs, u.id)).length;
+  const c = chunkAt(lp.sizes, tIn);
+  return c ? { lv, lp, rp, k: c.k, size: Math.min(c.size, lp.n - tIn) } : { lv, lp, rp, k: lp.sizes.length - 1, size: 0 };
+}
+function lagSize(cfg, units, prog, pack, el){
+  if(!cfg.ramp) return cfg.setSize;
+  const pos = lagRampPos(cfg, pack, units, prog, el);
+  return pos ? pos.size : cfg.setSize;
+}
 function lagCharSet(pack, words, units, prog, ids){
   const cfg = charsConfig(pack), all = units || [], recs = charRecs(prog);
-  let list = lagUnits(pack, words, all, prog).slice(0, lagSize(cfg, all, prog));
+  const el = lagUnits(pack, words, all, prog);
+  let list = cfg.ramp ? lagLevelUnits(pack, el).slice(0, lagSize(cfg, all, prog, pack, el)) : el.slice(0, lagSize(cfg, all, prog));
   if(ids){ const by = new Map(all.map(u => [u.id, u])); list = Array.isArray(ids) ? ids.map(id => by.get(id)) : []; if(!list.every(Boolean)) return null; }
   if(!list.length) return null;
   // lv/lvIndex/lvTotal: the same position counted inside the set's lowest level (owner 2026-10-03: "48 of 120" said nothing about where in the characters).
   const idx = levelIndexMap(pack), at = u => idx[String(u.lv)] !== undefined ? idx[String(u.lv)] : Infinity;
   const lv = list.reduce((m, u) => at(u) < at(m) ? u : m, list[0]).lv, inLv = all.filter(u => String(u.lv) === String(lv));
   if(cfg.ramp){
-    // Level positions walk the same ramp: lower levels' units come first, so a later level never restarts at 3.
-    const below = all.filter(u => at(u) < at({ lv })).length, tIn = inLv.filter(u => hasCharRec(recs, u.id)).length;
-    return { index: rampSetOf(cfg, lagTaught(all, prog)), units: list, total: rampSetsFor(cfg, all.length), ids: list.map(u => u.id),
-      lv, lvIndex: Math.max(0, rampSetsFor(cfg, below + tIn) - rampSetsFor(cfg, below)), lvTotal: rampSetsFor(cfg, below + inLv.length) - rampSetsFor(cfg, below) };
+    // Sets never straddle a level; the ramp applies to the global count only while it runs (levelChunks).
+    const rp = rampPlan(cfg, pack, all), lp = rp.plan.find(x => x.lv === String(lv)), tIn = inLv.filter(u => hasCharRec(recs, u.id)).length;
+    const c = chunkAt(lp.sizes, tIn), k = c ? c.k : lp.sizes.length - 1;
+    return { index: lp.setsBefore + k, units: list, total: rp.total, ids: list.map(u => u.id), lv, lvIndex: k, lvTotal: lp.sizes.length };
   }
   return { index: Math.floor(all.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), units: list, total: Math.ceil(all.length / cfg.setSize), ids: list.map(u => u.id),
     lv, lvIndex: Math.floor(inLv.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), lvTotal: Math.ceil(inLv.length / cfg.setSize) };
@@ -3859,16 +3983,17 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
+  FT_AMBIENT, FT_CORE, FT_PERIPHERAL, freqTiersOn, wordTier, unitTier, knownBarAt, wordPairs, wordKnown, settleProv, unitDone,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairsOn, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
-  markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
-  charStageUnits, rampSetOf, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
+  charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,

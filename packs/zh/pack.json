@@ -178,5 +178,6 @@
    }
   ]
  },
- "pairs": true
+ "pairs": true,
+ "freqTiers": true
 }

@@ -45,12 +45,12 @@ Why it is built this way (one line each):
 
 ## Commands (pinned)
 
-Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-05, branch fb23-pairs (on main c26a9d4).
+Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-06, branch fb26-freq-tiers (main a20398c merged in).
 
 ```sh
 $NODE tests/engine_checks.js                     # 704 passed; includes the dist/zh.html + sw.js stale guard and the packs/zh generator drift check from an empty dir (needs ../chinese)
 $NODE tests/pron_aids_checks.js                  # 158
-$NODE tests/migration_checks.js                  # 421 (hsk_pinyin -> vocab_zh; uses ../chinese when present; [bare5] zh bare 6 -> 5; [rotation-s] read.done s/ls; [wordsBy] records read on a8e9c08; [progressMap] prog.pm both directions vs a2f2426; fb22 entries with g vs a2f2426 and 2412992; [f] records with f boot on 2412992 unchanged and back; [pairs] records with p boot on 2412992 and 3901e2e unchanged)
+$NODE tests/migration_checks.js                  # 426 (hsk_pinyin -> vocab_zh; uses ../chinese when present; [bare5] zh bare 6 -> 5; [rotation-s] read.done s/ls; [wordsBy] records read on a8e9c08; [progressMap] prog.pm both directions vs a2f2426; fb22 entries with g vs a2f2426 and 2412992; [f] records with f boot on 2412992 unchanged and back; [pairs] records with p boot on 2412992 and 3901e2e unchanged; [freqTiers] no new field, records written under the flag boot on b21ee93 and 2412992 byte-equal and back)
 $NODE tests/characters_checks.js                 # 134
 $NODE tests/characters_app_checks.js             # 211 (Math.random seeded: Placement walk deterministic; hint pinyin tone colours)
 $NODE tests/script_checks.js                     # 128
@@ -67,9 +67,10 @@ $NODE tests/typed_mastery_checks.js              # 81 (characters.bareBy typed c
 $NODE tests/words_typed_checks.js                # 57 (pack.wordsBy typed: streak table, flag-off markRec + two-session app control vs a8e9c08, held words planned typed + held share, one typed ask per session (replay recall, session record today.tw across a reload), no in-drill retry credit, untypable words keep the old rule)
 $NODE tests/progress_map_checks.js              # 94 (pack.progressMap: whole-pack bar (true) position, prog.pm cap 14, sessionsToGo; goals ladder: goalPosition per level range, 90% switch, last-goal clamp, pm g window, Today row, Progress Goals block, session writes g, owner export; flag-off control vs a2f2426, progressMap true vs 2412992)
 $NODE tests/pairs_checks.js                      # 49 (pack.pairs: validator, kind -> pair table, pair streak table, bootstrap from the legacy streak, scheduler order, flag-off plans + two-session app walk vs 3901e2e, three Today sessions on the owner export; reads PAIRS_OWNER or ../chinese/.cache/owner-progress.json, read-only)
-$NODE tests/lag_checks.js                        # 55 (characters.start / ramp: fresh 60-word start then sets 3,5,8,10, mid-ramp 4 taught -> 5, owner export same units; characters.learn "lag": core rule, owner shape before/after, per-level set label (Today row + card header, straddling set, resume), app sessions, resume, per-level Progress rows vs 68930bd, control vs 590af86)
+$NODE tests/freq_tiers_checks.js                 # 79 (pack.freqTiers: validator, generated tiers + shares + zipf order, same pair mechanics, typed-first / held boot / refresh / known per tier, unit tier + target, owner-export Learn order (nothing re-taught) + counters in id order, flag-off control + two-session app walk vs ff760d8, three Today sessions, Words tab sets numbered by count; owner export read-only)
+$NODE tests/lag_checks.js                        # 62 (characters.start / ramp: fresh 60-word start then sets 3,5,8,10, mid-ramp 4 taught -> 5, owner export same units, sets never straddle a level (HSK 3 set 30 of 30 -> HSK 4 set 1 of 60), short last set; characters.learn "lag": core rule, owner shape before/after, per-level set label (Today row + card header, straddling set, resume), app sessions, resume, per-level Progress rows vs 68930bd, control vs 590af86)
 $NODE tests/pause_checks.js                      # 49 (pack.pauseNew: flag-off / unpaused control vs 36aee02, chip, paused sessions teach nothing, Review +Learn items, toggling mid-session)
-$NODE tests/opts_mix_checks.js                  # 50 (pack.optsMix: records carry f (session learned), buckets by f, rotation by sn, charSound by syllables [4]; length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
+$NODE tests/opts_mix_checks.js                  # 50, 49 + 1 known FAIL on zh (weak-unit repeat bound; also fails on main; fb26 report) (pack.optsMix: records carry f (session learned), buckets by f, rotation by sn, charSound by syllables [4]; length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
 $NODE tests/session_resume_checks.js             # 125 (drill/passage resume: tab switch, reload, relaunch, per-tab parking; readRotation Read pick + question order, rd without qx; listening look-back list + text state; an old record with reopened/peekText resumes)
 $NODE tests/day_sim_checks.js                    # 77 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; weak-word floor + production settles, owner-shape before/after vs fb49c1b; --why)
 $NODE tests/help_close_checks.js                 # 42 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
@@ -84,7 +85,8 @@ python3 tools/validate_pack.py packs/zh          # schema + referential integrit
 .venv/bin/python -m pytest tools/packbuilder/tests
 python3 -m unittest discover -s tools/packbuilder/tests -t tools   # same suite, stdlib runner
 (cd tools && python3 -m packbuilder audio --lang fa --repo ../../persian --check)   # recorded-audio status of a repo
-python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the hsk data (idempotent)
+python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the hsk data (idempotent; reads tools/zh_freq.json)
+.venv/bin/python tools/zh_freq.py [../chinese] [--check]   # zipf table for freqTiers (pip install wordfreq==3.1.1 into .venv)
 .cache/venv/bin/python tools/zh_say_scan.py [--write]   # zh polyphone TTS carriers; venv: pip install pypinyin jieba
 ```
 
@@ -129,6 +131,8 @@ Dev mode without a rebuild: open `engine/app.html?pack=zh` from `file://` (loads
 | packs/zh/*.json except passages_src.json, gloss_display.json | tools/pack_from_hsk.py (incl. attribution.json); passages.json + REPORT_passages.md by `packbuilder passages` |
 | tools/zh_hints.json | tools/zh_hints.py [../chinese] from the hsk vocabulary + .cache/makemeahanzi/dictionary.txt (`--fetch`) + tools/zh_hints_overrides.json; committed so pack_from_hsk.py needs no network (run it first when the hsk vocabulary gains characters) |
 | tools/zh_say.json, docs/ZH_SAY.md | tools/zh_say_scan.py --write (pypinyin + jieba venv; read by pack_from_hsk.py) |
+| tools/zh_freq.json | `.venv/bin/python tools/zh_freq.py [../chinese]` (wordfreq 3.1.1 zipf; committed so pack_from_hsk.py needs no wordfreq) |
+| docs/ZH_TIERS.md, words.json + characters.json `ft`, each level's word order | tools/pack_from_hsk.py from tools/zh_freq.json + tools/zh_tiers_overrides.json (hand-edited, owner-facing; PACK_SCHEMA "freqTiers") |
 | docs/ZH_GLOSS.md, words.json `syn`/`typedSyn`/`noTypedMeaning`/`pronInGloss` | tools/pack_from_hsk.py via tools/zh_gloss.js (from tools/zh_gloss_overrides.json, checked against tools/zh_gloss_expect.json) |
 | tests/golden/*.json | tests/flagoff_snapshot.js --capture |
 | <lang>/pack/*, index.html, sw.js, tools/REPORT.md | packbuilder, jsonify, build.sh in each language repo |

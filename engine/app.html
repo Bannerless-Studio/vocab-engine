@@ -484,7 +484,7 @@ function wordRetry(id, ok){
   if(!D) return false; const dn = D.down || (D.down = []); if(dn.includes(id)) return true;
   if(!ok && ((prog.w[id] || {}).s || 0) >= VC.WORD_HOLD) dn.push(id); return false;
 }
-function markWord(id, ok, kind, reqKind){ const fresh = !prog.w[id]; VC.ensureWordRec(prog, WORDS, PACK, id); if(fresh && OPTS_MIX && VC.daySn(prog)) prog.w[id].f = VC.daySn(prog); const s0 = prog.w[id].s; VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, WORDS_TYPED ? { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) } : undefined); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); if(PAIRS_ON) pairNoteWord(id, ok, kind, s0); dayNote("w:" + id, kind, ok); store.save(); }
+function markWord(id, ok, kind, reqKind){ const fresh = !prog.w[id]; VC.ensureWordRec(prog, WORDS, PACK, id); if(fresh && OPTS_MIX && VC.daySn(prog)) prog.w[id].f = VC.daySn(prog); const s0 = prog.w[id].s; VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, WORDS_TYPED ? { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) } : undefined); if(WORDS_TYPED && kind === "type" && todayStepState) typedSession.add(id); if(PAIRS_ON) pairNoteWord(id, ok, kind, s0); if(FREQ_TIERS) VC.settleProv(prog.w[id], WORDS_BY_ID[id], PACK); dayNote("w:" + id, kind, ok); store.save(); }
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
 // pack.pairs: a cloze miss is a miss of the word's meaning -> written pair; a right cloze moves no pair.
 function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(PAIRS_ON && !ok && prog.w[id]) VC.notePair(prog.w[id], "wm", false, false, VC.daySn(prog)); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
@@ -498,7 +498,7 @@ function markChar(unitId, ok, kind){
   VC.markChar(prog, unitId, ok, PACK, held);
   // pack.pairs: a hard choice is the production answer of a pair the unit cannot be typed in now.
   const pr = PAIRS_ON && VC.PAIR_OF_KIND[kind];
-  if(pr) VC.notePair(VC.charRecs(prog)[unitId], pr, ok, VC.PAIR_HARD.includes(kind) && !(due && VC.pairTypedKinds(PACK, pr).some(k => VC.TYPED_WRITTEN_KINDS.includes(k) && typedKindFits(TYPED_UNITS.get(unitId), k))), VC.daySn(prog), s0, VC.pairUnitHeld(PACK));
+  if(pr) VC.notePair(VC.charRecs(prog)[unitId], pr, ok, VC.PAIR_HARD.includes(kind) && !(due && VC.pairTypedKinds(PACK, pr).some(k => VC.TYPED_WRITTEN_KINDS.includes(k) && typedKindFits(TYPED_UNITS.get(unitId), k))), VC.daySn(prog), s0, VC.pairUnitHeld(PACK), unitTierOf(unitId));
   dayNote("c:" + unitId, kind, ok); store.save(); return moves;
 }
 // characters.bareBy "typed": a written-side typed answer also answers the word's unit. The in-drill
@@ -509,7 +509,7 @@ function markUnitTyped(it, id, ok){
   const u0 = PAIRS_ON ? VC.unitByWord(CHAR_LIST).get(id) : null, s0 = u0 ? (VC.charRecs(prog)[u0.id] || {}).s : 0;
   const u = VC.markUnitTyped(prog, CHAR_LIST, PACK, id, ok);
   const up = typedPairOf(it && it.rz) || "wm";
-  if(u){ if(it) it.cueUnit = u.id; if(PAIRS_ON) VC.notePair(VC.charRecs(prog)[u.id], up, ok, true, VC.daySn(prog), s0, VC.pairUnitHeld(PACK)); dayNote("c:" + u.id, "type", ok); store.save(); }
+  if(u){ if(it) it.cueUnit = u.id; if(PAIRS_ON) VC.notePair(VC.charRecs(prog)[u.id], up, ok, true, VC.daySn(prog), s0, VC.pairUnitHeld(PACK), unitTierOf(u.id)); dayNote("c:" + u.id, "type", ok); store.save(); }
 }
 // docs/PACK_SCHEMA.md "dayAware": today's answers steer the day's later plans.
 const DAY_AWARE = VC.dayAwareOn(PACK);
@@ -518,6 +518,10 @@ const PLAN_ORDER = DAY_AWARE ? "misses and due first" : "weakest first";
 // pack.pairs (docs/PACK_SCHEMA.md "pairs"): every answer moves its pair's streak; Review, Recall,
 // Listen and the characters Test ask the weakest pairs first.
 const PAIRS_ON = VC.pairsOn(PACK), PAIR_ORDER = PAIRS_ON ? "weakest pairs first" : PLAN_ORDER;
+// pack.freqTiers (docs/PACK_SCHEMA.md "freqTiers"): a unit takes its own ft (its words' lowest); known
+// reads core.js wordKnown.
+const FREQ_TIERS = VC.freqTiersOn(PACK);
+const unitTierOf = id => FREQ_TIERS ? VC.unitTier(CHAR_LIST.find(u => u.id === id), null, PACK) : VC.FT_CORE;
 // The session a plan built now runs in: a plan built outside a Today session starts its own.
 const planSn = () => VC.daySn(prog) + (todayStepState ? 0 : 1);
 // The answer being marked (the drill runner sets it around onAnswer): its builder names the typed
@@ -531,7 +535,7 @@ function pairNoteWord(id, ok, kind, s0){
   const pair = tp && (kind === "type" || fb) ? tp : VC.PAIR_OF_KIND[kind] || (kind === "type" ? "wm" : null);
   if(!pair || !prog.w[id]) return;
   const prod = tp && (kind === "type" || fb) ? !fb : kind === "type" || (VC.PAIR_HARD.includes(kind) && !(TYPING || PRON_TYPING ? VC.pairTypedKinds(PACK, pair).some(k => typedKindFits(w, k)) : false));
-  VC.notePair(prog.w[id], pair, ok, prod, VC.daySn(prog), s0);
+  VC.notePair(prog.w[id], pair, ok, prod, VC.daySn(prog), s0, undefined, VC.wordTier(w, PACK));
 }
 // The kinds a word / sentence can be shown in on this device: planners never route a miss to a
 // kind the item builder would swap out (no voice, no blank), and such a miss settles as
@@ -555,7 +559,7 @@ const dayCanOf = key => {
 const dayNote = (key, kind, ok) => DAY_AWARE && VC.noteDay(prog, PACK, todayISO(), key, kind, ok, dayCanOf(key));
 const pickHear = (list, n) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "w:", ["hear"], undefined, dayWordCan, PAIRS_ON ? { sn: planSn() } : undefined) : weakFirst(list, n);
 const pickSentences = (list, n, kinds) => DAY_AWARE ? VC.dayPickList(list, n, prog, PACK, todayISO(), "s:", kinds || daySentCan, undefined, daySentCan) : weakFirstSentences(list, n);
-const mastered = id => ((prog.w[id]||{}).s||0) >= VC.WORD_MASTERED;
+const mastered = id => VC.wordKnown(prog.w[id], WORDS_BY_ID[id], PACK);
 const sentenceMastered = id => ((prog.s[id]||{}).s||0) >= VC.SENTENCE_MASTERED;
 const weakFirst = (list, n) => VC.weakFirst(list, n, prog.w);
 const weakFirstSentences = (list, n) => VC.weakFirst(list, n, prog.s);
@@ -880,10 +884,11 @@ let mixSets = null;
 function mixSetOf(){
   if(mixSets) return mixSets;
   const w = new Map(); let base = 0;
-  LEVELS.forEach(lv => { const l = levelList(lv); l.forEach((x, i) => w.set(x.id, base + Math.floor(i / SIZE))); base += VC.nSets(l, SIZE); });
+  // Under pack.freqTiers a record without f was taught in the earlier order (VC.counterOrder).
+  LEVELS.forEach(lv => { const l = VC.counterOrder(levelList(lv), PACK); l.forEach((x, i) => w.set(x.id, base + Math.floor(i / SIZE))); base += VC.nSets(l, SIZE); });
   const u = new Map();
   if(HAS_CHARACTERS){
-    let list = VC.charStageUnits(LEVELS, CHAR_LIST, PACK);
+    let list = VC.charStageUnits(LEVELS, VC.counterOrder(CHAR_LIST, PACK), PACK);
     list.forEach((x, i) => u.set(x.id, Math.floor(i / (CHAR_CFG.setSize || 10))));
   }
   return mixSets = { w, u };
@@ -2508,7 +2513,8 @@ function wordListInto(wl, list){
 // taught word it would hide the level's taught record and could flip the level back to the
 // counter-prefix fallback.
 const wordsSetDone = (lv, set, untaught) => rzTag({ o: "wordsSet", lv, set, ut: untaught }, () => {
-  if(wordsSet !== (prog.sets[wordsLv]||0)) untaught.forEach(id => { VC.ensureWordRec(prog, WORDS, PACK, id).d = 1; });
+  const cur = FREQ_TIERS ? (nn => nn ? nn.set : -1)(VC.levelNewSet(WORDS, PACK, prog, wordsLv)) : (prog.sets[wordsLv]||0);
+  if(wordsSet !== cur) untaught.forEach(id => { VC.ensureWordRec(prog, WORDS, PACK, id).d = 1; });
   VC.settleSetCounter(prog, WORDS, PACK, wordsLv);
   store.save(); wordsRender();
 });
@@ -2523,10 +2529,15 @@ function renderWordBody(){
     wordListInto($("wl"), matches.slice(0,150));
     return;
   }
-  // Browsing slices stay fixed rank order so a set's words don't move as the learner progresses;
+  // Browsing slices stay fixed rank order (but see freqTiers below) so a set's words don't move as the learner progresses;
   // done-ness comes from records because a republish can shift the counter prefix.
-  const list = levelList(wordsLv); const total = nSets(wordsLv);
+  let list = levelList(wordsLv); const total = nSets(wordsLv);
   const lwAll = learnedWords(); const got = new Set(lwAll.map(w => w.id));
+  // freqTiers: learned words sit anywhere in the frequency order (taught under the earlier one), so
+  // sets are numbered by count as on Today (VC.levelNewSet): the learned sets first, then the unlearned
+  // words in rank order (the next set = what Learn teaches), the leftover learned words last.
+  if(FREQ_TIERS){ const lrn = list.filter(w => got.has(w.id)), cut = Math.floor(lrn.length / SIZE) * SIZE;
+    list = lrn.slice(0, cut).concat(list.filter(w => !got.has(w.id)), lrn.slice(cut)); }
   const firstNew = list.findIndex(w => !got.has(w.id));
   const next = Math.max(0, Math.min(firstNew < 0 ? total : Math.floor(firstNew/SIZE), total-1));
   if(wordsSet == null) wordsSet = next;
@@ -3154,17 +3165,18 @@ function charProgress(){
   // characters.learn "lag": no stages; its own block (a wider label would narrow the word rows' value column), one row per
   // level, a unit's level being its word's. Value text <= the longest word-row value (32 chars): bare shown drops "taught", then "mastered" -> "mast.".
   const lag = () => `<p class="q" style="margin-top:14px">Characters</p><table class="stats nw">${LEVELS.map(lv => { const list = CHAR_LIST.filter(u => String(u.lv) === String(lv)); if(!list.length) return "";
-    const rec = list.filter(u => recs[u.id]), bare = rec.filter(u => VC.charTier(streak(u), PACK) === "bare").length, mas = rec.filter(u => VC.charTier(streak(u), PACK) !== "pron").length;
+    const rec = list.filter(u => recs[u.id]), bare = rec.filter(u => FREQ_TIERS ? VC.unitDone(recs[u.id], u, PACK) : VC.charTier(streak(u), PACK) === "bare").length, mas = rec.filter(u => VC.charTier(streak(u), PACK) !== "pron").length;
+    // freqTiers: a unit is done at its target (bare, a peripheral unit mastered).
     let v = `${rec.length} / ${list.length} taught · ${mas} mastered`;
-    if(bare){ v = `${rec.length} / ${list.length} · ${mas} mastered · ${bare} bare`; if(v.length > 32) v = v.replace("mastered", "mast."); }
+    if(bare){ v = `${rec.length} / ${list.length} · ${mas} mastered · ${bare} ${FREQ_TIERS ? "done" : "bare"}`; if(v.length > 32) v = v.replace("mastered", "mast."); }
     return `<tr><td>${escapeHtml(levelLabel(lv))}</td><td>${v}</td></tr>`; }).join("")}</table>`;
   const block = started && CHAR_CFG.learn === "lag" ? lag() : "";
   const rows = !started || block ? "" : stages.map(st => {
     const list = VC.charStageUnits(st.levels, CHAR_LIST, PACK);
     const taught = VC.charSets(st.levels, CHAR_LIST, PACK).filter(set => VC.charSetTaught(set, prog)).reduce((n, set) => n + set.length, 0);
     const masteredN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) !== "pron").length;
-    const bareN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) === "bare").length;
-    return `<tr><td>${tf(st.label)}</td><td>${taught} / ${list.length} taught · ${st.recorded} recorded · ${masteredN} mastered · ${bareN} bare</td></tr>`;
+    const bareN = list.filter(u => recs[u.id] && (FREQ_TIERS ? VC.unitDone(recs[u.id], u, PACK) : VC.charTier(streak(u), PACK) === "bare")).length;
+    return `<tr><td>${tf(st.label)}</td><td>${taught} / ${list.length} taught · ${st.recorded} recorded · ${masteredN} mastered · ${bareN} ${FREQ_TIERS ? "done" : "bare"}</td></tr>`;
   }).join("");
   const defer = !!(prog.chars && prog.chars.defer === true), order = VC.charOrder(PACK, prog);
   const deferred = VC.charStages(PACK, Object.assign({}, prog, { chars: Object.assign({}, prog.chars, { defer: true }) }));

@@ -445,8 +445,27 @@ try {
       check(`owner export (${Object.keys(pr.w).length} word records, ${Object.keys(pr.chars.c).length} units): first Learn ${a.kind}, same units with and without the ramp (label: set ${ca && cb ? `${cb.lvIndex + 1} of ${cb.lvTotal} -> ${ca.lvIndex + 1} of ${ca.lvTotal}` : "-"})`,
         a.kind === b.kind && (!ca || eq(ca.ids, cb.ids)));
     } else console.log("  skip: owner export not found");
-    // Set label under the ramp: whole-pack total counts 3, 5, 8, then tens.
-    check(`label total: ${VC.lagCharSet(PACKR, WORDS, CHARACTERS, mid).total} sets (3+5+8 then tens over ${CHARACTERS.length} units)`, VC.lagCharSet(PACKR, WORDS, CHARACTERS, mid).total === 3 + Math.ceil((CHARACTERS.length - 16) / 10));
+    // Set label under the ramp: sets never straddle a level, so the whole-pack total is the sum of the per-level counts.
+    const perLv = VC.levelIds(PACKR).map(lv => CHARACTERS.filter(u => String(u.lv) === lv).length);
+    const gotT = VC.lagCharSet(PACKR, WORDS, CHARACTERS, mid).total;
+    check(`label total: ${gotT} sets (HSK 1 ramp 3,5,8 then tens; later levels tens; per level ${perLv.join("/")})`, gotT === (3 + Math.ceil((perLv[0] - 16) / 10)) + perLv.slice(1).reduce((a, n) => a + Math.ceil(n / 10), 0));
+    // Level boundary (owner export shape): 297 units below HSK 3, 298 in it; a set never straddles.
+    const bnd = n => { const q = ownerProg(n); byLv["4"].slice(0, 40).forEach(w => { q.w[w.id] = { r: 5, w: 0, s: 5 }; }); q.sets["4"] = 4; return q; };
+    const lvOf = cs => [...new Set(cs.units.map(u => String(u.lv)))].join();
+    const b1 = VC.lagCharSet(PACKR, WORDS, CHARACTERS, bnd(587)), b2 = VC.lagCharSet(PACKR, WORDS, CHARACTERS, bnd(595));
+    check(`boundary: HSK 3 ends "set ${b1.lvIndex + 1} of ${b1.lvTotal}" with ${b1.units.length} units, all HSK ${lvOf(b1)}`, b1.lv === "3" && b1.lvIndex === 29 && b1.lvTotal === 30 && b1.units.length === 8 && lvOf(b1) === "3");
+    check(`boundary: next is HSK ${b2.lv} set ${b2.lvIndex + 1} of ${b2.lvTotal} with ${b2.units.length} units, all HSK ${lvOf(b2)}`, b2.lv === "4" && b2.lvIndex === 0 && b2.lvTotal === 60 && b2.units.length === 10 && lvOf(b2) === "4");
+    { const { api } = await bootWith(PACKR, bnd(587), 1); const l = learnLine(api.panel());
+      check(`boundary, Today: "${l}"`, l === "字 HSK 3, set 30 of 30"); }
+    // Every level of a fresh learner walks the sets of its own units: sizes sum to the level, never straddle, ramp only in HSK 1.
+    { const cfgR = VC.charsConfig(PACKR), perLvSizes = []; let below = 0;
+      perLv.forEach(n => { perLvSizes.push(VC.levelChunks(cfgR, below, n)); below += n; });
+      check(`ramp walk: HSK 1 ${perLvSizes[0].slice(0, 5)}..., later levels tens; sums = level units`, eq(perLvSizes[0].slice(0, 4), [3, 5, 8, 10]) && perLvSizes.every((z, i) => z.reduce((a, b) => a + b, 0) === perLv[i]) && perLvSizes.slice(1).every(z => z.slice(0, -1).every(x => x === 10)));
+      check(`short last set: ${perLv.map((n, i) => `HSK ${i + 1}: ${perLvSizes[i][perLvSizes[i].length - 1]}`).join(", ")}`, perLvSizes[0].slice(-1)[0] === 4 && perLvSizes[2].slice(-1)[0] === 8 && perLvSizes[1].slice(-1)[0] === 7);
+      const mc = VC.levelChunks({ ramp: [3, 5, 8], setSize: 10 }, 0, 47);
+      check(`a level of 47 units (not a multiple of 10): ${mc} ends short`, eq(mc, [3, 5, 8, 10, 10, 10, 1]));
+      check("a level starting inside the ramp is cut at the ramp walk: ramp 3,5,8 below 4 -> 4, 8, then tens", eq(VC.levelChunks({ ramp: [3, 5, 8], setSize: 10 }, 4, 30), [4, 8, 10, 8]));
+    }
   }
 
   console.log(`\n${passes} passed, ${fails} failed`);

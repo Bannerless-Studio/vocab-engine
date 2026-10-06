@@ -182,6 +182,11 @@ def check_pack(pack, rep):
         rep.err("pack.pairs needs pack.dayAware (pairs are scheduled by session)")
     elif pack.get("pairs") is True and "script" in pack:
         rep.err("pack.pairs with pack.script: script units have no pairs yet")
+    # freqTiers (docs/PACK_SCHEMA.md "freqTiers"): per-word practice tiers act on pair streaks.
+    if "freqTiers" in pack and not is_bool(pack["freqTiers"]):
+        rep.err("pack.freqTiers must be a boolean")
+    elif pack.get("freqTiers") is True and not (pack.get("pairs") is True and pack.get("dayAware")):
+        rep.err("pack.freqTiers needs pack.pairs (tiers set each pair's mastery)")
     if "pronFirst" in pack:
         if not is_bool(pack["pronFirst"]):
             rep.err("pack.pronFirst must be a boolean")
@@ -427,6 +432,9 @@ def check_words(words, levels, rep):
             rep.err(f"{where}.say must be a non-empty string other than w when present")
         if "rank" in w and not is_num(w["rank"]):
             rep.err(f"{where}.rank must be a number")
+        # ft: frequency tier, 0 ambient / 1 core / 2 peripheral (docs/PACK_SCHEMA.md "freqTiers"); absent = core.
+        if "ft" in w and not (isinstance(w["ft"], int) and not isinstance(w["ft"], bool) and w["ft"] in (0, 1, 2)):
+            rep.err(f"{where}.ft must be 0, 1 or 2 when present")
         if "alt" in w and not (isinstance(w["alt"], list) and all(is_str(a) for a in w["alt"])):
             rep.err(f"{where}.alt must be a list of non-empty strings")
         # forms: inflected surfaces used only to locate the word in text (never typed
@@ -886,6 +894,13 @@ def check_characters_data(chars, char_levels, by_id, rep):
                 rep.err(f"{where}.lv {c.get('lv')!r} is not covered by any pack.characters.stages[].levels")
         if "reading" in c and not is_str(c["reading"]):
             rep.err(f"{where}.reading must be a non-empty string when present")
+        # ft: the unit's tier, the lowest (highest-demand) ft of its words (docs/PACK_SCHEMA.md "freqTiers").
+        if "ft" in c:
+            wft = [by_id[x].get("ft", 1) for x in (ws if isinstance(ws, list) else []) if is_str(x) and isinstance(by_id.get(x), dict)]
+            if not (isinstance(c["ft"], int) and not isinstance(c["ft"], bool) and c["ft"] in (0, 1, 2)):
+                rep.err(f"{where}.ft must be 0, 1 or 2 when present")
+            elif wft and c["ft"] != min(wft):
+                rep.err(f"{where}.ft {c['ft']} is not the lowest ft of its words ({min(wft)})")
         if "hint" in c:
             h, t = c["hint"], c.get("t")
             if not isinstance(h, list) or not all(x is None or is_str(x) for x in h):

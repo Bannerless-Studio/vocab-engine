@@ -1,0 +1,16 @@
+{
+  "_comment": "Owner-facing tier overrides for packs/zh (docs/PACK_SCHEMA.md \"freqTiers\", docs/ZH_TIERS.md). Map a word (as written) to ambient, core or peripheral; tools/pack_from_hsk.py applies it after the zipf rule. Edit, then regenerate: python3 tools/pack_from_hsk.py ../chinese && python3 tools/jsonify_pack.py packs/zh && ./build.sh packs/zh dist/zh.html.",
+  "_why": "2026-10-06 (owner via main): spoken basics that wordfreq's written corpus under-ranks: HSK 1 再见 没关系 不客气 汉语 饭馆; HSK 2 便宜 好吃 累 服务员 起床.",
+  "tiers": {
+    "再见": "core",
+    "没关系": "core",
+    "不客气": "core",
+    "汉语": "core",
+    "饭馆": "core",
+    "便宜": "core",
+    "好吃": "core",
+    "累": "core",
+    "服务员": "core",
+    "起床": "core"
+  }
+}

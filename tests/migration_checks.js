@@ -31,10 +31,10 @@ const skip = name => { skips++; console.log(`SKIP  ${name}`); };
 const clone = x => JSON.parse(JSON.stringify(x));
 const eq = util.isDeepStrictEqual;
 
-// hanzi per level, in pack (= hsk VOCAB) order.
+// hanzi per level, in hsk VOCAB order: id order (the zh pack lists levels by frequency, freqTiers).
 const hanziOf = {}; Object.keys(LEGACY.w).forEach(h => { hanziOf[LEGACY.w[h]] = h; });
 const byLv = { 1:[], 2:[], 3:[], 4:[] };
-WORDS.forEach(w => byLv[w.lv].push(hanziOf[w.id]));
+WORDS.slice().sort((a, b) => a.id < b.id ? -1 : 1).forEach(w => byLv[w.lv].push(hanziOf[w.id]));
 const nsets = lv => Math.ceil(byLv[lv].length / 10);
 const SENTS = Object.keys(LEGACY.s);
 const rec = (r, w, s, extra) => Object.assign({ r, w, s }, extra || {});
@@ -391,13 +391,15 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
   check(`(a) fresh: path ${labels(a)}; next HSK 1 set 0 (old pack the same)`, labels(a) === "HSK 1 字1 HSK 2 字2 HSK 3 字3 HSK 4 字4" && nextOf(PACK, a) === "words:1/0" && nextOf(OLD, a) === "words:1/0");
   // (b) mid HSK 2
   const b = mig("C mid-HSK2"), braw = JSON.stringify(b);
+  // The first HSK 1 unit in pack order (c0001 before fb26 put each level in frequency order).
+  const C1 = "chars:1 " + VC.charStageUnits(["1"], U, PACK)[0].id;
   const bs = n => Object.assign(clone(b), { sessions: n });
-  check(`(b) mid HSK 2: old pack ${nextOf(OLD, b)}; now no card, sessions alternate ${nextOf(PACK, bs(4))} / ${nextOf(PACK, bs(5))}`, nextOf(OLD, b) === "words:2/3" && nextOf(PACK, bs(4)) === "words:2/3" && nextOf(PACK, bs(5)) === "chars:1 c0001" && !VC.showCharChoice(PACK, W, U, b));
+  check(`(b) mid HSK 2: old pack ${nextOf(OLD, b)}; now no card, sessions alternate ${nextOf(PACK, bs(4))} / ${nextOf(PACK, bs(5))}`, nextOf(OLD, b) === "words:2/3" && nextOf(PACK, bs(4)) === "words:2/3" && nextOf(PACK, bs(5)) === C1 && !VC.showCharChoice(PACK, W, U, b));
   // Stored choice mapping: chars.defer true ("after") is "later"; anything else is "with words".
   // The alternation reads prog.sessions only: no new field.
   check("(b) stored choice: defer true -> later (HSK 2 set 3 every session, one 字 stage last); seen + defer false or unseen -> with words",
     [4, 5].every(n => (p => nextOf(PACK, p) === "words:2/3" && VC.stagePath(PACK, W, U, p).filter(s => s.kind === "chars").length === 1)(VC.setCharOrder(bs(n), true)))
-    && nextOf(PACK, VC.answerCharChoice(bs(5), true)) === "chars:1 c0001" && nextOf(PACK, bs(5)) === "chars:1 c0001"
+    && nextOf(PACK, VC.answerCharChoice(bs(5), true)) === C1 && nextOf(PACK, bs(5)) === C1
     && !VC.charsWithWords(PACK, VC.setCharOrder(bs(5), true)) && VC.charsWithWords(PACK, bs(5)) && !VC.charsWithWords(OLD, bs(5)));
   // (c) in the characters stage
   const c = mig("D1 chars started, card answered: start"), craw = JSON.stringify(c);
@@ -743,6 +745,39 @@ console.log("\n[pairs] pack.pairs (fb23): optional record field p = {wm|sm|ws: [
     check(`[pairs] a mark on ${sha} keeps p on the record`, eq(q.w.w9998.p, p.w.w9998.p) && q.w.w9998.r === 4 && eq(q.chars.c.c9998.p, p.chars.c.c9998.p) && q.chars.c.c9998.w === 1);
     const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
     check(`[pairs] and back here from ${sha}: no backup, p byte-equal`, back.backupRaw === null && eq(back.prog.w.w9998.p, p.w.w9998.p) && eq(back.prog.chars.c.c9998.p, p.chars.c.c9998.p));
+  }
+}
+
+console.log("\n[freqTiers] pack.freqTiers (fb26): no new stored field; records written under the flag (peripheral pair at 2 by choice, settled prov, counter by learned count) boot on b21ee93 and 2412992 byte-equal, and back");
+{
+  const TW = WORDS.filter(w => w.ft === 2).slice(0, 2).concat(WORDS.filter(w => w.ft === 0).slice(0, 1));
+  const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog; p.sn = 42;
+  TW.forEach((w, i) => {
+    const r = VC.ensureWordRec(p, WORDS, LAG_PACK, w.id);
+    VC.markRec(p.w, w.id, true, true);
+    VC.notePair(r, "wm", true, false, 42, r.s, false, VC.wordTier(w, LAG_PACK));
+    VC.notePair(r, "wm", true, false, 42, r.s, false, VC.wordTier(w, LAG_PACK));
+    if(i === 0) r.prov = 1;
+    VC.settleProv(r, w, LAG_PACK);
+  });
+  VC.levelIds(LAG_PACK).forEach(lv => VC.settleSetCounter(p, WORDS, LAG_PACK, lv));
+  const KNOWN = new Set(["r", "w", "s", "u", "f", "p", "prov", "d"]);
+  check(`[freqTiers] records written under the flag carry no new field (${TW.map(w => w.w + " ft" + w.ft).join(", ")}: ${TW.map(w => Object.keys(p.w[w.id]).join("/")).join(", ")})`,
+    TW.every(w => Object.keys(p.w[w.id]).every(k => KNOWN.has(k))) && Object.keys(p).every(k => k in mig("C mid-HSK2") || k in VC.defaultProg(LAG_PACK) || ["sn", "chars"].includes(k)));
+  const raw = JSON.stringify(p);
+  for(const sha of ["b21ee93", "2412992"]){
+    let eng = null, op = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
+      op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`[freqTiers] engine ${sha} not in this checkout's history`); continue; }
+    const o = eng.bootProg(raw, op);
+    check(`[freqTiers] engine ${sha} (its zh pack) boots a record written under the flag: no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw);
+    const back = VC.bootProg(JSON.stringify(o.prog), LAG_PACK);
+    check(`[freqTiers] and back here from ${sha}: no backup, progress byte-equal`, back.backupRaw === null && JSON.stringify(back.prog) === raw);
   }
 }
 

@@ -200,7 +200,8 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
   // ---------------------------------------------------------------- [1] build
   console.log("\n[1] build: words.json fields equal a fresh tools/zh_gloss.js run");
   {
-    const pre = WORDS.map(w => { const c = strip(w); const o = OV.en[w.w]; if(o && w.en === o.en) c.en = o.was; return c; });
+    // id order: the generator runs zh_gloss.js before freqTiers puts each level in frequency order.
+    const pre = WORDS.slice().sort((x, y) => x.id < y.id ? -1 : 1).map(w => { const c = strip(w); const o = OV.en[w.w]; if(o && w.en === o.en) c.en = o.was; return c; });
     const r = ZG.build(pre, OV);
     check(`zh_gloss.js build: no errors (${r.errs.join("; ")})`, r.errs.length === 0);
     const bad = WORDS.filter(w => {
@@ -297,7 +298,7 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
   // ---------------------------------------------------------------- [5] noTypedMeaning
   console.log("\n[5] noTypedMeaning words never get a typed-meaning kind");
   {
-    const marked = WORDS.filter(w => w.noTypedMeaning);
+    const marked = WORDS.filter(w => w.noTypedMeaning).sort((x, y) => x.id < y.id ? -1 : 1);
     console.log(`    marked: ${marked.map(lab).join(", ")}`);
     check("marked: first alternative an explanation (particles, classifiers, markers, 把 被) plus 地 -ly and 场",
       marked.map(w => w.w).join(" ") === "个 了 吗 呢 本 件 吧 张 得 正在 着 位 地 把 条 被 辆 之 分之 台 场 座 朵 棵 篇 顿");
