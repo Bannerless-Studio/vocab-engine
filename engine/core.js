@@ -1517,7 +1517,7 @@ function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds, wordCan, ty
 // can be typed is asked as its word, typed from the written side (plan item { kind: "type", word,
 // tu: unit id }); the app picks a written-side kind for it. typedUnits: typedUnitWords().
 function typedUnitDue(unit, prog, pack, typedUnits){
-  if(!(typedUnits instanceof Map) || !typedUnits.has(unit.id) || !typedBareOn(pack) || unitTier(unit, null, pack) === FT_PERIPHERAL) return false;
+  if(!(typedUnits instanceof Map) || !typedUnits.has(unit.id) || !typedBareOn(pack)) return false;
   const cfg = charsConfig(pack), s = dayS(charRecs(prog)[unit.id]);
   return s >= cfg.mastered && s < cfg.bare;
 }
@@ -1526,7 +1526,7 @@ function typedUnitDue(unit, prog, pack, typedUnits){
 // recently (it reached 2 by that answer) keeps the day rule: no same-kind repeat; a word asked typed
 // in the running Today session (typedSeen) waits for the next one.
 function typedWordDue(word, prog, pack, today, kinds, typedOk, typedSeen){
-  if(!wordsTypedOn(pack) || !dayAwareOn(pack) || !(kinds || []).includes("type") || tierNoTyped(pack, word) || (typeof typedSeen === "function" && typedSeen(word))) return false;
+  if(!wordsTypedOn(pack) || !dayAwareOn(pack) || !(kinds || []).includes("type") || (typeof typedSeen === "function" && typedSeen(word))) return false;
   const s = dayS((prog.w || {})[word.id]);
   if(s < WORD_HOLD || s >= WORD_MASTERED || dayRight(dayLog(prog, today).a["w:" + word.id], daySn(prog)).includes("type")) return false;
   return typeof typedOk === "function" ? !!typedOk(word) : typedKinds(pack).some(k => typedKindOk(k, word, false));
@@ -1603,11 +1603,12 @@ const PAIRS = ["wm", "sm", "ws"];
 const PAIR_KNOWN = 3, PAIR_HOLD = 2, PAIR_REFRESH = 0.1;
 function pairsOn(pack){ return !!(pack && pack.pairs === true) && dayAwareOn(pack); }
 // pack.freqTiers (docs/PACK_SCHEMA.md "freqTiers"; owner 2026-10-06: "give more priority to words that
-// come up more in real life and the exam ... mastery requirements as well"): words.json ft sets the
-// practice a word needs. Ambient (0, the pack's ~100 commonest words): every sentence and passage
-// rehearses them, so a known pair gets no refresh ask. Core (1): the pairs rules. Peripheral (2): a
-// pair is mastered at PAIR_HOLD by any right answer, never typed, and refreshed half as often; its
-// unit's target is mastered (its reading stays shown). Tiers act on pair streaks only, so they need pairs.
+// come up more in real life and the exam ... mastery requirements as well", then "why not typed asks
+// but much less frequent?"): words.json ft sets how often a word is practised and its known bar; pair
+// and unit mechanics are the same for every tier. Ambient (0, the pack's ~100 commonest words): every
+// sentence and passage rehearses them, so a known pair gets no refresh ask. Core (1): the pairs rules.
+// Peripheral (2): no typed-first priority at equal streak, no held boot, refresh age counts half, known
+// at PAIR_HOLD, its unit done for Progress at mastered (it still reaches bare by typed credit).
 const FT_AMBIENT = 0, FT_CORE = 1, FT_PERIPHERAL = 2;
 const ftOf = v => v === FT_AMBIENT || v === FT_CORE || v === FT_PERIPHERAL ? v : FT_CORE;
 function freqTiersOn(pack){ return !!(pack && pack.freqTiers === true) && pairsOn(pack); }
@@ -1621,8 +1622,7 @@ function unitTier(unit, words, pack){
   const ts = words ? (unit.words || []).map(look).filter(Boolean).map(w => wordTier(w, pack)) : [];
   return ts.length ? Math.min(...ts) : ftOf(unit.ft);
 }
-const pairKnownAt = tier => tier === FT_PERIPHERAL ? PAIR_HOLD : PAIR_KNOWN;
-const tierNoTyped = (pack, word) => wordTier(word, pack) === FT_PERIPHERAL;
+const knownBarAt = tier => tier === FT_PERIPHERAL ? PAIR_HOLD : PAIR_KNOWN;
 // A cloze ("gap", "gapType") asks its blanked word meaning -> written.
 const PAIR_OF_KIND = { read: "wm", recall: "wm", hear: "sm", gap: "wm", gapType: "wm", charRead: "wm", charRecall: "wm", charSound: "ws", charPick: "ws" };
 const PAIR_OF_TYPED = { word: "wm", written: "wm", writtenMeaning: "wm", pron: "sm", pronMeaning: "sm", writtenPron: "ws" };
@@ -1647,34 +1647,35 @@ function pairState(rec, pair, held){
 // One answer in a pair. s0: the record's streak before this answer, held as pairState (the start of
 // a pair never answered). A miss sets the pair to 0; a right answer adds one, a choice answer only up
 // to PAIR_HOLD; a pair already answered this session (sn) gains nothing more (the in-drill retry).
-// tier (freqTiers): a peripheral pair counts every right answer, as it is never typed.
+// tier (freqTiers): a peripheral unit boots without the held exception, as pairCharCand plans it.
 function notePair(rec, pair, ok, prod, sn, s0, held, tier){
+  if(tier === FT_PERIPHERAL) held = undefined;
   if(!isObj(rec) || !PAIRS.includes(pair)) return false;
   const e = isObj(rec.p) ? pairEntry(rec.p[pair]) : null;
   const s = e ? e[0] : pairBoot(typeof s0 === "number" ? s0 : 0, held);
   const again = !!e && sn > 0 && e[1] === sn;
-  const ns = !ok ? 0 : !again && (prod || tier === FT_PERIPHERAL || s < PAIR_HOLD) ? s + 1 : s;
+  const ns = !ok ? 0 : !again && (prod || s < PAIR_HOLD) ? s + 1 : s;
   if(!isObj(rec.p)) rec.p = {};
   rec.p[pair] = [ns, sn > 0 ? sn : 0];
   return true;
 }
 // freqTiers: the pairs a word's "known" reads, device-independent: wm always; sm when the pack can
-// voice the word (TTS or a clip); ws when a typed kind of ws fits the written word and its tier is typed
-// (a typed written -> reading kind; a word has no ws choice kind). A pair never answered reads its boot (the
+// voice the word (TTS or a clip); ws when a typed kind of ws fits the written word (a typed written ->
+// reading kind; a word has no ws choice kind). A pair never answered reads its boot (the
 // legacy streak), as the scheduler does, so a word at legacy WORD_MASTERED+ stays known until a miss.
 function wordPairs(word, pack){
   const out = ["wm"];
   if(word && (pack.tts || pack.audio || word.audio)) out.push("sm");
-  if(word && !tierNoTyped(pack, word) && pairTypedKinds(pack, "ws").some(k => typedKindOk(k, word, true))) out.push("ws");
+  if(word && pairTypedKinds(pack, "ws").some(k => typedKindOk(k, word, true))) out.push("ws");
   return out;
 }
 // "Known" (Progress, goals, progress map, prov): without freqTiers the legacy streak; with it every
-// pair of wordPairs at its tier's mastery (pairKnownAt). wordsBy holds and optsMix stages keep the
+// pair of wordPairs at its tier's bar (knownBarAt: peripheral 2, else PAIR_KNOWN). wordsBy holds and optsMix stages keep the
 // legacy streak.
 function wordKnown(rec, word, pack){
   if(!freqTiersOn(pack)) return !!rec && (rec.s || 0) >= WORD_MASTERED;
   if(!isObj(rec)) return false;
-  const k = pairKnownAt(wordTier(word, pack));
+  const k = knownBarAt(wordTier(word, pack));
   return wordPairs(word, pack).every(p => pairState(rec, p).s >= k);
 }
 // A placement word stays provisional (kept in review) until known; markRec drops prov at the legacy
@@ -1683,8 +1684,8 @@ function settleProv(rec, word, pack){
   if(!freqTiersOn(pack) || !isObj(rec) || !rec.prov || !wordKnown(rec, word, pack)) return false;
   delete rec.prov; return true;
 }
-// A unit's target: bare; under freqTiers a peripheral unit's is mastered (it is never typed, and only
-// a typed answer takes a unit past mastered under bareBy "typed").
+// A unit counts as done at bare; under freqTiers a peripheral unit at mastered (it still reaches bare
+// by the same typed credit, only less often asked).
 function unitDone(rec, unit, pack, words){
   if(!isObj(rec)) return false;
   const t = charTier(rec.s || 0, pack);
@@ -1700,7 +1701,7 @@ function pairOpts(c, pack, o, psn){
   const out = {}, ks = c.kinds || [];
   const add = (p, k, typed) => { const e = out[p] || (out[p] = { choice: [], typed: [] }); (typed ? e.typed : e.choice).push(k); };
   ks.forEach(k => { if(k !== "type" && PAIR_OF_KIND[k]) add(PAIR_OF_KIND[k], k, false); });
-  if(ks.includes("type") && c.tw && c.tier !== FT_PERIPHERAL && !(typeof o.typedSeen === "function" && o.typedSeen(c.tw))){
+  if(ks.includes("type") && c.tw && !(typeof o.typedSeen === "function" && o.typedSeen(c.tw))){
     const fits = typeof o.typedKindFits === "function" ? k => !!o.typedKindFits(c.tw, k) : k => typedKindOk(k, c.tw, false);
     [...new Set(typedKinds(pack))].forEach(k => { const p = PAIR_OF_TYPED[k]; if(p && (!c.typedOnly || c.typedOnly.includes(k)) && !(c.twRec && psn > 0 && (pairEntry(isObj(c.twRec.p) ? c.twRec.p[p] : null) || [])[1] === psn) && fits(k)) add(p, k, true); });
   }
@@ -1734,11 +1735,13 @@ function pairPick(cands, n, d, rng, sn, pack, o){
       if(!st.boot && psn > 0 && st.a === psn) return;
       const kind = pairKind(po[pair], st.s, mk); if(!kind) return;
       // freqTiers: a known pair of an ambient item gets no refresh ask; a peripheral one's age counts half.
-      const known = st.s >= pairKnownAt(c.tier); if(known && c.tier === FT_AMBIENT) return;
+      const known = st.s >= PAIR_KNOWN; if(known && c.tier === FT_AMBIENT) return;
       (known ? hi : lo).push({ c, pair, kind, s: st.s, a: st.a, ra: c.tier === FT_PERIPHERAL ? (st.a + sn) / 2 : st.a, j: r() });
     });
   });
-  lo.sort((x, y) => x.s - y.s || (y.kind === "type") - (x.kind === "type") || (x.c.t === "c") - (y.c.t === "c") || x.a - y.a || x.j - y.j);
+  // freqTiers: a peripheral typed ask gets no typed-first priority (asked typed only when drawn anyway).
+  const tf = e => e.kind === "type" && e.c.tier !== FT_PERIPHERAL;
+  lo.sort((x, y) => x.s - y.s || tf(y) - tf(x) || (x.c.t === "c") - (y.c.t === "c") || x.a - y.a || x.j - y.j);
   hi.sort((x, y) => x.ra - y.ra || x.j - y.j);
   const out = [], seen = new Set();
   const alias = e => e.kind === "type" && e.c.t === "c" && e.c.tw ? "w:" + e.c.tw.id : null;
@@ -1752,9 +1755,9 @@ function pairPick(cands, n, d, rng, sn, pack, o){
 const pairWordCand = (prog, kinds, wordCan, pack) => w => { const can = wordCan ? wordCan(w) : undefined; return { t: "w", x: w, key: "w:" + w.id, rec: (prog.w || {})[w.id], kinds: dayCanKinds(kinds, can), can, tw: w, tier: wordTier(w, pack) }; };
 // A unit is typed (as its word, written-side kinds) only while typedUnitDue: from mastered to bare.
 const pairCharCand = (prog, pack, kinds, typedUnits) => { const recs = charRecs(prog);
-  const held = pairUnitHeld(pack);
-  return u => { const tw = typedUnitDue(u, prog, pack, typedUnits) ? typedUnits.get(u.id) : null;
-    return Object.assign({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], kinds, held, tier: unitTier(u, null, pack) }, tw ? { kinds: [...kinds, "type"], tw, twRec: (prog.w || {})[tw.id], typedOnly: TYPED_WRITTEN_KINDS } : {}); }; };
+  const hd = pairUnitHeld(pack);
+  return u => { const tw = typedUnitDue(u, prog, pack, typedUnits) ? typedUnits.get(u.id) : null, tier = unitTier(u, null, pack);
+    return Object.assign({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], kinds, held: tier === FT_PERIPHERAL ? undefined : hd, tier }, tw ? { kinds: [...kinds, "type"], tw, twRec: (prog.w || {})[tw.id], typedOnly: TYPED_WRITTEN_KINDS } : {}); }; };
 // A unit's typed ask types its word (tu); pair tells the app which typed kinds belong to the item.
 const pairPlanItem = e => e.c.t === "w" ? { kind: e.kind, word: e.c.x, pair: e.pair }
   : e.kind === "type" ? { kind: "type", word: e.c.tw, tu: e.c.x.id, pair: e.pair } : { kind: e.kind, unit: e.c.x, pair: e.pair };
@@ -3900,7 +3903,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
-  FT_AMBIENT, FT_CORE, FT_PERIPHERAL, freqTiersOn, wordTier, unitTier, pairKnownAt, tierNoTyped, wordPairs, wordKnown, settleProv, unitDone,
+  FT_AMBIENT, FT_CORE, FT_PERIPHERAL, freqTiersOn, wordTier, unitTier, knownBarAt, wordPairs, wordKnown, settleProv, unitDone,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairsOn, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,

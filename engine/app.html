@@ -518,8 +518,8 @@ const PLAN_ORDER = DAY_AWARE ? "misses and due first" : "weakest first";
 // pack.pairs (docs/PACK_SCHEMA.md "pairs"): every answer moves its pair's streak; Review, Recall,
 // Listen and the characters Test ask the weakest pairs first.
 const PAIRS_ON = VC.pairsOn(PACK), PAIR_ORDER = PAIRS_ON ? "weakest pairs first" : PLAN_ORDER;
-// pack.freqTiers (docs/PACK_SCHEMA.md "freqTiers"): a peripheral word is never typed, a unit takes its
-// own ft (its words' lowest); known reads core.js wordKnown.
+// pack.freqTiers (docs/PACK_SCHEMA.md "freqTiers"): a unit takes its own ft (its words' lowest); known
+// reads core.js wordKnown.
 const FREQ_TIERS = VC.freqTiersOn(PACK);
 const unitTierOf = id => FREQ_TIERS ? VC.unitTier(CHAR_LIST.find(u => u.id === id), null, PACK) : VC.FT_CORE;
 // The session a plan built now runs in: a plan built outside a Today session starts its own.
@@ -1747,10 +1747,10 @@ const TYPED_ITEM = { word: typeItem, pron: pronTypeItem, written: silentWrittenT
   writtenMeaning: e => meaningTypeItem(e, false), pronMeaning: e => meaningTypeItem(e, true) };
 // pack.wordsBy "typed": a held word is planned typed only when some typed kind fits it as shown, and
 // once per Today session.
-const typedWordFits = e => !!e && !VC.tierNoTyped(PACK, e) && VC.typedKinds(PACK).some(k => VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB || undefined));
+const typedWordFits = e => !!e && VC.typedKinds(PACK).some(k => VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB || undefined));
 const typedWordSeen = e => !!todayStepState && typedSession.has(e.id);
-const typedKindFits = (e, k) => !!e && !VC.tierNoTyped(PACK, e) && VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB || undefined);
-const typedFits = e => !TYPED_FROM || !VC.tierNoTyped(PACK, e) && VC.typedKinds(PACK).some(k => VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB));
+const typedKindFits = (e, k) => !!e && VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB || undefined);
+const typedFits = e => !TYPED_FROM || VC.typedKinds(PACK).some(k => VC.typedKindOk(k, e, !!e.w && !dispWord(e).isPron, TYPED_AMB));
 function typedFromSlotItem(plan, i){
   const e = plan[i].word; const shown = !!e.w && !dispWord(e).isPron; const only = plan[i].tu ? VC.TYPED_WRITTEN_KINDS : null, pair = plan[i].pair;
   const k = VC.typedSlotKind(plan, i, prog, PACK, k => (!only || only.includes(k)) && (!pair || VC.PAIR_OF_TYPED[k] === pair) && VC.typedKindOk(k, e, shown, TYPED_AMB));

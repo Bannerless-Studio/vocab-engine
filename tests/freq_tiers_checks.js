@@ -154,7 +154,7 @@ function synth(s, a, sn, f){
   return p;
 }
 const lwOf = (p, pk) => VC.learnedWords(WORDS, pk || PACK, p);
-const planOpts = (rng, extra) => Object.assign({ canHear: () => true, today: TODAY, rng: mulberry32(rng), typedKindFits: (w, k) => !VC.tierNoTyped(PACK, w) && VC.typedKindOk(k, w, true), typedOk: w => !VC.tierNoTyped(PACK, w) }, extra || {});
+const planOpts = (rng, extra) => Object.assign({ canHear: () => true, today: TODAY, rng: mulberry32(rng), typedKindFits: (w, k) => VC.typedKindOk(k, w, true), typedOk: () => true }, extra || {});
 const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KIND[it.kind]) : VC.PAIR_OF_KIND[it.kind];
 
 (async () => {
@@ -202,54 +202,63 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
   }
   check("characters.json in word order (unit order follows word rank), each unit's ft its words' lowest", CHARACTERS.length === WORDS.length && CHARACTERS.every((u, i) => u.words[0] === WORDS[i].id && u.ft === Math.min(...u.words.map(id => BY_ID[id].ft))));
 
-  console.log("\n[3] pair streak per tier (core.js notePair)");
+  console.log("\n[3] pair streak: the same in every tier (core.js notePair)");
   {
     const rows = [];
     for(const tier of [0, 1, 2]) for(const s of [0, 1, 2, 3]) for(const prod of [false, true]) for(const ok of [true, false]){
       const r = { s: 0, p: { wm: [s, 1] } }; VC.notePair(r, "wm", ok, prod, 5, s, undefined, tier); rows.push([tier, s, prod, ok, r.p.wm[0]]);
     }
     const at = (t, s, prod, ok) => rows.find(x => x[0] === t && x[1] === s && x[2] === prod && x[3] === ok)[4];
-    check("core and ambient: a choice answer stops at 2, only production goes on (as pairs)", [0, 1].every(t => at(t, 1, false, true) === 2 && at(t, 2, false, true) === 2 && at(t, 2, true, true) === 3 && at(t, 3, false, true) === 3));
-    check("peripheral: every right answer adds one (a choice answer takes 2 -> 3)", at(2, 1, false, true) === 2 && at(2, 2, false, true) === 3 && at(2, 3, false, true) === 4);
+    check("every tier: a choice answer stops at 2, only production (typed, or the hard choice where nothing can be typed) takes 2 -> 3", [0, 1, 2].every(t => at(t, 1, false, true) === 2 && at(t, 2, false, true) === 2 && at(t, 2, true, true) === 3 && at(t, 3, false, true) === 3));
     check("every tier: a miss sets 0", rows.filter(x => !x[3]).every(x => x[4] === 0));
-    const again = { s: 0, p: { wm: [1, 5] } }; VC.notePair(again, "wm", true, false, 5, 1, undefined, 2);
-    check("peripheral: the in-drill retry (same session) still gains nothing", again.p.wm[0] === 1);
-    check("pair mastered at: core / ambient 3, peripheral 2", VC.pairKnownAt(0) === 3 && VC.pairKnownAt(1) === 3 && VC.pairKnownAt(2) === 2 && VC.pairKnownAt(undefined) === 3);
+    const H = VC.pairUnitHeld(PACK), bootOf = tier => { const r = { r: 6, w: 0, s: H }; VC.notePair(r, "wm", true, false, 5, H, H, tier); return r.p.wm[0]; };
+    check(`a unit held at ${H} (bare - 1): core boots at 2 (asked typed first), peripheral at 3 (no held priority; refresh)`, bootOf(1) === 2 && bootOf(2) === 3);
+    check("word known bar: core / ambient 3, peripheral 2", VC.knownBarAt(0) === 3 && VC.knownBarAt(1) === 3 && VC.knownBarAt(2) === 2 && VC.knownBarAt(undefined) === 3);
   }
 
-  console.log("\n[4] typed planning per tier");
+  console.log("\n[4] typed planning per tier: peripheral typed asks happen, never prioritised");
   {
-    // HSK 1 at legacy 2, pairs below every tier's mastery: peripheral at 0 (missed, first in the plan),
-    // the rest at 1 (typed asks first among equals).
-    const p = synth(2, 3, 6, (r, w) => { Object.keys(r.p).forEach(k => { r.p[k] = [tierOf(w) === 2 ? 0 : 1, 3]; }); });
-    const lw = lwOf(p); let typedPer = 0, typedCore = 0, perItems = 0;
+    // Synthetic candidates at equal streak 1: core typed asks go first; a peripheral pair is asked typed
+    // when drawn, after the core typed asks even when older.
+    const cand = (t, a, id) => { const w = Object.assign({}, BY_W[id]); return { t: "w", x: w, key: "w:" + w.id, rec: { s: 1, u: a, p: { wm: [1, a] } }, kinds: ["read", "recall", "type"], tier: t, tw: w }; };
+    const fits = { typedKindFits: (w, k) => k === "written" || k === "word" };
+    const pick = (cs, n, pk) => VC.pairPick(cs, n, { a: {} }, mulberry32(1), 40, pk || PACK, fits).filter(e => e.pair === "wm").map(e => [e.c.tier, e.kind]);
+    const two = [cand(1, 30, "虽然"), cand(2, 5, "爬山")];
+    const r1 = pick(two, 1), r2 = pick(two, 2);
+    check(`equal streak: the core typed ask before the older peripheral one (${JSON.stringify(r1)}); the peripheral one, when drawn, is typed (${JSON.stringify(r2)})`, r1.length === 1 && r1[0][0] === 1 && r1[0][1] === "type" && r2.length === 2 && r2[1][0] === 2 && r2[1][1] === "type");
+    const cOff = [cand(undefined, 30, "虽然"), cand(undefined, 5, "爬山")];
+    check("flag off: the older typed ask first (no tier)", pick(cOff, 1, PACK_OFF)[0] && VC.pairPick(cOff, 1, { a: {} }, mulberry32(1), 40, PACK_OFF, fits)[0].c.key === "w:" + BY_W["爬山"].id);
+    // A peripheral pair below its streak still comes before a core one higher up: streak first.
+    const lowP = [cand(1, 30, "虽然"), Object.assign(cand(2, 5, "爬山"), { rec: { s: 0, u: 5, p: { wm: [0, 5] } } })];
+    check("streak first: a peripheral pair at 0 before a core pair at 1", VC.pairPick(lowP, 1, { a: {} }, mulberry32(1), 40, PACK, fits)[0].c.tier === 2);
+    // Plans on HSK 1 at pair streak 1: peripheral words are typed when planned; the typed share is below core's.
+    const p = synth(2, 3, 6, (r) => { Object.keys(r.p).forEach(k => { r.p[k] = [1, 3]; }); });
+    const lw = lwOf(p); let tP = 0, nP = 0, tC = 0, nC = 0;
     for(const sd of [1, 2, 3, 4, 5]){
-      const pl = VC.buildReviewPlan(lw, clone(p), PACK, Object.assign(planOpts(sd), { size: 40, sn: 7 }));
-      pl.forEach(it => { if(!it.word) return; const t = tierOf(it.word); if(t === 2){ perItems++; if(it.kind === "type") typedPer++; } else if(it.kind === "type") typedCore++; });
-      const rc = VC.buildRecallPlan(lw, clone(p), PACK, 12, Object.assign(planOpts(sd), { sn: 7 }));
-      rc.forEach(it => { if(it.word && tierOf(it.word) === 2 && it.kind === "type") typedPer++; });
+      VC.buildReviewPlan(lw, clone(p), PACK, Object.assign(planOpts(sd), { size: 20, sn: 7 })).forEach(it => { if(!it.word) return; if(tierOf(it.word) === 2){ nP++; if(it.kind === "type") tP++; } else { nC++; if(it.kind === "type") tC++; } });
     }
-    check(`Review / Recall plans: peripheral words never typed (${perItems} peripheral items, ${typedPer} typed); core / ambient words typed (${typedCore})`, perItems > 0 && typedPer === 0 && typedCore > 0);
+    console.log(`    Review plans, HSK 1 at pair streak 1 (5 seeds x 20): core/ambient ${tC} typed of ${nC}; peripheral ${tP} typed of ${nP} (HSK 1 has ${byLv["1"].filter(w => tierOf(w) === 2).length} peripheral of 150)`);
+    check("a size-20 Review at equal streak fills with core typed asks before any peripheral one", nP === 0 || tC >= 20 * 5 - nP);
     const w2 = byLv["1"].find(w => tierOf(w) === 2), w1 = byLv["1"].find(w => tierOf(w) === 1);
-    check(`typedWordDue: a held peripheral word (${w2.w}) is never due typed; a held core word (${w1.w}) is`, !VC.typedWordDue(w2, p, PACK, TODAY, ["recall", "type"], () => true) && VC.typedWordDue(w1, p, PACK, TODAY, ["recall", "type"], () => true));
-    // Units: HSK 1 units recorded at 4 (mastered..bare-1, held for a typed ask).
-    // Every word pair known (3), so the plan's low list is the units.
+    check(`typedWordDue: a held peripheral word (${w2.w}) and a held core word (${w1.w}) are both due typed (same mechanics)`, VC.typedWordDue(w2, p, PACK, TODAY, ["recall", "type"], () => true) && VC.typedWordDue(w1, p, PACK, TODAY, ["recall", "type"], () => true));
+    // Units: HSK 1 units at 4 (mastered..bare-1, held for a typed ask); every word pair known.
     const pu = synth(3, 3, 6); VC.answerCharChoice(pu, true); VC.ensureChars(pu);
     byLv["1"].forEach(w => { const u = CHARACTERS.find(x => x.words[0] === w.id); pu.chars.c[u.id] = { r: 5, w: 0, s: 4 }; });
     const TU = VC.typedUnitWords(CHARACTERS, WORDS, PACK);
     const uP = CHARACTERS.find(u => u.lv === "1" && u.ft === 2 && TU.has(u.id)), uC = CHARACTERS.find(u => u.lv === "1" && u.ft === 1 && TU.has(u.id));
-    check(`typedUnitDue: a peripheral unit at 4 (${uP.t}) is never due typed; a core one (${uC.t}) is; both stay held (in typedUnitWords)`, !VC.typedUnitDue(uP, pu, PACK, TU) && VC.typedUnitDue(uC, pu, PACK, TU) && TU.has(uP.id));
-    let tuPer = 0, tuAll = 0;
+    check(`typedUnitDue: a peripheral unit at 4 (${uP.t}) and a core one (${uC.t}) are both due typed`, VC.typedUnitDue(uP, pu, PACK, TU) && VC.typedUnitDue(uC, pu, PACK, TU));
+    let tuPer = 0, tuCore = 0;
     for(const sd of [1, 2, 3]){
       const pl = VC.buildReviewPlan(lwOf(pu), clone(pu), PACK, Object.assign(planOpts(sd), { size: 40, sn: 7, units: CHARACTERS, typedUnits: TU }));
-      pl.forEach(it => { if(it.tu){ tuAll++; if(CHARACTERS.find(u => u.id === it.tu).ft === 2) tuPer++; } });
-      const tp = VC.charTestPlan(CHARACTERS, lwOf(pu), clone(pu), PACK, 20, mulberry32(sd), TODAY, { sn: 7 });
-      tp.forEach(it => { if(it.tu && CHARACTERS.find(u => u.id === it.tu).ft === 2) tuPer++; });
+      pl.forEach(it => { if(it.tu){ if(CHARACTERS.find(u => u.id === it.tu).ft === 2) tuPer++; else tuCore++; } });
     }
-    check(`unit typed asks (as its word): none for a peripheral unit (${tuPer} of ${tuAll})`, tuAll > 0 && tuPer === 0);
+    console.log(`    Review plans, HSK 1 units at 4 (3 seeds x 40): unit typed asks core ${tuCore}, peripheral ${tuPer} (refresh share only)`);
+    check("unit typed asks: core units held at 4 first; peripheral ones only through the refresh share (fewer)", tuCore > 0 && tuPer < tuCore && tuPer <= 3 * Math.ceil(40 * VC.PAIR_REFRESH));
     const held = { r: 6, w: 0, s: 4 }, before = clone(held);
     VC.markChar({ chars: { c: { x: held } } }, "x", true, PACK, true);
-    check("a peripheral unit held at mastered: a right choice answer does not move it to bare (it stays shown with its reading)", held.s === before.s);
+    check("a unit held at 4: a right choice answer does not move it to bare (every tier)", held.s === before.s);
+    const pt = clone(pu), wid = uP.words[0]; const tu = VC.markUnitTyped(pt, CHARACTERS, PACK, BY_ID[wid] ? TU.get(uP.id).id : wid, true);
+    check(`a peripheral unit at 4 (${uP.t}) reaches bare (${PACK.characters.bare}) by a right typed answer: ${pt.chars.c[uP.id].s}`, !!tu && pt.chars.c[uP.id].s === PACK.characters.bare && VC.charTier(pt.chars.c[uP.id].s, PACK) === "bare");
   }
 
   console.log("\n[5] refresh: ambient excluded, peripheral age halved");
@@ -279,14 +288,14 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
   {
     const wp = byLv["1"].find(w => tierOf(w) === 2), wc = byLv["1"].find(w => tierOf(w) === 1), wa = byLv["1"].find(w => tierOf(w) === 0);
     const K = (rec, w, pk) => VC.wordKnown(rec, w, pk || PACK);
-    check(`pairs a word's known reads: core ${VC.wordPairs(wc, PACK).join("/")}, peripheral ${VC.wordPairs(wp, PACK).join("/")} (never typed: no written <-> sound pair)`, VC.wordPairs(wc, PACK).join() === "wm,sm,ws" && VC.wordPairs(wp, PACK).join() === "wm,sm");
+    check(`pairs a word's known reads: core ${VC.wordPairs(wc, PACK).join("/")}, peripheral ${VC.wordPairs(wp, PACK).join("/")}`, VC.wordPairs(wc, PACK).join() === "wm,sm,ws" && VC.wordPairs(wp, PACK).join() === "wm,sm,ws");
     check("legacy 2, no pairs answered: peripheral known, core and ambient not", K({ r: 3, w: 0, s: 2 }, wp) && !K({ r: 3, w: 0, s: 2 }, wc) && !K({ r: 3, w: 0, s: 2 }, wa));
     check("legacy 3+, no pairs answered: known in every tier (boot follows the legacy streak)", [wp, wc, wa].every(w => K({ r: 4, w: 0, s: 3 }, w)));
     check("core: wm 3 and sm 3 but ws at boot 2 (legacy 2): not known; ws 3: known", !K({ r: 4, w: 0, s: 2, p: { wm: [3, 1], sm: [4, 2] } }, wc) && K({ r: 4, w: 0, s: 2, p: { wm: [3, 1], sm: [4, 2], ws: [3, 2] } }, wc));
     check("a missed pair (0) takes a word out of known in every tier", [wp, wc, wa].every(w => !K({ r: 4, w: 1, s: 5, p: { sm: [0, 3] } }, w)));
-    check("peripheral: wm 2 and sm 2 by choice answers: known", K({ r: 4, w: 0, s: 1, p: { wm: [2, 3], sm: [2, 4] } }, wp));
+    check("peripheral: every pair at 2 (choice answers): known; core at 2 not", K({ r: 4, w: 0, s: 1, p: { wm: [2, 3], sm: [2, 4], ws: [2, 4] } }, wp) && !K({ r: 4, w: 0, s: 1, p: { wm: [2, 3], sm: [2, 4], ws: [2, 4] } }, wc));
     check("flag off: the legacy streak alone (3+), pairs ignored", K({ r: 4, w: 0, s: 3, p: { wm: [0, 3] } }, wc, PACK_OFF) && !K({ r: 3, w: 0, s: 2 }, wp, PACK_OFF) && !K(undefined, wc, PACK_OFF));
-    const pr = { r: 3, w: 0, s: 2, prov: 1, p: { wm: [2, 3], sm: [2, 3] } };
+    const pr = { r: 3, w: 0, s: 2, prov: 1, p: { wm: [2, 3], sm: [2, 3], ws: [2, 3] } };
     check("settleProv: a peripheral placement word known by pairs drops prov; flag off keeps it", (() => { const a = clone(pr), b = clone(pr); return VC.settleProv(a, wp, PACK) && !a.prov && !VC.settleProv(b, wp, PACK_OFF) && b.prov === 1; })());
     // Goal / progress positions read the same rule.
     const p = synth(2, 3, 6), lv1 = byLv["1"];
@@ -395,12 +404,16 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       const sn = (api.getProg().sn || 0) + 1;
       (await session(api, (it, rec, rows) => { const key = String(it.key), p = api.getProg();
         const r = key[0] === "w" ? p.w[key.slice(2)] : key[0] === "c" ? p.chars.c[key.slice(2)] : null;
-        all.push({ key, kind: it.kind, sn, tier: key[0] === "w" ? tierOf(BY_ID[key.slice(2)]) : key[0] === "c" ? VC.unitTier(CHARACTERS.find(u => u.id === key.slice(2)), null, PACK) : null,
-          ws: r ? ["wm", "sm", "ws"].map(k => VC.pairState(r, k).s) : null, retry: rows.some(x => x.key === key && !x.ok) });
+        all.push({ key, kind: it.kind, sn, tu: it.tu || null, tier: key[0] === "w" ? tierOf(BY_ID[key.slice(2)]) : key[0] === "c" ? VC.unitTier(CHARACTERS.find(u => u.id === key.slice(2)), null, PACK) : null,
+          ws: r ? ["wm", "sm", "ws"].map(k => VC.pairState(r, k).s) : null,
+          us: (() => { if(key[0] !== "w") return null; const u = CHARACTERS.find(x => x.words[0] === key.slice(2)), ur = u && (p.chars || {}).c ? p.chars.c[u.id] : null; return ur ? ["wm", "ws"].map(k => VC.pairState(ur, k, VC.pairUnitHeld(PACK)).s).concat([ur.s || 0]) : null; })(), retry: rows.some(x => x.key === key && !x.ok) });
         return ans() < 0.88; })); }
-    const typedPer = all.filter(r => r.kind === "type" && r.tier === 2);
-    check(`no typed ask of a peripheral word or unit in three sessions (${all.filter(r => r.kind === "type").length} typed asks)`, typedPer.length === 0 && all.some(r => r.kind === "type"));
-    const ambKnown = all.filter(r => r.tier === 0 && !r.retry && r.ws && r.ws.every(s => s >= 3) && r.key[0] === "w");
+    const tyBy = t => all.filter(r => r.kind === "type" && r.tier === t).length, asksBy = t => all.filter(r => r.tier === t).length;
+    console.log(`    typed asks in three sessions by tier: ambient ${tyBy(0)} of ${asksBy(0)}, core ${tyBy(1)} of ${asksBy(1)}, peripheral ${tyBy(2)} of ${asksBy(2)}`);
+    check("typed asks happen for core words; peripheral typed asks fewer than core's", tyBy(1) > 0 && tyBy(2) < tyBy(1));
+    // a written-side typed ask also answers the word's unit (bareBy typed): with the unit's pairs below 3 it is
+    // the unit's ask, not a refresh of the word
+    const ambKnown = all.filter(r => r.tier === 0 && !r.retry && !r.tu && !(r.kind === "type" && r.us && r.us.slice(0, 2).some(x => x < 3)) && r.ws && r.ws.every(s => s >= 3) && r.key[0] === "w");
     check(`no ask of an ambient word whose every pair is known (refresh) (${ambKnown.length}; ${all.filter(r => r.tier === 0).length} ambient asks)`, ambKnown.length === 0);
     api.goto("progress"); const ph = api.panel(), prog = api.getProg();
     const rows = [...(ph.match(/>Characters<\/p><table class="stats nw">([\s\S]*?)<\/table>/) || ["", ""])[1].matchAll(/<td>([^<]*)<\/td><\/tr>/g)].map(m => m[1]);
