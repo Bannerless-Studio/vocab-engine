@@ -5,7 +5,8 @@ Checks schema (required fields, types), referential integrity (sentence.words id
 exist, every lv is a pack level, functionWords exist, placement levels exist,
 typing.strictFromLevel exists), placement feasibility, lesson shape, optional
 passages.json (ids, levels, word ids, question shape and sentence indices), optional
-script.json (script primer units and notes, with pack.script), and that
+script.json (script primer units and notes, with pack.script), optional patterns.json
+(grammar patterns, with pack.patterns), and that
 the generated .js consts are in sync with the .json sources.
 
 Usage: python3 tools/validate_pack.py packs/zh [--dump-strata]
@@ -187,6 +188,10 @@ def check_pack(pack, rep):
         rep.err("pack.freqTiers must be a boolean")
     elif pack.get("freqTiers") is True and not (pack.get("pairs") is True and pack.get("dayAware")):
         rep.err("pack.freqTiers needs pack.pairs (tiers set each pair's mastery)")
+    if "patterns" in pack and not is_bool(pack["patterns"]):
+        rep.err("pack.patterns must be a boolean")
+    elif pack.get("patterns") is True and pack.get("pairs") is not True:
+        rep.err("pack.patterns needs pack.pairs (and so pack.dayAware): pattern asks are counted by session")
     if "pronFirst" in pack:
         if not is_bool(pack["pronFirst"]):
             rep.err("pack.pronFirst must be a boolean")
@@ -640,6 +645,125 @@ def check_sentences(sents, levels, by_id, rep, char_word0=None):
         rep.warn(f"sentence spans: {unspanned} of {linked} linked words in {spanned} sentences with spans have no span "
                  f"(located by w/alt/forms instead); {len(sents) - spanned} sentences have no spans")
     return spanned
+
+
+PATTERN_NOTE_MAX = 60
+
+
+def check_patterns(pack, patterns, levels, by_id, rep, char_word0=None):
+    """patterns.json (optional, with pack.patterns): docs/PACK_SCHEMA.md "patterns". Returns the
+    number of pattern sentences."""
+    on = isinstance(pack, dict) and pack.get("patterns") is True
+    if patterns is None:
+        if on:
+            rep.err("pack.patterns is true but patterns.json is missing")
+        return 0
+    if not on:
+        rep.warn("patterns.json present but pack.patterns is not true: patterns will not be shown")
+    if not isinstance(patterns, list) or not patterns:
+        rep.err("patterns.json must be a non-empty list")
+        return 0
+    # levels is a set: the order comes from pack.levels.
+    order = {x.get("id"): i for i, x in enumerate(pack.get("levels") or []) if isinstance(x, dict) and x.get("id") in levels}
+    ids, prev, n, all_sids = set(), -1, 0, set()
+    all_ids = {p.get("id") for p in patterns if isinstance(p, dict)}
+    for i, p in enumerate(patterns):
+        where = f"patterns[{i}]"
+        if not isinstance(p, dict) or not is_str(p.get("id")):
+            rep.err(f"{where} must be an object with a non-empty id")
+            continue
+        if p["id"] in ids:
+            rep.err(f"{where}.id {p['id']} duplicated")
+        ids.add(p["id"])
+        where = f"pattern {p['id']}"
+        lv = p.get("lv")
+        if lv not in order:
+            rep.err(f"{where}.lv {lv!r} not in pack.levels")
+        elif order[lv] < prev:
+            rep.err(f"{where}.lv {lv} comes after a higher-level pattern (patterns.json is in level order)")
+        else:
+            prev = order[lv]
+        for f in ("label", "en"):
+            if not is_str(p.get(f)):
+                rep.err(f"{where}.{f} must be a non-empty string")
+        note = p.get("note")
+        if not (isinstance(note, list) and 1 <= len(note) <= 2 and all(is_str(x) for x in note)):
+            rep.err(f"{where}.note must be a list of one or two non-empty lines")
+        else:
+            for x in note:
+                if len(x) > PATTERN_NOTE_MAX:
+                    rep.err(f"{where}.note line over {PATTERN_NOTE_MAX} characters: {x!r}")
+        near = p.get("near", [])
+        if not isinstance(near, list) or any(q not in all_ids or q == p["id"] for q in near):
+            rep.err(f"{where}.near must list other pattern ids")
+        sents = p.get("sentences")
+        if not isinstance(sents, list) or not sents:
+            rep.err(f"{where}.sentences must be a non-empty list")
+            continue
+        keys = p.get("keys", [])
+        sent_words = {w for s in sents if isinstance(s, dict) and isinstance(s.get("words"), list) for w in s["words"] if isinstance(w, (str, int))}
+        if not isinstance(keys, list) or any(k not in sent_words for k in keys):
+            rep.err(f"{where}.keys must list word ids that occur in the pattern's sentence words")
+        elif lv in order and any(k in by_id and by_id[k].get("lv") in order and order[by_id[k]["lv"]] > order[lv] for k in keys):
+            rep.err(f"{where}.keys must not list a word above the pattern's level {lv} (the pattern teaches it)")
+        for k, s in enumerate(sents):
+            sw = f"{where}.sentences[{k}]"
+            if not isinstance(s, dict):
+                rep.err(f"{sw} must be an object")
+                continue
+            n += 1
+            if not is_str(s.get("id")) or s["id"] in all_sids:
+                rep.err(f"{sw}.id must be a non-empty id, unique across patterns.json")
+            all_sids.add(s.get("id"))
+            for f in ("t", "en"):
+                if not is_str(s.get(f)):
+                    rep.err(f"{sw}.{f} must be a non-empty string")
+            if "pron" in s and not is_str(s["pron"]):
+                rep.err(f"{sw}.pron must be a non-empty string when present")
+            if s.get("lv") != lv:
+                rep.err(f"{sw}.lv {s.get('lv')!r} must be the pattern's lv {lv!r}")
+            ws = s.get("words")
+            if not isinstance(ws, list) or not ws:
+                rep.err(f"{sw}.words must be a non-empty list of word ids")
+            else:
+                missing = [w for w in ws if w not in by_id]
+                if missing:
+                    rep.err(f"{sw}.words has unknown ids {missing}")
+                elif lv in order:
+                    # a mark word above the level is the pattern's own word, taught by it (hsk check_patterns.py)
+                    ts = s.get("t") if isinstance(s.get("t"), str) else ""
+                    u16 = ts.encode("utf-16-le")
+                    mk = {u16[2 * m[0]:2 * m[1]].decode("utf-16-le", "ignore") for m in (s.get("marks") or []) if isinstance(m, list) and len(m) == 2 and all(isinstance(x, int) for x in m)}
+                    high = [w for w in ws if by_id[w].get("lv") in order and order[by_id[w]["lv"]] > order[lv] and by_id[w].get("w") not in mk]
+                    if high:
+                        rep.err(f"{sw}.words {high} are above the pattern's level {lv}")
+            t = s.get("t") if isinstance(s.get("t"), str) else ""
+            u = len(t.encode("utf-16-le")) // 2
+            marks = s.get("marks")
+            if not isinstance(marks, list) or not marks:
+                rep.err(f"{sw}.marks must be a non-empty list of [start, end] ranges")
+            else:
+                end = 0
+                for m in marks:
+                    if not (isinstance(m, list) and len(m) == 2 and all(isinstance(v, int) and not is_bool(v) for v in m)
+                            and end <= m[0] < m[1] <= u):
+                        rep.err(f"{sw}.marks {m!r} must be [start, end] UTF-16 offsets inside t, sorted, not overlapping")
+                        continue
+                    end = m[1]
+                    piece = t.encode("utf-16-le")[2 * m[0]:2 * m[1]]
+                    try:
+                        if not piece.decode("utf-16-le").strip():
+                            rep.err(f"{sw}.marks {m!r} covers only whitespace")
+                    except UnicodeDecodeError:
+                        rep.err(f"{sw}.marks {m!r} splits a surrogate pair")
+            if "ruby" in s:
+                check_ruby(s["ruby"], s.get("t"), ws, char_word0, sw, rep, null_ok=True)
+                if isinstance(s["ruby"], list) and isinstance(marks, list):
+                    cuts = {0, u} | {x[0] for x in s["ruby"] if isinstance(x, list) and x} | {x[1] for x in s["ruby"] if isinstance(x, list) and len(x) > 1}
+                    for m in marks:
+                        if isinstance(m, list) and len(m) == 2 and (m[0] not in cuts or m[1] not in cuts):
+                            rep.err(f"{sw}.marks {m!r} splits a ruby token (the blank would widen to it)")
+    return n
 
 
 def check_lessons(pack, lessons, rep):
@@ -1198,6 +1322,7 @@ def validate(packdir):
     chars = load(packdir, "characters", rep, required=False)
     legacy = load(packdir, "legacy", rep, required=False)
     script = load(packdir, "script", rep, required=False)
+    patterns = load(packdir, "patterns", rep, required=False)
     if pack is None or words is None or sents is None:
         return rep, {}
     levels, char_levels = check_pack(pack, rep)
@@ -1214,6 +1339,7 @@ def validate(packdir):
         rep.err("characters.json is present but pack.characters is not set")
     char_ids, char_word0 = check_characters_data(chars, char_levels, by_id, rep)
     sent_spans = check_sentences(sents, levels, by_id, rep, char_word0=char_word0 if has_pack_chars else None)
+    n_patterns = check_patterns(pack, patterns, levels, by_id, rep, char_word0=char_word0 if has_pack_chars else None)
     check_lessons(pack, lessons, rep)
     check_pron_aids_data(pack, words, lessons, rep)
     check_passages(passages, levels, by_id, rep, char_word0=char_word0 if has_pack_chars else None)
@@ -1236,8 +1362,15 @@ def validate(packdir):
               "passages": len(passages) if isinstance(passages, list) else 0,
               "sentence_spans": sent_spans,
               "characters": len(chars) if isinstance(chars, list) else 0,
-              "script": len(script["units"]) if isinstance(script, dict) and isinstance(script.get("units"), list) else 0}
+              "script": len(script["units"]) if isinstance(script, dict) and isinstance(script.get("units"), list) else 0,
+              "patterns": len(patterns) if isinstance(patterns, list) else 0, "pattern_sentences": n_patterns}
     return rep, counts
+
+
+def patterns_note(counts):
+    # Only packs with patterns mention them, so other packs' output is unchanged.
+    n = counts.get("patterns", 0)
+    return f", {n} patterns ({counts.get('pattern_sentences', 0)} sentences)" if n else ""
 
 
 def passages_note(counts):
@@ -1283,7 +1416,7 @@ def main(argv):
         print(f"ERROR ... and {len(rep.errors) - 50} more")
     status = "FAIL" if rep.errors else "OK"
     print(f"{status} {packdir}: {counts.get('words', 0)} words, {counts.get('sentences', 0)} sentences, "
-          f"{counts.get('lessons', 0)} lessons{sentence_spans_note(counts)}{passages_note(counts)}{characters_note(counts)}{script_note(counts)}; "
+          f"{counts.get('lessons', 0)} lessons{sentence_spans_note(counts)}{passages_note(counts)}{characters_note(counts)}{script_note(counts)}{patterns_note(counts)}; "
           f"{len(rep.errors)} errors, {len(rep.warnings)} warnings")
     return 1 if rep.errors else 0
 

@@ -14,6 +14,7 @@ and build.sh can inline them with awk, no JSON loader needed):
     passages.json  -> sentences.js  const PASSAGES=...;  (optional; appended after
                       SENTENCES so build.sh and the dev loader need no new file. A pack
                       without passages.json gets the same sentences.js as before.)
+    patterns.json  -> sentences.js  const PATTERNS=...;  (optional; appended last, the same way)
 
 Usage: python3 tools/jsonify_pack.py packs/zh [--check]
   --check  write nothing; exit 1 if any .js is missing or differs from what
@@ -53,6 +54,12 @@ def expected_outputs(packdir):
             data = json.load(f)
         body = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
         out[os.path.join(packdir, "sentences.js")] += f"const PASSAGES={body};\n"
+    tsrc = os.path.join(packdir, "patterns.json")
+    if os.path.exists(tsrc):
+        with open(tsrc, encoding="utf-8") as f:
+            data = json.load(f)
+        body = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+        out[os.path.join(packdir, "sentences.js")] += f"const PATTERNS={body};\n"
     return out
 
 

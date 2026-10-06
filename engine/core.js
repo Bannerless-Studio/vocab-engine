@@ -1778,6 +1778,98 @@ function pairPlan(learned, prog, pack, n, o, wk, ck){
   return hearableKinds(pool.map(pairPlanItem), o.canHear);
 }
 
+// ------------------------------------------------------------------ patterns
+// pack.patterns (docs/PACK_SCHEMA.md "patterns"; owner 2026-10-06: grammar drills from level 3, a few
+// level-2 patterns carried in; drills, not lessons). patterns.json lists patterns, each with 6-8
+// sentences and marks (the UTF-16 ranges of its words); open patterns take a share of the Sentences
+// step as cloze items on a mark. prog.pt[id] = { s: streak, a: session last answered }, written only
+// on an answer under the flag. validateProgShape never looks at pt: a malformed entry reads as a
+// pattern never answered instead of resetting the progress. Needs pairs (and so dayAware): asks are
+// counted by session.
+// PATTERN_OPEN: share of a pattern's distinct sentence words that must be learned before it opens.
+// PATTERN_SHARE: 3 of the step's 8 items. PATTERN_DONE: the streak a pattern is done at (as PAIR_KNOWN).
+const PATTERN_DONE = 3, PATTERN_OPEN = 0.8, PATTERN_SHARE = 3 / 8;
+function patternsOn(pack){ return !!(pack && pack.patterns === true) && pairsOn(pack); }
+const patternCount = n => Math.round(n * PATTERN_SHARE);
+const patternWords = p => [...new Set(((p && p.sentences) || []).flatMap(s => s.words || []))];
+const patternEntry = v => isObj(v) && Number.isInteger(v.s) && v.s >= 0 && typeof v.a === "number" && isFinite(v.a) ? v : null;
+// A pattern never answered has no record: streak 0, asked never (a -1).
+function patternState(prog, id){
+  const e = patternEntry(prog && isObj(prog.pt) ? prog.pt[id] : null);
+  return e ? { s: e.s, a: e.a } : { s: 0, a: -1, fresh: true };
+}
+// A pattern opens when all hold: its `keys` (sentence word ids that are its own words, emitted by
+// the pack generator) have records; the learner has reached its level (a word of that level has a
+// record: patterns are placed by level on purpose); and PATTERN_OPEN of its sentence words have one.
+// `words`: the pack's words (their lv); without it no level counts as reached and nothing opens.
+function openPatterns(prog, pack, patterns, words){
+  if(!patternsOn(pack)) return [];
+  const w = (prog && prog.w) || {}, reached = new Set();
+  (words || []).forEach(x => { if(x && isObj(w[x.id])) reached.add(String(x.lv)); });
+  return (patterns || []).filter(p => {
+    if(!reached.has(String(p.lv)) || !(p.keys || []).every(id => isObj(w[id]))) return false;
+    const ids = patternWords(p);
+    return ids.length > 0 && ids.filter(id => isObj(w[id])).length >= PATTERN_OPEN * ids.length;
+  });
+}
+// A miss sets the streak to 0, a right answer adds one; a pattern already answered this session (sn)
+// gains nothing more (the in-drill retry after a miss), as notePair.
+function notePattern(prog, id, ok, sn){
+  if(!prog || typeof id !== "string") return null;
+  const e = patternEntry(isObj(prog.pt) ? prog.pt[id] : null);
+  const s = e ? e.s : 0, again = !!e && sn > 0 && e.a === sn;
+  if(!isObj(prog.pt)) prog.pt = {};
+  return prog.pt[id] = { s: !ok ? 0 : again ? s : s + 1, a: sn > 0 ? sn : 0 };
+}
+// The n patterns to ask in the session psn: open ones not answered in it nor in skip (ids already
+// planned this session). Lowest streak first, then asked longest ago, then pack order; at equal streak
+// a pattern asked before comes ahead of one never asked, so a miss (s 0) comes back next session
+// instead of after every newly opened pattern. Done ones (s >= PATTERN_DONE) refresh like a known pair at half its rate: a known pair's 0.1
+// share of an 8-item step is one item a session, so a done pattern gets one slot every second session
+// (even psn), oldest first; done ones also fill the slots the others leave (as pairPick).
+function patternPick(open, prog, n, psn, skip){
+  const lo = [], hi = [];
+  (open || []).forEach((p, i) => {
+    if(skip && skip.has(p.id)) return;
+    const st = patternState(prog, p.id);
+    if(!st.fresh && psn > 0 && st.a === psn) return;
+    (st.s >= PATTERN_DONE ? hi : lo).push({ p, s: st.s, a: st.a, i });
+  });
+  lo.sort((x, y) => x.s - y.s || (x.a < 0) - (y.a < 0) || x.a - y.a || x.i - y.i);
+  hi.sort((x, y) => x.a - y.a || x.i - y.i);
+  const rk = hi.length && psn % 2 === 0 ? Math.min(1, n) : 0;
+  const out = [...lo.slice(0, n - rk), ...hi.slice(0, rk)];
+  hi.slice(rk).forEach(e => { if(out.length < n) out.push(e); });
+  lo.slice(n - rk).forEach(e => { if(out.length < n) out.push(e); });
+  return out.map(e => e.p);
+}
+const patternMarkText = (s, m) => String((s && s.t) || "").slice(m[0], m[1]);
+const patternMarkTexts = p => [...new Set(((p && p.sentences) || []).flatMap(s => (s.marks || []).map(m => patternMarkText(s, m))))];
+// The mark asked in session sn: several marks (虽然 and 但是) take turns by session.
+const patternMarkIndex = (s, sn) => { const n = ((s && s.marks) || []).length; return n ? Math.max(0, sn) % n : 0; };
+// Wrong choices: the pattern's own other mark texts first (了 vs 过, 才 vs 就), then other patterns'
+// marks of the answer's length, then any. Never the answer, never a mark of a pattern in p.near (an
+// author-listed pattern whose word could also fit the blank, 如果 for 即使).
+function patternOpts(p, s, mi, patterns, rng){
+  const r = rng || Math.random, ans = patternMarkText(s, s.marks[mi]), near = new Set(p.near || []);
+  const own = patternMarkTexts(p).filter(t => t !== ans);
+  const others = [...new Set((patterns || []).filter(q => q.id !== p.id && !near.has(q.id)).flatMap(patternMarkTexts))].filter(t => t !== ans && !own.includes(t));
+  const len = cpLen(ans), out = [];
+  [own, others.filter(t => cpLen(t) === len), others.filter(t => cpLen(t) !== len)].forEach(t => shuffle(t.slice(), r).forEach(x => { if(out.length < 3 && !out.includes(x)) out.push(x); }));
+  return out;
+}
+// The sentence to ask: one whose words are all learned when there is one, else any.
+function patternSentenceIndex(p, prog, rng){
+  const w = (prog && prog.w) || {}, ss = (p && p.sentences) || [];
+  const all = ss.map((s, i) => i), ok = all.filter(i => (ss[i].words || []).every(id => isObj(w[id])));
+  const pool = ok.length ? ok : all;
+  return pool[Math.floor((rng || Math.random)() * pool.length)];
+}
+function patternStats(prog, pack, patterns, words){
+  const list = patterns || [];
+  return { done: list.filter(p => patternState(prog, p.id).s >= PATTERN_DONE).length, open: openPatterns(prog, pack, list, words).length, total: list.length };
+}
+
 // A pack that types the reading (pronTypingOn) never gets gapType: the blank is written.
 function sentenceKind(pack, rng){
   const r = (rng || Math.random)();
@@ -3984,6 +4076,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
   FT_AMBIENT, FT_CORE, FT_PERIPHERAL, freqTiersOn, wordTier, unitTier, knownBarAt, wordPairs, wordKnown, settleProv, unitDone,
+  PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairsOn, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,

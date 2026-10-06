@@ -70,6 +70,7 @@
   .pron{color:var(--mute);font-size:18px;text-align:center;margin:-10px 0 14px}
   .en{color:var(--mute);font-size:15px;text-align:center;margin-top:-8px;margin-bottom:14px}
   .blank{color:var(--mute);letter-spacing:1px;unicode-bidi:isolate}
+  .pnote{margin:0 0 10px;padding:6px 10px;border-left:3px solid var(--line);color:var(--mute)}
   /* Target-language text carries data-tl + lang (+ dir="rtl" for pack.rtl); block
      elements then align to their start side. English glosses never carry it. */
   [data-tl]{font-family:var(--wfont)}
@@ -370,6 +371,10 @@ const HAS_LESSONS = !!PACK.hasLessons && LESSON_LIST.length > 0;
 // with passages.json. Without it the Read tab and every reading hint stay hidden.
 const PASSAGE_LIST = (typeof PASSAGES !== "undefined" && Array.isArray(PASSAGES)) ? PASSAGES : [];
 const HAS_PASSAGES = PASSAGE_LIST.length > 0;
+// PATTERNS (pack.patterns, docs/PACK_SCHEMA.md "patterns") is appended to sentences.js the same way;
+// without it, or with the flag off, no pattern item, plan line or Progress row exists.
+const PATTERN_LIST = (typeof PATTERNS !== "undefined" && Array.isArray(PATTERNS)) ? PATTERNS : [];
+const PATTERNS_ON = VC.patternsOn(PACK) && PATTERN_LIST.length > 0;
 // Every character surface is gated on HAS_CHARACTERS; without it each code path is the
 // pre-characters one.
 const CHAR_LIST = (typeof CHARACTERS !== "undefined" && Array.isArray(CHARACTERS)) ? CHARACTERS : [];
@@ -411,7 +416,9 @@ const SCRIPT_BYID = (() => {
 // Without LEGACY no boot migration and no legacy import ever runs.
 const LEGACY_MAP = (typeof LEGACY !== "undefined" && LEGACY && typeof LEGACY === "object") ? LEGACY : null;
 const HAS_LEGACY = !!(PACK.legacy && typeof PACK.legacy === "object" && typeof PACK.legacy.key === "string" && PACK.legacy.key) && !!LEGACY_MAP;
-const SENT_INDEX = new Map(SENTENCES.map((s,i)=>[s, i]));
+// Pattern sentences index after the pack's own, so their reveal rows play and a resumed item finds them.
+const SENT_ALL = PATTERNS_ON ? SENTENCES.concat(PATTERN_LIST.flatMap(p => p.sentences || [])) : SENTENCES;
+const SENT_INDEX = new Map(SENT_ALL.map((s,i)=>[s, i]));
 const TYPING = VC.typingEnabled(PACK) && !VC.pronTypingOn(PACK);
 const levelLabel = lv => VC.levelLabel(PACK, lv);
 document.title = PACK.name;
@@ -1173,7 +1180,7 @@ $("panel").addEventListener("click", e => {
   if(t.dataset.xs !== undefined){ const u = SUNIT_BY_ID[t.dataset.xs]; if(!u) return; if(t.dataset.xopen !== undefined) scriptOpenCard(u, e); sayUnitSound(u, t); return; }
   if(t.dataset.xw !== undefined){ const w = SCRIPT_BYID[t.dataset.xw]; if(w && (wordAudio(w) || scriptVoice())) sayWord(w); return; }
   if(t.dataset.wid !== undefined){ const w = WORDS_BY_ID[t.dataset.wid]; if(w) sayWord(w); return; }
-  const s = SENTENCES[+t.dataset.sent]; if(s) saySentence(s);
+  const s = SENT_ALL[+t.dataset.sent]; if(s) saySentence(s);
 });
 // Attached once, here, like the above.
 $("panel").addEventListener("keydown", e => {
@@ -1526,7 +1533,7 @@ function rzWrap(name, f){
 hearItem = rzWrap("hear", hearItem); readItem = rzWrap("read", readItem); recallItem = rzWrap("recall", recallItem); typeItem = rzWrap("type", typeItem);
 pronTypeItem = rzWrap("typePron", pronTypeItem); writtenTypeItem = rzWrap("typeWritten", writtenTypeItem); silentWrittenTypeItem = rzWrap("typeWrittenSilent", silentWrittenTypeItem);
 writtenPronTypeItem = rzWrap("typeWrittenPron", writtenPronTypeItem); meaningTypeItem = rzWrap("typeMeaning", meaningTypeItem);
-readSentence = rzWrap("sRead", readSentence); hearSentence = rzWrap("sHear", hearSentence); gapSentence = rzWrap("sGap", gapSentence);
+readSentence = rzWrap("sRead", readSentence); hearSentence = rzWrap("sHear", hearSentence); gapSentence = rzWrap("sGap", gapSentence); patternItem = rzWrap("pattern", patternItem);
 charDrillItem = rzWrap("char", charDrillItem); scriptDrillItem = rzWrap("script", scriptDrillItem); lessonItem = rzWrap("lesson", lessonItem);
 // A choice counterpart (typedRequeue) is rebuilt from its typed parent.
 function rzFallback(it){
@@ -1564,7 +1571,7 @@ function rzDec(e){
   if("v" in e) return e.v;
   if(e.r){ const ref = rzRefs().find(r => r[0] === e.r); return ref ? ref[1] : rzFail(); }
   if(e.w != null) return rzHas(WORDS_BY_ID[e.w]);
-  if(e.s != null) return rzHas(SENTENCES[e.s]);
+  if(e.s != null) return rzHas(SENT_ALL[e.s]);
   if(e.c != null) return rzHas(CHAR_LIST[e.c]);
   if(e.x != null) return rzHas(SUNITS[e.x]);
   if(e.l) return rzHas(((LESSON_LIST[e.l[0]] || {}).items || [])[e.l[1]]);
@@ -1666,6 +1673,7 @@ function sessionRecord(){
     // characters.learn "lag": sets are dynamic, so the set is kept by its unit ids.
     if(t.snap && t.snap.stage && t.snap.stage.lag && t.snap.cset) rec.today.cu = t.snap.cset.ids;
     if(WORDS_TYPED && typedSession.size) rec.today.tw = [...typedSession];
+    if(PATTERNS_ON && patternSession.size) rec.today.pt = [...patternSession];
   }
   return Object.assign({ v: VC.SESSION_VERSION, build: sessionBuild(), t: Date.now(), fp: sessProgFp || VC.sessionHash(JSON.stringify(prog)) }, rec);
 }
@@ -1712,6 +1720,7 @@ function sessionResume(forTab){
       if(t.hasRead) today.read = t.read ? Object.assign({}, t.read, { p: passageById(t.read.p) }) : null;
       if(t.cu) today.snap = VC.lagResume(takeSnapshot(), PACK, WORDS, CHAR_LIST, prog, t.cu);
       typedSession.clear(); if(WORDS_TYPED && Array.isArray(t.tw)) t.tw.forEach(id => { if(typeof id === "string") typedSession.add(id); });
+      patternSession.clear(); if(PATTERNS_ON && Array.isArray(t.pt)) t.pt.forEach(id => { if(typeof id === "string") patternSession.add(id); });
     }
     if(rec.drill){
       if(rec.drill.o.o === "today" && !today) rzFail();
@@ -1832,6 +1841,53 @@ function sentenceItemFor(s){
   if(k === "hear") return sentenceByEar(s);
   if(k === "read") return readSentence(s);
   return gapSentence(s, k === "gapType") || readSentence(s);
+}
+// pack.patterns (docs/PACK_SCHEMA.md "patterns"): a cloze on one mark of a pattern sentence, typed when
+// the pack types its sentence blanks (gapType). The two-line note shows above the sentence while the
+// pattern has no record (dismissed by answering) and with the verdict after a miss (once: not again
+// in the reveal when the stem already shows it). patternSession: the
+// patterns planned in the running Today session, kept in its session record (today.pt).
+const PATTERN_BY_ID = new Map(PATTERN_LIST.map(p => [p.id, p])), patternSession = new Set();
+// The reading of each mark text, for the options: its sentence's ruby tokens inside the mark.
+const PATTERN_READING = (() => { const m = new Map(); PATTERN_LIST.forEach(p => (p.sentences || []).forEach(x => (x.marks || []).forEach(mk => {
+  const t = VC.patternMarkText(x, mk), r = Array.isArray(x.ruby) ? x.ruby.filter(k => k[0] >= mk[0] && k[1] <= mk[1]).map(k => k[2]).join("") : "";
+  if(r && !m.has(t)) m.set(t, r); }))); return m; })();
+const patternOptHTML = o => { const r = HAS_CHARACTERS && PATTERN_READING.get(o); return r ? rubyTokHTML(escapeHtml(o), { tier: showPron() ? "ruby" : "bare", reading: r }) : escapeHtml(o); };
+const patternNoteHTML = p => `<div class="pnote">${p.note.map(ui).join("<br>")}</div>`;
+function patternItem(pid, si, mi){
+  const p = PATTERN_BY_ID.get(pid), s = p && p.sentences[si], mk = s && (s.marks || [])[mi];
+  if(!mk) return null;
+  const ans = VC.patternMarkText(s, mk), t = String(s.t);
+  const pf = pfSentence(s, null, { start: mk[0], end: mk[1], text: ans });
+  const body = (pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div>`
+    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + `<div class="q cue">${ui(s.en)}</div>`;
+  const note = patternNoteHTML(p), shown = VC.patternState(prog, pid).fresh ? note + body : body, rv = sentenceRevealBlock(s);
+  const base = { key: "p:" + pid, html: shown, reveal: rv, onReveal: b => saySentence(s, b), revealHear: canHearSentence(s) };
+  // A miss shows the note with the verdict, unless the stem on screen already carries it (first meeting).
+  base.onAnswer = function(ok){ const up = this.html !== body; VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); this.html = body; this.reveal = ok || up ? rv : note + rv; };
+  const choice = () => ({ kind: "mc", label: "What's the missing word?", optsClass: "opts-hero opts-w", opts: [ans, ...VC.patternOpts(p, s, mi, PATTERN_LIST)], a: ans, optHtml: patternOptHTML, optsT: true });
+  if(TYPING) return Object.assign(base, { kind: "type", label: "Type the missing word", check: v => VC.normKey(String(v).normalize("NFC")) === VC.normKey(ans.normalize("NFC")),
+    choiceFallback(){ const c = Object.assign({}, this, choice()); c.onAnswer = base.onAnswer; return c; } });
+  return Object.assign(base, choice());
+}
+// n pattern items for the session psn (skip: ids already planned in it); each asks a sentence whose
+// words are all learned when one is, on the mark whose turn it is this session.
+function patternItems(n, psn, skip){
+  return VC.patternPick(VC.openPatterns(prog, PACK, PATTERN_LIST, WORDS), prog, n, psn, skip).map(p => {
+    const si = VC.patternSentenceIndex(p, prog); return patternItem(p.id, si, VC.patternMarkIndex(p.sentences[si], psn)); }).filter(Boolean);
+}
+// The plan line's pattern count, planned as the step plans: a parked Today session continues at its own
+// sn skipping the patterns it already planned; a new one runs at sn + 1.
+function patternPlanCount(){
+  const rec = sessStore.get("today"), parked = rec && rec.today && !VC.sessionStale(rec, { build: sessionBuild(), fp: [rec.fp], now: Date.now() });
+  const psn = VC.daySn(prog) + (parked ? 0 : 1), skip = parked && Array.isArray(rec.today.pt) ? new Set(rec.today.pt) : undefined;
+  return VC.patternPick(VC.openPatterns(prog, PACK, PATTERN_LIST, WORDS), prog, VC.patternCount(8), psn, skip).length;
+}
+function todayPatternItems(){
+  if(!PATTERNS_ON) return [];
+  const its = patternItems(VC.patternCount(8), VC.daySn(prog), patternSession);
+  its.forEach(it => patternSession.add(it.key.slice(2)));
+  return its;
 }
 
 const sayUnit = (it, btn) => { const w = WORDS_BY_ID[it.wordId]; if(w) sayWord(w, btn); else { const u = CHAR_LIST.find(x => x.id === it.unitId); speak(VC.wordSay({ w: it.t, say: u && u.say }), btn); } };
@@ -2167,12 +2223,13 @@ function todayRender(){
   const reviewLine = snap
     ? `${snap.reviewExtra && todayPrep.review ? todayPrep.review.length : snap.reviewSize} items, ${PAIR_ORDER}${reviewWhat(snap, todayPrep.review)}`
     : `${pz && g.review ? VC.buildReviewPlan(lw, prog, PACK, { extra: learnDrillCount(null), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), rng: () => 0.5 }).length : VC.REVIEW_SIZE} items, ${PAIR_ORDER}`;
+  const pk = PATTERNS_ON && g.sentences ? patternPlanCount() : 0;
   const steps = [
     ["Review", g.review ? reviewLine : (snap && snap.stage && snap.stage.kind === "script" ? "skipped until a set is learned" : "skipped until 5+ words are learned")],
     ["Learn", snap ? snapLearnLine(snap) : (nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered")],
     ["Listen", g.listen ? listenLine(lw) : "skipped until something is learned"],
     ["Recall", g.recall ? (DAY_AWARE ? `${RECALL_N} items, ${PAIR_ORDER}` : `${RECALL_N} items`) : "skipped until something is learned"],
-    ["Sentences", g.sentences ? `8 items, ${PLAN_ORDER}` : "skipped until 8+ sentences are available"]
+    ["Sentences", g.sentences ? (pk ? `8 items · ${pk} pattern${pk > 1 ? "s" : ""}` : `8 items, ${PLAN_ORDER}`) : "skipped until 8+ sentences are available"]
   ];
   if(pz) steps.splice(1, 1);
   const showPlaceHint = !prog.placedOnce;
@@ -2210,7 +2267,7 @@ function todayRender(){
     return;
   }
   if(idle){ $("unpause").onclick = () => { VC.setPause(prog, false); store.save(); todayRender(); }; return; }
-  $("go").onclick = () => { todayStepState = HAS_STAGES ? (todayPrep ? { step:0, snap: todayPrep.snap, review: todayPrep.review } : { step:0, snap: takeSnapshot() }) : { step:0 }; todayStepState.read = readNext; todayPrep = null; typedSession.clear(); if(VC.daySessionStart(prog, PACK)) store.save(); todayStep(); };
+  $("go").onclick = () => { todayStepState = HAS_STAGES ? (todayPrep ? { step:0, snap: todayPrep.snap, review: todayPrep.review } : { step:0, snap: takeSnapshot() }) : { step:0 }; todayStepState.read = readNext; todayPrep = null; typedSession.clear(); patternSession.clear(); if(VC.daySessionStart(prog, PACK)) store.save(); todayStep(); };
   // A parked Today session (Today re-tapped, Escape) is resumed, never restarted.
   if(sessStore.get("today")){ const start = $("go").onclick; $("go").textContent = "Resume today"; $("go").onclick = () => { if(!sessionResume("today")) start(); }; }
 }
@@ -2288,7 +2345,7 @@ function todayStep(){
     return todayStep();
   }
   if(s === 4){
-    if(g.sentences){ drill(pickSentences(avail,8).map(sentenceItemFor), todayStep, missSummary); return; }
+    if(g.sentences){ const pi = todayPatternItems(); drill(pickSentences(avail, 8 - pi.length).map(sentenceItemFor).concat(pi), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 5){
@@ -3004,7 +3061,7 @@ function testRender(){
     $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20, { missedKinds: false, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn() }).map(itemFromPlan), testRender, missSummary);
   }
   if(tg.sentences){
-    $("tSentences").onclick = () => drill(pickSentences(availSent,20,s => [canHearSentence(s) ? "hear" : "read"]).map(sentenceByEar), testRender, missSummary);
+    $("tSentences").onclick = () => { const pi = PATTERNS_ON ? patternItems(VC.patternCount(20), planSn()) : []; drill(pickSentences(availSent, 20 - pi.length, s => [canHearSentence(s) ? "hear" : "read"]).map(sentenceByEar).concat(pi), testRender, missSummary); };
   }
   if(charN) $("tChars").onclick = () => drill(charPlan().map(planItem), testRender, missSummary);
 }
@@ -3066,6 +3123,7 @@ function placeResult(){
   $("ok").onclick = () => { switchToTab("today", "Today"); testSel = null; render(); };
 }
 
+const patternRowHTML = () => { const st = VC.patternStats(prog, PACK, PATTERN_LIST, WORDS); return `<tr><td>Patterns</td><td>${st.done} done / ${st.open} open (of ${st.total})</td></tr>`; };
 function progressRender(){
   stopSpeaking();
   setScore(0,0);
@@ -3085,7 +3143,7 @@ function progressRender(){
   const cp = HAS_CHARACTERS ? charProgress() : null;
   const xp = HAS_SCRIPT ? scriptProgress() : null;
   P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound.</div>`}${goalsBlockHTML()}
-    <table class="stats${cp && cp.block ? " nw" : ""}">${xp ? xp.rows : ""}${rows}${cp ? cp.rows : ""}
+    <table class="stats${cp && cp.block ? " nw" : ""}">${xp ? xp.rows : ""}${rows}${PATTERNS_ON ? patternRowHTML() : ""}${cp ? cp.rows : ""}
       ${HAS_PASSAGES ? VC.readingStats(PASSAGE_LIST, PACK, prog).map(r => `<tr><td>${escapeHtml(levelLabel(r.lv))} reading</td><td>${r.done} / ${r.total} passages${r.avg != null ? ` · avg ${r.avg}%` : ""}</td></tr>`).join("") : ""}
       ${HAS_LESSONS ? `<tr><td>Sounds</td><td>${LESSON_LIST.filter(l=>prog.lessons[l.id]).length} / ${LESSON_LIST.length} lessons done</td></tr>` : ""}
       <tr><td>Sessions</td><td>${prog.sessions||0}</td></tr></table>${cp ? cp.block : ""}

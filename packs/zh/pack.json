@@ -179,5 +179,6 @@
   ]
  },
  "pairs": true,
- "freqTiers": true
+ "freqTiers": true,
+ "patterns": true
 }

@@ -33,5 +33,9 @@
   "source": "wordfreq 3.1.1 zipf_frequency(word, \"zh\") via tools/zh_freq.py -> tools/zh_freq.json: word order within an HSK level and words.json `ft` (docs/ZH_TIERS.md)",
   "licence": "CC-BY-SA-4.0 (wordfreq data); Apache-2.0 (wordfreq code, not shipped)",
   "url": "https://github.com/rspeer/wordfreq"
+ },
+ "patterns": {
+  "source": "hand-authored for this pack (chinese repo data/hsk_patterns.js)",
+  "licence": "CC-BY-SA-4.0"
  }
 }

@@ -155,6 +155,8 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     delete pack.pairs;
     // Frequency tiers (docs/PACK_SCHEMA.md "freqTiers") are a new, flag-on field.
     delete pack.freqTiers;
+    // Grammar patterns (docs/PACK_SCHEMA.md "patterns") is a new, flag-on field.
+    delete pack.patterns;
   }
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.

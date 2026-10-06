@@ -781,5 +781,33 @@ console.log("\n[freqTiers] pack.freqTiers (fb26): no new stored field; records w
   }
 }
 
+console.log("\n[patterns] pack.patterns (fb29): optional top-level prog.pt = {patternId: {s, a}}; b21ee93 and 2412992 keep it on boot and on a mark, no backup");
+{
+  const seed = mig("HEAD"); const ob0 = VC.bootProg(JSON.stringify(seed), LAG_PACK);
+  check("[patterns] old progress (no pt) boots here unchanged: no backup, no pt added", ob0.backupRaw === null && !("pt" in ob0.prog));
+  const p = clone(ob0.prog); p.sn = 41; p.pt = { p01: { s: 2, a: 40 }, p14: { s: 0, a: 41 } };
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK), im = VC.applyImport(null, raw, LAG_PACK);
+  check("[patterns] a record with pt survives boot and export/import byte-identical; validateProgShape accepts pt", here.backupRaw === null && eq(here.prog.pt, p.pt) && im.ok && eq(im.prog.pt, p.pt) && VC.validateProgShape(p, Object.keys(p.sets)).ok);
+  const odd = clone(p); odd.pt = { p01: "x", p02: { s: -1, a: "b" } };
+  const ob = VC.bootProg(JSON.stringify(odd), LAG_PACK);
+  check("[patterns] a malformed pt never resets progress (no backup) and reads as never answered", ob.backupRaw === null && eq(ob.prog.pt, odd.pt) && VC.patternState(ob.prog, "p01").fresh && VC.patternState(ob.prog, "p02").fresh);
+  for(const sha of ["b21ee93", "2412992"]){
+    let eng = null, op = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
+      op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`[patterns] engine ${sha} not in this checkout's history`); continue; }
+    const o = eng.bootProg(raw, op);
+    check(`[patterns] engine ${sha} (its zh pack) boots a record carrying pt: no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw);
+    const q = clone(o.prog); eng.markRec(q.w, Object.keys(q.w)[0], true, true);
+    check(`[patterns] a mark on ${sha} keeps pt`, eq(q.pt, p.pt));
+    const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
+    check(`[patterns] and back here from ${sha}: no backup, pt byte-equal`, back.backupRaw === null && eq(back.prog.pt, p.pt));
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

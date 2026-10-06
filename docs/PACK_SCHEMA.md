@@ -12,10 +12,11 @@ A pack is one directory of JSON files that holds all the language-specific data.
   characters.json  optional  character-stage units; required when pack.characters is set
   script.json      optional  script-primer units; required when pack.script is set
   legacy.json      optional  old-app id maps for one-time progress migration
+  patterns.json    optional  grammar patterns drilled as cloze; required when pack.patterns is true
   pack.js words.js sentences.js lessons.js characters.js script.js legacy.js   generated, never edit by hand
 ```
 
-The `.js` files are generated with `python3 tools/jsonify_pack.py <packdir>`. They hold the same data as `const PACK=`, `WORDS=`, `SENTENCES=`, `LESSONS=`, `CHARACTERS=`, `SCRIPT=` and `LEGACY=`, so the app can load them from `file://` and `build.sh` can inline them. `passages.json` has no file of its own: its `const PASSAGES=` is appended to `sentences.js`, so `build.sh` and the dev loader need nothing new, and a pack without passages gets exactly the `sentences.js` it had before. `characters.json`, `script.json` and `legacy.json` follow `lessons.json`'s pattern instead: their own optional generated file, present only when the source `.json` is. `tools/validate_pack.py` fails when they are stale.
+The `.js` files are generated with `python3 tools/jsonify_pack.py <packdir>`. They hold the same data as `const PACK=`, `WORDS=`, `SENTENCES=`, `LESSONS=`, `CHARACTERS=`, `SCRIPT=` and `LEGACY=`, so the app can load them from `file://` and `build.sh` can inline them. `passages.json` has no file of its own: its `const PASSAGES=` is appended to `sentences.js`, so `build.sh` and the dev loader need nothing new, and a pack without passages gets exactly the `sentences.js` it had before. `patterns.json` works the same way (`const PATTERNS=`, appended after `PASSAGES`). `characters.json`, `script.json` and `legacy.json` follow `lessons.json`'s pattern instead: their own optional generated file, present only when the source `.json` is. `tools/validate_pack.py` fails when they are stale.
 
 ## pack.json
 
@@ -64,6 +65,7 @@ The `.js` files are generated with `python3 tools/jsonify_pack.py <packdir>`. Th
 | `wordsBy` | `"typed"` | no (off) | From streak 2 a word moves up only by a typed answer: right choice and ear answers hold it, a miss steps it down one; held words are planned typed. Needs `typing` (validator error) and `dayAware` (warning). See "wordsBy" below. Only zh sets it. |
 | `pairs` | bool | no (off) | Review, Recall, Listen and the Test Characters pool pick by pair (written↔meaning, sound↔meaning, written↔sound), lowest pair streak first, then asked longest ago, instead of the day planner's tiers; a pair past 2 only by a production answer. Needs `dayAware`; not with `script` (validator errors). Adds the optional record field `p`. See "pairs". Only zh sets it (owner 2026-10-05). |
 | `freqTiers` | bool | no (off) | Three frequency tiers per word from words.json `ft` (ambient / core / peripheral): how often each is asked (typed-first priority, held boot, refresh share) and the known bar; pair and unit mechanics stay the same. Needs `pairs` (validator error; without it the flag reads as off). See "freqTiers". Only zh sets it (owner 2026-10-06). No stored field. |
+| `patterns` | bool | no (off) | Grammar patterns from `patterns.json` take 3 of the 8 Today Sentences items (and 8 of the 20 in the Sentences test) as cloze on the pattern word, with a two-line note on first meeting and on a miss. Needs `pairs` (validator error; without it the flag reads as off). Adds the optional top-level progress key `pt`. See "patterns". Only zh sets it (owner 2026-10-06). |
 | `progressMap` | `{goals: [{upTo, label}]}` or bool | no (off) | Today row above the plan: a ladder of goals, one shown at a time, each scoped to levels <= `upTo` (a level id), with a 10-cell bar and "≈ N sessions to go" from the measured pace; `true` is the old whole-pack bar. See "progressMap". Needs `dayAware` (sessions are counted by `prog.sn`; the validator errors without it). Adds the optional top-level `prog.pm`. Only zh sets it (owner 2026-10-04). |
 | `tones` | `"pinyin"` | no | Readings carry tone marks: every displayed reading is coloured per syllable by tone; see "Pronunciation aids" below. The only accepted value is `"pinyin"`. |
 | `soundsReference` | `true` | no | The Sounds tab gets a Reference card built from the lesson rows; see "Pronunciation aids" below. Needs `hasLessons` (validator warning). |
@@ -449,6 +451,20 @@ Pair and unit mechanics are the same in every tier (pair 2 → 3 by production, 
 - **Storage**: NO new stored field. The tier is pack data; pair streaks are `p` (see "pairs"). A record written under the flag boots on b21ee93 and 2412992 byte-equal and back (tests/migration_checks.js [freqTiers]).
 - **Measured** (owner export a48ee4d3, 7 days × 3 Today sessions × 3 seeds, scratchpad fb23 harness; mean, main ff760d8 → freqTiers): known at boot 455 → 491 (36 peripheral words at legacy 2); typed asks per session ambient 4.08 → 3.67, core 18.2 → 20.6, peripheral 6.3 → 4.3; units reaching bare in the week core 85.3 → 124.7, peripheral 18.3 → 11.0; refresh asks in the week ambient 23.7 → 0, core 95.3 → 95, peripheral 43 → 30 (seed 1); production asks per weak core word per day 1.74 → 1.41; words known after the week under the tier rule on both runs 579.7 → 581.7. Nothing tuned; full table in .cache/briefs/fb26-freq-tiers-report.md.
 
+### patterns
+
+`"patterns": true` (zh only; owner 2026-10-06: grammar drills, not lessons, from HSK 3 with a few HSK 2 patterns carried in). Needs `pairs`, which needs `dayAware` (validator error; without it the flag reads as off). Data: `patterns.json` (below), from the chinese repo's hand-authored `data/hsk_patterns.js` via tools/pack_from_hsk.py (its `PATTERN_EXTRA` compounds resolve pattern sentences only and never join `pack.compounds`, so flag-off blanks are unchanged); docs/ZH_PATTERNS.md lists every pattern for review. Tests: tests/patterns_checks.js.
+
+- **Open** (core.js `openPatterns(prog, pack, patterns, words)`): a pattern is open when all hold: its `keys` (the sentence word ids that are its own mark words) have records; the learner has reached its level (a word of level `lv` has a record; `words` gives the levels, without it nothing opens); and at least 80% (`PATTERN_OPEN`) of the distinct word ids across its sentences have a record.
+- **Share**: Today's Sentences step keeps 8 items; open patterns take `patternCount(8)` = 3 of them (`PATTERN_SHARE` 3/8), fewer when fewer are due. The Sentences test takes `patternCount(20)` = 8 of 20. The plan line reads "8 items · 3 patterns" when patterns are in, else the old line.
+- **Order** (core.js `patternPick`): one ask per pattern per session (a pattern last asked in the planned session, or already in this Today session's `today.pt`, is skipped). Below `PATTERN_DONE` (3): lowest streak first, then patterns asked before ahead of never-asked ones (a missed pattern does not wait behind every newly opened one), then oldest, then file order. Done patterns refresh at half a pair's rate: one slot every other session (even session numbers), oldest first; when too few are below 3, done patterns fill the rest, and the reverse.
+- **Item**: the sentence is a random one of the pattern's whose words are all learned (else any); the blank is one `marks` range, cycled by session (虽然 one session, 但是 the next). Choice by default ("What's the missing word?": the answer plus three of the pattern's other mark texts, then other patterns' marks of the same length, never a mark of a `near` pattern); typed ("Type the missing word") when the pack types sentences, with the usual choice fallback. Pron-first packs show the blank in the reading line like a sentence gap.
+- **Note**: the two-line `note` shows above the sentence when the pattern has no `pt` record yet, and with the verdict on a miss.
+- **Streak** (core.js `notePattern`): right adds 1, a miss sets 0; a second answer in the same session (the in-drill retry) gains nothing; a miss still sets 0. Done at 3; the streak keeps counting.
+- **Progress tab**: one row under the word rows, "Patterns | done / open (of total)". Goals and `goalPosition` do not count patterns.
+- **Storage**: new optional top-level progress key `pt`: `{ <patternId>: { s, a } }`, s the streak (int ≥ 0), a the session ordinal (`prog.sn`, via `daySn`) it was last answered. Written only with the flag on, only for a pattern answered. `validateProgShape` does not check it: a malformed entry reads as never answered and never resets progress. A record with `pt` boots on b21ee93 and 2412992 unchanged, with no backup key, keeps `pt` through a mark there, and boots back here (tests/migration_checks.js [patterns]).
+- **Session resume**: `today.pt`, the pattern ids asked this Today session, so a resumed step does not plan them again; the pattern items themselves resume through the drill recipe (builder `pattern`, args pattern id, sentence index, mark index).
+
 ### progressMap
 
 `"progressMap": {"goals": [{"upTo": "2", "label": "..."}, ...]}` (zh only; owner 2026-10-04: the whole-pack bar read 2/10, because half the pack is HSK 4 and bare units and listened passages sit near zero). One goal is shown at a time. Needs `dayAware`. The validator requires a non-empty list of `{upTo, label}`, `upTo` a pack level id (zh: "2", "3", "4" for HSK 2, 3, 4), `label` a non-empty string.
@@ -695,6 +711,19 @@ Optional. When present and non-empty, the app shows a **Read** tab. Without it n
 **Progress.** `prog.read` (`{unlocked: {levelId: 1}, done: {passageId: {sc, n, d, x, l?, s?, ls?}}}`) is created on first use, exported and imported with the rest, and checked by `validateProgShape` (`l`, `s`, `ls`, like `sc`/`n`/`x`, must be numbers when present). Stored progress without it loads unchanged, and so do `done` records from before listening passes (no `l`) and from before `readRotation` (no `s`/`ls`: under rotation such a record is never-listened and not passed in the latest session). `s`/`ls` (fb16) are written only under `readRotation`; an older engine keeps them on boot and drops them from a record it re-marks (migration_checks [rotation-s]). The Progress tab shows passages done and the average latest score per level.
 
 **Script display.** Titles, passage sentences, questions, mc options and gloss words carry `lang`, `dir="rtl"` and the pack fonts, as everywhere else. English translations and True/False labels do not. In RTL packs the tap-to-gloss popover itself is `dir="rtl"` with `text-align:start`, so the tapped word sits at the right edge and its `pron` and English gloss follow in reading order. Those two stay isolated left-to-right runs (`dir="ltr"`).
+
+## patterns.json
+
+Only with `pack.patterns` (see "patterns"). A list in level order:
+
+```json
+{ "id": "p06", "lv": "3", "label": "虽然…但是", "en": "although … (but)",
+  "note": ["Admits one fact, then turns against it.", "虽然 A，但是 B"],
+  "near": ["p20"], "keys": [12, 40],
+  "sentences": [{ "id": "p06.1", "t": "…", "en": "…", "lv": "3", "words": [12, 40], "pron": "…", "marks": [[0, 2], [5, 7]], "ruby": [] }] }
+```
+
+`id` unique; `lv` a pack level, non-decreasing through the file; `label`, `en` non-empty; `note` 1–2 non-empty lines of at most 60 characters; `near` (optional) other pattern ids whose mark words could also fit a blank, never offered as wrong choices; `keys` (optional, written by pack_from_hsk.py: the sentence word ids whose text is a mark text) a list of word ids that occur in the pattern's sentence `words`, all learned before the pattern opens; `sentences` non-empty with ids unique across the file (validator checks the whole file), `t`, `en`, `pron` non-empty, `lv` equal to the pattern's, `words` known ids none above the pattern's level, `marks` a non-empty sorted, non-overlapping list of UTF-16 `[start, end)` ranges inside `t` covering non-blank text and never splitting a `ruby` token, `ruby` as sentences.json. Validator: `pack.patterns` must be a bool and needs `pairs`; `patterns.json` missing with the flag on is an error, present with it off a warning.
 
 ## legacy.json
 

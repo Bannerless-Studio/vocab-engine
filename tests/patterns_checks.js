@@ -1,0 +1,394 @@
+// pack.patterns (docs/PACK_SCHEMA.md "patterns"; owner 2026-10-06: grammar drills from HSK 3 with a few
+// HSK 2 patterns carried in; drills, not lessons): [1] config and validator, [2] openPatterns threshold,
+// [3] notePattern streak table (miss, right, retry, done), [4] patternPick (3 of 8, lowest streak, oldest,
+// one per session, done refresh at half a known pair's rate), [5] patternOpts, [6] progress shape,
+// [7] the app: plan line, Sentences step 3 of 8, note once and on a miss, prog.pt writes, Progress row,
+// Sentences test, typed variant, [8] session resume keeps the pattern items (today.pt), [9] flag-off
+// control: plans and a two-session app walk byte-identical to 1a762a3 (flag off, and flag on without
+// patterns.json), [10] the owner's export opens 19 patterns. Migration of prog.pt: tests/migration_checks.js [patterns].
+// Run: node tests/patterns_checks.js
+"use strict";
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
+const cp = require("child_process");
+
+const ROOT = path.join(__dirname, "..");
+const VC = require(path.join(ROOT, "engine", "core.js"));
+const ZH = path.join(ROOT, "packs", "zh");
+const MAIN = "1a762a3"; // main before patterns (frequency tiers, character ramp)
+const PY = process.env.PYTHON3 || "python3";
+function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn typeof ${name} !== "undefined" ? ${name} : undefined;`)(); }
+const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.patterns; return q; })(PACK);
+const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
+const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
+const PATTERNS = loadConst(path.join(ZH, "sentences.js"), "PATTERNS");
+const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
+const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
+const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
+const clone = x => JSON.parse(JSON.stringify(x));
+let passes = 0, fails = 0, skips = 0;
+function check(name, cond, extra){
+  if(cond){ passes++; console.log(`PASS  ${name}`); }
+  else { fails++; console.log(`FAIL  ${name}`); if(extra) console.log("    " + String(extra).replace(/\n/g, "\n    ")); }
+}
+function skip(name){ skips++; console.log(`SKIP  ${name}`); }
+const git = (sha, f) => { try { return cp.execSync(`git -C "${ROOT}" show ${sha}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }); } catch(e){ return null; } };
+const mainCoreSrc = git(MAIN, "engine/core.js"), mainHtml = git(MAIN, "engine/app.html");
+const OLD = mainCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "patterns-")), `core_${MAIN}.js`); fs.writeFileSync(f, mainCoreSrc); return require(f); })() : null;
+
+// ------------------------------------------------------------------ fake DOM (copied from pairs_checks.js)
+// ------------------------------------------------------------------ fake DOM (copied from words_typed_checks.js)
+const appHtml = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
+const scriptOf = html => { const b = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]; return b[b.length - 1][1]; };
+function extractAttrs(tag){ const attrs = {}; const re = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)(?:\s*=\s*"([^"]*)")?/g; let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; } return attrs; }
+function makeFakeDom(){
+  const registry = new Map(); const tabButtons = [];
+  class El {
+    constructor(tag, attrs){ this.tagName = (tag||"div").toUpperCase(); this._attrs = Object.assign({}, attrs); this._classes = new Set((this._attrs.class||"").split(/\s+/).filter(Boolean));
+      this._html = ""; this._text = ""; this.style = { setProperty(k,v){ this[k]=v; } }; this.hidden = false; this.disabled = false; this.value = "";
+      this.onclick = null; this.oninput = null; this.onchange = null; this._listeners = {}; this._children = []; if(this._attrs.id) registry.set(this._attrs.id, this); }
+    get id(){ return this._attrs.id || ""; } set id(v){ this._attrs.id = v; registry.set(v, this); }
+    get classList(){ const s = this._classes; return { add:(...c)=>c.forEach(x=>s.add(x)), remove:(...c)=>c.forEach(x=>s.delete(x)), toggle:(c,f)=>{ if(f===undefined){ s.has(c)?s.delete(c):s.add(c); } else { f?s.add(c):s.delete(c); } }, contains:c=>s.has(c) }; }
+    get dataset(){ const attrs = this._attrs; const toKebab = k => k.replace(/[A-Z]/g, m => "-" + m.toLowerCase()); return new Proxy({}, { get(_, k){ return attrs["data-" + toKebab(String(k))]; }, set(_, k, v){ attrs["data-" + toKebab(String(k))] = String(v); return true; } }); }
+    get children(){ return this._children; } get innerHTML(){ return this._html; } set innerHTML(h){ this._html = h; this._children = []; registerIdsFromHtml(h); }
+    get textContent(){ return this._text; } set textContent(t){ this._text = String(t); this._html = String(t); }
+    setAttribute(k,v){ this._attrs[k]=String(v); if(k==="id") registry.set(v,this); } getAttribute(k){ return this._attrs[k]; }
+    addEventListener(t,f){ (this._listeners[t]=this._listeners[t]||[]).push(f); } removeEventListener(){}
+    appendChild(c){ this._children.push(c); return c; } insertBefore(c){ this._children.unshift(c); return c; } get firstChild(){ return this._children[0] || null; }
+    remove(){} focus(){} click(){ if(this.onclick) this.onclick({}); (this._listeners.click||[]).forEach(f=>f({})); } closest(){ return null; } querySelector(){ return null; } querySelectorAll(){ return []; }
+  }
+  function registerIdsFromHtml(html){ const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g; let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); } }
+  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/); const btnRe = /<button([^>]*)>/g;
+  let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
+  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  return { title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
+    write(){}, createElement(tag){ return new El(tag, {}); }, getElementById(id){ return registry.get(id) || null; },
+    querySelector(sel){ return this.querySelectorAll(sel)[0] || null; },
+    querySelectorAll(sel){ const m = sel.match(/^#tabs\s+button(?:\[data-t="([^"]+)"\])?$/); if(m) return m[1] ? tabButtons.filter(b=>b.dataset.t===m[1]) : tabButtons.slice(); return []; },
+    _listeners: {}, addEventListener(t,f){ (this._listeners[t]=this._listeners[t]||[]).push(f); } };
+}
+const tick = () => new Promise(r => setTimeout(r, 0));
+function mulberry32(seed){ let a = seed >>> 0; return function(){ a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function memStore(){ const m = new Map(); return { getItem: k => m.has(k) ? m.get(k) : null, setItem: (k, v) => { m.set(k, String(v)); }, removeItem: k => { m.delete(k); }, keys: () => [...m.keys()] }; }
+let NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
+class FakeDate extends Date { constructor(...a){ if(a.length) super(...a); else super(NOW); } static now(){ return NOW; } }
+async function boot(pack, prog, seed, opts){
+  const o = opts || {};
+  Math.random = mulberry32(seed);
+  const st = o.st || { ls: memStore(), ss: memStore() }; if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog));
+  const document = makeFakeDom();
+  const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(){} };
+  const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
+  const fnBody = scriptOf(o.html || appHtml) + `
+let __cur = null; const __log = [];
+const __mc = renderMcItem; renderMcItem = function(it){ __cur = it; __log.push({ key: it.key, kind: "mc", label: it.label, step: todayStepState && todayStepState.at }); return __mc(it); };
+const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; __log.push({ key: it.key, kind: "type", label: it.label, step: todayStepState && todayStepState.at }); return __ty(it); };
+return { el: id => document.getElementById(id), panel: () => document.getElementById("panel").innerHTML, getProg: () => prog, getD: () => D, getCur: () => __cur, log: __log,
+  rd: () => (typeof RD !== "undefined" ? RD : null), skipRead: () => { RD = null; todayStep(); },
+  tss: () => todayStepState, ps: () => (typeof patternSession !== "undefined" ? [...patternSession] : null), home: () => todayRender(), tab: t => document.querySelector('#tabs button[data-t="' + t + '"]').click(), itemFromPlan: (p, i, plan) => itemFromPlan(p, i, plan), planItem: (p, i, plan) => planItem(p, i, plan), unitTypedFor: id => TYPED_UNITS && TYPED_UNITS.get(id) };`;
+  const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS","PATTERNS"];
+  const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"PairsChecks/1.0" }, undefined, st.ls, st.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
+    function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, WORDS, SENTENCES, LESSONS, [], CHARACTERS, o.patterns];
+  const api = new Function(...names, fnBody)(...args);
+  await tick(); await tick();
+  api.st = st;
+  return api;
+}
+function typedRight(it){
+  const w = BY_ID[String(it.key).slice(2)];
+  if(typeof it.check === "function" && w){
+    const cands = [w.w, w.pron, VC.gloss(w), ...(w.alt || []), ...String(VC.gloss(w)).split(/[;,/]| or /).map(s => s.trim())].filter(Boolean);
+    for(const c of cands){ try { if(it.check(c)) return c; } catch(e){} }
+  }
+  return w ? w.w : "";
+}
+function answer(api, right){
+  const it = api.getCur();
+  if(it.kind === "type"){ api.el("tin").value = right ? typedRight(it) : "zzz not it"; api.el("submit").click(); return; }
+  const btns = api.el("o").children;
+  (right ? btns.find(b => b.dataset.v === String(it.a)) : btns.find(b => b.dataset.v !== String(it.a))).click();
+}
+// One Today session; okFn(item, rec before) decides each answer. Returns per-item rows.
+// o.cont: carry on a resumed session (no Go); o.stop(rows, item): leave before answering item.
+async function session(api, okFn, o){
+  const rows = [], x = o || {};
+  if(!x.cont) api.el("go").click();
+  for(let guard = 0; guard < 600; guard++){
+    const h = api.panel(), D = api.getD();
+    if(D && D.cur){ const it = api.getCur(), key = String(it.key); const p = api.getProg();
+      if(x.stop && x.stop(rows, it)) break;
+      const rec = key[0] === "w" ? p.w[key.slice(2)] : null; const s0 = rec ? rec.s || 0 : null; const r0 = rec ? rec.r : null;
+      const lg = api.log[api.log.length - 1]; const ok = okFn(it, rec, rows, lg.step);
+      answer(api, ok); const r1 = key[0] === "w" ? api.getProg().w[key.slice(2)] : null;
+      if(x.after) x.after(it, ok, api.panel());
+      rows.push({ key, kind: it.kind, label: it.label, step: lg.step, ok, s0, s1: r1 ? r1.s : null, r0, r1: r1 ? r1.r : null });
+      api.el("nx").click(); continue; }
+    if(api.rd()){ api.skipRead(); continue; }
+    if(/id="again"/.test(h)) break;
+    if(/id="ok"/.test(h)){ api.el("ok").click(); continue; }
+    if(/id="dr"/.test(h)){ api.el("dr").click(); continue; }
+    break;
+  }
+  return rows;
+}
+const byLv = VC.wordsByLevel(WORDS, PACK);
+const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
+
+// One Today session that also records, per answer, the pairs noted (core notePair via a wrapped core)
+// Synthetic progress: every word of levels upTo learned (streak s, last answered session a), session sn.
+function synth(upTo, s, a, sn){
+  const p = VC.normalizeProg({ placedOnce: true, soundsOpened: true, sessions: 10 }, PACK);
+  p.sets = { "1": 0, "2": 0, "3": 0, "4": 0 }; p.sn = sn;
+  upTo.forEach(lv => { p.sets[lv] = NS(lv); byLv[lv].forEach(w => { p.w[w.id] = { r: s + 1, w: 0, s, u: a }; }); });
+  return p;
+}
+const patternWordIds = p => [...new Set(p.sentences.flatMap(x => x.words))];
+const ids = l => l.map(p => p.id).join(",");
+const ptKey = it => String(it.key).startsWith("p:");
+
+(async () => {
+  console.log("[1] config: pack.patterns on zh with pairs; patterns.json; validator");
+  check("packs/zh sets patterns: true with pairs and dayAware; sentences.js carries PATTERNS", PACK.patterns === true && VC.patternsOn(PACK) && Array.isArray(PATTERNS) && PATTERNS.length === 27);
+  check("patternsOn: off without pairs, without dayAware, with patterns missing or not true", !VC.patternsOn(Object.assign({}, PACK, { pairs: false })) && !VC.patternsOn(Object.assign({}, PACK, { dayAware: false })) && !VC.patternsOn(PACK_OFF) && !VC.patternsOn(Object.assign({}, PACK, { patterns: "yes" })));
+  const lvN = { "2": 0, "3": 0, "4": 0 }; PATTERNS.forEach(p => { lvN[p.lv]++; });
+  check(`27 patterns: ${lvN["2"]} HSK 2, ${lvN["3"]} HSK 3, ${lvN["4"]} HSK 4; 6-8 sentences each; every sentence <= 14 characters`, lvN["2"] + lvN["3"] === 14 && lvN["4"] === 13 &&
+    PATTERNS.every(p => p.sentences.length >= 6 && p.sentences.length <= 8) && PATTERNS.every(p => p.sentences.every(s => s.t.replace(/[，。？！]/g, "").length <= 14)));
+  check("no pattern sentence repeats a sentences.json sentence", PATTERNS.every(p => p.sentences.every(s => !SENTENCES.some(x => x.t === s.t))));
+  check("every pattern sentence covers its Han characters with ruby (a pron-first blank can be placed)", PATTERNS.every(p => p.sentences.every(s => VC.rubyCovers(s.t, s.ruby.map(k => ({ start: k[0], end: k[1] }))))));
+  {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "patterns-val-"));
+    const run = (pk, pt, drop) => { const d = path.join(tmp, String(Math.random()).slice(2)); fs.mkdirSync(d); for(const f of fs.readdirSync(ZH)) if(f.endsWith(".json")) fs.copyFileSync(path.join(ZH, f), path.join(d, f));
+      const pj = JSON.parse(fs.readFileSync(path.join(d, "pack.json"), "utf8")); if(pk) pk(pj); fs.writeFileSync(path.join(d, "pack.json"), JSON.stringify(pj));
+      const tj = JSON.parse(fs.readFileSync(path.join(d, "patterns.json"), "utf8")); if(pt) pt(tj); fs.writeFileSync(path.join(d, "patterns.json"), JSON.stringify(tj));
+      if(drop) fs.unlinkSync(path.join(d, "patterns.json"));
+      cp.execSync(`${PY} "${path.join(ROOT, "tools", "jsonify_pack.py")}" "${d}"`, { stdio: "ignore" });
+      try { const out = cp.execSync(`${PY} "${path.join(ROOT, "tools", "validate_pack.py")}" "${d}"`, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); return /WARN {2}patterns/.test(out) ? out : ""; } catch(e){ return String(e.stdout || "") + String(e.stderr || ""); } };
+    check("validate_pack: zh as shipped passes", run() === "");
+    check("validate_pack: patterns not a boolean is an error", /pack\.patterns must be a boolean/.test(run(p => { p.patterns = 1; })));
+    check("validate_pack: patterns without pairs is an error", /pack\.patterns needs pack\.pairs/.test(run(p => { delete p.pairs; })));
+    check("validate_pack: patterns on without patterns.json is an error", /patterns\.json is missing/.test(run(null, null, true)));
+    check("validate_pack: patterns.json without the flag warns", /patterns\.json present but pack\.patterns is not true/.test(run(p => { delete p.patterns; })));
+    check("validate_pack: a key not in the pattern's words is an error", /keys must list word ids/.test(run(null, t => { t[0].keys = ["w9999"]; })));
+    check("validate_pack: a sentence id repeated across patterns is an error", /unique across patterns\.json/.test(run(null, t => { t[1].sentences[0].id = t[0].sentences[0].id; })));
+    check("validate_pack: a duplicated pattern id is an error", /id p01 duplicated/.test(run(null, t => { t[1].id = "p01"; })));
+    check("validate_pack: a mark past the end of t is an error", /marks \[2, 99\]/.test(run(null, t => { t[0].sentences[0].marks = [[2, 99]]; })));
+    check("validate_pack: overlapping or unsorted marks are an error", /must be \[start, end\] UTF-16 offsets/.test(run(null, t => { t[3].sentences[0].marks = [[5, 7], [0, 2]]; })));
+    check("validate_pack: a mark splitting a ruby token is an error", /splits a ruby token/.test(run(null, t => { t[3].sentences[0].marks = [[0, 1]]; })));
+    check("validate_pack: an unknown word id is an error", /words has unknown ids \['w9999'\]/.test(run(null, t => { t[0].sentences[0].words.push("w9999"); })));
+    check("validate_pack: a word above the pattern's level is an error", /are above the pattern's level 2/.test(run(null, t => { t[0].sentences[0].words.push(WORDS.find(w => w.lv === "4").id); })));
+    check("validate_pack: patterns out of level order is an error", /comes after a higher-level pattern/.test(run(null, t => { const x = t.pop(); t.unshift(x); })));
+    check("validate_pack: a note line over 60 characters is an error", /note line over 60/.test(run(null, t => { t[0].note[0] = "x".repeat(61); })));
+    check("validate_pack: a three-line note is an error", /note must be a list of one or two/.test(run(null, t => { t[0].note.push("third"); })));
+    check("validate_pack: near naming no pattern is an error", /near must list other pattern ids/.test(run(null, t => { t[0].near = ["p99"]; })));
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+
+  console.log("\n[2] openPatterns: open at >= 80% of a pattern's distinct sentence words learned (a record exists)");
+  {
+    const p = PATTERNS[0], ws = [...new Set(p.sentences.flatMap(s => s.words))], need = Math.ceil(0.8 * ws.length);
+    const prog = id => { const q = synth([], 0, 0, 5); ws.slice(0, id).forEach(w => { q.w[w] = { r: 1, w: 0, s: 0 }; }); return q; };
+    console.log(`    ${p.id} ${p.label}: ${ws.length} distinct words, opens at ${need}`);
+    check(`${p.id} closed at ${need - 1} of ${ws.length} learned, open at ${need}`, !VC.openPatterns(prog(need - 1), PACK, [p], WORDS).length && VC.openPatterns(prog(need), PACK, [p], WORDS).length === 1);
+    check("flag off (pack without patterns, or pairs off): nothing opens", !VC.openPatterns(prog(ws.length), PACK_OFF, [p], WORDS).length && !VC.openPatterns(prog(ws.length), Object.assign({}, PACK, { pairs: false }), [p], WORDS).length);
+    {
+      // keys and level gate: p = first pattern, its own words (keys) and the level reached
+      const k = PATTERNS.find(x => (x.keys || []).length), kws = patternWordIds(k);
+      const full = () => { const q = synth([], 0, 0, 5); kws.forEach(w => { q.w[w] = { r: 1, w: 0, s: 0 }; }); return q; };
+      const noKey = full(); k.keys.forEach(id => { delete noKey.w[id]; });
+      check(`${k.id} keys ${k.keys.join(",")} unlearned: closed with every other word learned; opens once learned`, !VC.openPatterns(noKey, PACK, [k], WORDS).length && VC.openPatterns(full(), PACK, [k], WORDS).length === 1);
+      const k4 = PATTERNS.filter(x => x.lv === "4")[0], w4 = patternWordIds(k4), l4 = new Set(WORDS.filter(x => x.lv === "4").map(x => x.id));
+      const lowOnly = () => { const q = synth(["1", "2", "3"], 2, 4, 5); return q; };
+      const q0 = lowOnly(); w4.forEach(id => { if(!l4.has(id)) q0.w[id] = q0.w[id] || { r: 1, w: 0, s: 0 }; });
+      const zeroL4 = Object.keys(q0.w).filter(id => l4.has(id)).length === 0 && w4.filter(id => !l4.has(id)).length >= 0.8 * w4.length;
+      console.log(`    ${k4.id}: ${w4.filter(id => !l4.has(id)).length} of ${w4.length} words below L4`);
+      check(`${k4.id} (HSK 4): >= 80% of words learned, zero L4 words learned: closed`, zeroL4 && !VC.openPatterns(q0, PACK, [k4], WORDS).length);
+      const q1 = clone(q0); q1.w[[...l4][0]] = { r: 1, w: 0, s: 0 }; (k4.keys || []).forEach(id => { q1.w[id] = { r: 1, w: 0, s: 0 }; });
+      check(`${k4.id} opens after its key words and a first L4 word`, VC.openPatterns(q1, PACK, [k4], WORDS).length === 1);
+      const g = PATTERNS.find(x => x.label === "了 vs 过"), g4 = WORDS.find(x => x.w === "过");
+      const qg = synth(["1"], 2, 4, 5); patternWordIds(g).forEach(id => { if(id !== g4.id) qg.w[id] = qg.w[id] || { r: 1, w: 0, s: 0 }; });
+      check(`${g.id} (HSK ${g.lv}) has the mark word 过 (L${g4.lv}) in no keys; opens with the level reached and the other 80%+ words learned`, g.lv === "2" && g4.lv === "4" && !g.keys.includes(g4.id) && !qg.w[g4.id] && VC.openPatterns(qg, PACK, [g], WORDS).length === 1);
+      check("without the words argument nothing opens (level unknown)", !VC.openPatterns(full(), PACK, [k]).length);
+    }
+    const o12 = VC.openPatterns(synth(["1", "2"], 2, 4, 5), PACK, PATTERNS, WORDS), o4 = VC.openPatterns(synth(["1", "2", "3", "4"], 2, 4, 5), PACK, PATTERNS, WORDS);
+    console.log(`    HSK 1-2 learned: ${o12.length} open (${ids(o12)}); everything learned: ${o4.length}`);
+    check("HSK 1-2 learned opens every HSK 2 pattern; everything learned opens all 27", PATTERNS.filter(p => p.lv === "2").every(p => o12.includes(p)) && o4.length === 27);
+    const st = VC.patternStats(synth(["1", "2"], 2, 4, 5), PACK, PATTERNS, WORDS);
+    check("patternStats: done 0, open as openPatterns, total 27", st.done === 0 && st.open === o12.length && st.total === 27);
+  }
+
+  console.log("\n[3] notePattern: miss -> 0, right -> +1, a retry in the same session gains nothing, done at 3");
+  {
+    const T = [];
+    const run = (s0, a0, ok, sn) => { const q = { pt: s0 == null ? undefined : { p01: { s: s0, a: a0 } } }; const r = VC.notePattern(q, "p01", ok, sn); return [r.s, r.a]; };
+    const rows = [["never answered, right", null, null, true, 7, [1, 7]], ["never answered, miss", null, null, false, 7, [0, 7]], ["s 1 (session 5), right in 7", 1, 5, true, 7, [2, 7]],
+      ["s 2, right in 7: done", 2, 5, true, 7, [3, 7]], ["s 3 done, miss", 3, 5, false, 7, [0, 7]], ["s 3 done, right", 3, 5, true, 7, [4, 7]],
+      ["retry: answered (miss) in 7, right in 7", 0, 7, true, 7, [0, 7]], ["retry: answered (right) in 7, right again", 2, 7, true, 7, [2, 7]], ["retry, miss", 2, 7, false, 7, [0, 7]]];
+    rows.forEach(r => { const got = run(r[1], r[2], r[3], r[4]); T.push(`    ${r[0].padEnd(44)} -> s ${got[0]}, a ${got[1]}`); check(`notePattern: ${r[0]}`, got[0] === r[5][0] && got[1] === r[5][1], JSON.stringify(got)); });
+    console.log(T.join("\n"));
+    check("PATTERN_DONE is 3 (the known-pair streak)", VC.PATTERN_DONE === 3 && VC.PAIR_KNOWN === 3);
+    const q = { pt: "x" }; VC.notePattern(q, "p02", true, 3);
+    check("a malformed prog.pt reads as never answered and is replaced on the first answer", VC.patternState({ pt: { p01: { s: "2", a: 1 } } }, "p01").fresh && q.pt.p02.s === 1);
+  }
+
+  console.log("\n[4] patternPick: 3 of 8, lowest streak, then oldest (never asked first), one per session, done at half a known pair's rate");
+  {
+    const P = PATTERNS.slice(0, 8);
+    const pr = pt => ({ pt });
+    check("patternCount: 3 of 8 (Sentences step), 8 of 20 (Sentences test)", VC.patternCount(8) === 3 && VC.patternCount(20) === 8);
+    check("all never asked: pack order", ids(VC.patternPick(P, pr({}), 3, 9)) === "p01,p02,p03");
+    const a = pr({ p01: { s: 2, a: 8 }, p02: { s: 0, a: 7 }, p03: { s: 1, a: 3 }, p04: { s: 0, a: 4 } });
+    check("lowest streak first, then oldest; at equal streak an asked (missed) one before a never-asked one", ids(VC.patternPick(P, a, 3, 9)) === "p04,p02,p05" && ids(VC.patternPick(P.slice(0, 4), a, 3, 9)) === "p04,p02,p03");
+    check("a pattern answered in the plan's session is not asked again in it", ids(VC.patternPick(P.slice(0, 4), a, 3, 7)) === "p04,p03,p01");
+    check("ids already planned this session (skip) are left out", ids(VC.patternPick(P.slice(0, 4), a, 3, 9, new Set(["p04"]))) === "p02,p03,p01");
+    const d = pr({ p01: { s: 3, a: 2 }, p02: { s: 4, a: 1 }, p03: { s: 0, a: 8 }, p04: { s: 1, a: 8 }, p05: { s: 2, a: 8 }, p06: { s: 0, a: 7 } });
+    const P6 = P.slice(0, 6);
+    check("done patterns refresh one slot on an even session, oldest first", ids(VC.patternPick(P6, d, 3, 10)) === "p06,p03,p02");
+    check("and none on an odd session", ids(VC.patternPick(P6, d, 3, 9)) === "p06,p03,p04");
+    check("done patterns fill the slots open ones leave", ids(VC.patternPick(P.slice(0, 3), d, 3, 9)) === "p03,p02,p01");
+    let asked = 0; for(let sn = 11; sn <= 30; sn++) asked += VC.patternPick(P6, d, 3, sn).filter(p => ["p01", "p02"].includes(p.id)).length;
+    check(`over 20 sessions with 4 open patterns not done, done ones get ${asked} slots (one every second session)`, asked === 10);
+    check("patternMarkIndex: several marks take turns by session", VC.patternMarkIndex({ marks: [[0, 2], [5, 7]] }, 8) === 0 && VC.patternMarkIndex({ marks: [[0, 2], [5, 7]] }, 9) === 1 && VC.patternMarkIndex({ marks: [[0, 1]] }, 9) === 0);
+  }
+
+  console.log("\n[5] patternOpts: own other marks first, then same length; never the answer or a near pattern's mark");
+  {
+    const byId = id => PATTERNS.find(p => p.id === id);
+    let bad = [];
+    PATTERNS.forEach(p => p.sentences.forEach(s => s.marks.forEach((m, mi) => {
+      for(let k = 0; k < 4; k++){
+        const ans = VC.patternMarkText(s, m), o = VC.patternOpts(p, s, mi, PATTERNS, Math.random);
+        const nearT = new Set((p.near || []).flatMap(id => byId(id).sentences.flatMap(x => x.marks.map(mm => VC.patternMarkText(x, mm)))));
+        const own = new Set(p.sentences.flatMap(x => x.marks.map(mm => VC.patternMarkText(x, mm))));
+        if(o.length !== 3 || new Set(o).size !== 3 || o.includes(ans) || o.some(x => nearT.has(x) && !own.has(x))) bad.push(`${s.id} ${o}`);
+      }
+    })));
+    check("every mark of every sentence: 3 distinct wrong choices, never the answer, never a near pattern's mark", bad.length === 0, bad.slice(0, 5).join("\n"));
+    const p14 = PATTERNS.find(x => x.label === "了 vs 过"), s14 = p14.sentences.find(x => x.marks.some(m => VC.patternMarkText(x, m) === "过")), m14 = s14.marks.findIndex(m => VC.patternMarkText(s14, m) === "过");
+    check("了 vs 过: the blank 过 always offers 了 (the pattern's own other mark)", Array.from({ length: 10 }, () => VC.patternOpts(p14, s14, m14, PATTERNS, Math.random)).every(o => o.includes("了")));
+    const p20 = byId("p20"), o20 = Array.from({ length: 30 }, () => VC.patternOpts(p20, p20.sentences[0], 0, PATTERNS, Math.random)).flat();
+    check("即使: never 如果, 虽然, 不管 or 既然 (near)", !o20.some(x => ["如果", "虽然", "不管", "既然"].includes(x)));
+  }
+
+  console.log("\n[6] progress shape: prog.pt is additive; validateProgShape accepts it");
+  {
+    const p = synth(["1"], 1, 2, 3); p.pt = { p01: { s: 2, a: 3 } };
+    const raw = JSON.stringify(p), b = VC.bootProg(raw, PACK);
+    check("a record with pt boots here unchanged (no backup) and validateProgShape accepts it", b.backupRaw === null && JSON.stringify(b.prog.pt) === JSON.stringify(p.pt) && VC.validateProgShape(p, ["1", "2", "3", "4"]).ok);
+    const odd = clone(p); odd.pt = "x";
+    const ob = VC.bootProg(JSON.stringify(odd), PACK);
+    check("a malformed pt never resets progress (no backup)", ob.backupRaw === null && ob.prog.pt === "x");
+    check("defaultProg has no pt (written only on a pattern answer)", !("pt" in VC.defaultProg(PACK)));
+  }
+
+  console.log("\n[7] the app with patterns (HSK 1-2 learned)");
+  {
+    const base = synth(["1", "2"], 2, 4, 5);
+    const open = VC.openPatterns(base, PACK, PATTERNS, WORDS);
+    let api = await boot(PACK, clone(base), 11, { patterns: PATTERNS });
+    check("Today plan line: Sentences 8 items · 3 patterns", /5\. Sentences<\/td><td>8 items · 3 patterns</.test(api.panel()), (api.panel().match(/Sentences<\/td><td>[^<]*/) || [""])[0]);
+    const notes = []; let firstMiss = 0;
+    const rows = await session(api, (it, rec, rows, step) => {
+      if(ptKey(it)) notes.push({ key: it.key, note: /class="pnote"/.test(api.panel()), step });
+      return !(ptKey(it) && notes.filter(n => n.key === it.key).length === 1 && it.key === notes[0].key);
+    }, { after: (it, ok, h) => { if(ptKey(it) && !ok && !firstMiss) firstMiss = (h.match(/class="pnote"/g) || []).length; } });
+    const s4 = rows.filter(r => r.step === 4), pts = s4.filter(r => ptKey(r));
+    const firstAsk = [...new Map(pts.map(r => [r.key, r])).values()];
+    console.log(`    Sentences step: ${s4.length} answers, pattern asks ${pts.map(r => r.key + (r.ok ? "" : " (miss)")).join(", ")}`);
+    check("Sentences step: 8 items, 3 of them patterns (lowest-first: the first open patterns in pack order)", firstAsk.length === 3 && new Set(s4.map(r => r.key)).size === 8 && firstAsk.map(r => r.key.slice(2)).sort().join(",") === ids(open.slice(0, 3)));
+    check("no pattern item outside the Sentences step", rows.filter(r => ptKey(r) && r.step !== 4).length === 0);
+    check("pattern items are cloze choices on a blank (What's the missing word?)", pts.every(r => r.kind === "mc" && r.label === "What's the missing word?"));
+    const pr = api.getProg();
+    const miss = notes[0].key.slice(2);
+    check("the first showing of a pattern with no record carries the two-line note; the retry after its miss does not", notes.filter(n => n.key !== notes[0].key).every(n => n.note) && notes[0].note && notes.length === 4 && !notes[3].note);
+    check("a miss at first meeting shows the note once (above the sentence, not again in the reveal)", firstMiss === 1, `${firstMiss} notes on screen after the miss`);
+    check("prog.pt written for the 3 asked patterns: the missed one s 0 (retry gains nothing), the others s 1, a = this session", Object.keys(pr.pt).length === 3 && pr.pt[miss].s === 0 && Object.keys(pr.pt).filter(k => k !== miss).every(k => pr.pt[k].s === 1) && Object.values(pr.pt).every(e => e.a === pr.sn));
+    check("session record kept the planned ids (today.pt) while the step ran", api.ps().length === 3);
+    // Miss verdict shows the note: build the item fresh and answer it wrong.
+    api.tab("today"); await tick();
+    api.el("go").click(); await tick();
+    let sawMissNote = false, sawNoteStim = false, pt2 = [];
+    for(let g = 0; g < 400; g++){
+      const D = api.getD(), h = api.panel();
+      if(D && D.cur){ const it = api.getCur(); const isP = ptKey(it), first = isP && !pt2.includes(it.key); if(isP){ pt2.push(it.key); if(/class="pnote"/.test(h) && pr.pt[it.key.slice(2)]) sawNoteStim = true; }
+        answer(api, !first); if(first && /class="pnote"/.test(it.reveal)) sawMissNote = true; api.el("nx").click(); continue; }
+      if(api.rd()){ api.skipRead(); continue; }
+      if(/id="ok"/.test(h)){ api.el("ok").click(); continue; }
+      if(/id="dr"/.test(h)){ api.el("dr").click(); continue; }
+      break;
+    }
+    const pr2 = api.getProg(), uniq2 = [...new Set(pt2)];
+    console.log(`    second session pattern asks: ${uniq2.join(", ")}`);
+    check("second session: 3 patterns, lowest streak first: the one missed last session (s 0) before never-asked ones; no note on the stimulus of a recorded pattern", uniq2.length === 3 && uniq2.slice().sort().join(",") === ["p:" + miss, "p:p04", "p:p05"].sort().join(",") && !sawNoteStim, uniq2.join(","));
+    check("a miss shows the note with the verdict (reveal)", sawMissNote);
+    check("misses set s 0", uniq2.every(k => pr2.pt[k.slice(2)].s === 0));
+    api.tab("progress"); await tick();
+    const st = VC.patternStats(pr2, PACK, PATTERNS, WORDS);
+    check(`Progress row: Patterns ${st.done} done / ${st.open} open (of 27)`, api.panel().includes(`<tr><td>Patterns</td><td>${st.done} done / ${st.open} open (of 27)</td></tr>`));
+    // Sentences test: 8 of 20 pattern items.
+    api.tab("test"); await tick();
+    const tb = api.el("tSentences");
+    if(tb){ tb.click(); const D = api.getD(); const all = [D.cur, ...D.q].filter(Boolean);
+      check(`Sentences test: ${all.filter(ptKey).length} pattern items of ${all.length}`, all.length === 20 && all.filter(ptKey).length === Math.min(8, open.length)); }
+    else skip("Sentences test button absent");
+  }
+  {
+    // Typed variant: a pack typing its sentence blanks (TYPING) gets typed pattern items.
+    const P2 = Object.assign({}, PACK, { typing: {} });
+    const api = await boot(P2, synth(["1", "2"], 2, 4, 5), 12, { patterns: PATTERNS });
+    const kinds = [], checks = [];
+    await session(api, it => { if(ptKey(it)){ kinds.push(it.kind); if(it.kind === "type"){ const fb = it.choiceFallback(); checks.push(it.check(fb.a) && !it.check(fb.opts.find(o => o !== fb.a)) && fb.kind === "mc" && fb.opts.length === 4); } } return true; });
+    check("a pack typing its sentence blanks gets typed pattern items; the typed answer is the mark text; the choice counterpart has 4 options", kinds.length >= 3 && kinds.every(k => k === "type") && checks.length >= 3 && checks.every(Boolean));
+  }
+
+  console.log("\n[8] session resume: a parked Sentences step keeps its pattern items (today.pt)");
+  {
+    const st = { ls: memStore(), ss: memStore() };
+    let api = await boot(PACK, synth(["1", "2"], 2, 4, 5), 21, { patterns: PATTERNS, st });
+    let before = null;
+    await session(api, () => true, { stop: (rows, it) => { const D = api.getD(); if(api.log[api.log.length - 1].step === 4 && rows.filter(r => r.step === 4).length === 2){ before = [D.cur, ...D.q].map(x => x.key).sort(); return true; } return false; } });
+    const ps0 = api.ps();
+    const api2 = await boot(PACK, null, 22, { patterns: PATTERNS, st });
+    const D2 = api2.getD(); const after = D2 ? [D2.cur, ...D2.q].filter(Boolean).map(x => x.key).sort() : [];
+    check("reload mid-step: the same items come back, pattern items included", before && JSON.stringify(after) === JSON.stringify(before) && after.filter(k => k.startsWith("p:")).length >= 2);
+    check("today.pt restored (the planned pattern ids)", JSON.stringify(api2.ps().sort()) === JSON.stringify(ps0.sort()) && ps0.length === 3);
+    const cur = api2.getCur(); const it = cur && ptKey(cur) ? cur : null;
+    const rest = await session(api2, () => true, { cont: true });
+    check("the resumed step finishes with 8 distinct items", new Set(rest.filter(r => r.step === 4).map(r => r.key).concat(before ? [] : [])).size >= 6);
+  }
+
+  console.log(`\n[9] flag-off control vs ${MAIN}`);
+  if(!OLD || !mainHtml) skip(`${MAIN} not in this checkout's history`);
+  else {
+    const walk = async (pack, html, core, pats) => {
+      const api = await boot(pack, synth(["1", "2"], 2, 4, 5), 31, { html, core, patterns: pats });
+      const out = [api.panel()];
+      for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
+      api.tab("progress"); await tick(); out.push(api.panel());
+      return out;
+    };
+    const ref = await walk(PACK_OFF, mainHtml, OLD, undefined);
+    const off = await walk(PACK_OFF, appHtml, VC, PATTERNS);
+    check("flag off (pack.patterns absent, PATTERNS present): two-session walk byte-identical to main", JSON.stringify(off) === JSON.stringify(ref), off.findIndex((x, i) => x !== ref[i]));
+    const nofile = await walk(PACK, appHtml, VC, undefined);
+    const refOn = await walk(PACK, mainHtml, OLD, undefined);
+    check("flag on without patterns.json: byte-identical to main", JSON.stringify(nofile) === JSON.stringify(refOn), nofile.findIndex((x, i) => x !== refOn[i]));
+    const ctl = (core, pack) => { const p = synth(["1", "2", "3"], 2, 4, 9); return JSON.stringify([core.buildReviewPlan(VC.learnedWords(WORDS, pack, p), p, pack, { canHear: () => true, today: "2026-10-05", rng: mulberry32(4), sn: 10 }).map(x => [x.kind, x.word && x.word.id]), core.validateProgShape(p, ["1", "2", "3", "4"]).ok]); };
+    check("core plans unchanged (Review plan, validateProgShape)", ctl(VC, PACK) === ctl(OLD, PACK));
+  }
+
+  console.log("\n[10] the owner's export (a48ee4d3, read-only; $PAIRS_OWNER overrides) under this pack");
+  {
+    const f = [process.env.PAIRS_OWNER, "/Users/ishmum/.claude/uploads/9e41e879-e4d7-4530-b040-c9be1286edd7/a48ee4d3-vocab_zh_progress_8.json"].find(x => x && fs.existsSync(x));
+    if(!f) skip("owner export missing");
+    else {
+      const b = VC.bootProg(fs.readFileSync(f, "utf8"), PACK), op = VC.openPatterns(b.prog, PACK, PATTERNS, WORDS);
+      console.log(`    open: ${op.map(p => p.id).join(" ")}`);
+      check("owner export boots with no backup and opens 19 of the 27 patterns (records only: word order and tiers do not count)", b.backupRaw === null && op.length === 19, op.length);
+    }
+  }
+
+  console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
+  process.exit(fails ? 1 : 0);
+})();

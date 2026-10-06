@@ -91,19 +91,20 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   // and a republish would have dropped it) must fail here. A fresh pack_from_hsk.py run into a
   // dir holding only the files it does not write (packbuilder passages, gloss_display.json; it
   // then runs jsonify there) has to produce every packs/zh file byte-equal, and nothing else.
-  const HSK = path.join(ROOT, "..", "chinese");
+  // HSK_DIR: a branch of the chinese repo that changes data/ (fb29 hsk_patterns.js) is checked from its worktree.
+  const HSK = process.env.HSK_DIR ? path.resolve(process.env.HSK_DIR) : path.join(ROOT, "..", "chinese");
   if(!fs.existsSync(path.join(HSK, "data", "hsk_vocab.json"))) console.log(`NOTE  ${HSK} absent: generator drift check skipped`);
   else {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "zhgen-"));
     const NOT_GENERATED = ["passages_src.json", "passages.json", "REPORT_passages.md", "gloss_display.json"];
     NOT_GENERATED.forEach(f => { if(fs.existsSync(path.join(ZH, f))) fs.copyFileSync(path.join(ZH, f), path.join(tmp, f)); });
     const g = cp.spawnSync("python3", [path.join(ROOT, "tools", "pack_from_hsk.py"), HSK, "--out", tmp], { encoding: "utf8", maxBuffer: 1 << 26 });
-    const DOCS = ["ZH_GLOSS.md", "ZH_TIERS.md"];
+    const DOCS = ["ZH_GLOSS.md", "ZH_TIERS.md", "ZH_PATTERNS.md"];
     const names = [...new Set([...fs.readdirSync(ZH), ...fs.readdirSync(tmp).filter(f => !DOCS.includes(f))])];
     const drift = names.filter(f => !fs.existsSync(path.join(ZH, f)) || !fs.existsSync(path.join(tmp, f)) || !fs.readFileSync(path.join(ZH, f)).equals(fs.readFileSync(path.join(tmp, f))));
     const docDrift = DOCS.filter(d => !(fs.existsSync(path.join(tmp, d)) && fs.readFileSync(path.join(tmp, d)).equals(fs.readFileSync(path.join(ROOT, "docs", d)))));
     fs.rmSync(tmp, { recursive: true, force: true });
-    check(`pack_from_hsk.py ${HSK} reproduces packs/zh from an empty dir (${names.length} files incl. the jsonified .js; ${NOT_GENERATED.length} non-generated seeded) and docs/ZH_GLOSS.md + docs/ZH_TIERS.md byte for byte (drift: ${[...drift, ...docDrift].join(", ") || "none"}${g.status ? `, exit ${g.status}` : ""})`,
+    check(`pack_from_hsk.py ${HSK} reproduces packs/zh from an empty dir (${names.length} files incl. the jsonified .js; ${NOT_GENERATED.length} non-generated seeded) and docs/ZH_GLOSS.md + docs/ZH_TIERS.md + docs/ZH_PATTERNS.md byte for byte (drift: ${[...drift, ...docDrift].join(", ") || "none"}${g.status ? `, exit ${g.status}` : ""})`,
       g.status === 0 && drift.length === 0 && docDrift.length === 0);
   }
 })();
