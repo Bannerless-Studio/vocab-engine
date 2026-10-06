@@ -1083,16 +1083,22 @@ function provPick(list, n, wrecs){
 // exports and seeds carry sets without word records, and `d` (drilled ahead of the counter)
 // says nothing about the counter's own prefix.
 const taughtRec = (r, w) => !!(r[w.id] && !r[w.id].d);
-function levelLearned(list, sets, size, recs){
+// pack.freqTiers reorders each level by frequency, but every stored counter was written against
+// the earlier order, which is id order (ids are append-only and were assigned in it), so a
+// counter prefix is read in id order (docs/PACK_SCHEMA.md "freqTiers").
+function counterOrder(list, pack){
+  return freqTiersOn(pack) ? list.slice().sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0) : list;
+}
+function levelLearned(list, sets, size, recs, pack){
   const r = recs || {};
   if(list.some(w => taughtRec(r, w))) return list.filter(w => r[w.id]);
-  const pre = list.slice(0, (sets||0)*size); const seen = new Set(pre.map(w => w.id));
+  const pre = counterOrder(list, pack).slice(0, (sets||0)*size); const seen = new Set(pre.map(w => w.id));
   return pre.concat(list.filter(w => !seen.has(w.id) && r[w.id]));
 }
 function learnedWords(words, pack, prog){
   const size = setSizeOf(pack); const byLv = wordsByLevel(words, pack);
   const out = [];
-  levelIds(pack).forEach(lv=>{ out.push(...levelLearned(byLv[lv], (prog.sets||{})[lv], size, prog.w)); });
+  levelIds(pack).forEach(lv=>{ out.push(...levelLearned(byLv[lv], (prog.sets||{})[lv], size, prog.w, pack)); });
   return out;
 }
 // `set` names the set that holds fresh[0] by its position in the level's list (rank order),
@@ -1101,9 +1107,12 @@ function learnedWords(words, pack, prog){
 function levelNewSet(words, pack, prog, lv){
   const size = setSizeOf(pack); const list = wordsByLevel(words, pack)[lv] || [];
   const done = (prog.sets||{})[lv]||0;
-  const got = new Set(levelLearned(list, done, size, prog.w).map(w => w.id));
+  const got = new Set(levelLearned(list, done, size, prog.w, pack).map(w => w.id));
   const fresh = list.filter(w => !got.has(w.id)).slice(0, size);
   if(!fresh.length) return null;
+  // Under pack.freqTiers learned words sit anywhere in the frequency order (taught under the
+  // earlier order), so the set is the count of sets already learned.
+  if(freqTiersOn(pack)) return { lv, set: Math.min(Math.floor(got.size / size), nSets(list, size) - 1), words: fresh };
   const idx = list.findIndex(w => w.id === fresh[0].id);
   return { lv, set: Math.floor((idx < 0 ? 0 : idx) / size), words: fresh };
 }
@@ -1116,7 +1125,8 @@ function settleSetCounter(prog, words, pack, lv){
   if(!levelNewSet(words, pack, prog, lv)) return (prog.sets[lv] = n);
   const r = prog.w || {};
   let lead = 0;
-  while(lead < n && list.slice(lead*size, (lead+1)*size).every(w => r[w.id])) lead++;
+  if(freqTiersOn(pack)) lead = Math.min(n, Math.floor(list.filter(w => r[w.id]).length / size));
+  else while(lead < n && list.slice(lead*size, (lead+1)*size).every(w => r[w.id])) lead++;
   return (prog.sets[lv] = Math.max(Math.min(prog.sets[lv] || 0, n), lead));
 }
 function nextNewSet(words, pack, prog){
@@ -1134,7 +1144,7 @@ function pinPrefixRecords(prog, words, pack, lv, counters){
   (lv === undefined ? levelIds(pack) : [String(lv)]).forEach(id => {
     const list = byLv[id] || [];
     if(list.some(w => taughtRec(prog.w, w))) return;
-    list.slice(0, (sets[id]||0)*size).forEach(w => { if(!prog.w[w.id]) prog.w[w.id] = {r:1,w:0,s:1,prov:1}; });
+    counterOrder(list, pack).slice(0, (sets[id]||0)*size).forEach(w => { if(!prog.w[w.id]) prog.w[w.id] = {r:1,w:0,s:1,prov:1}; });
   });
   return prog;
 }
@@ -3893,7 +3903,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   FT_AMBIENT, FT_CORE, FT_PERIPHERAL, freqTiersOn, wordTier, unitTier, pairKnownAt, tierNoTyped, wordPairs, wordKnown, settleProv, unitDone,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairsOn, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
-  markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP,

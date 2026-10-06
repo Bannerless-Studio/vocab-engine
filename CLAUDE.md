@@ -67,6 +67,7 @@ $NODE tests/typed_mastery_checks.js              # 81 (characters.bareBy typed c
 $NODE tests/words_typed_checks.js                # 57 (pack.wordsBy typed: streak table, flag-off markRec + two-session app control vs a8e9c08, held words planned typed + held share, one typed ask per session (replay recall, session record today.tw across a reload), no in-drill retry credit, untypable words keep the old rule)
 $NODE tests/progress_map_checks.js              # 94 (pack.progressMap: whole-pack bar (true) position, prog.pm cap 14, sessionsToGo; goals ladder: goalPosition per level range, 90% switch, last-goal clamp, pm g window, Today row, Progress Goals block, session writes g, owner export; flag-off control vs a2f2426, progressMap true vs 2412992)
 $NODE tests/pairs_checks.js                      # 49 (pack.pairs: validator, kind -> pair table, pair streak table, bootstrap from the legacy streak, scheduler order, flag-off plans + two-session app walk vs 3901e2e, three Today sessions on the owner export; reads PAIRS_OWNER or ../chinese/.cache/owner-progress.json, read-only)
+$NODE tests/freq_tiers_checks.js                 # 66 (pack.freqTiers: validator, generated tiers + shares + zipf order, pair streak / typed / refresh / known per tier, unit tier + target, owner-export Learn order (nothing re-taught) + counters in id order, flag-off control + two-session app walk vs ff760d8, three Today sessions; owner export read-only)
 $NODE tests/lag_checks.js                        # 45 (characters.learn "lag": core rule, owner shape before/after, per-level set label (Today row + card header, straddling set, resume), app sessions, resume, per-level Progress rows vs 68930bd, control vs 590af86)
 $NODE tests/pause_checks.js                      # 49 (pack.pauseNew: flag-off / unpaused control vs 36aee02, chip, paused sessions teach nothing, Review +Learn items, toggling mid-session)
 $NODE tests/opts_mix_checks.js                  # 50 (pack.optsMix: records carry f (session learned), buckets by f, rotation by sn, charSound by syllables [4]; length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
@@ -84,7 +85,8 @@ python3 tools/validate_pack.py packs/zh          # schema + referential integrit
 .venv/bin/python -m pytest tools/packbuilder/tests
 python3 -m unittest discover -s tools/packbuilder/tests -t tools   # same suite, stdlib runner
 (cd tools && python3 -m packbuilder audio --lang fa --repo ../../persian --check)   # recorded-audio status of a repo
-python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the hsk data (idempotent)
+python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the hsk data (idempotent; reads tools/zh_freq.json)
+.venv/bin/python tools/zh_freq.py [../chinese] [--check]   # zipf table for freqTiers (pip install wordfreq==3.1.1 into .venv)
 .cache/venv/bin/python tools/zh_say_scan.py [--write]   # zh polyphone TTS carriers; venv: pip install pypinyin jieba
 ```
 
@@ -129,6 +131,8 @@ Dev mode without a rebuild: open `engine/app.html?pack=zh` from `file://` (loads
 | packs/zh/*.json except passages_src.json, gloss_display.json | tools/pack_from_hsk.py (incl. attribution.json); passages.json + REPORT_passages.md by `packbuilder passages` |
 | tools/zh_hints.json | tools/zh_hints.py [../chinese] from the hsk vocabulary + .cache/makemeahanzi/dictionary.txt (`--fetch`) + tools/zh_hints_overrides.json; committed so pack_from_hsk.py needs no network (run it first when the hsk vocabulary gains characters) |
 | tools/zh_say.json, docs/ZH_SAY.md | tools/zh_say_scan.py --write (pypinyin + jieba venv; read by pack_from_hsk.py) |
+| tools/zh_freq.json | `.venv/bin/python tools/zh_freq.py [../chinese]` (wordfreq 3.1.1 zipf; committed so pack_from_hsk.py needs no wordfreq) |
+| docs/ZH_TIERS.md, words.json + characters.json `ft`, each level's word order | tools/pack_from_hsk.py from tools/zh_freq.json (PACK_SCHEMA "freqTiers") |
 | docs/ZH_GLOSS.md, words.json `syn`/`typedSyn`/`noTypedMeaning`/`pronInGloss` | tools/pack_from_hsk.py via tools/zh_gloss.js (from tools/zh_gloss_overrides.json, checked against tools/zh_gloss_expect.json) |
 | tests/golden/*.json | tests/flagoff_snapshot.js --capture |
 | <lang>/pack/*, index.html, sw.js, tools/REPORT.md | packbuilder, jsonify, build.sh in each language repo |

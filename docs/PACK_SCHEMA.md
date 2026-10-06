@@ -63,6 +63,7 @@ The `.js` files are generated with `python3 tools/jsonify_pack.py <packdir>`. Th
 | `readRotation` | bool | no (off) | Today Read stage without day gates: reading and listening passes alternate by pass, picks are random, and every pass shuffles the question order; see "passages.json", Today ("Rotation"). Needs `dayAware` (passes are counted by session; without it the flag reads as off and the validator errors). Adds `s` / `ls` to `prog.read.done` records. Only zh sets it (owner 2026-10-03). |
 | `wordsBy` | `"typed"` | no (off) | From streak 2 a word moves up only by a typed answer: right choice and ear answers hold it, a miss steps it down one; held words are planned typed. Needs `typing` (validator error) and `dayAware` (warning). See "wordsBy" below. Only zh sets it. |
 | `pairs` | bool | no (off) | Review, Recall, Listen and the Test Characters pool pick by pair (written↔meaning, sound↔meaning, written↔sound), lowest pair streak first, then asked longest ago, instead of the day planner's tiers; a pair past 2 only by a production answer. Needs `dayAware`; not with `script` (validator errors). Adds the optional record field `p`. See "pairs". Only zh sets it (owner 2026-10-05). |
+| `freqTiers` | bool | no (off) | Three frequency tiers per word from words.json `ft` (ambient / core / peripheral): per-tier pair mastery, typed asks, refresh share, the known rule and the character unit's target. Needs `pairs` (validator error; without it the flag reads as off). See "freqTiers". Only zh sets it (owner 2026-10-06). No stored field. |
 | `progressMap` | `{goals: [{upTo, label}]}` or bool | no (off) | Today row above the plan: a ladder of goals, one shown at a time, each scoped to levels <= `upTo` (a level id), with a 10-cell bar and "≈ N sessions to go" from the measured pace; `true` is the old whole-pack bar. See "progressMap". Needs `dayAware` (sessions are counted by `prog.sn`; the validator errors without it). Adds the optional top-level `prog.pm`. Only zh sets it (owner 2026-10-04). |
 | `tones` | `"pinyin"` | no | Readings carry tone marks: every displayed reading is coloured per syllable by tone; see "Pronunciation aids" below. The only accepted value is `"pinyin"`. |
 | `soundsReference` | `true` | no | The Sounds tab gets a Reference card built from the lesson rows; see "Pronunciation aids" below. Needs `hasLessons` (validator warning). |
@@ -423,6 +424,26 @@ A passage span can be longer than its linked word: 这个 links 这, 越来越 l
 
   Tuning: `PAIR_REFRESH` 0.2 (the first value) gave words net known below main; 0.1 restored it. A unit bootstrap of min(s, 3) for every unit left held units (s 4) in the refresh share and bare fell to 122–221; holding every unit below bare at 2 starved words (known 88–107); holding only the units at bare − 1 plus the typed-first and words-first ties gives the row above. `PAIR_HOLD` stays 2. Words reaching known in the week is 1.4 below main on the mean and inside the seed spread (main 163–172, pairs 164–168); net known is 5.6 above.
 
+### freqTiers
+
+`"freqTiers": true` (zh only; owner 2026-10-06: "Should we give more priority to words that come up more in real life and the exam? Not just word order, mastery requirements as well."). Needs `pairs` (validator error; core.js `freqTiersOn` reads it as off without `pairs`). Every word carries `ft`: 0 ambient (我 你 是 的 了 不: every sentence rehearses them), 1 core (虽然), 2 peripheral (爬山). A pack without the flag ignores `ft` (field absent = core); flag off is byte-identical (tests/flagoff_snapshot.js, tests/freq_tiers_checks.js control vs ff760d8).
+
+| | ambient | core | peripheral |
+|---|---|---|---|
+| pair mastered at | 3, last answer production (as `pairs`) | same | 2, any right answer (`pairKnownAt`) |
+| typed asks planned | yes | yes | never: `typedKindFits` false for its pairs (`tierNoTyped`); the unit's typed ask too (`typedUnitDue`) |
+| refresh share | excluded (sentences and passages cover it) | as `pairs` | age counts half when ranking refresh candidates |
+| word counts as known | every askable pair mastered | same | every askable pair at 2 |
+| its character unit | bare required (pinyin disappears), as today | same | mastered is the target: no typed unit asks, ruby stays, Progress counts it done at mastered |
+
+- **Tier source** (tools/pack_from_hsk.py `freq_tiers`): wordfreq 3.1.1 zipf of the written form (`zh`), cached in tools/zh_freq.json by tools/zh_freq.py. Ambient: the 100 highest-zipf words of the whole pack. Peripheral: per level the lowest-zipf share of its words, HSK 1 10 %, HSK 2 20 %, HSK 3 35 %, HSK 4 45 % (ambient words excluded). A word not in wordfreq (zipf 0) is core. Each level lists its words by zipf descending (ties keep hsk order), so Learn sets follow frequency; characters.json follows. The per-level lists by name: docs/ZH_TIERS.md (generated).
+- **Unit tier** (core.js `unitTier`): the lowest `ft` of its words (ambient or core over peripheral); the generator writes it as the unit's `ft` and the validator checks it.
+- **Known rule** (core.js `wordKnown(rec, word, pack)`): the word's askable pairs (`wordPairs`: wm always; sm with TTS or audio; ws unless peripheral and a typed ws kind fits) all at `pairKnownAt(tier)`. A pair never answered under `pairs` bootstraps from the legacy streak as `pairs` does, so a word at legacy 3+ stays known and a peripheral word at legacy 2 becomes known. Read by Progress level rows, `goalPosition`, `progressPosition` and the `prov` drop (`settleProv`). The legacy streak still drives `optsMix` stages, `wordsBy` holds, dayPick tiers (planners without `pairs`), `provPick` (non-day plans) and Weakest words.
+- **Unit rule** (core.js `unitDone`): a peripheral unit is done at mastered; others at bare. The Progress Characters rows show "done" in place of "bare" under the flag.
+- **Learn order and stored counters**: learned means a record (README "What the app does"), so the reorder re-teaches nothing; the next Learn set is the level's next unrecorded words in the new order. Stored set counters were written in the earlier order, which is id order: a records-less level's counter prefix (`levelLearned`, `pinPrefixRecords`) and the learn-order sets of records without `f` (app.html `mixSetOf`) read the level in id order (`counterOrder`). Under the flag the set label and the counter count the level's learned words (`levelNewSet`, `settleSetCounter`), because learned words sit anywhere in the frequency order.
+- **Storage**: NO new stored field. The tier is pack data; pair streaks are `p` (see "pairs"). A record written under the flag boots on b21ee93 and 2412992 byte-equal and back (tests/migration_checks.js [freqTiers]).
+- **Measured** (owner export a48ee4d3, 7 days × 3 Today sessions × 3 seeds, scratchpad fb23 harness; mean): known at boot 455 → 491 (36 peripheral words at legacy 2); typed asks per session on peripheral 6.67 → 0, core 17.8 → 24.3; refresh asks on ambient 23.7 → 0 in the week; production asks per weak core word per day 1.75 → 1.72; units at their target after the week 133 → 216; words known after the week under the tier rule on both runs 580.7 → 575.7 (core 348.7 → 340.7: the refresh slots freed from ambient and peripheral go to known core pairs, and the harness answers a refresh at the same 86 % typed accuracy as a fresh ask, so refresh misses are overstated). Nothing tuned; full table in .cache/briefs/fb26-freq-tiers-report.md.
+
 ### progressMap
 
 `"progressMap": {"goals": [{"upTo": "2", "label": "..."}, ...]}` (zh only; owner 2026-10-04: the whole-pack bar read 2/10, because half the pack is HSK 4 and bare units and listened passages sit near zero). One goal is shown at a time. Needs `dayAware`. The validator requires a non-empty list of `{upTo, label}`, `upTo` a pack level id (zh: "2", "3", "4" for HSK 2, 3, 4), `label` a non-empty string.
@@ -492,7 +513,7 @@ Three pack fields and the sentence `ruby` turn on learning aids for the reading.
 
 Required when `pack.characters` is set (and must be absent otherwise). Holds the units, in teaching order within each level: sets are consecutive runs of `setSize` units of one level, in file order.
 
-`[{ id, t, words, lv, reading?, hint?, say? }]`
+`[{ id, t, words, lv, ft?, reading?, hint?, say? }]`
 
 | field | type | meaning |
 |---|---|---|
@@ -500,6 +521,7 @@ Required when `pack.characters` is set (and must be absent otherwise). Holds the
 | `t` | non-empty string | Written form, shown large. |
 | `words` | `[wordId]`, non-empty | Linked words, ids from this pack's `words.json`. `words[0]` supplies the gloss and the audio. |
 | `lv` | levelId | Must be one of `pack.levels[].id`, equal to the `lv` of `words[0]`, and covered by one of `pack.characters.stages[].levels` — decides which stage the unit belongs to. |
+| `ft` | 0, 1 or 2 | Optional unit frequency tier, the lowest `ft` of its words (validator checks it). Read only under `pack.freqTiers`; see "freqTiers". |
 | `reading` | string | Optional. Answer for `charSound` and the ruby text. Defaults to the `pron` of `words[0]`. |
 | `hint` | `[string \| null]` | Optional. A memory hint per character of `t` (aligned by code point, `null` for a character without one; at least one string, else leave the field out). Shown dimmed under the form on the teach card and in every unit item's reveal, one line per distinct character, prefixed with the character when `t` has more than one; a character already hinted on the same teach screen is not repeated (core.js `unitHints`, app.html `charHintHTML`). Under `pack.tones` a marked pinyin syllable inside a hint ("sound cǐ") takes the same per-syllable tone classes as word pinyin (`toneHTML`); unmarked text is unchanged (fb21). The word popover (a tapped sentence token or Read-tab word) shows the hints of the word's unit (`words[0]`) after the gloss, the same way, only while the word is shown written: under `pronFirst` a hint's characters would spell a form not yet taught. Results weak-word rows do not. Never on a stimulus or option: a hint names the meaning and parts, so it would answer charRead/charSound/charPick. Absent, nothing renders (byte-identical). zh: `tools/pack_from_hsk.py` from the committed tools/zh_hints.json (tools/zh_hints.py over Make Me a Hanzi, LGPL-3.0-or-later, credited in packs/zh/attribution.json; hand overrides in tools/zh_hints_overrides.json). |
 | `say` | string | Optional TTS carrier, as words.json `say`. A unit is spoken through `words[0]` (whose `say` then applies), so the unit's own `say` is heard only for a unit with no word; packs/zh copies the word's. Never displayed. |
@@ -564,7 +586,7 @@ Required when `pack.script` is set, absent otherwise. `{units, notes?}`.
 
 ## words.json
 
-`[{ id, w, en, lv, pos?, rank?, pron?, alt?, forms?, audio?, say?, syn?, typedSyn?, noTypedMeaning?, pronInGloss? }]`, in teaching order within each level. Learn teaches the level's next `setSize` not-yet-learned words in file order; learned means the word has a progress record, so reordering or editing a level on republish never shifts what counts as learned (README "What the app does"). The Words tab browses consecutive runs of `setSize` words in file order.
+`[{ id, w, en, lv, pos?, rank?, ft?, pron?, alt?, forms?, audio?, say?, syn?, typedSyn?, noTypedMeaning?, pronInGloss? }]`, in teaching order within each level. Learn teaches the level's next `setSize` not-yet-learned words in file order; learned means the word has a progress record, so reordering or editing a level on republish never shifts what counts as learned (README "What the app does"). The Words tab browses consecutive runs of `setSize` words in file order.
 
 | field | type | meaning |
 |---|---|---|
@@ -574,6 +596,7 @@ Required when `pack.script` is set, absent otherwise. `{units, notes?}`.
 | `lv` | levelId | Must be one of `pack.levels[].id`. |
 | `pos` | string | Optional part of speech. Recall and cloze distractors prefer the same `pos` and level. |
 | `rank` | number | Optional frequency rank (1 = commonest). The engine takes Learn sets from words.json in file order; the packbuilder writes each level sorted by `rank` ascending (`core/words.sort_by_rank`: stable, unranked words last in file order), so sets follow frequency. Every packbuilder pack shipped as of 2026-09-28 is already in this order, so a rebuild moves no word. A pack built elsewhere (packs/zh has no `rank`) keeps its file order. |
+| `ft` | 0, 1 or 2 | Optional frequency tier: 0 ambient, 1 core, 2 peripheral (absent = core). Read only under `pack.freqTiers`; see "freqTiers". zh: tools/pack_from_hsk.py from wordfreq zipf. Validator: 0, 1 or 2. |
 | `pron` | string | Optional pronunciation (pinyin, IPA). It is display-only, except that `typing: "pron"` makes it a typed answer. |
 | `audio` | URL string | Optional recorded clip of `w`, with the same rules as `sentences.json` `audio`. Every place the app speaks the word plays it instead of TTS, and a word with a clip can be heard with no voice (Listen items, taps, placement, the script primer's example words; app.html `sayWord`/`canHearWord`). |
 | `say` | string | Optional TTS carrier spoken in place of `w` wherever the app speaks the word (app.html `sayWord`, core.js `wordSay`; the script primer's example words too). Never displayed, typed or searched. A recorded `audio` clip beats it; a clip that fails falls back to TTS of `say`. Sentences are spoken as written (the TTS reads them in context). Use: zh polyphonic characters a TTS misreads alone (还 hái is spoken huán; `say` 孩), built by tools/zh_say_scan.py into tools/zh_say.json, table in docs/ZH_SAY.md. Validator: a non-empty string other than `w`. |

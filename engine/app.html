@@ -884,10 +884,11 @@ let mixSets = null;
 function mixSetOf(){
   if(mixSets) return mixSets;
   const w = new Map(); let base = 0;
-  LEVELS.forEach(lv => { const l = levelList(lv); l.forEach((x, i) => w.set(x.id, base + Math.floor(i / SIZE))); base += VC.nSets(l, SIZE); });
+  // Under pack.freqTiers a record without f was taught in the earlier order (VC.counterOrder).
+  LEVELS.forEach(lv => { const l = VC.counterOrder(levelList(lv), PACK); l.forEach((x, i) => w.set(x.id, base + Math.floor(i / SIZE))); base += VC.nSets(l, SIZE); });
   const u = new Map();
   if(HAS_CHARACTERS){
-    let list = VC.charStageUnits(LEVELS, CHAR_LIST, PACK);
+    let list = VC.charStageUnits(LEVELS, VC.counterOrder(CHAR_LIST, PACK), PACK);
     list.forEach((x, i) => u.set(x.id, Math.floor(i / (CHAR_CFG.setSize || 10))));
   }
   return mixSets = { w, u };

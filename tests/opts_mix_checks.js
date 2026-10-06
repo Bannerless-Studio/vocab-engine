@@ -183,7 +183,8 @@ try {
 } catch(e){ OLD = null; OLD_HTML = null; }
 
 const byLv = VC.wordsByLevel(WORDS, PACK);
-const ORDER_W = VC.levelIds(PACK).flatMap(lv => byLv[lv]);
+// Learners here carry records without f, taught before pack.freqTiers reordered the levels: in id order (VC.counterOrder).
+const ORDER_W = VC.levelIds(PACK).flatMap(lv => VC.counterOrder(byLv[lv], PACK));
 const UNIT_OF = new Map(CHARACTERS.map(u => [u.words[0], u]));
 const FW = new Set(PACK.functionWords || []);
 const CM = VC.charsConfig(PACK).mastered;
@@ -208,8 +209,8 @@ function shape(n, unitShare, unitStreak, nWeak){
   return p;
 }
 // Learn-order sets and buckets as app.html mixSetOf / mixBucket build them.
-const WSET = new Map(); { let base = 0; VC.levelIds(PACK).forEach(lv => { const l = byLv[lv]; l.forEach((x, i) => WSET.set(x.id, base + Math.floor(i / VC.setSizeOf(PACK)))); base += VC.nSets(l, VC.setSizeOf(PACK)); }); }
-const USET = new Map(VC.charStageUnits(VC.levelIds(PACK), CHARACTERS, PACK).map((u, i) => [u.id, Math.floor(i / (VC.charsConfig(PACK).setSize || 10))]));
+const WSET = new Map(); { let base = 0; VC.levelIds(PACK).forEach(lv => { const l = VC.counterOrder(byLv[lv], PACK); l.forEach((x, i) => WSET.set(x.id, base + Math.floor(i / VC.setSizeOf(PACK)))); base += VC.nSets(l, VC.setSizeOf(PACK)); }); }
+const USET = new Map(VC.charStageUnits(VC.levelIds(PACK), VC.counterOrder(CHARACTERS, PACK), PACK).map((u, i) => [u.id, Math.floor(i / (VC.charsConfig(PACK).setSize || 10))]));
 const mixBucket = (sets, ln) => (a, v) => {
   const x = sets.get(a.id), y = sets.get(v.id), d = x == null || y == null ? 2 : Math.min(2, Math.abs(x - y));
   return ln && ln.has(a.id) ? (ln.has(v.id) ? 0 : Math.max(1, d)) : d; };
