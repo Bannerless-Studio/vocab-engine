@@ -2331,15 +2331,41 @@ function lagRamp(c, size){
   if(Array.isArray(c.ramp) && c.ramp.length && c.ramp.every((x, i) => Number.isInteger(x) && x >= 1 && x <= size && (!i || x >= c.ramp[i - 1]))) o.ramp = c.ramp.slice();
   return o;
 }
-// Ramp position by units taught so far (no counter stored): sets are ramp[0], ramp[1], ..., then setSize.
+// Ramp (fb27). Sets never straddle a level: the ramp walks the learner's global unit count only until
+// it is finished (rampSetOf / rampEnd); inside a level, sets are chunks of the level's units in pack
+// order, the last one possibly short. A level that starts at or after the ramp end is plain setSize chunks.
 function rampSetOf(cfg, taught){
   if(!cfg.ramp) return Math.floor(taught / cfg.setSize);
   let sum = 0;
   for(let k = 0; k < cfg.ramp.length; k++){ sum += cfg.ramp[k]; if(taught < sum) return k; }
   return cfg.ramp.length + Math.floor((taught - sum) / cfg.setSize);
 }
-const rampSizeAt = (cfg, taught) => cfg.ramp ? (rampSetOf(cfg, taught) < cfg.ramp.length ? cfg.ramp[rampSetOf(cfg, taught)] : cfg.setSize) : cfg.setSize;
-const rampSetsFor = (cfg, n) => cfg.ramp ? (n <= 0 ? 0 : rampSetOf(cfg, n - 1) + 1) : Math.ceil(n / cfg.setSize);
+const rampEnd = cfg => cfg.ramp.reduce((a, b) => a + b, 0);
+// Chunk sizes of one level with `below` units before it and `n` of its own; they sum to n.
+function levelChunks(cfg, below, n){
+  const sizes = []; let pos = 0, g = below, end = 0;
+  for(let k = 0; k < cfg.ramp.length && pos < n; k++){
+    end += cfg.ramp[k];
+    if(end > g){ const sz = Math.min(end - g, n - pos); sizes.push(sz); pos += sz; g += sz; }
+  }
+  while(pos < n){ const sz = Math.min(cfg.setSize, n - pos); sizes.push(sz); pos += sz; }
+  return sizes;
+}
+// Per level (pack order) { lv, below, n, sizes }, plus the number of sets before each.
+function rampPlan(cfg, pack, units){
+  const idx = levelIndexMap(pack), by = new Map();
+  (units || []).forEach(u => by.set(String(u.lv), (by.get(String(u.lv)) || 0) + 1));
+  const lvs = [...by.keys()].sort((x, y) => (idx[x] !== undefined ? idx[x] : Infinity) - (idx[y] !== undefined ? idx[y] : Infinity));
+  let below = 0, sets = 0;
+  const plan = lvs.map(lv => { const n = by.get(lv), sizes = levelChunks(cfg, below, n), o = { lv, below, n, sizes, setsBefore: sets }; below += n; sets += sizes.length; return o; });
+  return { plan, total: sets };
+}
+// Set containing local position `taught` of a level: { k, size } (size capped by what is left), or null when the level is done.
+function chunkAt(sizes, taught){
+  let c = 0;
+  for(let k = 0; k < sizes.length; k++){ c += sizes[k]; if(taught < c) return { k, size: sizes[k] }; }
+  return null;
+}
 // Default mix is the predecessor app's.
 const CHAR_TEST_KINDS = { charRead:40, charSound:30, charPick:30 };
 function testKinds(tk, kinds, def){
@@ -2537,28 +2563,50 @@ function nextStage(pack, words, units, prog, sunits){
 const lagOn = pack => { const c = charsConfig(pack); return !!(c && c.learn === "lag"); };
 function lagUnits(pack, words, units, prog){ return newCharUnits(units, learnedWords(words, pack, prog || {}), prog, pack, Infinity); }
 function lagStage(pack, words, units, prog, path){
-  const cfg = charsConfig(pack), n = lagUnits(pack, words, units, prog).length;
+  const cfg = charsConfig(pack), el = lagUnits(pack, words, units, prog);
   const w = (path || stagePath(pack, words, units, prog)).find(s => s.kind === "words" && !s.done) || null;
   if(cfg.start && w && learnedWords(words, pack, prog || {}).length < cfg.start) return w;
-  return n >= lagSize(cfg, units, prog) || (n && !w) ? lagCharStage(pack) : w;
+  const n = cfg.ramp ? lagLevelUnits(pack, el).length : el.length;
+  return n >= lagSize(cfg, units, prog, pack, el) || (n && !w) ? lagCharStage(pack) : w;
 }
 const lagCharStage = pack => ({ kind:"chars", key:"lag", lag:true, levels: levelIds(pack), label: charsConfig(pack).label, done:false });
 // Indexed by records taught so far: sets are dynamic, so "set k of n" counts tens of units.
 const lagTaught = (units, prog) => { const r = charRecs(prog); return (units || []).filter(u => hasCharRec(r, u.id)).length; };
-const lagSize = (cfg, units, prog) => cfg.ramp ? rampSizeAt(cfg, lagTaught(units, prog)) : cfg.setSize;
+// Under a ramp the eligible units of the lowest level only (a set never straddles a level).
+function lagLevelUnits(pack, el){
+  if(!el.length) return el;
+  const idx = levelIndexMap(pack), at = u => idx[String(u.lv)] !== undefined ? idx[String(u.lv)] : Infinity;
+  const lv = el.reduce((m, u) => at(u) < at(m) ? u : m, el[0]).lv;
+  return el.filter(u => String(u.lv) === String(lv));
+}
+// Where the next ramp set sits: its level, level-local set number, size, and the plan.
+function lagRampPos(cfg, pack, units, prog, el){
+  const first = lagLevelUnits(pack, el);
+  if(!first.length) return null;
+  const lv = String(first[0].lv), rp = rampPlan(cfg, pack, units), lp = rp.plan.find(x => x.lv === lv), recs = charRecs(prog);
+  const tIn = (units || []).filter(u => String(u.lv) === lv && hasCharRec(recs, u.id)).length;
+  const c = chunkAt(lp.sizes, tIn);
+  return c ? { lv, lp, rp, k: c.k, size: Math.min(c.size, lp.n - tIn) } : { lv, lp, rp, k: lp.sizes.length - 1, size: 0 };
+}
+function lagSize(cfg, units, prog, pack, el){
+  if(!cfg.ramp) return cfg.setSize;
+  const pos = lagRampPos(cfg, pack, units, prog, el);
+  return pos ? pos.size : cfg.setSize;
+}
 function lagCharSet(pack, words, units, prog, ids){
   const cfg = charsConfig(pack), all = units || [], recs = charRecs(prog);
-  let list = lagUnits(pack, words, all, prog).slice(0, lagSize(cfg, all, prog));
+  const el = lagUnits(pack, words, all, prog);
+  let list = cfg.ramp ? lagLevelUnits(pack, el).slice(0, lagSize(cfg, all, prog, pack, el)) : el.slice(0, lagSize(cfg, all, prog));
   if(ids){ const by = new Map(all.map(u => [u.id, u])); list = Array.isArray(ids) ? ids.map(id => by.get(id)) : []; if(!list.every(Boolean)) return null; }
   if(!list.length) return null;
   // lv/lvIndex/lvTotal: the same position counted inside the set's lowest level (owner 2026-10-03: "48 of 120" said nothing about where in the characters).
   const idx = levelIndexMap(pack), at = u => idx[String(u.lv)] !== undefined ? idx[String(u.lv)] : Infinity;
   const lv = list.reduce((m, u) => at(u) < at(m) ? u : m, list[0]).lv, inLv = all.filter(u => String(u.lv) === String(lv));
   if(cfg.ramp){
-    // Level positions walk the same ramp: lower levels' units come first, so a later level never restarts at 3.
-    const below = all.filter(u => at(u) < at({ lv })).length, tIn = inLv.filter(u => hasCharRec(recs, u.id)).length;
-    return { index: rampSetOf(cfg, lagTaught(all, prog)), units: list, total: rampSetsFor(cfg, all.length), ids: list.map(u => u.id),
-      lv, lvIndex: Math.max(0, rampSetsFor(cfg, below + tIn) - rampSetsFor(cfg, below)), lvTotal: rampSetsFor(cfg, below + inLv.length) - rampSetsFor(cfg, below) };
+    // Sets never straddle a level; the ramp applies to the global count only while it runs (levelChunks).
+    const rp = rampPlan(cfg, pack, all), lp = rp.plan.find(x => x.lv === String(lv)), tIn = inLv.filter(u => hasCharRec(recs, u.id)).length;
+    const c = chunkAt(lp.sizes, tIn), k = c ? c.k : lp.sizes.length - 1;
+    return { index: lp.setsBefore + k, units: list, total: rp.total, ids: list.map(u => u.id), lv, lvIndex: k, lvTotal: lp.sizes.length };
   }
   return { index: Math.floor(all.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), units: list, total: Math.ceil(all.length / cfg.setSize), ids: list.map(u => u.id),
     lv, lvIndex: Math.floor(inLv.filter(u => hasCharRec(recs, u.id)).length / cfg.setSize), lvTotal: Math.ceil(inLv.length / cfg.setSize) };
@@ -3945,7 +3993,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
-  charStageUnits, rampSetOf, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
+  charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
