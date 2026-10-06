@@ -281,7 +281,7 @@ const mean = (s, n) => n ? (s / n).toFixed(3) : "-";
 const lenOutlier = (a, os) => { const L = String(a.en).length || 1; return os.length === 3 && os.every(s => { const q = String(s.en).length / L; return q >= 1.8 || q <= 1 / 1.8; }); };
 
 async function sec4(){
-  const REPEAT_BOUND = 0.20; // fb21 (b): 23-26% of presentations repeated a set before mix.rot (small closed sets), 2-4% after. fb28: repeats are skipped when forced: the answer's same-length weak pool P has <= 3 others (e.g. the four 2-character units 自己 认为 需要 必须), or C(P,3) <= its prior draws (every 3-subset already shown) (counted in the NOTE); a different-length filler would be a length giveaway
+  const REPEAT_BOUND = 0.20; // fb21 (b): 23-26% of presentations repeated a set before mix.rot (small closed sets), 2-4% after. fb28/fb30: repeats are skipped when forced, counted in the NOTE: the engine's rotating group (same-length weak records by learn-order bucket, see pool) offers 1 combination (e.g. an answer's three learn-set mates, always shown together by design) or no more than the prior draws; a different-length filler would be a length giveaway
   console.log("\n[4] fb21 R3-M1: records carry f (session learned); a lag learner's sets are not on 10-boundaries; Test Characters after the session and on later days");
   {
     // Learner of shape(30, 0.3): 30 words, 9 units (a 9-unit lag set). Seven Today sessions, a day apart; after each, the options of the
@@ -290,9 +290,23 @@ async function sec4(){
     const KINDS = [["charPick", "u"], ["charRecall", "u"], ["charSound", "u"], ["read", "w"]];
     const cpl = t => [...String(t)].length, syl = r => (VC.splitReading(r).filter(x => x.tone !== undefined).length || 1);
     const unitLab = (k, o) => k === "charSound" ? (BY_READ.get(nk(o)) || []) : (BY_T.get(o) || []);
-    const pool = (fam, a, pr) => { const L = cpl(a.t), isU = fam === "u"; let n = 0;
-      for(const id of Object.keys(isU ? pr.chars.c : pr.w)){ if(id === a.id) continue; const x = isU ? CHARACTERS.find(c => c.id === id) : BY_ID[id], r = isU ? pr.chars.c[id] : pr.w[id]; if(x && cpl(x.t) === L && (r.s || 0) < (isU ? CM : VC.WORD_MASTERED)) n++; }
-      return n; };
+    // Distinct wrong-choice sets the engine can rotate through for answer a (core.js mixPick): its candidates are the same-length weak
+    // records, grouped by learn-order bucket (app.html mixBucket: session-rank distance of f, else set distance) nearest first; the
+    // groups before the one that fills the last slots are shown whole, that one supplies C(g, need) combinations. A learn-set of exactly
+    // the answer's three mates (bucket 0) leaves 1: the same triple every session by design (they were met together), not a missed rotation.
+    const comb = (m, k) => { let c = 1; for(let i = 1; i <= k; i++) c = c * (m - k + i) / i; return Math.round(c); };
+    const pool = (fam, a, pr) => { const L = cpl(a.t), isU = fam === "u", recs = isU ? pr.chars.c : pr.w, sets = isU ? USET : WSET;
+      const fs = new Set(); [pr.w, pr.chars.c].forEach(m => Object.keys(m).forEach(k => { if(typeof m[k].f === "number") fs.add(m[k].f); }));
+      const rk = new Map([...fs].sort((x, y) => x - y).map((f, i) => [f, i])), fOf = id => typeof (recs[id] || {}).f === "number" ? recs[id].f : null;
+      const bucket = id => { const fa = fOf(a.id), fv = fOf(id);
+        if(fa != null && fv != null && rk.has(fa) && rk.has(fv)) return Math.min(2, Math.abs(rk.get(fa) - rk.get(fv)));
+        if((fa != null) !== (fv != null)){ const f = fa != null ? fa : fv; return rk.has(f) ? Math.min(2, rk.get(f) + 1) : 2; }
+        const x = sets.get(a.id), y = sets.get(id); return x == null || y == null ? 2 : Math.min(2, Math.abs(x - y)); };
+      const g = [0, 0, 0];
+      for(const id of Object.keys(recs)){ if(id === a.id) continue; const x = isU ? CHARACTERS.find(c => c.id === id) : BY_ID[id], r = recs[id]; if(x && cpl(x.t) === L && (r.s || 0) < (isU ? CM : VC.WORD_MASTERED)) g[bucket(id)]++; }
+      let before = 0;
+      for(const n of g){ const need = 3 - before; if(need <= 0) break; if(n === 0) continue; if(need < n) return comb(n, need); before += n; }
+      return 1; };
     async function lagWeek(core, html, pack, seed, mkShape){
       NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
       const st = fresh(); st.ls.setItem(VC.storageKey(pack), JSON.stringify((mkShape || (() => shape(30, 0.3)))()));
@@ -334,7 +348,7 @@ async function sec4(){
         }
       }
       let rep = { u: [0, 0, 0], w: [0, 0, 0] };
-      for(const [key, arr] of seenSets){ const f = key.includes("|c") ? "u" : "w"; if(key.startsWith("charPick|") || key.startsWith("read|")) for(let i = 1; i < arr.length; i++){ const P = arr[i].pool; if(P <= 3 || P * (P - 1) * (P - 2) / 6 <= i){ rep[f][2]++; continue; } rep[f][1]++; if(arr.slice(0, i).some(x => x.ks === arr[i].ks)) rep[f][0]++; } }
+      for(const [key, arr] of seenSets){ const f = key.includes("|c") ? "u" : "w"; if(key.startsWith("charPick|") || key.startsWith("read|")) for(let i = 1; i < arr.length; i++){ const P = arr[i].pool; if(P <= 1 || P <= i){ rep[f][2]++; continue; } rep[f][1]++; if(arr.slice(0, i).some(x => x.ks === arr[i].ks)) rep[f][0]++; } }
       return { cells: cells.filter(c => c.day), fvals, rep, prog: st.ls.getItem(VC.storageKey(pack)), pr: api.getProg() };
     }
     const OLDX = (() => { try { const os = require("os"); const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "optsmix-")), "core_main.js"); fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ac891e3:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); return { core: require(f), html: cp.execSync(`git -C "${ROOT}" show ac891e3:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }) }; } catch(e){ return null; } })();
