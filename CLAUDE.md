@@ -45,7 +45,7 @@ Why it is built this way (one line each):
 
 ## Commands (pinned)
 
-Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-06, branch fb26-freq-tiers (on main ff760d8).
+Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-06, branch fb26-freq-tiers (main a20398c merged in).
 
 ```sh
 $NODE tests/engine_checks.js                     # 704 passed; includes the dist/zh.html + sw.js stale guard and the packs/zh generator drift check from an empty dir (needs ../chinese)
@@ -70,7 +70,7 @@ $NODE tests/pairs_checks.js                      # 49 (pack.pairs: validator, ki
 $NODE tests/freq_tiers_checks.js                 # 70 (pack.freqTiers: validator, generated tiers + shares + zipf order, same pair mechanics, typed-first / held boot / refresh / known per tier, unit tier + target, owner-export Learn order (nothing re-taught) + counters in id order, flag-off control + two-session app walk vs ff760d8, three Today sessions; owner export read-only)
 $NODE tests/lag_checks.js                        # 55 (characters.start / ramp: fresh 60-word start then sets 3,5,8,10, mid-ramp 4 taught -> 5, owner export same units; characters.learn "lag": core rule, owner shape before/after, per-level set label (Today row + card header, straddling set, resume), app sessions, resume, per-level Progress rows vs 68930bd, control vs 590af86)
 $NODE tests/pause_checks.js                      # 49 (pack.pauseNew: flag-off / unpaused control vs 36aee02, chip, paused sessions teach nothing, Review +Learn items, toggling mid-session)
-$NODE tests/opts_mix_checks.js                  # 50, 49 + 1 known FAIL on zh (weak-unit repeat bound; also fails on ff760d8; fb26 report) (pack.optsMix: records carry f (session learned), buckets by f, rotation by sn, charSound by syllables [4]; length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
+$NODE tests/opts_mix_checks.js                  # 50, 49 + 1 known FAIL on zh (weak-unit repeat bound; also fails on main; fb26 report) (pack.optsMix: records carry f (session learned), buckets by f, rotation by sn, charSound by syllables [4]; length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
 $NODE tests/session_resume_checks.js             # 125 (drill/passage resume: tab switch, reload, relaunch, per-tab parking; readRotation Read pick + question order, rd without qx; listening look-back list + text state; an old record with reopened/peekText resumes)
 $NODE tests/day_sim_checks.js                    # 77 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; weak-word floor + production settles, owner-shape before/after vs fb49c1b; --why)
 $NODE tests/help_close_checks.js                 # 42 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
