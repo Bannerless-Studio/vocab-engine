@@ -237,7 +237,7 @@
   .psent .ptxt.hasruby{line-height:2.3}
   .hasruby ruby{ruby-position:over}
   .hasruby rt{font-family:var(--font);font-size:0.5em;line-height:1;color:var(--mute);font-weight:400}
-  .hasruby ruby.bare rt{visibility:hidden}
+  ruby.bare rt{visibility:hidden}  /* global: stems, options, titles, results too, not only .hasruby scopes */
   .sent{padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}
   .sent .st{font-family:var(--wfont);font-size:17px}
   .sent .sp{color:var(--mute);font-size:14px}
@@ -5334,7 +5334,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "3824552733-1955360";
+const VE_BUILD = "1650971515-1955428";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -7175,4 +7175,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1628810542-1954684-->
+<!--ve-build:3644599825-1954752-->

@@ -153,7 +153,7 @@ return {
   goto: t => { tab = t; testSel = null; RD = null; render(); },
   legacyNotice: () => legacyNotice, legacyFail: () => legacyFail, readOnly: () => storeReadOnly, getPrep: () => todayPrep,
   sayWord, sayUnit, saySentence, typeItem, vocabTeach,
-  rubyTextHTML, sentenceRowHTML, sentenceRevealBlock, readSentence, charDrillItem, passageSentenceHTML, hasChars: () => HAS_CHARACTERS,
+  rubyTextHTML, pfRubyText, rubyTextOr, rubyTw, sentenceRowHTML, sentenceRevealBlock, readSentence, charDrillItem, passageSentenceHTML, hasChars: () => HAS_CHARACTERS,
   onShowWritten, gapSentence, recallItem, readItem, hearItem, revealBlock, wordRowHTML, glossHTML, passagePlainHTML, charTeach, revealWritten, pronFirst: () => PRON_FIRST, tokTap,
   panelListeners: () => document.getElementById("panel")._listeners.click || [],
   wordsSearch: q => { tab = "words"; wordsQuery = q; render(); }, startPassage: p => { tab = "read"; startPassage(p); },
@@ -368,7 +368,7 @@ Math.random = mulberry32(20261004);
     const row = api.sentenceRowHTML(s);
     check(`ruby below bare: ${s.t.slice(ta[0], ta[1])} gets <ruby> with its reading`, row.includes(`<ruby>${s.t.slice(ta[0], ta[1])}<rt>${ta[2]}</rt></ruby>`));
     check(`bare at/above bare: ${s.t.slice(tb[0], tb[1])} keeps its <rt>, hidden (class "bare")`, !row.includes(`<ruby>${s.t.slice(tb[0], tb[1])}<rt>`) && row.includes(`<ruby class="bare">${s.t.slice(tb[0], tb[1])}<rt>${tb[2]}</rt></ruby>`));
-    check("CSS: a bare token's <rt> is visibility:hidden (keeps its width)", /\.hasruby ruby\.bare rt\{visibility:hidden\}/.test(appHtml));
+    check("CSS: a bare token's <rt> is visibility:hidden (keeps its width)", /(^|\n)\s*ruby\.bare rt\{visibility:hidden\}/.test(appHtml));
     check("ruby replaces the pron line (no .sp), line box class set", !/class="sp"/.test(row) && /class="st hasruby"/.test(row));
     check("reveal block and read item also render ruby", /<ruby>/.test(api.sentenceRevealBlock(s)) && /<ruby>/.test(api.readSentence(s).html));
     // Every sentence renders back to its own text (ruby readings aside), with and without a highlighted word.
@@ -1162,6 +1162,29 @@ Math.random = mulberry32(20261004);
     const bad2 = rtlAudit(it.reveal);
     check(`rtl pack: character reveal block has no bidi/font violations (${bad2.length})`, bad2.length === 0);
   } catch(e){ check(`rtl charTeach section threw: ${e.message}`, false); }
+
+  // fb24: bare-tier words hide their pinyin wherever ruby renders (stems, options, titles,
+  // results), not only in the passage body. The hide is the global CSS rule; the markup is
+  // the same shared token HTML (class "bare", <rt> kept for width) at every site.
+  try {
+    console.log("\n[fb24] bare ruby outside the passage body");
+    const pz = JSON.parse(fs.readFileSync(path.join(ZH, "passages.json"), "utf8")); const P0 = clone((Array.isArray(pz) ? pz : pz.passages)[0]);
+    const ubz = VC.unitByWord(CHARACTERS), tokT = P0.titleRuby.find(r => r[3] && ubz.get(r[3]));
+    const prog = VC.normalizeProg({ placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PACK_ZH);
+    const mark = u => { prog.chars.c[u.id] = { r: 6, w: 0, s: 6 }; };
+    [P0.titleRuby, P0.questions[0].ruby].concat(P0.questions[0].optionsRuby).forEach(rs => rs.forEach(r => { if(r[3] && ubz.get(r[3])) mark(ubz.get(r[3])); }));
+    const z = await boot({ pack: PACK_ZH, passages: [P0] }); z.api.setProg(prog);
+    const q0 = P0.questions[0], baseT = P0.title.slice(tokT[0], tokT[1]);
+    const bareT = `<ruby class="bare">${baseT}<rt>${tokT[2]}</rt></ruby>`;
+    check("global CSS: ruby.bare rt hidden outside .hasruby scopes", /(^|\n)\s*ruby\.bare rt\{visibility:hidden\}/.test(appHtml) && !/\.hasruby ruby\.bare rt\{visibility/.test(appHtml));
+    check("title/list ruby: bare token keeps hidden <rt> (rubyTextOr + rubyTw)", z.api.rubyTextOr(P0.title, P0.titleRuby).includes(bareT) && z.api.rubyTw(P0.title, P0.titleRuby, true).includes(bareT));
+    const stem = z.api.rubyTextOr(q0.q, q0.ruby), opt = z.api.rubyTw(q0.options[0], q0.optionsRuby[0], true);
+    const noVisRt = h => !/<ruby>[^<]*<rt>/.test(h) && /<ruby class="bare">/.test(h);
+    check("question stem: every marked token is bare (no visible-rt ruby)", noVisRt(stem));
+    check("option: every marked token is bare (no visible-rt ruby)", noVisRt(opt));
+    const body = z.api.passageSentenceHTML(P0.sentences[0], 0, false);
+    check("passage body renders the same bare markup for the same unit", /<ruby class="bare">/.test(body) || !(P0.sentences[0].ruby || []).some(r => r[3] && ubz.get(r[3])));
+  } catch(e){ check(`fb24 section threw: ${e.message}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);
