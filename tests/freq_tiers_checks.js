@@ -281,8 +281,25 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check(`an ambient word missed (${wa.w} wm at 0) comes back like any other`, pl.some(it => it.word && it.word.id === wa.id));
     const cand = (t, a, id) => ({ t: "w", x: { id }, key: "w:" + id, rec: { s: 3, p: { wm: [3, a] } }, kinds: ["read"], tier: t, tw: { id } });
     const pick = cs => VC.pairPick(cs, 10, { a: {} }, mulberry32(1), 40, PACK, {}).map(e => e.c.key);
-    check("peripheral age counts half: last answered 30 sessions ago ranks with core 15 ago (core 20 ago first; peripheral 40 ago before core 19 ago)",
-      pick([cand(2, 10, "p"), cand(1, 20, "c")])[0] === "w:c" && pick([cand(2, 0, "p"), cand(1, 21, "c")])[0] === "w:p");
+    // Pairs below 3 fill the plan except its refresh share (n = 20: 2 slots; n = 10: 1).
+    const low = k => Array.from({ length: k }, (_, i) => ({ t: "w", x: { id: "l" + i }, key: "w:l" + i, rec: { s: 1, p: { wm: [1, 30] } }, kinds: ["read"], tier: 1, tw: { id: "l" + i } }));
+    const ref = (cs, n, pk) => VC.pairPick(cs, n, { a: {} }, mulberry32(1), 40, pk || PACK, {}).map(e => e.c.key).filter(k => !k.startsWith("w:l"));
+    // Second slot by halved age: peripheral 10 ago ranks at 25, so core 20 ago comes first, core 26 ago after it.
+    const r1 = ref([...low(18), cand(2, 0, "pa"), cand(2, 10, "pb"), cand(1, 20, "c")], 20), r2 = ref([...low(18), cand(2, 0, "pa"), cand(2, 10, "pb"), cand(1, 26, "c")], 20);
+    check(`peripheral age counts half: after the reserved slot (pa), core 20 ago before peripheral 10 ago (${r1.join(" ")}); core 26 ago after it (${r2.join(" ")})`,
+      r1.join() === "w:pa,w:c" && r2.join() === "w:pa,w:pb");
+    {
+      // One refresh slot per plan for the oldest known peripheral pair, though ten core known pairs are older.
+      const cs = [...low(9), ...Array.from({ length: 10 }, (_, i) => cand(1, i, "c" + i)), cand(2, 30, "p1"), cand(2, 25, "p2")];
+      const got = ref(cs, 10);
+      check(`peripheral refresh: one slot per plan, the oldest known peripheral pair (${got.join(" ")})`, got.join() === "w:p2");
+      const n20 = ref([...low(18), ...cs.slice(9)], 20);
+      check(`two refresh slots: the peripheral pair, then the oldest core (${n20.join(" ")})`, n20.join() === "w:p2,w:c0");
+      const off = ref(cs.map(c => Object.assign({}, c, { tier: undefined })), 10, PACK_OFF);
+      check(`flag off: the oldest pair (${off.join(" ")})`, off.join() === "w:c0");
+      const none = ref([...low(9), ...Array.from({ length: 10 }, (_, i) => cand(1, i, "c" + i))], 10);
+      check(`no known peripheral pair: the share fills as before (${none.join(" ")})`, none.join() === "w:c0");
+    }
     check("flag off: candidates carry no tier effect (known at 3, oldest first)", (() => { const cs = [cand(undefined, 10, "p"), cand(undefined, 20, "c")]; return VC.pairPick(cs, 10, { a: {} }, mulberry32(1), 40, PACK_OFF, {}).map(e => e.c.key)[0] === "w:p"; })());
   }
 
