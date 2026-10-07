@@ -212,6 +212,20 @@ else {
   const hd = hidden(h);
   check("default view hides: Sounds (0 lessons), Weakest words list, path strip, other goals, HSK 4 parts (locked)", !hd.sounds && !hd.weakest && !hd.path && !hd.goals && !hd.hsk4parts);
   check("HSK 4 (locked, paused) reads paused with its learned count, dimmed", /<div class="pvl pvo"><div class="pvt"><span>HSK 4<\/span><span class="pvn">paused, 9 learned<\/span>/.test(h));
+  {
+    // The waiting-level note and the paused value are text: no opacity on a row that holds them, muted colour meets 4.5:1 in both themes.
+    const css = appHtml.slice(0, appHtml.indexOf("</style>"));
+    const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(m => [m[1].trim(), m[2]]);
+    const dimmed = rules.filter(([sel, body]) => /\bopacity\s*:/.test(body) && /\.pv(o|l|gate|s|t|n)\b/.test(sel) && !/\.pvb\b/.test(sel));
+    check("gate line and paused value: no reduced opacity on .pvo/.pvl/.pvgate/.pvs/.pvt/.pvn", dimmed.length === 0);
+    const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16) / 255).map(x => x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4));
+    const lum = c => { const [r, g, b] = hex(c); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+    const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+    const vars = body => Object.fromEntries([...body.matchAll(/--(\w+):(#[0-9A-Fa-f]{6})/g)].map(m => [m[1], m[2]]));
+    const light = vars(css.slice(css.indexOf(":root{"), css.indexOf("@media (prefers-color-scheme: dark)"))), dark = vars(css.slice(css.indexOf('":root[data-theme="dark"]'.slice(1)), css.indexOf(":root[data-theme=\"dark\"]") + 400));
+    check(`muted text on the page background is >= 4.5:1 (light ${ratio(light.mute, light.bg).toFixed(2)}, dark ${ratio(dark.mute, dark.bg).toFixed(2)})`, ratio(light.mute, light.bg) >= 4.5 && ratio(dark.mute, dark.bg) >= 4.5);
+    check("a locked or paused level row text is the muted colour, not dimmed", /\.pvo \.pvt[^{]*\{[^}]*color:var\(--mute\)/.test(css));
+  }
   // Bars: learned and mastered widths are the shares of the level size.
   const learned = VC.learnedWords(WORDS, PACK, P);
   const lowSum = ["1", "2"].reduce((o, lv) => { const l0 = learned.filter(w => w.lv === lv); o.l += l0.length; o.m += l0.filter(w => known(P, w)).length; return o; }, { l: 0, m: 0 });

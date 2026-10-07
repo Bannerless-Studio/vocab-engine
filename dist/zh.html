@@ -181,7 +181,9 @@
   .pvb .pvlr{background:color-mix(in srgb,var(--mute) 45%,transparent)}
   .pvb .pvm{background:var(--ink)}
   .pvs{color:var(--mute);font-size:13px;margin-top:6px!important}
-  .pvo{opacity:.55}
+  /* A locked or paused level reads quieter by colour (var(--mute), 4.88:1 light / 6.68:1 dark); text opacity would put the gate note and the paused value under 4.5:1. */
+  .pvo .pvt,.pvo .pvt>span{color:var(--mute)}
+  .pvo .pvb{opacity:.55}
   .pvc{display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%;min-height:44px;padding:0;border:0;background:transparent;font:inherit;font-size:15px;color:var(--mute);text-align:left;cursor:pointer}
   .pvw{font-family:var(--wfont);font-size:20px;line-height:1.6;word-spacing:.35em}
   .pvall{width:auto;align-self:flex-start;padding:10px 16px}
@@ -5802,7 +5804,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "983815154-2273521";
+const VE_BUILD = "3186684009-2273743";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -7849,4 +7851,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2507464803-2272844-->
+<!--ve-build:1315296599-2273067-->
