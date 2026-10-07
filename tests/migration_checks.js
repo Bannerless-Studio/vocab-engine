@@ -809,14 +809,14 @@ console.log("\n[patterns] pack.patterns (fb29): optional top-level prog.pt = {pa
   }
 }
 
-console.log("\n[bareByPair] characters.bareByPair (fb31): no stored field; it reads the pair streaks pairs writes. Records a pair-bare unit carries boot here and on 3044601 byte-equal, and back");
+console.log("\n[bareByPair] characters.bareByPair (fb31): no stored field; it reads the pair streaks pairs writes. Records a pair-bare unit (wm and ws at 2, fb35) carries boot here and on 3044601 byte-equal, and back");
 {
   const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog; p.sn = 43;
   const uid = Object.keys(p.chars.c)[0];
   const U = { id: uid, words: [Object.keys(p.w)[0]] };
-  p.chars.c[uid] = { r: 5, w: 1, s: 3, u: 43, p: { wm: [2, 43], ws: [1, 40] } };
+  p.chars.c[uid] = { r: 5, w: 1, s: 3, u: 43, p: { wm: [2, 43], ws: [2, 43] } };
   const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK);
-  check("[bareByPair] zh pack sets characters.bareByPair; a ruby unit with wm 2 reads bare; boot here: no backup, progress byte-equal, no field added", LAG_PACK.characters.bareByPair === true && VC.pairBare(here.prog.chars.c[uid], U, here.prog, LAG_PACK) && here.backupRaw === null && JSON.stringify(here.prog) === raw);
+  check("[bareByPair] zh pack sets characters.bareByPair; a ruby unit with wm 2 and ws 2 reads bare; boot here: no backup, progress byte-equal, no field added", LAG_PACK.characters.bareByPair === true && VC.pairBare(here.prog.chars.c[uid], U, here.prog, LAG_PACK) && here.backupRaw === null && JSON.stringify(here.prog) === raw);
   let eng = null, op = null;
   try {
     const cp = require("child_process"), os = require("os");

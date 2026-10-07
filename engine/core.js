@@ -2534,22 +2534,27 @@ function bareWord(word, units, prog, pack){
   return !!u && hasCharRec(recs, u.id) && (charTier(recs[u.id].s, pack) === "bare" || pairBare(recs[u.id], u, prog, pack));
 }
 // characters.bareByPair (docs/PACK_SCHEMA.md "bareByPair"; owner 2026-10-07: readings stayed on words
-// the learner could already read): a unit at the ruby tier shows bare once its
-// written <-> meaning pair, or its word's, whichever was answered last, has BARE_PAIR right answers in a row; a miss resets the pair
-// and the reading returns. Only an answered pair counts (no boot from the legacy streak, which would
-// make every mastered unit bare at once). Display only: unitDone, goals and the typed credit keep rec.s.
+// the learner could already read; then "sound too"): a unit at the ruby tier shows bare once BOTH its
+// written <-> meaning pair (wm) AND its written <-> sound pair (ws) have BARE_PAIR right answers in a row.
+// Each pair is judged by the most recent answered entry among the unit's own and its word's records; a miss
+// on any of the four streams resets it and the reading returns. Only an answered pair counts (no boot from
+// the legacy streak, which would make every mastered unit bare at once). Display only: unitDone, goals and
+// the typed credit keep rec.s.
 const BARE_PAIR = 2;
 function bareByPairOn(pack){ const c = charsConfig(pack); return !!(c && c.bareByPair) && pairsOn(pack); }
 function pairBare(rec, unit, prog, pack){
   if(!bareByPairOn(pack) || !isObj(rec) || charTier(rec.s || 0, pack) !== "ruby") return false;
-  const wm = r => isObj(r) && isObj(r.p) ? pairEntry(r.p.wm) : null;
   const wid = unit && (unit.words || [])[0], w = wid != null && prog && isObj(prog.w) ? prog.w[wid] : null;
-  // The unit's and the word's pairs are separate streams; the most recent answer decides, so a miss
-  // on either brings the reading back (review fb31). Same session: the lower streak.
-  const es = [wm(rec), wm(w)].filter(Boolean);
-  if(!es.length) return false;
-  const last = Math.max(...es.map(e => e[1]));
-  return Math.min(...es.filter(e => e[1] === last).map(e => e[0])) >= BARE_PAIR;
+  // The unit's and the word's records are separate streams per pair; the most recent answer decides (higher
+  // session ordinal [1]; in the same session the lower streak), so a miss on either brings the reading back.
+  const ok = pair => {
+    const en = r => isObj(r) && isObj(r.p) ? pairEntry(r.p[pair]) : null;
+    const es = [en(rec), en(w)].filter(Boolean);
+    if(!es.length) return false;
+    const last = Math.max(...es.map(e => e[1]));
+    return Math.min(...es.filter(e => e[1] === last).map(e => e[0])) >= BARE_PAIR;
+  };
+  return ok("wm") && ok("ws");
 }
 function answerCharChoice(prog, start){
   const ch = ensureChars(prog); ch.choiceSeen = true; if(!start) ch.defer = true; return prog;

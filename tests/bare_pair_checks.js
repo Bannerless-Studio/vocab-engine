@@ -1,6 +1,6 @@
 // characters.bareByPair (docs/PACK_SCHEMA.md "bareByPair"; owner 2026-10-07: "Can/should we let go of the
 // pinyins a bit earlier? ... a lot of words I can read without pinyin comfortably but it still shows them"):
-// [1] config and validator, [2] the rule (ruby unit + wm pair at 2, the unit's or its word's, the one answered
+// [1] config and validator, [2] the rule (ruby unit + wm and ws pairs at 2, the unit's or its word's, the one answered
 // last deciding; answered pairs only; a miss on either brings the reading back; flag off never), [3] sites: rubyTiers tokens, bareWord, Progress
 // rows without freqTiers, [4] the app: a drill question and a passage token lose their reading, a miss
 // brings it back, records byte-equal with the flag on and off, [5] flag-off control: a two-session app walk,
@@ -175,23 +175,31 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 
-  console.log("\n[2] the rule: a ruby unit is bare once its wm pair, or its word's, is at 2 (answered pairs only)");
+  console.log("\n[2] the rule: a ruby unit is bare once its wm AND ws pairs (unit's or word's, latest answered) are at 2 (answered pairs only)");
   const pb = (rec, wrec, pack) => { const p = withRec(rec, wrec); return VC.pairBare(p.chars.c[U0.id], U0, p, pack || PACK); };
   const T = [
     ["ruby (3), no pair answered", { r: 3, w: 0, s: 3 }, null, false],
     ["ruby (3), wm 1", { r: 4, w: 0, s: 3, p: { wm: [1, 9] } }, null, false],
-    ["ruby (3), wm 2", { r: 5, w: 0, s: 3, p: { wm: [2, 9] } }, null, true],
-    ["ruby (4), wm 3", { r: 5, w: 0, s: 4, p: { wm: [3, 9] } }, null, true],
+    ["ruby (3), wm 2", { r: 5, w: 0, s: 3, p: { wm: [2, 9], ws: [2, 9] } }, null, true],
+    ["ruby (3), wm 2, ws never answered", { r: 5, w: 0, s: 3, p: { wm: [2, 9] } }, null, false],
+    ["ruby (3), wm 2, ws 0", { r: 5, w: 0, s: 3, p: { wm: [2, 9], ws: [0, 9] } }, null, false],
+    ["ruby (3), wm 2, ws 1", { r: 5, w: 0, s: 3, p: { wm: [2, 9], ws: [1, 9] } }, null, false],
+    ["ruby (3), wm 0 (missed), ws 3", { r: 5, w: 0, s: 3, p: { wm: [0, 9], ws: [3, 9] } }, null, false],
+    ["ruby (3), ws 2 only", { r: 5, w: 0, s: 3, p: { ws: [2, 9] } }, null, false],
+    ["ruby (3), wm on the unit 2, ws on its word 2", { r: 5, w: 0, s: 3, p: { wm: [2, 9] } }, { r: 6, w: 0, s: 4, p: { ws: [2, 9] } }, true],
+    ["ruby (4), wm 3", { r: 5, w: 0, s: 4, p: { wm: [3, 9], ws: [2, 9] } }, null, true],
     ["ruby (4), ws 5 only (another pair)", { r: 5, w: 0, s: 4, p: { ws: [5, 9] } }, null, false],
-    ["ruby (3), its word's wm 2", { r: 3, w: 0, s: 3 }, { r: 6, w: 0, s: 4, p: { wm: [2, 9] } }, true],
+    ["ruby (3), its word's wm 2", { r: 3, w: 0, s: 3 }, { r: 6, w: 0, s: 4, p: { wm: [2, 9], ws: [2, 9] } }, true],
     ["ruby (3), its word's wm 1, sm 4", { r: 3, w: 0, s: 3 }, { r: 6, w: 0, s: 4, p: { wm: [1, 9], sm: [4, 9] } }, false],
     ["ruby (3), its word at streak 6 with no pair answered (boot not counted)", { r: 3, w: 0, s: 3 }, { r: 6, w: 0, s: 6 }, false],
     ["pron (2), wm 3 (below mastered stays pron)", { r: 5, w: 0, s: 2, p: { wm: [3, 9] } }, null, false],
     ["malformed wm", { r: 5, w: 0, s: 3, p: { wm: ["2", 9] } }, null, false],
-    ["ruby (3), unit wm 2 (sn 4), word wm 2 (sn 5)", { r: 5, w: 0, s: 3, p: { wm: [2, 4] } }, { r: 6, w: 0, s: 4, p: { wm: [2, 5] } }, true],
+    ["ruby (3), unit wm 2 (sn 4), word wm 2 (sn 5)", { r: 5, w: 0, s: 3, p: { wm: [2, 4], ws: [2, 4] } }, { r: 6, w: 0, s: 4, p: { wm: [2, 5], ws: [2, 5] } }, true],
     ["ruby (3), unit wm 2 (sn 4), word missed later (0, sn 6)", { r: 5, w: 0, s: 3, p: { wm: [2, 4] } }, { r: 6, w: 1, s: 0, p: { wm: [0, 6] } }, false],
     ["ruby (3), unit missed later (0, sn 6), word wm 2 (sn 5)", { r: 5, w: 1, s: 3, p: { wm: [0, 6] } }, { r: 6, w: 0, s: 4, p: { wm: [2, 5] } }, false],
-    ["ruby (3), unit wm 3 (sn 8) after a word miss (0, sn 6)", { r: 6, w: 1, s: 3, p: { wm: [3, 8] } }, { r: 6, w: 1, s: 0, p: { wm: [0, 6] } }, true],
+    ["ruby (3), unit wm 3 (sn 8) after a word miss (0, sn 6)", { r: 6, w: 1, s: 3, p: { wm: [3, 8], ws: [3, 8] } }, { r: 6, w: 1, s: 0, p: { wm: [0, 6], ws: [0, 6] } }, true],
+    ["ruby (3), unit wm/ws 2 (sn 4), word ws missed later (0, sn 6)", { r: 5, w: 0, s: 3, p: { wm: [2, 4], ws: [2, 4] } }, { r: 6, w: 1, s: 0, p: { ws: [0, 6] } }, false],
+    ["ruby (3), word ws missed (sn 6), unit ws 2 later (sn 8), wm 2", { r: 5, w: 0, s: 3, p: { wm: [2, 4], ws: [2, 8] } }, { r: 6, w: 1, s: 0, p: { ws: [0, 6] } }, true],
     ["ruby (3), same session: unit 2, word 0", { r: 5, w: 0, s: 3, p: { wm: [2, 7] } }, { r: 6, w: 1, s: 0, p: { wm: [0, 7] } }, false],
   ];
   T.forEach(([name, rec, wrec, want]) => console.log(`    ${name.padEnd(72)} ${want ? "bare" : "-"}`));
@@ -199,17 +207,21 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
   check("bare (5) stays bare by its streak; pairBare adds nothing there", pb({ r: 5, w: 0, s: 5 }) === false && VC.charTier(5, PACK) === "bare");
   check("flag off (bareByPair stripped, or pairs off): never", T.every(([, rec, wrec]) => !pb(rec, wrec, PACK_OFF) && !pb(rec, wrec, Object.assign({}, PACK, { pairs: false }))));
   {
-    const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 9] } }), r = p.chars.c[U0.id];
+    const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 9], ws: [2, 9] } }), r = p.chars.c[U0.id];
     const was = VC.pairBare(r, U0, p, PACK);
     VC.notePair(r, "wm", false, false, 10, r.s, VC.pairUnitHeld(PACK));
     const after = VC.pairBare(r, U0, p, PACK);
     VC.notePair(r, "wm", true, true, 11, r.s, VC.pairUnitHeld(PACK)); const one = VC.pairBare(r, U0, p, PACK);
     VC.notePair(r, "wm", true, true, 12, r.s, VC.pairUnitHeld(PACK)); const two = VC.pairBare(r, U0, p, PACK);
-    check("a miss on the pair resets it to 0: the reading returns; two right production answers make it bare again", was && !after && r.p.wm[0] === 2 && !one && two);
+    check("a miss on the wm pair resets it to 0: the reading returns; two right production answers make it bare again", was && !after && r.p.wm[0] === 2 && !one && two);
+    VC.notePair(r, "ws", false, false, 13, r.s, VC.pairUnitHeld(PACK)); const sMiss = VC.pairBare(r, U0, p, PACK);
+    VC.notePair(r, "ws", true, true, 14, r.s, VC.pairUnitHeld(PACK)); const sOne = VC.pairBare(r, U0, p, PACK);
+    VC.notePair(r, "ws", true, true, 15, r.s, VC.pairUnitHeld(PACK)); const sTwo = VC.pairBare(r, U0, p, PACK);
+    check("a miss on the ws pair brings the reading back; right twice restores it", !sMiss && !sOne && sTwo, JSON.stringify([sMiss, sOne, sTwo]));
   }
   {
     // Two streams (review fb31 F1): the unit's and the word's wm pairs; the most recent answer decides.
-    const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 4] } }, { r: 6, w: 0, s: 4, p: { wm: [2, 5] } }), r = p.chars.c[U0.id], w = p.w[W0.id];
+    const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 4], ws: [2, 4] } }, { r: 6, w: 0, s: 4, p: { wm: [2, 5], ws: [2, 5] } }), r = p.chars.c[U0.id], w = p.w[W0.id];
     const bare = () => VC.pairBare(r, U0, p, PACK), held = VC.pairUnitHeld(PACK);
     const s0 = bare();
     VC.notePair(w, "wm", false, false, 6, w.s); const wMiss = bare();
@@ -220,12 +232,16 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     VC.notePair(r, "wm", true, true, 10, r.s, held); const uOne = bare();
     VC.notePair(r, "wm", true, true, 11, r.s, held); const uTwo = bare();
     check("both streams at 2, a miss on the unit: reading back; the unit right twice later: bare again", !uMiss && !uOne && uTwo, JSON.stringify([uMiss, uOne, uTwo]));
+    VC.notePair(w, "ws", false, false, 12, w.s); const wsMiss = bare();
+    VC.notePair(w, "ws", true, true, 13, w.s); const wsOne = bare();
+    VC.notePair(w, "ws", true, true, 14, w.s); const wsTwo = bare();
+    check("word-record ws stream: a miss brings the reading back; right twice restores it (unit and word records are separate streams)", !wsMiss && !wsOne && wsTwo, JSON.stringify([wsMiss, wsOne, wsTwo]));
   }
 
   console.log("\n[3] sites: sentence tokens (rubyTiers), drill words (bareWord), Progress rows without freqTiers");
   {
     const s = SENTENCES.find(x => (x.ruby || []).some(k => k[3] === W0.id) && x.ruby.length >= 3);
-    const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 9] } });
+    const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 9], ws: [2, 9] } });
     const on = tiersOf(s, p, PACK), off = tiersOf(s, p, PACK_OFF), i0 = s.ruby.findIndex(k => k[3] === W0.id);
     check(`rubyTiers ("${s.t}"): the pair-bare unit's token bare (off: ruby), every other token unchanged`, on[i0] === "bare" && off[i0] === "ruby" && on.every((t, i) => i === i0 || t === off[i]), JSON.stringify([on, off]));
     const pass = PASSAGES.find(x => (x.titleRuby || []).some(k => k[3] === W0.id) || x.questions.some(q => (q.ruby || []).some(k => k[3] === W0.id)));
@@ -243,7 +259,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
 
   console.log("\n[4] the app with the flag: drill word and passage token lose the reading; a miss brings it back; records unchanged");
   {
-    const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 9] } });
+    const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 9], ws: [2, 9] } });
     const api = await boot(PACK, p, 5), apiOff = await boot(PACK_OFF, p, 5);
     check("drill question (pronAsked): no reading beside the word; off, the reading", api.pronAsked(W0) === "" && apiOff.pronAsked(W0) !== "");
     const s = SENTENCES.find(x => (x.ruby || []).some(k => k[3] === W0.id));
@@ -253,8 +269,8 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     api.startPassage(pass); apiOff.startPassage(pass);
     const hOn = api.panel(), hOff = apiOff.panel();
     check(`Read tab passage ${pass.id}: more bare ruby tokens with the flag (one unit flipped)`, (hOn.match(/<ruby class="bare">/g) || []).length > (hOff.match(/<ruby class="bare">/g) || []).length);
-    const r = api.getProg().chars.c[U0.id]; VC.notePair(r, "wm", false, false, 13, r.s, VC.pairUnitHeld(PACK));
-    check("after a miss on the pair: the reading is back in the app", api.pronAsked(W0) !== "" && t(api) === "ruby");
+    const r = api.getProg().chars.c[U0.id]; VC.notePair(r, "ws", false, false, 13, r.s, VC.pairUnitHeld(PACK));
+    check("after a miss on the ws pair: the reading is back in the app", api.pronAsked(W0) !== "" && t(api) === "ruby");
     // Display only: two Today sessions with the same answers write byte-equal records with the flag on and off.
     const run = async pk => { NOW = new Date(2026, 9, 7, 8, 0, 0).getTime(); const a = await boot(pk, OWNER || synth(), 21); const rng = mulberry32(9);
       const rows = []; for(let k = 0; k < 2; k++){ NOW += 4 * 3600e3; rows.push(...(await session(a, () => rng() < 0.85)).map(x => [x.key, x.kind, x.ok])); } return { rows: JSON.stringify(rows), prog: JSON.stringify(a.getProg()) }; };
@@ -294,9 +310,14 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
       let toks = 0, bOff = 0, bOn = 0;
       passageSents().forEach(s => { const a = VC.rubyTiers(s, CHARACTERS, prog, PACK_OFF, st) || [], b = VC.rubyTiers(s, CHARACTERS, prog, PACK, st) || [];
         toks += a.length; bOff += a.filter(t => t.tier === "bare").length; bOn += b.filter(t => t.tier === "bare").length; });
-      return { taught: us.length, ruby, before, after, toks, bOff, bOn };
+      // Diagnostic: ruby units that the fb31 wm-only rule would flip, and units with any ws answer.
+            const ent = (r, k) => (r && r.p && Array.isArray(r.p[k]) && r.p[k].length === 2) ? r.p[k] : null;
+      const wmOnly = us.filter(u => { if(VC.charTier(recs[u.id].s, PACK) !== "ruby") return false; const wid = (u.words || [])[0], w = wid != null && prog.w ? prog.w[wid] : null;
+        const es = [ent(recs[u.id], "wm"), ent(w, "wm")].filter(Boolean); if(!es.length) return false; const last = Math.max(...es.map(e => e[1])); return Math.min(...es.filter(e => e[1] === last).map(e => e[0])) >= VC.BARE_PAIR; }).length;
+      const wsAns = us.filter(u => { const wid = (u.words || [])[0], w = wid != null && prog.w ? prog.w[wid] : null; return ent(recs[u.id], "ws") || ent(w, "ws"); }).length;
+      return { taught: us.length, ruby, before, after, toks, bOff, bOn, wmOnly, wsAns };
     };
-    const line = (name, c) => console.log(`    ${name.padEnd(46)} units ${c.taught} taught, ${c.ruby} ruby: bare ${c.before} -> ${c.after}; passage tokens ${c.toks}: bare ${c.bOff} -> ${c.bOn} (+${c.bOn - c.bOff})`);
+    const line = (name, c) => console.log(`    ${name.padEnd(46)} units ${c.taught} taught, ${c.ruby} ruby: bare ${c.before} -> ${c.after}; passage tokens ${c.toks}: bare ${c.bOff} -> ${c.bOn} (+${c.bOn - c.bOff}); wm-only rule would flip ${c.wmOnly}, units with a ws answer ${c.wsAns}`);
     const boot0 = VC.bootProg(JSON.stringify(OWNER), PACK).prog, c0 = count(boot0);
     line("as exported (no pair answered yet)", c0);
     check("as exported: no unit flips (the export predates pairs: no p on any record)", c0.after === c0.before && c0.bOn === c0.bOff);
@@ -309,7 +330,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
       for(const h of [8, 13, 20]){ NOW = new Date(2026, 9, 7 + d, h, 0, 0).getTime(); n += (await session(api, () => rng() < 0.85)).length; }
       const c = count(api.getProg()); res.push(c); line(`after day ${d + 1} (3 Today sessions a day, 85% right)`, c);
     }
-    check(`simulated ${n} answers over 3 days: more units and passage tokens bare under the rule, every flip a ruby unit`, res.every(c => c.after >= c.before && c.bOn >= c.bOff) && res[res.length - 1].after > res[res.length - 1].before && res[res.length - 1].bOn > res[res.length - 1].bOff);
+    check(`simulated ${n} answers over 3 days: the rule never lowers bare counts (flips are ruby units with wm and ws both at 2)`, res.every(c => c.after >= c.before && c.bOn >= c.bOff));
   }
 
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);

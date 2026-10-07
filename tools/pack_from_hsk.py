@@ -558,8 +558,8 @@ def main(argv):
             # without pinyin (docs/PACK_SCHEMA.md "bareBy").
             "bareBy": "typed",
             "bareWords": True,
-            # A mastered unit shows bare once its written <-> meaning pair (or its word's) has 2 right
-            # in a row; a miss brings the pinyin back (docs/PACK_SCHEMA.md "bareByPair"; owner 2026-10-07).
+            # A mastered unit shows bare once its written <-> meaning AND written <-> sound pairs (unit's or word's)
+            # each have 2 right in a row; a miss brings the pinyin back (docs/PACK_SCHEMA.md "bareByPair"; owner 2026-10-07).
             "bareByPair": True,
             # Learn teaches characters when a full set of learned words' units is untaught,
             # else new words (owner 2026-10-02, docs/PACK_SCHEMA.md "learn"); stages unused.
