@@ -78,6 +78,7 @@ TIER_NAMES = {"ambient": 0, "core": 1, "peripheral": 2}
 AMBIENT_N = 100
 PERIPHERAL_SHARE = {"1": 0.10, "2": 0.20, "3": 0.35, "4": 0.45}
 HINTS = os.path.join(ROOT, "tools", "zh_hints.json")
+HINT_MEANINGS = os.path.join(ROOT, "tools", "zh_hint_meanings.json")
 PATTERNS_REPORT = os.path.join(ROOT, "docs", "ZH_PATTERNS.md")
 PATTERNS_ATTRIBUTION = {"source": "hand-authored for this pack (chinese repo data/hsk_patterns.js)", "licence": "CC-BY-SA-4.0"}
 ATTRIBUTION = {
@@ -103,7 +104,7 @@ ATTRIBUTION = {
         "licence_text": "LICENSES/LGPL-3.0.txt, with LICENSES/GPL-3.0.txt (LGPL-3.0 is a set of additional permissions on GPL-3.0)",
     },
     "character_hint_overrides": {
-        "source": "tools/zh_hints_overrides.json: 13 hand-written hints restating Make Me a Hanzi entries; "
+        "source": "tools/zh_hints_overrides.json: 37 hand-written hints restating Make Me a Hanzi entries (24 where it has no usable template, marked as mnemonic when plain); "
                   "气 and 来 also restate English Wiktionary's glyph origin for 气 (pictogram of vapour) and 來 "
                   "(wheat, phonetic loan for 'come')",
         "licence": "CC-BY-SA-4.0 (Wiktionary text); the rest as character_hints",
@@ -267,15 +268,24 @@ def dump(path, data):
         print(f"wrote {os.path.relpath(path, ROOT)}")
 
 
-def attach_hints(units, hints):
+def attach_hints(units, hints, meanings):
     """Sets each unit's `hint` (one per character of `t`, null where none; omitted when all
-    are null) from the zh_hints.py table. A character the table lacks means the table is
-    stale: tools/zh_hints.py reads the same hsk input, so rerun it."""
-    missing = sorted({c for u in units for c in u["t"] if c not in hints})
+    are null). A one-character unit takes the component hint from the zh_hints.py table; a
+    unit of two or more takes each character's meaning from tools/zh_hint_meanings.json
+    (the app prefixes the character), with no components; a "compound:char" key (that unit's
+    `t`) wins over the bare character key. A character a table lacks means the table is stale:
+    tools/zh_hints.py reads the same hsk input, so rerun it. A compound key that matches no unit
+    fails too (a stale `_meanings` override)."""
+    missing = sorted({c for u in units for c in u["t"] if c not in hints or c not in meanings})
     if missing:
-        raise SystemExit(f"pack_from_hsk: characters missing from tools/zh_hints.json (run tools/zh_hints.py): {''.join(missing)}")
+        raise SystemExit(f"pack_from_hsk: characters missing from tools/zh_hints.json or zh_hint_meanings.json (run tools/zh_hints.py): {''.join(missing)}")
+    multi = {u["t"] for u in units if len(u["t"]) > 1}
+    stale = sorted(k for k in meanings if ":" in k and k.partition(":")[0] not in multi)
+    if stale:
+        raise SystemExit(f"pack_from_hsk: zh_hint_meanings.json compound keys match no unit (fix _meanings in tools/zh_hints_overrides.json): {stale[:10]}")
     for u in units:
-        h = [hints[c] for c in u["t"]]
+        t = u["t"]
+        h = [meanings.get(f"{t}:{c}") or meanings[c] for c in t] if len(t) > 1 else [hints[c] for c in t]
         if any(h):
             u["hint"] = h
         else:
@@ -505,6 +515,9 @@ def main(argv):
         # (docs/PACK_SCHEMA.md "typedFrom and glossFocus", TODO.md).
         "typedFrom": ["written", "pron"],
         "glossFocus": True,
+        # First sense plain, the others in brackets, and an "also:" line of typedSyn partners
+        # (docs/PACK_SCHEMA.md "glossStyle"; owner 2026-10-07).
+        "glossStyle": "primary",
         # Help overlays (word popovers, audio toast) get a close button, tap-outside, Escape
         # and an 8 s timer (docs/PACK_SCHEMA.md "helpClose"; owner feedback 2026-10-02).
         "helpClose": True,
@@ -545,6 +558,9 @@ def main(argv):
             # without pinyin (docs/PACK_SCHEMA.md "bareBy").
             "bareBy": "typed",
             "bareWords": True,
+            # A mastered unit shows bare once its written <-> meaning pair (or its word's) has 2 right
+            # in a row; a miss brings the pinyin back (docs/PACK_SCHEMA.md "bareByPair"; owner 2026-10-07).
+            "bareByPair": True,
             # Learn teaches characters when a full set of learned words' units is untaught,
             # else new words (owner 2026-10-02, docs/PACK_SCHEMA.md "learn"); stages unused.
             "learn": "lag",
@@ -590,6 +606,9 @@ def main(argv):
     # Grammar patterns drilled in the Sentences step (docs/PACK_SCHEMA.md "patterns"; owner 2026-10-06).
     if patterns:
         pack["patterns"] = True
+        # The English cue names the blank; it shows after the answer, or on a "meaning" tap
+        # (docs/PACK_SCHEMA.md "patternCue"; owner 2026-10-07).
+        pack["patternCue"] = "after"
 
     # one unit per word, same order as words.json (docs/HSK_MERGE.md §2.1).
     # A unit's `ft` is the highest-demand (lowest) tier of its words, so the planner needs no word lookup.
@@ -610,7 +629,7 @@ def main(argv):
             "ft": w["ft"],
         }
         characters.append(unit)
-    attach_hints(characters, hints)
+    attach_hints(characters, hints, json.load(open(HINT_MEANINGS, encoding="utf-8")))
     # legacy map for the hsk_pinyin -> vocab_zh progress migration (docs/HSK_MERGE.md §4)
     legacy = {
         "w": {w["w"]: w["id"] for w in words},

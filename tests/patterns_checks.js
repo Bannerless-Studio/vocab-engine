@@ -5,7 +5,8 @@
 // [7] the app: plan line, Sentences step 3 of 8, note once and on a miss, prog.pt writes, Progress row,
 // Sentences test, typed variant, [8] session resume keeps the pattern items (today.pt), [9] flag-off
 // control: plans and a two-session app walk byte-identical to 1a762a3 (flag off, and flag on without
-// patterns.json), [10] the owner's export opens 19 patterns. Migration of prog.pt: tests/migration_checks.js [patterns].
+// patterns.json), [10] the owner's export opens 19 patterns, [11] patternCue "after": English hidden
+// until answered (meaning tap, reveal, Sentences test, reload re-hides), flag-off walk vs 3044601. Migration of prog.pt: tests/migration_checks.js [patterns].
 // Run: node tests/patterns_checks.js
 "use strict";
 const fs = require("fs");
@@ -19,7 +20,8 @@ const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "1a762a3"; // main before patterns (frequency tiers, character ramp)
 const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn typeof ${name} !== "undefined" ? ${name} : undefined;`)(); }
-const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+// glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
+const PACK = (p => { delete p.glossStyle; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.patterns; return q; })(PACK);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
@@ -87,7 +89,7 @@ const __mc = renderMcItem; renderMcItem = function(it){ __cur = it; __log.push({
 const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; __log.push({ key: it.key, kind: "type", label: it.label, step: todayStepState && todayStepState.at }); return __ty(it); };
 return { el: id => document.getElementById(id), panel: () => document.getElementById("panel").innerHTML, getProg: () => prog, getD: () => D, getCur: () => __cur, log: __log,
   rd: () => (typeof RD !== "undefined" ? RD : null), skipRead: () => { RD = null; todayStep(); },
-  tss: () => todayStepState, ps: () => (typeof patternSession !== "undefined" ? [...patternSession] : null), home: () => todayRender(), tab: t => document.querySelector('#tabs button[data-t="' + t + '"]').click(), itemFromPlan: (p, i, plan) => itemFromPlan(p, i, plan), planItem: (p, i, plan) => planItem(p, i, plan), unitTypedFor: id => TYPED_UNITS && TYPED_UNITS.get(id) };`;
+  doc: () => document, tss: () => todayStepState, ps: () => (typeof patternSession !== "undefined" ? [...patternSession] : null), home: () => todayRender(), tab: t => document.querySelector('#tabs button[data-t="' + t + '"]').click(), itemFromPlan: (p, i, plan) => itemFromPlan(p, i, plan), planItem: (p, i, plan) => planItem(p, i, plan), unitTypedFor: id => TYPED_UNITS && TYPED_UNITS.get(id) };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS","PATTERNS"];
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"PairsChecks/1.0" }, undefined, st.ls, st.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
     function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, WORDS, SENTENCES, LESSONS, [], CHARACTERS, o.patterns];
@@ -182,6 +184,8 @@ const ptKey = it => String(it.key).startsWith("p:");
     check("validate_pack: a note line over 60 characters is an error", /note line over 60/.test(run(null, t => { t[0].note[0] = "x".repeat(61); })));
     check("validate_pack: a three-line note is an error", /note must be a list of one or two/.test(run(null, t => { t[0].note.push("third"); })));
     check("validate_pack: near naming no pattern is an error", /near must list other pattern ids/.test(run(null, t => { t[0].near = ["p99"]; })));
+    check("validate_pack: patternCue other than \"after\" is an error", /pack\.patternCue must be "after"/.test(run(p => { p.patternCue = "before"; })));
+    check("validate_pack: patternCue without patterns warns", /pack\.patternCue without pack\.patterns/.test(run(p => { delete p.patterns; })));
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 
@@ -387,6 +391,67 @@ const ptKey = it => String(it.key).startsWith("p:");
       console.log(`    open: ${op.map(p => p.id).join(" ")}`);
       check("owner export boots with no backup and opens 19 of the 27 patterns (records only: word order and tiers do not count)", b.backupRaw === null && op.length === 19, op.length);
     }
+  }
+
+  console.log("\n[11] pack.patternCue \"after\" (fb31; owner 2026-10-07: the English cue gave the blank away)");
+  {
+    const esc = VC.escapeHtml; // the app's own escaper (fb33's rewritten sentences carry apostrophes)
+    const ENS = new Set(PATTERNS.flatMap(p => p.sentences.map(x => x.en)));
+    check("zh pack sets patternCue \"after\"", PACK.patternCue === "after");
+    const api = await boot(PACK, synth(["1", "2"], 2, 4, 5), 41, { patterns: PATTERNS });
+    const seen = [];
+    await session(api, (it, rec, rows) => {
+      if(ptKey(it)){ const h = api.panel(), m = h.match(/data-pcue="([^"]*)"/), en = m ? m[1] : null;
+        seen.push({ it, en, note: /class="pnote"/.test(h), cueBefore: !!en && h.includes(`>${en}<`), hasBtn: /<button type="button" class="showw"[^>]*data-pcue="[^"]*"[^>]*>meaning<\/button>/.test(h) }); }
+      return rows.length % 4 !== 2; });
+    check(`pattern items (${seen.length}) carry a "meaning" tap and no English before the answer`, seen.length >= 3 && seen.every(x => x.hasBtn && x.en && !x.cueBefore));
+    check("the tap's English is the item's own sentence", seen.every(x => [...ENS].some(e => esc(e) === x.en)));
+    check("the English is in the reveal after the answer (right and wrong)", seen.every(x => String(x.it.reveal).includes(x.en)));
+    check("the two-line note still shows above the sentence at first meeting", seen.length >= 3 && seen.every(x => x.note));
+    // The tap: the panel's capture listener swaps the button for the English; nothing is recorded.
+    const ls = (api.el("panel")._listeners.click || []);
+    const btn = { dataset: { pcue: "He is taller than me." }, replaceWith(x){ this.by = x; } }, doc = api.doc(), mk = doc.createElement;
+    let focused = null; doc.createElement = t => { const e = mk.call(doc, t); e.focus = () => { focused = e; }; return e; }; doc.activeElement = btn;
+    const before = JSON.stringify(api.getProg()), ss0 = JSON.stringify(api.st.ss.keys().map(k => api.st.ss.getItem(k)));
+    let prevented = 0;
+    ls.forEach(f => f({ target: { closest: sel => sel === "[data-pcue]" ? btn : null }, preventDefault(){ prevented++; }, stopPropagation(){} }));
+    doc.createElement = mk;
+    check("tapping \"meaning\" shows the English in place, keyboard focus on it (tabindex -1, as show written); no progress or session write", btn.by && btn.by.innerHTML === "He is taller than me." && btn.by.getAttribute("tabindex") === "-1" && focused === btn.by && prevented === 1 && JSON.stringify(api.getProg()) === before && JSON.stringify(api.st.ss.keys().map(k => api.st.ss.getItem(k))) === ss0);
+    check("announce() leaves the meaning button out of the live-region text", /querySelectorAll\("\[data-showw\],\[data-pcue\]"\)/.test(appHtml));
+    api.tab("test"); await tick();
+    const tb = api.el("tSentences");
+    if(tb){ tb.click(); const D = api.getD(); const pts = [D.cur, ...D.q].filter(Boolean).filter(ptKey);
+      check(`Sentences test: pattern items (${pts.length}) hide the English the same way`, pts.length >= 3 && pts.every(it => /data-pcue=/.test(it.html) && !/<div class="q cue">[^<]/.test(it.html))); }
+    else skip("Sentences test button absent");
+    // Reload mid-cloze: the item comes back with the English hidden again (the tap is not kept).
+    const st = { ls: memStore(), ss: memStore() };
+    const a1 = await boot(PACK, synth(["1", "2"], 2, 4, 5), 42, { patterns: PATTERNS, st });
+    await session(a1, () => true, { stop: (rows, it) => ptKey(it) });
+    const a2 = await boot(PACK, null, 43, { patterns: PATTERNS, st }), c2 = a2.getCur();
+    check("reload mid-cloze: the pattern item resumes with the English hidden (re-hidden, not kept)", !!c2 && ptKey(c2) && /data-pcue=/.test(a2.panel()));
+    // Without the field: the English shows above the options, as before.
+    const P0 = Object.assign({}, PACK); delete P0.patternCue;
+    const b = await boot(P0, synth(["1", "2"], 2, 4, 5), 41, { patterns: PATTERNS }); const off = [];
+    await session(b, (it, rec, rows) => { if(ptKey(it)) off.push(b.panel()); return rows.length % 4 !== 2; });
+    check("patternCue absent: no meaning tap; the English cue shows before the answer", off.length >= 3 && off.every(h => !/data-pcue/.test(h) && /<div class="q cue">[^<]/.test(h)));
+  }
+  const CUE_MAIN = "3044601"; // main before fb31
+  const cueHtml = git(CUE_MAIN, "engine/app.html"), cueCore = git(CUE_MAIN, "engine/core.js");
+  if(!cueHtml || !cueCore) skip(`${CUE_MAIN} not in this checkout's history`);
+  else {
+    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "patterns-cue-")), `core_${CUE_MAIN}.js`); fs.writeFileSync(f, cueCore); const C0 = require(f);
+    // Both fb31 fields stripped (characters.bareByPair has its own control in tests/bare_pair_checks.js).
+    const P0 = Object.assign({}, PACK, { characters: (c => { const q = Object.assign({}, c); delete q.bareByPair; return q; })(PACK.characters) }); delete P0.patternCue;
+    const walk = async (html, core) => {
+      const api = await boot(P0, synth(["1", "2"], 2, 4, 5), 31, { html, core, patterns: PATTERNS });
+      const out = [api.panel()];
+      for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
+      api.tab("test"); await tick(); const tb = api.el("tSentences"); if(tb){ tb.click(); const D = api.getD(); out.push([D.cur, ...D.q].filter(Boolean).map(x => x.html).join("\n")); }
+      api.tab("progress"); await tick(); out.push(api.panel());
+      return out;
+    };
+    const ref = await walk(cueHtml, C0), cur = await walk(appHtml, VC);
+    check(`patternCue absent: two-session walk + Sentences test byte-identical to ${CUE_MAIN} (patterns on)`, JSON.stringify(ref) === JSON.stringify(cur) && ref.length >= 7, cur.findIndex((x, i) => x !== ref[i]));
   }
 
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);

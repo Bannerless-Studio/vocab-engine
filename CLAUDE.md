@@ -17,7 +17,7 @@ Shared engine for the Bannerless-Studio language trainers. End-user docs: README
             sw.js       (template + build id + page name + pack audio.version)
 
  In-repo pack:   packs/zh, Mandarin HSK 1–4 ported from hsk (now ../chinese): 1193 words, 882 sentences,
-                 12 lessons (tools/pack_from_hsk.py; passages via packbuilder) -> dist/zh.html + dist/sw.js
+                 12 lessons, 75 passages 15/15/20/25 (tools/pack_from_hsk.py; passages via packbuilder) -> dist/zh.html + dist/sw.js
  Language repos: sources (kaikki, Tatoeba, FrequencyWords, wordfreq, corpora)
                  -> tools/packbuilder (langs/<code>.py spec + core stages + qa)
                  -> <lang>/pack/*.json -> jsonify -> pack/*.js
@@ -45,14 +45,14 @@ Why it is built this way (one line each):
 
 ## Commands (pinned)
 
-Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-06, branch fb26-freq-tiers (main a20398c merged in).
+Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-07, branch w29 (main 3044601 + fb31-fb34).
 
 ```sh
 $NODE tests/engine_checks.js                     # 704 passed; includes the dist/zh.html + sw.js stale guard and the packs/zh generator drift check from an empty dir (needs ../chinese, or HSK_DIR=<chinese checkout>)
 $NODE tests/pron_aids_checks.js                  # 158
-$NODE tests/migration_checks.js                  # 435 (hsk_pinyin -> vocab_zh; uses ../chinese when present; [bare5] zh bare 6 -> 5; [rotation-s] read.done s/ls; [wordsBy] records read on a8e9c08; [progressMap] prog.pm both directions vs a2f2426; fb22 entries with g vs a2f2426 and 2412992; [f] records with f boot on 2412992 unchanged and back; [pairs] records with p boot on 2412992 and 3901e2e unchanged; [freqTiers] no new field, records written under the flag boot on b21ee93 and 2412992 byte-equal and back; [patterns] prog.pt on b21ee93 and 2412992)
+$NODE tests/migration_checks.js                  # 438 (hsk_pinyin -> vocab_zh; uses ../chinese when present; [bare5] zh bare 6 -> 5; [rotation-s] read.done s/ls; [wordsBy] records read on a8e9c08; [progressMap] prog.pm both directions vs a2f2426; fb22 entries with g vs a2f2426 and 2412992; [f] records with f boot on 2412992 unchanged and back; [pairs] records with p boot on 2412992 and 3901e2e unchanged; [freqTiers] no new field, records written under the flag boot on b21ee93 and 2412992 byte-equal and back; [patterns] prog.pt on b21ee93 and 2412992; [bareByPair] no new field, a pair-bare unit's records boot on 3044601 byte-equal and back)
 $NODE tests/characters_checks.js                 # 134
-$NODE tests/characters_app_checks.js             # 211 (Math.random seeded: Placement walk deterministic; hint pinyin tone colours)
+$NODE tests/characters_app_checks.js             # 219 (214 without ../japanese/pack: one ja check; Math.random seeded: Placement walk deterministic; hint pinyin tone colours; every unit hinted, multi-character units hint each character's meaning; hint dedupe keyed on character + hint text (衣服 服 clothes / 服务员 服 to serve), control: 3044601 units byte-identical with the key reverted)
 $NODE tests/script_checks.js                     # 128
 $NODE tests/script_app_checks.js                 # 216
 $NODE tests/audio_checks.js                      # 90 (app section needs ../persian)
@@ -62,20 +62,22 @@ $NODE tests/validate_pack_audio_checks.js        # 30
 $NODE tests/validate_pack_characters_checks.js   # 83
 $NODE tests/validate_pack_script_checks.js       # 56
 $NODE tests/validate_pack_spans_checks.js        # 13
+$NODE tests/gloss_display_checks.js           # 29 (pack.glossStyle "primary": glossSenses/typedSynWords, first sense + bracket and the also: line at every word-gloss site on 别/帮助, raw en kept for matching, flag-off control vs 3044601)
 $NODE tests/typed_from_checks.js                 # 70 (pack.typedFrom / glossFocus; control vs ef44c6e)
 $NODE tests/typed_mastery_checks.js              # 81 (characters.bareBy typed credit/hold/miss step-down, bareWords, per-level stages, withWords + Learn turn + order chips on a withWords pack, gloss fields; control vs 7fe35f7, markChar vs 7a21ccd)
 $NODE tests/words_typed_checks.js                # 57 (pack.wordsBy typed: streak table, flag-off markRec + two-session app control vs a8e9c08, held words planned typed + held share, one typed ask per session (replay recall, session record today.tw across a reload), no in-drill retry credit, untypable words keep the old rule)
 $NODE tests/progress_map_checks.js              # 94 (pack.progressMap: whole-pack bar (true) position, prog.pm cap 14, sessionsToGo; goals ladder: goalPosition per level range, 90% switch, last-goal clamp, pm g window, Today row, Progress Goals block, session writes g, owner export; flag-off control vs a2f2426, progressMap true vs 2412992)
 $NODE tests/pairs_checks.js                      # 49 (pack.pairs: validator, kind -> pair table, pair streak table, bootstrap from the legacy streak, scheduler order, flag-off plans + two-session app walk vs 3901e2e, three Today sessions on the owner export; reads PAIRS_OWNER or ../chinese/.cache/owner-progress.json, read-only)
 $NODE tests/freq_tiers_checks.js                 # 79 (pack.freqTiers: validator, generated tiers + shares + zipf order, same pair mechanics, typed-first / held boot / refresh / known per tier, unit tier + target, owner-export Learn order (nothing re-taught) + counters in id order, flag-off control + two-session app walk vs ff760d8, three Today sessions, Words tab sets numbered by count; owner export read-only)
-$NODE tests/patterns_checks.js                   # 79 (pack.patterns: validator incl. keys + file-wide sentence ids, openPatterns keys + level reached + 80%, streak table, patternPick order + done refresh, options, Today Sentences 3 of 8 + note (once on a first-meeting miss) + Progress row + Sentences test, resume today.pt, flag-off control vs 1a762a3, owner export opens 19; needs HSK_DIR or ../chinese with data/hsk_patterns.js for the engine_checks drift check)
+$NODE tests/patterns_checks.js                   # 92 (pack.patterns: validator incl. keys + file-wide sentence ids, openPatterns keys + level reached + 80%, streak table, patternPick order + done refresh, options, Today Sentences 3 of 8 + note (once on a first-meeting miss) + Progress row + Sentences test, resume today.pt, flag-off control vs 1a762a3, owner export opens 19; [11] patternCue "after": English behind a meaning tap until answered, reveal, Sentences test, reload re-hides, flag-off walk vs 3044601; needs HSK_DIR or ../chinese with data/hsk_patterns.js for the engine_checks drift check)
+$NODE tests/bare_pair_checks.js                  # 25 (characters.bareByPair: rule table (ruby unit + own or word's wm pair at 2, answered pairs only, miss brings the reading back), rubyTiers / bareWord / Progress row sites, app drill + Read tokens, records byte-equal flag on/off, flag-off control vs 3044601, owner-export measurement; owner export read-only)
 $NODE tests/lag_checks.js                        # 62 (characters.start / ramp: fresh 60-word start then sets 3,5,8,10, mid-ramp 4 taught -> 5, owner export same units, sets never straddle a level (HSK 3 set 30 of 30 -> HSK 4 set 1 of 60), short last set; characters.learn "lag": core rule, owner shape before/after, per-level set label (Today row + card header, straddling set, resume), app sessions, resume, per-level Progress rows vs 68930bd, control vs 590af86)
 $NODE tests/pause_checks.js                      # 49 (pack.pauseNew: flag-off / unpaused control vs 36aee02, chip, paused sessions teach nothing, Review +Learn items, toggling mid-session)
 $NODE tests/opts_mix_checks.js                  # 50 (pack.optsMix: records carry f (session learned), buckets by f, rotation by sn, charSound by syllables [4]; length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
 $NODE tests/session_resume_checks.js             # 125 (drill/passage resume: tab switch, reload, relaunch, per-tab parking; readRotation Read pick + question order, rd without qx; listening look-back list + text state; an old record with reopened/peekText resumes)
 $NODE tests/day_sim_checks.js                    # 77 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; weak-word floor + production settles, owner-shape before/after vs fb49c1b; --why)
 $NODE tests/help_close_checks.js                 # 42 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
-$NODE tests/gloss_overlap_checks.js              # 74 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~5-14 min: 286 s on main 7fe35f7 idle, 151 s on fb2-write2 alone, 836 s under parallel load)
+$NODE tests/gloss_overlap_checks.js              # 75 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~5-14 min: 286 s on main 7fe35f7 idle, 151 s on fb2-write2 alone, 836 s under parallel load)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
 $NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)
@@ -130,7 +132,7 @@ Dev mode without a rebuild: open `engine/app.html?pack=zh` from `file://` (loads
 | dist/zh.html, dist/sw.js | build.sh (committed; engine_checks fails when stale) |
 | packs/zh/*.js | tools/jsonify_pack.py |
 | packs/zh/*.json except passages_src.json, gloss_display.json | tools/pack_from_hsk.py (incl. attribution.json); passages.json + REPORT_passages.md by `packbuilder passages` |
-| tools/zh_hints.json | tools/zh_hints.py [../chinese] from the hsk vocabulary + .cache/makemeahanzi/dictionary.txt (`--fetch`) + tools/zh_hints_overrides.json; committed so pack_from_hsk.py needs no network (run it first when the hsk vocabulary gains characters) |
+| tools/zh_hints.json, tools/zh_hint_meanings.json | tools/zh_hints.py [../chinese] from the hsk vocabulary + .cache/makemeahanzi/dictionary.txt (`--fetch`) + tools/zh_hints_overrides.json; committed so pack_from_hsk.py needs no network (run it first when the hsk vocabulary gains characters) |
 | tools/zh_say.json, docs/ZH_SAY.md | tools/zh_say_scan.py --write (pypinyin + jieba venv; read by pack_from_hsk.py) |
 | tools/zh_freq.json | `.venv/bin/python tools/zh_freq.py [../chinese]` (wordfreq 3.1.1 zipf; committed so pack_from_hsk.py needs no wordfreq) |
 | docs/ZH_TIERS.md, words.json + characters.json `ft`, each level's word order | tools/pack_from_hsk.py from tools/zh_freq.json + tools/zh_tiers_overrides.json (hand-edited, owner-facing; PACK_SCHEMA "freqTiers") |

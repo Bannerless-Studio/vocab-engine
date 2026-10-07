@@ -27,7 +27,8 @@ function tryLoadConst(file, name){ try{ return loadConst(file, name); }catch(e){
 // BP2's pronunciation aids (tones, typing "pron", soundsReference) are left out here, so
 // these checks keep testing BP's markup; tests/pron_aids_checks.js checks the pack with them.
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
-const PACK_ZH = (p => { const q = Object.assign({}, p); delete q.pairs; delete q.tones; delete q.soundsReference; delete q.wordsBy; delete q.progressMap; if(q.typing === "pron") q.typing = null; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
+const PACK_ZH = (p => { const q = Object.assign({}, p); delete q.glossStyle; delete q.pairs; delete q.tones; delete q.soundsReference; delete q.wordsBy; delete q.progressMap; if(q.typing === "pron") q.typing = null; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // [1]-[13] keep the earlier stage layout (one stage after HSK 3 for 1-3, one after HSK 4) and choice
 // crediting: they test the stage machinery, which is unchanged for it. tests/typed_mastery_checks.js
@@ -135,10 +136,10 @@ async function boot(opts){
   const o = opts || {};
   const document = makeFakeDom();
   const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(u){ if(o.spoken) o.spoken.push(u.text); } };
-  const window = { VocabCore: VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(){}, addEventListener(){} };
+  const window = { VocabCore: o.vc || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(){}, addEventListener(){} };
   const localStorage = o.storage || { getItem(){ return null; }, setItem(){} };
   const pack = o.pack || PACK;
-  const fnBody = appSrc + `
+  const fnBody = (o.appSrc || appSrc) + `
 let __cur = null;
 const __mc = renderMcItem;
 renderMcItem = function(it){ __cur = it; return __mc(it); };
@@ -930,8 +931,8 @@ Math.random = mulberry32(20261004);
     check("a mouse tap (button not focused) does not move focus", b2.by && focused === null);
     document.createElement = mk;
     check("keys on a show-written button never reach the drill shortcuts (Enter = Next)",
-      api.onShowWritten({ target: { closest: s => s === "[data-showw]" ? b : null } }) && !api.onShowWritten({ target: { closest: () => null } }) && /if\(drillKeyHandler && !onShowWritten\(e\) && !tokOwns\(e\)\) drillKeyHandler\(e\)/.test(appHtml));
-    check("announce() drops the show-written button label from the live-region text", /querySelectorAll\("\[data-showw\]"\)\.forEach\(x => x\.remove\(\)\)/.test(appHtml.match(/function announce[\s\S]*?\n}\n/)[0]));
+      api.onShowWritten({ target: { closest: s => s.split(",").includes("[data-showw]") ? b : null } }) && !api.onShowWritten({ target: { closest: () => null } }) && /if\(drillKeyHandler && !onShowWritten\(e\) && !tokOwns\(e\)\) drillKeyHandler\(e\)/.test(appHtml));
+    check("announce() drops the show-written button label from the live-region text", /querySelectorAll\("\[data-showw\](,\[data-pcue\])?"\)\.forEach\(x => x\.remove\(\)\)/.test(appHtml.match(/function announce[\s\S]*?\n}\n/)[0]));
     let other = false;
     cap({ target: { closest: () => null }, preventDefault(){ other = true; }, stopPropagation(){ other = true; } });
     check("the tap has no progress effect; other clicks pass through untouched", JSON.stringify(api.getProg()) === before && !other);
@@ -1021,9 +1022,9 @@ Math.random = mulberry32(20261004);
     const withSound = CHARACTERS.filter(u => sounds(u).length).slice(0, 40);
     const bad = withSound.filter(u => { const h = teach(on, [u]); return !sounds(u).every(py => h.includes(VC.toneHTML(py)) && /<span class="t[1-4]">/.test(VC.toneHTML(py))); });
     check(`tones on: ${withSound.length} units, every "sound <pinyin>" in the hint is VocabCore.toneHTML markup (${bad.length} bad: ${bad.map(u => u.t + " " + sounds(u)).join(" ")})`, withSound.length > 20 && bad.length === 0);
-    const ma = CHARACTERS.find(u => u.t === "妈妈"), hOn = teach(on, [ma]);
+    const ma = CHARACTERS.find(u => u.t === "吗"), hOn = teach(on, [ma]);
     const wordPy = on.revealBlock(WORDS.find(w => w.pron === "mǎ"));
-    check("妈妈: hint syllable mǎ has the class markup the word's pinyin uses for the same syllable", hOn.includes('<span class="t3">mǎ</span>') && wordPy.includes('<span class="t3">mǎ</span>'));
+    check("吗: hint syllable mǎ has the class markup the word's pinyin uses for the same syllable", hOn.includes('<span class="t3">mǎ</span>') && wordPy.includes('<span class="t3">mǎ</span>'));
     check("hint text outside pinyin (English, Han) is unchanged: no tone class on 'sound' or the parts", !/<span class="t\d">(sound|a|with)<\/span>/.test(hOn) && /<span data-tl lang="zh">/.test(hOn));
     check("tones off: no tone classes in the hint", !/class="t[1-5]"/.test((teach(off, [ma]).match(/<span class="chint">[\s\S]*$/) || [""])[0]));
   }catch(e){ check(`[hint-tones] threw ${e.message}`, false); }
@@ -1042,9 +1043,46 @@ Math.random = mulberry32(20261004);
     const cards = api.html("panel").split('<div class="charteach">').slice(1);
     check("teach card (one character): the hint under the form, no character prefix",
       cards[0].includes('<span class="chint"><span>a woman <span data-tl lang="zh">女</span> with a son <span data-tl lang="zh">子</span>: good</span></span>'), cards[0]);
-    check("teach card (two characters): 好 already hinted on this screen, so only 吃 with its prefix",
-      /<span class="chint"><span><span class="hc" data-tl[^>]*>吃<\/span> /.test(cards[1]) && !cards[1].includes("son: good"), cards[1]);
-    check("teach card 妈妈: the repeated character is hinted once", (cards[2].match(/sound mǎ/g) || []).length === 1, cards[2]);
+    // w29: the dedupe keys on character + hint text, so 好吃's "好 good" is not 好's breakdown and shows.
+    check("teach card (two characters): each character with its prefix and its sense in the word; 好's breakdown not repeated",
+      /<span class="chint"><span><span class="hc" data-tl[^>]*>好<\/span> good<\/span><span><span class="hc" data-tl[^>]*>吃<\/span> to eat<\/span><\/span>/.test(cards[1]) && !cards[1].includes("son: good"), cards[1]);
+    check("teach card 妈妈: the repeated character is hinted once", (cards[2].match(/<span class="hc" data-tl[^>]*>妈<\/span> mother/g) || []).length === 1, cards[2]);
+    // w29 (fb33 open issue): one character in two senses on one teach screen is hinted in each;
+    // the same character + text is hinted once.
+    const yifu = byT("衣服"), fwy = byT("服务员");
+    api.charTeach({ units: [yifu, fwy], index: 0, total: 1 }, { label: "字" }, () => {});
+    const c2 = api.html("panel").split('<div class="charteach">').slice(1);
+    const fuLine = (h, m) => new RegExp(`<span class="hc" data-tl[^>]*>服</span> ${m}</span>`).test(h);
+    check("teach screen 衣服 + 服务员: 服 clothes on the first card, 服 to serve on the second", c2.length === 2 && fuLine(c2[0], "clothes") && fuLine(c2[1], "to serve"), c2.join("\n"));
+    const sameT = (() => { const m = new Map(); for(const u of CHARACTERS.filter(u => [...u.t].length > 1)) for(const x of VC.unitHints(u)){ const k = VC.hintKey(x); if(m.has(k) && m.get(k).t !== u.t) return [m.get(k), u, x]; m.set(k, u); } return null; })();
+    if(sameT){
+      api.charTeach({ units: [sameT[0], sameT[1]], index: 0, total: 1 }, { label: "字" }, () => {});
+      const c3 = api.html("panel").split('<div class="charteach">').slice(1);
+      const esc = sameT[2].hint.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const re = new RegExp(`<span class="hc" data-tl[^>]*>${sameT[2].c}</span> ${esc}</span>`);
+      check(`teach screen ${sameT[0].t} + ${sameT[1].t}: ${sameT[2].c} "${sameT[2].hint}" hinted on the first card only`, re.test(c3[0]) && !re.test(c3[1]), c3.join("\n"));
+    } else check("a character + hint text shared by two multi-character units exists", false);
+    // Control: the key reduces to the character on any pack whose characters carry one hint text
+    // each (zh at 3044601, ../chinese/pack live). Teach screens of 10 units over the 3044601 units
+    // render byte-identical with the w29 key and with the key reverted to the character.
+    const old = (() => { try{ return JSON.parse(require("child_process").execFileSync("git", ["show", "3044601:packs/zh/characters.json"], { cwd: ROOT, encoding: "utf8", maxBuffer: 64 << 20, stdio: ["ignore", "pipe", "ignore"] })); }catch(e){ return null; } })();
+    if(!old) console.log("SKIP  [hints] control: 3044601 not in this checkout's history");
+    else {
+      const OLDU = Array.isArray(old) ? old : old.units;
+      const perChar = new Map(); OLDU.forEach(u => (u.hint || []).forEach((h, i) => { const c = [...u.t][i]; if(h){ if(!perChar.has(c)) perChar.set(c, new Set()); perChar.get(c).add(h); } }));
+      const revert = appSrc.replace("skip.has(VC.hintKey(x))", "skip.has(x.c)").replace("skip.add(VC.hintKey(x))", "skip.add(x.c)");
+      const VC0 = Object.assign({}, VC, { unitHints: u => { const h = u && u.hint; if(!Array.isArray(h)) return []; const out = [], seen = new Set(); [...String(u.t || "")].forEach((c, i) => { const x = h[i]; if(typeof x === "string" && x && !seen.has(c)){ seen.add(c); out.push({ c, hint: x }); } }); return out; } });
+      const a = (await boot({ units: OLDU })).api, b = (await boot({ units: OLDU, appSrc: revert, vc: VC0 })).api;
+      a.setProg(seedC()); b.setProg(seedC());
+      let same = 0, diff = 0, first = "";
+      for(let i = 0; i < OLDU.length; i += 10){
+        const us = OLDU.slice(i, i + 10);
+        a.charTeach({ units: us, index: 0, total: 1 }, { label: "字" }, () => {}); b.charTeach({ units: us, index: 0, total: 1 }, { label: "字" }, () => {});
+        if(a.html("panel") === b.html("panel")) same++; else { diff++; if(!first) first = us.map(u => u.t).join(" "); }
+      }
+      check(`control: 3044601 units carry one hint text per character (${[...perChar.values()].filter(s => s.size > 1).length} with more)`, [...perChar.values()].every(s => s.size === 1));
+      check(`control: ${same} teach screens over the 3044601 units byte-identical with the key reverted to the character (${diff} differ${first ? ": " + first : ""})`, revert !== appSrc && diff === 0 && same > 100);
+    }
     let stimBad = [], revealMiss = [], n = 0;
     CHARACTERS.forEach(u => {
       const hs = VC.unitHints(u);
@@ -1052,12 +1090,23 @@ Math.random = mulberry32(20261004);
         const it = api.charDrillItem(k, u); n++;
         const stim = it.html + it.opts.map(o => it.optHtml ? it.optHtml(o) : o).join("");
         // class="chint", not /chint/: adjacent option texts concatenate ("to teach" + "intelligent").
-        if(/class="chint"/.test(stim) || hs.some(x => stripTags(stim).includes(x.hint))) stimBad.push(`${k} ${u.t}`);
+        // A multi-character unit's hint is a bare meaning ("what"), which a gloss option may spell by coincidence: only the markup is checked there.
+        if(/class="chint"/.test(stim) || (u.t.length === 1 && hs.some(x => stripTags(stim).includes(x.hint)))) stimBad.push(`${k} ${u.t}`);
         if(hs.length && !(it.reveal.includes('class="chint"') && hs.every(x => stripTags(it.reveal).includes(x.hint)))) revealMiss.push(`${k} ${u.t}`);
       });
     });
     check(`no stimulus or option carries a hint (${n} items, ${stimBad.length} bad${stimBad[0] ? ": " + stimBad.slice(0, 5).join(", ") : ""})`, n === CHARACTERS.length * 4 && stimBad.length === 0);
     check(`every hinted unit's reveal shows each of its hints (${revealMiss.length} missing${revealMiss[0] ? ": " + revealMiss.slice(0, 5).join(", ") : ""})`, revealMiss.length === 0);
+    // fb33: a unit of two or more characters hints each character's own meaning, never components.
+    const multi = CHARACTERS.filter(u => [...u.t].length > 1), hintOf = t => byT(t).hint;
+    check(`every one of ${CHARACTERS.length} units has a hint`, CHARACTERS.every(u => Array.isArray(u.hint) && u.hint.length === [...u.t].length && u.hint.every(h => typeof h === "string" && h)));
+    // A Han character only inside a bound-morpheme label ("(part of 钥匙 key)", "(with 烦: trouble)"); "(sound qiǎo)" only as a whole transliteration entry.
+    const meaningOnly = h => !/ \+ /.test(h) && (!/[\u3400-\u9fff]/.test(h) || /^\((part of|with) [\u3400-\u9fff]+[ :]/.test(h)) && (!/\(sound/.test(h) || /^\(sound [^()]+\)$/.test(h));
+    const badMulti = multi.filter(u => !u.hint.every(meaningOnly)).map(u => u.t);
+    check(`multi-character units (${multi.length}): entries are meanings, no component breakdown (${badMulti.length} bad${badMulti[0] ? ": " + badMulti.slice(0, 5).join(", ") : ""})`, badMulti.length === 0);
+    // fb33 content pass: the sense each character has in this word (compound:char overrides), suffixes labelled.
+    check("我们 / 以后 / 便宜 / 服务员 / 一会儿 / 衣服 hint each character as it works in the word", JSON.stringify([hintOf("我们"), hintOf("以后"), hintOf("便宜"), hintOf("服务员"), hintOf("一会儿"), hintOf("衣服")]) === JSON.stringify([["I", "(plural)"], ["(limit marker)", "after"], ["cheap (pián)", "(part of 便宜 cheap)"], ["to serve", "duty", "staff"], ["one", "moment", "(suffix)"], ["clothes", "clothes"]]), JSON.stringify([hintOf("以后"), hintOf("便宜"), hintOf("服务员")]));
+    check("single-character units keep the component breakdown (好 / 以 / 刀)", hao.hint[0] === "a woman 女 with a son 子: good" && /^a left part MMAH leaves out/.test(hintOf("以")[0]) && /^mnemonic/.test(hintOf("刀")[0]));
     // Flag off: the same units without `hint` render exactly as before the field existed.
     const bare = CHARACTERS.map(u => { const v = Object.assign({}, u); delete v.hint; return v; });
     const b2 = await boot({ units: bare });

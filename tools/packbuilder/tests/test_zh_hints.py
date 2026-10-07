@@ -116,9 +116,9 @@ class BuildTest(unittest.TestCase):
         table = zh_hints.build(words, DIC, {"们": "an override"})
         self.assertEqual(table, {"是": "to speak 日 directly 疋: to be", "她": "a woman 女 beside you 也: she", "们": "an override"})
 
-    def test_committed_overrides_are_sourced_and_bounded(self):
+    def test_committed_overrides_are_sourced(self):
         ov = zh_hints.load_overrides()
-        self.assertLessEqual(len(ov), 15)
+        self.assertGreater(len(ov), 15)
         table = json.loads((ROOT / "tools" / "zh_hints.json").read_text(encoding="utf-8"))
         for c, h in ov.items():
             self.assertEqual(table[c], h, c)
@@ -130,18 +130,47 @@ class BuildTest(unittest.TestCase):
             vocab = [{"w": "好", "py": "hǎo", "n": "hao3", "en": "good", "lv": 1}]
             (Path(d) / "data" / "hsk_vocab.json").write_text(json.dumps(vocab), encoding="utf-8")
             stale = zh_hints.build(zh_hints.hsk_words(d), DIC, {})
+            stale_m = zh_hints.build_meanings(zh_hints.hsk_words(d), DIC, {})
             vocab.append({"w": "休", "py": "xiū", "n": "xiu1", "en": "to rest", "lv": 1})
             (Path(d) / "data" / "hsk_vocab.json").write_text(json.dumps(vocab), encoding="utf-8")
             fresh = zh_hints.build(zh_hints.hsk_words(d), DIC, {})
+            fresh_m = zh_hints.build_meanings(zh_hints.hsk_words(d), DIC, {})
         self.assertNotIn("休", stale)
         self.assertEqual(fresh["休"], "a person 亻 leaning against a tree 木: to rest")
         units = [{"t": "好"}, {"t": "休息"}]
         with self.assertRaises(SystemExit) as e:
-            pack_from_hsk.attach_hints([dict(u) for u in units], stale)
+            pack_from_hsk.attach_hints([dict(u) for u in units], stale, stale_m)
         self.assertIn("休", str(e.exception))
         ok = [dict(u) for u in units]
-        pack_from_hsk.attach_hints(ok, dict(fresh, 息=None))
-        self.assertEqual(ok, [{"t": "好", "hint": [fresh["好"]]}, {"t": "休息", "hint": [fresh["休"], None]}])
+        pack_from_hsk.attach_hints(ok, dict(fresh, 息=None), dict(fresh_m, 息=None))
+        self.assertEqual(ok, [{"t": "好", "hint": [fresh["好"]]}, {"t": "休息", "hint": ["to rest", None]}])
+
+    def test_meaning_is_the_pack_gloss_first_alternative_else_the_source_sense_unless_overridden(self):
+        words = [{"w": "我", "en": "I; me; my"}, {"w": "我们", "en": "we; us"}]
+        m = zh_hints.build_meanings(words, DIC, {"们": "(plural)", "我们:我": "we"})
+        self.assertEqual(m["我"], "I")
+        self.assertEqual(m["们"], "(plural)")
+        self.assertEqual(m["我们:我"], "we")
+
+    def test_compound_key_wins_for_that_compound_only_and_a_stale_one_fails(self):
+        import pack_from_hsk
+        meanings = {"衣": "clothes", "服": "clothes", "务": "duty", "员": "member", "服务员:服": "to serve"}
+        units = [{"t": "衣服"}, {"t": "服务员"}]
+        hints = {c: "x" for c in "衣服务员"}
+        pack_from_hsk.attach_hints(units, hints, meanings)
+        self.assertEqual(units[0]["hint"], ["clothes", "clothes"])
+        self.assertEqual(units[1]["hint"], ["to serve", "duty", "member"])
+        with self.assertRaises(SystemExit) as e:
+            pack_from_hsk.attach_hints([{"t": "衣服"}], hints, dict(meanings, **{"制服:服": "uniform"}))
+        self.assertIn("制服:服", str(e.exception))
+
+    def test_meaning_override_keys_are_validated(self):
+        for key in ("服务员:我", "服:服", "服务员:服务"):
+            with tempfile.TemporaryDirectory() as d:
+                p = Path(d) / "o.json"
+                p.write_text(json.dumps({"_meanings": {key: {"meaning": "m", "reason": "r", "source": "s"}}}), encoding="utf-8")
+                with self.assertRaises(SystemExit, msg=key):
+                    zh_hints.load_meaning_overrides(str(p))
 
 
 class EmittedTest(unittest.TestCase):
@@ -151,14 +180,20 @@ class EmittedTest(unittest.TestCase):
         self.assertEqual(table["是"], "to speak 日 directly 疋: to be")
         self.assertEqual(table["妈"], "女 (woman) + 马 (sound mǎ)")
         units = {u["t"]: u for u in json.loads((ROOT / "packs" / "zh" / "characters.json").read_text(encoding="utf-8"))}
+        meanings = json.loads((ROOT / "tools" / "zh_hint_meanings.json").read_text(encoding="utf-8"))
         self.assertEqual(units["好"]["hint"], [table["好"]])
-        self.assertEqual(units["妈妈"]["hint"], [table["妈"], table["妈"]])
-        self.assertEqual(units["休息"]["hint"], [table["休"], table["息"]])
+        self.assertEqual(units["妈妈"]["hint"], [meanings["妈"], meanings["妈"]])
+        self.assertEqual(units["休息"]["hint"], [meanings["休"], meanings["休息:息"]])
+        self.assertEqual(units["我们"]["hint"], ["I", "(plural)"])
+        self.assertEqual(units["衣服"]["hint"], ["clothes", "clothes"])
+        self.assertEqual(units["服务员"]["hint"], ["to serve", "duty", "staff"])
+        self.assertEqual(units["一会儿"]["hint"], ["one", "moment", "(suffix)"])
+        self.assertEqual(len(units), 1193)
         for u in units.values():
-            if "hint" in u:
-                self.assertEqual(len(u["hint"]), len(u["t"]), u["id"])
-                self.assertTrue(any(u["hint"]), u["id"])
-                self.assertTrue(all(h is None or len(h.split()) <= zh_hints.MAX_WORDS for h in u["hint"]), u["id"])
+            self.assertIn("hint", u, u["id"])
+            self.assertEqual(len(u["hint"]), len(u["t"]), u["id"])
+            self.assertTrue(all(h for h in u["hint"]), u["id"])
+            self.assertTrue(all(len(h.split()) <= zh_hints.MAX_WORDS for h in u["hint"]), u["id"])
 
 
 if __name__ == "__main__":

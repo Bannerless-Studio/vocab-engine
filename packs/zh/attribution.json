@@ -21,7 +21,7 @@
   "licence_text": "LICENSES/LGPL-3.0.txt, with LICENSES/GPL-3.0.txt (LGPL-3.0 is a set of additional permissions on GPL-3.0)"
  },
  "character_hint_overrides": {
-  "source": "tools/zh_hints_overrides.json: 13 hand-written hints restating Make Me a Hanzi entries; 气 and 来 also restate English Wiktionary's glyph origin for 气 (pictogram of vapour) and 來 (wheat, phonetic loan for 'come')",
+  "source": "tools/zh_hints_overrides.json: 37 hand-written hints restating Make Me a Hanzi entries (24 where it has no usable template, marked as mnemonic when plain); 气 and 来 also restate English Wiktionary's glyph origin for 气 (pictogram of vapour) and 來 (wheat, phonetic loan for 'come')",
   "licence": "CC-BY-SA-4.0 (Wiktionary text); the rest as character_hints",
   "url": "https://en.wiktionary.org/wiki/气 https://en.wiktionary.org/wiki/來"
  },

@@ -28,6 +28,17 @@ first sense of its own entry. tools/zh_hints_overrides.json (each with a reason 
 source) wins over the rules. A character the source lacks, or whose hint has no usable
 parts or runs over MAX_WORDS words, gets null.
 
+Units of two or more characters show no components (owner 2026-10-07: "for multi-character
+words give meanings of the individual characters"): tools/zh_hint_meanings.json holds the
+per-character meaning that tools/pack_from_hsk.py assembles into each such unit's `hint` list
+(the app prefixes the character). meaning(c) = the first alternative of c's HSK gloss when c is
+itself a word, else the first sense of the source definition; "_meanings" in the overrides file
+wins where that first sense misleads (什 "what? mixed", 机 "desk", the particles). A "_meanings"
+key "compound:char" (服务:服 "to serve" beside 衣服:服 "clothes") gives the character's sense as it
+works in that one compound and is written to the meanings file under the same key; the bare-char
+key stays the default for every other compound (owner 2026-10-07: the meaning as it functions in
+this word; a suffix or particle is labelled as one, 们/子/儿 never "son").
+
 Usage: python3 tools/zh_hints.py [HSK_REPO_DIR] [--fetch]   (default ../chinese, as pack_from_hsk.py)
 """
 import hashlib
@@ -43,6 +54,7 @@ SOURCE_URL = f"https://raw.githubusercontent.com/skishore/makemeahanzi/{SOURCE_S
 SOURCE_SHA256 = "744bb05d5b0742e9ee35c37791f94d56a173349b3367569e7ca11e510364d203"
 CACHE = os.path.join(ROOT, ".cache", "makemeahanzi", "dictionary.txt")
 OUT = os.path.join(ROOT, "tools", "zh_hints.json")
+MEANINGS_OUT = os.path.join(ROOT, "tools", "zh_hint_meanings.json")
 OVERRIDES = os.path.join(ROOT, "tools", "zh_hints_overrides.json")
 MAX_WORDS = 14
 IDS = set(chr(c) for c in range(0x2FF0, 0x2FFC))
@@ -284,6 +296,8 @@ def table_chars(words):
 
 
 def load_overrides(path=OVERRIDES):
+    # No entry cap: the 24 characters added with the first 13 are source gaps (MMAH has no
+    # usable template), not style fixes, so the file's size follows the source, not taste.
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
     out = {}
@@ -293,6 +307,34 @@ def load_overrides(path=OVERRIDES):
         if not (e.get("reason") and e.get("source")) or words_of(e["hint"]) > MAX_WORDS:
             raise SystemExit(f"zh_hints: override {c} needs a reason, a source and at most {MAX_WORDS} words")
         out[c] = e["hint"]
+    return out
+
+
+def load_meaning_overrides(path=OVERRIDES):
+    """{key: meaning}; a key is a character (default) or "compound:char" (that compound only)."""
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f).get("_meanings", {})
+    for k, e in data.items():
+        if not (e.get("meaning") and e.get("reason") and e.get("source")):
+            raise SystemExit(f"zh_hints: _meanings {k} needs a meaning, a reason and a source")
+        if words_of(e["meaning"]) > MAX_WORDS:
+            raise SystemExit(f"zh_hints: _meanings {k} runs over {MAX_WORDS} words")
+        if ":" in k:
+            word, _, c = k.partition(":")
+            if len(c) != 1 or len(word) < 2 or c not in word:
+                raise SystemExit(f"zh_hints: _meanings {k}: key must be compound:char with char in compound")
+        elif len(k) != 1:
+            raise SystemExit(f"zh_hints: _meanings {k}: key must be a character or compound:char")
+    return {k: e["meaning"] for k, e in data.items()}
+
+
+def build_meanings(words, dic, overrides):
+    gloss = {w["w"]: w["en"] for w in words if len(w["w"]) == 1}
+    out = {}
+    for c in table_chars(words):
+        m = overrides.get(c) or (first_alt(gloss[c]) if c in gloss else "") or first_sense((dic.get(c) or {}).get("definition"))
+        out[c] = m or None
+    out.update({k: m for k, m in overrides.items() if ":" in k})
     return out
 
 
@@ -318,6 +360,9 @@ def main(argv):
     text = json.dumps(table, ensure_ascii=False, indent=0, sort_keys=True) + "\n"
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(text)
+    meanings = build_meanings(words, dic, load_meaning_overrides())
+    with open(MEANINGS_OUT, "w", encoding="utf-8") as f:
+        f.write(json.dumps(meanings, ensure_ascii=False, indent=0, sort_keys=True) + "\n")
     han = [c for c in table if HAN.match(c)]
     missing = [c for c in han if c not in dic]
     hinted = sum(1 for v in table.values() if v)

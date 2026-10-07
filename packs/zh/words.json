@@ -13,9 +13,6 @@
   "en": "to be; is; are; am; yes",
   "lv": "1",
   "pron": "shì",
-  "syn": [
-   "w0005"
-  ],
   "ft": 0
  },
  {
@@ -1418,11 +1415,10 @@
  {
   "id": "w0005",
   "w": "上午",
-  "en": "morning (before noon); a.m.",
+  "en": "morning (before noon)",
   "lv": "1",
   "pron": "shàngwǔ",
   "syn": [
-   "w0099",
    "w0227"
   ],
   "ft": 1

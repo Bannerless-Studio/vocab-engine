@@ -188,10 +188,19 @@ def check_pack(pack, rep):
         rep.err("pack.freqTiers must be a boolean")
     elif pack.get("freqTiers") is True and not (pack.get("pairs") is True and pack.get("dayAware")):
         rep.err("pack.freqTiers needs pack.pairs (tiers set each pair's mastery)")
+    # glossStyle (docs/PACK_SCHEMA.md "glossStyle"): a display style of the glossFocus renderer.
+    if "glossStyle" in pack and pack["glossStyle"] != "primary":
+        rep.err('pack.glossStyle must be "primary"')
+    elif pack.get("glossStyle") == "primary" and pack.get("glossFocus") is not True:
+        rep.err("pack.glossStyle needs pack.glossFocus")
     if "patterns" in pack and not is_bool(pack["patterns"]):
         rep.err("pack.patterns must be a boolean")
     elif pack.get("patterns") is True and pack.get("pairs") is not True:
         rep.err("pack.patterns needs pack.pairs (and so pack.dayAware): pattern asks are counted by session")
+    if "patternCue" in pack and pack["patternCue"] != "after":
+        rep.err('pack.patternCue must be "after" when present')
+    elif pack.get("patternCue") == "after" and pack.get("patterns") is not True:
+        rep.warn("pack.patternCue without pack.patterns: it has no effect")
     if "pronFirst" in pack:
         if not is_bool(pack["pronFirst"]):
             rep.err("pack.pronFirst must be a boolean")
@@ -356,6 +365,10 @@ def check_characters_pack(pack, level_ids, rep):
         rep.warn("pack.characters.bareBy without pack.dayAware: units between mastered and bare get no guaranteed typed share")
     if "bareWords" in ch and not is_bool(ch["bareWords"]):
         rep.err("pack.characters.bareWords must be a boolean")
+    if "bareByPair" in ch and not is_bool(ch["bareByPair"]):
+        rep.err("pack.characters.bareByPair must be a boolean")
+    elif ch.get("bareByPair") is True and not (pack.get("pairs") is True and pack.get("dayAware")):
+        rep.err("pack.characters.bareByPair needs pack.pairs (it reads the written <-> meaning pair streak)")
     if "withWords" in ch and not is_bool(ch["withWords"]):
         rep.err("pack.characters.withWords must be a boolean")
     if "learn" in ch and ch["learn"] != "lag":

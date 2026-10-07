@@ -7432,6 +7432,808 @@
    ]
   },
   {
+   "id": "p0061",
+   "lv": "3",
+   "title": "弟弟的作业",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "九月一号，我弟弟上三年级了。",
+     "On the first of September my little brother started Year Three."
+    ],
+    [
+     "三年级的作业比以前多，数学题也越来越难。",
+     "Year Three has more homework than before, and the maths problems keep getting harder."
+    ],
+    [
+     "弟弟回到家总是先看电视，然后才开始写作业。",
+     "When my brother gets home he always watches TV first, and only then starts his homework."
+    ],
+    [
+     "有时候到了晚上十点，他的作业还没写完。",
+     "Sometimes it's ten at night and his homework still isn't done."
+    ],
+    [
+     "妈妈很担心，就去学校问数学老师有没有好办法。",
+     "Mum was worried, so she went to the school to ask his maths teacher for a good idea."
+    ],
+    [
+     "老师告诉她：“如果作业写得又快又好，就让他多看一会儿电视。”",
+     "The teacher told her: \"If he does his homework quickly and well, let him watch a bit more TV.\""
+    ],
+    [
+     "弟弟同意了，现在他七点以前就能写完作业。",
+     "My brother agreed, and now he finishes his homework before seven."
+    ],
+    [
+     "上个星期，他的作业还被老师放在黑板旁边，给同学们看，他高兴极了。",
+     "Last week the teacher even put his homework by the blackboard for his classmates to see, and he was over the moon."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "三年级的数学题怎么样？",
+     "en": "What are the Year Three maths problems like?",
+     "type": "mc",
+     "options": [
+      "比以前难",
+      "比以前容易",
+      "比以前少",
+      "跟以前一样"
+     ],
+     "answer": 0,
+     "words": [
+      "数学"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "弟弟回到家先做什么？",
+     "en": "What does the brother do first when he gets home?",
+     "type": "mc",
+     "options": [
+      "写作业",
+      "看电视",
+      "打篮球",
+      "吃东西"
+     ],
+     "answer": 1,
+     "words": [
+      "先"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "弟弟晚上十点以前总是能写完作业。",
+     "en": "The brother can always finish his homework before ten at night.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "写"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "妈妈为什么去学校？",
+     "en": "Why did Mum go to the school?",
+     "type": "mc",
+     "options": [
+      "想看看弟弟的教室",
+      "想给老师送一个礼物",
+      "想问老师有没有办法",
+      "想跟校长见面"
+     ],
+     "answer": 2,
+     "words": [
+      "办法"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "妈妈很担心弟弟的作业。",
+     "en": "Mum was worried about the brother's homework.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "担心"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "老师的办法是什么？",
+     "en": "What was the teacher's idea?",
+     "type": "mc",
+     "options": [
+      "不写完作业，就不吃东西",
+      "作业写得慢，就不能出去",
+      "每次考试以后，都休息一下",
+      "作业写得好，就多看电视"
+     ],
+     "answer": 3,
+     "words": [
+      "如果"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "现在弟弟几点以前能写完作业？",
+     "en": "Before what time can the brother finish his homework now?",
+     "type": "mc",
+     "options": [
+      "七点",
+      "六点",
+      "八点",
+      "十点"
+     ],
+     "answer": 0,
+     "words": [
+      "以前"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "上个星期，同学们看到了弟弟的作业。",
+     "en": "Last week the classmates saw the brother's homework.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "黑板"
+     ],
+     "sentence": 7
+    }
+   ]
+  },
+  {
+   "id": "p0062",
+   "lv": "3",
+   "title": "叔叔来了",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "星期六，叔叔要来我们家，我们已经五年没见面了。",
+     "On Saturday my uncle was coming to our home. We hadn't seen each other for five years."
+    ],
+    [
+     "早上，妈妈让我把房间和洗手间打扫干净。",
+     "In the morning Mum had me clean my room and the bathroom."
+    ],
+    [
+     "爸爸去超市买了很多菜，还买了叔叔最喜欢的啤酒。",
+     "Dad went to the supermarket and bought lots of food, plus my uncle's favourite beer."
+    ],
+    [
+     "中午十二点，叔叔终于到了。",
+     "At twelve noon my uncle finally arrived."
+    ],
+    [
+     "他比以前胖了，头发也短了。",
+     "He'd put on weight, and his hair was shorter."
+    ],
+    [
+     "叔叔一边笑一边问我：“你还记得我吗？”",
+     "My uncle laughed and asked me: \"Do you still remember me?\""
+    ],
+    [
+     "我当然记得！我小时候，他经常带我去公园看动物。",
+     "Of course I did! When I was little, he often took me to the park to see the animals."
+    ],
+    [
+     "大家一边吃一边讲过去的事情，叔叔觉得妈妈做的菜又好吃又好看。",
+     "We ate and talked about the old days, and my uncle thought Mum's cooking looked as good as it tasted."
+    ],
+    [
+     "虽然他晚上就要坐飞机回去，但是大家都非常高兴。",
+     "Although he had to fly back that evening, we all had a wonderful time."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "他们多长时间没见面了？",
+     "en": "How long had they not seen each other?",
+     "type": "mc",
+     "options": [
+      "三年",
+      "五年",
+      "一年",
+      "十年"
+     ],
+     "answer": 1,
+     "words": [
+      "见面"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "妈妈让我打扫房间和洗手间。",
+     "en": "Mum had me clean the room and the bathroom.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "打扫",
+      "洗手间"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "爸爸给叔叔买了什么？",
+     "en": "What did Dad buy for the uncle?",
+     "type": "mc",
+     "options": [
+      "咖啡",
+      "水果",
+      "啤酒",
+      "牛奶"
+     ],
+     "answer": 2,
+     "words": [
+      "啤酒"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "叔叔是几点到的？",
+     "en": "What time did the uncle arrive?",
+     "type": "mc",
+     "options": [
+      "上午十点半",
+      "下午两点",
+      "晚上七点",
+      "中午十二点"
+     ],
+     "answer": 3,
+     "words": [
+      "终于"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "叔叔现在跟以前比，有什么不一样？",
+     "en": "How is the uncle different from before?",
+     "type": "mc",
+     "options": [
+      "胖了一点，头发也短了",
+      "瘦了一点，头发也长了",
+      "高了，还戴着眼镜",
+      "老了，头发也白了"
+     ],
+     "answer": 0,
+     "words": [
+      "胖",
+      "头发"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "我小时候，叔叔经常带我去看动物。",
+     "en": "When I was little, my uncle often took me to see animals.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "动物"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "叔叔觉得妈妈做的菜怎么样？",
+     "en": "What did the uncle think of Mum's cooking?",
+     "type": "mc",
+     "options": [
+      "有点儿太甜了",
+      "很好吃，也很好看",
+      "没有以前好吃",
+      "做得太多，吃不完"
+     ],
+     "answer": 1,
+     "words": [
+      "好吃"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "叔叔在我们家住了一个星期。",
+     "en": "The uncle stayed at our home for a week.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "飞机"
+     ],
+     "sentence": 8
+    }
+   ]
+  },
+  {
+   "id": "p0063",
+   "lv": "3",
+   "title": "花园里的小鸟",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "春天来了，楼下的花园越来越漂亮。",
+     "Spring has come, and the garden downstairs is getting prettier and prettier."
+    ],
+    [
+     "草绿了，树上也开了很多小黄花。",
+     "The grass has turned green, and the trees are covered in little yellow flowers."
+    ],
+    [
+     "早上，我经常一边在花园里跑步，一边听鸟叫。",
+     "In the mornings I often run in the garden, listening to the birds sing."
+    ],
+    [
+     "上个星期，我发现树上有一个鸟的家。",
+     "Last week I found a bird's nest in a tree."
+    ],
+    [
+     "鸟妈妈出去找吃的，找到了就马上带回来给小鸟吃。",
+     "The mother bird goes out for food, and as soon as she finds some she brings it straight back for her babies to eat."
+    ],
+    [
+     "我想把小鸟带回家，但是奶奶不同意。",
+     "I wanted to take the baby birds home, but Grandma said no."
+    ],
+    [
+     "奶奶告诉我：“如果你把它们带走，鸟妈妈就找不到它们了。”",
+     "Grandma told me: \"If you take them away, their mother won't be able to find them.\""
+    ],
+    [
+     "所以我只在远一点的地方看，不敢走得太近。",
+     "So I only watch from a little way off and don't dare go too close."
+    ],
+    [
+     "现在小鸟已经长大了，我多么高兴啊！",
+     "Now the birds have grown up, and I'm so happy!"
+    ]
+   ],
+   "questions": [
+    {
+     "q": "花园里的小花是什么颜色的？",
+     "en": "What colour are the little flowers in the garden?",
+     "type": "mc",
+     "options": [
+      "红的",
+      "白的",
+      "黄的",
+      "蓝的"
+     ],
+     "answer": 2,
+     "words": [
+      "黄"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "早上我在花园里做什么？",
+     "en": "What do I do in the garden in the morning?",
+     "type": "mc",
+     "options": [
+      "画画",
+      "打扫",
+      "看书",
+      "跑步"
+     ],
+     "answer": 3,
+     "words": [
+      "跑步"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "我在树上发现了一个鸟的家。",
+     "en": "I found a bird's nest in a tree.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "发现"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "鸟妈妈出去做什么？",
+     "en": "What does the mother bird go out to do?",
+     "type": "mc",
+     "options": [
+      "找吃的",
+      "找新家",
+      "找别的鸟",
+      "找小猫"
+     ],
+     "answer": 0,
+     "words": [
+      "找"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "奶奶同意我把小鸟带回家。",
+     "en": "Grandma agreed to let me take the birds home.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "同意"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "奶奶为什么不让我带走小鸟？",
+     "en": "Why won't Grandma let me take the birds?",
+     "type": "mc",
+     "options": [
+      "小鸟会生病",
+      "鸟妈妈会找不到它们",
+      "家里已经有一只猫",
+      "小鸟不能吃我们的东西"
+     ],
+     "answer": 1,
+     "words": [
+      "如果"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "我是怎么看小鸟的？",
+     "en": "How do I watch the birds?",
+     "type": "mc",
+     "options": [
+      "站在树下，离它们很近",
+      "坐在花园的门口",
+      "离它们远一点",
+      "坐在树的旁边"
+     ],
+     "answer": 2,
+     "words": [
+      "敢"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "现在小鸟还没有长大。",
+     "en": "The birds haven't grown up yet.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "已经"
+     ],
+     "sentence": 8
+    }
+   ]
+  },
+  {
+   "id": "p0064",
+   "lv": "3",
+   "title": "我的行李箱",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "去年夏天，我坐飞机去看奶奶。",
+     "Last summer I flew to see my grandma."
+    ],
+    [
+     "下了飞机，我找了很久，但是一直没看到我的行李箱。",
+     "When I got off the plane I looked for ages, but my suitcase never turned up."
+    ],
+    [
+     "我非常着急，因为里面有我给奶奶买的礼物。",
+     "I was very worried, because the present I'd bought Grandma was inside."
+    ],
+    [
+     "机场的服务员看了我的票，告诉我：“你的行李箱可能被放到别的飞机上了。”",
+     "An airport attendant looked at my ticket and told me: \"Your suitcase may have been put on another plane.\""
+    ],
+    [
+     "“别担心，如果找到了，我们就马上给你送到家。”",
+     "\"Don't worry. If we find it, we'll bring it straight to your home.\""
+    ],
+    [
+     "我把奶奶家的地址给了他，然后先走了。",
+     "I gave him Grandma's address and left."
+    ],
+    [
+     "晚上八点一刻，机场的人开车把行李箱送来了。",
+     "At a quarter past eight that evening, someone from the airport drove the suitcase over."
+    ],
+    [
+     "里面的东西一个都没少，我终于放心了。",
+     "Nothing inside was missing, and at last I could relax."
+    ],
+    [
+     "奶奶看到礼物，高兴得像个孩子。",
+     "When Grandma saw the present, she was as happy as a child."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "我是怎么去奶奶家的？",
+     "en": "How did I get to Grandma's?",
+     "type": "mc",
+     "options": [
+      "坐船",
+      "坐地铁",
+      "骑自行车",
+      "坐飞机"
+     ],
+     "answer": 3,
+     "words": [
+      "飞机"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "下了飞机，我很快就找到了行李箱。",
+     "en": "After getting off the plane I found my suitcase quickly.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "行李箱"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "我为什么非常着急？",
+     "en": "Why was I so worried?",
+     "type": "mc",
+     "options": [
+      "给奶奶的礼物在里面",
+      "我忘记带护照了",
+      "我的护照也找不到了",
+      "奶奶已经到了机场"
+     ],
+     "answer": 0,
+     "words": [
+      "礼物"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "服务员认为我的行李箱在哪儿？",
+     "en": "Where did the attendant think my suitcase was?",
+     "type": "mc",
+     "options": [
+      "在出租车上",
+      "在别的飞机上",
+      "在机场外面",
+      "在奶奶的家里"
+     ],
+     "answer": 1,
+     "words": [
+      "飞机"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "机场的人让我下个星期再去拿行李箱。",
+     "en": "The airport people told me to come and collect the suitcase the following week.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "送"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "行李箱是几点送来的？",
+     "en": "At what time was the suitcase delivered?",
+     "type": "mc",
+     "options": [
+      "晚上八点半",
+      "下午四点一刻",
+      "晚上八点一刻",
+      "晚上九点半"
+     ],
+     "answer": 2,
+     "words": [
+      "刻"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "行李箱里的东西都还在。",
+     "en": "Everything in the suitcase was still there.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "少"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "奶奶看到礼物以后怎么样？",
+     "en": "How was Grandma after seeing the present?",
+     "type": "mc",
+     "options": [
+      "有点儿生气",
+      "不太满意",
+      "有点儿难过",
+      "非常高兴"
+     ],
+     "answer": 3,
+     "words": [
+      "像"
+     ],
+     "sentence": 8
+    }
+   ]
+  },
+  {
+   "id": "p0065",
+   "lv": "3",
+   "title": "爷爷的普通话",
+   "oop": {},
+   "names": [
+    "广州",
+    "上海",
+    "西安"
+   ],
+   "sentences": [
+    [
+     "爷爷七十岁了，以前一直住在广州。",
+     "My grandpa is seventy. He used to live in Guangzhou."
+    ],
+    [
+     "他的普通话不太好，别人经常听不明白他的意思。",
+     "His Mandarin isn't very good, and people often can't understand what he means."
+    ],
+    [
+     "去年他搬到北京跟我们一起住，决定好好学习普通话。",
+     "Last year he moved to Beijing to live with us and decided to learn Mandarin properly."
+    ],
+    [
+     "早上，他先听半个小时新闻，然后跟着电视读句子。",
+     "In the morning he first listens to half an hour of news, then reads sentences along with the TV."
+    ],
+    [
+     "遇到不清楚的地方，他就写下来，晚上再问我。",
+     "When he comes across something unclear, he writes it down and asks me in the evening."
+    ],
+    [
+     "我问他：“爷爷，您为什么要学习普通话？”",
+     "I asked him: \"Grandpa, why do you want to learn Mandarin?\""
+    ],
+    [
+     "爷爷回答：“如果别人听不懂我讲的普通话，我就没有机会认识新朋友。”",
+     "Grandpa answered: \"If people can't understand my Mandarin, I won't get the chance to make new friends.\""
+    ],
+    [
+     "虽然爷爷已经是老人了，但是他学习非常认真。",
+     "Although Grandpa is an old man now, he studies very seriously."
+    ],
+    [
+     "现在他的普通话越来越好，还在公园里认识了很多新朋友。",
+     "Now his Mandarin is getting better and better, and he has made lots of new friends in the park."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "爷爷以前住在哪儿？",
+     "en": "Where did Grandpa use to live?",
+     "type": "mc",
+     "options": [
+      "广州",
+      "北京",
+      "西安",
+      "上海"
+     ],
+     "answer": 0,
+     "words": [
+      "住"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "以前别人经常听不明白爷爷的意思。",
+     "en": "People often used to not understand what Grandpa meant.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "明白"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "早上爷爷先做什么？",
+     "en": "What does Grandpa do first in the morning?",
+     "type": "mc",
+     "options": [
+      "读句子",
+      "听新闻",
+      "去公园",
+      "写东西"
+     ],
+     "answer": 1,
+     "words": [
+      "新闻"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "遇到不清楚的地方，爷爷会做什么？",
+     "en": "What does Grandpa do when he meets something unclear?",
+     "type": "mc",
+     "options": [
+      "马上打电话问他的老师",
+      "再听一次新闻",
+      "写下来，晚上问我",
+      "去楼下问邻居"
+     ],
+     "answer": 2,
+     "words": [
+      "清楚"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "爷爷为什么要学习普通话？",
+     "en": "Why does Grandpa want to learn Mandarin?",
+     "type": "mc",
+     "options": [
+      "想去广州工作",
+      "想参加一个考试",
+      "想看懂中国电影",
+      "想认识新朋友"
+     ],
+     "answer": 3,
+     "words": [
+      "机会"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "爷爷学习不太认真。",
+     "en": "Grandpa doesn't study very seriously.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "认真"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "爷爷现在的普通话比以前好。",
+     "en": "Grandpa's Mandarin is better now than before.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "普通话"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "爷爷在哪儿认识了很多新朋友？",
+     "en": "Where has Grandpa made lots of new friends?",
+     "type": "mc",
+     "options": [
+      "公园",
+      "学校",
+      "超市",
+      "医院"
+     ],
+     "answer": 0,
+     "words": [
+      "公园"
+     ],
+     "sentence": 8
+    }
+   ]
+  },
+  {
    "id": "p0046",
    "lv": "4",
    "title": "招聘广告",
@@ -9905,6 +10707,1652 @@
       "健康"
      ],
      "sentence": 3
+    }
+   ]
+  },
+  {
+   "id": "p0066",
+   "lv": "4",
+   "title": "第一次去她家",
+   "oop": {},
+   "names": [
+    "李娜"
+   ],
+   "sentences": [
+    [
+     "我和李娜在一起一年了。上个周末，她第一次带我去跟她爸爸妈妈见面。",
+     "Li Na and I have been together for a year. Last weekend she took me to meet her parents for the first time."
+    ],
+    [
+     "去以前我紧张极了，在镜子前面换了三件衬衫。",
+     "Beforehand I was terribly nervous and changed my shirt three times in front of the mirror."
+    ],
+    [
+     "李娜笑着告诉我：“别紧张，你看起来很帅。”",
+     "Li Na smiled and told me: \"Relax, you look very handsome.\""
+    ],
+    [
+     "她爸爸是一位教授，看起来很严格，其实非常幽默。",
+     "Her dad is a professor. He looks strict, but he's actually very funny."
+    ],
+    [
+     "他不但跟我谈了很多工作上的事情，而且还讲了几个笑话。",
+     "He not only talked with me a lot about work, but also told a few jokes."
+    ],
+    [
+     "她妈妈做了一桌子菜，连我最喜欢的鱼都做了。",
+     "Her mum cooked a whole tableful of dishes, even my favourite, fish."
+    ],
+    [
+     "我有点害羞，吃得很少，她妈妈就问我：“难道我做的菜不好吃吗？”",
+     "I felt a bit shy and ate very little, so her mum asked me: \"Don't you like my cooking?\""
+    ],
+    [
+     "我马上回答：“太香了！”然后又吃了两碗米饭。",
+     "I answered at once: \"It's delicious!\" and then ate two more bowls of rice."
+    ],
+    [
+     "回家的路上，李娜告诉我，她爸爸妈妈对我很满意。",
+     "On the way home Li Na told me her parents were very pleased with me."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "去以前，我在镜子前面做什么？",
+     "en": "What did I do in front of the mirror beforehand?",
+     "type": "mc",
+     "options": [
+      "洗衣服",
+      "换衬衫",
+      "唱歌",
+      "打电话"
+     ],
+     "answer": 1,
+     "words": [
+      "镜子"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "李娜觉得我看起来很帅。",
+     "en": "Li Na thinks I look handsome.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "帅"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "她爸爸是做什么工作的？",
+     "en": "What does her dad do?",
+     "type": "mc",
+     "options": [
+      "医生",
+      "律师",
+      "教授",
+      "经理"
+     ],
+     "answer": 2,
+     "words": [
+      "教授"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "她爸爸是一个很严格、不爱笑的人。",
+     "en": "Her dad is a very strict person who seldom smiles.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "幽默"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "她爸爸给我讲了什么？",
+     "en": "What did her dad tell me?",
+     "type": "mc",
+     "options": [
+      "一个故事",
+      "他的爱好",
+      "他小时候的事情",
+      "笑话"
+     ],
+     "answer": 3,
+     "words": [
+      "笑话"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "她妈妈做的菜里有什么？",
+     "en": "What was among the dishes her mum made?",
+     "type": "mc",
+     "options": [
+      "我爱吃的鱼",
+      "她自己做的面包",
+      "很多饺子",
+      "一个大蛋糕"
+     ],
+     "answer": 0,
+     "words": [
+      "鱼"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "她妈妈为什么问我菜好吃不好吃？",
+     "en": "Why did her mum ask whether the food was good?",
+     "type": "mc",
+     "options": [
+      "我吃得太快",
+      "我吃得很少",
+      "我没有喝茶",
+      "我讲了一个笑话"
+     ],
+     "answer": 1,
+     "words": [
+      "难道"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "她爸爸妈妈对我不太满意。",
+     "en": "Her parents weren't very pleased with me.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "满意"
+     ],
+     "sentence": 8
+    }
+   ]
+  },
+  {
+   "id": "p0067",
+   "lv": "4",
+   "title": "钥匙丢了",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "昨天我加班，晚上十一点半才回到家。",
+     "Yesterday I worked overtime and didn't get home until half past eleven at night."
+    ],
+    [
+     "到了门口，我才发现钥匙丢了。",
+     "Only when I reached the door did I realise I'd lost my keys."
+    ],
+    [
+     "我把包里的东西全部拿出来，仔细找了一遍，可是怎么也找不到。",
+     "I took everything out of my bag and searched carefully, but I just couldn't find them."
+    ],
+    [
+     "那时候邻居们都已经休息了，我不好意思敲他们的门。",
+     "By then the neighbours had all gone to bed, and I didn't like to knock on their door."
+    ],
+    [
+     "我只好打电话找了一位专门开门的师傅。",
+     "I had no choice but to phone a locksmith."
+    ],
+    [
+     "师傅告诉我，即使他马上出发，也要四十分钟才能到。",
+     "The locksmith told me that even if he set off right away, it would take forty minutes to get there."
+    ],
+    [
+     "我又累又困，坐在门口等得非常无聊。",
+     "I was tired and sleepy, and sitting by the door waiting was terribly boring."
+    ],
+    [
+     "师傅到了以后，不到五分钟就把门弄开了。",
+     "Once the locksmith arrived, he had the door open in under five minutes."
+    ],
+    [
+     "他给我出了一个主意：换一个用密码开的门。",
+     "He gave me an idea: get a door that opens with a code."
+    ],
+    [
+     "以后不管去哪儿，都不用带钥匙了。",
+     "Then wherever I go, I won't need to take keys."
+    ],
+    [
+     "我觉得这个主意不错，今天就去买了一个。",
+     "I thought it was a good idea and went and bought one today."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "我昨天几点回到家？",
+     "en": "What time did I get home yesterday?",
+     "type": "mc",
+     "options": [
+      "十点半",
+      "十二点半",
+      "十一点半",
+      "十一点"
+     ],
+     "answer": 2,
+     "words": [
+      "才"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "我回到家以前就知道钥匙丢了。",
+     "en": "I knew I had lost my keys before I got home.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "发现"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "我为什么没有敲邻居的门？",
+     "en": "Why didn't I knock on the neighbours' door?",
+     "type": "mc",
+     "options": [
+      "邻居不在家",
+      "我不认识邻居",
+      "邻居家没有钥匙",
+      "邻居们都休息了"
+     ],
+     "answer": 3,
+     "words": [
+      "敲"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "师傅要多长时间才能到？",
+     "en": "How long would it take the locksmith to get there?",
+     "type": "mc",
+     "options": [
+      "四十分钟",
+      "五分钟",
+      "十分钟",
+      "一个小时"
+     ],
+     "answer": 0,
+     "words": [
+      "即使"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "等师傅的时候，我觉得怎么样？",
+     "en": "How did I feel while waiting for the locksmith?",
+     "type": "mc",
+     "options": [
+      "又饿又渴",
+      "很累，想睡觉",
+      "又冷又饿",
+      "很饿，想吃东西"
+     ],
+     "answer": 1,
+     "words": [
+      "困"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "师傅很快就把门弄开了。",
+     "en": "The locksmith got the door open quickly.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "弄"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "师傅给我出了什么主意？",
+     "en": "What idea did the locksmith give me?",
+     "type": "mc",
+     "options": [
+      "以后少加班",
+      "在邻居家放一把钥匙",
+      "换一个用密码开的门",
+      "买一个新的包"
+     ],
+     "answer": 2,
+     "words": [
+      "主意"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "我还没有决定买不买新门。",
+     "en": "I haven't decided yet whether to buy a new door.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "主意"
+     ],
+     "sentence": 10
+    }
+   ]
+  },
+  {
+   "id": "p0068",
+   "lv": "4",
+   "title": "去大使馆",
+   "oop": {},
+   "names": [
+    "法国"
+   ],
+   "sentences": [
+    [
+     "下个月我要去法国留学，上个星期去大使馆申请签证。",
+     "Next month I'm going to study in France, and last week I went to the embassy to apply for a visa."
+    ],
+    [
+     "去以前，我先上网仔细看了大使馆的要求。",
+     "Before going, I first went online and read the embassy's requirements carefully."
+    ],
+    [
+     "要准备护照、照片、银行的证明和一张表格。",
+     "I had to prepare a passport, photos, a bank statement and a form."
+    ],
+    [
+     "表格要先在电脑上按照要求详细地写好，然后打印出来，护照也要复印一份。",
+     "The form had to be filled in on a computer in detail as required, then printed out, and the passport photocopied too."
+    ],
+    [
+     "我早上八点就到了，可是门口已经有很多人了。",
+     "I was there by eight in the morning, but there were already lots of people at the door."
+    ],
+    [
+     "我等了一个多小时才进去。",
+     "I waited over an hour before I got in."
+    ],
+    [
+     "里面的一位阿姨检查了我的材料，发现表格上的地址写错了一个号码。",
+     "The woman at the desk checked my documents and found one of the numbers in the address on my form was wrong."
+    ],
+    [
+     "我很担心要重新等一次，但是她告诉我：“没关系，只要在这里写清楚就行了。”",
+     "I was worried I'd have to queue all over again, but she told me: \"It's fine. Just write it clearly here.\""
+    ],
+    [
+     "她告诉我，签证大约两个星期就能拿到。",
+     "She told me I'd get the visa in about two weeks."
+    ],
+    [
+     "一切都很顺利，我高高兴兴地回家了。",
+     "Everything went smoothly, and I went home very happy."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "我为什么要去大使馆？",
+     "en": "Why did I go to the embassy?",
+     "type": "mc",
+     "options": [
+      "为了找工作",
+      "为了换护照",
+      "为了参观",
+      "为了签证"
+     ],
+     "answer": 3,
+     "words": [
+      "签证"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "去以前，我上网看了大使馆的要求。",
+     "en": "Before going, I read the embassy's requirements online.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "要求"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "申请签证需要什么？",
+     "en": "What is needed to apply for the visa?",
+     "type": "mc",
+     "options": [
+      "护照和照片",
+      "地图和手机",
+      "电脑和钥匙",
+      "手表和衬衫"
+     ],
+     "answer": 0,
+     "words": [
+      "护照"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "护照要怎么准备？",
+     "en": "What had to be done with the passport?",
+     "type": "mc",
+     "options": [
+      "打印两份",
+      "复印一份",
+      "给银行看",
+      "写在表格上"
+     ],
+     "answer": 1,
+     "words": [
+      "复印"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "我等了多长时间才进去？",
+     "en": "How long did I wait before getting in?",
+     "type": "mc",
+     "options": [
+      "半个小时",
+      "两个多小时",
+      "一个多小时",
+      "十分钟"
+     ],
+     "answer": 2,
+     "words": [
+      "才"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "我的表格上，地址写错了。",
+     "en": "The address on my form was wrong.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "地址"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "阿姨让我怎么做？",
+     "en": "What did the woman tell me to do?",
+     "type": "mc",
+     "options": [
+      "重新等一次",
+      "明天再来一次",
+      "回家重新打印一份",
+      "在表格上写清楚"
+     ],
+     "answer": 3,
+     "words": [
+      "只要"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "我要等两个月才能拿到签证。",
+     "en": "I have to wait two months to get the visa.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "大约"
+     ],
+     "sentence": 8
+    }
+   ]
+  },
+  {
+   "id": "p0069",
+   "lv": "4",
+   "title": "奶奶用手机",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "我奶奶已经七十五岁了，以前连电脑都没用过。",
+     "My grandma is seventy-five, and she had never even used a computer before."
+    ],
+    [
+     "去年我给她买了一个新手机，教她怎么用。",
+     "Last year I bought her a new phone and taught her how to use it."
+    ],
+    [
+     "开始的时候，她觉得手机太复杂，字也太小，即使戴着眼镜也看不清楚。",
+     "At first she found the phone too complicated and the text too small; even with her glasses on she couldn't read it."
+    ],
+    [
+     "我就把手机上的字放大了。",
+     "So I made the text on the phone bigger."
+    ],
+    [
+     "每个周末我都去陪她练习，教她怎么发消息、看新闻。",
+     "Every weekend I went to practise with her, teaching her how to send messages and read the news."
+    ],
+    [
+     "奶奶非常认真，还把要注意的地方都写了下来。",
+     "Grandma was very serious about it and wrote down everything she needed to remember."
+    ],
+    [
+     "现在她不但会用手机跟我们聊天，而且还会上网买东西。",
+     "Now she can not only chat with us on her phone, but also shop online."
+    ],
+    [
+     "上个月我过生日，她还上网给我买了一件礼物，我非常感动。",
+     "Last month, for my birthday, she even bought me a present online, and I was really touched."
+    ],
+    [
+     "奶奶经常告诉我：“只要愿意学习，多老都没关系。”",
+     "Grandma often tells me: \"As long as you're willing to learn, it doesn't matter how old you are.\""
+    ]
+   ],
+   "questions": [
+    {
+     "q": "奶奶以前用过电脑吗？",
+     "en": "Had Grandma used a computer before?",
+     "type": "mc",
+     "options": [
+      "没有用过",
+      "用过很多次",
+      "用过一次",
+      "只在银行用过"
+     ],
+     "answer": 0,
+     "words": [
+      "连"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "手机是奶奶自己去商店买的。",
+     "en": "Grandma bought the phone herself at a shop.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "手机"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "开始的时候，奶奶觉得手机怎么样？",
+     "en": "What did Grandma think of the phone at first?",
+     "type": "mc",
+     "options": [
+      "太贵，也太大",
+      "很复杂，字也很小",
+      "太简单，没有意思",
+      "太大，不方便带"
+     ],
+     "answer": 1,
+     "words": [
+      "复杂"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "我每个周末去奶奶家做什么？",
+     "en": "What do I do at Grandma's every weekend?",
+     "type": "mc",
+     "options": [
+      "给她打扫房间",
+      "给她做菜",
+      "陪她练习用手机",
+      "陪她去公园跑步"
+     ],
+     "answer": 2,
+     "words": [
+      "陪"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "奶奶把要注意的地方写了下来。",
+     "en": "Grandma wrote down what she needed to remember.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "注意"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "现在奶奶会用手机做什么？",
+     "en": "What can Grandma do with her phone now?",
+     "type": "mc",
+     "options": [
+      "玩游戏",
+      "看电影和唱歌",
+      "画画和听音乐",
+      "聊天和买东西"
+     ],
+     "answer": 3,
+     "words": [
+      "聊天"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "收到奶奶的礼物，我觉得怎么样？",
+     "en": "How did I feel when I got Grandma's present?",
+     "type": "mc",
+     "options": [
+      "很感动",
+      "很吃惊",
+      "很害羞",
+      "很担心"
+     ],
+     "answer": 0,
+     "words": [
+      "感动"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "奶奶认为人老了就不能学习新东西了。",
+     "en": "Grandma thinks you can't learn new things once you're old.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "只要"
+     ],
+     "sentence": 8
+    }
+   ]
+  },
+  {
+   "id": "p0070",
+   "lv": "4",
+   "title": "搬到农村",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "我和丈夫在城市里住了十年，去年我们决定搬到农村。",
+     "My husband and I lived in the city for ten years. Last year we decided to move to the countryside."
+    ],
+    [
+     "很多朋友都很吃惊，问我们为什么要离开城市。",
+     "Lots of friends were surprised and asked us why we wanted to leave the city."
+    ],
+    [
+     "原因很简单：城市里人越来越多，堵车越来越厉害，空气也越来越差。",
+     "The reason is simple: the city keeps getting more crowded, the traffic jams worse and the air dirtier."
+    ],
+    [
+     "我们现在住的地方，周围都是森林，空气非常新鲜。",
+     "Where we live now is surrounded by forest, and the air is wonderfully fresh."
+    ],
+    [
+     "这里的气候也很好，夏天凉快，冬天暖和。",
+     "The climate here is good too: cool in summer and warm in winter."
+    ],
+    [
+     "当然，农村的生活也有不方便的地方。",
+     "Of course, country life has its inconveniences too."
+    ],
+    [
+     "附近连一个大超市都没有，不管买什么，我们都要坐一个小时的公共汽车。",
+     "There isn't even a big supermarket nearby; whatever we want to buy, we have to take an hour-long bus ride."
+    ],
+    [
+     "但是我们一点也不后悔。",
+     "But we don't regret it at all."
+    ],
+    [
+     "相反，我们的身体比以前更健康，心情也更愉快了。",
+     "On the contrary, we're healthier than before and in a better mood too."
+    ],
+    [
+     "当地人都很友好，经常请我们去他们家里吃东西。",
+     "The locals are very friendly and often invite us round to eat."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "我们在城市里住了多长时间？",
+     "en": "How long did we live in the city?",
+     "type": "mc",
+     "options": [
+      "五年",
+      "十年",
+      "两年",
+      "二十年"
+     ],
+     "answer": 1,
+     "words": [
+      "城市"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "朋友们知道我们要搬到农村，都很吃惊。",
+     "en": "Our friends were surprised to hear we were moving to the countryside.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "吃惊"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "我们为什么要离开城市？",
+     "en": "Why did we want to leave the city?",
+     "type": "mc",
+     "options": [
+      "工作太累，收入太低",
+      "住的地方太小",
+      "人多，堵车，空气差",
+      "朋友都搬走了"
+     ],
+     "answer": 2,
+     "words": [
+      "原因"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "我们现在住的地方周围有什么？",
+     "en": "What is around the place where we live now?",
+     "type": "mc",
+     "options": [
+      "大超市",
+      "很多高楼",
+      "一个机场",
+      "森林"
+     ],
+     "answer": 3,
+     "words": [
+      "周围",
+      "森林"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "这里夏天很热，冬天很冷。",
+     "en": "Here it's hot in summer and cold in winter.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "凉快",
+      "暖和"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "我们去买东西要多长时间？",
+     "en": "How long does it take us to go shopping?",
+     "type": "mc",
+     "options": [
+      "一个小时",
+      "十分钟",
+      "半个小时",
+      "两个小时"
+     ],
+     "answer": 0,
+     "words": [
+      "不管"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "现在我们的身体怎么样？",
+     "en": "How is our health now?",
+     "type": "mc",
+     "options": [
+      "跟以前一样",
+      "比以前好",
+      "比以前差多了",
+      "经常生病"
+     ],
+     "answer": 1,
+     "words": [
+      "健康"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "当地人不太喜欢我们。",
+     "en": "The locals don't like us much.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "友好"
+     ],
+     "sentence": 9
+    }
+   ]
+  },
+  {
+   "id": "p0071",
+   "lv": "4",
+   "title": "输了一场比赛",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "我从小就喜欢网球，已经练习了八年。",
+     "I've loved tennis since I was little and have been practising for eight years."
+    ],
+    [
+     "上个月，我参加了我们城市的网球比赛。",
+     "Last month I took part in our city's tennis tournament."
+    ],
+    [
+     "参加比赛的人都很厉害，竞争非常大。",
+     "Everyone in the tournament was very good, and the competition was fierce."
+    ],
+    [
+     "我一直赢到了最后一场，遇到了一个比我大两岁的学生。",
+     "I kept winning all the way to the final, where I came up against a student two years older than me."
+    ],
+    [
+     "他比我高，力气也比我大。",
+     "He was taller than me and stronger too."
+    ],
+    [
+     "我一紧张就出了很多汗，最后输了。",
+     "As soon as I got nervous I started sweating a lot, and in the end I lost."
+    ],
+    [
+     "比赛结束以后，我觉得自己太失败了，连水都不想喝。",
+     "After the match I felt like a total failure and didn't even want a drink of water."
+    ],
+    [
+     "我的老师鼓励我：“既然已经输了，就别难过了。你应该想一想，他为什么能赢你。”",
+     "My coach encouraged me: \"Since you've already lost, don't be upset. You should think about why he was able to beat you.\""
+    ],
+    [
+     "后来我才知道，他平时练习的时间是我的两倍。",
+     "Later I found out that he normally practises twice as long as I do."
+    ],
+    [
+     "现在我对自己又有了信心，因为我知道应该怎么做了。",
+     "Now I have confidence in myself again, because I know what I need to do."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "我练习网球多长时间了？",
+     "en": "How long have I been practising tennis?",
+     "type": "mc",
+     "options": [
+      "两年",
+      "三年",
+      "八年",
+      "十年"
+     ],
+     "answer": 2,
+     "words": [
+      "练习"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "这次比赛的竞争不太大。",
+     "en": "The competition in this tournament wasn't very strong.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "竞争"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "最后一场比赛，我遇到了谁？",
+     "en": "Whom did I play in the final match?",
+     "type": "mc",
+     "options": [
+      "我的老师",
+      "比我小两岁的学生",
+      "我的同学",
+      "比我大两岁的学生"
+     ],
+     "answer": 3,
+     "words": [
+      "遇到"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "那个学生比我高，力气也比我大。",
+     "en": "That student was taller and stronger than me.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "力气"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "我一紧张就怎么样？",
+     "en": "What happens to me as soon as I get nervous?",
+     "type": "mc",
+     "options": [
+      "出很多汗",
+      "想喝很多水",
+      "想马上回家",
+      "一直笑"
+     ],
+     "answer": 0,
+     "words": [
+      "汗"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "比赛结束以后，我觉得怎么样？",
+     "en": "How did I feel after the match?",
+     "type": "mc",
+     "options": [
+      "很高兴",
+      "非常难过",
+      "觉得自己很厉害",
+      "没什么"
+     ],
+     "answer": 1,
+     "words": [
+      "失败"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "老师让我想什么？",
+     "en": "What did my coach want me to think about?",
+     "type": "mc",
+     "options": [
+      "下次比赛什么时候开始",
+      "怎么找一个更好的老师",
+      "那个学生为什么能赢我",
+      "我为什么喜欢网球"
+     ],
+     "answer": 2,
+     "words": [
+      "鼓励"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "那个学生平时练习的时间比我少。",
+     "en": "That student normally practises less than I do.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "倍"
+     ],
+     "sentence": 8
+    }
+   ]
+  },
+  {
+   "id": "p0072",
+   "lv": "4",
+   "title": "我做的第一个菜",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "以前除了面条以外，我什么菜都不会做。",
+     "I used to be unable to cook anything except noodles."
+    ],
+    [
+     "上个月我搬出去一个人住，只好自己做菜。",
+     "Last month I moved out to live on my own, so I had to cook for myself."
+    ],
+    [
+     "我上网找了一个做鱼的方法，看起来一点也不难。",
+     "I found a recipe for fish online, and it didn't look hard at all."
+    ],
+    [
+     "我先去超市买了一条鱼，还买了盐和糖。",
+     "First I went to the supermarket and bought a fish, plus salt and sugar."
+    ],
+    [
+     "回家以后，我按照网站上写的顺序开始做。",
+     "Back home, I started cooking, following the steps on the website."
+    ],
+    [
+     "可是真的做起来，比我想的复杂得多。",
+     "But actually doing it was much more complicated than I'd thought."
+    ],
+    [
+     "因为太紧张，我把盐放了两次。",
+     "Because I was so nervous, I put the salt in twice."
+    ],
+    [
+     "鱼做好以后，看起来还不错，也很香。",
+     "When the fish was done it looked quite good and smelled lovely."
+    ],
+    [
+     "可是我尝了一口，味道太咸了，完全不能吃。",
+     "But when I tasted it, it was far too salty, completely inedible."
+    ],
+    [
+     "最后我只好去楼下的饭馆吃了一碗面条。",
+     "In the end I had to go to the restaurant downstairs and have a bowl of noodles."
+    ],
+    [
+     "虽然失败了，但是我相信，只要多练习，下次一定能做得更好。",
+     "Although it was a failure, I believe that as long as I practise more, I'll definitely do better next time."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "以前我会做什么菜？",
+     "en": "What could I cook before?",
+     "type": "mc",
+     "options": [
+      "只会做鱼",
+      "什么都会做",
+      "会做很多菜",
+      "只会做面条"
+     ],
+     "answer": 3,
+     "words": [
+      "除了"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "做鱼的方法是妈妈教我的。",
+     "en": "My mum taught me how to cook the fish.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "方法"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "我在超市买了什么？",
+     "en": "What did I buy at the supermarket?",
+     "type": "mc",
+     "options": [
+      "鱼、盐和糖",
+      "鱼和面条",
+      "鸡蛋和盐",
+      "鱼、米和水果"
+     ],
+     "answer": 0,
+     "words": [
+      "盐"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "做菜的时候，我是按照什么做的？",
+     "en": "What did I follow when cooking?",
+     "type": "mc",
+     "options": [
+      "妈妈教的方法",
+      "网站上的方法",
+      "饭馆师傅教的方法",
+      "朋友写的东西"
+     ],
+     "answer": 1,
+     "words": [
+      "顺序"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "真的做起来，比我想的简单。",
+     "en": "Actually doing it was simpler than I'd thought.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "复杂"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "鱼的味道为什么不好？",
+     "en": "Why did the fish taste bad?",
+     "type": "mc",
+     "options": [
+      "鱼不新鲜",
+      "我放了太多糖",
+      "我放了两次盐",
+      "我做的时间太短"
+     ],
+     "answer": 2,
+     "words": [
+      "盐"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "最后我吃了什么？",
+     "en": "What did I eat in the end?",
+     "type": "mc",
+     "options": [
+      "我做的鱼",
+      "一个蛋糕",
+      "一些水果",
+      "一碗面条"
+     ],
+     "answer": 3,
+     "words": [
+      "碗"
+     ],
+     "sentence": 9
+    },
+    {
+     "q": "我相信下次能做得更好。",
+     "en": "I believe I can do better next time.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "相信"
+     ],
+     "sentence": 10
+    }
+   ]
+  },
+  {
+   "id": "p0073",
+   "lv": "4",
+   "title": "寒假",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "寒假终于开始了！",
+     "The winter holidays have finally started!"
+    ],
+    [
+     "第一个星期，我到中午十二点才起床，起床以后就玩手机。",
+     "The first week I didn't get up till twelve noon, and after getting up I'd play on my phone."
+    ],
+    [
+     "可是寒假才过了一个星期，我就觉得无聊了。",
+     "But the holidays were only a week old and I was already bored."
+    ],
+    [
+     "妈妈让我陪她去逛商店。",
+     "Mum had me go round the shops with her."
+    ],
+    [
+     "快过年了，路上和商店里到处都很热闹。",
+     "New Year is coming, and the streets and shops are bustling everywhere."
+    ],
+    [
+     "妈妈给我买了一件新衣服，还带我去理发。",
+     "Mum bought me some new clothes and took me for a haircut."
+    ],
+    [
+     "理发以后，我在镜子里看了看自己，好像换了一个人。",
+     "After the haircut I looked at myself in the mirror, and I seemed like a different person."
+    ],
+    [
+     "老师留的寒假作业很多，还要求我们写日记。",
+     "The teacher set a lot of holiday homework, and also wants us to keep a diary."
+    ],
+    [
+     "我打算先把作业写完，然后再好好玩。",
+     "I plan to finish the homework first and then have a good time."
+    ],
+    [
+     "下个星期，我还要跟爸爸去一趟爷爷家，路上要八个小时才能到。",
+     "Next week I'm going with Dad to Grandpa's, which takes eight hours to get to."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "寒假第一个星期，我几点起床？",
+     "en": "What time did I get up in the first week of the holidays?",
+     "type": "mc",
+     "options": [
+      "中午十二点",
+      "早上七点半",
+      "上午九点",
+      "下午两点"
+     ],
+     "answer": 0,
+     "words": [
+      "起床"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "寒假过了一个月，我才觉得无聊。",
+     "en": "I only got bored after a month of the holidays.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "无聊"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "妈妈让我做什么？",
+     "en": "What did Mum have me do?",
+     "type": "mc",
+     "options": [
+      "打扫房间",
+      "陪她逛商店",
+      "去图书馆看书",
+      "写日记"
+     ],
+     "answer": 1,
+     "words": [
+      "陪"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "为什么商店里很热闹？",
+     "en": "Why are the shops so lively?",
+     "type": "mc",
+     "options": [
+      "商店的东西很便宜",
+      "商店里有比赛",
+      "要过年了",
+      "天气很好"
+     ],
+     "answer": 2,
+     "words": [
+      "热闹"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "妈妈还带我去理发了。",
+     "en": "Mum also took me for a haircut.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "理发"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "老师要求我们做什么？",
+     "en": "What does the teacher want us to do?",
+     "type": "mc",
+     "options": [
+      "看小说",
+      "多运动",
+      "听新闻",
+      "写日记"
+     ],
+     "answer": 3,
+     "words": [
+      "日记"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "我打算先做什么？",
+     "en": "What do I plan to do first?",
+     "type": "mc",
+     "options": [
+      "写寒假作业",
+      "好好玩",
+      "去爷爷家住几个星期",
+      "去理发"
+     ],
+     "answer": 0,
+     "words": [
+      "打算"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "去爷爷家，路上要八个小时。",
+     "en": "It takes eight hours to get to Grandpa's.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "趟"
+     ],
+     "sentence": 9
+    }
+   ]
+  },
+  {
+   "id": "p0074",
+   "lv": "4",
+   "title": "哥哥换工作",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "我哥哥以前是一位律师，在一家很大的公司工作。",
+     "My older brother used to be a lawyer at a very big firm."
+    ],
+    [
+     "这份工作收入很高，但是非常辛苦，他经常十点以后才下班。",
+     "The job pays very well but is very hard; he often doesn't finish work until after ten at night."
+    ],
+    [
+     "上个月，他突然告诉我们，他不想当律师了，想跟朋友开一个小饭馆。",
+     "Last month he suddenly told us he didn't want to be a lawyer any more and wanted to open a small restaurant with a friend."
+    ],
+    [
+     "爸爸妈妈都很担心，认为做生意很难赚钱，而且律师是很好的职业。",
+     "Mum and Dad were very worried. They think it's hard to make money in business, and that law is a very good career."
+    ],
+    [
+     "哥哥却告诉他们，他已经考虑了很久。",
+     "But my brother told them he had been thinking about it for a long time."
+    ],
+    [
+     "尽管当律师赚得多，可是他一点也不快乐。",
+     "Although being a lawyer pays more, he wasn't happy at all."
+    ],
+    [
+     "“难道为了钱，就要一直做不喜欢的工作吗？”",
+     "\"Should I really keep doing work I don't like, just for the money?\""
+    ],
+    [
+     "最后，我们一家人坐在一起商量了一个晚上。",
+     "In the end the whole family sat down together and talked it over for an evening."
+    ],
+    [
+     "爸爸终于同意了：“既然你已经决定了，我们就支持你。”",
+     "Dad finally agreed: \"Since you've made up your mind, we'll support you.\""
+    ],
+    [
+     "饭馆已经开了三个月，虽然还没赚到很多钱，但是哥哥很快乐。",
+     "The restaurant has now been open for three months. It hasn't made much money yet, but my brother is happy."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "哥哥以前做什么工作？",
+     "en": "What did my brother do before?",
+     "type": "mc",
+     "options": [
+      "医生",
+      "律师",
+      "老师",
+      "司机"
+     ],
+     "answer": 1,
+     "words": [
+      "律师"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "哥哥以前的工作收入不高。",
+     "en": "My brother's old job didn't pay well.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "收入"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "哥哥想跟朋友一起做什么？",
+     "en": "What did my brother want to do with a friend?",
+     "type": "mc",
+     "options": [
+      "去别的城市工作",
+      "开一个公司",
+      "开一个小饭馆",
+      "当老师"
+     ],
+     "answer": 2,
+     "words": [
+      "饭馆"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "爸爸妈妈为什么担心？",
+     "en": "Why were Mum and Dad worried?",
+     "type": "mc",
+     "options": [
+      "哥哥身体不好",
+      "朋友不太认真",
+      "饭馆离家里太远了",
+      "做生意不容易赚钱"
+     ],
+     "answer": 3,
+     "words": [
+      "担心"
+     ],
+     "sentence": 3
+    },
+    {
+     "q": "哥哥是突然决定换工作的，以前没有想过。",
+     "en": "My brother decided to change jobs on the spur of the moment, without having thought about it before.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "考虑"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "当律师的时候，哥哥觉得怎么样？",
+     "en": "How did my brother feel when he was a lawyer?",
+     "type": "mc",
+     "options": [
+      "很不快乐",
+      "很忙，但是很快乐",
+      "很轻松",
+      "很有意思"
+     ],
+     "answer": 0,
+     "words": [
+      "尽管"
+     ],
+     "sentence": 5
+    },
+    {
+     "q": "最后爸爸的意见是什么？",
+     "en": "What was Dad's view in the end?",
+     "type": "mc",
+     "options": [
+      "不同意",
+      "支持哥哥",
+      "让哥哥再考虑一年",
+      "让妈妈决定"
+     ],
+     "answer": 1,
+     "words": [
+      "支持"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "饭馆已经赚了很多钱。",
+     "en": "The restaurant has already made a lot of money.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "赚"
+     ],
+     "sentence": 9
+    }
+   ]
+  },
+  {
+   "id": "p0075",
+   "lv": "4",
+   "title": "妈妈是护士",
+   "oop": {},
+   "names": [],
+   "sentences": [
+    [
+     "我妈妈是一位护士，在医院工作了二十多年。",
+     "My mum is a nurse. She has worked at the hospital for more than twenty years."
+    ],
+    [
+     "护士的工作其实比别人想的辛苦。",
+     "A nurse's work is actually harder than people think."
+    ],
+    [
+     "除了给生病的人打针、送药以外，她还要照顾他们的生活。",
+     "Besides giving patients injections and bringing them their medicine, she also has to look after their daily needs."
+    ],
+    [
+     "有时候她要在医院工作一个晚上，早上才能回家。",
+     "Sometimes she has to work all night at the hospital and only gets home in the morning."
+    ],
+    [
+     "回到家，她往往累得连电视都不想看，马上就躺下休息。",
+     "When she gets home she's often too tired even to watch TV and lies down to rest straight away."
+    ],
+    [
+     "我问她：“当护士很累，你为什么还要做？”",
+     "I asked her: \"Being a nurse is tiring, why do you keep doing it?\""
+    ],
+    [
+     "她告诉我，有一次，一位老奶奶生病了，非常难受，她照顾了老奶奶一个多月。",
+     "She told me that once an old lady fell ill and was in a bad way, and she looked after her for over a month."
+    ],
+    [
+     "老奶奶离开医院的时候，拉着妈妈，一直对她表示感谢。",
+     "When the old lady left hospital, she held on to Mum and kept thanking her."
+    ],
+    [
+     "那一刻，妈妈觉得自己的工作非常重要。",
+     "At that moment Mum felt her work really mattered."
+    ],
+    [
+     "现在我也想当护士，跟妈妈一样帮助别人。",
+     "Now I want to be a nurse too and help people like Mum does."
+    ]
+   ],
+   "questions": [
+    {
+     "q": "妈妈在医院工作了多长时间？",
+     "en": "How long has Mum worked at the hospital?",
+     "type": "mc",
+     "options": [
+      "十多年",
+      "三十多年",
+      "二十多年",
+      "五年"
+     ],
+     "answer": 2,
+     "words": [
+      "医院"
+     ],
+     "sentence": 0
+    },
+    {
+     "q": "护士的工作比别人想的轻松。",
+     "en": "A nurse's work is easier than people think.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "辛苦"
+     ],
+     "sentence": 1
+    },
+    {
+     "q": "除了打针、送药以外，妈妈还要做什么？",
+     "en": "Besides injections and medicine, what else does Mum have to do?",
+     "type": "mc",
+     "options": [
+      "打扫医院",
+      "给他们做菜",
+      "给他们的家人打电话",
+      "照顾生病的人"
+     ],
+     "answer": 3,
+     "words": [
+      "照顾"
+     ],
+     "sentence": 2
+    },
+    {
+     "q": "妈妈回到家以后经常怎么样？",
+     "en": "How is Mum often after getting home?",
+     "type": "mc",
+     "options": [
+      "马上躺下休息",
+      "很高兴地做菜",
+      "马上去运动",
+      "跟我讲医院的事情"
+     ],
+     "answer": 0,
+     "words": [
+      "躺"
+     ],
+     "sentence": 4
+    },
+    {
+     "q": "妈妈照顾那位老奶奶一个多月。",
+     "en": "Mum looked after the old lady for more than a month.",
+     "type": "tf",
+     "options": null,
+     "answer": true,
+     "words": [
+      "照顾"
+     ],
+     "sentence": 6
+    },
+    {
+     "q": "老奶奶离开医院的时候做了什么？",
+     "en": "What did the old lady do when she left hospital?",
+     "type": "mc",
+     "options": [
+      "送给妈妈一个礼物",
+      "一直对妈妈表示感谢",
+      "请妈妈以后去她家玩儿",
+      "马上回家休息"
+     ],
+     "answer": 1,
+     "words": [
+      "感谢"
+     ],
+     "sentence": 7
+    },
+    {
+     "q": "那一刻妈妈觉得自己的工作怎么样？",
+     "en": "At that moment, how did Mum feel about her work?",
+     "type": "mc",
+     "options": [
+      "太辛苦了",
+      "没有意思",
+      "很重要",
+      "收入太低"
+     ],
+     "answer": 2,
+     "words": [
+      "重要"
+     ],
+     "sentence": 8
+    },
+    {
+     "q": "我以后不想当护士。",
+     "en": "I don't want to be a nurse in the future.",
+     "type": "tf",
+     "options": null,
+     "answer": false,
+     "words": [
+      "护士"
+     ],
+     "sentence": 9
     }
    ]
   }

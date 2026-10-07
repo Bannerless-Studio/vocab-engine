@@ -20,7 +20,8 @@ const MAIN = "36aee02"; // main before pauseNew
 const CHAR_ROWS = /<tr><td><bdi[^>]*>字[^<]*<\/bdi>[^<]*<\/td><td>[^<]*<\/td><\/tr>|<p class="q" style="margin-top:14px">Characters<\/p><table class="stats nw">[\s\S]*?<\/table>/g;
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
-const PACK = (p => { delete p.pairs; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
+const PACK = (p => { delete p.pairs; delete p.glossStyle; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");

@@ -10,8 +10,8 @@ linked words, the count the app shows for an unspaced pack (report only).
 
 - **1**: 15 passages; words/passage 64-80 (median 75); ws_words 64-78; coverage min 1.000, median 1.000 (rule >= 0.95); linked min 1.000; questions mc 75, tf 45
 - **2**: 15 passages; words/passage 85-97 (median 92); ws_words 81-92; coverage min 1.000, median 1.000 (rule >= 0.95); linked min 1.000; questions mc 75, tf 45
-- **3**: 15 passages; words/passage 100-115 (median 107); ws_words 92-113; coverage min 0.962, median 1.000 (rule >= 0.95); linked min 0.962; questions mc 75, tf 45
-- **4**: 15 passages; words/passage 118-146 (median 133); ws_words 108-139; coverage min 0.992, median 1.000 (rule >= 0.93); linked min 0.992; questions mc 75, tf 45
+- **3**: 20 passages; words/passage 100-120 (median 109.0); ws_words 92-115; coverage min 0.962, median 1.000 (rule >= 0.95); linked min 0.962; questions mc 100, tf 60
+- **4**: 25 passages; words/passage 118-149 (median 137); ws_words 108-143; coverage min 0.992, median 1.000 (rule >= 0.93); linked min 0.992; questions mc 125, tf 75
 
 | id | lv | title | words | ws_words | coverage | linked | out-of-pack lemmas (reason) | higher-level lemmas |
 |---|---|---|---|---|---|---|---|---|
@@ -60,6 +60,11 @@ linked words, the count the app shows for an unspaced pack (report only).
 | p0043 | 3 | 买了一双新鞋 | 107 | 105 | 1.000 | 1.000 | - | 4: 试, 道歉 |
 | p0044 | 3 | 骑自行车 | 111 | 104 | 1.000 | 1.000 | - | 4: 掉 |
 | p0045 | 3 | 中国的节日 | 109 | 95 | 0.962 | 0.962 | 中秋节 x2 (Mid-Autumn Festival; festival name, the pack lacks 节), 春节 x2 (Spring Festival; festival name, the pack lacks 节) | 4: 圆, 饺子 |
+| p0061 | 3 | 弟弟的作业 | 113 | 110 | 1.000 | 1.000 | - | - |
+| p0062 | 3 | 叔叔来了 | 114 | 104 | 1.000 | 1.000 | - | 4: 戴 |
+| p0063 | 3 | 花园里的小鸟 | 120 | 112 | 1.000 | 1.000 | - | - |
+| p0064 | 3 | 我的行李箱 | 119 | 110 | 1.000 | 1.000 | - | 4: 地址 |
+| p0065 | 3 | 爷爷的普通话 | 119 | 115 | 1.000 | 1.000 | - | - |
 | p0046 | 4 | 招聘广告 | 133 | 127 | 1.000 | 1.000 | - | - |
 | p0047 | 4 | 找工作 | 146 | 130 | 1.000 | 1.000 | - | - |
 | p0048 | 4 | 保护环境，从小事情开始 | 119 | 113 | 1.000 | 1.000 | - | - |
@@ -75,6 +80,16 @@ linked words, the count the app shows for an unspaced pack (report only).
 | p0058 | 4 | 好的学习方法 | 130 | 119 | 1.000 | 1.000 | - | - |
 | p0059 | 4 | 航班推迟了 | 143 | 139 | 1.000 | 1.000 | - | - |
 | p0060 | 4 | 健康地减肥 | 140 | 131 | 1.000 | 1.000 | - | - |
+| p0066 | 4 | 第一次去她家 | 144 | 131 | 1.000 | 1.000 | - | - |
+| p0067 | 4 | 钥匙丢了 | 148 | 143 | 1.000 | 1.000 | - | - |
+| p0068 | 4 | 去大使馆 | 149 | 139 | 1.000 | 1.000 | - | - |
+| p0069 | 4 | 奶奶用手机 | 131 | 125 | 1.000 | 1.000 | - | - |
+| p0070 | 4 | 搬到农村 | 129 | 121 | 1.000 | 1.000 | - | - |
+| p0071 | 4 | 输了一场比赛 | 137 | 124 | 1.000 | 1.000 | - | - |
+| p0072 | 4 | 我做的第一个菜 | 148 | 143 | 1.000 | 1.000 | - | - |
+| p0073 | 4 | 寒假 | 126 | 122 | 1.000 | 1.000 | - | - |
+| p0074 | 4 | 哥哥换工作 | 149 | 138 | 1.000 | 1.000 | - | - |
+| p0075 | 4 | 妈妈是护士 | 141 | 134 | 1.000 | 1.000 | - | - |
 
 Title words, and question/option words the budget does not count (a numeral-like
 pack word), that are out of the pack or above the passage's level (report only;
@@ -87,10 +102,11 @@ the budget rule above is unchanged):
 - p0042: s3 '小河': jieba reads a proper noun (nr), linked as 小 + 河; declare it in names if it is one; s4 '河里': jieba reads a proper noun (ns), linked as 河 + 里; declare it in names if it is one; s5 '河里': jieba reads a proper noun (ns), linked as 河 + 里; declare it in names if it is one
 - p0048: s2 '河里': jieba reads a proper noun (ns), linked as 河 + 里; declare it in names if it is one
 - p0060: s6 '太咸': jieba reads a proper noun (nr), linked as 太 + 咸; declare it in names if it is one; s6 '太辣': jieba reads a proper noun (nr), linked as 太 + 辣; declare it in names if it is one
+- p0071: s6 '连水': jieba reads a proper noun (nr), linked as 连 + 水; declare it in names if it is one
 
-Readings (`ruby`, langs/zh.py passage_ruby): 6136 reading tokens over 577 sentences (6017 on a linked word, 119 without one: names, oop words, 过, 第), 6213 in titles, questions and options.
-pypinyin readings with no override: 568 characters, 45 distinct: 周 x35, 婷 x29, 王 x24, 上 x22, 丽 x22, 娜 x22, 海 x22, 刘 x21, 芳 x21, 何 x20, 杰 x20, 陈 x20, 孙 x18, 浩 x18, 明 x17, 李 x17, 林 x17, 静 x17, 强 x14, 赵 x14, 吴 x13, 安 x13, 磊 x13, 节 x12, 郑 x11, 国 x10, 文 x9, 法 x8, 玛 x8, 迪 x8 ....
-Override readings used (SURFACE_READINGS, CHAR_READINGS, 地 rule, aspect 过): 便宜 x13, 过 (aspect) x3, 草地 x2, 长大 x2, 切 x1.
+Readings (`ruby`, langs/zh.py passage_ruby): 8131 reading tokens over 721 sentences (8006 on a linked word, 125 without one: names, oop words, 过, 第), 8245 in titles, questions and options.
+pypinyin readings with no override: 604 characters, 47 distinct: 周 x35, 婷 x29, 娜 x26, 王 x24, 上 x23, 海 x23, 丽 x22, 刘 x21, 李 x21, 芳 x21, 何 x20, 杰 x20, 陈 x20, 孙 x18, 浩 x18, 明 x17, 林 x17, 静 x17, 们 x14, 安 x14, 强 x14, 赵 x14, 吴 x13, 磊 x13, 节 x12, 国 x11, 郑 x11, 文 x9, 法 x9, 玛 x8 ....
+Override readings used (SURFACE_READINGS, CHAR_READINGS, 地 rule, aspect 过): 便宜 x14, 过 (aspect) x11, 长大 x4, 草地 x2, 切 x1.
 
 <!-- manual section: kept across runs -->
 
@@ -104,3 +120,8 @@ Override readings used (SURFACE_READINGS, CHAR_READINGS, 地 rule, aspect 过): 
 - **Level grammar.** No 把/被 at HSK1-2. Experiential 过 appears only at HSK4. HSK1 speech is written as dialogue with speaker labels, since 说 is not a pack word.
 - **Names.** Declared whole (王明, 周婷...). Bare surnames before a title are declared as written (王, 李, 周, 何, 杨). 上海 and 成都 contain the pack characters 上 and 都 and stay one unit as declared names.
 - **Report notes.** The jieba proper-noun notes (班能赢, 太甜, 长大, 小河, 河里, 太咸, 太辣) are false positives, and none is a name. The title notes are 房间 (p0015) and 西红柿 (p0037). Both words are already inside the budget of their own passage.
+
+## fb34 (2026-10-07): p0061-p0075
+
+- 15 hand-written passages (5 HSK 3, 10 HSK 4), then one content-review round (2 HIGH and 12 of 17 LOW applied). Coverage 1.000, no oop. Words a reviewer suggested that are not pack words (动物园, 锁, 女士, 街, 说, 话, 饭) were written around.
+- The jieba note on p0071 '连水' is a false positive (连 + 水, "not even water").

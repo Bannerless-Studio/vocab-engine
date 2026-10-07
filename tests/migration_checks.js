@@ -809,5 +809,29 @@ console.log("\n[patterns] pack.patterns (fb29): optional top-level prog.pt = {pa
   }
 }
 
+console.log("\n[bareByPair] characters.bareByPair (fb31): no stored field; it reads the pair streaks pairs writes. Records a pair-bare unit carries boot here and on 3044601 byte-equal, and back");
+{
+  const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog; p.sn = 43;
+  const uid = Object.keys(p.chars.c)[0];
+  const U = { id: uid, words: [Object.keys(p.w)[0]] };
+  p.chars.c[uid] = { r: 5, w: 1, s: 3, u: 43, p: { wm: [2, 43], ws: [1, 40] } };
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK);
+  check("[bareByPair] zh pack sets characters.bareByPair; a ruby unit with wm 2 reads bare; boot here: no backup, progress byte-equal, no field added", LAG_PACK.characters.bareByPair === true && VC.pairBare(here.prog.chars.c[uid], U, here.prog, LAG_PACK) && here.backupRaw === null && JSON.stringify(here.prog) === raw);
+  let eng = null, op = null;
+  try {
+    const cp = require("child_process"), os = require("os");
+    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_3044601.js");
+    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show 3044601:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
+    op = JSON.parse(cp.execSync(`git -C "${ROOT}" show 3044601:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+  } catch(e){ eng = null; }
+  if(!eng) skip("[bareByPair] engine 3044601 not in this checkout's history");
+  else {
+    const o = eng.bootProg(raw, op), o2 = eng.bootProg(raw, LAG_PACK);
+    check("[bareByPair] engine 3044601 boots them (its zh pack, and this pack with the new fields): no backup, progress byte-equal", o.backupRaw === null && JSON.stringify(o.prog) === raw && o2.backupRaw === null && JSON.stringify(o2.prog) === raw);
+    const back = VC.bootProg(JSON.stringify(o.prog), LAG_PACK);
+    check("[bareByPair] and back here: no backup, byte-equal", back.backupRaw === null && JSON.stringify(back.prog) === raw);
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

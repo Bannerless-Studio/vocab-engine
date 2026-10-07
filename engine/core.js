@@ -2414,7 +2414,8 @@ function charsConfig(pack){
     bareWords: c.bareWords === true,
     // characters.learn "lag" supersedes withWords: no turn, no order chips.
     withWords: c.withWords === true && c.learn !== "lag",
-  }, c.learn === "lag" ? Object.assign({ learn: "lag" }, lagRamp(c, Number.isInteger(c.setSize) && c.setSize > 0 ? c.setSize : CHAR_SET_SIZE)) : {});
+  }, c.learn === "lag" ? Object.assign({ learn: "lag" }, lagRamp(c, Number.isInteger(c.setSize) && c.setSize > 0 ? c.setSize : CHAR_SET_SIZE)) : {},
+  c.bareByPair === true ? { bareByPair: true } : {});
 }
 // characters.start / ramp (fb27): only under learn "lag"; invalid values are ignored like the other fields.
 function lagRamp(c, size){
@@ -2530,7 +2531,25 @@ function markUnitTyped(prog, units, pack, wordId, ok){
 function bareWord(word, units, prog, pack){
   const c = charsConfig(pack); if(!c || !c.bareWords || !word) return false;
   const u = unitByWord(units).get(word.id); const recs = charRecs(prog);
-  return !!u && hasCharRec(recs, u.id) && charTier(recs[u.id].s, pack) === "bare";
+  return !!u && hasCharRec(recs, u.id) && (charTier(recs[u.id].s, pack) === "bare" || pairBare(recs[u.id], u, prog, pack));
+}
+// characters.bareByPair (docs/PACK_SCHEMA.md "bareByPair"; owner 2026-10-07: readings stayed on words
+// the learner could already read): a unit at the ruby tier shows bare once its
+// written <-> meaning pair, or its word's, whichever was answered last, has BARE_PAIR right answers in a row; a miss resets the pair
+// and the reading returns. Only an answered pair counts (no boot from the legacy streak, which would
+// make every mastered unit bare at once). Display only: unitDone, goals and the typed credit keep rec.s.
+const BARE_PAIR = 2;
+function bareByPairOn(pack){ const c = charsConfig(pack); return !!(c && c.bareByPair) && pairsOn(pack); }
+function pairBare(rec, unit, prog, pack){
+  if(!bareByPairOn(pack) || !isObj(rec) || charTier(rec.s || 0, pack) !== "ruby") return false;
+  const wm = r => isObj(r) && isObj(r.p) ? pairEntry(r.p.wm) : null;
+  const wid = unit && (unit.words || [])[0], w = wid != null && prog && isObj(prog.w) ? prog.w[wid] : null;
+  // The unit's and the word's pairs are separate streams; the most recent answer decides, so a miss
+  // on either brings the reading back (review fb31). Same session: the lower streak.
+  const es = [wm(rec), wm(w)].filter(Boolean);
+  if(!es.length) return false;
+  const last = Math.max(...es.map(e => e[1]));
+  return Math.min(...es.filter(e => e[1] === last).map(e => e[0])) >= BARE_PAIR;
 }
 function answerCharChoice(prog, start){
   const ch = ensureChars(prog); ch.choiceSeen = true; if(!start) ch.defer = true; return prog;
@@ -2560,12 +2579,14 @@ function unitReading(unit, byId){
 }
 function unitGloss(unit, byId){ return gloss(unitWord(unit, byId)); }
 // characters.json `hint` is aligned with the code points of `t`; a character repeated in
-// `t` (妈妈) or without a hint is listed once or not at all (docs/PACK_SCHEMA.md).
+// `t` with the same hint (妈妈) or without a hint is listed once or not at all (docs/PACK_SCHEMA.md).
+// The dedupe key is character + hint text (hintKey), so one character in two senses lists twice.
+function hintKey(x){ return x.c + "\u0001" + x.hint; }
 function unitHints(unit){
   const h = unit && unit.hint;
   if(!Array.isArray(h)) return [];
   const out = [], seen = new Set();
-  [...String(unit.t || "")].forEach((c, i) => { const x = h[i]; if(typeof x === "string" && x && !seen.has(c)){ seen.add(c); out.push({ c, hint: x }); } });
+  [...String(unit.t || "")].forEach((c, i) => { const x = h[i]; if(typeof x === "string" && x && !seen.has(hintKey({ c, hint: x }))){ seen.add(hintKey({ c, hint: x })); out.push({ c, hint: x }); } });
   return out;
 }
 const UNIT_BY_WORD = new WeakMap();
@@ -2769,7 +2790,7 @@ function rubyTiers(sentence, units, prog, pack, started){
   const byWord = unitByWord(units), recs = charRecs(prog);
   return sentence.ruby.map(([start, end, reading, wordId]) => {
     const u = byWord.get(wordId) || null; const rec = u && hasCharRec(recs, u.id) ? recs[u.id] : null;
-    const tier = pf && !(started && mix) ? "pron" : sentenceTokenTier(rec ? rec.s : 0, true, true, pack);
+    const tier = pf && !(started && mix) ? "pron" : rec && pairBare(rec, u, prog, pack) ? "bare" : sentenceTokenTier(rec ? rec.s : 0, true, true, pack);
     return { start, end, reading, wordId, unitId: u ? u.id : null, tier };
   });
 }
@@ -3925,6 +3946,18 @@ function checkGlossTyped(val, en, pack){
   return parts.length > 0 && parts.every(k => keys.has(k));
 }
 function glossFocusOn(pack){ return !!(pack && pack.glossFocus === true); }
+// pack.glossStyle "primary" (docs/PACK_SCHEMA.md "glossStyle"; owner 2026-10-07: 别 shows its most
+// used sense, the others in brackets). Display only; needs glossFocus, matching keeps the raw gloss.
+function glossStyleOn(pack){ return !!(pack && pack.glossStyle === "primary" && pack.glossFocus === true); }
+// The ";"-separated senses of a gloss, reading notes out: the first is the primary one.
+function glossSenses(en){
+  const a = splitTopLevel(String(en == null ? "" : en).replace(/\s+/g, " ").trim(), [";"]).map(x => x.trim()).filter(x => x && !isPronNote(x));
+  return a.length ? { first: a[0], rest: a.slice(1) } : { first: String(en == null ? "" : en).trim(), rest: [] };
+}
+// The words listed in entry.typedSyn that exist, in list order (the "also:" line).
+function typedSynWords(entry, byId){
+  return (Array.isArray(entry && entry.typedSyn) ? entry.typedSyn : []).map(id => byId && byId[id]).filter(Boolean);
+}
 // pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): help overlays get explicit dismissal.
 function helpCloseOn(pack){ return !!(pack && pack.helpClose === true); }
 // pack.readAnswerBlock (docs/PACK_SCHEMA.md "readAnswerBlock"): Next sits under the verdict.
@@ -4084,8 +4117,8 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
-  defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
-  unitWord, unitReading, unitGloss, unitHints, unitByWord, recordedUnits,
+  BARE_PAIR, bareByPairOn, pairBare, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
+  unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,
   charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
@@ -4095,7 +4128,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
   scriptOpts, scriptRomanOpts, scriptExamples, scriptWordOpts, scriptJoinedForms, scriptItem, learnScriptPlan, scriptReviewScore, scriptTestPlan,
   tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings,
-  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, helpCloseOn, readAnswerBlockOn, optsOneScriptOn, composeSpanReading, spanReadingText,
+  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, glossStyleOn, glossSenses, typedSynWords, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, helpCloseOn, readAnswerBlockOn, optsOneScriptOn, composeSpanReading, spanReadingText,
   LEGACY_DROPPED, legacyBackupKey, isLegacyRecord, migrateLegacy };
 if(typeof module!=="undefined" && module.exports) module.exports = API;
 if(root) root.VocabCore = API;

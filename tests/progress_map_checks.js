@@ -20,7 +20,8 @@ const CHAR_ROWS = /<tr><td><bdi[^>]*>字[^<]*<\/bdi>[^<]*<\/td><td>[^<]*<\/td><\
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // fb27: the controls predate characters.start / ramp, so the pack is compared without them.
-const PACK = (p => { delete p.pairs; delete p.characters.start; delete p.characters.ramp; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
+const PACK = (p => { delete p.glossStyle; delete p.pairs; delete p.characters.start; delete p.characters.ramp; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");

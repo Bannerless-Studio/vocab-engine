@@ -21,7 +21,8 @@ const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "ff760d8"; // main before freqTiers
 const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
-const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+// glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
+const PACK = (p => { delete p.glossStyle; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.freqTiers; return q; })(PACK);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
@@ -195,10 +196,18 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
   if(!OLD_WORDS) skip(`packs/zh/words.js at ${MAIN} not in this checkout's history`);
   else {
     const ow = Object.fromEntries(OLD_WORDS.map(w => [w.id, w]));
+    // fb33 (owner 2026-10-07): 上午 dropped "a.m." (its key am folded onto 是's "am"), so 是 / 上午 lost that syn; the old
+    // records are compared with the fb33 gloss fix applied, every other word as it stood.
+    const FB33 = { w0099: w => { const v = Object.assign({}, w); delete v.syn; return v; }, w0005: w => Object.assign({}, w, { en: "morning (before noon)", syn: ["w0227"] }) };
+    Object.keys(FB33).forEach(id => { if(ow[id]) ow[id] = FB33[id](ow[id]); });
     check(`same word ids, written forms and levels as ${MAIN} (only the order within a level and ft changed)`, OLD_WORDS.length === WORDS.length && WORDS.every(w => ow[w.id] && ow[w.id].w === w.w && ow[w.id].lv === w.lv && JSON.stringify(Object.assign({}, w, { ft: undefined })) === JSON.stringify(Object.assign({}, ow[w.id], { ft: undefined }))));
     check(`level order kept (every HSK 1 word before HSK 2, ...)`, WORDS.every((w, i) => !i || VC.levelIds(PACK).indexOf(WORDS[i - 1].lv) <= VC.levelIds(PACK).indexOf(w.lv)));
     const same = f => { const a = git(MAIN, `packs/zh/${f}`); return a !== null && a === fs.readFileSync(path.join(ZH, f), "utf8"); };
-    check(`sentences.json, passages.json, lessons.json byte-identical to ${MAIN} (sentence word ids unchanged)`, same("sentences.json") && same("passages.json") && same("lessons.json"));
+    // passages authored after ff760d8 (fb34: p0061-p0075) are new content; every passage that existed then stays byte-identical
+    const oldPass = (() => { const a = git(MAIN, "packs/zh/passages.json"); return a === null ? null : JSON.parse(a); })();
+    const curPass = Object.fromEntries(JSON.parse(fs.readFileSync(path.join(ZH, "passages.json"), "utf8")).map(p => [p.id, JSON.stringify(p)]));
+    const samePass = !!oldPass && oldPass.every(p => curPass[p.id] === JSON.stringify(p));
+    check(`sentences.json, lessons.json byte-identical to ${MAIN}, and each of its ${oldPass ? oldPass.length : "?"} passages unchanged (sentence word ids unchanged)`, same("sentences.json") && samePass && same("lessons.json"));
     const idMap = cp.spawnSync("git", ["-C", ROOT, "diff", "--quiet", MAIN, "--", "tools/id_map_v1.json", "tools/id_map"], { encoding: "utf8" });
     check(`tools/id_map untouched since ${MAIN}`, idMap.status === 0);
   }
@@ -397,7 +406,9 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
   else {
     const run = async (html, core) => {
       NOW = new Date(2026, 9, 6, 8, 0, 0).getTime();
-      const api = await boot(PACK_OFF, OWNER || synth(2, 3, 6), 11, { html, core: core ? core : Object.assign({}, VC) });
+      // characters.bareByPair (fb31) postdates ff760d8: stripped too (tests/bare_pair_checks.js controls it).
+      const pk = Object.assign({}, PACK_OFF, { characters: (c => { const q = Object.assign({}, c); delete q.bareByPair; return q; })(PACK_OFF.characters) });
+      const api = await boot(pk, OWNER || synth(2, 3, 6), 11, { html, core: core ? core : Object.assign({}, VC) });
       const out = { today: api.panel() }; const ans = mulberry32(7);
       out.walk = JSON.stringify((await session(api, () => ans() < 0.8)).map(r => [r.key, r.kind, r.label, r.ok]));
       NOW = new Date(2026, 9, 6, 13, 0, 0).getTime();

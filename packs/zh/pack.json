@@ -64,6 +64,7 @@
   "pron"
  ],
  "glossFocus": true,
+ "glossStyle": "primary",
  "helpClose": true,
  "readAnswerBlock": true,
  "optsOneScript": true,
@@ -142,6 +143,7 @@
   "compose": true,
   "bareBy": "typed",
   "bareWords": true,
+  "bareByPair": true,
   "learn": "lag",
   "start": 60,
   "ramp": [
@@ -180,5 +182,6 @@
  },
  "pairs": true,
  "freqTiers": true,
- "patterns": true
+ "patterns": true,
+ "patternCue": "after"
 }

@@ -135,6 +135,7 @@
   .replay{border:1px solid var(--line);background:transparent;border-radius:999px;width:44px;height:44px;font-size:17px;color:var(--ink);flex:0 0 auto}
   .ktag{text-align:center;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
   .ktag b{font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+  .gx{color:var(--mute);font-size:.86em;font-weight:400} /* pack.glossStyle: the other senses */
   .dim{opacity:.6} /* pack.glossFocus: a gloss's (...) qualifiers */
   .listen-stage{display:flex;flex-direction:column;align-items:center;gap:10px;margin:18px 0}
   input[type=text]{width:100%;padding:14px 14px;border:1px solid var(--line);border-radius:12px;font-size:19px;background:var(--card);color:var(--ink);font-family:var(--wfont)}
@@ -781,6 +782,9 @@ const PRON_TYPING = VC.pronTypingOn(PACK);
 // meanings; a (...) qualifier is dimmed, and one that opens its alternative moves to that
 // alternative's end. Off, glossOut is ui().
 const GLOSS_FOCUS = VC.glossFocusOn(PACK);
+// pack.glossStyle (docs/PACK_SCHEMA.md "glossStyle"): the first sense plain, the others in
+// brackets; also the "also:" line of typedSyn partners. Display only.
+const GLOSS_STYLE = VC.glossStyleOn(PACK);
 // pack.helpClose (docs/PACK_SCHEMA.md "helpClose"; owner feedback 2026-10-02 "passage help
 // should have close button or timer"): a help overlay (word popover, audio toast) gets a close
 // button, closes on a tap outside it and on Escape, and closes itself after HELP_MS unless a
@@ -830,10 +834,14 @@ if(HELP_CLOSE){
 }
 // withNotes: reading notes ("also pr. [shuí]") are shown after the answer only; they would
 // give a reading away on a stimulus, an option or a Words row.
+const glossPiecesHTML = s => VC.glossParts(s).pieces.map(x => x.dim ? `<span class="dim">${ui(x.t)}</span>` : ui(x.t)).join("");
+// A sense that is only a (...) group stays dimmed, as in the whole-gloss parse (glossParts alone
+// leaves a qualifier-only text undimmed).
+const glossSenseHTML = s => VC.parenPieces(s).every(x => x.g || !x.t.trim()) && VC.parenPieces(s).some(x => x.g) ? `<span class="dim">${ui(s)}</span>` : glossPiecesHTML(s);
 function glossOut(s, withNotes){
   if(!GLOSS_FOCUS) return ui(s);
-  const p = VC.glossParts(s);
-  const body = p.pieces.map(x => x.dim ? `<span class="dim">${ui(x.t)}</span>` : ui(x.t)).join("");
+  const p = VC.glossParts(s), sn = GLOSS_STYLE ? VC.glossSenses(s) : null;
+  const body = sn && sn.rest.length ? `${glossSenseHTML(sn.first)} <span class="gx">(${sn.rest.map(glossSenseHTML).join("; ")})</span>` : glossPiecesHTML(s);
   return withNotes && p.notes.length ? `${body} <span class="dim">${ui(p.notes.join("; "))}</span>` : body;
 }
 // An option button or an "also right" note shows the first alternatives only (the reveal shows
@@ -850,7 +858,19 @@ function glossShort(s, maxAlts, maxLen){
   }
   return out.join("; ");
 }
-const GLOSS_OPT = GLOSS_FOCUS ? (o => glossShort(o, 2, 32)) : undefined;
+// glossStyle: the first sense (shortened) and the rest in brackets, every sense shortened alike.
+function glossBrief(s, maxAlts, maxLen){
+  const sn = GLOSS_STYLE ? VC.glossSenses(s) : null;
+  if(!sn || !sn.rest.length) return glossShort(s, maxAlts, maxLen);
+  return `${glossShort(sn.first, 1, 0)} <span class="gx">(${glossShort(sn.rest.join("; "), sn.rest.length, 1e9)})</span>`;
+}
+const GLOSS_OPT = GLOSS_FOCUS ? (o => glossBrief(o, 2, 32)) : undefined;
+// glossStyle: a word's typedSyn partners ("also: 帮忙"), the words its whole gloss also fits.
+function synAlsoHTML(w){
+  if(!GLOSS_STYLE) return "";
+  const ps = VC.typedSynWords(w, WORDS_BY_ID);
+  return ps.length ? `also: ${ps.map(s => `<bdi${TA}>${wordFormHTML(s, false)}</bdi>`).join(", ")}` : "";
+}
 // Only used with pack.characters.compose; first unit in file order wins.
 const CHAR_READING = new Map();
 CHAR_LIST.forEach(u => { const t = String((u && u.t) || ""); if([...t].length === 1 && !CHAR_READING.has(t)){ const r = VC.unitReading(u, WORDS_BY_ID); if(r) CHAR_READING.set(t, r); } });
@@ -951,7 +971,7 @@ function setScore(answered, total){
 function announce(html){
   const el = $("live"); if(!el) return;
   const tmp = document.createElement("div"); tmp.innerHTML = html || "";
-  tmp.querySelectorAll("[data-showw]").forEach(x => x.remove()); // the show-written button's label is not content
+  tmp.querySelectorAll("[data-showw],[data-pcue]").forEach(x => x.remove()); // the show-written button's label is not content
   el.textContent = tmp.textContent || "";
 }
 // scrollIntoView "nearest" leaves the page still when Next is already clear of the tab bar.
@@ -1102,7 +1122,7 @@ function renderTypeItem(it){
   };
 }
 // Keys on a show-written button are its own; they never reach the drill's shortcuts.
-const onShowWritten = e => !!(e && e.target && e.target.closest && e.target.closest("[data-showw]"));
+const onShowWritten = e => !!(e && e.target && e.target.closest && e.target.closest("[data-showw],[data-pcue]"));
 // Escape belongs to a word tap only when it closed something (tokEscEaten); otherwise it
 // reaches the drill as usual (quit).
 let tokEscEaten = null;
@@ -1288,7 +1308,7 @@ function exampleSentencesHTML(entry){
 function revealBlock(entry){
   const p = pronBeside(entry), hear = canHearWord(entry);
   const icon = hear ? ` <span style="color:var(--mute);vertical-align:middle">${TEACH_PLAY_SVG}</span>` : "";
-  return `<div${hear ? ` data-wid="${escapeHtml(entry.id)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${wordFormHTML(entry)}${icon}</div>${p ? `<div class="rp">${readingHTML(p)}</div>` : ""}<div style="color:var(--mute)">${glossOut(VC.gloss(entry), true)}</div></div>${exampleSentencesHTML(entry)}`;
+  return `<div${hear ? ` data-wid="${escapeHtml(entry.id)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${wordFormHTML(entry)}${icon}</div>${p ? `<div class="rp">${readingHTML(p)}</div>` : ""}<div style="color:var(--mute)">${glossOut(VC.gloss(entry), true)}</div>${GLOSS_STYLE && VC.typedSynWords(entry, WORDS_BY_ID).length ? `<div class="syn" style="color:var(--mute);font-size:15px">${synAlsoHTML(entry)}</div>` : ""}</div>${exampleSentencesHTML(entry)}`;
 }
 const meaningChoices = entry => [VC.gloss(entry), ...VC.meaningOpts(entry, WORDS, wordMix()).map(d=>VC.gloss(d))];
 // Plans skip unplayable words (hearableKinds, learnPair); this fallback covers a voice lost
@@ -1334,7 +1354,7 @@ function recallItem(entry){
 function synTyped(entry, fit, show){
   const hit = val => fit(entry, val) ? null : VC.typedSynHit(entry, WORDS_BY_ID, s => fit(s, val));
   return { check: val => fit(entry, val) || !!hit(val),
-    note: val => { const s = hit(val); return s ? `<div class="diff">also right: ${show(s)} · ${glossShort(VC.gloss(s), 1, 0)}</div>` : ""; } };
+    note: val => { const s = hit(val); return s ? `<div class="diff">also right: ${show(s)} · ${glossBrief(VC.gloss(s), 1, 0)}</div>` : ""; } };
 }
 function typeItem(entry){
   const syn = synTyped(entry, (e, val) => VC.acceptTyped(val, e, PACK, VC.affixAlts(e.w), WORDS), e => `<bdi${TA}>${escapeHtml(e.w)}</bdi>`);
@@ -1854,13 +1874,27 @@ const PATTERN_READING = (() => { const m = new Map(); PATTERN_LIST.forEach(p => 
   if(r && !m.has(t)) m.set(t, r); }))); return m; })();
 const patternOptHTML = o => { const r = HAS_CHARACTERS && PATTERN_READING.get(o); return r ? rubyTokHTML(escapeHtml(o), { tier: showPron() ? "ruby" : "bare", reading: r }) : escapeHtml(o); };
 const patternNoteHTML = p => `<div class="pnote">${p.note.map(ui).join("<br>")}</div>`;
+// pack.patternCue "after" (docs/PACK_SCHEMA.md "patternCue"; owner 2026-10-07: the English names the
+// blank): hidden until answered behind a "meaning" tap (no penalty, nothing
+// recorded; a reload hides it again); the reveal always carries it (sentenceRevealBlock).
+const PATTERN_CUE_AFTER = PATTERNS_ON && PACK.patternCue === "after";
+const patternCueHTML = s => PATTERN_CUE_AFTER ? `<div class="q cue"><button type="button" class="showw" style="margin:0" data-pcue="${escapeHtml(s.en)}" aria-label="Show meaning">meaning</button></div>` : `<div class="q cue">${ui(s.en)}</div>`;
+if(PATTERN_CUE_AFTER) $("panel").addEventListener("click", e => {
+  const b = e.target && e.target.closest ? e.target.closest("[data-pcue]") : null;
+  if(!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const sp = document.createElement("span"); sp.setAttribute("tabindex", "-1"); sp.innerHTML = ui(b.dataset.pcue || "");
+  const had = document.activeElement === b;
+  b.replaceWith(sp); // focus stays on the revealed text, as revealWritten does
+  if(had) sp.focus();
+}, true);
 function patternItem(pid, si, mi){
   const p = PATTERN_BY_ID.get(pid), s = p && p.sentences[si], mk = s && (s.marks || [])[mi];
   if(!mk) return null;
   const ans = VC.patternMarkText(s, mk), t = String(s.t);
   const pf = pfSentence(s, null, { start: mk[0], end: mk[1], text: ans });
   const body = (pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div>`
-    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + `<div class="q cue">${ui(s.en)}</div>`;
+    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s);
   const note = patternNoteHTML(p), shown = VC.patternState(prog, pid).fresh ? note + body : body, rv = sentenceRevealBlock(s);
   const base = { key: "p:" + pid, html: shown, reveal: rv, onReveal: b => saySentence(s, b), revealHear: canHearSentence(s) };
   // A miss shows the note with the verdict, unless the stem on screen already carries it (first meeting).
@@ -1894,11 +1928,13 @@ const sayUnit = (it, btn) => { const w = WORDS_BY_ID[it.wordId]; if(w) sayWord(w
 const canHearUnit = it => { const w = WORDS_BY_ID[it.wordId]; return w ? canHearWord(w) : hasSpeech; };
 // Memory hints (characters.json `hint`) show only on teach cards and reveals: a hint names
 // the character's meaning and parts, so on a stimulus it would give the answer away.
-// `skip` holds characters already hinted on this screen; the character prefixes a line only
-// when the unit has more than one character.
+// `skip` holds the character + hint pairs already shown on this screen (VC.hintKey): a character
+// a second word uses in another sense (衣服 服 clothes, 服务员 服 to serve) is hinted again. Packs
+// whose characters carry one hint text each dedupe exactly as by character. The character
+// prefixes a line only when the unit has more than one character.
 function charHintHTML(u, skip){
-  const hs = VC.unitHints(u).filter(x => !(skip && skip.has(x.c)));
-  if(skip) hs.forEach(x => skip.add(x.c));
+  const hs = VC.unitHints(u).filter(x => !(skip && skip.has(VC.hintKey(x))));
+  if(skip) hs.forEach(x => skip.add(VC.hintKey(x)));
   if(!hs.length) return "";
   const multi = [...String(u.t)].length > 1;
   const line = h => { if(!TONES) return escapeHtml(h).replace(/\p{Script=Han}+/gu, m => `<span${TA}>${m}</span>`);
@@ -2371,7 +2407,7 @@ function wordRowHTML(w, cls){
   // Pron + gloss share one .info column: a pron shrunk to width:0 beside a long gloss made
   // unbreakable transliterations ("budan") overlap the gloss text.
   const p = pronBeside(w);
-  return `<span class="wd${dispWord(w).isPron ? " pf" : ""}"${TA}>${wordFormHTML(w)}</span><span class="info">${p ? `<span class="pr">${readingHTML(p)}</span>` : ""}<span class="en">${glossOut(VC.gloss(w))}</span></span>`;
+  return `<span class="wd${dispWord(w).isPron ? " pf" : ""}"${TA}>${wordFormHTML(w)}</span><span class="info">${p ? `<span class="pr">${readingHTML(p)}</span>` : ""}<span class="en">${glossOut(VC.gloss(w))}</span>${GLOSS_STYLE && VC.typedSynWords(w, WORDS_BY_ID).length ? `<span class="en syn">${synAlsoHTML(w)}</span>` : ""}</span>`;
 }
 function vocabTeach(list, lv, onDrill){
   setScore(0,0); screenTop();
@@ -3223,7 +3259,7 @@ function charProgress(){
   // characters.learn "lag": no stages; its own block (a wider label would narrow the word rows' value column), one row per
   // level, a unit's level being its word's. Value text <= the longest word-row value (32 chars): bare shown drops "taught", then "mastered" -> "mast.".
   const lag = () => `<p class="q" style="margin-top:14px">Characters</p><table class="stats nw">${LEVELS.map(lv => { const list = CHAR_LIST.filter(u => String(u.lv) === String(lv)); if(!list.length) return "";
-    const rec = list.filter(u => recs[u.id]), bare = rec.filter(u => FREQ_TIERS ? VC.unitDone(recs[u.id], u, PACK) : VC.charTier(streak(u), PACK) === "bare").length, mas = rec.filter(u => VC.charTier(streak(u), PACK) !== "pron").length;
+    const rec = list.filter(u => recs[u.id]), bare = rec.filter(u => FREQ_TIERS ? VC.unitDone(recs[u.id], u, PACK) : (VC.charTier(streak(u), PACK) === "bare" || VC.pairBare(recs[u.id], u, prog, PACK))).length, mas = rec.filter(u => VC.charTier(streak(u), PACK) !== "pron").length;
     // freqTiers: a unit is done at its target (bare, a peripheral unit mastered).
     let v = `${rec.length} / ${list.length} taught · ${mas} mastered`;
     if(bare){ v = `${rec.length} / ${list.length} · ${mas} mastered · ${bare} ${FREQ_TIERS ? "done" : "bare"}`; if(v.length > 32) v = v.replace("mastered", "mast."); }
@@ -3233,7 +3269,7 @@ function charProgress(){
     const list = VC.charStageUnits(st.levels, CHAR_LIST, PACK);
     const taught = VC.charSets(st.levels, CHAR_LIST, PACK).filter(set => VC.charSetTaught(set, prog)).reduce((n, set) => n + set.length, 0);
     const masteredN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) !== "pron").length;
-    const bareN = list.filter(u => recs[u.id] && (FREQ_TIERS ? VC.unitDone(recs[u.id], u, PACK) : VC.charTier(streak(u), PACK) === "bare")).length;
+    const bareN = list.filter(u => recs[u.id] && (FREQ_TIERS ? VC.unitDone(recs[u.id], u, PACK) : (VC.charTier(streak(u), PACK) === "bare" || VC.pairBare(recs[u.id], u, prog, PACK)))).length;
     return `<tr><td>${tf(st.label)}</td><td>${taught} / ${list.length} taught · ${st.recorded} recorded · ${masteredN} mastered · ${bareN} ${FREQ_TIERS ? "done" : "bare"}</td></tr>`;
   }).join("");
   const defer = !!(prog.chars && prog.chars.defer === true), order = VC.charOrder(PACK, prog);

@@ -24,7 +24,8 @@ const ZG = require(path.join(ROOT, "tools", "zh_gloss.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
-const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+// glossStyle (fb32) rebrackets option and also-right glosses; tests/gloss_display_checks.js covers it.
+const PACK = (p => { delete p.glossStyle; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -234,6 +235,8 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     const wo0 = count(OFF0, ws => VC.wordOpts(off(zj.id), ws, e => e.pron, PACK)), wo1 = count(WORDS, ws => VC.wordOpts(zj, ws, e => e.pron, PACK));
     console.log(`    before: 担心/烦恼 among 着急's meaning options in ${mo0}/300 seeds, word options in ${wo0}/300; after: ${mo1}, ${wo1}`);
     check("before (syn absent) 担心 or 烦恼 is a 着急 distractor; after, never (300 seeds, meaning and word options)", mo0 > 0 && wo0 > 0 && mo1 === 0 && wo1 === 0);
+    // fb33: "a.m." folds to the key "am" of 是 "am"; the 上午 gloss no longer carries it.
+    check("是 and 上午 are not syn (key collision am / a.m.); 上午 keeps 早上", !(BY_W["是"].syn || []).includes(BY_W["上午"].id) && !(BY_W["上午"].syn || []).includes(BY_W["是"].id) && BY_W["上午"].syn.includes(BY_W["早上"].id));
     check("着急 syn / typedSyn hold 担心 and 烦恼", [dx.id, fn.id].every(x => zj.syn.includes(x) && zj.typedSyn.includes(x)));
     check("typed meaning for 着急: worry, to worry, feel anxious, anxious (copula), any one", ["worry", "to worry", "feel anxious", "anxious", "to worry; anxious"].every(v => VC.checkGlossTyped(v, zj.en, PACK)) && !VC.checkGlossTyped("worried", zj.en, PACK));
   }

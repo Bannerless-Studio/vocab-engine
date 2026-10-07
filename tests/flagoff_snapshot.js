@@ -126,7 +126,7 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     if (pack.typing === "pron") pack.typing = null;
     // Typed items from the target side and focused glosses (docs/PACK_SCHEMA.md "typedFrom
     // and glossFocus") are new, flag-on fields.
-    delete pack.typedFrom; delete pack.glossFocus;
+    delete pack.typedFrom; delete pack.glossFocus; delete pack.glossStyle;
     // Help overlay dismissal, the Read answer block, one-mode option labels and mixed options
     // (docs/PACK_SCHEMA.md "helpClose", "readAnswerBlock", "optsOneScript", "optsMix") are new, flag-on fields.
     delete pack.helpClose; delete pack.readAnswerBlock; delete pack.optsOneScript; delete pack.optsMix;
@@ -157,6 +157,8 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     delete pack.freqTiers;
     // Grammar patterns (docs/PACK_SCHEMA.md "patterns") is a new, flag-on field.
     delete pack.patterns;
+    // The pattern cue after the answer (docs/PACK_SCHEMA.md "patternCue") is a new, flag-on field.
+    delete pack.patternCue;
   }
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.
