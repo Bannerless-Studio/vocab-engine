@@ -22,7 +22,8 @@ const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // freqTiers (fb26) layers tier rules on the pair streaks; these checks pin the pairs rule itself, so the
 // zh pack runs without it (tests/freq_tiers_checks.js covers the tiers).
-const PACK = (p => { const q = Object.assign({}, p); delete q.freqTiers; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
+const PACK = (p => { const q = Object.assign({}, p); delete q.freqTiers; return q; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.pairs; return q; })(PACK);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");

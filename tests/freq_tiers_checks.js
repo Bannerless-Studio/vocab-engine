@@ -22,7 +22,8 @@ const MAIN = "ff760d8"; // main before freqTiers
 const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
-const PACK = (p => { delete p.glossStyle; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
+const PACK = (p => { delete p.glossStyle; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.freqTiers; return q; })(PACK);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");

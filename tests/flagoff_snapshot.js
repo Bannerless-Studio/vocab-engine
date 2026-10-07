@@ -159,6 +159,8 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     delete pack.patterns;
     // The pattern cue after the answer (docs/PACK_SCHEMA.md "patternCue") is a new, flag-on field.
     delete pack.patternCue;
+    // The Progress tab layout (docs/PACK_SCHEMA.md "progressView") is a new, flag-on field.
+    delete pack.progressView;
   }
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.

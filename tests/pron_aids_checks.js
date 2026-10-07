@@ -25,7 +25,8 @@ const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ a
 // readRotation (fb16) shuffles questions and picks by session; its checks are listen_mode_checks [14].
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
-const PACK = (p => { delete p.glossStyle; delete p.readRotation; delete p.pairs; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
+const PACK = (p => { delete p.glossStyle; delete p.readRotation; delete p.pairs; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });

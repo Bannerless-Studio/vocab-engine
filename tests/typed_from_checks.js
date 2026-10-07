@@ -21,7 +21,8 @@ const MAIN = "ef44c6e"; // main before typedFrom/glossFocus
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
-const PACK = (p => { delete p.pairs; delete p.glossStyle; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
+const PACK = (p => { delete p.pairs; delete p.glossStyle; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");

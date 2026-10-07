@@ -25,7 +25,8 @@ const ZH = path.join(ROOT, "packs", "zh");
 const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // glossStyle (fb32) rebrackets option and also-right glosses; tests/gloss_display_checks.js covers it.
-const PACK = (p => { delete p.glossStyle; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
+const PACK = (p => { delete p.glossStyle; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");

@@ -22,7 +22,8 @@ const ZH = path.join(ROOT, "packs", "zh");
 const BASE = "68930bd"; // main before optsMix: level-tier options everywhere
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // fb27: the fresh-learner scenarios and the control predate characters.start / ramp (sets of 10 from the first Learn).
-const PACK = (p => { delete p.characters.start; delete p.characters.ramp; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
+const PACK = (p => { delete p.characters.start; delete p.characters.ramp; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");

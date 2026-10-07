@@ -833,5 +833,30 @@ console.log("\n[bareByPair] characters.bareByPair (fb31): no stored field; it re
   }
 }
 
+console.log("\n[pv] pack.progressView (fb37): optional top-level prog.pv = {sn, m, co, p}; 806ad57 and 3044601 boot it unchanged, no backup, and back");
+{
+  const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog; p.pv = { sn: 12, m: 40, co: 3, p: 1 };
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK), im = VC.applyImport(null, raw, LAG_PACK);
+  check("[pv] boot here keeps pv byte-equal, no backup; export/import keeps it; validateProgShape accepts it", here.backupRaw === null && JSON.stringify(here.prog) === raw && im.ok && eq(im.prog.pv, p.pv) && VC.validateProgShape(p, Object.keys(p.sets)).ok);
+  const odd = clone(p); odd.pv = "x"; const ob = VC.bootProg(JSON.stringify(odd), LAG_PACK);
+  check("[pv] a malformed pv never resets progress (no backup) and reads as no visit", ob.backupRaw === null && ob.prog.pv === "x" && VC.progressVisit(ob.prog) === null);
+  for(const sha of ["806ad57", "3044601"]){
+    let eng = null, op = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
+      op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`[pv] engine ${sha} not in this checkout's history`); continue; }
+    const o = eng.bootProg(raw, op), o2 = eng.bootProg(raw, LAG_PACK);
+    check(`[pv] engine ${sha} boots a record carrying pv (its zh pack, and this pack with progressView): no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw && o2.backupRaw === null && JSON.stringify(o2.prog) === raw);
+    const q = clone(o.prog); eng.markRec(q.w, Object.keys(q.w)[0], true, true);
+    check(`[pv] a mark on ${sha} keeps pv`, eq(q.pv, p.pv));
+    const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
+    check(`[pv] and back here from ${sha}: no backup, pv byte-equal`, back.backupRaw === null && eq(back.prog.pv, p.pv));
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);

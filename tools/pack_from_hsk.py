@@ -601,6 +601,9 @@ def main(argv):
         # Frequency tiers (docs/PACK_SCHEMA.md "freqTiers"; owner 2026-10-06): words.json `ft` sets per word
         # how much practice it needs (ambient / core / peripheral); levels are in zipf order.
         "freqTiers": True,
+        # Progress tab: since-last-visit deltas, one bar per level, rows at their expected state behind
+        # Show all (docs/PACK_SCHEMA.md "progressView"; owner 2026-10-07).
+        "progressView": "v2",
     }
 
     # Grammar patterns drilled in the Sentences step (docs/PACK_SCHEMA.md "patterns"; owner 2026-10-06).

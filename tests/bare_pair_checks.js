@@ -19,7 +19,8 @@ const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "3044601"; // main before bareByPair
 const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn typeof ${name} !== "undefined" ? ${name} : undefined;`)(); }
-const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
+// fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
+const PACK = (q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 const noBBP = p => Object.assign({}, p, { characters: (c => { const q = Object.assign({}, c); delete q.bareByPair; return q; })(p.characters) });
 const PACK_OFF = noBBP(PACK);
 // The 3044601 control strips every field that postdates it (fb31 patternCue, fb32 glossStyle); each has its own control.

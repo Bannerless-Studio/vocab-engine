@@ -20,7 +20,8 @@ function loadConst(file, name){
 // reading, brief BP2) is set back to null here; tests/pron_aids_checks.js checks it.
 // readRotation (fb16) shuffles questions and picks by session; its checks are listen_mode_checks [14].
 // pack.pairs (fb23) has its own suite (tests/pairs_checks.js); the app checks here run the day planner.
-const PACK = (p => { delete p.readRotation; delete p.pairs; return p; })(Object.assign({}, loadConst(path.join(ZH, "pack.js"), "PACK"), { typing: null }));
+// fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
+const PACK = (p => { delete p.readRotation; delete p.pairs; return p; })(Object.assign({}, (q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")), { typing: null }));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");

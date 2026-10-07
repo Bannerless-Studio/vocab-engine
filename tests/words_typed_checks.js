@@ -23,7 +23,8 @@ const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // fb27: the controls predate characters.start / ramp, so the pack is compared without them.
-const PACK = (p => { delete p.pairs; delete p.characters.start; delete p.characters.ramp; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+// fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
+const PACK = (p => { delete p.pairs; delete p.characters.start; delete p.characters.ramp; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
 const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.wordsBy; delete q.progressMap; delete q.optsMix; return q; })(PACK);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");

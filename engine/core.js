@@ -2370,6 +2370,68 @@ function recordProgressMap(prog, pack, words, units, passages){
   prog.pm = pm.slice(-PM_KEEP);
   return true;
 }
+// pack.progressView "v2" (docs/PACK_SCHEMA.md "progressView"; owner 2026-10-07): the Progress tab leads
+// with what moved since the learner last left it. prog.pv = {sn, m, co, p} (sessions, mastered words,
+// character units at their target, passages done) is written when the tab is left (app.html), never at
+// boot; older engines keep it (validateProgShape ignores unknown top-level fields).
+function progressViewOn(pack){ return !!(pack && pack.progressView === "v2"); }
+// The Progress "done" count: under freqTiers unitDone, else bare by streak or by pairs.
+function unitAtTarget(rec, unit, prog, pack){
+  if(!isObj(rec)) return false;
+  return freqTiersOn(pack) ? unitDone(rec, unit, pack) : (charTier(rec.s || 0, pack) === "bare" || pairBare(rec, unit, prog, pack));
+}
+function progressTotals(prog, pack, words, units, passages){
+  const w = (prog && prog.w) || {}, recs = charRecs(prog);
+  const done = prog && isObj(prog.read) && isObj(prog.read.done) ? prog.read.done : {};
+  return {
+    sn: prog && typeof prog.sessions === "number" ? prog.sessions : 0,
+    m: learnedWords(words, pack, prog).filter(x => wordKnown(w[x.id], x, pack)).length,
+    co: (units || []).filter(u => unitAtTarget(recs[u.id], u, prog, pack)).length,
+    p: (passages || []).filter(x => done[x.id]).length,
+  };
+}
+// A level below the current one is settled (collapses into one Progress line) once 90% of its learned words are mastered (owner 2026-10-07).
+const SETTLED = 0.9;
+const levelSettled = (learned, mastered) => learned > 0 && mastered >= SETTLED * learned - 1e-9;
+const PV_KEYS = ["sn", "m", "co", "p"];
+// A pv an older engine, an import or a hand edit mangled reads as no visit yet.
+function progressVisit(prog){
+  const v = prog && prog.pv;
+  return isObj(v) && PV_KEYS.every(k => typeof v[k] === "number" && isFinite(v[k])) ? v : null;
+}
+function progressDeltas(prog, cur){
+  const v = progressVisit(prog);
+  return v ? Object.fromEntries(PV_KEYS.map(k => [k, cur[k] - v[k]])) : null;
+}
+// Returns whether pv changed (the caller saves only then).
+function noteProgressVisit(prog, pack, cur){
+  if(!progressViewOn(pack) || !prog) return false;
+  const v = progressVisit(prog);
+  if(v && PV_KEYS.every(k => v[k] === cur[k])) return false;
+  prog.pv = { sn: cur.sn, m: cur.m, co: cur.co, p: cur.p };
+  return true;
+}
+// Words missed in the last n sessions (session ordinal prog.sn). Records keep no miss ordinal: a pair
+// streak reset to 0 by an answer in the window stands for the miss (a later right answer in that pair
+// hides it), plus a miss still pending in the day log (ms); without pairs a record at streak 0 with
+// misses, last answered in the window. Most recent first.
+const WEEK_SESSIONS = 7;
+function recentMisses(prog, list, n){
+  const sn = daySn(prog); if(!sn) return [];
+  const lo = sn - (n || WEEK_SESSIONS) + 1, w = (prog && prog.w) || {};
+  const log = isObj(prog.day) && isObj(prog.day.a) ? prog.day.a : {};
+  const out = [];
+  (list || []).forEach(x => {
+    const r = w[x.id]; if(!isObj(r)) return;
+    let a = -1;
+    if(isObj(r.p)) PAIRS.forEach(k => { const e = pairEntry(r.p[k]); if(e && e[0] === 0 && e[1] >= lo && e[1] > a) a = e[1]; });
+    else if((r.s || 0) === 0 && (r.w || 0) > 0 && typeof r.u === "number" && r.u >= lo) a = r.u;
+    const e = log["w:" + x.id];
+    if(isObj(e) && Array.isArray(e.mk) && e.mk.length && typeof e.ms === "number" && e.ms >= lo && e.ms > a) a = e.ms;
+    if(a >= 0) out.push({ w: x, a });
+  });
+  return out.sort((x, y) => y.a - x.a || (x.w.id < y.w.id ? -1 : x.w.id > y.w.id ? 1 : 0)).map(o => o.w);
+}
 // g/n (goal packs): only entries of goal g count; entries without g count for goal 0 when the pack has <= 1 goal.
 // Goal packs pace to GOAL_DONE (where the goal switches); the whole-pack bar paces to 1.
 function sessionsToGo(prog, g, n){
@@ -4143,7 +4205,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, progressViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,
