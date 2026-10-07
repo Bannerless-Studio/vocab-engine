@@ -219,13 +219,14 @@
   :root[data-appview="v2"] .drill-body .opts-hero button{padding:14px 18px;min-height:52px}
   :root[data-appview="v2"] .drill-body .listen-stage{margin:10px 0}
   :root[data-appview="v2"] .drill-body .hear-stage{margin:10px 0 16px}
-  :root[data-appview="v2"] .drill-body .reveal{margin-top:10px;padding-top:10px}
+  :root[data-appview="v2"] .drill-body .reveal{margin-top:6px;padding-top:6px}
+  :root[data-appview="v2"] .drill-body .reveal>.q:first-child{margin-bottom:4px}
   :root[data-appview="v2"] .rvrow{display:flex;align-items:center;gap:12px}
   :root[data-appview="v2"] .rvm{flex:1 1 auto;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:10px;row-gap:2px}
   :root[data-appview="v2"] .rvm .rw{font-size:22px;margin:0;font-family:var(--wfont)}
   :root[data-appview="v2"] .rvm .rp,:root[data-appview="v2"] .rvm .rg,:root[data-appview="v2"] .rvm .rvi{color:var(--mute);margin:0}
   :root[data-appview="v2"] .ucue{color:var(--mute);font-size:15px;margin:2px 0 0}
-  :root[data-appview="v2"] .rvxb{width:auto;min-height:36px}
+  :root[data-appview="v2"] .rvxb{width:auto;min-height:44px}
   :root[data-appview="v2"] .rvx{margin-top:8px}
   :root[data-appview="v2"] #panel>p.pva:first-child{margin:0 0 12px}
   /* Stage path: one line per label, bars on one top line. A segment is as wide as its label
@@ -1117,6 +1118,8 @@ const RV_CUE = '<i class="rvk"></i>', RV_PLAY = '<i class="rvr"></i>', RV_ICON =
 function revealRow(form, reading, gloss, wid, below){
   return `<div class="rvrow"><div class="rvm"${wid ? ` data-wid="${escapeHtml(wid)}" style="cursor:pointer"` : ""}><span class="rw"${TA}>${form}</span>${reading ? `<span class="rp">${reading}</span>` : ""}<span class="rg">${gloss}</span>${wid ? RV_ICON : ""}</div>${RV_PLAY}</div>${RV_CUE}${below || ""}`;
 }
+// A row's cue/play slots are filled only by revealHTMLv2; any other copy of the block (the drill-end Missed list) drops them.
+const stripRvSlots = h => h.split(RV_CUE).join("").split(RV_PLAY).join("");
 function revealHTMLv2(it, html, ok){
   const cue = unitCue(it), play = !!(it.onReveal && it.revealHear), row = html.includes(RV_PLAY);
   let h = row ? html.replace(RV_CUE, cue) : cue + html;
@@ -1125,7 +1128,7 @@ function revealHTMLv2(it, html, ok){
   if(row && play) h = h.replace(RV_PLAY, REVEAL_REPLAY_BTN);
   else if(play) h += REVEAL_REPLAY;
   if(ok) h = h.replace('<div class="rvx">', '<button type="button" class="pvc rvxb" id="rvxb" data-rvxb aria-expanded="false" aria-controls="rvx">Examples</button><div class="rvx" id="rvx" hidden>');
-  return h.split(RV_CUE).join("").split(RV_PLAY).join("");
+  return stripRvSlots(h);
 }
 function playReveal(it){
   if(!it.onReveal) return;
@@ -1201,8 +1204,15 @@ const optKey = h => h.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim().toLowe
 function optsPrimary(opts, full){
   const f = new Map(opts.map(o => [o, full(o)]));
   const prim = h => { const i = h.lastIndexOf(OPT_GX); return i >= 0 && h.endsWith("</span>") ? h.slice(0, i) : h; };
-  const n = new Map(); opts.forEach(o => { const k = optKey(prim(f.get(o))); n.set(k, (n.get(k) || 0) + 1); });
-  return o => { const h = f.get(o), p = prim(h); return n.get(optKey(p)) > 1 ? h : p; };
+  // The senses an option hides: "(a; b)" after the primary.
+  const hidden = h => { const i = h.lastIndexOf(OPT_GX); return i >= 0 && h.endsWith("</span>") ? optKey(h.slice(i)).replace(/^\(|\)$/g, "").split(";").map(x => x.trim()).filter(Boolean) : []; };
+  const pk = new Map(opts.map(o => [o, optKey(prim(f.get(o)))]));
+  const n = new Map(); opts.forEach(o => n.set(pk.get(o), (n.get(pk.get(o)) || 0) + 1));
+  // Same primary, or one option's primary is another's hidden sense ("to walk (to go)" beside "to go"): both keep brackets.
+  const keep = new Set();
+  opts.forEach(a => { const hs = hidden(f.get(a)); if(!hs.length) return;
+    opts.forEach(b => { if(b !== a && hs.includes(pk.get(b))){ keep.add(a); keep.add(b); } }); });
+  return o => { const h = f.get(o); return n.get(pk.get(o)) > 1 || keep.has(o) ? h : prim(h); };
 }
 // From the second miss the item comes back as its choice counterpart, where the answer is
 // among the options; k stays "type" so the next review still asks for it typed.
@@ -1948,9 +1958,9 @@ function missRowParts(item){
 }
 function missRowHTML(item, count, i){
   const r = missRowParts(item);
-  if(!r) return `<div class="stmt rvb">${count > 1 ? `<div class="q" style="margin:0 0 4px">${count} misses</div>` : ""}${item.reveal}</div>`;
+  if(!r) return `<div class="stmt rvb">${count > 1 ? `<div class="q" style="margin:0 0 4px">${count} misses</div>` : ""}${stripRvSlots(item.reveal)}</div>`;
   const play = r.wid != null ? ` data-wid="${escapeHtml(r.wid)}"` : r.sent != null ? ` data-sent="${r.sent}"` : "";
-  return `<div class="mrow"><button class="mtap" data-mopen="${i}" aria-expanded="false" aria-controls="mf${i}"><span class="mt">${r.form}${r.reading ? `<span class="mp">${r.reading}</span>` : ""}<span class="mg"${r.form ? "" : ' style="color:var(--ink)"'}>${r.gloss}</span>${count > 1 ? `<span class="mn">${count} misses</span>` : ""}</span></button>${play ? `<button class="replay"${play} aria-label="Replay ${escapeHtml(String(r.say || ""))}">${REPLAY_SVG}</button>` : ""}</div><div class="stmt rvb mfull" id="mf${i}" hidden>${item.reveal}</div>`;
+  return `<div class="mrow"><button class="mtap" data-mopen="${i}" aria-expanded="false" aria-controls="mf${i}"><span class="mt">${r.form}${r.reading ? `<span class="mp">${r.reading}</span>` : ""}<span class="mg"${r.form ? "" : ' style="color:var(--ink)"'}>${r.gloss}</span>${count > 1 ? `<span class="mn">${count} misses</span>` : ""}</span></button>${play ? `<button class="replay"${play} aria-label="Replay ${escapeHtml(String(r.say || ""))}">${REPLAY_SVG}</button>` : ""}</div><div class="stmt rvb mfull" id="mf${i}" hidden>${stripRvSlots(item.reveal)}</div>`;
 }
 if(APP_V2) $("panel").addEventListener("click", e => {
   const b = e.target && e.target.closest ? e.target.closest("[data-mopen]") : null;

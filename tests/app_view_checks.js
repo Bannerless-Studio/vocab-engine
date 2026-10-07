@@ -78,7 +78,7 @@ function makeFakeDom(){
     get children(){ return this._children; }
     get innerHTML(){ return this._html; }
     set innerHTML(h){ this._html = h; this._children = []; registerIdsFromHtml(h); }
-    get textContent(){ return this._text; }
+    get textContent(){ return this._tmp ? this._html.replace(/<[^>]+>/g, "") : this._text; }
     set textContent(t){ this._text = String(t); this._html = String(t); }
     setAttribute(k,v){ this._attrs[k]=String(v); if(k==="id") registry.set(v,this); }
     getAttribute(k){ return this._attrs[k]; }
@@ -92,7 +92,25 @@ function makeFakeDom(){
     click(){ if(this.onclick) this.onclick({}); (this._listeners.click||[]).forEach(f=>f({})); }
     closest(){ return null; }
     querySelector(){ return null; }
-    querySelectorAll(){ return []; }
+    // Only a createElement scratch node (announce) parses: the elements its selectors name are cut from its html, textContent is the tags stripped.
+    querySelectorAll(sel){
+      if(!this._tmp) return [];
+      const self = this, out = [];
+      for(const part of sel.split(",")){
+        const m = /^(?:\.([\w-]+))?\[([\w-]+)\]$/.exec(part.trim()); if(!m) continue;
+        const re = new RegExp(`<(\\w+)\\b[^>]*${m[1] ? `class="[^"]*\\b${m[1]}\\b[^"]*"[^>]*` : ""}\\b${m[2]}\\b[^>]*>`, "g");
+        out.push({ remove(){
+          let r; re.lastIndex = 0;
+          while((r = re.exec(self._html))){
+            const tag = r[1], open = new RegExp(`<${tag}\\b`, "g"), close = new RegExp(`</${tag}>`, "g");
+            let depth = 1, i = r.index + r[0].length;
+            while(depth > 0){ open.lastIndex = close.lastIndex = i; const o = open.exec(self._html), c = close.exec(self._html); if(!c) break;
+              if(o && o.index < c.index){ depth++; i = o.index + 1; } else { depth--; i = c.index + c[0].length; } }
+            self._html = self._html.slice(0, r.index) + self._html.slice(i); re.lastIndex = 0;
+          } } });
+      }
+      return out;
+    }
   }
   function registerIdsFromHtml(html){
     const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
@@ -104,7 +122,7 @@ function makeFakeDom(){
   registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
   return {
     title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
-    write(){}, createElement(tag){ return new El(tag, {}); },
+    write(){}, createElement(tag){ const e = new El(tag, {}); e._tmp = true; return e; },
     getElementById(id){ return registry.get(id) || null; },
     querySelector(sel){ return this.querySelectorAll(sel)[0] || null; },
     querySelectorAll(sel){
@@ -267,6 +285,7 @@ if(owner){
   check(`Review drill end: header Review, "R of N", Missed + one row per missed word (${rows} rows, ${rv && rv.miss} misses)`, !!rv && rv.title === "Review" && /<h2>\d+ of \d+<\/h2>/.test(rv.html) && /<p class="pvk">Missed<\/p>/.test(rv.html) && rows === rv.miss && rows >= 3);
   const rowOk = rv && [...rv.html.matchAll(/<div class="mrow"><button class="mtap" data-mopen="(\d+)" aria-expanded="false" aria-controls="mf\1">([\s\S]*?)<\/button>([\s\S]*?)<\/div><div class="stmt rvb mfull" id="mf\1" hidden>/g)];
   check("each row: the form, a reading, a primary sense (no brackets), a replay; its full reveal hidden in place", rowOk && rowOk.length === rows && rowOk.every(m => /class="mw"/.test(m[2]) && /class="mg"/.test(m[2]) && !/class="gx"/.test(m[2]) && /class="replay" data-wid=/.test(m[3])));
+  check("Missed full reveal and wrong-answer rows carry no empty cue/play slot markers", !!rv && !/class="rvk"|class="rvr"/.test(rv.html) && /class="rvrow"/.test(rv.html));
   const mb = api.mopen(0), mf = api.el("mf0");
   check("Missed row tap: the full reveal un-hides in place, aria-expanded true; a second tap folds it", !!rv && mf.hidden === false && mb.attrs["aria-expanded"] === "true" && (api.mopen(0), mf.hidden === true));
   check("Missed row replay: aria-label names the word, not bare Play/Replay", rv && [...rv.html.matchAll(/<button class="replay" data-wid="[^"]*" aria-label="([^"]*)">/g)].length === rows && [...rv.html.matchAll(/<button class="replay" data-wid="[^"]*" aria-label="([^"]*)">/g)].every(m => /^Replay \S/.test(m[1])));
@@ -492,8 +511,14 @@ if(owner){
   check("two options sharing a primary sense keep their brackets; the others show the primary only", g[0] === 'to walk <span class="gx">(to go)</span>' && g[1] === 'to walk <span class="gx">(to leave)</span>' && g[2] === "road" && g[3] === "body");
   const g2 = JSON.parse(api.ev(`JSON.stringify((() => { const os = ["To Walk; to go", "to  walk", "x; y"]; const f = optsPrimary(os, o => GLOSS_OPT(o)); return os.map(f); })())`));
   check("the guard compares the shown text, case and spacing folded (an option without brackets counts)", g2[0] === 'To Walk <span class="gx">(to go)</span>' && g2[2] === "x");
+  const g3 = JSON.parse(api.ev(`JSON.stringify((() => { const os = ["to walk; to go", "to go", "body"]; const f = optsPrimary(os, o => GLOSS_OPT(o)); return os.map(f); })())`));
+  check("an option whose hidden sense is another option's primary keeps its brackets; the rest show the primary only", g3[0] === 'to walk <span class="gx">(to go)</span>' && g3[1] === "to go" && g3[2] === "body");
+  const g4 = JSON.parse(api.ev(`JSON.stringify((() => { const os = ["to walk; to go", "to go; to leave", "body; trunk"]; const f = optsPrimary(os, o => GLOSS_OPT(o)); return os.map(f); })())`));
+  check("both options of a primary / hidden-sense clash keep brackets, an unrelated option does not", g4[0].includes('class="gx"') && g4[1].includes('class="gx"') && g4[2] === "body");
   // The guard on the owner export: 7 Today sessions paused, 7 unpaused.
-  const count = { mc: 0, br: 0, fired: 0, items: 0 };
+  const count = { mc: 0, br: 0, fired: 0, items: 0, opts: 0, newOpts: 0, newItems: 0 };
+  const oldKeep = (hs) => { const key = h => h.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim().toLowerCase(), i = h => h.lastIndexOf(GX), pr = h => i(h) >= 0 && h.endsWith("</span>") ? h.slice(0, i(h)) : h;
+    const n = new Map(); hs.forEach(h => n.set(key(pr(h)), (n.get(key(pr(h))) || 0) + 1)); return hs.map(h => n.get(key(pr(h))) > 1); };
   for(const [name, mk] of [["paused", () => clone(owner)], ["unpaused", unpaused]]){
     const { api: a } = await bootWith(PACK, mk(), 31, { patterns: true });
     for(let s = 0; s < 7; s++){
@@ -501,11 +526,14 @@ if(owner){
       a.el("go").click();
       await play(a, { onItem: (x, it) => { count.items++; if(it.kind !== "mc") return; count.mc++;
         if(it.optHtml && it.opts.some(o => String(it.optHtml(o)).includes(GX))) count.br++;
-        if(x.el("o").children.some(b => b.innerHTML.includes(GX))) count.fired++; }, wrong: (it, n) => n % 7 === 3 });
+        if(x.el("o").children.some(b => b.innerHTML.includes(GX))) count.fired++;
+        if(it.optHtml){ const full = it.opts.map(o => String(it.optHtml(o))), was = oldKeep(full), bs = x.el("o").children;
+          const now = bs.filter(b => b.innerHTML.includes(GX)).length, before = full.filter((h, k) => h.includes(GX) && was[k]).length;
+          count.opts += full.length; count.newOpts += now - before; if(now > before) count.newItems++; } }, wrong: (it, n) => n % 7 === 3 });
       a.el("again").click(); NOW += 3600e3;
     }
   }
-  console.log(`INFO  owner export, 14 sessions: ${count.items} items, ${count.mc} choice items, ${count.br} with bracketed options, collision guard kept brackets on ${count.fired}`);
+  console.log(`INFO  owner export, 14 sessions: ${count.items} items, ${count.mc} choice items, ${count.br} with bracketed options, collision guard kept brackets on ${count.fired}; hidden-sense rule newly keeps brackets on ${count.newOpts} of ${count.opts} options in ${count.newItems} items`);
   check(`collision count measured on the owner export's drills: guard fired on ${count.fired} of ${count.br} choice items with bracketed options`, count.mc > 100 && count.br > 0);
   NOW = new Date(2026, 9, 7, 20, 0, 0).getTime();
 }
@@ -534,6 +562,13 @@ if(ON){
   const box = api.el("rvx"); const b = api.el("rvxb");
   if(box) box.hidden = true; // the fake DOM does not parse the attribute
   check("Examples tap: the block opens in place", !!box && !!b && typeof b.onclick === "function" && (b.click(), box.hidden === false));
+  // The live region reads the answer, not the fold: no "Examples" label, none of the hidden example text.
+  { const { api: lv } = await bootWith(PACK, unpaused(), 21, { patterns: true }); lv.ev(PICK);
+    for(const [what, expr] of [["recall", "recallItem(__W)"], ["meaning MC", "readItem(__W)"]]){
+      const r = runItem(lv, expr, true), live = lv.el("live") ? lv.el("live").textContent : null;
+      const ex = lv.ev(`(() => { const e = exampleSentencesHTML(__W).replace(/<[^>]+>/g, "").trim(); return e.slice(0, 12); })()`);
+      check(`${what}: the live region on a right answer omits "Examples" and the hidden example text (${live === null ? "no live node" : live.length + " chars"})`, !!r && live !== null && live.length > 0 && !/Examples/.test(live) && !!ex && !live.includes(ex)); }
+  }
 }
 
 console.log("\n[B6] teach cards");
