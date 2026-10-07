@@ -289,6 +289,7 @@ if(owner){
   const mb = api.mopen(0), mf = api.el("mf0");
   check("Missed row tap: the full reveal un-hides in place, aria-expanded true; a second tap folds it", !!rv && mf.hidden === false && mb.attrs["aria-expanded"] === "true" && (api.mopen(0), mf.hidden === true));
   check("Missed row replay: aria-label names the word, not bare Play/Replay", rv && [...rv.html.matchAll(/<button class="replay" data-wid="[^"]*" aria-label="([^"]*)">/g)].length === rows && [...rv.html.matchAll(/<button class="replay" data-wid="[^"]*" aria-label="([^"]*)">/g)].every(m => /^Replay \S/.test(m[1])));
+  check("Missed row replay: aria-label speaks the written word, never an id (w0518)", !!rv && (() => { const rs = [...rv.html.matchAll(/data-wid="([^"]*)" aria-label="Replay ([^"]*)"/g)]; return rs.length > 0 && rs.every(m => BY_ID[m[1]] && !/^[a-z]\d+$/i.test(m[2]) && m[2] === (BY_ID[m[1]].say || BY_ID[m[1]].w)); })());
   check("no old drill-end strings: Missed:, Clean., N / M", !/Missed:|Clean\.|<h2>\d+ \/ \d+/.test(rv ? rv.html : "Missed:"));
   const clean = ends.filter(e => e.miss === 0);
   check(`a clean drill: "No misses." (${clean.length} clean drills)`, clean.length > 0 && clean.every(e => /<p class="pvk">No misses\.<\/p>/.test(e.html) && !/mrow/.test(e.html)));

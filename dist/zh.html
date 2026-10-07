@@ -198,6 +198,8 @@
   :root[data-appview="v2"] .tst{display:flex;gap:12px;align-items:baseline;font-size:15px}
   :root[data-appview="v2"] .tst>span:first-child{font-weight:500;flex:0 0 92px}
   :root[data-appview="v2"] .tsd{color:var(--mute);min-width:0;overflow-wrap:anywhere}
+  :root[data-appview="v2"] input::placeholder{color:var(--mute);opacity:1} /* the browser default grey misses 4.5:1 and the placeholder carries the instruction */
+  :root[data-appview="v2"] .dim{opacity:1;color:var(--mute)} /* an all-bracketed gloss: .6 opacity missed 4.5:1 */
   :root[data-appview="v2"] #pmap.pmv{cursor:pointer}
   :root[data-appview="v2"] .done .pvk{margin-top:var(--sect)!important}
   :root[data-appview="v2"] .done .pvds{margin-top:2px}
@@ -5908,7 +5910,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "4145952163-2291689";
+const VE_BUILD = "1665199685-2291976";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6224,7 +6226,7 @@ function missRowParts(item){
   const k = String(item.key || ""), id = k.slice(2);
   if(k.startsWith("w:") && WORDS_BY_ID[id]){
     const w = WORDS_BY_ID[id], p = pronBeside(w);
-    return { form: `<span class="mw"${TA}>${wordFormHTML(w, false)}</span>`, reading: p ? readingHTML(p) : "", gloss: glossPrimary(VC.gloss(w)), say: w.t || w.id, wid: canHearWord(w) ? w.id : null };
+    return { form: `<span class="mw"${TA}>${wordFormHTML(w, false)}</span>`, reading: p ? readingHTML(p) : "", gloss: glossPrimary(VC.gloss(w)), say: VC.wordSay(w) || w.w, wid: canHearWord(w) ? w.id : null };
   }
   if(k.startsWith("c:")){
     const u = CHAR_LIST.find(x => x.id === id); if(!u) return null;
@@ -8033,4 +8035,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3396143057-2291013-->
+<!--ve-build:3576859450-2291300-->
