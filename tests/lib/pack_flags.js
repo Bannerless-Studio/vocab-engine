@@ -43,7 +43,7 @@ const FLAG_SINCE = [
   { key: "glossStyle", sha: "34c5df3", path: ["glossStyle"] },
   { key: "patternCue", sha: "34c5df3", path: ["patternCue"] },
   { key: "characters.bareByPair", sha: "34c5df3", path: ["characters", "bareByPair"] },
-  { key: "appView", sha: "f1e535c", path: ["appView"] },
+  { key: "appView", sha: "d39eda2", path: ["appView"] },
 ];
 
 const byKey = new Map(FLAG_SINCE.map(f => [f.key, f]));
