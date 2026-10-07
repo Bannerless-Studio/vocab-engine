@@ -1136,6 +1136,42 @@ function nextNewSet(words, pack, prog){
   }
   return null;
 }
+// pack.levelGate (docs/PACK_SCHEMA.md "levelGate"; owner 2026-10-07): the first level with untaught
+// words opens only when the level before it is known to the fraction. Evaluated where Today plans;
+// nothing is stored, and the word level keeps its own order inside.
+const levelGateOn = pack => !!(pack && typeof pack.levelGate === "number" && pack.levelGate > 0 && pack.levelGate <= 1) && pairsOn(pack);
+function levelKnownPct(words, pack, prog, lv, units){
+  const list = wordsByLevel(words, pack)[lv] || [], r = (prog && prog.w) || {}, bw = knownCtx(pack, units);
+  return list.length ? list.filter(w => wordKnownX(r[w.id], w, pack, prog, bw)).length / list.length : 1;
+}
+// pack.levelExam (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): per level, what the exam asks. On a
+// "characters" level a word is known (level counts, goals, levelGate) only when its character unit's wm pair
+// is also at BARE_PAIR (pairJudge: unit or word record, latest answer): the written form is read for meaning.
+// Neither stream answered yet (a record from before pairs): the unit's legacy streak boots the pair as
+// pairState does for words, else every existing learner would drop to 0 and, the booted pair being
+// "known", never be asked again. Any other level, or a word with no unit, keeps the word rule.
+// wordKnown itself (prov, mastered) is untouched.
+const levelExamOn = pack => !!(pack && isObj(pack.levelExam) && Object.values(pack.levelExam).includes("characters") && charsConfig(pack)) && pairsOn(pack);
+const knownCtx = (pack, units) => levelExamOn(pack) ? unitByWord(units) : null;
+function wordKnownX(rec, word, pack, prog, byWord){
+  if(!wordKnown(rec, word, pack)) return false;
+  if(!byWord || !word || pack.levelExam[String(word.lv)] !== "characters") return true;
+  const u = byWord.get(word.id); if(!u) return true;
+  const ur = charRecs(prog)[u.id], j = pairJudge(ur, u, prog, "wm");
+  return (j ? j.s : isObj(ur) ? pairState(ur, "wm").s : 0) >= BARE_PAIR;
+}
+// { lv, prev, pct } while the first level with untaught words waits; else null.
+function levelGateHold(words, pack, prog, units){
+  if(!levelGateOn(pack)) return null;
+  const nn = nextNewSet(words, pack, prog), ids = levelIds(pack);
+  const i = nn ? ids.indexOf(nn.lv) : -1;
+  if(i < 1) return null;
+  const pct = levelKnownPct(words, pack, prog, ids[i - 1], units);
+  return pct + 1e-9 >= pack.levelGate ? null : { lv: nn.lv, prev: ids[i - 1], pct: Math.floor(pct * 100) };
+}
+const levelGateNote = (words, pack, prog, units) => { const h = levelGateHold(words, pack, prog, units); return h ? `${levelLabel(pack, h.lv)} waits · ${levelLabel(pack, h.prev)} at ${h.pct}% known` : null; };
+// What Today teaches: nextNewSet unless the gate holds.
+const nextNewSetOpen = (words, pack, prog, units) => levelGateHold(words, pack, prog, units) ? null : nextNewSet(words, pack, prog);
 // Before the first record lands in a records-less level, its counter prefix gets placement's
 // provisional records, so switching the level to the records rule loses nothing.
 function pinPrefixRecords(prog, words, pack, lv, counters){
@@ -2318,8 +2354,8 @@ function progressMapGoals(pack){ const m = pack && pack.progressMap; return (m &
 function progressMapOn(pack){ return !!(pack && (pack.progressMap === true || progressMapGoals(pack).length > 0) && dayAwareOn(pack)); }
 function progressPosition(prog, pack, words, units, passages){
   const ws = words || [], us = units || [], ps = passages || [];
-  const recs = (prog && isObj(prog.w)) ? prog.w : {};
-  const known = ws.filter(w => wordKnown(recs[w.id], w, pack)).length;
+  const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, us);
+  const known = ws.filter(w => wordKnownX(recs[w.id], w, pack, prog, bw)).length;
   let wu = us.length ? 0.25 : 0, wp = ps.length ? 0.25 : 0;
   const ww = 1 - wu - wp;
   let x = ws.length ? ww * known / ws.length : 0;
@@ -2337,8 +2373,8 @@ function goalPosition(prog, pack, goal, words, units, passages){
   const byId = {}; for(const w of (words || [])) byId[w.id] = w;
   const us = (units || []).filter(u => inR(u.lv !== undefined ? u.lv : (byId[(u.words || [])[0]] || {}).lv));
   const ps = (passages || []).filter(p => inR(p.lv));
-  const recs = (prog && isObj(prog.w)) ? prog.w : {};
-  const known = ws.filter(w => wordKnown(recs[w.id], w, pack)).length;
+  const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, units);
+  const known = ws.filter(w => wordKnownX(recs[w.id], w, pack, prog, bw)).length;
   const wu = us.length ? 0.2 : 0, wp = ps.length ? 0.2 : 0;
   let x = ws.length ? (1 - wu - wp) * known / ws.length : 0;
   if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && charTier(cr[u.id].s, pack) !== "pron").length / us.length; }
@@ -2381,11 +2417,12 @@ function unitAtTarget(rec, unit, prog, pack){
   return freqTiersOn(pack) ? unitDone(rec, unit, pack) : (charTier(rec.s || 0, pack) === "bare" || pairBare(rec, unit, prog, pack));
 }
 function progressTotals(prog, pack, words, units, passages){
-  const w = (prog && prog.w) || {}, recs = charRecs(prog);
+  const w = (prog && prog.w) || {}, recs = charRecs(prog), bw = knownCtx(pack, units);
   const done = prog && isObj(prog.read) && isObj(prog.read.done) ? prog.read.done : {};
   return {
     sn: prog && typeof prog.sessions === "number" ? prog.sessions : 0,
-    m: learnedWords(words, pack, prog).filter(x => wordKnown(w[x.id], x, pack)).length,
+    // pack.levelExam: the same mastered count as the level rows (wordKnownX).
+    m: learnedWords(words, pack, prog).filter(x => wordKnownX(w[x.id], x, pack, prog, bw)).length,
     co: (units || []).filter(u => unitAtTarget(recs[u.id], u, prog, pack)).length,
     p: (passages || []).filter(x => done[x.id]).length,
   };
@@ -2731,29 +2768,30 @@ function stagePath(pack, words, units, prog, sunits){
   const p = prog || {}; const sets = p.sets || {};
   const size = setSizeOf(pack), byLv = wordsByLevel(words, pack), recs = charRecs(p);
   const cfg = charsConfig(pack); const cs = charStages(pack, p);
-  const out = [];
-  levelIds(pack).forEach(lv => {
+  const out = [], ids = levelIds(pack), gate = levelGateHold(words, pack, p, units);
+  ids.forEach(lv => {
     const n = nSets(byLv[lv], size), k = sets[lv] || 0, nn = levelNewSet(words, pack, p, lv);
-    out.push({ kind:"words", lv, label: levelLabel(pack, lv), set: nn ? nn.set : k, nsets: n, frac: nn ? Math.min(k, n-1)/n : 1, done: !nn });
+    out.push(Object.assign({ kind:"words", lv, label: levelLabel(pack, lv), set: nn ? nn.set : k, nsets: n, frac: nn ? Math.min(k, n-1)/n : 1, done: !nn }, gate && nn && ids.indexOf(lv) >= ids.indexOf(gate.lv) ? { gated: true } : {}));
     cs.filter(st => st.after === lv).forEach(st => {
       const list = charStageUnits(st.levels, units, pack);
       const rec = list.filter(u => hasCharRec(recs, u.id)).length;
-      out.push({ kind:"chars", key: st.levels.join("+"), levels: st.levels, label: st.label, after: st.after, recorded: rec,
-        nunits: list.length, nsets: Math.ceil(list.length / cfg.setSize), frac: list.length ? rec/list.length : 1, done: rec >= list.length });
+      out.push(Object.assign({ kind:"chars", key: st.levels.join("+"), levels: st.levels, label: st.label, after: st.after, recorded: rec,
+        nunits: list.length, nsets: Math.ceil(list.length / cfg.setSize), frac: list.length ? rec/list.length : 1, done: rec >= list.length },
+        gate && ids.indexOf(lv) >= ids.indexOf(gate.lv) ? { gated: true } : {}));
     });
   });
   const sc = scriptStages(pack, sunits, p);
   return sc.length ? [...sc, ...out] : out;
 }
 function nextStage(pack, words, units, prog, sunits){
-  const path = stagePath(pack, words, units, prog, sunits), first = path.find(s => !s.done) || null;
+  const path = stagePath(pack, words, units, prog, sunits), first = path.find(s => !s.done && !s.gated) || null;
   if(lagOn(pack) && !(first && first.kind === "script")) return lagStage(pack, words, units, prog, path);
   if(!charsWithWords(pack, prog) || !first || first.kind === "script") return first;
   // characters.withWords (docs/PACK_SCHEMA.md): an unlocked character stage (its level's words
   // learned) and the next word level take turns; oldest stage first. The turn flips when a Learn
   // step completes (chars.turn, learnTurnDone), so a Today closed after Learn still alternates
   // (review 2026-10-02); without it, session parity.
-  const w = path.find(s => s.kind === "words" && !s.done), c = pendingCharStage(path);
+  const w = path.find(s => s.kind === "words" && !s.done && !s.gated), c = pendingCharStage(path);
   if(!w || !c) return c || w || first;
   if(charOrder(pack, prog) === "first") return c;
   const t = prog && isObj(prog.chars) ? prog.chars.turn : undefined;
@@ -2767,7 +2805,7 @@ const lagOn = pack => { const c = charsConfig(pack); return !!(c && c.learn === 
 function lagUnits(pack, words, units, prog){ return newCharUnits(units, learnedWords(words, pack, prog || {}), prog, pack, Infinity); }
 function lagStage(pack, words, units, prog, path){
   const cfg = charsConfig(pack), el = lagUnits(pack, words, units, prog);
-  const w = (path || stagePath(pack, words, units, prog)).find(s => s.kind === "words" && !s.done) || null;
+  const w = (path || stagePath(pack, words, units, prog)).find(s => s.kind === "words" && !s.done && !s.gated) || null;
   if(cfg.start && w && learnedWords(words, pack, prog || {}).length < cfg.start) return w;
   const n = cfg.ramp ? lagLevelUnits(pack, el).length : el.length;
   return n >= lagSize(cfg, units, prog, pack, el) || (n && !w) ? lagCharStage(pack) : w;
@@ -4202,7 +4240,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairsOn, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
-  markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, progressViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,

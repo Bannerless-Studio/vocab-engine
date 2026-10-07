@@ -24,7 +24,8 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
 const PACK = (p => { delete p.glossStyle; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
-const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.freqTiers; return q; })(PACK);
+// levelGate and levelExam (fb38) came after ff760d8: the flag-off controls drop them too (tests/level_gate_checks.js covers it).
+const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.freqTiers; delete q.levelGate; delete q.levelExam; return q; })(PACK);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -454,7 +455,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     console.log("    Progress characters rows: " + rows.join(" | "));
     check("Progress characters rows count units at their target as done (a peripheral unit at mastered)", rows.length === 4 && rows.every((r, i) => { const n = doneOf(String(i + 1)); return n ? r.endsWith(` · ${n} done`) : !/done|bare/.test(r); }) && rows.every(r => r.length <= 32));
     const lvRows = VC.levelIds(PACK).map(lv => (ph.match(new RegExp(`HSK ${lv}</td><td>(\\d+) / \\d+ learned · (\\d+) mastered`)) || [])[2]);
-    check(`Progress level rows count known by the tier rule (${lvRows.join(" / ")})`, VC.levelIds(PACK).every((lv, i) => +lvRows[i] === VC.learnedWords(WORDS, PACK, prog).filter(w => w.lv === lv && VC.wordKnown(prog.w[w.id], w, PACK)).length)); check("nothing new stored: records carry only fields older engines know (r w s k t u f d prov p)", Object.values(prog.w).every(r => Object.keys(r).every(k => ["r", "w", "s", "k", "t", "u", "f", "d", "prov", "p"].includes(k))));
+    check(`Progress level rows count known by the tier rule (${lvRows.join(" / ")})`, VC.levelIds(PACK).every((lv, i) => +lvRows[i] === VC.learnedWords(WORDS, PACK, prog).filter(w => w.lv === lv && VC.wordKnownX(prog.w[w.id], w, PACK, prog, VC.knownCtx(PACK, CHARACTERS))).length)); check("nothing new stored: records carry only fields older engines know (r w s k t u f d prov p)", Object.values(prog.w).every(r => Object.keys(r).every(k => ["r", "w", "s", "k", "t", "u", "f", "d", "prov", "p"].includes(k))));
   }
 
   console.log("\n[11] Words tab numbers sets by count (as Today) for a learner taught in the earlier order");

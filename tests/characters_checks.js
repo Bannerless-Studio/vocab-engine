@@ -440,7 +440,8 @@ function flagOffEquality(){
   if(!OLD) return;
   const loadConst = (file, name) => new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)();
   const ZH = path.join(ROOT, "packs", "zh");
-  const real = { name: "zh (real pack)", pack: loadConst(path.join(ZH, "pack.js"), "PACK"), words: loadConst(path.join(ZH, "words.js"), "WORDS"), units: [] };
+  // levelGate / levelExam (fb38) gate nextStage; they came after the base engine, tests/level_gate_checks.js covers them.
+  const real = { name: "zh (real pack)", pack: (p => { delete p.levelGate; delete p.levelExam; return p; })(loadConst(path.join(ZH, "pack.js"), "PACK")), words: loadConst(path.join(ZH, "words.js"), "WORDS"), units: [] };
   const z = zhLike(), j = jaLike();
   // Variants: [label, pack, words, units passed to the plan builders, whether to give records]
   const variants = [

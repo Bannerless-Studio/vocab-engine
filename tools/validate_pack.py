@@ -190,6 +190,20 @@ def check_pack(pack, rep):
         rep.err("pack.freqTiers must be a boolean")
     elif pack.get("freqTiers") is True and not (pack.get("pairs") is True and pack.get("dayAware")):
         rep.err("pack.freqTiers needs pack.pairs (tiers set each pair's mastery)")
+    # levelGate (docs/PACK_SCHEMA.md "levelGate"): a fraction of the previous level that must be known.
+    if "levelGate" in pack:
+        lg = pack["levelGate"]
+        if isinstance(lg, bool) or not isinstance(lg, (int, float)) or not 0 < lg <= 1:
+            rep.err("pack.levelGate must be a number in (0, 1]")
+        elif not (pack.get("pairs") is True and pack.get("dayAware")):
+            rep.err("pack.levelGate needs pack.pairs (known is the pair definition)")
+    # levelExam (docs/PACK_SCHEMA.md "levelExam"): level id -> "pinyin" | "characters".
+    if "levelExam" in pack:
+        le = pack["levelExam"]; ids = {str(l.get("id")) for l in pack.get("levels", []) if isinstance(l, dict)}
+        if not isinstance(le, dict) or not all(isinstance(k, str) and k in ids and v in ("pinyin", "characters") for k, v in le.items()):
+            rep.err("pack.levelExam must map level ids to \"pinyin\" or \"characters\"")
+        elif not (pack.get("pairs") is True and pack.get("dayAware") and "characters" in pack):
+            rep.err("pack.levelExam needs pack.pairs and pack.characters (the unit's meaning pair)")
     # glossStyle (docs/PACK_SCHEMA.md "glossStyle"): a display style of the glossFocus renderer.
     if "glossStyle" in pack and pack["glossStyle"] != "primary":
         rep.err('pack.glossStyle must be "primary"')

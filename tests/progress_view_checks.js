@@ -22,7 +22,8 @@ const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
-const OFF = (p => { const q = Object.assign({}, p); delete q.progressView; return q; })(PACK);
+// levelGate and levelExam (fb38) came after 9667a81: the flag-off control drops them too (tests/level_gate_checks.js covers them).
+const OFF = (p => { const q = Object.assign({}, p); delete q.progressView; delete q.levelGate; delete q.levelExam; return q; })(PACK);
 const clone = x => JSON.parse(JSON.stringify(x));
 
 let fails = 0, passes = 0, skips = 0;
@@ -154,6 +155,8 @@ async function bootWith(pack, prog, seed, opts){ const st = fresh(); if(prog) st
 const stored = (st, pack) => JSON.parse(st.ls.getItem(VC.storageKey(pack)) || "null");
 const stripTags = h => String(h).replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+>/g, " ").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&").replace(/\s+/g, " ");
 const totals = p => VC.progressTotals(p, PACK, WORDS, CHARACTERS, PASSAGES);
+// pack.levelExam (fb38): Progress counts a characters-level word mastered by the exam rule.
+const known = (p, w) => VC.wordKnownX(p.w[w.id], w, PACK, p, VC.knownCtx(PACK, CHARACTERS));
 
 // ------------------------------------------------------------------ records
 const byLv = VC.wordsByLevel(WORDS, PACK);
@@ -169,7 +172,7 @@ console.log("\n[1] core: totals, pv, deltas, recent misses");
   check("progressViewOn: zh pack sets v2; absent / other values are off", VC.progressViewOn(PACK) && !VC.progressViewOn(OFF) && !VC.progressViewOn(Object.assign({}, PACK, { progressView: "v3" })));
   const p = midProg(); p.sessions = 12;
   const t = totals(p);
-  check("progressTotals: sessions, mastered (wordKnown), units at target, passages", t.sn === 12 && t.m === VC.learnedWords(WORDS, PACK, p).filter(w => VC.wordKnown(p.w[w.id], w, PACK)).length && t.co === 0 && t.p === 0);
+  check("progressTotals: sessions, mastered (wordKnownX, the exam rule), units at target, passages", t.sn === 12 && t.m === VC.learnedWords(WORDS, PACK, p).filter(w => known(p, w)).length && t.co === 0 && t.p === 0);
   check("no pv: no deltas (first visit)", VC.progressVisit(p) === null && VC.progressDeltas(p, t) === null);
   check("noteProgressVisit writes pv = totals, and reports no change on a second call", VC.noteProgressVisit(p, PACK, t) && JSON.stringify(p.pv) === JSON.stringify({ sn: 12, m: t.m, co: 0, p: 0 }) && !VC.noteProgressVisit(p, PACK, t));
   const q = clone(p); q.sessions = 15; q.read = { done: { [PASSAGES[0].id]: { sc: 4, n: 4, d: DAY, x: 1 } } };
@@ -211,7 +214,7 @@ else {
   check("HSK 4 (locked, paused) reads paused with its learned count, dimmed", /<div class="pvl pvo"><div class="pvt"><span>HSK 4<\/span><span class="pvn">paused, 9 learned<\/span>/.test(h));
   // Bars: learned and mastered widths are the shares of the level size.
   const learned = VC.learnedWords(WORDS, PACK, P);
-  const lowSum = ["1", "2"].reduce((o, lv) => { const l0 = learned.filter(w => w.lv === lv); o.l += l0.length; o.m += l0.filter(w => VC.wordKnown(P.w[w.id], w, PACK)).length; return o; }, { l: 0, m: 0 });
+  const lowSum = ["1", "2"].reduce((o, lv) => { const l0 = learned.filter(w => w.lv === lv); o.l += l0.length; o.m += l0.filter(w => known(P, w)).length; return o; }, { l: 0, m: 0 });
   check(`collapse: current level HSK 4 and HSK 3 (unsettled) keep rows; HSK 1–2 fold into one line, ${lowSum.m} of ${lowSum.l} mastered`, /<span>HSK 3<\/span>/.test(h) && /<span>HSK 4<\/span>/.test(h) && !/<span>HSK [12]<\/span>/.test(h) && new RegExp(`id="pvLow"[^>]*><span>HSK 1–2</span><span class="pvn">${lowSum.m} of ${lowSum.l} mastered</span>`).test(h));
   api.el("pvLow").click();
   const hx = api.panel();
@@ -219,7 +222,7 @@ else {
   h = hx;
   const bars = [...h.matchAll(/<span>(HSK \d)<\/span>[\s\S]*?<i class="pvlr" style="width:([\d.]+)%"><\/i><i class="pvm" style="width:([\d.]+)%"><\/i>/g)];
   const okBars = bars.length === 4 && bars.every(([, L, lw, mw]) => {
-    const lv = L.slice(4), size = byLv[lv].length, lw0 = learned.filter(w => w.lv === lv), m0 = lw0.filter(w => VC.wordKnown(P.w[w.id], w, PACK)).length;
+    const lv = L.slice(4), size = byLv[lv].length, lw0 = learned.filter(w => w.lv === lv), m0 = lw0.filter(w => known(P, w)).length;
     return Math.abs(+lw - lw0.length / size * 100) < 0.06 && Math.abs(+mw - m0 / size * 100) < 0.06;
   });
   check("bars: learned and mastered widths proportional to the level size, 4 levels", okBars);
@@ -241,11 +244,11 @@ else {
   check("leaving the tab writes pv = the totals, and saves it", JSON.stringify(pv1) === JSON.stringify(cur));
   // A simulated session: 3 sessions, words reaching known, one more passage.
   const p2 = api.getProg(); p2.sessions += 3; p2.sn += 3;
-  const notKnown = VC.learnedWords(WORDS, PACK, p2).filter(w => !VC.wordKnown(p2.w[w.id], w, PACK)).slice(0, 6);
+  const notKnown = VC.learnedWords(WORDS, PACK, p2).filter(w => !known(p2, w)).slice(0, 6);
   notKnown.forEach(w => { p2.w[w.id].p = { wm: [3, p2.sn], sm: [3, p2.sn], ws: [3, p2.sn] }; p2.w[w.id].s = 6; });
   const pid = PASSAGES.find(x => !(p2.read.done || {})[x.id] && x.lv === "3").id; p2.read.done[pid] = { sc: 5, n: 5, d: DAY, x: 1 };
   // A word not known, outside the six, missed in its wm pair this session.
-  const missW = VC.learnedWords(WORDS, PACK, p2).find(w => !notKnown.includes(w) && !VC.wordKnown(p2.w[w.id], w, PACK));
+  const missW = VC.learnedWords(WORDS, PACK, p2).find(w => !notKnown.includes(w) && !known(p2, w));
   p2.w[missW.id].p = Object.assign({}, p2.w[missW.id].p, { wm: [0, p2.sn] });
   const cur2 = totals(p2), d = { m: cur2.m - cur.m, co: cur2.co - cur.co, p: cur2.p - cur.p };
   api.clickTab("progress");

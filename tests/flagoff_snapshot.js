@@ -155,6 +155,10 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     delete pack.pairs;
     // Frequency tiers (docs/PACK_SCHEMA.md "freqTiers") are a new, flag-on field.
     delete pack.freqTiers;
+    // Level gate (docs/PACK_SCHEMA.md "levelGate") is a new, flag-on field.
+    delete pack.levelGate;
+    // Per-level exam profile (docs/PACK_SCHEMA.md "levelExam") is a new, flag-on field.
+    delete pack.levelExam;
     // Grammar patterns (docs/PACK_SCHEMA.md "patterns") is a new, flag-on field.
     delete pack.patterns;
     // The pattern cue after the answer (docs/PACK_SCHEMA.md "patternCue") is a new, flag-on field.

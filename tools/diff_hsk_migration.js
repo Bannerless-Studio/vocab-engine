@@ -26,7 +26,9 @@ const USAGE = "usage: node tools/diff_hsk_migration.js <hsk_pinyin_progress.json
 const readJSON = f => JSON.parse(fs.readFileSync(f, "utf8"));
 function loadPack(dir){
   const opt = f => fs.existsSync(path.join(dir, f)) ? readJSON(path.join(dir, f)) : [];
-  return { pack: readJSON(path.join(dir, "pack.json")), words: readJSON(path.join(dir, "words.json")),
+  // The old hsk app has no level gate or exam profile (docs/PACK_SCHEMA.md "levelGate", "levelExam"): compare without them.
+  const pack = readJSON(path.join(dir, "pack.json")); delete pack.levelGate; delete pack.levelExam;
+  return { pack, words: readJSON(path.join(dir, "words.json")),
     units: opt("characters.json"), sentences: opt("sentences.json"), legacy: readJSON(path.join(dir, "legacy.json")) };
 }
 function loadHsk(dir){
