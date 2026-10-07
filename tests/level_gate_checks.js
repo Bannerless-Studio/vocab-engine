@@ -16,7 +16,8 @@ const ZH = path.join(ROOT, "packs", "zh");
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // progressView "v2" (fb37) replaces the Progress layout [3] / [7] pin (the old rows, still the flag-off layout); [8] checks v2.
-const PACK_V2 = loadConst(path.join(ZH, "pack.js"), "PACK");
+// appView "v2" (fb40a) words the gate as a sentence on Today and Progress; tests/app_view_checks.js covers it.
+const PACK_V2 = stripFlags(loadConst(path.join(ZH, "pack.js"), "PACK"), ["appView"]);
 const PACK = stripFlags(PACK_V2, ["progressView"]);
 const G = PACK.levelGate; // zh ships 0.7 (owner, w32 brief)
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");

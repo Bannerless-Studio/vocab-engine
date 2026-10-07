@@ -173,6 +173,8 @@ def check_pack(pack, rep):
         rep.err("pack.progressMap needs pack.dayAware (the pace is counted in sessions)")
     if "progressView" in pack and pack["progressView"] != "v2":
         rep.err('pack.progressView must be "v2" when present')
+    if "appView" in pack and pack["appView"] != "v2":
+        rep.err('pack.appView must be "v2" when present')
     if "wordsBy" in pack and pack["wordsBy"] != "typed":
         rep.err('pack.wordsBy must be "typed" when present')
     elif pack.get("wordsBy") == "typed" and pack.get("typing") in (None, False):

@@ -604,6 +604,8 @@ def main(argv):
         # Progress tab: since-last-visit deltas, one bar per level, rows at their expected state behind
         # Show all (docs/PACK_SCHEMA.md "progressView"; owner 2026-10-07).
         "progressView": "v2",
+        # Today, header, drill end and session done in the Progress v2 direction (docs/PACK_SCHEMA.md "appView"; owner 2026-10-07).
+        "appView": "v2",
         # The next HSK level opens when this share of the previous one is known (docs/PACK_SCHEMA.md "levelGate"; owner 2026-10-07).
         "levelGate": 0.7,
         # What each level's exam asks (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): HSK 1-2 are pinyin papers, HSK 3-4 read hanzi.

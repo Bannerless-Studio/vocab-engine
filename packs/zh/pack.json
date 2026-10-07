@@ -183,6 +183,7 @@
  "pairs": true,
  "freqTiers": true,
  "progressView": "v2",
+ "appView": "v2",
  "levelGate": 0.7,
  "levelExam": {
   "1": "pinyin",
