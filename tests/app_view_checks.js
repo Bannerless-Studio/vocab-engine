@@ -257,7 +257,9 @@ else {
   check("button Start, header Today", /id="go">Start<\/button>/.test(h) && api.title() === "Today");
   const r2 = await bootWith(PACK, unpaused(), 3); h = r2.api.panel(); t = stripTags(h);
   const g = VC.levelGateHold(WORDS, PACK, r2.api.getProg(), CHARACTERS);
-  const gs = g ? `HSK ${g.lv} opens at 70% of HSK ${g.prev} known. Now ${g.pct}%.` : "";
+  // fb41: the sentence ends with the gate estimate (tests/eta_checks.js).
+  const eta = VC.levelOpensIn(WORDS, PACK, r2.api.getProg(), CHARACTERS);
+  const gs = g ? `HSK ${g.lv} opens at 70% of HSK ${g.prev} known. Now ${g.pct}%, ${(r => r > 999 ? "≈\u00a0999+ sessions" : `≈\u00a0${r} session${r === 1 ? "" : "s"}`)(eta >= 100 ? Math.round(eta / 10) * 10 : eta)}.` : "";
   console.log(`INFO  unpaused gate: ${gs || "none"}`);
   check(`unpaused: anchor "Session ${n}"`, h.includes(`<p class="pva">Session ${n}</p>`));
   check("unpaused: Learn row names the set and carries the gate sentence", !!g && /<div class="tst"><span>Learn<\/span><div class="tsd">[^<]*set \d+ of \d+<div class="pvs pvgate">/.test(h) && h.includes(gs) && !/waits ·/.test(h));
@@ -358,7 +360,7 @@ if(owner){
   api.clickTab("progress");
   let h = api.panel();
   const g = VC.levelGateHold(WORDS, PACK, api.getProg(), CHARACTERS);
-  check("gate row: the sentence, not the dot string", /<p class="pvs pvgate">HSK \d opens at 70% of HSK \d known\. Now \d+%\.<\/p>/.test(h) && !/waits ·/.test(h) && !!g);
+  check("gate row: the sentence, not the dot string", /<p class="pvs pvgate">HSK \d opens at 70% of HSK \d known\. Now \d+%, ≈\u00a0\d+\+? sessions?\.<\/p>/.test(h) && !/waits ·/.test(h) && !!g);
   const gsent = api.gate();
   check("gate row: the very sentence Today shows (gateSentence)", !!gsent && h.includes(`<p class="pvs pvgate">${gsent}</p>`));
   check("Learned total: absent by default", !/id="pvLearned"/.test(h));

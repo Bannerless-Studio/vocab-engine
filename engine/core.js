@@ -2333,12 +2333,15 @@ function applyWeakWords(prog, entries, words, pack){
   });
   return prog;
 }
-// l is absent for a reading pass, so reading-only records are unchanged.
+// l is absent for a reading pass, so reading-only records are unchanged. Under readRotation (zh) l is credit only
+// (alternation reads r.mode) and stays once earned: a later reading pass must not take back what a listening pass
+// earned (the goal position's passage share fell .87 -> .57, fb41). Without it l marks "latest pass was a listen"
+// and readPassMode alternates on it, so those packs keep the replaced record.
 // pack.readRotation adds s (session of the latest pass) and ls (of the latest listening pass).
 function markPassageDone(prog, pid, sc, n, d, listen, pack){
   const st = readState(prog); const prev = st.done[pid];
   st.done[pid] = { sc, n, d: String(d), x: ((prev && prev.x) || 0) + 1 };
-  if(listen) st.done[pid].l = 1;
+  if(listen || (prev && prev.l && readRotationOn(pack))) st.done[pid].l = 1;
   if(readRotationOn(pack)){
     const sn = daySn(prog);
     st.done[pid].s = sn;
@@ -2482,6 +2485,33 @@ function sessionsToGo(prog, g, n){
   const rate = (z.p - a.p) / (z.sn - a.sn);
   if(!(rate > 0) || !isFinite(rate)) return null;
   return Math.max(0, Math.ceil(((g !== undefined ? GOAL_DONE : 1) - z.p) / rate - 1e-9));
+}
+// pack.appView "v2" ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"; owner 2026-10-08: an estimate from the first
+// session). Goal packs: the model below, never the measured pace. pm.p rounds to 0.001 and a goal gains ~0.001 a session, and
+// the measured pace at PM_KEEP (14) entries missed the actual crossing by -57% to +195% on 3 of 4 owner-export sims
+// (tests/eta_checks.js --calibrate). A whole-pack bar has no model: it shows sessionsToGo (a pace from PM_KEEP entries), else nothing.
+// Calibration (tests/eta_checks.js --calibrate; Today sessions at 85% right, unpaused, 7 a day, passages read, seeds 5-7):
+// ETA_GAIN[g] = goal position gained per session until the goal first reaches GOAL_DONE, from the owner export
+// (vocab_zh_progress_8, goals at .708/.539/.271), after the fb41 markPassageDone fix: goal 1 183/162/184 sessions
+// (0.00109), goal 2 195/186/195 (0.00188), goal 3 191/183/190 (0.00335). A fresh record reaches goal 1 after 96/94/99
+// sessions (0.0091-0.0096 a session), 8x faster: no one constant fits both, so the gains are the owner export's and
+// the fresh record's session-1 estimate reads "≈ 830".
+// ETA_KNOWN = words of the waiting level's predecessor that become known per session while the gate holds: 5.2, the
+// geometric mean of 12 holds, 5.16 (fresh record, levels 1/2/3: 4.5 4.6 4.0, 5.1 4.9 4.9, 3.9 5.5 5.3; owner export, level 3: 6.4 8.2 5.8).
+// prog.pm holds goal positions only, so the level estimate is the model alone (no storage field).
+const ETA_GAIN = [0.00109, 0.00188, 0.00335], ETA_KNOWN = 5.2;
+function sessionsToGoX(prog, g, n, ctx){
+  const goal = g !== undefined && ctx ? progressMapGoals(ctx.pack)[g] : null;
+  if(!goal) return g === undefined ? sessionsToGo(prog) : null;
+  const p = goalPosition(prog, ctx.pack, goal, ctx.words, ctx.units, ctx.passages);
+  return p >= GOAL_DONE ? 0 : Math.ceil((GOAL_DONE - p) / ETA_GAIN[Math.min(g, ETA_GAIN.length - 1)] - 1e-9);
+}
+// Sessions until the waiting level opens (levelGate); null when no level waits.
+function levelOpensIn(words, pack, prog, units){
+  const h = levelGateHold(words, pack, prog, units);
+  if(!h) return null;
+  const n = (wordsByLevel(words, pack)[h.prev] || []).length;
+  return Math.max(1, Math.ceil((pack.levelGate - levelKnownPct(words, pack, prog, h.prev, units)) * n / ETA_KNOWN - 1e-9));
 }
 function readingStats(passages, pack, prog){
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
@@ -4246,7 +4276,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,

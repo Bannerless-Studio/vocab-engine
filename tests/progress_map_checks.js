@@ -484,6 +484,17 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
     }
   }
 
+  console.log("\n[l kept] a reading pass after a listening pass keeps the goal position's passage share (fb41)");
+  {
+    const g = VC.progressMapGoals(PACK)[0] || null, ps = PASSAGES.filter(x => x.lv === "1").slice(0, 2);
+    const p = VC.normalizeProg({}, PACK); p.sn = 4;
+    ps.forEach(x => VC.markPassageDone(p, x.id, 1, 4, "2026-09-01", true, PACK));
+    const before = VC.progressPosition(p, PACK, WORDS, CHARACTERS, PASSAGES), gb = g ? VC.goalPosition(p, PACK, g, WORDS, CHARACTERS, PASSAGES) : null;
+    VC.markPassageDone(p, ps[0].id, 1, 4, "2026-09-02", false, PACK);
+    const after = VC.progressPosition(p, PACK, WORDS, CHARACTERS, PASSAGES), ga = g ? VC.goalPosition(p, PACK, g, WORDS, CHARACTERS, PASSAGES) : null;
+    check(`readRotation pack: position ${before.toFixed(4)} -> ${after.toFixed(4)} and goal ${gb} -> ${ga} unchanged by a reading pass; l kept`, PACK.readRotation === true && after === before && ga === gb && p.read.done[ps[0].id].l === 1);
+  }
+
   console.log("\n[11] owner export (read-only copy)");
   {
     const f = "/Users/ishmum/Programming/Voluntary/chinese/.cache/owner-progress.json";

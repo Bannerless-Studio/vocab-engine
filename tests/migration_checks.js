@@ -224,7 +224,7 @@ console.log("\n[read.done.l] listening-pass marker");
   const i2 = VC.applyImport(null, raw2, PACK);
   check("record with l survives export/import", i2.ok && eq(i2.prog.read, p.read));
   VC.markPassageDone(p, "p0001", 5, 5, "2026-10-05");
-  check("a later reading pass replaces the record without l", eq(p.read.done.p0001, { sc: 5, n: 5, d: "2026-10-05", x: 3 }));
+  check("a later reading pass replaces the record without l (no readRotation: l marks the latest pass, readPassMode alternates on it)", eq(p.read.done.p0001, { sc: 5, n: 5, d: "2026-10-05", x: 3 }));
   const bad = JSON.stringify({ read: { done: { p0001: { sc: 1, n: 5, d: "2026-09-27", x: 1, l: "yes" } } } });
   check("a non-number l is rejected by validation (boot keeps a backup)", !VC.validateProgShape(JSON.parse(bad), []).ok && VC.bootProg(bad, PACK).backupRaw === bad);
   check("progress carrying read (with l) is native, not legacy", !VC.isLegacyRecord(PACK, LEGACY, p));
@@ -596,7 +596,8 @@ console.log("\n[rotation-s] pack.readRotation (fb16): optional read.done s / ls 
   const p = clone(bo.prog);
   VC.markPassageDone(p, "p0001", 4, 5, "2026-10-03", true, RR);
   VC.markPassageDone(p, "p0002", 5, 5, "2026-10-03", false, RR);
-  check("this build writes s (and ls on a listening pass)", eq(p.read.done.p0001, { sc: 4, n: 5, d: "2026-10-03", x: 2, l: 1, s: 6, ls: 6 }) && eq(p.read.done.p0002, { sc: 5, n: 5, d: "2026-10-03", x: 3, s: 6 }));
+  check("this build writes s (and ls on a listening pass)", eq(p.read.done.p0001, { sc: 4, n: 5, d: "2026-10-03", x: 2, l: 1, s: 6, ls: 6 }) && eq(p.read.done.p0002, { sc: 5, n: 5, d: "2026-10-03", x: 3, l: 1, s: 6 }));
+  { const q = clone(bo.prog); VC.markPassageDone(q, "p0002", 5, 5, "2026-10-03", false, RR); VC.markPassageDone(q, "p0001", 4, 5, "2026-10-03", false, RR); check("[l kept] readRotation: a reading pass keeps l of an earlier listening pass (p0002) and adds none to a never-listened record (p0001)", q.read.done.p0002.l === 1 && q.read.done.p0002.s === 6 && q.read.done.p0002.x === 3 && !("l" in q.read.done.p0001) && eq(q.read.done.p0001, { sc: 4, n: 5, d: "2026-10-03", x: 2, s: 6 })); }
   const raw = JSON.stringify(p);
   const here = VC.bootProg(raw, RR), im = VC.applyImport(null, raw, RR);
   check("s/ls survive boot and export/import byte-identical", here.backupRaw === null && JSON.stringify(here.prog) === raw && im.ok && eq(im.prog.read, p.read));

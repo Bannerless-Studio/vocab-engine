@@ -222,7 +222,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     const r1 = VC.markPassageDone(q, "p1", 2, 5, "2026-09-27", true);
     check("markPassageDone listen -> {sc,n,d,x,l:1}", JSON.stringify(r1) === JSON.stringify({ sc:2, n:5, d:"2026-09-27", x:1, l:1 }));
     const r2 = VC.markPassageDone(q, "p1", 3, 5, "2026-10-05");
-    check("markPassageDone read after a listen -> no l (record replaced), x counts on", JSON.stringify(r2) === JSON.stringify({ sc:3, n:5, d:"2026-10-05", x:2 }));
+    check("markPassageDone read after a listen -> no l (record replaced; readPassMode alternates on it), x counts on", JSON.stringify(r2) === JSON.stringify({ sc:3, n:5, d:"2026-10-05", x:2 }));
     check("validateProgShape accepts done.l:1 and a record without l", VC.validateProgShape({ read: { done: { a: { sc:1, n:2, d:"2026-01-01", x:1, l:1 }, b: { sc:1, n:2, d:"2026-01-01", x:1 } } } }, []).ok);
     check("validateProgShape rejects a non-number l", !VC.validateProgShape({ read: { done: { a: { sc:1, n:2, l:"yes" } } } }, []).ok);
   }
@@ -782,6 +782,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check(`session 7's new passage is session 8's listening pass (${JSON.stringify(rd)})`, seq[7].p.id === seq[6].p.id && rd.s === 8 && rd.ls === 8);
     check("reading pass record before listening: no ls", (() => { const pr = blank(); session(pr, { rng: mulberry32(2) }); const r = Object.values(pr.read.done)[0]; return r.s === 1 && !("ls" in r) && !("l" in r); })());
     check("ls is kept across a later reading pass", (() => { const pr = allDone(4, [[A, 0, 2, 3, 2]]); VC.daySessionStart(pr, RON); VC.markPassageDone(pr, A.id, 1, full(A), daysAgo(0), false, RON); const r = pr.read.done[A.id]; return r.s === 5 && r.ls === 2 && !r.l; })());
+    check("[l kept] readRotation: a listen then a reading pass keeps l and ls; readPassMode follows the item mode, not l", (() => { const pr = blank(); VC.markPassageDone(pr, A.id, 2, 2, daysAgo(0), true, RON); VC.markPassageDone(pr, A.id, 2, 2, daysAgo(0), false, RON); const r = pr.read.done[A.id]; return r.l === 1 && r.ls === r.s - 0 && VC.readPassMode({ p: A, reason: "reread", mode: "read" }, pr, true, RON) === "read" && VC.readPassMode({ p: A, reason: "reread", mode: "listen" }, pr, true, RON) === "listen"; })());
     // Listening turn picks: latest pass a reading pass (s 5 > every ls).
     const lt = spec => allDone(5, [[D4, "full", 2, 5, 4]].concat(spec));
     const picks = (pr, o) => new Set(Array.from({ length: 40 }, (_, i) => (nx(pr, Object.assign({ rng: mulberry32(i + 1) }, o)) || { p: { id: "-" } }).p.id));

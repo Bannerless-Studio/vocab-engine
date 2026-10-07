@@ -666,7 +666,11 @@ const nextNewSetRaw = () => VC.nextNewSet(WORDS, PACK, prog);
 const nextNewSet = () => VC.nextNewSetOpen(WORDS, PACK, prog, CHAR_LIST);
 const gateNote = () => VC.levelGateNote(WORDS, PACK, prog, CHAR_LIST);
 // appView: the gate as one sentence, the same on Today and Progress.
-const gateSentence = () => { const h = VC.levelGateHold(WORDS, PACK, prog, CHAR_LIST); return h ? `${levelLabel(h.lv)} opens at ${Math.round(PACK.levelGate * 100)}% of ${levelLabel(h.prev)} known. Now ${h.pct}%.` : null; };
+const gateSentence = () => { const h = VC.levelGateHold(WORDS, PACK, prog, CHAR_LIST); return h ? `${levelLabel(h.lv)} opens at ${Math.round(PACK.levelGate * 100)}% of ${levelLabel(h.prev)} known. Now ${h.pct}%, ${etaText(VC.levelOpensIn(WORDS, PACK, prog, CHAR_LIST))}.` : null; };
+// appView ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"): "≈" marks every estimate; a done goal or an open gate (0 / null) shows nothing.
+// A no-break space keeps "≈" with its number when the gate sentence wraps.
+const etaText = n => { if(!n) return ""; const r = n >= 100 ? Math.round(n / 10) * 10 : n; return r > 999 ? "≈\u00a0999+ sessions" : `≈\u00a0${r} session${r === 1 ? "" : "s"}`; };
+const goalEta = cg => cg && !cg.all ? VC.sessionsToGoX(prog, cg.i, cg.n, { pack: PACK, words: WORDS, units: CHAR_LIST, passages: PASSAGE_LIST }) : null;
 const availableSentences = () => VC.availableSentences(SENTENCES, WORDS, PACK, prog);
 // docs/PACK_SCHEMA.md "pauseNew": paused, Today teaches nothing new (no Learn, no first read,
 // no sentence with an unlearned word); manual teaching outside Today is unchanged.
@@ -2433,11 +2437,13 @@ function progressMapHTML(){
   if(cg){
     const f = Math.min(10, Math.round(10 * cg.p)), n = VC.sessionsToGo(prog, cg.i, cg.n), pc = Math.round(cg.p * 100);
     const head = cg.all ? "All goals" : `Goal ${cg.i + 1} of ${cg.n}`;
-    return `<div class="pmap pmg" id="pmap" role="button" tabindex="0" aria-label="${pc}% of ${cg.all ? "all goals" : `goal ${cg.i + 1} of ${cg.n}`}: ${escapeHtml(cg.goal.label)}"><div class="pm1"><span class="pmh">${ui(head + " ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸")}</span> ${ui(cg.goal.label)}</div>${cg.all ? "" : `<div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div>`}</div>`;
+    const eta = APP_V2 ? etaText(goalEta(cg)) : "";
+    return `<div class="pmap pmg" id="pmap" role="button" tabindex="0" aria-label="${pc}% of ${cg.all ? "all goals" : `goal ${cg.i + 1} of ${cg.n}`}: ${escapeHtml(cg.goal.label)}"><div class="pm1"><span class="pmh">${ui(head + " ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸")}</span> ${ui(cg.goal.label)}</div>${APP_V2 ? (eta ? `<div class="pm2">${ui(eta)}</div>` : "") : cg.all ? "" : `<div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div>`}</div>`;
   }
   const p = VC.progressPosition(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST), f = Math.round(10 * p), n = VC.sessionsToGo(prog);
   const aria = `${Math.round(p * 100)}% of the way to following a drama without pausing`;
-  return `<div class="pmap" id="pmap" role="button" tabindex="0" aria-label="${aria}"><div class="pm1">${ui("You ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸ follow a drama without pausing")}</div><div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div></div>`;
+  const eta = APP_V2 ? etaText(VC.sessionsToGoX(prog)) : "";
+  return `<div class="pmap" id="pmap" role="button" tabindex="0" aria-label="${aria}"><div class="pm1">${ui("You ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸ follow a drama without pausing")}</div>${APP_V2 ? (eta ? `<div class="pm2">${ui(eta)}</div>` : "") : `<div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div>`}</div>`;
 }
 // Progress tab: every goal, one row each.
 function goalsBlockHTML(){
@@ -3585,9 +3591,9 @@ function pvGoalHTML(){
   if(!VC.progressMapOn(PACK)) return "";
   const cg = VC.currentGoal(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST);
   if(!cg) return "";
-  const pc = Math.round(cg.p * 100), n = cg.all ? null : VC.sessionsToGo(prog, cg.i, cg.n);
+  const pc = Math.round(cg.p * 100), n = cg.all ? null : VC.sessionsToGo(prog, cg.i, cg.n), eta = APP_V2 ? etaText(goalEta(cg)) : "";
   const head = cg.all ? "All goals" : `Goal ${cg.i + 1} of ${cg.n}`;
-  return `<section class="pvg"><div class="pvt"><span>${head}</span><span class="pvn">${n == null ? `${pc}%` : `≈ ${n} sessions to go`}</span></div><div class="pvb" role="img" aria-label="${pc}% of ${escapeHtml(head.toLowerCase())}"><i class="pvm" style="width:${pvPct(cg.p, 1)}"></i></div><p class="pvs">${escapeHtml(cg.goal.label)}</p></section>`;
+  return `<section class="pvg"><div class="pvt"><span>${head}</span><span class="pvn">${APP_V2 ? eta || `${pc}%` : n == null ? `${pc}%` : `≈ ${n} sessions to go`}</span></div><div class="pvb" role="img" aria-label="${pc}% of ${escapeHtml(head.toLowerCase())}"><i class="pvm" style="width:${pvPct(cg.p, 1)}"></i></div><p class="pvs">${escapeHtml(cg.goal.label)}</p></section>`;
 }
 // Show all: every goal, one line each, in the level rows' form.
 function pvGoalsHTML(){

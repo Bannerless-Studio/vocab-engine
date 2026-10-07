@@ -43,6 +43,7 @@ words_typed_checks||words
 progress_map_checks||progress
 progress_view_checks||progress
 app_view_checks||progress
+eta_checks||progress
 pairs_checks||pairs
 freq_tiers_checks||pairs
 patterns_checks||pairs,patterns
