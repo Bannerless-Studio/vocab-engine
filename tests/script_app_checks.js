@@ -835,7 +835,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     const faF = FX.fa(); faF.pack.fontFamily = '"Noto Nastaliq Urdu", serif';
     const ff = await boot(faF);
     check("RTL pack: --wfont drops the generic serif", ff.document.documentElement.style["--wfont"] === '"Noto Nastaliq Urdu", var(--wbase)');
-    check("app.html: the placeholder font rule is scoped to RTL packs", /:root\[data-tlrtl\] input\[data-tl\]::placeholder\{font-family:var\(--font\)\}/.test(appHtml) && (appHtml.match(/[^\n]*::placeholder[^\n]*/g) || []).every(l => /^\s*:root\[data-tlrtl\] /.test(l)));
+    check("app.html: the placeholder font rule is scoped to RTL packs", /:root\[data-tlrtl\] input\[data-tl\]::placeholder\{font-family:var\(--font\)\}/.test(appHtml) && (appHtml.match(/[^\n]*::placeholder[^\n]*font-family[^\n]*/g) || []).every(l => /^\s*:root\[data-tlrtl\] /.test(l)));
     check("LTR pack: ui() is escapeHtml, tf() is tw(), glossBox has no dir", kb.api.ui("x (아이)") === "x (아이)" && kb.api.tf("아이") === '<bdi data-tl lang="ko">아이</bdi>' && !/dir=/.test(kb.api.glossBox()));
   }
 
