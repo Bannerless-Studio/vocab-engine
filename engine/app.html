@@ -231,6 +231,21 @@
   :root[data-appview="v2"] .rvxb{width:auto;min-height:44px}
   :root[data-appview="v2"] .rvx{margin-top:8px}
   :root[data-appview="v2"] #panel>p.pva:first-child{margin:0 0 12px}
+  :root[data-appview="v2"] .plist button{font-family:var(--font)} /* buttons do not inherit the page font */
+  :root[data-appview="v2"] .plist .rsc{color:var(--mute);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  :root[data-appview="v2"] .rlv{margin-bottom:var(--sect)}
+  :root[data-appview="v2"] .rlv>.pvt{margin-bottom:2px}
+  :root[data-appview="v2"] .rlk{margin:0 0 8px!important}
+  :root[data-appview="v2"] .rback{display:block;width:fit-content;padding:10px 16px;margin-bottom:12px}
+  :root[data-appview="v2"] .wseg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px}
+  :root[data-appview="v2"] .wseg button{flex:1 1 0;min-width:0;min-height:44px;padding:8px 4px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--ink);font-family:var(--font);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  :root[data-appview="v2"] .wseg button:first-child{border-left:0}
+  :root[data-appview="v2"] .wseg button.on{background:var(--ink);color:var(--bg)}
+  :root[data-appview="v2"] .wnav{flex-wrap:nowrap;gap:4px}
+  :root[data-appview="v2"] .wnav #pv,:root[data-appview="v2"] .wnav #nx{border:0;min-width:44px;padding:8px 10px;font-size:18px}
+  :root[data-appview="v2"] .wnav .pvn{font-size:15px;white-space:nowrap}
+  :root[data-appview="v2"] .wnav #jump{margin-left:auto}
+  :root[data-appview="v2"] .tacts{margin-top:0} /* the test rows start under the header; nothing sits above them once placed */
   /* Stage path: one line per label, bars on one top line. A segment is as wide as its label
      plus an equal share of the rest (flex 1 1 auto), so a long script-stage label stays whole
      beside A1; labels only ellipsize when the whole strip cannot fit. flex-start: a taller
@@ -662,6 +677,7 @@ const APP_V2 = VC.appViewOn(PACK);
 if(APP_V2) document.documentElement.setAttribute("data-appview", "v2");
 // appView: the header names what is on screen (a Today step, a test); render() puts the tab name back.
 const setTitle = t => { if(APP_V2) $("htitle").textContent = t; };
+const VOICE_NOTICE_V2 = "No voice for this language in this browser. Listening items show the word instead.";
 const TODAY_STEP_TITLE = ["Review", "Learn", "Listen", "Recall", "Sentences", "Read"];
 const todayStepTitle = (s, listen) => s === 5 && listen ? "Listen" : TODAY_STEP_TITLE[s] || "Today";
 // appView: VC.progressTotals at Start, in memory only (no progress field): Session done reports what
@@ -682,7 +698,7 @@ let todayPrep = null;          // pack.characters: the snapshot + Review plan To
 let soundsSel = null;
 let wordsLv = LEVELS[0], wordsSet = null, wordsQuery = "";
 let RD = null;
-let testSel = null, PL = null;
+let testSel = null, PL = null, placeFrom = null; // placeFrom "progress": placement was opened from Progress Settings (appView), so it returns there
 let legacyNotice = null;       // one-time notice after the boot migration (HTML), until dismissed
 let legacyFail = null;         // boot found an old-app record it could not import: why (text); session read-only until "Start without it"
 // The voice probe can fire before boot's store.load(), while prog is still the default;
@@ -693,7 +709,7 @@ let booted = false;
 // Shown every visit (no dismiss: the problem persists until the learner switches browser).
 // todayRender() reads it, so it is declared before the voice probe can call render() (TDZ).
 const samsungNoticeHTML = VC.isSamsungBrowser(navigator.userAgent)
-  ? `<div class="warn">Audio doesn't play in Samsung Internet. Open this page in Chrome or Firefox to hear the words.</div>` : "";
+  ? `<div class="warn">Audio doesn't play in Samsung Internet. Open this page in Chrome or Firefox to hear ${APP_V2 ? "" : "the "}words.</div>` : "";
 
 const SS = window.speechSynthesis || null;
 const speechAPI = !!(SS && window.SpeechSynthesisUtterance);
@@ -827,7 +843,7 @@ function listenLine(lw){
 function speechNotice(){
   if(hasSpeech || PACK_AUDIO || noticeShown) return "";
   noticeShown = true;
-  return `<div class="warn">This browser has no text-to-speech voice for this language, so listening items show the word instead of playing audio.</div>`;
+  return `<div class="warn">${APP_V2 ? VOICE_NOTICE_V2 : "This browser has no text-to-speech voice for this language, so listening items show the word instead of playing audio."}</div>`;
 }
 // Items are built in plan order, then shuffled, so the one-time notice is attached on the
 // render path: it lands on whichever needsNotice item is shown first.
@@ -2288,6 +2304,7 @@ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{
   const same = b.dataset.t === tab;
   // pack.progressView: leaving Progress is the visit the next one is measured against.
   if(tab === "progress" && !same) progressLeave();
+  if(tab === "read" && !same) readOpen = false;
   // A finished drill or passage (its results on screen) ends on a re-tap, as render() ends
   // it; a Today drill's results are mid-session, so Today keeps them.
   const fin = (rzFin && rzFin.rzo && RZ_TAB[rzFin.rzo.o] !== "today") || (RD && RD.resultsDone && !RD.today);
@@ -2528,7 +2545,9 @@ function readPlanLine(r){
   const t = pfRubyText(p.title, p.titleRuby) ? rubyTw(p.title, p.titleRuby) : tf(p.title);
   return `${ui(r.mode === "listen" ? "1 passage to listen to: " : r.reason === "reread" ? "1 passage to re-read: " : "1 passage: ")}${t}${ui(` (${levelLabel(p.lv)}, ${VC.passageLength(p, PACK)} words)`)}`;
 }
-function enterPlacementFromToday(){ switchToTab("test", "Test"); testSel = "placement"; startPlacement(); }
+function enterPlacementFromToday(){ placeFrom = null; switchToTab("test", "Test"); testSel = "placement"; startPlacement(); }
+function enterPlacementFromProgress(){ placeFrom = "progress"; switchToTab("test", "Test"); testSel = "placement"; testRender(); }
+function leavePlacement(){ if(placeFrom === "progress"){ placeFrom = null; testSel = null; document.querySelector('#tabs button[data-t="progress"]').click(); } else { testSel = null; testRender(); } }
 function enterFirstSoundsLessonFromToday(){
   switchToTab("sounds", "Sounds");
   soundsSel = 0;
@@ -2702,7 +2721,7 @@ function lessonTeach(lesson, onDone, onBack){
   setScore(0,0); screenTop();
   if(!prog.soundsOpened){ prog.soundsOpened = true; store.save(); }
   const P = $("panel");
-  P.innerHTML = `${onBack ? '<div class="row"><button id="back">‹ lessons</button></div>' : ""}<p class="q">${ui(lesson.blurb)}</p>
+  P.innerHTML = `${onBack ? (APP_V2 ? '<button class="ghost rback" id="back">Lessons</button>' : '<div class="row"><button id="back">‹ lessons</button></div>') : ""}<p class="q">${ui(lesson.blurb)}</p>
     <div id="cards"></div><div class="actions"><button class="next" id="dr">Drill</button></div>`;
   if(onBack) $("back").onclick = onBack;
   const cw = $("cards");
@@ -2721,7 +2740,7 @@ function lessonTeach(lesson, onDone, onBack){
   // One notice per lesson screen: the drill shuffles, so a per-item notice could land anywhere.
   const hasSay = lesson.items.some(it => it.say);
   if(!hasSpeech && hasSay){
-    $("cards").insertAdjacentHTML("beforebegin", `<div class="warn">This browser has no voice for this language, so listening items show the text instead of playing audio.${skipped ? ` ${skipped} item${skipped>1?"s were":" was"} skipped because the text would give the answer away.` : ""}</div>`);
+    $("cards").insertAdjacentHTML("beforebegin", `<div class="warn">${APP_V2 ? "No voice for this language in this browser. Listening items show the text instead." : "This browser has no voice for this language, so listening items show the text instead of playing audio."}${skipped ? ` ${skipped} item${skipped>1?"s were":" was"} skipped because the text would give the answer away.` : ""}</div>`);
   }
   $("dr").onclick = () => drill(planned.map(x => lessonItem(x.it, VC.lessonItemKey(lesson.id, x.i), x.mode)), onDone, missSummary);
 }
@@ -2739,7 +2758,8 @@ function soundsRender(){
     return;
   }
   const done = LESSON_LIST.filter(l=>prog.lessons[l.id]).length;
-  P.innerHTML = `<p class="q">Optional: how ${ui(PACK.name)} sounds and is written. ${LESSON_LIST.length} lessons, ${done} done.</p>
+  // appView: the pack name without a trailing parenthetical (its level range).
+  P.innerHTML = `${APP_V2 ? `<p class="q">${LESSON_LIST.length} short lesson${LESSON_LIST.length === 1 ? "" : "s"} on how ${ui(String(PACK.name || "").replace(/\s*\([^)]*\)\s*$/, ""))} sounds and is written.</p>` : `<p class="q">Optional: how ${ui(PACK.name)} sounds and is written. ${LESSON_LIST.length} lessons, ${done} done.</p>`}
     ${HAS_SCRIPT ? scriptTabHTML() : ""}<div class="plist">${LESSON_LIST.map((l,i)=>`<button data-i="${i}"><span>${ui(l.title)}</span>${prog.lessons[l.id]?'<span class="tick">✓</span>':''}</button>`).join("")}</div>${SOUNDS_REF ? soundsRefHTML() : ""}`;
   P.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{ soundsSel = +b.dataset.i; soundsRender(); });
   if(SOUNDS_REF) P.querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>speak(b.dataset.rs, b));
@@ -2800,7 +2820,8 @@ function wordsRender(){
   stopSpeaking();
   setScore(0,0);
   const P = $("panel");
-  const pronChip = PACK.showPron !== false ? `<button class="chip ${showPron()?'on':''}" id="wPron" aria-label="Show pronunciation" aria-pressed="${showPron()}">Pron</button>` : "";
+  // appView: one name for one setting, the same word as the Progress chip (PRON_NOUN).
+  const pronChip = PACK.showPron !== false ? `<button class="chip ${showPron()?'on':''}" id="wPron" aria-label="Show ${APP_V2 ? escapeHtml(PRON_NOUN) : "pronunciation"}" aria-pressed="${showPron()}">${APP_V2 ? escapeHtml(PRON_NOUN.charAt(0).toUpperCase() + PRON_NOUN.slice(1)) : "Pron"}</button>` : "";
   P.innerHTML = `<div class="row">
       <input type="text" id="wsearch" autocomplete="off" dir="auto" placeholder="Search word or meaning…" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:15px" value="${escapeHtml(wordsQuery)}">
       ${pronChip}
@@ -2856,13 +2877,17 @@ function renderWordBody(){
   const set = list.slice(wordsSet*SIZE, wordsSet*SIZE+SIZE);
   const setDone = set.length > 0 && set.every(w => got.has(w.id));
   const canReview = lwAll.length >= 5;
-  body.innerHTML = `<div class="row">${LEVELS.map(lv=>`<button data-l="${escapeHtml(lv)}" class="${lv===wordsLv?'on':''}">${escapeHtml(levelLabel(lv))}</button>`).join("")}</div>
+  // appView: "Next new" only away from the next set; Review sits under Drill.
+  body.innerHTML = APP_V2 ? `<div class="wseg" role="group" aria-label="Level">${LEVELS.map(lv=>`<button data-l="${escapeHtml(lv)}" id="wl_${escapeHtml(lv)}" class="${lv===wordsLv?'on':''}" aria-pressed="${lv===wordsLv}">${escapeHtml(levelLabel(lv))}</button>`).join("")}</div>
+    <div class="row wnav"><button id="pv" aria-label="Previous set">‹</button><span class="pvn">Set ${wordsSet+1} of ${total}${setDone?' ✓':''}</span><button id="nx" aria-label="Next set">›</button>${wordsSet !== next ? `<button id="jump">Next new</button>` : ""}</div>
+    <div id="wl"></div><div class="actions"><button class="next" id="dr">Drill this set</button>${canReview ? `<button class="ghost" id="rev">Review</button>` : ""}</div>`
+  : `<div class="row">${LEVELS.map(lv=>`<button data-l="${escapeHtml(lv)}" class="${lv===wordsLv?'on':''}">${escapeHtml(levelLabel(lv))}</button>`).join("")}</div>
     <div class="row"><button id="pv">‹</button><button class="on">Set ${wordsSet+1} / ${total}${setDone?' ✓':''}</button><button id="nx">›</button><button id="jump">next new</button>${canReview ? `<button id="rev">review</button>` : ""}</div>
     <div id="wl"></div><div class="actions"><button class="next" id="dr">Drill this set</button></div>`;
-  body.querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{ wordsLv = b.dataset.l; wordsSet = null; renderWordBody(); });
+  (APP_V2 ? LEVELS.map(lv => $("wl_" + lv)) : body.querySelectorAll("[data-l]")).forEach(b=>b.onclick=()=>{ wordsLv = b.dataset.l; wordsSet = null; renderWordBody(); });
   $("pv").onclick = () => { wordsSet = Math.max(0, wordsSet-1); renderWordBody(); };
   $("nx").onclick = () => { wordsSet = Math.min(total-1, wordsSet+1); renderWordBody(); };
-  $("jump").onclick = () => { wordsSet = next; renderWordBody(); };
+  if(!APP_V2 || wordsSet !== next) $("jump").onclick = () => { wordsSet = next; renderWordBody(); };
   wordListInto($("wl"), set);
   $("dr").onclick = () => {
     const items = []; withLearn(set.map(w => w.id), () => set.forEach(w => items.push(...learnPair(w))));
@@ -2886,6 +2911,7 @@ function readRender(){
   const P = $("panel");
   const pct = Math.round(VC.READ_UNLOCK * 100);
   const levels = readLevelsNow().filter(l => l.count > 0);
+  if(APP_V2){ readListV2(P, levels, pct); return; }
   P.innerHTML = `<p class="q">Short passages built from this course's words. Tap any underlined word for its meaning, then answer a few questions.</p>
     ${levels.map(l => {
       const L = escapeHtml(levelLabel(l.lv));
@@ -2897,6 +2923,33 @@ function readRender(){
           return `<button data-pid="${escapeHtml(p.id)}"${DISP.rtl ? ' dir="rtl"' : ""}><span>${rubyTw(p.title, p.titleRuby, true)}<span class="q"${UIA} style="display:block;margin:0;font-size:13px">${VC.passageLength(p, PACK)} words</span></span>${d ? `<span class="tick"${UIA}>✓ ${d.sc} / ${d.n}</span>` : ""}</button>`; }).join("")}</div></div>`;
     }).join("")}`;
   P.querySelectorAll("[data-pid]").forEach(b => b.onclick = () => startPassage(PASSAGE_LIST.find(p => p.id === b.dataset.pid)));
+}
+// appView: the anchor is the highest open level with its unread passages first; levels read to the end fold into
+// one line that opens on a tap (view state, folded again when the tab is left); a locked level is one quiet line.
+let readOpen = false;
+function readListV2(P, levels, pct){
+  const psOf = l => PASSAGE_LIST.filter(p => p.lv === l.lv);
+  const allRead = l => psOf(l).every(passageDone);
+  const open = levels.filter(l => l.unlocked), anchor = open[open.length - 1] || null;
+  const fin = open.filter(l => l !== anchor && allRead(l)), rest = open.filter(l => l !== anchor && !allRead(l)).reverse();
+  const hold = VC.levelGateHold(WORDS, PACK, prog, CHAR_LIST);
+  const row = p => { const d = passageDone(p);
+    const mark = !d ? "" : d.sc >= d.n ? `<span class="tick" role="img" aria-label="${d.sc} of ${d.n}"${UIA}>✓</span>` : `<span class="rsc"${UIA}>${d.sc} of ${d.n}</span>`;
+    return `<button data-pid="${escapeHtml(p.id)}"${DISP.rtl ? ' dir="rtl"' : ""}><span>${rubyTw(p.title, p.titleRuby, true)}</span>${mark}</button>`; };
+  const block = l => { const ps = psOf(l), list = l === anchor ? ps.filter(p => !passageDone(p)).concat(ps.filter(passageDone)) : ps;
+    return `<div class="rlv"><div class="pvt"><span>${escapeHtml(levelLabel(l.lv))}</span><span class="pvn">${ps.filter(passageDone).length} of ${ps.length} read</span></div><div class="plist">${list.map(row).join("")}</div></div>`; };
+  const contiguous = fin.every((l, i) => !i || levels.indexOf(l) === levels.indexOf(fin[i - 1]) + 1);
+  const finName = !fin.length ? "" : fin.length === 1 || !contiguous ? fin.map(l => levelLabel(l.lv)).join(", ") : pvRange(levelLabel(fin[0].lv), levelLabel(fin[fin.length - 1].lv));
+  // Only levels read to the end fold, so the line names them and nothing else ("30 of 30 read" never varies).
+  const foldLine = `<div class="rlv"><button class="pvc" id="rfold" aria-expanded="false" aria-label="${escapeHtml(finName)}, all read"><span>${escapeHtml(finName)}</span></button></div>`;
+  const locked = l => { const L = levelLabel(l.lv);
+    // Read passages open on the level's OWN words learned; the level gate only holds its new words, so it adds one clause.
+    const t = `${L} passages open at ${pct}% of its words learned. Now ${l.learned} of ${l.total}.${hold && String(hold.lv) === String(l.lv) ? ` New ${L} words wait on ${levelLabel(hold.prev)}.` : ""}`;
+    return `<p class="pvs rlk" data-locked="${escapeHtml(l.lv)}">${escapeHtml(t)}</p>`; };
+  P.innerHTML = `${PASSAGE_LIST.some(passageDone) ? "" : `<p class="q">Short passages built from this course's words. Tap any underlined word for its meaning, then answer a few questions.</p>`}
+    ${anchor ? block(anchor) : ""}${rest.map(block).join("")}${fin.length ? (readOpen ? fin.map(block).join("") : foldLine) : ""}${levels.filter(l => !l.unlocked).map(locked).join("")}`;
+  P.querySelectorAll("[data-pid]").forEach(b => b.onclick = () => startPassage(PASSAGE_LIST.find(p => p.id === b.dataset.pid)));
+  if(fin.length && !readOpen) $("rfold").onclick = () => { readOpen = true; readRender(); };
 }
 function startPassage(p, today, mode){
   if(!p) return;
@@ -3062,9 +3115,9 @@ function listenScreen(){
   const p = RD.p, P = $("panel");
   // Every way onto this screen has just stopped speech, so no chain survives a re-render.
   RD.playing = false;
-  P.innerHTML = `<div class="row">${RD.today ? `<button id="rskip">Skip today</button>` : `<button id="rback">‹ passages</button>`}</div>
+  P.innerHTML = `${readBackHTML()}
     <h2 class="ptitle"${TA}>${rubyTextOr(p.title, p.titleRuby)}</h2>
-    <p class="q">Listening pass · ${escapeHtml(levelLabel(p.lv))} · ${p.sentences.length} sentence${p.sentences.length === 1 ? "" : "s"}. Listen, then answer the questions.</p>
+    <p class="q">${APP_V2 ? "Listening pass" : `Listening pass · ${escapeHtml(levelLabel(p.lv))} · ${p.sentences.length} sentence${p.sentences.length === 1 ? "" : "s"}. Listen, then answer the questions.`}</p>
     <div class="row"><button id="lplay">Play all</button><button id="ltext" aria-expanded="${RD.textShown}">${RD.textShown ? "Hide text" : "Show text"}</button></div>
     ${glossBox()}
     <div class="passage" id="pbox">${RD.textShown ? passageHTML(-1) : listenRowsHTML()}</div>
@@ -3097,13 +3150,16 @@ function listenScreen(){
   $("rdone").onclick = () => { leave(); RD.qi = 0; RD.shown = false; readQuestionScreen(); };
   sessionSave(true);
 }
+const readBackHTML = () => RD.today ? `<div class="row"><button id="rskip">Skip today</button></div>` : APP_V2 ? `<button class="ghost rback" id="rback">Passages</button>` : `<div class="row"><button id="rback">‹ passages</button></div>`;
 function readPassageScreen(){
   setScore(0,0); screenTop();
   if(RD.mode === "listen"){ listenScreen(); return; }
   const p = RD.p, P = $("panel");
-  P.innerHTML = `<div class="row">${RD.today ? `<button id="rskip">Skip today</button>` : `<button id="rback">‹ passages</button>`}</div>
+  // appView: the dotted underline is the affordance once a passage has been read; the first time says it.
+  const meta = !APP_V2 ? `${escapeHtml(levelLabel(p.lv))} · ${VC.passageLength(p, PACK)} words. Tap a word to see its meaning.` : PASSAGE_LIST.some(passageDone) ? "" : "Tap a word to see its meaning.";
+  P.innerHTML = `${readBackHTML()}
     <h2 class="ptitle"${TA}>${rubyTextOr(p.title, p.titleRuby)}</h2>
-    <p class="q">${escapeHtml(levelLabel(p.lv))} · ${VC.passageLength(p, PACK)} words. Tap a word to see its meaning.</p>
+    ${meta ? `<p class="q">${meta}</p>` : ""}
     ${glossBox()}
     <div class="passage" id="pbox">${passageHTML(-1)}</div>
     <div class="actions"><button class="next" id="rdone">Done reading</button></div>`;
@@ -3134,7 +3190,7 @@ function readQuestionScreen(){
   const qTr = () => q.en ? `<div id="qtrwrap">${view.trShown ? `<div class="q cue">${ui(q.en)}</div>` : `<button class="ghost" id="qtr" style="margin:8px 0">Show translation</button>`}</div>` : "";
   const qHidden = RD.mode === "listen" && hearQ && RD.audioOnly.indexOf(qi) >= 0 && !view.qOpen && rec.ok === null;
   const nxBtn = `<button class="next" id="nx" style="display:none">${qi+1 < p.questions.length ? "Next" : "See results"}</button>`;
-  P.innerHTML = `<div class="drill-body top"><p class="q">Question ${qi+1} / ${p.questions.length}</p>
+  P.innerHTML = `<div class="drill-body top">${APP_V2 ? "" : `<p class="q">Question ${qi+1} / ${p.questions.length}</p>`}
     ${qHidden ? `<div id="qshwrap"><button class="ghost" id="qsh" style="margin:8px 0">Show question</button></div>${REPLAY_STAGE}` : `${qText()}${hearQ ? REPLAY_STAGE : ""}${qTr()}`}
     <div class="opts ${tf ? "" : "opts-w"}" id="o"></div>
     ${READ_BLOCK ? `<div id="qans"><div class="reveal" id="rv"></div>${nxBtn}</div>` : `<div class="reveal" id="rv"></div>`}
@@ -3195,7 +3251,7 @@ function readQuestionScreen(){
     [...box.children].forEach(x => { x.disabled = true; if(x.dataset.v === String(q.answer)) x.classList.add("ok"); if(!rec.ok && x.dataset.v === String(rec.given)) x.classList.add("bad"); });
     const s = p.sentences[q.sentence];
     const hearS = canHearSentence(s);
-    showReveal(`<div class="q" style="margin:0 0 6px">${rec.ok ? "Right." : "Not quite."} The answer is in this sentence:</div><div class="stmt hi" style="margin:0"${TOKBOX}><div${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:4px 0 0">${ui(s.en)}</div></div>${hearS ? REVEAL_REPLAY : ""}`);
+    showReveal(`<div class="q" style="margin:0 0 6px">${rec.ok ? "Right." : "Not quite."}${APP_V2 ? "" : " The answer is in this sentence:"}</div><div class="stmt hi" style="margin:0"${TOKBOX}><div${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:4px 0 0">${ui(s.en)}</div></div>${hearS ? REVEAL_REPLAY : ""}`);
     // speak() cancels the question's TTS, so the source sentence never overlaps it.
     if(hearS){ const rb = $("rvp"); if(fresh) saySentence(s, rb); rb.onclick = () => saySentence(s, rb); }
     const hs = $("pbox").querySelector(`[data-si="${q.sentence}"]`); if(hs) hs.classList.add("hi");
@@ -3247,17 +3303,23 @@ function readResults(){
   if(RD.today && paused()){ const lw = new Set(learnedWords().map(w => w.id)); weak.forEach(w => { if(!lw.has(w.id)) w.weight = 0; }); }
   // Weight-0 entries (paused, unlearned) are information: never applied, no checkbox.
   const anyWeak = weak.some(w => w.weight > 0);
+  // appView: missed questions open, the right ones fold into one line that opens on a tap; no weak words is whitespace.
+  const qBlock = (q, i) => { const a = RD.answers[i] || {}, s = p.sentences[q.sentence], seen = [a.qh && "question", a.tr && "translation"].filter(Boolean);
+    return `<div class="stmt"${TOKBOX}>${seen.length ? `<p class="pvs" style="margin:0 0 4px!important"${UIA}>${seen.join(" and ").replace(/^./, c => c.toUpperCase())} shown</p>` : ""}<div${TA}>${rubyTextOr(q.q, q.ruby)}</div><div style="margin-top:6px"${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:2px 0 0">${ui(s.en)}</div>${canHearSentence(s) ? `<button type="button" class="replay" id="rr${i}" aria-label="Replay">${REPLAY_SVG}</button>` : ""}</div>`; };
+  const qIdx = p.questions.map((q, i) => i), qMiss = qIdx.filter(i => !(RD.answers[i] || {}).ok), qRight = qIdx.filter(i => (RD.answers[i] || {}).ok);
+  const qListV2 = () => `${qMiss.length ? `<p class="pvk">Missed</p>${qMiss.map(i => qBlock(p.questions[i], i)).join("")}` : ""}${qRight.length ? `<button class="pvc" id="rright" aria-expanded="false" aria-controls="rrbox"><span>${qRight.length} right</span></button><div id="rrbox" hidden>${qRight.map(i => qBlock(p.questions[i], i)).join("")}</div>` : ""}`;
   // Without RD.added a re-mount would offer "Add to review" again and apply the same words twice.
-  P.innerHTML = `<div class="done"><h2>${sc} / ${p.questions.length}</h2>
+  P.innerHTML = `<div class="done"><h2>${sc} ${APP_V2 ? "of" : "/"} ${p.questions.length}</h2>
     ${RD.mode === "listen" ? `<p class="q" id="lmode" style="margin-bottom:4px">Listening pass</p>` : ""}<p class="q"${TA} style="margin-bottom:8px">${rubyTextOr(p.title, p.titleRuby)}</p>
-    ${p.questions.map((q, i) => { const a = RD.answers[i] || {}; const s = p.sentences[q.sentence]; const hearS = canHearSentence(s);
+    ${APP_V2 ? qListV2() : p.questions.map((q, i) => { const a = RD.answers[i] || {}; const s = p.sentences[q.sentence]; const hearS = canHearSentence(s);
       return `<div class="stmt"${TOKBOX}><div class="q" style="margin:0 0 4px;color:${a.ok ? "var(--ok)" : "var(--bad)"}">${a.ok ? "✓" : "✗"} Question ${i+1}${a.qh ? " · question shown" : ""}${a.tr ? " · translation shown" : ""}</div><div${TA}>${rubyTextOr(q.q, q.ruby)}</div><div style="margin-top:6px"${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:2px 0 0">${ui(s.en)}</div>${hearS ? `<button type="button" class="replay" id="rr${i}" aria-label="Replay">${REPLAY_SVG}</button>` : ""}</div>`; }).join("")}
     ${anyWeak ? `<p class="q">Weak words from this passage${RD.today ? ". Ticked ones go to your next review." : ""}</p><div id="weak">${weak.map((w, i) => `<label class="wk"${DISP.rtl ? ' dir="rtl"' : ""}>${w.weight > 0 ? `<input type="checkbox" data-wi="${i}"${RD.unticked[i] ? "" : " checked"}${RD.added ? " disabled" : ""}> ` : ""}${glossHTML(w.id, RD.glosses && RD.glosses[w.id])} <span class="q"${UIA} style="margin:0;font-size:13px">${escapeHtml(w.why.map(x => WHY_LABEL[x]).join(", "))}</span></label>`).join("")}</div>
-      ${RD.today ? "" : `<button class="next" id="addrev"${RD.added ? " disabled" : ""}>Add to review</button>`}` : `<p class="q">No weak words from this passage.</p>`}
+      ${RD.today ? "" : `<button class="next" id="addrev"${RD.added ? " disabled" : ""}>Add to review</button>`}` : APP_V2 ? "" : `<p class="q">No weak words from this passage.</p>`}
     ${RD.today ? `<button class="next" id="rcont" style="margin-top:10px">Continue</button></div>` : `<div id="addmsg" class="q"${RD.added ? "" : " hidden"}>${RD.added ? escapeHtml(RD.added) : ""}</div>
     <button class="ghost" id="rlist" style="margin-top:10px">Back to passages</button></div>`}`;
   // Replay only: results is a review screen, nothing autoplays here.
   p.questions.forEach((q, i) => { const s = p.sentences[q.sentence]; if(canHearSentence(s)){ const rb = $("rr"+i); rb.onclick = () => saySentence(s, rb); } });
+  if(APP_V2 && qRight.length) $("rright").onclick = () => { const box = $("rrbox"), b = $("rright"); box.hidden = !box.hidden; b.setAttribute("aria-expanded", String(!box.hidden)); };
   const rd = RD;
   P.querySelectorAll("[data-wi]").forEach(x => { x.onchange = () => { rd.unticked[x.dataset.wi] = !x.checked; }; });
   if(RD.today){
@@ -3299,7 +3361,17 @@ function testRender(){
   const lockNote = (id, text) => `<p class="q" id="${id}" style="margin:8px 0 0">${text}</p>`;
   const sentNote = !needMore && !tg.sentences ? lockNote("tSentLock", `Sentences test: unlocks at ${VC.TEST_MIN_SENTENCES} sentences (${availSent.length} so far).`) : "";
   const charNote = !needMore && HAS_CHARACTERS && !charsOn ? lockNote("tCharsLock", "Characters test: unlocks when the characters stage starts on Today.") : "";
-  P.innerHTML = `<p class="q">Placement finds where to start. Free tests draw from what's already learned.</p>
+  // appView: placement leads before the first placement and is gone after it (owner 2026-10-08; Reset all progress
+  // brings it back); a test of 20 drops its count.
+  const placed = !!prog.placedOnce, cnt = n => n === 20 ? "" : ` ${n}`;
+  P.innerHTML = APP_V2 ? `${placed ? "" : `<p class="q">Placement finds where to start. Free tests draw from what's already learned.</p>`}
+    <div class="actions tacts">
+      ${needMore ? (placed ? `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far).</div>` : `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far). Learn ${VC.TEST_MIN_WORDS} words first, or let placement find where to start.<button class="next" id="needPlace" style="margin-top:8px">Take the placement test</button></div>`) : placed ? "" : `<button class="next" id="pl">Take the placement test</button>`}
+      ${tg.words ? `${hearN ? `<button class="ghost" id="tListen">Listen${cnt(hearN)}</button>` : lockNote("tListenLock", "Listen test: no items until a voice or recording is available.")}
+      <button class="ghost" id="tRecall">Recall${cnt(n20)}</button>` : ""}
+      ${tg.sentences ? `<button class="ghost" id="tSentences">Sentences${cnt(sentN)}</button>` : sentNote}${charN ? `
+      <button class="ghost" id="tChars">Characters${cnt(charN)}</button>` : charNote}
+    </div>` : `<p class="q">Placement finds where to start. Free tests draw from what's already learned.</p>
     <div class="actions">
       ${needMore ? `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far). Learn ${VC.TEST_MIN_WORDS} words first, or let placement find where to start.<button class="next" id="needPlace" style="margin-top:8px">Take the placement test</button></div>` : `<button class="next" id="pl">Take Placement</button>`}
       ${tg.words ? `<div class="row" style="margin-top:8px;margin-bottom:0">
@@ -3309,8 +3381,10 @@ function testRender(){
       ${tg.sentences ? `<button class="ghost" id="tSentences">Sentences ${sentN}</button>` : sentNote}${charN ? `
       <button class="ghost" id="tChars">Characters ${charN}</button>` : charNote}
     </div>`;
-  if(needMore) $("needPlace").onclick = enterPlacementFromToday;
-  else $("pl").onclick = () => { testSel = "placement"; testRender(); };
+  if(!(APP_V2 && placed)){
+    if(needMore) $("needPlace").onclick = enterPlacementFromToday;
+    else $("pl").onclick = () => { placeFrom = null; testSel = "placement"; testRender(); };
+  }
   if(tg.words){
     if(hearN) $("tListen").onclick = () => drill(pickHear(hearLw,20).map(hearItem), testRender, missSummary);
     $("tRecall").onclick = () => drill(VC.buildRecallPlan(lw, prog, PACK, 20, { missedKinds: false, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn() }).map(itemFromPlan), testRender, missSummary);
@@ -3330,11 +3404,11 @@ function placeRender(){
   D = null; drillKeyHandler = null; PL = null; setScore(0,0);
   const P = $("panel"); const lw = learnedWords();
   const first = levelLabel(PACK.placement[0][0]), last = levelLabel(PACK.placement[PACK.placement.length-1][0]);
-  P.innerHTML = `<div class="row"><button id="back">‹ test</button></div>
+  P.innerHTML = `${APP_V2 ? `<button class="ghost rback" id="back">${placeFrom === "progress" ? "Progress" : "Test"}</button>` : `<div class="row"><button id="back">‹ test</button></div>`}
     <p class="q">${placementItemTotal()} words across ${escapeHtml(first)}–${escapeHtml(last)}: hear or read the word, pick the meaning. No feedback until the end. Places you inside a level; skipped words stay in review as provisional.</p>
     ${lw.length ? `<p class="q">Current: ${lw.length} words learned. Retaking can only move you forward: nothing already learned is lost.</p>` : ""}
-    <div class="actions"><button class="next" id="go">Start placement</button></div>`;
-  $("back").onclick = () => { testSel = null; testRender(); };
+    <div class="actions"><button class="next" id="go">${APP_V2 ? "Start" : "Start placement"}</button></div>`;
+  $("back").onclick = leavePlacement;
   $("go").onclick = startPlacement;
 }
 function startPlacement(){
@@ -3378,8 +3452,8 @@ function placeResult(){
   P.innerHTML = `<div class="done"><h2>Start at ${escapeHtml(pos)}</h2>
     <table class="stats">${st.map((b,i)=>{ const r = PL.res[i]; return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${i<passed?'var(--ok)':'var(--bad)'}">${r.r}/${r.n}</td></tr>`; }).join("")}</table>
     <p class="q">${learnedWords().length} words learned; newly placed ones are provisional and kept in review.</p>
-    <button class="next" id="ok">Go to Today</button></div>`;
-  $("ok").onclick = () => { switchToTab("today", "Today"); testSel = null; render(); };
+    <button class="next" id="ok">${APP_V2 && placeFrom === "progress" ? "Back to Progress" : "Go to Today"}</button></div>`;
+  $("ok").onclick = () => { if(APP_V2 && placeFrom === "progress"){ leavePlacement(); return; } placeFrom = null; switchToTab("today", "Today"); testSel = null; render(); };
 }
 
 const progressToolsHTML = () => `
@@ -3394,7 +3468,7 @@ const progressToolsHTML = () => `
       <div id="impErr" class="warn" style="display:none;margin-top:8px"></div>${HAS_LEGACY ? `
       <div id="impSum" class="stmt" style="display:none;margin-top:8px"></div>` : ""}
     </div>
-    <button class="ghost" id="reset" style="margin-top:16px;color:var(--bad);border-color:var(--bad)">Reset all progress</button>`;
+    ${APP_V2 ? `<button class="ghost" id="placeRow" style="margin-top:16px">Placement test</button>` : ""}<button class="ghost" id="reset" style="margin-top:16px;color:var(--bad);border-color:var(--bad)">Reset all progress</button>`;
 const patternRowHTML = () => { const st = VC.patternStats(prog, PACK, PATTERN_LIST, WORDS); return `<tr><td>Patterns</td><td>${st.done} done / ${st.open} open (of ${st.total})</td></tr>`; };
 function progressRender(){
   if(PROGRESS_V2) return progressRenderV2();
@@ -3416,7 +3490,7 @@ function progressRender(){
   const weak = weakFirst(lwAll.filter(w=>VC.weakScore(prog.w[w.id])>0), 10);
   const cp = HAS_CHARACTERS ? charProgress() : null;
   const xp = HAS_SCRIPT ? scriptProgress() : null;
-  P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound.</div>`}${goalsBlockHTML()}
+  P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">${APP_V2 ? VOICE_NOTICE_V2 : "No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound."}</div>`}${goalsBlockHTML()}
     <table class="stats${cp && cp.block ? " nw" : ""}">${xp ? xp.rows : ""}${rows}${PATTERNS_ON ? patternRowHTML() : ""}${cp ? cp.rows : ""}
       ${HAS_PASSAGES ? VC.readingStats(PASSAGE_LIST, PACK, prog).map(r => `<tr><td>${escapeHtml(levelLabel(r.lv))} reading</td><td>${r.done} / ${r.total} passages${r.avg != null ? ` · avg ${r.avg}%` : ""}</td></tr>`).join("") : ""}
       ${HAS_LESSONS ? `<tr><td>Sounds</td><td>${LESSON_LIST.filter(l=>prog.lessons[l.id]).length} / ${LESSON_LIST.length} lessons done</td></tr>` : ""}
@@ -3474,6 +3548,7 @@ function progressWire(xp, cp){
       showImportError("That doesn't look like valid exported progress: " + (e && e.message ? e.message : "could not be read"));
     }
   };
+  if(APP_V2) $("placeRow").onclick = enterPlacementFromProgress;
   $("reset").onclick = async () => {
     if(!confirm(`Reset all progress? A copy is kept under ${STORE_KEY}_reset_backup until the next reset.`)) return;
     if(!(await store.backup("reset_backup", JSON.stringify(prog)))){ alert("Reset cancelled: the current progress couldn't be backed up first (storage unavailable)."); return; }
@@ -3580,7 +3655,7 @@ function progressRenderV2(){
   const missed = VC.recentMisses(prog, lwAll).slice(0, 12);
   const weak = all ? weakFirst(lwAll.filter(w => VC.weakScore(prog.w[w.id]) > 0), 10) : [];
   const N = VC.WEEK_SESSIONS;
-  P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound.</div>`}<div class="pv">
+  P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">${APP_V2 ? VOICE_NOTICE_V2 : "No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound."}</div>`}<div class="pv">
     <p class="pva">${prog.sessions || 0} session${prog.sessions === 1 ? "" : "s"}, ${escapeHtml(levelLabel(LEVELS[at]))}</p>
     ${pvHeroHTML(cur, anim)}${pvGoalHTML()}${all ? pvGoalsHTML() : ""}
     <section class="pvls">${all ? `<div class="pvl" id="pvLearned"><div class="pvt"><span>Learned</span><span class="pvn">${lwAll.length} of ${WORDS.length}</span></div></div>` : ""}${xp ? `<table class="stats">${xp.rows}</table>` : ""}${lvData.map(levelRow).join("")}${cp && !lag && cp.rows ? `<table class="stats">${cp.rows}</table>` : ""}${sounds}</section>

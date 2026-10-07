@@ -9,6 +9,11 @@
 // guard count on the owner export's drills; [B5] reveal by verdict (answer row, inline Replay, unit dots, Examples
 // fold); [B6] teach cards; [B7] flag off: every item kind (question, options, typed field, reveal right and wrong),
 // teach cards and the drill items of a whole session byte-identical to 6c591c9 on 3 records.
+// Stage C, the tabs: [C1] CSS (page font on passage/lesson rows, segmented level row, muted contrast); [C2] Read list
+// (anchor level, unread first, tick vs "4 of 5", finished levels folded + tap opens + refold on leaving, locked line);
+// [C3] reader, listening pass, question, verdict, results (missed open, right folded) and storage equal flag off; [C4] Words
+// (segmented levels, set nav, Next new rule, Review ghost, Pinyin chip, search); [C5] Test order by placedOnce; [C6] Sounds;
+// [C7] notices; [C8] flag off: those screens byte-identical to 9bf0e78 on 4 records.
 // Run: node tests/app_view_checks.js [owner export path]
 "use strict";
 const fs = require("fs");
@@ -63,6 +68,7 @@ function makeFakeDom(){
       this._listeners = {}; this._children = [];
       if(this._attrs.id) registry.set(this._attrs.id, this);
     }
+    insertAdjacentHTML(pos, html){ (this._ins = this._ins || []).push([pos, String(html)]); }
     get id(){ return this._attrs.id || ""; }
     set id(v){ this._attrs.id = v; registry.set(v, this); }
     get classList(){
@@ -153,7 +159,7 @@ async function boot(pack, st, seed, opts){
   const o = opts || {};
   Math.random = mulberry32(seed);
   const document = makeFakeDom();
-  const voices = [{ lang:"zh-CN", name:"x" }];
+  const voices = o.voices || [{ lang:"zh-CN", name:"x" }];
   const ss = { getVoices: () => voices, onvoiceschanged: null, cancel(){}, speak(){} };
   const wl = {};
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(t, f){ (wl[t] = wl[t] || []).push(f); } };
@@ -172,7 +178,7 @@ return {
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
 };`;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS","PATTERNS"];
-  const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"AppViewChecks/1.0" }, undefined, st.ls, st.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
+  const args = [window.SpeechSynthesisUtterance, document, window, { userAgent: o.ua || "AppViewChecks/1.0" }, undefined, st.ls, st.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
     function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, WORDS, SENTENCES, LESSONS, PASSAGES, CHARACTERS, o.patterns ? PATTERNS : undefined];
   const api = new Function(...names, fnBody)(...args);
   await tick(); await tick();
@@ -464,7 +470,9 @@ console.log("\n[B1] drill card CSS");
   check("drill body flex-start at --stim-top under v2 (Today's .top body untouched)", css.includes(':root[data-appview="v2"] .drill-body:not(.top){justify-content:flex-start;padding-top:max(0px, calc(var(--stim-top) - 18px))}'));
   check("label centred above the stimulus", css.includes(':root[data-appview="v2"] .drill-body:not(.top)>.q:first-child{text-align:center;margin-bottom:6px}'));
   check("option numbers hidden only under (hover: none) and (pointer: coarse)", /@media \(hover: none\) and \(pointer: coarse\)\{ :root\[data-appview="v2"\] \.opts button b\.num\{display:none\} \}/.test(css) && (css.match(/b\.num\{display:none\}/g) || []).length === 1);
-  check("no new radius, no all-caps, no letter-spacing, no new motion in v2 rules", ![...css.matchAll(/(:root\[data-appview="v2"\][^{]*)\{([^}]*)\}/g)].some(m => /border-radius|text-transform|letter-spacing|animation|transition/.test(m[2])));
+  // A radius is allowed only at a value the base CSS already uses (stage C's segmented level row: 12px, as .ghost).
+  const baseRadii = new Set([...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(m => !/appview/.test(m[1])).flatMap(m => [...m[2].matchAll(/border-radius:([^;}]+)/g)].map(r => r[1].trim())));
+  check("no new radius, no all-caps, no letter-spacing, no new motion in v2 rules", ![...css.matchAll(/(:root\[data-appview="v2"\][^{]*)\{([^}]*)\}/g)].some(m => /text-transform|letter-spacing|animation|transition/.test(m[2]) || [...m[2].matchAll(/border-radius:([^;}]+)/g)].some(r => !baseRadii.has(r[1].trim()))));
 }
 
 let ON = null, OFFK = null;
@@ -605,6 +613,295 @@ console.log(`\n[B7] flag off: every item kind, teach cards and a session's drill
     if(!kindsSame) console.log("INFO  differs: " + KINDS.map(([n]) => n).filter(n => JSON.stringify(a[n]) !== JSON.stringify(b[n])).join(", "));
     if(diff >= 0) console.log(`INFO  walk first difference at ${diff}: ${JSON.stringify(w1[diff]).slice(0, 300)} vs ${JSON.stringify(w2[diff]).slice(0, 300)}`);
     check(`${name}: ${KINDS.length} kinds (question, options, typed field, reveal right + wrong), word + character teach cards, and a Today session's ${w1.filter(x => x[0] === "q").length} items + ${w1.filter(x => x[0] === "teach").length} teach screens byte-identical`, kindsSame && a.teachWords === b.teachWords && a.teachChars === b.teachChars && diff < 0 && w1.length === w2.length);
+  }
+}
+
+// ------------------------------------------------------------------ stage C: Read, Words, Test, Sounds, notices
+const BASE_C = "9bf0e78"; // stage B head: the flag-off control for the tabs
+const LV_LABEL = lv => `HSK ${lv}`;
+const pidsIn = h => [...h.matchAll(/<button data-pid="([^"]+)"/g)].map(m => m[1]);
+// Answers every question of the passage on screen: wrongAt(i) answers question i wrong. Returns the results html.
+function answerPassage(api, wrongAt){
+  const p = api.rd().p;
+  for(let i = 0; i < p.questions.length; i++){
+    const q = p.questions[i], btns = api.el("o").children;
+    (wrongAt(i) ? btns.find(b => b.dataset.v !== String(q.answer)) : btns.find(b => b.dataset.v === String(q.answer))).click();
+    api.el("nx").click();
+  }
+  return api.panel();
+}
+// One walk over every stage C surface; returns [name, html] pairs (flag-off control and flag-on probes share it).
+async function walkTabs(pack, rec, seed, o){
+  const { api, st } = await bootWith(pack, rec, seed, o); const tr = [];
+  const put = (n, h) => tr.push([n, h === undefined ? api.panel() + (/id="wbody"/.test(api.panel()) ? api.el("wbody").innerHTML : "") : h, api.title()]);
+  api.clickTab("read"); put("read list");
+  if(api.el("rfold")){ api.el("rfold").click(); put("read list opened"); }
+  const pid = api.ev(`(() => { const p = PASSAGE_LIST.find(x => !passageDone(x) && readLevelsNow().some(l => l.lv === x.lv && l.unlocked)) || PASSAGE_LIST[0]; startPassage(p); return p.id; })()`);
+  put("reader " + pid);
+  api.el("rdone").click(); put("question 1");
+  const q0 = api.rd().p.questions[0];
+  api.el("o").children.find(b => b.dataset.v !== String(q0.answer)).click(); put("verdict wrong", api.el("rv").innerHTML); api.el("nx").click();
+  const q1 = api.rd().p.questions[1];
+  api.el("o").children.find(b => b.dataset.v === String(q1.answer)).click(); put("verdict right", api.el("rv").innerHTML); api.el("nx").click();
+  const n = api.rd().p.questions.length;
+  for(let i = 2; i < n; i++){ const q = api.rd().p.questions[i]; api.el("o").children.find(b => b.dataset.v === String(q.answer)).click(); api.el("nx").click(); }
+  put("results one miss");
+  api.el("rlist").click(); put("read list after");
+  api.ev(`startPassage(PASSAGE_LIST.find(x => passageDone(x)) || PASSAGE_LIST[0], false, "listen")`); put("listening pass");
+  api.el("rdone").click(); put("listening question");
+  api.clickTab("words"); put("words default");
+  api.el("pv").click(); put("words previous set");
+  const lv2 = LEVELS_ZH[1]; (api.el("wl_" + lv2) && pack.appView ? api.el("wl_" + lv2) : null) ? api.el("wl_" + lv2).click() : api.ev(`wordsLv = ${JSON.stringify(lv2)}; wordsSet = null; renderWordBody()`); put("words level 2");
+  api.el("wsearch").value = "tea"; api.el("wsearch").oninput(); await new Promise(r => setTimeout(r, 150)); put("words search");
+  api.clickTab("test"); put("test home");
+  api.ev(`testSel = "placement"; testRender()`); put("placement screen");
+  api.clickTab("sounds"); put("sounds list");
+  api.ev(`soundsSel = 0; soundsRender()`); put("lesson");
+  put("speech notice", api.ev(`(() => { const h = hasSpeech; hasSpeech = false; noticeShown = false; const r = speechNotice(); hasSpeech = h; return r; })()`));
+  put("samsung notice", api.ev("samsungNoticeHTML"));
+  return { tr, api, st };
+}
+const LEVELS_ZH = VC.levelIds(PACK);
+
+console.log("\n[C1] stage C CSS");
+{
+  const css = appHtml.slice(0, appHtml.indexOf("</style>")).replace(/\/\*[\s\S]*?\*\//g, "");
+  check("passage and lesson rows in the page font under v2 only (.plist button font-family var(--font))", css.includes(':root[data-appview="v2"] .plist button{font-family:var(--font)}') && !/(^|\})\s*\.plist button\{[^}]*font-family/.test(css));
+  check("segmented level row: one bordered row, equal 44px segments, the pressed one inked", css.includes(':root[data-appview="v2"] .wseg button{flex:1 1 0;min-width:0;min-height:44px') && css.includes(':root[data-appview="v2"] .wseg button.on{background:var(--ink);color:var(--bg)}'));
+  const lum = hex => { const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const tok = (name, dark) => { const m = [...appHtml.matchAll(new RegExp(`--${name}:(#[0-9A-Fa-f]{6})`, "g"))].map(x => x[1]); return dark ? m[m.length - 1] : m[0]; };
+  const rs = [["light", false], ["dark", true]].map(([n, d]) => [n, ratio(tok("mute", d), tok("bg", d)), ratio(tok("mute", d), tok("card", d))]);
+  check(`muted text (score "4 of 5", locked line, fold line, Next new count) meets 4.5:1 on bg and card (${rs.map(([n, a, b]) => `${n} ${a.toFixed(2)}/${b.toFixed(2)}`).join(", ")})`, rs.every(([, a, b]) => a >= 4.5 && b >= 4.5));
+}
+
+console.log("\n[C2] Read list, owner export");
+if(owner){
+  const rec = clone(owner);
+  const pdone = Object.keys(rec.read.done);
+  const imperfect = pdone.find(id => rec.read.done[id].sc < rec.read.done[id].n);
+  const { api } = await bootWith(PACK, rec, 51);
+  api.clickTab("read");
+  const h = api.panel(), t = stripTags(h), prog = api.getProg();
+  const lvls = VC.readingLevels(PASSAGES, WORDS, PACK, prog).filter(l => l.count > 0);
+  const open = lvls.filter(l => l.unlocked), anchor = open[open.length - 1];
+  const psOf = lv => PASSAGES.filter(p => p.lv === lv), isDone = p => !!prog.read.done[p.id];
+  const fin = open.filter(l => l !== anchor && psOf(l.lv).every(isDone));
+  console.log(`INFO  anchor ${LV_LABEL(anchor.lv)}; folded ${fin.map(l => l.lv).join(",")}; locked ${lvls.filter(l => !l.unlocked).map(l => l.lv).join(",")}`);
+  const firstHead = (h.match(/<div class="rlv"><div class="pvt"><span>([^<]+)<\/span><span class="pvn">(\d+) of (\d+) read<\/span><\/div>/) || []);
+  check(`anchor: the highest open level first, "${LV_LABEL(anchor.lv)}  N of M read"`, firstHead[1] === LV_LABEL(anchor.lv) && +firstHead[2] === psOf(anchor.lv).filter(isDone).length && +firstHead[3] === psOf(anchor.lv).length);
+  const ap = psOf(anchor.lv), want = ap.filter(p => !isDone(p)).concat(ap.filter(isDone)).map(p => p.id);
+  check(`anchor rows: unread first in pack order, then read (${want.length} rows)`, JSON.stringify(pidsIn(h).slice(0, want.length)) === JSON.stringify(want));
+  const tNoLk = stripTags(h.replace(/<p class="pvs rlk"[^>]*>[^<]*<\/p>/g, ""));
+  check("no intro once a passage is done; no word counts on rows; no middle-dot strings (locked lines aside)", !/Short passages built/.test(h) && !/\d+ words/.test(tNoLk) && !/ · /.test(t));
+  const finIds = fin.flatMap(l => psOf(l.lv).map(p => p.id));
+  const finN = finIds.length;
+  check(`finished levels fold into one line "${fin.length > 1 ? `HSK ${fin[0].lv}–${fin[fin.length - 1].lv}` : ""}" (${finN} passages, all read), their rows absent`, fin.length >= 2 && h.includes(`<button class="pvc" id="rfold" aria-expanded="false" aria-label="HSK ${fin[0].lv}–${fin[fin.length - 1].lv}, all read"><span>HSK ${fin[0].lv}–${fin[fin.length - 1].lv}</span></button>`) && finIds.every(id => !pidsIn(h).includes(id)));
+  const marks = [...h.matchAll(/<button data-pid="([^"]+)"><span>[\s\S]*?<\/span>(<span class="(tick|rsc)"[^>]*>([^<]*)<\/span>)?<\/button>/g)];
+  const markOk = marks.length === pidsIn(h).length && marks.every(m => { const d = prog.read.done[m[1]]; if(!d) return !m[2]; return d.sc >= d.n ? m[3] === "tick" && m[4] === "✓" && m[2].includes(`aria-label="${d.sc} of ${d.n}"`) : m[3] === "rsc" && m[4] === `${d.sc} of ${d.n}`; });
+  const shownImperfect = marks.filter(m => m[3] === "rsc").length;
+  check(`perfect score: a tick alone; imperfect: "4 of 5"; unread: nothing (${marks.length} rows, ${shownImperfect} imperfect shown)`, markOk && marks.some(m => m[3] === "tick"));
+  const lk = lvls.filter(l => !l.unlocked);
+  const hold = VC.levelGateHold(WORDS, PACK, prog, CHARACTERS);
+  const lkOk = lk.every(l => { const s = `HSK ${l.lv} passages open at 70% of its words learned. Now ${l.learned} of ${l.total}.${hold && String(hold.lv) === String(l.lv) ? ` New HSK ${l.lv} words wait on HSK ${hold.prev}.` : ""}`; return h.includes(`<p class="pvs rlk" data-locked="${l.lv}">${s}</p>`); });
+  check(`locked level: one quiet line, no box (${lk.map(l => stripTags((h.match(new RegExp(`data-locked="${l.lv}">[^<]*`)) || [""])[0].replace(/^[^>]*>/, ""))).join(" | ")})`, lk.length > 0 && lkOk && !/class="stmt" data-locked/.test(h));
+  api.el("rfold").click();
+  const h2 = api.panel();
+  check("fold tap: the finished levels open in place with their rows, the line goes", !/id="rfold"/.test(h2) && finIds.every(id => pidsIn(h2).includes(id)) && fin.every(l => h2.includes(`<span>${LV_LABEL(l.lv)}</span><span class="pvn">${psOf(l.lv).length} of ${psOf(l.lv).length} read</span>`)));
+  if(imperfect && finIds.includes(imperfect)) check("an opened finished level shows its imperfect score", h2.includes(`data-pid="${imperfect}"`) && new RegExp(`data-pid="${imperfect}"[\\s\\S]*?<span class="rsc">${rec.read.done[imperfect].sc} of ${rec.read.done[imperfect].n}</span>`).test(h2));
+  api.clickTab("read");
+  check("re-tapped Read: stays open (same tab)", !/id="rfold"/.test(api.panel()));
+  api.clickTab("today"); api.clickTab("read");
+  check("leaving the tab folds again", /id="rfold"/.test(api.panel()));
+  const f = await bootWith(PACK, freshRec(), 51); f.api.clickTab("read");
+  const fh = f.api.panel();
+  check("fresh record: the intro shows (no passage done yet), no fold line", /Short passages built from this course's words/.test(fh) && !/id="rfold"/.test(fh));
+}
+
+console.log("\n[C3] reader, listening pass, question, verdict, results");
+if(owner){
+  const { tr, api } = await walkTabs(PACK, clone(owner), 52);
+  const get = n => (tr.find(x => x[0].startsWith(n)) || [])[1] || "";
+  const rd = get("reader ");
+  check('reader: ghost "Passages" back button, title, no level/word-count line once a passage is done', /^<button class="ghost rback" id="rback">Passages<\/button>/.test(rd) && /class="ptitle"/.test(rd) && !/words\. Tap a word|Tap a word to see/.test(rd) && !/‹/.test(rd));
+  const f = await bootWith(PACK, freshRec(), 52);
+  f.api.ev(`startPassage(PASSAGE_LIST[0])`);
+  check('first passage ever: "Tap a word to see its meaning." with no level or count', f.api.panel().includes('<p class="q">Tap a word to see its meaning.</p>') && !/ · /.test(f.api.panel()));
+  const q = get("question 1");
+  check('question screen: no "Question 1 / N" line (the header counts)', !/Question \d+ \//.test(q) && /<div class="drill-body top">\s*<div class="med wd"/.test(q));
+  const vw = get("verdict wrong"), vr = get("verdict right");
+  check('verdict: "Right." / "Not quite." then the highlighted sentence, no "The answer is in this sentence:"', /^<div class="q" style="margin:0 0 6px">Not quite\.<\/div><div class="stmt hi"/.test(vw) && /^<div class="q" style="margin:0 0 6px">Right\.<\/div><div class="stmt hi"/.test(vr) && !/answer is in this sentence/.test(vw + vr));
+  const res = get("results one miss"), n = (res.match(/<h2>(\d+) of (\d+)<\/h2>/) || []);
+  check(`results: "${n[1]} of ${n[2]}", Missed with the one missed question open`, +n[2] - +n[1] === 1 && /<p class="pvk">Missed<\/p><div class="stmt"/.test(res) && (res.slice(res.indexOf("Missed"), res.indexOf('id="rright"')).match(/<div class="stmt"/g) || []).length === 1);
+  check(`results: the right answers fold into one line "${+n[1]} right", hidden until tapped`, res.includes(`<button class="pvc" id="rright" aria-expanded="false" aria-controls="rrbox"><span>${n[1]} right</span></button><div id="rrbox" hidden>`) && (res.slice(res.indexOf('id="rrbox"')).match(/<div class="stmt"/g) || []).length === +n[1]);
+  check("results: no ✓/✗ Question N markers", !/[✓✗] Question \d/.test(res));
+  // The fold opens on a tap.
+  const r2 = await bootWith(PACK, clone(owner), 53);
+  r2.api.ev(`startPassage(PASSAGE_LIST.find(x => passageDone(x)))`); r2.api.el("rdone").click();
+  answerPassage(r2.api, i => i === 0);
+  const box = r2.api.el("rrbox"), btn = r2.api.el("rright");
+  check("right-answers line: tap opens the block, aria-expanded true; tap again folds", box.hidden === true && (btn.click(), box.hidden === false && btn.getAttribute("aria-expanded") === "true") && (btn.click(), box.hidden === true));
+  // A clean pass with no taps: no weak words, so nothing (was "No weak words from this passage.").
+  const r3 = await bootWith(PACK, clone(owner), 54);
+  r3.api.ev(`startPassage(PASSAGE_LIST.find(x => passageDone(x)))`); r3.api.el("rdone").click();
+  const clean = answerPassage(r3.api, () => false);
+  check('clean pass: no Missed section, "N right" line, "No weak words" becomes whitespace', !/Missed/.test(clean) && /id="rright"/.test(clean) && !/No weak words/.test(clean) && /id="rlist"[^>]*>Back to passages</.test(clean));
+  const lp = get("listening pass");
+  check('listening pass: "Listening pass" alone (no level, no sentence count)', lp.includes('<p class="q">Listening pass</p>') && !/sentences?\. Listen/.test(lp) && /id="rback">Passages</.test(lp));
+  check("Read back button returns to the list", (() => { const { api: a } = { api: r2.api }; a.ev(`startPassage(PASSAGE_LIST[0])`); a.el("rback").click(); return /data-pid=/.test(a.panel()) && !a.rd(); })());
+}
+
+if(owner){
+  const noAv = Object.assign({}, PACK); delete noAv.appView;
+  const a = await walkTabs(PACK, clone(owner), 62), b = await walkTabs(noAv, clone(owner), 62);
+  check("storage: the same walk (Read list fold, a passage with one miss, a listening pass, Words, Test, Sounds) stores the same record with and without appView", a.st.ls.getItem(VC.storageKey(PACK)) === b.st.ls.getItem(VC.storageKey(PACK)) && JSON.stringify(a.st.ls.keys().sort()) === JSON.stringify(b.st.ls.keys().sort()));
+}
+
+console.log("\n[C4] Words tab");
+if(owner){
+  const { tr, api } = await walkTabs(PACK, clone(owner), 55);
+  const get = n => (tr.find(x => x[0] === n) || [])[1] || "";
+  const d = get("words default");
+  check("one segmented level row, the shown level pressed", new RegExp(`<div class="wseg" role="group" aria-label="Level">${LEVELS_ZH.map(lv => `<button data-l="${lv}" id="wl_${lv}" class="(on)?" aria-pressed="(true|false)">HSK ${lv}</button>`).join("")}</div>`).test(d) && (d.match(/aria-pressed="true">HSK/g) || []).length === 1);
+  const sn = d.match(/<span class="pvn">Set (\d+) of (\d+)( ✓)?<\/span>/);
+  check(`set nav on one line: "‹ Set ${sn && sn[1]} of ${sn && sn[2]} ›"`, !!sn && /<div class="row wnav"><button id="pv" aria-label="Previous set">‹<\/button><span class="pvn">Set \d+ of \d+( ✓)?<\/span><button id="nx" aria-label="Next set">›<\/button>/.test(d));
+  check('"Next new" hidden on the next set (the default)', !/id="jump"/.test(d));
+  const pv = get("words previous set");
+  check('"Next new" shows once the shown set is not the next set; tap returns to it', /<button id="jump">Next new<\/button>/.test(pv) && (api.clickTab("words"), api.el("pv").click(), api.el("jump").click(), !/id="jump"/.test(api.panel())));
+  check('"Review" as a ghost under "Drill this set"', /<div class="actions"><button class="next" id="dr">Drill this set<\/button><button class="ghost" id="rev">Review<\/button><\/div>/.test(d) && !/>review</.test(d));
+  check('chip "Pinyin" (PRON_NOUN), labelled "Show pinyin"', /id="wsearch"[\s\S]*<button class="chip (on)?" id="wPron" aria-label="Show pinyin" aria-pressed="(true|false)">Pinyin<\/button>/.test(d) && !/>Pron</.test(d));
+  const l2 = get("words level 2");
+  check(`level switch: HSK ${LEVELS_ZH[1]} pressed, its set shown`, l2.includes(`id="wl_${LEVELS_ZH[1]}" class="on" aria-pressed="true"`) && /Set \d+ of \d+/.test(l2));
+  const s = get("words search");
+  const sb = await bootWith(PACK, clone(owner), 55); sb.api.clickTab("words");
+  sb.api.el("wsearch").value = "tea"; sb.api.el("wsearch").oninput(); await new Promise(r => setTimeout(r, 150));
+  const hits = VC.searchWords(WORDS, "tea").length;
+  check(`search: the matches listed (${hits}), level row and set nav gone`, hits > 0 && sb.api.el("wbody").innerHTML === '<div id="wl"></div>' && sb.api.el("wl").children.length === Math.min(150, hits) && s.endsWith('<div id="wl"></div>'));
+}
+
+console.log("\n[C5] Test tab");
+if(owner){
+  const { tr } = await walkTabs(PACK, clone(owner), 56);
+  const h = (tr.find(x => x[0] === "test home") || [])[1] || "";
+  const ids = [...h.matchAll(/<button class="(ghost|next)" id="([^"]+)">([^<]*)<\/button>/g)].map(m => [m[1], m[2], m[3]]);
+  console.log("INFO  placed: " + ids.map(x => x.join(":")).join(" | "));
+  check("placed learner: full-width ghost rows Listen, Recall, Sentences, Characters, nothing else", JSON.stringify(ids.map(x => x[2])) === JSON.stringify(["Listen", "Recall", "Sentences", "Characters"]) && ids.every(x => x[0] === "ghost"));
+  check('placed learner (owner 2026-10-08): no placement at all on the Test tab (no "lacement" text)', !/lacement/.test(h));
+  check('placed learner: no intro, no "20", no "Take Placement"', !/Placement finds where to start/.test(h) && !/ 20</.test(h) && !/Take Placement/.test(h) && !/style="flex:1"/.test(h));
+  const pl = (tr.find(x => x[0] === "placement screen") || [])[1] || "";
+  check('placement screen: ghost "Test" back, "Start"', /^<button class="ghost rback" id="back">Test<\/button>/.test(pl) && /id="go">Start<\/button>/.test(pl) && !/Start placement|‹ test/.test(pl));
+  const un = clone(owner); delete un.placedOnce;
+  const u = await walkTabs(PACK, un, 56);
+  const uh = (u.tr.find(x => x[0] === "test home") || [])[1] || "";
+  const uids = [...uh.matchAll(/<button class="(ghost|next)" id="([^"]+)">([^<]*)<\/button>/g)].map(m => m[3]);
+  check("unplaced learner: the intro, then the primary \"Take the placement test\" first, the four tests after", /^<p class="q">Placement finds where to start\./.test(uh) && /<button class="next" id="pl">Take the placement test<\/button>/.test(uh) && JSON.stringify(uids) === JSON.stringify(["Take the placement test", "Listen", "Recall", "Sentences", "Characters"]));
+  const small = clone(owner); // a characters plan under 20 shows its count
+  const { api } = await bootWith(PACK, small, 57);
+  api.ev(`VC.__charTestPlan = VC.charTestPlan; VC.charTestPlan = (...a) => VC.__charTestPlan(...a).slice(0, 12)`);
+  api.clickTab("test");
+  const sh = api.panel(); api.ev(`VC.charTestPlan = VC.__charTestPlan`);
+  check('a test under 20 shows its count ("Characters 12")', /id="tChars">Characters 12<\/button>/.test(sh));
+  const lockRec = freshRec(); lockRec.placedOnce = true;
+  const lr = await bootWith(PACK, lockRec, 58); lr.api.clickTab("test");
+  check("placed, under the word minimum: the lock note without a placement offer", /Free tests unlock at \d+ learned words \(\d+ so far\)\.<\/div>/.test(lr.api.panel()) && !/lacement/.test(lr.api.panel()));
+  const fr = await bootWith(PACK, freshRec(), 58); fr.api.clickTab("test");
+  check('fresh record: the Test tab offers placement ("Take the placement test")', /lacement/.test(fr.api.panel()) && /id="needPlace"[^>]*>Take the placement test</.test(fr.api.panel()));
+}
+
+console.log("\n[C6] Sounds tab");
+if(owner){
+  const rec = clone(owner); rec.lessons = rec.lessons || {}; rec.lessons[LESSONS[0].id] = 1;
+  const { tr } = await walkTabs(PACK, rec, 59);
+  const h = (tr.find(x => x[0] === "sounds list") || [])[1] || "";
+  check(`intro "${LESSONS.length} short lessons on how Mandarin sounds and is written." (pack.name without its range)`, h.startsWith(`<p class="q">${LESSONS.length} short lessons on how Mandarin sounds and is written.</p>`) && !/Optional:|lessons, \d+ done/.test(h));
+  check("a done lesson shows a tick, the rest nothing", (h.match(/<span class="tick">✓<\/span>/g) || []).length === 1 && h.includes(`<button data-i="0"><span>${LESSONS[0].title}</span><span class="tick">✓</span></button>`));
+  const l = (tr.find(x => x[0] === "lesson") || [])[1] || "";
+  check('lesson: ghost "Lessons" back button, cards and Drill unchanged', /^<button class="ghost rback" id="back">Lessons<\/button><p class="q">/.test(l) && /id="dr">Drill<\/button>/.test(l) && !/‹ lessons/.test(l));
+}
+
+console.log("\n[C7] notices");
+{
+  const { tr } = await walkTabs(PACK, freshRec(), 60, { ua: "Mozilla/5.0 (Linux; Android 14) SamsungBrowser/25.0 Chrome/121 Mobile Safari/537.36" });
+  const sp = (tr.find(x => x[0] === "speech notice") || [])[1], sm = (tr.find(x => x[0] === "samsung notice") || [])[1];
+  check(`voice notice: "${stripTags(sp).trim()}"`, sp === '<div class="warn">No voice for this language in this browser. Listening items show the word instead.</div>');
+  check(`Samsung notice: "${stripTags(sm).trim()}"`, sm === `<div class="warn">Audio doesn't play in Samsung Internet. Open this page in Chrome or Firefox to hear words.</div>`);
+  check("storeWarn texts verbatim (no v2 branch in storageWarn or the read-only notice)", !/APP_V2/.test((appHtml.match(/function storageWarn[\s\S]*?\n\}/) || [""])[0]));
+}
+
+console.log("\n[C9] review fixes: Read rule line, Placement in Progress Settings, no-voice copy");
+{
+  const noV = { voices: [{ lang: "en-US", name: "y" }] }; // a voice list with none for the pack language: hasSpeech false
+  // Read rule line: always the Read rule (own words), never the level-gate sentence; the clause only when the gate holds that level.
+  if(owner){
+    const { api } = await bootWith(PACK, clone(owner), 71); api.clickTab("read");
+    const h = api.panel();
+    check("Read locked line never shows the level-gate sentence (no \"known\")", !/opens at 70% of HSK \d known/.test(h) && /data-locked="\d"/.test(h));
+    const hold = VC.levelGateHold(WORDS, PACK, api.getProg(), CHARACTERS);
+    if(hold) check(`level gate holds HSK ${hold.lv}: one clause "New HSK ${hold.lv} words wait on HSK ${hold.prev}." appended, no second number`, h.includes(`New HSK ${hold.lv} words wait on HSK ${hold.prev}.</p>`));
+    const g = await bootWith(PACK, (r => { r.w = {}; return r; })(clone(owner)), 71); g.api.clickTab("read");
+    check("a level the gate does not hold carries no clause", (g.api.panel().match(/New HSK \d words wait on/g) || []).length <= 1);
+  }
+  // Placement hatch: owner (placed) Progress Settings carries the row before Reset; Test tab still has none; the row starts the flow and returns.
+  if(owner){
+    const { api } = await bootWith(PACK, clone(owner), 72); api.clickTab("progress");
+    const h = api.panel();
+    const iP = h.indexOf('id="placeRow"'), iR = h.indexOf('id="reset"'), iI = h.indexOf('id="imp"');
+    check('owner export: Progress Settings has the "Placement test" ghost row after Import and before Reset', iI > 0 && iP > iI && iR > iP && /<button class="ghost" id="placeRow"[^>]*>Placement test<\/button>/.test(h));
+    api.clickTab("test"); check('owner export: Test tab still has no "lacement"', !/lacement/.test(api.panel()));
+    api.clickTab("progress"); api.el("placeRow").click();
+    check("row opens the placement intro under the Test tab title, back button reads Progress", api.title() === "Test" && /id="back">Progress<\/button>/.test(api.panel()) && /id="go">Start<\/button>/.test(api.panel()));
+    api.el("back").click();
+    check("back returns to Progress (settings row visible again)", api.ev("tab") === "progress" && /id="placeRow"/.test(api.panel()));
+    api.clickTab("test"); check('after the round trip the Test tab is still placement-free and a later entry is not sent to Progress', !/lacement/.test(api.panel()) && api.ev("placeFrom") === null);
+    api.clickTab("progress"); api.el("placeRow").click(); api.el("go").click();
+    check("flow starts from the row (placement run in progress)", api.ev("!!PL"));
+  }
+  const fr = await bootWith(PACK, freshRec(), 73); fr.api.clickTab("progress");
+  check("fresh record: the row is present too (one Placement test, nothing else added)", (fr.api.panel().match(/id="placeRow"/g) || []).length === 1);
+  const off = await bootWith(OFF, freshRec(), 73); off.api.clickTab("progress");
+  check("flag off: no placement row on Progress", !/placeRow/.test(off.api.panel()));
+  // No voice under v2 (the harness otherwise always has one).
+  const nv = await bootWith(PACK, freshRec(), 74, noV); nv.api.clickTab("progress");
+  const ph = nv.api.panel();
+  check('no voice, Progress: the trimmed notice copy once, at the top', ph.startsWith('<div class="warn">No voice for this language in this browser. Listening items show the word instead.</div>') && !/text-to-speech/.test(ph));
+  nv.api.clickTab("sounds"); nv.api.ev(`soundsSel = 0; soundsRender()`);
+  const lh = nv.api.panel() + JSON.stringify(nv.api.ev(`document.getElementById("cards")._ins || []`));
+  console.log("INFO  lesson no voice: " + stripTags(lh).slice(0, 160).replace(/\s+/g, " "));
+  check('no voice, lesson: the trimmed notice copy "No voice for this language in this browser. Listening items show the text instead."', lh.includes("No voice for this language in this browser. Listening items show the text instead.") && !/This browser has no voice/.test(lh));
+  // flag-off equality with 9bf0e78 on the same no-voice render.
+  let oc = null, oh = null;
+  try {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avc9-")); const f = path.join(dir, `core_${BASE_C}.js`);
+    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${BASE_C}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); oc = require(f);
+    oh = cp.execSync(`git -C "${ROOT}" show ${BASE_C}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+  } catch(e){ oc = null; }
+  if(!oc) skip(`${BASE_C} not in this checkout's history`);
+  else for(const [name, mk] of [["fresh", freshRec], ["owner", () => owner && clone(owner)]]){
+    const rec = mk(); if(!rec){ skip(`${name}: owner export not found`); continue; }
+    const shots = async o2 => { const { api } = await bootWith(OFF, clone(rec), 75, Object.assign({}, noV, o2)); const out = []; api.clickTab("progress"); out.push(api.panel()); api.clickTab("sounds"); api.ev(`soundsSel = 0; soundsRender()`); out.push(api.panel() + JSON.stringify(api.ev(`document.getElementById("cards")._ins || []`))); return out; };
+    const a = await shots({}), b = await shots({ core: oc, html: oh });
+    check(`flag off, no voice, ${name}: Progress and a lesson byte-identical to ${BASE_C} (${a.length} screens)`, JSON.stringify(a) === JSON.stringify(b) && /text-to-speech|no voice/i.test(a[0] + a[1]));
+  }
+}
+
+console.log(`\n[C8] flag off: Read, Words, Test, Sounds and notices byte-identical to ${BASE_C} on 4 records, plain and Samsung user agents`);
+{
+  let oldCore = null, oldHtml = null;
+  try {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avc-"));
+    const f = path.join(dir, `core_${BASE_C}.js`);
+    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${BASE_C}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); oldCore = require(f);
+    oldHtml = cp.execSync(`git -C "${ROOT}" show ${BASE_C}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+  } catch(e){ oldCore = null; }
+  if(!oldCore) skip(`${BASE_C} not in this checkout's history`);
+  else for(const [name, mk] of [["fresh", freshRec], ["owner export (paused)", () => owner && clone(owner)], ["owner, unpaused copy", () => owner && unpaused()], ["owner, never placed", () => owner && (r => { delete r.placedOnce; return r; })(clone(owner))]]){
+    const rec = mk(); if(!rec){ skip(`${name}: owner export not found`); continue; }
+    for(const ua of [undefined, "Mozilla/5.0 (Linux; Android 14) SamsungBrowser/25.0 Chrome/121 Mobile Safari/537.36"]){
+      const a = await walkTabs(OFF, clone(rec), 61, { ua }), b = await walkTabs(OFF, clone(rec), 61, { ua, core: oldCore, html: oldHtml });
+      const diff = a.tr.findIndex((x, i) => JSON.stringify(x) !== JSON.stringify(b.tr[i]));
+      if(diff >= 0) console.log(`INFO  first difference at ${a.tr[diff][0]}: ${JSON.stringify(a.tr[diff]).slice(0, 300)} vs ${JSON.stringify(b.tr[diff]).slice(0, 300)}`);
+      check(`${name}${ua ? ", Samsung UA" : ""}: ${a.tr.length} screens byte-identical (${a.tr.map(x => x[0].replace(/ [a-z]\d+$/, "")).join(", ")})`, diff < 0 && a.tr.length === b.tr.length && a.tr.length >= 18);
+    }
   }
 }
 
