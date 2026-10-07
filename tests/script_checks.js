@@ -8,6 +8,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { stripFlags, FLAG_SINCE } = require("./lib/pack_flags.js");
 const util = require("util");
 
 const ROOT = path.join(__dirname, "..");
@@ -296,7 +297,7 @@ section("[9] flag-off: pack.script stripped by the harness; outputs unchanged wi
   let mod = null; try{ mod = JSON.parse(r.stdout); }catch(e){ mod = null; }
   check("flagoff_snapshot.js exports stripFlagOnFields when required", !!(mod && mod.ok), (r.stdout || "") + (r.stderr || ""));
   if(!(mod && mod.ok)) return;
-  const stripFlagOnFields = new Function(`return (${mod.src});`)(); const FLAGOFF_PACKS = mod.packs;
+  const stripFlagOnFields = new Function("stripFlags", "FLAG_SINCE", `return (${mod.src});`)(stripFlags, FLAG_SINCE); const FLAGOFF_PACKS = mod.packs;
   const synth = FX.ko().pack.script;
   const sunits = FX.ko().script.units;
   let checked = 0;

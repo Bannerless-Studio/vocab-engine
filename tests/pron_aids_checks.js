@@ -12,6 +12,7 @@
 const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
+const { packAsOf, packBefore } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 
 const ROOT = path.join(__dirname, "..");
@@ -26,7 +27,7 @@ const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ a
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = (p => { delete p.glossStyle; delete p.readRotation; delete p.pairs; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
+const PACK = packBefore(loadConst(path.join(ZH, "pack.js"), "PACK"), "pairs", { strip: ["readRotation"] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });
@@ -37,7 +38,7 @@ const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // The zh pack without typedFrom/glossFocus: the typed-slot rules and controls below predate them
 // (tests/typed_from_checks.js covers them).
-const PACK_BASE = (p => { delete p.typedFrom; delete p.glossFocus; delete p.helpClose; delete p.readAnswerBlock; delete p.optsOneScript; delete p.optsMix; delete p.wordsBy; delete p.progressMap; return p; })(preWrite(PACK));
+const PACK_BASE = packAsOf(preWrite(PACK), "34c5df3", { strip: ["typedFrom", "glossFocus", "helpClose", "readAnswerBlock", "optsOneScript", "optsMix", "wordsBy", "progressMap"] });
 console.log(`Loaded zh pack: ${WORDS.length} words, ${SENTENCES.length} sentences, ${PASSAGES.length} passages, ${CHARACTERS.length} units`);
 
 let fails = 0, passes = 0;

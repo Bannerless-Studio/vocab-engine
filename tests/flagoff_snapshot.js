@@ -28,6 +28,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { stripFlags, FLAG_SINCE } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 const util = require("util");
 const crypto = require("crypto");
@@ -117,55 +118,11 @@ const FLAGOFF_PACKS = [
 ];
 function readJsonIfPresent(p) { return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, "utf8")) : null; }
 function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
-  const pack = packJson ? Object.assign({}, packJson) : null;
-  if (pack) {
-    delete pack.characters; delete pack.legacy; delete pack.pronFirst;
-    // BP2 pronunciation aids (docs/PACK_SCHEMA.md): tones and soundsReference are new
-    // fields; typing "pron" replaced the pre-merge typing: null (typed reading is flag-on).
-    delete pack.tones; delete pack.soundsReference;
-    if (pack.typing === "pron") pack.typing = null;
-    // Typed items from the target side and focused glosses (docs/PACK_SCHEMA.md "typedFrom
-    // and glossFocus") are new, flag-on fields.
-    delete pack.typedFrom; delete pack.glossFocus; delete pack.glossStyle;
-    // Help overlay dismissal, the Read answer block, one-mode option labels and mixed options
-    // (docs/PACK_SCHEMA.md "helpClose", "readAnswerBlock", "optsOneScript", "optsMix") are new, flag-on fields.
-    delete pack.helpClose; delete pack.readAnswerBlock; delete pack.optsOneScript; delete pack.optsMix;
-    // Script primer (docs/SCRIPT_PRIMER.md): pack.script is new. script.json / script.js
-    // need nothing here: only pack.json, words.json and sentences.json are hashed.
-    delete pack.script;
-    // Recorded audio (docs/AUDIO.md): pack.audio, words[].audio and the builder's own
-    // relative sentence clips are new. An absolute sentence URL (Tatoeba) predates it
-    // and stays hashed.
-    delete pack.audio;
-    // Day-aware planning (docs/PACK_SCHEMA.md "dayAware") is a new, flag-on field.
-    delete pack.dayAware;
-    // New-material pause (docs/PACK_SCHEMA.md "pauseNew") is a new, flag-on field.
-    delete pack.pauseNew;
-    // Listening-pass question mode (docs/PACK_SCHEMA.md "Listening pass") is a new, flag-on field.
-    delete pack.listenQuestions;
-    // Perfect-passage re-read (docs/PACK_SCHEMA.md "Today") is a new, flag-on field.
-    delete pack.rereadPerfectDays;
-    // Read-stage rotation (docs/PACK_SCHEMA.md "readRotation") is a new, flag-on field.
-    delete pack.readRotation;
-    // Words held at streak 2 until typed (docs/PACK_SCHEMA.md "wordsBy") is a new, flag-on field.
-    delete pack.wordsBy;
-    // Today progress map (docs/PACK_SCHEMA.md "progressMap") is a new, flag-on field.
-    delete pack.progressMap;
-    // Pair scheduling (docs/PACK_SCHEMA.md "pairs") is a new, flag-on field.
-    delete pack.pairs;
-    // Frequency tiers (docs/PACK_SCHEMA.md "freqTiers") are a new, flag-on field.
-    delete pack.freqTiers;
-    // Level gate (docs/PACK_SCHEMA.md "levelGate") is a new, flag-on field.
-    delete pack.levelGate;
-    // Per-level exam profile (docs/PACK_SCHEMA.md "levelExam") is a new, flag-on field.
-    delete pack.levelExam;
-    // Grammar patterns (docs/PACK_SCHEMA.md "patterns") is a new, flag-on field.
-    delete pack.patterns;
-    // The pattern cue after the answer (docs/PACK_SCHEMA.md "patternCue") is a new, flag-on field.
-    delete pack.patternCue;
-    // The Progress tab layout (docs/PACK_SCHEMA.md "progressView") is a new, flag-on field.
-    delete pack.progressView;
-  }
+  // Every pack-gated flag (tests/lib/pack_flags.js FLAG_SINCE, so a new flag is stripped without an edit here)
+  // plus the pre-flag fields: pack.legacy; typing "pron" replaced the pre-merge typing: null (typed reading is flag-on).
+  // Only pack.json, words.json and sentences.json are hashed, so script.json / audio files need nothing here.
+  const pack = packJson ? stripFlags(packJson, FLAG_SINCE.map(f => f.key).concat(["legacy"])) : null;
+  if (pack && pack.typing === "pron") pack.typing = null;
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.
   const generated = u => typeof u === "string" && !/^[a-z][a-z0-9+.-]*:/i.test(u);

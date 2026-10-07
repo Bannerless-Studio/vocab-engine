@@ -11,6 +11,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { packAsOf } = require("./lib/pack_flags.js");
 const os = require("os");
 const cp = require("child_process");
 
@@ -23,7 +24,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
 // levelGate and levelExam (fb38) came after these controls; tests/level_gate_checks.js covers them.
-const PACK = (p => { delete p.glossStyle; delete p.levelGate; delete p.levelExam; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["glossStyle", "levelGate", "levelExam", "progressView"] });
 const PACK_OFF = (p => { const q = Object.assign({}, p); delete q.patterns; return q; })(PACK);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
@@ -443,7 +444,7 @@ const ptKey = it => String(it.key).startsWith("p:");
   else {
     const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "patterns-cue-")), `core_${CUE_MAIN}.js`); fs.writeFileSync(f, cueCore); const C0 = require(f);
     // Both fb31 fields stripped (characters.bareByPair has its own control in tests/bare_pair_checks.js).
-    const P0 = Object.assign({}, PACK, { characters: (c => { const q = Object.assign({}, c); delete q.bareByPair; return q; })(PACK.characters) }); delete P0.patternCue;
+    const P0 = packAsOf(PACK, CUE_MAIN);
     const walk = async (html, core) => {
       const api = await boot(P0, synth(["1", "2"], 2, 4, 5), 31, { html, core, patterns: PATTERNS });
       const out = [api.panel()];

@@ -12,6 +12,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { packAsOf } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 const util = require("util");
 
@@ -23,7 +24,7 @@ const BASE = "68930bd"; // main before optsMix: level-tier options everywhere
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // fb27: the fresh-learner scenarios and the control predate characters.start / ramp (sets of 10 from the first Learn).
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = (p => { delete p.characters.start; delete p.characters.ramp; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["characters.start", "characters.ramp", "progressView"] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -694,7 +695,7 @@ async function sec4(){
     }
     // wordsBy (docs/PACK_SCHEMA.md "wordsBy") came after 68930bd: this control drops it too.
     // pack.pairs (fb23) replaces the day planner this control walks; tests/pairs_checks.js covers it.
-    const PACK_CTL = (q => { delete q.wordsBy; delete q.progressMap; delete q.pairs; return q; })(Object.assign({}, PACK_OFF));
+    const PACK_CTL = packAsOf(PACK_OFF, BASE);
     for(const [name, p] of [["fresh", null], ["HSK 1-3", shape(595)]]){
       const out = [];
       for(const [core, html] of [[VC, appHtml], [OLD, OLD_HTML]]){

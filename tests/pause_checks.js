@@ -8,6 +8,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { packAsOf, packBefore, stripFlags } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 const util = require("util");
 
@@ -22,7 +23,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = (p => { delete p.pairs; delete p.glossStyle; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
+const PACK = packBefore(loadConst(path.join(ZH, "pack.js"), "PACK"), "pairs");
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -31,8 +32,8 @@ const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // The lag Learn row's set label changed after 36aee02 (per-level, fb9): both sides compared with it masked.
 // optsMix (docs/PACK_SCHEMA.md "optsMix"), readRotation and wordsBy came after 36aee02: the controls drop them too.
-const NOMIX = (p => { const q = Object.assign({}, p); delete q.optsMix; delete q.readRotation; delete q.wordsBy; delete q.progressMap; return q; })(PACK);
-const OFF = (p => { const q = Object.assign({}, p); delete q.pauseNew; return q; })(NOMIX);
+const NOMIX = packAsOf(PACK, MAIN, { keep: ["pauseNew"] });
+const OFF = stripFlags(NOMIX, ["pauseNew"]);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
 

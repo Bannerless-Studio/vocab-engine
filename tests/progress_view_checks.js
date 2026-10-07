@@ -7,6 +7,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { packAsOf } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 const os = require("os");
 
@@ -23,7 +24,7 @@ const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 // levelGate and levelExam (fb38) came after 9667a81: the flag-off control drops them too (tests/level_gate_checks.js covers them).
-const OFF = (p => { const q = Object.assign({}, p); delete q.progressView; delete q.levelGate; delete q.levelExam; return q; })(PACK);
+const OFF = packAsOf(PACK, MAIN);
 const clone = x => JSON.parse(JSON.stringify(x));
 
 let fails = 0, passes = 0, skips = 0;

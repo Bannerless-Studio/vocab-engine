@@ -4,6 +4,9 @@ Node checks with no dependencies. Each suite `require`s `engine/core.js`, and th
 
 | file | what it boots / checks |
 |---|---|
+| run_tier.sh | `fast\|full [--area a,b]`: runs a test tier with the pinned Node, one summary line per suite, exit 0 only when all pass. Tiers and the area to suites table: CLAUDE.md "Test tiers". |
+| lib/pack_flags.js | FLAG_SINCE (every pack-gated flag and the sha that introduced it), `packAsOf(pack, sha, {keep, strip})`, `packBefore(pack, flag)`, `stripFlags(pack, keys)`: how flag-off controls build the pack an older engine shipped with. |
+| pack_flags_checks.js | The FLAG_SINCE table is complete (every zh pack flag, every flag a suite names), true (shas are ancestors of HEAD, packAsOf matches the committed zh pack flag set at each flag commit and its parent) and the helpers behave. |
 | engine_checks.js | core.js and app.html against the real packs/zh plus inline synthetic packs; build.sh output and the dist/zh.html + sw.js stale guard; tools/check_site.sh; generator drift: a fresh tools/pack_from_hsk.py --out run (with ../chinese present, or `HSK_DIR=<chinese checkout>`) reproduces every packs/zh file, docs/ZH_GLOSS.md, docs/ZH_TIERS.md and docs/ZH_PATTERNS.md byte for byte. |
 | flagoff_snapshot.js | Flag-off golden harness (docs/HSK_MERGE.md §6): pack sources, `defaultProg`/`normalizeProg`/plan builders under a seeded RNG, and a fake-DOM boot of every tab for 3 seeds. Packs: zh, ../italian, ../korean, ../japanese (boot and pure goldens); source goldens also for spanish, french, german, russian, persian, indonesian. Goldens: golden/. |
 | pron_aids_checks.js | Pronunciation aids (tones, typed reading, word taps, Sounds reference); control byte-identical to pinned engine sha 55c843e. Uses ../korean for one guard. |

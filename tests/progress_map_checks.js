@@ -7,6 +7,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { packAsOf, packBefore } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 const util = require("util");
 
@@ -22,7 +23,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // fb27: the controls predate characters.start / ramp, so the pack is compared without them.
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = (p => { delete p.glossStyle; delete p.pairs; delete p.characters.start; delete p.characters.ramp; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
+const PACK = packBefore(loadConst(path.join(ZH, "pack.js"), "PACK"), "pairs");
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -33,7 +34,7 @@ const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 const LEG = Object.assign(clone0(PACK), { progressMap: true });
 // fb21 changes optsMix picks (and stamps f), which the flag-off controls vs older shas do not measure: they run without it.
 const noMix = p => { const q = Object.assign({}, p); delete q.optsMix; return q; };
-const OFF = (p => { const q = Object.assign({}, p); delete q.progressMap; return q; })(PACK);
+const OFF = packAsOf(PACK, MAIN);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
 

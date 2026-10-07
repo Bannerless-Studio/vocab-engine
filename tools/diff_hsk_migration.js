@@ -17,6 +17,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { packAsOf } = require("../tests/lib/pack_flags.js");
 const util = require("util");
 
 const ROOT = path.join(__dirname, "..");
@@ -27,7 +28,7 @@ const readJSON = f => JSON.parse(fs.readFileSync(f, "utf8"));
 function loadPack(dir){
   const opt = f => fs.existsSync(path.join(dir, f)) ? readJSON(path.join(dir, f)) : [];
   // The old hsk app has no level gate or exam profile (docs/PACK_SCHEMA.md "levelGate", "levelExam"): compare without them.
-  const pack = readJSON(path.join(dir, "pack.json")); delete pack.levelGate; delete pack.levelExam;
+  const pack = packAsOf(readJSON(path.join(dir, "pack.json")), "34c5df3", { strip: ["levelGate", "levelExam"] });
   return { pack, words: readJSON(path.join(dir, "words.json")),
     units: opt("characters.json"), sentences: opt("sentences.json"), legacy: readJSON(path.join(dir, "legacy.json")) };
 }

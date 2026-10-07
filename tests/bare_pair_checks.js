@@ -10,6 +10,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { packAsOf } = require("./lib/pack_flags.js");
 const os = require("os");
 const cp = require("child_process");
 
@@ -21,11 +22,11 @@ const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn typeof ${name} !== "undefined" ? ${name} : undefined;`)(); }
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
 // levelGate and levelExam (fb38) came after 3044601; tests/level_gate_checks.js covers them.
-const PACK = (q => { delete q.progressView; delete q.levelGate; delete q.levelExam; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["progressView", "levelGate", "levelExam"] });
 const noBBP = p => Object.assign({}, p, { characters: (c => { const q = Object.assign({}, c); delete q.bareByPair; return q; })(p.characters) });
 const PACK_OFF = noBBP(PACK);
 // The 3044601 control strips every field that postdates it (fb31 patternCue, fb32 glossStyle); each has its own control.
-const PACK_OFF_ALL = (p => { delete p.patternCue; delete p.glossStyle; return p; })(Object.assign({}, PACK_OFF));
+const PACK_OFF_ALL = packAsOf(PACK_OFF, MAIN);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");

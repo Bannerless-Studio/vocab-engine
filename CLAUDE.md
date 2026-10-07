@@ -48,6 +48,7 @@ Why it is built this way (one line each):
 Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-07, main after w32 (9667a81 + fb37 + fb38).
 
 ```sh
+$NODE tests/pack_flags_checks.js                 # 16 (tests/lib/pack_flags.js: FLAG_SINCE covers every zh pack flag and every flag a suite strips, shas are ancestors of HEAD, packAsOf matches the committed zh pack flag set at 52 probed commits)
 $NODE tests/engine_checks.js                     # 704 passed; includes the dist/zh.html + sw.js stale guard and the packs/zh generator drift check from an empty dir (needs ../chinese, or HSK_DIR=<chinese checkout>)
 $NODE tests/pron_aids_checks.js                  # 158
 $NODE tests/migration_checks.js                  # 446 (hsk_pinyin -> vocab_zh; uses ../chinese when present; [bare5] zh bare 6 -> 5; [rotation-s] read.done s/ls; [wordsBy] records read on a8e9c08; [progressMap] prog.pm both directions vs a2f2426; fb22 entries with g vs a2f2426 and 2412992; [f] records with f boot on 2412992 unchanged and back; [pairs] records with p boot on 2412992 and 3901e2e unchanged; [freqTiers] no new field, records written under the flag boot on b21ee93 and 2412992 byte-equal and back; [patterns] prog.pt on b21ee93 and 2412992; [bareByPair] no new field, a pair-bare unit's records boot on 3044601 byte-equal and back; [pv] prog.pv on 806ad57 and 3044601 both directions)
@@ -95,12 +96,32 @@ python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the 
 .cache/venv/bin/python tools/zh_say_scan.py [--write]   # zh polyphone TTS carriers; venv: pip install pypinyin jieba
 ```
 
+### Test tiers
+
+`tests/run_tier.sh fast|full [--area a,b]` runs a tier with the pinned Node (sets HSK_DIR when `../chinese` is absent), prints one line per suite (pass/fail counts, seconds) and exits 0 only when all pass. Run from a sibling checkout (`../vocab-engine-<branch>`) or any worktree.
+
+- **FAST** (per-feature worker, every commit): pack_flags_checks, engine_checks, migration_checks, `flagoff_snapshot.js --check`, plus the suites of every area the diff touches (`--area`).
+- **FULL** (integration / republish only): every suite, including opts_mix (~8 to 14 min) and gloss_overlap (~6 to 16 min). About 20 min idle.
+
+| area | suites |
+|---|---|
+| options | opts_mix |
+| gloss | gloss_overlap, gloss_display, typed_from |
+| progress | progress_map, progress_view |
+| pairs | pairs, bare_pair, freq_tiers, level_gate, patterns |
+| passages | passage_audio, listen_mode |
+| resume | session_resume |
+| characters | characters, characters_app, lag, typed_mastery |
+| words | words_typed |
+
+Flag-off controls never keep their own list of newer pack fields. A control that pins a sha builds its pack with `packAsOf(pack, PINNED_SHA)` from `tests/lib/pack_flags.js`; a suite that isolates itself from other flags uses `packAsOf(pack, ERA_SHA, { strip: [...] })` or `packBefore(pack, "<flag>")`, so a flag added later is stripped without touching the suite. Adding a pack flag means appending one row to FLAG_SINCE (key, introducing sha, path); pack_flags_checks fails until you do.
+
 Dev mode without a rebuild: open `engine/app.html?pack=zh` from `file://` (loads `../packs/zh/*.js`); `?packdir=<relative path>` loads a pack elsewhere.
 
 ## Always
 
 - Rebuild dist after any change to engine/ or packs/zh: `./build.sh packs/zh dist/zh.html`, then commit dist/zh.html and dist/sw.js with the change.
-- Run every tests/*.js suite plus `flagoff_snapshot.js --check` before merging an engine change; paste the counts.
+- Feature workers run `tests/run_tier.sh fast --area <areas touched>` before every commit (areas in "Test tiers"); integration and republish runs `tests/run_tier.sh full`. Paste the per-suite lines before merging an engine change.
 - After any language-repo pack republish, run `flagoff_snapshot.js --check` here; a pack golden that drifted is recaptured with `--capture` in its own commit that names the republish (the goldens read ../<lang>/pack).
 - Keep new engine behaviour pack-gated and prove the flag-off path byte-identical (a control check against a pinned sha, as pron_aids and listen_mode do).
 - Use one git worktree per branch (`git worktree add ../vocab-engine-<branch> <branch>`); other workers share this checkout.

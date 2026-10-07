@@ -8,6 +8,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { packAsOf, stripFlags } = require("./lib/pack_flags.js");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
@@ -16,7 +17,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // progressView "v2" (fb37) replaces the Progress layout [3] / [7] pin (the old rows, still the flag-off layout); [8] checks v2.
 const PACK_V2 = loadConst(path.join(ZH, "pack.js"), "PACK");
-const PACK = (p => { delete p.progressView; return p; })(Object.assign({}, PACK_V2));
+const PACK = stripFlags(PACK_V2, ["progressView"]);
 const G = PACK.levelGate; // zh ships 0.7 (owner, w32 brief)
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
@@ -356,9 +357,9 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
   console.log(`\n[4] controls vs main ${MAIN} (flag off, gate open, no pairs)`);
   if(!OLD) check("main core readable via git", false);
   else {
-    const OFF = (p => { delete p.levelGate; delete p.levelExam; return p; })(Object.assign({}, PACK));
+    const OFF = packAsOf(PACK, MAIN);
     const NOPAIRS = Object.assign({}, PACK, { pairs: false, freqTiers: false });
-    const OLDNP = (p => { delete p.levelGate; delete p.levelExam; return p; })(Object.assign({}, NOPAIRS));
+    const OLDNP = packAsOf(NOPAIRS, MAIN);
     const recs = [["fresh", () => VC.normalizeProg({}, PACK)], ["HSK 1-2 held-shaped", () => hold], ["HSK 1-2 open-shaped", () => open], ["HSK 1-3 learned", () => seed(3, 100, PACK)]];
     const sig = (C, pack, p) => JSON.stringify([C.todaySnapshot(pack, WORDS, CHARACTERS, clone(p), []), C.stagePath(pack, WORDS, CHARACTERS, clone(p), []), C.nextNewSet(WORDS, pack, clone(p))]);
     for(const [name, mk] of recs){
@@ -460,7 +461,7 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
       const sg = C => JSON.stringify([(PACK.progressMap.goals || []).map(g => C.goalPosition(clone(p), NOEXAM, g, WORDS, CHARACTERS, [])), C.progressPosition(clone(p), NOEXAM, WORDS, CHARACTERS, [])]);
       check(`flag off (no levelExam): goal and progress positions identical to main on ${name}`, sg(VC) === sg(OLD));
     }
-    check("flag off: Progress rows HTML identical to main (no levelExam, no levelGate)", await (async () => { const OFF2 = (p => { delete p.levelGate; delete p.levelExam; return p; })(Object.assign({}, PACK)); const a = await todayHtml(OFF2, unanswered, null), b = await todayHtml(OFF2, unanswered, { app: OLD_APP, core: OLD }); a.api.clickTab("progress"); b.api.clickTab("progress"); return strip(a.api.panel()) === strip(b.api.panel()); })());
+    check("flag off: Progress rows HTML identical to main (no levelExam, no levelGate)", await (async () => { const OFF2 = packAsOf(PACK, MAIN); const a = await todayHtml(OFF2, unanswered, null), b = await todayHtml(OFF2, unanswered, { app: OLD_APP, core: OLD }); a.api.clickTab("progress"); b.api.clickTab("progress"); return strip(a.api.panel()) === strip(b.api.panel()); })());
     check("levelGate alone (no levelExam) is the word rule: levelKnownPct equals the pre-exam value", VC.levelKnownPct(WORDS, NOEXAM, unanswered, LV[2], CHARACTERS) === VC.levelKnownPct(WORDS, NOEXAM, unanswered, LV[2]));
   }
   if(OWNER){

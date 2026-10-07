@@ -8,6 +8,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
+const { packAsOf, packBefore } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 const util = require("util");
 
@@ -22,7 +23,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // fb27: PACK is zh without characters.start / ramp (the rule of sections 1-4 and the control); PACKR is zh as shipped.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACKR = (p => { delete p.pairs; return p; })((q => { delete q.progressView; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK")));
+const PACKR = packBefore(loadConst(path.join(ZH, "pack.js"), "PACK"), "pairs", { keep: ["characters.start", "characters.ramp"] });
 const PACK = (p => { delete p.characters.start; delete p.characters.ramp; return p; })(clone0(PACKR));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
@@ -30,7 +31,7 @@ const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // The zh pack on main 590af86: characters.withWords, no learn (and no pauseNew / optsMix / wordsBy, added after it).
-const WITH = (p => { const c = Object.assign({}, p.characters, { withWords: true }); delete c.learn; const q = Object.assign({}, p, { characters: c }); delete q.pauseNew; delete q.optsMix; delete q.wordsBy; delete q.progressMap; return q; })(PACK);
+const WITH = (p => { const q = packAsOf(p, "590af86"); q.characters = Object.assign({}, q.characters, { withWords: true }); return q; })(PACK);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
 
