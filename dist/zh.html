@@ -1544,7 +1544,7 @@ function levelKnownPct(words, pack, prog, lv, units){
 }
 // pack.levelExam (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): per level, what the exam asks. On a
 // "characters" level a word is known (level counts, goals, levelGate) only when its character unit's wm pair
-// is also at BARE_PAIR (pairJudge: unit or word record, latest answer): the written form is read for meaning.
+// is also at BARE_PAIR in the unit's OWN wm stream (never the word record: word-side answers run under pronFirst/lag with the reading shown, so they do not test reading): the written form is read for meaning.
 // Neither stream answered yet (a record from before pairs): the unit's legacy streak boots the pair as
 // pairState does for words, else every existing learner would drop to 0 and, the booted pair being
 // "known", never be asked again. Any other level, or a word with no unit, keeps the word rule.
@@ -1555,8 +1555,8 @@ function wordKnownX(rec, word, pack, prog, byWord){
   if(!wordKnown(rec, word, pack)) return false;
   if(!byWord || !word || pack.levelExam[String(word.lv)] !== "characters") return true;
   const u = byWord.get(word.id); if(!u) return true;
-  const ur = charRecs(prog)[u.id], j = pairJudge(ur, u, prog, "wm");
-  return (j ? j.s : isObj(ur) ? pairState(ur, "wm").s : 0) >= BARE_PAIR;
+  const ur = charRecs(prog)[u.id], own = isObj(ur) && isObj(ur.p) ? pairEntry(ur.p.wm) : null;
+  return (own ? own[0] : isObj(ur) ? pairState(ur, "wm").s : 0) >= BARE_PAIR;
 }
 // { lv, prev, pct } while the first level with untaught words waits; else null.
 function levelGateHold(words, pack, prog, units){
@@ -5802,7 +5802,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2199284078-2273145";
+const VE_BUILD = "983815154-2273521";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6082,8 +6082,8 @@ document.addEventListener("visibilitychange", () => { if(document.visibilityStat
 if(typeof window.addEventListener === "function") window.addEventListener("pagehide", () => sessionSave());
 // pack.progressView: closing the app on Progress ends the visit too.
 if(PROGRESS_V2){
-  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden" && tab === "progress") progressLeave(); });
-  if(typeof window.addEventListener === "function") window.addEventListener("pagehide", () => { if(tab === "progress") progressLeave(); });
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden" && tab === "progress") progressVisit(); });
+  if(typeof window.addEventListener === "function") window.addEventListener("pagehide", () => { if(tab === "progress") progressVisit(); });
 }
 const TYPED_ITEM = { word: typeItem, pron: pronTypeItem, written: silentWrittenTypeItem, writtenPron: writtenPronTypeItem,
   writtenMeaning: e => meaningTypeItem(e, false), pronMeaning: e => meaningTypeItem(e, true) };
@@ -7583,13 +7583,17 @@ function progressWire(xp, cp){
 // anchor line, what moved since the last visit, the current goal, one bar per level, recent misses, then
 // every setting. A row whose value is the expected state (zero, locked, never started) is left out of the
 // view and comes back with Show all, so nothing is out of reach.
-let pvAll = false, pvLow = false;
+let pvAll = false, pvLow = false, pvBase;
 const pvTotals = () => VC.progressTotals(prog, PACK, WORDS, HAS_CHARACTERS ? CHAR_LIST : [], PASSAGE_LIST);
-function progressLeave(){ pvAll = false; pvLow = false; if(PROGRESS_V2 && VC.noteProgressVisit(prog, PACK, pvTotals())) store.save(); }
+// A phone lock or page hide only writes the visit; the expanded view and the hero stay while Progress is on screen.
+function progressVisit(){ if(PROGRESS_V2 && VC.noteProgressVisit(prog, PACK, pvTotals())) store.save(); }
+function progressLeave(){ pvAll = false; pvLow = false; progressVisit(); pvBase = undefined; }
 const pvPct = (n, d) => d > 0 ? `${Math.round(Math.min(1, Math.max(0, n / d)) * 1000) / 10}%` : "0%";
 const pvSigned = n => n > 0 ? `+${n}` : n < 0 ? `−${-n}` : "0";
 function pvHeroHTML(cur, anim){
-  const dl = VC.progressDeltas(prog, cur);
+  // The visit this view is measured against is fixed on entry: progressVisit writes pv on a phone lock while the hero stays.
+  if(pvBase === undefined) pvBase = prog.pv || null;
+  const dl = VC.progressDeltas({ pv: pvBase }, cur);
   const src = dl || cur;
   const items = [["m", n => "mastered"]];
   if(HAS_CHARACTERS) items.push(["co", n => "characters only"]);
@@ -7652,7 +7656,7 @@ function progressRenderV2(){
   const gateRow = () => `<p class="pvs pvgate">${escapeHtml(gateNote())}</p>`;
   const levelRow = (d, i) => {
     if(!all && i > lastShown) return "";
-    if(folded && low.includes(d)) return d === low[0] ? lowLine() + (gate && low.some(x => String(x.lv) === String(gate.lv)) ? gateRow() : "") : "";
+    if(folded && low.includes(d)) return d === low[0] ? lowLine() : "";
     const L = escapeHtml(levelLabel(d.lv)), open = isOpen(d.lv), size = d.list.length;
     const parts = [];
     if(open || all){
@@ -7677,7 +7681,7 @@ function progressRenderV2(){
     <p class="pva">${prog.sessions || 0} session${prog.sessions === 1 ? "" : "s"}, ${escapeHtml(levelLabel(LEVELS[at]))}</p>
     ${pvHeroHTML(cur, anim)}${pvGoalHTML()}${all ? pvGoalsHTML() : ""}
     <section class="pvls">${xp ? `<table class="stats">${xp.rows}</table>` : ""}${lvData.map(levelRow).join("")}${cp && !lag && cp.rows ? `<table class="stats">${cp.rows}</table>` : ""}${sounds}</section>
-    <section class="pvx">${missed.length ? `<p class="pvk">Missed in your last ${N} sessions</p><p class="pvw">${missed.map(w => `<span${TA}>${wordFormHTML(w, false)}</span>`).join(" ")}</p>` : `<p class="pvk">No misses in your last ${N} sessions.</p>`}</section>
+    ${missed.length ? `<section class="pvx"><p class="pvk">Missed in your last ${N} sessions</p><p class="pvw">${missed.map(w => `<span${TA}>${wordFormHTML(w, false)}</span>`).join(" ")}</p></section>` : ""}
     ${all && weak.length ? `<section><p class="pvk">Weakest words</p>${weak.map(w => `<div class="rowset">${wordRowHTML(w, "rowset")}</div>`).join("")}</section>` : ""}
     <button class="ghost pvall" id="pvAll" aria-expanded="${all}">${all ? "Show less" : "Show all"}</button>
     <section class="pvset"><p class="pvk">Settings</p>
@@ -7845,4 +7849,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3017589903-2272469-->
+<!--ve-build:2507464803-2272844-->

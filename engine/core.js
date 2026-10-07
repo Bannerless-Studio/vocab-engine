@@ -1146,7 +1146,7 @@ function levelKnownPct(words, pack, prog, lv, units){
 }
 // pack.levelExam (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): per level, what the exam asks. On a
 // "characters" level a word is known (level counts, goals, levelGate) only when its character unit's wm pair
-// is also at BARE_PAIR (pairJudge: unit or word record, latest answer): the written form is read for meaning.
+// is also at BARE_PAIR in the unit's OWN wm stream (never the word record: word-side answers run under pronFirst/lag with the reading shown, so they do not test reading): the written form is read for meaning.
 // Neither stream answered yet (a record from before pairs): the unit's legacy streak boots the pair as
 // pairState does for words, else every existing learner would drop to 0 and, the booted pair being
 // "known", never be asked again. Any other level, or a word with no unit, keeps the word rule.
@@ -1157,8 +1157,8 @@ function wordKnownX(rec, word, pack, prog, byWord){
   if(!wordKnown(rec, word, pack)) return false;
   if(!byWord || !word || pack.levelExam[String(word.lv)] !== "characters") return true;
   const u = byWord.get(word.id); if(!u) return true;
-  const ur = charRecs(prog)[u.id], j = pairJudge(ur, u, prog, "wm");
-  return (j ? j.s : isObj(ur) ? pairState(ur, "wm").s : 0) >= BARE_PAIR;
+  const ur = charRecs(prog)[u.id], own = isObj(ur) && isObj(ur.p) ? pairEntry(ur.p.wm) : null;
+  return (own ? own[0] : isObj(ur) ? pairState(ur, "wm").s : 0) >= BARE_PAIR;
 }
 // { lv, prev, pct } while the first level with untaught words waits; else null.
 function levelGateHold(words, pack, prog, units){

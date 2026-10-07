@@ -256,7 +256,7 @@ async function playDay(pack, seedP, sessions, seed, gapMs, onSession){
 }
 
 const argv = process.argv.slice(2);
-const N_SESSIONS = argv.includes("--sessions") ? +argv[argv.indexOf("--sessions") + 1] : 14;
+const N_SESSIONS = argv.includes("--sessions") ? +argv[argv.indexOf("--sessions") + 1] : 30;
 if(argv.includes("--acc")) ACC = +argv[argv.indexOf("--acc") + 1];
 const cp = require("child_process"), os = require("os");
 const MAIN = "9667a81"; // main before levelGate
@@ -382,7 +382,8 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
     const o = clone(OWNER); const rows = LV.map(lv => `${VC.levelLabel(PACK, lv)} ${(VC.levelKnownPct(WORDS, PACK, o, lv, CHARACTERS) * 100).toFixed(1)}%`);
     const hd = VC.levelGateHold(WORDS, PACK, o, CHARACTERS);
     console.log(`  known per level: ${rows.join(", ")}; gate on the next level: ${hd ? `HELD at ${hd.pct}%` : "open"}; next level ${(VC.nextNewSet(WORDS, PACK, o) || {}).lv}`);
-    check("owner export: every level's known share is measured and the gate decision matches the levelGate rule", LV.every(lv => { const v = VC.levelKnownPct(WORDS, PACK, o, lv, CHARACTERS); return v >= 0 && v <= 1; }) && (VC.levelKnownPct(WORDS, PACK, o, LV[2], CHARACTERS) >= G) === (hd === null));
+    const known3 = (() => { const ub = new Map(CHARACTERS.map(u => [u.words[0], u])); return BYLV[LV[2]].filter(w => { const r = o.w[w.id]; if(!VC.wordKnown(r, w, PACK)) return false; const u = ub.get(w.id); if(!u) return true; const ur = o.chars && o.chars.c && o.chars.c[u.id]; const e = ur && ur.p && ur.p.wm; return (e ? e[0] : ur ? VC.pairState(ur, "wm").s : 0) >= VC.BARE_PAIR; }).length; })();
+    check("owner export: HSK 3 known share equals an independent count of known words over the level", Math.abs(VC.levelKnownPct(WORDS, PACK, o, LV[2], CHARACTERS) - known3 / BYLV[LV[2]].length) < 1e-9 && LV.every(lv => { const v = VC.levelKnownPct(WORDS, PACK, o, lv, CHARACTERS); return v >= 0 && v <= 1; }) && (known3 / BYLV[LV[2]].length >= G) === (hd === null));
     const ou = clone(o); delete ou.pause; // the export is paused: unpaused, as the learner would see the plan
     const T = await todayHtml(PACK, ou, null);
     check("owner export Today: the Learn row matches the gate decision", hd ? (learnRow(T.html) || "").endsWith(VC.levelGateNote(WORDS, PACK, o, CHARACTERS)) : !/waits/.test(T.html));
@@ -403,7 +404,7 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
     });
     console.log(`  HSK 3 known at start ${(pct0 * 100).toFixed(1)}% (next level ${lvl4}); after each session ${pcts.join(", ")}%; gate open after session ${openedAt < 0 ? "never within " + N_SESSIONS : openedAt}; first HSK 4 word taught in session ${taught4 < 0 ? "never" : taught4}`);
     check(`the gate held at the start and the sim ran ${N_SESSIONS} sessions`, pct0 < G && day.learnNew.length === N_SESSIONS);
-    check(`no HSK 4 word is taught before the gate opens (opened ${openedAt}, first taught ${taught4})`, taught4 < 0 || (openedAt > 0 && taught4 >= openedAt));
+    check(`no HSK 4 word is taught before the gate opens (opened ${openedAt}, first taught ${taught4})`, openedAt > 0 && taught4 >= 0 && taught4 >= openedAt);
   }
   console.log(`\n[7] levelExam: pinyin vs characters levels`);
   const NOEXAM = (p => { delete p.levelExam; return p; })(Object.assign({}, PACK));
@@ -419,9 +420,13 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
   check("characters level: an old unit record (streak 4, no pair data) boots the meaning pair at known", k(booted, w3));
   const ans = (s0, pair) => exam({ r: 4, w: 0, s: 0, t: DAY_N - 1, p: { wm: pair } });
   check("characters level: unit wm answered at 2 is known, at 1 is not (the boot never overrides an answered pair)", k(ans(0, [2, 5]), w3) && !k(ans(0, [1, 5]), w3));
-  const mix = exam({ r: 4, w: 0, s: 5, t: DAY_N - 1, p: { wm: [3, 4] } }); mix.w[w3.id].p = { wm: [3, 4], sm: [3, 4], ws: [3, 4] };
-  mix.w[w3.id].p.wm = [1, 6];
-  check("characters level: a later word answer decides (pairJudge): word wm miss after the unit's 3 -> not known", !k(mix, w3));
+  // Word-side pair answers happen with the reading shown (pronFirst / lag): they never judge the hanzi.
+  const withWord = (p, w, wm) => { p.w[w.id].p = { wm }; return p; };
+  check("characters level: unit unrecorded + word wm [3, 5] answered: not known (word stream ignored)", !k(withWord(exam(null), w3, [3, 5]), w3));
+  check("characters level: unit wm [0, 3] older than word wm [3, 6]: not known", !k(withWord(exam({ r: 4, w: 0, s: 0, t: DAY_N - 1, p: { wm: [0, 3] } }), w3, [3, 6]), w3));
+  // (a word's own wm miss already fails the word rule, wordKnown, whatever the unit holds)
+  check("characters level: unit wm [2, 3] + a newer word wm [3, 6]: known; unit wm [2, 3] + word wm miss [0, 6]: not known (word rule)", k(withWord(exam({ r: 4, w: 0, s: 0, t: DAY_N - 1, p: { wm: [2, 3] } }), w3, [3, 6]), w3) && !k(withWord(exam({ r: 4, w: 0, s: 0, t: DAY_N - 1, p: { wm: [2, 3] } }), w3, [0, 6]), w3));
+  check("characters level: unit with a legacy streak 4 + word wm [3, 6]: boots known; legacy streak 1 + word wm [3, 6]: not known", k(withWord(exam({ r: 4, w: 0, s: 4, t: DAY_N - 1 }), w3, [3, 6]), w3) && !k(withWord(exam({ r: 1, w: 0, s: 1, t: DAY_N - 1 }), w3, [3, 6]), w3));
   const pctNo = VC.levelKnownPct(WORDS, NOEXAM, unanswered, LV[2], CHARACTERS), pctYes = VC.levelKnownPct(WORDS, PACK, unanswered, LV[2], CHARACTERS);
   check(`levelKnownPct on the characters level drops (${(pctNo * 100).toFixed(1)}% -> ${(pctYes * 100).toFixed(1)}%), the pinyin level is unchanged`, pctYes < pctNo && VC.levelKnownPct(WORDS, NOEXAM, unanswered, LV[0], CHARACTERS) === VC.levelKnownPct(WORDS, PACK, unanswered, LV[0], CHARACTERS));
   const g3 = (PACK.progressMap.goals || []).find(g => String(g.upTo) === LV[2]);

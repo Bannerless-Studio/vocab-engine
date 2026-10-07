@@ -255,6 +255,11 @@ else {
   h = api.panel(); t = stripTags(h);
   check(`after a session: hero "In 3 sessions since your last visit" with +${d.m} mastered and +1 passage`, t.includes("In 3 sessions since your last visit") && d.m >= 6 && t.includes(`+${d.m} mastered`) && t.includes("+1 passage ") && !/So far/.test(t));
   check("after a session: the anchor counts the sessions", /<p class="pva">81 sessions, HSK 3<\/p>/.test(h));
+  // A phone lock (visibilitychange hidden / pagehide) while Progress stays on screen writes the visit only.
+  api.el("pvAll").click(); api.hide(); api.pagehide();
+  check("hide + pagehide on Progress keep the expanded view and the hero on screen", /id="pvAll" aria-expanded="true">Show less</.test(api.panel()) && /id="pvh"/.test(api.panel()));
+  api.el("pvAll").click(); h = api.panel();
+  check("after a hide, Show less still collapses and the hero (since the visit on entry) stays", /id="pvAll" aria-expanded="false">Show all</.test(h) && /In 3 sessions since your last visit/.test(stripTags(h)));
   const missLine = (h.match(/Missed in your last 7 sessions<\/p><p class="pvw">([\s\S]*?)<\/p>/) || [])[1] || "";
   check("a word missed this session leads the Missed in your last 7 sessions line, max 12 words", VC.recentMisses(api.getProg(), VC.learnedWords(WORDS, PACK, api.getProg()))[0].id === missW.id && (missLine.match(/<span data-tl/g) || []).length <= 12 && stripTags(missLine.split("</span> <span")[0]).trim() === stripTags(api.wordForm(missW)).trim());
   api.clickTab("today"); api.clickTab("progress");
@@ -275,7 +280,7 @@ else {
   // Fresh learner: hero shows nothing (all totals 0), level rows beyond HSK 1 hidden.
   const { api } = await bootWith(PACK, base(), 5);
   api.clickTab("progress"); const h = api.panel();
-  check("fresh record: no hero (nothing to report), only HSK 1 shown, no collapsed line, no misses line says so", !/id="pvh"/.test(h) && /<span>HSK 1<\/span>/.test(h) && !/<span>HSK 2<\/span>/.test(h) && !/id="pvLow"/.test(h) && /No misses in your last 7 sessions\./.test(h));
+  check("fresh record: no hero (nothing to report), only HSK 1 shown, no collapsed line, no misses line at all", !/id="pvh"/.test(h) && /<span>HSK 1<\/span>/.test(h) && !/<span>HSK 2<\/span>/.test(h) && !/id="pvLow"/.test(h) && !/pvx|No misses/.test(h));
   api.el("pvAll").click();
   check("fresh record, Show all: every level row", ["1", "2", "3", "4"].every(lv => new RegExp(`<span>HSK ${lv}</span>`).test(api.panel())));
 }
