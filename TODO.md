@@ -274,6 +274,18 @@ Wiktionary translation table and PanLex added) stays under the 2,000-word target
 verified path to close the gap from open data; the only culture-native aligned source is
 African Storybook at ~87 stories. Revisit only if a bigger open Somali dictionary surfaces.
 
+## Port to the other 13 languages (owner 2026-10-08: "mostly convinced about the current Chinese state and learnings; start porting")
+
+Plan: .cache/briefs/port-plan.md + port-inventory.md (waves; per-site migration proof for the pairs bootstrap + prog.pv). Ported: pairs, freqTiers, glossStyle primary (where glosses carry senses), progressView v2, levelGate 0.7 on known, appView v2 (all tabs), fb41 session estimates, markPassageDone listening credit, slim live-proof policy, test tiers. Japanese also gets the characters set (lag/start 60/ramp, bareByPair, ws boost, levelExam).
+
+NOT ported — content or script-specific; each is its own later project:
+- Grammar patterns + cloze drills (zh: 27 patterns / 177 sentences, patternCue): per-language authoring + naturalness review.
+- Per-compound memory hooks and per-character hint meanings (tools/zh_hint_meanings.json, hand hints): hanzi-specific; ja kanji hooks possible later but packbuilder has no hint source.
+- Pinyin fade by pair, character ramp, sound-ask boost: only where a script layer is learned separately (ja yes; alphabetic sites have nothing to fade).
+- Hanzi exam rule (levelExam "characters"): needs a character layer; elsewhere known = the word rule.
+- The 15 new HSK 3/4 passages: content; "more stories at higher levels" is a per-language content decision.
+- Tier overrides (tools/zh_tiers_overrides.json) and gloss overrides (478 gloss fixes, 723 hint meanings): data; each language needs its own pass; glossStyle lands only where senses already exist.
+
 ## Backlog (not scheduled)
 - **Video stage** (user 2026-09-25: backlog only): level-graded YouTube
   videos per language with a timed transcript and passage-style questions,
