@@ -272,10 +272,10 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     const r = api.getProg().chars.c[U0.id]; VC.notePair(r, "ws", false, false, 13, r.s, VC.pairUnitHeld(PACK));
     check("after a miss on the ws pair: the reading is back in the app", api.pronAsked(W0) !== "" && t(api) === "ruby");
     // Display only: two Today sessions with the same answers write byte-equal records with the flag on and off.
-    const run = async pk => { NOW = new Date(2026, 9, 7, 8, 0, 0).getTime(); const a = await boot(pk, OWNER || synth(), 21); const rng = mulberry32(9);
-      const rows = []; for(let k = 0; k < 2; k++){ NOW += 4 * 3600e3; rows.push(...(await session(a, () => rng() < 0.85)).map(x => [x.key, x.kind, x.ok])); } return { rows: JSON.stringify(rows), prog: JSON.stringify(a.getProg()) }; };
+    const run = async pk => { NOW = new Date(2026, 9, 7, 8, 0, 0).getTime(); const a = await boot(pk, OWNER || synth(), 21); const rng = mulberry32(9); let first, firstProg;
+      const rows = []; for(let k = 0; k < 2; k++){ NOW += 4 * 3600e3; const r = (await session(a, () => rng() < 0.85)).map(x => [x.key, x.kind, x.ok]); if(!k) first = JSON.stringify(r); rows.push(...r); if(!k) firstProg = JSON.stringify(a.getProg()); } return { rows: JSON.stringify(rows), prog: JSON.stringify(a.getProg()), first, firstProg }; };
     const on = await run(PACK), off = await run(PACK_OFF);
-    check(`two Today sessions on ${OWNER ? "the owner export" : "a synthetic record"} (${JSON.parse(on.rows).length} answers): same items and records byte-equal with the flag on and off`, on.rows === off.rows && on.prog === off.prog);
+    check(`first Today session on ${OWNER ? "the owner export" : "a synthetic record"}: same items and records byte-equal with the flag on and off (no wm pair answered yet, so no ws boost; later sessions differ by the boost, [7])`, on.first === off.first && on.firstProg === off.firstProg);
   }
 
   console.log(`\n[5] flag-off control vs ${MAIN}`);
@@ -331,6 +331,59 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
       const c = count(api.getProg()); res.push(c); line(`after day ${d + 1} (3 Today sessions a day, 85% right)`, c);
     }
     check(`simulated ${n} answers over 3 days: the rule never lowers bare counts (flips are ruby units with wm and ws both at 2)`, res.every(c => c.after >= c.before && c.bOn >= c.bOff));
+  }
+
+  console.log("\n[7] fb36 ws boost: the Review plan reserves up to BARE_BOOST slots for ruby units with wm at 2+ and ws below 2, asked in ws");
+  {
+    const TODAY = "2026-10-07", lw = p => VC.learnedWords(WORDS, PACK, p);
+    const po = (sd, x) => Object.assign({ canHear: () => true, today: TODAY, rng: mulberry32(sd), units: CHARACTERS, sn: 13, typedKindFits: (w, k) => VC.typedKindOk(k, w, false) }, x || {});
+    const uItem = it => it.unit ? it.unit.id : it.tu;
+    const rubyIds = p => CHARACTERS.filter(u => p.chars.c[u.id] && VC.charTier(p.chars.c[u.id].s, PACK) === "ruby").map(u => u.id);
+    const mk = (n, wsOf) => { const p = synth(); rubyIds(p).slice(0, n).forEach((id, i) => { p.chars.c[id].p = Object.assign({ wm: [2, 9] }, wsOf(i)); }); return p; };
+    const plan = (p, pack, sd, x) => VC.buildReviewPlan(lw(p), p, pack || PACK, po(sd, Object.assign({ size: 20 }, x)));
+    const boosted = (p, pl) => pl.filter(it => (it.unit || it.tu) && it.pair !== "wm" && (it.kind === "charSound" || it.kind === "charPick" || it.kind === "type") && (VC.pairJudge(p.chars.c[uItem(it)], CHARACTERS.find(u => u.id === uItem(it)), p, "wm") || { s: 0 }).s >= VC.BARE_PAIR);
+    check("BARE_BOOST is 3 and exported", VC.BARE_BOOST === 3);
+    // Crowded pool: every other unit and word has a pair at 0 (a miss), so the normal order has plenty of lower streaks.
+    const crowd = p => { const keep = new Set(rubyIds(p).slice(0, 8)); Object.keys(p.chars.c).forEach(id => { if(!keep.has(id)) p.chars.c[id].p = { wm: [0, 9], ws: [0, 9] }; });
+      Object.keys(p.w).forEach(id => { p.w[id].p = { wm: [0, 1] }; }); return p; };
+    const p1 = crowd(mk(8, i => i % 2 ? { ws: [1, 9] } : {}));
+    const ids = new Set(rubyIds(p1).slice(0, 8)), never = new Set(rubyIds(p1).slice(0, 8).filter(id => !(p1.chars.c[id].p || {}).ws));
+    const wsAsk = it => (it.unit || it.tu) && ids.has(uItem(it)) && (it.kind === "charSound" || it.kind === "charPick" || (it.kind === "type" && it.pair === "ws"));
+    let nmin = 99, nOff = 0, once = true, ord = true;
+    for(let sd = 1; sd <= 20; sd++){
+      const pl = plan(p1, PACK, sd), ws = pl.filter(wsAsk);
+      nmin = Math.min(nmin, ws.length); nOff += plan(p1, PACK_OFF, sd).filter(wsAsk).length;
+      const keys = pl.map(it => it.word ? "w:" + it.word.id : (it.tu ? "c:" + it.tu : "c:" + it.unit.id)); if(new Set(keys).size !== keys.length) once = false;
+      if(ws.filter(it => never.has(uItem(it))).length < 3) ord = false;
+    }
+    check(`crowded pool, 8 candidates (4 ws never answered, 4 at 1): >= 3 asked in ws in each of 20 plans (min ${nmin}); flag off asks ${nOff / 20} on average`, nmin >= 3 && nOff / 20 < nmin);
+    check("the reserved slots take the lowest ws streak first (the never-answered units fill them)", ord);
+    check("one ask per item per plan", once);
+    const exactly = plan(p1, PACK, 7).filter(wsAsk).length;
+    check(`at most BARE_BOOST are reserved (others follow the normal order): ${exactly} candidates asked ws in a plan of 20`, exactly >= 3 && plan(p1, PACK, 7).length === 20);
+    // None when there are no candidates: wm below 2, or ws already at 2.
+    const pNone = mk(8, () => ({ ws: [2, 9] })), pNone2 = synth();
+    check("no candidate (ws already at 2 on every wm-2 unit; or no pair answered): plan byte-identical to the flag off", [pNone, pNone2].every(p => JSON.stringify(plan(p, PACK, 5)) === JSON.stringify(plan(p, PACK_OFF, 5))));
+    // A candidate whose ws was answered this session is not asked again in it.
+    const pS = mk(8, () => ({ ws: [0, 13] }));
+    const plS = plan(pS, PACK, 5), askedWs = plS.filter(it => (it.unit || it.tu) && ids.has(uItem(it)) && it.kind !== "charRead" && (it.kind === "charSound" || it.kind === "charPick" || (it.kind === "type" && it.pair === "ws")));
+    check("ws answered in this session (sn 13): not asked again in it", askedWs.length === 0, askedWs.length);
+    // A unit not at ruby, or without wm at 2, is no candidate.
+    const pW = mk(8, () => ({})); rubyIds(pW).slice(0, 8).forEach(id => { pW.chars.c[id].p.wm = [1, 9]; });
+    check("wm below 2: no boost, plan identical to the flag off", JSON.stringify(plan(pW, PACK, 5)) === JSON.stringify(plan(pW, PACK_OFF, 5)));
+    // Flag off (no bareByPair): Review and Recall plans byte-identical to 806ad57 (the build before the boost).
+    const PRE = git("806ad57", "engine/core.js");
+    if(!PRE) skip("806ad57 not in this checkout's history");
+    else {
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "barepair-pre-")), "core_806ad57.js"); fs.writeFileSync(f, PRE); const OLD2 = require(f);
+      const cmp = (p, pk) => { const out = []; for(let sd = 1; sd <= 12; sd++){ out.push(JSON.stringify(OLD2.buildReviewPlan(OLD2.learnedWords(WORDS, pk, p), p, pk, po(sd, { size: 20 }))), JSON.stringify(OLD2.buildRecallPlan(OLD2.learnedWords(WORDS, pk, p), p, pk, 12, po(sd)))); } return out.join("|"); };
+      const cur = (p, pk) => { const out = []; for(let sd = 1; sd <= 12; sd++){ out.push(JSON.stringify(VC.buildReviewPlan(lw(p), p, pk, po(sd, { size: 20 }))), JSON.stringify(VC.buildRecallPlan(lw(p), p, pk, 12, po(sd)))); } return out.join("|"); };
+      check("flag off (bareByPair stripped): 12 Review + 12 Recall plans on three records byte-identical to 806ad57", [p1, mk(8, () => ({})), synth()].every(p => cmp(p, PACK_OFF) === cur(p, PACK_OFF)));
+      check("flag on, no candidate (synthetic, no pair answered): plans byte-identical to 806ad57", [pNone, pNone2, pW].every(p => cmp(p, PACK) === cur(p, PACK)));
+    }
+    // Recall plans are not boosted.
+    const rc = p => VC.buildRecallPlan(lw(p), p, PACK, 12, po(4));
+    check("Recall plan unchanged by the flag (not boosted)", JSON.stringify(rc(p1)) === JSON.stringify(VC.buildRecallPlan(lw(p1), p1, PACK_OFF, 12, po(4))));
   }
 
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);

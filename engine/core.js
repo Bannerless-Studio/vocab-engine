@@ -1556,7 +1556,7 @@ function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng, can, o){
 }
 const dayHeldMark = (cands, prog, pack, o) => { if(wordsTypedOn(pack)) cands.forEach(c => { if(c.t === "w" && typedWordDue(c.x, prog, pack, o.today, c.kinds, o.typedOk, o.typedSeen)) c.held = true; }); return cands; };
 function dayReviewPlan(learned, prog, pack, n, o){
-  if(pairsOn(pack)) return pairPlan(learned, prog, pack, n, o, dayWordKinds(pack), dayCharKinds(pack));
+  if(pairsOn(pack)) return pairPlan(learned, prog, pack, n, o, dayWordKinds(pack), dayCharKinds(pack), true);
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = o.rng || Math.random;
   const d = dayLog(prog, o.today); const wk = dayWordKinds(pack), ck = dayCharKinds(pack);
   const ru = recordedUnits(o.units, prog, pack), rs = recordedScriptUnits(o.script, prog, pack);
@@ -1727,7 +1727,7 @@ function pairKind(po, s, mk){
 // on; by streak and age alone words reaching known per week fell 168 -> 107, fb23 measure); then
 // asked longest ago, then jitter. A PAIR_REFRESH share goes to known pairs (s >= PAIR_KNOWN),
 // oldest first. Returns [{ c, pair, kind }].
-function pairPick(cands, n, d, rng, sn, pack, o){
+function pairPick(cands, n, d, rng, sn, pack, o, pre){
   const r = rng || Math.random, opt = o || {}, lo = [], hi = [], psn = Number.isInteger(opt.sn) ? opt.sn : sn;
   (cands || []).forEach(c => {
     const po = pairOpts(c, pack, opt, psn), mk = dayPending(d.a[c.key], sn) || [];
@@ -1746,6 +1746,7 @@ function pairPick(cands, n, d, rng, sn, pack, o){
   hi.sort((x, y) => x.ra - y.ra || x.j - y.j);
   const out = [], seen = new Set();
   const alias = e => e.kind === "type" && e.c.t === "c" && e.c.tw ? "w:" + e.c.tw.id : null;
+  (pre || []).forEach(e => { out.push(e); seen.add(e.c.key); if(alias(e)) seen.add(alias(e)); });
   const take = (list, upto) => { for(let i = 0; i < list.length && out.length < upto; i++){ const e = list[i]; if(!e) continue;
     const al = alias(e); if(seen.has(e.c.key) || (al && seen.has(al))) continue;
     seen.add(e.c.key); if(al) seen.add(al); out.push(e); list[i] = null; } };
@@ -1768,13 +1769,34 @@ const pairCharCand = (prog, pack, kinds, typedUnits) => { const recs = charRecs(
 // A unit's typed ask types its word (tu); pair tells the app which typed kinds belong to the item.
 const pairPlanItem = e => e.c.t === "w" ? { kind: e.kind, word: e.c.x, pair: e.pair }
   : e.kind === "type" ? { kind: "type", word: e.c.tw, tu: e.c.x.id, pair: e.pair } : { kind: e.kind, unit: e.c.x, pair: e.pair };
+// characters.bareByPair (owner 2026-10-07; the ws pair was rarely answered, so units stayed ruby): the Review
+// plan reserves up to BARE_BOOST slots for bare candidates, ruby units whose wm pair is at BARE_PAIR+ and whose
+// ws pair is below it or never answered (pairJudge, as pairBare), asked in the ws direction (pairOpts / pairKind
+// as pairPick: a pair answered this session, or no ws kind on the device, leaves it out; a pending ws miss
+// keeps its kind). Lowest ws streak first, then asked longest ago. The slots left follow pairPick's order.
+const BARE_BOOST = 3;
+function bareBoost(cands, prog, pack, sn, d, o){
+  if(!bareByPairOn(pack)) return undefined;
+  const psn = Number.isInteger(o.sn) ? o.sn : sn, out = [];
+  cands.forEach(c => {
+    if(c.t !== "c" || !isObj(c.rec) || charTier(c.rec.s || 0, pack) !== "ruby") return;
+    const wm = pairJudge(c.rec, c.x, prog, "wm"); if(!wm || wm.s < BARE_PAIR) return;
+    const ws = pairJudge(c.rec, c.x, prog, "ws"); if(ws && ws.s >= BARE_PAIR) return;
+    if(ws && psn > 0 && ws.a === psn) return;
+    const po = pairOpts(c, pack, o, psn).ws; if(!po) return;
+    const kind = pairKind(po, ws ? ws.s : 0, dayPending(d.a[c.key], sn) || []); if(!kind) return;
+    out.push({ c, pair: "ws", kind, s: ws ? ws.s : 0, a: ws ? ws.a : 0 });
+  });
+  out.sort((x, y) => x.s - y.s || x.a - y.a);
+  return out.slice(0, BARE_BOOST);
+}
 // Review and Recall under pack.pairs. o.extra (pauseNew) is ignored: a paused Review stays at n items.
-function pairPlan(learned, prog, pack, n, o, wk, ck){
+function pairPlan(learned, prog, pack, n, o, wk, ck, boost){
   const d = dayLog(prog, o.today), sn = daySn(prog), wc = dayWordCan(pack, o.canHear);
   const cands = [...(learned || []).map(pairWordCand(prog, wk, wc, pack)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
   // Owner 2026-10-06: a paused session's 40-item Review is too long to keep focus and remember mistakes,
   // so under pairs the pauseNew growth (o.extra) is ignored and Review keeps its normal size.
-  const pool = shuffle(pairPick(cands, n, d, o.rng, sn, pack, o), o.rng);
+  const pool = shuffle(pairPick(cands, n, d, o.rng, sn, pack, o, boost ? bareBoost(cands, prog, pack, sn, d, o) : undefined), o.rng);
   return hearableKinds(pool.map(pairPlanItem), o.canHear);
 }
 
@@ -2544,17 +2566,18 @@ const BARE_PAIR = 2;
 function bareByPairOn(pack){ const c = charsConfig(pack); return !!(c && c.bareByPair) && pairsOn(pack); }
 function pairBare(rec, unit, prog, pack){
   if(!bareByPairOn(pack) || !isObj(rec) || charTier(rec.s || 0, pack) !== "ruby") return false;
+  return (pairJudge(rec, unit, prog, "wm") || { s: 0 }).s >= BARE_PAIR && (pairJudge(rec, unit, prog, "ws") || { s: 0 }).s >= BARE_PAIR;
+}
+// A unit pair's judged state: the unit's and the word's records are separate streams per pair; the most
+// recent answer decides (higher session ordinal [1]; in the same session the lower streak), so a miss on
+// either brings the reading back. null: the pair was never answered. { s: streak, a: ordinal }.
+function pairJudge(rec, unit, prog, pair){
   const wid = unit && (unit.words || [])[0], w = wid != null && prog && isObj(prog.w) ? prog.w[wid] : null;
-  // The unit's and the word's records are separate streams per pair; the most recent answer decides (higher
-  // session ordinal [1]; in the same session the lower streak), so a miss on either brings the reading back.
-  const ok = pair => {
-    const en = r => isObj(r) && isObj(r.p) ? pairEntry(r.p[pair]) : null;
-    const es = [en(rec), en(w)].filter(Boolean);
-    if(!es.length) return false;
-    const last = Math.max(...es.map(e => e[1]));
-    return Math.min(...es.filter(e => e[1] === last).map(e => e[0])) >= BARE_PAIR;
-  };
-  return ok("wm") && ok("ws");
+  const en = r => isObj(r) && isObj(r.p) ? pairEntry(r.p[pair]) : null;
+  const es = [en(rec), en(w)].filter(Boolean);
+  if(!es.length) return null;
+  const last = Math.max(...es.map(e => e[1]));
+  return { s: Math.min(...es.filter(e => e[1] === last).map(e => e[0])), a: last };
 }
 function answerCharChoice(prog, start){
   const ch = ensureChars(prog); ch.choiceSeen = true; if(!start) ch.defer = true; return prog;
@@ -4122,7 +4145,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
-  BARE_PAIR, bareByPairOn, pairBare, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
+  BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,
   charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
