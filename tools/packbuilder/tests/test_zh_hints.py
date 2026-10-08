@@ -139,10 +139,10 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(fresh["休"], "a person 亻 leaning against a tree 木: to rest")
         units = [{"t": "好"}, {"t": "休息"}]
         with self.assertRaises(SystemExit) as e:
-            pack_from_hsk.attach_hints([dict(u) for u in units], stale, stale_m)
+            pack_from_hsk.attach_hints([dict(u) for u in units], stale, stale_m, dict.fromkeys(stale_m, ""))
         self.assertIn("休", str(e.exception))
         ok = [dict(u) for u in units]
-        pack_from_hsk.attach_hints(ok, dict(fresh, 息=None), dict(fresh_m, 息=None))
+        pack_from_hsk.attach_hints(ok, dict(fresh, 息=None), dict(fresh_m, 息=None), dict.fromkeys([*fresh_m, "息"], ""))
         self.assertEqual(ok, [{"t": "好", "hint": [fresh["好"]]}, {"t": "休息", "hint": ["to rest", None]}])
 
     def test_meaning_is_the_pack_gloss_first_alternative_else_the_source_sense_unless_overridden(self):
@@ -157,11 +157,12 @@ class BuildTest(unittest.TestCase):
         meanings = {"衣": "clothes", "服": "clothes", "务": "duty", "员": "member", "服务员:服": "to serve"}
         units = [{"t": "衣服"}, {"t": "服务员"}]
         hints = {c: "x" for c in "衣服务员"}
-        pack_from_hsk.attach_hints(units, hints, meanings)
+        parts = dict.fromkeys(hints, "")
+        pack_from_hsk.attach_hints(units, hints, meanings, parts)
         self.assertEqual(units[0]["hint"], ["clothes", "clothes"])
         self.assertEqual(units[1]["hint"], ["to serve", "duty", "member"])
         with self.assertRaises(SystemExit) as e:
-            pack_from_hsk.attach_hints([{"t": "衣服"}], hints, dict(meanings, **{"制服:服": "uniform"}))
+            pack_from_hsk.attach_hints([{"t": "衣服"}], hints, dict(meanings, **{"制服:服": "uniform"}), parts)
         self.assertIn("制服:服", str(e.exception))
 
     def test_meaning_override_keys_are_validated(self):
@@ -182,18 +183,20 @@ class EmittedTest(unittest.TestCase):
         units = {u["t"]: u for u in json.loads((ROOT / "packs" / "zh" / "characters.json").read_text(encoding="utf-8"))}
         meanings = json.loads((ROOT / "tools" / "zh_hint_meanings.json").read_text(encoding="utf-8"))
         self.assertEqual(units["好"]["hint"], [table["好"]])
-        self.assertEqual(units["妈妈"]["hint"], [meanings["妈"], meanings["妈"]])
-        self.assertEqual(units["休息"]["hint"], [meanings["休"], meanings["休息:息"]])
-        self.assertEqual(units["我们"]["hint"], ["I", "(plural)"])
-        self.assertEqual(units["衣服"]["hint"], ["clothes", "clothes"])
-        self.assertEqual(units["服务员"]["hint"], ["to serve", "duty", "staff"])
-        self.assertEqual(units["一会儿"]["hint"], ["one", "moment", "(suffix)"])
+        m = "mother: 女 (woman) + 马 (sound mǎ)"
+        self.assertEqual(units["妈妈"]["hint"], [m, m])
+        self.assertEqual(units["休息"]["hint"][0], meanings["休"] + ": a person 亻 leaning against a tree 木")
+        self.assertEqual(units["我们"]["hint"], ["I", "(plural): 亻 (people) + 门 (sound mén)"])
+        self.assertEqual(units["衣服"]["hint"], ["clothes: picture of a woman's dress", "clothes: a person 卩 putting on 又 a coat 月"])
+        self.assertEqual(units["服务员"]["hint"], ["to serve: a person 卩 putting on 又 a coat 月", "duty: 夂 to go + 力 strength", "staff: 贝 (money) + 口"])
+        self.assertEqual(units["一会儿"]["hint"], ["one", "moment", "(suffix): picture of a child"])
         self.assertEqual(len(units), 1193)
         for u in units.values():
             self.assertIn("hint", u, u["id"])
             self.assertEqual(len(u["hint"]), len(u["t"]), u["id"])
             self.assertTrue(all(h for h in u["hint"]), u["id"])
-            self.assertTrue(all(len(h.split()) <= zh_hints.MAX_WORDS for h in u["hint"]), u["id"])
+            # the cap bounds the breakdown; fb43 puts the word-specific meaning in front of it
+            self.assertTrue(all(len((h.partition(": ")[2] or h).split()) <= zh_hints.MAX_WORDS for h in u["hint"]), u["id"])
 
 
 if __name__ == "__main__":

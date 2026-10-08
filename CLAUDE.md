@@ -45,7 +45,7 @@ Why it is built this way (one line each):
 
 ## Commands (pinned)
 
-Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-08, main after w35 (port wave 0: E1+E2, E3, E4+E5).
+Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-08, main after w36 (fb42 ETA curves, fb43 compound breakdowns, fb44 pattern note; on top of w35 port wave 0).
 
 ```sh
 $NODE tests/pack_flags_checks.js                 # 30 (sibling pack.json keys gained against the committed pack are in FLAG_SINCE or SIBLING_ALLOW, tests/lib/pack_flags.js: FLAG_SINCE covers every zh pack flag and every flag a suite strips, shas are ancestors of HEAD, packAsOf matches the committed zh pack flag set at 52 probed commits)
