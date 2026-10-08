@@ -274,6 +274,8 @@ Wiktionary translation table and PanLex added) stays under the 2,000-word target
 verified path to close the gap from open data; the only culture-native aligned source is
 African Storybook at ~87 stories. Revisit only if a bigger open Somali dictionary surfaces.
 
+STATUS 2026-10-08 (wave 1): LIVE italian c1b9950 (rollback f3e2a96), spanish 1aec8dc (rollback 47167a2), french 7c21e1c (rollback 00e81a9), all on engine 439df3d with the generic flag set G + ft tiers + per-site eta (tools/eta.json, calibrated 600 sessions at 85% seeds 5/6/7, out-of-sample gate 8/9/10 PASS 3/3 on every goal and the gate; it gain [0.0053,0.0033,0.0027] known 7.6; es [0.0050,0.0032,0.0027] 7.3; fr [0.0049,0.0032,0.0027] 7.4); slim live proofs KEEP (12-session seed on the previous build, new record boots there byte-equal). Each site's check.sh now runs `enrich --check`. w35 review fixes on main (f4299b5: null eta block when a site has no eta.json, out-of-sample --gate seeds, migration [port] learns the script primer on the 7 script sites, enrich --emit refuses its own source, validator checks eta.gain length; 6e54524: port_sites branches on tools/eta.json). Chinese live unchanged on 85150ba (next republish picks up the eta-in-pack block). Next: wave 2 german/indonesian/swahili, wave 3 korean/russian + arabic/persian/urdu/hindi, wave 4 japanese (characters set).
+
 ## Port to the other 13 languages (owner 2026-10-08: "mostly convinced about the current Chinese state and learnings; start porting")
 
 Plan: .cache/briefs/port-plan.md + port-inventory.md (waves; per-site migration proof for the pairs bootstrap + prog.pv). Ported: pairs, freqTiers, glossStyle primary (where glosses carry senses), progressView v2, levelGate 0.7 on known, appView v2 (all tabs), fb41 session estimates, markPassageDone listening credit, slim live-proof policy, test tiers. Japanese also gets the characters set (lag/start 60/ramp, bareByPair, ws boost, levelExam).
@@ -285,6 +287,8 @@ NOT ported — content or script-specific; each is its own later project:
 - Hanzi exam rule (levelExam "characters"): needs a character layer; elsewhere known = the word rule.
 - The 15 new HSK 3/4 passages: content; "more stories at higher levels" is a per-language content decision.
 - Tier overrides (tools/zh_tiers_overrides.json) and gloss overrides (478 gloss fixes, 723 hint meanings): data; each language needs its own pass; glossStyle lands only where senses already exist.
+
+Wave 0 review follow-ups (w35-review 2026-10-08, LOW, not blocking wave 1): pack_flags sibling drift check compares the working tree against the sibling HEAD, not the pre-port sha (flagoff hash still catches drift); port_sim.js has its own withTiers (tie-break rank then input order) instead of enrich's (-rank, id) so the old-core proof skips the shipped tier function; migration [port] "byte-equal after its own save" compares the old core's bootProg output, not the old app.html save path (the per-site browser proof covers it); enrich --check proves idempotence only, a flag later dropped from port_flags would linger in pack.json; sim_app.js / migration_checks.js temp dirs are never cleaned up; script+pairs mixing asserted only on ko/ru/ja, not ar/hi/fa/ur.
 
 ## Backlog (not scheduled)
 - **Video stage** (user 2026-09-25: backlog only): level-graded YouTube
