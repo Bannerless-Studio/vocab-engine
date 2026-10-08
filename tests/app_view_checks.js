@@ -1081,7 +1081,7 @@ console.log("\n[D3] fb50: placement places the characters layer (pack.placementC
   }
 }
 
-const BASE_G = "b66bfb5"; // fb50 head: the flag-off control for placementEarlyStop and the base of the fb51 reveal / meaning changes
+const BASE_G = "8564258"; // fb50 head: the flag-off control for placementEarlyStop and the base of the fb51 reveal / meaning changes
 const oldOfG = f => cp.execSync(`git -C "${ROOT}" show ${BASE_G}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
 let G_CORE = null, G_HTML = null;
 try {

@@ -3210,13 +3210,13 @@ async function swChecks(){
   check("unknown pl: pack order", VC.suggestPassage(PASSAGES, WORDS, ON, unk) === VC.suggestPassage(PASSAGES, WORDS, OFFR, unk));
   // flag-off equality with the pre-fb51 core on 5 records
   let oldCore = null;
-  try { const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ec-")); const f = path.join(dir, "core_b66bfb5.js");
-    fs.writeFileSync(f, require("child_process").execSync(`git -C "${ROOT}" show b66bfb5:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+  try { const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ec-")); const f = path.join(dir, "core_8564258.js");
+    fs.writeFileSync(f, require("child_process").execSync(`git -C "${ROOT}" show 8564258:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
     oldCore = require(f); fs.rmSync(dir, { recursive: true, force: true }); } catch(e){ oldCore = null; }
-  if(!oldCore) console.log("SKIP  b66bfb5 not in this checkout's history");
+  if(!oldCore) console.log("SKIP  8564258 not in this checkout's history");
   else {
     const recs = [frs, placedTop, noPl, prm, prl];
-    check("flag off: suggestPassage and nextReadItem (both modes) equal b66bfb5 on 5 records", recs.every(r => {
+    check("flag off: suggestPassage and nextReadItem (both modes) equal 8564258 on 5 records", recs.every(r => {
       const a = JSON.parse(JSON.stringify(r)), b = JSON.parse(JSON.stringify(r));
       const rot = Object.assign({}, OFFR, { dayAware: true, readRotation: true });
       return VC.suggestPassage(PASSAGES, WORDS, OFFR, a) === oldCore.suggestPassage(PASSAGES, WORDS, OFFR, b)

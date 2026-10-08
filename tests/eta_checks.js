@@ -413,7 +413,7 @@ const BASE = "e165cb1";
 const git = f => cp.execSync(`git -C "${ROOT}" show ${BASE}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
 let BASE_CORE = null, BASE_APP = null;
 // [6] pack.placedKnown flag-off control: fb51 head, the engine before the flag.
-const PK_BASE = process.env.PLACED_KNOWN_BASE || "92a1aed";
+const PK_BASE = process.env.PLACED_KNOWN_BASE || "334ede8";
 let PK_CORE = null, PK_APP = null;
 try { const gs = f => cp.execSync(`git -C "${ROOT}" show ${PK_BASE}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }); const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "eta-pk-")), "core_pk.js"); fs.writeFileSync(f, gs("engine/core.js")); PK_CORE = require(f); PK_APP = gs("engine/app.html"); } catch(e){ PK_CORE = null; }
 try { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "eta-")), "core_base.js"); fs.writeFileSync(f, git("engine/core.js")); BASE_CORE = require(f); BASE_APP = git("engine/app.html"); } catch(e){ BASE_CORE = null; }
