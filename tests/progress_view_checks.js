@@ -357,10 +357,11 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
   check("core: validateProgShape accepts numeric read.done.t, rejects a string", VC.validateProgShape(rp({ p0001: { sc: 1, n: 1, d: "x", x: 1, t: 9 } }), VC.levelIds(PACK)).ok && VC.validateProgShape(rp({ p0001: { sc: 1, n: 1, d: "x", x: 1, t: "9" } }), VC.levelIds(PACK)).reason === "read.done.p0001.t must be a number");
   const en = [1, 2, 3, 4].map(i => ({ id: "e" + i, text: Array(100).fill("word").join(" ") }));
   const dn = (ts) => rp(Object.fromEntries(ts.map((t, i) => ["e" + (i + 1), { sc: 1, n: 1, d: "x", x: 1, t }])));
-  check("speed: under 3 passages with t is no row", VC.readingSpeed(en, PACK, dn([60, 60])) === null && VC.readingSpeed(en, PACK, dn([60, 60, undefined])) === null);
-  const s3 = VC.readingSpeed(en, PACK, dn([30, 60, 120]));
+  const PACKW = Object.assign({}, PACK, { spaced: true });
+  check("speed: under 3 passages with t is no row", VC.readingSpeed(en, PACKW, dn([60, 60])) === null && VC.readingSpeed(en, PACKW, dn([60, 60, undefined])) === null);
+  const s3 = VC.readingSpeed(en, PACKW, dn([30, 60, 120]));
   check("speed: median of 200, 100, 50 words a minute is 100 in words", s3 && s3.rate === 100 && s3.unit === "words" && s3.n === 3);
-  check("speed: even count averages the middle two", VC.readingSpeed(en, PACK, dn([30, 60, 120, 240])).rate === 75);
+  check("speed: even count averages the middle two", VC.readingSpeed(en, PACKW, dn([30, 60, 120, 240])).rate === 75);
   const zhp = PASSAGES.slice(0, 3);
   const zs = VC.readingSpeed(zhp, PACK, rp(Object.fromEntries(zhp.map(p => [p.id, { sc: 1, n: 1, d: "x", x: 1, t: 60 }]))));
   check("speed: zh counts characters", zs && zs.unit === "characters" && zs.rate === Math.round(([...zhp.map(p => VC.passageUnits(p, PACK).n)].sort((a, b) => a - b))[1]) && zs.rate > 20);
@@ -373,9 +374,9 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
   const t0 = NOW;
   check("app: finishing a pass stores whole seconds open to results", await pass(95) === 95);
   check("app: hidden 60 s of the pass keeps t", await pass(200, 60) === 200);
-  check("app: hidden 150 s drops t", await pass(300, 150) === undefined);
-  check("app: a pass over 20 minutes drops t", await pass(1300) === undefined);
-  check("app: the record on screen carries no stamp after results (RD kept in memory only)", stored(st, PACK).read.done[pid].t === undefined);
+  check("app: hidden 150 s drops this timing and keeps the previous t (200)", await pass(300, 150) === 200);
+  check("app: a pass over 20 minutes drops this timing and keeps the previous t (200)", await pass(1300) === 200);
+  check("app: the stored record carries the last kept t after a dropped pass (200)", stored(st, PACK).read.done[pid].t === 200);
   api.startPassage(pid); NOW += 50000;
   const rec = JSON.parse(JSON.stringify(api.rd()));
   check("app: t0 is on the pass in progress", typeof api.rd().t0 === "number" && api.rd().hid === 0);
