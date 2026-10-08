@@ -276,6 +276,7 @@ class Spanish(LanguageSpec):
     verb_homograph_ratio = 8
     fallback_same_class = True
     propn_lowercase_rescue = 10      # tierra, dios, reino, vía: common nouns as well as names
+    pron_conj_link = ("que",)    # relative "que" is tagged PRON, the pack word is the conjunction
     homograph_by_translation = True
     homograph_cues = {("solo", "adv"): ("only", "just", "merely", "simply", "solely"),
                       ("solo", "adj"): ("alone", "lonely", "lone", "single", "own", "oneself"),

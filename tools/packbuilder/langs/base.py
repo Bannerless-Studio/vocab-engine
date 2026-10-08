@@ -392,6 +392,7 @@ class LanguageSpec:
     propn_lowercase_rescue = 0  # >0: a lemma seen lowercase mid-sentence this often is not a proper noun
     homograph_by_translation = False   # links: pick between a lemma's entries by the English translation
     homograph_cues = {}         # (lemma, pos) -> extra English cue words for homograph_by_translation
+    pron_conj_link = ()         # lemmas whose PRON tag links the CONJ entry and back (es/fr "que"); any other PRON<->CONJ pair is two words (it se)
     sensitive_gloss_re = None   # a sense matching it never leads a gloss; check fails on an A1/A2 match
     sensitive_re = None         # sentences matching (text or English) are kept to the top level
     drop_all_levels = None      # sentences matching (text or English) are removed at every level; build with drop_all_re(own-language terms)

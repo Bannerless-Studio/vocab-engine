@@ -29,7 +29,6 @@ Wave 0 review follow-ups (w35-review 2026-10-08, LOW, not blocking wave 1): pack
 
 | item | where | what it takes |
 |---|---|---|
-| patterns on alphabetic packs: patternOpts compares mark text case-sensitively (core.js ~1938), so sentence-initial marks ("Si …", "Ya he …") cannot be used; `near` is per pattern, ambiguity is per sentence | core.js patternOpts; validate_pack patterns | case-folded compare + options shown in the answer's case; optional per-sentence exclusion list; es pilot 2026-10-08 (.cache/briefs/patterns-pilot-es-review.md) ships without it. fb47 |
 | noun gender field `g` for article agreement in cloze gaps | it es fr de builders; core.js gap distractors | builders emit `g` (m/f), engine prefers same-gender distractors (un ____ offers feminine l'informazione); fb46 |
 | Nastaliq line height on Urdu | urdu site | unverified in a real browser; being checked by the urdu port 2026-10-08 |
 | `glossKey` joins words without spaces | core.js glossKey | "to be at" keys as "beat"; join with a separator or key on the word list |
