@@ -260,3 +260,39 @@ class CheckDetectsFlagDrift(unittest.TestCase):
             pack["typing"] = {"x": 1}
             pack["eta"] = {"gain": [1, 2, 3], "known": 4}
             self.assertEqual(enrich.flag_drift(get_spec("it"), pack), [])
+
+class Gender(unittest.TestCase):
+    """fb46: words.json `g` (core/words.gender_code) and pack.gapGender, for it es fr de only."""
+
+    def test_gender_code(self):
+        from packbuilder.core.words import gender_code
+        self.assertEqual([gender_code(g, False) for g in ("m", "f", "n", "mf", None)], ["m", "f", "n", None, None])
+        self.assertEqual((gender_code("m", True), gender_code(None, True), gender_code("f", True)), ("p", "p", "p"))
+
+    def test_spec_parse_gender_feeds_it(self):
+        from packbuilder.core.words import gender_code
+        de, fr = get_spec("de"), get_spec("fr")
+        self.assertEqual(gender_code(*de.parse_gender("n|Häuser")), "n")
+        self.assertEqual(gender_code(*de.parse_gender("p")), "p")
+        self.assertIsNone(gender_code(*de.parse_gender("mf|Angestellte")))
+        self.assertEqual(gender_code(*fr.parse_gender("f")), "f")
+        self.assertIsNone(gender_code(*fr.parse_gender("mf")))        # fr: a plain mf is left to the corpus
+        self.assertEqual(gender_code(*get_spec("it").parse_gender("f,m<l:archaic>")), "f")
+
+    def test_flag_and_emit_only_for_it_es_fr_de(self):
+        for lang in ("it", "es", "fr", "de"):
+            spec = get_spec(lang)
+            self.assertTrue(spec.emit_gender, lang)
+            self.assertIs(spec.port_flags()["gapGender"], True, lang)
+        for lang in ("ru", "fa", "ar", "hi", "id", "ja", "ko", "sw", "ur"):
+            spec = get_spec(lang)
+            self.assertFalse(spec.emit_gender, lang)
+            self.assertNotIn("gapGender", spec.port_flags(), lang)
+
+    def test_enrich_sets_flag_and_leaves_words_alone(self):
+        ws = words()
+        for w in ws[:3]:
+            w["g"] = "f"
+        p, w, _ = enrich.enrich_data(get_spec("it"), {"key": "it"}, ws, None)
+        self.assertIs(p["gapGender"], True)
+        self.assertEqual([x.get("g") for x in w[:4]], ["f", "f", "f", None])

@@ -229,6 +229,7 @@ class Spanish(LanguageSpec):
     name_en = "Spanish"
     pack_name = "Spanish (A1–B1)"
     tts = "es-ES"
+    emit_gender = True
     stt = "es-ES"
     tatoeba_code = "spa"
 

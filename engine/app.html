@@ -199,6 +199,13 @@
   :root[data-appview="v2"] .tst{display:flex;gap:12px;align-items:baseline;font-size:15px}
   :root[data-appview="v2"] .tst>span:first-child{font-weight:500;flex:0 0 92px}
   :root[data-appview="v2"] .tsd{color:var(--mute);min-width:0;overflow-wrap:anywhere}
+  /* Words list: one word column for every row (the widest headword up to half the width), so the reading and
+     gloss column starts at the same x on each row; a longer headword wraps inside it. Rows keep 44px. */
+  @supports (grid-template-columns: subgrid){
+    :root[data-appview="v2"] #wl{display:grid;grid-template-columns:fit-content(50%) minmax(0,1fr);column-gap:12px}
+    :root[data-appview="v2"] #wl .wl{display:grid;grid-column:1/-1;grid-template-columns:subgrid;column-gap:12px;min-height:44px;box-sizing:border-box}
+    :root[data-appview="v2"] #wl .wl .wd{max-width:none;min-width:0;white-space:normal;overflow-wrap:anywhere}
+  }
   :root[data-appview="v2"] input::placeholder{color:var(--mute);opacity:1} /* the browser default grey misses 4.5:1 and the placeholder carries the instruction */
   :root[data-appview="v2"] .dim{opacity:1;color:var(--mute)} /* an all-bracketed gloss: .6 opacity missed 4.5:1 */
   :root[data-appview="v2"] #pmap.pmv{cursor:pointer}
@@ -1800,6 +1807,18 @@ function rzRehear(){
     if(n !== c){ n.rzOrder = c.rzShown; D.q.unshift(n); D.cur = null; dnext(); }
   }
 }
+// The mirror of rzRehear. An empty voice list is read as "a voice is there" (speechUsable), so a hear item
+// built before the list arrives asks for audio; when the list comes without the pack's language, every such
+// item not yet answered becomes the read item with the no-voice notice, the one on screen included.
+function rzNoVoice(){
+  const down = it => {
+    if(!it || it.needsNotice || !it.rz || (it.rz.b !== "hear" && it.rz.b !== "sHear")) return it;
+    try { const n = rzDecItem(rzEncItem(it, !!it.rzSeen)); return n.needsNotice ? n : it; } catch(e){ rzReplay = null; return it; }
+  };
+  D.q = D.q.map(down);
+  const c = D.cur;
+  if(c){ const n = down(c); if(n !== c){ D.q.unshift(n); D.cur = null; dnext(); } }
+}
 // The options as last shown, once, when they are exactly this item's options.
 function rzOrderOf(it){
   const o = it.rzOrder; it.rzOrder = null;
@@ -2341,7 +2360,7 @@ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{
 // results screen (render() would drop it), a Today session between steps (continuations
 // live in closures) and a placement run (render() would restart it from the intro).
 function remountScreen(){
-  if(D){ if(hasSpeech) rzRehear(); return; }
+  if(D){ if(hasSpeech) rzRehear(); else rzNoVoice(); return; }
   if(rzFin) return;
   if(RD && tab === (RD.today ? "today" : "read")){ readRender(); return; }
   if(tab === "today" && todayStepState) return;

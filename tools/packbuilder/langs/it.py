@@ -107,6 +107,7 @@ class Italian(LanguageSpec):
     name_en = "Italian"
     pack_name = "Italian (A1–B1)"
     tts = "it-IT"
+    emit_gender = True
     stt = "it-IT"
     tatoeba_code = "ita"
 
