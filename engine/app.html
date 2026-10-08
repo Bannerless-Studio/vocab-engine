@@ -121,13 +121,12 @@
   @media (prefers-reduced-motion: reduce){ .speaker.speaking,.replay.speaking{animation:none} }
   .rvsay{display:flex;justify-content:center;margin:10px 0 0}
   .reveal{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:none;font-size:15px}
-  .rvtail{font-size:15px}
   .reveal .rw{font-size:22px;margin-bottom:2px;font-family:var(--wfont)}
   .reveal .rp{color:var(--mute);margin-bottom:2px}
   /* pack.rtl: an answer block (the reveal, and the same block in the Missed list) aligns
      to one edge, the right: target lines are dir=rtl (start = right) and the Latin pron,
      gloss and labels keep their LTR direction but share the right edge. */
-  :root[data-tlrtl] .reveal,:root[data-tlrtl] .rvtail,:root[data-tlrtl] .rvb{text-align:right}
+  :root[data-tlrtl] .reveal,:root[data-tlrtl] .rvb{text-align:right}
   .next,.primary{margin-top:14px;width:100%;padding:14px;border:none;border-radius:12px;background:var(--ink);color:var(--bg);font-size:16px;min-height:48px;font-family:var(--font)}
   .ghost{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font-size:15px;min-height:44px;font-family:var(--font)}
   .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
@@ -239,7 +238,6 @@
   :root[data-appview="v2"] .rvm .rp,:root[data-appview="v2"] .rvm .rg,:root[data-appview="v2"] .rvm .rvi{color:var(--mute);margin:0}
   :root[data-appview="v2"] .ucue{color:var(--mute);font-size:15px;margin:2px 0 0}
   :root[data-appview="v2"] .rvx{margin-top:8px}
-  :root[data-appview="v2"] .rvtail:not(:empty){margin-top:10px}
   :root[data-appview="v2"] #panel>p.pva:first-child{margin:0 0 12px}
   :root[data-appview="v2"] .plist button{font-family:var(--font)} /* buttons do not inherit the page font */
   :root[data-appview="v2"] .plist .rsc{color:var(--mute);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -1116,8 +1114,6 @@ function screenTop(){
   const p = $("panel");
   if(p && typeof p.getBoundingClientRect === "function" && typeof scrollTo === "function" && p.getBoundingClientRect().top < 0) scrollTo(0, 0);
 }
-// v2 drill cards end with this slot for the examples (showReveal); flag off has no slot.
-const rvTail = () => APP_V2 ? '<div class="rvtail" id="rvtail"></div>' : "";
 // appView (fb51; owner 2026-10-08): the pre-answer hint links ("Show meaning", "show written") go once the answer is
 // marked when the reveal makes them redundant. A reveal that shows the item's form row (class rw) carries the English and
 // the characters, or its own show-written link; a reveal without that row (the unit and script kinds) leaves them.
@@ -1129,12 +1125,9 @@ function dropStimLinks(rh){
 }
 function showReveal(html){
   const rv = $("rv"); if(!rv) return;
-  // v2: the examples ride below Next (answer row, Next, examples), so Next never needs a scroll.
-  const tail = APP_V2 ? $("rvtail") : null, cut = tail ? html.indexOf('<div class="rvx">') : -1;
-  if(tail) tail.innerHTML = cut >= 0 ? html.slice(cut) : "";
-  const head = cut >= 0 ? html.slice(0, cut) : html;
-  rv.innerHTML = head;
-  rv.style.display = head ? "block" : "none";
+  // v2 order (owner 2026-10-09, reverses fb45): answer row, examples (open), Next last; the examples stay inside #rv.
+  rv.innerHTML = html;
+  rv.style.display = html ? "block" : "none";
   if(html){ rv.style.opacity = "0"; requestAnimationFrame(()=>{ rv.style.opacity = "1"; }); }
   announce(html);
 }
@@ -1213,7 +1206,7 @@ function firstTimeScore(seen, miss){
 const sentClass = it => APP_V2 && /^[sp]:/.test(it.key || "") ? " sent" : "";
 function renderMcItem(it){
   const P = $("panel");
-  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>${rvTail()}`;
+  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>`;
   if(it.mount) it.mount();
   const opts = rzOrderOf(it) || shuffle(it.opts.slice());
   it.rzShown = opts;
@@ -1275,7 +1268,7 @@ function renderTypeItem(it){
   const P = $("panel");
   P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}
     <input type="text" id="tin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"${it.inputTA !== undefined ? it.inputTA : TA} placeholder="${escapeHtml(it.placeholder || (DISP.rtl ? "type the word" : "type the word…"))}">
-    <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>${rvTail()}`;
+    <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>`;
   if(it.mount) it.mount();
   const input = $("tin"); input.focus();
   let answered = false;
@@ -2139,12 +2132,12 @@ function patternItem(pid, si, mi){
   const ans = VC.patternMarkText(s, mk), t = String(s.t);
   const pf = pfSentence(s, null, { start: mk[0], end: mk[1], text: ans });
   const body = (pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div>`
-    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s, VC.patternState(prog, pid).fresh === true);
+    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s, VC.patternFirstMeeting(prog, p, PACK));
   const note = patternNoteHTML(p), rv = sentenceRevealBlock(s);
   const base = { key: "p:" + pid, html: body, reveal: rv, onReveal: b => saySentence(s, b), revealHear: canHearSentence(s), mrowSent: s };
   // The note names the answer, so it rides with the verdict (owner 2026-10-08): on a first meeting right or
   // wrong, and on a miss any time. Read before notePattern writes the record.
-  base.onAnswer = function(ok){ const first = VC.patternState(prog, pid).fresh; VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); this.reveal = ok && !first ? rv : note + rv; };
+  base.onAnswer = function(ok){ const first = VC.patternFirstMeeting(prog, p, PACK); VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); this.reveal = ok && !first ? rv : note + rv; };
   const choice = () => ({ kind: "mc", label: "What's the missing word?", optsClass: "opts-hero opts-w", opts: [ans, ...VC.patternOpts(p, s, mi, PATTERN_LIST)], a: ans, optHtml: patternOptHTML, optsT: true });
   if(TYPING) return Object.assign(base, { kind: "type", label: "Type the missing word", check: v => VC.normKey(String(v).normalize("NFC")) === VC.normKey(ans.normalize("NFC")),
     choiceFallback(){ const c = Object.assign({}, this, choice()); c.onAnswer = base.onAnswer; return c; } });

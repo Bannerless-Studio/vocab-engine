@@ -2063,6 +2063,17 @@ function patternState(prog, id){
   const e = patternEntry(prog && isObj(prog.pt) ? prog.pt[id] : null);
   return e ? { s: e.s, a: e.a } : { s: 0, a: -1, fresh: true };
 }
+// A pattern's first meeting: the opening meaning and the verdict note ride with it (fb44, fb51). Under pack.placedRead a pattern
+// of a level strictly below the placed level (prog.pl) is not one: the placement vouched for it, so its first ask is a later
+// meeting, still drilled until known (owner 2026-10-09).
+function patternFirstMeeting(prog, pattern, pack){
+  if(!pattern || !patternState(prog, pattern.id).fresh) return false;
+  if(placedReadOn(pack) && prog && prog.pl != null){
+    const ids = levelIds(pack), pi = ids.indexOf(String(prog.pl)), li = ids.indexOf(String(pattern.lv));
+    if(pi >= 0 && li >= 0 && li < pi) return false;
+  }
+  return true;
+}
 // A pattern opens when all hold: its `keys` (sentence word ids that are its own words, emitted by
 // the pack generator) have records; the learner has reached its level (a word of that level has a
 // record: patterns are placed by level on purpose); and PATTERN_OPEN of its sentence words have one.
@@ -4611,7 +4622,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
   FT_AMBIENT, FT_CORE, FT_PERIPHERAL, freqTiersOn, wordTier, unitTier, knownBarAt, wordPairs, wordKnown, settleProv, unitDone,
-  PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
+  PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, patternFirstMeeting, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairsOn, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,

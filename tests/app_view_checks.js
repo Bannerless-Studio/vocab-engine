@@ -568,13 +568,13 @@ if(ON){
   check("a word reveal outside the drill (the drill-end Missed box) keeps the row's speaker icon", /<span class="rvi">/.test(ON.rawReveal));
   check("flag off: the centred Replay row as before", /<div class="rvsay"><button type="button" class="replay" id="rvp"/.test(OFFK["recall"].right.rv));
   check("right answer (fb45): the examples open under the row, as on a miss, no Examples button, nothing hidden", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].right.rv) && !/rvxb|\shidden[\s>=]|Examples/.test(ON[n].right.rv)));
-  check("reveal order after any answer (fb45): the answer row stays in #rv, the examples move to the tail under Next", words.every(n => ["right", "wrong"].every(v => { const x = ON[n][v]; return /class="rvrow"/.test(x.head) && !/class="rvx"/.test(x.head) && x.tail.startsWith('<div class="rvx"><div class="sent'); })));
+  check("reveal order after any answer (fb51, reverses fb45): answer row then the open examples, both in #rv; no tail slot", words.every(n => ["right", "wrong"].every(v => { const x = ON[n][v]; return /class="rvrow"/.test(x.head) && x.head.indexOf('class="rvrow"') < x.head.indexOf('<div class="rvx"><div class="sent') && x.tail === ""; })));
   { const { api } = await bootWith(PACK, unpaused(), 21, { patterns: true }); api.ev(PICK); runItem(api, "recallItem(__W)", true);
     const h = api.panel(), pos = id => h.indexOf(`id="${id}"`);
-    check("DOM order: answer row (#rv), then Next (#nx), then the examples tail (#rvtail)", pos("rv") > 0 && pos("rv") < pos("nx") && pos("nx") < pos("rvtail") && api.el("rvtail").innerHTML.includes('class="rvx"') && !api.el("rv").innerHTML.includes('class="rvx"'));
-    check("a missed item's reveal (typed, wrong) keeps the same order", (() => { const r = runItem(api, "typeItem(__W)", false); const g = api.panel(); return !!r && g.indexOf('id="nx"') < g.indexOf('id="rvtail"') && api.el("rvtail").innerHTML.includes('class="rvx"') && !api.el("rv").innerHTML.includes('class="rvx"'); })()); }
+    check("DOM order: answer row and examples (#rv), then Next (#nx) last, no #rvtail", pos("rv") > 0 && pos("rv") < pos("nx") && !/rvtail/.test(h) && api.el("rv").innerHTML.includes('class="rvx"') && h.indexOf('id="nx"') > h.indexOf('id="rv"'));
+    check("a missed item's reveal (typed, wrong) keeps the same order", (() => { const r = runItem(api, "typeItem(__W)", false); const g = api.panel(); return !!r && g.indexOf('id="rv"') < g.indexOf('id="nx"') && api.el("rv").innerHTML.includes('class="rvx"') && !/rvtail/.test(g); })()); }
   { const { api } = await bootWith(OFF, unpaused(), 21, { patterns: true }); api.ev(PICK); runItem(api, "recallItem(__W)", true);
-    check("RTL tail: .rvtail carries the .reveal font size and the data-tlrtl right-align rule", /\.rvtail\{font-size:15px\}/.test(appHtml) && /:root\[data-tlrtl\] \.reveal,:root\[data-tlrtl\] \.rvtail,:root\[data-tlrtl\] \.rvb\{text-align:right\}/.test(appHtml));
+    check("no dead .rvtail rules: the examples sit in .reveal, which carries the font size and the data-tlrtl right-align rule", !/rvtail/.test(appHtml) && /\.reveal\{[^}]*font-size:15px/.test(appHtml) && /:root\[data-tlrtl\] \.reveal,:root\[data-tlrtl\] \.rvb\{text-align:right\}/.test(appHtml));
     check("flag off: no rvtail slot, the reveal block as before", !/rvtail/.test(api.panel())); }
   check("wrong answer (and every You typed): the examples open", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].wrong.rv) && !/Examples?:/.test(ON[n].wrong.rv) && !/rvxb/.test(ON[n].wrong.rv)));
   const cued = KINDS.map(([n]) => n).filter(n => ON[n].right.cue || ON[n].wrong.cue);
@@ -587,7 +587,7 @@ if(ON){
   { const { api: lv } = await bootWith(PACK, unpaused(), 21, { patterns: true }); lv.ev(PICK);
     for(const [what, expr] of [["recall", "recallItem(__W)"], ["meaning MC", "readItem(__W)"]]){
       const r = runItem(lv, expr, true), live = lv.el("live") ? lv.el("live").textContent : null;
-      const rvh = lv.el("rv").innerHTML + lv.el("rvtail").innerHTML, ex = (rvh.slice(rvh.indexOf('<div class="rvx">')).match(/<ruby>([^<]+)/) || [])[1] || "";
+      const rvh = lv.el("rv").innerHTML, ex = (rvh.slice(rvh.indexOf('<div class="rvx">')).match(/<ruby>([^<]+)/) || [])[1] || "";
       check(`${what}: the live region on a right answer has the example text and no "Examples" label (${live === null ? "no live node" : live.length + " chars"})`, !!r && live !== null && live.length > 0 && !/Examples/.test(live) && !!ex && live.includes(ex)); }
   }
 }
@@ -1190,6 +1190,36 @@ console.log("\n[D5] fb51: the reveal drops the stimulus hint links it makes redu
   const withLinks = kinds.filter(k => sources.some(([sn]) => table[k][sn] && table[k][sn].pre > 0));
   check(`links present before answering and gone after, on every kind that carries one (${withLinks.join(", ")})`, ["meaning MC", "gap", "gap typed", "pattern, met before", "read sentence"].every(k => withLinks.includes(k)) && withLinks.every(k => sources.every(([sn]) => !table[k][sn] || (table[k][sn].postR === 0 && table[k][sn].postW === 0))));
   check("the hear sentence, recall, typed and unit kinds carry no stimulus link (nothing to drop)", ["hear sentence", "recall", "hear word", "typed pinyin", "typed meaning", "typed characters", "typed word", "charPick", "charRead", "charSound"].every(k => sources.every(([sn]) => !table[k][sn] || table[k][sn].pre === 0)));
+}
+
+console.log("\n[D6] fb51: a pattern below the placed level is not a first meeting (pack.placedRead)");
+{
+  const OFFP = packAsOf(PACK, BASE_G, { strip: ["placedRead"] });
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
+  const placedRec = () => VC.applyPlacement(VC.normalizeProg({}, PACK), st0, st0.length, WORDS, PACK, CHARACTERS);
+  const lvOf = lv => PATTERNS.find(p => String(p.lv) === lv).id;
+  const lowId = lvOf("2"), topId = lvOf("4");
+  const ask = async (pack, rec, pid, right) => {
+    const { api } = await bootWith(pack, rec, 21, { patterns: true });
+    const r = runItem(api, `patternItem(${JSON.stringify(pid)}, 0, 0)`, right);
+    return { q: r.q, rv: r.rv, first: VC.patternFirstMeeting(rec || VC.normalizeProg({}, pack), PATTERNS.find(p => p.id === pid), pack), pt: api.getProg().pt };
+  };
+  const tap = h => /data-pcue/.test(h), note = h => /class="pnote"/.test(h);
+  const pr = placedRec();
+  check(`placed record: pl = ${pr.pl}`, pr.pl === "4");
+  const a = await ask(PACK, pr, lowId, true);
+  check("placed zh record, an HSK 2 pattern's first ask: tap link, no meaning open, no note, not a first meeting", a.first === false && tap(a.q) && !note(a.rv) && !!a.pt && !!a.pt[lowId]);
+  const aw = await ask(PACK, placedRec(), lowId, false);
+  check("... and after a wrong first ask: still no note (a miss any time is a later-meeting miss: note shown)", tap(aw.q) && note(aw.rv));
+  const t = await ask(PACK, placedRec(), topId, true);
+  check("placed record, a pattern at the placed level: first meeting, English open, the note rides the verdict", t.first === true && !tap(t.q) && note(t.rv));
+  const f = await ask(PACK, VC.normalizeProg({}, PACK), lowId, true);
+  check("fresh record: an HSK 2 pattern is a first meeting (English open, note)", f.first === true && !tap(f.q) && note(f.rv));
+  const o = await ask(OFFP, placedRec(), lowId, true);
+  check("flag off, placed record: the HSK 2 pattern is a first meeting as before (English open, note)", o.first === true && !tap(o.q) && note(o.rv));
+  check("patternFirstMeeting: a recorded pattern is never a first meeting; unknown pl or level counts as first", VC.patternFirstMeeting({ pt: { x: { s: 1, a: 1 } }, pl: "4" }, { id: "x", lv: "4" }, PACK) === false && VC.patternFirstMeeting({ pl: "zz" }, { id: "y", lv: "2" }, PACK) === true && VC.patternFirstMeeting({ pl: "4" }, { id: "y", lv: "9" }, PACK) === true);
+  // the pattern is still drilled until known: it stays in the open list for a placed record
+  check("placed record: the HSK 2 pattern still opens and is picked (drilled until known)", VC.openPatterns(placedRec(), PACK, PATTERNS, WORDS).some(p => p.id === lowId));
 }
 
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
