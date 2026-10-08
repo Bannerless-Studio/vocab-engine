@@ -84,7 +84,7 @@ $NODE tests/day_sim_checks.js                    # 77 (pack.dayAware: 8 sessions
 $NODE tests/help_close_checks.js                 # 42 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
 $NODE tests/gloss_overlap_checks.js              # 75 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~5-14 min: 286 s on main 7fe35f7 idle, 151 s on fb2-write2 alone, 836 s under parallel load)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
-$NODE tests/port_sites_checks.js                # 281: all 13 sibling packs (../<lang>/pack, read only) through `packbuilder enrich --emit`: ft tiers, generic flag set, validator 0 errors (script sites too, since E3), 8 Today sessions at 85% each (script sites also with the primer learned), pair streaks written, ft-based known, Today / Progress / Read render, gate sentence, ETA null without tools/eta.json, measured and null values; ~2 min
+$NODE tests/port_sites_checks.js                # 307: all 13 sibling packs (../<lang>/pack, read only) through `packbuilder enrich --emit`: ft tiers, generic flag set, validator 0 errors (script sites too, since E3), 8 Today sessions at 85% each (script sites also with the primer learned), pair streaks written, ft-based known, Today / Progress / Read render, gate sentence, ETA null without tools/eta.json, measured and null values; ~2 min
 $NODE tests/flagoff_snapshot.js --check          # 46 (ar hi sw ur added; reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)
 
