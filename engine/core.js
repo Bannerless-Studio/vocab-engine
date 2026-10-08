@@ -2416,9 +2416,12 @@ function applyWeakWords(prog, entries, words, pack){
 // earned (the goal position's passage share fell .87 -> .57, fb41). Without it l marks "latest pass was a listen"
 // and readPassMode alternates on it, so those packs keep the replaced record.
 // pack.readRotation adds s (session of the latest pass) and ls (of the latest listening pass).
-function markPassageDone(prog, pid, sc, n, d, listen, pack){
+// t (fb46, progressView v2 only): whole seconds from opening the passage to its results, the LATEST reading pass only
+// (absent when the pass was a listen, ran over READ_MAX_S, or the tab was hidden over READ_HIDE_MAX_MS of it).
+function markPassageDone(prog, pid, sc, n, d, listen, pack, t){
   const st = readState(prog); const prev = st.done[pid];
   st.done[pid] = { sc, n, d: String(d), x: ((prev && prev.x) || 0) + 1 };
+  if(!listen && progressViewOn(pack) && typeof t === "number" && t > 0) st.done[pid].t = Math.round(t);
   if(listen || (prev && prev.l && readRotationOn(pack))) st.done[pid].l = 1;
   if(readRotationOn(pack)){
     const sn = daySn(prog);
@@ -2642,6 +2645,29 @@ function readingStats(passages, pack, prog){
     return { lv, total: ps.length, done: d.length, avg: pct.length ? Math.round(pct.reduce((a,b)=>a+b,0) / pct.length) : null };
   }).filter(r => r.total > 0);
 }
+// Reading speed (fb46): median over the passages with a stored t, shown after READ_ROW_MIN of them. A passage with no spaces
+// to speak of (zh, ja) counts letters, so the row says characters; others count whitespace-separated words.
+const READ_MAX_S = 1200, READ_HIDE_MAX_MS = 120000, READ_ROW_MIN = 3;
+function readTimeKeep(secs, hiddenMs){ return secs > 0 && secs <= READ_MAX_S && !(hiddenMs > READ_HIDE_MAX_MS); }
+function passageUnits(p){
+  const text = String((p && p.text) || ""), sp = (text.match(/\s/g) || []).length;
+  if(sp * 25 < text.length) return { n: [...text].filter(ch => /[\p{L}\p{N}]/u.test(ch)).length, unit: "characters" };
+  return { n: text.split(/\s+/).filter(Boolean).length, unit: "words" };
+}
+function readingSpeed(passages, pack, prog){
+  if(!progressViewOn(pack) || !isObj(prog) || !isObj(prog.read) || !isObj(prog.read.done)) return null;
+  const rates = []; let unit = "words";
+  for(const p of passages || []){
+    const r = prog.read.done[p.id];
+    if(!r || typeof r.t !== "number" || !(r.t > 0)) continue;
+    const u = passageUnits(p); if(!(u.n > 0)) continue;
+    unit = u.unit; rates.push(u.n * 60 / r.t);
+  }
+  if(rates.length < READ_ROW_MIN) return null;
+  rates.sort((a, b) => a - b);
+  const m = rates.length >> 1, med = rates.length % 2 ? rates[m] : (rates[m - 1] + rates[m]) / 2;
+  return { n: rates.length, rate: Math.max(1, Math.round(med)), unit };
+}
 function validateReadShape(r){
   if(!isObj(r)) return "read must be an object";
   if(r.unlocked !== undefined){
@@ -2653,7 +2679,7 @@ function validateReadShape(r){
     for(const k of Object.keys(r.done)){
       const p = r.done[k];
       if(!isObj(p)) return `read.done.${k} must be an object`;
-      for(const f of ["sc","n","x","l","s","ls"]) if(p[f] !== undefined && typeof p[f] !== "number") return `read.done.${k}.${f} must be a number`;
+      for(const f of ["sc","n","x","l","s","ls","t"]) if(p[f] !== undefined && typeof p[f] !== "number") return `read.done.${k}.${f} must be a number`;
       if(p.d !== undefined && typeof p.d !== "string") return `read.done.${k}.d must be a string`;
     }
   }
@@ -4411,7 +4437,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, etaPlaced, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, etaPlaced, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,

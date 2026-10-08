@@ -1872,7 +1872,7 @@ function sessionRecord(){
   const d = D || rzFin, rec = {};
   if(d && d.rzo && RZ_TAB[d.rzo.o] === tab){ rec.tab = tab; rec.drill = drillRec(d); }
   else if(d && !d.rzo) return null;
-  else if(RD && (RD.today ? "today" : "read") === tab){ rec.tab = tab; rec.rd = Object.assign({}, RD, { p: undefined, pid: RD.p.id, playing: false }); }
+  else if(RD && (RD.today ? "today" : "read") === tab){ rec.tab = tab; rec.rd = Object.assign({}, RD, { p: undefined, pid: RD.p.id, playing: false }); if(typeof RD.t0 === "number") rec.rd.hs = RD.hs != null ? RD.hs : Date.now(); }
   else if(tab === "today" && todayStepState && todayStepState.at != null) rec.tab = tab;
   else return null;
   if(rec.tab === "today"){
@@ -1956,7 +1956,11 @@ function sessionResume(forTab){
     D = { q: items, right: rec.drill.right, seen: rec.drill.seen, miss: misses, onDone, summary: results.summary, onShown: results.onShown, rzo: o, rzs: results.summary.rzs };
     if(WORDS_TYPED && Array.isArray(rec.drill.dn)) D.down = rec.drill.dn.filter(id => typeof id === "string");
     dnext();
-  } else if(rd){ D = null; RD = rd; readRender(); }
+  } else if(rd){
+    // fb46: the time between the record and now was not spent reading.
+    if(typeof rd.t0 === "number" && rd.hs != null){ rd.hid = (rd.hid || 0) + Math.max(0, Date.now() - rd.hs); rd.hs = null; }
+    D = null; RD = rd; readRender();
+  }
   else { D = null; todayStepState.step = todayStepState.at; todayStep(); }
   return true;
 }
@@ -2995,6 +2999,8 @@ function startPassage(p, today, mode){
   const qx = (prog.read && prog.read.done && prog.read.done[p.id] && prog.read.done[p.id].x) || 0;
   p = VC.passageForPass(p, qx, PACK);
   RD = { p, tapped: [], glosses: {}, answers: [], qv: [], qi: null, shown: false, resultsDone: false, today: !!today, unticked: {}, added: null };
+  // fb46: reading time. t0 = open (kept in the session record, so a resume keeps it), hid = ms the tab was hidden, hs = hidden since.
+  if(PROGRESS_V2 && mode !== "listen"){ RD.t0 = Date.now(); RD.hid = 0; RD.hs = null; }
   // pack.readRotation: the attempt count that seeded the question order, so a resume after the pass is marked done keeps it.
   if(VC.readRotationOn(PACK)) RD.qx = qx;
   if(mode === "listen"){
@@ -3326,9 +3332,20 @@ function readQuestionScreen(){
   };
   sessionSave(true);
 }
+// Whole seconds of this pass, or undefined when it ran over 20 minutes or the tab was hidden over 2 minutes of it.
+function readSecs(){
+  if(!PROGRESS_V2 || !RD || RD.mode === "listen" || typeof RD.t0 !== "number") return undefined;
+  const now = Date.now(), secs = Math.round((now - RD.t0) / 1000), hid = (RD.hid || 0) + (RD.hs != null ? now - RD.hs : 0);
+  return VC.readTimeKeep(secs, hid) ? secs : undefined;
+}
+document.addEventListener("visibilitychange", () => {
+  if(!RD || typeof RD.t0 !== "number" || RD.resultsDone) return;
+  if(document.visibilityState === "hidden"){ if(RD.hs == null) RD.hs = Date.now(); }
+  else if(RD.hs != null){ RD.hid = (RD.hid || 0) + Date.now() - RD.hs; RD.hs = null; }
+});
 function markPassageFinished(){
   const sc = RD.answers.filter(a => a && a.ok).length;
-  VC.markPassageDone(prog, RD.p.id, sc, RD.p.questions.length, todayISO(), RD.mode === "listen", PACK);
+  VC.markPassageDone(prog, RD.p.id, sc, RD.p.questions.length, todayISO(), RD.mode === "listen", PACK, readSecs());
   store.save();
 }
 const WHY_LABEL = { tapped: "tapped while reading", wrong: "missed question" };
@@ -3692,6 +3709,8 @@ function progressRenderV2(){
     return `<div class="pvl${open ? "" : " pvo"}"><div class="pvt"><span>${L}</span><span class="pvn">${value}</span></div><div class="pvb" role="img" aria-label="${escapeHtml(aria)}"><i class="pvlr" style="width:${pvPct(d.learned, size)}"></i><i class="pvm" style="width:${pvPct(d.mas, size)}"></i></div>${parts.length ? `<p class="pvs">${parts.join(" · ")}</p>` : ""}${gate && String(gate.lv) === String(d.lv) ? gateRow() : ""}</div>`;
   };
   const lessonsDone = HAS_LESSONS ? LESSON_LIST.filter(l => prog.lessons[l.id]).length : 0;
+  const rsp = HAS_PASSAGES ? VC.readingSpeed(PASSAGE_LIST, PACK, prog) : null;
+  const rspd = rsp ? `<div class="pvl"><div class="pvt"><span>Reading</span><span class="pvn">${rsp.rate} ${rsp.unit} a minute</span></div></div>` : "";
   const sounds = HAS_LESSONS && (lessonsDone || all) ? `<div class="pvl"><div class="pvt"><span>Sounds</span><span class="pvn">${lessonsDone} of ${LESSON_LIST.length} lessons</span></div></div>` : "";
   const missed = VC.recentMisses(prog, lwAll).slice(0, 12);
   const weak = all ? weakFirst(lwAll.filter(w => VC.weakScore(prog.w[w.id]) > 0), 10) : [];
@@ -3699,7 +3718,7 @@ function progressRenderV2(){
   P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">${APP_V2 ? VOICE_NOTICE_V2 : "No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound."}</div>`}<div class="pv">
     <p class="pva">${prog.sessions || 0} session${prog.sessions === 1 ? "" : "s"}, ${escapeHtml(levelLabel(LEVELS[at]))}</p>
     ${pvHeroHTML(cur, anim)}${pvGoalHTML()}${all ? pvGoalsHTML() : ""}
-    <section class="pvls">${all ? `<div class="pvl" id="pvLearned"><div class="pvt"><span>Learned</span><span class="pvn">${lwAll.length} of ${WORDS.length}</span></div></div>` : ""}${xp ? `<table class="stats">${xp.rows}</table>` : ""}${lvData.map(levelRow).join("")}${cp && !lag && cp.rows ? `<table class="stats">${cp.rows}</table>` : ""}${sounds}</section>
+    <section class="pvls">${all ? `<div class="pvl" id="pvLearned"><div class="pvt"><span>Learned</span><span class="pvn">${lwAll.length} of ${WORDS.length}</span></div></div>` : ""}${xp ? `<table class="stats">${xp.rows}</table>` : ""}${lvData.map(levelRow).join("")}${cp && !lag && cp.rows ? `<table class="stats">${cp.rows}</table>` : ""}${sounds}${rspd}</section>
     ${missed.length ? `<section class="pvx"><p class="pvk">${APP_V2 ? "Still shaky" : `Missed in your last ${N} sessions`}</p><p class="pvw">${missed.map(w => `<span${TA}>${wordFormHTML(w, false)}</span>`).join(" ")}</p></section>` : ""}
     ${all && weak.length ? `<section><p class="pvk">Weakest words</p>${weak.map(w => `<div class="rowset">${wordRowHTML(w, "rowset")}</div>`).join("")}</section>` : ""}
     <button class="ghost pvall" id="pvAll" aria-expanded="${all}">${all ? "Show less" : "Show all"}</button>

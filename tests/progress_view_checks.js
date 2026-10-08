@@ -142,6 +142,10 @@ return {
   hide: () => { document.visibilityState = "hidden"; (document._listeners.visibilitychange || []).forEach(f => f()); document.visibilityState = "visible"; },
   wordForm: w => wordFormHTML(w, false),
   pagehide: () => (window.__wl.pagehide || []).forEach(f => f()),
+  vis: s => { document.visibilityState = s; (document._listeners.visibilitychange || []).forEach(f => f()); },
+  startPassage: id => startPassage(PASSAGE_LIST.find(p => p.id === id)),
+  finishPassage: () => { RD.resultsDone = true; markPassageFinished(); },
+  rd: () => RD,
 };`;
   window.__wl = wl;
   const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
@@ -330,6 +334,57 @@ console.log(`\n[3] flag off: Progress HTML byte-identical to ${MAIN}, nothing wr
     a.api.clickTab("today"); b.api.clickTab("today"); a.api.clickTab("progress"); a.api.hide();
     check(`${name}: Progress HTML byte-identical to ${MAIN}; leaving the tab writes no pv; stored records equal`, same && !("pv" in a.api.getProg()) && a.st.ls.getItem(VC.storageKey(OFF)) === b.st.ls.getItem(VC.storageKey(OFF)));
   }
+}
+
+console.log("\n[4] reading speed row (fb46): t stored at completion, guards, median after 3 passages");
+{
+  const rp = (done) => { const p = base({ sets: { "1": 1 } }); p.read = { done }; return p; };
+  const mk = (pack, listen, t, prev) => { const p = rp(prev || {}); VC.markPassageDone(p, "p0001", 3, 4, "2026-10-04", listen, pack, t); return p.read.done.p0001; };
+  check("core: t stored on a reading pass under v2, rounded", mk(PACK, false, 41.6).t === 42);
+  check("core: no t for a listening pass, flag off, undefined or 0", mk(PACK, true, 40).t === undefined && mk(OFF, false, 40).t === undefined && mk(PACK, false, undefined).t === undefined && mk(PACK, false, 0).t === undefined);
+  check("core: a later pass with no t drops the old one (latest pass only)", mk(PACK, false, undefined, { p0001: { sc: 1, n: 4, d: "x", x: 1, t: 50 } }).t === undefined);
+  check("core: readTimeKeep: 1200 s kept, 1201 s dropped, hidden 120 s kept, 121 s dropped, 0 s dropped", VC.readTimeKeep(1200, 0) && !VC.readTimeKeep(1201, 0) && VC.readTimeKeep(60, 120000) && !VC.readTimeKeep(60, 120001) && !VC.readTimeKeep(0, 0));
+  check("core: validateProgShape accepts numeric read.done.t, rejects a string", VC.validateProgShape(rp({ p0001: { sc: 1, n: 1, d: "x", x: 1, t: 9 } }), VC.levelIds(PACK)).ok && VC.validateProgShape(rp({ p0001: { sc: 1, n: 1, d: "x", x: 1, t: "9" } }), VC.levelIds(PACK)).reason === "read.done.p0001.t must be a number");
+  const en = [1, 2, 3, 4].map(i => ({ id: "e" + i, text: Array(100).fill("word").join(" ") }));
+  const dn = (ts) => rp(Object.fromEntries(ts.map((t, i) => ["e" + (i + 1), { sc: 1, n: 1, d: "x", x: 1, t }])));
+  check("speed: under 3 passages with t is no row", VC.readingSpeed(en, PACK, dn([60, 60])) === null && VC.readingSpeed(en, PACK, dn([60, 60, undefined])) === null);
+  const s3 = VC.readingSpeed(en, PACK, dn([30, 60, 120]));
+  check("speed: median of 200, 100, 50 words a minute is 100 in words", s3 && s3.rate === 100 && s3.unit === "words" && s3.n === 3);
+  check("speed: even count averages the middle two", VC.readingSpeed(en, PACK, dn([30, 60, 120, 240])).rate === 75);
+  const zhp = PASSAGES.slice(0, 3);
+  const zs = VC.readingSpeed(zhp, PACK, rp(Object.fromEntries(zhp.map(p => [p.id, { sc: 1, n: 1, d: "x", x: 1, t: 60 }]))));
+  check("speed: zh counts characters", zs && zs.unit === "characters" && zs.rate === Math.round(([...zhp.map(p => VC.passageUnits(p).n)].sort((a, b) => a - b))[1]) && zs.rate > 20);
+  check("speed: flag off is null", VC.readingSpeed(en, OFF, dn([30, 60, 120])) === null);
+
+  // The app: a pass opened, read, finished.
+  const { api, st } = await bootWith(PACK, midProg(), 5);
+  const pid = PASSAGES[0].id;
+  const pass = async (secs, hid) => { api.startPassage(pid); if(hid){ api.vis("hidden"); NOW += hid * 1000; api.vis("visible"); } NOW += (secs - (hid || 0)) * 1000; api.finishPassage(); return (api.getProg().read.done[pid] || {}).t; };
+  const t0 = NOW;
+  check("app: finishing a pass stores whole seconds open to results", await pass(95) === 95);
+  check("app: hidden 60 s of the pass keeps t", await pass(200, 60) === 200);
+  check("app: hidden 150 s drops t", await pass(300, 150) === undefined);
+  check("app: a pass over 20 minutes drops t", await pass(1300) === undefined);
+  check("app: the record on screen carries no stamp after results (RD kept in memory only)", stored(st, PACK).read.done[pid].t === undefined);
+  api.startPassage(pid); NOW += 50000;
+  const rec = JSON.parse(JSON.stringify(api.rd()));
+  check("app: t0 is on the pass in progress", typeof api.rd().t0 === "number" && api.rd().hid === 0);
+  api.finishPassage();
+  check("app: t stored once, at completion", api.getProg().read.done[pid].t === 50);
+  NOW = t0;
+  const ids = PASSAGES.slice(0, 3).map(p => p.id);
+  for(const id of ids){ api.startPassage(id); NOW += 60000; api.finishPassage(); }
+  api.clickTab("progress");
+  const h4 = stripTags(api.panel());
+  const u = ids.map(id => VC.passageUnits(PASSAGES.find(p => p.id === id)).n);
+  const med = Math.round(u.slice().sort((a, b) => a - b)[1]);
+  check("app: Progress shows Reading: N characters a minute after 3 passages", h4.includes(`Reading ${med} characters a minute`));
+  const fewer = await bootWith(PACK, (() => { const p = midProg(); p.read = { done: { [ids[0]]: { sc: 1, n: 1, d: "x", x: 1, t: 60 }, [ids[1]]: { sc: 1, n: 1, d: "x", x: 1, t: 60 } } }; return p; })(), 5);
+  fewer.api.clickTab("progress");
+  check("app: two timed passages show no Reading row", !/Reading \d/.test(stripTags(fewer.api.panel())));
+  const off = await bootWith(OFF, midProg(), 5);
+  off.api.startPassage(pid); NOW += 60000; off.api.finishPassage();
+  check("app: flag off stores no t and creates no t0", off.api.getProg().read.done[pid].t === undefined && off.api.rd().t0 === undefined);
 }
 
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
