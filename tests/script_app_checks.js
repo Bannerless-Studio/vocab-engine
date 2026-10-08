@@ -924,6 +924,42 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       check("flag off: the chip stays on after the primer is skipped (stored default true)", pressed(api) === "true" && api.getProg().showPron === true); }
   }
 
+  console.log("\n[17] pack.placedKnown (fb52): a placement past the first bucket skips the script primer as the learner's own skip does");
+  {
+    const fixtures = [["fa", FX.fa()], ["ko", FX.ko()]];
+    // A real script sibling (ur) when checked out next to the engine.
+    const urDir = path.join(ROOT, "..", "urdu", "pack"), uf = n => path.join(urDir, n + ".js");
+    if([uf("pack"), uf("words"), uf("script")].every(x => fs.existsSync(x))){
+      const load = (file, name) => new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)();
+      const P = load(uf("pack"), "PACK");
+      if(P.script) fixtures.push(["ur (sibling)", { pack: P, words: load(uf("words"), "WORDS"), script: load(uf("script"), "SCRIPT") }]);
+    } else console.log("SKIP  ur sibling: no ../urdu/pack/script.js");
+    for(const [name, F] of fixtures){
+      const on = Object.assign({}, F.pack, { placedKnown: true, pronUntilPrimer: true, showPron: true }), off = Object.assign({}, F.pack, { pronUntilPrimer: true, showPron: true });
+      delete off.placedKnown;
+      const units = F.script.units, st = VC.strata(F.words, on.placement, VC.setSizeOf(on));
+      // The learner's own skip, through the app: fresh boot, "I can read it, skip".
+      const own = await boot({ pack: on, words: F.words, script: F.script }); own.api.el("scriptSkip").click();
+      const ownScript = JSON.stringify(own.api.getProg().script);
+      const base = () => { const b = VC.normalizeProg({}, on); b.script = JSON.parse(JSON.stringify(VC.normalizeProg({}, on).script)); return b; };
+      const p1 = VC.applyPlacement(base(), st, 1, F.words, on), p0 = VC.applyPlacement(base(), st, 0, F.words, on);
+      const f1 = VC.applyPlacement(base(), st, 1, F.words, off);
+      check(`${name}: landing past bucket 0 writes the learner's skip (${ownScript})`, JSON.stringify(p1.script) === ownScript && VC.scriptSkipped(p1) && VC.scriptPrimerDone(on, units, p1));
+      check(`${name}: pronUntilPrimer then turns pron off by its own rule (no showPron stored)`, !("showPron" in p1) && VC.showPronOn(on, units, p1) === false && VC.showPronOn(on, units, base()) === true);
+      check(`${name}: a placement landing in bucket 0 leaves the primer as it was`, JSON.stringify(p0.script) === JSON.stringify(base().script) && !VC.scriptSkipped(p0));
+      check(`${name}: applyPlacement stays pure (input script untouched)`, (() => { const b = base(), s0 = JSON.stringify(b); VC.applyPlacement(b, st, 1, F.words, on); return JSON.stringify(b) === s0; })());
+      check(`${name}: flag off, the placement leaves the primer as it was (applyPlacement output = flag-off pack)`, JSON.stringify(f1.script) === JSON.stringify(base().script) && JSON.stringify(f1) === JSON.stringify(VC.applyPlacement(base(), st, 1, F.words, F.pack)));
+      // The app on the placed record: Today does not open with the primer; the Script tab stays reachable.
+      const mk = pr => { const m = memStore(); m.setItem(VC.storageKey(on), JSON.stringify(pr)); return m; };
+      const A = await boot({ pack: on, words: F.words, script: F.script }, { storage: mk(p1) }), h = A.api.html("panel");
+      check(`${name}: Today after placement: no choice card, Learn is not the script stage (got "${learnLine(h)}")`, !/id="scriptChoice"/.test(h) && /id="go"/.test(h) && !learnLine(h).startsWith(on.script.stages[0].label));
+      A.api.goto("sounds"); const sh = A.api.html("panel");
+      check(`${name}: the Script tab still renders its units (${units.length})`, A.api.scriptTab() ? units.slice(0, 3).every(u => sh.includes(u.t)) : true);
+      const B = await boot({ pack: off, words: F.words, script: F.script }, { storage: mk(f1) });
+      check(`${name}: flag off, Today after placement still offers the choice card`, /id="scriptChoice"/.test(B.api.html("panel")));
+    }
+  }
+
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

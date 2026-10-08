@@ -191,7 +191,7 @@ class LanguageSpec:
             "readRotation": True, "wordsBy": "typed",
             "progressMap": {"goals": [{"upTo": lv, "label": lab} for lv, lab in zip(ids, self.port_goals)]},
             "pairs": True, "freqTiers": True, "progressView": "v2", "appView": "v2", "levelGate": self.port_level_gate,
-            "placementWhole": True, "placementEarlyStop": True, "placedRead": True,
+            "placementWhole": True, "placementEarlyStop": True, "placedRead": True, "placedKnown": True,
         }
         if self.emit_gender:
             flags["gapGender"] = True

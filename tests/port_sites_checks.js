@@ -64,7 +64,7 @@ async function site(dirName, code){
   const periph = LV.map(lv => cnt(lv)[2]), want = LV.map(lv => Math.floor((SHARE[lv] || 0) * BY[lv].length + 0.5));
   check(`${code}: tiers per level [ambient core peripheral] ${LV.map(lv => `${lv} ${cnt(lv)}`).join("  ")}; peripheral = ${want.join("/")}`, JSON.stringify(periph) === JSON.stringify(want) && D.WORDS.filter(w => w.ft === 0).every(w => w.rank <= 100));
   if(units.length) check(`${code}: unit ft = lowest ft of its words (${units.length} units)`, units.every(u => u.ft === Math.min(...u.words.map(i => S.BY_ID[i].ft))));
-  const flags = ["dayAware", "glossFocus", "helpClose", "readAnswerBlock", "optsMix", "pauseNew", "readRotation", "pairs", "freqTiers", "placementWhole", "placementEarlyStop", "placedRead"];
+  const flags = ["dayAware", "glossFocus", "helpClose", "readAnswerBlock", "optsMix", "pauseNew", "readRotation", "pairs", "freqTiers", "placementWhole", "placementEarlyStop", "placedRead", "placedKnown"];
   check(`${code}: generic flag set (typedFrom ${JSON.stringify(P.typedFrom)}, goals ${P.progressMap && P.progressMap.goals.map(g => g.upTo)}, levelGate ${P.levelGate})`,
     flags.every(k => P[k] === true) && P.glossStyle === "primary" && P.wordsBy === "typed" && P.listenQuestions === "all" && P.progressView === "v2" && P.appView === "v2" && P.levelGate === 0.7
     && JSON.stringify(P.typedFrom) === JSON.stringify(code === "ja" ? ["written", "pron"] : ["written"]) && P.progressMap.goals.length === 3

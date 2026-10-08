@@ -188,6 +188,7 @@
  "placementChars": true,
  "placementEarlyStop": true,
  "placedRead": true,
+ "placedKnown": true,
  "levelGate": 0.7,
  "levelExam": {
   "1": "pinyin",

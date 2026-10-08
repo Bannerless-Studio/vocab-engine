@@ -993,6 +993,9 @@ function applyPlacement(prog, st, passed, words, pack, units){
   Object.keys(seed).forEach(lv => (byLv[lv]||[]).slice(0, seed[lv]*size).forEach(w => { covered.add(w.id); if(!out.w[w.id]) out.w[w.id] = {r:1,w:0,s:1,prov:1}; }));
   ids.forEach(lv => settleSetCounter(out, words, pack, lv));
   placeCharUnits(out, pack, units, covered);
+  // pack.placedKnown: a placement past the first bucket reads the script, so the primer is skipped exactly as the learner's own
+  // skip writes it (answerScriptChoice); pronUntilPrimer then turns the reading aid off by its own rule.
+  if(placedKnownOn(pack) && passed >= 1 && scriptConfig(pack)){ out.script = isObj(prog.script) ? Object.assign({}, prog.script) : defaultScriptProg(); answerScriptChoice(out, false); }
   out.placedOnce = true;
   // prog.pl: the level this placement landed in, for pack.eta.placed (docs/PACK_SCHEMA.md "ETA model"); only when no
   // session came before it, since a record with sessions is not a placed start.
@@ -1312,7 +1315,7 @@ function nextNewSet(words, pack, prog){
 const levelGateOn = pack => !!(pack && typeof pack.levelGate === "number" && pack.levelGate > 0 && pack.levelGate <= 1) && pairsOn(pack);
 function levelKnownPct(words, pack, prog, lv, units){
   const list = wordsByLevel(words, pack)[lv] || [], r = (prog && prog.w) || {}, bw = knownCtx(pack, units);
-  return list.length ? list.filter(w => wordKnownX(r[w.id], w, pack, prog, bw)).length / list.length : 1;
+  return list.length ? list.filter(w => wordKnownP(r[w.id], w, pack, prog, bw)).length / list.length : 1;
 }
 // pack.levelExam (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): per level, what the exam asks. On a
 // "characters" level a word is known (level counts, goals, levelGate) only when its character unit's wm pair
@@ -1329,6 +1332,21 @@ function wordKnownX(rec, word, pack, prog, byWord){
   const u = byWord.get(word.id); if(!u) return true;
   const ur = charRecs(prog)[u.id], own = isObj(ur) && isObj(ur.p) ? pairEntry(ur.p.wm) : null;
   return (own ? own[0] : isObj(ur) ? pairState(ur, "wm").s : 0) >= BARE_PAIR;
+}
+// pack.placedKnown (docs/PACK_SCHEMA.md "placedKnown"; fb52, owner 2026-10-08: placed at the top level, Today read
+// "Goal 1 of 3 ≈ 96 sessions" on an empty bar and the gate "Now 0%"): a record placement seeded provisional (prov, from
+// applyPlacement / pinPrefixRecords / placeCharUnits; dropped by the first miss and at mastered / known) counts as known for
+// position only: the level gate and its sentence, the goal bars, the progress map and the ETA position. Review picks,
+// mastered counts (Progress rows, totals), typed tiers, Still shaky, Test pools and wordKnownX (levelExam) keep it provisional.
+const placedKnownOn = pack => !!(pack && pack.placedKnown === true);
+const placedProv = rec => isObj(rec) && !!rec.prov;
+const posKnown = (pack, rec) => placedKnownOn(pack) && placedProv(rec);
+// On a levelExam "characters" level a word whose prov settled at known (settleProv) still waits on its unit's exam; while that
+// unit is itself placed-provisional the word keeps counting, so the gate does not close again between the two.
+function wordKnownP(rec, word, pack, prog, byWord){
+  if(posKnown(pack, rec) || wordKnownX(rec, word, pack, prog, byWord)) return true;
+  const u = placedKnownOn(pack) && byWord && word ? byWord.get(word.id) : null;
+  return !!u && posKnown(pack, charRecs(prog)[u.id]) && wordKnown(rec, word, pack);
 }
 // { lv, prev, pct } while the first level with untaught words waits; else null.
 function levelGateHold(words, pack, prog, units){
@@ -2622,11 +2640,11 @@ function progressMapOn(pack){ return !!(pack && (pack.progressMap === true || pr
 function progressPosition(prog, pack, words, units, passages){
   const ws = words || [], us = units || [], ps = passages || [];
   const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, us);
-  const known = ws.filter(w => wordKnownX(recs[w.id], w, pack, prog, bw)).length;
+  const known = ws.filter(w => wordKnownP(recs[w.id], w, pack, prog, bw)).length;
   let wu = us.length ? 0.25 : 0, wp = ps.length ? 0.25 : 0;
   const ww = 1 - wu - wp;
   let x = ws.length ? ww * known / ws.length : 0;
-  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (freqTiersOn(pack) ? unitDone(cr[u.id], u, pack) : charTier(cr[u.id].s, pack) === "bare")).length / us.length; }
+  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (posKnown(pack, cr[u.id]) || (freqTiersOn(pack) ? unitDone(cr[u.id], u, pack) : charTier(cr[u.id].s, pack) === "bare"))).length / us.length; }
   if(ps.length){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
   return Math.max(0, Math.min(1, x));
 }
@@ -2641,10 +2659,13 @@ function goalPosition(prog, pack, goal, words, units, passages){
   const us = (units || []).filter(u => inR(u.lv !== undefined ? u.lv : (byId[(u.words || [])[0]] || {}).lv));
   const ps = (passages || []).filter(p => inR(p.lv));
   const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, units);
-  const known = ws.filter(w => wordKnownX(recs[w.id], w, pack, prog, bw)).length;
+  const known = ws.filter(w => wordKnownP(recs[w.id], w, pack, prog, bw)).length;
+  // pack.placedKnown (owner 2026-10-09): a goal whose words placement covered (all known for position, some still placed)
+  // is full: its bar reads 100%, currentGoal moves on and it carries no estimate.
+  if(placedKnownOn(pack) && ws.length && known === ws.length && ws.some(w => placedProv(recs[w.id]))) return 1;
   const wu = us.length ? 0.2 : 0, wp = ps.length ? 0.2 : 0;
   let x = ws.length ? (1 - wu - wp) * known / ws.length : 0;
-  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && charTier(cr[u.id].s, pack) !== "pron").length / us.length; }
+  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (posKnown(pack, cr[u.id]) || charTier(cr[u.id].s, pack) !== "pron")).length / us.length; }
   if(ps.length){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
   return Math.max(0, Math.min(1, x));
 }
@@ -2792,9 +2813,16 @@ const etaRound = r => r === null ? null : Math.max(1, Math.ceil(r - 1e-9));
 // since placement), since such a start's goal position sits on a plateau for ~70 sessions before it crosses. The set
 // applies for the whole record (its provisional records clear 50-80 sessions before the crossing); an entry it lacks, a
 // level without a set, or no prog.pl: the fresh curves.
+// pack.placedKnown: a prog.pl without a set reads the nearest lower level's set (zh has sets for the second and third level
+// only, so a top-level landing read the fresh curves at a position of 0).
 function etaPlaced(prog, pack){
   const e = pack && pack.eta, pl = prog && prog.pl;
-  return isObj(e) && isObj(e.placed) && typeof pl === "string" && isObj(e.placed[pl]) ? e.placed[pl] : null;
+  if(!(isObj(e) && isObj(e.placed) && typeof pl === "string")) return null;
+  if(isObj(e.placed[pl])) return e.placed[pl];
+  if(!placedKnownOn(pack)) return null;
+  const ids = levelIds(pack);
+  for(let i = ids.indexOf(pl) - 1; i >= 0; i--) if(isObj(e.placed[ids[i]])) return e.placed[ids[i]];
+  return null;
 }
 function sessionsToGoX(prog, g, n, ctx){
   const goal = g !== undefined && ctx ? progressMapGoals(ctx.pack)[g] : null;
@@ -2802,7 +2830,9 @@ function sessionsToGoX(prog, g, n, ctx){
   const p = goalPosition(prog, ctx.pack, goal, ctx.words, ctx.units, ctx.passages);
   if(p >= GOAL_DONE) return 0;
   const e = ctx.pack && ctx.pack.eta, ps = etaPlaced(prog, ctx.pack);
-  if(ps && Array.isArray(ps.bySessions) && Array.isArray(ps.bySessions[g])) return etaRound(etaCurveAt(ps.bySessions[g], prog.sessions || 0));
+  // bySessions models the plateau a placed start sat on while its provisional records were not known; under
+  // pack.placedKnown they count at once, so the goal reads the fresh curve at its position.
+  if(ps && !placedKnownOn(ctx.pack) && Array.isArray(ps.bySessions) && Array.isArray(ps.bySessions[g])) return etaRound(etaCurveAt(ps.bySessions[g], prog.sessions || 0));
   if(isObj(e) && Array.isArray(e.curve)) return etaRound(etaCurveAt(e.curve[g], p));
   const gain = etaGain(ctx.pack, g);
   return gain === null ? null : Math.ceil((GOAL_DONE - p) / gain - 1e-9);
@@ -4625,7 +4655,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, patternFirstMeeting, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairsOn, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
-  markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, placedKnownOn, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, placedReadOn, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, etaPlaced, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,

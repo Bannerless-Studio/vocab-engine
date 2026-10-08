@@ -51,6 +51,7 @@ const FLAG_SINCE = [
   { key: "placementChars", sha: "f75f21f", path: ["placementChars"] },
   { key: "placedRead", sha: "c37f843", path: ["placedRead"] },
   { key: "placementEarlyStop", sha: "4c9fab1", path: ["placementEarlyStop"] },
+  { key: "placedKnown", sha: "4104bac", path: ["placedKnown"] },
 ];
 
 const byKey = new Map(FLAG_SINCE.map(f => [f.key, f]));
