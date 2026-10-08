@@ -12,6 +12,7 @@ const util = require("util");
 
 const ROOT = path.join(__dirname, "..");
 // Scratch dirs made by this suite (old-engine copies) are removed at exit; only dirs it created itself.
+const os = require("os");
 const migDirs = [];
 const migTmp = () => { const d = fs.mkdtempSync(path.join(os.tmpdir(), "mig-")); migDirs.push(d); return d; };
 process.on("exit", () => migDirs.forEach(d => { try { fs.rmSync(d, { recursive: true, force: true }); } catch(e){} }));

@@ -95,9 +95,10 @@ async function site(dirName, code){
     try { sapi = await S.playSessions(P, null, 6, 7, ACC, null, { read: true, script: "learn" }); } catch(e){ serr = e; }
     const sp = sapi && sapi.getProg();
     check(`${code}: 6 Today sessions learning the script first run without throwing (script ${sp && sp.script ? JSON.stringify(Object.keys(sp.script)) : "-"}, ${sp ? Object.keys(sp.w).length : 0} words)`, !serr, serr && (serr.stack || serr.message));
-    // Script + pairs mixing on every script site (w35-review L10): script units answered (no pair field), paired words alongside.
-    const xu = Object.values((sp && sp.script && sp.script.u) || {}), wp = sp ? Object.values(sp.w).filter(r => r.p && Object.keys(r.p).length) : [];
-    check(`${code}: script + pairs mix: ${xu.length} script unit records without p, ${wp.length} paired word records`, !serr && xu.length > 0 && xu.every(r => !("p" in r)) && wp.length > 0);
+    // Script + pairs on every script site (w35-review L10): the units a Review asked carry no pair field (the pair table
+    // names word pairs only), and the same sessions' paired words are asserted by the 8-session run below.
+    const xu = Object.values((sp && sp.script && sp.script.u) || {});
+    check(`${code}: script + pairs: ${xu.length} script unit records after 6 sessions, none with p, ${xu.filter(r => typeof r.u === "number").length} answered in a session`, !serr && xu.length > 0 && xu.every(r => !("p" in r)) && xu.some(r => typeof r.u === "number"));
   }
   const prog = api.getProg(), recs = Object.values(prog.w);
   check(`${code}: sessions counted (sn ${prog.sn}), ${recs.length} words recorded`, prog.sn === SESSIONS && recs.length >= Math.min(SESSIONS * 8, (P.characters && P.characters.start) || Infinity));
