@@ -955,6 +955,13 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       check(`${name}: Today after placement: no choice card, Learn is not the script stage (got "${learnLine(h)}")`, !/id="scriptChoice"/.test(h) && /id="go"/.test(h) && !learnLine(h).startsWith(on.script.stages[0].label));
       A.api.goto("sounds"); const sh = A.api.html("panel");
       check(`${name}: the Script tab still renders its units (${units.length})`, A.api.scriptTab() ? units.slice(0, 3).every(u => sh.includes(u.t)) : true);
+      // fb52 review M1: an explicit "Learn the script" choice survives a placement past bucket 0.
+      const lb = base(); VC.answerScriptChoice(lb, true);
+      const pl1 = VC.applyPlacement(lb, st, 1, F.words, on), L = await boot({ pack: on, words: F.words, script: F.script }, { storage: mk(pl1) });
+      check(`${name}: prior "learn" choice + placement: choice intact (${JSON.stringify(pl1.script).slice(0, 60)}), primer not done, pron still on`, JSON.stringify(pl1.script) === JSON.stringify(lb.script) && !VC.scriptSkipped(pl1) && !VC.scriptPrimerDone(on, units, pl1) && VC.showPronOn(on, units, pl1) === true);
+      check(`${name}: prior "learn" choice + placement: Today still opens on the primer stage (got "${learnLine(L.api.html("panel"))}")`, learnLine(L.api.html("panel")).startsWith(on.script.stages[0].label));
+      const sk = base(); VC.answerScriptChoice(sk, false);
+      check(`${name}: prior "skip" choice + placement: stays skipped`, VC.scriptSkipped(VC.applyPlacement(sk, st, 1, F.words, on)));
       const B = await boot({ pack: off, words: F.words, script: F.script }, { storage: mk(f1) });
       check(`${name}: flag off, Today after placement still offers the choice card`, /id="scriptChoice"/.test(B.api.html("panel")));
     }

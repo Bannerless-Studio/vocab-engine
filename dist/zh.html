@@ -1461,7 +1461,10 @@ function applyPlacement(prog, st, passed, words, pack, units){
   placeCharUnits(out, pack, units, covered);
   // pack.placedKnown: a placement past the first bucket reads the script, so the primer is skipped exactly as the learner's own
   // skip writes it (answerScriptChoice); pronUntilPrimer then turns the reading aid off by its own rule.
-  if(placedKnownOn(pack) && passed >= 1 && scriptConfig(pack)){ out.script = isObj(prog.script) ? Object.assign({}, prog.script) : defaultScriptProg(); answerScriptChoice(out, false); }
+  if(placedKnownOn(pack) && passed >= 1 && scriptConfig(pack)){
+    out.script = isObj(prog.script) ? Object.assign({}, prog.script) : defaultScriptProg();
+    if(out.script.choiceSeen !== true) answerScriptChoice(out, false);
+  }
   out.placedOnce = true;
   // prog.pl: the level this placement landed in, for pack.eta.placed (docs/PACK_SCHEMA.md "ETA model"); only when no
   // session came before it, since a record with sessions is not a placed start.
@@ -3126,13 +3129,15 @@ function goalPosition(prog, pack, goal, words, units, passages){
   const ps = (passages || []).filter(p => inR(p.lv));
   const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, units);
   const known = ws.filter(w => wordKnownP(recs[w.id], w, pack, prog, bw)).length;
-  // pack.placedKnown (owner 2026-10-09): a goal whose words placement covered (all known for position, some still placed)
-  // is full: its bar reads 100%, currentGoal moves on and it carries no estimate.
-  if(placedKnownOn(pack) && ws.length && known === ws.length && ws.some(w => placedProv(recs[w.id]))) return 1;
-  const wu = us.length ? 0.2 : 0, wp = ps.length ? 0.2 : 0;
+  // pack.placedKnown (owner 2026-10-09): a goal whose levels all lie at or below the placed level (prog.pl) is positioned from
+  // its words and units only, never its passages and with no "still placed" condition, so one miss moves the bar by one word
+  // and a covered goal stays full (no estimate, currentGoal on the next unmet goal) after its provisional records settle or drop.
+  const plIdx = placedKnownOn(pack) && prog && typeof prog.pl === "string" ? idx[prog.pl] : undefined;
+  const placedGoal = plIdx !== undefined && top <= plIdx;
+  const wu = us.length ? 0.2 : 0, wp = ps.length && !placedGoal ? 0.2 : 0;
   let x = ws.length ? (1 - wu - wp) * known / ws.length : 0;
   if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (posKnown(pack, cr[u.id]) || charTier(cr[u.id].s, pack) !== "pron")).length / us.length; }
-  if(ps.length){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
+  if(wp){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
   return Math.max(0, Math.min(1, x));
 }
 const GOAL_DONE = 0.9;
@@ -6365,7 +6370,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "545285836-2383505";
+const VE_BUILD = "496325278-2383786";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -8600,4 +8605,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1228071013-2382828-->
+<!--ve-build:1495525623-2383109-->

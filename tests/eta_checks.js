@@ -647,7 +647,31 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
     check(`etaPlaced: pl "4" -> the "3" set under the flag, null without it`, VC.etaPlaced(near, PACK) === PACK.eta.placed["3"] && VC.etaPlaced(near, PK0) === null && VC.etaPlaced(Object.assign({}, near, { pl: "1" }), PACK) === null);
     // After placement + one session (the owner's screenshot state): still open, goal still near, ETA finite.
     const api = await playSessions(PACK, placedOwner(), 1, 3, 0.85, null, VIEW), q = api.getProg(), cq = VC.currentGoal(q, PACK, WORDS, CHARACTERS, PASSAGES), eq = VC.sessionsToGoX(q, cq.i, cq.n, ctx);
-    check(`owner k=10 + 1 session: gate open, goal ${cq.i + 1} at ${cq.p.toFixed(3)}, ETA ${eq} finite below ${freshEta}`, VC.levelGateHold(WORDS, PACK, q, CHARACTERS) === null && cq.p >= 0.75 && Number.isFinite(eq) && eq < freshEta);
+    const freshG3 = VC.sessionsToGoX(freshStart(), 2, 3, ctx);
+    check(`owner k=10 + 1 session (fb52 review H1): gate open, goals 1-2 full, current goal ${cq.i + 1} at ${cq.p.toFixed(3)}, ETA ${eq} finite below the fresh goal-3 value ${freshG3}`, VC.levelGateHold(WORDS, PACK, q, CHARACTERS) === null && VC.goalPositions(q, PACK, WORDS, CHARACTERS, PASSAGES).slice(0, 2).every(x => x >= VC.GOAL_DONE) && cq.i === 2 && cq.p >= 0.4 && Number.isFinite(eq) && eq < freshG3);
+    // fb52 review H1: a goal placement covered stays full after a session, a miss, or its provisional records settling; the estimate stays on goal 3.
+    {
+      const pg = (q, tag) => { const cg2 = VC.currentGoal(q, PACK, WORDS, CHARACTERS, PASSAGES); return { gps: VC.goalPositions(q, PACK, WORDS, CHARACTERS, PASSAGES), cg: cg2, eta: [0, 1, 2].map(g => VC.sessionsToGoX(q, g, 3, ctx)) }; };
+      const missOne = q => { const w = WORDS.find(x => x.lv === "1" && q.w[x.id] && q.w[x.id].prov); q.w[w.id] = { r: 0, w: 1, s: 0 }; return w; };
+      const owner = placedOwner(); owner.sessions = 1; missOne(owner);
+      const a = pg(owner);
+      console.log(`INFO  owner k=10 + 1 session + 1 HSK 1 miss: goals ${a.gps.map(x => x.toFixed(3)).join(", ")}, current ${a.cg.i + 1}, ETA ${a.eta.join("/")}`);
+      check("H1 owner k=10 + 1 session + a miss on a placed HSK 1 word: goals 1-2 stay full (>= GOAL_DONE), currentGoal 3, estimate on goal 3 only", a.gps[0] >= VC.GOAL_DONE && a.gps[1] >= VC.GOAL_DONE && a.cg.i === 2 && a.eta[0] === 0 && a.eta[1] === 0 && a.eta[2] > 0);
+      const t0 = pg(placedOwner());
+      check("H1 the miss moves the covered goal by about one word, not to 0.8", t0.gps[0] - a.gps[0] > 0 && t0.gps[0] - a.gps[0] < 0.01);
+      const settled = placedOwner(); settled.sessions = 1;
+      for(const w of WORDS) if(w.lv <= "2" && settled.w[w.id] && settled.w[w.id].prov){ const r = settled.w[w.id]; delete r.prov; r.p = { wm: [3, 1], sm: [3, 1], ws: [3, 1] }; }
+      const sg = pg(settled);
+      check(`H1 every goal 1-2 provisional record settled known (no prov left): goals ${sg.gps.slice(0, 2).map(x => x.toFixed(2)).join(", ")} stay full, currentGoal 3`, sg.gps[0] >= VC.GOAL_DONE && sg.gps[1] >= VC.GOAL_DONE && sg.cg.i === 2);
+      const all = VC.applyPlacement(freshStart(), st, st.length, WORDS, PACK, CHARACTERS); all.sessions = 1; missOne(all);
+      const al = pg(all), T = await bootWith(PACK, all, 1, VIEW), th = T.panel(); T.clickTab("progress"); const ph = T.panel();
+      check(`H1 fully placed + 1 session + a miss: goals ${al.gps.map(x => x.toFixed(3)).join(", ")} full, currentGoal all, "All goals" 100% with no estimate`, al.gps.every(x => x >= VC.GOAL_DONE) && al.cg.all === true && /<span>All goals<\/span><span class="pvn">100%/.test(th) && !/≈/.test(th + ph));
+      const gp = { w: owner.w, sessions: 1 };
+      const noPl = clone(owner); delete noPl.pl;
+      check("H1 without prog.pl (no placement on record) the normal formula applies", VC.goalPosition(noPl, PACK, PACK.progressMap.goals[0], WORDS, CHARACTERS, PASSAGES) < a.gps[0]);
+      const off = clone(owner), PKo = stripFlags(PACK, ["placedKnown"]);
+      check("H1 flag off ignores prog.pl (positions equal the same record read without pl)", JSON.stringify(VC.goalPositions(off, PKo, WORDS, CHARACTERS, PASSAGES)) === JSON.stringify(VC.goalPositions(Object.assign(clone(off), { pl: undefined }), PKo, WORDS, CHARACTERS, PASSAGES)));
+    }
     // A fresh record and the owner export (no provisional records) are unchanged by the flag.
     const same = [["fresh", freshStart()]].concat(OWNER ? [["owner export", ownerStart()]] : []);
     for(const [name, r] of same){
