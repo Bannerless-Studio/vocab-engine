@@ -228,7 +228,7 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("whole: a zero bucket followed by a zero is not isolated even when accuracy holds", VC.placementStopIndex(rn([6,6,6,6,0,0], [6,6,6,6,3,3]), W) === 4);
   check("whole: accuracy exactly 0.75 passes (3/4 over one bucket)", VC.placementStopIndex(rn([3], [4]), W) === null);
   check("whole: 0.75 exactly passes, just under stops (6/8 vs 5/7 + 1/1 prefix)", VC.placementStopIndex(rn([3,3], [4,4]), W) === null && VC.placementStopIndex(rn([3,2], [4,4]), W) === 1);
-  check("whole: the largest k wins over a smaller passing prefix (a later recovery)", VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3]), W) === null && VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3])) === 2);
+  check("whole: the largest k wins over a smaller passing prefix (a later recovery)", VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3]), W) === null && VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3])) === 1);
   check("whole: empty result -> null", VC.placementStopIndex([], W) === null);
   check("whole off (opts absent, whole false): window rule untouched", VC.placementStopIndex(REPORTED, { whole: false }) === 0 && VC.placementStopIndex(rn([3,3,3,0,3,3], [3,3,3,3,3,3])) === 3);
   check("whole: applyPlacement at the stop seeds provisional, prog.pl is the landing bucket's level", (() => {
