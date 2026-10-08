@@ -281,8 +281,8 @@ STATUS 2026-10-08 (wave 1): LIVE italian c1b9950 (rollback f3e2a96), spanish 1ae
 Plan: .cache/briefs/port-plan.md + port-inventory.md (waves; per-site migration proof for the pairs bootstrap + prog.pv). Ported: pairs, freqTiers, glossStyle primary (where glosses carry senses), progressView v2, levelGate 0.7 on known, appView v2 (all tabs), fb41 session estimates, markPassageDone listening credit, slim live-proof policy, test tiers. Japanese also gets the characters set (lag/start 60/ramp, bareByPair, ws boost, levelExam).
 
 NOT ported — content or script-specific; each is its own later project:
-- Grammar patterns + cloze drills (zh: 27 patterns / 177 sentences, patternCue): per-language authoring + naturalness review.
-- Per-compound memory hooks and per-character hint meanings (tools/zh_hint_meanings.json, hand hints): hanzi-specific; ja kanji hooks possible later but packbuilder has no hint source.
+- Grammar patterns + cloze drills (zh: 27 patterns / 177 sentences, patternCue): per-language authoring + naturalness review. The engine rules (patternCue after, note with the verdict only: fb44) are flag-gated and carry over the moment a language ships patterns.json.
+- Per-compound memory hooks and per-character hint meanings (tools/zh_hint_meanings.json, hand hints; fb43 compound-character breakdowns): hanzi-specific generator data; ja kanji hooks possible later but packbuilder has no hint source.
 - Pinyin fade by pair, character ramp, sound-ask boost: only where a script layer is learned separately (ja yes; alphabetic sites have nothing to fade).
 - Hanzi exam rule (levelExam "characters"): needs a character layer; elsewhere known = the word rule.
 - The 15 new HSK 3/4 passages: content; "more stories at higher levels" is a per-language content decision.
