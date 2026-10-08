@@ -2374,10 +2374,20 @@ function updateReadUnlocks(passages, words, pack, prog){
   if(fresh.length){ const st = readState(prog); fresh.forEach(l => { st.unlocked[l.lv] = 1; }); }
   return fresh.map(l => l.lv);
 }
+// pack.placedRead (fb51; owner 2026-10-08: placed at the top level, Read still began at the first level): with prog.pl
+// the unread passages of the placed level come first, then the levels below it from the top down, then the levels above
+// in pack order. Rotation, listening and re-read logic only ever call this for the new-passage pick.
+const placedReadOn = pack => !!(pack && pack.placedRead === true);
 function suggestPassage(passages, words, pack, prog){
   const open = new Set(readingLevels(passages, words, pack, prog).filter(l => l.unlocked).map(l => l.lv));
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
-  return (passages||[]).find(p => open.has(p.lv) && !done[p.id]) || null;
+  const list = passages || [];
+  const ids = levelIds(pack), pi = placedReadOn(pack) && prog.pl != null ? ids.indexOf(String(prog.pl)) : -1;
+  if(pi < 0) return list.find(p => open.has(p.lv) && !done[p.id]) || null;
+  const rank = p => { const i = ids.indexOf(String(p.lv)); return i <= pi ? pi - i : i; };
+  let best = null;
+  list.forEach(p => { if(open.has(p.lv) && !done[p.id] && (!best || rank(p) < rank(best))) best = p; });
+  return best;
 }
 // Today's Read stage (README "Today"). Skipping the stage writes nothing, so the same
 // passage comes back next session.
@@ -4606,7 +4616,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
-  READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
+  READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, placedReadOn, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, etaPlaced, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,

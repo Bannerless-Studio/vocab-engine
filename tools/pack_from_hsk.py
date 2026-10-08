@@ -623,6 +623,8 @@ def main(argv):
         "placementChars": True,
         # Placement stops asking after three empty buckets (docs/PACK_SCHEMA.md "placementEarlyStop"; owner 2026-10-08).
         "placementEarlyStop": True,
+        # A placed learner reads from the placed level (docs/PACK_SCHEMA.md "placedRead"; owner 2026-10-08).
+        "placedRead": True,
         # The next HSK level opens when this share of the previous one is known (docs/PACK_SCHEMA.md "levelGate"; owner 2026-10-07).
         "levelGate": 0.7,
         # What each level's exam asks (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): HSK 1-2 are pinyin papers, HSK 3-4 read hanzi.

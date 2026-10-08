@@ -49,6 +49,7 @@ const FLAG_SINCE = [
   { key: "placementWhole", sha: "c44a6c8", path: ["placementWhole"] },
   { key: "gapGender", sha: "cd94707", path: ["gapGender"] },
   { key: "placementChars", sha: "f75f21f", path: ["placementChars"] },
+  { key: "placedRead", sha: "e4630a5", path: ["placedRead"] },
   { key: "placementEarlyStop", sha: "4c9fab1", path: ["placementEarlyStop"] },
 ];
 
