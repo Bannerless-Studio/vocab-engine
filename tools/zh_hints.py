@@ -28,7 +28,11 @@ first sense of its own entry. tools/zh_hints_overrides.json (each with a reason 
 source) wins over the rules. A character the source lacks, or whose hint has no usable
 parts or runs over MAX_WORDS words, gets null.
 
-Units of two or more characters show no components (owner 2026-10-07: "for multi-character
+A character of a unit of two or more characters that is also a one-character unit shows only its
+meaning there (its breakdown is taught on its own card). Any other character shows
+"<meaning in the word>: <breakdown>", the breakdown from tools/zh_hint_parts.json (owner
+2026-10-07 asked for meanings; the no-breakdown rule was narrowed 2026-10-08, fb43). Meanings:
+(owner 2026-10-07: "for multi-character
 words give meanings of the individual characters"): tools/zh_hint_meanings.json holds the
 per-character meaning that tools/pack_from_hsk.py assembles into each such unit's `hint` list
 (the app prefixes the character). meaning(c) = the first alternative of c's HSK gloss when c is
@@ -55,6 +59,7 @@ SOURCE_SHA256 = "744bb05d5b0742e9ee35c37791f94d56a173349b3367569e7ca11e510364d20
 CACHE = os.path.join(ROOT, ".cache", "makemeahanzi", "dictionary.txt")
 OUT = os.path.join(ROOT, "tools", "zh_hints.json")
 MEANINGS_OUT = os.path.join(ROOT, "tools", "zh_hint_meanings.json")
+PARTS_OUT = os.path.join(ROOT, "tools", "zh_hint_parts.json")
 OVERRIDES = os.path.join(ROOT, "tools", "zh_hints_overrides.json")
 MAX_WORDS = 14
 IDS = set(chr(c) for c in range(0x2FF0, 0x2FFC))
@@ -225,8 +230,9 @@ def other_side(decomp, known):
     return o if isinstance(o, str) and o != "？" else None
 
 
-def compose(c, dic, gloss=None):
-    """The hint for character c, or None. gloss: the HSK gloss of c when c is itself a word."""
+def compose(c, dic, gloss=None, with_m=True):
+    """The hint for character c, or None. gloss: the HSK gloss of c when c is itself a word.
+    with_m False leaves the trailing ": <meaning>" off (the breakdown alone, see build_parts)."""
     d = dic.get(c)
     if not d:
         return None
@@ -266,11 +272,11 @@ def compose(c, dic, gloss=None):
         base = clean_src(src, c, d.get("decomposition"))
         if not base:
             return None
-        out = with_meaning(base, meaning)
+        out = with_meaning(base, meaning if with_m else "")
     else:
         parts = [f"{x} {comp_gloss(x, src, dic)}".strip() for x in leaves(d.get("decomposition"))]
         if kind == "ideographic" and len(parts) >= 2:
-            out = with_meaning(" + ".join(parts), meaning)
+            out = with_meaning(" + ".join(parts), meaning if with_m else "")
         elif kind is None and len(parts) == 2:
             out = " + ".join(parts)
         else:
@@ -346,6 +352,22 @@ def build(words, dic, overrides):
     return table
 
 
+def build_parts(words, dic, overrides):
+    """{character: breakdown without its trailing ": <meaning>"}, for the lines of a compound's
+    characters that have no one-character unit of their own (the meaning there is the sense in
+    that word, so the character's own meaning would repeat or contradict it). An override hint
+    is "<breakdown>: <meaning>", split at its last ": "; a hint with no meaning (pictophonetic,
+    "picture of ...") is its own breakdown."""
+    gloss = {w["w"]: w["en"] for w in words if len(w["w"]) == 1}
+    out = {}
+    for c in table_chars(words):
+        if c in overrides:
+            out[c] = overrides[c].rpartition(": ")[0] or overrides[c]
+        else:
+            out[c] = compose(c, dic, gloss.get(c), with_m=False) if HAN.match(c) else None
+    return out
+
+
 def main(argv):
     args = [a for a in argv if not a.startswith("--")]
     hsk = os.path.abspath(args[0]) if args else os.path.join(os.path.dirname(ROOT), "chinese")
@@ -363,6 +385,9 @@ def main(argv):
     meanings = build_meanings(words, dic, load_meaning_overrides())
     with open(MEANINGS_OUT, "w", encoding="utf-8") as f:
         f.write(json.dumps(meanings, ensure_ascii=False, indent=0, sort_keys=True) + "\n")
+    parts = build_parts(words, dic, load_overrides())
+    with open(PARTS_OUT, "w", encoding="utf-8") as f:
+        f.write(json.dumps(parts, ensure_ascii=False, indent=0, sort_keys=True) + "\n")
     han = [c for c in table if HAN.match(c)]
     missing = [c for c in han if c not in dic]
     hinted = sum(1 for v in table.values() if v)

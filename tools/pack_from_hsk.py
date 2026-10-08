@@ -79,6 +79,7 @@ AMBIENT_N = 100
 PERIPHERAL_SHARE = {"1": 0.10, "2": 0.20, "3": 0.35, "4": 0.45}
 HINTS = os.path.join(ROOT, "tools", "zh_hints.json")
 HINT_MEANINGS = os.path.join(ROOT, "tools", "zh_hint_meanings.json")
+HINT_PARTS = os.path.join(ROOT, "tools", "zh_hint_parts.json")
 PATTERNS_REPORT = os.path.join(ROOT, "docs", "ZH_PATTERNS.md")
 PATTERNS_ATTRIBUTION = {"source": "hand-authored for this pack (chinese repo data/hsk_patterns.js)", "licence": "CC-BY-SA-4.0"}
 ATTRIBUTION = {
@@ -104,7 +105,7 @@ ATTRIBUTION = {
         "licence_text": "LICENSES/LGPL-3.0.txt, with LICENSES/GPL-3.0.txt (LGPL-3.0 is a set of additional permissions on GPL-3.0)",
     },
     "character_hint_overrides": {
-        "source": "tools/zh_hints_overrides.json: 37 hand-written hints restating Make Me a Hanzi entries (24 where it has no usable template, marked as mnemonic when plain); "
+        "source": "tools/zh_hints_overrides.json: 45 hand-written hints restating Make Me a Hanzi entries (32 where it has no usable template, marked as mnemonic when plain); "
                   "气 and 来 also restate English Wiktionary's glyph origin for 气 (pictogram of vapour) and 來 "
                   "(wheat, phonetic loan for 'come')",
         "licence": "CC-BY-SA-4.0 (Wiktionary text); the rest as character_hints",
@@ -268,24 +269,34 @@ def dump(path, data):
         print(f"wrote {os.path.relpath(path, ROOT)}")
 
 
-def attach_hints(units, hints, meanings):
+def attach_hints(units, hints, meanings, parts):
     """Sets each unit's `hint` (one per character of `t`, null where none; omitted when all
     are null). A one-character unit takes the component hint from the zh_hints.py table; a
     unit of two or more takes each character's meaning from tools/zh_hint_meanings.json
-    (the app prefixes the character), with no components; a "compound:char" key (that unit's
+    (the app prefixes the character), followed by ": <breakdown>" from tools/zh_hint_parts.json
+    when the pack has no one-character unit for that character (its breakdown is taught on
+    that unit's card) and the source has a breakdown; a "compound:char" key (that unit's
     `t`) wins over the bare character key. A character a table lacks means the table is stale:
     tools/zh_hints.py reads the same hsk input, so rerun it. A compound key that matches no unit
     fails too (a stale `_meanings` override)."""
-    missing = sorted({c for u in units for c in u["t"] if c not in hints or c not in meanings})
+    missing = sorted({c for u in units for c in u["t"] if c not in hints or c not in meanings or c not in parts})
     if missing:
-        raise SystemExit(f"pack_from_hsk: characters missing from tools/zh_hints.json or zh_hint_meanings.json (run tools/zh_hints.py): {''.join(missing)}")
+        raise SystemExit(f"pack_from_hsk: characters missing from tools/zh_hints.json, zh_hint_meanings.json or zh_hint_parts.json (run tools/zh_hints.py): {''.join(missing)}")
     multi = {u["t"] for u in units if len(u["t"]) > 1}
     stale = sorted(k for k in meanings if ":" in k and k.partition(":")[0] not in multi)
     if stale:
         raise SystemExit(f"pack_from_hsk: zh_hint_meanings.json compound keys match no unit (fix _meanings in tools/zh_hints_overrides.json): {stale[:10]}")
+    single = {u["t"] for u in units if len(u["t"]) == 1}
+
+    def compound_line(t, c):
+        m = meanings.get(f"{t}:{c}") or meanings[c]
+        if c in single or not parts[c]:
+            return m
+        return f"{m}: {parts[c]}" if m else parts[c]
+
     for u in units:
         t = u["t"]
-        h = [meanings.get(f"{t}:{c}") or meanings[c] for c in t] if len(t) > 1 else [hints[c] for c in t]
+        h = [compound_line(t, c) for c in t] if len(t) > 1 else [hints[c] for c in t]
         if any(h):
             u["hint"] = h
         else:
@@ -641,7 +652,7 @@ def main(argv):
             "ft": w["ft"],
         }
         characters.append(unit)
-    attach_hints(characters, hints, json.load(open(HINT_MEANINGS, encoding="utf-8")))
+    attach_hints(characters, hints, json.load(open(HINT_MEANINGS, encoding="utf-8")), json.load(open(HINT_PARTS, encoding="utf-8")))
     # legacy map for the hsk_pinyin -> vocab_zh progress migration (docs/HSK_MERGE.md §4)
     legacy = {
         "w": {w["w"]: w["id"] for w in words},

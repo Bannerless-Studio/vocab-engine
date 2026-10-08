@@ -1053,14 +1053,13 @@ Math.random = mulberry32(20261004);
     const yifu = byT("衣服"), fwy = byT("服务员");
     api.charTeach({ units: [yifu, fwy], index: 0, total: 1 }, { label: "字" }, () => {});
     const c2 = api.html("panel").split('<div class="charteach">').slice(1);
-    const fuLine = (h, m) => new RegExp(`<span class="hc" data-tl[^>]*>服</span> ${m}</span>`).test(h);
+    const fuLine = (h, m) => new RegExp(`<span class="hc" data-tl[^>]*>服</span> ${m}(?::|</span>)`).test(h);
     check("teach screen 衣服 + 服务员: 服 clothes on the first card, 服 to serve on the second", c2.length === 2 && fuLine(c2[0], "clothes") && fuLine(c2[1], "to serve"), c2.join("\n"));
     const sameT = (() => { const m = new Map(); for(const u of CHARACTERS.filter(u => [...u.t].length > 1)) for(const x of VC.unitHints(u)){ const k = VC.hintKey(x); if(m.has(k) && m.get(k).t !== u.t) return [m.get(k), u, x]; m.set(k, u); } return null; })();
     if(sameT){
       api.charTeach({ units: [sameT[0], sameT[1]], index: 0, total: 1 }, { label: "字" }, () => {});
       const c3 = api.html("panel").split('<div class="charteach">').slice(1);
-      const esc = sameT[2].hint.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const re = new RegExp(`<span class="hc" data-tl[^>]*>${sameT[2].c}</span> ${esc}</span>`);
+      const re = { test: h => stripTags(h).includes(`${sameT[2].c} ${sameT[2].hint}`) };
       check(`teach screen ${sameT[0].t} + ${sameT[1].t}: ${sameT[2].c} "${sameT[2].hint}" hinted on the first card only`, re.test(c3[0]) && !re.test(c3[1]), c3.join("\n"));
     } else check("a character + hint text shared by two multi-character units exists", false);
     // Control: the key reduces to the character on any pack whose characters carry one hint text
@@ -1098,15 +1097,28 @@ Math.random = mulberry32(20261004);
     });
     check(`no stimulus or option carries a hint (${n} items, ${stimBad.length} bad${stimBad[0] ? ": " + stimBad.slice(0, 5).join(", ") : ""})`, n === CHARACTERS.length * 4 && stimBad.length === 0);
     check(`every hinted unit's reveal shows each of its hints (${revealMiss.length} missing${revealMiss[0] ? ": " + revealMiss.slice(0, 5).join(", ") : ""})`, revealMiss.length === 0);
-    // fb33: a unit of two or more characters hints each character's own meaning, never components.
+    // fb33: a unit of two or more characters hints each character's meaning in the word (fb43 adds the breakdown for a character with no unit of its own).
     const multi = CHARACTERS.filter(u => [...u.t].length > 1), hintOf = t => byT(t).hint;
     check(`every one of ${CHARACTERS.length} units has a hint`, CHARACTERS.every(u => Array.isArray(u.hint) && u.hint.length === [...u.t].length && u.hint.every(h => typeof h === "string" && h)));
-    // A Han character only inside a bound-morpheme label ("(part of 钥匙 key)", "(with 烦: trouble)"); "(sound qiǎo)" only as a whole transliteration entry.
-    const meaningOnly = h => !/ \+ /.test(h) && (!/[\u3400-\u9fff]/.test(h) || /^\((part of|with) [\u3400-\u9fff]+[ :]/.test(h)) && (!/\(sound/.test(h) || /^\(sound [^()]+\)$/.test(h));
-    const badMulti = multi.filter(u => !u.hint.every(meaningOnly)).map(u => u.t);
-    check(`multi-character units (${multi.length}): entries are meanings, no component breakdown (${badMulti.length} bad${badMulti[0] ? ": " + badMulti.slice(0, 5).join(", ") : ""})`, badMulti.length === 0);
+    // fb43: a compound's character line is "<meaning in the word>" and, when the pack has no one-character unit for that character,
+    // ": <breakdown>" (tools/zh_hint_parts.json); a character that is its own unit keeps the meaning only (its breakdown is on its own card).
+    const meaningsJ = JSON.parse(fs.readFileSync(path.join(ROOT, "tools", "zh_hint_meanings.json"), "utf8")), partsJ = JSON.parse(fs.readFileSync(path.join(ROOT, "tools", "zh_hint_parts.json"), "utf8"));
+    const singles = new Set(CHARACTERS.filter(u => [...u.t].length === 1).map(u => u.t));
+    const expLine = (t, c) => { const m = meaningsJ[`${t}:${c}`] || meaningsJ[c]; return singles.has(c) || !partsJ[c] ? m : (m ? `${m}: ${partsJ[c]}` : partsJ[c]); };
+    const badRule = [], tally = { lines: 0, withBreakdown: 0, ownUnitMeaningOnly: 0, gapMeaningOnly: 0 };
+    for(const u of multi) [...u.t].forEach((c, i) => {
+      tally.lines++;
+      if(u.hint[i] !== expLine(u.t, c)) badRule.push(`${u.t}:${c}`);
+      if(singles.has(c)) tally.ownUnitMeaningOnly++; else if(partsJ[c]) tally.withBreakdown++; else tally.gapMeaningOnly++;
+    });
+    check(`all ${tally.lines} compound character lines follow the rule (${badRule.length} bad${badRule[0] ? ": " + badRule.slice(0, 5).join(", ") : ""})`, tally.lines === 1702 && badRule.length === 0);
+    console.log(`      lines: ${tally.withBreakdown} meaning + breakdown, ${tally.ownUnitMeaningOnly} own unit (meaning only), ${tally.gapMeaningOnly} source gap (meaning only)`);
+    const nonSingle = new Set(multi.flatMap(u => [...u.t]).filter(c => !singles.has(c)));
+    check(`${nonSingle.size} compound characters have no unit of their own; those with a breakdown carry it in every compound (${[...nonSingle].filter(c => !partsJ[c]).length} source gaps)`, nonSingle.size === 708 && [...nonSingle].filter(c => partsJ[c]).every(c => multi.every(u => [...u.t].every((x, i) => x !== c || u.hint[i].endsWith(partsJ[c])))));
+    check("a compound character with no unit of its own shows '<meaning>: <breakdown>' (服 in 衣服 / 服务员), one that is a unit shows the meaning only (我 in 我们, 好 / 吃 in 好吃)",
+      hintOf("衣服")[1] === "clothes: a person 卩 putting on 又 a coat 月" && hintOf("服务员")[0] === "to serve: a person 卩 putting on 又 a coat 月" && JSON.stringify(hintOf("好吃")) === JSON.stringify(["good", "to eat"]) && hintOf("我们")[0] === "I" && !singles.has("服") && singles.has("好") && singles.has("我"));
     // fb33 content pass: the sense each character has in this word (compound:char overrides), suffixes labelled.
-    check("我们 / 以后 / 便宜 / 服务员 / 一会儿 / 衣服 hint each character as it works in the word", JSON.stringify([hintOf("我们"), hintOf("以后"), hintOf("便宜"), hintOf("服务员"), hintOf("一会儿"), hintOf("衣服")]) === JSON.stringify([["I", "(plural)"], ["(limit marker)", "after"], ["cheap (pián)", "(part of 便宜 cheap)"], ["to serve", "duty", "staff"], ["one", "moment", "(suffix)"], ["clothes", "clothes"]]), JSON.stringify([hintOf("以后"), hintOf("便宜"), hintOf("服务员")]));
+    check("我们 / 以后 / 便宜 / 服务员 / 一会儿 / 衣服 hint each character as it works in the word", JSON.stringify([hintOf("我们"), hintOf("以后"), hintOf("便宜"), hintOf("服务员"), hintOf("一会儿"), hintOf("衣服")]) === JSON.stringify([["I", "(plural): 亻 (people) + 门 (sound mén)"], ["(limit marker)", "after"], ["cheap (pián): 亻 man + 更 more", "(part of 便宜 cheap): a memorial service 且 held in a house 宀"], ["to serve: a person 卩 putting on 又 a coat 月", "duty: 夂 to go + 力 strength", "staff: 贝 (money) + 口"], ["one", "moment", "(suffix): picture of a child"], ["clothes: picture of a woman's dress", "clothes: a person 卩 putting on 又 a coat 月"]]), JSON.stringify([hintOf("以后"), hintOf("便宜"), hintOf("服务员")]));
     check("single-character units keep the component breakdown (好 / 以 / 刀)", hao.hint[0] === "a woman 女 with a son 子: good" && /^a left part MMAH leaves out/.test(hintOf("以")[0]) && /^mnemonic/.test(hintOf("刀")[0]));
     // Flag off: the same units without `hint` render exactly as before the field existed.
     const bare = CHARACTERS.map(u => { const v = Object.assign({}, u); delete v.hint; return v; });
