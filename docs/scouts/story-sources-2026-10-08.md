@@ -20,4 +20,4 @@ Verdicts
 - ru: yes, small aligned. Bloom ru 1027 for volume (twin unmeasured); sbc-source 17 clean seed; StoryWeaver 124.
 - ko: yes. StoryWeaver 996 with twin; Bloom 206; sbc-source 29.
 
-Caveats: StoryWeaver licence must be checked per book before shipping; all alignment is page-level, not sentence-level; filter sbc-source CC-BY-NC by the `License:` line; Bloom Parse API is unofficial.
+Caveats: StoryWeaver licence is CC BY 4.0 platform-wide for stories and images per ToS 9A (Read Along/videos CC BY-NC-ND; filter isAudio/isGif=false), per-book text only via the login-gated read API: docs/scouts/storyweaver-licence-2026-10-08.md; all alignment is page-level, not sentence-level; filter sbc-source CC-BY-NC by the `License:` line; Bloom Parse API is unofficial.
