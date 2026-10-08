@@ -291,6 +291,7 @@ NOT ported — content or script-specific; each is its own later project:
 Wave 0 review follow-ups (w35-review 2026-10-08, LOW, not blocking wave 1): pack_flags sibling drift check compares the working tree against the sibling HEAD, not the pre-port sha (flagoff hash still catches drift); port_sim.js has its own withTiers (tie-break rank then input order) instead of enrich's (-rank, id) so the old-core proof skips the shipped tier function; migration [port] "byte-equal after its own save" compares the old core's bootProg output, not the old app.html save path (the per-site browser proof covers it); enrich --check proves idempotence only, a flag later dropped from port_flags would linger in pack.json; sim_app.js / migration_checks.js temp dirs are never cleaned up; script+pairs mixing asserted only on ko/ru/ja, not ar/hi/fa/ur.
 
 ## Backlog (not scheduled)
+- Private engine repo (owner 2026-10-08, deferred): the language repos use the legacy GitHub Pages build, which clones submodules, so a private vocab-engine breaks every deploy (tried 2026-10-08 14:14, reverted 15:24). Route: switch all 14 repos to Pages via an Actions workflow (actions/checkout submodules: false, upload-pages-artifact of the committed index.html + sw.js) and set the Pages source to Actions, then flip visibility.
 - **Video stage** (user 2026-09-25: backlog only): level-graded YouTube
   videos per language with a timed transcript and passage-style questions,
   modelled as a passage with a video id; player hidden and item degraded to a
