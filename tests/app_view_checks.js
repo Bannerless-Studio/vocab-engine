@@ -1006,8 +1006,8 @@ console.log("\n[D2] fb48: placement reads the whole result (pack.placementWhole)
   for(const [sn, mk] of sources){
     // flag on
     const rep = await place(PACK, mk(), RECS["reported record"]);
-    check(`${sn}, flag on, reported record: placement lands past the skipped bucket (${rep.html.match(/Start at ([^<]*)/)[1]})`, rep.prog.placedOnce === true && /<h2>Start at /.test(rep.html));
-    check(`${sn}, flag on, reported record: 10 ok cells with the zero bucket muted, 6 bad cells`, (rep.html.match(/color:var\(--ok\)/g) || []).length === 9 && (rep.html.match(/color:var\(--mute\)/g) || []).length === 1 && (rep.html.match(/color:var\(--bad\)/g) || []).length === 6);
+    check(`${sn}, flag on, reported record: placement lands past the skipped bucket (${rep.html.match(/Start at ([^<]*)/)[1]})`, rep.prog.placedOnce === true && /<h2>Start at HSK 4, set 1\b/.test(rep.html));
+    check(`${sn}, flag on, reported record: 9 ok cells, the zero bucket muted, 6 bad cells`, (rep.html.match(/color:var\(--ok\)/g) || []).length === 9 && (rep.html.match(/color:var\(--mute\)/g) || []).length === 1 && (rep.html.match(/color:var\(--bad\)/g) || []).length === 6);
     const poor = await place(PACK, mk(), RECS["poor"]);
     check(`${sn}, flag on, poor record: no muted cell`, !/var\(--mute\)/.test(poor.html));
     const first0 = await place(PACK, mk(), RECS["first bucket 0"]);
