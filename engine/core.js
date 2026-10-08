@@ -916,6 +916,8 @@ function storageKey(pack){ return `vocab_${pack.key}`; }
 function defaultProg(pack){
   const sets = {}; levelIds(pack).forEach(id=>{ sets[id] = 0; });
   const p = { v:PROG_VERSION, w:{}, s:{}, sets, lessons:{}, sessions:0, theme:null, showPron: pack.showPron !== false, placedOnce:false };
+  // pack.pronUntilPrimer: no stored showPron means the learner never chose, so showPronOn derives the default.
+  if(pack.pronUntilPrimer === true && pack.script) delete p.showPron;
   if(charsConfig(pack)) p.chars = seedCharOrder(defaultCharsProg(), pack); // absent without pack.characters: flag-off shape unchanged
   if(scriptConfig(pack)) p.script = defaultScriptProg(); // absent without pack.script: likewise
   return p;
@@ -3398,6 +3400,20 @@ function nextScriptSets(key, units, pack, prog, n){
 // done = every unit recorded, so a missed review never pulls the stage back into the path.
 // pack.script without units is the primer off everywhere, exactly the flag-off output.
 function scriptActive(pack, units){ return !!scriptConfig(pack) && Array.isArray(units) && units.length > 0; }
+// pack.pronUntilPrimer (docs/PACK_SCHEMA.md "pronUntilPrimer"): the primer is done when it was skipped or every
+// unit of every stage still on has a record (the stage `done` rule); a pack with no active primer never is.
+function pronUntilPrimerOn(pack){ return !!pack && pack.pronUntilPrimer === true && !!scriptConfig(pack); }
+function scriptPrimerDone(pack, units, prog){
+  if(!scriptActive(pack, units)) return false;
+  if(scriptSkipped(prog)) return true;
+  return scriptStages(pack, units, prog).every(st => st.done);
+}
+// A stored showPron is the learner's own choice and always wins; the default is on, and off once the primer is done.
+function showPronOn(pack, units, prog){
+  if(pack.showPron === false) return false;
+  if(prog && prog.showPron !== undefined) return prog.showPron !== false;
+  return !(pronUntilPrimerOn(pack) && scriptPrimerDone(pack, units, prog));
+}
 function scriptStages(pack, units, prog){
   const cfg = scriptConfig(pack); if(!cfg || !scriptActive(pack, units) || scriptSkipped(prog)) return [];
   const recs = scriptRecs(prog);
@@ -4354,7 +4370,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
-  SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
+  pronUntilPrimerOn, scriptPrimerDone, showPronOn, SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
   defaultScriptProg, validateScriptShape, normalizeScriptProg, ensureScript, scriptRecs, scriptSkipped, setScriptSkipped, answerScriptChoice,
   scriptNotice, dismissScriptNotice, markScript, scriptMastered, scriptStageUnits, scriptSets, scriptSetTaught, nextScriptSets, scriptStages,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,

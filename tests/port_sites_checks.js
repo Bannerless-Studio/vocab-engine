@@ -71,6 +71,7 @@ async function site(dirName, code){
     && (code === "ja" ? JSON.stringify(P.levelExam) === JSON.stringify({ [LV[0]]: "pinyin", [LV[1]]: "characters", [LV[2]]: "characters" })
       && P.characters.learn === "lag" && P.characters.start === 60 && JSON.stringify(P.characters.ramp) === "[3,5,8]" && P.characters.bareBy === "typed" && P.characters.bareWords === true && P.characters.bareByPair === true
       : !P.levelExam && !P.characters));
+  check(`${code}: pronUntilPrimer on exactly for script sites (${P.script ? "script" : "no script"}: ${JSON.stringify(P.pronUntilPrimer)}), engine reads it`, P.script ? P.pronUntilPrimer === true && VC.pronUntilPrimerOn(P) : P.pronUntilPrimer === undefined && !VC.pronUntilPrimerOn(P));
   check(`${code}: engine reads pairs, freqTiers, levelGate, progressView, appView as on`, VC.pairsOn(P) && VC.freqTiersOn(P) && VC.levelGateOn(P) && VC.progressViewOn(P) && VC.appViewOn(P));
 
   const val = require("child_process").spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), E.dir], { encoding: "utf8" });

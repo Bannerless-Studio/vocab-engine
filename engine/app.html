@@ -231,6 +231,7 @@
   :root[data-appview="v2"] .rvm .rp,:root[data-appview="v2"] .rvm .rg,:root[data-appview="v2"] .rvm .rvi{color:var(--mute);margin:0}
   :root[data-appview="v2"] .ucue{color:var(--mute);font-size:15px;margin:2px 0 0}
   :root[data-appview="v2"] .rvx{margin-top:8px}
+  :root[data-appview="v2"] .rvtail:not(:empty){margin-top:10px}
   :root[data-appview="v2"] #panel>p.pva:first-child{margin:0 0 12px}
   :root[data-appview="v2"] .plist button{font-family:var(--font)} /* buttons do not inherit the page font */
   :root[data-appview="v2"] .plist .rsc{color:var(--mute);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -510,7 +511,7 @@ const SENT_ALL = PATTERNS_ON ? SENTENCES.concat(PATTERN_LIST.flatMap(p => p.sent
 const SENT_INDEX = new Map(SENT_ALL.map((s,i)=>[s, i]));
 const TYPING = VC.typingEnabled(PACK) && !VC.pronTypingOn(PACK);
 const levelLabel = lv => VC.levelLabel(PACK, lv);
-document.title = PACK.name;
+document.title = PACK.name.replace(/\s*\([^)]*\)\s*$/, "");
 // tw() wraps inline target text in an isolating <bdi> so it never reorders the English or
 // number text around it.
 const DISP = VC.scriptDisplay(PACK);
@@ -867,7 +868,8 @@ const TEACH_PLAY_SVG = speakerSVG(14);
 // Read items autoplay beside shown text: the text stays the stimulus, the button replays.
 const REPLAY_STAGE = `<div class="listen-stage"><button class="replay" id="rpa" aria-label="Replay">${REPLAY_SVG}</button></div>`;
 
-const showPron = () => PACK.showPron !== false && prog.showPron !== false;
+const PRON_UNTIL_PRIMER = VC.pronUntilPrimerOn(PACK);
+const showPron = PRON_UNTIL_PRIMER ? () => VC.showPronOn(PACK, SUNITS, prog) : () => PACK.showPron !== false && prog.showPron !== false;
 const pronOf = x => showPron() ? VC.pronShown(x) : "";
 // pronFirst (core.js displayForm). Off, dispWord returns the written form and every helper
 // below renders exactly the pre-pronFirst markup.
@@ -1106,10 +1108,16 @@ function screenTop(){
   const p = $("panel");
   if(p && typeof p.getBoundingClientRect === "function" && typeof scrollTo === "function" && p.getBoundingClientRect().top < 0) scrollTo(0, 0);
 }
+// v2 drill cards end with this slot for the examples (showReveal); flag off has no slot.
+const rvTail = () => APP_V2 ? '<div class="rvtail" id="rvtail"></div>' : "";
 function showReveal(html){
   const rv = $("rv"); if(!rv) return;
-  rv.innerHTML = html;
-  rv.style.display = html ? "block" : "none";
+  // v2: the examples ride below Next (answer row, Next, examples), so Next never needs a scroll.
+  const tail = APP_V2 ? $("rvtail") : null, cut = tail ? html.indexOf('<div class="rvx">') : -1;
+  if(tail) tail.innerHTML = cut >= 0 ? html.slice(cut) : "";
+  const head = cut >= 0 ? html.slice(0, cut) : html;
+  rv.innerHTML = head;
+  rv.style.display = head ? "block" : "none";
   if(html){ rv.style.opacity = "0"; requestAnimationFrame(()=>{ rv.style.opacity = "1"; }); }
   announce(html);
 }
@@ -1188,7 +1196,7 @@ function firstTimeScore(seen, miss){
 const sentClass = it => APP_V2 && /^[sp]:/.test(it.key || "") ? " sent" : "";
 function renderMcItem(it){
   const P = $("panel");
-  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>`;
+  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>${rvTail()}`;
   if(it.mount) it.mount();
   const opts = rzOrderOf(it) || shuffle(it.opts.slice());
   it.rzShown = opts;
@@ -1250,7 +1258,7 @@ function renderTypeItem(it){
   const P = $("panel");
   P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}
     <input type="text" id="tin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"${it.inputTA !== undefined ? it.inputTA : TA} placeholder="${escapeHtml(it.placeholder || (DISP.rtl ? "type the word" : "type the word…"))}">
-    <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>`;
+    <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>${rvTail()}`;
   if(it.mount) it.mount();
   const input = $("tin"); input.focus();
   let answered = false;

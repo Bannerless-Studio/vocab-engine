@@ -447,7 +447,7 @@ function runItem(api, expr, right){
     const bs = api.el("o").children; (right ? bs.find(b => b.dataset.v === String(it.a)) : bs.find(b => b.dataset.v !== String(it.a))).click();
     r.marks = bs.map(b => [...b._classes].join(" "));
   }
-  r.rv = api.el("rv").innerHTML; r.nx = api.el("nx").style.display; r.score2 = api.el("score").textContent; r.cue = !!it.cueUnit; r.hear = !!(it.onReveal && it.revealHear);
+  r.head = api.el("rv").innerHTML; r.tail = api.el("rvtail") ? api.el("rvtail").innerHTML : ""; r.rv = r.head + r.tail; r.nx = api.el("nx").style.display; r.score2 = api.el("score").textContent; r.cue = !!it.cueUnit; r.hear = !!(it.onReveal && it.revealHear);
   return r;
 }
 async function runKinds(pack, rec, seed, o){
@@ -560,6 +560,13 @@ if(ON){
   check("a word reveal outside the drill (the drill-end Missed box) keeps the row's speaker icon", /<span class="rvi">/.test(ON.rawReveal));
   check("flag off: the centred Replay row as before", /<div class="rvsay"><button type="button" class="replay" id="rvp"/.test(OFFK["recall"].right.rv));
   check("right answer (fb45): the examples open under the row, as on a miss, no Examples button, nothing hidden", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].right.rv) && !/rvxb|\shidden[\s>=]|Examples/.test(ON[n].right.rv)));
+  check("reveal order after any answer (fb45): the answer row stays in #rv, the examples move to the tail under Next", words.every(n => ["right", "wrong"].every(v => { const x = ON[n][v]; return /class="rvrow"/.test(x.head) && !/class="rvx"/.test(x.head) && x.tail.startsWith('<div class="rvx"><div class="sent'); })));
+  { const { api } = await bootWith(PACK, unpaused(), 21, { patterns: true }); api.ev(PICK); runItem(api, "recallItem(__W)", true);
+    const h = api.panel(), pos = id => h.indexOf(`id="${id}"`);
+    check("DOM order: answer row (#rv), then Next (#nx), then the examples tail (#rvtail)", pos("rv") > 0 && pos("rv") < pos("nx") && pos("nx") < pos("rvtail") && api.el("rvtail").innerHTML.includes('class="rvx"') && !api.el("rv").innerHTML.includes('class="rvx"'));
+    check("a missed item's reveal (typed, wrong) keeps the same order", (() => { const r = runItem(api, "typeItem(__W)", false); const g = api.panel(); return !!r && g.indexOf('id="nx"') < g.indexOf('id="rvtail"') && api.el("rvtail").innerHTML.includes('class="rvx"') && !api.el("rv").innerHTML.includes('class="rvx"'); })()); }
+  { const { api } = await bootWith(OFF, unpaused(), 21, { patterns: true }); api.ev(PICK); runItem(api, "recallItem(__W)", true);
+    check("flag off: no rvtail slot, the reveal block as before", !/rvtail/.test(api.panel())); }
   check("wrong answer (and every You typed): the examples open", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].wrong.rv) && !/Examples?:/.test(ON[n].wrong.rv) && !/rvxb/.test(ON[n].wrong.rv)));
   const cued = KINDS.map(([n]) => n).filter(n => ON[n].right.cue || ON[n].wrong.cue);
   const cueOk = v => !v.cue || /<\/div><div class="ucue" aria-label="字 \d\/5"><span data-tl lang="zh">字<\/span> [●○]{5}<\/div>/.test(v.rv) && !/letter-spacing/.test(v.rv) && v.rv.indexOf("ucue") > v.rv.indexOf("rvrow");
@@ -571,7 +578,7 @@ if(ON){
   { const { api: lv } = await bootWith(PACK, unpaused(), 21, { patterns: true }); lv.ev(PICK);
     for(const [what, expr] of [["recall", "recallItem(__W)"], ["meaning MC", "readItem(__W)"]]){
       const r = runItem(lv, expr, true), live = lv.el("live") ? lv.el("live").textContent : null;
-      const rvh = lv.el("rv").innerHTML, ex = (rvh.slice(rvh.indexOf('<div class="rvx">')).match(/<ruby>([^<]+)/) || [])[1] || "";
+      const rvh = lv.el("rv").innerHTML + lv.el("rvtail").innerHTML, ex = (rvh.slice(rvh.indexOf('<div class="rvx">')).match(/<ruby>([^<]+)/) || [])[1] || "";
       check(`${what}: the live region on a right answer has the example text and no "Examples" label (${live === null ? "no live node" : live.length + " chars"})`, !!r && live !== null && live.length > 0 && !/Examples/.test(live) && !!ex && live.includes(ex)); }
   }
 }
@@ -947,6 +954,12 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
       check(`Today Read row under v2 has no ruby / pinyin on the title (${a && a.replace(/<[^>]+>/g, "").slice(0, 30)})`, !!a && !/<ruby|<rt|class="t\d"/.test(a.slice(0, a.indexOf("Start") > 0 ? a.indexOf("Start") : 700)));
       const ph = (await bootWith(PACK, unpaused(), 13)).api.panel();
       check("Today under v2: no ruby tags anywhere in the plan's Read step", !/<ruby/.test(ph.slice(ph.search(/>Read</), ph.search(/>Read</) + 400))); }
+    // 8. the tab title drops a trailing parenthetical (the level range)
+    { for(const [nm, pack] of [["zh pack", PACK], ["a French-named pack", Object.assign({}, PACK, { name: "French (A1–B1)" })]]){
+        const { api } = await bootWith(pack, unpaused(), 13); const t = api.ev("document.title");
+        check(`document.title for the ${nm} has no "(" and no level range ("${t}")`, !/\(/.test(t) && t.length > 0 && !/HSK 1|A1/.test(t)); }
+      const t2 = (await bootWith(Object.assign({}, PACK, { name: "Mandarin (HSK 1–4)" }), unpaused(), 13)).api.ev("document.title");
+      check(`"Mandarin (HSK 1–4)" shows as "Mandarin"`, t2 === "Mandarin"); }
     // 6. flag off byte-identical to the base on 3 records
     if(!oldCore) skip(`${BASE_D} not in this checkout's history`);
     else for(const [name, mk] of [["fresh", freshRec], ["owner export (paused)", () => clone(owner)], ["owner, unpaused copy", unpaused]]){

@@ -62,6 +62,37 @@ def assign_tiers(words, overrides=None, shares=None, ambient_rank=AMBIENT_RANK):
             w["ft"] = overrides[w["id"]]
 
 
+# Every top-level key LanguageSpec.port_flags() has ever been able to emit, and the `characters` sub-keys it merges.
+# --check reads them as port-era: one the spec no longer emits must not linger in a shipped pack.json.
+PORT_KEYS = ("dayAware", "typedFrom", "glossFocus", "glossStyle", "helpClose", "readAnswerBlock", "optsMix", "pauseNew",
+             "listenQuestions", "readRotation", "wordsBy", "progressMap", "pairs", "freqTiers", "progressView", "appView",
+             "levelGate", "levelExam", "pronUntilPrimer")
+PORT_CHARACTERS_KEYS = ("learn", "start", "ramp", "bareBy", "bareWords", "bareByPair")
+
+
+def flag_drift(spec, pack):
+    """Differences between the shipped flag block and the spec's, as lines: a port key missing or with another value,
+    a port-era key the spec no longer emits. eta and every non-port key are not looked at."""
+    want, out = spec.port_flags(), []
+    for k in PORT_KEYS:
+        if k in want:
+            have = pack.get(k, "<absent>")
+            ok = all(isinstance(have, dict) and have.get(sk, "<absent>") == sv for sk, sv in want[k].items()) if isinstance(want[k], dict) else have == want[k]
+            if not ok:
+                out.append(f"{k}: shipped {have!r}, spec {want[k]!r}")
+        elif k in pack:
+            out.append(f"{k}: shipped {pack[k]!r}, the spec no longer emits it")
+    wc = want.get("characters") if isinstance(want.get("characters"), dict) else {}
+    have_c = pack.get("characters") if isinstance(pack.get("characters"), dict) else {}
+    for sk in PORT_CHARACTERS_KEYS:
+        if sk in wc:
+            if have_c.get(sk, "<absent>") != wc[sk]:
+                out.append(f"characters.{sk}: shipped {have_c.get(sk, '<absent>')!r}, spec {wc[sk]!r}")
+        elif sk in have_c:
+            out.append(f"characters.{sk}: shipped {have_c[sk]!r}, the spec no longer emits it")
+    return out
+
+
 def tier_counts(words):
     levels = sorted({w["lv"] for w in words})
     return {lv: [sum(1 for w in words if w["lv"] == lv and w["ft"] == t) for t in (0, 1, 2)] for lv in levels}
@@ -121,6 +152,12 @@ def main(lang, repo, check=False, emit=None):
         parts.append(("characters", "CHARACTERS", units, new_units))
     stale = [stem for stem, _, old, new in parts if old != new]
     if check:
+        drift = flag_drift(spec, pack)
+        if drift:
+            print("enrich --check: the shipped pack.json flag block differs from the spec's port_flags():")
+            for line in drift:
+                print("  " + line)
+            return 1
         if stale:
             print("enrich --check: shipped " + ", ".join(s + ".json" for s in stale) + " differs from the enrich output (run: python3 -m packbuilder enrich --lang %s --repo .)" % lang)
             return 1

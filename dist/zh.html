@@ -231,6 +231,7 @@
   :root[data-appview="v2"] .rvm .rp,:root[data-appview="v2"] .rvm .rg,:root[data-appview="v2"] .rvm .rvi{color:var(--mute);margin:0}
   :root[data-appview="v2"] .ucue{color:var(--mute);font-size:15px;margin:2px 0 0}
   :root[data-appview="v2"] .rvx{margin-top:8px}
+  :root[data-appview="v2"] .rvtail:not(:empty){margin-top:10px}
   :root[data-appview="v2"] #panel>p.pva:first-child{margin:0 0 12px}
   :root[data-appview="v2"] .plist button{font-family:var(--font)} /* buttons do not inherit the page font */
   :root[data-appview="v2"] .plist .rsc{color:var(--mute);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -1375,6 +1376,8 @@ function storageKey(pack){ return `vocab_${pack.key}`; }
 function defaultProg(pack){
   const sets = {}; levelIds(pack).forEach(id=>{ sets[id] = 0; });
   const p = { v:PROG_VERSION, w:{}, s:{}, sets, lessons:{}, sessions:0, theme:null, showPron: pack.showPron !== false, placedOnce:false };
+  // pack.pronUntilPrimer: no stored showPron means the learner never chose, so showPronOn derives the default.
+  if(pack.pronUntilPrimer === true && pack.script) delete p.showPron;
   if(charsConfig(pack)) p.chars = seedCharOrder(defaultCharsProg(), pack); // absent without pack.characters: flag-off shape unchanged
   if(scriptConfig(pack)) p.script = defaultScriptProg(); // absent without pack.script: likewise
   return p;
@@ -3857,6 +3860,20 @@ function nextScriptSets(key, units, pack, prog, n){
 // done = every unit recorded, so a missed review never pulls the stage back into the path.
 // pack.script without units is the primer off everywhere, exactly the flag-off output.
 function scriptActive(pack, units){ return !!scriptConfig(pack) && Array.isArray(units) && units.length > 0; }
+// pack.pronUntilPrimer (docs/PACK_SCHEMA.md "pronUntilPrimer"): the primer is done when it was skipped or every
+// unit of every stage still on has a record (the stage `done` rule); a pack with no active primer never is.
+function pronUntilPrimerOn(pack){ return !!pack && pack.pronUntilPrimer === true && !!scriptConfig(pack); }
+function scriptPrimerDone(pack, units, prog){
+  if(!scriptActive(pack, units)) return false;
+  if(scriptSkipped(prog)) return true;
+  return scriptStages(pack, units, prog).every(st => st.done);
+}
+// A stored showPron is the learner's own choice and always wins; the default is on, and off once the primer is done.
+function showPronOn(pack, units, prog){
+  if(pack.showPron === false) return false;
+  if(prog && prog.showPron !== undefined) return prog.showPron !== false;
+  return !(pronUntilPrimerOn(pack) && scriptPrimerDone(pack, units, prog));
+}
 function scriptStages(pack, units, prog){
   const cfg = scriptConfig(pack); if(!cfg || !scriptActive(pack, units) || scriptSkipped(prog)) return [];
   const recs = scriptRecs(prog);
@@ -4813,7 +4830,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
-  SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
+  pronUntilPrimerOn, scriptPrimerDone, showPronOn, SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
   defaultScriptProg, validateScriptShape, normalizeScriptProg, ensureScript, scriptRecs, scriptSkipped, setScriptSkipped, answerScriptChoice,
   scriptNotice, dismissScriptNotice, markScript, scriptMastered, scriptStageUnits, scriptSets, scriptSetTaught, nextScriptSets, scriptStages,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
@@ -4891,7 +4908,7 @@ const SENT_ALL = PATTERNS_ON ? SENTENCES.concat(PATTERN_LIST.flatMap(p => p.sent
 const SENT_INDEX = new Map(SENT_ALL.map((s,i)=>[s, i]));
 const TYPING = VC.typingEnabled(PACK) && !VC.pronTypingOn(PACK);
 const levelLabel = lv => VC.levelLabel(PACK, lv);
-document.title = PACK.name;
+document.title = PACK.name.replace(/\s*\([^)]*\)\s*$/, "");
 // tw() wraps inline target text in an isolating <bdi> so it never reorders the English or
 // number text around it.
 const DISP = VC.scriptDisplay(PACK);
@@ -5248,7 +5265,8 @@ const TEACH_PLAY_SVG = speakerSVG(14);
 // Read items autoplay beside shown text: the text stays the stimulus, the button replays.
 const REPLAY_STAGE = `<div class="listen-stage"><button class="replay" id="rpa" aria-label="Replay">${REPLAY_SVG}</button></div>`;
 
-const showPron = () => PACK.showPron !== false && prog.showPron !== false;
+const PRON_UNTIL_PRIMER = VC.pronUntilPrimerOn(PACK);
+const showPron = PRON_UNTIL_PRIMER ? () => VC.showPronOn(PACK, SUNITS, prog) : () => PACK.showPron !== false && prog.showPron !== false;
 const pronOf = x => showPron() ? VC.pronShown(x) : "";
 // pronFirst (core.js displayForm). Off, dispWord returns the written form and every helper
 // below renders exactly the pre-pronFirst markup.
@@ -5487,10 +5505,16 @@ function screenTop(){
   const p = $("panel");
   if(p && typeof p.getBoundingClientRect === "function" && typeof scrollTo === "function" && p.getBoundingClientRect().top < 0) scrollTo(0, 0);
 }
+// v2 drill cards end with this slot for the examples (showReveal); flag off has no slot.
+const rvTail = () => APP_V2 ? '<div class="rvtail" id="rvtail"></div>' : "";
 function showReveal(html){
   const rv = $("rv"); if(!rv) return;
-  rv.innerHTML = html;
-  rv.style.display = html ? "block" : "none";
+  // v2: the examples ride below Next (answer row, Next, examples), so Next never needs a scroll.
+  const tail = APP_V2 ? $("rvtail") : null, cut = tail ? html.indexOf('<div class="rvx">') : -1;
+  if(tail) tail.innerHTML = cut >= 0 ? html.slice(cut) : "";
+  const head = cut >= 0 ? html.slice(0, cut) : html;
+  rv.innerHTML = head;
+  rv.style.display = head ? "block" : "none";
   if(html){ rv.style.opacity = "0"; requestAnimationFrame(()=>{ rv.style.opacity = "1"; }); }
   announce(html);
 }
@@ -5569,7 +5593,7 @@ function firstTimeScore(seen, miss){
 const sentClass = it => APP_V2 && /^[sp]:/.test(it.key || "") ? " sent" : "";
 function renderMcItem(it){
   const P = $("panel");
-  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>`;
+  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>${rvTail()}`;
   if(it.mount) it.mount();
   const opts = rzOrderOf(it) || shuffle(it.opts.slice());
   it.rzShown = opts;
@@ -5631,7 +5655,7 @@ function renderTypeItem(it){
   const P = $("panel");
   P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}
     <input type="text" id="tin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"${it.inputTA !== undefined ? it.inputTA : TA} placeholder="${escapeHtml(it.placeholder || (DISP.rtl ? "type the word" : "type the word…"))}">
-    <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>`;
+    <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>${rvTail()}`;
   if(it.mount) it.mount();
   const input = $("tin"); input.focus();
   let answered = false;
@@ -6035,7 +6059,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2611567419-2356342";
+const VE_BUILD = "3119424399-2358164";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -8222,4 +8246,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3440696480-2355666-->
+<!--ve-build:2014892815-2357488-->
