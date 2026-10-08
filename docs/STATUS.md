@@ -128,8 +128,5 @@ STATUS 2026-09-25 16:00: design docs/HSK_MERGE.md; briefs B0–B7 merged on main
 
 STATUS 2026-10-08 fb45: version one merged on main (v2 fixes, Next/examples order, export refusal on a higher progress version, pronUntilPrimer, tab title without level range); checks: flagoff 46/46, app_view 192, export 19, script_app 242, migration 638, port_sites 358/359 (es: local untracked pack/patterns.json makes validate_pack flag a stale sentences.js, not an fb45 defect).
 
-<<<<<<< HEAD
 STATUS 2026-10-08 round-tooling: tools/round/{calibrate_queue,republish}.sh merged (resumable calibration queue, 2 sites x 3 procs; republish --dry-run proven on italian and chinese, tree restored); queue not yet run on real sites.
-=======
 STATUS 2026-10-08 fb48: pack.placementWhole (placement reads the whole result: largest prefix with cumulative accuracy >= 0.75, isolated zero bucket skipped and muted); in port_flags for all sites + zh generator; flag off byte-identical; engine 718, app_view 208, pack_flags 30, flagoff 46, migration 638, export 19, session_resume 125, eta 49, port_sites 359; siblings not rebuilt (enrich --check reports placementWhole drift until each republishes).
->>>>>>> a0c1d7f (fb48: STATUS line)
