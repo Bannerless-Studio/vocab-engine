@@ -81,7 +81,7 @@ Wave 0 review follow-ups (w35-review 2026-10-08, LOW, not blocking wave 1): pack
 
 ## Standing decisions
 
-- Licence: MIT for code, CC BY-SA 4.0 for data; see LICENSE and README "Licence". The Italian build is constrained by it_core_news_sm (CC BY-NC-SA), not the engine.
+- Licence: MIT for code, CC BY-SA 4.0 for data; per-repo map, what binds the choice and how to change it: docs/LICENSING.md. The Italian build is constrained by it_core_news_sm (CC BY-NC-SA), not the engine.
 - Behaviour differences between the engine zh pack and the old hsk trainer (all intentional): docs/ZH_DIFFERENCES.md.
 - Verification: CLAUDE.md "Commands" and "Test tiers" cover it (the old browser-verification note was stale; chinese has been live and proven since 2026-09-30).
 - New log lines go to docs/STATUS.md, not here.
