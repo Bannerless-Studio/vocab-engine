@@ -504,6 +504,87 @@ const ptKey = it => String(it.key).startsWith("p:");
     check(`patternCue absent: two-session walk + Sentences test byte-identical to ${CUE_MAIN} (patterns on; pnote stripped, fb44)`, JSON.stringify(ref) === JSON.stringify(cur) && ref.length >= 7, cur.findIndex((x, i) => x !== ref[i]));
   }
 
+  console.log("\n[13] alphabetic packs (fb47): marks compare case-folded, options in the answer's case, per-sentence near, validator rules");
+  {
+    const sent = (id, t, a, b, near) => Object.assign({ id, t, en: "x", lv: "A1", words: ["w1"], marks: [[a, b]] }, near ? { near } : {});
+    const pat = (id, ss, near) => Object.assign({ id, lv: "A1", label: id, en: id, note: ["a", "b"], sentences: ss.map((x, i) => sent(`${id}.${i}`, ...x)) }, near ? { near } : {});
+    // ayer/antes: three sentences, the first sentence-initial
+    const B = pat("pb", [["Ayer llovió.", 0, 4], ["Antes vivía allí.", 0, 5], ["No lo vi antes.", 9, 14]]);
+    const A = pat("pa", [["Ya he visto esto.", 0, 2], ["Ella ya llegó.", 5, 7], ["Todavía no he comido.", 0, 7]]);
+    const C = pat("pc", [["Mientras tanto, canto.", 0, 8], ["Entonces vendrá.", 0, 8]]);
+    const D = pat("pd", [["Cuando llegues, avisa.", 0, 6], ["Avisa cuando llegues.", 6, 12]]);
+    const ALL = [B, A, C, D], draws = (pp, si, mi, n) => Array.from({ length: n }, () => VC.patternOpts(pp, pp.sentences[si], mi, ALL, mulberry32(Math.floor(Math.random() * 1e9)))).flat();
+    const cap = x => x[0] === x[0].toUpperCase() && x[0] !== x[0].toLowerCase(), fold2 = o => new Set(o.map(x => x.toLowerCase())).size === o.length;
+    const o1 = Array.from({ length: 80 }, (_, k) => VC.patternOpts(B, B.sentences[0], 0, ALL, mulberry32(k)));
+    check("sentence-initial blank \"Ayer\": every option capitalised, Antes offered (own other mark), never ayer/Ayer/antes", o1.every(o => o.length === 3 && o.every(cap)) && o1.some(o => o.includes("Antes")) && o1.flat().every(x => x !== "Ayer" && x !== "antes" && x !== "ayer"));
+    const o2 = Array.from({ length: 80 }, (_, k) => VC.patternOpts(B, B.sentences[2], 0, ALL, mulberry32(k)));
+    check("mid-sentence blank \"antes\": options lowercase (a capitalised source mark is re-cased), \"ayer\" offered, never Antes/Ayer", o2.every(o => o.length === 3 && o.every(x => x === x.toLowerCase())) && o2.some(o => o.includes("ayer")) && o2.flat().every(x => x !== "Antes" && x !== "Ayer"));
+    const oA = Array.from({ length: 80 }, (_, k) => VC.patternOpts(A, A.sentences[2], 0, ALL, mulberry32(k)));
+    check("\"Ya\" and \"ya\" are one word: a pattern with both offers it once, in the answer's case", oA.every(o => o.length === 3 && fold2(o) && o.every(cap)) && oA.some(o => o.includes("Ya")) && oA.flat().every(x => x !== "ya"));
+    check("distractor identity is by word, not surface string: no two options equal after case folding (other patterns' Ya/ya included)", [B, A, C, D].every(pp => pp.sentences.every((sn, si) => Array.from({ length: 40 }, (_, k) => VC.patternOpts(pp, sn, 0, ALL, mulberry32(k))).every(fold2))));
+    const base = draws(C, 1, 0, 200), withNear = (() => { const sn = Object.assign({}, C.sentences[1], { near: ["pd"] }); return Array.from({ length: 200 }, (_, k) => VC.patternOpts(C, sn, 0, ALL, mulberry32(k))).flat(); })();
+    check("per-sentence near: without it the other pattern's marks are offered", base.some(x => ["Cuando", "cuando"].includes(x)) || base.some(x => ["cuando"].includes(x)));
+    check("per-sentence near: with near [pd] on this sentence its marks (cuando) are never offered", withNear.length > 0 && withNear.every(x => x.toLowerCase() !== "cuando"));
+    const sibling = Array.from({ length: 200 }, (_, k) => VC.patternOpts(C, C.sentences[0], 0, ALL, mulberry32(k))).flat();
+    check("per-sentence near affects that sentence only (the pattern's other sentence still offers cuando)", sibling.some(x => x.toLowerCase() === "cuando"));
+    const both = Object.assign({}, C, { near: ["pa"] }), sn2 = Object.assign({}, C.sentences[1], { near: ["pd"] });
+    const merged = Array.from({ length: 300 }, (_, k) => VC.patternOpts(both, sn2, 0, ALL, mulberry32(k))).flat().map(x => x.toLowerCase());
+    check("pattern near and sentence near merge", merged.length > 0 && !merged.includes("cuando") && !merged.includes("ya") && !merged.includes("todavía"));
+    // zh: the same options, in the same order, from the same rng, as main before this branch
+    const B47 = "d1601cd", b47core = git(B47, "engine/core.js");
+    if(!b47core) skip(`${B47} not in this checkout's history`);
+    else {
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "patterns-b47-")), `core_${B47}.js`); fs.writeFileSync(f, b47core); const C47 = require(f);
+      let same = 0, bad = [];
+      PATTERNS.forEach(pp => pp.sentences.forEach(sn => sn.marks.forEach((m, mi) => { for(let k = 0; k < 6; k++){
+        const a = JSON.stringify(C47.patternOpts(pp, sn, mi, PATTERNS, mulberry32(k))), b = JSON.stringify(VC.patternOpts(pp, sn, mi, PATTERNS, mulberry32(k))); if(a === b) same++; else bad.push(sn.id); } })));
+      check(`zh patternOpts identical to ${B47} for every mark of every sentence (${same} draws, same seeds)`, bad.length === 0 && same > 1000, bad.slice(0, 5).join(" "));
+      const walk = async (html, core, prog, seed) => {
+        const api = await boot(PACK, clone(prog), seed, { html, core, patterns: PATTERNS });
+        const out = [api.panel()];
+        for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
+        api.tab("test"); await tick(); const tb = api.el("tSentences"); if(tb){ tb.click(); const D = api.getD(); out.push([D.cur, ...D.q].filter(Boolean).map(x => x.html).join("\n")); }
+        return out;
+      };
+      const rec = [["a learned record", synth(["1", "2"], 2, 4, 5)]];
+      const of = [process.env.PAIRS_OWNER, "/Users/ishmum/.claude/uploads/9e41e879-e4d7-4530-b040-c9be1286edd7/a48ee4d3-vocab_zh_progress_8.json"].find(x => x && fs.existsSync(x));
+      if(of) rec.push(["the owner export", VC.bootProg(fs.readFileSync(of, "utf8"), PACK).prog]);
+      const fresh = VC.bootProg(null, PACK).prog; rec.push(["a fresh record", fresh]);
+      for(const [name, prog] of rec){
+        const ref = await walk(b47html(), C47, prog, 31), cur = await walk(appHtml, VC, prog, 31);
+        const ptItems = cur.filter(x => /What's the missing word|Type the missing word/.test(x)).length;
+        check(`${name}: two-session patterns walk (plans, items, options, Sentences test) byte-identical to ${B47}`, JSON.stringify(ref) === JSON.stringify(cur) && ref.length >= 7, cur.findIndex((x, i) => x !== ref[i]));
+        if(name !== "a fresh record") check(`${name}: the walk reached pattern items`, ptItems > 0, ptItems);
+      }
+      function b47html(){ return git(B47, "engine/app.html"); }
+    }
+    // validator
+    const val = (patterns) => JSON.parse(cp.execFileSync(PY, ["-I", "-c", `import sys, json
+sys.path.insert(0, ${JSON.stringify(path.join(ROOT, "tools"))})
+import validate_pack as v
+d = json.load(sys.stdin); r = v.Report()
+v.check_patterns({"patterns": True, "levels": [{"id": "A1"}]}, d, {"A1"}, {"w1": {"id": "w1", "lv": "A1", "w": "x"}}, r)
+print(json.dumps([r.errors, r.warnings]))`], { input: JSON.stringify(patterns), encoding: "utf8" }));
+    const [e0, w0] = val([B, A, C, D]);
+    check("validator: a clean alphabetic file has no errors and no warnings", e0.length === 0 && w0.length === 0, JSON.stringify([e0, w0]));
+    const withS = (pp, si, extra) => Object.assign({}, pp, { sentences: pp.sentences.map((x, i) => i === si ? Object.assign({}, x, extra) : x) });
+    check("validator: a sentence near with real ids passes", val([withS(B, 0, { near: ["pa", "pc"] }), A, C, D])[0].length === 0);
+    check("validator: a sentence near naming no pattern is an error", /near must list other pattern ids/.test(val([withS(B, 0, { near: ["p99"] }), A, C, D])[0].join("\n")));
+    check("validator: a sentence near naming its own pattern is an error", /near must list other pattern ids/.test(val([withS(B, 0, { near: ["pb"] }), A, C, D])[0].join("\n")));
+    check("validator: a sentence near that is not a list is an error", /near must list other pattern ids/.test(val([withS(B, 0, { near: "pa" }), A, C, D])[0].join("\n")));
+    const A2 = pat("pa2", [["Esto ya pasó.", 5, 7], ["Ya lo vi.", 0, 2]]);
+    const sh = (a, b) => val([a, b]).flat().join("\n");
+    check("validator: two patterns sharing a mark word (ya, Ya) with no near is an error", /patterns pa and pa2 share the mark word 'ya'/.test(sh(A, A2)));
+    check("validator: one-way near is still an error", /share the mark word/.test(sh(A, Object.assign({}, A2, { near: ["pa"] }))));
+    check("validator: each listing the other in near passes", !/share the mark word/.test(sh(Object.assign({}, A, { near: ["pa2"] }), Object.assign({}, A2, { near: ["pa"] }))));
+    check("validator: patterns with distinct mark words are not flagged", !/share the mark word/.test(sh(A, B)));
+    const amb = pat("pe", [["Ya lo vi, ya.", 0, 2], ["Ella ya vio la playa.", 5, 7], ["Ya llegó.", 0, 2]]);
+    const [, wa] = val([amb]);
+    check("validator: a mark word twice in t (whole words) warns, once or inside a longer word does not", wa.length === 1 && /sentences\[0\]: mark word 'ya' occurs more than once/.test(wa[0]), JSON.stringify(wa));
+    const [ez, wz] = val([pat("pz", [["我喜欢就是你就好", 5, 6]])]);
+    check("validator: unspaced scripts are exempt from both rules (zh 就 in two patterns)", ez.length === 0 && wz.length === 0 && !/share/.test(val([pat("pz1", [["我就是", 1, 2]]), pat("pz2", [["他就来", 1, 2]])]).flat().join("")));
+  }
+
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
   process.exit(fails ? 1 : 0);
 })();

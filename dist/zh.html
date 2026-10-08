@@ -2451,15 +2451,27 @@ const patternMarkText = (s, m) => String((s && s.t) || "").slice(m[0], m[1]);
 const patternMarkTexts = p => [...new Set(((p && p.sentences) || []).flatMap(s => (s.marks || []).map(m => patternMarkText(s, m))))];
 // The mark asked in session sn: several marks (虽然 and 但是) take turns by session.
 const patternMarkIndex = (s, sn) => { const n = ((s && s.marks) || []).length; return n ? Math.max(0, sn) % n : 0; };
+// Marks are words: "Ya" opening a sentence and "ya" inside one are the same word, and an option shows
+// in the answer's case (a lowercase option beside a capitalised blank would give the answer away).
+// Scripts without case are untouched.
+const patternFold = t => String(t).toLowerCase();
+function patternCased(t, like){
+  const c = String(like).codePointAt(0), a = c === undefined ? "" : String.fromCodePoint(c), f = String(t).toLowerCase();
+  if(!a || a === a.toLowerCase() || !f) return f;
+  const h = String.fromCodePoint(f.codePointAt(0));
+  return h.toUpperCase() + f.slice(h.length);
+}
 // Wrong choices: the pattern's own other mark texts first (了 vs 过, 才 vs 就), then other patterns'
-// marks of the answer's length, then any. Never the answer, never a mark of a pattern in p.near (an
-// author-listed pattern whose word could also fit the blank, 如果 for 即使).
+// marks of the answer's length, then any. Never the answer, never a mark of a pattern in p.near or in the
+// sentence's own near (an author-listed pattern whose word could also fit the blank, 如果 for 即使).
 function patternOpts(p, s, mi, patterns, rng){
-  const r = rng || Math.random, ans = patternMarkText(s, s.marks[mi]), near = new Set(p.near || []);
-  const own = patternMarkTexts(p).filter(t => t !== ans);
-  const others = [...new Set((patterns || []).filter(q => q.id !== p.id && !near.has(q.id)).flatMap(patternMarkTexts))].filter(t => t !== ans && !own.includes(t));
-  const len = cpLen(ans), out = [];
-  [own, others.filter(t => cpLen(t) === len), others.filter(t => cpLen(t) !== len)].forEach(t => shuffle(t.slice(), r).forEach(x => { if(out.length < 3 && !out.includes(x)) out.push(x); }));
+  const r = rng || Math.random, ans = patternMarkText(s, s.marks[mi]), af = patternFold(ans), near = new Set([...(p.near || []), ...(s.near || [])]);
+  const uniq = ts => { const seen = new Set(); return ts.filter(t => { const f = patternFold(t); if(seen.has(f)) return false; seen.add(f); return true; }); };
+  const own = uniq(patternMarkTexts(p)).filter(t => patternFold(t) !== af);
+  const ownF = new Set(own.map(patternFold));
+  const others = uniq((patterns || []).filter(q => q.id !== p.id && !near.has(q.id)).flatMap(patternMarkTexts)).filter(t => patternFold(t) !== af && !ownF.has(patternFold(t)));
+  const len = cpLen(ans), out = [], outF = new Set();
+  [own, others.filter(t => cpLen(t) === len), others.filter(t => cpLen(t) !== len)].forEach(t => shuffle(t.slice(), r).forEach(x => { if(out.length < 3 && !outF.has(patternFold(x))){ outF.add(patternFold(x)); out.push(patternCased(x, ans)); } }));
   return out;
 }
 // The sentence to ask: one whose words are all learned when there is one, else any.

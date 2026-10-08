@@ -97,6 +97,20 @@ def homograph_table(words, sp):
     return out
 
 
+# Closed-class groups: a token the tagger reads as one of them and the pack holds under another of them
+# is the same word (es relative "que" is tagged PRON, the pack entry is the conjunction).
+FUNCTION_GROUPS = ("CONJ", "PRON", "DET", "ADP", "PART")
+
+
+def function_word_link(lem, g, key_to_id):
+    """Pack word id of lemma lem under a function group other than the tagged g, when there is
+    exactly one such entry; None otherwise. Content groups never cross POS here (cross_pos_link)."""
+    if g not in FUNCTION_GROUPS:
+        return None
+    ids = {key_to_id[(lem, x)] for x in FUNCTION_GROUPS if x != g and key_to_id.get((lem, x))}
+    return next(iter(ids)) if len(ids) == 1 else None
+
+
 def sentence_links(toks, lexicon, key_to_id, allowed, text, groups=None, gender_of=None, epos_to_id=None,
                    lemma_ids=None, en=None, homs=None, st=None, where=None, merged_out=None):
     """Word ids linked by (lemma, POS) in context, or None if the sentence
@@ -203,6 +217,8 @@ def sentence_links(toks, lexicon, key_to_id, allowed, text, groups=None, gender_
                 wid = epos_to_id.get((lem, sp.group_kpos[g][0]))
             if wid is None:
                 wid = sp.cross_pos_link(lexicon, lem, g, key_to_id)    # default None (id: same sense)
+            if wid is None:
+                wid = function_word_link(lem, g, key_to_id)
             if wid and en_words is not None and lem in homs:
                 # several entries for this lemma: the English translation decides
                 # when it names the other entry's sense and not this one's

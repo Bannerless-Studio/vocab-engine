@@ -775,6 +775,35 @@ def check_sentences(sents, levels, by_id, rep, char_word0=None):
 PATTERN_NOTE_MAX = 60
 
 
+def pattern_mark_text(t, m):
+    u = t.encode("utf-16-le")
+    return u[2 * m[0]:2 * m[1]].decode("utf-16-le", "ignore")
+
+
+def pattern_mark_word(t, m):
+    """The mark text lowercased when it is a whole word of space-delimited text (neighbours not
+    letters or digits), else None: a script written without spaces has no word boundary to count."""
+    w = pattern_mark_text(t, m)
+    u = t.encode("utf-16-le")
+    before = u[2 * m[0] - 2:2 * m[0]].decode("utf-16-le", "ignore") if m[0] else ""
+    after = u[2 * m[1]:2 * m[1] + 2].decode("utf-16-le", "ignore")
+    if w != w.strip() or not w or before.isalnum() or after.isalnum() or not all(ch.isalnum() for ch in w.replace("'", "").replace("-", "").replace(" ", "")):
+        return None
+    return w.lower()
+
+
+def pattern_word_spans(t, word):
+    """Offsets of the whole-word occurrences of word in t, case folded."""
+    low = t.lower()
+    out, at = [], low.find(word)
+    while at >= 0:
+        e = at + len(word)
+        if not (at and low[at - 1].isalnum()) and not (e < len(low) and low[e].isalnum()):
+            out.append(at)
+        at = low.find(word, at + 1)
+    return out
+
+
 def check_patterns(pack, patterns, levels, by_id, rep, char_word0=None):
     """patterns.json (optional, with pack.patterns): docs/PACK_SCHEMA.md "patterns". Returns the
     number of pattern sentences."""
@@ -792,6 +821,7 @@ def check_patterns(pack, patterns, levels, by_id, rep, char_word0=None):
     order = {x.get("id"): i for i, x in enumerate(pack.get("levels") or []) if isinstance(x, dict) and x.get("id") in levels}
     ids, prev, n, all_sids = set(), -1, 0, set()
     all_ids = {p.get("id") for p in patterns if isinstance(p, dict)}
+    pat_marks = {}
     for i, p in enumerate(patterns):
         where = f"patterns[{i}]"
         if not isinstance(p, dict) or not is_str(p.get("id")):
@@ -847,6 +877,9 @@ def check_patterns(pack, patterns, levels, by_id, rep, char_word0=None):
                 rep.err(f"{sw}.pron must be a non-empty string when present")
             if s.get("lv") != lv:
                 rep.err(f"{sw}.lv {s.get('lv')!r} must be the pattern's lv {lv!r}")
+            sn = s.get("near", [])
+            if not isinstance(sn, list) or any(not isinstance(q, str) or q not in all_ids or q == p["id"] for q in sn):
+                rep.err(f"{sw}.near must list other pattern ids")
             ws = s.get("words")
             if not isinstance(ws, list) or not ws:
                 rep.err(f"{sw}.words must be a non-empty list of word ids")
@@ -881,6 +914,14 @@ def check_patterns(pack, patterns, levels, by_id, rep, char_word0=None):
                             rep.err(f"{sw}.marks {m!r} covers only whitespace")
                     except UnicodeDecodeError:
                         rep.err(f"{sw}.marks {m!r} splits a surrogate pair")
+            for m in marks if isinstance(marks, list) else ():
+                if not (isinstance(m, list) and len(m) == 2 and all(isinstance(v, int) and not is_bool(v) for v in m) and 0 <= m[0] < m[1] <= u):
+                    continue
+                word = pattern_mark_word(t, m)
+                if word is not None and len(pattern_word_spans(t, word)) > 1:
+                    rep.warn(f"{sw}: mark word {word!r} occurs more than once in t (the blank is ambiguous)")
+                if word is not None:
+                    pat_marks.setdefault(p["id"], set()).add(word)
             if "ruby" in s:
                 check_ruby(s["ruby"], s.get("t"), ws, char_word0, sw, rep, null_ok=True)
                 if isinstance(s["ruby"], list) and isinstance(marks, list):
@@ -888,6 +929,15 @@ def check_patterns(pack, patterns, levels, by_id, rep, char_word0=None):
                     for m in marks:
                         if isinstance(m, list) and len(m) == 2 and (m[0] not in cuts or m[1] not in cuts):
                             rep.err(f"{sw}.marks {m!r} splits a ruby token (the blank would widen to it)")
+    # Space-delimited marks only: a character of an unspaced script plays different words (zh 就 in p12, p15, p23).
+    # A mark word two patterns share would be offered as a wrong choice for the other's blank.
+    near_of = {p["id"]: set(p["near"]) for p in patterns if isinstance(p, dict) and isinstance(p.get("id"), str) and isinstance(p.get("near"), list) and all(isinstance(q, str) for q in p["near"])}
+    pids = [p["id"] for p in patterns if isinstance(p, dict) and isinstance(p.get("id"), str) and p["id"] in pat_marks]
+    for i, a_id in enumerate(pids):
+        for b_id in pids[i + 1:]:
+            both = pat_marks[a_id] & pat_marks[b_id]
+            if both and not (b_id in near_of.get(a_id, ()) and a_id in near_of.get(b_id, ())):
+                rep.err(f"patterns {a_id} and {b_id} share the mark word {sorted(both)[0]!r}: each must list the other in near")
     return n
 
 
