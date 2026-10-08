@@ -616,6 +616,11 @@ function articleAgreement(pack){
 // surface is the blanked text is never a distractor, since it fits literally: する blanked at
 // its form した must not offer 下 (w した).
 // like: an optional preference (pack.optsOneScript); with an article preference both must hold.
+// pack.gapGender (it es fr de; docs/PACK_SCHEMA.md): a gap whose answer word has `g` prefers distractors of
+// the same gender, so "un ____" never offers l'informazione next to un libro. Words without `g`, and a pool
+// with fewer than GAP_GENDER_MIN same-gender candidates, behave as without the flag.
+const GAP_GENDER_MIN = 3;
+function gapGenderOn(pack){ return !!(pack && pack.gapGender === true); }
 function gapChoices(entry, match, pool, pack, like, mix){
   const arts = packArticles(pool);
   const show = e => bareForm(e, arts);
@@ -625,9 +630,13 @@ function gapChoices(entry, match, pool, pack, like, mix){
     const ok = new Set(articleAgreement(pack)[vis] || [vis]);
     prefer = v => citationArticles(v, arts).some(a => ok.has(a));
   }
-  if(like) prefer = prefer ? (p => v => p(v) && like(v))(prefer) : like;
   const blank = match && match.text ? normKey(match.text) : "";
   const fits = v => !!blank && v !== entry && !(v.id != null && v.id === entry.id) && surfaces(v).includes(blank);
+  if(gapGenderOn(pack) && entry && typeof entry.g === "string" && entry.g){
+    const base = prefer, same = base ? v => base(v) && v.g === entry.g : v => v.g === entry.g;
+    if((pool || []).filter(v => v.id !== entry.id && !fits(v) && same(v) && (!like || like(v))).length >= GAP_GENDER_MIN) prefer = same;
+  }
+  if(like) prefer = prefer ? (p => v => p(v) && like(v))(prefer) : like;
   const ds = wordOpts(entry, blank ? (pool || []).filter(v => !fits(v)) : pool, show, pack, prefer, mix);
   const byLabel = {}; [entry, ...ds].forEach(e => { byLabel[show(e)] = e; });
   return { opts: [show(entry), ...ds.map(show)], a: show(entry), byLabel };
@@ -1575,8 +1584,7 @@ function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds, wordCan, ty
       // wordsBy: one typed ask per word per Today session, the miss replay included: recall settles the miss and holds the streak.
       if(k === "type" && seen(it.word) && ks.includes("recall")) k = "recall";
       return k === it.kind ? it : Object.assign({}, it, { kind: k }); }
-    // Script units ("x:") keep their drawn kind: a script miss waits for a draw of its kind.
-    // Route them here before dayAware is set on a script pack (TODO.md).
+    // Script units ("x:") are routed in dayScriptItems / scriptTestPlan, where their renderable kinds are known.
     if(it.unit && CHAR_KINDS.includes(it.kind)){ const k = dayItemKind(prog, pack, today, "c:" + it.unit.id, it.kind, charKinds); return k === it.kind ? it : Object.assign({}, it, { kind: k }); }
     return it;
   });
@@ -1630,10 +1638,24 @@ function dayReviewCands(learned, prog, pack, o, rs){
   return [...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits)),
     ...rs.map(u => ({ t: "x", x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: scfg ? scfg.mastered : SCRIPT_MASTERED, kinds: scfg ? scfg.reviewKinds : [] }))];
 }
-// The script items of a Review without pack.pairs, kinds drawn as there (dayPlanKinds leaves "x:" items on their drawn kind).
-function dayScriptItems(pool, pack, o, r){
-  const scfg = scriptConfig(pack);
-  return pool.filter(c => c.t === "x").map(c => ({ c, kind: pickScriptKind(scfg.reviewKinds, c.x, scfg, r, Object.assign({ units: o.script }, o.scriptCtx || {})) }));
+// The script items of a Review, kinds drawn as without pairs, then routed by dayScriptKind.
+function dayScriptItems(pool, pack, o, r, prog){
+  const scfg = scriptConfig(pack), ctx = Object.assign({ units: o.script }, o.scriptCtx || {});
+  return pool.filter(c => c.t === "x").map(c => { const fit = scriptFitKinds(scfg.reviewKinds, c.x, scfg, ctx);
+    return { c, kind: dayScriptKind(prog, pack, o.today, c.x, pickScriptKind(scfg.reviewKinds, c.x, scfg, r, ctx, fit), fit, scfg, ctx) }; });
+}
+// dayItemKind for a script unit ("x:"), the one place its kind is decided per day (fb46): its kinds are
+// the ones it can be shown in here, plus a pending miss's own kind (a Test miss in a kind the Review
+// does not draw). No script kind is a production kind, so a miss settles only in its own kind: a random
+// draw left 3 of 5 asks of a pending unit unable to settle it on the live script packs (tests/lib/script_day_sim.js).
+// fit: the kinds that fit the unit here (scriptFitKinds).
+function dayScriptKind(prog, pack, today, unit, planned, fit, cfg, ctx){
+  if(!dayAwareOn(pack) || !today || !planned || !isObj(unit)) return planned;
+  const e = dayLog(prog, today).a["x:" + unit.id];
+  if(!isObj(e)) return planned;
+  const ks = fit.slice(), mk = dayPending(e, daySn(prog)) || [];
+  mk.forEach(k => { if(!ks.includes(k) && SCRIPT_KINDS.includes(k) && scriptKindFor(k, unit, cfg, ctx) === k) ks.push(k); });
+  return ks.length ? dayItemKind(prog, pack, today, "x:" + unit.id, planned, ks) : planned;
 }
 function dayReviewPlan(learned, prog, pack, n, o){
   if(pairsOn(pack)) return pairPlan(learned, prog, pack, n, o, dayWordKinds(pack), dayCharKinds(pack), true, pairScriptPre(learned, prog, pack, n, o));
@@ -1651,7 +1673,7 @@ function dayReviewPlan(learned, prog, pack, n, o){
   let wi = 0;
   const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {})
     : c.t === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: c.x }
-    : { kind: dayScriptItems([c], pack, o, r)[0].kind, unit: c.x });
+    : { kind: dayScriptItems([c], pack, o, r, prog)[0].kind, unit: c.x });
   return hearableKinds(dayPlanKinds(applyMissedKinds(plan.filter(it => it.kind), prog, pack, false, o), prog, pack, o.today, wk, ck, wc, o.typedUnits, o.typedOk, o.typedSeen), o.canHear);
 }
 function dayRecallPlan(learned, prog, pack, n, o){
@@ -1877,7 +1899,7 @@ function pairScriptPre(learned, prog, pack, n, o){
   const rs = recordedScriptUnits(o.script, prog, pack); if(!rs.length) return [];
   const cands = dayHeldMark(dayReviewCands(learned, prog, pack, o, rs), prog, pack, o);
   const pool = dayPick(cands, n, dayLog(prog, o.today), o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined, undefined, wordsTypedOn(pack) ? DAY_HELD_SHARE_REVIEW : undefined);
-  return dayScriptItems(pool, pack, o, o.rng || Math.random).filter(e => e.kind);
+  return dayScriptItems(pool, pack, o, o.rng || Math.random, prog).filter(e => e.kind);
 }
 // Review and Recall under pack.pairs. o.extra (pauseNew) is ignored: a paused Review stays at n items.
 // sx: pairScriptPre's script items, taken first.
@@ -2394,9 +2416,16 @@ function applyWeakWords(prog, entries, words, pack){
 // earned (the goal position's passage share fell .87 -> .57, fb41). Without it l marks "latest pass was a listen"
 // and readPassMode alternates on it, so those packs keep the replaced record.
 // pack.readRotation adds s (session of the latest pass) and ls (of the latest listening pass).
-function markPassageDone(prog, pid, sc, n, d, listen, pack){
+// t (fb46, progressView v2 only): whole seconds from opening the passage to its results, the LATEST reading pass only
+// (a listen pass, or a reading pass that ran over READ_MAX_S or was hidden over READ_HIDE_MAX_MS, keeps the previous t:
+// all ported packs alternate read/listen, so dropping it would make the Reading row vanish as listen passes land).
+function markPassageDone(prog, pid, sc, n, d, listen, pack, t){
   const st = readState(prog); const prev = st.done[pid];
   st.done[pid] = { sc, n, d: String(d), x: ((prev && prev.x) || 0) + 1 };
+  if(progressViewOn(pack)){
+    if(!listen && typeof t === "number" && t > 0) st.done[pid].t = Math.round(t);
+    else if(prev && typeof prev.t === "number") st.done[pid].t = prev.t;
+  }
   if(listen || (prev && prev.l && readRotationOn(pack))) st.done[pid].l = 1;
   if(readRotationOn(pack)){
     const sn = daySn(prog);
@@ -2620,6 +2649,29 @@ function readingStats(passages, pack, prog){
     return { lv, total: ps.length, done: d.length, avg: pct.length ? Math.round(pct.reduce((a,b)=>a+b,0) / pct.length) : null };
   }).filter(r => r.total > 0);
 }
+// Reading speed (fb46): median over the passages with a stored t, shown after READ_ROW_MIN of them. A passage with no spaces
+// to speak of (zh, ja) counts letters, so the row says characters; others count whitespace-separated words.
+const READ_MAX_S = 1200, READ_HIDE_MAX_MS = 120000, READ_ROW_MIN = 3;
+function readTimeKeep(secs, hiddenMs){ return secs > 0 && secs <= READ_MAX_S && !(hiddenMs > READ_HIDE_MAX_MS); }
+function passageUnits(p, pack){
+  const text = String((p && p.text) || "");
+  if(pack && pack.spaced === false) return { n: [...text].filter(ch => /[\p{L}\p{N}]/u.test(ch)).length, unit: "characters" };
+  return { n: text.split(/\s+/).filter(Boolean).length, unit: "words" };
+}
+function readingSpeed(passages, pack, prog){
+  if(!progressViewOn(pack) || !isObj(prog) || !isObj(prog.read) || !isObj(prog.read.done)) return null;
+  const rates = []; let unit = "words";
+  for(const p of passages || []){
+    const r = prog.read.done[p.id];
+    if(!r || typeof r.t !== "number" || !(r.t > 0)) continue;
+    const u = passageUnits(p, pack); if(!(u.n > 0)) continue;
+    unit = u.unit; rates.push(u.n * 60 / r.t);
+  }
+  if(rates.length < READ_ROW_MIN) return null;
+  rates.sort((a, b) => a - b);
+  const m = rates.length >> 1, med = rates.length % 2 ? rates[m] : (rates[m - 1] + rates[m]) / 2;
+  return { n: rates.length, rate: Math.max(1, Math.round(med)), unit };
+}
 function validateReadShape(r){
   if(!isObj(r)) return "read must be an object";
   if(r.unlocked !== undefined){
@@ -2631,7 +2683,7 @@ function validateReadShape(r){
     for(const k of Object.keys(r.done)){
       const p = r.done[k];
       if(!isObj(p)) return `read.done.${k} must be an object`;
-      for(const f of ["sc","n","x","l","s","ls"]) if(p[f] !== undefined && typeof p[f] !== "number") return `read.done.${k}.${f} must be a number`;
+      for(const f of ["sc","n","x","l","s","ls","t"]) if(p[f] !== undefined && typeof p[f] !== "number") return `read.done.${k}.${f} must be a number`;
       if(p.d !== undefined && typeof p.d !== "string") return `read.done.${k}.d must be a string`;
     }
   }
@@ -3494,8 +3546,9 @@ function scriptKindFor(kind, unit, cfg, ctx){
   const k = kind === "wordHear" && ((cfg && !cfg.tts) || (isObj(ctx) && ctx.tts === false)) && !exRecorded(unit, byId) ? "wordRead" : kind;
   return scriptKindFits(k, unit, ctx) ? k : null;
 }
-function pickScriptKind(kinds, unit, cfg, rng, ctx){
-  const fit = [...new Set((kinds || []).map(k => scriptKindFor(k, unit, cfg, ctx)).filter(Boolean))];
+const scriptFitKinds = (kinds, unit, cfg, ctx) => [...new Set((kinds || []).map(k => scriptKindFor(k, unit, cfg, ctx)).filter(Boolean))];
+function pickScriptKind(kinds, unit, cfg, rng, ctx, fitKinds){
+  const fit = fitKinds || scriptFitKinds(kinds, unit, cfg, ctx);
   if(fit.length) return fit[Math.floor((rng || Math.random)() * fit.length)];
   return ["wordRead","symSound","formMatch"].find(k => scriptKindFits(k, unit, ctx)) || null;
 }
@@ -3750,7 +3803,7 @@ function scriptTestPlan(units, prog, pack, n, rng, ctx){
   rec.forEach(unit => {
     const w = {}; Object.keys(cfg.testKinds).forEach(k => { const f = scriptKindFor(k, unit, cfg, kctx); if(f) w[f] = (w[f] || 0) + cfg.testKinds[k]; });
     const kind = Object.keys(w).length ? pickWeighted(w, rng) : pickScriptKind(cfg.reviewKinds, unit, cfg, rng, kctx);
-    if(kind) out.push({ kind, unit });
+    if(kind) out.push({ kind: today ? dayScriptKind(prog, pack, today, unit, kind, scriptFitKinds(Object.keys(cfg.testKinds), unit, cfg, kctx), cfg, kctx) : kind, unit });
   });
   return out;
 }
@@ -4372,7 +4425,7 @@ function migrateLegacy(pack, legacyMap, oldRecord){
 // ------------------------------------------------------------------ export
 const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   levelIds, levelIndexMap, levelLabel, setSizeOf, wordsByLevel, nSets,
-  synIds, isSyn, typedSynHit, meaningOpts, wordOpts, gapOpts, sentenceOpts, bareForm, packArticles, articleCut, trailingCut, citationArticles, articleAgreement, visibleArticle, gapChoices, exampleSentences, unitExampleSentences, rubyCovers, highlightParts, searchWords, pronShown, audioSlot, TEST_MIN_WORDS, TEST_MIN_SENTENCES,
+  synIds, isSyn, typedSynHit, meaningOpts, wordOpts, gapOpts, sentenceOpts, bareForm, packArticles, articleCut, trailingCut, citationArticles, articleAgreement, visibleArticle, gapGenderOn, GAP_GENDER_MIN, gapChoices, exampleSentences, unitExampleSentences, rubyCovers, highlightParts, searchWords, pronShown, audioSlot, TEST_MIN_WORDS, TEST_MIN_SENTENCES,
   targetLang, fontFamilyOf, fontStackOf, lineHeightOf, fontsHref, scriptDisplay, rtlRuns,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,
@@ -4388,7 +4441,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, etaPlaced, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, etaPlaced, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,

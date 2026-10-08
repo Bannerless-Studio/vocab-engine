@@ -181,6 +181,8 @@ class LanguageSpec:
     ]
     port_level_gate = 0.7
 
+    emit_gender = False                 # words.json `g` on nouns whose gender the lexicon knows (it es fr de; pack.gapGender)
+
     def port_flags(self):
         ids = [b[0] for b in self.bands]
         flags = {
@@ -191,6 +193,8 @@ class LanguageSpec:
             "pairs": True, "freqTiers": True, "progressView": "v2", "appView": "v2", "levelGate": self.port_level_gate,
             "placementWhole": True,
         }
+        if self.emit_gender:
+            flags["gapGender"] = True
         if self.port_characters:
             flags["characters"] = {"learn": "lag", "start": 60, "ramp": [3, 5, 8], "bareBy": "typed", "bareWords": True, "bareByPair": True}
             flags["levelExam"] = {ids[0]: "pinyin", ids[1]: "characters", ids[2]: "characters"}

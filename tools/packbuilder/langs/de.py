@@ -182,6 +182,7 @@ class German(LanguageSpec):
     name_en = "German"
     pack_name = "German (A1–B1)"
     tts = "de-DE"
+    emit_gender = True
     stt = "de-DE"
     tatoeba_code = "deu"
 

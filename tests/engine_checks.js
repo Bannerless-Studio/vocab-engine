@@ -1218,6 +1218,35 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("agreement fallback: 'lo ____' with no other lo-noun still gets 3 distractors", lo.m.article === "lo" && lo.out.every(ds => ds.length === 3));
   const none = run(BY.mela, "Mela!");
   check("no visible article -> article '' and 3 distractors", none.m && none.m.article === "" && none.out.every(ds => ds.length === 3));
+  // pack.gapGender: same-gender distractors for an answer with `g` (fallback below GAP_GENDER_MIN same-gender candidates).
+  {
+    const gmap = { mela:"f", casa:"f", sedia:"f", porta:"f", strada:"f", conto:"m", gior:"m", libro:"m", treno:"m", cane:"m", amico:"m", acqua:"f", isola:"f", uovo:"m", zaino:"m" };
+    const withG = list => list.map(w => gmap[w.id] ? Object.assign({}, w, { g: gmap[w.id] }) : w);
+    const extra = [mk("info", "l'informazione", "information"), mk("ora", "l'ora", "hour")];
+    const WG = withG([...W, ...extra]).map(w => w.id === "info" || w.id === "ora" ? Object.assign({}, w, { g: "f" }) : w);
+    const BG = {}; WG.forEach(w => { BG[w.id] = w; }); const AG = VC.packArticles(WG);
+    const ON = Object.assign({}, IT, { gapGender: true });
+    const draw = (pool, by, entry, text, pack, n) => { const s = { id: "x", t: text, en: "x", lv: "A1", words: [entry.id] }; const m = VC.gapMatch(s, entry, by, pack);
+      const out = []; for(let i = 0; i < (n || 80); i++){ const gc = VC.gapChoices(entry, m, pool, pack); out.push(gc.opts.slice(1).map(o => gc.byLabel[o])); } return { m, out }; };
+    const fOn = draw(WG, BG, BG.info, "Ho un'informazione.", ON), fOff = draw(WG, BG, BG.info, "Ho un'informazione.", IT);
+    check("gapGender: 'un'____' answer l'informazione (f) -> every distractor feminine (acqua, isola, ora), 80 draws", fOn.m && fOn.m.article === "un'" && fOn.out.every(ds => ds.length === 3 && ds.every(v => v.g === "f" && VC.citationArticles(v, AG).includes("l'"))));
+    check("gapGender: flag off, the same gap still offers masculine l'-nouns (the defect)", fOff.out.some(ds => ds.some(v => v.g === "m")));
+    const mOn = draw(WG, BG, BG.libro, "Ho un libro.", ON);
+    check("gapGender: 'un ____' answer libro (m) -> masculine il/lo/l'-nouns only", mOn.m.article === "un" && mOn.out.every(ds => ds.length === 3 && ds.every(v => v.g === "m")));
+    const noOra = WG.filter(w => w.id !== "ora"), BN = {}; noOra.forEach(w => { BN[w.id] = w; });
+    const fb = draw(noOra, BN, BN.info, "Ho un'informazione.", ON);
+    check("gapGender fallback: only 2 other feminine l'-nouns (< 3) -> 3 article-agreeing distractors as without the flag, masculine ones included", fb.out.every(ds => ds.length === 3 && ds.every(v => VC.citationArticles(v, VC.packArticles(noOra)).includes("l'"))) && fb.out.some(ds => ds.some(v => v.g === "m")));
+    const fitW = Object.assign(mk("ora2", "l'ora2", "hour two"), { g: "f", alt: ["informazione"] });
+    const withFit = [...noOra, fitW], BF = {}; withFit.forEach(w => { BF[w.id] = w; });
+    const fitDraw = draw(withFit, BF, BF.info, "Ho un'informazione.", ON);
+    check("gapGender L3: a same-gender word whose surface is the blank does not count toward the 3 minimum (2 usable -> fallback, masculine l'-nouns allowed)", fitDraw.out.every(ds => ds.length === 3 && ds.every(v => v.id !== "ora2")) && fitDraw.out.some(ds => ds.some(v => v.g === "m")));
+    const seeded = f => { const r = Math.random; let a = 12345; Math.random = () => { a = (a * 1664525 + 1013904223) >>> 0; return a / 4294967296; }; try { return f(); } finally { Math.random = r; } };
+    const sig = (pack, pool, by, entry, text) => seeded(() => JSON.stringify(draw(pool, by, entry, text, pack, 40).out.map(ds => ds.map(v => v.id))));
+    const W0 = [...W, ...extra].map(w => Object.assign({}, w)); const B0 = {}; W0.forEach(w => { B0[w.id] = w; });
+    check("gapGender: words without g (no field) draw byte-identically with the flag on and off", sig(ON, W0, B0, B0.info, "Ho un'informazione.") === sig(IT, W0, B0, B0.info, "Ho un'informazione.") && sig(ON, W0, B0, B0.libro, "Ho un libro.") === sig(IT, W0, B0, B0.libro, "Ho un libro."));
+    check("gapGender: answer with g but the flag off -> byte-identical to words without g", sig(IT, WG, BG, BG.info, "Ho un'informazione.") === sig(IT, W0, B0, B0.info, "Ho un'informazione.") && sig(IT, WG, BG, BG.libro, "Ho un libro.") === sig(IT, W0, B0, B0.libro, "Ho un libro."));
+    check("gapGender: pack.gapGender must be exactly true (\"yes\" is off)", !VC.gapGenderOn(Object.assign({}, IT, { gapGender: "yes" })) && VC.gapGenderOn(ON) && !VC.gapGenderOn(IT));
+  }
   // German case forms via the default table (de): den -> masculine citation (der).
   const DE = { tts:"de-DE", levels:[{id:"A1",label:"A1"}], functionWords:["der"], spaced:true };
   const G = [{ id:"der", w:"der", en:"the", lv:"A1", pos:"art", alt:["die","das","den","dem","des"] },
@@ -1753,6 +1782,39 @@ return {
     check("voice probe: empty voice list -> no throw, page renders Today", document.getElementById("htitle").textContent === "Today");
     check("voice probe: empty voice list -> hasSpeech true", api.getHasSpeech() === true);
   }catch(e){ check(`voice probe (empty voice list) does not throw (got: ${e.message})`, false); }
+
+  // (d) late voice list (fb46): an empty list reads as "a voice is there", so a hear item built before the
+  // list arrives asks for audio. voiceschanged re-runs the probe: a list without the pack's language turns the
+  // unanswered hear items, the one on screen included, into read items with the no-voice notice; a list with
+  // the voice leaves them hear items (nothing re-rendered, nothing restarted).
+  try{
+    const NOTICE = "no text-to-speech voice";
+    const b = await bootApp([]); const r0 = b.api.getRenderCalls();
+    check("late voices: empty list at boot -> optimistic (hasSpeech true), no notice on Today", b.api.getHasSpeech() === true && !b.api.getHtml("panel").includes(NOTICE));
+    const hearA = b.api.hearItem(WORDS[5]), hearB = b.api.hearItem(WORDS[6]);
+    check("late voices: hear items built on the empty list are hear items (not flagged needsNotice)", !hearA.needsNotice && !hearB.needsNotice);
+    b.api.setQueueAndNext([hearA, hearB], () => {});
+    const hearHtml = b.api.getHtml("panel");
+    check("late voices: the hear item on screen shows no notice", !hearHtml.includes(NOTICE));
+    b.ss.getVoices = () => [{ lang: "en-US", name: "x" }]; b.ss.onvoiceschanged();
+    const afterHtml = b.api.getHtml("panel");
+    check("late voices: the list arrives without the pack's language -> hasSpeech false", b.api.getHasSpeech() === false);
+    check("late voices: the item on screen is now the read item with the no-voice notice (same drill, not Today)", afterHtml.includes(NOTICE) && afterHtml !== hearHtml && /id="o"/.test(afterHtml) && b.api.getRenderCalls() === r0);
+    b.document.getElementById("o").children[0].click(); b.document.getElementById("nx").click();
+    const nextHtml = b.api.getHtml("panel");
+    check("late voices: the queued hear item was turned into a read item too (no second notice, an item shown)", /id="o"/.test(nextHtml) && !nextHtml.includes(NOTICE) && nextHtml !== afterHtml);
+    const c = await bootApp([]);
+    c.api.today(); const cr = c.api.getRenderCalls();
+    c.ss.getVoices = () => [{ lang: "en-US", name: "x" }]; c.ss.onvoiceschanged();
+    check("late voices: Today re-renders when the list arrives without the pack's language", c.api.getHasSpeech() === false && c.api.getRenderCalls() === cr + 1);
+    c.ss.getVoices = () => [{ lang: "en-US", name: "x" }, { lang: "zh-CN", name: "z" }]; c.ss.onvoiceschanged();
+    check("late voices: a later list with the voice flips hasSpeech back to true", c.api.getHasSpeech() === true);
+    const d = await bootApp([]); const hearC = d.api.hearItem(WORDS[7]); d.api.setQueueAndNext([hearC], () => {}); const h0 = d.api.getHtml("panel"), dr = d.api.getRenderCalls();
+    d.ss.getVoices = () => [{ lang: "zh-CN", name: "z" }]; d.ss.onvoiceschanged();
+    check("late voices: the list arrives with the voice -> the hear item on screen is left as it is", d.api.getHasSpeech() === true && d.api.getHtml("panel") === h0 && d.api.getRenderCalls() === dr);
+    const e = await bootApp([]); e.ss.getVoices = () => []; e.ss.onvoiceschanged();
+    check("late voices: an event that still lists nothing keeps the optimistic read (hasSpeech true)", e.api.getHasSpeech() === true);
+  }catch(e){ check(`late voice list scenario does not throw (got: ${e.stack})`, false); }
 
   // Boot gating: a voice-probe re-render must not run before boot has rendered once
   // (prog isn't loaded yet — a pre-boot render could refreshReadUnlocks() -> store.save()

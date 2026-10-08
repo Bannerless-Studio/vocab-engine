@@ -47,6 +47,7 @@ const FLAG_SINCE = [
   { key: "eta", sha: "77e046a", path: ["eta"] },
   { key: "pronUntilPrimer", sha: "a6f2cc5", path: ["pronUntilPrimer"] },
   { key: "placementWhole", sha: "c44a6c8", path: ["placementWhole"] },
+  { key: "gapGender", sha: "cd94707", path: ["gapGender"] },
 ];
 
 const byKey = new Map(FLAG_SINCE.map(f => [f.key, f]));

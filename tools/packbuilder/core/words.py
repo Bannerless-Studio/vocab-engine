@@ -515,6 +515,7 @@ def build_words(env, ctx):
         lem, g = rec["lemma"], rec["group"]
         w, alt, en = lem, None, rec["en"]
         gender = None
+        gout = None       # `g`: the lexicon's gender, "p" for a plural-only noun (sp.emit_gender)
         pos = GROUP_LABEL.get(g, rec.get("pos", "other"))
         if g == "PHRASE":
             pos = "phrase"
@@ -525,6 +526,7 @@ def build_words(env, ctx):
             pos = "art"
         elif g == "NOUN" and lem not in sp.no_article:
             gender, plural = sp.parse_gender(rec["gender"])
+            lex_gender = gender
             mc = morph.get(k, Counter())
             if gender is None:
                 gm, gf = mc["Gender=Masc"], mc["Gender=Fem"]
@@ -532,6 +534,8 @@ def build_words(env, ctx):
             # plural articles only for dictionary plural-only heads and the
             # pluralia tantum list; corpus plural majorities are not evidence
             plural = plural or lem in sp.pluralia_tantum
+            if sp.emit_gender:
+                gout = gender_code(lex_gender, plural)
             w, en = sp.noun_display(lem, gender, plural, en)
             if w != lem:
                 alt = [lem]
@@ -543,6 +547,8 @@ def build_words(env, ctx):
         word = {"lemma": lem, "w": w, "pos": pos, "en": en, "lv": level_of[k], "rank": rank_of[k]}
         if alt:
             word["alt"] = alt
+        if gout:
+            word["g"] = gout
         word["_key"] = k
         if rec.get("display"):
             word["_base"] = (rec["lemma"], rec["base_en"])
@@ -563,6 +569,12 @@ def build_words(env, ctx):
         if len(top3000) >= 3000:
             break
     return words, records, top3000
+
+
+def gender_code(lex_gender, plural):
+    """words.json `g`: the lexicon's single gender (m, f, n), "p" for a plural-only noun, else None
+    ("mf", or a gender only the corpus or the spec default supplied, is not known)."""
+    return "p" if plural else lex_gender if lex_gender in ("m", "f", "n") else None
 
 
 def override_key(lem, g):

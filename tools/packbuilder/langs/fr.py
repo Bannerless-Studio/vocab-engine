@@ -285,6 +285,7 @@ class French(LanguageSpec):
     name_en = "French"
     pack_name = "French (A1–B1)"
     tts = "fr-FR"
+    emit_gender = True
     stt = "fr-FR"
     tatoeba_code = "fra"
 

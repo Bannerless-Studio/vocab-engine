@@ -751,6 +751,34 @@ function missesCarried(drilled0){
     const on = res["typed only (as shipped)"], off = res["choice credit (bareBy off)"];
     check(`typed week (${NW}/${NU}, ${perDay}/day): typed only reaches bare at least as often as choice credit (${on.reached}/${on.n} vs ${off.reached}/${off.n}; ${on.typedU} typed answers on them)`, on.n > 0 && on.reached >= off.reached);
   }
+  // fb46: script units ("x:") routed through dayItemKind (core-level sim, tests/lib/script_day_sim.js). Control: main before fb46.
+  {
+    console.log("\n[script x:] 14 Today Review sessions of a script primer (12 items, 85% right): asks of a pending miss that cannot settle it");
+    const { runScriptDay } = require("./lib/script_day_sim.js");
+    let BASE = null;
+    try {
+      const os = require("os"), cp = require("child_process");
+      const src = cp.execSync(`git -C "${ROOT}" show 38e071e:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "daysim-x-")), "core_38e071e.js"); fs.writeFileSync(f, src); BASE = require(f);
+    } catch(e){ BASE = null; }
+    const repos = process.env.LANG_REPOS_DIR || path.join(ROOT, "..");
+    const sib = lang => { const d = path.join(repos, lang, "pack"), f = n => path.join(d, n + ".js");
+      if(![f("pack"), f("words"), f("script")].every(x => fs.existsSync(x))) return null;
+      return { name: lang, pack: loadConst(f("pack"), "PACK"), words: loadConst(f("words"), "WORDS"), script: loadConst(f("script"), "SCRIPT") }; };
+    const FX = require("./fixtures/script_packs.js");
+    const fxs = [Object.assign({ name: "fa fixture" }, FX.fa()), ...["persian", "arabic", "urdu", "hindi"].map(sib).filter(Boolean)];
+    for(const fx of fxs) for(const shape of ["pairs", "plain"]){
+      const now = runScriptDay(fx, shape), old = BASE ? runScriptDay(fx, shape, { core: BASE }) : null;
+      console.log(`  ${fx.name} ${shape}: dead ${now.dead}/${now.pendingAsks} pending asks, settle in ${now.meanToSettle} sessions (max ${now.maxToSettle}); before: ${old ? `dead ${old.dead}/${old.pendingAsks}, max ${old.maxToSettle}` : "n/a"}`);
+      check(`${fx.name} ${shape}: a pending script miss is only asked in a kind that settles it (dead ${now.dead}/${now.pendingAsks}), settled within 5 sessions (max ${now.maxToSettle})`, now.pendingAsks > 0 && now.dead === 0 && now.maxToSettle <= 5 && now.settled > 0);
+      if(old) check(`${fx.name} ${shape}: control, main before fb46 leaves pending misses unsettleable asks (dead ${old.dead}/${old.pendingAsks})`, fx.name === "fa fixture" || old.dead > 0);
+    }
+    // dayAware off: the kinds are the drawn ones, nothing logged is read.
+    const fa = fxs[0], off = (core) => { const pk = Object.assign({}, fa.pack, { dayAware: false }); delete pk.pairs; const p = core.defaultProg(pk); p.script.skipped = false; p.script.choiceSeen = true;
+      fa.script.units.forEach(u => { p.script.u[u.id] = { r: 2, w: 0, s: 1, u: 1, t: 20000 }; });
+      return JSON.stringify([1, 2, 3].map(seed => core.buildReviewPlan([], p, pk, { size: 12, rng: mulberry32(seed), canHear: () => true, script: fa.script.units, scriptCtx: { words: fa.words, tts: false } }).map(it => [it.kind, it.unit && it.unit.id]))); };
+    if(BASE) check("dayAware off: Review plans on 3 seeds equal main before fb46", off(VC) === off(BASE));
+  }
   console.log(`\n${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

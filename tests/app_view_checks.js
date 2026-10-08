@@ -235,6 +235,10 @@ check("appViewOn: zh pack sets v2; absent / other values are off", VC.appViewOn(
   const css = appHtml.slice(0, appHtml.indexOf("</style>")).replace(/\/\*[\s\S]*?\*\//g, "");
   const v2rules = [...css.matchAll(/([^{}]+)\{[^{}]*\}/g)].map(m => m[1].trim()).filter(sel => /appview/.test(sel));
   check(`every appView rule is scoped to :root[data-appview="v2"] (${v2rules.length} rules)`, v2rules.length > 5 && v2rules.every(sel => sel.split(",").every(x => x.trim().startsWith(':root[data-appview="v2"]'))));
+  check("Words list (fb46): one word column for every row under v2 (#wl grid, fit-content word column capped at 50%, rows on a subgrid, 44px min, long headwords wrap inside it), scoped like the rest",
+    /@supports \(grid-template-columns: subgrid\)\{\s*:root\[data-appview="v2"\] #wl\{display:grid;grid-template-columns:fit-content\(50%\) minmax\(0,1fr\)/.test(css) &&
+    /:root\[data-appview="v2"\] #wl \.wl\{display:grid;grid-column:1\/-1;grid-template-columns:subgrid;[^}]*min-height:44px/.test(css) &&
+    /:root\[data-appview="v2"\] #wl \.wl \.wd\{max-width:none;min-width:0;white-space:normal;overflow-wrap:anywhere\}/.test(css) && !/(^|\})\s*#wl\{/.test(css));
   check("the hdrbar and the theme button are hidden under v2 (CSS)", /:root\[data-appview="v2"\] \.themebtn,:root\[data-appview="v2"\] \.hdrbar\{display:none\}/.test(css));
   check("new tokens: --sect and --stim-top only (no new colour)", /:root\[data-appview="v2"\]\{--sect:22px;--stim-top:clamp\(12px, 8vh, 64px\)\}/.test(css) && !/data-appview[^{]*\{[^}]*#[0-9A-Fa-f]{3,6}/.test(css));
   const fresh0 = api.panel();

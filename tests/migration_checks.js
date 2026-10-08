@@ -893,6 +893,32 @@ console.log("\n[pl] prog.pl (fb42): the level a pre-session placement landed in 
 }
 
 
+console.log("\n[rs] read.done[pid].t (fb46): whole seconds of the latest completed reading pass (progressView v2); boot writes nothing; ef44c6e and aa00571 carry it through, no backup, and back");
+{
+  const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog; p.read = { done: { p0001: { sc: 3, n: 4, d: "2026-10-04", x: 2, t: 95 }, p0002: { sc: 4, n: 4, d: "2026-10-04", x: 1 } } };
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK), im = VC.applyImport(null, raw, LAG_PACK);
+  check("[rs] boot here keeps read.done t byte-equal, no backup; export/import keeps it; validateProgShape accepts it", here.backupRaw === null && JSON.stringify(here.prog) === raw && im.ok && im.prog.read.done.p0001.t === 95 && VC.validateProgShape(p, Object.keys(p.sets)).ok);
+  const odd = clone(p); odd.read.done.p0001.t = "95"; const ob = VC.bootProg(JSON.stringify(odd), LAG_PACK);
+  check("[rs] a malformed t (string) is refused by validateProgShape like any malformed field", !VC.validateProgShape(odd, Object.keys(odd.sets)).ok);
+  for(const sha of ["ef44c6e", "aa00571"]){
+    let eng = null, op = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const f = path.join(migTmp(), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
+      op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`[rs] engine ${sha} not in this checkout's history`); continue; }
+    const o = eng.bootProg(raw, op), o2 = eng.bootProg(raw, LAG_PACK);
+    check(`[rs] engine ${sha} boots a record carrying t (its zh pack, and this pack): no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw && o2.backupRaw === null && JSON.stringify(o2.prog) === raw);
+    const q = clone(o.prog); eng.markRec(q.w, Object.keys(q.w)[0], true, true);
+    check(`[rs] a mark on ${sha} keeps t`, q.read.done.p0001.t === 95 && q.read.done.p0002.t === undefined);
+    const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
+    check(`[rs] and back here from ${sha}: no backup, t byte-equal`, back.backupRaw === null && JSON.stringify(back.prog) === JSON.stringify(q));
+  }
+}
+
+
 (async () => {
 console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/briefs/port-plan.md sections 1 and 3): no field is new beyond the pairs / dayAware / progress-map family; sibling engines ef44c6e and aa00571 boot it unchanged");
 {

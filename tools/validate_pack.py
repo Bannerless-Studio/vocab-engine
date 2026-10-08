@@ -296,6 +296,8 @@ def check_pack(pack, rep):
                         if "knownCurve" in ps:
                             known_map(ps["knownCurve"], f"pack.eta.placed[{lv!r}].knownCurve")
     # glossStyle (docs/PACK_SCHEMA.md "glossStyle"): a display style of the glossFocus renderer.
+    if "gapGender" in pack and pack["gapGender"] is not True:
+        rep.err("pack.gapGender must be true when present")
     if "glossStyle" in pack and pack["glossStyle"] != "primary":
         rep.err('pack.glossStyle must be "primary"')
     elif pack.get("glossStyle") == "primary" and pack.get("glossFocus") is not True:
@@ -560,6 +562,9 @@ def check_words(words, levels, rep):
         # ft: frequency tier, 0 ambient / 1 core / 2 peripheral (docs/PACK_SCHEMA.md "freqTiers"); absent = core.
         if "ft" in w and not (isinstance(w["ft"], int) and not isinstance(w["ft"], bool) and w["ft"] in (0, 1, 2)):
             rep.err(f"{where}.ft must be 0, 1 or 2 when present")
+        # g: noun gender, "m" / "f" / "n" or "p" (plural-only); read only under pack.gapGender.
+        if "g" in w and w["g"] not in ("m", "f", "n", "p"):
+            rep.err(f"{where}.g must be \"m\", \"f\", \"n\" or \"p\" when present")
         if "alt" in w and not (isinstance(w["alt"], list) and all(is_str(a) for a in w["alt"])):
             rep.err(f"{where}.alt must be a list of non-empty strings")
         # forms: inflected surfaces used only to locate the word in text (never typed
