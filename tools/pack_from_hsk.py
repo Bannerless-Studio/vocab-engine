@@ -610,8 +610,9 @@ def main(argv):
         "levelGate": 0.7,
         # What each level's exam asks (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): HSK 1-2 are pinyin papers, HSK 3-4 read hanzi.
         "levelExam": {"1": "pinyin", "2": "pinyin", "3": "characters", "4": "characters"},
-        # ETA model constants (docs/PACK_SCHEMA.md "eta"): zh's measured values, the engine's former built-in constants.
-        "eta": {"gain": [0.00109, 0.00188, 0.00335], "known": 5.2},
+        # ETA curves (docs/PACK_SCHEMA.md "eta"): tools/zh_eta.json, written by tests/eta_checks.js --calibrate --write
+        # (fresh-record sims), committed so this build runs no sim.
+        "eta": json.load(open(os.path.join(ROOT, "tools", "zh_eta.json"), encoding="utf-8")),
     }
 
     # Grammar patterns drilled in the Sentences step (docs/PACK_SCHEMA.md "patterns"; owner 2026-10-06).

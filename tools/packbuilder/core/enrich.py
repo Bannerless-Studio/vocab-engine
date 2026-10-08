@@ -5,7 +5,8 @@ port (vocab-engine .cache/briefs/port-plan.md §1, §2, §4): a pure function of
     from its `rank` and the optional <repo>/tools/tiers_overrides.json, and on every unit of
     pack/characters.json (the lowest `ft` of its words);
   * the pack.json flag block `LanguageSpec.port_flags()`;
-  * pack.json `eta` copied from the optional <repo>/tools/eta.json (tests/eta_checks.js --pack ... --write).
+  * pack.json `eta` copied from the optional <repo>/tools/eta.json (tests/eta_checks.js --pack ... --calibrate --write):
+    {curve, knownCurve}, or the legacy {gain, known} of sites calibrated before fb42.
 
 Run it after `build` / `passages` / `script` / `audio`, then the site's build. `--check` writes nothing and
 exits 1 when the shipped pack differs from the function's output (a site's check.sh runs it). `--emit DIR`
@@ -111,7 +112,7 @@ def main(lang, repo, check=False, emit=None):
     tools = Path(repo) / "tools"
     eta = _read(tools / "eta.json")
     if eta is not None:
-        eta = {k: eta[k] for k in ("gain", "known") if k in eta}
+        eta = {k: eta[k] for k in ("curve", "knownCurve", "placed", "gain", "known") if k in eta}
     new_pack, new_words, new_units = enrich_data(spec, pack, words, units, load_overrides(tools / "tiers_overrides.json", words), eta)
     counts = tier_counts(new_words)
     print(f"{lang} tiers [ambient core peripheral]: " + "  ".join(f"{lv} {c}" for lv, c in counts.items()))

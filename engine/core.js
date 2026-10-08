@@ -2511,21 +2511,26 @@ function sessionsToGo(prog, g, n){
   return Math.max(0, Math.ceil(((g !== undefined ? GOAL_DONE : 1) - z.p) / rate - 1e-9));
 }
 // pack.appView "v2" ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"; owner 2026-10-08: an estimate from the first
-// session). Goal packs: the model below, never the measured pace. pm.p rounds to 0.001 and a goal gains ~0.001 a session, and
-// the measured pace at PM_KEEP (14) entries missed the actual crossing by -57% to +195% on 3 of 4 owner-export sims
-// (tests/eta_checks.js --calibrate). A whole-pack bar has no model: it shows sessionsToGo (a pace from PM_KEEP entries), else nothing.
-// Calibration (tests/eta_checks.js --calibrate; Today sessions at 85% right, unpaused, 7 a day, passages read, seeds 5-7):
-// ETA_GAIN[g] = goal position gained per session until the goal first reaches GOAL_DONE, from the owner export
-// (vocab_zh_progress_8, goals at .708/.539/.271), after the fb41 markPassageDone fix: goal 1 183/162/184 sessions
-// (0.00109), goal 2 195/186/195 (0.00188), goal 3 191/183/190 (0.00335). A fresh record reaches goal 1 after 96/94/99
-// sessions (0.0091-0.0096 a session), 8x faster: no one constant fits both, so the gains are the owner export's and
-// the fresh record's session-1 estimate reads "≈ 830".
-// ETA_KNOWN = words of the waiting level's predecessor that become known per session while the gate holds: 5.2, the
-// geometric mean of 12 holds, 5.16 (fresh record, levels 1/2/3: 4.5 4.6 4.0, 5.1 4.9 4.9, 3.9 5.5 5.3; owner export, level 3: 6.4 8.2 5.8).
-// prog.pm holds goal positions only, so the level estimate is the model alone (no storage field).
+// session). Goal packs: a calibrated curve, never the measured pace (pm.p rounds to 0.001 and the pace at PM_KEEP entries
+// missed the actual crossing by -57% to +195% on owner-export sims). A whole-pack bar has no model: sessionsToGo or nothing.
+// pack.eta.curve[g] = [[position, sessions remaining until the goal first reaches GOAL_DONE], ...] sampled from fresh-record
+// sims (tests/eta_checks.js --calibrate): a goal gains ~9x faster early (new words count at once) than late (mastery
+// streaks), so one constant slope cannot fit both ends (fb42; the fb41 constant read "≈ 830" on a fresh zh record).
+// pack.eta.knownCurve = {<level id>: [[known share of that level, sessions until the next level's gate opens], ...]}: the
+// share rises 0.3x a hold's mean rate in its first third and up to 2x in its last (fresh sims), past +-30% of linear, and
+// one curve pooled over levels missed the zh level with twice the words of the two before it by -38%.
+// Legacy shape {gain: [g...], known: k} (sites published before fb42): a constant slope, kept until the site republishes.
+// No pack.eta: the zh constants below (fb41 owner-export slopes), the shape every pack had before pack.eta.
 const ETA_GAIN = [0.00109, 0.00188, 0.00335], ETA_KNOWN = 5.2;
-// pack.eta {gain: [g...], known: k} (docs/PACK_SCHEMA.md "eta"; measured per site by tests/eta_checks.js --pack <dir> --calibrate)
-// replaces the zh constants above; an absent key falls back to them, a null value means that goal / the gate shows no estimate.
+function etaCurveAt(curve, x){
+  if(!Array.isArray(curve) || !curve.length) return null;
+  if(x <= curve[0][0]) return curve[0][1];
+  for(let i = 1; i < curve.length; i++){
+    const [x1, y1] = curve[i];
+    if(x <= x1){ const [x0, y0] = curve[i - 1]; return x1 > x0 ? y0 + (y1 - y0) * (x - x0) / (x1 - x0) : y1; }
+  }
+  return 0;
+}
 function etaGain(pack, g){
   const e = pack && pack.eta, d = ETA_GAIN[Math.min(g, ETA_GAIN.length - 1)];
   if(!isObj(e) || !Array.isArray(e.gain)) return d;
@@ -2537,11 +2542,21 @@ function etaKnown(pack){
   if(!isObj(e) || !("known" in e)) return ETA_KNOWN;
   return typeof e.known === "number" && e.known > 0 ? e.known : null;
 }
+const etaRound = r => r === null ? null : Math.max(1, Math.ceil(r - 1e-9));
+// pack.eta.placed {curve, knownCurve}: the same shapes for a record placed by the Test tab. A placed level's words carry
+// provisional records (prov) the scheduler must bring to mastery while new levels are taught, so a goal whose top level
+// was placed took ~155 sessions from position 0 against ~90 fresh, and a placed level's gate hold 2-4x the fresh one.
+// A placed curve applies while that level still holds a prov record (no stored field: the record says it); a null or
+// absent entry leaves the fresh curve.
+const provIn = (prog, words, lv) => (words || []).some(w => String(w.lv) === String(lv) && isObj(prog.w) && isObj(prog.w[w.id]) && prog.w[w.id].prov);
 function sessionsToGoX(prog, g, n, ctx){
   const goal = g !== undefined && ctx ? progressMapGoals(ctx.pack)[g] : null;
   if(!goal) return g === undefined ? sessionsToGo(prog) : null;
   const p = goalPosition(prog, ctx.pack, goal, ctx.words, ctx.units, ctx.passages);
   if(p >= GOAL_DONE) return 0;
+  const e = ctx.pack && ctx.pack.eta;
+  if(isObj(e) && isObj(e.placed) && Array.isArray(e.placed.curve) && Array.isArray(e.placed.curve[g]) && provIn(prog, ctx.words, goal.upTo)) return etaRound(etaCurveAt(e.placed.curve[g], p));
+  if(isObj(e) && Array.isArray(e.curve)) return etaRound(etaCurveAt(e.curve[g], p));
   const gain = etaGain(ctx.pack, g);
   return gain === null ? null : Math.ceil((GOAL_DONE - p) / gain - 1e-9);
 }
@@ -2549,10 +2564,13 @@ function sessionsToGoX(prog, g, n, ctx){
 function levelOpensIn(words, pack, prog, units){
   const h = levelGateHold(words, pack, prog, units);
   if(!h) return null;
+  const e = pack.eta, pct = levelKnownPct(words, pack, prog, h.prev, units);
+  if(isObj(e) && isObj(e.placed) && isObj(e.placed.knownCurve) && Array.isArray(e.placed.knownCurve[h.prev]) && provIn(prog, words, h.prev)) return etaRound(etaCurveAt(e.placed.knownCurve[h.prev], pct));
+  if(isObj(e) && "knownCurve" in e) return etaRound(isObj(e.knownCurve) ? etaCurveAt(e.knownCurve[h.prev], pct) : null);
   const k = etaKnown(pack);
   if(k === null) return null;
   const n = (wordsByLevel(words, pack)[h.prev] || []).length;
-  return Math.max(1, Math.ceil((pack.levelGate - levelKnownPct(words, pack, prog, h.prev, units)) * n / k - 1e-9));
+  return Math.max(1, Math.ceil((pack.levelGate - pct) * n / k - 1e-9));
 }
 function readingStats(passages, pack, prog){
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
@@ -4317,7 +4335,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,

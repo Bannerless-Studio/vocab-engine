@@ -204,19 +204,63 @@ def check_pack(pack, rep):
             rep.err("pack.levelExam must map level ids to \"pinyin\" or \"characters\"")
         elif not (pack.get("pairs") is True and pack.get("dayAware") and "characters" in pack):
             rep.err("pack.levelExam needs pack.pairs and pack.characters (the unit's meaning pair)")
-    # eta (docs/PACK_SCHEMA.md "eta"): measured ETA model constants; null = no estimate for that goal / the gate.
+    # eta (docs/PACK_SCHEMA.md "eta"): calibrated ETA curves (legacy: constant slopes); null = no estimate for that goal / the gate.
     if "eta" in pack:
         et = pack["eta"]
         pos = lambda v: is_num(v) and not isinstance(v, bool) and v > 0
-        if not isinstance(et, dict) or set(et) - {"gain", "known"}:
-            rep.err("pack.eta must be {gain: [...], known: k}")
+        nonneg = lambda v: is_num(v) and not isinstance(v, bool) and v >= 0
+        goals_n = len(pm["goals"]) if isinstance(pm, dict) and isinstance(pm.get("goals"), list) else None
+
+        def curve_err(c):
+            if not (isinstance(c, list) and len(c) >= 2 and all(isinstance(p, list) and len(p) == 2 and nonneg(p[0]) and nonneg(p[1]) for p in c)):
+                return "a list of at least 2 [position, sessions] pairs of non-negative numbers"
+            if any(b[0] <= a[0] for a, b in zip(c, c[1:])):
+                return "positions strictly increasing"
+            if any(b[1] > a[1] for a, b in zip(c, c[1:])):
+                return "sessions non-increasing (monotone)"
+            if c[-1][1] != 0 or c[-1][0] > 1:
+                return "last point [position <= 1, 0]"
+            return None
+        if not isinstance(et, dict) or set(et) - {"gain", "known", "curve", "knownCurve", "placed"}:
+            rep.err("pack.eta must be {curve: [...], knownCurve: [...]} (legacy {gain: [...], known: k})")
         else:
             if "gain" in et and not (isinstance(et["gain"], list) and et["gain"] and all(v is None or pos(v) for v in et["gain"])):
                 rep.err("pack.eta.gain must be a non-empty list of positive numbers or null")
-            elif "gain" in et and isinstance(pm, dict) and isinstance(pm.get("goals"), list) and len(et["gain"]) != len(pm["goals"]):
-                rep.err(f"pack.eta.gain has {len(et['gain'])} entries, pack.progressMap has {len(pm['goals'])} goals")
+            elif "gain" in et and goals_n is not None and len(et["gain"]) != goals_n:
+                rep.err(f"pack.eta.gain has {len(et['gain'])} entries, pack.progressMap has {goals_n} goals")
             if "known" in et and not (et["known"] is None or pos(et["known"])):
                 rep.err("pack.eta.known must be a positive number or null")
+            ids = {str(l.get("id")) for l in pack.get("levels", []) if isinstance(l, dict)}
+
+            def curves_err(et, where):
+                if "curve" in et:
+                    if not (isinstance(et["curve"], list) and et["curve"]):
+                        rep.err(f"{where}.curve must be a non-empty list, one curve (or null) per goal")
+                    else:
+                        if goals_n is not None and len(et["curve"]) != goals_n:
+                            rep.err(f"{where}.curve has {len(et['curve'])} curves, pack.progressMap has {goals_n} goals")
+                        for i, c in enumerate(et["curve"]):
+                            e = c is not None and curve_err(c)
+                            if e:
+                                rep.err(f"{where}.curve[{i}] must be null or {e}")
+                if "knownCurve" in et and et["knownCurve"] is not None:
+                    kc = et["knownCurve"]
+                    if not isinstance(kc, dict):
+                        rep.err(f"{where}.knownCurve must be null or {{level id: curve or null}}")
+                    else:
+                        for lv, c in kc.items():
+                            if ids and lv not in ids:
+                                rep.err(f"{where}.knownCurve key {lv!r} is not a level id")
+                            e = c is not None and curve_err(c)
+                            if e:
+                                rep.err(f"{where}.knownCurve[{lv!r}] must be null or {e}")
+            curves_err(et, "pack.eta")
+            if "placed" in et:
+                pl = et["placed"]
+                if not isinstance(pl, dict) or set(pl) - {"curve", "knownCurve"}:
+                    rep.err("pack.eta.placed must be {curve: [...], knownCurve: {...}}")
+                else:
+                    curves_err(pl, "pack.eta.placed")
     # glossStyle (docs/PACK_SCHEMA.md "glossStyle"): a display style of the glossFocus renderer.
     if "glossStyle" in pack and pack["glossStyle"] != "primary":
         rep.err('pack.glossStyle must be "primary"')

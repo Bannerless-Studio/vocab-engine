@@ -136,6 +136,15 @@ class Pure(unittest.TestCase):
         self.assertEqual(p["eta"], {"gain": [None] * len(p["progressMap"]["goals"]), "known": None})
         self.assertEqual(p["appView"], "v2")
 
+    def test_eta_curve_copied_from_file(self):
+        crv = [[0, 90.0], [0.5, 30.5], [0.9, 0]]
+        eta = {"curve": [crv, None, crv], "knownCurve": {"A1": [[0, 19.3], [0.7, 0]]}, "placed": {"curve": [crv, None, None]}, "extra": 1}
+        with tempfile.TemporaryDirectory() as t:
+            r = repo(t, words(), eta=eta)
+            emit = Path(t) / "out"
+            self.assertEqual(enrich.main("it", r, emit=emit), 0)
+            self.assertEqual(json.loads((emit / "pack.json").read_text())["eta"], {"curve": [crv, None, crv], "knownCurve": {"A1": [[0, 19.3], [0.7, 0]]}, "placed": {"curve": [crv, None, None]}})
+
     def test_eta_dropped_without_appview_goals(self):
         class Bare:
             def port_flags(self):

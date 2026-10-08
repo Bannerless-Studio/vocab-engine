@@ -184,6 +184,13 @@ async function site(dirName, code){
   check(`${code}: gate sentence with a measured estimate ends "≈ N sessions"`, /^\S+ opens at 70% of \S+ known\. Now \d+%, ≈ \d+ sessions?\.$/.test(M.gate()), M.gate());
   const N = await S.bootWith(withEta, gp, 2, { passages: D.PASSAGES });
   check(`${code}: gate sentence without an estimate ends "Now N%."`, /^\S+ opens at 70% of \S+ known\. Now \d+%\.$/.test(N.gate()), N.gate());
+  // fb42 curve shape (what a site republished with a fresh calibration ships): estimates read off the curves
+  const crv = [[0, 100], [0.5, 30], [0.9, 0]], curved = Object.assign(clone(P), { eta: { curve: Array.from({ length: goalsN }, (_, g) => g === 1 ? null : crv), knownCurve: { [LV[0]]: [[0, 20], [0.7, 0]] } } });
+  const cctx = Object.assign({}, ctx, { pack: curved }), gpct = VC.levelKnownPct(D.WORDS, curved, gp, LV[0], units), CG = await S.bootWith(curved, gp, 2, { passages: D.PASSAGES });
+  const cg0 = VC.goalPosition(fresh, curved, VC.progressMapGoals(curved)[0], D.WORDS, units, D.PASSAGES), want0 = Math.max(1, Math.ceil(VC.etaCurveAt(crv, cg0) - 1e-9));
+  check(`${code}: curve eta -> goal 1 ${VC.sessionsToGoX(fresh, 0, goalsN, cctx)} (curve at ${cg0.toFixed(3)}), goal 2 null curve -> none, gate ${VC.levelOpensIn(D.WORDS, curved, gp, units)} at ${(gpct * 100).toFixed(1)}%, sentence "${CG.gate()}"`,
+    VC.sessionsToGoX(fresh, 0, goalsN, cctx) === want0 && VC.sessionsToGoX(fresh, 1, goalsN, cctx) === null
+    && VC.levelOpensIn(D.WORDS, curved, gp, units) === Math.max(1, Math.ceil(20 * (1 - gpct / 0.7) - 1e-9)) && /^\S+ opens at 70% of \S+ known\. Now \d+%, ≈\s\d+ sessions?\.$/.test(CG.gate()), CG.gate());
 }
 
 (async () => {
