@@ -538,9 +538,10 @@ const ptKey = it => String(it.key).startsWith("p:");
       const GH = [G, H], ask = (pp, i) => Array.from({ length: 120 }, (_, k) => VC.patternOpts(pp, pp.sentences[i], 0, GH, mulberry32(k)));
       const mid = ask(G, 4).flat(), start = ask(G, 3).flat(), sie = ask(G, 0).flat(), hd = ask(H, 0).flat(), hs = ask(H, 1).flat();
       check("de lowercase blank \"und\": Sie, Haus, USA keep their case (no sie / haus / Usa / uSA)", mid.length > 0 && mid.every(x => ["Sie", "Haus", "USA", "dass"].includes(x)) && mid.includes("Sie") && mid.includes("USA") && mid.includes("Haus"));
-      check("de sentence-initial blank \"Und\": a lowercase option takes a capital (Dass), Sie / Haus / USA unchanged", start.every(x => ["Sie", "Haus", "USA", "Dass"].includes(x)) && start.includes("Dass"));
-      check("de mid-sentence blank \"Sie\": a lowercase option stays lowercase (und, dass), no Und / Dass", sie.every(x => ["Haus", "USA", "und", "dass"].includes(x)) && sie.includes("und") && sie.includes("dass"));
-      check("\"dass\" blank: Sie / Haus / USA are not lowercased; \"Dass\" blank: not forced lower", hd.every(x => ["Sie", "Haus", "USA", "und"].includes(x)) && hs.every(x => ["Sie", "Haus", "USA", "Und"].includes(x)));
+      check("de sentence-initial blank \"Dass\": a lowercase-mid option takes a capital (Und, not und), Sie / Haus / USA unchanged", hs.length > 0 && hs.every(x => ["Sie", "Haus", "USA", "Und"].includes(x)) && hs.includes("Und"));
+      check("de mid-sentence blank \"dass\": options keep running-text case (und lowercase; Sie, Haus, USA as written)", hd.length > 0 && hd.every(x => ["Sie", "Haus", "USA", "und"].includes(x)) && hd.includes("und") && hd.includes("Sie"));
+      check("de mid-sentence blank \"Sie\": a lowercase option stays lowercase (und), no Und", sie.length > 0 && sie.every(x => ["Haus", "USA", "und"].includes(x)) && sie.includes("und"));
+      check("de sentence-initial blank \"Und\" keeps own-pattern Sie / Haus / USA as written", start.length > 0 && start.every(x => ["Sie", "Haus", "USA"].includes(x)));
       check("de fold identity: Und / und and Dass / dass are one word each, never offered twice", [...ask(G, 0), ...ask(G, 3), ...ask(H, 0)].every(o => new Set(o.map(x => x.toLowerCase())).size === o.length));
     }
     // zh: the same options, in the same order, from the same rng, as main before this branch
