@@ -5,7 +5,8 @@
 // known, refresh share, one pair per item, no pair twice in a session, Listen, characters Test, a unit
 // typed as its word), [6] flag-off control: plans and a two-session app walk byte-identical to 3901e2e,
 // [7] the app with pairs on the owner export (records gain p only for answered pairs, no same-pair
-// repeat in a session, typed items of their planned pair). The before/after measurement on the owner
+// repeat in a session, typed items of their planned pair), [8] pairs with script (port E3): Review keeps the
+// script units the non-pairs dayPick takes, zh and pairs-off script plans byte-identical to d5952d9. The before/after measurement on the owner
 // export (7 days x 3 sessions x 3 seeds) is in the fb23 commit message and docs/PACK_SCHEMA.md "pairs".
 // Run: node tests/pairs_checks.js
 "use strict";
@@ -190,7 +191,15 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check("validate_pack: zh as shipped passes", run(() => {}) === "");
     check("validate_pack: pairs not a boolean is an error", /pack\.pairs must be a boolean/.test(run(p => { p.pairs = 1; })));
     check("validate_pack: pairs without dayAware is an error", /pack\.pairs needs pack\.dayAware/.test(run(p => { delete p.dayAware; })));
-    check("validate_pack: pairs with script is an error", /pack\.pairs with pack\.script/.test(run(p => { p.script = {}; })));
+    // Port E3: pairs with a script primer is valid (a real script pack, ../russian, with the flags on).
+    const ruPack = path.join(ROOT, "..", "russian", "pack");
+    if(fs.existsSync(path.join(ruPack, "script.json"))){
+      const d = path.join(tmp, "ru"); fs.mkdirSync(d); for(const f of fs.readdirSync(ruPack)) if(f.endsWith(".json")) fs.copyFileSync(path.join(ruPack, f), path.join(d, f));
+      const pj = JSON.parse(fs.readFileSync(path.join(d, "pack.json"), "utf8")); Object.assign(pj, { dayAware: true, pairs: true }); fs.writeFileSync(path.join(d, "pack.json"), JSON.stringify(pj));
+      cp.execSync(`${PY} "${path.join(ROOT, "tools", "jsonify_pack.py")}" "${d}"`, { stdio: "ignore" });
+      let out = "", code = 0; try { out = cp.execSync(`${PY} "${path.join(ROOT, "tools", "validate_pack.py")}" "${d}"`, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); } catch(e){ code = e.status; out = String(e.stdout || "") + String(e.stderr || ""); }
+      check(`validate_pack: pairs with script is valid (../russian/pack + dayAware + pairs: exit ${code}, ${(out.match(/(\d+) errors/) || [])[1]} errors)`, code === 0 && !/pack\.pairs/.test(out) && / 0 errors/.test(out));
+    } else skip("validate_pack pairs + script: ../russian/pack absent");
   }
 
   console.log("\n[2] kind -> pair table");
@@ -376,6 +385,93 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     if(uw){ const ww = api.unitTypedFor(uw.id); const ws = api.itemFromPlan({ kind: "type", word: ww, tu: uw.id, pair: "ws" }, 0, [{ kind: "type", word: ww, tu: uw.id, pair: "ws" }]);
       check(`a unit typed as its word in written <-> sound asks the pinyin from the characters (${ws.rz && ws.rz.b})`, !!ws.rz && (ws.rz.b === "typeWrittenPron" || ws.rz.b === "recall")); }
     else skip("no typed unit in this record");
+  }
+
+  console.log("\n[8] pairs with script (port E3): Review keeps the script units dayPick gives it without pairs");
+  {
+    const FX = require("./fixtures/script_packs.js");
+    const E3 = "d5952d9"; // main before pairs + script
+    const e3Src = git(E3, "engine/core.js");
+    const OLD3 = e3Src ? (() => { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "pairs-e3-")), `core_${E3}.js`); fs.writeFileSync(f, e3Src); return require(f); })() : null;
+    const sib = lang => { const d = path.join(ROOT, "..", lang, "pack"), f = n => path.join(d, n + ".js");
+      if(![f("pack"), f("words"), f("script")].every(x => fs.existsSync(x))) return null;
+      return { pack: loadConst(f("pack"), "PACK"), words: loadConst(f("words"), "WORDS"), script: loadConst(f("script"), "SCRIPT"), lang }; };
+    const on = pk => Object.assign({}, pk, { dayAware: true, pairs: true });
+    const offPairs = pk => { const p = Object.assign({}, pk); delete p.pairs; return p; };
+    // A seeded record: every script unit recorded (streak 0-4, last answered in an earlier session), the
+    // first nw words learned likewise, sn 10; one script unit and one word with a pending miss from this session.
+    const seedRec = (fx, seed, nw) => {
+      const r = mulberry32(seed), pk = on(fx.pack), sn = 10, p = VC.defaultProg(pk);
+      p.script.skipped = false; p.script.choiceSeen = true; p.sn = sn;
+      const rec = () => { const s = Math.floor(r() * 5); return { r: s + 1, w: Math.floor(r() * 2), s, u: 1 + Math.floor(r() * (sn - 1)), t: 20000 }; };
+      fx.script.units.forEach(u => { p.script.u[u.id] = rec(); });
+      const learned = fx.words.slice(0, nw); learned.forEach(w => { p.w[w.id] = rec(); });
+      const mu = fx.script.units[Math.floor(r() * fx.script.units.length)];
+      const kind = VC.scriptConfig(pk).reviewKinds.find(k => VC.scriptKindFits(k, mu, { units: fx.script.units, words: fx.words, tts: VC.scriptConfig(pk).tts }));
+      p.day = { d: TODAY, n: 1, a: { ["x:" + mu.id]: { m: 1, mk: [kind], ms: sn } } };
+      if(learned.length) p.day.a["w:" + learned[0].id] = { m: 1, mk: ["recall"], ms: sn };
+      return { fx, pk, p, learned, mu };
+    };
+    const RU = sib("russian"), JA = sib("japanese");
+    const recs = [seedRec(FX.ko(), 11, 20), RU ? seedRec(RU, 12, 120) : null, JA ? seedRec(JA, 13, 150) : seedRec(FX.ja(), 13, 20)].filter(Boolean);
+    if(!RU) skip("../russian/pack absent: the real-pack record is ja (or fixtures only)");
+    const opts = (x, seed, extra) => Object.assign(planOpts(seed), { script: x.fx.script.units, scriptCtx: { words: x.fx.words, tts: VC.scriptConfig(x.pk).tts } }, extra || {});
+    const xs = plan => plan.filter(it => it.unit && VC.SCRIPT_KINDS.includes(it.kind));
+    const ids = plan => xs(plan).map(it => it.unit.id).sort().join(",");
+    for(const x of recs){
+      const name = x.fx.lang || x.pk.key, units = x.fx.script.units, kctx = { units, words: x.fx.words, tts: VC.scriptConfig(x.pk).tts };
+      check(`${name}: pairs on with the script primer (pairsOn, scriptConfig)`, VC.pairsOn(x.pk) && !!VC.scriptConfig(x.pk));
+      let same = 0, shares = [], fit = true, noPair = true, wordsPaired = true, miss = 0, full = 0;
+      for(const seed of [1, 2, 3]){
+        const n = 20;
+        const pon = VC.buildReviewPlan(x.learned, x.p, x.pk, opts(x, seed, { size: n }));
+        const poff = VC.buildReviewPlan(x.learned, x.p, offPairs(x.pk), opts(x, seed, { size: n }));
+        if(ids(pon) === ids(poff)) same++;
+        const k = xs(pon).length; shares.push(`${k}/${n}`);
+        if(pon.length === n) full++;
+        if(!xs(pon).every(it => x.pk.script.reviewKinds.includes(it.kind) && VC.scriptKindFits(it.kind, it.unit, kctx))) fit = false;
+        if(xs(pon).some(it => "pair" in it)) noPair = false;
+        if(!pon.filter(it => it.word).every(it => VC.PAIRS.includes(it.pair))) wordsPaired = false;
+        if(xs(pon).some(it => it.unit.id === x.mu.id)) miss++;
+      }
+      check(`${name}: the script units asked are exactly the ones dayPick takes without pairs, same draw (3 seeds; shares ${shares.join(" ")})`, same === 3 && shares.every(s => +s.split("/")[0] > 0));
+      check(`${name}: the plan is full (n items) with words filling the slots the script units leave (${full}/3)`, full === 3);
+      check(`${name}: script items keep their review kinds (drawn from reviewKinds, kind fits the unit), no pair`, fit && noPair);
+      check(`${name}: word items carry their pair`, wordsPaired);
+      check(`${name}: a script unit with a pending miss is asked (3 of 3 seeds, got ${miss})`, miss === 3);
+      const rc = VC.buildRecallPlan(x.learned, x.p, x.pk, 8, opts(x, 4));
+      check(`${name}: Recall asks no script unit (as without pairs)`, xs(rc).length === 0 && rc.length > 0);
+      // A script pack with pairs off: the refactored non-pairs Review is byte-identical to d5952d9 (dayAware on and off).
+      if(OLD3){
+        const dayOff = Object.assign({}, offPairs(x.pk)); delete dayOff.dayAware;
+        const eqOld = pk => [1, 2, 3].every(seed => JSON.stringify(VC.buildReviewPlan(x.learned, x.p, pk, opts(x, seed, { size: 15 }))) === JSON.stringify(OLD3.buildReviewPlan(x.learned, x.p, pk, opts(x, seed, { size: 15 }))));
+        check(`${name}: pairs off (dayAware on, and both off) Review plans byte-identical to ${E3} (3 seeds)`, eqOld(offPairs(x.pk)) && eqOld(dayOff));
+      } else skip(`${name}: no git ${E3}`);
+    }
+    {
+      // In the primer (no learned words yet): Review is the 12 script items it was without pairs.
+      const x = seedRec(FX.ko(), 21, 0);
+      const pon = VC.buildReviewPlan([], x.p, x.pk, opts(x, 5, { size: 12 })), poff = VC.buildReviewPlan([], x.p, offPairs(x.pk), opts(x, 5, { size: 12 }));
+      check(`primer, no words: 12 script items, the same units as without pairs (${pon.length})`, pon.length === 12 && xs(pon).length === 12 && ids(pon) === ids(poff));
+      x.p.script.skipped = true;
+      check("primer skipped: no script items under pairs", VC.buildReviewPlan([], x.p, x.pk, opts(x, 5, { size: 12 })).length === 0);
+    }
+    // zh (no pack.script): Review and Recall byte-identical to d5952d9 on 3 seeded records, script option passed or not.
+    if(OLD3){
+      const zrec = (seed, nw) => { const r = mulberry32(seed), p = VC.defaultProg(PACK); p.sn = 12;
+        WORDS.slice(0, nw).forEach(w => { const s = Math.floor(r() * 5); p.w[w.id] = { r: s + 1, w: Math.floor(r() * 3), s, u: 1 + Math.floor(r() * 11), t: 20000 }; if(r() < 0.3) p.w[w.id].p = { wm: [Math.floor(r() * 4), 1 + Math.floor(r() * 11)] }; });
+        p.day = { d: TODAY, n: 1, a: { ["w:" + WORDS[0].id]: { m: 1, mk: ["hear"], ms: 12 } } }; return { p, lw: WORDS.slice(0, nw) }; };
+      let same = 0, tot = 0;
+      for(const [seed, nw] of [[31, 60], [32, 250], [33, 600]]){
+        const z = zrec(seed, nw);
+        for(const o of [planOpts(seed), planOpts(seed, { script: [], size: 20 })]){
+          tot += 2;
+          if(JSON.stringify(VC.buildReviewPlan(z.lw, z.p, PACK, Object.assign({}, o, { rng: mulberry32(seed) }))) === JSON.stringify(OLD3.buildReviewPlan(z.lw, z.p, PACK, Object.assign({}, o, { rng: mulberry32(seed) })))) same++;
+          if(JSON.stringify(VC.buildRecallPlan(z.lw, z.p, PACK, 8, Object.assign({}, o, { rng: mulberry32(seed) }))) === JSON.stringify(OLD3.buildRecallPlan(z.lw, z.p, PACK, 8, Object.assign({}, o, { rng: mulberry32(seed) })))) same++;
+        }
+      }
+      check(`zh (pairs on, no script): Review + Recall plans byte-identical to ${E3} on 3 seeded records (${same}/${tot})`, same === tot);
+    } else skip(`zh control: no git ${E3}`);
   }
 
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);

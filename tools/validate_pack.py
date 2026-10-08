@@ -185,8 +185,6 @@ def check_pack(pack, rep):
         rep.err("pack.pairs must be a boolean")
     elif pack.get("pairs") is True and not pack.get("dayAware"):
         rep.err("pack.pairs needs pack.dayAware (pairs are scheduled by session)")
-    elif pack.get("pairs") is True and "script" in pack:
-        rep.err("pack.pairs with pack.script: script units have no pairs yet")
     # freqTiers (docs/PACK_SCHEMA.md "freqTiers"): per-word practice tiers act on pair streaks.
     if "freqTiers" in pack and not is_bool(pack["freqTiers"]):
         rep.err("pack.freqTiers must be a boolean")

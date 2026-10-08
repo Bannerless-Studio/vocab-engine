@@ -839,6 +839,63 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("LTR pack: ui() is escapeHtml, tf() is tw(), glossBox has no dir", kb.api.ui("x (아이)") === "x (아이)" && kb.api.tf("아이") === '<bdi data-tl lang="ko">아이</bdi>' && !/dir=/.test(kb.api.glossBox()));
   }
 
+  console.log("\n[15] pairs with script (port E3): Today Review asks script units in their kinds, records without p");
+  {
+    const onP = fx => { const f = JSON.parse(JSON.stringify(fx)); Object.assign(f.pack, { dayAware: true, pairs: true }); delete f.pack.typing; return f; };
+    // Plays the active drill answering every first ask right but the first (a miss), retries right. Returns the items shown.
+    const playMixed = (api, roman) => { const shown = []; for(let i = 0; i < 300; i++){ if(!api.getD()) return shown; const it = api.getCur(); shown.push(it);
+      if(it.kind === "type") it.__accept = roman[it.key]; answer(api, shown.length !== 1); api.el("nx").click(); } throw new Error("drill did not finish"); };
+    const recOk = (r, sn) => !!r && Number.isInteger(r.s) && typeof r.t === "number" && r.u === sn && !("p" in r);
+    // ko-like, in the primer: Learn two sets under pairs, then the next Today's Review.
+    {
+      const fx = onP(FX.ko()); const { api } = await boot(fx);
+      api.el("scriptLearn").click(); api.el("go").click();
+      let err = null; try{ playDrillFrom(api, "dr"); api.el("moreSet").click(); playDrillFrom(api, "dr"); api.el("ok").click(); }catch(e){ err = e; }
+      const p = api.getProg();
+      check(`ko pairs: Learn sets 1-2 run (${Object.keys(p.script.u).length} units recorded)${err ? ` (${err.message})` : ""}`, !err && Object.keys(p.script.u).length === 14 && /Session done/.test(api.html("panel")));
+      api.today(); api.el("go").click();
+      const rv = [api.getCur(), ...api.getD().q];
+      check(`ko pairs: next Review is 12 script items (${rv.length})`, rv.length === 12 && rv.every(x => x.key.startsWith("x:")));
+      const sn = api.getProg().sn, w0 = JSON.parse(JSON.stringify(api.getProg().script.u)); let shown = []; err = null; try{ shown = playMixed(api, ROMAN_OF); }catch(e){ err = e; }
+      const q = api.getProg();
+      const asked = [...new Set(shown.map(it => it.key.slice(2)))];
+      check(`ko pairs: Review plays through (${shown.length} items incl. the retry)${err ? ` (${err.message})` : ""}`, !err && shown.length === 13);
+      check(`ko pairs: every answered script record has s, t, u = sn ${sn} and no p (${asked.length})`, asked.every(id => recOk(q.script.u[id], sn)));
+      const miss = shown[0].key;
+      check(`ko pairs: the miss is logged pending in the day log (${miss})`, Array.isArray((q.day.a[miss] || {}).mk) && q.day.a[miss].mk.length === 1 && q.script.u[miss.slice(2)].w === (w0[miss.slice(2)].w || 0) + 1);
+      check("ko pairs: no word record, no p anywhere", Object.keys(q.w).length === 0 && !JSON.stringify(q.script).includes('"p"'));
+    }
+    // Real sibling packs (when present): primer done, the first A1 sets learned; Today Review mixes words (paired) and script units.
+    for(const lang of ["russian","japanese"]){
+      const dir = path.join(ROOT, "..", lang, "pack"), f = n => path.join(dir, n + ".js");
+      if(![f("pack"), f("words"), f("script")].every(x => fs.existsSync(x))){ console.log(`SKIP  ${lang}: no pack/script.js`); continue; }
+      const load = (file, name) => new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)();
+      const fx = onP({ pack: load(f("pack"), "PACK"), words: load(f("words"), "WORDS"), script: load(f("script"), "SCRIPT") });
+      delete fx.pack.characters; // kanji units are not this check's subject (pairs on units: pairs_checks)
+      const r = (() => { let a = 77; return () => { a = (a * 1103515245 + 12345) & 0x7fffffff; return a / 0x7fffffff; }; })();
+      const p0 = VC.defaultProg(fx.pack); p0.script.skipped = false; p0.script.choiceSeen = true; p0.sn = 6; p0.sessions = 6; p0.placedOnce = true;
+      fx.script.units.forEach(u => { const s = Math.floor(r() * 5); p0.script.u[u.id] = { r: s + 1, w: 1, s, u: 1 + Math.floor(r() * 5), t: 20000 }; });
+      const lv0 = fx.pack.levels[0].id; p0.sets[lv0] = 4;
+      VC.learnedWords(fx.words, fx.pack, Object.assign({}, p0, { w: {} })).forEach(w => { const s = Math.floor(r() * 4); p0.w[w.id] = { r: s + 1, w: 1, s, u: 1 + Math.floor(r() * 5), t: 20000 }; });
+      const learned = VC.learnedWords(fx.words, fx.pack, p0);
+      const storage = memStore({ ["vocab_" + fx.pack.key]: JSON.stringify(p0) });
+      const { api } = await boot(fx, { storage });
+      api.el("go").click();
+      const plan = [api.getCur(), ...api.getD().q];
+      const sx = plan.filter(it => it.key.startsWith("x:")), wx = plan.filter(it => it.key.startsWith("w:"));
+      check(`${lang} pairs: Review mixes script units (${sx.length}) and words (${wx.length}) of ${learned.length} learned`, sx.length > 0 && wx.length > 0 && sx.length + wx.length === plan.length);
+      const sn = api.getProg().sn; let shown = [], err = null;
+      const roman = Object.fromEntries(fx.script.units.map(u => ["x:" + u.id, u.roman]));
+      try{ shown = playMixed(api, roman); }catch(e){ err = e; }
+      const q = api.getProg();
+      const xa = [...new Set(shown.filter(it => it.key.startsWith("x:")).map(it => it.key.slice(2)))], wa = [...new Set(shown.filter(it => it.key.startsWith("w:")).map(it => it.key.slice(2)))];
+      check(`${lang} pairs: Review plays through (${shown.length} items)${err ? ` (${err.message})` : ""}`, !err && shown.length >= plan.length);
+      check(`${lang} pairs: answered script records: s, t, u = sn ${sn}, no p (${xa.length})`, xa.length === sx.length && xa.every(id => recOk(q.script.u[id], sn)));
+      check(`${lang} pairs: answered word records gain p for their pair (${wa.length})`, wa.length > 0 && wa.every(id => q.w[id] && q.w[id].p && Object.keys(q.w[id].p).every(k => VC.PAIRS.includes(k))));
+      check(`${lang} pairs: unanswered script records byte-identical`, fx.script.units.filter(u => !xa.includes(u.id)).every(u => JSON.stringify(q.script.u[u.id]) === JSON.stringify(p0.script.u[u.id])));
+    }
+  }
+
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

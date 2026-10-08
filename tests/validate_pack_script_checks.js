@@ -49,6 +49,11 @@ for(const k of ["ko", "fa", "ja"]){
   check(`${k}-like: OK line counts script units`, /\d+ script units;/.test(r.out), r.out);
   check(`${k}-like: script.js generated as const SCRIPT`, fs.existsSync(path.join(dir, "script.js")) && /^const SCRIPT=\{/m.test(fs.readFileSync(path.join(dir, "script.js"), "utf8")));
 }
+// Port E3: pack.pairs with pack.script is valid (script units keep their non-pairs Review slots).
+for(const k of ["ko", "fa", "ja"]){
+  const fx = FX[k](); Object.assign(fx.pack, { dayAware: true, pairs: true }); const r = runValidate(mkPack(fx));
+  check(`${k}-like + dayAware + pairs validates clean (no pairs error)`, r.status === 0 && / 0 errors/.test(r.out) && !/pack\.pairs/.test(r.out), r.out);
+}
 {
   const r = runValidate(path.join(ROOT, "packs", "zh"));
   check("shipped packs/zh passes with no script line", r.status === 0 && !/script/i.test(r.out), r.out);

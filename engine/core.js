@@ -1591,15 +1591,24 @@ function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng, can, o){
   return dayPick(cands, n, d, rng, daySn(prog)).map(c => c.x);
 }
 const dayHeldMark = (cands, prog, pack, o) => { if(wordsTypedOn(pack)) cands.forEach(c => { if(c.t === "w" && typedWordDue(c.x, prog, pack, o.today, c.kinds, o.typedOk, o.typedSeen)) c.held = true; }); return cands; };
-function dayReviewPlan(learned, prog, pack, n, o){
-  if(pairsOn(pack)) return pairPlan(learned, prog, pack, n, o, dayWordKinds(pack), dayCharKinds(pack), true);
-  const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = o.rng || Math.random;
-  const d = dayLog(prog, o.today); const wk = dayWordKinds(pack), ck = dayCharKinds(pack);
-  const ru = recordedUnits(o.units, prog, pack), rs = recordedScriptUnits(o.script, prog, pack);
-  const srecs = scriptRecs(prog);
-  const wc = dayWordCan(pack, o.canHear);
-  const cands = [...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits)),
+// Today's Review candidates without pack.pairs: words, recorded character units, recorded script units.
+function dayReviewCands(learned, prog, pack, o, rs){
+  const scfg = scriptConfig(pack), wk = dayWordKinds(pack), ck = dayCharKinds(pack), srecs = scriptRecs(prog);
+  const ru = recordedUnits(o.units, prog, pack), wc = dayWordCan(pack, o.canHear);
+  return [...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits)),
     ...rs.map(u => ({ t: "x", x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: scfg ? scfg.mastered : SCRIPT_MASTERED, kinds: scfg ? scfg.reviewKinds : [] }))];
+}
+// The script items of a Review without pack.pairs, kinds drawn as there (dayPlanKinds leaves "x:" items on their drawn kind).
+function dayScriptItems(pool, pack, o, r){
+  const scfg = scriptConfig(pack);
+  return pool.filter(c => c.t === "x").map(c => ({ c, kind: pickScriptKind(scfg.reviewKinds, c.x, scfg, r, Object.assign({ units: o.script }, o.scriptCtx || {})) }));
+}
+function dayReviewPlan(learned, prog, pack, n, o){
+  if(pairsOn(pack)) return pairPlan(learned, prog, pack, n, o, dayWordKinds(pack), dayCharKinds(pack), true, pairScriptPre(learned, prog, pack, n, o));
+  const cfg = charsConfig(pack); const r = o.rng || Math.random;
+  const d = dayLog(prog, o.today); const wk = dayWordKinds(pack), ck = dayCharKinds(pack);
+  const wc = dayWordCan(pack, o.canHear);
+  const cands = dayReviewCands(learned, prog, pack, o, recordedScriptUnits(o.script, prog, pack));
   const share = typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined;
   // o.extra (pauseNew): extra items never come from tier 4 (right recently in every kind), and the
   // grown plan takes at most a quarter of the items not right recently (tiers 0-2), so a small pool
@@ -1610,7 +1619,7 @@ function dayReviewPlan(learned, prog, pack, n, o){
   let wi = 0;
   const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {})
     : c.t === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: c.x }
-    : { kind: pickScriptKind(scfg.reviewKinds, c.x, scfg, r, Object.assign({ units: o.script }, o.scriptCtx || {})), unit: c.x });
+    : { kind: dayScriptItems([c], pack, o, r)[0].kind, unit: c.x });
   return hearableKinds(dayPlanKinds(applyMissedKinds(plan.filter(it => it.kind), prog, pack, false, o), prog, pack, o.today, wk, ck, wc, o.typedUnits, o.typedOk, o.typedSeen), o.canHear);
 }
 function dayRecallPlan(learned, prog, pack, n, o){
@@ -1732,8 +1741,8 @@ function unitDone(rec, unit, pack, words){
 // show) grouped by pair; "type" joins every pair one of its typed kinds fits (c.tw: the word typed;
 // o.typedKindFits(word, kind), else the written form taken as hidden). A word typed this Today session
 // (o.typedSeen) gets no typed kind. A unit typed as its word answers the word's pair too: not when
-// the word's pair was answered in the plan's session (psn). Script units have no pairs
-// (validate_pack.py refuses pairs with script).
+// the word's pair was answered in the plan's session (psn). Script units have no pairs: Review
+// gives them the slots dayPick gives them without pairs (pairScriptPre).
 function pairOpts(c, pack, o, psn){
   const out = {}, ks = c.kinds || [];
   const add = (p, k, typed) => { const e = out[p] || (out[p] = { choice: [], typed: [] }); (typed ? e.typed : e.choice).push(k); };
@@ -1803,7 +1812,7 @@ const pairCharCand = (prog, pack, kinds, typedUnits) => { const recs = charRecs(
   return u => { const tw = typedUnitDue(u, prog, pack, typedUnits) ? typedUnits.get(u.id) : null, tier = unitTier(u, null, pack);
     return Object.assign({ t: "c", x: u, key: "c:" + u.id, rec: recs[u.id], kinds, held: tier === FT_PERIPHERAL ? undefined : hd, tier }, tw ? { kinds: [...kinds, "type"], tw, twRec: (prog.w || {})[tw.id], typedOnly: TYPED_WRITTEN_KINDS } : {}); }; };
 // A unit's typed ask types its word (tu); pair tells the app which typed kinds belong to the item.
-const pairPlanItem = e => e.c.t === "w" ? { kind: e.kind, word: e.c.x, pair: e.pair }
+const pairPlanItem = e => e.c.t === "w" ? { kind: e.kind, word: e.c.x, pair: e.pair } : e.c.t === "x" ? { kind: e.kind, unit: e.c.x }
   : e.kind === "type" ? { kind: "type", word: e.c.tw, tu: e.c.x.id, pair: e.pair } : { kind: e.kind, unit: e.c.x, pair: e.pair };
 // characters.bareByPair (owner 2026-10-07; the ws pair was rarely answered, so units stayed ruby): the Review
 // plan reserves up to BARE_BOOST slots for bare candidates, ruby units whose wm pair is at BARE_PAIR+ and whose
@@ -1826,13 +1835,28 @@ function bareBoost(cands, prog, pack, sn, d, o){
   out.sort((x, y) => x.s - y.s || x.a - y.a);
   return out.slice(0, BARE_BOOST);
 }
+// pack.pairs with pack.script (port plan E3; script units have no pairs, docs/PACK_SCHEMA.md "pairs"):
+// Review keeps the script units the Review without pairs would ask. dayPick runs over that plan's
+// candidates (dayReviewCands: words, units and script units, its shares and held mark) and the k script
+// units it takes keep k slots, kinds drawn as there; pairPick fills the other n - k. So the reserved
+// share is k / n of the non-pairs scheduler, per plan: ceil(n x share) = k. No recorded script unit
+// (every pack without pack.script): [] and no draw, so the plan is the pairs plan as before.
+function pairScriptPre(learned, prog, pack, n, o){
+  const rs = recordedScriptUnits(o.script, prog, pack); if(!rs.length) return [];
+  const cands = dayHeldMark(dayReviewCands(learned, prog, pack, o, rs), prog, pack, o);
+  const pool = dayPick(cands, n, dayLog(prog, o.today), o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined, undefined, wordsTypedOn(pack) ? DAY_HELD_SHARE_REVIEW : undefined);
+  return dayScriptItems(pool, pack, o, o.rng || Math.random).filter(e => e.kind);
+}
 // Review and Recall under pack.pairs. o.extra (pauseNew) is ignored: a paused Review stays at n items.
-function pairPlan(learned, prog, pack, n, o, wk, ck, boost){
+// sx: pairScriptPre's script items, taken first.
+function pairPlan(learned, prog, pack, n, o, wk, ck, boost, sx){
   const d = dayLog(prog, o.today), sn = daySn(prog), wc = dayWordCan(pack, o.canHear);
   const cands = [...(learned || []).map(pairWordCand(prog, wk, wc, pack)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
   // Owner 2026-10-06: a paused session's 40-item Review is too long to keep focus and remember mistakes,
   // so under pairs the pauseNew growth (o.extra) is ignored and Review keeps its normal size.
-  const pool = shuffle(pairPick(cands, n, d, o.rng, sn, pack, o, boost ? bareBoost(cands, prog, pack, sn, d, o) : undefined), o.rng);
+  const bb = boost ? bareBoost(cands, prog, pack, sn, d, o) : undefined;
+  const pre = sx && sx.length ? [...sx, ...(bb || []).slice(0, Math.max(0, n - sx.length))] : bb;
+  const pool = shuffle(pairPick(cands, n, d, o.rng, sn, pack, o, pre), o.rng);
   return hearableKinds(pool.map(pairPlanItem), o.canHear);
 }
 
