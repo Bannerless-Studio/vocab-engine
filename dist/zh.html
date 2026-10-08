@@ -1098,13 +1098,13 @@ function gapChoices(entry, match, pool, pack, like, mix){
     const ok = new Set(articleAgreement(pack)[vis] || [vis]);
     prefer = v => citationArticles(v, arts).some(a => ok.has(a));
   }
-  if(gapGenderOn(pack) && entry && typeof entry.g === "string" && entry.g){
-    const base = prefer, same = base ? v => base(v) && v.g === entry.g : v => v.g === entry.g;
-    if((pool || []).filter(v => v.id !== entry.id && same(v) && (!like || like(v))).length >= GAP_GENDER_MIN) prefer = same;
-  }
-  if(like) prefer = prefer ? (p => v => p(v) && like(v))(prefer) : like;
   const blank = match && match.text ? normKey(match.text) : "";
   const fits = v => !!blank && v !== entry && !(v.id != null && v.id === entry.id) && surfaces(v).includes(blank);
+  if(gapGenderOn(pack) && entry && typeof entry.g === "string" && entry.g){
+    const base = prefer, same = base ? v => base(v) && v.g === entry.g : v => v.g === entry.g;
+    if((pool || []).filter(v => v.id !== entry.id && !fits(v) && same(v) && (!like || like(v))).length >= GAP_GENDER_MIN) prefer = same;
+  }
+  if(like) prefer = prefer ? (p => v => p(v) && like(v))(prefer) : like;
   const ds = wordOpts(entry, blank ? (pool || []).filter(v => !fits(v)) : pool, show, pack, prefer, mix);
   const byLabel = {}; [entry, ...ds].forEach(e => { byLabel[show(e)] = e; });
   return { opts: [show(entry), ...ds.map(show)], a: show(entry), byLabel };
@@ -2885,11 +2885,15 @@ function applyWeakWords(prog, entries, words, pack){
 // and readPassMode alternates on it, so those packs keep the replaced record.
 // pack.readRotation adds s (session of the latest pass) and ls (of the latest listening pass).
 // t (fb46, progressView v2 only): whole seconds from opening the passage to its results, the LATEST reading pass only
-// (absent when the pass was a listen, ran over READ_MAX_S, or the tab was hidden over READ_HIDE_MAX_MS of it).
+// (a listen pass, or a reading pass that ran over READ_MAX_S or was hidden over READ_HIDE_MAX_MS, keeps the previous t:
+// all ported packs alternate read/listen, so dropping it would make the Reading row vanish as listen passes land).
 function markPassageDone(prog, pid, sc, n, d, listen, pack, t){
   const st = readState(prog); const prev = st.done[pid];
   st.done[pid] = { sc, n, d: String(d), x: ((prev && prev.x) || 0) + 1 };
-  if(!listen && progressViewOn(pack) && typeof t === "number" && t > 0) st.done[pid].t = Math.round(t);
+  if(progressViewOn(pack)){
+    if(!listen && typeof t === "number" && t > 0) st.done[pid].t = Math.round(t);
+    else if(prev && typeof prev.t === "number") st.done[pid].t = prev.t;
+  }
   if(listen || (prev && prev.l && readRotationOn(pack))) st.done[pid].l = 1;
   if(readRotationOn(pack)){
     const sn = daySn(prog);
@@ -3117,9 +3121,9 @@ function readingStats(passages, pack, prog){
 // to speak of (zh, ja) counts letters, so the row says characters; others count whitespace-separated words.
 const READ_MAX_S = 1200, READ_HIDE_MAX_MS = 120000, READ_ROW_MIN = 3;
 function readTimeKeep(secs, hiddenMs){ return secs > 0 && secs <= READ_MAX_S && !(hiddenMs > READ_HIDE_MAX_MS); }
-function passageUnits(p){
-  const text = String((p && p.text) || ""), sp = (text.match(/\s/g) || []).length;
-  if(sp * 25 < text.length) return { n: [...text].filter(ch => /[\p{L}\p{N}]/u.test(ch)).length, unit: "characters" };
+function passageUnits(p, pack){
+  const text = String((p && p.text) || "");
+  if(pack && pack.spaced === false) return { n: [...text].filter(ch => /[\p{L}\p{N}]/u.test(ch)).length, unit: "characters" };
   return { n: text.split(/\s+/).filter(Boolean).length, unit: "words" };
 }
 function readingSpeed(passages, pack, prog){
@@ -3128,7 +3132,7 @@ function readingSpeed(passages, pack, prog){
   for(const p of passages || []){
     const r = prog.read.done[p.id];
     if(!r || typeof r.t !== "number" || !(r.t > 0)) continue;
-    const u = passageUnits(p); if(!(u.n > 0)) continue;
+    const u = passageUnits(p, pack); if(!(u.n > 0)) continue;
     unit = u.unit; rates.push(u.n * 60 / r.t);
   }
   if(rates.length < READ_ROW_MIN) return null;
@@ -6141,7 +6145,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "3569921611-2359557";
+const VE_BUILD = "3496772686-2366463";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -8361,4 +8365,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2649285734-2358881-->
+<!--ve-build:3380801882-2365787-->
