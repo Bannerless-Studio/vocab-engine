@@ -77,6 +77,10 @@ def enrich_data(spec, pack, words, units=None, overrides=None, eta=None):
         else:
             pack[k] = v
     pack.pop("eta", None)
+    goals = (pack.get("progressMap") or {}).get("goals") if isinstance(pack.get("progressMap"), dict) else None
+    if eta is None and goals and pack.get("appView") == "v2":
+        # no measured constants: absent would fall back to the zh pace (a sibling would promise ~830 sessions), null shows none
+        eta = {"gain": [None] * len(goals), "known": None}
     if eta is not None:
         pack["eta"] = eta
     if units is not None:
@@ -124,6 +128,9 @@ def main(lang, repo, check=False, emit=None):
     out = pack_dir
     if emit:
         out = Path(emit)
+        src, dst = pack_dir.resolve(), out.resolve()
+        if dst == src or src in dst.parents:
+            raise SystemExit(f"enrich: --emit {emit} is the source pack dir or inside it (it would be deleted before the copy)")
         if out.exists():
             shutil.rmtree(out)
         shutil.copytree(pack_dir, out)

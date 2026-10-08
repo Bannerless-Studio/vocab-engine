@@ -3,10 +3,11 @@
 // [2] rendering on Today / Progress (owner export, done goal, open gate, two-digit display, 999+ cap); [3] flag-off byte-identical to base;
 // [4] the session-1 gate estimate vs the seeded 85% sim. --calibrate prints the calibration sims behind ETA_GAIN / ETA_KNOWN.
 // Run: node tests/eta_checks.js [--calibrate] [--sessions N]
-//      node tests/eta_checks.js --pack <packdir> (--calibrate | --gate) [--sessions N] [--seeds 5,6,7] [--write <file>]
+//      node tests/eta_checks.js --pack <packdir> (--calibrate | --gate) [--sessions N] [--seeds a,b,c] [--write <file>]
 //      --pack: any pack directory (a sibling's enriched pack, see packbuilder enrich --emit); fresh record, Today sessions at 85%
 //      right, passages read. --calibrate measures pack.eta {gain, known}; --gate checks the session-1 estimate (the pack's own eta,
 //      or the measured values with --calibrate) against the sim crossing: within +-30% on at least 2 of the 3 seeds, else null.
+//      Seeds: --calibrate 5,6,7; a bare --gate 8,9,10 so the gate runs out of sample; --seeds overrides both.
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -293,8 +294,10 @@ async function calibrate(){
 async function packMode(){
   const sim = require("./lib/sim_app.js");
   const arg = n => argv.includes(n) ? argv[argv.indexOf(n) + 1] : null;
-  const dir = arg("--pack"), N = +(arg("--sessions") || 240), seeds = (arg("--seeds") || "5,6,7").split(",").map(Number), ACC = 0.85, TOL = 0.30;
+  const dir = arg("--pack"), N = +(arg("--sessions") || 240), ACC = 0.85, TOL = 0.30;
   const calibrateMode = argv.includes("--calibrate");
+  // the gate runs out of sample: --calibrate measures on 5/6/7, a bare --gate checks the pack's eta on 8/9/10
+  const seeds = (arg("--seeds") || (calibrateMode ? "5,6,7" : "8,9,10")).split(",").map(Number);
   if(!calibrateMode && !argv.includes("--gate")){ console.error("--pack needs --calibrate or --gate"); process.exit(2); }
   const D = sim.loadPackDir(dir), P = D.PACK, S = sim.createSim(D), units = D.CHARACTERS || [], pass = D.PASSAGES || [];
   const LVS = VC.levelIds(P), BYL = VC.wordsByLevel(D.WORDS, P), goals = VC.progressMapGoals(P), cl = sim.clone;

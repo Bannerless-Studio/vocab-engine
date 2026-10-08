@@ -881,6 +881,20 @@ console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/bri
     if(!site){ skip(`[port] ${lang}: ../${lang}/pack/*.js not present`); continue; }
     const G = PS.withG(site), L = `[port] ${lang}`;
     const seed = PS.legacySeed(VC, site, 150, 7);
+    // old engines boot a record written under G byte-equal, a mark keeps every new field, and back on main
+    const boots = (raw, prog, L) => {
+        for(const { sha, eng } of OLD){
+          if(!eng){ skip(`${L}: engine ${sha} not in this checkout's history`); continue; }
+          const o = eng.bootProg(raw, site.pack);
+          check(`${L}: engine ${sha} boots a record written under G: no _invalid/_reset backup, progress byte-equal after its own save`, o.backupRaw === null && JSON.stringify(o.prog) === raw);
+          const q = clone(o.prog), id = Object.keys(q.w).find(k => q.w[k].p);
+          eng.markRec(q.w, id, true, true);
+          const others = Object.keys(q).filter(k => k !== "w").every(k => eq(q[k], prog[k])) && Object.keys(q.w).filter(k => k !== id).every(k => eq(q.w[k], prog.w[k]));
+          check(`${L}: a mark on ${sha} keeps every new field (p, f, day, pm, pv, read.done s / ls) and every other record`, others && eq(sans(q.w[id]), sans(prog.w[id])) && eq(q.w[id].p, prog.w[id].p));
+          const back = VC.bootProg(JSON.stringify(q), G.pack);
+          check(`${L}: and back on main from ${sha}: no backup, progress byte-equal`, back.backupRaw === null && JSON.stringify(back.prog) === JSON.stringify(q));
+        }
+    };
     let sim = null, err = null;
     const run = () => PS.playSessions(site, G.pack, G.words, seed, { sessions: 8, acc: 0.85, seed: 11 });
     await run().then(r => { sim = r; }, e => { err = e; }).then(() => {
@@ -889,17 +903,7 @@ console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/bri
       const done = Object.values((prog.read || {}).done || {});
       check(`${L}: 8 sessions at 85% under G (${sim.stat.items} items, ${Math.round(100 * sim.stat.right / sim.stat.items)}% right) write p on ${recs.filter(r => r.p).length} words, day/sn/pm/pv, read.done s and ls, session key only`,
         recs.some(r => r.p) && prog.day !== undefined && typeof prog.sn === "number" && Array.isArray(prog.pm) && prog.pv && done.some(d => typeof d.s === "number") && done.some(d => typeof d.ls === "number") && sim.keys.length === 1);
-      for(const { sha, eng } of OLD){
-        if(!eng){ skip(`${L}: engine ${sha} not in this checkout's history`); continue; }
-        const o = eng.bootProg(raw, site.pack);
-        check(`${L}: engine ${sha} boots a record written under G: no _invalid/_reset backup, progress byte-equal after its own save`, o.backupRaw === null && JSON.stringify(o.prog) === raw);
-        const q = clone(o.prog), id = Object.keys(q.w).find(k => q.w[k].p);
-        eng.markRec(q.w, id, true, true);
-        const others = Object.keys(q).filter(k => k !== "w").every(k => eq(q[k], prog[k])) && Object.keys(q.w).filter(k => k !== id).every(k => eq(q.w[k], prog.w[k]));
-        check(`${L}: a mark on ${sha} keeps every new field (p, f, day, pm, pv, read.done s / ls) and every other record`, others && eq(sans(q.w[id]), sans(prog.w[id])) && eq(q.w[id].p, prog.w[id].p));
-        const back = VC.bootProg(JSON.stringify(q), G.pack);
-        check(`${L}: and back on main from ${sha}: no backup, progress byte-equal`, back.backupRaw === null && JSON.stringify(back.prog) === JSON.stringify(q));
-      }
+      boots(raw, prog, L);
       // pre-port record (legacy streaks, no p)
       const lraw = JSON.stringify(seed), lm = VC.bootProg(lraw, G.pack), lo = OLD[0].eng ? OLD[0].eng.bootProg(lraw, site.pack) : null;
       const bad = [];
@@ -912,6 +916,27 @@ console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/bri
       const surplus = G.words.filter(w => w.ft === 2 && lm.prog.w[w.id] && lm.prog.w[w.id].s === 2).length;
       check(`${L}: known count on the pre-port record: old engine ${oldKnown} = main with pairs ${mainPairs}; with freqTiers ${mainTiers} = ${oldKnown} + ${surplus} peripheral words at streak 2`, oldKnown === mainPairs && mainTiers === oldKnown + surplus);
     });
+    // script primer sites: a run that learns the primer writes prog.script.u records (t/u) beside the word records
+    if(site.script){
+      let ss = null, serr = null;
+      await PS.playSessions(site, G.pack, G.words, seed, { sessions: 8, acc: 0.85, seed: 11, script: "learn" }).then(r => { ss = r; }, e => { serr = e; });
+      const LS = `${L} (primer learned)`;
+      if(serr || !ss){ check(`${LS}: 8 seeded sessions at 85% under G play to the end (${serr ? serr.message.slice(0, 160) : "no result"})`, false); }
+      else {
+        const sraw = ss.raw, sprog = JSON.parse(sraw), su = (sprog.script || {}).u || {}, sids = Object.keys(su);
+        check(`${LS}: ${sids.length} script records written (t on ${sids.filter(i => typeof su[i].t === "number").length}, u on ${sids.filter(i => typeof su[i].u === "number").length}), session key only`,
+          sids.length > 0 && sids.some(i => typeof su[i].t === "number") && sids.some(i => typeof su[i].u === "number") && ss.keys.length === 1);
+        boots(sraw, sprog, LS);
+        for(const { sha, eng } of OLD){
+          if(!eng) continue;
+          const q = clone(eng.bootProg(sraw, site.pack).prog), id = sids.find(i => su[i].u !== undefined) || sids[0];
+          eng.markRec(q.script.u, id, true, true);
+          const keep = Object.keys(q).filter(k => k !== "script").every(k => eq(q[k], sprog[k])) && Object.keys(q.script.u).filter(k => k !== id).every(k => eq(q.script.u[k], su[k]));
+          check(`${LS}: a mark on script unit ${id} on ${sha} keeps every other record and the unit's own non-streak fields, and back on main it is byte-equal`,
+            keep && eq(sans(q.script.u[id]), sans(su[id])) && JSON.stringify(VC.bootProg(JSON.stringify(q), G.pack).prog) === JSON.stringify(q));
+        }
+      }
+    }
   }
 }
 })().then(() => {

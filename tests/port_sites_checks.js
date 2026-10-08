@@ -120,16 +120,26 @@ async function site(dirName, code){
   const G = await S.bootWith(P, gp, 2, { passages: D.PASSAGES });
   const gs = G.gate(), gth = G.panel(); G.clickTab("progress");
   check(`${code}: gate holds ${LV[1]} at ${hold && hold.pct}% of ${LV[0]}: sentence "${gs}" on Today and Progress, Learn teaches no ${LV[1]} word`,
-    !!hold && hold.lv === LV[1] && /^\S+ opens at 70% of \S+ known\. Now \d+%, ≈ \d+ sessions?\.$/.test(gs) && gth.includes(esc(gs)) && G.panel().includes(esc(gs)) && VC.nextNewSetOpen(D.WORDS, P, gp, units) === null, gth.slice(0, 300));
+    !!hold && hold.lv === LV[1] && /^\S+ opens at 70% of \S+ known\. Now \d+%\.$/.test(gs) && !gs.includes("≈") && gth.includes(esc(gs)) && G.panel().includes(esc(gs)) && VC.nextNewSetOpen(D.WORDS, P, gp, units) === null, gth.slice(0, 300));
   const open = seedLevel(D, S, 1, Math.ceil(0.7 * BY[LV[0]].length) + 3);
   check(`${code}: gate open at 70%: no hold, no sentence`, VC.levelGateHold(D.WORDS, P, open, units) === null && (await S.bootWith(P, open, 2, { passages: D.PASSAGES })).gate() === null);
 
-  // ETA: constants fall back to zh's; a null pack value shows no estimate
-  const cg = VC.currentGoal(VC.normalizeProg({ placedOnce: true }, P), P, D.WORDS, units, D.PASSAGES), ctx = { pack: P, words: D.WORDS, units, passages: D.PASSAGES };
+  // ETA: the enriched pack carries no estimate (no tools/eta.json: eta = all null, never zh's pace); measured values show one
+  const goalsN = VC.progressMapGoals(P).length, fresh = VC.normalizeProg({ placedOnce: true }, P);
+  const cg = VC.currentGoal(fresh, P, D.WORDS, units, D.PASSAGES), ctx = { pack: P, words: D.WORDS, units, passages: D.PASSAGES };
+  check(`${code}: enriched eta without tools/eta.json = ${JSON.stringify(P.eta)}: no goal estimate (goal ${cg && cg.i + 1}), no gate estimate, Today / Progress carry no "≈"`,
+    !!P.eta && P.eta.gain.length === goalsN && P.eta.gain.every(v => v === null) && P.eta.known === null
+    && Array.from({ length: goalsN }, (_, g) => VC.sessionsToGoX({}, g, goalsN, ctx)).every(v => v === null) && VC.levelOpensIn(D.WORDS, P, gp, units) === null
+    && !(await S.bootWith(P, fresh, 1, { passages: D.PASSAGES })).panel().includes("≈"));
   const withEta = Object.assign(clone(P), { eta: { gain: [0.01, null, 0.02], known: null } });
   const ctx2 = Object.assign({}, ctx, { pack: withEta });
-  check(`${code}: eta absent -> zh constants (goal estimate ${VC.sessionsToGoX({}, 0, 3, ctx)}); null gain / known -> no estimate`,
-    Number.isFinite(VC.sessionsToGoX({}, 0, 3, ctx)) && VC.sessionsToGoX({}, 0, 3, ctx2) !== null && VC.sessionsToGoX({}, 1, 3, ctx2) === null && VC.levelOpensIn(D.WORDS, withEta, gp, units) === null && VC.levelOpensIn(D.WORDS, P, gp, units) >= 1);
+  const measured = Object.assign(clone(P), { eta: { gain: [0.01, 0.01, 0.01], known: 5 } });
+  check(`${code}: measured eta -> estimates (goal ${VC.sessionsToGoX({}, 0, goalsN, Object.assign({}, ctx, { pack: measured }))}, gate ${VC.levelOpensIn(D.WORDS, measured, gp, units)}); null gain / known -> none; eta key absent -> the zh constants`,
+    Number.isFinite(VC.sessionsToGoX({}, 0, goalsN, Object.assign({}, ctx, { pack: measured }))) && VC.levelOpensIn(D.WORDS, measured, gp, units) >= 1
+    && VC.sessionsToGoX({}, 0, 3, ctx2) !== null && VC.sessionsToGoX({}, 1, 3, ctx2) === null && VC.levelOpensIn(D.WORDS, withEta, gp, units) === null
+    && Number.isFinite(VC.sessionsToGoX({}, 0, goalsN, Object.assign({}, ctx, { pack: (({ eta, ...rest }) => rest)(P) }))));
+  const M = await S.bootWith(measured, gp, 2, { passages: D.PASSAGES });
+  check(`${code}: gate sentence with a measured estimate ends "≈ N sessions"`, /^\S+ opens at 70% of \S+ known\. Now \d+%, ≈ \d+ sessions?\.$/.test(M.gate()), M.gate());
   const N = await S.bootWith(withEta, gp, 2, { passages: D.PASSAGES });
   check(`${code}: gate sentence without an estimate ends "Now N%."`, /^\S+ opens at 70% of \S+ known\. Now \d+%\.$/.test(N.gate()), N.gate());
 }

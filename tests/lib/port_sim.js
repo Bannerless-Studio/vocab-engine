@@ -16,7 +16,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 function tryConst(file, name){ try { return loadConst(file, name); } catch(e){ return undefined; } }
 // null when the sibling checkout (or its generated pack/*.js) is not beside this repo
 function loadSibling(lang){
-  const dir = path.join(ROOT, "..", lang, "pack");
+  const dir = path.join(process.env.LANG_REPOS_DIR || path.join(ROOT, ".."), lang, "pack");
   if(!["pack.js", "words.js", "sentences.js"].every(f => fs.existsSync(path.join(dir, f)))) return null;
   return { lang, dir, pack: loadConst(path.join(dir, "pack.js"), "PACK"), words: loadConst(path.join(dir, "words.js"), "WORDS"),
     sentences: loadConst(path.join(dir, "sentences.js"), "SENTENCES"), passages: tryConst(path.join(dir, "sentences.js"), "PASSAGES") || [],
@@ -211,8 +211,8 @@ return {
     const ans = mulberry32(o.seed * 7919 + 1), stat = { items: 0, right: 0 };
     for(let sn = 0; sn < o.sessions; sn++){
       NOW += 60 * 60 * 1000;
-      // the script primer's one-time choice (a learner who reads the script skips it)
-      if(/id="scriptSkip"/.test(api.panel())) api.el("scriptSkip").click();
+      // the script primer's one-time choice: skipped by default (a learner who reads the script), learned with opts.script "learn"
+      if(/id="scriptSkip"/.test(api.panel())) api.el(o.script === "learn" ? "scriptLearn" : "scriptSkip").click();
       if(!/id="go"/.test(api.panel())) throw new Error(site.lang + " session " + (sn + 1) + ": no Start button: " + api.panel().replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 500));
       api.el("go").click();
       for(let guard = 0; guard < 3000; guard++){

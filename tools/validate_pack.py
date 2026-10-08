@@ -213,6 +213,8 @@ def check_pack(pack, rep):
         else:
             if "gain" in et and not (isinstance(et["gain"], list) and et["gain"] and all(v is None or pos(v) for v in et["gain"])):
                 rep.err("pack.eta.gain must be a non-empty list of positive numbers or null")
+            elif "gain" in et and isinstance(pm, dict) and isinstance(pm.get("goals"), list) and len(et["gain"]) != len(pm["goals"]):
+                rep.err(f"pack.eta.gain has {len(et['gain'])} entries, pack.progressMap has {len(pm['goals'])} goals")
             if "known" in et and not (et["known"] is None or pos(et["known"])):
                 rep.err("pack.eta.known must be a positive number or null")
     # glossStyle (docs/PACK_SCHEMA.md "glossStyle"): a display style of the glossFocus renderer.

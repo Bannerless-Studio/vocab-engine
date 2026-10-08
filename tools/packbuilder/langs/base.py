@@ -173,7 +173,7 @@ class LanguageSpec:
     has_lessons = False
     # `packbuilder enrich` (core/enrich.py): the generic port flag set (vocab-engine .cache/briefs/port-plan.md §1 "G")
     port_typed_from = ["written"]       # pack.typedFrom; ja adds "pron"
-    port_characters = False             # ja only, once pairs works with script units (E3): the characters lag set + levelExam
+    port_characters = False             # ja only, switched on in port wave 4 (ja): the characters lag set + levelExam
     port_goals = [                      # pack.progressMap goals, upTo = the 1st, 2nd and 3rd level id
         "survive a trip: greet, order, count, buy",
         "daily life: directions, simple chat, short notices",
