@@ -896,7 +896,7 @@ console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/bri
         }
     };
     let sim = null, err = null;
-    const run = () => PS.playSessions(site, G.pack, G.words, seed, { sessions: 8, acc: 0.85, seed: 11 });
+    const run = () => PS.playSessions(site, G.pack, G.words, seed, { sessions: 8, acc: 0.85, seed: 11, characters: G.characters });
     await run().then(r => { sim = r; }, e => { err = e; }).then(() => {
       if(err || !sim){ check(`${L}: 8 seeded sessions at 85% under G play to the end (${err ? err.message.slice(0, 160) : "no result"})`, false); return; }
       const raw = sim.raw, prog = JSON.parse(raw), recs = Object.values(prog.w);
@@ -916,10 +916,24 @@ console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/bri
       const surplus = G.words.filter(w => w.ft === 2 && lm.prog.w[w.id] && lm.prog.w[w.id].s === 2).length;
       check(`${L}: known count on the pre-port record: old engine ${oldKnown} = main with pairs ${mainPairs}; with freqTiers ${mainTiers} = ${oldKnown} + ${surplus} peripheral words at streak 2`, oldKnown === mainPairs && mainTiers === oldKnown + surplus);
     });
+    // characters set (ja): the run above writes unit records with their own wm / ws streaks (p) and f; the old cores know them from zh
+    if(G.characters && sim && sim.raw){
+      const craw = sim.raw, cprog = JSON.parse(craw), cc = (cprog.chars || {}).c || {}, cids = Object.keys(cc), LC = `${L} (characters set)`;
+      check(`${LC}: ${cids.length} unit records written (wm on ${cids.filter(i => cc[i].p && cc[i].p.wm).length}, ws on ${cids.filter(i => cc[i].p && cc[i].p.ws).length}, f on ${cids.filter(i => typeof cc[i].f === "number").length})`,
+        cids.length > 0 && cids.some(i => cc[i].p && cc[i].p.wm) && cids.some(i => cc[i].p && cc[i].p.ws) && cids.every(i => typeof cc[i].f === "number"));
+      for(const { sha, eng } of OLD){
+        if(!eng) continue;
+        const q = clone(eng.bootProg(craw, site.pack).prog), id = cids.find(i => cc[i].p && cc[i].p.wm && cc[i].p.ws) || cids[0];
+        eng.markRec(q.chars.c, id, true, true);
+        const keep = Object.keys(q).filter(k => k !== "chars").every(k => eq(q[k], cprog[k])) && Object.keys(q.chars.c).filter(k => k !== id).every(k => eq(q.chars.c[k], cc[k]));
+        check(`${LC}: a mark on unit ${id} on ${sha} keeps its p and f and every other record, and back on main it is byte-equal`,
+          keep && eq(q.chars.c[id].p, cc[id].p) && q.chars.c[id].f === cc[id].f && JSON.stringify(VC.bootProg(JSON.stringify(q), G.pack).prog) === JSON.stringify(q));
+      }
+    }
     // script primer sites: a run that learns the primer writes prog.script.u records (t/u) beside the word records
     if(site.script){
       let ss = null, serr = null;
-      await PS.playSessions(site, G.pack, G.words, seed, { sessions: 8, acc: 0.85, seed: 11, script: "learn" }).then(r => { ss = r; }, e => { serr = e; });
+      await PS.playSessions(site, G.pack, G.words, seed, { sessions: 8, acc: 0.85, seed: 11, script: "learn", characters: G.characters }).then(r => { ss = r; }, e => { serr = e; });
       const LS = `${L} (primer learned)`;
       if(serr || !ss){ check(`${LS}: 8 seeded sessions at 85% under G play to the end (${serr ? serr.message.slice(0, 160) : "no result"})`, false); }
       else {

@@ -619,10 +619,11 @@ class Japanese(LanguageSpec):
     tts = "ja-JP"
     stt = "ja-JP"
     tatoeba_code = "jpn"
-    # enrich (core/enrich.py): typed asks cover the written form and the reading; the zh-style characters set and
-    # levelExam stay off until pairs works with script units (port plan E3), then flip this to True
+    # enrich (core/enrich.py): typed asks cover the written form and the reading; the zh-style characters set
+    # (learn lag, start 60, ramp 3/5/8, bareBy typed, bareByPair) and levelExam (A1 reading, A2/B1 characters)
+    # switched on in port wave 4; bare 6 stays (the pack's own, zh is 5)
     port_typed_from = ["written", "pron"]
-    port_characters = False
+    port_characters = True
 
     # custom tagger (spacy_model None + tag_texts): SudachiPy, see tagger_desc
     spacy_model = None

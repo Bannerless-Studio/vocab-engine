@@ -25,18 +25,23 @@ function loadSibling(lang){
 }
 
 // Flags every ported site ends with (.cache/briefs/port-plan.md section 1, G). ja types the reading too.
-// Not in G here: eta (not in the engine yet), levelExam and the characters set (ja only, wave 4, need pairs with script units).
+// ja adds the characters set + levelExam on top (wave 4); eta is not in G here (tests/port_sites_checks.js covers it).
 const PERIPHERAL_SHARE = [0.10, 0.25, 0.40];   // per level index A1 A2 B1: the least frequent share of the level
 const AMBIENT_RANK = 100;
 function genericFlags(pack, lang){
   const ids = pack.levels.map(l => String(l.id));
   const lbl = { A1: "survive a trip: greet, order, count, buy", A2: "daily life: directions, simple chat, short notices", B1: "follow a slow drama with subtitles" };
-  return {
+  const f = {
     dayAware: true, typedFrom: lang === "japanese" ? ["written", "pron"] : ["written"], glossFocus: true, glossStyle: "primary",
     helpClose: true, readAnswerBlock: true, optsMix: true, pauseNew: true, listenQuestions: "all", readRotation: true, wordsBy: "typed",
     progressMap: { goals: ids.map(id => ({ upTo: id, label: lbl[id] || id })) },
     pairs: true, freqTiers: true, progressView: "v2", appView: "v2", levelGate: 0.7,
   };
+  if(lang === "japanese"){
+    f.characters = Object.assign({}, pack.characters, { learn: "lag", start: 60, ramp: [3, 5, 8], bareBy: "typed", bareWords: true, bareByPair: true });
+    f.levelExam = { [ids[0]]: "pinyin", [ids[1]]: "characters", [ids[2]]: "characters" };
+  }
+  return f;
 }
 // ft from the word's frequency rank: ambient rank <= 100, peripheral the least frequent share of each level, else core
 function withTiers(pack, words){
@@ -48,8 +53,14 @@ function withTiers(pack, words){
   });
   return out;
 }
+// a unit's ft is the lowest of its words (core/enrich.py)
+function withUnitTiers(units, words){
+  const ft = Object.fromEntries(words.map(w => [w.id, w.ft]));
+  return units && clone(units).map(u => { const t = u.words.filter(i => i in ft).map(i => ft[i]); return Object.assign(u, { ft: t.length ? Math.min(...t) : 1 }); });
+}
 function withG(site){
-  return { pack: Object.assign(clone(site.pack), genericFlags(site.pack, site.lang)), words: withTiers(site.pack, site.words) };
+  const words = withTiers(site.pack, site.words);
+  return { pack: Object.assign(clone(site.pack), genericFlags(site.pack, site.lang)), words, characters: withUnitTiers(site.characters, words) };
 }
 
 function mulberry32(seed){
@@ -204,7 +215,7 @@ return {
 };`;
     const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS","SCRIPT"];
     const args = [window.SpeechSynthesisUtterance, document, window, { userAgent: "PortSim/1.0" }, undefined, st.ls, st.ss, () => ({ matches: false }), fn => setTimeout(fn, 0),
-      function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, words, site.sentences, site.lessons, site.passages, site.characters, site.script];
+      function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, words, site.sentences, site.lessons, site.passages, o.characters || site.characters, site.script];
     const api = new Function(...names, fnBody)(...args);
     await tick(); await tick();
     const byId = Object.fromEntries(words.map(w => [w.id, w]));

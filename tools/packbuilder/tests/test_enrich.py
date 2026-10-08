@@ -92,13 +92,16 @@ class Flags(unittest.TestCase):
         self.assertNotIn("characters", f)
         self.assertNotIn("levelExam", f)
 
-    def test_ja_typed_from_and_characters_gated(self):
+    def test_ja_typed_from_and_characters_set(self):
         ja = get_spec("ja")
-        self.assertEqual(ja.port_flags()["typedFrom"], ["written", "pron"])
+        f = ja.port_flags()
+        self.assertEqual(f["typedFrom"], ["written", "pron"])
+        self.assertEqual(f["characters"], {"learn": "lag", "start": 60, "ramp": [3, 5, 8], "bareBy": "typed", "bareWords": True, "bareByPair": True})
+        ja.port_characters = False
         self.assertNotIn("characters", ja.port_flags())
+        self.assertNotIn("levelExam", ja.port_flags())
         ja.port_characters = True
         f = ja.port_flags()
-        self.assertEqual(f["characters"]["learn"], "lag")
         self.assertEqual(f["levelExam"], {"A1": "pinyin", "A2": "characters", "B1": "characters"})
 
     def test_characters_set_merges_into_existing_block(self):

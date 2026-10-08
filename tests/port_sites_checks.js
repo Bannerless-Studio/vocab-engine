@@ -65,7 +65,10 @@ async function site(dirName, code){
   const flags = ["dayAware", "glossFocus", "helpClose", "readAnswerBlock", "optsMix", "pauseNew", "readRotation", "pairs", "freqTiers"];
   check(`${code}: generic flag set (typedFrom ${JSON.stringify(P.typedFrom)}, goals ${P.progressMap && P.progressMap.goals.map(g => g.upTo)}, levelGate ${P.levelGate})`,
     flags.every(k => P[k] === true) && P.glossStyle === "primary" && P.wordsBy === "typed" && P.listenQuestions === "all" && P.progressView === "v2" && P.appView === "v2" && P.levelGate === 0.7
-    && JSON.stringify(P.typedFrom) === JSON.stringify(code === "ja" ? ["written", "pron"] : ["written"]) && P.progressMap.goals.length === 3 && !P.levelExam && (code === "ja" || !P.characters));
+    && JSON.stringify(P.typedFrom) === JSON.stringify(code === "ja" ? ["written", "pron"] : ["written"]) && P.progressMap.goals.length === 3
+    && (code === "ja" ? JSON.stringify(P.levelExam) === JSON.stringify({ [LV[0]]: "pinyin", [LV[1]]: "characters", [LV[2]]: "characters" })
+      && P.characters.learn === "lag" && P.characters.start === 60 && JSON.stringify(P.characters.ramp) === "[3,5,8]" && P.characters.bareBy === "typed" && P.characters.bareWords === true && P.characters.bareByPair === true
+      : !P.levelExam && !P.characters));
   check(`${code}: engine reads pairs, freqTiers, levelGate, progressView, appView as on`, VC.pairsOn(P) && VC.freqTiersOn(P) && VC.levelGateOn(P) && VC.progressViewOn(P) && VC.appViewOn(P));
 
   const val = require("child_process").spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), E.dir], { encoding: "utf8" });
@@ -91,9 +94,41 @@ async function site(dirName, code){
     check(`${code}: 3 Today sessions learning the script first run without throwing (script ${sp && sp.script ? JSON.stringify(Object.keys(sp.script)) : "-"}, ${sp ? Object.keys(sp.w).length : 0} words)`, !serr, serr && (serr.stack || serr.message));
   }
   const prog = api.getProg(), recs = Object.values(prog.w);
-  check(`${code}: sessions counted (sn ${prog.sn}), ${recs.length} words recorded`, prog.sn === SESSIONS && recs.length >= SESSIONS * 8);
+  check(`${code}: sessions counted (sn ${prog.sn}), ${recs.length} words recorded`, prog.sn === SESSIONS && recs.length >= Math.min(SESSIONS * 8, (P.characters && P.characters.start) || Infinity));
   const withP = recs.filter(r => r.p && Object.keys(r.p).length >= 1).length;
   check(`${code}: pair streaks p written on answers (${withP} of ${recs.length} records)`, withP >= recs.length * 0.9);
+  if(code === "ja"){
+    // characters set (docs/PACK_SCHEMA.md "learn" / "start and ramp"): 60 words first, then unit sets of 3, 5, 8; units carry their own pair streaks
+    const cc = (prog.chars && prog.chars.c) || {}, uids = Object.keys(cc), A1 = BY[LV[0]];
+    check(`${code}: characters lag layout on: ${recs.length} words learned before the first unit set (start 60), ${uids.length} unit records after ${SESSIONS} sessions`,
+      VC.lagOn(P) && recs.length >= 60 && uids.length > 0 && [3, 8, 16].includes(uids.length) && uids.every(i => units.some(u => u.id === i)));
+    check(`${code}: unit records carry f and the unit's own wm / ws streaks (${uids.filter(i => cc[i].p && cc[i].p.wm).length} wm, ${uids.filter(i => cc[i].p && cc[i].p.ws).length} ws of ${uids.length})`,
+      uids.every(i => typeof cc[i].f === "number") && uids.some(i => cc[i].p && cc[i].p.wm) && uids.some(i => cc[i].p && cc[i].p.ws));
+    const mkp = (nw, nu) => {
+      const q = VC.normalizeProg({ placedOnce: true, soundsOpened: true, sessions: 30 }, P); q.chars = q.chars || { v: 1, c: {} };
+      A1.slice(0, nw).forEach(w => { q.w[w.id] = { r: 6, w: 0, s: 5, t: S.DAY_N - 1 }; }); q.sets[LV[0]] = Math.floor(nw / 10);
+      units.filter(u => u.words.every(i => q.w[i])).slice(0, nu).forEach(u => { q.chars.c[u.id] = { r: 3, w: 0, s: 3, f: 1 }; });
+      return q;
+    };
+    const stg = (nw, nu) => { const q = mkp(nw, nu), st = VC.lagStage(P, D.WORDS, units, q), cs = VC.lagCharSet(P, D.WORDS, units, q); return [st && st.kind, cs && cs.ids.length]; };
+    check(`${code}: lag sets: words until 60 learned (${stg(59, 0)}), then a unit set of 3 (${stg(60, 0)}), 5 (${stg(60, 3)}), 8 (${stg(60, 8)})`,
+      stg(59, 0)[0] === "words" && JSON.stringify(stg(60, 0)) === '["chars",3]' && JSON.stringify(stg(60, 3)) === '["chars",5]' && JSON.stringify(stg(60, 8)) === '["chars",8]');
+    // levelExam: a "characters" level counts a word known only when its unit's own wm pair is at 2; the reading level keeps the word rule
+    const byW = VC.unitByWord(units), pickW = lv => BY[lv].find(w => byW.get(w.id)), w1 = pickW(LV[0]), w2 = pickW(LV[1]), w3 = pickW(LV[2]);
+    const full = w => ({ r: 6, w: 0, s: 5, p: Object.fromEntries(VC.wordPairs(w, P).map(k => [k, [3, 3]])) });
+    const ex = (w, wm) => { const q = VC.normalizeProg({ placedOnce: true }, P); q.chars = { v: 1, c: {} }; if(wm !== null) q.chars.c[byW.get(w.id).id] = { r: 3, w: 0, s: 3, p: { wm: [wm, 3] } }; return VC.wordKnownX(full(w), w, P, q, byW); };
+    check(`${code}: levelExam: ${LV[0]} word known on the word rule (${ex(w1, 0)}); ${LV[1]} / ${LV[2]} word unknown until its unit's wm is 2 (${ex(w2, 0)}/${ex(w2, 1)}/${ex(w2, 2)}, ${ex(w3, 1)}/${ex(w3, 2)}), unknown with no unit record (${ex(w2, null)})`,
+      VC.levelExamOn(P) && ex(w1, 0) === true && ex(w1, null) === true && ex(w2, 0) === false && ex(w2, 1) === false && ex(w2, 2) === true && ex(w2, null) === false && ex(w3, 1) === false && ex(w3, 2) === true);
+    // gate on a characters level: A2 words all at the word bar, units untouched -> B1 waits; with the units' wm at 2 it opens
+    const g2 = seedLevel(D, S, 2, BY[LV[1]].length); g2.chars = g2.chars || { v: 1, c: {} };
+    const g2h = clone(g2), hx = VC.levelGateHold(D.WORDS, P, g2, units), gx = await S.bootWith(P, clone(g2), 2, { passages: D.PASSAGES }), gxs = gx.gate();
+    units.filter(u => String(u.lv) === LV[1]).forEach(u => { g2.chars.c[u.id] = { r: 3, w: 0, s: 3, f: 1, p: { wm: [2, S.DAY_N - 1] } }; });
+    const ho = VC.levelGateHold(D.WORDS, P, g2, units);
+    check(`${code}: gate on a characters level: ${LV[2]} waits at ${hx && hx.pct}% of ${LV[1]} (words learned, units unread), open once the units' wm is 2 (${ho ? ho.pct + "%" : "open"})`,
+      !!hx && hx.lv === LV[2] && hx.pct < 70 && ho === null);
+    check(`${code}: gate sentence on the characters level: "${gxs}" on Today and Progress, Learn teaches no ${LV[2]} word`,
+      new RegExp(`^${LV[2]} opens at 70% of ${LV[1]} known\\. Now ${hx.pct}%\\.$`).test(gxs) && gx.panel().includes(esc(gxs)) && VC.nextNewSetOpen(D.WORDS, P, g2h, units) === null);
+  }
   check(`${code}: typed asks answered as intended (${S.stats.typedMatched} of ${S.stats.typedRight}; the sim finds the accepted string through the item's own check)`, S.stats.typedRight === 0 || S.stats.typedMatched / S.stats.typedRight >= 0.8);
   // render: Today, Progress, Read, v2 chrome markers
   const T = await S.bootWith(P, clone(prog), 3, { passages: D.PASSAGES });
