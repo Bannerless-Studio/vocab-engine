@@ -100,7 +100,7 @@ function makeFakeDom(){
     querySelector(){ return null; }
     // Only a createElement scratch node (announce) parses: the elements its selectors name are cut from its html, textContent is the tags stripped.
     querySelectorAll(sel){
-      if(!this._tmp) return [];
+      if(!this._tmp && !/data-(pcue|showw)/.test(sel)) return []; // the panel answers only the hint-link query (dropStimLinks)
       const self = this, out = [];
       for(const part of sel.split(",")){
         const m = /^(?:\.([\w-]+))?\[([\w-]+)\]$/.exec(part.trim()); if(!m) continue;
@@ -451,7 +451,7 @@ function runItem(api, expr, right){
     const bs = api.el("o").children; (right ? bs.find(b => b.dataset.v === String(it.a)) : bs.find(b => b.dataset.v !== String(it.a))).click();
     r.marks = bs.map(b => [...b._classes].join(" "));
   }
-  r.head = api.el("rv").innerHTML; r.tail = api.el("rvtail") ? api.el("rvtail").innerHTML : ""; r.rv = r.head + r.tail; r.nx = api.el("nx").style.display; r.score2 = api.el("score").textContent; r.cue = !!it.cueUnit; r.hear = !!(it.onReveal && it.revealHear);
+  r.after = api.panel(); r.head = api.el("rv").innerHTML; r.tail = api.el("rvtail") ? api.el("rvtail").innerHTML : ""; r.rv = r.head + r.tail; r.nx = api.el("nx").style.display; r.score2 = api.el("score").textContent; r.cue = !!it.cueUnit; r.hear = !!(it.onReveal && it.revealHear);
   return r;
 }
 async function runKinds(pack, rec, seed, o){
@@ -499,7 +499,9 @@ else {
   const typed = KINDS.map(([n]) => n).filter(n => ON[n].right.kind === "type");
   check(`every typed miss: "You typed zzz" (${typed.length} typed kinds)`, typed.every(n => ON[n].wrong.rv.includes('<div class="diff">You typed zzz</div>') && !/you typed:/.test(ON[n].wrong.rv)));
   check('hear items: "You heard" (no colon)', ["hear word", "hear sentence"].every(n => ON[n].right.rv.startsWith('<div class="q">You heard</div>') && !/You heard:/.test(ON[n].right.rv)));
-  check('pattern cue: "Show meaning" button, aria-label kept', /<button type="button" class="showw" style="margin:0" data-pcue="[^"]+" aria-label="Show meaning">Show meaning<\/button>/.test(ON["pattern, first meeting"].right.q) && />meaning<\/button>/.test(OFFK["pattern, first meeting"].right.q));
+  check('pattern cue on a later meeting: "Show meaning" button, aria-label kept; flag off ">meaning<"', /<button type="button" class="showw" style="margin:0" data-pcue="[^"]+" aria-label="Show meaning">Show meaning<\/button>/.test(ON["pattern, met before"].right.q) && />meaning<\/button>/.test(OFFK["pattern, met before"].right.q));
+  { const q = ON["pattern, first meeting"].right.q, en = (OFFK["pattern, first meeting"].right.q.match(/data-pcue="([^"]*)"/) || [])[1];
+    check("pattern cue on the first meeting: the English open in the cue block, no link; flag off keeps the tap", !!en && q.includes(`<div class="q cue">${en}</div>`) && !/data-pcue/.test(q) && !/Show meaning/.test(q) && /data-pcue/.test(OFFK["pattern, first meeting"].right.q)); }
 }
 
 console.log("\n[B3] stimulus, options and reading aids equal flag off minus the chrome (plan §14)");
@@ -509,7 +511,9 @@ if(ON){
   for(const [n] of KINDS) for(const v of ["right", "wrong"]){
     const a = ON[n][v], b = OFFK[n][v];
     if(a.label !== b.label) bad.push(`${n} label`);
-    if(stimOf(a.q).replace(">Show meaning</button>", ">meaning</button>") !== noKtag(stimOf(b.q))) bad.push(`${n} stimulus`);
+    // fb51: a pattern's first meeting shows the English open (checked in B2); the rest of its stimulus still equals flag off
+    const noCue = h => n === "pattern, first meeting" ? h.replace(/<div class="q cue">[\s\S]*?<\/div>/, "") : h;
+    if(noCue(stimOf(a.q).replace(">Show meaning</button>", ">meaning</button>")) !== noCue(noKtag(stimOf(b.q)))) bad.push(`${n} stimulus`);
     if(a.opts.length !== b.opts.length || a.opts.some((o, i) => { if(o === b.opts[i]){ if(o.includes(GX)) keptN++; return false; } if(o === primOf(b.opts[i])){ primN++; return false; } return true; })) bad.push(`${n} options`);
     if(JSON.stringify(aids(a.q)) !== JSON.stringify(aids(b.q)) || JSON.stringify(aids(a.rv)) !== JSON.stringify(aids(b.rv))) bad.push(`${n} reading aids`);
     if(JSON.stringify(a.marks) !== JSON.stringify(b.marks) || a.score !== b.score || a.score2 !== b.score2 || a.nx !== b.nx) bad.push(`${n} marks/score/Next`);
@@ -564,13 +568,13 @@ if(ON){
   check("a word reveal outside the drill (the drill-end Missed box) keeps the row's speaker icon", /<span class="rvi">/.test(ON.rawReveal));
   check("flag off: the centred Replay row as before", /<div class="rvsay"><button type="button" class="replay" id="rvp"/.test(OFFK["recall"].right.rv));
   check("right answer (fb45): the examples open under the row, as on a miss, no Examples button, nothing hidden", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].right.rv) && !/rvxb|\shidden[\s>=]|Examples/.test(ON[n].right.rv)));
-  check("reveal order after any answer (fb45): the answer row stays in #rv, the examples move to the tail under Next", words.every(n => ["right", "wrong"].every(v => { const x = ON[n][v]; return /class="rvrow"/.test(x.head) && !/class="rvx"/.test(x.head) && x.tail.startsWith('<div class="rvx"><div class="sent'); })));
+  check("reveal order after any answer (fb51, reverses fb45): answer row then the open examples, both in #rv; no tail slot", words.every(n => ["right", "wrong"].every(v => { const x = ON[n][v]; return /class="rvrow"/.test(x.head) && x.head.indexOf('class="rvrow"') < x.head.indexOf('<div class="rvx"><div class="sent') && x.tail === ""; })));
   { const { api } = await bootWith(PACK, unpaused(), 21, { patterns: true }); api.ev(PICK); runItem(api, "recallItem(__W)", true);
     const h = api.panel(), pos = id => h.indexOf(`id="${id}"`);
-    check("DOM order: answer row (#rv), then Next (#nx), then the examples tail (#rvtail)", pos("rv") > 0 && pos("rv") < pos("nx") && pos("nx") < pos("rvtail") && api.el("rvtail").innerHTML.includes('class="rvx"') && !api.el("rv").innerHTML.includes('class="rvx"'));
-    check("a missed item's reveal (typed, wrong) keeps the same order", (() => { const r = runItem(api, "typeItem(__W)", false); const g = api.panel(); return !!r && g.indexOf('id="nx"') < g.indexOf('id="rvtail"') && api.el("rvtail").innerHTML.includes('class="rvx"') && !api.el("rv").innerHTML.includes('class="rvx"'); })()); }
+    check("DOM order: answer row and examples (#rv), then Next (#nx) last, no #rvtail", pos("rv") > 0 && pos("rv") < pos("nx") && !/rvtail/.test(h) && api.el("rv").innerHTML.includes('class="rvx"') && h.indexOf('id="nx"') > h.indexOf('id="rv"'));
+    check("a missed item's reveal (typed, wrong) keeps the same order", (() => { const r = runItem(api, "typeItem(__W)", false); const g = api.panel(); return !!r && g.indexOf('id="rv"') < g.indexOf('id="nx"') && api.el("rv").innerHTML.includes('class="rvx"') && !/rvtail/.test(g); })()); }
   { const { api } = await bootWith(OFF, unpaused(), 21, { patterns: true }); api.ev(PICK); runItem(api, "recallItem(__W)", true);
-    check("RTL tail: .rvtail carries the .reveal font size and the data-tlrtl right-align rule", /\.rvtail\{font-size:15px\}/.test(appHtml) && /:root\[data-tlrtl\] \.reveal,:root\[data-tlrtl\] \.rvtail,:root\[data-tlrtl\] \.rvb\{text-align:right\}/.test(appHtml));
+    check("no dead .rvtail rules: the examples sit in .reveal, which carries the font size and the data-tlrtl right-align rule", !/rvtail/.test(appHtml) && /\.reveal\{[^}]*font-size:15px/.test(appHtml) && /:root\[data-tlrtl\] \.reveal,:root\[data-tlrtl\] \.rvb\{text-align:right\}/.test(appHtml));
     check("flag off: no rvtail slot, the reveal block as before", !/rvtail/.test(api.panel())); }
   check("wrong answer (and every You typed): the examples open", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].wrong.rv) && !/Examples?:/.test(ON[n].wrong.rv) && !/rvxb/.test(ON[n].wrong.rv)));
   const cued = KINDS.map(([n]) => n).filter(n => ON[n].right.cue || ON[n].wrong.cue);
@@ -583,7 +587,7 @@ if(ON){
   { const { api: lv } = await bootWith(PACK, unpaused(), 21, { patterns: true }); lv.ev(PICK);
     for(const [what, expr] of [["recall", "recallItem(__W)"], ["meaning MC", "readItem(__W)"]]){
       const r = runItem(lv, expr, true), live = lv.el("live") ? lv.el("live").textContent : null;
-      const rvh = lv.el("rv").innerHTML + lv.el("rvtail").innerHTML, ex = (rvh.slice(rvh.indexOf('<div class="rvx">')).match(/<ruby>([^<]+)/) || [])[1] || "";
+      const rvh = lv.el("rv").innerHTML, ex = (rvh.slice(rvh.indexOf('<div class="rvx">')).match(/<ruby>([^<]+)/) || [])[1] || "";
       check(`${what}: the live region on a right answer has the example text and no "Examples" label (${live === null ? "no live node" : live.length + " chars"})`, !!r && live !== null && live.length > 0 && !/Examples/.test(live) && !!ex && live.includes(ex)); }
   }
 }
@@ -1022,6 +1026,200 @@ console.log("\n[D2] fb48: placement reads the whole result (pack.placementWhole)
       check(`${sn}, flag off, ${rn}: result screen and stored record byte-identical to ${BASE_E}`, a.html === b.html && a.rec === b.rec && !/var\(--mute\)/.test(a.html));
     }
   }
+}
+
+const BASE_F = "143a674"; // main before fb50: the flag-off control for placementChars
+console.log("\n[D3] fb50: placement places the characters layer (pack.placementChars) + Today's Sounds hint");
+{
+  const oldOf = f => cp.execSync(`git -C "${ROOT}" show ${BASE_F}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+  let oldCore = null, oldHtml = null;
+  try {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avd-")); const f = path.join(dir, `core_${BASE_F}.js`);
+    fs.writeFileSync(f, oldOf("engine/core.js")); oldCore = require(f); oldHtml = oldOf("engine/app.html");
+    fs.rmSync(dir, { recursive: true, force: true });
+  } catch(e){ oldCore = null; }
+  const OFFC = packAsOf(PACK, BASE_F, { strip: ["placementChars"] });
+  check("pack.placementChars: on in the shipped pack, off in the control", PACK.placementChars === true && OFFC.placementChars === undefined && VC.placementCharsOn(PACK) && !VC.placementCharsOn(OFFC));
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
+  const RECS = {
+    "reported record": [1, 3, 2, 0, 2, 2, 2, 2, 2, 3, 1, 2, 0, 0, 0, 0],
+    "all right": N.slice(),
+    "first bucket 0": N.map((n, i) => i === 0 ? 0 : n),
+    "first bucket only": N.map((n, i) => i === 0 ? n : 0),
+    "poor": N.map((n, i) => i < 2 ? n : 0),
+  };
+  const place = async (pack, rec, r, o) => { const { api, st } = await bootWith(pack, rec, 13, o);
+    api.ev(`PL = { vocab:{items:[], i:0}, st: VC.strata(WORDS, PACK.placement, SIZE), res: ${JSON.stringify(r.map((x, i) => ({ r: x, n: N[i] })))} }; placeResult();`);
+    const html = api.panel(), prog = api.getProg(), rec2 = st.ls.getItem(VC.storageKey(pack));
+    api.clickTab("today");
+    return { html, rec: rec2, prog, today: api.panel() }; };
+  const owner2 = owner ? () => clone(owner) : null;
+  const sources = [["fresh record", () => null]].concat(owner2 ? [["owner export", owner2]] : []);
+  for(const [sn, mk] of sources){
+    const rep = await place(PACK, mk(), RECS["reported record"]);
+    const line = (rep.html.match(/<p class="q" id="plChars">([^<]*)<\/p>/) || [])[1];
+    const n = VC.placedCharsThrough(PACK, CHARACTERS, rep.prog);
+    check(`${sn}, flag on, reported record: one line under the table "${line}"`, /^Characters: placed through HSK \d, set \d+$/.test(line || "") && n && line === `Characters: placed through HSK ${n.lv}, set ${n.set}` && rep.html.indexOf("</table>") < rep.html.indexOf('id="plChars"') && (rep.html.match(/id="plChars"/g) || []).length === 1);
+    check(`${sn}, flag on, reported record: unit records written provisional (${Object.keys(VC.charRecs(rep.prog)).length}), Learn teaches no placed unit`, Object.keys(VC.charRecs(rep.prog)).length > 0 && Object.values(VC.charRecs(rep.prog)).some(r => r.prov === 1));
+    const none = await place(PACK, mk(), RECS["first bucket 0"]);
+    check(`${sn}, flag on, first bucket 0: no line (nothing placed)`, !/plChars/.test(none.html));
+    const one = await place(PACK, mk(), RECS["first bucket only"]);
+    check(`${sn}, flag on, first bucket only: ${/plChars/.test(one.html) ? "line present: " + one.html.match(/id="plChars">([^<]*)/)[1] : "no line (first set not whole)"}`, true);
+    // Today's Sounds hint
+    check(`${sn}, flag on, reported record: Today has no "Start the first lesson" hint`, !/id="hintSounds"/.test(rep.today) && /id="go"/.test(rep.today));
+    check(`${sn}, flag on, reported record: Sounds stays unmarked (prog.soundsOpened ${rep.prog.soundsOpened}, lessons done ${Object.keys(rep.prog.lessons || {}).length}) and its tab is reachable`, rep.prog.soundsOpened === (mk() || {}).soundsOpened && Object.keys(rep.prog.lessons || {}).length === Object.keys((mk() || { lessons: {} }).lessons || {}).length);
+    if(!owner2 || sn !== "owner export") {
+      const f = await bootWith(PACK, null, 3); check("flag on, fresh record, no placement: the hint is shown", /id="hintSounds"/.test(f.api.panel()));
+      const o1 = await place(PACK, null, RECS["first bucket only"]);
+      check("flag on, placement passing only the first bucket: the hint is still shown", /id="hintSounds"/.test(o1.today));
+    }
+    if(!oldCore) { skip(`${BASE_F} not in this checkout's history`); continue; }
+    for(const [rn, r] of Object.entries(RECS)){
+      const a = await place(OFFC, mk(), r), b = await place(OFFC, mk(), r, { core: oldCore, html: oldHtml });
+      check(`${sn}, flag off, ${rn}: result screen, stored record and Today byte-identical to ${BASE_F} (hint ${/id="hintSounds"/.test(a.today) ? "shown" : "hidden"})`, a.html === b.html && a.rec === b.rec && a.today === b.today && !/plChars/.test(a.html));
+    }
+  }
+}
+
+const BASE_G = "8564258"; // fb50 head: the flag-off control for placementEarlyStop and the base of the fb51 reveal / meaning changes
+const oldOfG = f => cp.execSync(`git -C "${ROOT}" show ${BASE_G}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+let G_CORE = null, G_HTML = null;
+try {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avd-")); const f = path.join(dir, `core_${BASE_G}.js`);
+  fs.writeFileSync(f, oldOfG("engine/core.js")); G_CORE = require(f); G_HTML = oldOfG("engine/app.html");
+  fs.rmSync(dir, { recursive: true, force: true });
+} catch(e){ G_CORE = null; }
+console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack.placementEarlyStop)");
+{
+  const OFFE = packAsOf(PACK, BASE_G, { strip: ["placementEarlyStop"] });
+  check("pack.placementEarlyStop: on in the shipped pack, off in the control", PACK.placementEarlyStop === true && VC.placementEarlyStopOn(PACK) && OFFE.placementEarlyStop === undefined && !VC.placementEarlyStopOn(OFFE));
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
+  const TOT = N.reduce((a, b) => a + b, 0);
+  // right = how many items of bucket b to get right
+  const walk = async (pack, rec, rightOf, o) => {
+    const { api, st } = await bootWith(pack, rec, 13, o);
+    api.ev("placeFrom = null; placeRender()"); const screens = [api.panel()];
+    api.el("go").click();
+    const seen = {}; let asked = 0;
+    for(let g = 0; g < 100 && api.el("o"); g++){
+      if(!/Words \d+ \/ \d+/.test(api.panel())) break;
+      const b = api.ev("PL.vocab.items[PL.vocab.i - 1].b"), want = api.ev("glossOut(VC.gloss(PL.vocab.items[PL.vocab.i - 1].w))");
+      seen[b] = (seen[b] || 0) + 1; asked++;
+      const ok = seen[b] <= rightOf(b), btns = api.el("o").children;
+      screens.push(api.panel());
+      (ok ? btns.find(x => x.innerHTML === want) : btns.find(x => x.innerHTML !== want)).click();
+    }
+    screens.push(api.panel());
+    return { asked, html: api.panel(), screens, rec: st.ls.getItem(VC.storageKey(pack)), prog: api.getProg() };
+  };
+  const RECS = {
+    "beginner (all wrong)": () => 0,
+    "advanced (all right)": b => N[b],
+    "two empty buckets then right": b => (b === 1 || b === 2) ? 0 : N[b],
+    "right to bucket 5, then empty": b => b < 6 ? N[b] : 0,
+  };
+  const lvLabel = lv => api0.ev(`levelLabel(${JSON.stringify(lv)})`);
+  var api0 = (await bootWith(PACK, null, 13)).api;
+  const owner2 = owner ? () => clone(owner) : null;
+  const sources = [["fresh record", () => null]].concat(owner2 ? [["owner export", owner2]] : []);
+  for(const [sn, mk] of sources){
+    const beg = await walk(PACK, mk(), RECS["beginner (all wrong)"]);
+    check(`${sn}, flag on, beginner: stops after bucket 3 with ${N[0] + N[1] + N[2]} items asked (asked ${beg.asked})`, beg.asked === N[0] + N[1] + N[2] && N[0] + N[1] + N[2] >= 7 && N[0] + N[1] + N[2] <= 8);
+    const lineOf = (html, nAsked) => { const na = VC.placementNotAsked(st0, st0.map((_, i) => i < nAsked ? { r:0, n:N[i] } : { r:0, n:0, skipped:true }));
+      return { na, line: (html.match(/<tr id="plNotAsked"><td colspan="2" style="color:var\(--mute\)">([^<]*)<\/td><\/tr>/) || [])[1],
+        want: "Not asked: " + na.map(e => e.whole ? lvLabel(e.lv) : `${lvLabel(e.lv)} ${e.s1 - e.s0 > 1 ? `sets ${e.s0 + 1}–${e.s1}` : `set ${e.s1}`}`).join(", ") }; };
+    const lb = lineOf(beg.html, 3);
+    check(`${sn}, flag on, beginner: one muted line "${lb.line}" (whole levels by label)`, lb.line === lb.want && /^Not asked: HSK 2, HSK 3, HSK 4$/.test(lb.line || "") && lb.na.every(e => e.whole));
+    check(`${sn}, flag on, beginner: 3 table rows for asked buckets (bad), the unasked buckets not listed`, (beg.html.match(/<tr><td>HSK/g) || []).length === 3 && (beg.html.match(/color:var\(--bad\)/g) || []).length === 3);
+    check(`${sn}, flag on, beginner: nothing stored for the unasked buckets (placed once, no word beyond the first level placed)`, beg.prog.placedOnce === true && !/skipped/.test(beg.rec || ""));
+    const adv = await walk(PACK, mk(), RECS["advanced (all right)"]);
+    check(`${sn}, flag on, advanced: all ${TOT} items asked, no "Not asked" line (asked ${adv.asked})`, adv.asked === TOT && !/plNotAsked/.test(adv.html));
+    const two = await walk(PACK, mk(), RECS["two empty buckets then right"]);
+    check(`${sn}, flag on, two empty buckets then right: all asked (asked ${two.asked})`, two.asked === TOT && !/plNotAsked/.test(two.html));
+    const mid = await walk(PACK, mk(), RECS["right to bucket 5, then empty"]);
+    const lm = lineOf(mid.html, 9);
+    check(`${sn}, flag on, right to bucket 5 then empty: stops after bucket 9 (asked ${mid.asked} of ${TOT}); partial level by set range: "${lm.line}"`, mid.asked === N.slice(0, 9).reduce((a, b) => a + b, 0) && lm.line === lm.want && lm.na.some(e => !e.whole) && /^Not asked: HSK 3 sets? \d+(–\d+)?, HSK 4$/.test(lm.line || ""));
+    if(!G_CORE){ skip(`${BASE_G} not in this checkout's history`); continue; }
+    for(const [rn, f] of Object.entries(RECS)){
+      const a = await walk(OFFE, mk(), f), b = await walk(OFFE, mk(), f, { core: G_CORE, html: G_HTML });
+      check(`${sn}, flag off, ${rn}: ${a.screens.length} placement screens, result and stored record byte-identical to ${BASE_G}; all ${TOT} asked`, a.asked === TOT && a.screens.length === b.screens.length && a.screens.every((x, i) => x === b.screens[i]) && a.html === b.html && a.rec === b.rec && !/plNotAsked/.test(a.html));
+    }
+    // placement result of the same accuracy record equals flag on and off where the flag does not stop (advanced)
+    const advOff = await walk(OFFE, mk(), RECS["advanced (all right)"]);
+    check(`${sn}, advanced record: stored record and result screen equal flag on / off`, adv.rec === advOff.rec && adv.html === advOff.html);
+  }
+  // the stop rules treat the unasked buckets as failed: whole and window
+  const res = N.map((n, i) => i < 3 ? { r:0, n } : { r:0, n:0, skipped:true });
+  check("placementStopIndex reads unasked buckets as failed (window rule 0, whole rule 0)", VC.placementStopIndex(res) === 0 && VC.placementStopIndex(res, { whole: true }) === 0);
+  const res2 = N.map((n, i) => i < 5 ? { r:n, n } : i < 8 ? { r:0, n } : { r:0, n:0, skipped:true });
+  check("right to bucket 4, three empty, rest unasked: both rules stop at 5", VC.placementStopIndex(res2) === 5 && VC.placementStopIndex(res2, { whole: true }) === 5);
+  check("placementEarlyStopAfter: needs three asked buckets, all zero", !VC.placementEarlyStopAfter([{r:0},{r:0}], 1) && VC.placementEarlyStopAfter([{r:0},{r:0},{r:0}], 2) && !VC.placementEarlyStopAfter([{r:0},{r:1},{r:0},{r:0}], 3) && VC.placementEarlyStopAfter([{r:2},{r:0},{r:0},{r:0}], 3));
+}
+
+console.log("\n[D5] fb51: the reveal drops the stimulus hint links it makes redundant (appView v2)");
+{
+  const LINK = /data-(?:showw|pcue)/g, n = h => (String(h).match(LINK) || []).length;
+  const K5 = KINDS.concat([["read sentence", "readSentence(__S)"]]);
+  const probe = async (pack, rec, seed, o) => {
+    const { api } = await bootWith(pack, rec, seed, Object.assign({ patterns: true }, o));
+    api.ev(PICK); const out = {};
+    for(const [name, expr] of K5) out[name] = { right: runItem(api, expr, true), wrong: runItem(api, expr, false) };
+    return out;
+  };
+  const sources = owner ? [["owner export", unpaused], ["fresh record", freshRec]] : [["fresh record", freshRec]];
+  const table = {};
+  for(const [sn, mk] of sources){
+    const on = await probe(PACK, mk(), 21), off = await probe(OFF, mk(), 21);
+    for(const [name] of K5){
+      const a = on[name], b = off[name];
+      if(!a.right || !a.wrong) continue;
+      const row = (table[name] = table[name] || {});
+      const pre = n(a.right.q), postR = n(a.right.after), postW = n(a.wrong.after), rvLinks = n(a.right.rv), rvRow = /class="rw[ "]/.test(a.right.rv);
+      row[sn] = { pre, postR, postW, rvLinks, rvRow, offPost: n(b.right.after) };
+      // a link the reveal makes redundant is gone after a right and a wrong answer; one it does not is kept
+      check(`${sn}, ${name}: stimulus links ${pre} -> ${postR} (right) / ${postW} (wrong); the reveal ${rvRow ? "shows the form row (the characters or its own link)" : "has no form row, links stay"}`, rvRow ? postR === 0 && postW === 0 : postR === pre && postW === pre);
+      check(`${sn}, ${name}: flag off keeps all ${n(b.right.q)} stimulus link(s) after a right and a wrong answer`, n(b.right.after) === n(b.right.q) && n(b.wrong.after) === n(b.wrong.q));
+      check(`${sn}, ${name}: the question screen is unchanged by the drop (links present before answering equal flag off, minus the first-meeting cue)`, name === "pattern, first meeting" || n(a.right.q) === n(b.right.q));
+    }
+  }
+  const kinds = Object.keys(table);
+  console.log("INFO  kind | links before | after right / wrong | reveal form row | reveal links  (" + sources.map(x => x[0]).join(" / ") + ")");
+  kinds.forEach(k => console.log("INFO  " + k.padEnd(30) + sources.map(([sn]) => { const r = table[k][sn]; return r ? `${r.pre} | ${r.postR}/${r.postW} | ${r.rvRow ? "row" : "-"} | ${r.rvLinks}` : "n/a"; }).join("   ")));
+  // dropped on cloze and pattern items where the stimulus had a link
+  const dropped = kinds.filter(k => sources.some(([sn]) => table[k][sn] && table[k][sn].pre > 0 && table[k][sn].postR < table[k][sn].pre && table[k][sn].rvRow));
+  const withLinks = kinds.filter(k => sources.some(([sn]) => table[k][sn] && table[k][sn].pre > 0));
+  check(`links present before answering and gone after, on every kind that carries one (${withLinks.join(", ")})`, ["meaning MC", "gap", "gap typed", "pattern, met before", "read sentence"].every(k => withLinks.includes(k)) && withLinks.every(k => sources.every(([sn]) => !table[k][sn] || (table[k][sn].postR === 0 && table[k][sn].postW === 0))));
+  check("the hear sentence, recall, typed and unit kinds carry no stimulus link (nothing to drop)", ["hear sentence", "recall", "hear word", "typed pinyin", "typed meaning", "typed characters", "typed word", "charPick", "charRead", "charSound"].every(k => sources.every(([sn]) => !table[k][sn] || table[k][sn].pre === 0)));
+}
+
+console.log("\n[D6] fb51: a pattern below the placed level is not a first meeting (pack.placedRead)");
+{
+  const OFFP = packAsOf(PACK, BASE_G, { strip: ["placedRead"] });
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
+  const placedRec = () => VC.applyPlacement(VC.normalizeProg({}, PACK), st0, st0.length, WORDS, PACK, CHARACTERS);
+  const lvOf = lv => PATTERNS.find(p => String(p.lv) === lv).id;
+  const lowId = lvOf("2"), topId = lvOf("4");
+  const ask = async (pack, rec, pid, right) => {
+    const { api } = await bootWith(pack, rec, 21, { patterns: true });
+    const r = runItem(api, `patternItem(${JSON.stringify(pid)}, 0, 0)`, right);
+    return { q: r.q, rv: r.rv, first: VC.patternFirstMeeting(rec || VC.normalizeProg({}, pack), PATTERNS.find(p => p.id === pid), pack), pt: api.getProg().pt };
+  };
+  const tap = h => /data-pcue/.test(h), note = h => /class="pnote"/.test(h);
+  const pr = placedRec();
+  check(`placed record: pl = ${pr.pl}`, pr.pl === "4");
+  const a = await ask(PACK, pr, lowId, true);
+  check("placed zh record, an HSK 2 pattern's first ask: tap link, no meaning open, no note, not a first meeting", a.first === false && tap(a.q) && !note(a.rv) && !!a.pt && !!a.pt[lowId]);
+  const aw = await ask(PACK, placedRec(), lowId, false);
+  check("... and after a wrong first ask: still no note (a miss any time is a later-meeting miss: note shown)", tap(aw.q) && note(aw.rv));
+  const t = await ask(PACK, placedRec(), topId, true);
+  check("placed record, a pattern at the placed level: first meeting, English open, the note rides the verdict", t.first === true && !tap(t.q) && note(t.rv));
+  const f = await ask(PACK, VC.normalizeProg({}, PACK), lowId, true);
+  check("fresh record: an HSK 2 pattern is a first meeting (English open, note)", f.first === true && !tap(f.q) && note(f.rv));
+  const o = await ask(OFFP, placedRec(), lowId, true);
+  check("flag off, placed record: the HSK 2 pattern is a first meeting as before (English open, note)", o.first === true && !tap(o.q) && note(o.rv));
+  check("patternFirstMeeting: a recorded pattern is never a first meeting; unknown pl or level counts as first", VC.patternFirstMeeting({ pt: { x: { s: 1, a: 1 } }, pl: "4" }, { id: "x", lv: "4" }, PACK) === false && VC.patternFirstMeeting({ pl: "zz" }, { id: "y", lv: "2" }, PACK) === true && VC.patternFirstMeeting({ pl: "4" }, { id: "y", lv: "9" }, PACK) === true);
+  // the pattern is still drilled until known: it stays in the open list for a placed record
+  check("placed record: the HSK 2 pattern still opens and is picked (drilled until known)", VC.openPatterns(placedRec(), PACK, PATTERNS, WORDS).some(p => p.id === lowId));
 }
 
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);

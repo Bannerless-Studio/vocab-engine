@@ -85,7 +85,7 @@ class Flags(unittest.TestCase):
         f = get_spec("it").port_flags()
         self.assertEqual(f["typedFrom"], ["written"])
         self.assertEqual([g["upTo"] for g in f["progressMap"]["goals"]], ["A1", "A2", "B1"])
-        for k in ("dayAware", "pairs", "freqTiers", "glossFocus", "readRotation", "optsMix", "pauseNew", "placementWhole"):
+        for k in ("dayAware", "pairs", "freqTiers", "glossFocus", "readRotation", "optsMix", "pauseNew", "placementWhole", "placedKnown"):
             self.assertIs(f[k], True)
         self.assertEqual((f["glossStyle"], f["progressView"], f["appView"], f["levelGate"], f["wordsBy"], f["listenQuestions"]),
                          ("primary", "v2", "v2", 0.7, "typed", "all"))

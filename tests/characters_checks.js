@@ -724,6 +724,133 @@ function teachExampleChecks(){
   }
 }
 
+// fb50: pack.placementChars. Real zh pack (and the shipped ja pack when its checkout is present) against the pre-fb50 engine.
+function placeCharsChecks(){
+  console.log("\n================ [placeChars] placement places the characters layer (pack.placementChars)");
+  const loadConst = (file, name) => new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)();
+  const ZH = path.join(ROOT, "packs", "zh");
+  const PACK = loadConst(path.join(ZH, "pack.js"), "PACK"), WORDS = loadConst(path.join(ZH, "words.js"), "WORDS"), UNITS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
+  const PREV = process.env.PLACE_CHARS_BASE_REV || "143a674";
+  let OLD = null;
+  try{
+    const src = cp.execSync(`git show ${PREV}:engine/core.js`, { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] }).toString();
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "place_base_"));
+    fs.writeFileSync(path.join(dir, "core.js"), src); OLD = require(path.join(dir, "core.js")); fs.rmSync(dir, { recursive: true, force: true });
+  }catch(e){ console.log(`    cannot load ${PREV}:engine/core.js: ${e.message}`); }
+  check(`[placeChars] pre-fb50 engine ${PREV} loads from git`, !!OLD);
+  const st = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
+  const W = { whole: true };
+  // The owner's record shape (docs/PACK_SCHEMA.md "placementWhole"): every bucket answered, one isolated zero, k = 10 of 16.
+  const ownerRes = st.map((_, i) => i < 10 ? { r: i === 3 ? 0 : 3, n: 3 } : { r: 0, n: 3 });
+  const k = VC.placementStopIndex(ownerRes, W);
+  check(`[placeChars] zh fixture: whole rule gives k = 10 (got ${k}), flag on in the shipped pack`, k === 10 && PACK.placementChars === true && VC.placementCharsOn(PACK));
+  const fresh = () => VC.defaultProg(PACK);
+  const snap = JSON.stringify(fresh());
+  const out = VC.applyPlacement(fresh(), st, k, WORDS, PACK, UNITS);
+  check("[placeChars] applyPlacement stays pure (input untouched, chars object not shared)", JSON.stringify(fresh()) === snap && (() => { const a = fresh(); const b = VC.applyPlacement(a, st, k, WORDS, PACK, UNITS); return JSON.stringify(a) === snap && a.chars !== b.chars && a.chars.c !== b.chars.c; })());
+  const recs = VC.charRecs(out), sets = VC.charPlanSets(PACK, UNITS), placedW = new Set(Object.keys(out.w));
+  const run = VC.placedCharSets(PACK, UNITS, placedW, {});
+  const seeded = UNITS.filter(u => recs[u.id]);
+  console.log(`    zh k=10: ${placedW.size} placed words, ${seeded.length} units seeded in ${run.length} of ${sets.length} sets`);
+  check(`[placeChars] zh: ${seeded.length} units seeded provisional {r:1,w:0,s:1,prov:1}, every one with all its words placed`, seeded.length > 0 && seeded.every(u => JSON.stringify(recs[u.id]) === '{"r":1,"w":0,"s":1,"prov":1}' && u.words.every(i => placedW.has(i))));
+  check("[placeChars] zh: the seeded units are exactly the whole sets of the leading run (no partial set)", run.length > 0 && run.length < sets.length && run.every(x => x.units.every(u => recs[u.id])) && sets.slice(run.length).every(x => !x.units.every(u => recs[u.id])) && seeded.length === run.reduce((n, x) => n + x.units.length, 0));
+  const nextSet = sets[run.length];
+  check("[placeChars] zh: the first unseeded set has a unit whose word is unplaced", nextSet.units.some(u => !u.words.every(i => placedW.has(i))));
+  // Right after placement nothing is eligible; once the next word set is learned, the characters set that follows is the first unplaced one.
+  const nn = VC.nextNewSet(WORDS, PACK, out), more = JSON.parse(JSON.stringify(out));
+  nn.words.forEach(w => { more.w[w.id] = { r: 1, w: 0, s: 1 }; });
+  const cs = VC.lagCharSet(PACK, WORDS, UNITS, more);
+  check(`[placeChars] zh: right after placement no learned word lacks a unit; after the next word set Learn's characters set is the first unplaced one (index ${cs && cs.index} = ${run.length} sets placed, none of its units seeded)`, VC.lagUnits(PACK, WORDS, UNITS, out).length === 0 && !!cs && cs.index === run.length && cs.units.length > 0 && cs.units.every(u => !recs[u.id]) && cs.units.every(u => nextSet.units.includes(u)));
+  const noUnits = VC.applyPlacement(fresh(), st, k, WORDS, PACK);
+  const cs0 = VC.lagCharSet(PACK, WORDS, UNITS, noUnits);
+  check(`[placeChars] zh: control, without the units argument the layer stays at set ${cs0.index} (the owner's defect: first set taught after a placement at HSK 4)`, cs0.index === 0 && VC.lagUnits(PACK, WORDS, UNITS, noUnits).length === placedW.size && Object.keys(VC.charRecs(noUnits)).length === 0);
+  // A unit with one unplaced word is not seeded, and neither is anything after its set.
+  const mid = run[run.length - 2], hit = mid.units[0], unplaced = WORDS.find(w => !placedW.has(w.id));
+  const UN2 = UNITS.map(u => u.id === hit.id ? Object.assign({}, u, { words: [u.words[0], unplaced.id] }) : u);
+  const out2 = VC.applyPlacement(fresh(), st, k, WORDS, PACK, UN2), recs2 = VC.charRecs(out2);
+  check("[placeChars] zh: a unit with one unplaced word is not seeded, nor is the rest of its set or any later set; earlier sets are", !recs2[hit.id] && mid.units.every(u => !recs2[u.id]) && run.slice(0, -2).every(x => x.units.every(u => recs2[u.id])) && sets.slice(run.length - 2).every(x => x.units.every(u => !recs2[u.id])));
+  // Forward only.
+  const learnt = JSON.parse(JSON.stringify(out)); const some = seeded[0].id; learnt.chars.c[some] = { r: 9, w: 1, s: 5 }; const extra = UNITS.find(u => !recs[u.id]).id; learnt.chars.c[extra] = { r: 4, w: 0, s: 2 };
+  const retake = VC.applyPlacement(learnt, st, 1, WORDS, PACK, UNITS);
+  check("[placeChars] zh: a poor retake never lowers the layer (every record kept as is, none removed)", Object.keys(learnt.chars.c).every(id => JSON.stringify(retake.chars.c[id]) === JSON.stringify(learnt.chars.c[id])) && VC.charRecs(retake)[some].s === 5 && VC.charRecs(retake)[extra].s === 2);
+  const better = VC.applyPlacement(out, st, st.length, WORDS, PACK, UNITS), allRun = VC.placedCharSets(PACK, UNITS, new Set(Object.keys(better.w)), {});
+  check("[placeChars] zh: a better retake moves it forward and keeps what was seeded", allRun.length > run.length && Object.keys(recs).every(id => better.chars.c[id]));
+  check("[placeChars] zh: placing nothing (passed 0, fresh record) seeds nothing", Object.keys(VC.charRecs(VC.applyPlacement(fresh(), st, 0, WORDS, PACK, UNITS))).length === 0);
+  // A learner whose characters lag their words: words learned outside the placed prefix are never taken for placed.
+  const lagger = fresh(); WORDS.filter(w => w.lv === "1").slice(0, 60).forEach(w => { lagger.w[w.id] = { r: 3, w: 0, s: 3 }; });
+  const lag0 = VC.applyPlacement(lagger, st, 0, WORDS, PACK, UNITS), lag1 = VC.applyPlacement(lagger, st, 1, WORDS, PACK, UNITS);
+  check(`[placeChars] zh: 60 learned HSK 1 words with no unit records: a placement passing 0 buckets seeds no unit (${Object.keys(VC.charRecs(lag0)).length}), passing bucket 1 (words 1-50) seeds only inside it (${Object.keys(VC.charRecs(lag1)).length}, none of words 51-60)`, Object.keys(VC.charRecs(lag0)).length === 0 && UNITS.filter(u => VC.charRecs(lag1)[u.id]).every(u => u.words.every(i => WORDS.findIndex(w => w.id === i) < 50)) && Object.keys(VC.charRecs(lag1)).length > 0);
+  // Provisional until known.
+  const pm = JSON.parse(JSON.stringify(out)); const uid = seeded[0].id;
+  VC.markChar(pm, uid, true, PACK, false);
+  const afterOne = pm.chars.c[uid].prov;
+  VC.markChar(pm, uid, true, PACK, false); VC.markChar(pm, uid, true, PACK, false);
+  const afterMastered = pm.chars.c[uid].prov;
+  const pm2 = JSON.parse(JSON.stringify(out)); VC.markChar(pm2, seeded[1].id, false, PACK, false);
+  check(`[placeChars] zh: prov stays on a right answer below mastered (${afterOne}), drops at mastered (${afterMastered}) and on a miss (${pm2.chars.c[seeded[1].id].prov})`, afterOne === 1 && afterMastered === undefined && pm2.chars.c[seeded[1].id].prov === undefined);
+  // Review keeps placed units in review (non-day planner: no dayAware / pairs).
+  const plain = Object.assign({}, PACK); ["dayAware", "pairs", "freqTiers", "wordsBy", "optsMix", "levelGate", "levelExam", "progressView", "appView", "readRotation", "pauseNew", "progressMap", "eta"].forEach(f => delete plain[f]);
+  const learned = VC.learnedWords(WORDS, plain, out);
+  let withProv = 0, maxProv = 0, nPlans = 0;
+  for(let i = 0; i < 40; i++){
+    const plan = VC.buildReviewPlan(learned, out, plain, { units: UNITS, rng: mulberry32(100 + i), size: 20 });
+    const pu = plan.filter(it => it.unit && recs[it.unit.id] && recs[it.unit.id].prov === 1).length; nPlans++;
+    if(pu > 0) withProv++; maxProv = Math.max(maxProv, pu);
+  }
+  check(`[placeChars] zh: Review picks provisional units (${withProv} of ${nPlans} plans carry one, at most ${maxProv} per plan, cap 5)`, withProv === nPlans && maxProv >= 1);
+  const noProv = JSON.parse(JSON.stringify(out)); Object.values(noProv.chars.c).forEach(r => { delete r.prov; });
+  const planSame = (a, b) => JSON.stringify(a.map(x => [x.kind, x.word ? x.word.id : x.unit.id])) === JSON.stringify(b.map(x => [x.kind, x.word ? x.word.id : x.unit.id]));
+  const rp = core => withSeed(5, () => core.buildReviewPlan(learned, noProv, plain, { units: UNITS, rng: mulberry32(5), size: 20 }));
+  check("[placeChars] zh: unit records without prov plan Review exactly as the pre-fb50 engine (no rng drawn for the unit slot)", !!OLD && planSame(rp(OLD), rp(VC)));
+  // levelExam "characters": provisional units move no word's known status.
+  const bare = VC.applyPlacement(fresh(), st, k, WORDS, PACK), ctx = VC.knownCtx(PACK, UNITS);
+  const diff = WORDS.filter(w => VC.wordKnownX(out.w[w.id], w, PACK, out, ctx) !== VC.wordKnownX(bare.w[w.id], w, PACK, bare, ctx));
+  const pct = lv => VC.levelKnownPct(WORDS, PACK, out, lv, UNITS) === VC.levelKnownPct(WORDS, PACK, bare, lv, UNITS);
+  check(`[placeChars] zh: levelExam "characters" gate unchanged by placed units (${diff.length} words change known status; level pct equal on all levels)`, VC.levelExamOn(PACK) && diff.length === 0 && VC.levelIds(PACK).every(pct));
+  // Sounds hint.
+  const hint = p => VC.placedPastFirstBucket(p, WORDS, PACK);
+  const k0 = VC.applyPlacement(fresh(), st, 0, WORDS, PACK, UNITS), k1 = VC.applyPlacement(fresh(), st, 1, WORDS, PACK, UNITS), k2 = VC.applyPlacement(fresh(), st, 2, WORDS, PACK, UNITS);
+  check(`[placeChars] Sounds hint: hidden once a placement passed 2+ buckets (k=10 ${hint(out)}, k=2 ${hint(k2)}); shown on a fresh record, after 0 and after 1 bucket (${!hint(fresh())} ${!hint(k0)} ${!hint(k1)})`, hint(out) && hint(k2) && !hint(fresh()) && !hint(k1) && !hint(k0));
+  const off = Object.assign({}, PACK); delete off.placementChars;
+  check("[placeChars] flag off: no hint hiding, placementCharsOn false; a pack without learn lag never turns it on", !VC.placedPastFirstBucket(out, WORDS, off) && !VC.placementCharsOn(off) && !VC.placementCharsOn(Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { learn: undefined }) })));
+  // Flag off byte identity against the pre-fb50 engine.
+  if(OLD){
+    const bad = [];
+    [0, 1, 2, 5, 10, 16].forEach(kk => {
+      const o1 = OLD.applyPlacement(OLD.defaultProg(off), st, kk, WORDS, off), o2 = VC.applyPlacement(VC.defaultProg(off), st, kk, WORDS, off, UNITS);
+      if(JSON.stringify(o1) !== JSON.stringify(o2)) bad.push(`zh k=${kk}`);
+    });
+    const withRecs = VC.defaultProg(off); withRecs.chars.c.c0125 = { r: 3, w: 0, s: 3 };
+    const q1 = OLD.applyPlacement(JSON.parse(JSON.stringify(withRecs)), st, 6, WORDS, off), q2 = VC.applyPlacement(JSON.parse(JSON.stringify(withRecs)), st, 6, WORDS, off, UNITS);
+    if(JSON.stringify(q1) !== JSON.stringify(q2)) bad.push("zh with a unit record");
+    check(`[placeChars] flag off (zh without the key): applyPlacement byte-identical to ${PREV} at 6 passed counts + a record with units (${bad.length} differ${bad[0] ? ": " + bad.join(", ") : ""})`, bad.length === 0);
+    const noLag = Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { learn: undefined }) });
+    const n1 = OLD.applyPlacement(OLD.defaultProg(noLag), st, 8, WORDS, noLag), n2 = VC.applyPlacement(VC.defaultProg(noLag), st, 8, WORDS, noLag, UNITS);
+    check("[placeChars] flag on without characters.learn lag: identical to the pre-fb50 engine", JSON.stringify(n1) === JSON.stringify(n2));
+    const lw = zhLike(), lagPk = Object.assign({}, lw.pack, { placementChars: true });
+    const stz = VC.strata(lw.words, lw.pack.placement, VC.setSizeOf(lw.pack));
+    const z1 = OLD.applyPlacement(OLD.defaultProg(lw.pack), stz, 2, lw.words, lw.pack), z2 = VC.applyPlacement(VC.defaultProg(lw.pack), stz, 2, lw.words, lw.pack, lw.units);
+    check("[placeChars] zh-like fixture (no key): byte-identical to the pre-fb50 engine", JSON.stringify(z1) === JSON.stringify(z2));
+    check("[placeChars] zh-like fixture with the key but no learn lag: no unit seeded", Object.keys(VC.charRecs(VC.applyPlacement(VC.defaultProg(lagPk), stz, 2, lw.words, lagPk, lw.units))).length === 0);
+  }
+  // ja: the shipped pack, flag added.
+  const JA = path.join(ROOT, "..", "japanese", "pack");
+  if(fs.existsSync(path.join(JA, "characters.js"))){
+    const jp = loadConst(path.join(JA, "pack.js"), "PACK"), jw = loadConst(path.join(JA, "words.js"), "WORDS"), ju = loadConst(path.join(JA, "characters.js"), "CHARACTERS");
+    const on = Object.assign({}, jp, { placementChars: true }), sj = VC.strata(jw, jp.placement, VC.setSizeOf(jp));
+    const kj = Math.floor(sj.length * 0.75), oj = VC.applyPlacement(VC.defaultProg(on), sj, kj, jw, on, ju), rj = VC.charRecs(oj), pj = new Set(Object.keys(oj.w));
+    const runJ = VC.placedCharSets(on, ju, pj, {});
+    const csj = VC.lagCharSet(on, jw, ju, oj);
+    check(`[placeChars] ja: ${Object.keys(rj).length} units seeded in ${runJ.length} sets at ${kj}/${sj.length} buckets, all words placed, next set index ${csj && csj.index} = ${runJ.length}`, Object.keys(rj).length > 0 && ju.filter(u => rj[u.id]).every(u => u.words.every(i => pj.has(i)) && rj[u.id].prov === 1) && (!csj || csj.index === runJ.length) && VC.placedCharsThrough(on, ju, oj) != null);
+    if(OLD){
+      const ja1 = OLD.applyPlacement(OLD.defaultProg(jp), sj, kj, jw, jp), ja2 = VC.applyPlacement(VC.defaultProg(jp), sj, kj, jw, jp, ju);
+      check("[placeChars] ja without the key: applyPlacement byte-identical to the pre-fb50 engine", JSON.stringify(ja1) === JSON.stringify(ja2));
+    }
+  } else console.log("    ../japanese/pack not present: ja checks skipped");
+  const thr = VC.placedCharsThrough(PACK, UNITS, out), lastSet = run[run.length - 1];
+  check(`[placeChars] zh: placedCharsThrough names the last placed set (level ${thr && thr.lv}, set ${thr && thr.set}); null without records and without the flag`, !!thr && thr.lv === lastSet.lv && thr.set === lastSet.k + 1 && VC.placedCharsThrough(PACK, UNITS, fresh()) === null && VC.placedCharsThrough(off, UNITS, out) === null);
+}
+
 suite(zhLike());
 suite(jaLike());
 teachExampleChecks();
@@ -732,6 +859,7 @@ pronFirstChecks(jaLike());
 pronFirstSentenceChecks();
 b8Checks(zhLike());
 flagOffEquality();
+placeCharsChecks();
 
 console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);
 process.exit(fails === 0 ? 0 : 1);

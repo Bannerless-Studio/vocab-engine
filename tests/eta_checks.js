@@ -412,6 +412,10 @@ async function packMode(){
 const BASE = "e165cb1";
 const git = f => cp.execSync(`git -C "${ROOT}" show ${BASE}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
 let BASE_CORE = null, BASE_APP = null;
+// [6] pack.placedKnown flag-off control: fb51 head, the engine before the flag.
+const PK_BASE = process.env.PLACED_KNOWN_BASE || "334ede8";
+let PK_CORE = null, PK_APP = null;
+try { const gs = f => cp.execSync(`git -C "${ROOT}" show ${PK_BASE}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }); const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "eta-pk-")), "core_pk.js"); fs.writeFileSync(f, gs("engine/core.js")); PK_CORE = require(f); PK_APP = gs("engine/app.html"); } catch(e){ PK_CORE = null; }
 try { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "eta-")), "core_base.js"); fs.writeFileSync(f, git("engine/core.js")); BASE_CORE = require(f); BASE_APP = git("engine/app.html"); } catch(e){ BASE_CORE = null; }
 
 const ctx = { pack: PACK, words: WORDS, units: CHARACTERS, passages: PASSAGES };
@@ -547,8 +551,10 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
     }
   }
 
-  console.log(`\n[5] placed starts (Test tab placement at HSK 2 / HSK 3): prog.pl selects pack.eta.placed for the whole record`);
+  console.log(`\n[5] placed starts (Test tab placement at HSK 2 / HSK 3): prog.pl selects pack.eta.placed for the whole record (pack.placedKnown off: [6] has it on)`);
+  const PK0 = stripFlags(PACK, ["placedKnown"]), ctx0 = Object.assign({}, ctx, { pack: PK0 });
   {
+    const PACK = PK0, ctx = ctx0;
     // Replaces fb41's seeded-record gate check (owner 2026-10-08: new learners, with or without the placement test).
     // Crossings of `--calibrate`'s placed runs, seeds 8/9/10 (85% right, 7 a day, passages read); --calibrate probes every
     // 25 sessions up to the crossing plus the first session without provisional records.
@@ -588,6 +594,102 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
     const T = await bootWith(PACK, placedStart(3), 1, VIEW), th = T.panel(), n3 = VC.sessionsToGoX(placedStart(3), 0, 3, ctx);
     console.log(`INFO  placed HSK 3 Today: goal "${pvn(th, "Goal 1 of 3")}"; gate "${T.gate()}"`);
     check(`placed at HSK 3, Today: goal line "${SIG2(n3)}" and the gate sentence ends "≈ ${VC.levelOpensIn(WORDS, PACK, placedStart(3), CHARACTERS)} sessions."`, pvn(th, "Goal 1 of 3") === SIG2(n3) && T.gate().endsWith(`≈\u00a0${VC.levelOpensIn(WORDS, PACK, placedStart(3), CHARACTERS)} sessions.`));
+  }
+
+  console.log(`\n[6] pack.placedKnown (fb52): placed provisional records count as known for the gate, goals, map and ETA position; flag off byte-identical to ${PK_BASE}`);
+  {
+    const PK0 = stripFlags(PACK, ["placedKnown"]), c0 = Object.assign({}, ctx, { pack: PK0 });
+    const st = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
+    // The owner's placement (docs/PACK_SCHEMA.md "placementWhole"): every bucket answered, one isolated zero, k = 10 -> lands in HSK 4.
+    const k = VC.placementStopIndex(st.map((_, i) => i < 10 ? { r: i === 3 ? 0 : 3, n: 3 } : { r: 0, n: 3 }), { whole: true });
+    const placedOwner = () => VC.applyPlacement(freshStart(), st, k, WORDS, PACK, CHARACTERS);
+    const placedA2 = () => VC.applyPlacement(freshStart(), st, st.findIndex(b => String(b.lv) === "3"), WORDS, PACK, CHARACTERS);
+    check(`zh ships placedKnown; the owner fixture gives k = ${k} (lands ${st[k] && st[k].lv})`, PACK.placedKnown === true && VC.placedKnownOn(PACK) && !VC.placedKnownOn(PK0) && k === 10 && String(st[k].lv) === "4");
+    const freshEta = VC.sessionsToGoX(freshStart(), 0, 3, ctx);
+    for(const [name, mk] of [["owner k=10 (HSK 4)", placedOwner], ["A2-equivalent (HSK 3)", placedA2]]){
+      const p = mk(), land = st[name.startsWith("owner") ? k : st.findIndex(b => String(b.lv) === "3")];
+      const nn = VC.nextNewSetOpen(WORDS, PACK, p, CHARACTERS), cg = VC.currentGoal(p, PACK, WORDS, CHARACTERS, PASSAGES), eta = VC.sessionsToGoX(p, cg.i, cg.n, ctx);
+      const cg0 = VC.currentGoal(p, PK0, WORDS, CHARACTERS, PASSAGES), eta0 = VC.sessionsToGoX(p, cg0.i, cg0.n, c0), hold0 = VC.levelGateHold(WORDS, PK0, p, CHARACTERS);
+      console.log(`INFO  ${name}: pl ${p.pl}; next ${nn && nn.lv}/${nn && nn.set + 1}; goal ${cg.i + 1} at ${cg.p.toFixed(3)} -> ${eta} (flag off: goal ${cg0.i + 1} at ${cg0.p.toFixed(3)} -> ${eta0}, gate ${hold0 ? hold0.pct + "%" : "open"}); map ${VC.progressPosition(p, PACK, WORDS, CHARACTERS, PASSAGES).toFixed(3)}`);
+      check(`${name}: flag off reproduces the defect (gate holds at 0%, goal 1 at 0)`, !!hold0 && hold0.pct === 0 && cg0.i === 0 && cg0.p === 0);
+      check(`${name}: Learn's next set is the placed one (${land.lv} set ${land.s0 + 1})`, !!nn && nn.lv === String(land.lv) && nn.set === land.s0);
+      check(`${name}: no gate hold, no gate estimate`, VC.levelGateHold(WORDS, PACK, p, CHARACTERS) === null && VC.levelOpensIn(WORDS, PACK, p, CHARACTERS) === null);
+      // Owner 2026-10-09: a goal placement covered is full and carries no estimate; the next unmet goal carries it.
+      const gps = VC.goalPositions(p, PACK, WORDS, CHARACTERS, PASSAGES), covered = VC.progressMapGoals(PACK).map(g => VC.levelIndexMap(PACK)[g.upTo] < VC.levelIndexMap(PACK)[String(land.lv)]);
+      check(`${name}: goals placement covered are full (${gps.map(x => x.toFixed(2)).join(", ")}), the current goal is the first unmet one (${cg.i + 1}) and carries no estimate for a covered goal`, covered.every((c, g) => !c || gps[g] === 1) && cg.i === covered.indexOf(false) && covered.every((c, g) => !c || VC.sessionsToGoX(p, g, 3, ctx) === 0));
+      const freshG = VC.sessionsToGoX(freshStart(), cg.i, 3, ctx);
+      check(`${name}: ETA of goal ${cg.i + 1} finite and below the fresh value for that goal (${eta} < ${freshG}) (flag off: goal ${cg0.i + 1} ${eta0})`, Number.isFinite(eta) && eta > 0 && eta < freshG && (cg0.i !== cg.i || eta < eta0));
+      check(`${name}: mastered counts unchanged by the flag (progressTotals m, wordKnownX)`, VC.progressTotals(p, PACK, WORDS, CHARACTERS, PASSAGES).m === VC.progressTotals(p, PK0, WORDS, CHARACTERS, PASSAGES).m);
+      const T = await bootWith(PACK, p, 1, VIEW), th = T.panel(); T.clickTab("progress"); const ph = T.panel();
+      check(`${name}: Today + Progress carry no gate sentence; Today goal line "${SIG2(eta)}"`, !T.gate() && !/opens at/.test(th + ph) && pvn(th, `Goal ${cg.i + 1} of 3`) === SIG2(eta));
+    }
+    // levelExam "characters" (HSK 3): a placed word whose prov settled at known keeps counting while its unit is still placed.
+    {
+      const p = placedOwner(), bw = VC.knownCtx(PACK, CHARACTERS), w = WORDS.find(x => x.lv === "3" && bw.get(x.id) && p.w[x.id] && p.w[x.id].prov && VC.charRecs(p)[bw.get(x.id).id] && VC.charRecs(p)[bw.get(x.id).id].prov);
+      const pct0 = VC.levelKnownPct(WORDS, PACK, p, "3", CHARACTERS), n = BYLV["3"].length;
+      const r = p.w[w.id]; delete r.prov; r.p = { wm: [3, 1], sm: [3, 1], ws: [3, 1] };
+      const known = VC.wordKnown(r, w, PACK), exam = VC.wordKnownX(r, w, PACK, p, bw), pct1 = VC.levelKnownPct(WORDS, PACK, p, "3", CHARACTERS);
+      const u = VC.charRecs(p)[bw.get(w.id).id]; delete u.prov; const pct2 = VC.levelKnownPct(WORDS, PACK, p, "3", CHARACTERS);
+      check(`levelExam characters: ${w.w} known by the word rule, not by the exam (unit at streak 1): counts while its unit is placed (${pct0} -> ${pct1}), not once the unit's prov is gone (${pct2})`, known && !exam && pct1 === pct0 && Math.abs(pct2 - (pct0 - 1 / n)) < 1e-9);
+    }
+    // Fully placed (every bucket passed, k = null; owner 2026-10-09 es screenshot "everything covered", "Goal 1 of 3 ≈ 180 sessions"):
+    // every goal full, the finished learner's "All goals" line without an estimate, mastered rows stay literal (0).
+    {
+      const all = VC.applyPlacement(freshStart(), st, st.length, WORDS, PACK, CHARACTERS), cg = VC.currentGoal(all, PACK, WORDS, CHARACTERS, PASSAGES);
+      const T = await bootWith(PACK, all, 1, VIEW), th = T.panel(); T.clickTab("progress"); const ph = T.panel();
+      console.log("INFO  fully placed Today goal: " + ((th.match(/<div class="pmap[\s\S]*?<\/div><\/div>/) || [])[0] || th.slice(0, 600)).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ") + " | gate: " + T.gate() + " | ≈ " + /≈/.test(th) + "/" + /≈/.test(ph));
+      check(`fully placed: every goal 1 (${VC.goalPositions(all, PACK, WORDS, CHARACTERS, PASSAGES).join(", ")}), currentGoal all`, cg.all === true && VC.goalPositions(all, PACK, WORDS, CHARACTERS, PASSAGES).every(x => x === 1) && [0, 1, 2].every(g => VC.sessionsToGoX(all, g, 3, ctx) === 0));
+      check("fully placed: Today reads \"All goals\" 100% (the finished learner's line), Today and Progress carry no \"≈\" and no gate sentence", /<span>All goals<\/span><span class="pvn">100%/.test(th) && !/≈/.test(th + ph) && !T.gate());
+      check(`fully placed: mastered counts stay literal (progressTotals m ${VC.progressTotals(all, PACK, WORDS, CHARACTERS, PASSAGES).m}; flag off equal), Progress shows "0 of"`, VC.progressTotals(all, PACK, WORDS, CHARACTERS, PASSAGES).m === 0 && VC.progressTotals(all, PK0, WORDS, CHARACTERS, PASSAGES).m === 0 && / 0 of \d+ mastered|>0 of \d+ mastered/.test(ph));
+    }
+    // A pl without a placed set reads the nearest lower level's set (zh: "4" -> "3"); its knownCurve answers a gate hold.
+    const near = placedOwner(); delete near.pl; near.pl = "4";
+    check(`etaPlaced: pl "4" -> the "3" set under the flag, null without it`, VC.etaPlaced(near, PACK) === PACK.eta.placed["3"] && VC.etaPlaced(near, PK0) === null && VC.etaPlaced(Object.assign({}, near, { pl: "1" }), PACK) === null);
+    // After placement + one session (the owner's screenshot state): still open, goal still near, ETA finite.
+    const api = await playSessions(PACK, placedOwner(), 1, 3, 0.85, null, VIEW), q = api.getProg(), cq = VC.currentGoal(q, PACK, WORDS, CHARACTERS, PASSAGES), eq = VC.sessionsToGoX(q, cq.i, cq.n, ctx);
+    const freshG3 = VC.sessionsToGoX(freshStart(), 2, 3, ctx);
+    check(`owner k=10 + 1 session (fb52 review H1): gate open, goals 1-2 full, current goal ${cq.i + 1} at ${cq.p.toFixed(3)}, ETA ${eq} finite below the fresh goal-3 value ${freshG3}`, VC.levelGateHold(WORDS, PACK, q, CHARACTERS) === null && VC.goalPositions(q, PACK, WORDS, CHARACTERS, PASSAGES).slice(0, 2).every(x => x >= VC.GOAL_DONE) && cq.i === 2 && cq.p >= 0.4 && Number.isFinite(eq) && eq < freshG3);
+    // fb52 review H1: a goal placement covered stays full after a session, a miss, or its provisional records settling; the estimate stays on goal 3.
+    {
+      const pg = (q, tag) => { const cg2 = VC.currentGoal(q, PACK, WORDS, CHARACTERS, PASSAGES); return { gps: VC.goalPositions(q, PACK, WORDS, CHARACTERS, PASSAGES), cg: cg2, eta: [0, 1, 2].map(g => VC.sessionsToGoX(q, g, 3, ctx)) }; };
+      const missOne = q => { const w = WORDS.find(x => x.lv === "1" && q.w[x.id] && q.w[x.id].prov); q.w[w.id] = { r: 0, w: 1, s: 0 }; return w; };
+      const owner = placedOwner(); owner.sessions = 1; missOne(owner);
+      const a = pg(owner);
+      console.log(`INFO  owner k=10 + 1 session + 1 HSK 1 miss: goals ${a.gps.map(x => x.toFixed(3)).join(", ")}, current ${a.cg.i + 1}, ETA ${a.eta.join("/")}`);
+      check("H1 owner k=10 + 1 session + a miss on a placed HSK 1 word: goals 1-2 stay full (>= GOAL_DONE), currentGoal 3, estimate on goal 3 only", a.gps[0] >= VC.GOAL_DONE && a.gps[1] >= VC.GOAL_DONE && a.cg.i === 2 && a.eta[0] === 0 && a.eta[1] === 0 && a.eta[2] > 0);
+      const t0 = pg(placedOwner());
+      check("H1 the miss moves the covered goal by about one word, not to 0.8", t0.gps[0] - a.gps[0] > 0 && t0.gps[0] - a.gps[0] < 0.01);
+      const settled = placedOwner(); settled.sessions = 1;
+      for(const w of WORDS) if(w.lv <= "2" && settled.w[w.id] && settled.w[w.id].prov){ const r = settled.w[w.id]; delete r.prov; r.p = { wm: [3, 1], sm: [3, 1], ws: [3, 1] }; }
+      const sg = pg(settled);
+      check(`H1 every goal 1-2 provisional record settled known (no prov left): goals ${sg.gps.slice(0, 2).map(x => x.toFixed(2)).join(", ")} stay full, currentGoal 3`, sg.gps[0] >= VC.GOAL_DONE && sg.gps[1] >= VC.GOAL_DONE && sg.cg.i === 2);
+      const all = VC.applyPlacement(freshStart(), st, st.length, WORDS, PACK, CHARACTERS); all.sessions = 1; missOne(all);
+      const al = pg(all), T = await bootWith(PACK, all, 1, VIEW), th = T.panel(); T.clickTab("progress"); const ph = T.panel();
+      check(`H1 fully placed + 1 session + a miss: goals ${al.gps.map(x => x.toFixed(3)).join(", ")} full, currentGoal all, "All goals" 100% with no estimate`, al.gps.every(x => x >= VC.GOAL_DONE) && al.cg.all === true && /<span>All goals<\/span><span class="pvn">100%/.test(th) && !/≈/.test(th + ph));
+      const gp = { w: owner.w, sessions: 1 };
+      const noPl = clone(owner); delete noPl.pl;
+      check("H1 without prog.pl (no placement on record) the normal formula applies", VC.goalPosition(noPl, PACK, PACK.progressMap.goals[0], WORDS, CHARACTERS, PASSAGES) < a.gps[0]);
+      const off = clone(owner), PKo = stripFlags(PACK, ["placedKnown"]);
+      check("H1 flag off ignores prog.pl (positions equal the same record read without pl)", JSON.stringify(VC.goalPositions(off, PKo, WORDS, CHARACTERS, PASSAGES)) === JSON.stringify(VC.goalPositions(Object.assign(clone(off), { pl: undefined }), PKo, WORDS, CHARACTERS, PASSAGES)));
+    }
+    // A fresh record and the owner export (no provisional records) are unchanged by the flag.
+    const same = [["fresh", freshStart()]].concat(OWNER ? [["owner export", ownerStart()]] : []);
+    for(const [name, r] of same){
+      const run = async pk => { const x = await bootWith(pk, clone(r), 3, VIEW); const t = x.panel(); x.clickTab("progress"); return t + "\u0000" + x.panel(); };
+      check(`${name}: Today + Progress equal with the flag on and off`, (await run(PACK)) === (await run(PK0)));
+    }
+    // Flag off: Today, Progress and the ETA numbers byte-identical to the engine before placedKnown.
+    if(!PK_CORE) console.log("SKIP  base unavailable");
+    else {
+      const recs = [["fresh", freshStart()], ["owner k=10", placedOwner()], ["A2-equivalent", placedA2()]].concat(OWNER ? [["owner export", ownerStart()]] : []);
+      for(const [name, r] of recs){
+        const run = async env => { const x = await bootWith(PK0, clone(r), 3, Object.assign({}, env, VIEW)); const t = x.panel(); x.clickTab("progress"); return [t, x.panel()]; };
+        const [t1, p1] = await run({}), [t2, p2] = await run({ core: PK_CORE, html: PK_APP });
+        const nums = C => { const cg = C.currentGoal(r, PK0, WORDS, CHARACTERS, PASSAGES); return JSON.stringify([C.goalPositions(r, PK0, WORDS, CHARACTERS, PASSAGES), C.progressPosition(r, PK0, WORDS, CHARACTERS, PASSAGES), [0, 1, 2].map(g => C.sessionsToGoX(r, g, 3, c0)), C.levelOpensIn(WORDS, PK0, r, CHARACTERS), C.levelGateHold(WORDS, PK0, r, CHARACTERS), C.etaPlaced(r, PK0), cg && cg.i]); };
+        check(`flag off, ${name}: Today + Progress + ETA equal ${PK_BASE}`, t1 === t2 && p1 === p2 && nums(VC) === nums(PK_CORE));
+        check(`flag off, ${name}: applyPlacement output equal ${PK_BASE}`, JSON.stringify(VC.applyPlacement(clone(r), st, k, WORDS, PK0, CHARACTERS)) === JSON.stringify(PK_CORE.applyPlacement(clone(r), st, k, WORDS, PK0, CHARACTERS)));
+      }
+    }
   }
 
   console.log(`\n${passes} passed, ${fails} failed`);

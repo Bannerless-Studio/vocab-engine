@@ -483,7 +483,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("... a head name that differs from the roman is kept on both",
       /class="xnm">be<\/span>/.test(rbN.api.scriptTeachHTML(ru3)) && VC.scriptItem("symSound", ru3, { units: rnN.script.units, words: rnN.words }).reveal.name === "be");
     // RTL answer block: one edge for every line (root flag + rule), LTR packs untouched.
-    check("rtl pack: root carries data-tlrtl, and .reveal/.rvtail/.rvb align right under it", fb.document.documentElement._attrs["data-tlrtl"] === "" && /:root\[data-tlrtl\] \.reveal,:root\[data-tlrtl\] \.rvtail,:root\[data-tlrtl\] \.rvb\{text-align:right\}/.test(appHtml));
+    check("rtl pack: root carries data-tlrtl, and .reveal/.rvb align right under it", fb.document.documentElement._attrs["data-tlrtl"] === "" && /:root\[data-tlrtl\] \.reveal,:root\[data-tlrtl\] \.rvb\{text-align:right\}/.test(appHtml));
     check("ltr pack (ko): no data-tlrtl on the root", kb.document.documentElement._attrs["data-tlrtl"] === undefined);
   }
 
@@ -922,6 +922,50 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       check(`app: chip on before the primer is done (${p0}), off once skipped (${p1}), the tap turns it on and stores showPron ${stored} (${p2}), kept on re-entry (${p3})`, p0 === "true" && p1 === "false" && p2 === "true" && stored === true && p3 === "true"); }
     { const { api } = await boot({ pack: offPk, words: K.words, script: K.script }); api.getProg().script.skipped = true; api.goto("progress");
       check("flag off: the chip stays on after the primer is skipped (stored default true)", pressed(api) === "true" && api.getProg().showPron === true); }
+  }
+
+  console.log("\n[17] pack.placedKnown (fb52): a placement past the first bucket skips the script primer as the learner's own skip does");
+  {
+    const fixtures = [["fa", FX.fa()], ["ko", FX.ko()]];
+    // A real script sibling (ur) when checked out next to the engine.
+    const urDir = path.join(ROOT, "..", "urdu", "pack"), uf = n => path.join(urDir, n + ".js");
+    if([uf("pack"), uf("words"), uf("script")].every(x => fs.existsSync(x))){
+      const load = (file, name) => new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)();
+      const P = load(uf("pack"), "PACK");
+      if(P.script) fixtures.push(["ur (sibling)", { pack: P, words: load(uf("words"), "WORDS"), script: load(uf("script"), "SCRIPT") }]);
+    } else console.log("SKIP  ur sibling: no ../urdu/pack/script.js");
+    for(const [name, F] of fixtures){
+      const on = Object.assign({}, F.pack, { placedKnown: true, pronUntilPrimer: true, showPron: true }), off = Object.assign({}, F.pack, { pronUntilPrimer: true, showPron: true });
+      delete off.placedKnown;
+      const units = F.script.units, st = VC.strata(F.words, on.placement, VC.setSizeOf(on));
+      // The learner's own skip, through the app: fresh boot, "I can read it, skip".
+      const own = await boot({ pack: on, words: F.words, script: F.script }); own.api.el("scriptSkip").click();
+      const ownScript = JSON.stringify(own.api.getProg().script);
+      const base = () => { const b = VC.normalizeProg({}, on); b.script = JSON.parse(JSON.stringify(VC.normalizeProg({}, on).script)); return b; };
+      const p1 = VC.applyPlacement(base(), st, 1, F.words, on), p0 = VC.applyPlacement(base(), st, 0, F.words, on);
+      const f1 = VC.applyPlacement(base(), st, 1, F.words, off);
+      check(`${name}: landing past bucket 0 writes the learner's skip (${ownScript})`, JSON.stringify(p1.script) === ownScript && VC.scriptSkipped(p1) && VC.scriptPrimerDone(on, units, p1));
+      check(`${name}: pronUntilPrimer then turns pron off by its own rule (no showPron stored)`, !("showPron" in p1) && VC.showPronOn(on, units, p1) === false && VC.showPronOn(on, units, base()) === true);
+      check(`${name}: a placement landing in bucket 0 leaves the primer as it was`, JSON.stringify(p0.script) === JSON.stringify(base().script) && !VC.scriptSkipped(p0));
+      check(`${name}: applyPlacement stays pure (input script untouched)`, (() => { const b = base(), s0 = JSON.stringify(b); VC.applyPlacement(b, st, 1, F.words, on); return JSON.stringify(b) === s0; })());
+      check(`${name}: flag off, the placement leaves the primer as it was (applyPlacement output = flag-off pack)`, JSON.stringify(f1.script) === JSON.stringify(base().script) && JSON.stringify(f1) === JSON.stringify(VC.applyPlacement(base(), st, 1, F.words, F.pack)));
+      // The app on the placed record: Today does not open with the primer; the Script tab stays reachable.
+      const mk = pr => { const m = memStore(); m.setItem(VC.storageKey(on), JSON.stringify(pr)); return m; };
+      const A = await boot({ pack: on, words: F.words, script: F.script }, { storage: mk(p1) }), h = A.api.html("panel");
+      check(`${name}: Today after placement: no choice card, Learn is not the script stage (got "${learnLine(h)}")`, !/id="scriptChoice"/.test(h) && /id="go"/.test(h) && !learnLine(h).startsWith(on.script.stages[0].label));
+      A.api.goto("sounds"); const sh = A.api.html("panel");
+      check(`${name}: the Script tab still renders its units (${units.length})`, A.api.scriptTab() ? units.slice(0, 3).every(u => sh.includes(u.t)) : true);
+      // fb52 review M1: an explicit "Learn the script" choice survives a placement past bucket 0.
+      const lb = base(); VC.answerScriptChoice(lb, true);
+      const pl1 = VC.applyPlacement(lb, st, 1, F.words, on), L = await boot({ pack: on, words: F.words, script: F.script }, { storage: mk(pl1) });
+      check(`${name}: prior "learn" choice + placement: choice intact (${JSON.stringify(pl1.script).slice(0, 60)}), primer not done, pron still on`, JSON.stringify(pl1.script) === JSON.stringify(lb.script) && !VC.scriptSkipped(pl1) && !VC.scriptPrimerDone(on, units, pl1) && VC.showPronOn(on, units, pl1) === true);
+      const lh = L.api.html("panel");
+      check(`${name}: prior "learn" choice + placement: Today still carries the script stage "${on.script.stages[0].label}" and no choice card`, lh.includes(on.script.stages[0].label) && !/id="scriptChoice"/.test(lh));
+      const sk = base(); VC.answerScriptChoice(sk, false);
+      check(`${name}: prior "skip" choice + placement: stays skipped`, VC.scriptSkipped(VC.applyPlacement(sk, st, 1, F.words, on)));
+      const B = await boot({ pack: off, words: F.words, script: F.script }, { storage: mk(f1) });
+      check(`${name}: flag off, Today after placement still offers the choice card`, /id="scriptChoice"/.test(B.api.html("panel")));
+    }
   }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

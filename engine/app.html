@@ -121,13 +121,12 @@
   @media (prefers-reduced-motion: reduce){ .speaker.speaking,.replay.speaking{animation:none} }
   .rvsay{display:flex;justify-content:center;margin:10px 0 0}
   .reveal{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:none;font-size:15px}
-  .rvtail{font-size:15px}
   .reveal .rw{font-size:22px;margin-bottom:2px;font-family:var(--wfont)}
   .reveal .rp{color:var(--mute);margin-bottom:2px}
   /* pack.rtl: an answer block (the reveal, and the same block in the Missed list) aligns
      to one edge, the right: target lines are dir=rtl (start = right) and the Latin pron,
      gloss and labels keep their LTR direction but share the right edge. */
-  :root[data-tlrtl] .reveal,:root[data-tlrtl] .rvtail,:root[data-tlrtl] .rvb{text-align:right}
+  :root[data-tlrtl] .reveal,:root[data-tlrtl] .rvb{text-align:right}
   .next,.primary{margin-top:14px;width:100%;padding:14px;border:none;border-radius:12px;background:var(--ink);color:var(--bg);font-size:16px;min-height:48px;font-family:var(--font)}
   .ghost{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font-size:15px;min-height:44px;font-family:var(--font)}
   .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
@@ -239,7 +238,6 @@
   :root[data-appview="v2"] .rvm .rp,:root[data-appview="v2"] .rvm .rg,:root[data-appview="v2"] .rvm .rvi{color:var(--mute);margin:0}
   :root[data-appview="v2"] .ucue{color:var(--mute);font-size:15px;margin:2px 0 0}
   :root[data-appview="v2"] .rvx{margin-top:8px}
-  :root[data-appview="v2"] .rvtail:not(:empty){margin-top:10px}
   :root[data-appview="v2"] #panel>p.pva:first-child{margin:0 0 12px}
   :root[data-appview="v2"] .plist button{font-family:var(--font)} /* buttons do not inherit the page font */
   :root[data-appview="v2"] .plist .rsc{color:var(--mute);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -1116,16 +1114,20 @@ function screenTop(){
   const p = $("panel");
   if(p && typeof p.getBoundingClientRect === "function" && typeof scrollTo === "function" && p.getBoundingClientRect().top < 0) scrollTo(0, 0);
 }
-// v2 drill cards end with this slot for the examples (showReveal); flag off has no slot.
-const rvTail = () => APP_V2 ? '<div class="rvtail" id="rvtail"></div>' : "";
+// appView (fb51; owner 2026-10-08): the pre-answer hint links ("Show meaning", "show written") go once the answer is
+// marked when the reveal makes them redundant. A reveal that shows the item's form row (class rw) carries the English and
+// the characters, or its own show-written link; a reveal without that row (the unit and script kinds) leaves them.
+// Called before showReveal, so every link in the panel is still a stimulus link.
+function dropStimLinks(rh){
+  if(!APP_V2 || !/class="rw[ "]/.test(rh)) return;
+  const p = $("panel");
+  if(p && typeof p.querySelectorAll === "function") p.querySelectorAll("[data-pcue],[data-showw]").forEach(x => x.remove());
+}
 function showReveal(html){
   const rv = $("rv"); if(!rv) return;
-  // v2: the examples ride below Next (answer row, Next, examples), so Next never needs a scroll.
-  const tail = APP_V2 ? $("rvtail") : null, cut = tail ? html.indexOf('<div class="rvx">') : -1;
-  if(tail) tail.innerHTML = cut >= 0 ? html.slice(cut) : "";
-  const head = cut >= 0 ? html.slice(0, cut) : html;
-  rv.innerHTML = head;
-  rv.style.display = head ? "block" : "none";
+  // v2 order (owner 2026-10-09, reverses fb45): answer row, examples (open), Next last; the examples stay inside #rv.
+  rv.innerHTML = html;
+  rv.style.display = html ? "block" : "none";
   if(html){ rv.style.opacity = "0"; requestAnimationFrame(()=>{ rv.style.opacity = "1"; }); }
   announce(html);
 }
@@ -1204,7 +1206,7 @@ function firstTimeScore(seen, miss){
 const sentClass = it => APP_V2 && /^[sp]:/.test(it.key || "") ? " sent" : "";
 function renderMcItem(it){
   const P = $("panel");
-  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>${rvTail()}`;
+  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>`;
   if(it.mount) it.mount();
   const opts = rzOrderOf(it) || shuffle(it.opts.slice());
   it.rzShown = opts;
@@ -1222,7 +1224,7 @@ function renderMcItem(it){
       if(!ok) b.classList.add("bad");
       D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(it); }
       ANS_IT = it; try { if(it.onAnswer) it.onAnswer(ok); } finally { ANS_IT = null; }
-      showReveal(revealHTML(it, it.reveal || "", ok));
+      const rh = revealHTML(it, it.reveal || "", ok); dropStimLinks(rh); showReveal(rh);
       playReveal(it);
       showNext(); setScore(D.seen, D.seen + D.q.length);
       D.cur = null; sessionSave(true);
@@ -1266,7 +1268,7 @@ function renderTypeItem(it){
   const P = $("panel");
   P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}
     <input type="text" id="tin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"${it.inputTA !== undefined ? it.inputTA : TA} placeholder="${escapeHtml(it.placeholder || (DISP.rtl ? "type the word" : "type the word…"))}">
-    <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>${rvTail()}`;
+    <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>`;
   if(it.mount) it.mount();
   const input = $("tin"); input.focus();
   let answered = false;
@@ -1276,7 +1278,8 @@ function renderTypeItem(it){
     const ok = it.check(input.value);
     D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(typedRequeue(it)); }
     ANS_IT = it; try { if(it.onAnswer) it.onAnswer(ok); } finally { ANS_IT = null; }
-    showReveal(revealHTML(it, (ok ? "" : `<div class="diff">${APP_V2 ? "You typed " : "you typed: "}${escapeHtml(input.value)}</div>`) + (it.feedback ? it.feedback(input.value) : "") + (it.reveal||""), ok));
+    const rh = revealHTML(it, (ok ? "" : `<div class="diff">${APP_V2 ? "You typed " : "you typed: "}${escapeHtml(input.value)}</div>`) + (it.feedback ? it.feedback(input.value) : "") + (it.reveal||""), ok);
+    dropStimLinks(rh); showReveal(rh);
     playReveal(it);
     showNext(); setScore(D.seen, D.seen + D.q.length);
     D.cur = null; sessionSave(true);
@@ -2112,7 +2115,8 @@ const patternNoteHTML = p => `<div class="pnote">${p.note.map(ui).join("<br>")}<
 // blank): hidden until answered behind a "meaning" tap (no penalty, nothing
 // recorded; a reload hides it again); the reveal always carries it (sentenceRevealBlock).
 const PATTERN_CUE_AFTER = PATTERNS_ON && PACK.patternCue === "after";
-const patternCueHTML = s => PATTERN_CUE_AFTER ? `<div class="q cue"><button type="button" class="showw" style="margin:0" data-pcue="${escapeHtml(s.en)}" aria-label="Show meaning">${APP_V2 ? "Show meaning" : "meaning"}</button></div>` : `<div class="q cue">${ui(s.en)}</div>`;
+// first (fb51; owner 2026-10-08, appView v2): a pattern's first meeting shows the English open, as the note does; later meetings keep the tap.
+const patternCueHTML = (s, first) => PATTERN_CUE_AFTER && !(APP_V2 && first) ? `<div class="q cue"><button type="button" class="showw" style="margin:0" data-pcue="${escapeHtml(s.en)}" aria-label="Show meaning">${APP_V2 ? "Show meaning" : "meaning"}</button></div>` : `<div class="q cue">${ui(s.en)}</div>`;
 if(PATTERN_CUE_AFTER) $("panel").addEventListener("click", e => {
   const b = e.target && e.target.closest ? e.target.closest("[data-pcue]") : null;
   if(!b) return;
@@ -2128,12 +2132,12 @@ function patternItem(pid, si, mi){
   const ans = VC.patternMarkText(s, mk), t = String(s.t);
   const pf = pfSentence(s, null, { start: mk[0], end: mk[1], text: ans });
   const body = (pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div>`
-    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s);
+    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s, VC.patternFirstMeeting(prog, p, PACK));
   const note = patternNoteHTML(p), rv = sentenceRevealBlock(s);
   const base = { key: "p:" + pid, html: body, reveal: rv, onReveal: b => saySentence(s, b), revealHear: canHearSentence(s), mrowSent: s };
   // The note names the answer, so it rides with the verdict (owner 2026-10-08): on a first meeting right or
   // wrong, and on a miss any time. Read before notePattern writes the record.
-  base.onAnswer = function(ok){ const first = VC.patternState(prog, pid).fresh; VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); this.reveal = ok && !first ? rv : note + rv; };
+  base.onAnswer = function(ok){ const first = VC.patternFirstMeeting(prog, p, PACK); VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); this.reveal = ok && !first ? rv : note + rv; };
   const choice = () => ({ kind: "mc", label: "What's the missing word?", optsClass: "opts-hero opts-w", opts: [ans, ...VC.patternOpts(p, s, mi, PATTERN_LIST)], a: ans, optHtml: patternOptHTML, optsT: true });
   if(TYPING) return Object.assign(base, { kind: "type", label: "Type the missing word", check: v => VC.normKey(String(v).normalize("NFC")) === VC.normKey(ans.normalize("NFC")),
     choiceFallback(){ const c = Object.assign({}, this, choice()); c.onAnswer = base.onAnswer; return c; } });
@@ -2517,7 +2521,7 @@ function todayRender(){
   ];
   if(pz) steps.splice(1, 1);
   const showPlaceHint = !prog.placedOnce;
-  const showSoundsHint = HAS_LESSONS && !prog.soundsOpened;
+  const showSoundsHint = HAS_LESSONS && !prog.soundsOpened && !VC.placedPastFirstBucket(prog, WORDS, PACK);
   const readNext = todayReadItem(false);
   if(readNext) steps.push([readNext.mode === "listen" ? "Listen" : "Read", null, readPlanLine(readNext)]);
   // Paused: a choice of what Learn teaches next waits, so it cannot block review.
@@ -3472,12 +3476,22 @@ function startPlacement(){
   const st = VC.strata(WORDS, PACK.placement, SIZE);
   const bucketItems = [];
   st.forEach((b,bi) => { pick(b.words, VC.placementItemCount(bi, PACK)).forEach(w=>bucketItems.push({b:bi, w})); });
-  PL = { vocab:{items:shuffle(bucketItems), i:0}, st, res: st.map(()=>({r:0,n:0})) };
+  // pack.placementEarlyStop: asked bucket by bucket (shuffled inside a bucket) so the loop can stop after three empty buckets.
+  const early = VC.placementEarlyStopOn(PACK);
+  const items = early ? st.reduce((acc, _, bi) => acc.concat(shuffle(bucketItems.filter(x => x.b === bi))), []) : shuffle(bucketItems);
+  PL = { vocab:{items, i:0}, st, res: st.map(()=>({r:0,n:0})) };
   placeVocabNext();
 }
 function placeVocabNext(){
   stopSpeaking();
   const P = $("panel"); const V = PL.vocab;
+  if(V.i > 0 && VC.placementEarlyStopOn(PACK)){
+    const k = V.items[V.i - 1].b, nxt = V.items[V.i];
+    if((!nxt || nxt.b !== k) && VC.placementEarlyStopAfter(PL.res, k)){
+      for(let j = k + 1; j < PL.res.length; j++) PL.res[j] = { r:0, n:0, skipped:true };
+      V.i = V.items.length;
+    }
+  }
   if(V.i >= V.items.length){ placeResult(); return; }
   const it = V.items[V.i++]; const w = it.w; setScore(V.i - 1, V.items.length);
   const opts = shuffle([VC.gloss(w), ...VC.meaningOpts(w, WORDS).map(d => VC.gloss(d))]); // a measurement: level tiers, never optsMix (review M1)
@@ -3500,7 +3514,11 @@ function placeResult(){
   const stop = VC.placementStopIndex(PL.res, whole ? { whole: true } : undefined);
   const passed = stop==null ? st.length : stop;
   const skipped = whole ? VC.placementSkipped(PL.res, passed) || [] : [];
-  prog = VC.applyPlacement(prog, st, passed, WORDS, PACK);
+  const charsBefore = Object.keys(VC.charRecs(prog)).length;
+  prog = VC.applyPlacement(prog, st, passed, WORDS, PACK, CHAR_LIST);
+  const na = VC.placementNotAsked(st, PL.res);
+  const notAskedRow = na.length ? `<tr id="plNotAsked"><td colspan="2" style="color:var(--mute)">Not asked: ${na.map(e => e.whole ? escapeHtml(levelLabel(e.lv)) : `${escapeHtml(levelLabel(e.lv))} ${e.s1 - e.s0 > 1 ? `sets ${e.s0 + 1}–${e.s1}` : `set ${e.s1}`}`).join(", ")}</td></tr>` : "";
+  const charsLine = APP_V2 && Object.keys(VC.charRecs(prog)).length > charsBefore ? VC.placedCharsThrough(PACK, CHAR_LIST, prog) : null;
   store.save();
   // Where the learner actually is now (a poor retake never moves them back), not where
   // this attempt stopped.
@@ -3508,8 +3526,8 @@ function placeResult(){
   const pos = nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered";
   const P = $("panel");
   P.innerHTML = `<div class="done"><h2>Start at ${escapeHtml(pos)}</h2>
-    <table class="stats">${st.map((b,i)=>{ const r = PL.res[i]; return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${skipped.includes(i)?'var(--mute)':i<passed?'var(--ok)':'var(--bad)'}">${r.r}/${r.n}</td></tr>`; }).join("")}</table>
-    <p class="q">${learnedWords().length} words learned; newly placed ones are provisional and kept in review.</p>
+    <table class="stats">${st.map((b,i)=>{ const r = PL.res[i]; if(r.skipped) return ""; return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${skipped.includes(i)?'var(--mute)':i<passed?'var(--ok)':'var(--bad)'}">${r.r}/${r.n}</td></tr>`; }).join("")}${notAskedRow}</table>
+    ${charsLine ? `<p class="q" id="plChars">Characters: placed through ${escapeHtml(levelLabel(charsLine.lv))}, set ${charsLine.set}</p>` : ""}<p class="q">${learnedWords().length} words learned; newly placed ones are provisional and kept in review.</p>
     <button class="next" id="ok">${APP_V2 && placeFrom === "progress" ? "Back to Progress" : "Go to Today"}</button></div>`;
   $("ok").onclick = () => { if(APP_V2 && placeFrom === "progress"){ leavePlacement(); return; } placeFrom = null; switchToTab("today", "Today"); testSel = null; render(); };
 }

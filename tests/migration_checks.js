@@ -867,6 +867,31 @@ console.log("\n[pv] pack.progressView (fb37): optional top-level prog.pv = {sn, 
 }
 
 
+console.log("\n[pc] pack.placementChars (fb50): optional prov on prog.chars.c unit records; 143a674 and 806ad57 boot them unchanged, no backup, a unit mark there keeps prov, and back");
+{
+  const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog;
+  const ids = ["c0001", "c0002", "c0003", "c0004"]; ids.forEach(id => { p.chars.c[id] = { r: 1, w: 0, s: 1, prov: 1 }; });
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK), im = VC.applyImport(null, raw, LAG_PACK);
+  check("[pc] boot here keeps prov byte-equal, no backup (boot writes nothing); export/import keeps it; validateProgShape accepts it", here.backupRaw === null && JSON.stringify(here.prog) === raw && im.ok && ids.every(id => im.prog.chars.c[id].prov === 1) && VC.validateProgShape(p, Object.keys(p.sets)).ok);
+  for(const sha of ["143a674", "806ad57"]){
+    let eng = null, op = null;
+    try {
+      const cp = require("child_process");
+      const f = path.join(migTmp(), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
+      op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`[pc] engine ${sha} not in this checkout's history`); continue; }
+    const o = eng.bootProg(raw, op), o2 = eng.bootProg(raw, LAG_PACK);
+    check(`[pc] engine ${sha} boots a record carrying prov units (its zh pack, and this pack with placementChars): no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw && o2.backupRaw === null && JSON.stringify(o2.prog) === raw);
+    const q = clone(o.prog); eng.markChar ? eng.markChar(q, ids[0], true, op, false) : eng.markRec(q.chars.c, ids[0], true, false);
+    check(`[pc] a unit mark on ${sha} keeps prov (it never reads it; s ${q.chars.c[ids[0]].s})`, q.chars.c[ids[0]].s === 2 && q.chars.c[ids[0]].prov === 1 && q.chars.c[ids[1]].prov === 1);
+    const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
+    check(`[pc] and back here from ${sha}: no backup, prov byte-equal`, back.backupRaw === null && ids.slice(1).every(id => back.prog.chars.c[id].prov === 1) && back.prog.chars.c[ids[0]].prov === 1);
+  }
+}
+
+
 console.log("\n[pl] prog.pl (fb42): the level a pre-session placement landed in (pack.eta.placed); ef44c6e and aa00571 boot it unchanged, no backup, and back");
 {
   const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog; p.pl = "3"; p.placedOnce = true;

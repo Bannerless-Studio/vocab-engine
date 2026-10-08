@@ -29,6 +29,11 @@ Wave 0 review follow-ups (w35-review 2026-10-08, LOW, not blocking wave 1): pack
 
 | item | where | what it takes |
 |---|---|---|
+| Words tab opens on the first level whatever the learner's position (after a placement at HSK 4, HSK 1 and its "Next new" within it) | app.html `wordsLv` (init LEVELS[0], kept across tab switches) | open on the level Learn teaches until the learner picks one; owner call whether a picked level sticks. fb52 audit |
+| placedKnown position can step back once a placed record leaves `prov` without failing: a unit reaching `characters.mastered` leaves the whole-pack bar's unit share until bare, a placed word on a levelExam "characters" level after its unit's `prov` drops waits on the exam | core.js `progressPosition`, `wordKnownP` | keep a placed marker past `prov` (stored field) or accept; small on zh (goal bars count units past pron). fb52 |
+| retaking the Test rewrites `prog.pl` downward when a later placement lands lower (pre-existing; `applyPlacement` sets pl whenever no session came before) | core.js `applyPlacement` | keep the max level, or ignore a retake below the stored pl. fb52 review L1 |
+| a re-queued first-meeting pattern shows the English again on the retry (patternCue "after" hides it only on the first meeting) | core.js patternPick / app.html pattern item | keep the cue hidden for the retry of a first-meeting item. fb52 review L4 |
+| placed-start ETA under placedKnown: zh `eta.placed` was measured with placed words not known; with the flag, goals read the fresh `curve` at their position (owner k=10: goals 1-2 full, goal 3 at 0.50 -> ≈ 140 on the fresh curve) | tests/eta_checks.js --calibrate, tools/zh_eta.json | recalibrate the HSK 2 / HSK 3 placed probes with placedKnown on; fit a placed curve where the fresh one misses; the landing goal ignores passages, so the fresh curve is optimistic after a placement. fb52 |
 | noun gender field `g` for article agreement in cloze gaps | it es fr de builders; core.js gap distractors | builders emit `g` (m/f), engine prefers same-gender distractors (un ____ offers feminine l'informazione); fb46 |
 | Nastaliq line height on Urdu | urdu site | unverified in a real browser; being checked by the urdu port 2026-10-08 |
 | `glossKey` joins words without spaces | core.js glossKey | "to be at" keys as "beat"; join with a separator or key on the word list |

@@ -3175,6 +3175,62 @@ async function swChecks(){
   check("Recall with nothing playable: zero hear kinds", r1.every(x => x.kind !== "hear"));
 })();
 
+(function(){
+  console.log("\n[33] pack.placedRead: the new-passage pick starts from the placed level (fb51)");
+  const ids = VC.levelIds(PACK), top = ids[ids.length - 1];
+  // The suite's PACK is pre-pairs era (flags stripped above); the flag is added on a copy, the control is the pack itself.
+  const OFFR = PACK, ON = Object.assign({}, PACK, { placedRead: true }), SHIPPED = loadConst(path.join(ZH, "pack.js"), "PACK");
+  check("pack.placedRead: on in the shipped pack, off in the control", SHIPPED.placedRead === true && VC.placedReadOn(SHIPPED) && VC.placedReadOn(ON) && !VC.placedReadOn(OFFR));
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
+  const placedTop = VC.applyPlacement(VC.normalizeProg({}, PACK), st0, st0.length, WORDS, PACK, undefined);
+  check(`placed record: pl is the top level "${placedTop.pl}"`, placedTop.pl === top);
+  const sTop = VC.suggestPassage(PASSAGES, WORDS, ON, placedTop);
+  check(`placed at the top: the first unread passage of the top level (${sTop && sTop.id})`, sTop === PASSAGES.find(p => p.lv === top) && sTop.lv === top);
+  check("placed at the top, flag off: pack order (the first level's first passage)", VC.suggestPassage(PASSAGES, WORDS, OFFR, placedTop) === PASSAGES.find(p => p.lv === ids[0]));
+  // reading down: finish the top level, the next pick is the level below
+  const pr = JSON.parse(JSON.stringify(placedTop)); VC.readState(pr);
+  const seq = []; for(let g = 0; g < 100; g++){ const p = VC.suggestPassage(PASSAGES, WORDS, ON, pr); if(!p) break; seq.push(p.lv); pr.read.done[p.id] = { sc: 3, n: 3, d: "2026-10-07", x: 1 }; }
+  const want = ids.slice().reverse().flatMap(lv => PASSAGES.filter(p => p.lv === lv).map(() => lv));
+  check(`placed at the top: all ${seq.length} unread passages come top level down, in pack order inside a level`, seq.length === PASSAGES.length && seq.join() === want.join());
+  // placed in the middle: levels above pl keep pack order after the lower levels
+  const mid = ids[1], prm = JSON.parse(JSON.stringify(placedTop)); prm.pl = mid; VC.readState(prm);
+  const seqm = []; for(let g = 0; g < 100; g++){ const p = VC.suggestPassage(PASSAGES, WORDS, ON, prm); if(!p) break; seqm.push(p.lv); prm.read.done[p.id] = { sc: 3, n: 3, d: "2026-10-07", x: 1 }; }
+  const orderM = [mid].concat(ids.slice(0, ids.indexOf(mid)).reverse(), ids.slice(ids.indexOf(mid) + 1));
+  check(`pl = ${mid}: ${mid} first, then the levels below descending, then the levels above in pack order`, seqm.join() === orderM.flatMap(lv => PASSAGES.filter(p => p.lv === lv).map(() => lv)).join());
+  // a locked level above pl is not suggested; a locked level below is not either
+  const prl = VC.normalizeProg({ pl: ids[2], sets: { [ids[0]]: 99, [ids[1]]: 99 } }, PACK);
+  const sl = VC.suggestPassage(PASSAGES, WORDS, ON, prl);
+  check(`open levels only: with levels ${ids[0]}-${ids[1]} learned and ${ids[2]} locked, pl = ${ids[2]} picks ${sl && sl.lv}`, sl && sl.lv === ids[1]);
+  // fresh record and a record without pl: unchanged
+  const frs = VC.normalizeProg({}, PACK);
+  check("fresh record: nothing unlocked, null on and off", VC.suggestPassage(PASSAGES, WORDS, ON, frs) === VC.suggestPassage(PASSAGES, WORDS, OFFR, frs));
+  const noPl = JSON.parse(JSON.stringify(placedTop)); delete noPl.pl;
+  check("placed words but no pl: pack order, equal to the flag-off pick", VC.suggestPassage(PASSAGES, WORDS, ON, noPl) === VC.suggestPassage(PASSAGES, WORDS, OFFR, noPl) && VC.suggestPassage(PASSAGES, WORDS, ON, noPl).lv === ids[0]);
+  const unk = JSON.parse(JSON.stringify(placedTop)); unk.pl = "zz";
+  check("unknown pl: pack order", VC.suggestPassage(PASSAGES, WORDS, ON, unk) === VC.suggestPassage(PASSAGES, WORDS, OFFR, unk));
+  // flag-off equality with the pre-fb51 core on 5 records
+  let oldCore = null;
+  try { const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ec-")); const f = path.join(dir, "core_8564258.js");
+    fs.writeFileSync(f, require("child_process").execSync(`git -C "${ROOT}" show 8564258:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    oldCore = require(f); fs.rmSync(dir, { recursive: true, force: true }); } catch(e){ oldCore = null; }
+  if(!oldCore) console.log("SKIP  8564258 not in this checkout's history");
+  else {
+    const recs = [frs, placedTop, noPl, prm, prl];
+    check("flag off: suggestPassage and nextReadItem (both modes) equal 8564258 on 5 records", recs.every(r => {
+      const a = JSON.parse(JSON.stringify(r)), b = JSON.parse(JSON.stringify(r));
+      const rot = Object.assign({}, OFFR, { dayAware: true, readRotation: true });
+      return VC.suggestPassage(PASSAGES, WORDS, OFFR, a) === oldCore.suggestPassage(PASSAGES, WORDS, OFFR, b)
+        && util.isDeepStrictEqual(VC.nextReadItem(PASSAGES, WORDS, OFFR, a, "2026-10-08"), oldCore.nextReadItem(PASSAGES, WORDS, OFFR, b, "2026-10-08"))
+        && util.isDeepStrictEqual(VC.nextReadItem(PASSAGES, WORDS, rot, a, "2026-10-08", false, 5, seededOnce()), oldCore.nextReadItem(PASSAGES, WORDS, rot, b, "2026-10-08", false, 5, seededOnce()));
+    }));
+  }
+  function seededOnce(){ let a = 7; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  // rotation: the new pick under the flag is the placed-level passage; re-read picks are the done ones (unchanged)
+  const rotOn = Object.assign({}, ON, { dayAware: true, readRotation: true });
+  const nr = VC.nextReadItem(PASSAGES, WORDS, rotOn, placedTop, "2026-10-08", false, 5, seededOnce());
+  check("readRotation on a placed record: the new pick is the top-level passage", nr && nr.reason === "new" && nr.p.lv === top);
+})();
+
 appBootChecks.catch(e => { console.error("app boot checks crashed:", e); fails++; })
   .then(() => swChecks().catch(e => { console.error("service worker checks crashed:", e); fails++; })).then(() => {
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

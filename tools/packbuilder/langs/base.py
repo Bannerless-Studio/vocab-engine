@@ -191,13 +191,14 @@ class LanguageSpec:
             "readRotation": True, "wordsBy": "typed",
             "progressMap": {"goals": [{"upTo": lv, "label": lab} for lv, lab in zip(ids, self.port_goals)]},
             "pairs": True, "freqTiers": True, "progressView": "v2", "appView": "v2", "levelGate": self.port_level_gate,
-            "placementWhole": True,
+            "placementWhole": True, "placementEarlyStop": True, "placedRead": True, "placedKnown": True,
         }
         if self.emit_gender:
             flags["gapGender"] = True
         if self.port_characters:
             flags["characters"] = {"learn": "lag", "start": 60, "ramp": [3, 5, 8], "bareBy": "typed", "bareWords": True, "bareByPair": True}
             flags["levelExam"] = {ids[0]: "pinyin", ids[1]: "characters", ids[2]: "characters"}
+            flags["placementChars"] = True      # placement places the lag characters layer too (fb50)
         if self.script:                 # script primer sites: pron off by default once the primer is done (fb45)
             flags["pronUntilPrimer"] = True
         return flags
