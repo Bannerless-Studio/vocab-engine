@@ -185,6 +185,8 @@ def check_pack(pack, rep):
         rep.err("pack.pronUntilPrimer must be a boolean")
     elif pack.get("pronUntilPrimer") is True and "script" not in pack:
         rep.err("pack.pronUntilPrimer needs pack.script (the default turns off when the primer is done)")
+    if "placementWhole" in pack and not is_bool(pack["placementWhole"]):
+        rep.err("pack.placementWhole must be a boolean")
     if "pairs" in pack and not is_bool(pack["pairs"]):
         rep.err("pack.pairs must be a boolean")
     elif pack.get("pairs") is True and not pack.get("dayAware"):

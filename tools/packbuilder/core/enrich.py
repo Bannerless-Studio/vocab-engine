@@ -66,7 +66,7 @@ def assign_tiers(words, overrides=None, shares=None, ambient_rank=AMBIENT_RANK):
 # --check reads them as port-era: one the spec no longer emits must not linger in a shipped pack.json.
 PORT_KEYS = ("dayAware", "typedFrom", "glossFocus", "glossStyle", "helpClose", "readAnswerBlock", "optsMix", "pauseNew",
              "listenQuestions", "readRotation", "wordsBy", "progressMap", "pairs", "freqTiers", "progressView", "appView",
-             "levelGate", "levelExam", "pronUntilPrimer")
+             "levelGate", "levelExam", "pronUntilPrimer", "placementWhole")
 PORT_CHARACTERS_KEYS = ("learn", "start", "ramp", "bareBy", "bareWords", "bareByPair")
 
 

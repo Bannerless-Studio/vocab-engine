@@ -3460,8 +3460,10 @@ function placeResult(){
   stopSpeaking();
   setScore(0,0);
   const st = PL.st;
-  const stop = VC.placementStopIndex(PL.res);
+  const whole = PACK.placementWhole === true;
+  const stop = VC.placementStopIndex(PL.res, whole ? { whole: true } : undefined);
   const passed = stop==null ? st.length : stop;
+  const skipped = whole ? VC.placementSkipped(PL.res, passed) || [] : [];
   prog = VC.applyPlacement(prog, st, passed, WORDS, PACK);
   store.save();
   // Where the learner actually is now (a poor retake never moves them back), not where
@@ -3470,7 +3472,7 @@ function placeResult(){
   const pos = nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered";
   const P = $("panel");
   P.innerHTML = `<div class="done"><h2>Start at ${escapeHtml(pos)}</h2>
-    <table class="stats">${st.map((b,i)=>{ const r = PL.res[i]; return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${i<passed?'var(--ok)':'var(--bad)'}">${r.r}/${r.n}</td></tr>`; }).join("")}</table>
+    <table class="stats">${st.map((b,i)=>{ const r = PL.res[i]; return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${skipped.includes(i)?'var(--mute)':i<passed?'var(--ok)':'var(--bad)'}">${r.r}/${r.n}</td></tr>`; }).join("")}</table>
     <p class="q">${learnedWords().length} words learned; newly placed ones are provisional and kept in review.</p>
     <button class="next" id="ok">${APP_V2 && placeFrom === "progress" ? "Back to Progress" : "Go to Today"}</button></div>`;
   $("ok").onclick = () => { if(APP_V2 && placeFrom === "progress"){ leavePlacement(); return; } placeFrom = null; switchToTab("today", "Today"); testSel = null; render(); };

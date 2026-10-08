@@ -979,6 +979,47 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
   }
 }
 
+const BASE_E = "f6481b8"; // main before fb48: the flag-off control for placementWhole
+console.log("\n[D2] fb48: placement reads the whole result (pack.placementWhole)");
+{
+  const oldOf = f => cp.execSync(`git -C "${ROOT}" show ${BASE_E}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+  let oldCore = null, oldHtml = null;
+  try {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avd-")); const f = path.join(dir, `core_${BASE_E}.js`);
+    fs.writeFileSync(f, oldOf("engine/core.js")); oldCore = require(f); oldHtml = oldOf("engine/app.html");
+    fs.rmSync(dir, { recursive: true, force: true });
+  } catch(e){ oldCore = null; }
+  const OFFW = packAsOf(PACK, BASE_E, { strip: ["placementWhole"] });
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
+  // right answers per bucket (zh asks 2,3,2,3,...); the first 12 are the owner-reported record
+  const RECS = {
+    "reported record": [1, 3, 2, 0, 2, 2, 2, 2, 2, 3, 1, 2, 0, 0, 0, 0],
+    "all right": N.slice(),
+    "first bucket 0": N.map((n, i) => i === 0 ? 0 : n),
+    "poor": N.map((n, i) => i < 2 ? n : 0),
+  };
+  const place = async (pack, rec, r, o) => { const { api, st } = await bootWith(pack, rec, 13, o);
+    api.ev(`PL = { vocab:{items:[], i:0}, st: VC.strata(WORDS, PACK.placement, SIZE), res: ${JSON.stringify(r.map((x, i) => ({ r: x, n: N[i] })))} }; placeResult();`);
+    return { html: api.panel(), rec: st.ls.getItem(VC.storageKey(pack)), prog: api.getProg() }; };
+  const owner2 = owner ? () => clone(owner) : null;
+  const sources = [["fresh record", () => null]].concat(owner2 ? [["owner export", owner2]] : []);
+  for(const [sn, mk] of sources){
+    // flag on
+    const rep = await place(PACK, mk(), RECS["reported record"]);
+    check(`${sn}, flag on, reported record: placement lands past the skipped bucket (${rep.html.match(/Start at ([^<]*)/)[1]})`, rep.prog.placedOnce === true && /<h2>Start at HSK 4, set 1\b/.test(rep.html));
+    check(`${sn}, flag on, reported record: 9 ok cells, the zero bucket muted, 6 bad cells`, (rep.html.match(/color:var\(--ok\)/g) || []).length === 9 && (rep.html.match(/color:var\(--mute\)/g) || []).length === 1 && (rep.html.match(/color:var\(--bad\)/g) || []).length === 6);
+    const poor = await place(PACK, mk(), RECS["poor"]);
+    check(`${sn}, flag on, poor record: no muted cell`, !/var\(--mute\)/.test(poor.html));
+    const first0 = await place(PACK, mk(), RECS["first bucket 0"]);
+    check(`${sn}, flag on, first bucket 0: every cell bad (stop 0, nothing skipped)`, (first0.html.match(/color:var\(--bad\)/g) || []).length === 16 && !/var\(--mute\)/.test(first0.html));
+    if(!oldCore) { skip(`${BASE_E} not in this checkout's history`); continue; }
+    for(const [rn, r] of Object.entries(RECS)){
+      const a = await place(OFFW, mk(), r), b = await place(OFFW, mk(), r, { core: oldCore, html: oldHtml });
+      check(`${sn}, flag off, ${rn}: result screen and stored record byte-identical to ${BASE_E}`, a.html === b.html && a.rec === b.rec && !/var\(--mute\)/.test(a.html));
+    }
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);
 })();
