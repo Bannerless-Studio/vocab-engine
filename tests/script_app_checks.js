@@ -959,7 +959,8 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       const lb = base(); VC.answerScriptChoice(lb, true);
       const pl1 = VC.applyPlacement(lb, st, 1, F.words, on), L = await boot({ pack: on, words: F.words, script: F.script }, { storage: mk(pl1) });
       check(`${name}: prior "learn" choice + placement: choice intact (${JSON.stringify(pl1.script).slice(0, 60)}), primer not done, pron still on`, JSON.stringify(pl1.script) === JSON.stringify(lb.script) && !VC.scriptSkipped(pl1) && !VC.scriptPrimerDone(on, units, pl1) && VC.showPronOn(on, units, pl1) === true);
-      check(`${name}: prior "learn" choice + placement: Today still opens on the primer stage (got "${learnLine(L.api.html("panel"))}")`, learnLine(L.api.html("panel")).startsWith(on.script.stages[0].label));
+      const lh = L.api.html("panel");
+      check(`${name}: prior "learn" choice + placement: Today still carries the script stage "${on.script.stages[0].label}" and no choice card`, lh.includes(on.script.stages[0].label) && !/id="scriptChoice"/.test(lh));
       const sk = base(); VC.answerScriptChoice(sk, false);
       check(`${name}: prior "skip" choice + placement: stays skipped`, VC.scriptSkipped(VC.applyPlacement(sk, st, 1, F.words, on)));
       const B = await boot({ pack: off, words: F.words, script: F.script }, { storage: mk(f1) });
