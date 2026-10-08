@@ -121,12 +121,13 @@
   @media (prefers-reduced-motion: reduce){ .speaker.speaking,.replay.speaking{animation:none} }
   .rvsay{display:flex;justify-content:center;margin:10px 0 0}
   .reveal{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:none;font-size:15px}
+  .rvtail{font-size:15px}
   .reveal .rw{font-size:22px;margin-bottom:2px;font-family:var(--wfont)}
   .reveal .rp{color:var(--mute);margin-bottom:2px}
   /* pack.rtl: an answer block (the reveal, and the same block in the Missed list) aligns
      to one edge, the right: target lines are dir=rtl (start = right) and the Latin pron,
      gloss and labels keep their LTR direction but share the right edge. */
-  :root[data-tlrtl] .reveal,:root[data-tlrtl] .rvb{text-align:right}
+  :root[data-tlrtl] .reveal,:root[data-tlrtl] .rvtail,:root[data-tlrtl] .rvb{text-align:right}
   .next,.primary{margin-top:14px;width:100%;padding:14px;border:none;border-radius:12px;background:var(--ink);color:var(--bg);font-size:16px;min-height:48px;font-family:var(--font)}
   .ghost{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font-size:15px;min-height:44px;font-family:var(--font)}
   .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
@@ -2547,7 +2548,7 @@ function todayPlanV2(o){
     ["Sentences", g.sentences ? (pk ? `${pk} pattern${pk > 1 ? "s" : ""}` : "") : "skipped until 8+ sentences are available"]
   ];
   if(pz) steps.splice(1, 1);
-  if(readNext){ const p = readNext.p; steps.push([readNext.mode === "listen" ? "Listen" : "Read", tf(p.title)]); } // characters only (fb45)
+  if(readNext){ const p = readNext.p; steps.push([readNext.mode === "listen" ? "Listen" : "Read", tf(p.title)]); }
   const goal = pvGoalHTML();
   return `<div class="pv tdv"><p class="pva">Session ${n}${pz ? ", review only" : ""}</p>${goal ? `<div class="pmv" id="pmap" role="button" tabindex="0" aria-label="Open Progress">${goal}</div>` : progressMapHTML()}<section class="tsts">${steps.map(s => `<div class="tst"><span>${s[0]}</span><div class="tsd">${s[1]}</div></div>`).join("")}</section></div>`;
 }

@@ -566,6 +566,7 @@ if(ON){
     check("DOM order: answer row (#rv), then Next (#nx), then the examples tail (#rvtail)", pos("rv") > 0 && pos("rv") < pos("nx") && pos("nx") < pos("rvtail") && api.el("rvtail").innerHTML.includes('class="rvx"') && !api.el("rv").innerHTML.includes('class="rvx"'));
     check("a missed item's reveal (typed, wrong) keeps the same order", (() => { const r = runItem(api, "typeItem(__W)", false); const g = api.panel(); return !!r && g.indexOf('id="nx"') < g.indexOf('id="rvtail"') && api.el("rvtail").innerHTML.includes('class="rvx"') && !api.el("rv").innerHTML.includes('class="rvx"'); })()); }
   { const { api } = await bootWith(OFF, unpaused(), 21, { patterns: true }); api.ev(PICK); runItem(api, "recallItem(__W)", true);
+    check("RTL tail: .rvtail carries the .reveal font size and the data-tlrtl right-align rule", /\.rvtail\{font-size:15px\}/.test(appHtml) && /:root\[data-tlrtl\] \.reveal,:root\[data-tlrtl\] \.rvtail,:root\[data-tlrtl\] \.rvb\{text-align:right\}/.test(appHtml));
     check("flag off: no rvtail slot, the reveal block as before", !/rvtail/.test(api.panel())); }
   check("wrong answer (and every You typed): the examples open", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].wrong.rv) && !/Examples?:/.test(ON[n].wrong.rv) && !/rvxb/.test(ON[n].wrong.rv)));
   const cued = KINDS.map(([n]) => n).filter(n => ON[n].right.cue || ON[n].wrong.cue);

@@ -41,7 +41,7 @@ Why it is built this way (one line each):
 - **Read stage in Today:** passage reading is a skippable Today stage (first not-done passage at an unlocked level, else a spaced re-read) so reading happens without visiting a tab.
 - **Read rotation (`readRotation`, zh):** no day gates; reading and listening passes alternate by pass with random picks and shuffled questions, because 60 passages can fit in one day (owner 2026-10-03).
 - **Listening pass:** a spaced re-read becomes a listening pass (text hidden, half the questions audio-only, done record gains `l:1`) only when every sentence is playable on this device.
-- **Pack-gated features:** characters, script primer, tones, audio, typing modes switch on from pack fields only; a pack without them must render byte-identically (flag-off proof).
+- **Pack-gated features:** characters, script primer, tones, audio, typing modes switch on from pack fields only; a pack without them must render byte-identically (flag-off proof). The one recorded exception: the `document.title` parenthetical strip is ungated (owner 2026-10-08, tab title for every pack).
 
 ## Commands (pinned)
 

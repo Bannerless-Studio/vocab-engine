@@ -23,7 +23,7 @@ The `.js` files are generated with `python3 tools/jsonify_pack.py <packdir>`. Th
 | field | type | required | meaning |
 |---|---|---|---|
 | `key` | string `[a-z0-9_-]+` | yes | Pack identity. Progress is stored under the localStorage key `vocab_<key>`; the drill in progress under the localStorage key `vocab_<key>_session` (see "Session resume"). Changing it orphans learners' progress. |
-| `name` | string | yes | Display name, e.g. `"Mandarin (HSK 1–4)"`. The browser tab title drops a trailing parenthetical (`Mandarin`), as the Sounds intro does (fb45; the level range is not chrome). |
+| `name` | string | yes | Display name, e.g. `"Mandarin (HSK 1–4)"`. The browser tab title drops a trailing parenthetical (`Mandarin`), as the Sounds intro does (fb45; the level range is not chrome). Ungated by owner decision 2026-10-08: the tab title strip applies to every pack, the one exception to flag gating. |
 | `tts` | string | yes | BCP-47 locale for speech synthesis, e.g. `"zh-CN"`, `"it-IT"`. A voice with the exact locale is preferred, then any voice for the same language. |
 | `ttsRate` | number 0.1–3 | no (0.9) | Speech rate. |
 | `audio` | `{voice, version}` | no | The pack ships recorded clips (docs/AUDIO.md, written by `packbuilder audio`). `voice` is a non-empty string, `version` an integer ≥ 1 that names the service worker's audio cache, so a new version never plays a stale cached clip. With it, the no-voice notices are not shown. Clips play with or without it. |
