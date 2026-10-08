@@ -1024,6 +1024,59 @@ console.log("\n[D2] fb48: placement reads the whole result (pack.placementWhole)
   }
 }
 
+const BASE_F = "143a674"; // main before fb50: the flag-off control for placementChars
+console.log("\n[D3] fb50: placement places the characters layer (pack.placementChars) + Today's Sounds hint");
+{
+  const oldOf = f => cp.execSync(`git -C "${ROOT}" show ${BASE_F}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+  let oldCore = null, oldHtml = null;
+  try {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avd-")); const f = path.join(dir, `core_${BASE_F}.js`);
+    fs.writeFileSync(f, oldOf("engine/core.js")); oldCore = require(f); oldHtml = oldOf("engine/app.html");
+    fs.rmSync(dir, { recursive: true, force: true });
+  } catch(e){ oldCore = null; }
+  const OFFC = packAsOf(PACK, BASE_F, { strip: ["placementChars"] });
+  check("pack.placementChars: on in the shipped pack, off in the control", PACK.placementChars === true && OFFC.placementChars === undefined && VC.placementCharsOn(PACK) && !VC.placementCharsOn(OFFC));
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
+  const RECS = {
+    "reported record": [1, 3, 2, 0, 2, 2, 2, 2, 2, 3, 1, 2, 0, 0, 0, 0],
+    "all right": N.slice(),
+    "first bucket 0": N.map((n, i) => i === 0 ? 0 : n),
+    "first bucket only": N.map((n, i) => i === 0 ? n : 0),
+    "poor": N.map((n, i) => i < 2 ? n : 0),
+  };
+  const place = async (pack, rec, r, o) => { const { api, st } = await bootWith(pack, rec, 13, o);
+    api.ev(`PL = { vocab:{items:[], i:0}, st: VC.strata(WORDS, PACK.placement, SIZE), res: ${JSON.stringify(r.map((x, i) => ({ r: x, n: N[i] })))} }; placeResult();`);
+    const html = api.panel(), prog = api.getProg(), rec2 = st.ls.getItem(VC.storageKey(pack));
+    api.clickTab("today");
+    return { html, rec: rec2, prog, today: api.panel() }; };
+  const owner2 = owner ? () => clone(owner) : null;
+  const sources = [["fresh record", () => null]].concat(owner2 ? [["owner export", owner2]] : []);
+  for(const [sn, mk] of sources){
+    const rep = await place(PACK, mk(), RECS["reported record"]);
+    const line = (rep.html.match(/<p class="q" id="plChars">([^<]*)<\/p>/) || [])[1];
+    const n = VC.placedCharsThrough(PACK, CHARACTERS, rep.prog);
+    check(`${sn}, flag on, reported record: one line under the table "${line}"`, /^Characters: placed through HSK \d, set \d+$/.test(line || "") && n && line === `Characters: placed through HSK ${n.lv}, set ${n.set}` && rep.html.indexOf("</table>") < rep.html.indexOf('id="plChars"') && (rep.html.match(/id="plChars"/g) || []).length === 1);
+    check(`${sn}, flag on, reported record: unit records written provisional (${Object.keys(VC.charRecs(rep.prog)).length}), Learn teaches no placed unit`, Object.keys(VC.charRecs(rep.prog)).length > 0 && Object.values(VC.charRecs(rep.prog)).some(r => r.prov === 1));
+    const none = await place(PACK, mk(), RECS["first bucket 0"]);
+    check(`${sn}, flag on, first bucket 0: no line (nothing placed)`, !/plChars/.test(none.html));
+    const one = await place(PACK, mk(), RECS["first bucket only"]);
+    check(`${sn}, flag on, first bucket only: ${/plChars/.test(one.html) ? "line present: " + one.html.match(/id="plChars">([^<]*)/)[1] : "no line (first set not whole)"}`, true);
+    // Today's Sounds hint
+    check(`${sn}, flag on, reported record: Today has no "Start the first lesson" hint`, !/id="hintSounds"/.test(rep.today) && /id="go"/.test(rep.today));
+    check(`${sn}, flag on, reported record: Sounds stays unmarked (prog.soundsOpened ${rep.prog.soundsOpened}, lessons done ${Object.keys(rep.prog.lessons || {}).length}) and its tab is reachable`, rep.prog.soundsOpened === (mk() || {}).soundsOpened && Object.keys(rep.prog.lessons || {}).length === Object.keys((mk() || { lessons: {} }).lessons || {}).length);
+    if(!owner2 || sn !== "owner export") {
+      const f = await bootWith(PACK, null, 3); check("flag on, fresh record, no placement: the hint is shown", /id="hintSounds"/.test(f.api.panel()));
+      const o1 = await place(PACK, null, RECS["first bucket only"]);
+      check("flag on, placement passing only the first bucket: the hint is still shown", /id="hintSounds"/.test(o1.today));
+    }
+    if(!oldCore) { skip(`${BASE_F} not in this checkout's history`); continue; }
+    for(const [rn, r] of Object.entries(RECS)){
+      const a = await place(OFFC, mk(), r), b = await place(OFFC, mk(), r, { core: oldCore, html: oldHtml });
+      check(`${sn}, flag off, ${rn}: result screen, stored record and Today byte-identical to ${BASE_F} (hint ${/id="hintSounds"/.test(a.today) ? "shown" : "hidden"})`, a.html === b.html && a.rec === b.rec && a.today === b.today && !/plChars/.test(a.html));
+    }
+  }
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);
 })();

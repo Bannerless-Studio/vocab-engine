@@ -954,7 +954,7 @@ function placementStopWhole(res){
 
 // Placement only ever moves a learner forward: no word record is removed or downgraded, so
 // learned and drilled-ahead state survive a poor retake.
-function applyPlacement(prog, st, passed, words, pack){
+function applyPlacement(prog, st, passed, words, pack, units){
   const out = Object.assign({}, prog, { w: {} });
   Object.keys(prog.w||{}).forEach(k => { out.w[k] = Object.assign({}, prog.w[k]); });
   out.sets = Object.assign({}, defaultProg(pack).sets, prog.sets||{});
@@ -968,13 +968,76 @@ function applyPlacement(prog, st, passed, words, pack){
   const seed = {};
   for(let i=0;i<passed;i++){ const b = st[i]; seed[b.lv] = Math.max(seed[b.lv]||0, b.s1); }
   if(passed > 0 && firstIdx > 0) ids.slice(0, firstIdx).forEach(lv => { seed[lv] = nSets(byLv[lv], size); });
-  Object.keys(seed).forEach(lv => (byLv[lv]||[]).slice(0, seed[lv]*size).forEach(w => { if(!out.w[w.id]) out.w[w.id] = {r:1,w:0,s:1,prov:1}; }));
+  const covered = new Set();
+  Object.keys(seed).forEach(lv => (byLv[lv]||[]).slice(0, seed[lv]*size).forEach(w => { covered.add(w.id); if(!out.w[w.id]) out.w[w.id] = {r:1,w:0,s:1,prov:1}; }));
   ids.forEach(lv => settleSetCounter(out, words, pack, lv));
+  placeCharUnits(out, pack, units, covered);
   out.placedOnce = true;
   // prog.pl: the level this placement landed in, for pack.eta.placed (docs/PACK_SCHEMA.md "ETA model"); only when no
   // session came before it, since a record with sessions is not a placed start.
   if(!(prog.sessions > 0)){ const land = st[passed] || st[st.length - 1]; if(land) out.pl = String(land.lv); }
   return out;
+}
+
+// pack.placementChars (fb50; owner 2026-10-08: placed at HSK 4, then taught the HSK 1 characters from set 1): under characters.learn
+// "lag" the units are taught separately from the words and the set position is the count of unit records, so a placement
+// that seeds 1650 word records leaves the characters layer at 0. The unit sets of the lag plan (ramp chunks per level, else
+// setSize chunks of the pack order) whose units all have a unit record or all their words in the prefix this placement
+// asserts (placed now, or learned before inside it; a word learned beyond the prefix never counts, so a retake that
+// places nothing leaves a learner whose characters lag behind their words alone) are seeded the way a placed word is: {r:1,w:0,s:1,prov:1}, kept in review until known (markChar / unifiedReviewPlan). Only the
+// contiguous run of such sets from the start is seeded, so the next ramp chunk stays aligned; a set with one unplaced unit and
+// everything after it stay unplaced. Adds records only: a retake never removes or lowers one.
+const placementCharsOn = pack => !!(pack && pack.placementChars === true) && lagOn(pack);
+function charPlanSets(pack, units){
+  const cfg = charsConfig(pack), list = charStageUnits(levelIds(pack), units, pack), out = [];
+  if(cfg.ramp){
+    rampPlan(cfg, pack, units).plan.forEach(lp => {
+      const lu = list.filter(u => String(u.lv) === lp.lv); let pos = 0;
+      lp.sizes.forEach((sz, k) => { out.push({ lv: lp.lv, k, units: lu.slice(pos, pos + sz) }); pos += sz; });
+    });
+    return out;
+  }
+  const seen = {};
+  for(let i = 0; i < list.length; i += cfg.setSize){
+    const chunk = list.slice(i, i + cfg.setSize), lv = String(chunk[0].lv);
+    out.push({ lv, k: Math.floor((seen[lv] || 0) / cfg.setSize), units: chunk });
+    chunk.forEach(u => { seen[String(u.lv)] = (seen[String(u.lv)] || 0) + 1; });
+  }
+  return out;
+}
+// The run of sets from the start that are fully recorded or whose units' words all lie in `covered` (a Set of word ids).
+function placedCharSets(pack, units, covered, recs){
+  const run = [];
+  for(const s of charPlanSets(pack, units)){
+    if(!s.units.length || !s.units.every(u => hasCharRec(recs, u.id) || ((u.words || []).length > 0 && !!covered && u.words.every(id => covered.has(id))))) break;
+    run.push(s);
+  }
+  return run;
+}
+function placeCharUnits(out, pack, units, covered){
+  if(!placementCharsOn(pack) || !Array.isArray(units) || !units.length) return 0;
+  const recs = charRecs(out), add = [];
+  placedCharSets(pack, units, covered, recs).forEach(s => s.units.forEach(u => { if(!hasCharRec(recs, u.id)) add.push(u.id); }));
+  if(!add.length) return 0;
+  // out.chars is the input's object until cloned (applyPlacement is pure).
+  out.chars = Object.assign({}, ensureChars(Object.assign({}, out)), { c: Object.assign({}, recs) });
+  add.forEach(id => { out.chars.c[id] = { r:1, w:0, s:1, prov:1 }; });
+  return add.length;
+}
+// "Characters: placed through HSK 3, set 12" on the result screen: the last set of the recorded run, level-local number.
+function placedCharsThrough(pack, units, prog){
+  if(!placementCharsOn(pack) || !Array.isArray(units) || !units.length) return null;
+  const run = placedCharSets(pack, units, null, charRecs(prog));
+  const last = run[run.length - 1];
+  return last ? { lv: last.lv, set: last.k + 1 } : null;
+}
+// Today's Sounds hint under pack.placementChars (fb50; owner 2026-10-08: placed at HSK 4, Today still said "Start the first lesson"):
+// derived from the counters, nothing stored. A placement that passed at least two buckets has raised the second bucket's level to
+// its end; the first bucket alone (or none) leaves the learner at the start, where the hint still helps.
+function placedPastFirstBucket(prog, words, pack){
+  if(!placementCharsOn(pack) || !prog || !prog.placedOnce) return false;
+  const b = strata(words, pack.placement, setSizeOf(pack))[1];
+  return !!b && ((prog.sets || {})[b.lv] || 0) >= b.s1;
 }
 
 // One entry per word or sentence, whatever question type it was missed as.
@@ -2879,8 +2942,13 @@ const hasCharRec = (recs, id) => hasOwn(recs, id) && !!recs[id];
 // answer: only typed answers (markUnitTyped) take it to bare.
 function markChar(prog, unitId, ok, pack, held){
   const recs = ensureChars(prog).c, p = recs[unitId], m = typedBareOn(pack) ? charsConfig(pack).mastered : Infinity;
-  if(!isObj(p) || (p.s || 0) < m) return markRec(recs, unitId, ok, false);
+  if(!isObj(p) || (p.s || 0) < m) return settleUnitProv(markRec(recs, unitId, ok, false), ok, pack);
   if(ok){ p.r++; if(!held) p.s++; } else { p.w++; p.s = Math.max(m, p.s - 1); }
+  return settleUnitProv(p, ok, pack);
+}
+// A placed unit (placeCharUnits) stays provisional until mastered or missed, as markRec does for a word.
+function settleUnitProv(p, ok, pack){
+  if(p.prov && (p.s >= (charsConfig(pack) || {}).mastered || !ok)) delete p.prov;
   return p;
 }
 function typedBareOn(pack){ const c = charsConfig(pack); return !!(c && c.bareBy === "typed"); }
@@ -3401,8 +3469,11 @@ function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx, opts){
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = rng || Math.random;
   const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
   const pvSet = new Set(pv.map(w => w.id));
-  const ranked = rankUnified(learned.filter(x => !pvSet.has(x.id)), prog.w, ru, charRecs(prog), n - pv.length, pack, rng, rs, scriptRecs(prog));
-  const pool = shuffle([...ranked, ...pv.map(w => ({ kind:"w", entry:w }))], rng);
+  // Placed units (pack.placementChars) are kept in review like placed words; with none, no slot is taken and no rng drawn.
+  const pu = ru.some(u => (charRecs(prog)[u.id] || {}).prov) ? provPick(ru, Math.min(REVIEW_PROV, n - pv.length), charRecs(prog)) : [];
+  const puSet = new Set(pu.map(u => u.id));
+  const ranked = rankUnified(learned.filter(x => !pvSet.has(x.id)), prog.w, pu.length ? ru.filter(u => !puSet.has(u.id)) : ru, charRecs(prog), n - pv.length - pu.length, pack, rng, rs, scriptRecs(prog));
+  const pool = shuffle([...ranked, ...pv.map(w => ({ kind:"w", entry:w })), ...pu.map(u => ({ kind:"c", entry:u }))], rng);
   const kinds = kindMix(pool.filter(x => x.kind === "w").length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), rng);
   let wi = 0;
   const out = pool.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry }
@@ -4504,7 +4575,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,
   findSurface, textForms, locateWord, packSurfaces, spannedByLonger, gapMatch, gapCandidateIndices, blankSentence,
-  strata, placementItemCount, placementStopIndex, placementSkipped, applyPlacement, dedupeMisses,
+  strata, placementItemCount, placementStopIndex, placementSkipped, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,

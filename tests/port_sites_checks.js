@@ -69,8 +69,8 @@ async function site(dirName, code){
     flags.every(k => P[k] === true) && P.glossStyle === "primary" && P.wordsBy === "typed" && P.listenQuestions === "all" && P.progressView === "v2" && P.appView === "v2" && P.levelGate === 0.7
     && JSON.stringify(P.typedFrom) === JSON.stringify(code === "ja" ? ["written", "pron"] : ["written"]) && P.progressMap.goals.length === 3
     && (code === "ja" ? JSON.stringify(P.levelExam) === JSON.stringify({ [LV[0]]: "pinyin", [LV[1]]: "characters", [LV[2]]: "characters" })
-      && P.characters.learn === "lag" && P.characters.start === 60 && JSON.stringify(P.characters.ramp) === "[3,5,8]" && P.characters.bareBy === "typed" && P.characters.bareWords === true && P.characters.bareByPair === true
-      : !P.levelExam && !P.characters));
+      && P.characters.learn === "lag" && P.characters.start === 60 && JSON.stringify(P.characters.ramp) === "[3,5,8]" && P.characters.bareBy === "typed" && P.characters.bareWords === true && P.characters.bareByPair === true && P.placementChars === true
+      : !P.levelExam && !P.characters && P.placementChars === undefined));
   check(`${code}: pronUntilPrimer on exactly for script sites (${P.script ? "script" : "no script"}: ${JSON.stringify(P.pronUntilPrimer)}), engine reads it`, P.script ? P.pronUntilPrimer === true && VC.pronUntilPrimerOn(P) : P.pronUntilPrimer === undefined && !VC.pronUntilPrimerOn(P));
   check(`${code}: engine reads pairs, freqTiers, levelGate, progressView, appView as on`, VC.pairsOn(P) && VC.freqTiersOn(P) && VC.levelGateOn(P) && VC.progressViewOn(P) && VC.appViewOn(P));
 

@@ -619,6 +619,8 @@ def main(argv):
         "appView": "v2",
         # Placement reads the whole result (docs/PACK_SCHEMA.md "placementWhole"; owner 2026-10-08).
         "placementWhole": True,
+        # Placement also places the characters layer (docs/PACK_SCHEMA.md "placementChars"; owner 2026-10-08).
+        "placementChars": True,
         # The next HSK level opens when this share of the previous one is known (docs/PACK_SCHEMA.md "levelGate"; owner 2026-10-07).
         "levelGate": 0.7,
         # What each level's exam asks (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): HSK 1-2 are pinyin papers, HSK 3-4 read hanzi.

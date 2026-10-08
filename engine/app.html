@@ -2517,7 +2517,7 @@ function todayRender(){
   ];
   if(pz) steps.splice(1, 1);
   const showPlaceHint = !prog.placedOnce;
-  const showSoundsHint = HAS_LESSONS && !prog.soundsOpened;
+  const showSoundsHint = HAS_LESSONS && !prog.soundsOpened && !VC.placedPastFirstBucket(prog, WORDS, PACK);
   const readNext = todayReadItem(false);
   if(readNext) steps.push([readNext.mode === "listen" ? "Listen" : "Read", null, readPlanLine(readNext)]);
   // Paused: a choice of what Learn teaches next waits, so it cannot block review.
@@ -3500,7 +3500,9 @@ function placeResult(){
   const stop = VC.placementStopIndex(PL.res, whole ? { whole: true } : undefined);
   const passed = stop==null ? st.length : stop;
   const skipped = whole ? VC.placementSkipped(PL.res, passed) || [] : [];
-  prog = VC.applyPlacement(prog, st, passed, WORDS, PACK);
+  const charsBefore = Object.keys(VC.charRecs(prog)).length;
+  prog = VC.applyPlacement(prog, st, passed, WORDS, PACK, CHAR_LIST);
+  const charsLine = APP_V2 && Object.keys(VC.charRecs(prog)).length > charsBefore ? VC.placedCharsThrough(PACK, CHAR_LIST, prog) : null;
   store.save();
   // Where the learner actually is now (a poor retake never moves them back), not where
   // this attempt stopped.
@@ -3509,7 +3511,7 @@ function placeResult(){
   const P = $("panel");
   P.innerHTML = `<div class="done"><h2>Start at ${escapeHtml(pos)}</h2>
     <table class="stats">${st.map((b,i)=>{ const r = PL.res[i]; return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${skipped.includes(i)?'var(--mute)':i<passed?'var(--ok)':'var(--bad)'}">${r.r}/${r.n}</td></tr>`; }).join("")}</table>
-    <p class="q">${learnedWords().length} words learned; newly placed ones are provisional and kept in review.</p>
+    ${charsLine ? `<p class="q" id="plChars">Characters: placed through ${escapeHtml(levelLabel(charsLine.lv))}, set ${charsLine.set}</p>` : ""}<p class="q">${learnedWords().length} words learned; newly placed ones are provisional and kept in review.</p>
     <button class="next" id="ok">${APP_V2 && placeFrom === "progress" ? "Back to Progress" : "Go to Today"}</button></div>`;
   $("ok").onclick = () => { if(APP_V2 && placeFrom === "progress"){ leavePlacement(); return; } placeFrom = null; switchToTab("today", "Today"); testSel = null; render(); };
 }
