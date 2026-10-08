@@ -342,7 +342,17 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
   const mk = (pack, listen, t, prev) => { const p = rp(prev || {}); VC.markPassageDone(p, "p0001", 3, 4, "2026-10-04", listen, pack, t); return p.read.done.p0001; };
   check("core: t stored on a reading pass under v2, rounded", mk(PACK, false, 41.6).t === 42);
   check("core: no t for a listening pass, flag off, undefined or 0", mk(PACK, true, 40).t === undefined && mk(OFF, false, 40).t === undefined && mk(PACK, false, undefined).t === undefined && mk(PACK, false, 0).t === undefined);
-  check("core: a later pass with no t drops the old one (latest pass only)", mk(PACK, false, undefined, { p0001: { sc: 1, n: 4, d: "x", x: 1, t: 50 } }).t === undefined);
+  const prevT = { p0001: { sc: 1, n: 4, d: "x", x: 1, t: 50 } };
+  check("core: a listening pass keeps the previous t, so the Reading row survives alternating read/listen passes", mk(PACK, true, 40, prevT).t === 50);
+  check("core: a reading pass with its timing dropped keeps the previous t; a timed reading pass replaces it", mk(PACK, false, undefined, prevT).t === 50 && mk(PACK, false, 0, prevT).t === 50 && mk(PACK, false, 30, prevT).t === 30);
+  check("core: flag off writes no t even over a record that has one", mk(OFF, true, 40, prevT).t === undefined);
+  {
+    const pk = Object.assign({}, PACK), ps = PASSAGES.slice(0, 3), prog3 = rp(Object.fromEntries(ps.map(p => [p.id, { sc: 1, n: 1, d: "x", x: 1, t: 60 }])));
+    ps.forEach(p => VC.markPassageDone(prog3, p.id, 1, 1, "2026-10-05", true, pk));
+    check("speed: the Reading row survives a listening pass on every timed passage", VC.readingSpeed(ps, pk, prog3) !== null);
+  }
+  const pkSp = Object.assign({}, PACK, { spaced: false }), pkWd = Object.assign({}, PACK, { spaced: true });
+  check("units: keyed on pack.spaced like passageLength (an unspaced pack counts letters, a spaced one words, whatever the whitespace ratio)", VC.passageUnits({ text: "ab cd ef" }, pkSp).unit === "characters" && VC.passageUnits({ text: "ab cd ef" }, pkSp).n === 6 && VC.passageUnits({ text: "abcdef ghij" }, pkWd).unit === "words" && VC.passageUnits({ text: "abcdef ghij" }, pkWd).n === 2);
   check("core: readTimeKeep: 1200 s kept, 1201 s dropped, hidden 120 s kept, 121 s dropped, 0 s dropped", VC.readTimeKeep(1200, 0) && !VC.readTimeKeep(1201, 0) && VC.readTimeKeep(60, 120000) && !VC.readTimeKeep(60, 120001) && !VC.readTimeKeep(0, 0));
   check("core: validateProgShape accepts numeric read.done.t, rejects a string", VC.validateProgShape(rp({ p0001: { sc: 1, n: 1, d: "x", x: 1, t: 9 } }), VC.levelIds(PACK)).ok && VC.validateProgShape(rp({ p0001: { sc: 1, n: 1, d: "x", x: 1, t: "9" } }), VC.levelIds(PACK)).reason === "read.done.p0001.t must be a number");
   const en = [1, 2, 3, 4].map(i => ({ id: "e" + i, text: Array(100).fill("word").join(" ") }));
@@ -353,7 +363,7 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
   check("speed: even count averages the middle two", VC.readingSpeed(en, PACK, dn([30, 60, 120, 240])).rate === 75);
   const zhp = PASSAGES.slice(0, 3);
   const zs = VC.readingSpeed(zhp, PACK, rp(Object.fromEntries(zhp.map(p => [p.id, { sc: 1, n: 1, d: "x", x: 1, t: 60 }]))));
-  check("speed: zh counts characters", zs && zs.unit === "characters" && zs.rate === Math.round(([...zhp.map(p => VC.passageUnits(p).n)].sort((a, b) => a - b))[1]) && zs.rate > 20);
+  check("speed: zh counts characters", zs && zs.unit === "characters" && zs.rate === Math.round(([...zhp.map(p => VC.passageUnits(p, PACK).n)].sort((a, b) => a - b))[1]) && zs.rate > 20);
   check("speed: flag off is null", VC.readingSpeed(en, OFF, dn([30, 60, 120])) === null);
 
   // The app: a pass opened, read, finished.
@@ -376,7 +386,7 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
   for(const id of ids){ api.startPassage(id); NOW += 60000; api.finishPassage(); }
   api.clickTab("progress");
   const h4 = stripTags(api.panel());
-  const u = ids.map(id => VC.passageUnits(PASSAGES.find(p => p.id === id)).n);
+  const u = ids.map(id => VC.passageUnits(PASSAGES.find(p => p.id === id), PACK).n);
   const med = Math.round(u.slice().sort((a, b) => a - b)[1]);
   check("app: Progress shows Reading: N characters a minute after 3 passages", h4.includes(`Reading ${med} characters a minute`));
   const fewer = await bootWith(PACK, (() => { const p = midProg(); p.read = { done: { [ids[0]]: { sc: 1, n: 1, d: "x", x: 1, t: 60 }, [ids[1]]: { sc: 1, n: 1, d: "x", x: 1, t: 60 } } }; return p; })(), 5);

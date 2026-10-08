@@ -1236,6 +1236,10 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     const noOra = WG.filter(w => w.id !== "ora"), BN = {}; noOra.forEach(w => { BN[w.id] = w; });
     const fb = draw(noOra, BN, BN.info, "Ho un'informazione.", ON);
     check("gapGender fallback: only 2 other feminine l'-nouns (< 3) -> 3 article-agreeing distractors as without the flag, masculine ones included", fb.out.every(ds => ds.length === 3 && ds.every(v => VC.citationArticles(v, VC.packArticles(noOra)).includes("l'"))) && fb.out.some(ds => ds.some(v => v.g === "m")));
+    const fitW = Object.assign(mk("ora2", "l'ora2", "hour two"), { g: "f", alt: ["informazione"] });
+    const withFit = [...noOra, fitW], BF = {}; withFit.forEach(w => { BF[w.id] = w; });
+    const fitDraw = draw(withFit, BF, BF.info, "Ho un'informazione.", ON);
+    check("gapGender L3: a same-gender word whose surface is the blank does not count toward the 3 minimum (2 usable -> fallback, masculine l'-nouns allowed)", fitDraw.out.every(ds => ds.length === 3 && ds.every(v => v.id !== "ora2")) && fitDraw.out.some(ds => ds.some(v => v.g === "m")));
     const seeded = f => { const r = Math.random; let a = 12345; Math.random = () => { a = (a * 1664525 + 1013904223) >>> 0; return a / 4294967296; }; try { return f(); } finally { Math.random = r; } };
     const sig = (pack, pool, by, entry, text) => seeded(() => JSON.stringify(draw(pool, by, entry, text, pack, 40).out.map(ds => ds.map(v => v.id))));
     const W0 = [...W, ...extra].map(w => Object.assign({}, w)); const B0 = {}; W0.forEach(w => { B0[w.id] = w; });
