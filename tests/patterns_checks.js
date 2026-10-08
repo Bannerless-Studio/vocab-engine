@@ -299,7 +299,7 @@ const ptKey = it => String(it.key).startsWith("p:");
     const rows = await session(api, (it, rec, rows, step) => {
       if(ptKey(it)) notes.push({ key: it.key, note: /class="pnote"/.test(api.panel()), step });
       return !(ptKey(it) && notes.filter(n => n.key === it.key).length === 1 && it.key === notes[0].key);
-    }, { after: (it, ok, h) => { if(ptKey(it) && !ok && !firstMiss) firstMiss = (h.match(/class="pnote"/g) || []).length; } });
+    }, { after: (it, ok, h) => { if(ptKey(it) && !ok && !firstMiss) firstMiss = (api.el("rv").innerHTML.match(/class="pnote"/g) || []).length; } });
     const s4 = rows.filter(r => r.step === 4), pts = s4.filter(r => ptKey(r));
     const firstAsk = [...new Map(pts.map(r => [r.key, r])).values()];
     console.log(`    Sentences step: ${s4.length} answers, pattern asks ${pts.map(r => r.key + (r.ok ? "" : " (miss)")).join(", ")}`);
@@ -308,8 +308,8 @@ const ptKey = it => String(it.key).startsWith("p:");
     check("pattern items are cloze choices on a blank (What's the missing word?)", pts.every(r => r.kind === "mc" && r.label === "What's the missing word?"));
     const pr = api.getProg();
     const miss = notes[0].key.slice(2);
-    check("the first showing of a pattern with no record carries the two-line note; the retry after its miss does not", notes.filter(n => n.key !== notes[0].key).every(n => n.note) && notes[0].note && notes.length === 4 && !notes[3].note);
-    check("a miss at first meeting shows the note once (above the sentence, not again in the reveal)", firstMiss === 1, `${firstMiss} notes on screen after the miss`);
+    check("no pattern question carries the note before the answer, first meeting included (fb44: it names the answer)", notes.length === 4 && notes.every(n => !n.note));
+    check("a miss at first meeting shows the note once, with the verdict", firstMiss === 1, `${firstMiss} notes on screen after the miss`);
     check("prog.pt written for the 3 asked patterns: the missed one s 0 (retry gains nothing), the others s 1, a = this session", Object.keys(pr.pt).length === 3 && pr.pt[miss].s === 0 && Object.keys(pr.pt).filter(k => k !== miss).every(k => pr.pt[k].s === 1) && Object.values(pr.pt).every(e => e.a === pr.sn));
     check("session record kept the planned ids (today.pt) while the step ran", api.ps().length === 3);
     // Miss verdict shows the note: build the item fresh and answer it wrong.
@@ -365,6 +365,51 @@ const ptKey = it => String(it.key).startsWith("p:");
     check("the resumed step finishes with 8 distinct items", new Set(rest.filter(r => r.step === 4).map(r => r.key).concat(before ? [] : [])).size >= 6);
   }
 
+  console.log("\n[12] the note rides with the verdict (fb44; owner 2026-10-08: the note named the answer before it was given)");
+  {
+    const NOTE = /class="pnote"/;
+    const base = synth(["1", "2"], 2, 4, 5);
+    const open = VC.openPatterns(base, PACK, PATTERNS, WORDS);
+    // Every open pattern recorded (s 1): the first pattern asked is answered right (later right), the second wrong (later miss).
+    const seeded = clone(base); seeded.pt = {}; open.forEach(pp => { seeded.pt[pp.id] = { s: 1, a: 0 }; });
+    const api = await boot(PACK, seeded, 51, { patterns: PATTERNS });
+    const got = [], seenKeys = [];
+    await session(api, it => { if(!ptKey(it)) return true; if(!seenKeys.includes(it.key)) seenKeys.push(it.key); return seenKeys.indexOf(it.key) !== 1; },
+      { after: (it, ok, h) => { if(ptKey(it) && !got.some(g => g.key === it.key)) got.push({ key: it.key, ok, verdictNote: NOTE.test(api.el("rv").innerHTML), stimNote: NOTE.test(it.html) }); } });
+    console.log(`    recorded: ${got.map(g => g.key + ":" + (g.ok ? "right" : "miss") + (g.verdictNote ? "+note" : "")).join(" ")}`);
+    check("later right (recorded pattern): no note, none on the question", got[0] && got[0].ok && !got[0].verdictNote && !got[0].stimNote);
+    check("later miss: the note with the verdict, none on the question", got[1] && !got[1].ok && got[1].verdictNote && !got[1].stimNote);
+    const api1 = await boot(PACK, clone(base), 57, { patterns: PATTERNS }); const g1 = [];
+    await session(api1, () => true, { after: (it, ok, h) => { if(ptKey(it) && !g1.some(g => g.key === it.key)) g1.push({ key: it.key, ok, verdictNote: NOTE.test(api1.el("rv").innerHTML), stimNote: NOTE.test(it.html) }); } });
+    check("first meeting, right: the note with the verdict, none on the question", g1.length >= 3 && g1.every(g => g.ok && g.verdictNote && !g.stimNote));
+    // First meeting, wrong, in a fresh run.
+    const api2 = await boot(PACK, clone(base), 52, { patterns: PATTERNS }); const g2 = {};
+    await session(api2, it => !ptKey(it), { after: (it, ok, h) => { if(ptKey(it) && !g2[it.key]) g2[it.key] = { n: (api2.el("rv").innerHTML.match(/class="pnote"/g) || []).length, stim: NOTE.test(it.html) }; } });
+    check("first meeting, wrong: the note once with the verdict, none on the question", Object.keys(g2).length >= 3 && Object.values(g2).every(x => x.n === 1 && !x.stim));
+    // The retry of a first-meeting miss in the same drill is no longer a first meeting: a right retry shows no note.
+    const api3 = await boot(PACK, clone(base), 53, { patterns: PATTERNS }); const seq = {};
+    await session(api3, (it) => { if(!ptKey(it)) return true; const k = it.key; seq[k] = (seq[k] || []); return seq[k].length > 0; }, { after: (it, ok, h) => { if(ptKey(it)) seq[it.key].push({ ok, note: NOTE.test(it.reveal) }); } });
+    const retried = Object.values(seq).filter(a => a.length > 1);
+    check("miss then right retry in one session: note on the miss, none on the retry", retried.length >= 1 && retried.every(a => !a[0].ok && a[0].note && a[1].ok && !a[1].note), JSON.stringify(retried));
+    // Sentences test: same rule.
+    const api4 = await boot(PACK, clone(base), 54, { patterns: PATTERNS });
+    api4.tab("test"); await tick();
+    const tb = api4.el("tSentences");
+    if(tb){ tb.click(); const D = api4.getD(); const pts = [D.cur, ...D.q].filter(Boolean).filter(ptKey);
+      check(`Sentences test: ${pts.length} pattern questions carry no note`, pts.length >= 3 && pts.every(it => !NOTE.test(it.html)) && !NOTE.test(api4.panel()));
+      const cur = api4.getCur(); let first = null;
+      if(cur && ptKey(cur)){ first = cur; answer(api4, true); }
+      check("Sentences test: a first-meeting right answer shows the note with the verdict", !!first && NOTE.test(api4.el("rv").innerHTML));
+    } else skip("Sentences test button absent");
+    // Resume mid-cloze: the question still has no note; the first-meeting verdict still has it.
+    const st = { ls: memStore(), ss: memStore() };
+    const a1 = await boot(PACK, clone(base), 55, { patterns: PATTERNS, st });
+    await session(a1, () => true, { stop: (rows, it) => ptKey(it) });
+    const a2 = await boot(PACK, null, 56, { patterns: PATTERNS, st }), c2 = a2.getCur();
+    check("reload mid-cloze: no note on the question", !!c2 && ptKey(c2) && !NOTE.test(a2.panel()) && !NOTE.test(c2.html));
+    if(c2 && ptKey(c2)){ answer(a2, true); check("reload mid-cloze: the first-meeting verdict carries the note", NOTE.test(a2.el("rv").innerHTML)); }
+  }
+
   console.log(`\n[9] flag-off control vs ${MAIN}`);
   if(!OLD || !mainHtml) skip(`${MAIN} not in this checkout's history`);
   else {
@@ -410,7 +455,7 @@ const ptKey = it => String(it.key).startsWith("p:");
     check(`pattern items (${seen.length}) carry a "meaning" tap and no English before the answer`, seen.length >= 3 && seen.every(x => x.hasBtn && x.en && !x.cueBefore));
     check("the tap's English is the item's own sentence", seen.every(x => [...ENS].some(e => esc(e) === x.en)));
     check("the English is in the reveal after the answer (right and wrong)", seen.every(x => String(x.it.reveal).includes(x.en)));
-    check("the two-line note still shows above the sentence at first meeting", seen.length >= 3 && seen.every(x => x.note));
+    check("the two-line note is not on the question at first meeting (it rides with the verdict, [12])", seen.length >= 3 && seen.every(x => !x.note));
     // The tap: the panel's capture listener swaps the button for the English; nothing is recorded.
     const ls = (api.el("panel")._listeners.click || []);
     const btn = { dataset: { pcue: "He is taller than me." }, replaceWith(x){ this.by = x; } }, doc = api.doc(), mk = doc.createElement;
@@ -453,8 +498,10 @@ const ptKey = it => String(it.key).startsWith("p:");
       api.tab("progress"); await tick(); out.push(api.panel());
       return out;
     };
-    const ref = await walk(cueHtml, C0), cur = await walk(appHtml, VC);
-    check(`patternCue absent: two-session walk + Sentences test byte-identical to ${CUE_MAIN} (patterns on)`, JSON.stringify(ref) === JSON.stringify(cur) && ref.length >= 7, cur.findIndex((x, i) => x !== ref[i]));
+    // fb44 moved the note from the question to the verdict, so it is stripped from both sides; everything else is compared as before.
+    const noNote = o => o.map(x => String(x).replace(/<div class="pnote">.*?<\/div>/g, ""));
+    const ref = noNote(await walk(cueHtml, C0)), cur = noNote(await walk(appHtml, VC));
+    check(`patternCue absent: two-session walk + Sentences test byte-identical to ${CUE_MAIN} (patterns on; pnote stripped, fb44)`, JSON.stringify(ref) === JSON.stringify(cur) && ref.length >= 7, cur.findIndex((x, i) => x !== ref[i]));
   }
 
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);

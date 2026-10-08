@@ -6019,7 +6019,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "319295731-2355366";
+const VE_BUILD = "1819685658-2355386";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6462,10 +6462,11 @@ function patternItem(pid, si, mi){
   const pf = pfSentence(s, null, { start: mk[0], end: mk[1], text: ans });
   const body = (pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div>`
     : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s);
-  const note = patternNoteHTML(p), shown = VC.patternState(prog, pid).fresh ? note + body : body, rv = sentenceRevealBlock(s);
-  const base = { key: "p:" + pid, html: shown, reveal: rv, onReveal: b => saySentence(s, b), revealHear: canHearSentence(s), mrowSent: s };
-  // A miss shows the note with the verdict, unless the stem on screen already carries it (first meeting).
-  base.onAnswer = function(ok){ const up = this.html !== body; VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); this.html = body; this.reveal = ok || up ? rv : note + rv; };
+  const note = patternNoteHTML(p), rv = sentenceRevealBlock(s);
+  const base = { key: "p:" + pid, html: body, reveal: rv, onReveal: b => saySentence(s, b), revealHear: canHearSentence(s), mrowSent: s };
+  // The note names the answer, so it rides with the verdict (owner 2026-10-08): on a first meeting right or
+  // wrong, and on a miss any time. Read before notePattern writes the record.
+  base.onAnswer = function(ok){ const first = VC.patternState(prog, pid).fresh; VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); this.reveal = ok && !first ? rv : note + rv; };
   const choice = () => ({ kind: "mc", label: "What's the missing word?", optsClass: "opts-hero opts-w", opts: [ans, ...VC.patternOpts(p, s, mi, PATTERN_LIST)], a: ans, optHtml: patternOptHTML, optsT: true });
   if(TYPING) return Object.assign(base, { kind: "type", label: "Type the missing word", check: v => VC.normKey(String(v).normalize("NFC")) === VC.normKey(ans.normalize("NFC")),
     choiceFallback(){ const c = Object.assign({}, this, choice()); c.onAnswer = base.onAnswer; return c; } });
@@ -8205,4 +8206,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1720014360-2354689-->
+<!--ve-build:2669759189-2354710-->

@@ -610,9 +610,11 @@ console.log(`\n[B7] flag off: every item kind, teach cards and a session's drill
       return tr;
     };
     const w1 = await walk(), w2 = await walk({ core: oldCore, html: oldHtml });
-    const kindsSame = KINDS.every(([n]) => JSON.stringify(a[n]) === JSON.stringify(b[n]));
-    const diff = w1.findIndex((x, i) => JSON.stringify(x) !== JSON.stringify(w2[i]));
-    if(!kindsSame) console.log("INFO  differs: " + KINDS.map(([n]) => n).filter(n => JSON.stringify(a[n]) !== JSON.stringify(b[n])).join(", "));
+    // fb44 moved the pattern note from the question to the verdict (placement only), so the note div is stripped from both sides.
+    const J = x => JSON.stringify(x).replace(/<div class=\\"pnote\\">.*?<\/div>/g, "");
+    const kindsSame = KINDS.every(([n]) => J(a[n]) === J(b[n]));
+    const diff = w1.findIndex((x, i) => J(x) !== J(w2[i]));
+    if(!kindsSame) console.log("INFO  differs: " + KINDS.map(([n]) => n).filter(n => J(a[n]) !== J(b[n])).join(", "));
     if(diff >= 0) console.log(`INFO  walk first difference at ${diff}: ${JSON.stringify(w1[diff]).slice(0, 300)} vs ${JSON.stringify(w2[diff]).slice(0, 300)}`);
     check(`${name}: ${KINDS.length} kinds (question, options, typed field, reveal right + wrong), word + character teach cards, and a Today session's ${w1.filter(x => x[0] === "q").length} items + ${w1.filter(x => x[0] === "teach").length} teach screens byte-identical`, kindsSame && a.teachWords === b.teachWords && a.teachChars === b.teachChars && diff < 0 && w1.length === w2.length);
   }
