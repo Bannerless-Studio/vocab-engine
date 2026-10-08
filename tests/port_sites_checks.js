@@ -51,6 +51,9 @@ async function site(dirName, code){
   const D = sim.loadPackDir(E.dir), P = D.PACK, S = sim.createSim(D), units = D.CHARACTERS || [];
   const LV = VC.levelIds(P), BY = VC.wordsByLevel(D.WORDS, P);
   const orig = JSON.parse(fs.readFileSync(path.join(repo, "pack", "words.json"), "utf8"));
+  // wave 1 sites commit tools/eta.json (enrich copies it); later waves do not yet, so every ETA assertion branches on the file
+  const etaFile = path.join(repo, "tools", "eta.json");
+  const shipped = fs.existsSync(etaFile) ? JSON.parse(fs.readFileSync(etaFile, "utf8")) : null;
 
   // enrich output
   const ftOk = D.WORDS.every(w => w.ft === 0 || w.ft === 1 || w.ft === 2) && D.WORDS.length === orig.length && D.WORDS.every((w, i) => w.id === orig[i].id);
@@ -120,17 +123,21 @@ async function site(dirName, code){
   const G = await S.bootWith(P, gp, 2, { passages: D.PASSAGES });
   const gs = G.gate(), gth = G.panel(); G.clickTab("progress");
   check(`${code}: gate holds ${LV[1]} at ${hold && hold.pct}% of ${LV[0]}: sentence "${gs}" on Today and Progress, Learn teaches no ${LV[1]} word`,
-    !!hold && hold.lv === LV[1] && /^\S+ opens at 70% of \S+ known\. Now \d+%\.$/.test(gs) && !gs.includes("≈") && gth.includes(esc(gs)) && G.panel().includes(esc(gs)) && VC.nextNewSetOpen(D.WORDS, P, gp, units) === null, gth.slice(0, 300));
+    !!hold && hold.lv === LV[1] && (shipped ? /^\S+ opens at 70% of \S+ known\. Now \d+%, ≈\s\d+ sessions?\.$/.test(gs) : /^\S+ opens at 70% of \S+ known\. Now \d+%\.$/.test(gs) && !gs.includes("≈")) && gth.includes(esc(gs)) && G.panel().includes(esc(gs)) && VC.nextNewSetOpen(D.WORDS, P, gp, units) === null, gth.slice(0, 300));
   const open = seedLevel(D, S, 1, Math.ceil(0.7 * BY[LV[0]].length) + 3);
   check(`${code}: gate open at 70%: no hold, no sentence`, VC.levelGateHold(D.WORDS, P, open, units) === null && (await S.bootWith(P, open, 2, { passages: D.PASSAGES })).gate() === null);
 
   // ETA: the enriched pack carries no estimate (no tools/eta.json: eta = all null, never zh's pace); measured values show one
   const goalsN = VC.progressMapGoals(P).length, fresh = VC.normalizeProg({ placedOnce: true }, P);
   const cg = VC.currentGoal(fresh, P, D.WORDS, units, D.PASSAGES), ctx = { pack: P, words: D.WORDS, units, passages: D.PASSAGES };
-  check(`${code}: enriched eta without tools/eta.json = ${JSON.stringify(P.eta)}: no goal estimate (goal ${cg && cg.i + 1}), no gate estimate, Today / Progress carry no "≈"`,
-    !!P.eta && P.eta.gain.length === goalsN && P.eta.gain.every(v => v === null) && P.eta.known === null
-    && Array.from({ length: goalsN }, (_, g) => VC.sessionsToGoX({}, g, goalsN, ctx)).every(v => v === null) && VC.levelOpensIn(D.WORDS, P, gp, units) === null
-    && !(await S.bootWith(P, fresh, 1, { passages: D.PASSAGES })).panel().includes("≈"));
+  const allNull = !!P.eta && P.eta.gain.length === goalsN && P.eta.gain.every(v => v === null) && P.eta.known === null;
+  const gateEst = VC.levelOpensIn(D.WORDS, P, gp, units), goalEst = Array.from({ length: goalsN }, (_, g) => VC.sessionsToGoX({}, g, goalsN, ctx));
+  const freshPanel = (await S.bootWith(P, fresh, 1, { passages: D.PASSAGES })).panel();
+  if(shipped) check(`${code}: tools/eta.json shipped: pack eta = the committed file (${JSON.stringify(P.eta)}), finite goal ${goalEst[0]} and gate ${gateEst} estimates, gate sentence carries "≈ N sessions"`,
+    !!P.eta && JSON.stringify(P.eta.gain) === JSON.stringify(shipped.gain) && P.eta.known === shipped.known && P.eta.gain.length === goalsN
+    && Number.isFinite(goalEst[0]) && Number.isFinite(gateEst) && /≈\s\d+ sessions?\./.test(gs) && freshPanel.includes("≈"));
+  else check(`${code}: enriched eta without tools/eta.json = ${JSON.stringify(P.eta)}: no goal estimate (goal ${cg && cg.i + 1}), no gate estimate, Today / Progress carry no "≈"`,
+    allNull && goalEst.every(v => v === null) && gateEst === null && !freshPanel.includes("≈"));
   const withEta = Object.assign(clone(P), { eta: { gain: [0.01, null, 0.02], known: null } });
   const ctx2 = Object.assign({}, ctx, { pack: withEta });
   const measured = Object.assign(clone(P), { eta: { gain: [0.01, 0.01, 0.01], known: 5 } });
