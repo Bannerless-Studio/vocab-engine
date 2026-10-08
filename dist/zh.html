@@ -6219,7 +6219,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "36123465-2368696";
+const VE_BUILD = "1509897650-2371155";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -8439,4 +8439,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1132782875-2368018-->
+<!--ve-build:1019756951-2370479-->
