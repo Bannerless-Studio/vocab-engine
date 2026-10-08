@@ -979,7 +979,7 @@ function applyPlacement(prog, st, passed, words, pack, units){
   return out;
 }
 
-// pack.placementChars (fb50; owner 2026-10-08: placed at HSK 4, then taught the HSK 1 characters from set 1): under characters.learn
+// pack.placementChars (fb50; owner 2026-10-08: placed at the top level, then taught the first level's characters from set 1): under characters.learn
 // "lag" the units are taught separately from the words and the set position is the count of unit records, so a placement
 // that seeds 1650 word records leaves the characters layer at 0. The unit sets of the lag plan (ramp chunks per level, else
 // setSize chunks of the pack order) whose units all have a unit record or all their words in the prefix this placement
@@ -1024,14 +1024,14 @@ function placeCharUnits(out, pack, units, covered){
   add.forEach(id => { out.chars.c[id] = { r:1, w:0, s:1, prov:1 }; });
   return add.length;
 }
-// "Characters: placed through HSK 3, set 12" on the result screen: the last set of the recorded run, level-local number.
+// "Characters: placed through <level>, set N" on the result screen: the last set of the recorded run, level-local number.
 function placedCharsThrough(pack, units, prog){
   if(!placementCharsOn(pack) || !Array.isArray(units) || !units.length) return null;
   const run = placedCharSets(pack, units, null, charRecs(prog));
   const last = run[run.length - 1];
   return last ? { lv: last.lv, set: last.k + 1 } : null;
 }
-// Today's Sounds hint under pack.placementChars (fb50; owner 2026-10-08: placed at HSK 4, Today still said "Start the first lesson"):
+// Today's Sounds hint under pack.placementChars (fb50; owner 2026-10-08: placed at the top level, Today still said "Start the first lesson"):
 // derived from the counters, nothing stored. A placement that passed at least two buckets has raised the second bucket's level to
 // its end; the first bucket alone (or none) leaves the learner at the start, where the hint still helps.
 function placedPastFirstBucket(prog, words, pack){
