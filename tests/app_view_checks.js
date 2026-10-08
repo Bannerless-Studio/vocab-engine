@@ -1077,6 +1077,81 @@ console.log("\n[D3] fb50: placement places the characters layer (pack.placementC
   }
 }
 
+const BASE_G = "b66bfb5"; // fb50 head: the flag-off control for placementEarlyStop and the base of the fb51 reveal / meaning changes
+const oldOfG = f => cp.execSync(`git -C "${ROOT}" show ${BASE_G}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+let G_CORE = null, G_HTML = null;
+try {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avd-")); const f = path.join(dir, `core_${BASE_G}.js`);
+  fs.writeFileSync(f, oldOfG("engine/core.js")); G_CORE = require(f); G_HTML = oldOfG("engine/app.html");
+  fs.rmSync(dir, { recursive: true, force: true });
+} catch(e){ G_CORE = null; }
+console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack.placementEarlyStop)");
+{
+  const OFFE = packAsOf(PACK, BASE_G, { strip: ["placementEarlyStop"] });
+  check("pack.placementEarlyStop: on in the shipped pack, off in the control", PACK.placementEarlyStop === true && VC.placementEarlyStopOn(PACK) && OFFE.placementEarlyStop === undefined && !VC.placementEarlyStopOn(OFFE));
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
+  const TOT = N.reduce((a, b) => a + b, 0);
+  // right = how many items of bucket b to get right
+  const walk = async (pack, rec, rightOf, o) => {
+    const { api, st } = await bootWith(pack, rec, 13, o);
+    api.ev("placeFrom = null; placeRender()"); const screens = [api.panel()];
+    api.el("go").click();
+    const seen = {}; let asked = 0;
+    for(let g = 0; g < 100 && api.el("o"); g++){
+      if(!/Words \d+ \/ \d+/.test(api.panel())) break;
+      const b = api.ev("PL.vocab.items[PL.vocab.i - 1].b"), want = api.ev("glossOut(VC.gloss(PL.vocab.items[PL.vocab.i - 1].w))");
+      seen[b] = (seen[b] || 0) + 1; asked++;
+      const ok = seen[b] <= rightOf(b), btns = api.el("o").children;
+      screens.push(api.panel());
+      (ok ? btns.find(x => x.innerHTML === want) : btns.find(x => x.innerHTML !== want)).click();
+    }
+    screens.push(api.panel());
+    return { asked, html: api.panel(), screens, rec: st.ls.getItem(VC.storageKey(pack)), prog: api.getProg() };
+  };
+  const RECS = {
+    "beginner (all wrong)": () => 0,
+    "advanced (all right)": b => N[b],
+    "two empty buckets then right": b => (b === 1 || b === 2) ? 0 : N[b],
+    "right to bucket 5, then empty": b => b < 6 ? N[b] : 0,
+  };
+  const lvLabel = lv => api0.ev(`levelLabel(${JSON.stringify(lv)})`);
+  var api0 = (await bootWith(PACK, null, 13)).api;
+  const owner2 = owner ? () => clone(owner) : null;
+  const sources = [["fresh record", () => null]].concat(owner2 ? [["owner export", owner2]] : []);
+  for(const [sn, mk] of sources){
+    const beg = await walk(PACK, mk(), RECS["beginner (all wrong)"]);
+    check(`${sn}, flag on, beginner: stops after bucket 3 with ${N[0] + N[1] + N[2]} items asked (asked ${beg.asked})`, beg.asked === N[0] + N[1] + N[2] && N[0] + N[1] + N[2] >= 7 && N[0] + N[1] + N[2] <= 8);
+    const lineOf = (html, nAsked) => { const na = VC.placementNotAsked(st0, st0.map((_, i) => i < nAsked ? { r:0, n:N[i] } : { r:0, n:0, skipped:true }));
+      return { na, line: (html.match(/<tr id="plNotAsked"><td colspan="2" style="color:var\(--mute\)">([^<]*)<\/td><\/tr>/) || [])[1],
+        want: "Not asked: " + na.map(e => e.whole ? lvLabel(e.lv) : `${lvLabel(e.lv)} ${e.s1 - e.s0 > 1 ? `sets ${e.s0 + 1}–${e.s1}` : `set ${e.s1}`}`).join(", ") }; };
+    const lb = lineOf(beg.html, 3);
+    check(`${sn}, flag on, beginner: one muted line "${lb.line}" (whole levels by label)`, lb.line === lb.want && /^Not asked: HSK 2, HSK 3, HSK 4$/.test(lb.line || "") && lb.na.every(e => e.whole));
+    check(`${sn}, flag on, beginner: 3 table rows for asked buckets (bad), the unasked buckets not listed`, (beg.html.match(/<tr><td>HSK/g) || []).length === 3 && (beg.html.match(/color:var\(--bad\)/g) || []).length === 3);
+    check(`${sn}, flag on, beginner: nothing stored for the unasked buckets (placed once, no word beyond the first level placed)`, beg.prog.placedOnce === true && !/skipped/.test(beg.rec || ""));
+    const adv = await walk(PACK, mk(), RECS["advanced (all right)"]);
+    check(`${sn}, flag on, advanced: all ${TOT} items asked, no "Not asked" line (asked ${adv.asked})`, adv.asked === TOT && !/plNotAsked/.test(adv.html));
+    const two = await walk(PACK, mk(), RECS["two empty buckets then right"]);
+    check(`${sn}, flag on, two empty buckets then right: all asked (asked ${two.asked})`, two.asked === TOT && !/plNotAsked/.test(two.html));
+    const mid = await walk(PACK, mk(), RECS["right to bucket 5, then empty"]);
+    const lm = lineOf(mid.html, 9);
+    check(`${sn}, flag on, right to bucket 5 then empty: stops after bucket 9 (asked ${mid.asked} of ${TOT}); partial level by set range: "${lm.line}"`, mid.asked === N.slice(0, 9).reduce((a, b) => a + b, 0) && lm.line === lm.want && lm.na.some(e => !e.whole) && /^Not asked: HSK 3 sets? \d+(–\d+)?, HSK 4$/.test(lm.line || ""));
+    if(!G_CORE){ skip(`${BASE_G} not in this checkout's history`); continue; }
+    for(const [rn, f] of Object.entries(RECS)){
+      const a = await walk(OFFE, mk(), f), b = await walk(OFFE, mk(), f, { core: G_CORE, html: G_HTML });
+      check(`${sn}, flag off, ${rn}: ${a.screens.length} placement screens, result and stored record byte-identical to ${BASE_G}; all ${TOT} asked`, a.asked === TOT && a.screens.length === b.screens.length && a.screens.every((x, i) => x === b.screens[i]) && a.html === b.html && a.rec === b.rec && !/plNotAsked/.test(a.html));
+    }
+    // placement result of the same accuracy record equals flag on and off where the flag does not stop (advanced)
+    const advOff = await walk(OFFE, mk(), RECS["advanced (all right)"]);
+    check(`${sn}, advanced record: stored record and result screen equal flag on / off`, adv.rec === advOff.rec && adv.html === advOff.html);
+  }
+  // the stop rules treat the unasked buckets as failed: whole and window
+  const res = N.map((n, i) => i < 3 ? { r:0, n } : { r:0, n:0, skipped:true });
+  check("placementStopIndex reads unasked buckets as failed (window rule 0, whole rule 0)", VC.placementStopIndex(res) === 0 && VC.placementStopIndex(res, { whole: true }) === 0);
+  const res2 = N.map((n, i) => i < 5 ? { r:n, n } : i < 8 ? { r:0, n } : { r:0, n:0, skipped:true });
+  check("right to bucket 4, three empty, rest unasked: both rules stop at 5", VC.placementStopIndex(res2) === 5 && VC.placementStopIndex(res2, { whole: true }) === 5);
+  check("placementEarlyStopAfter: needs three asked buckets, all zero", !VC.placementEarlyStopAfter([{r:0},{r:0}], 1) && VC.placementEarlyStopAfter([{r:0},{r:0},{r:0}], 2) && !VC.placementEarlyStopAfter([{r:0},{r:1},{r:0},{r:0}], 3) && VC.placementEarlyStopAfter([{r:2},{r:0},{r:0},{r:0}], 3));
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);
 })();

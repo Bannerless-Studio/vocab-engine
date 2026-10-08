@@ -186,6 +186,7 @@
  "appView": "v2",
  "placementWhole": true,
  "placementChars": true,
+ "placementEarlyStop": true,
  "levelGate": 0.7,
  "levelExam": {
   "1": "pinyin",

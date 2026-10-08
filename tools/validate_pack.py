@@ -187,6 +187,8 @@ def check_pack(pack, rep):
         rep.err("pack.pronUntilPrimer needs pack.script (the default turns off when the primer is done)")
     if "placementWhole" in pack and not is_bool(pack["placementWhole"]):
         rep.err("pack.placementWhole must be a boolean")
+    if "placementEarlyStop" in pack and not is_bool(pack["placementEarlyStop"]):
+        rep.err("pack.placementEarlyStop must be a boolean")
     if "placementChars" in pack and not is_bool(pack["placementChars"]):
         rep.err("pack.placementChars must be a boolean")
     elif pack.get("placementChars") is True and not (isinstance(pack.get("characters"), dict) and pack["characters"].get("learn") == "lag"):

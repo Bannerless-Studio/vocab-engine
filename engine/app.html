@@ -3472,12 +3472,22 @@ function startPlacement(){
   const st = VC.strata(WORDS, PACK.placement, SIZE);
   const bucketItems = [];
   st.forEach((b,bi) => { pick(b.words, VC.placementItemCount(bi, PACK)).forEach(w=>bucketItems.push({b:bi, w})); });
-  PL = { vocab:{items:shuffle(bucketItems), i:0}, st, res: st.map(()=>({r:0,n:0})) };
+  // pack.placementEarlyStop: asked bucket by bucket (shuffled inside a bucket) so the loop can stop after three empty buckets.
+  const early = VC.placementEarlyStopOn(PACK);
+  const items = early ? st.reduce((acc, _, bi) => acc.concat(shuffle(bucketItems.filter(x => x.b === bi))), []) : shuffle(bucketItems);
+  PL = { vocab:{items, i:0}, st, res: st.map(()=>({r:0,n:0})) };
   placeVocabNext();
 }
 function placeVocabNext(){
   stopSpeaking();
   const P = $("panel"); const V = PL.vocab;
+  if(V.i > 0 && VC.placementEarlyStopOn(PACK)){
+    const k = V.items[V.i - 1].b, nxt = V.items[V.i];
+    if((!nxt || nxt.b !== k) && VC.placementEarlyStopAfter(PL.res, k)){
+      for(let j = k + 1; j < PL.res.length; j++) PL.res[j] = { r:0, n:0, skipped:true };
+      V.i = V.items.length;
+    }
+  }
   if(V.i >= V.items.length){ placeResult(); return; }
   const it = V.items[V.i++]; const w = it.w; setScore(V.i - 1, V.items.length);
   const opts = shuffle([VC.gloss(w), ...VC.meaningOpts(w, WORDS).map(d => VC.gloss(d))]); // a measurement: level tiers, never optsMix (review M1)
@@ -3502,6 +3512,8 @@ function placeResult(){
   const skipped = whole ? VC.placementSkipped(PL.res, passed) || [] : [];
   const charsBefore = Object.keys(VC.charRecs(prog)).length;
   prog = VC.applyPlacement(prog, st, passed, WORDS, PACK, CHAR_LIST);
+  const na = VC.placementNotAsked(st, PL.res);
+  const notAskedRow = na.length ? `<tr id="plNotAsked"><td colspan="2" style="color:var(--mute)">Not asked: ${na.map(e => e.whole ? escapeHtml(levelLabel(e.lv)) : `${escapeHtml(levelLabel(e.lv))} ${e.s1 - e.s0 > 1 ? `sets ${e.s0 + 1}–${e.s1}` : `set ${e.s1}`}`).join(", ")}</td></tr>` : "";
   const charsLine = APP_V2 && Object.keys(VC.charRecs(prog)).length > charsBefore ? VC.placedCharsThrough(PACK, CHAR_LIST, prog) : null;
   store.save();
   // Where the learner actually is now (a poor retake never moves them back), not where
@@ -3510,7 +3522,7 @@ function placeResult(){
   const pos = nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered";
   const P = $("panel");
   P.innerHTML = `<div class="done"><h2>Start at ${escapeHtml(pos)}</h2>
-    <table class="stats">${st.map((b,i)=>{ const r = PL.res[i]; return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${skipped.includes(i)?'var(--mute)':i<passed?'var(--ok)':'var(--bad)'}">${r.r}/${r.n}</td></tr>`; }).join("")}</table>
+    <table class="stats">${st.map((b,i)=>{ const r = PL.res[i]; if(r.skipped) return ""; return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${skipped.includes(i)?'var(--mute)':i<passed?'var(--ok)':'var(--bad)'}">${r.r}/${r.n}</td></tr>`; }).join("")}${notAskedRow}</table>
     ${charsLine ? `<p class="q" id="plChars">Characters: placed through ${escapeHtml(levelLabel(charsLine.lv))}, set ${charsLine.set}</p>` : ""}<p class="q">${learnedWords().length} words learned; newly placed ones are provisional and kept in review.</p>
     <button class="next" id="ok">${APP_V2 && placeFrom === "progress" ? "Back to Progress" : "Go to Today"}</button></div>`;
   $("ok").onclick = () => { if(APP_V2 && placeFrom === "progress"){ leavePlacement(); return; } placeFrom = null; switchToTab("today", "Today"); testSel = null; render(); };

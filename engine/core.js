@@ -952,6 +952,27 @@ function placementStopWhole(res){
   return 0;
 }
 
+// pack.placementEarlyStop (fb51; owner 2026-10-08: a beginner answered 35 words to learn they know none): the items are asked
+// bucket by bucket, and the asking stops once three consecutive asked buckets have no right answer. The buckets not asked
+// are in-memory entries {r:0, n:0, skipped:true} (never stored) that both stop rules read as failed.
+const placementEarlyStopOn = pack => !!(pack && pack.placementEarlyStop === true);
+// res[0..k] are all asked; true when the last three of them are all zero (so at least three buckets were asked).
+function placementEarlyStopAfter(res, k){
+  return k >= 2 && res[k].r === 0 && res[k - 1].r === 0 && res[k - 2].r === 0;
+}
+// The unasked buckets of a result as one entry per level: whole when every bucket of that level was skipped, else the set range.
+function placementNotAsked(st, res){
+  const out = [];
+  st.forEach((b, i) => {
+    if(!res[i] || !res[i].skipped) return;
+    const last = out[out.length - 1];
+    if(last && last.lv === b.lv){ last.s1 = b.s1; last.n++; }
+    else out.push({ lv: b.lv, s0: b.s0, s1: b.s1, n: 1 });
+  });
+  out.forEach(e => { e.whole = e.n === st.filter(b => b.lv === e.lv).length; delete e.n; });
+  return out;
+}
+
 // Placement only ever moves a learner forward: no word record is removed or downgraded, so
 // learned and drilled-ahead state survive a poor retake.
 function applyPlacement(prog, st, passed, words, pack, units){
@@ -4575,7 +4596,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,
   findSurface, textForms, locateWord, packSurfaces, spannedByLonger, gapMatch, gapCandidateIndices, blankSentence,
-  strata, placementItemCount, placementStopIndex, placementSkipped, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
+  strata, placementItemCount, placementEarlyStopOn, placementEarlyStopAfter, placementNotAsked, placementStopIndex, placementSkipped, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
