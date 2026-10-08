@@ -831,6 +831,26 @@ const escapeRe = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // ASCII ', right single quote and modifier letter apostrophe are one symbol in sentence text.
 const APOS = String.fromCodePoint(39, 0x2019, 0x02bc);
 const isApos = c => APOS.indexOf(c) >= 0;
+// Compiled findSurface regex per (surface, clitics): the same few thousand surfaces recur
+// every item/session, and compiling a unicode lookbehind RegExp per call made the
+// simulation crawl. Key joins on \u0001 (never in a surface); bounded, cleared when full.
+// The cached regex is global: lastIndex is reset before each use and every caller finishes
+// its exec loop before the next call (no re-entrancy inside the loop).
+const SURFACE_RE_CACHE = new Map(), SURFACE_RE_MAX = 5000;
+function surfaceRe(s, clitics){
+  const key = s + "\u0001" + (clitics && clitics.length ? clitics.join("\u0001") : "");
+  let re = SURFACE_RE_CACHE.get(key);
+  if(re) return re;
+  const cps = [...s];
+  const body = cps.map(c => isApos(c) ? `[${APOS}]` : escapeRe(c)).join("");
+  const lb = isApos(cps[0]) ? "" : "(?<![\\p{L}\\p{M}\\p{N}\\u200c\\u200d])";
+  const cliticGroup = (clitics && clitics.length) ? `(?:${clitics.map(escapeRe).join("|")})?` : "";
+  const la = isApos(cps[cps.length-1]) ? "" : "(?![\\p{L}\\p{M}\\p{N}\\u200c\\u200d])";
+  re = new RegExp(lb + body + cliticGroup + la, "giu");
+  if(SURFACE_RE_CACHE.size >= SURFACE_RE_MAX) SURFACE_RE_CACHE.clear();
+  SURFACE_RE_CACHE.set(key, re);
+  return re;
+}
 // An apostrophe-final surface ("l'") may run into the next word. ZWNJ/ZWJ are word-internal
 // (Persian می‌روم is one word). spaced=false is for scripts written without spaces.
 // The clitic group sits inside this regex rather than as a post-hoc extension because a
@@ -838,6 +858,19 @@ const isApos = c => APOS.indexOf(c) >= 0;
 // base regex's own right boundary fails first, before any hit exists to extend. `blockKeys`
 // exists because a fused hit can coincide with a different real pack word's own surface
 // (Indonesian ada+lah = adalah, apa+kah = apakah, bu+ku = buku) — that word, not entry+clitic.
+// Cheap exact reject before the regex: true only when `surface` provably cannot match `t`
+// under the "iu" regex. Caseless-script surfaces (no case folding exists) match by identity,
+// so indexOf decides. Plain ASCII surfaces fold only with ASCII case and the two non-ASCII
+// letters that fold into it (U+212A Kelvin sign, U+017F long s), so a lowercase includes
+// decides unless t holds one of those. Anything else (apostrophes, accents, cased non-ASCII)
+// goes to the regex, so results never change.
+const CASELESS_SURFACE = /^[\p{Script=Hangul}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]+$/u;
+const ASCII_SURFACE = /^[A-Za-z0-9 \-]+$/;
+function surfaceAbsent(t, s){
+  if(CASELESS_SURFACE.test(s)) return t.indexOf(s) < 0;
+  if(ASCII_SURFACE.test(s)) return t.toLowerCase().indexOf(s.toLowerCase()) < 0 && !/[\u212a\u017f]/.test(t);
+  return false;
+}
 function findSurface(text, surface, spaced, clitics, blockKeys){
   const out = []; const t = String(text), s = String(surface||"");
   if(!s) return out;
@@ -846,14 +879,11 @@ function findSurface(text, surface, spaced, clitics, blockKeys){
     while(i >= 0){ out.push({ start:i, end:i+s.length, text:s }); i = t.indexOf(s, i + s.length); }
     return out;
   }
-  const cps = [...s];
-  const body = cps.map(c => isApos(c) ? `[${APOS}]` : escapeRe(c)).join("");
-  const lb = isApos(cps[0]) ? "" : "(?<![\\p{L}\\p{M}\\p{N}\\u200c\\u200d])";
-  const cliticGroup = (clitics && clitics.length) ? `(?:${clitics.map(escapeRe).join("|")})?` : "";
-  const la = isApos(cps[cps.length-1]) ? "" : "(?![\\p{L}\\p{M}\\p{N}\\u200c\\u200d])";
-  const re = new RegExp(lb + body + cliticGroup + la, "giu");
+  if(surfaceAbsent(t, s)) return out;
+  const re = surfaceRe(s, clitics), cpsLen = [...s].length;
+  re.lastIndex = 0;
   let m; while((m = re.exec(t))){
-    if([...m[0]].length > cps.length && blockKeys && blockKeys.has(normKey(m[0]))) continue;
+    if([...m[0]].length > cpsLen && blockKeys && blockKeys.has(normKey(m[0]))) continue;
     out.push({ start:m.index, end:m.index+m[0].length, text:m[0] });
   }
   return out;
@@ -943,12 +973,27 @@ function packSurfaceKeys(wordsById, pack){
   packSurfaces(wordsById, pack); // fills/refreshes the cache entry, including .keys
   return SURFACE_CACHE.get(wordsById).keys;
 }
+// Pack surfaces whose normKey contains `inner`, in packSurfaces order. spannedByLonger asks
+// this per gap candidate; scanning + normKey-ing every surface each time dominated the
+// simulation (korean: ~100 s/session late). Memoised on the SURFACE_CACHE entry, so it
+// dies with the pack's cache; bounded, cleared when full.
+function surfacesContaining(wordsById, pack, inner){
+  const list = packSurfaces(wordsById, pack), c = SURFACE_CACHE.get(wordsById);
+  if(!c.containing) c.containing = new Map();
+  let r = c.containing.get(inner);
+  if(!r){
+    r = list.filter(x => normKey(x).indexOf(inner) >= 0);
+    if(c.containing.size >= 5000) c.containing.clear();
+    c.containing.set(inner, r);
+  }
+  return r;
+}
 // 为 inside 为什么, per inside "per favore": blanking it would cut a longer unit.
 function spannedByLonger(sentence, match, wordsById, pack){
   const spaced = !pack || pack.spaced !== false;
   const inner = normKey(match.text);
-  for(const s of packSurfaces(wordsById, pack)){
-    if(s.length <= match.text.length || normKey(s).indexOf(inner) < 0) continue;
+  for(const s of surfacesContaining(wordsById, pack, inner)){
+    if(s.length <= match.text.length) continue;
     for(const m of findSurface(sentence.t, s, spaced)){
       if(m.start <= match.start && m.end >= match.end) return true;
     }
