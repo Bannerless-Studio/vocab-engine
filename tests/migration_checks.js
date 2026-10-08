@@ -861,5 +861,60 @@ console.log("\n[pv] pack.progressView (fb37): optional top-level prog.pv = {sn, 
   }
 }
 
+
+(async () => {
+console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/briefs/port-plan.md sections 1 and 3): no field is new beyond the pairs / dayAware / progress-map family; sibling engines ef44c6e and aa00571 boot it unchanged");
+{
+  const PS = require("./lib/port_sim.js"), cp = require("child_process"), os = require("os");
+  const OLD = ["ef44c6e", "aa00571"].map(sha => {
+    try {
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+      return { sha, eng: require(f) };
+    } catch(e){ return { sha, eng: null }; }
+  });
+  const SANS = new Set(["r", "w", "s", "t", "u", "prov", "d"]);
+  const sans = rec => { const o = {}; Object.keys(rec || {}).forEach(k => { if(!SANS.has(k)) o[k] = rec[k]; }); return o; };
+  const legacyBoot = s => (s >= 3 ? 3 : Math.min(s, 2));
+  for(const lang of PS.SIBLINGS){
+    const site = PS.loadSibling(lang);
+    if(!site){ skip(`[port] ${lang}: ../${lang}/pack/*.js not present`); continue; }
+    const G = PS.withG(site), L = `[port] ${lang}`;
+    const seed = PS.legacySeed(VC, site, 150, 7);
+    let sim = null, err = null;
+    const run = () => PS.playSessions(site, G.pack, G.words, seed, { sessions: 8, acc: 0.85, seed: 11 });
+    await run().then(r => { sim = r; }, e => { err = e; }).then(() => {
+      if(err || !sim){ check(`${L}: 8 seeded sessions at 85% under G play to the end (${err ? err.message.slice(0, 160) : "no result"})`, false); return; }
+      const raw = sim.raw, prog = JSON.parse(raw), recs = Object.values(prog.w);
+      const done = Object.values((prog.read || {}).done || {});
+      check(`${L}: 8 sessions at 85% under G (${sim.stat.items} items, ${Math.round(100 * sim.stat.right / sim.stat.items)}% right) write p on ${recs.filter(r => r.p).length} words, day/sn/pm/pv, read.done s and ls, session key only`,
+        recs.some(r => r.p) && prog.day !== undefined && typeof prog.sn === "number" && Array.isArray(prog.pm) && prog.pv && done.some(d => typeof d.s === "number") && done.some(d => typeof d.ls === "number") && sim.keys.length === 1);
+      for(const { sha, eng } of OLD){
+        if(!eng){ skip(`${L}: engine ${sha} not in this checkout's history`); continue; }
+        const o = eng.bootProg(raw, site.pack);
+        check(`${L}: engine ${sha} boots a record written under G: no _invalid/_reset backup, progress byte-equal after its own save`, o.backupRaw === null && JSON.stringify(o.prog) === raw);
+        const q = clone(o.prog), id = Object.keys(q.w).find(k => q.w[k].p);
+        eng.markRec(q.w, id, true, true);
+        const others = Object.keys(q).filter(k => k !== "w").every(k => eq(q[k], prog[k])) && Object.keys(q.w).filter(k => k !== id).every(k => eq(q.w[k], prog.w[k]));
+        check(`${L}: a mark on ${sha} keeps every new field (p, f, day, pm, pv, read.done s / ls) and every other record`, others && eq(sans(q.w[id]), sans(prog.w[id])) && eq(q.w[id].p, prog.w[id].p));
+        const back = VC.bootProg(JSON.stringify(q), G.pack);
+        check(`${L}: and back on main from ${sha}: no backup, progress byte-equal`, back.backupRaw === null && JSON.stringify(back.prog) === JSON.stringify(q));
+      }
+      // pre-port record (legacy streaks, no p)
+      const lraw = JSON.stringify(seed), lm = VC.bootProg(lraw, G.pack), lo = OLD[0].eng ? OLD[0].eng.bootProg(lraw, site.pack) : null;
+      const bad = [];
+      G.words.forEach(w => { const r = lm.prog.w[w.id]; if(!r) return; VC.wordPairs(w, G.pack).forEach(pr => { const st = VC.pairState(r, pr); if(!st.boot || st.s !== legacyBoot(r.s || 0)) bad.push(w.id + ":" + pr); }); });
+      check(`${L}: a pre-port record (legacy streaks, no p) boots here unchanged and every word pair bootstraps from its streak (3 from 3, else min(s, 2)), none written`, lm.backupRaw === null && JSON.stringify(lm.prog) === lraw && bad.length === 0 && Object.values(lm.prog.w).every(r => !("p" in r)));
+      if(!lo){ skip(`${L}: known count needs engine ef44c6e`); return; }
+      const oldKnown = G.words.filter(w => (lo.prog.w[w.id] || {}).s >= OLD[0].eng.WORD_MASTERED).length;
+      const noTiers = Object.assign(clone(G.pack), { freqTiers: false }), mainPairs = G.words.filter(w => VC.wordKnown(lm.prog.w[w.id], w, noTiers)).length;
+      const mainTiers = G.words.filter(w => VC.wordKnown(lm.prog.w[w.id], w, G.pack)).length;
+      const surplus = G.words.filter(w => w.ft === 2 && lm.prog.w[w.id] && lm.prog.w[w.id].s === 2).length;
+      check(`${L}: known count on the pre-port record: old engine ${oldKnown} = main with pairs ${mainPairs}; with freqTiers ${mainTiers} = ${oldKnown} + ${surplus} peripheral words at streak 2`, oldKnown === mainPairs && mainTiers === oldKnown + surplus);
+    });
+  }
+}
+})().then(() => {
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
-process.exit(fails ? 1 : 0);
+  process.exit(fails ? 1 : 0);
+}, e => { console.log(e.stack); process.exit(1); });

@@ -66,6 +66,26 @@ shas.forEach(sha => {
 });
 check(`packAsOf(pack, sha) carries the flag keys the committed zh pack had at ${probed} probed commits (each flag sha and its parent)`, probed > 0 && mismatches.length === 0, mismatches.join("\n"));
 
+// Sibling drift: a language repo's pack.json may not grow a top-level key (against its own committed pack) unless the key is
+// a FLAG_SINCE flag or on this allow list; otherwise the flag-off goldens' strip list would miss it and hash a new field.
+const SIBLINGS = ["arabic", "french", "german", "hindi", "indonesian", "italian", "japanese", "korean", "persian", "russian", "spanish", "swahili", "urdu"];
+const SIBLING_ALLOW = [];
+const unlistedNewKeys = (work, committed) => Object.keys(work).filter(k => !(k in committed) && !topFlags.has(k) && !SIBLING_ALLOW.includes(k));
+check("sibling drift rule: a new unlisted key is caught, a FLAG_SINCE key and an allow-listed one pass", (() => {
+  const u = unlistedNewKeys({ key: "x", pairs: true, bogusNew: 1 }, { key: "x" });
+  return u.length === 1 && u[0] === "bogusNew";
+})());
+SIBLINGS.forEach(lang => {
+  const dir = path.join(ROOT, "..", lang);
+  if (!fs.existsSync(path.join(dir, "pack", "pack.json"))) { console.log(`SKIP  ../${lang}/pack/pack.json not present`); return; }
+  let committed;
+  try { committed = JSON.parse(execFileSync("git", ["-C", dir, "show", "HEAD:pack/pack.json"], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], maxBuffer: 1 << 26 })); }
+  catch (e) { console.log(`SKIP  ../${lang}: no committed pack/pack.json at HEAD`); return; }
+  const work = JSON.parse(fs.readFileSync(path.join(dir, "pack", "pack.json"), "utf8"));
+  const u = unlistedNewKeys(work, committed);
+  check(`../${lang}/pack/pack.json: every key added since its committed pack is in FLAG_SINCE or SIBLING_ALLOW`, u.length === 0, "not listed: " + u.join(", "));
+});
+
 const first = packBefore(PACK, "characters");
 check("packBefore(first flag): no flag key left", FLAG_SINCE.every(f => !flagPresent(first, f)));
 check("packAsOf(pack, HEAD) is the pack unchanged", JSON.stringify(packAsOf(PACK, "HEAD")) === JSON.stringify(PACK));

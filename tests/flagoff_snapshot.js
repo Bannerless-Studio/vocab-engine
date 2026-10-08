@@ -115,6 +115,10 @@ const FLAGOFF_PACKS = [
   { name: "indonesian", dir: path.join(ROOT, "..", "indonesian", "pack") },
   { name: "korean", dir: path.join(ROOT, "..", "korean", "pack") },
   { name: "japanese", dir: path.join(ROOT, "..", "japanese", "pack") },
+  { name: "arabic", dir: path.join(ROOT, "..", "arabic", "pack") },
+  { name: "hindi", dir: path.join(ROOT, "..", "hindi", "pack") },
+  { name: "swahili", dir: path.join(ROOT, "..", "swahili", "pack") },
+  { name: "urdu", dir: path.join(ROOT, "..", "urdu", "pack") },
 ];
 function readJsonIfPresent(p) { return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, "utf8")) : null; }
 function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
@@ -129,11 +133,13 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
   // words[].ft (docs/PACK_SCHEMA.md "freqTiers") is new, flag-on; a freqTiers pack's levels are in
   // frequency order, and its word ids were assigned in the earlier file order (tools/pack_from_hsk.py:
   // hsk order; ids are append-only), so id order restores the pre-freqTiers file order.
+  // That is a zh assumption (zh words carry no `rank`). A rank-ordered sibling pack is already in
+  // frequency order and freqTiers only adds `ft`, so its file order is kept.
   const NEW_WORD_FIELDS = ["audio", "say", "syn", "typedSyn", "noTypedMeaning", "pronInGloss", "ft"];
   const stripped = Array.isArray(wordsJson)
     ? wordsJson.map(w => { if(!w || !NEW_WORD_FIELDS.some(k => k in w)) return w; const c = Object.assign({}, w); NEW_WORD_FIELDS.forEach(k => delete c[k]); return c; })
     : wordsJson;
-  const words = Array.isArray(stripped) && packJson && packJson.freqTiers !== undefined
+  const words = Array.isArray(stripped) && packJson && packJson.freqTiers !== undefined && !stripped.some(w => w && "rank" in w)
     ? stripped.map((w, i) => [w, i]).sort((a, b) => (a[0].id < b[0].id ? -1 : a[0].id > b[0].id ? 1 : a[1] - b[1])).map(x => x[0])
     : stripped;
   const sentences = Array.isArray(sentencesJson)
@@ -180,6 +186,10 @@ const REAL_PACKS = [
   { name: "italian", dir: path.join(ROOT, "..", "italian", "pack") },
   { name: "korean", dir: path.join(ROOT, "..", "korean", "pack") },
   { name: "japanese", dir: path.join(ROOT, "..", "japanese", "pack") },
+  { name: "arabic", dir: path.join(ROOT, "..", "arabic", "pack") },
+  { name: "hindi", dir: path.join(ROOT, "..", "hindi", "pack") },
+  { name: "swahili", dir: path.join(ROOT, "..", "swahili", "pack") },
+  { name: "urdu", dir: path.join(ROOT, "..", "urdu", "pack") },
 ];
 function loadPack(dir) {
   const pack = loadConst(path.join(dir, "pack.js"), "PACK");
@@ -405,7 +415,7 @@ async function captureBootGolden(seed, pack, words, sentences, lessons, passages
 }
 
 async function runBootGoldens() {
-  console.log("\n[3] fake-DOM boot goldens (Today/Words/Test/Progress/Read, 3 seeds x 4 packs)");
+  console.log("\n[3] fake-DOM boot goldens (Today/Words/Test/Progress/Read, 3 seeds x REAL_PACKS)");
   const appHtml = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
   const scriptBlocks = [...appHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)];
   if (scriptBlocks.length < 2) { check("app.html has the inline app script (2 plain <script> tags)", false); return; }

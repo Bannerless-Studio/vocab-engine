@@ -48,10 +48,10 @@ Why it is built this way (one line each):
 Node: `/Users/ishmum/.nvm/versions/node/v22.22.2/bin/node` (written `$NODE` below). Run from the repo root. Expected counts as of 2026-10-08, main after w34 (w33 + fb40c stage C + fb41 ETA).
 
 ```sh
-$NODE tests/pack_flags_checks.js                 # 16 (tests/lib/pack_flags.js: FLAG_SINCE covers every zh pack flag and every flag a suite strips, shas are ancestors of HEAD, packAsOf matches the committed zh pack flag set at 52 probed commits)
+$NODE tests/pack_flags_checks.js                 # 30 (sibling pack.json keys gained against the committed pack are in FLAG_SINCE or SIBLING_ALLOW, tests/lib/pack_flags.js: FLAG_SINCE covers every zh pack flag and every flag a suite strips, shas are ancestors of HEAD, packAsOf matches the committed zh pack flag set at 52 probed commits)
 $NODE tests/engine_checks.js                     # 704 passed; includes the dist/zh.html + sw.js stale guard and the packs/zh generator drift check from an empty dir (needs ../chinese, or HSK_DIR=<chinese checkout>)
 $NODE tests/pron_aids_checks.js                  # 158
-$NODE tests/migration_checks.js                  # 447 (hsk_pinyin -> vocab_zh; uses ../chinese when present; [bare5] zh bare 6 -> 5; [rotation-s] read.done s/ls; [wordsBy] records read on a8e9c08; [progressMap] prog.pm both directions vs a2f2426; fb22 entries with g vs a2f2426 and 2412992; [f] records with f boot on 2412992 unchanged and back; [pairs] records with p boot on 2412992 and 3901e2e unchanged; [freqTiers] no new field, records written under the flag boot on b21ee93 and 2412992 byte-equal and back; [patterns] prog.pt on b21ee93 and 2412992; [bareByPair] no new field, a pair-bare unit's records boot on 3044601 byte-equal and back; [pv] prog.pv on 806ad57 and 3044601 both directions)
+$NODE tests/migration_checks.js                  # 564 ([port] x13 sibling packs: 8 seeded sessions at 85% under the generic flag set G boot on ef44c6e and aa00571 unchanged and back, pre-port record bootstraps pairs, ~2 min; hsk_pinyin -> vocab_zh; uses ../chinese when present; [bare5] zh bare 6 -> 5; [rotation-s] read.done s/ls; [wordsBy] records read on a8e9c08; [progressMap] prog.pm both directions vs a2f2426; fb22 entries with g vs a2f2426 and 2412992; [f] records with f boot on 2412992 unchanged and back; [pairs] records with p boot on 2412992 and 3901e2e unchanged; [freqTiers] no new field, records written under the flag boot on b21ee93 and 2412992 byte-equal and back; [patterns] prog.pt on b21ee93 and 2412992; [bareByPair] no new field, a pair-bare unit's records boot on 3044601 byte-equal and back; [pv] prog.pv on 806ad57 and 3044601 both directions)
 $NODE tests/characters_checks.js                 # 134
 $NODE tests/characters_app_checks.js             # 219 (214 without ../japanese/pack: one ja check; Math.random seeded: Placement walk deterministic; hint pinyin tone colours; every unit hinted, multi-character units hint each character's meaning; hint dedupe keyed on character + hint text (衣服 服 clothes / 服务员 服 to serve), control: 3044601 units byte-identical with the key reverted)
 $NODE tests/script_checks.js                     # 128
@@ -84,7 +84,7 @@ $NODE tests/day_sim_checks.js                    # 77 (pack.dayAware: 8 sessions
 $NODE tests/help_close_checks.js                 # 42 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
 $NODE tests/gloss_overlap_checks.js              # 75 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~5-14 min: 286 s on main 7fe35f7 idle, 151 s on fb2-write2 alone, 836 s under parallel load)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
-$NODE tests/flagoff_snapshot.js --check          # 26 (reads ../<lang>/pack; drift in a sibling checkout fails it)
+$NODE tests/flagoff_snapshot.js --check          # 46 (ar hi sw ur added; reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)
 
 ./build.sh packs/zh dist/zh.html                 # also writes dist/sw.js
