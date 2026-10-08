@@ -1985,13 +1985,29 @@ const patternMarkTexts = p => [...new Set(((p && p.sentences) || []).flatMap(s =
 const patternMarkIndex = (s, sn) => { const n = ((s && s.marks) || []).length; return n ? Math.max(0, sn) % n : 0; };
 // Marks are words: "Ya" opening a sentence and "ya" inside one are the same word, and an option shows
 // in the answer's case (a lowercase option beside a capitalised blank would give the answer away).
+// Only the FIRST LETTER of an option follows the answer; a word that is capitalised mid-sentence
+// (de Sie, any noun) or that spells capitals past its first letter (USA) keeps its own case.
 // Scripts without case are untouched.
 const patternFold = t => String(t).toLowerCase();
-function patternCased(t, like){
-  const c = String(like).codePointAt(0), a = c === undefined ? "" : String.fromCodePoint(c), f = String(t).toLowerCase();
-  if(!a || a === a.toLowerCase() || !f) return f;
-  const h = String.fromCodePoint(f.codePointAt(0));
-  return h.toUpperCase() + f.slice(h.length);
+const patternFirst = t => { const c = String(t).codePointAt(0); return c === undefined ? "" : String.fromCodePoint(c); };
+const patternSentenceStart = (t, i) => { const pre = String(t).slice(0, i).replace(/\s+$/, ""); return pre === "" || /[.!?\u2026\u00bf\u00a1\u00ab\u201c\u201e"(]$/.test(pre); };
+// fold -> { text: the form seen mid-sentence when there is one, else the first seen; mid }
+function patternForms(patterns){
+  const m = new Map();
+  (patterns || []).forEach(p => ((p && p.sentences) || []).forEach(s => (s.marks || []).forEach(k => {
+    const tx = patternMarkText(s, k), f = patternFold(tx), mid = !patternSentenceStart(s.t, k[0]), e = m.get(f);
+    if(!e || (mid && !e.mid)) m.set(f, { text: tx, mid });
+  })));
+  return m;
+}
+function patternCased(form, ans, ansStart){
+  const t = String(form.text), h = patternFirst(t), a = patternFirst(ans);
+  if(!h || !a || h.toLowerCase() === h.toUpperCase()) return t;
+  const rest = t.slice(h.length);
+  if(rest !== rest.toLowerCase()) return t;
+  if(form.mid && h !== h.toLowerCase()) return t;
+  const up = a !== a.toLowerCase(), want = up && !ansStart ? h : (up ? h.toUpperCase() : h.toLowerCase());
+  return want + rest;
 }
 // Wrong choices: the pattern's own other mark texts first (了 vs 过, 才 vs 就), then other patterns'
 // marks of the answer's length, then any. Never the answer, never a mark of a pattern in p.near or in the
@@ -2002,8 +2018,9 @@ function patternOpts(p, s, mi, patterns, rng){
   const own = uniq(patternMarkTexts(p)).filter(t => patternFold(t) !== af);
   const ownF = new Set(own.map(patternFold));
   const others = uniq((patterns || []).filter(q => q.id !== p.id && !near.has(q.id)).flatMap(patternMarkTexts)).filter(t => patternFold(t) !== af && !ownF.has(patternFold(t)));
-  const len = cpLen(ans), out = [], outF = new Set();
-  [own, others.filter(t => cpLen(t) === len), others.filter(t => cpLen(t) !== len)].forEach(t => shuffle(t.slice(), r).forEach(x => { if(out.length < 3 && !outF.has(patternFold(x))){ outF.add(patternFold(x)); out.push(patternCased(x, ans)); } }));
+  const len = cpLen(ans), out = [], outF = new Set(), forms = patternForms([p, ...(patterns || [])]);
+  const ansStart = patternSentenceStart(s.t, s.marks[mi][0]);
+  [own, others.filter(t => cpLen(t) === len), others.filter(t => cpLen(t) !== len)].forEach(t => shuffle(t.slice(), r).forEach(x => { if(out.length < 3 && !outF.has(patternFold(x))){ outF.add(patternFold(x)); out.push(patternCased(forms.get(patternFold(x)) || { text: x, mid: false }, ans, ansStart)); } }));
   return out;
 }
 // The sentence to ask: one whose words are all learned when there is one, else any.

@@ -98,16 +98,32 @@ def homograph_table(words, sp):
 
 
 # Closed-class groups: a token the tagger reads as one of them and the pack holds under another of them
-# is the same word (es relative "que" is tagged PRON, the pack entry is the conjunction).
+# is the same word (es relative "que" is tagged PRON, the pack entry is the conjunction). Not every pair is
+# one word: spaCy lemmatises PRON das/die/der (relative, demonstrative) to the article "der", it object
+# pronouns la/lo/le to the article "il", reflexive "se" is not the conjunction "se" "if".
 FUNCTION_GROUPS = ("CONJ", "PRON", "DET", "ADP", "PART")
 
 
-def function_word_link(lem, g, key_to_id):
-    """Pack word id of lemma lem under a function group other than the tagged g, when there is
-    exactly one such entry; None otherwise. Content groups never cross POS here (cross_pos_link)."""
+def function_word_link(lem, g, key_to_id, sp=None, surface=None):
+    """Pack word id of a closed-class token tagged g that the pack holds under another function group,
+    or None. Order: the token's own surface under the tagged group (de das PRON, it la PRON are entries
+    of their own); then the lemma under exactly one other group, except that an article entry
+    (sp.fixed_word) is reached from a DET tag only and PRON<->CONJ only for sp.pron_conj_link lemmas.
+    Content groups never cross POS here (cross_pos_link)."""
     if g not in FUNCTION_GROUPS:
         return None
-    ids = {key_to_id[(lem, x)] for x in FUNCTION_GROUPS if x != g and key_to_id.get((lem, x))}
+    if surface and key_to_id.get((surface.lower(), g)):
+        return key_to_id[(surface.lower(), g)]
+    arts = getattr(sp, "fixed_word", None) or {}
+    pc = getattr(sp, "pron_conj_link", ())
+    ids = set()
+    for x in FUNCTION_GROUPS:
+        wid = key_to_id.get((lem, x)) if x != g else None
+        if not wid or ((lem, x) in arts and g != "DET"):
+            continue
+        if {g, x} == {"PRON", "CONJ"} and lem not in pc:
+            continue
+        ids.add(wid)
     return next(iter(ids)) if len(ids) == 1 else None
 
 
@@ -218,7 +234,7 @@ def sentence_links(toks, lexicon, key_to_id, allowed, text, groups=None, gender_
             if wid is None:
                 wid = sp.cross_pos_link(lexicon, lem, g, key_to_id)    # default None (id: same sense)
             if wid is None:
-                wid = function_word_link(lem, g, key_to_id)
+                wid = function_word_link(lem, g, key_to_id, sp, text_t)
             if wid and en_words is not None and lem in homs:
                 # several entries for this lemma: the English translation decides
                 # when it names the other entry's sense and not this one's

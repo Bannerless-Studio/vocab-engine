@@ -780,9 +780,12 @@ def pattern_mark_text(t, m):
     return u[2 * m[0]:2 * m[1]].decode("utf-16-le", "ignore")
 
 
-def pattern_mark_word(t, m):
+def pattern_mark_word(t, m, spaced=True):
     """The mark text lowercased when it is a whole word of space-delimited text (neighbours not
-    letters or digits), else None: a script written without spaces has no word boundary to count."""
+    letters or digits), else None. spaced is pack.spaced: a pack written without spaces (False) has
+    no word boundary to count, whatever the neighbours are (zh 所以， at a sentence edge is not a word)."""
+    if spaced is False:
+        return None
     w = pattern_mark_text(t, m)
     u = t.encode("utf-16-le")
     before = u[2 * m[0] - 2:2 * m[0]].decode("utf-16-le", "ignore") if m[0] else ""
@@ -917,11 +920,12 @@ def check_patterns(pack, patterns, levels, by_id, rep, char_word0=None):
             for m in marks if isinstance(marks, list) else ():
                 if not (isinstance(m, list) and len(m) == 2 and all(isinstance(v, int) and not is_bool(v) for v in m) and 0 <= m[0] < m[1] <= u):
                     continue
-                word = pattern_mark_word(t, m)
+                word = pattern_mark_word(t, m, pack.get("spaced"))
                 if word is not None and len(pattern_word_spans(t, word)) > 1:
                     rep.warn(f"{sw}: mark word {word!r} occurs more than once in t (the blank is ambiguous)")
                 if word is not None:
-                    pat_marks.setdefault(p["id"], set()).add(word)
+                    sent_near = set(sn) if isinstance(sn, list) and all(isinstance(q, str) for q in sn) else set()
+                    pat_marks.setdefault(p["id"], {}).setdefault(word, []).append(sent_near)
             if "ruby" in s:
                 check_ruby(s["ruby"], s.get("t"), ws, char_word0, sw, rep, null_ok=True)
                 if isinstance(s["ruby"], list) and isinstance(marks, list):
@@ -935,9 +939,15 @@ def check_patterns(pack, patterns, levels, by_id, rep, char_word0=None):
     pids = [p["id"] for p in patterns if isinstance(p, dict) and isinstance(p.get("id"), str) and p["id"] in pat_marks]
     for i, a_id in enumerate(pids):
         for b_id in pids[i + 1:]:
-            both = pat_marks[a_id] & pat_marks[b_id]
-            if both and not (b_id in near_of.get(a_id, ()) and a_id in near_of.get(b_id, ())):
-                rep.err(f"patterns {a_id} and {b_id} share the mark word {sorted(both)[0]!r}: each must list the other in near")
+            for word in sorted(set(pat_marks[a_id]) & set(pat_marks[b_id])):
+                # the exclusion is the pattern's near plus the sentence's near (core.js patternOpts): a side is
+                # resolved when the pattern lists the other, or every sentence carrying the word does
+                def lists(x, y):
+                    return y in near_of.get(x, ()) or all(y in sn for sn in pat_marks[x][word])
+                if not (lists(a_id, b_id) and lists(b_id, a_id)):
+                    rep.err(f"patterns {a_id} and {b_id} share the mark word {word!r}: each must list the other in near "
+                            f"(pattern near, or near on every sentence carrying the word)")
+                    break
     return n
 
 

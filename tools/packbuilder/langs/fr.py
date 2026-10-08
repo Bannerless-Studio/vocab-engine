@@ -373,6 +373,7 @@ class French(LanguageSpec):
                  "il y a": ("il", "y", "a"), "est-ce que": ("est-ce", "que"), "excusez-moi": ("excusez", "moi"),
                  "s'il te plaît": ("s'il", "te", "plaît")}
     phrase_absorbs_parts = True        # "il y a" links the phrase, not avoir
+    pron_conj_link = ("que",)    # relative "que" is tagged PRON, the pack word is the conjunction
     homograph_by_translation = True    # les morts "the dead" links mort (adj), not la mort
     strict_selection = True
     revert_dedupe_gloss = True

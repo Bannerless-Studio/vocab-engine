@@ -530,6 +530,19 @@ const ptKey = it => String(it.key).startsWith("p:");
     const both = Object.assign({}, C, { near: ["pa"] }), sn2 = Object.assign({}, C.sentences[1], { near: ["pd"] });
     const merged = Array.from({ length: 300 }, (_, k) => VC.patternOpts(both, sn2, 0, ALL, mulberry32(k))).flat().map(x => x.toLowerCase());
     check("pattern near and sentence near merge", merged.length > 0 && !merged.includes("cuando") && !merged.includes("ya") && !merged.includes("todavía"));
+    // M3: only the first letter of an option follows the answer; Sie, a noun and USA keep their own case
+    {
+      const mk = (id, t, w, near) => { const i = t.indexOf(w); return Object.assign({ id, t, en: "x", lv: "A1", words: ["w1"], marks: [[i, i + w.length]] }, near ? { near } : {}); };
+      const G = { id: "pg", lv: "A1", label: "g", en: "g", note: ["a", "b"], sentences: [mk("g.0", "Wir sehen Sie dort.", "Sie"), mk("g.1", "Das Haus ist alt.", "Haus"), mk("g.2", "Die USA sind groß.", "USA"), mk("g.3", "Und dann ging er.", "Und"), mk("g.4", "Er kam und ging.", "und")] };
+      const H = { id: "ph", lv: "A1", label: "h", en: "h", note: ["a", "b"], sentences: [mk("h.0", "Ich weiß, dass er schläft.", "dass"), mk("h.1", "Dass er schläft, weiß ich.", "Dass")] };
+      const GH = [G, H], ask = (pp, i) => Array.from({ length: 120 }, (_, k) => VC.patternOpts(pp, pp.sentences[i], 0, GH, mulberry32(k)));
+      const mid = ask(G, 4).flat(), start = ask(G, 3).flat(), sie = ask(G, 0).flat(), hd = ask(H, 0).flat(), hs = ask(H, 1).flat();
+      check("de lowercase blank \"und\": Sie, Haus, USA keep their case (no sie / haus / Usa / uSA)", mid.length > 0 && mid.every(x => ["Sie", "Haus", "USA", "dass"].includes(x)) && mid.includes("Sie") && mid.includes("USA") && mid.includes("Haus"));
+      check("de sentence-initial blank \"Und\": a lowercase option takes a capital (Dass), Sie / Haus / USA unchanged", start.every(x => ["Sie", "Haus", "USA", "Dass"].includes(x)) && start.includes("Dass"));
+      check("de mid-sentence blank \"Sie\": a lowercase option stays lowercase (und, dass), no Und / Dass", sie.every(x => ["Haus", "USA", "und", "dass"].includes(x)) && sie.includes("und") && sie.includes("dass"));
+      check("\"dass\" blank: Sie / Haus / USA are not lowercased; \"Dass\" blank: not forced lower", hd.every(x => ["Sie", "Haus", "USA", "und"].includes(x)) && hs.every(x => ["Sie", "Haus", "USA", "Und"].includes(x)));
+      check("de fold identity: Und / und and Dass / dass are one word each, never offered twice", [...ask(G, 0), ...ask(G, 3), ...ask(H, 0)].every(o => new Set(o.map(x => x.toLowerCase())).size === o.length));
+    }
     // zh: the same options, in the same order, from the same rng, as main before this branch
     const B47 = "d1601cd", b47core = git(B47, "engine/core.js");
     if(!b47core) skip(`${B47} not in this checkout's history`);
@@ -559,12 +572,13 @@ const ptKey = it => String(it.key).startsWith("p:");
       function b47html(){ return git(B47, "engine/app.html"); }
     }
     // validator
-    const val = (patterns) => JSON.parse(cp.execFileSync(PY, ["-I", "-c", `import sys, json
+    const val = (patterns, pk) => JSON.parse(cp.execFileSync(PY, ["-I", "-c", `import sys, json
 sys.path.insert(0, ${JSON.stringify(path.join(ROOT, "tools"))})
 import validate_pack as v
 d = json.load(sys.stdin); r = v.Report()
-v.check_patterns({"patterns": True, "levels": [{"id": "A1"}]}, d, {"A1"}, {"w1": {"id": "w1", "lv": "A1", "w": "x"}}, r)
-print(json.dumps([r.errors, r.warnings]))`], { input: JSON.stringify(patterns), encoding: "utf8" }));
+d, pk = d
+v.check_patterns(dict({"patterns": True, "levels": [{"id": "A1"}]}, **pk), d, {"A1"}, {"w1": {"id": "w1", "lv": "A1", "w": "x"}}, r)
+print(json.dumps([r.errors, r.warnings]))`], { input: JSON.stringify([patterns, pk || {}]), encoding: "utf8" }));
     const [e0, w0] = val([B, A, C, D]);
     check("validator: a clean alphabetic file has no errors and no warnings", e0.length === 0 && w0.length === 0, JSON.stringify([e0, w0]));
     const withS = (pp, si, extra) => Object.assign({}, pp, { sentences: pp.sentences.map((x, i) => i === si ? Object.assign({}, x, extra) : x) });
@@ -581,8 +595,15 @@ print(json.dumps([r.errors, r.warnings]))`], { input: JSON.stringify(patterns), 
     const amb = pat("pe", [["Ya lo vi, ya.", 0, 2], ["Ella ya vio la playa.", 5, 7], ["Ya llegó.", 0, 2]]);
     const [, wa] = val([amb]);
     check("validator: a mark word twice in t (whole words) warns, once or inside a longer word does not", wa.length === 1 && /sentences\[0\]: mark word 'ya' occurs more than once/.test(wa[0]), JSON.stringify(wa));
-    const [ez, wz] = val([pat("pz", [["我喜欢就是你就好", 5, 6]])]);
-    check("validator: unspaced scripts are exempt from both rules (zh 就 in two patterns)", ez.length === 0 && wz.length === 0 && !/share/.test(val([pat("pz1", [["我就是", 1, 2]]), pat("pz2", [["他就来", 1, 2]])]).flat().join("")));
+    const ZHP = { spaced: false };
+    const [ez, wz] = val([pat("pz", [["我喜欢就是你就好", 5, 6]])], ZHP);
+    check("validator: pack.spaced false exempts both rules (zh 就 in two patterns)", ez.length === 0 && wz.length === 0 && !/share/.test(val([pat("pz1", [["我就是", 1, 2]]), pat("pz2", [["他就来", 1, 2]])], ZHP).flat().join("")));
+    const edge = [pat("pz1", [["虽然，我来。", 0, 2], ["虽然，他来。", 0, 2]]), pat("pz2", [["所以，我来。", 0, 2], ["虽然，好。", 0, 2]])];
+    check("validator: a zh mark between punctuation / at a sentence edge is no word under pack.spaced false, a word when the pack is spaced", val(edge, ZHP).flat().length === 0 && /share the mark word/.test(val(edge).flat().join("\n")));
+    // L4: the shared word is resolved by pattern near OR by near on every sentence carrying it
+    const sn = (pp, ids) => Object.assign({}, pp, { sentences: pp.sentences.map(x => Object.assign({}, x, { near: ids })) });
+    check("validator L4: sentence near on every carrying sentence of both patterns resolves a shared mark word", !/share the mark word/.test(sh(sn(A, ["pa2"]), sn(A2, ["pa"]))));
+    check("validator L4: sentence near on only some carrying sentences does not; pattern near on one side + sentence near on the other does", /share the mark word/.test(sh(withS(A, 0, { near: ["pa2"] }), sn(A2, ["pa"]))) && !/share the mark word/.test(sh(Object.assign({}, A, { near: ["pa2"] }), sn(A2, ["pa"]))));
   }
 
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);

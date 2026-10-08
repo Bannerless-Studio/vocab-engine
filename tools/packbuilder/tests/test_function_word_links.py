@@ -46,19 +46,59 @@ class FunctionWordLink(unittest.TestCase):
 
     def test_own_group_entry_wins(self):
         k2i = {("que", "CONJ"): "w_conj", ("que", "PRON"): "w_pron"}
-        self.assertEqual(function_word_link("que", "PRON", k2i), "w_conj")      # only reached when (que, PRON) is missing
         sp = get_spec("es", tempfile.mkdtemp())
+        self.assertEqual(function_word_link("que", "PRON", k2i, sp), "w_conj")      # only reached when (que, PRON) is missing
         toks = [tok("que", "que", "PRON"), tok(".", ".", "PUNCT")]
         self.assertEqual(sentence_links(toks, Lex(sp, TABLE), k2i, set(), "que."), ["w_pron"])
 
     def test_two_candidates_link_nothing(self):
-        self.assertIsNone(function_word_link("que", "ADP", {("que", "CONJ"): "a", ("que", "PRON"): "b"}))
+        sp = get_spec("es", tempfile.mkdtemp())
+        self.assertIsNone(function_word_link("que", "ADP", {("que", "CONJ"): "a", ("que", "PRON"): "b"}, sp))
 
     def test_content_groups_never_cross(self):
+        sp = get_spec("es", tempfile.mkdtemp())
         k2i = {("que", "CONJ"): "w_que"}
-        self.assertIsNone(function_word_link("que", "NOUN", k2i))
-        self.assertIsNone(function_word_link("que", "ADV", k2i))
-        self.assertIsNone(function_word_link("otro", "PRON", k2i))
+        self.assertIsNone(function_word_link("que", "NOUN", k2i, sp))
+        self.assertIsNone(function_word_link("que", "ADV", k2i, sp))
+        self.assertIsNone(function_word_link("otro", "PRON", k2i, sp))
+
+    def test_de_das_pron_stays_off_the_article(self):
+        sp = get_spec("de", tempfile.mkdtemp())
+        self.assertIn(("der", "DET"), sp.fixed_word)
+        k2i = {("der", "DET"): "w_art", ("das", "PRON"): "w_das_pron"}
+        # lemma "der" PRON (relative das): the surface's own PRON entry wins, article is never reached
+        self.assertEqual(function_word_link("der", "PRON", k2i, sp, "Das"), "w_das_pron")
+        self.assertIsNone(function_word_link("der", "PRON", {("der", "DET"): "w_art"}, sp, "die"))
+        toks = [tok("Das", "der", "PRON"), tok("ist", "sein", "VERB"), tok(".", ".", "PUNCT")]
+        k2 = {**k2i, ("sein", "VERB"): "w_sein"}
+        tbl = {"das": ("der", "PRON"), "ist": ("sein", "VERB")}
+        self.assertEqual(sentence_links(toks, Lex(sp, tbl), k2, {"sein"}, "Das ist."), ["w_das_pron", "w_sein"])
+        k3 = {("der", "DET"): "w_art", ("sein", "VERB"): "w_sein"}
+        self.assertEqual(sentence_links(toks, Lex(sp, tbl), k3, {"sein"}, "Das ist."), ["w_sein"])
+
+    def test_it_object_pronouns_keep_their_own_entries_and_se_stays_unlinked(self):
+        sp = get_spec("it", tempfile.mkdtemp())
+        self.assertIn(("il", "DET"), sp.fixed_word)
+        k2i = {("il", "DET"): "w_il", ("la", "PRON"): "w_la_pron", ("lo", "PRON"): "w_lo_pron", ("se", "CONJ"): "w_se_conj"}
+        self.assertEqual(function_word_link("il", "PRON", k2i, sp, "la"), "w_la_pron")
+        self.assertEqual(function_word_link("il", "PRON", k2i, sp, "lo"), "w_lo_pron")
+        self.assertIsNone(function_word_link("il", "PRON", {("il", "DET"): "w_il"}, sp, "le"))
+        self.assertIsNone(function_word_link("se", "PRON", k2i, sp, "se"))     # reflexive se is not conj "if"
+        toks = [tok("Se", "se", "PRON"), tok("ne", "ne", "PRON"), tok(".", ".", "PUNCT")]
+        tbl = {"se": ("se", "PRON"), "ne": ("ne", "PRON")}
+        self.assertEqual(sentence_links(toks, Lex(sp, tbl), {("se", "CONJ"): "w_se_conj", ("ne", "PRON"): "w_ne"}, set(), "Se ne."), ["w_ne"])
+
+    def test_pron_conj_only_for_the_specs_allow_list(self):
+        for code, ok in (("es", True), ("fr", True), ("it", False), ("de", False)):
+            sp = get_spec(code, tempfile.mkdtemp())
+            self.assertEqual(function_word_link("que", "PRON", {("que", "CONJ"): "w"}, sp), "w" if ok else None, code)
+            self.assertEqual(function_word_link("que", "CONJ", {("que", "PRON"): "w"}, sp), "w" if ok else None, code)
+        self.assertIsNone(function_word_link("que", "PRON", {("que", "CONJ"): "w"}))            # no spec: nothing allowed
+
+    def test_other_function_pairs_still_cross(self):
+        sp = get_spec("de", tempfile.mkdtemp())
+        self.assertEqual(function_word_link("wie", "CONJ", {("wie", "ADP"): "w_adp"}, sp), "w_adp")
+        self.assertEqual(function_word_link("este", "PRON", {("este", "DET"): "w_det"}, get_spec("es", tempfile.mkdtemp())), "w_det")
 
     def test_language_hook_runs_first(self):
         sp = get_spec("hi", tempfile.mkdtemp())
