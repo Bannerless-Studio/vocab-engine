@@ -488,7 +488,7 @@ else {
   const all = KINDS.map(([n]) => ON[n]).filter(x => x && x.right);
   check(`${all.length} of ${KINDS.length} kinds rendered`, all.length === KINDS.length);
   check("no kind tag on any item (question and reveal)", all.every(x => !/class="ktag"/.test(x.right.q) && !/class="ktag"/.test(x.wrong.q)));
-  check("the label is the first line of the drill body", all.every(x => x.right.q.startsWith('<div class="drill-body"><p class="q">') && !/<p class="q">/.test(x.right.q.slice(30))));
+  check("the label is the first line of the drill body", all.every(x => /^<div class="drill-body( sent)?"><p class="q">/.test(x.right.q) && !/<p class="q">/.test(x.right.q.slice(34))));
   const ph = n => (ON[n].right.q.match(/placeholder="([^"]*)"/) || [])[1];
   check(`placeholders: pinyin "${ph("typed pinyin")}", meaning "${ph("typed meaning")}", characters "${ph("typed characters")}"`, ph("typed pinyin") === "tones optional" && ph("typed pinyin from characters") === "tones optional" && ph("typed meaning") === "any one meaning" && ph("typed meaning from pinyin") === "any one meaning" && ph("typed characters") === "characters" && ph("typed characters, listen") === "characters");
   check("flag off keeps the old placeholders and tags", /placeholder="pinyin, tones optional…"/.test(OFFK["typed pinyin"].right.q) && /<div class="ktag"/.test(OFFK["typed meaning"].right.q) && /placeholder="characters…"/.test(OFFK["typed characters"].right.q));
@@ -559,26 +559,20 @@ if(ON){
   check("hear word: no Replay and no row icon in the reveal (the card has its speaker); the row still plays on tap", !ON["hear word"].right.hear && !/class="rvi"|id="rvp"/.test(ON["hear word"].right.rv) && /<div class="rvm" data-wid=/.test(ON["hear word"].right.rv));
   check("a word reveal outside the drill (the drill-end Missed box) keeps the row's speaker icon", /<span class="rvi">/.test(ON.rawReveal));
   check("flag off: the centred Replay row as before", /<div class="rvsay"><button type="button" class="replay" id="rvp"/.test(OFFK["recall"].right.rv));
-  check("right answer: Examples folded behind a text button", words.every(n => ON[n].right.rv.includes('<button type="button" class="pvc rvxb" id="rvxb" data-rvxb aria-expanded="false" aria-controls="rvx">Examples</button><div class="rvx" id="rvx" hidden>')));
-  check("wrong answer (and every You typed): the examples open, no Examples button", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].wrong.rv) && !/Examples?:/.test(ON[n].wrong.rv) && !/rvxb/.test(ON[n].wrong.rv)));
+  check("right answer (fb45): the examples open under the row, as on a miss, no Examples button, nothing hidden", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].right.rv) && !/rvxb|\shidden[\s>=]|Examples/.test(ON[n].right.rv)));
+  check("wrong answer (and every You typed): the examples open", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].wrong.rv) && !/Examples?:/.test(ON[n].wrong.rv) && !/rvxb/.test(ON[n].wrong.rv)));
   const cued = KINDS.map(([n]) => n).filter(n => ON[n].right.cue || ON[n].wrong.cue);
   const cueOk = v => !v.cue || /<\/div><div class="ucue" aria-label="字 \d\/5"><span data-tl lang="zh">字<\/span> [●○]{5}<\/div>/.test(v.rv) && !/letter-spacing/.test(v.rv) && v.rv.indexOf("ucue") > v.rv.indexOf("rvrow");
   check(`unit dots on the row's second line when the streak could move (${cued.join(", ") || "none"})`, cued.length >= 2 && cued.every(n => cueOk(ON[n].right) && cueOk(ON[n].wrong)));
   check("dots absent when nothing moved (recall)", !ON["recall"].right.cue && !/ucue/.test(ON["recall"].right.rv));
   check("sentence reveals keep the centred Replay (no answer row)", /<div class="rvsay">/.test(ON["gap"].right.rv) && !/rvrow/.test(ON["gap"].right.rv));
   check("character reveals: the row, hints open, no Examples", /class="rvrow"/.test(ON["charRead"].right.rv) && !/rvxb/.test(ON["charRead"].right.rv));
-  // The Examples tap opens the block in place.
-  const { api } = await bootWith(PACK, unpaused(), 21, { patterns: true }); api.ev(PICK);
-  runItem(api, "recallItem(__W)", true);
-  const box = api.el("rvx"); const b = api.el("rvxb");
-  if(box) box.hidden = true; // the fake DOM does not parse the attribute
-  check("Examples tap: the block opens in place", !!box && !!b && typeof b.onclick === "function" && (b.click(), box.hidden === false));
-  // The live region reads the answer, not the fold: no "Examples" label, none of the hidden example text.
+  // The live region reads the answer and now the examples (fb45): no "Examples" label, the example text included.
   { const { api: lv } = await bootWith(PACK, unpaused(), 21, { patterns: true }); lv.ev(PICK);
     for(const [what, expr] of [["recall", "recallItem(__W)"], ["meaning MC", "readItem(__W)"]]){
       const r = runItem(lv, expr, true), live = lv.el("live") ? lv.el("live").textContent : null;
-      const ex = lv.ev(`(() => { const e = exampleSentencesHTML(__W).replace(/<[^>]+>/g, "").trim(); return e.slice(0, 12); })()`);
-      check(`${what}: the live region on a right answer omits "Examples" and the hidden example text (${live === null ? "no live node" : live.length + " chars"})`, !!r && live !== null && live.length > 0 && !/Examples/.test(live) && !!ex && !live.includes(ex)); }
+      const rvh = lv.el("rv").innerHTML, ex = (rvh.slice(rvh.indexOf('<div class="rvx">')).match(/<ruby>([^<]+)/) || [])[1] || "";
+      check(`${what}: the live region on a right answer has the example text and no "Examples" label (${live === null ? "no live node" : live.length + " chars"})`, !!r && live !== null && live.length > 0 && !/Examples/.test(live) && !!ex && live.includes(ex)); }
   }
 }
 
@@ -905,6 +899,67 @@ console.log(`\n[C8] flag off: Read, Words, Test, Sounds and notices byte-identic
       const diff = a.tr.findIndex((x, i) => JSON.stringify(x) !== JSON.stringify(b.tr[i]));
       if(diff >= 0) console.log(`INFO  first difference at ${a.tr[diff][0]}: ${JSON.stringify(a.tr[diff]).slice(0, 300)} vs ${JSON.stringify(b.tr[diff]).slice(0, 300)}`);
       check(`${name}${ua ? ", Samsung UA" : ""}: ${a.tr.length} screens byte-identical (${a.tr.map(x => x[0].replace(/ [a-z]\d+$/, "")).join(", ")})`, diff < 0 && a.tr.length === b.tr.length && a.tr.length >= 18);
+    }
+  }
+}
+
+const BASE_D = "0d542de"; // main before fb45: the flag-off control for the v2 fixes
+console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignment, Read row title");
+{
+  const oldOf = f => cp.execSync(`git -C "${ROOT}" show ${BASE_D}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
+  let oldCore = null, oldHtml = null;
+  try {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avd-")); const f = path.join(dir, `core_${BASE_D}.js`);
+    fs.writeFileSync(f, oldOf("engine/core.js")); oldCore = require(f); oldHtml = oldOf("engine/app.html");
+    fs.rmSync(dir, { recursive: true, force: true });
+  } catch(e){ oldCore = null; }
+  if(!owner) skip("owner export not found");
+  else {
+    // 1. the Progress heading
+    { const { api } = await bootWith(PACK, unpaused(), 13); api.el("go").click();
+      await play(api, { wrong: (it, n) => n % 4 === 1 }); api.clickTab("progress");
+      const h = api.panel();
+      check("Progress under v2: the recent-misses block is headed Still shaky, never Missed in your last", /<p class="pvk">Still shaky<\/p><p class="pvw">/.test(h) && !/Missed in your last/.test(h));
+      const o = await bootWith(OFF, unpaused(), 13); o.api.el("go").click(); await play(o.api, { wrong: (it, n) => n % 4 === 1 }); o.api.clickTab("progress");
+      check("flag off: no Still shaky", !/Still shaky/.test(o.api.panel())); }
+    // 2. the drill-end score: right first time over distinct items
+    for(const [what, wrongTimes, want, wantOff] of [["one miss re-asked", 1, "2 of 3", "3 / 4"], ["the same item missed twice", 2, "2 of 3", "3 / 5"], ["no miss", 0, "3 of 3", "3 / 3"]]){
+      const run = async pack => { const { api } = await bootWith(pack, unpaused(), 13); const first = api.ev("WORDS.slice(0, 3).map(w => w.id)")[0]; let k = 0;
+        api.ev("drill(WORDS.slice(0, 3).map(w => readItem(w)), () => {}, missSummary)");
+        await play(api, { wrong: it => it.key === "w:" + first && ++k <= wrongTimes, until: a => /id="ok"/.test(a.panel()) && !a.getD() });
+        return api.panel(); };
+      const on = await run(PACK), off = await run(OFF);
+      check(`drill end, ${what}: v2 "${want}" over distinct items`, on.includes(`<h2>${want}</h2>`));
+      check(`drill end, ${what}: flag off keeps "${wantOff}"`, off.includes(`<h2>${wantOff}</h2>`));
+      if(wrongTimes) check(`drill end, ${what}: the Missed rows list the one missed item`, (on.match(/data-mopen=/g) || []).length === 1); }
+    // 3. sentence and pattern items left-align label + stimulus; word and character items stay centred
+    { const ONk = ON || {}, sentK = ["hear sentence", "gap", "gap typed", "pattern, first meeting", "pattern, met before"].filter(n => ONk[n] && ONk[n].right);
+      const wordK = ["meaning MC", "recall", "hear word", "typed pinyin", "typed characters", "charPick", "charRead", "charSound"].filter(n => ONk[n] && ONk[n].right);
+      check(`sentence and pattern items carry the sent class on the drill body (${sentK.join(", ")})`, sentK.length >= 4 && sentK.every(n => ONk[n].right.q.startsWith('<div class="drill-body sent">') && ONk[n].wrong.q.startsWith('<div class="drill-body sent">')));
+      check(`word, character and unit items keep the centred label (${wordK.length} kinds)`, wordK.length >= 7 && wordK.every(n => ONk[n].right.q.startsWith('<div class="drill-body"><p class="q">')));
+      check("the CSS left-aligns the label and the hear stage under .sent, scoped to v2, after the centred rule", /:root\[data-appview="v2"\] \.drill-body\.sent>\.q:first-child\{text-align:start\}/.test(appHtml) && /:root\[data-appview="v2"\] \.drill-body\.sent \.hear-stage\{justify-content:flex-start\}/.test(appHtml)
+        && appHtml.indexOf(".drill-body.sent>.q:first-child") > appHtml.indexOf(".drill-body:not(.top)>.q:first-child{text-align:center"));
+      const offK = OFFK || {};
+      check("flag off: no sent class anywhere", Object.keys(offK).every(n => !offK[n] || !offK[n].right || !/ sent"/.test(offK[n].right.q.slice(0, 40)))); }
+    // 4. the Today Read row shows the title in characters only under v2
+    { const line = async pack => { const { api } = await bootWith(pack, unpaused(), 13); return api.ev("(() => { const r = todayReadItem(false); return r ? readPlanLine(r) : null; })()"); };
+      const a = await line(PACK), b = await line(OFF);
+      check(`Today Read row under v2 has no ruby / pinyin on the title (${a && a.replace(/<[^>]+>/g, "").slice(0, 40)})`, !!a && !/<ruby|<rt|class="t\d"/.test(a));
+      if(b && /<ruby/.test(b)) check("flag off: the same row still shows the title with ruby", true); else skip("flag-off Read row carries no ruby on this record"); }
+    // 6. flag off byte-identical to the base on 3 records
+    if(!oldCore) skip(`${BASE_D} not in this checkout's history`);
+    else for(const [name, mk] of [["fresh", freshRec], ["owner export (paused)", () => clone(owner)], ["owner, unpaused copy", unpaused]]){
+      const run = async o => { const { api, st } = await bootWith(OFF, mk(), 13, o); const tr = [["home", api.title(), api.panel()]]; api.el("go").click(); let k = 0;
+        await play(api, { wrong: (it, n) => n % 4 === 1, trace: (kind, a) => tr.push([kind, a.title(), a.panel()]) });
+        api.clickTab("progress"); tr.push(["progress", api.panel()]); api.clickTab("test"); tr.push(["test", api.panel()]);
+        return { tr, rec: st.ls.getItem(VC.storageKey(OFF)) }; };
+      const a = await run(), b = await run({ core: oldCore, html: oldHtml });
+      const diff = a.tr.findIndex((x, i) => JSON.stringify(x) !== JSON.stringify(b.tr[i]));
+      if(diff >= 0) console.log(`INFO  first difference at ${diff}: ${JSON.stringify(a.tr[diff]).slice(0, 300)} vs ${JSON.stringify(b.tr[diff]).slice(0, 300)}`);
+      check(`flag off, ${name}: ${a.tr.length} screens (Today, drill ends, Session done, Progress, Test) byte-identical to ${BASE_D}; stored records equal`, diff < 0 && a.tr.length === b.tr.length && a.rec === b.rec);
+      const ta = await walkTabs(OFF, mk(), 61, {}), tb = await walkTabs(OFF, mk(), 61, { core: oldCore, html: oldHtml });
+      const d2 = ta.tr.findIndex((x, i) => JSON.stringify(x) !== JSON.stringify(tb.tr[i]));
+      check(`flag off, ${name}: ${ta.tr.length} tab screens (Read, Words, Test, Sounds) byte-identical to ${BASE_D}`, d2 < 0 && ta.tr.length === tb.tr.length);
     }
   }
 }

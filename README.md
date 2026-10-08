@@ -79,6 +79,8 @@ To recover, copy the backup's value and paste it into Progress → Import progre
 
 Import is strict, so a backup taken from an older pack whose levels were since renamed is rejected with a reason.
 
+Exported files carry a format version, the top-level `v` (1 today). Import reads a file with no `v` or `v: 1`; a file from a newer app (`v` higher) is refused whole with "This file was exported by a newer version of the app (v2). Update the app, then import.", and the current progress and its `pre_import` backup are left untouched. When the format changes, `v` goes up, and an app reads every file of its own version or older. Version 1 is the current record (docs/PACK_SCHEMA.md "Progress file version").
+
 ## Using it from a language repo
 
 Each language repo includes this repo as a git submodule at `engine/` and holds only its pack. Italian as an example:

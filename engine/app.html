@@ -216,6 +216,8 @@
      the label shares the stimulus axis. Option numbers are a keyboard affordance: hidden on touch only. */
   :root[data-appview="v2"] .drill-body:not(.top){justify-content:flex-start;padding-top:max(0px, calc(var(--stim-top) - 18px))}
   :root[data-appview="v2"] .drill-body:not(.top)>.q:first-child{text-align:center;margin-bottom:6px}
+  :root[data-appview="v2"] .drill-body.sent>.q:first-child{text-align:start}
+  :root[data-appview="v2"] .drill-body.sent .hear-stage{justify-content:flex-start}
   @media (hover: none) and (pointer: coarse){ :root[data-appview="v2"] .opts button b.num{display:none} }
   /* Tighter vertical rhythm so a right answer's Next sits above the tab bar at 360x780 without scrolling. */
   :root[data-appview="v2"] .drill-body .opts-hero button{padding:14px 18px;min-height:52px}
@@ -228,7 +230,6 @@
   :root[data-appview="v2"] .rvm .rw{font-size:22px;margin:0;font-family:var(--wfont)}
   :root[data-appview="v2"] .rvm .rp,:root[data-appview="v2"] .rvm .rg,:root[data-appview="v2"] .rvm .rvi{color:var(--mute);margin:0}
   :root[data-appview="v2"] .ucue{color:var(--mute);font-size:15px;margin:2px 0 0}
-  :root[data-appview="v2"] .rvxb{width:auto;min-height:44px}
   :root[data-appview="v2"] .rvx{margin-top:8px}
   :root[data-appview="v2"] #panel>p.pva:first-child{margin:0 0 12px}
   :root[data-appview="v2"] .plist button{font-family:var(--font)} /* buttons do not inherit the page font */
@@ -1080,7 +1081,6 @@ function announce(html){
   const el = $("live"); if(!el) return;
   const tmp = document.createElement("div"); tmp.innerHTML = html || "";
   tmp.querySelectorAll("[data-showw],[data-pcue]").forEach(x => x.remove()); // the show-written button's label is not content
-  if(APP_V2) tmp.querySelectorAll("[data-rvxb],.rvx[hidden]").forEach(x => x.remove()); // nor the Examples fold and what it hides
   el.textContent = tmp.textContent || "";
 }
 // scrollIntoView "nearest" leaves the page still when Next is already clear of the tab bar.
@@ -1112,8 +1112,6 @@ function showReveal(html){
   rv.style.display = html ? "block" : "none";
   if(html){ rv.style.opacity = "0"; requestAnimationFrame(()=>{ rv.style.opacity = "1"; }); }
   announce(html);
-  const xb = APP_V2 ? $("rvxb") : null;
-  if(xb) xb.onclick = () => { const x = $("rvx"); if(!x) return; x.hidden = false; xb.remove(); bringIntoView(x, true); };
 }
 // Replay rule (docs/AUDIO.md "Playback reliability"): every item that plays audio on its own
 // shows Replay. Reveal-time audio gets its button only once answered, so a gap item's
@@ -1133,8 +1131,8 @@ function unitCue(it){
 }
 const revealHTML = (it, html, ok) => { if(APP_V2) return revealHTMLv2(it, html, ok); const h = unitCue(it) + html; return it.onReveal && it.revealHear ? h + REVEAL_REPLAY : h; };
 // appView: a word or character reveal is one answer row (revealRow). The unit dots fill its second line,
-// Replay sits at its end (the row's own speaker icon goes, one control), and on a right answer the
-// examples fold behind "Examples". A reveal with no row (sentences, script) keeps the dots on top and
+// Replay sits at its end (the row's own speaker icon goes, one control), and the examples
+// show on a right answer as on a miss (owner 2026-10-08). A reveal with no row (sentences, script) keeps the dots on top and
 // the centred Replay.
 const RV_CUE = '<i class="rvk"></i>', RV_PLAY = '<i class="rvr"></i>', RV_ICON = `<span class="rvi">${TEACH_PLAY_SVG}</span>`;
 function revealRow(form, reading, gloss, wid, below){
@@ -1149,7 +1147,6 @@ function revealHTMLv2(it, html, ok){
   if(row && (play || /id="(sp|rpa|rp2)"/.test(it.html || ""))) h = h.replace(RV_ICON, "");
   if(row && play) h = h.replace(RV_PLAY, REVEAL_REPLAY_BTN);
   else if(play) h += REVEAL_REPLAY;
-  if(ok) h = h.replace('<div class="rvx">', '<button type="button" class="pvc rvxb" id="rvxb" data-rvxb aria-expanded="false" aria-controls="rvx">Examples</button><div class="rvx" id="rvx" hidden>');
   return stripRvSlots(h);
 }
 function playReveal(it){
@@ -1168,7 +1165,7 @@ function dnext(){
     const { right, seen, miss, onDone, summary, onShown } = D;
     setScore(0, 0);
     screenTop();
-    P.innerHTML = `<div class="done"><h2>${APP_V2 ? `${right} of ${seen}` : `${right} / ${seen}`}</h2>${summary ? summary(miss) : ""}<button class="next" id="ok">Continue</button></div>`;
+    P.innerHTML = `<div class="done"><h2>${APP_V2 ? firstTimeScore(seen, miss) : `${right} / ${seen}`}</h2>${summary ? summary(miss) : ""}<button class="next" id="ok">Continue</button></div>`;
     rzFin = D; D = null; drillKeyHandler = null;
     $("ok").onclick = () => { rzFin = null; sessionClear(); onDone(); };
     if(onShown) onShown();
@@ -1182,9 +1179,16 @@ function dnext(){
   if(it.kind === "type") renderTypeItem(it); else renderMcItem(it);
   sessionSave(true);
 }
+// v2 score: right first time over distinct items. Every miss requeued one re-ask, so asks = items + misses.
+function firstTimeScore(seen, miss){
+  const n = seen - miss.length;
+  return `${n - VC.dedupeMisses(miss).length} of ${n}`;
+}
+// v2: sentence and pattern items (cloze, hear-sentence, pattern) left-align label and stimulus together.
+const sentClass = it => APP_V2 && /^[sp]:/.test(it.key || "") ? " sent" : "";
 function renderMcItem(it){
   const P = $("panel");
-  P.innerHTML = `<div class="drill-body"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>`;
+  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>`;
   if(it.mount) it.mount();
   const opts = rzOrderOf(it) || shuffle(it.opts.slice());
   it.rzShown = opts;
@@ -1244,7 +1248,7 @@ function typedRequeue(it){
 }
 function renderTypeItem(it){
   const P = $("panel");
-  P.innerHTML = `<div class="drill-body"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}
+  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}
     <input type="text" id="tin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"${it.inputTA !== undefined ? it.inputTA : TA} placeholder="${escapeHtml(it.placeholder || (DISP.rtl ? "type the word" : "type the word…"))}">
     <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>`;
   if(it.mount) it.mount();
@@ -1459,7 +1463,7 @@ function exampleSentencesHTML(entry){
 }
 function revealBlock(entry){
   const p = pronBeside(entry), hear = canHearWord(entry);
-  // The examples carry no "Examples:" heading in a reveal: on a right answer the fold button names them.
+  // The examples carry no "Examples:" heading in a reveal.
   if(APP_V2){ const ex = exampleSentencesHTML(entry).replace(/^<p class="q" style="margin-top:12px">Examples?:<\/p>/, "");
     return revealRow(wordFormHTML(entry), p ? readingHTML(p) : "", glossOut(VC.gloss(entry), true), hear ? entry.id : null, GLOSS_STYLE && VC.typedSynWords(entry, WORDS_BY_ID).length ? `<div class="syn" style="color:var(--mute);font-size:15px">${synAlsoHTML(entry)}</div>` : "") + (ex ? `<div class="rvx">${ex}</div>` : ""); }
   const icon = hear ? ` <span style="color:var(--mute);vertical-align:middle">${TEACH_PLAY_SVG}</span>` : "";
@@ -2549,7 +2553,7 @@ function todayReadItem(inSession){
 }
 function readPlanLine(r){
   const p = r.p;
-  const t = pfRubyText(p.title, p.titleRuby) ? rubyTw(p.title, p.titleRuby) : tf(p.title);
+  const t = !APP_V2 && pfRubyText(p.title, p.titleRuby) ? rubyTw(p.title, p.titleRuby) : tf(p.title);
   return `${ui(r.mode === "listen" ? "1 passage to listen to: " : r.reason === "reread" ? "1 passage to re-read: " : "1 passage: ")}${t}${ui(` (${levelLabel(p.lv)}, ${VC.passageLength(p, PACK)} words)`)}`;
 }
 function enterPlacementFromToday(){ placeFrom = null; switchToTab("test", "Test"); testSel = "placement"; startPlacement(); }
@@ -3549,7 +3553,7 @@ function progressWire(xp, cp){
         return;
       }
       const r = VC.applyImport(prog, text, PACK);
-      if(!r.ok){ showImportError("That doesn't look like valid exported progress for this pack: " + r.reason); return; }
+      if(!r.ok){ showImportError(r.newer ? r.reason : "That doesn't look like valid exported progress for this pack: " + r.reason); return; }
       await applyImported(r.prog);
     }catch(e){
       showImportError("That doesn't look like valid exported progress: " + (e && e.message ? e.message : "could not be read"));
@@ -3666,7 +3670,7 @@ function progressRenderV2(){
     <p class="pva">${prog.sessions || 0} session${prog.sessions === 1 ? "" : "s"}, ${escapeHtml(levelLabel(LEVELS[at]))}</p>
     ${pvHeroHTML(cur, anim)}${pvGoalHTML()}${all ? pvGoalsHTML() : ""}
     <section class="pvls">${all ? `<div class="pvl" id="pvLearned"><div class="pvt"><span>Learned</span><span class="pvn">${lwAll.length} of ${WORDS.length}</span></div></div>` : ""}${xp ? `<table class="stats">${xp.rows}</table>` : ""}${lvData.map(levelRow).join("")}${cp && !lag && cp.rows ? `<table class="stats">${cp.rows}</table>` : ""}${sounds}</section>
-    ${missed.length ? `<section class="pvx"><p class="pvk">Missed in your last ${N} sessions</p><p class="pvw">${missed.map(w => `<span${TA}>${wordFormHTML(w, false)}</span>`).join(" ")}</p></section>` : ""}
+    ${missed.length ? `<section class="pvx"><p class="pvk">${APP_V2 ? "Still shaky" : `Missed in your last ${N} sessions`}</p><p class="pvw">${missed.map(w => `<span${TA}>${wordFormHTML(w, false)}</span>`).join(" ")}</p></section>` : ""}
     ${all && weak.length ? `<section><p class="pvk">Weakest words</p>${weak.map(w => `<div class="rowset">${wordRowHTML(w, "rowset")}</div>`).join("")}</section>` : ""}
     <button class="ghost pvall" id="pvAll" aria-expanded="${all}">${all ? "Show less" : "Show all"}</button>
     <section class="pvset"><p class="pvk">Settings</p>

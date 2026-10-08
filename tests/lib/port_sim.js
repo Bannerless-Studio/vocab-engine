@@ -43,13 +43,17 @@ function genericFlags(pack, lang){
   }
   return f;
 }
-// ft from the word's frequency rank: ambient rank <= 100, peripheral the least frequent share of each level, else core
+// ft from the word's frequency rank, the rule of core/enrich.py assign_tiers: ambient rank <= 100; per level the
+// highest-rank share of the non-ambient words are peripheral (ties by id), the rest core; a word with no rank is core.
+// port_sites_checks asserts it equals the enrich output on all 13 sites (w35-review L2).
 function withTiers(pack, words){
   const ids = pack.levels.map(l => String(l.id)), out = clone(words);
+  const ranked = w => Number.isInteger(w.rank);
+  out.forEach(w => { w.ft = ranked(w) && w.rank <= AMBIENT_RANK ? 0 : 1; });
   ids.forEach((lv, i) => {
-    const list = out.filter(w => String(w.lv) === lv).sort((a, b) => a.rank - b.rank);
-    const nPer = Math.round(list.length * (PERIPHERAL_SHARE[i] !== undefined ? PERIPHERAL_SHARE[i] : 0.4));
-    list.forEach((w, k) => { w.ft = w.rank <= AMBIENT_RANK ? 0 : k >= list.length - nPer ? 2 : 1; });
+    const lw = out.filter(w => String(w.lv) === lv);
+    const k = Math.floor((PERIPHERAL_SHARE[i] !== undefined ? PERIPHERAL_SHARE[i] : 0.4) * lw.length + 0.5);
+    lw.filter(w => w.ft === 1 && ranked(w)).sort((a, b) => b.rank - a.rank || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)).slice(0, k).forEach(w => { w.ft = 2; });
   });
   return out;
 }

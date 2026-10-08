@@ -22,6 +22,7 @@ ALL="
 pack_flags_checks||base
 engine_checks||base
 migration_checks||base
+export_checks||base
 flagoff_snapshot|--check|base
 pron_aids_checks||-
 characters_checks||characters

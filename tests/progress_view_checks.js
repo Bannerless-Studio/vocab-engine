@@ -275,8 +275,8 @@ else {
   check("hide + pagehide on Progress keep the expanded view and the hero on screen", /id="pvAll" aria-expanded="true">Show less</.test(api.panel()) && /id="pvh"/.test(api.panel()));
   api.el("pvAll").click(); h = api.panel();
   check("after a hide, Show less still collapses and the hero (since the visit on entry) stays", /id="pvAll" aria-expanded="false">Show all</.test(h) && /In 3 sessions since your last visit/.test(stripTags(h)));
-  const missLine = (h.match(/Missed in your last 7 sessions<\/p><p class="pvw">([\s\S]*?)<\/p>/) || [])[1] || "";
-  check("a word missed this session leads the Missed in your last 7 sessions line, max 12 words", VC.recentMisses(api.getProg(), VC.learnedWords(WORDS, PACK, api.getProg()))[0].id === missW.id && (missLine.match(/<span data-tl/g) || []).length <= 12 && stripTags(missLine.split("</span> <span")[0]).trim() === stripTags(api.wordForm(missW)).trim());
+  const missLine = (h.match(/Still shaky<\/p><p class="pvw">([\s\S]*?)<\/p>/) || [])[1] || "";
+  check("a word missed this session leads the Still shaky line, max 12 words", VC.recentMisses(api.getProg(), VC.learnedWords(WORDS, PACK, api.getProg()))[0].id === missW.id && (missLine.match(/<span data-tl/g) || []).length <= 12 && stripTags(missLine.split("</span> <span")[0]).trim() === stripTags(api.wordForm(missW)).trim());
   api.clickTab("today"); api.clickTab("progress");
   h = api.panel();
   check("a visit with no change: no hero, the anchor and goal stay", !/id="pvh"/.test(h) && /class="pva"/.test(h) && /class="pvg"/.test(h));

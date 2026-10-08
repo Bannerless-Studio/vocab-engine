@@ -1018,6 +1018,8 @@ function bootProg(raw, pack, readError){
 function applyImport(prev, text, pack){
   const p = parseStored(text);
   if(!p.ok) return p;
+  // The file's v is its format version (PROG_VERSION); a newer file is refused whole, before any read.
+  if(typeof p.data.v === "number" && p.data.v > PROG_VERSION) return {ok:false, newer:true, reason:`This file was exported by a newer version of the app (v${p.data.v}). Update the app, then import.`};
   const v = validateProgShape(p.data, levelIds(pack));
   if(!v.ok) return v;
   const prog = normalizeProg(v.data, pack);

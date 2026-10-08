@@ -11,6 +11,10 @@ const { packAsOf } = require("./lib/pack_flags.js");
 const util = require("util");
 
 const ROOT = path.join(__dirname, "..");
+// Scratch dirs made by this suite (old-engine copies) are removed at exit; only dirs it created itself.
+const migDirs = [];
+const migTmp = () => { const d = fs.mkdtempSync(path.join(os.tmpdir(), "mig-")); migDirs.push(d); return d; };
+process.on("exit", () => migDirs.forEach(d => { try { fs.rmSync(d, { recursive: true, force: true }); } catch(e){} }));
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const { diffMigration } = require(path.join(ROOT, "tools", "diff_hsk_migration.js"));
 const ZH = path.join(ROOT, "packs", "zh");
@@ -372,7 +376,7 @@ console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"
   try {
     const cp = require("child_process"), os = require("os");
     const src = cp.execSync(`git -C "${ROOT}" show 3d66aea:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_3d66aea.js"); fs.writeFileSync(f, src); old = require(f);
+    const f = path.join(migTmp(), "core_3d66aea.js"); fs.writeFileSync(f, src); old = require(f);
   } catch(e){ old = null; }
   if(!old) skip("previous engine 3d66aea not in this checkout's history");
   else {
@@ -430,7 +434,7 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
   try {
     const cp = require("child_process"), os = require("os");
     const src = cp.execSync(`git -C "${ROOT}" show 8023572:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_8023572.js"); fs.writeFileSync(f, src); prev = require(f);
+    const f = path.join(migTmp(), "core_8023572.js"); fs.writeFileSync(f, src); prev = require(f);
   } catch(e){ prev = null; }
   if(!prev) skip("previous engine 8023572 not in this checkout's history");
   else {
@@ -457,7 +461,7 @@ console.log("\n[turn] characters.withWords Learn turn (chars.turn, fb2-write2): 
     try {
       const cp = require("child_process"), os = require("os");
       const src = cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
+      const f = path.join(migTmp(), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
     } catch(e){ eng = null; }
     if(!eng){ skip(`engine ${sha} not in this checkout's history`); continue; }
     const ob = eng.bootProg(raw, PACK);
@@ -487,7 +491,7 @@ console.log("\n[order] characters order chars.order (R5, fb2-write2): first / wi
     try {
       const cp = require("child_process"), os = require("os");
       const src = cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
+      const f = path.join(migTmp(), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
     } catch(e){ eng = null; }
     if(!eng){ skip(`engine ${sha} not in this checkout's history`); continue; }
     for(const o of ["first", "with"]){
@@ -524,7 +528,7 @@ console.log("\n[lag] characters.learn \"lag\" (fb3-lag): no stored field read or
     try {
       const cp = require("child_process"), os = require("os");
       const src = cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
+      const f = path.join(migTmp(), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
     } catch(e){ eng = null; }
     if(!eng){ skip(`engine ${sha} not in this checkout's history`); continue; }
     const ob = eng.bootProg(mraw, pk), st = eng.nextStage(pk, W, U, ob.prog), cs = st && st.kind === "chars" ? eng.nextCharSet(st.levels, U, pk, ob.prog) : null;
@@ -551,7 +555,7 @@ console.log("\n[pause] pack.pauseNew (fb4-pause): one additive field prog.pause 
     try {
       const cp = require("child_process"), os = require("os");
       const src = cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
+      const f = path.join(migTmp(), `core_${sha}.js`); fs.writeFileSync(f, src); eng = require(f);
     } catch(e){ eng = null; }
     if(!eng){ skip(`engine ${sha} not in this checkout's history`); continue; }
     const ob = eng.bootProg(raw, pk), ref = eng.bootProg(JSON.stringify(mig("HEAD")), pk);
@@ -569,7 +573,7 @@ console.log("\n[bare5] zh characters.bare 6 -> 5 (fb10-weak-floor; owner 2026-10
   try {
     const cp = require("child_process"), os = require("os");
     const src = cp.execSync(`git -C "${ROOT}" show 68930bd:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_68930bd.js"); fs.writeFileSync(f, src); eng = require(f);
+    const f = path.join(migTmp(), "core_68930bd.js"); fs.writeFileSync(f, src); eng = require(f);
     oldPack = JSON.parse(cp.execSync(`git -C "${ROOT}" show 68930bd:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
   } catch(e){ eng = null; }
   if(!eng) skip("engine 68930bd not in this checkout's history");
@@ -607,7 +611,7 @@ console.log("\n[rotation-s] pack.readRotation (fb16): optional read.done s / ls 
   try {
     const cp = require("child_process"), os = require("os");
     const src = cp.execSync(`git -C "${ROOT}" show 491d470:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_491d470.js"); fs.writeFileSync(f, src); eng = require(f);
+    const f = path.join(migTmp(), "core_491d470.js"); fs.writeFileSync(f, src); eng = require(f);
     oldPack = JSON.parse(cp.execSync(`git -C "${ROOT}" show 491d470:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
   } catch(e){ eng = null; }
   if(!eng) skip("engine 491d470 not in this checkout's history");
@@ -637,7 +641,7 @@ console.log("\n[wordsBy] pack.wordsBy \"typed\" (fb18): word streak semantics on
   try {
     const cp = require("child_process"), os = require("os");
     const src = cp.execSync(`git -C "${ROOT}" show a8e9c08:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_a8e9c08.js"); fs.writeFileSync(f, src); eng = require(f);
+    const f = path.join(migTmp(), "core_a8e9c08.js"); fs.writeFileSync(f, src); eng = require(f);
     oldPack = JSON.parse(cp.execSync(`git -C "${ROOT}" show a8e9c08:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
   } catch(e){ eng = null; }
   if(!eng) skip("engine a8e9c08 not in this checkout's history");
@@ -662,7 +666,7 @@ console.log("\n[progressMap] pack.progressMap (fb20): one optional top-level pro
   try {
     const cp = require("child_process"), os = require("os");
     const src = cp.execSync(`git -C "${ROOT}" show a2f2426:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_a2f2426.js"); fs.writeFileSync(f, src); eng = require(f);
+    const f = path.join(migTmp(), "core_a2f2426.js"); fs.writeFileSync(f, src); eng = require(f);
     oldPack = JSON.parse(cp.execSync(`git -C "${ROOT}" show a2f2426:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
   } catch(e){ eng = null; }
   if(!eng) skip("engine a2f2426 not in this checkout's history");
@@ -681,7 +685,7 @@ console.log("\n[progressMap] pack.progressMap (fb20): one optional top-level pro
     let e2 = null, op2 = null;
     try {
       const cp = require("child_process"), os = require("os");
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      const f = path.join(migTmp(), `core_${sha}.js`);
       fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); e2 = require(f);
       op2 = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
     } catch(e){ e2 = null; }
@@ -707,7 +711,7 @@ console.log("\n[optsF] pack.optsMix (fb21): optional record field f = session or
   try {
     const cp = require("child_process"), os = require("os");
     const src = cp.execSync(`git -C "${ROOT}" show 2412992:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_2412992.js"); fs.writeFileSync(f, src); eng = require(f);
+    const f = path.join(migTmp(), "core_2412992.js"); fs.writeFileSync(f, src); eng = require(f);
     oldPack = JSON.parse(cp.execSync(`git -C "${ROOT}" show 2412992:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
   } catch(e){ eng = null; }
   if(!eng) skip("engine 2412992 not in this checkout's history");
@@ -737,7 +741,7 @@ console.log("\n[pairs] pack.pairs (fb23): optional record field p = {wm|sm|ws: [
     let eng = null, op = null;
     try {
       const cp = require("child_process"), os = require("os");
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      const f = path.join(migTmp(), `core_${sha}.js`);
       fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
       op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
     } catch(e){ eng = null; }
@@ -772,7 +776,7 @@ console.log("\n[freqTiers] pack.freqTiers (fb26): no new stored field; records w
     let eng = null, op = null;
     try {
       const cp = require("child_process"), os = require("os");
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      const f = path.join(migTmp(), `core_${sha}.js`);
       fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
       op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
     } catch(e){ eng = null; }
@@ -798,7 +802,7 @@ console.log("\n[patterns] pack.patterns (fb29): optional top-level prog.pt = {pa
     let eng = null, op = null;
     try {
       const cp = require("child_process"), os = require("os");
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      const f = path.join(migTmp(), `core_${sha}.js`);
       fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
       op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
     } catch(e){ eng = null; }
@@ -823,7 +827,7 @@ console.log("\n[bareByPair] characters.bareByPair (fb31): no stored field; it re
   let eng = null, op = null;
   try {
     const cp = require("child_process"), os = require("os");
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), "core_3044601.js");
+    const f = path.join(migTmp(), "core_3044601.js");
     fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show 3044601:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
     op = JSON.parse(cp.execSync(`git -C "${ROOT}" show 3044601:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
   } catch(e){ eng = null; }
@@ -847,7 +851,7 @@ console.log("\n[pv] pack.progressView (fb37): optional top-level prog.pv = {sn, 
     let eng = null, op = null;
     try {
       const cp = require("child_process"), os = require("os");
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      const f = path.join(migTmp(), `core_${sha}.js`);
       fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
       op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
     } catch(e){ eng = null; }
@@ -873,7 +877,7 @@ console.log("\n[pl] prog.pl (fb42): the level a pre-session placement landed in 
     let eng = null, op = null;
     try {
       const cp = require("child_process"), os = require("os");
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      const f = path.join(migTmp(), `core_${sha}.js`);
       fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
       op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
     } catch(e){ eng = null; }
@@ -894,7 +898,7 @@ console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/bri
   const PS = require("./lib/port_sim.js"), cp = require("child_process"), os = require("os");
   const OLD = ["ef44c6e", "aa00571"].map(sha => {
     try {
-      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      const f = path.join(migTmp(), `core_${sha}.js`);
       fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
       return { sha, eng: require(f) };
     } catch(e){ return { sha, eng: null }; }
