@@ -100,6 +100,8 @@ python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the 
 .cache/venv/bin/python tools/zh_say_scan.py [--write]   # zh polyphone TTS carriers; venv: pip install pypinyin jieba
 ```
 
+Republish rounds (bump, enrich, build, check, guard, controls, commit per site; calibration queue as one background job): `sh tools/round/calibrate_queue.sh --sessions 600 --engine-sha <sha> ../<lang>...` then `sh tools/round/republish.sh [--dry-run] <site-dir> <engine-sha>`; tools/round/README.md.
+
 ### Test tiers
 
 `tests/run_tier.sh fast|full [--area a,b]` runs a tier with the pinned Node (sets HSK_DIR when `../chinese` is absent), prints one line per suite (pass/fail counts, seconds) and exits 0 only when all pass. Run from a sibling checkout (`../vocab-engine-<branch>`) or any worktree.
