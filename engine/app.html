@@ -666,7 +666,7 @@ const nextNewSetRaw = () => VC.nextNewSet(WORDS, PACK, prog);
 const nextNewSet = () => VC.nextNewSetOpen(WORDS, PACK, prog, CHAR_LIST);
 const gateNote = () => VC.levelGateNote(WORDS, PACK, prog, CHAR_LIST);
 // appView: the gate as one sentence, the same on Today and Progress.
-const gateSentence = () => { const h = VC.levelGateHold(WORDS, PACK, prog, CHAR_LIST); return h ? `${levelLabel(h.lv)} opens at ${Math.round(PACK.levelGate * 100)}% of ${levelLabel(h.prev)} known. Now ${h.pct}%, ${etaText(VC.levelOpensIn(WORDS, PACK, prog, CHAR_LIST))}.` : null; };
+const gateSentence = () => { const h = VC.levelGateHold(WORDS, PACK, prog, CHAR_LIST); if(!h) return null; const e = etaText(VC.levelOpensIn(WORDS, PACK, prog, CHAR_LIST)); return `${levelLabel(h.lv)} opens at ${Math.round(PACK.levelGate * 100)}% of ${levelLabel(h.prev)} known. Now ${h.pct}%${e ? ", " + e : ""}.`; };
 // appView ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"): "≈" marks every estimate; a done goal or an open gate (0 / null) shows nothing.
 // A no-break space keeps "≈" with its number when the gate sentence wraps.
 const etaText = n => { if(!n) return ""; const r = n >= 100 ? Math.round(n / 10) * 10 : n; return r > 999 ? "≈\u00a0999+ sessions" : `≈\u00a0${r} session${r === 1 ? "" : "s"}`; };

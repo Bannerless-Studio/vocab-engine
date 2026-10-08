@@ -171,6 +171,29 @@ class LanguageSpec:
     typing = {"caseSensitive": False, "accents": "lenient", "strictFromLevel": "B1"}
     show_pron = False
     has_lessons = False
+    # `packbuilder enrich` (core/enrich.py): the generic port flag set (vocab-engine .cache/briefs/port-plan.md §1 "G")
+    port_typed_from = ["written"]       # pack.typedFrom; ja adds "pron"
+    port_characters = False             # ja only, once pairs works with script units (E3): the characters lag set + levelExam
+    port_goals = [                      # pack.progressMap goals, upTo = the 1st, 2nd and 3rd level id
+        "survive a trip: greet, order, count, buy",
+        "daily life: directions, simple chat, short notices",
+        "follow a slow drama with subtitles",
+    ]
+    port_level_gate = 0.7
+
+    def port_flags(self):
+        ids = [b[0] for b in self.bands]
+        flags = {
+            "dayAware": True, "typedFrom": list(self.port_typed_from), "glossFocus": True, "glossStyle": "primary",
+            "helpClose": True, "readAnswerBlock": True, "optsMix": True, "pauseNew": True, "listenQuestions": "all",
+            "readRotation": True, "wordsBy": "typed",
+            "progressMap": {"goals": [{"upTo": lv, "label": lab} for lv, lab in zip(ids, self.port_goals)]},
+            "pairs": True, "freqTiers": True, "progressView": "v2", "appView": "v2", "levelGate": self.port_level_gate,
+        }
+        if self.port_characters:
+            flags["characters"] = {"learn": "lag", "start": 60, "ramp": [3, 5, 8], "bareBy": "typed", "bareWords": True, "bareByPair": True}
+            flags["levelExam"] = {ids[0]: "pinyin", ids[1]: "characters", ids[2]: "characters"}
+        return flags
     target_len = {"A1": 5, "A2": 7, "B1": 8}     # preferred sentence length per level
     min_len = {"A1": 4, "A2": 4, "B1": 5}
     max_len = 14

@@ -191,6 +191,14 @@
   "3": "characters",
   "4": "characters"
  },
+ "eta": {
+  "gain": [
+   0.00109,
+   0.00188,
+   0.00335
+  ],
+  "known": 5.2
+ },
  "patterns": true,
  "patternCue": "after"
 }

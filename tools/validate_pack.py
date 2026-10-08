@@ -204,6 +204,17 @@ def check_pack(pack, rep):
             rep.err("pack.levelExam must map level ids to \"pinyin\" or \"characters\"")
         elif not (pack.get("pairs") is True and pack.get("dayAware") and "characters" in pack):
             rep.err("pack.levelExam needs pack.pairs and pack.characters (the unit's meaning pair)")
+    # eta (docs/PACK_SCHEMA.md "eta"): measured ETA model constants; null = no estimate for that goal / the gate.
+    if "eta" in pack:
+        et = pack["eta"]
+        pos = lambda v: is_num(v) and not isinstance(v, bool) and v > 0
+        if not isinstance(et, dict) or set(et) - {"gain", "known"}:
+            rep.err("pack.eta must be {gain: [...], known: k}")
+        else:
+            if "gain" in et and not (isinstance(et["gain"], list) and et["gain"] and all(v is None or pos(v) for v in et["gain"])):
+                rep.err("pack.eta.gain must be a non-empty list of positive numbers or null")
+            if "known" in et and not (et["known"] is None or pos(et["known"])):
+                rep.err("pack.eta.known must be a positive number or null")
     # glossStyle (docs/PACK_SCHEMA.md "glossStyle"): a display style of the glossFocus renderer.
     if "glossStyle" in pack and pack["glossStyle"] != "primary":
         rep.err('pack.glossStyle must be "primary"')

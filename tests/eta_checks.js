@@ -3,6 +3,10 @@
 // [2] rendering on Today / Progress (owner export, done goal, open gate, two-digit display, 999+ cap); [3] flag-off byte-identical to base;
 // [4] the session-1 gate estimate vs the seeded 85% sim. --calibrate prints the calibration sims behind ETA_GAIN / ETA_KNOWN.
 // Run: node tests/eta_checks.js [--calibrate] [--sessions N]
+//      node tests/eta_checks.js --pack <packdir> (--calibrate | --gate) [--sessions N] [--seeds 5,6,7] [--write <file>]
+//      --pack: any pack directory (a sibling's enriched pack, see packbuilder enrich --emit); fresh record, Today sessions at 85%
+//      right, passages read. --calibrate measures pack.eta {gain, known}; --gate checks the session-1 estimate (the pack's own eta,
+//      or the measured values with --calibrate) against the sim crossing: within +-30% on at least 2 of the 3 seeds, else null.
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -285,6 +289,63 @@ async function calibrate(){
   console.log(`ETA_KNOWN: geometric mean of ${known.length} holds ${geo(known).toFixed(2)} (min ${Math.min(...known).toFixed(2)}, max ${Math.max(...known).toFixed(2)}); core.js ${VC.ETA_KNOWN}`);
 }
 
+// ------------------------------------------------------------------ --pack: per-site calibration and gate (docs/PACK_SCHEMA.md "ETA model" > "Per-pack constants")
+async function packMode(){
+  const sim = require("./lib/sim_app.js");
+  const arg = n => argv.includes(n) ? argv[argv.indexOf(n) + 1] : null;
+  const dir = arg("--pack"), N = +(arg("--sessions") || 240), seeds = (arg("--seeds") || "5,6,7").split(",").map(Number), ACC = 0.85, TOL = 0.30;
+  const calibrateMode = argv.includes("--calibrate");
+  if(!calibrateMode && !argv.includes("--gate")){ console.error("--pack needs --calibrate or --gate"); process.exit(2); }
+  const D = sim.loadPackDir(dir), P = D.PACK, S = sim.createSim(D), units = D.CHARACTERS || [], pass = D.PASSAGES || [];
+  const LVS = VC.levelIds(P), BYL = VC.wordsByLevel(D.WORDS, P), goals = VC.progressMapGoals(P), cl = sim.clone;
+  if(!goals.length || !VC.levelGateHold) throw new Error(`${dir}: pack has no progressMap goals`);
+  const start = () => VC.normalizeProg({ placedOnce: true, soundsOpened: true }, P);
+  const t00 = Date.now(), runs = [];
+  for(const seed of seeds){
+    const t0 = Date.now(), rows = [], p0 = VC.goalPositions(start(), P, D.WORDS, units, pass);
+    await S.playSessions(P, start(), N, seed, ACC, (sn, api) => { if(sn < 0) return; const q = api.getProg();
+      rows.push({ sn: sn + 1, g: VC.goalPositions(q, P, D.WORDS, units, pass), k: LVS.map(lv => VC.levelKnownPct(D.WORDS, P, q, lv, units)), gate: VC.levelGateHold(D.WORDS, P, q, units) }); }, { read: true, patterns: false });
+    const cross = goals.map((_, g) => { const r = rows.find(r => r.g[g] >= VC.GOAL_DONE); return r ? r.sn : null; });
+    const holds = []; let hold = null;
+    rows.forEach(r => { if(r.gate && !hold) hold = { lv: r.gate.lv, prev: r.gate.prev, from: r.sn, k: r.k[LVS.indexOf(r.gate.prev)] };
+      if(!r.gate && hold){ const n = BYL[hold.prev].length, d = r.sn - hold.from;
+        if(hold.k < P.levelGate - 0.01 && d > 0) holds.push(Object.assign(hold, { n: d, size: n, rate: (P.levelGate - hold.k) * n / d })); hold = null; } });
+    runs.push({ seed, rows, p0, cross, holds, secs: Math.round((Date.now() - t0) / 1000) });
+    console.log(`seed ${seed} (${runs[runs.length - 1].secs} s): goals from ${p0.map(x => x.toFixed(3)).join("/")} reach ${VC.GOAL_DONE} after ${cross.map(c => c == null ? `>${N}` : c).join("/")} sessions; holds ${holds.map(h => `${h.prev}->${h.lv} from ${(h.k * 100).toFixed(1)}% open after ${h.n} (${h.rate.toFixed(2)} words/session)`).join(", ") || "none"}; typed asks answered right as intended ${S.stats.typedMatched}/${S.stats.typedRight}`);
+  }
+  const geo2 = xs => Math.exp(xs.reduce((a, x) => a + Math.log(x), 0) / xs.length);
+  const gain = goals.map((_, g) => { const xs = runs.filter(r => r.cross[g] != null).map(r => (VC.GOAL_DONE - r.p0[g]) / r.cross[g]); return xs.length >= 2 ? geo2(xs) : null; });
+  const rates = runs.flatMap(r => r.holds.map(h => h.rate)), known = rates.length ? geo2(rates) : null;
+  const eta = calibrateMode ? { gain, known } : { gain: (P.eta && P.eta.gain) || VC.ETA_GAIN, known: P.eta && "known" in P.eta ? P.eta.known : VC.ETA_KNOWN };
+  const verdicts = [], out = { gain: eta.gain.slice(), known: eta.known };
+  goals.forEach((_, g) => {
+    const gv = VC.etaGain({ eta }, g);
+    if(gv == null){ verdicts.push({ what: `goal ${g + 1}`, value: null, why: calibrateMode ? "fewer than 2 seeds reached it" : "pack.eta null" }); out.gain[g] = null; return; }
+    const per = runs.map(r => { if(r.cross[g] == null) return { ok: false, note: `no crossing in ${N}` };
+      const est = Math.ceil((VC.GOAL_DONE - r.rows[0].g[g]) / gv - 1e-9), act = r.cross[g] - 1, err = (est - act) / Math.max(1, act);
+      return { ok: Math.abs(err) <= TOL, note: `${est} vs ${act} (${Math.round(err * 100)}%)` }; });
+    const ok = per.filter(x => x.ok).length >= 2;
+    verdicts.push({ what: `goal ${g + 1}`, value: gv, ok, per });
+    if(!ok) out.gain[g] = null;
+  });
+  const kv = eta.known == null ? null : VC.etaKnown({ eta });
+  if(kv == null) verdicts.push({ what: "gate", value: null, why: calibrateMode ? "no gate hold in any seed" : "pack.eta null" });
+  else {
+    const per = runs.map(r => { if(!r.holds.length) return { ok: false, note: "no completed hold" };
+      const errs = r.holds.map(h => { const est = Math.max(1, Math.ceil((P.levelGate - h.k) * h.size / kv - 1e-9)); return { est, act: h.n, err: (est - h.n) / h.n }; });
+      return { ok: errs.every(e => Math.abs(e.err) <= TOL), note: errs.map(e => `${e.est} vs ${e.act} (${Math.round(e.err * 100)}%)`).join(", ") }; });
+    const ok = per.filter(x => x.ok).length >= 2;
+    verdicts.push({ what: "gate", value: kv, ok, per });
+    if(!ok) out.known = null;
+  }
+  const fmt = v => v == null ? "null" : +v.toPrecision(4);
+  console.log(`${calibrateMode ? "measured" : "pack.eta"}: gain [${eta.gain.map(fmt).join(", ")}], known ${fmt(eta.known)}; sessions ${N}, accuracy ${ACC}, seeds ${seeds.join("/")}`);
+  verdicts.forEach(v => console.log(v.value == null ? `GATE  ${v.what}: no estimate (${v.why})` : `GATE  ${v.what}: ${fmt(v.value)} ${v.ok ? "PASS" : calibrateMode ? "FAIL (written null: no estimate shown)" : "FAIL"} within +-${TOL * 100}% on ${v.per.filter(x => x.ok).length} of ${v.per.length} seeds: ${v.per.map(x => x.note).join(" | ")}`));
+  console.log(`result: ${JSON.stringify(out)}; wall ${Math.round((Date.now() - t00) / 1000)} s`);
+  if(arg("--write")){ fs.writeFileSync(arg("--write"), JSON.stringify(out) + "\n"); console.log(`wrote ${arg("--write")}`); }
+  if(!calibrateMode && verdicts.some(v => v.value != null && !v.ok)) process.exitCode = 1;
+}
+
 // ------------------------------------------------------------------ flag-off base (main before fb41)
 const BASE = "e165cb1";
 const git = f => cp.execSync(`git -C "${ROOT}" show ${BASE}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
@@ -299,6 +360,7 @@ const SIG2 = n => { const r = n >= 100 ? Math.round(n / 10) * 10 : n; return r >
 const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10 + i, p: Math.round((p0 + step * i) * 1000) / 1000, g }));
 
 (async () => {
+  if(argv.includes("--pack")){ await packMode(); return; }
   if(argv.includes("--calibrate")){ await calibrate(); return; }
 
   console.log(`\n[1] core: the model from the first session (measured pace never shown for goals), levelOpensIn`);

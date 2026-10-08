@@ -9,6 +9,8 @@
     script  <repo>: the script primer only -- pack/script.json (+ script.js) and the
             "script" key of pack/pack.json (+ pack.js) from the shipped pack/words.json;
             touches no other file
+    enrich  <repo>: pack/words.json `ft`, the pack.json port flag block and `eta` (core/enrich.py);
+            --check verifies the shipped pack, --emit DIR writes an enriched copy elsewhere
     audio   recorded audio (docs/AUDIO.md): <repo>/audio/{w,s,p,x}/*.opus + manifest.json,
             item `audio` URLs and pack.json audio; --check/--prune/--only/--limit
 """
@@ -46,6 +48,9 @@ def main(argv=None):
     sc = sub.add_parser("script", help="script primer: pack/script.json + pack.json script key")
     sc.add_argument("repo", help="language repo root (holds pack/)")
     sc.add_argument("--lang", required=True, help="language code (packbuilder/langs/<code>.py)")
+    en = common(sub.add_parser("enrich", help="frequency tiers + port flag block + eta into the built pack"))
+    en.add_argument("--check", action="store_true", help="write nothing; exit 1 when the shipped pack differs from the enrich output")
+    en.add_argument("--emit", help="write the enriched pack (json + js) to this directory instead of the repo")
     au = common(sub.add_parser("audio", help="recorded audio: <repo>/audio/*.opus + pack audio URLs (docs/AUDIO.md)"))
     au.add_argument("--check", action="store_true", help="report missing/stale/orphan clips and stale overrides; write nothing")
     au.add_argument("--prune", action="store_true", help="delete clips no pack item wants")
@@ -60,6 +65,10 @@ def main(argv=None):
     if args.cmd == "passages":
         from .passages import main as passages_main
         return passages_main(args.repo, args.lang, args.check)
+
+    if args.cmd == "enrich":
+        from .core.enrich import main as enrich_main
+        return enrich_main(args.lang, args.repo, args.check, args.emit)
 
     if args.cmd == "script":
         from .core.script_cli import main as script_main

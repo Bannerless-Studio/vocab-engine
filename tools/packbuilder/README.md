@@ -83,6 +83,7 @@ python3 -m packbuilder sample --lang it --repo . --seed 303
 python3 -m packbuilder passages . [--lang it] [--check]    # reading passages, see below
 python3 -m packbuilder passages ../packs/zh [--check]      # a flat pack dir (zh, from vocab-engine/tools), see docs/PACKBUILDER_HOOKS.md "Chinese (zh) passages"
 python3 -m packbuilder script --lang ko .                  # script primer only, see below
+python3 -m packbuilder enrich --lang it --repo . [--check|--emit DIR]   # ft tiers + port flag block + eta, see "Port enrich"
 python3 -m packbuilder audio  --lang fa --repo .            # recorded audio, see docs/AUDIO.md; run LAST
 python3 -m unittest discover -s engine/tools/packbuilder/tests -t engine/tools
 .venv/bin/python -m pytest tools/packbuilder/tests                # from vocab-engine (same suite, its .venv)
@@ -105,6 +106,10 @@ span, and the engine locates it by surface. Rules and hooks: docs/PACKBUILDER_HO
 ### Script primer
 
 `script` (and the `final` build stage) writes `pack/script.json`, `script.js` and the `script` key of `pack.json`/`pack.js` for a spec with a `script` block (ko, ru, fa, ja; docs/SCRIPT_PRIMER.md). Run it with the repo's `.venv` python and `PYTHONPATH=<engine>/tools`. Details: docs/PACKBUILDER_HOOKS.md "Script primer".
+
+### Port enrich
+
+`enrich` (core/enrich.py) is a pure post-stage over a built pack: it adds `ft` to every word (rank <= 100 ambient; per level the least frequent 10% / 25% / 40% of A1 / A2 / B1 peripheral; overrides in `tools/tiers_overrides.json`), the unit `ft` (lowest of its words), the pack.json flag block from `LanguageSpec.port_flags()` and `eta` from `tools/eta.json`. It needs the standard library only. Run it after `build` / `passages` / `script` / `audio` and before `tools/jsonify_pack.py` is trusted (it rewrites pack.js, words.js and characters.js itself). `--check` writes nothing and exits 1 when the shipped pack differs (a site's check.sh runs it); `--emit DIR` writes an enriched copy and leaves the repo alone. Rules: docs/PACK_SCHEMA.md "freqTiers" > "Other languages"; ETA constants: `node tests/eta_checks.js --pack <packdir> --calibrate --write <repo>/tools/eta.json`, then enrich again.
 
 ### Reading passages
 

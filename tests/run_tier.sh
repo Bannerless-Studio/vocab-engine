@@ -17,7 +17,7 @@ while [ $# -gt 0 ]; do
 done
 case "$TIER" in fast|full) ;; *) echo "usage: tests/run_tier.sh fast|full [--area a,b]" >&2; exit 2 ;; esac
 
-# suite file | args | areas (comma list; "base" = every fast run, "-" = full only)
+# suite file | args | areas (comma list; "base" = every fast run, "-" = full only; "port" = run it when core/app/packbuilder enrich changes)
 ALL="
 pack_flags_checks||base
 engine_checks||base
@@ -55,6 +55,7 @@ session_resume_checks||resume
 day_sim_checks||-
 help_close_checks||-
 gloss_overlap_checks||gloss
+port_sites_checks||port
 sentence_spans_checks||-
 "
 

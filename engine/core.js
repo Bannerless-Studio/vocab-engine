@@ -2524,18 +2524,35 @@ function sessionsToGo(prog, g, n){
 // geometric mean of 12 holds, 5.16 (fresh record, levels 1/2/3: 4.5 4.6 4.0, 5.1 4.9 4.9, 3.9 5.5 5.3; owner export, level 3: 6.4 8.2 5.8).
 // prog.pm holds goal positions only, so the level estimate is the model alone (no storage field).
 const ETA_GAIN = [0.00109, 0.00188, 0.00335], ETA_KNOWN = 5.2;
+// pack.eta {gain: [g...], known: k} (docs/PACK_SCHEMA.md "eta"; measured per site by tests/eta_checks.js --pack <dir> --calibrate)
+// replaces the zh constants above; an absent key falls back to them, a null value means that goal / the gate shows no estimate.
+function etaGain(pack, g){
+  const e = pack && pack.eta, d = ETA_GAIN[Math.min(g, ETA_GAIN.length - 1)];
+  if(!isObj(e) || !Array.isArray(e.gain)) return d;
+  const v = e.gain[Math.min(g, e.gain.length - 1)];
+  return typeof v === "number" && v > 0 ? v : null;
+}
+function etaKnown(pack){
+  const e = pack && pack.eta;
+  if(!isObj(e) || !("known" in e)) return ETA_KNOWN;
+  return typeof e.known === "number" && e.known > 0 ? e.known : null;
+}
 function sessionsToGoX(prog, g, n, ctx){
   const goal = g !== undefined && ctx ? progressMapGoals(ctx.pack)[g] : null;
   if(!goal) return g === undefined ? sessionsToGo(prog) : null;
   const p = goalPosition(prog, ctx.pack, goal, ctx.words, ctx.units, ctx.passages);
-  return p >= GOAL_DONE ? 0 : Math.ceil((GOAL_DONE - p) / ETA_GAIN[Math.min(g, ETA_GAIN.length - 1)] - 1e-9);
+  if(p >= GOAL_DONE) return 0;
+  const gain = etaGain(ctx.pack, g);
+  return gain === null ? null : Math.ceil((GOAL_DONE - p) / gain - 1e-9);
 }
 // Sessions until the waiting level opens (levelGate); null when no level waits.
 function levelOpensIn(words, pack, prog, units){
   const h = levelGateHold(words, pack, prog, units);
   if(!h) return null;
+  const k = etaKnown(pack);
+  if(k === null) return null;
   const n = (wordsByLevel(words, pack)[h.prev] || []).length;
-  return Math.max(1, Math.ceil((pack.levelGate - levelKnownPct(words, pack, prog, h.prev, units)) * n / ETA_KNOWN - 1e-9));
+  return Math.max(1, Math.ceil((pack.levelGate - levelKnownPct(words, pack, prog, h.prev, units)) * n / k - 1e-9));
 }
 function readingStats(passages, pack, prog){
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
@@ -4300,7 +4317,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,

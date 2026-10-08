@@ -84,6 +84,7 @@ $NODE tests/day_sim_checks.js                    # 77 (pack.dayAware: 8 sessions
 $NODE tests/help_close_checks.js                 # 42 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
 $NODE tests/gloss_overlap_checks.js              # 75 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~5-14 min: 286 s on main 7fe35f7 idle, 151 s on fb2-write2 alone, 836 s under parallel load)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
+$NODE tests/port_sites_checks.js                # all 13 sibling packs (../<lang>/pack, read only) through `packbuilder enrich --emit`: ft tiers, generic flag set, validator (script sites: only pairs + script, until E3), 8 Today sessions at 85% each (script sites also with the primer learned), pair streaks written, ft-based known, Today / Progress / Read render, gate sentence, ETA fallback and null; ~2 min
 $NODE tests/flagoff_snapshot.js --check          # 46 (ar hi sw ur added; reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)
 
@@ -115,6 +116,7 @@ python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the 
 | resume | session_resume |
 | characters | characters, characters_app, lag, typed_mastery |
 | words | words_typed |
+| port | port_sites (the 13 sibling packs enriched by `packbuilder enrich`, booted with the generic flag set; add `--area port` when core, app or the enrich stage changes) |
 
 Flag-off controls never keep their own list of newer pack fields. A control that pins a sha builds its pack with `packAsOf(pack, PINNED_SHA)` from `tests/lib/pack_flags.js`; a suite that isolates itself from other flags uses `packAsOf(pack, ERA_SHA, { strip: [...] })` or `packBefore(pack, "<flag>")`, so a flag added later is stripped without touching the suite. Adding a pack flag means appending one row to FLAG_SINCE (key, introducing sha, path); pack_flags_checks fails until you do.
 
