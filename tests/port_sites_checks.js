@@ -134,7 +134,7 @@ async function site(dirName, code){
     check(`${code}: gate on a characters level: ${LV[2]} waits at ${hx && hx.pct}% of ${LV[1]} (words learned, units unread), open once the units' wm is 2 (${ho ? ho.pct + "%" : "open"})`,
       !!hx && hx.lv === LV[2] && hx.pct < 70 && ho === null);
     check(`${code}: gate sentence on the characters level: "${gxs}" on Today and Progress, Learn teaches no ${LV[2]} word`,
-      new RegExp(`^${LV[2]} opens at 70% of ${LV[1]} known\\. Now ${hx.pct}%(, ≈ \\d+ sessions)?\\.$`).test(gxs) && gx.panel().includes(esc(gxs)) && VC.nextNewSetOpen(D.WORDS, P, g2h, units) === null);
+      new RegExp(`^${LV[2]} opens at 70% of ${LV[1]} known\\. Now ${hx.pct}%(, ≈\\s\\d+ sessions)?\\.$`).test(gxs) && gx.panel().includes(esc(gxs)) && VC.nextNewSetOpen(D.WORDS, P, g2h, units) === null);
   }
   check(`${code}: typed asks answered as intended (${S.stats.typedMatched} of ${S.stats.typedRight}; the sim finds the accepted string through the item's own check)`, S.stats.typedRight === 0 || S.stats.typedMatched / S.stats.typedRight >= 0.8);
   // render: Today, Progress, Read, v2 chrome markers
