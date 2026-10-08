@@ -179,7 +179,7 @@ Flag-off packs: zh with `characters` stripped, the synthetic packs, and each sib
 
 ## 7. Open questions
 1. **Pinyin-first vs word-first.** hsk shows pinyin only and hides characters by default, and its characters stage assumes that. The engine is word-first, so zh learners see hanzi from day one, and the stage becomes "read without pinyin". The switch would change hsk's core pedagogy, and the parity list cannot pass without a decision. The options are to accept word-first, or to build BP.
-2. **Other pre-fork losses** recorded in TODO "Behaviour differences": tone colouring, typed pinyin and Extras, the pinyin chart, per-word tap in sentences, and `showChars`. Are these accepted for the switch?
+2. **Other pre-fork losses** recorded in docs/ZH_DIFFERENCES.md: tone colouring, typed pinyin and Extras, the pinyin chart, per-word tap in sentences, and `showChars`. Are these accepted for the switch?
 3. **ja unlock point.** The TODO says "after A1/A2". The design assumes the first stage comes after A2. Kanji-word units are used because single-glyph units would need KANJIDIC-type data and its licence.
 4. **The `hsk_pinyin.html` URL** after the switch. `build.sh` writes one `sw.js` per page name, so the options are a redirect stub or a single page.
 5. **Recall order.** The design uses the engine's weakest-first, where hsk picks at random in unified mode. The random choice was a brief artefact, not a finding.

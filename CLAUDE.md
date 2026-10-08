@@ -1,6 +1,6 @@
 # vocab-engine: agent notes
 
-Shared engine for the Bannerless-Studio language trainers. End-user docs: README.md. Module maps: engine/README.md, tests/README.md, tools/README.md, tools/packbuilder/README.md, docs/README.md. Backlog and STATUS history: TODO.md.
+Shared engine for the Bannerless-Studio language trainers. End-user docs: README.md. Module maps: engine/README.md, tests/README.md, tools/README.md, tools/packbuilder/README.md, docs/README.md. Backlog (pipeline, open defects, parked features): TODO.md. STATUS history: docs/STATUS.md; integrators append new STATUS lines there, never to TODO.md.
 
 ## Architecture
 
