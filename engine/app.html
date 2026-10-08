@@ -1118,6 +1118,15 @@ function screenTop(){
 }
 // v2 drill cards end with this slot for the examples (showReveal); flag off has no slot.
 const rvTail = () => APP_V2 ? '<div class="rvtail" id="rvtail"></div>' : "";
+// appView (fb51; owner 2026-10-08): the pre-answer hint links ("Show meaning", "show written") go once the answer is
+// marked when the reveal makes them redundant. A reveal that shows the item's form row (class rw) carries the English and
+// the characters, or its own show-written link; a reveal without that row (the unit and script kinds) leaves them.
+// Called before showReveal, so every link in the panel is still a stimulus link.
+function dropStimLinks(rh){
+  if(!APP_V2 || !/class="rw[ "]/.test(rh)) return;
+  const p = $("panel");
+  if(p && typeof p.querySelectorAll === "function") p.querySelectorAll("[data-pcue],[data-showw]").forEach(x => x.remove());
+}
 function showReveal(html){
   const rv = $("rv"); if(!rv) return;
   // v2: the examples ride below Next (answer row, Next, examples), so Next never needs a scroll.
@@ -1222,7 +1231,7 @@ function renderMcItem(it){
       if(!ok) b.classList.add("bad");
       D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(it); }
       ANS_IT = it; try { if(it.onAnswer) it.onAnswer(ok); } finally { ANS_IT = null; }
-      showReveal(revealHTML(it, it.reveal || "", ok));
+      const rh = revealHTML(it, it.reveal || "", ok); dropStimLinks(rh); showReveal(rh);
       playReveal(it);
       showNext(); setScore(D.seen, D.seen + D.q.length);
       D.cur = null; sessionSave(true);
@@ -1276,7 +1285,8 @@ function renderTypeItem(it){
     const ok = it.check(input.value);
     D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(typedRequeue(it)); }
     ANS_IT = it; try { if(it.onAnswer) it.onAnswer(ok); } finally { ANS_IT = null; }
-    showReveal(revealHTML(it, (ok ? "" : `<div class="diff">${APP_V2 ? "You typed " : "you typed: "}${escapeHtml(input.value)}</div>`) + (it.feedback ? it.feedback(input.value) : "") + (it.reveal||""), ok));
+    const rh = revealHTML(it, (ok ? "" : `<div class="diff">${APP_V2 ? "You typed " : "you typed: "}${escapeHtml(input.value)}</div>`) + (it.feedback ? it.feedback(input.value) : "") + (it.reveal||""), ok);
+    dropStimLinks(rh); showReveal(rh);
     playReveal(it);
     showNext(); setScore(D.seen, D.seen + D.q.length);
     D.cur = null; sessionSave(true);
@@ -2112,7 +2122,8 @@ const patternNoteHTML = p => `<div class="pnote">${p.note.map(ui).join("<br>")}<
 // blank): hidden until answered behind a "meaning" tap (no penalty, nothing
 // recorded; a reload hides it again); the reveal always carries it (sentenceRevealBlock).
 const PATTERN_CUE_AFTER = PATTERNS_ON && PACK.patternCue === "after";
-const patternCueHTML = s => PATTERN_CUE_AFTER ? `<div class="q cue"><button type="button" class="showw" style="margin:0" data-pcue="${escapeHtml(s.en)}" aria-label="Show meaning">${APP_V2 ? "Show meaning" : "meaning"}</button></div>` : `<div class="q cue">${ui(s.en)}</div>`;
+// first (fb51; owner 2026-10-08, appView v2): a pattern's first meeting shows the English open, as the note does; later meetings keep the tap.
+const patternCueHTML = (s, first) => PATTERN_CUE_AFTER && !(APP_V2 && first) ? `<div class="q cue"><button type="button" class="showw" style="margin:0" data-pcue="${escapeHtml(s.en)}" aria-label="Show meaning">${APP_V2 ? "Show meaning" : "meaning"}</button></div>` : `<div class="q cue">${ui(s.en)}</div>`;
 if(PATTERN_CUE_AFTER) $("panel").addEventListener("click", e => {
   const b = e.target && e.target.closest ? e.target.closest("[data-pcue]") : null;
   if(!b) return;
@@ -2128,7 +2139,7 @@ function patternItem(pid, si, mi){
   const ans = VC.patternMarkText(s, mk), t = String(s.t);
   const pf = pfSentence(s, null, { start: mk[0], end: mk[1], text: ans });
   const body = (pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div>`
-    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s);
+    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s, VC.patternState(prog, pid).fresh === true);
   const note = patternNoteHTML(p), rv = sentenceRevealBlock(s);
   const base = { key: "p:" + pid, html: body, reveal: rv, onReveal: b => saySentence(s, b), revealHear: canHearSentence(s), mrowSent: s };
   // The note names the answer, so it rides with the verdict (owner 2026-10-08): on a first meeting right or

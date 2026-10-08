@@ -100,7 +100,7 @@ function makeFakeDom(){
     querySelector(){ return null; }
     // Only a createElement scratch node (announce) parses: the elements its selectors name are cut from its html, textContent is the tags stripped.
     querySelectorAll(sel){
-      if(!this._tmp) return [];
+      if(!this._tmp && !/data-(pcue|showw)/.test(sel)) return []; // the panel answers only the hint-link query (dropStimLinks)
       const self = this, out = [];
       for(const part of sel.split(",")){
         const m = /^(?:\.([\w-]+))?\[([\w-]+)\]$/.exec(part.trim()); if(!m) continue;
@@ -451,7 +451,7 @@ function runItem(api, expr, right){
     const bs = api.el("o").children; (right ? bs.find(b => b.dataset.v === String(it.a)) : bs.find(b => b.dataset.v !== String(it.a))).click();
     r.marks = bs.map(b => [...b._classes].join(" "));
   }
-  r.head = api.el("rv").innerHTML; r.tail = api.el("rvtail") ? api.el("rvtail").innerHTML : ""; r.rv = r.head + r.tail; r.nx = api.el("nx").style.display; r.score2 = api.el("score").textContent; r.cue = !!it.cueUnit; r.hear = !!(it.onReveal && it.revealHear);
+  r.after = api.panel(); r.head = api.el("rv").innerHTML; r.tail = api.el("rvtail") ? api.el("rvtail").innerHTML : ""; r.rv = r.head + r.tail; r.nx = api.el("nx").style.display; r.score2 = api.el("score").textContent; r.cue = !!it.cueUnit; r.hear = !!(it.onReveal && it.revealHear);
   return r;
 }
 async function runKinds(pack, rec, seed, o){
@@ -499,7 +499,9 @@ else {
   const typed = KINDS.map(([n]) => n).filter(n => ON[n].right.kind === "type");
   check(`every typed miss: "You typed zzz" (${typed.length} typed kinds)`, typed.every(n => ON[n].wrong.rv.includes('<div class="diff">You typed zzz</div>') && !/you typed:/.test(ON[n].wrong.rv)));
   check('hear items: "You heard" (no colon)', ["hear word", "hear sentence"].every(n => ON[n].right.rv.startsWith('<div class="q">You heard</div>') && !/You heard:/.test(ON[n].right.rv)));
-  check('pattern cue: "Show meaning" button, aria-label kept', /<button type="button" class="showw" style="margin:0" data-pcue="[^"]+" aria-label="Show meaning">Show meaning<\/button>/.test(ON["pattern, first meeting"].right.q) && />meaning<\/button>/.test(OFFK["pattern, first meeting"].right.q));
+  check('pattern cue on a later meeting: "Show meaning" button, aria-label kept; flag off ">meaning<"', /<button type="button" class="showw" style="margin:0" data-pcue="[^"]+" aria-label="Show meaning">Show meaning<\/button>/.test(ON["pattern, met before"].right.q) && />meaning<\/button>/.test(OFFK["pattern, met before"].right.q));
+  { const q = ON["pattern, first meeting"].right.q, en = (OFFK["pattern, first meeting"].right.q.match(/data-pcue="([^"]*)"/) || [])[1];
+    check("pattern cue on the first meeting: the English open in the cue block, no link; flag off keeps the tap", !!en && q.includes(`<div class="q cue">${en}</div>`) && !/data-pcue/.test(q) && !/Show meaning/.test(q) && /data-pcue/.test(OFFK["pattern, first meeting"].right.q)); }
 }
 
 console.log("\n[B3] stimulus, options and reading aids equal flag off minus the chrome (plan §14)");
@@ -509,7 +511,9 @@ if(ON){
   for(const [n] of KINDS) for(const v of ["right", "wrong"]){
     const a = ON[n][v], b = OFFK[n][v];
     if(a.label !== b.label) bad.push(`${n} label`);
-    if(stimOf(a.q).replace(">Show meaning</button>", ">meaning</button>") !== noKtag(stimOf(b.q))) bad.push(`${n} stimulus`);
+    // fb51: a pattern's first meeting shows the English open (checked in B2); the rest of its stimulus still equals flag off
+    const noCue = h => n === "pattern, first meeting" ? h.replace(/<div class="q cue">[\s\S]*?<\/div>/, "") : h;
+    if(noCue(stimOf(a.q).replace(">Show meaning</button>", ">meaning</button>")) !== noCue(noKtag(stimOf(b.q)))) bad.push(`${n} stimulus`);
     if(a.opts.length !== b.opts.length || a.opts.some((o, i) => { if(o === b.opts[i]){ if(o.includes(GX)) keptN++; return false; } if(o === primOf(b.opts[i])){ primN++; return false; } return true; })) bad.push(`${n} options`);
     if(JSON.stringify(aids(a.q)) !== JSON.stringify(aids(b.q)) || JSON.stringify(aids(a.rv)) !== JSON.stringify(aids(b.rv))) bad.push(`${n} reading aids`);
     if(JSON.stringify(a.marks) !== JSON.stringify(b.marks) || a.score !== b.score || a.score2 !== b.score2 || a.nx !== b.nx) bad.push(`${n} marks/score/Next`);
@@ -1150,6 +1154,42 @@ console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack
   const res2 = N.map((n, i) => i < 5 ? { r:n, n } : i < 8 ? { r:0, n } : { r:0, n:0, skipped:true });
   check("right to bucket 4, three empty, rest unasked: both rules stop at 5", VC.placementStopIndex(res2) === 5 && VC.placementStopIndex(res2, { whole: true }) === 5);
   check("placementEarlyStopAfter: needs three asked buckets, all zero", !VC.placementEarlyStopAfter([{r:0},{r:0}], 1) && VC.placementEarlyStopAfter([{r:0},{r:0},{r:0}], 2) && !VC.placementEarlyStopAfter([{r:0},{r:1},{r:0},{r:0}], 3) && VC.placementEarlyStopAfter([{r:2},{r:0},{r:0},{r:0}], 3));
+}
+
+console.log("\n[D5] fb51: the reveal drops the stimulus hint links it makes redundant (appView v2)");
+{
+  const LINK = /data-(?:showw|pcue)/g, n = h => (String(h).match(LINK) || []).length;
+  const K5 = KINDS.concat([["read sentence", "readSentence(__S)"]]);
+  const probe = async (pack, rec, seed, o) => {
+    const { api } = await bootWith(pack, rec, seed, Object.assign({ patterns: true }, o));
+    api.ev(PICK); const out = {};
+    for(const [name, expr] of K5) out[name] = { right: runItem(api, expr, true), wrong: runItem(api, expr, false) };
+    return out;
+  };
+  const sources = owner ? [["owner export", unpaused], ["fresh record", freshRec]] : [["fresh record", freshRec]];
+  const table = {};
+  for(const [sn, mk] of sources){
+    const on = await probe(PACK, mk(), 21), off = await probe(OFF, mk(), 21);
+    for(const [name] of K5){
+      const a = on[name], b = off[name];
+      if(!a.right || !a.wrong) continue;
+      const row = (table[name] = table[name] || {});
+      const pre = n(a.right.q), postR = n(a.right.after), postW = n(a.wrong.after), rvLinks = n(a.right.rv), rvRow = /class="rw[ "]/.test(a.right.rv);
+      row[sn] = { pre, postR, postW, rvLinks, rvRow, offPost: n(b.right.after) };
+      // a link the reveal makes redundant is gone after a right and a wrong answer; one it does not is kept
+      check(`${sn}, ${name}: stimulus links ${pre} -> ${postR} (right) / ${postW} (wrong); the reveal ${rvRow ? "shows the form row (the characters or its own link)" : "has no form row, links stay"}`, rvRow ? postR === 0 && postW === 0 : postR === pre && postW === pre);
+      check(`${sn}, ${name}: flag off keeps all ${n(b.right.q)} stimulus link(s) after a right and a wrong answer`, n(b.right.after) === n(b.right.q) && n(b.wrong.after) === n(b.wrong.q));
+      check(`${sn}, ${name}: the question screen is unchanged by the drop (links present before answering equal flag off, minus the first-meeting cue)`, name === "pattern, first meeting" || n(a.right.q) === n(b.right.q));
+    }
+  }
+  const kinds = Object.keys(table);
+  console.log("INFO  kind | links before | after right / wrong | reveal form row | reveal links  (" + sources.map(x => x[0]).join(" / ") + ")");
+  kinds.forEach(k => console.log("INFO  " + k.padEnd(30) + sources.map(([sn]) => { const r = table[k][sn]; return r ? `${r.pre} | ${r.postR}/${r.postW} | ${r.rvRow ? "row" : "-"} | ${r.rvLinks}` : "n/a"; }).join("   ")));
+  // dropped on cloze and pattern items where the stimulus had a link
+  const dropped = kinds.filter(k => sources.some(([sn]) => table[k][sn] && table[k][sn].pre > 0 && table[k][sn].postR < table[k][sn].pre && table[k][sn].rvRow));
+  const withLinks = kinds.filter(k => sources.some(([sn]) => table[k][sn] && table[k][sn].pre > 0));
+  check(`links present before answering and gone after, on every kind that carries one (${withLinks.join(", ")})`, ["meaning MC", "gap", "gap typed", "pattern, met before", "read sentence"].every(k => withLinks.includes(k)) && withLinks.every(k => sources.every(([sn]) => !table[k][sn] || (table[k][sn].postR === 0 && table[k][sn].postW === 0))));
+  check("the hear sentence, recall, typed and unit kinds carry no stimulus link (nothing to drop)", ["hear sentence", "recall", "hear word", "typed pinyin", "typed meaning", "typed characters", "typed word", "charPick", "charRead", "charSound"].every(k => sources.every(([sn]) => !table[k][sn] || table[k][sn].pre === 0)));
 }
 
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
