@@ -81,7 +81,7 @@ $NODE tests/pause_checks.js                      # 49 (pack.pauseNew: flag-off /
 $NODE tests/level_gate_checks.js              # 63 (pack.levelExam: pinyin vs characters levels, boot / answered / unit-own wm (word stream ignored), Progress rows (old and v2 bars, folded line, hero total), goals, gate, controls; pack.levelGate: hold just under / open at the pack value (zh 0.7), note text, Learn row, characters still taught, pauseNew, Progress note (old row and v2 line in the waiting level block), flag-off / gate-open / no-pairs controls vs 9667a81, owner-export known % per level, seeded 30-session sim (gate opens after session 23); --sessions N --acc A)
 $NODE tests/opts_mix_checks.js                  # 50 (pack.optsMix: records carry f (session learned), buckets by f, rotation by sn, charSound by syllables [4]; length-first char/pron builders [1c], same-stage wrong choices, new/weak answers by learn-order set; 8 builders x 5 shapes x new/known guess success before/after, Learn drill + rest of session by set (--table), app sites + Today Learn drills, placement as flag off, control vs 68930bd; ~7 min)
 $NODE tests/session_resume_checks.js             # 125 (drill/passage resume: tab switch, reload, relaunch, per-tab parking; readRotation Read pick + question order, rd without qx; listening look-back list + text state; an old record with reopened/peekText resumes)
-$NODE tests/day_sim_checks.js                    # 77 (pack.dayAware: 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; weak-word floor + production settles, owner-shape before/after vs fb49c1b; --why)
+$NODE tests/day_sim_checks.js                    # 98 (pack.dayAware ([script x:] fb46: script units settle through dayItemKind on fa ar ur hi, control vs 38e071e shows dead asks): 8 sessions in one day, rollover, voiceless, 60-miss backlog, 14 days, resume / lessons never count a session; weak-word floor + production settles, owner-shape before/after vs fb49c1b; --why)
 $NODE tests/help_close_checks.js                 # 42 (pack.helpClose popover dismissal; pack.readAnswerBlock, Read verdict scroll)
 $NODE tests/gloss_overlap_checks.js              # 75 (words syn/typedSyn/noTypedMeaning/pronInGloss, stimulus gate, natural answers; ~5-14 min: 286 s on main 7fe35f7 idle, 151 s on fb2-write2 alone, 836 s under parallel load)
 $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off control vs 8ad46d6; ~2 min, reads ../<lang>/pack)
@@ -92,7 +92,7 @@ $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (exp
 ./build.sh packs/zh dist/zh.html                 # also writes dist/sw.js
 python3 tools/jsonify_pack.py packs/zh           # after editing any packs/zh/*.json
 python3 tools/validate_pack.py packs/zh          # schema + referential integrity; fails on stale .js
-.venv/bin/python -m pytest tools/packbuilder/tests
+.venv/bin/python -m pytest tools/packbuilder/tests   # 734 passed (fb46 Gender class)
 python3 -m unittest discover -s tools/packbuilder/tests -t tools   # same suite, stdlib runner
 (cd tools && python3 -m packbuilder audio --lang fa --repo ../../persian --check)   # recorded-audio status of a repo
 python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the hsk data (idempotent; reads tools/zh_freq.json)
