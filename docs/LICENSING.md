@@ -6,7 +6,7 @@ Each repo is licensed on its own; nothing is inherited from the engine.
 |---|---|---|---|
 | vocab-engine | MIT (engine/, tools/, tests/, docs/) | CC BY-SA 4.0 (packs/*) | LICENSE, README "Licence" |
 | each language site | MIT (build.sh, check.sh, index.html, tools/*.py) | CC BY-SA 4.0 (pack/, tools/*.tsv) | LICENSE (both sections), README "Sources and licences" table, pack/attribution.json (per-source record the pack build writes) |
-| chinese | MIT | CC BY-SA 4.0; Make Me a Hanzi glyph data LGPL-3.0-or-later (LICENSES/) | LICENSE (added 2026-10-08), README "Sources", pack/attribution.json |
+| chinese | MIT | CC BY-SA 4.0 (CC-CEDICT, wordfreq data, Wiktionary hints, hand-authored sentences/patterns); complete-hsk-vocabulary MIT; Make Me a Hanzi glyph data LGPL-3.0-or-later (LICENSES/) | LICENSE (added 2026-10-08, b7691a1), README "Sources and licences", pack/attribution.json |
 
 What binds the choice (why the data licence cannot simply change):
 - ShareAlike sources: Wiktionary/kaikki extracts (CC BY-SA 3.0), hermitdave FrequencyWords and wordfreq (CC BY-SA 4.0), CC-CEDICT (CC BY-SA 4.0), KANJIDIC2/JmdictFurigana (CC BY-SA 4.0, planned for ja). Any pack that keeps them stays CC BY-SA; a more permissive or proprietary data licence requires dropping or replacing those sources.
