@@ -862,6 +862,32 @@ console.log("\n[pv] pack.progressView (fb37): optional top-level prog.pv = {sn, 
 }
 
 
+console.log("\n[pl] prog.pl (fb42): the level a pre-session placement landed in (pack.eta.placed); ef44c6e and aa00571 boot it unchanged, no backup, and back");
+{
+  const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog; p.pl = "3"; p.placedOnce = true;
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK), im = VC.applyImport(null, raw, LAG_PACK);
+  check("[pl] boot here keeps pl byte-equal, no backup; export/import keeps it; validateProgShape accepts it", here.backupRaw === null && JSON.stringify(here.prog) === raw && im.ok && im.prog.pl === "3" && VC.validateProgShape(p, Object.keys(p.sets)).ok);
+  const odd = clone(p); odd.pl = 7; const ob = VC.bootProg(JSON.stringify(odd), LAG_PACK);
+  check("[pl] a malformed pl never resets progress (no backup) and selects no placed set", ob.backupRaw === null && ob.prog.pl === 7 && VC.etaPlaced(ob.prog, { eta: { placed: { "7": {} } } }) === null);
+  for(const sha of ["ef44c6e", "aa00571"]){
+    let eng = null, op = null;
+    try {
+      const cp = require("child_process"), os = require("os");
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "mig-")), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
+      op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`[pl] engine ${sha} not in this checkout's history`); continue; }
+    const o = eng.bootProg(raw, op), o2 = eng.bootProg(raw, LAG_PACK);
+    check(`[pl] engine ${sha} boots a record carrying pl (its zh pack, and this pack): no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw && o2.backupRaw === null && JSON.stringify(o2.prog) === raw);
+    const q = clone(o.prog); eng.markRec(q.w, Object.keys(q.w)[0], true, true);
+    check(`[pl] a mark on ${sha} keeps pl`, q.pl === "3");
+    const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
+    check(`[pl] and back here from ${sha}: no backup, pl byte-equal`, back.backupRaw === null && back.prog.pl === "3");
+  }
+}
+
+
 (async () => {
 console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/briefs/port-plan.md sections 1 and 3): no field is new beyond the pairs / dayAware / progress-map family; sibling engines ef44c6e and aa00571 boot it unchanged");
 {

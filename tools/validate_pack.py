@@ -211,19 +211,31 @@ def check_pack(pack, rep):
         nonneg = lambda v: is_num(v) and not isinstance(v, bool) and v >= 0
         goals_n = len(pm["goals"]) if isinstance(pm, dict) and isinstance(pm.get("goals"), list) else None
 
-        def curve_err(c):
+        gate = pack.get("levelGate") if is_num(pack.get("levelGate")) else None
+
+        def curve_err(c, last_min=None, last_max=None):
             if not (isinstance(c, list) and len(c) >= 2 and all(isinstance(p, list) and len(p) == 2 and nonneg(p[0]) and nonneg(p[1]) for p in c)):
-                return "a list of at least 2 [position, sessions] pairs of non-negative numbers"
+                return "a list of at least 2 [x, sessions] pairs of non-negative numbers"
             if any(b[0] <= a[0] for a, b in zip(c, c[1:])):
-                return "positions strictly increasing"
+                return "x strictly increasing"
             if any(b[1] > a[1] for a, b in zip(c, c[1:])):
                 return "sessions non-increasing (monotone)"
-            if c[-1][1] != 0 or c[-1][0] > 1:
-                return "last point [position <= 1, 0]"
+            if c[-1][1] != 0:
+                return "a last point with 0 sessions"
+            if last_min is not None and c[-1][0] < last_min - 1e-9:
+                return f"a last point at x >= {last_min}"
+            if last_max is not None and c[-1][0] > last_max:
+                return f"a last point at x <= {last_max}"
             return None
         if not isinstance(et, dict) or set(et) - {"gain", "known", "curve", "knownCurve", "placed"}:
-            rep.err("pack.eta must be {curve: [...], knownCurve: [...]} (legacy {gain: [...], known: k})")
+            rep.err("pack.eta must be {curve: [...], knownCurve: {...}, placed?: {...}} (legacy {gain: [...], known: k})")
         else:
+            if "curve" in et and "gain" in et:
+                rep.err("pack.eta has curve and gain: one shape only")
+            if "curve" in et and not ("knownCurve" in et or "known" in et):
+                rep.err("pack.eta.curve needs knownCurve (or known) for the gate estimate")
+            if "placed" in et and "curve" not in et:
+                rep.err("pack.eta.placed needs pack.eta.curve")
             if "gain" in et and not (isinstance(et["gain"], list) and et["gain"] and all(v is None or pos(v) for v in et["gain"])):
                 rep.err("pack.eta.gain must be a non-empty list of positive numbers or null")
             elif "gain" in et and goals_n is not None and len(et["gain"]) != goals_n:
@@ -232,35 +244,51 @@ def check_pack(pack, rep):
                 rep.err("pack.eta.known must be a positive number or null")
             ids = {str(l.get("id")) for l in pack.get("levels", []) if isinstance(l, dict)}
 
+            def per_goal(lst, where, **kw):
+                if not (isinstance(lst, list) and lst):
+                    rep.err(f"{where} must be a non-empty list, one curve (or null) per goal")
+                    return
+                if goals_n is not None and len(lst) != goals_n:
+                    rep.err(f"{where} has {len(lst)} curves, pack.progressMap has {goals_n} goals")
+                for i, c in enumerate(lst):
+                    e = c is not None and curve_err(c, **kw)
+                    if e:
+                        rep.err(f"{where}[{i}] must be null or {e}")
+
+            def known_map(kc, where):
+                if kc is None:
+                    return
+                if not isinstance(kc, dict):
+                    rep.err(f"{where} must be null or an object {{level id: curve or null}}")
+                    return
+                for lv, c in kc.items():
+                    if ids and lv not in ids:
+                        rep.err(f"{where} key {lv!r} is not a level id")
+                    e = c is not None and curve_err(c, last_min=gate, last_max=1)
+                    if e:
+                        rep.err(f"{where}[{lv!r}] must be null or {e}")
+
             def curves_err(et, where):
                 if "curve" in et:
-                    if not (isinstance(et["curve"], list) and et["curve"]):
-                        rep.err(f"{where}.curve must be a non-empty list, one curve (or null) per goal")
-                    else:
-                        if goals_n is not None and len(et["curve"]) != goals_n:
-                            rep.err(f"{where}.curve has {len(et['curve'])} curves, pack.progressMap has {goals_n} goals")
-                        for i, c in enumerate(et["curve"]):
-                            e = c is not None and curve_err(c)
-                            if e:
-                                rep.err(f"{where}.curve[{i}] must be null or {e}")
-                if "knownCurve" in et and et["knownCurve"] is not None:
-                    kc = et["knownCurve"]
-                    if not isinstance(kc, dict):
-                        rep.err(f"{where}.knownCurve must be null or {{level id: curve or null}}")
-                    else:
-                        for lv, c in kc.items():
-                            if ids and lv not in ids:
-                                rep.err(f"{where}.knownCurve key {lv!r} is not a level id")
-                            e = c is not None and curve_err(c)
-                            if e:
-                                rep.err(f"{where}.knownCurve[{lv!r}] must be null or {e}")
+                    per_goal(et["curve"], f"{where}.curve", last_min=0.9, last_max=1)
+                if "knownCurve" in et:
+                    known_map(et["knownCurve"], f"{where}.knownCurve")
             curves_err(et, "pack.eta")
             if "placed" in et:
                 pl = et["placed"]
-                if not isinstance(pl, dict) or set(pl) - {"curve", "knownCurve"}:
-                    rep.err("pack.eta.placed must be {curve: [...], knownCurve: {...}}")
+                if not isinstance(pl, dict) or not pl:
+                    rep.err("pack.eta.placed must be {level id: {bySessions: [...], knownCurve: {...}}}")
                 else:
-                    curves_err(pl, "pack.eta.placed")
+                    for lv, ps in pl.items():
+                        if ids and lv not in ids:
+                            rep.err(f"pack.eta.placed key {lv!r} is not a level id")
+                        if not isinstance(ps, dict) or set(ps) - {"bySessions", "knownCurve"}:
+                            rep.err(f"pack.eta.placed[{lv!r}] must be {{bySessions: [...], knownCurve: {{...}}}}")
+                            continue
+                        if "bySessions" in ps:
+                            per_goal(ps["bySessions"], f"pack.eta.placed[{lv!r}].bySessions")
+                        if "knownCurve" in ps:
+                            known_map(ps["knownCurve"], f"pack.eta.placed[{lv!r}].knownCurve")
     # glossStyle (docs/PACK_SCHEMA.md "glossStyle"): a display style of the glossFocus renderer.
     if "glossStyle" in pack and pack["glossStyle"] != "primary":
         rep.err('pack.glossStyle must be "primary"')

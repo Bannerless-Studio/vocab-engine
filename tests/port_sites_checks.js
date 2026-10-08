@@ -165,11 +165,13 @@ async function site(dirName, code){
   // ETA: the enriched pack carries no estimate (no tools/eta.json: eta = all null, never zh's pace); measured values show one
   const goalsN = VC.progressMapGoals(P).length, fresh = VC.normalizeProg({ placedOnce: true }, P);
   const cg = VC.currentGoal(fresh, P, D.WORDS, units, D.PASSAGES), ctx = { pack: P, words: D.WORDS, units, passages: D.PASSAGES };
-  const allNull = !!P.eta && P.eta.gain.length === goalsN && P.eta.gain.every(v => v === null) && P.eta.known === null;
+  const legacy = !!P.eta && Array.isArray(P.eta.gain);         // a curve-shaped eta has no gain (fb42 review M2)
+  const allNull = legacy && P.eta.gain.length === goalsN && P.eta.gain.every(v => v === null) && P.eta.known === null;
   const gateEst = VC.levelOpensIn(D.WORDS, P, gp, units), goalEst = Array.from({ length: goalsN }, (_, g) => VC.sessionsToGoX({}, g, goalsN, ctx));
   const freshPanel = (await S.bootWith(P, fresh, 1, { passages: D.PASSAGES })).panel();
   if(shipped) check(`${code}: tools/eta.json shipped: pack eta = the committed file (${JSON.stringify(P.eta)}), finite goal ${goalEst[0]} and gate ${gateEst} estimates, gate sentence carries "≈ N sessions"`,
-    !!P.eta && JSON.stringify(P.eta.gain) === JSON.stringify(shipped.gain) && P.eta.known === shipped.known && P.eta.gain.length === goalsN
+    !!P.eta && (legacy ? JSON.stringify(P.eta.gain) === JSON.stringify(shipped.gain) && P.eta.known === shipped.known && P.eta.gain.length === goalsN
+      : JSON.stringify(P.eta) === JSON.stringify(shipped))
     && Number.isFinite(goalEst[0]) && Number.isFinite(gateEst) && /≈\s\d+ sessions?\./.test(gs) && freshPanel.includes("≈"));
   else check(`${code}: enriched eta without tools/eta.json = ${JSON.stringify(P.eta)}: no goal estimate (goal ${cg && cg.i + 1}), no gate estimate, Today / Progress carry no "≈"`,
     allNull && goalEst.every(v => v === null) && gateEst === null && !freshPanel.includes("≈"));

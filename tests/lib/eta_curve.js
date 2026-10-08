@@ -22,7 +22,9 @@ function goalCurve(traces){
 // from at least 2 holds; null when no level has 2.
 function knownCurve(holds, gate){
   const by = {};
-  holds.forEach(h => { (by[h.prev] = by[h.prev] || []).push(h); });
+  // a re-hold (the level dips back under the gate for a few sessions after opening) starts near the gate; it would pull
+  // the low end of the curve down, so it is left out of the fit (it still counts in knownGate)
+  holds.filter(h => h[0] < gate - 0.05).forEach(h => { (by[h.prev] = by[h.prev] || []).push(h); });
   const out = {};
   Object.keys(by).forEach(lv => { const hs = by[lv];
     if(hs.length < 2){ out[lv] = null; return; }
@@ -42,16 +44,26 @@ function holdsOf(rows, gate){
 }
 const est = (curve, x) => { const v = VC.etaCurveAt(curve, x); return v === null ? null : Math.max(1, Math.ceil(v - 1e-9)); };
 // Out-of-sample check of a goal curve: at each probe position, the estimate at the run's actual position there vs the
-// sessions it still needed, within TOL on at least 2 of the runs at every probe.
+// sessions it still needed, within TOL on at least 2 of the runs at every probe. Tail rule (fb42 review L5; docs/PACK_SCHEMA.md
+// "ETA model" > "Tail rule"): the curve is kept when its only failing probe sits at position >= .75 and fails only because
+// of a stall outlier: at least one run stalled there (needed more than twice the estimate) and every other run is within
+// TOL or within 50%. About 1 fresh run in 6 stalls near a crossing; a few sessions off a small remainder is noise.
+// One run at one probe: estimate e vs the a sessions it still needed.
+const probeRun = (e, a, note) => { const err = (e - a) / a; return { ok: Math.abs(err) <= TOL, near: Math.abs(err) <= 0.5, stall: a > 2 * e, note: `${note}${e} vs ${a} (${Math.round(err * 100)}%)` }; };
+// The tail rule over a curve's probes ({at: position, per: [probeRun]}): every probe within TOL on 2 runs, or exactly one
+// failing probe, at position >= .75 on every run, with a stalled run and every other run within TOL or 50%.
+function tailRule(probes){
+  probes.forEach(p => { p.ok = p.per.filter(x => x.ok).length >= 2;
+    p.tail = !p.ok && p.at >= 0.75 && p.per.some(x => x.stall) && p.per.every(x => x.ok || x.near || x.stall); });
+  const bad = probes.filter(p => !p.ok), tail = bad.length === 1 && bad[0].tail;
+  if(!tail) probes.forEach(p => { p.tail = false; });
+  return { ok: bad.length === 0 || tail, tail, probes };
+}
 function goalGate(curve, traces){
   if(!curve) return { ok: null, probes: [] };
-  const probes = PROBES.map(q => {
-    const per = traces.map(t => { const c = crossOf(t); if(c === null) return { ok: false, note: "no crossing" };
-      const i = firstAt(t, q); const e = est(curve, t[i]), a = Math.max(1, c - i), err = (e - a) / a;
-      return { ok: Math.abs(err) <= TOL, note: `${e} vs ${a} (${Math.round(err * 100)}%)` }; });
-    return { q, ok: per.filter(x => x.ok).length >= 2, per };
-  });
-  return { ok: probes.every(p => p.ok), probes };
+  return tailRule(PROBES.map(q => ({ q, at: q, per: traces.map(t => { const c = crossOf(t);
+    if(c === null) return { ok: false, near: false, stall: false, note: "no crossing" };
+    const i = firstAt(t, q); return probeRun(est(curve, t[i]), Math.max(1, c - i), ""); }) })));
 }
 // Every completed hold of a run whose level has a curve, estimated from its first held session, within TOL; at least 2
 // runs. `curve` may be a function hold -> estimate (a legacy scalar `known`).
@@ -64,4 +76,4 @@ function knownGate(curve, runsHolds){
     return { ok: e.every(x => Math.abs(x.err) <= TOL), note: e.map(x => `${x.lv}: ${x.v} vs ${x.a} (${Math.round(x.err * 100)}%)`).join(", ") }; });
   return { ok: per.filter(x => x.ok).length >= 2, per };
 }
-module.exports = { TOL, PROBES, goalCurve, knownCurve, holdsOf, goalGate, knownGate, crossOf, firstAt, est };
+module.exports = { TOL, PROBES, probeRun, tailRule, goalCurve, knownCurve, holdsOf, goalGate, knownGate, crossOf, firstAt, est };

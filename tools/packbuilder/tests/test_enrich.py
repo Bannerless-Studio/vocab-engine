@@ -138,12 +138,12 @@ class Pure(unittest.TestCase):
 
     def test_eta_curve_copied_from_file(self):
         crv = [[0, 90.0], [0.5, 30.5], [0.9, 0]]
-        eta = {"curve": [crv, None, crv], "knownCurve": {"A1": [[0, 19.3], [0.7, 0]]}, "placed": {"curve": [crv, None, None]}, "extra": 1}
+        eta = {"curve": [crv, None, crv], "knownCurve": {"A1": [[0, 19.3], [0.7, 0]]}, "placed": {"A2": {"bySessions": [[[0, 50.0], [50.0, 0]], None, None]}}, "extra": 1}
         with tempfile.TemporaryDirectory() as t:
             r = repo(t, words(), eta=eta)
             emit = Path(t) / "out"
             self.assertEqual(enrich.main("it", r, emit=emit), 0)
-            self.assertEqual(json.loads((emit / "pack.json").read_text())["eta"], {"curve": [crv, None, crv], "knownCurve": {"A1": [[0, 19.3], [0.7, 0]]}, "placed": {"curve": [crv, None, None]}})
+            self.assertEqual(json.loads((emit / "pack.json").read_text())["eta"], {"curve": [crv, None, crv], "knownCurve": {"A1": [[0, 19.3], [0.7, 0]]}, "placed": {"A2": {"bySessions": [[[0, 50.0], [50.0, 0]], None, None]}}})
 
     def test_eta_dropped_without_appview_goals(self):
         class Bare:
