@@ -103,8 +103,12 @@ function loadPackDir(dir){
     CHARACTERS: j("characters"), PATTERNS: j("patterns"), SCRIPT: j("script"), LEGACY: j("legacy") };
 }
 // `packbuilder enrich --emit` of a language repo into a fresh scratch dir (the repo is read only); returns { dir, out }.
+// Scratch dirs it creates are removed when the process exits.
+const scratchDirs = [];
+process.on("exit", () => scratchDirs.forEach(d => { try { fs.rmSync(d, { recursive: true, force: true }); } catch(e){} }));
 function enrichedDir(lang, repo){
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), `enrich-${lang}-`));
+  scratchDirs.push(dir);
   const out = cp.execFileSync(PY, ["-m", "packbuilder", "enrich", "--lang", lang, "--repo", repo, "--emit", path.join(dir, "pack")],
     { cwd: path.join(ROOT, "tools"), env: Object.assign({}, process.env, { PYTHONPATH: path.join(ROOT, "tools") }), encoding: "utf8" });
   return { dir: path.join(dir, "pack"), out };

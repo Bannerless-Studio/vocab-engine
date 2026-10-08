@@ -201,3 +201,62 @@ class Cli(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PronUntilPrimer(unittest.TestCase):
+    def test_script_sites_emit_the_flag_others_do_not(self):
+        for code in ("ar", "fa", "hi", "ja", "ko", "ru", "ur"):
+            self.assertIs(get_spec(code).port_flags().get("pronUntilPrimer"), True, code)
+        for code in ("de", "es", "fr", "id", "it", "sw"):
+            self.assertNotIn("pronUntilPrimer", get_spec(code).port_flags(), code)
+
+    def test_enrich_writes_it_and_is_idempotent(self):
+        spec = get_spec("ko")
+        p1, w1, _ = enrich.enrich_data(spec, {"key": "ko"}, words(), None)
+        self.assertIs(p1["pronUntilPrimer"], True)
+        p2, _, _ = enrich.enrich_data(spec, p1, w1, None)
+        self.assertEqual(p1, p2)
+
+
+class CheckDetectsFlagDrift(unittest.TestCase):
+    def enriched_repo(self, t, code="it"):
+        r = repo(t, words(), pack={"key": code, "levels": [{"id": "A1"}, {"id": "A2"}, {"id": "B1"}]})
+        self.assertEqual(enrich.main(code, r), 0)
+        return r
+
+    def test_clean_enriched_pack_passes(self):
+        with tempfile.TemporaryDirectory() as t:
+            r = self.enriched_repo(t)
+            self.assertEqual(enrich.main("it", r, check=True), 0)
+
+    def test_a_flag_dropped_from_the_spec_is_reported(self):
+        with tempfile.TemporaryDirectory() as t:
+            r = self.enriched_repo(t)
+            pj = r / "pack" / "pack.json"
+            pack = json.loads(pj.read_text())
+            pack["pronUntilPrimer"] = True            # emitted by an older spec, dropped since (it has no script)
+            pack["characters"] = {"learn": "lag", "label": "x"}
+            pj.write_text(json.dumps(pack))
+            lines = enrich.flag_drift(get_spec("it"), pack)
+            self.assertEqual(lines, ["pronUntilPrimer: shipped True, the spec no longer emits it", "characters.learn: shipped 'lag', the spec no longer emits it"])
+            self.assertEqual(enrich.main("it", r, check=True), 1)
+
+    def test_a_changed_value_and_a_missing_key_are_reported_with_the_diff(self):
+        with tempfile.TemporaryDirectory() as t:
+            r = self.enriched_repo(t)
+            pack = json.loads((r / "pack" / "pack.json").read_text())
+            pack["levelGate"] = 0.5
+            del pack["pairs"]
+            pack["progressMap"]["goals"][0]["label"] = "other"
+            lines = enrich.flag_drift(get_spec("it"), pack)
+            self.assertEqual(sorted(l.split(":")[0] for l in lines), ["levelGate", "pairs", "progressMap"])
+            self.assertTrue(all("shipped" in l and "spec" in l for l in lines))
+
+    def test_eta_and_non_port_keys_are_ignored(self):
+        with tempfile.TemporaryDirectory() as t:
+            r = self.enriched_repo(t)
+            pack = json.loads((r / "pack" / "pack.json").read_text())
+            pack["tts"] = "it-IT"
+            pack["typing"] = {"x": 1}
+            pack["eta"] = {"gain": [1, 2, 3], "known": 4}
+            self.assertEqual(enrich.flag_drift(get_spec("it"), pack), [])

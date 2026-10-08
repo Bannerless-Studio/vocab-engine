@@ -7,6 +7,7 @@
 const fs = require("fs");
 const path = require("path");
 const sim = require("./lib/sim_app.js");
+const S2 = require("./lib/port_sim.js");
 const { VC, ROOT, clone } = sim;
 
 const SITES = [["arabic", "ar"], ["french", "fr"], ["german", "de"], ["hindi", "hi"], ["indonesian", "id"], ["italian", "it"], ["japanese", "ja"],
@@ -58,6 +59,7 @@ async function site(dirName, code){
   // enrich output
   const ftOk = D.WORDS.every(w => w.ft === 0 || w.ft === 1 || w.ft === 2) && D.WORDS.length === orig.length && D.WORDS.every((w, i) => w.id === orig[i].id);
   check(`${code}: ft on every word (0/1/2), word order and ids as shipped`, ftOk);
+  check(`${code}: port_sim withTiers equals the enrich output's ft on all ${D.WORDS.length} words`, S2.withTiers(P, orig).every((w, i) => w.ft === D.WORDS[i].ft));
   const cnt = lv => [0, 1, 2].map(t => BY[lv].filter(w => w.ft === t).length);
   const periph = LV.map(lv => cnt(lv)[2]), want = LV.map(lv => Math.floor((SHARE[lv] || 0) * BY[lv].length + 0.5));
   check(`${code}: tiers per level [ambient core peripheral] ${LV.map(lv => `${lv} ${cnt(lv)}`).join("  ")}; peripheral = ${want.join("/")}`, JSON.stringify(periph) === JSON.stringify(want) && D.WORDS.filter(w => w.ft === 0).every(w => w.rank <= 100));
@@ -69,6 +71,7 @@ async function site(dirName, code){
     && (code === "ja" ? JSON.stringify(P.levelExam) === JSON.stringify({ [LV[0]]: "pinyin", [LV[1]]: "characters", [LV[2]]: "characters" })
       && P.characters.learn === "lag" && P.characters.start === 60 && JSON.stringify(P.characters.ramp) === "[3,5,8]" && P.characters.bareBy === "typed" && P.characters.bareWords === true && P.characters.bareByPair === true
       : !P.levelExam && !P.characters));
+  check(`${code}: pronUntilPrimer on exactly for script sites (${P.script ? "script" : "no script"}: ${JSON.stringify(P.pronUntilPrimer)}), engine reads it`, P.script ? P.pronUntilPrimer === true && VC.pronUntilPrimerOn(P) : P.pronUntilPrimer === undefined && !VC.pronUntilPrimerOn(P));
   check(`${code}: engine reads pairs, freqTiers, levelGate, progressView, appView as on`, VC.pairsOn(P) && VC.freqTiersOn(P) && VC.levelGateOn(P) && VC.progressViewOn(P) && VC.appViewOn(P));
 
   const val = require("child_process").spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), E.dir], { encoding: "utf8" });
@@ -89,9 +92,13 @@ async function site(dirName, code){
   if(err) return;
   if(P.script){
     let serr = null, sapi = null;
-    try { sapi = await S.playSessions(P, null, 3, 7, ACC, null, { read: true, script: "learn" }); } catch(e){ serr = e; }
+    try { sapi = await S.playSessions(P, null, 6, 7, ACC, null, { read: true, script: "learn" }); } catch(e){ serr = e; }
     const sp = sapi && sapi.getProg();
-    check(`${code}: 3 Today sessions learning the script first run without throwing (script ${sp && sp.script ? JSON.stringify(Object.keys(sp.script)) : "-"}, ${sp ? Object.keys(sp.w).length : 0} words)`, !serr, serr && (serr.stack || serr.message));
+    check(`${code}: 6 Today sessions learning the script first run without throwing (script ${sp && sp.script ? JSON.stringify(Object.keys(sp.script)) : "-"}, ${sp ? Object.keys(sp.w).length : 0} words)`, !serr, serr && (serr.stack || serr.message));
+    // Script + pairs on every script site (w35-review L10): the units a Review asked carry no pair field (the pair table
+    // names word pairs only), and the same sessions' paired words are asserted by the 8-session run below.
+    const xu = Object.values((sp && sp.script && sp.script.u) || {});
+    check(`${code}: script + pairs: ${xu.length} script unit records after 6 sessions, none with p, ${xu.filter(r => typeof r.u === "number").length} answered in a session`, !serr && xu.length > 0 && xu.every(r => !("p" in r)) && xu.some(r => typeof r.u === "number"));
   }
   const prog = api.getProg(), recs = Object.values(prog.w);
   check(`${code}: sessions counted (sn ${prog.sn}), ${recs.length} words recorded`, prog.sn === SESSIONS && recs.length >= Math.min(SESSIONS * 8, (P.characters && P.characters.start) || Infinity));
@@ -127,7 +134,7 @@ async function site(dirName, code){
     check(`${code}: gate on a characters level: ${LV[2]} waits at ${hx && hx.pct}% of ${LV[1]} (words learned, units unread), open once the units' wm is 2 (${ho ? ho.pct + "%" : "open"})`,
       !!hx && hx.lv === LV[2] && hx.pct < 70 && ho === null);
     check(`${code}: gate sentence on the characters level: "${gxs}" on Today and Progress, Learn teaches no ${LV[2]} word`,
-      new RegExp(`^${LV[2]} opens at 70% of ${LV[1]} known\\. Now ${hx.pct}%\\.$`).test(gxs) && gx.panel().includes(esc(gxs)) && VC.nextNewSetOpen(D.WORDS, P, g2h, units) === null);
+      new RegExp(`^${LV[2]} opens at 70% of ${LV[1]} known\\. Now ${hx.pct}%(, ≈\\s\\d+ sessions)?\\.$`).test(gxs) && gx.panel().includes(esc(gxs)) && VC.nextNewSetOpen(D.WORDS, P, g2h, units) === null);
   }
   check(`${code}: typed asks answered as intended (${S.stats.typedMatched} of ${S.stats.typedRight}; the sim finds the accepted string through the item's own check)`, S.stats.typedRight === 0 || S.stats.typedMatched / S.stats.typedRight >= 0.8);
   // render: Today, Progress, Read, v2 chrome markers

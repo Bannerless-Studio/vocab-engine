@@ -121,12 +121,13 @@
   @media (prefers-reduced-motion: reduce){ .speaker.speaking,.replay.speaking{animation:none} }
   .rvsay{display:flex;justify-content:center;margin:10px 0 0}
   .reveal{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:none;font-size:15px}
+  .rvtail{font-size:15px}
   .reveal .rw{font-size:22px;margin-bottom:2px;font-family:var(--wfont)}
   .reveal .rp{color:var(--mute);margin-bottom:2px}
   /* pack.rtl: an answer block (the reveal, and the same block in the Missed list) aligns
      to one edge, the right: target lines are dir=rtl (start = right) and the Latin pron,
      gloss and labels keep their LTR direction but share the right edge. */
-  :root[data-tlrtl] .reveal,:root[data-tlrtl] .rvb{text-align:right}
+  :root[data-tlrtl] .reveal,:root[data-tlrtl] .rvtail,:root[data-tlrtl] .rvb{text-align:right}
   .next,.primary{margin-top:14px;width:100%;padding:14px;border:none;border-radius:12px;background:var(--ink);color:var(--bg);font-size:16px;min-height:48px;font-family:var(--font)}
   .ghost{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font-size:15px;min-height:44px;font-family:var(--font)}
   .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
@@ -216,6 +217,8 @@
      the label shares the stimulus axis. Option numbers are a keyboard affordance: hidden on touch only. */
   :root[data-appview="v2"] .drill-body:not(.top){justify-content:flex-start;padding-top:max(0px, calc(var(--stim-top) - 18px))}
   :root[data-appview="v2"] .drill-body:not(.top)>.q:first-child{text-align:center;margin-bottom:6px}
+  :root[data-appview="v2"] .drill-body.sent>.q:first-child{text-align:start}
+  :root[data-appview="v2"] .drill-body.sent .hear-stage{justify-content:flex-start}
   @media (hover: none) and (pointer: coarse){ :root[data-appview="v2"] .opts button b.num{display:none} }
   /* Tighter vertical rhythm so a right answer's Next sits above the tab bar at 360x780 without scrolling. */
   :root[data-appview="v2"] .drill-body .opts-hero button{padding:14px 18px;min-height:52px}
@@ -228,8 +231,8 @@
   :root[data-appview="v2"] .rvm .rw{font-size:22px;margin:0;font-family:var(--wfont)}
   :root[data-appview="v2"] .rvm .rp,:root[data-appview="v2"] .rvm .rg,:root[data-appview="v2"] .rvm .rvi{color:var(--mute);margin:0}
   :root[data-appview="v2"] .ucue{color:var(--mute);font-size:15px;margin:2px 0 0}
-  :root[data-appview="v2"] .rvxb{width:auto;min-height:44px}
   :root[data-appview="v2"] .rvx{margin-top:8px}
+  :root[data-appview="v2"] .rvtail:not(:empty){margin-top:10px}
   :root[data-appview="v2"] #panel>p.pva:first-child{margin:0 0 12px}
   :root[data-appview="v2"] .plist button{font-family:var(--font)} /* buttons do not inherit the page font */
   :root[data-appview="v2"] .plist .rsc{color:var(--mute);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -1374,6 +1377,8 @@ function storageKey(pack){ return `vocab_${pack.key}`; }
 function defaultProg(pack){
   const sets = {}; levelIds(pack).forEach(id=>{ sets[id] = 0; });
   const p = { v:PROG_VERSION, w:{}, s:{}, sets, lessons:{}, sessions:0, theme:null, showPron: pack.showPron !== false, placedOnce:false };
+  // pack.pronUntilPrimer: no stored showPron means the learner never chose, so showPronOn derives the default.
+  if(pack.pronUntilPrimer === true && pack.script) delete p.showPron;
   if(charsConfig(pack)) p.chars = seedCharOrder(defaultCharsProg(), pack); // absent without pack.characters: flag-off shape unchanged
   if(scriptConfig(pack)) p.script = defaultScriptProg(); // absent without pack.script: likewise
   return p;
@@ -1476,6 +1481,8 @@ function bootProg(raw, pack, readError){
 function applyImport(prev, text, pack){
   const p = parseStored(text);
   if(!p.ok) return p;
+  // The file's v is its format version (PROG_VERSION); a newer file is refused whole, before any read.
+  if(typeof p.data.v === "number" && p.data.v > PROG_VERSION) return {ok:false, newer:true, reason:`This file was exported by a newer version of the app (v${p.data.v}). Update the app, then import.`};
   const v = validateProgShape(p.data, levelIds(pack));
   if(!v.ok) return v;
   const prog = normalizeProg(v.data, pack);
@@ -3854,6 +3861,20 @@ function nextScriptSets(key, units, pack, prog, n){
 // done = every unit recorded, so a missed review never pulls the stage back into the path.
 // pack.script without units is the primer off everywhere, exactly the flag-off output.
 function scriptActive(pack, units){ return !!scriptConfig(pack) && Array.isArray(units) && units.length > 0; }
+// pack.pronUntilPrimer (docs/PACK_SCHEMA.md "pronUntilPrimer"): the primer is done when it was skipped or every
+// unit of every stage still on has a record (the stage `done` rule); a pack with no active primer never is.
+function pronUntilPrimerOn(pack){ return !!pack && pack.pronUntilPrimer === true && !!scriptConfig(pack); }
+function scriptPrimerDone(pack, units, prog){
+  if(!scriptActive(pack, units)) return false;
+  if(scriptSkipped(prog)) return true;
+  return scriptStages(pack, units, prog).every(st => st.done);
+}
+// A stored showPron is the learner's own choice and always wins; the default is on, and off once the primer is done.
+function showPronOn(pack, units, prog){
+  if(pack.showPron === false) return false;
+  if(prog && prog.showPron !== undefined) return prog.showPron !== false;
+  return !(pronUntilPrimerOn(pack) && scriptPrimerDone(pack, units, prog));
+}
 function scriptStages(pack, units, prog){
   const cfg = scriptConfig(pack); if(!cfg || !scriptActive(pack, units) || scriptSkipped(prog)) return [];
   const recs = scriptRecs(prog);
@@ -4810,7 +4831,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
-  SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
+  pronUntilPrimerOn, scriptPrimerDone, showPronOn, SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
   defaultScriptProg, validateScriptShape, normalizeScriptProg, ensureScript, scriptRecs, scriptSkipped, setScriptSkipped, answerScriptChoice,
   scriptNotice, dismissScriptNotice, markScript, scriptMastered, scriptStageUnits, scriptSets, scriptSetTaught, nextScriptSets, scriptStages,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
@@ -4888,7 +4909,7 @@ const SENT_ALL = PATTERNS_ON ? SENTENCES.concat(PATTERN_LIST.flatMap(p => p.sent
 const SENT_INDEX = new Map(SENT_ALL.map((s,i)=>[s, i]));
 const TYPING = VC.typingEnabled(PACK) && !VC.pronTypingOn(PACK);
 const levelLabel = lv => VC.levelLabel(PACK, lv);
-document.title = PACK.name;
+document.title = PACK.name.replace(/\s*\([^)]*\)\s*$/, "");
 // tw() wraps inline target text in an isolating <bdi> so it never reorders the English or
 // number text around it.
 const DISP = VC.scriptDisplay(PACK);
@@ -5245,7 +5266,8 @@ const TEACH_PLAY_SVG = speakerSVG(14);
 // Read items autoplay beside shown text: the text stays the stimulus, the button replays.
 const REPLAY_STAGE = `<div class="listen-stage"><button class="replay" id="rpa" aria-label="Replay">${REPLAY_SVG}</button></div>`;
 
-const showPron = () => PACK.showPron !== false && prog.showPron !== false;
+const PRON_UNTIL_PRIMER = VC.pronUntilPrimerOn(PACK);
+const showPron = PRON_UNTIL_PRIMER ? () => VC.showPronOn(PACK, SUNITS, prog) : () => PACK.showPron !== false && prog.showPron !== false;
 const pronOf = x => showPron() ? VC.pronShown(x) : "";
 // pronFirst (core.js displayForm). Off, dispWord returns the written form and every helper
 // below renders exactly the pre-pronFirst markup.
@@ -5459,7 +5481,6 @@ function announce(html){
   const el = $("live"); if(!el) return;
   const tmp = document.createElement("div"); tmp.innerHTML = html || "";
   tmp.querySelectorAll("[data-showw],[data-pcue]").forEach(x => x.remove()); // the show-written button's label is not content
-  if(APP_V2) tmp.querySelectorAll("[data-rvxb],.rvx[hidden]").forEach(x => x.remove()); // nor the Examples fold and what it hides
   el.textContent = tmp.textContent || "";
 }
 // scrollIntoView "nearest" leaves the page still when Next is already clear of the tab bar.
@@ -5485,14 +5506,18 @@ function screenTop(){
   const p = $("panel");
   if(p && typeof p.getBoundingClientRect === "function" && typeof scrollTo === "function" && p.getBoundingClientRect().top < 0) scrollTo(0, 0);
 }
+// v2 drill cards end with this slot for the examples (showReveal); flag off has no slot.
+const rvTail = () => APP_V2 ? '<div class="rvtail" id="rvtail"></div>' : "";
 function showReveal(html){
   const rv = $("rv"); if(!rv) return;
-  rv.innerHTML = html;
-  rv.style.display = html ? "block" : "none";
+  // v2: the examples ride below Next (answer row, Next, examples), so Next never needs a scroll.
+  const tail = APP_V2 ? $("rvtail") : null, cut = tail ? html.indexOf('<div class="rvx">') : -1;
+  if(tail) tail.innerHTML = cut >= 0 ? html.slice(cut) : "";
+  const head = cut >= 0 ? html.slice(0, cut) : html;
+  rv.innerHTML = head;
+  rv.style.display = head ? "block" : "none";
   if(html){ rv.style.opacity = "0"; requestAnimationFrame(()=>{ rv.style.opacity = "1"; }); }
   announce(html);
-  const xb = APP_V2 ? $("rvxb") : null;
-  if(xb) xb.onclick = () => { const x = $("rvx"); if(!x) return; x.hidden = false; xb.remove(); bringIntoView(x, true); };
 }
 // Replay rule (docs/AUDIO.md "Playback reliability"): every item that plays audio on its own
 // shows Replay. Reveal-time audio gets its button only once answered, so a gap item's
@@ -5512,8 +5537,8 @@ function unitCue(it){
 }
 const revealHTML = (it, html, ok) => { if(APP_V2) return revealHTMLv2(it, html, ok); const h = unitCue(it) + html; return it.onReveal && it.revealHear ? h + REVEAL_REPLAY : h; };
 // appView: a word or character reveal is one answer row (revealRow). The unit dots fill its second line,
-// Replay sits at its end (the row's own speaker icon goes, one control), and on a right answer the
-// examples fold behind "Examples". A reveal with no row (sentences, script) keeps the dots on top and
+// Replay sits at its end (the row's own speaker icon goes, one control), and the examples
+// show on a right answer as on a miss (owner 2026-10-08). A reveal with no row (sentences, script) keeps the dots on top and
 // the centred Replay.
 const RV_CUE = '<i class="rvk"></i>', RV_PLAY = '<i class="rvr"></i>', RV_ICON = `<span class="rvi">${TEACH_PLAY_SVG}</span>`;
 function revealRow(form, reading, gloss, wid, below){
@@ -5528,7 +5553,6 @@ function revealHTMLv2(it, html, ok){
   if(row && (play || /id="(sp|rpa|rp2)"/.test(it.html || ""))) h = h.replace(RV_ICON, "");
   if(row && play) h = h.replace(RV_PLAY, REVEAL_REPLAY_BTN);
   else if(play) h += REVEAL_REPLAY;
-  if(ok) h = h.replace('<div class="rvx">', '<button type="button" class="pvc rvxb" id="rvxb" data-rvxb aria-expanded="false" aria-controls="rvx">Examples</button><div class="rvx" id="rvx" hidden>');
   return stripRvSlots(h);
 }
 function playReveal(it){
@@ -5547,7 +5571,7 @@ function dnext(){
     const { right, seen, miss, onDone, summary, onShown } = D;
     setScore(0, 0);
     screenTop();
-    P.innerHTML = `<div class="done"><h2>${APP_V2 ? `${right} of ${seen}` : `${right} / ${seen}`}</h2>${summary ? summary(miss) : ""}<button class="next" id="ok">Continue</button></div>`;
+    P.innerHTML = `<div class="done"><h2>${APP_V2 ? firstTimeScore(seen, miss) : `${right} / ${seen}`}</h2>${summary ? summary(miss) : ""}<button class="next" id="ok">Continue</button></div>`;
     rzFin = D; D = null; drillKeyHandler = null;
     $("ok").onclick = () => { rzFin = null; sessionClear(); onDone(); };
     if(onShown) onShown();
@@ -5561,9 +5585,16 @@ function dnext(){
   if(it.kind === "type") renderTypeItem(it); else renderMcItem(it);
   sessionSave(true);
 }
+// v2 score: right first time over distinct items. Every miss requeued one re-ask, so asks = items + misses.
+function firstTimeScore(seen, miss){
+  const n = seen - miss.length;
+  return `${n - VC.dedupeMisses(miss).length} of ${n}`;
+}
+// v2: sentence and pattern items (cloze, hear-sentence, pattern) left-align label and stimulus together.
+const sentClass = it => APP_V2 && /^[sp]:/.test(it.key || "") ? " sent" : "";
 function renderMcItem(it){
   const P = $("panel");
-  P.innerHTML = `<div class="drill-body"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>`;
+  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>${rvTail()}`;
   if(it.mount) it.mount();
   const opts = rzOrderOf(it) || shuffle(it.opts.slice());
   it.rzShown = opts;
@@ -5623,9 +5654,9 @@ function typedRequeue(it){
 }
 function renderTypeItem(it){
   const P = $("panel");
-  P.innerHTML = `<div class="drill-body"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}
+  P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}
     <input type="text" id="tin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"${it.inputTA !== undefined ? it.inputTA : TA} placeholder="${escapeHtml(it.placeholder || (DISP.rtl ? "type the word" : "type the word…"))}">
-    <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>`;
+    <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>${rvTail()}`;
   if(it.mount) it.mount();
   const input = $("tin"); input.focus();
   let answered = false;
@@ -5838,7 +5869,7 @@ function exampleSentencesHTML(entry){
 }
 function revealBlock(entry){
   const p = pronBeside(entry), hear = canHearWord(entry);
-  // The examples carry no "Examples:" heading in a reveal: on a right answer the fold button names them.
+  // The examples carry no "Examples:" heading in a reveal.
   if(APP_V2){ const ex = exampleSentencesHTML(entry).replace(/^<p class="q" style="margin-top:12px">Examples?:<\/p>/, "");
     return revealRow(wordFormHTML(entry), p ? readingHTML(p) : "", glossOut(VC.gloss(entry), true), hear ? entry.id : null, GLOSS_STYLE && VC.typedSynWords(entry, WORDS_BY_ID).length ? `<div class="syn" style="color:var(--mute);font-size:15px">${synAlsoHTML(entry)}</div>` : "") + (ex ? `<div class="rvx">${ex}</div>` : ""); }
   const icon = hear ? ` <span style="color:var(--mute);vertical-align:middle">${TEACH_PLAY_SVG}</span>` : "";
@@ -6029,7 +6060,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2683841699-2356001";
+const VE_BUILD = "704967437-2358190";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6914,7 +6945,7 @@ function todayPlanV2(o){
     ["Sentences", g.sentences ? (pk ? `${pk} pattern${pk > 1 ? "s" : ""}` : "") : "skipped until 8+ sentences are available"]
   ];
   if(pz) steps.splice(1, 1);
-  if(readNext){ const p = readNext.p; steps.push([readNext.mode === "listen" ? "Listen" : "Read", pfRubyText(p.title, p.titleRuby) ? rubyTw(p.title, p.titleRuby, true) : tf(p.title)]); }
+  if(readNext){ const p = readNext.p; steps.push([readNext.mode === "listen" ? "Listen" : "Read", tf(p.title)]); }
   const goal = pvGoalHTML();
   return `<div class="pv tdv"><p class="pva">Session ${n}${pz ? ", review only" : ""}</p>${goal ? `<div class="pmv" id="pmap" role="button" tabindex="0" aria-label="Open Progress">${goal}</div>` : progressMapHTML()}<section class="tsts">${steps.map(s => `<div class="tst"><span>${s[0]}</span><div class="tsd">${s[1]}</div></div>`).join("")}</section></div>`;
 }
@@ -7928,7 +7959,7 @@ function progressWire(xp, cp){
         return;
       }
       const r = VC.applyImport(prog, text, PACK);
-      if(!r.ok){ showImportError("That doesn't look like valid exported progress for this pack: " + r.reason); return; }
+      if(!r.ok){ showImportError(r.newer ? r.reason : "That doesn't look like valid exported progress for this pack: " + r.reason); return; }
       await applyImported(r.prog);
     }catch(e){
       showImportError("That doesn't look like valid exported progress: " + (e && e.message ? e.message : "could not be read"));
@@ -8045,7 +8076,7 @@ function progressRenderV2(){
     <p class="pva">${prog.sessions || 0} session${prog.sessions === 1 ? "" : "s"}, ${escapeHtml(levelLabel(LEVELS[at]))}</p>
     ${pvHeroHTML(cur, anim)}${pvGoalHTML()}${all ? pvGoalsHTML() : ""}
     <section class="pvls">${all ? `<div class="pvl" id="pvLearned"><div class="pvt"><span>Learned</span><span class="pvn">${lwAll.length} of ${WORDS.length}</span></div></div>` : ""}${xp ? `<table class="stats">${xp.rows}</table>` : ""}${lvData.map(levelRow).join("")}${cp && !lag && cp.rows ? `<table class="stats">${cp.rows}</table>` : ""}${sounds}</section>
-    ${missed.length ? `<section class="pvx"><p class="pvk">Missed in your last ${N} sessions</p><p class="pvw">${missed.map(w => `<span${TA}>${wordFormHTML(w, false)}</span>`).join(" ")}</p></section>` : ""}
+    ${missed.length ? `<section class="pvx"><p class="pvk">${APP_V2 ? "Still shaky" : `Missed in your last ${N} sessions`}</p><p class="pvw">${missed.map(w => `<span${TA}>${wordFormHTML(w, false)}</span>`).join(" ")}</p></section>` : ""}
     ${all && weak.length ? `<section><p class="pvk">Weakest words</p>${weak.map(w => `<div class="rowset">${wordRowHTML(w, "rowset")}</div>`).join("")}</section>` : ""}
     <button class="ghost pvall" id="pvAll" aria-expanded="${all}">${all ? "Show less" : "Show all"}</button>
     <section class="pvset"><p class="pvk">Settings</p>
@@ -8216,4 +8247,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2720917438-2355325-->
+<!--ve-build:1022049533-2357513-->

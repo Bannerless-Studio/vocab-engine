@@ -483,7 +483,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("... a head name that differs from the roman is kept on both",
       /class="xnm">be<\/span>/.test(rbN.api.scriptTeachHTML(ru3)) && VC.scriptItem("symSound", ru3, { units: rnN.script.units, words: rnN.words }).reveal.name === "be");
     // RTL answer block: one edge for every line (root flag + rule), LTR packs untouched.
-    check("rtl pack: root carries data-tlrtl, and .reveal/.rvb align right under it", fb.document.documentElement._attrs["data-tlrtl"] === "" && /:root\[data-tlrtl\] \.reveal,:root\[data-tlrtl\] \.rvb\{text-align:right\}/.test(appHtml));
+    check("rtl pack: root carries data-tlrtl, and .reveal/.rvtail/.rvb align right under it", fb.document.documentElement._attrs["data-tlrtl"] === "" && /:root\[data-tlrtl\] \.reveal,:root\[data-tlrtl\] \.rvtail,:root\[data-tlrtl\] \.rvb\{text-align:right\}/.test(appHtml));
     check("ltr pack (ko): no data-tlrtl on the root", kb.document.documentElement._attrs["data-tlrtl"] === undefined);
   }
 
@@ -894,6 +894,34 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       check(`${lang} pairs: answered word records gain p for their pair (${wa.length})`, wa.length > 0 && wa.every(id => q.w[id] && q.w[id].p && Object.keys(q.w[id].p).every(k => VC.PAIRS.includes(k))));
       check(`${lang} pairs: unanswered script records byte-identical`, fx.script.units.filter(u => !xa.includes(u.id)).every(u => JSON.stringify(q.script.u[u.id]) === JSON.stringify(p0.script.u[u.id])));
     }
+  }
+
+  console.log("\n[16] pack.pronUntilPrimer (fb45): pronunciation off by default once the primer is done; the learner's own toggle wins");
+  {
+    const K = FX.ko(), pk = Object.assign({}, K.pack, { showPron: true, pronUntilPrimer: true }), units = K.script.units;
+    const offPk = Object.assign({}, K.pack, { showPron: true });
+    check("pronUntilPrimerOn: needs the flag and a script config", VC.pronUntilPrimerOn(pk) && !VC.pronUntilPrimerOn(offPk) && !VC.pronUntilPrimerOn(Object.assign({}, pk, { script: undefined })));
+    check("defaultProg: flag on writes no showPron (nothing chosen yet); flag off writes true as before", !("showPron" in VC.defaultProg(pk)) && VC.defaultProg(offPk).showPron === true);
+    const rec = ids => { const p = VC.defaultProg(pk); p.script = VC.defaultProg(pk).script || { v: 1, u: {}, skipped: false, skip: {}, choiceSeen: false, notice: false }; ids.forEach(id => { p.script.u[id] = { r: 1, w: 0, s: 1 }; }); return p; };
+    const allIds = units.map(u => u.id);
+    const fresh = rec([]), part = rec(allIds.slice(0, 3)), full = rec(allIds), skipped = rec([]); skipped.script.skipped = true;
+    check("before completion: fresh and partial records show pronunciation (the pack default)", VC.showPronOn(pk, units, fresh) === true && VC.showPronOn(pk, units, part) === true && VC.scriptPrimerDone(pk, units, part) === false);
+    check("after completion (every unit recorded) pronunciation is off by default", VC.scriptPrimerDone(pk, units, full) === true && VC.showPronOn(pk, units, full) === false);
+    check("a skipped primer counts as done: off by default", VC.scriptPrimerDone(pk, units, skipped) === true && VC.showPronOn(pk, units, skipped) === false);
+    const onFull = Object.assign(rec(allIds), { showPron: true }), offFresh = Object.assign(rec([]), { showPron: false });
+    check("an explicit showPron wins both ways: on after completion, off before it", VC.showPronOn(pk, units, onFull) === true && VC.showPronOn(pk, units, offFresh) === false);
+    check("pack.showPron false still hides it; flag off keeps stored-or-default behaviour; no active primer (no units) leaves the default on", VC.showPronOn(Object.assign({}, pk, { showPron: false }), units, fresh) === false && VC.showPronOn(offPk, units, full) === true && VC.showPronOn(pk, [], full) === true);
+    check("a record written by an older engine (showPron true stored) keeps showing it after completion", VC.showPronOn(pk, units, Object.assign(rec(allIds), { showPron: true })) === true);
+    // the app: Progress chip state and the toggle
+    const pressed = api => (api.html("panel").match(/id="togglePron" aria-pressed="(true|false)"/) || [])[1];
+    { const { api } = await boot({ pack: pk, words: K.words, script: K.script });
+      api.goto("progress"); const p0 = pressed(api);
+      api.getProg().script.skipped = true; api.goto("today"); api.goto("progress"); const p1 = pressed(api);
+      api.el("togglePron").click(); const p2 = pressed(api), stored = api.getProg().showPron;
+      api.goto("today"); api.goto("progress"); const p3 = pressed(api);
+      check(`app: chip on before the primer is done (${p0}), off once skipped (${p1}), the tap turns it on and stores showPron ${stored} (${p2}), kept on re-entry (${p3})`, p0 === "true" && p1 === "false" && p2 === "true" && stored === true && p3 === "true"); }
+    { const { api } = await boot({ pack: offPk, words: K.words, script: K.script }); api.getProg().script.skipped = true; api.goto("progress");
+      check("flag off: the chip stays on after the primer is skipped (stored default true)", pressed(api) === "true" && api.getProg().showPron === true); }
   }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
