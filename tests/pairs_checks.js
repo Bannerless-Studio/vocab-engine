@@ -445,7 +445,10 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       if(OLD3){
         const dayOff = Object.assign({}, offPairs(x.pk)); delete dayOff.dayAware;
         const eqOld = pk => [1, 2, 3].every(seed => JSON.stringify(VC.buildReviewPlan(x.learned, x.p, pk, opts(x, seed, { size: 15 }))) === JSON.stringify(OLD3.buildReviewPlan(x.learned, x.p, pk, opts(x, seed, { size: 15 }))));
-        check(`${name}: pairs off (dayAware on, and both off) Review plans byte-identical to ${E3} (3 seeds)`, eqOld(offPairs(x.pk)) && eqOld(dayOff));
+        // fb46: dayAware script units (x:) take their kind from dayItemKind, so with dayAware on only the kinds of script items may differ.
+        const maskX = plan => JSON.stringify(plan.map(it => it.unit && VC.SCRIPT_KINDS.includes(it.kind) ? Object.assign({}, it, { kind: "x" }) : it));
+        const eqMasked = pk => [1, 2, 3].every(seed => maskX(VC.buildReviewPlan(x.learned, x.p, pk, opts(x, seed, { size: 15 }))) === maskX(OLD3.buildReviewPlan(x.learned, x.p, pk, opts(x, seed, { size: 15 }))));
+        check(`${name}: pairs off Review plans byte-identical to ${E3} with dayAware off, and with it on up to the kind of script items (fb46) (3 seeds)`, eqMasked(offPairs(x.pk)) && eqOld(dayOff));
       } else skip(`${name}: no git ${E3}`);
     }
     {
