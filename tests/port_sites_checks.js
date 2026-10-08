@@ -1,8 +1,7 @@
 // Flag-on coverage of the 13 sibling language packs (docs/PACK_SCHEMA.md "enrich"; port plan §2): each pack beside this repo
 // (../<lang>/pack, read only) is enriched through `packbuilder enrich --emit` (ft from rank, the generic port flag set), booted in the
 // fake-DOM app, and played for 8 Today sessions at 85% right. A site whose checkout is absent is skipped and counted.
-// The 7 script-primer sites carry pairs + script, which tools/validate_pack.py still refuses until port plan E3; the engine
-// itself must run them, so every check except the validator one is the same for them.
+// The 7 script-primer sites carry pairs + script (port plan E3: validate_pack accepts it); every check is the same for them.
 // Run: node tests/port_sites_checks.js [lang ...]   (e.g. italian swahili)
 "use strict";
 const fs = require("fs");
@@ -66,12 +65,9 @@ async function site(dirName, code){
     && JSON.stringify(P.typedFrom) === JSON.stringify(code === "ja" ? ["written", "pron"] : ["written"]) && P.progressMap.goals.length === 3 && !P.levelExam && (code === "ja" || !P.characters));
   check(`${code}: engine reads pairs, freqTiers, levelGate, progressView, appView as on`, VC.pairsOn(P) && VC.freqTiersOn(P) && VC.levelGateOn(P) && VC.progressViewOn(P) && VC.appViewOn(P));
 
-  // validator: clean, or only the pairs + script rule (script sites, until port plan E3)
   const val = require("child_process").spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), E.dir], { encoding: "utf8" });
   const errs = (val.stdout + val.stderr).split("\n").filter(l => /^ERROR/.test(l));
-  const scriptSite = !!P.script;
-  check(`${code}: validate_pack ${scriptSite ? "fails only on pairs + script (port plan E3)" : "passes"} (${errs.length} errors)`,
-    scriptSite ? errs.length === 1 && /pack\.pairs with pack\.script/.test(errs[0]) : errs.length === 0 && val.status === 0, errs.join("\n"));
+  check(`${code}: validate_pack passes${P.script ? " (pairs + script, port plan E3)" : ""} (${errs.length} errors)`, errs.length === 0 && val.status === 0, errs.join("\n"));
 
   // known: the tier's bar (peripheral 2, else 3) on every pair the word reads
   const pw = lv => BY[lv].find(w => w.ft === 2) && BY[lv].find(w => w.ft === 1);
