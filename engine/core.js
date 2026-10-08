@@ -862,7 +862,8 @@ function placementItemCount(bucketIndex, pack){
   return items[bucketIndex % items.length];
 }
 
-function placementStopIndex(res){
+function placementStopIndex(res, opts){
+  if(opts && opts.whole) return placementStopWhole(res);
   for(let i=0;i<res.length;i++){
     const lo = Math.max(0, i-2);
     let wr = 0, wn = 0;
@@ -871,6 +872,30 @@ function placementStopIndex(res){
     if(!(windowAcc >= 0.75 && res[i].r >= 1)) return i;
   }
   return null;
+}
+
+// pack.placementWhole (owner 2026-10-08: a 1/2 opening bucket zeroed a 22/30 test): the window rule judges the first
+// buckets on 2-5 items, so one early miss stops placement at 0 while the later buckets are asked and discarded.
+// Here the largest passed prefix k wins: accuracy over buckets 0..k-1 >= 0.75 (integers, so exactly 0.75 passes) and
+// every bucket in it has a right answer, except an isolated zero (right answers on both sides, the bucket k itself for
+// the last one) which is skipped: counted in the accuracy, its words provisional like the rest.
+function placementSkipped(res, k){
+  const out = [];
+  for(let j=0;j<k;j++){
+    if(res[j].r >= 1) continue;
+    if(j > 0 && res[j-1].r >= 1 && j+1 < res.length && res[j+1].r >= 1) out.push(j);
+    else return null;
+  }
+  return out;
+}
+function placementStopWhole(res){
+  for(let k=res.length;k>=0;k--){
+    let r = 0, n = 0;
+    for(let j=0;j<k;j++){ r += res[j].r; n += res[j].n; }
+    if(r*4 < n*3 || placementSkipped(res, k) == null) continue;
+    return k === res.length ? null : k;
+  }
+  return 0;
 }
 
 // Placement only ever moves a learner forward: no word record is removed or downgraded, so
@@ -4352,7 +4377,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,
   findSurface, textForms, locateWord, packSurfaces, spannedByLonger, gapMatch, gapCandidateIndices, blankSentence,
-  strata, placementItemCount, placementStopIndex, applyPlacement, dedupeMisses,
+  strata, placementItemCount, placementStopIndex, placementSkipped, applyPlacement, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
