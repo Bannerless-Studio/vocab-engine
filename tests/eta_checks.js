@@ -397,7 +397,9 @@ async function packMode(){
   const kv = EC.knownGate(kc, runs.map(r => r.holds));
   if(kv.ok === false) out.knownCurve = null;
   verdicts.push(Object.assign({ what: "gate", curve: typeof kc === "function" ? [[0, "legacy known " + eta.legacyKnown]] : kc }, kv));
-  const fmtC = c => c ? c.map(([x, y]) => `${x}:${typeof y === "number" ? +y.toFixed(1) : y}`).join(" ") : "null";
+  const fmtA = c => c.map(([x, y]) => `${x}:${typeof y === "number" ? +y.toFixed(1) : y}`).join(" ");
+  // the gate verdict carries knownCurve, an object by level; goal verdicts carry one array
+  const fmtC = c => !c ? "null" : Array.isArray(c) ? fmtA(c) : Object.keys(c).map(k => `${k} ${c[k] ? fmtA(c[k]) : "null"}`).join("; ");
   console.log(`${calibrateMode ? "measured" : "pack.eta"}: sessions ${N}, accuracy ${ACC}, seeds ${seeds.join("/")}`);
   verdicts.forEach(v => { console.log(v.ok === null ? `GATE  ${v.what}: no estimate (${calibrateMode ? "fewer than 2 seeds reached it / no hold" : "pack.eta null"})` : `GATE  ${v.what}: ${v.ok ? (v.tail ? "PASS (tail rule)" : "PASS") : calibrateMode ? "FAIL (written null: no estimate shown)" : "FAIL"} within +-${EC.TOL * 100}%; curve ${fmtC(v.curve)}`);
     (v.probes || []).forEach(p => console.log(`        at ${p.q}: ${p.ok ? "pass" : p.tail ? "tail" : "fail"} ${p.per.map(x => x.note).join(" | ")}`)); (v.per || []).forEach(x => console.log(`        ${x.note}`)); });
