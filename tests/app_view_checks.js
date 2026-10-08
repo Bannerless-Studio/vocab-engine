@@ -941,11 +941,12 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
         && appHtml.indexOf(".drill-body.sent>.q:first-child") > appHtml.indexOf(".drill-body:not(.top)>.q:first-child{text-align:center"));
       const offK = OFFK || {};
       check("flag off: no sent class anywhere", Object.keys(offK).every(n => !offK[n] || !offK[n].right || !/ sent"/.test(offK[n].right.q.slice(0, 40)))); }
-    // 4. the Today Read row shows the title in characters only under v2
-    { const line = async pack => { const { api } = await bootWith(pack, unpaused(), 13); return api.ev("(() => { const r = todayReadItem(false); return r ? readPlanLine(r) : null; })()"); };
-      const a = await line(PACK), b = await line(OFF);
-      check(`Today Read row under v2 has no ruby / pinyin on the title (${a && a.replace(/<[^>]+>/g, "").slice(0, 40)})`, !!a && !/<ruby|<rt|class="t\d"/.test(a));
-      if(b && /<ruby/.test(b)) check("flag off: the same row still shows the title with ruby", true); else skip("flag-off Read row carries no ruby on this record"); }
+    // 4. the Today Read row shows the title in characters only under v2 (the v2 plan block, todayPlanV2)
+    { const row = async pack => { const { api } = await bootWith(pack, unpaused(), 13); const h = api.panel(); const i = h.search(/>Read</); return i < 0 ? null : h.slice(i, i + 700); };
+      const a = await row(PACK);
+      check(`Today Read row under v2 has no ruby / pinyin on the title (${a && a.replace(/<[^>]+>/g, "").slice(0, 30)})`, !!a && !/<ruby|<rt|class="t\d"/.test(a.slice(0, a.indexOf("Start") > 0 ? a.indexOf("Start") : 700)));
+      const ph = (await bootWith(PACK, unpaused(), 13)).api.panel();
+      check("Today under v2: no ruby tags anywhere in the plan's Read step", !/<ruby/.test(ph.slice(ph.search(/>Read</), ph.search(/>Read</) + 400))); }
     // 6. flag off byte-identical to the base on 3 records
     if(!oldCore) skip(`${BASE_D} not in this checkout's history`);
     else for(const [name, mk] of [["fresh", freshRec], ["owner export (paused)", () => clone(owner)], ["owner, unpaused copy", unpaused]]){

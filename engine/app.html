@@ -2539,7 +2539,7 @@ function todayPlanV2(o){
     ["Sentences", g.sentences ? (pk ? `${pk} pattern${pk > 1 ? "s" : ""}` : "") : "skipped until 8+ sentences are available"]
   ];
   if(pz) steps.splice(1, 1);
-  if(readNext){ const p = readNext.p; steps.push([readNext.mode === "listen" ? "Listen" : "Read", pfRubyText(p.title, p.titleRuby) ? rubyTw(p.title, p.titleRuby, true) : tf(p.title)]); }
+  if(readNext){ const p = readNext.p; steps.push([readNext.mode === "listen" ? "Listen" : "Read", tf(p.title)]); } // characters only (fb45)
   const goal = pvGoalHTML();
   return `<div class="pv tdv"><p class="pva">Session ${n}${pz ? ", review only" : ""}</p>${goal ? `<div class="pmv" id="pmap" role="button" tabindex="0" aria-label="Open Progress">${goal}</div>` : progressMapHTML()}<section class="tsts">${steps.map(s => `<div class="tst"><span>${s[0]}</span><div class="tsd">${s[1]}</div></div>`).join("")}</section></div>`;
 }
@@ -2553,7 +2553,7 @@ function todayReadItem(inSession){
 }
 function readPlanLine(r){
   const p = r.p;
-  const t = !APP_V2 && pfRubyText(p.title, p.titleRuby) ? rubyTw(p.title, p.titleRuby) : tf(p.title);
+  const t = pfRubyText(p.title, p.titleRuby) ? rubyTw(p.title, p.titleRuby) : tf(p.title);
   return `${ui(r.mode === "listen" ? "1 passage to listen to: " : r.reason === "reread" ? "1 passage to re-read: " : "1 passage: ")}${t}${ui(` (${levelLabel(p.lv)}, ${VC.passageLength(p, PACK)} words)`)}`;
 }
 function enterPlacementFromToday(){ placeFrom = null; switchToTab("test", "Test"); testSel = "placement"; startPlacement(); }
