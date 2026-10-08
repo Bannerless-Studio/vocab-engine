@@ -15,7 +15,7 @@ Next-level expansion order (owner 2026-10-08, weekly budget may not cover all; n
 
 NOT ported — content or script-specific (each becomes a per-language project per the plan above):
 - Grammar patterns + cloze drills (zh: 27 patterns / 177 sentences, patternCue): per-language authoring + naturalness review. The engine rules (patternCue after, note with the verdict only: fb44) are flag-gated and carry over the moment a language ships patterns.json.
-- Per-compound memory hooks and per-character hint meanings (tools/zh_hint_meanings.json, hand hints; fb43 compound-character breakdowns): hanzi-specific generator data; ja kanji hooks possible later but packbuilder has no hint source.
+- Per-compound memory hooks and per-character hint meanings (tools/zh_hint_meanings.json, hand hints; fb43 compound-character breakdowns): hanzi-specific generator data; ja kanji hooks: sources settled 2026-10-08 (docs/scouts/ja-kanji-furigana-2026-10-08.md: KANJIDIC2 + KRADFILE cover 989/989 pack kanji, JmdictFurigana aligns 1588/1590 words, all CC BY-SA 4.0).
 - Pinyin fade by pair, character ramp, sound-ask boost: only where a script layer is learned separately (ja yes; alphabetic sites have nothing to fade).
 - Hanzi exam rule (levelExam "characters"): needs a character layer; elsewhere known = the word rule.
 - The 15 new HSK 3/4 passages: content; "more stories at higher levels" is a per-language content decision.
