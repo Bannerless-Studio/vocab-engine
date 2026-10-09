@@ -900,12 +900,13 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     }
   }
 
-  console.log("\n[16] pack.pronUntilPrimer (fb45): pronunciation off by default once the primer is done; the learner's own toggle wins");
+  // pack.pronUntilPrimer until the flag collapse (stage 3): every pack with a script config runs it; the key is ignored.
+  console.log("\n[16] pronunciation off by default once the script primer is done (fb45); the learner's own toggle wins");
   {
-    const K = FX.ko(), pk = Object.assign({}, K.pack, { showPron: true, pronUntilPrimer: true }), units = K.script.units;
-    const offPk = Object.assign({}, K.pack, { showPron: true });
-    check("pronUntilPrimerOn: needs the flag and a script config", VC.pronUntilPrimerOn(pk) && !VC.pronUntilPrimerOn(offPk) && !VC.pronUntilPrimerOn(Object.assign({}, pk, { script: undefined })));
-    check("defaultProg: flag on writes no showPron (nothing chosen yet); flag off writes true as before", !("showPron" in VC.defaultProg(pk)) && VC.defaultProg(offPk).showPron === true);
+    const K = FX.ko(), pk = Object.assign({}, K.pack, { showPron: true }), units = K.script.units;
+    const noScript = Object.assign({}, pk, { script: undefined });
+    check("pronUntilPrimerOn: a script config, no pack key needed; off without one (a stale false key is ignored)", !("pronUntilPrimer" in pk) && VC.pronUntilPrimerOn(pk) && VC.pronUntilPrimerOn(Object.assign({}, pk, { pronUntilPrimer: false })) && !VC.pronUntilPrimerOn(noScript));
+    check("defaultProg: a script pack writes no showPron (nothing chosen yet); a pack without script writes true as before", !("showPron" in VC.defaultProg(pk)) && VC.defaultProg(noScript).showPron === true);
     const rec = ids => { const p = VC.defaultProg(pk); p.script = VC.defaultProg(pk).script || { v: 1, u: {}, skipped: false, skip: {}, choiceSeen: false, notice: false }; ids.forEach(id => { p.script.u[id] = { r: 1, w: 0, s: 1 }; }); return p; };
     const allIds = units.map(u => u.id);
     const fresh = rec([]), part = rec(allIds.slice(0, 3)), full = rec(allIds), skipped = rec([]); skipped.script.skipped = true;
@@ -914,7 +915,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("a skipped primer counts as done: off by default", VC.scriptPrimerDone(pk, units, skipped) === true && VC.showPronOn(pk, units, skipped) === false);
     const onFull = Object.assign(rec(allIds), { showPron: true }), offFresh = Object.assign(rec([]), { showPron: false });
     check("an explicit showPron wins both ways: on after completion, off before it", VC.showPronOn(pk, units, onFull) === true && VC.showPronOn(pk, units, offFresh) === false);
-    check("pack.showPron false still hides it; flag off keeps stored-or-default behaviour; no active primer (no units) leaves the default on", VC.showPronOn(Object.assign({}, pk, { showPron: false }), units, fresh) === false && VC.showPronOn(offPk, units, full) === true && VC.showPronOn(pk, [], full) === true);
+    check("pack.showPron false still hides it; a pack without script keeps stored-or-default behaviour; no active primer (no units) leaves the default on", VC.showPronOn(Object.assign({}, pk, { showPron: false }), units, fresh) === false && VC.showPronOn(noScript, units, full) === true && VC.showPronOn(pk, [], full) === true);
     check("a record written by an older engine (showPron true stored) keeps showing it after completion", VC.showPronOn(pk, units, Object.assign(rec(allIds), { showPron: true })) === true);
     // the app: Progress chip state and the toggle
     const pressed = api => (api.html("panel").match(/id="togglePron" aria-pressed="(true|false)"/) || [])[1];
@@ -924,8 +925,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       api.el("togglePron").click(); const p2 = pressed(api), stored = api.getProg().showPron;
       api.goto("today"); api.goto("progress"); const p3 = pressed(api);
       check(`app: chip on before the primer is done (${p0}), off once skipped (${p1}), the tap turns it on and stores showPron ${stored} (${p2}), kept on re-entry (${p3})`, p0 === "true" && p1 === "false" && p2 === "true" && stored === true && p3 === "true"); }
-    { const { api } = await boot({ pack: offPk, words: K.words, script: K.script }); api.getProg().script.skipped = true; api.goto("progress");
-      check("flag off: the chip stays on after the primer is skipped (stored default true)", pressed(api) === "true" && api.getProg().showPron === true); }
+    // the flag-off app control (a script pack without the key kept the chip on after a skip) went with the flag collapse.
   }
 
   console.log("\n[17] placedKnown (fb52; engine default): a placement past the first bucket skips the script primer as the learner's own skip does");
@@ -940,7 +940,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     } else console.log("SKIP  ur sibling: no ../urdu/pack/script.js");
     for(const [name, F] of fixtures){
       // placedKnown is engine default since the flag collapse: the flag-off checks went with it.
-      const on = Object.assign({}, F.pack, { pronUntilPrimer: true, showPron: true });
+      const on = Object.assign({}, F.pack, { showPron: true });
       const units = F.script.units, st = VC.strata(F.words, on.placement, VC.setSizeOf(on));
       // The learner's own skip, through the app: fresh boot, "I can read it, skip".
       const own = await boot({ pack: on, words: F.words, script: F.script }); own.api.el("scriptSkip").click();
@@ -948,7 +948,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       const base = () => { const b = VC.normalizeProg({}, on); b.script = JSON.parse(JSON.stringify(VC.normalizeProg({}, on).script)); return b; };
       const p1 = VC.applyPlacement(base(), st, 1, F.words, on), p0 = VC.applyPlacement(base(), st, 0, F.words, on);
       check(`${name}: landing past bucket 0 writes the learner's skip (${ownScript})`, JSON.stringify(p1.script) === ownScript && VC.scriptSkipped(p1) && VC.scriptPrimerDone(on, units, p1));
-      check(`${name}: pronUntilPrimer then turns pron off by its own rule (no showPron stored)`, !("showPron" in p1) && VC.showPronOn(on, units, p1) === false && VC.showPronOn(on, units, base()) === true);
+      check(`${name}: the primer rule then turns pron off by itself (no showPron stored)`, !("showPron" in p1) && VC.showPronOn(on, units, p1) === false && VC.showPronOn(on, units, base()) === true);
       check(`${name}: a placement landing in bucket 0 leaves the primer as it was`, JSON.stringify(p0.script) === JSON.stringify(base().script) && !VC.scriptSkipped(p0));
       check(`${name}: applyPlacement stays pure (input script untouched)`, (() => { const b = base(), s0 = JSON.stringify(b); VC.applyPlacement(b, st, 1, F.words, on); return JSON.stringify(b) === s0; })());
       // The app on the placed record: Today does not open with the primer; the Script tab stays reachable.
