@@ -384,6 +384,10 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
     check(`${LV[0]} and ${LV[1]} bars full, ${LV[2]} about half (35 of ${Math.ceil(BY[LV[2]].length / size)} sets)`, by[LV[0]] && by[LV[1]] && by[LV[2]] && by[LV[0]].w === 100 && by[LV[1]].w === 100 && Math.abs(by[LV[2]].w - 100 * 35 * size / BY[LV[2]].length) < 0.6, JSON.stringify(r));
     check("row texts stay literal (mastered counts on open levels, learned on a level not open for reading), not position", r.every(x => /^\d+ of \d+ mastered$|^\d+ learned$/.test(x.txt)) && by[LV[0]].txt === "0 of 600 mastered" && by[LV[1]].txt === "0 of 700 mastered", JSON.stringify(r));
     check("aria label carries the position", /aria-label="[^"]*: 100% known/.test(api.panel()));
+    { const p35 = mk(35), li = VC.levelIndexMap(SP), goals = VC.progressMapGoals(SP);
+      const exp = goals.map(g => { const lvs = LV.filter(lv => li[lv] <= li[String(g.upTo)]); const tot = lvs.reduce((a, lv) => a + BY[lv].length, 0); return lvs.reduce((a, lv) => a + VC.levelPosition(p35, SP, lv, D.WORDS, []) * BY[lv].length, 0) / tot; });
+      const got = VC.goalPositions(p35, SP, D.WORDS, [], []);
+      check("goal bar equals the size-weighted level bars (one shared predicate), spanish placed through " + LV[2] + " set 35: " + got.map(x => x.toFixed(3)).join("/"), goals.length >= 1 && got.every((x, i) => Math.abs(x - exp[i]) < 1e-9), JSON.stringify({ got, exp })); }
     const f = await S.bootWith(SP, null, 4); f.clickTab("progress");
     const fr = rows(f.panel()).filter(x => LV.includes(x.L));
     check("fresh record: the first level row draws a 0% bar", fr.length >= 1 && fr[0].w === 0, JSON.stringify(fr));

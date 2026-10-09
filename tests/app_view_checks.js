@@ -727,6 +727,10 @@ console.log("\n[C4b] fb53: Words tab start level");
   check("fresh record: Words opens on level 1", pressed(f.api) === LEVELS_ZH[0], pressed(f.api));
   f.api.el("wl_" + LEVELS_ZH[1]).click(); f.api.clickTab("today"); f.api.clickTab("words");
   check("a tapped level sticks across tab switches", pressed(f.api) === LEVELS_ZH[1], pressed(f.api));
+  const u = await bootWith(PACK, null, 73); u.api.clickTab("words");
+  const before = pressed(u.api); u.api.setProg ? u.api.setProg(clone(placed4)) : u.api.ev(`prog = ${JSON.stringify(placed4)}`);
+  u.api.clickTab("today"); u.api.clickTab("words");
+  check("an untapped default follows Learn's level after a placement in the same page (until a tap)", before === LEVELS_ZH[0] && pressed(u.api) === "4", before + " -> " + pressed(u.api));
 }
 
 console.log("\n[C5] Test tab");

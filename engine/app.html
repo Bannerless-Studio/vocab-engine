@@ -686,7 +686,7 @@ let todayPrep = null;          // pack.characters: the snapshot + Review plan To
 let soundsSel = null;
 // wordsLv: null until the Words tab first renders, then the level Learn's next new set belongs to (else the gated level's, else the last);
 // a level the learner taps sticks for the page lifetime, in memory only (fb53).
-let wordsLv = null, wordsSet = null, wordsQuery = "";
+let wordsLv = null, wordsSet = null, wordsQuery = "", wordsTapped = false;
 const wordsStartLevel = () => { const nn = VC.nextNewSetOpen(WORDS, PACK, prog, CHAR_LIST) || VC.nextNewSet(WORDS, PACK, prog); return nn ? nn.lv : LEVELS[LEVELS.length - 1]; };
 let RD = null;
 let testSel = null, PL = null, placeFrom = null; // placeFrom "progress": placement was opened from Progress Settings (appView), so it returns there
@@ -1904,7 +1904,7 @@ function sessionResume(forTab){
   if(rec.tab === "test" && testName && (rec.drill || rd)) setTitle(testName);
   if(rec.drill){
     const o = rec.drill.o;
-    if(o.o === "wordsSet"){ wordsQuery = ""; wordsLv = o.lv; wordsSet = o.set; }
+    if(o.o === "wordsSet"){ wordsQuery = ""; wordsLv = o.lv; wordsTapped = true; wordsSet = o.set; }
     if(o.o === "lesson") soundsSel = o.i;
     D = { q: items, right: rec.drill.right, seen: rec.drill.seen, miss: misses, onDone, summary: results.summary, onShown: results.onShown, rzo: o, rzs: results.summary.rzs };
     if(Array.isArray(rec.drill.dn)) D.down = rec.drill.dn.filter(id => typeof id === "string");
@@ -2753,7 +2753,8 @@ function soundsRefHTML(){
 
 function wordsRender(){
   stopSpeaking();
-  if(wordsLv == null) wordsLv = wordsStartLevel();
+  // Only a tapped level sticks; an untapped default re-derives on each render (Learn's level may move after a placement or advance).
+  if(wordsLv == null || !wordsTapped){ const d = wordsStartLevel(); if(d !== wordsLv){ wordsLv = d; wordsSet = null; } }
   setScore(0,0);
   const P = $("panel");
   // appView: one name for one setting, the same word as the Progress chip (PRON_NOUN).
@@ -2817,7 +2818,7 @@ function renderWordBody(){
   body.innerHTML = `<div class="wseg" role="group" aria-label="Level">${LEVELS.map(lv=>`<button data-l="${escapeHtml(lv)}" id="wl_${escapeHtml(lv)}" class="${lv===wordsLv?'on':''}" aria-pressed="${lv===wordsLv}">${escapeHtml(levelLabel(lv))}</button>`).join("")}</div>
     <div class="row wnav"><button id="pv" aria-label="Previous set">‹</button><span class="pvn">Set ${wordsSet+1} of ${total}${setDone?' ✓':''}</span><button id="nx" aria-label="Next set">›</button>${wordsSet !== next ? `<button id="jump">Next new</button>` : ""}</div>
     <div id="wl"></div><div class="actions"><button class="next" id="dr">Drill this set</button>${canReview ? `<button class="ghost" id="rev">Review</button>` : ""}</div>`;
-  (LEVELS.map(lv => $("wl_" + lv))).forEach(b=>b.onclick=()=>{ wordsLv = b.dataset.l; wordsSet = null; renderWordBody(); });
+  (LEVELS.map(lv => $("wl_" + lv))).forEach(b=>b.onclick=()=>{ wordsLv = b.dataset.l; wordsTapped = true; wordsSet = null; renderWordBody(); });
   $("pv").onclick = () => { wordsSet = Math.max(0, wordsSet-1); renderWordBody(); };
   $("nx").onclick = () => { wordsSet = Math.min(total-1, wordsSet+1); renderWordBody(); };
   if(wordsSet !== next) $("jump").onclick = () => { wordsSet = next; renderWordBody(); };
