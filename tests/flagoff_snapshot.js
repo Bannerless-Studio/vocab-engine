@@ -28,7 +28,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { stripFlags, FLAG_SINCE } = require("./lib/pack_flags.js");
+const { stripFlags, FLAG_SINCE, COLLAPSED } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 const util = require("util");
 const crypto = require("crypto");
@@ -125,7 +125,9 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
   // Every pack-gated flag (tests/lib/pack_flags.js FLAG_SINCE, so a new flag is stripped without an edit here)
   // plus the pre-flag fields: pack.legacy; typing "pron" replaced the pre-merge typing: null (typed reading is flag-on).
   // Only pack.json, words.json and sentences.json are hashed, so script.json / audio files need nothing here.
-  const pack = packJson ? stripFlags(packJson, FLAG_SINCE.map(f => f.key).concat(["legacy"])) : null;
+  // Collapsed keys (engine default since the flag collapse; the engine ignores them, enrich stops emitting them) are
+  // stripped too, so a republish that drops them is no drift.
+  const pack = packJson ? stripFlags(packJson, FLAG_SINCE.map(f => f.key).concat(COLLAPSED.filter(k => !FLAG_SINCE.some(f => f.key === k)), ["legacy"])) : null;
   if (pack && pack.typing === "pron") pack.typing = null;
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.
