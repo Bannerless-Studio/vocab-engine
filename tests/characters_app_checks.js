@@ -48,7 +48,10 @@ const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const LEGACY = loadConst(path.join(ZH, "legacy.js"), "LEGACY");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // pack.glossFocus renders the gloss as glossParts pieces, qualifiers dimmed (app.html glossOut).
-const glossShown = g => VC.glossParts(g).pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join(""); // glossFocus: engine default
+// glossFocus + glossStyle (engine default since the flag collapse): the first sense, the rest in a gx span (app.html glossOut).
+const glossPieces = g => VC.glossParts(g).pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join("");
+const glossSense = g => VC.parenPieces(g).every(x => x.g || !x.t.trim()) && VC.parenPieces(g).some(x => x.g) ? `<span class="dim">${VC.escapeHtml(g)}</span>` : glossPieces(g);
+const glossShown = g => { const sn = VC.glossSenses(g); return sn.rest.length ? `${glossSense(sn.first)} <span class="gx">(${sn.rest.map(glossSense).join("; ")})</span>` : glossPieces(g); };
 const CFG = VC.charsConfig(PACK);
 console.log(`Loaded zh pack: ${WORDS.length} words, ${SENTENCES.length} sentences, ${CHARACTERS.length} units, label ${CFG.label}`);
 
@@ -222,10 +225,12 @@ Math.random = mulberry32(20261004);
     check("HAS_CHARACTERS is on for zh + characters.js", api.hasChars());
     const ph = progressAll(api); api.today();
     const h = api.html("panel");
-    const segs = stripSegs(ph);
-    check(`strip is the stage path HSK 1, HSK 2, HSK 3, ${CFG.label}, HSK 4, ${CFG.label}4 (got ${segs.join(" | ")})`,
+    check("fresh learner (characters locked): Progress has no path strip (app v2: the strip sits with the character controls)", !/id="charCtl"/.test(ph) && !/class="seg"/.test(ph));
+    api.setProg(seedB()); const ph2 = progressAll(api); api.today();
+    const segs = stripSegs(ph2);
+    check(`seed B: strip is the stage path HSK 1, HSK 2, HSK 3, ${CFG.label}, HSK 4, ${CFG.label}4 (got ${segs.join(" | ")})`,
       segs.join("|") === ["HSK 1","HSK 2","HSK 3",CFG.label,"HSK 4",CFG.label+"4"].join("|"));
-    check("character stage labels carry the target-language markup", /<bdi data-tl lang="[^"]+">字<\/bdi>/.test(ph));
+    check("character stage labels carry the target-language markup", /<bdi data-tl lang="[^"]+">字<\/bdi>/.test(ph2));
     check("fresh learner: no choice card, Start today shown", !/id="charChoice"/.test(h) && /id="go"/.test(h));
   }
 
@@ -261,7 +266,7 @@ Math.random = mulberry32(20261004);
       cs.units.every(u => h.includes(`>${u.t}</span>`) && h.includes(VC.unitReading(u, BY_ID)) && h.includes(glossShown(VC.unitGloss(u, BY_ID)))));
     const withEx = cs.units.filter(u => VC.exampleSentences(BY_ID[u.words[0]], SENTENCES, PACK, 1).length).length;
     check(`teach cards carry the linked word's example sentence (${withEx} of 10 have one)`, count(h, /class="sent[" ]/g) === withEx && withEx > 0);
-    check("teach heading uses the stage label and set position", /<bdi[^>]*>字<\/bdi>, set 1 of \d+: the written form/.test(h));
+    check("teach heading names the set position", /<p class="pva">(HSK \d+ characters|Characters), set 1 of \d+<\/p>/.test(h));
     api.el("dr").click();
     const first = api.getD();
     const items = [api.getCur(), ...first.q];
@@ -305,7 +310,7 @@ Math.random = mulberry32(20261004);
     check("charSound: form only, 4 reading options, answer = reading", sd.html.includes(u.t) && !sd.html.includes(reading) && sd.opts.length === 4 && sd.a === reading);
     check("charPick: reading + speaker (audio), 4 written-form options, answer = form",
       pk.html.includes(reading) && /id="sp"/.test(pk.html) && pk.opts.length === 4 && pk.a === u.t && typeof pk.mount === "function");
-    check("charRecall: meaning shown, 4 written-form options, answer = form", rc.html.includes(VC.escapeHtml(g)) && rc.opts.length === 4 && rc.a === u.t && !rc.html.includes(reading));
+    check("charRecall: meaning shown, 4 written-form options, answer = form", rc.html.includes(glossShown(g)) && rc.opts.length === 4 && rc.a === u.t && !rc.html.includes(reading));
     check("all four: key c:<unit>, reveal has form + reading + gloss", [rd, sd, pk, rc].every(x => x.key === "c:" + u.id && x.reveal.includes(u.t) && x.reveal.includes(reading)));
     const before = JSON.stringify(api.getProg().w);
     rd.onAnswer(true); sd.onAnswer(false);
@@ -529,8 +534,8 @@ Math.random = mulberry32(20261004);
       VC.charStageUnits(["1","2","3"], CHARACTERS, PACK).slice(0, 10).every(u => items.some(x => x.key === "c:" + u.id)));
     let err = null, r = null;
     try{ r = playToResult(api); }catch(e){ err = e; }
-    check(`Characters test plays to the shared result screen (20 / 20, Continue)${err ? ` (${err.message})` : ""}`,
-      !err && r.shown.length === 20 && /<div class="done"><h2>20 \/ 20<\/h2>/.test(r.result) && /id="ok"/.test(r.result));
+    check(`Characters test plays to the shared result screen (20 of 20, Continue)${err ? ` (${err.message})` : ""}`,
+      !err && r.shown.length === 20 && /<div class="done"><h2>20 of 20<\/h2>/.test(r.result) && /id="ok"/.test(r.result));
     api.el("ok").click();
     check("Continue returns to the Test tab", /id="tChars"/.test(api.html("panel")));
   }
@@ -546,13 +551,13 @@ Math.random = mulberry32(20261004);
     api.setProg(seedC()); api.goto("progress");
     h = api.html("panel");
     const n1 = VC.charStageUnits(["1","2","3"], CHARACTERS, PACK).length, n4 = VC.charStageUnits(["4"], CHARACTERS, PACK).length;
-    check(`seed C rows: 字 40 / ${n1} taught · 40 recorded · 30 mastered · 0 done; 字4 0 / ${n4}`,
-      h.includes(`>字</bdi></td><td>40 / ${n1} taught · 40 recorded · 30 mastered · 0 done</td>`) && h.includes(`>字4</bdi></td><td>0 / ${n4} taught · 0 recorded · 0 mastered · 0 done</td>`)); // freqTiers: "done"
+    check(`seed C rows: 字 40 / ${n1} taught · 40 recorded · 30 mastered · 0 characters only; 字4 0 / ${n4}`,
+      h.includes(`>字</bdi></td><td>40 / ${n1} taught · 40 recorded · 30 mastered · 0 characters only</td>`) && h.includes(`>字4</bdi></td><td>0 / ${n4} taught · 0 recorded · 0 mastered · 0 characters only</td>`)); // progressView v2: bare is "characters only"
     const p = seedC(); const us = VC.charStageUnits(["1","2","3"], CHARACTERS, PACK);
     p.chars.c[us[0].id] = { r:6, w:0, s:6 }; delete p.chars.c[us[39].id]; p.chars.c[us[45].id] = { r:1, w:0, s:1 };
     api.setProg(p); api.goto("progress");
     check("taught counts whole sets only, recorded every record, bare by streak",
-      api.html("panel").includes(`>字</bdi></td><td>30 / ${n1} taught · 40 recorded · 30 mastered · 1 done</td>`));
+      api.html("panel").includes(`>字</bdi></td><td>30 / ${n1} taught · 40 recorded · 30 mastered · 1 characters only</td>`));
     api.setProg(seedB()); h = progressAll(api);
     check("levels 1-3 taught: order chips 'Characters before/after HSK 4' + mix chip + strip", /id="ordBefore"[^>]*>Characters before HSK 4</.test(h) && /id="ordAfter"[^>]*>Characters after HSK 4</.test(h) && /id="toggleMix"/.test(h) && /id="charCtl"/.test(h));
     check("default order: 'before' on, strip has 字 before HSK 4", /class="chip on" id="ordBefore"/.test(h) && segsOf(h).join("|") === "HSK 1|HSK 2|HSK 3|字|HSK 4|字4");
@@ -821,10 +826,10 @@ Math.random = mulberry32(20261004);
     // each is recorded at streak 0 (pron tier: its word still shows by its reading). The unit's
     // own drill items (c: keys) show the written form by design and are left out below.
     const { api } = await boot({ pack: PF_ZH });
-    check("PRON_FIRST on for zh, show-written capture listener attached", api.pronFirst() && api.panelListeners().length === 2);
+    check("PRON_FIRST on for zh, show-written capture listener attached", api.pronFirst() && api.panelListeners().length === 3); // taps, the Missed rows, the show-written capture
     api.setProg(seedPFLag()); api.today();
     // The plan's Read row names a passage by its title, which has no reading data here (reported residual).
-    const todayH = api.html("panel").replace(/<tr><td>6\. Read<\/td><td>[\s\S]*?<\/td><\/tr>/, "");
+    const todayH = api.html("panel").replace(/<div class="tst"><span>Read<\/span><div class="tsd">[\s\S]*?<\/div><\/div>/, "");
     check(`Today: no written form besides the stage label and the Read row's passage title (${visHan(todayH)})`, onlyLabel(todayH));
     api.el("go").click();
     let seen = [], err = null;
@@ -864,13 +869,14 @@ Math.random = mulberry32(20261004);
     check(`Test Recall ${seen.filter(x => x.where.startsWith("w:") && !x.where.endsWith("reveal")).length}: pinyin options and reveals`, seen.length > 20 && seen.every(x => !visHan(x.html)));
     api.goto("test"); api.el("tListen").click(); seen = walk(api);
     check("Test Listen: no hanzi in reveals or the result screen", seen.length > 20 && seen.every(x => !visHan(x.html)));
+    { const q = api.getProg(); q.placedOnce = false; api.setProg(q); } // app v2: the placement button is gone after the first placement
     api.goto("test"); api.el("pl").click(); api.el("go").click();
     let pbad = 0, pn = 0;
     for(let i = 0; i < 100 && /id="o"/.test(api.html("panel")); i++){ pn++; if(visHan(api.html("panel"))) pbad++; api.el("o").children[0].click(); }
     check(`Placement: ${pn} items, no hanzi (${pbad} bad)`, pn > 10 && pbad === 0);
     // Progress: weak rows.
     const pw = seedPF(); ["w0028","w0091","w0099"].forEach(id => { pw.w[id] = { r:1, w:3, s:0 }; });
-    api.setProg(pw); api.goto("progress");
+    api.setProg(pw); progressAll(api); // app v2: Weakest words sit under Show all
     check("Progress: weakest-word rows in pinyin", onlyLabel(api.html("panel")) && api.html("panel").includes(BY_ID["w0091"].pron));
     // Read: tap spans and question reveals.
     if(PASSAGES.length){
@@ -972,7 +978,7 @@ Math.random = mulberry32(20261004);
     const a = await boot({ pack: PACK }), b = await boot({ pack: noKey });
     a.api.setProg(seedC()); b.api.setProg(seedC());
     const pages = api => ["today","words","test","progress","read"].map(t => { api.goto(t); return api.html("panel") + (api.el("wl") ? api.el("wl").children.map(c => c.innerHTML).join("") : ""); });
-    check("pronFirst absent = pronFirst false: every tab identical, no show-written tap anywhere", JSON.stringify(pages(a.api)) === JSON.stringify(pages(b.api)) && !pages(b.api).some(h => /data-showw/.test(h)) && a.api.panelListeners().length === 1);
+    check("pronFirst absent = pronFirst false: every tab identical, no show-written tap anywhere", JSON.stringify(pages(a.api)) === JSON.stringify(pages(b.api)) && !pages(b.api).some(h => /data-showw/.test(h)) && a.api.panelListeners().length === 2); // taps and the Missed rows
   }
   {
     // ja-like synthetic pack: kanji words read in kana, kana words as they are.
@@ -1142,7 +1148,7 @@ Math.random = mulberry32(20261004);
     b2.api.charTeach({ units: bare.slice(0, 10), index: 0, total: 1 }, { label: "字" }, () => {});
     const it2 = b2.api.charDrillItem("charRead", bare[0]);
     check("units without hint: no hint markup on teach cards or reveals", !/class="chint"/.test(b2.api.html("panel")) && !/class="chint"/.test(it2.reveal));
-    const stripHint = h => h.replace(/<span class="chint">(?:<span>(?:<span[^>]*>[^<]*<\/span>|[^<])*<\/span>)+<\/span>/g, "");
+    const stripHint = h => h.replace(/(<div>)?<span class="chint">(?:<span>(?:<span[^>]*>[^<]*<\/span>|[^<])*<\/span>)+<\/span>(?:<\/div>)?/g, ""); // app v2: a reveal wraps the hint in a div
     api.charTeach({ units: CHARACTERS.slice(0, 10), index: 0, total: 1 }, { label: "字" }, () => {});
     check("hinted teach cards and reveals equal the hint-free ones with the hint block removed",
       stripHint(api.html("panel")) === b2.api.html("panel") && stripHint(api.charDrillItem("charRead", CHARACTERS[0]).reveal) === it2.reveal);
