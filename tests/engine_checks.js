@@ -2122,39 +2122,22 @@ return {
     check(`Continue: the missed question's words gain READ_WEIGHT.wrong misses in prog.w (${wrongIds.join(",")})`, wrongIds.length > 0 && wrongIds.every(id => pr.w[id].w === before[id] + VC.READ_WEIGHT.wrong && pr.w[id].s === 0));
     check("Continue ends the session as usual (Session done, sessions + 1)", /Session done/.test(b.api.getHtml("panel")) && pr.sessions === s0 + 1 && b.api.getRD() === null);
     b.api.today();
-    const p1 = VC.suggestPassage(PASSAGES, WORDS, PACK, pr);
-    check("next Today plan names the next passage", p1 && p1 !== p0 && readRow(b.api.getHtml("panel")).includes(VC.escapeHtml(p1.title)));
+    // Read rotation (default since the flag collapse): a reading pass is followed by a listening pass of it.
+    const listenRow = h => (h.match(/<tr><td>6\. Listen<\/td><td>([\s\S]*?)<\/td><\/tr>/) || [])[1];
+    const p1 = p0, lr1 = listenRow(b.api.getHtml("panel"));
+    check("next Today plan: the passage just read comes back as a listening pass (read rotation)", !!lr1 && lr1.startsWith("1 passage to listen to: ") && lr1.includes(VC.escapeHtml(p1.title)));
     // Skip: nothing recorded, session counts as usual, same passage next time.
     const doneBefore = JSON.stringify(pr.read.done), s1 = pr.sessions;
     b.api.enterTodayStep(5); doc.getElementById("rskip").click();
     check("Skip today: session finishes (sessions + 1 as without the stage), passage not marked done", /Session done/.test(b.api.getHtml("panel")) && pr.sessions === s1 + 1 && JSON.stringify(pr.read.done) === doneBefore && b.api.getRD() === null);
     b.api.today();
-    check("Skip today: the same passage is offered next session", readRow(b.api.getHtml("panel")).includes(VC.escapeHtml(p1.title)));
+    check("Skip today: the same passage is offered next session", (listenRow(b.api.getHtml("panel")) || "").includes(VC.escapeHtml(p1.title)));
     // Start today carries the plan's pick: the stage runs the passage the plan named.
     b.api.enterTodayStep(5, { p: PASSAGES[3], reason: "new" });
     check("stage runs the passage picked at Start today (todayStepState.read)", b.api.getRD().p.id === PASSAGES[3].id);
     b.api.enterTodayStep(5, null);
     check("Start today with no passage: step 5 goes straight to Session done", /Session done/.test(b.api.getHtml("panel")) && !/id="rskip"/.test(b.api.getHtml("panel")));
-    // Everything done: a spaced re-read, then nothing.
-    const today = new Date(), iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    const old = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 8)), recent = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 2));
-    pr.read.done = Object.fromEntries(PASSAGES.map(p => [p.id, { sc: p.questions.length, n: p.questions.length, d: old, x: 2 }]));
-    b.api.today();
-    check("all done, none missed: no Read row", !readRow(b.api.getHtml("panel")));
-    pr.read.done[PASSAGES[2].id].sc = 0; pr.read.done[PASSAGES[2].id].d = recent;
-    b.api.today();
-    check("all done, missed one 2 days ago: no Read row yet (7-day rule)", !readRow(b.api.getHtml("panel")));
-    pr.read.done[PASSAGES[5].id].sc = 0;
-    b.api.today();
-    // A voice is usable here, so the spaced re-read is a listening pass (VC.readPassMode);
-    // after a listening attempt (l: 1) the next re-read is a reading pass again.
-    const lrow = (b.api.getHtml("panel").match(/<tr><td>6\. Listen<\/td><td>([\s\S]*?)<\/td><\/tr>/) || [])[1];
-    check(`all done, missed one 8 days ago, voice usable: Listen row offers it as a listening pass (${lrow && lrow.replace(/<[^>]+>/g, "")})`, !!lrow && !readRow(b.api.getHtml("panel")) && lrow.startsWith("1 passage to listen to: ") && lrow.includes(VC.escapeHtml(PASSAGES[5].title)));
-    pr.read.done[PASSAGES[5].id].l = 1;
-    b.api.today();
-    const rrow = readRow(b.api.getHtml("panel"));
-    check(`all done, missed one 8 days ago, last attempt a listening pass: Read row offers it as a re-read (${rrow && rrow.replace(/<[^>]+>/g, "")})`, !!rrow && rrow.startsWith("1 passage to re-read: ") && rrow.includes(VC.escapeHtml(PASSAGES[5].title)));
-    delete pr.read.done[PASSAGES[5].id].l;
+    // (The legacy 7-day spaced re-read checks went with the readRotation flag: the rotation's picks are covered above and in tests/listen_mode_checks.js.)
     await tick(); await tick();
     // RTL: the plan line passes the shared RTL audit; UI parts isolated, title in pack font.
     const RP0 = JSON.parse(JSON.stringify(PASSAGES[0])); RP0.title = "خانه (آزمون)";
