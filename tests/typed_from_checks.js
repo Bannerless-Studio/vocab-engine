@@ -161,7 +161,7 @@ return {
   getD: () => D, getCur: () => __cur, panelListeners: t => document.getElementById("panel")._listeners[t || "click"] || [],
   startPassage: p => { tab = "read"; startPassage(p); }, rd: () => RD,
   sentenceRowHTML, sentenceRevealBlock, readSentence, gapSentence, passageSentenceHTML, passagePlainHTML, glossHTML, revealBlock, recallItem, readItem, wordRowHTML, charTeach, charDrillItem,
-  pronTypeItem: ${hook("pronTypeItem")}, writtenTypeItem: ${hook("writtenTypeItem")},
+  TYPED_ITEM: typeof TYPED_ITEM !== "undefined" ? TYPED_ITEM : null, dispWord, pronTypeItem: ${hook("pronTypeItem")}, writtenTypeItem: ${hook("writtenTypeItem")},
   glossOut: ${hook("glossOut")}, hearItem, typedFromSlotItem: ${hook("typedFromSlotItem")},
   itemFromPlan: ${hook("itemFromPlan")}, tokTap: ${hook("tokTap")}, onTok: ${hook("onTok")}, tokOwns: ${hook("tokOwns")}, docListeners: t => document._listeners[t] || [], soundsRefGroups: ${hook("soundsRefGroups")},
   drill1: it => drill([it], () => {}, null),
@@ -583,6 +583,48 @@ function walk(api, stopAt){
     const labels = new Set(typed(s2).map(x => x.it.label));
     check(`session 2 still asks typed items from the target side (${[...labels].join(", ")}; ${typed(s1).length} / ${typed(s2).length} typed), none a word typed right in the same way in session 1 (${rep.length})`,
       typed(s1).length > 0 && typed(s2).length > 0 && rep.length === 0 && [...labels].some(l => l !== "Type the pinyin"));
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  // [7] typed ask label matches its stimulus (owner screenshot 2026-10-09: 后面 under "Type the meaning" read "later";
+  // the cause was browser auto-translate, see the notranslate check): every typed kind of every word, on the
+  // current zh pack at both tiers and on a Latin pack.
+  try {
+    const stimOf = h => { const m = /<div class="(?:big wd|med)"[^>]*>([\s\S]*?)<\/div>/.exec(h); return m ? stripTags(m[1]).replace(/\s+/g, " ").trim() : ""; };
+    const ENG_CUE = ["word", "pron", "written"];
+    const audit = async (name, pack, words, opts) => {
+      const PRON_LABEL = `Type the ${pack.tones || "reading"}`;
+      const { api } = await boot(Object.assign({ pack, words }, opts || {}));
+      const by = Object.fromEntries(words.map(w => [w.id, w]));
+      const amb = VC.typedAmbiguity(words), kinds = [...new Set(VC.typedKinds(pack))];
+      const bad = [], differ = []; let n = 0;
+      for(const tier of pack.characters ? ["pron", "written"] : ["written"]){
+        const pm = VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5 }, pack);
+        if(tier === "written" && pack.characters) (opts && opts.units || CHARACTERS).forEach(u => { VC.ensureChars(pm).c[u.id] = { r: 5, w: 0, s: 5 }; });
+        api.setProg(pm);
+        for(const w of words){
+          const shown = !!w.w && !api.dispWord(w).isPron;
+          for(const k of kinds){
+            if(!VC.typedKindOk(k, w, shown, amb)) continue;
+            const it = api.TYPED_ITEM[k](w); n++;
+            const stim = stimOf(it.html), prim = VC.glossSenses(VC.gloss(w)).first.replace(/\s*\(.*$/, "").trim();
+            const cue = ENG_CUE.includes(k);
+            // gloss cue (word / pron / written asks): the label never says "meaning" and the cue leads with the primary sense;
+            // target-side stimulus (the word itself): label is the meaning or the reading
+            const okLabel = cue ? !/meaning|How is it said/.test(it.label) && stim.startsWith(prim) : /^(Type the meaning|Type the pinyin|Type the reading)$/.test(it.label) && it.label === (k === "writtenPron" ? PRON_LABEL : "Type the meaning") && !stim.startsWith(prim + " ");
+            if(!okLabel) bad.push(`${w.id} ${k} ${tier}: "${it.label}" / "${stim}" (primary "${prim}")`);
+            if(cue && stim !== VC.gloss(w) && !stim.startsWith(prim)) differ.push(`${w.id} ${k}: "${stim}" vs "${prim}"`);
+          }
+        }
+      }
+      check(`${name}: ${n} typed items, every label matches its stimulus${bad.length ? " (" + bad.slice(0, 3).join("; ") + ")" : ""}; English cues lead with the primary sense (${differ.length} differ)`, n > 0 && bad.length === 0 && differ.length === 0);
+    };
+    await audit("zh", loadConst(path.join(ZH, "pack.js"), "PACK"), WORDS);
+    const SP = path.join(ROOT, "..", "spanish", "pack");
+    if(fs.existsSync(path.join(SP, "pack.js"))){
+      const spPack = loadConst(path.join(SP, "pack.js"), "PACK"), spWords = loadConst(path.join(SP, "words.js"), "WORDS");
+      await audit("spanish", spPack, spWords.slice(0, 400), { sentences: loadConst(path.join(SP, "sentences.js"), "SENTENCES"), passages: loadConst(path.join(SP, "sentences.js"), "PASSAGES"), units: false });
+    } else console.log("SKIP  spanish label audit (no ../spanish/pack)");
+    check("app.html opts out of browser machine translation (meta google notranslate): the target text is the exercise", /<meta name="google" content="notranslate">/.test(CUR_HTML));
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

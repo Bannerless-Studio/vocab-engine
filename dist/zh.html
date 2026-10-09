@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Chrome auto-translate rewrote the Chinese stimulus 后面 to "later" under a "Type the meaning" label (owner screenshot 2026-10-09); the target text is the exercise, so no page is machine-translated. -->
+<meta name="google" content="notranslate">
 <title>Vocab trainer</title>
 <!-- Browsers request /favicon.ico by default when no icon link exists; GitHub Pages 404s
      that on every load. This data URI (a plain book glyph, no brand) stops the request. -->
@@ -6232,7 +6234,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "283122534-2355526";
+const VE_BUILD = "2725735968-2355778";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -8338,4 +8340,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:424776598-2354849-->
+<!--ve-build:854883540-2355102-->
