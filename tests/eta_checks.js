@@ -430,7 +430,7 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
   console.log(`\n[1] core: the model from the first session (measured pace never shown for goals), levelOpensIn`);
   {
     const ZE = JSON.parse(fs.readFileSync(ZH_ETA, "utf8"));
-    check("constants: no PM_MIN, PM_KEEP 14; legacy fallback ETA_GAIN one per zh goal, ETA_KNOWN 5.2", VC.PM_MIN === undefined && VC.PM_KEEP === 14 && VC.ETA_GAIN.length === GOALS.length && VC.ETA_KNOWN === 5.2);
+    check("constants: no PM_MIN, PM_KEEP 14; no ETA_GAIN / ETA_KNOWN zh fallback (pack.eta is required pack data since the flag collapse)", VC.PM_MIN === undefined && VC.PM_KEEP === 14 && VC.ETA_GAIN === undefined && VC.ETA_KNOWN === undefined);
     check("zh pack.eta = tools/zh_eta.json: a curve per goal + a knownCurve per gated level, no legacy keys", JSON.stringify(PACK.eta) === JSON.stringify(ZE) && PACK.eta.curve.length === GOALS.length && LV.slice(0, -1).every(lv => Array.isArray(PACK.eta.knownCurve[lv])) && !("gain" in PACK.eta) && !("known" in PACK.eta));
     // etaCurveAt: interpolation, endpoints, null
     const C = [[0, 100], [0.5, 30], [0.9, 0]];
@@ -438,10 +438,10 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
       VC.etaCurveAt(C, 0) === 100 && VC.etaCurveAt(C, 0.25) === 65 && VC.etaCurveAt(C, 0.5) === 30 && Math.abs(VC.etaCurveAt(C, 0.7) - 15) < 1e-9 && VC.etaCurveAt(C, 0.9) === 0
       && VC.etaCurveAt(C, 0.95) === 0 && VC.etaCurveAt([[0.2, 50], [0.9, 0]], 0.1) === 50 && VC.etaCurveAt(null, 0.3) === null && VC.etaCurveAt([], 0.3) === null);
     const withEta = eta => Object.assign(clone(PACK), { eta }), cx = pk => Object.assign({}, ctx, { pack: pk }), f0 = freshStart();
-    check("sessionsToGoX on a curve: position 0 = ceil(first point); null curve -> null; legacy {gain} -> (0.9 - p) / gain; no pack.eta -> the zh constants",
+    check("sessionsToGoX on a curve: position 0 = ceil(first point); null curve -> null; legacy {gain} -> (0.9 - p) / gain; no pack.eta -> null (no zh fallback)",
       VC.sessionsToGoX(f0, 0, 3, cx(withEta({ curve: [C, null, C] }))) === 100 && VC.sessionsToGoX(f0, 1, 3, cx(withEta({ curve: [C, null, C] }))) === null
       && VC.sessionsToGoX(f0, 0, 3, cx(withEta({ gain: [0.01, 0.02, 0.03], known: 5 }))) === 90 && VC.sessionsToGoX(f0, 1, 3, cx(withEta({ gain: [0.01, null, 0.03], known: 5 }))) === null
-      && VC.sessionsToGoX(f0, 0, 3, cx(stripFlags(PACK, ["eta"]))) === Math.ceil(VC.GOAL_DONE / VC.ETA_GAIN[0] - 1e-9));
+      && VC.sessionsToGoX(f0, 0, 3, cx(stripFlags(PACK, ["eta"]))) === null && VC.levelOpensIn(WORDS, stripFlags(PACK, ["eta"]), seedLevel(2, 10), CHARACTERS) === null);
     check("an eta object missing the needed key -> null, never the zh constants: {known} has no goal estimate, {curve} without knownCurve/known no gate estimate",
       VC.sessionsToGoX(f0, 0, 3, cx(withEta({ known: 5 }))) === null && VC.levelOpensIn(WORDS, withEta({ curve: [C, C, C] }), seedLevel(2, 10), CHARACTERS) === null
       && VC.levelOpensIn(WORDS, withEta({ curve: [C, C, C], known: 5 }), seedLevel(2, 10), CHARACTERS) !== null);
@@ -475,7 +475,7 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
       VC.levelOpensIn(WORDS, PACK, near, CHARACTERS) === 1 && VC.levelOpensIn(WORDS, PACK, far, CHARACTERS) === kcAt(far));
     const leg = Object.assign(clone(PACK), { eta: { gain: [0.01, 0.01, 0.01], known: 5.2 } }), noE = stripFlags(PACK, ["eta"]), nullK = Object.assign(clone(PACK), { eta: { curve: PACK.eta.curve, knownCurve: null } });
     const lin = Math.ceil((VC.LEVEL_GATE - VC.levelKnownPct(WORDS, PACK, far, LV[1], CHARACTERS)) * lv2 / 5.2 - 1e-9);
-    check(`levelOpensIn: legacy known 5.2 and no pack.eta -> words / 5.2 = ${lin}; knownCurve null -> null`, VC.levelOpensIn(WORDS, leg, far, CHARACTERS) === lin && VC.levelOpensIn(WORDS, noE, far, CHARACTERS) === lin && VC.levelOpensIn(WORDS, nullK, far, CHARACTERS) === null);
+    check(`levelOpensIn: legacy known 5.2 -> words / 5.2 = ${lin}; no pack.eta -> null (no zh fallback since the flag collapse); knownCurve null -> null`, VC.levelOpensIn(WORDS, leg, far, CHARACTERS) === lin && VC.levelOpensIn(WORDS, noE, far, CHARACTERS) === null && VC.levelOpensIn(WORDS, nullK, far, CHARACTERS) === null);
     check("levelOpensIn: open gate -> null", VC.levelOpensIn(WORDS, PACK, open, CHARACTERS) === null); // the gate is the engine's 0.7 since the flag collapse
   }
 
@@ -526,12 +526,9 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
     // every goal done: no estimate anywhere
     const all = seedKnown(4); const A = await bootWith(PACK, all, 1, VIEW); const ah = A.panel(); A.clickTab("progress"); const aph = A.panel();
     check(`all goals done: "All goals" shows its percent, no "≈" on Today or Progress`, (VC.currentGoal(all, PACK, WORDS, CHARACTERS, PASSAGES) || {}).all === true && /<span>All goals<\/span><span class="pvn">\d+%/.test(ah) && !/≈/.test(ah + aph));
-    // A whole-pack bar (progressMap true, no goals) under appView: sessionsToGo from PM_KEEP entries, else no second line (no model without a goal).
-    const WP = Object.assign(clone(PACK), { progressMap: true }), wp = ownerStart();
-    const F = await bootWith(WP, wp, 1, VIEW), fh = F.panel();
-    wp.pm = pmLine(14, undefined, 0.3, 0.01).map((e, i) => Object.assign(e, { sn: (wp.sn || 0) - 13 + i }));
-    const F3 = await bootWith(WP, wp, 1, VIEW), f3 = F3.panel();
-    check("whole-pack bar under appView: no pm -> no second line, no placeholder; 14 entries -> sessionsToGo", /<div class="pmap" id="pmap"/.test(fh) && !/class="pm2"/.test(fh) && !/pace: —/.test(fh) && f3.includes(`<div class="pm2">≈\u00a0${VC.sessionsToGoX(wp)} sessions</div>`));
+    // The whole-pack bar (progressMap: true, no goals) went with the flag collapse (stage 3): a pack without goals has no progress map.
+    const WP = Object.assign(clone(PACK), { progressMap: true }), F = await bootWith(WP, ownerStart(), 1, VIEW);
+    check("progressMap: true (no goals): no progress map on Today", !VC.progressMapOn(WP) && !/id=\"pmap\"/.test(F.panel()));
   }
 
   // [4] (flag-off: Today and Progress byte-identical to the base with appView / progressView off) deleted: both are
