@@ -193,9 +193,6 @@ class LanguageSpec:
         if self.port_characters:
             flags["characters"] = {"learn": "lag", "start": 60, "ramp": [3, 5, 8], "bareBy": "typed", "bareWords": True, "bareByPair": True}
             flags["levelExam"] = {ids[0]: "pinyin", ids[1]: "characters", ids[2]: "characters"}
-            flags["placementChars"] = True      # placement places the lag characters layer too (fb50)
-        if self.script:                 # script primer sites: pron off by default once the primer is done (fb45)
-            flags["pronUntilPrimer"] = True
         return flags
     target_len = {"A1": 5, "A2": 7, "B1": 8}     # preferred sentence length per level
     min_len = {"A1": 4, "A2": 4, "B1": 5}

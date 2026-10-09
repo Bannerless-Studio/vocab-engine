@@ -170,18 +170,12 @@ def check_pack(pack, rep):
                         rep.err(f"pack.progressMap.goals[{i}].upTo is not a level id")
                     elif not isinstance(g["label"], str) or not g["label"].strip():
                         rep.err(f"pack.progressMap.goals[{i}].label must be a non-empty string")
-        elif not is_bool(pm):
-            rep.err("pack.progressMap must be a boolean or {goals: [...]}")
+        elif pm is True:
+            rep.warn("pack.progressMap: true is ignored since the flag collapse (no goals, no progress map); give {goals: [...]}")
+        else:
+            rep.err("pack.progressMap must be {goals: [...]}")
     if pack.get("typing") in (None, False):
         rep.warn("pack.typing is off: a held word (streak 2) moves up only by typed answers (docs/PACK_SCHEMA.md \"wordsBy\"), so it stays held")
-    if "pronUntilPrimer" in pack and not is_bool(pack["pronUntilPrimer"]):
-        rep.err("pack.pronUntilPrimer must be a boolean")
-    elif pack.get("pronUntilPrimer") is True and "script" not in pack:
-        rep.err("pack.pronUntilPrimer needs pack.script (the default turns off when the primer is done)")
-    if "placementChars" in pack and not is_bool(pack["placementChars"]):
-        rep.err("pack.placementChars must be a boolean")
-    elif pack.get("placementChars") is True and not (isinstance(pack.get("characters"), dict) and pack["characters"].get("learn") == "lag"):
-        rep.err('pack.placementChars needs pack.characters with learn "lag"')
     # levelExam (docs/PACK_SCHEMA.md "levelExam"): level id -> "pinyin" | "characters".
     if "levelExam" in pack:
         le = pack["levelExam"]; ids = {str(l.get("id")) for l in pack.get("levels", []) if isinstance(l, dict)}
@@ -190,7 +184,10 @@ def check_pack(pack, rep):
         elif "characters" not in pack:
             rep.err("pack.levelExam needs pack.characters (the unit's meaning pair)")
     # eta (docs/PACK_SCHEMA.md "eta"): calibrated ETA curves (legacy: constant slopes); null = no estimate for that goal / the gate.
-    if "eta" in pack:
+    # Required since the flag collapse (the engine's zh-constant fallback for a pack without it is gone).
+    if "eta" not in pack:
+        rep.err("pack.eta is required (docs/PACK_SCHEMA.md \"eta\"; tests/eta_checks.js --calibrate writes the curves); {} gives no estimates")
+    else:
         et = pack["eta"]
         pos = lambda v: is_num(v) and not isinstance(v, bool) and v > 0
         nonneg = lambda v: is_num(v) and not isinstance(v, bool) and v >= 0

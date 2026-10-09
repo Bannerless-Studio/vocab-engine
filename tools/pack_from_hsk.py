@@ -580,8 +580,6 @@ def main(argv):
             {"upTo": "3", "label": "daily life: directions, simple chat, short notices"},
             {"upTo": "4", "label": "follow a slow drama with subtitles"},
         ]},
-        # Placement also places the characters layer (docs/PACK_SCHEMA.md "placementChars"; owner 2026-10-08).
-        "placementChars": True,
         # What each level's exam asks (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): HSK 1-2 are pinyin papers, HSK 3-4 read hanzi.
         "levelExam": {"1": "pinyin", "2": "pinyin", "3": "characters", "4": "characters"},
         # ETA curves (docs/PACK_SCHEMA.md "eta"): tools/zh_eta.json, written by tests/eta_checks.js --calibrate --write

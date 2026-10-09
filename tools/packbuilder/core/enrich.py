@@ -66,7 +66,7 @@ def assign_tiers(words, overrides=None, shares=None, ambient_rank=AMBIENT_RANK):
 # Every top-level key LanguageSpec.port_flags() has ever been able to emit, and the `characters` sub-keys it merges.
 # --check reads them as port-era: one the spec no longer emits must not linger in a shipped pack.json. The collapsed
 # flags (tools/pack_collapsed.py) are not here: enrich drops them, and --check notes a shipped one without failing.
-PORT_KEYS = ("typedFrom", "progressMap", "levelExam", "pronUntilPrimer", "placementChars")
+PORT_KEYS = ("typedFrom", "progressMap", "levelExam")
 PORT_CHARACTERS_KEYS = ("learn", "start", "ramp", "bareBy", "bareWords", "bareByPair")
 
 

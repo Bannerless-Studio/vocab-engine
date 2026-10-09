@@ -209,17 +209,20 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class PronUntilPrimer(unittest.TestCase):
-    def test_script_sites_emit_the_flag_others_do_not(self):
-        for code in ("ar", "fa", "hi", "ja", "ko", "ru", "ur"):
-            self.assertIs(get_spec(code).port_flags().get("pronUntilPrimer"), True, code)
-        for code in ("de", "es", "fr", "id", "it", "sw"):
-            self.assertNotIn("pronUntilPrimer", get_spec(code).port_flags(), code)
+class DerivedFlagsCollapsed(unittest.TestCase):
+    # pronUntilPrimer (= a pack.script pack) and placementChars (= characters.learn "lag") are engine defaults since the
+    # flag collapse stage 3: no spec emits them, and enrich drops a shipped one.
+    def test_no_spec_emits_them(self):
+        for code in ("ar", "fa", "hi", "ja", "ko", "ru", "ur", "de", "es", "fr", "id", "it", "sw"):
+            f = get_spec(code).port_flags()
+            self.assertNotIn("pronUntilPrimer", f, code)
+            self.assertNotIn("placementChars", f, code)
 
-    def test_enrich_writes_it_and_is_idempotent(self):
+    def test_enrich_drops_them_and_is_idempotent(self):
         spec = get_spec("ko")
-        p1, w1, _ = enrich.enrich_data(spec, {"key": "ko"}, words(), None)
-        self.assertIs(p1["pronUntilPrimer"], True)
+        p1, w1, _ = enrich.enrich_data(spec, {"key": "ko", "pronUntilPrimer": True, "placementChars": True}, words(), None)
+        self.assertNotIn("pronUntilPrimer", p1)
+        self.assertNotIn("placementChars", p1)
         p2, _, _ = enrich.enrich_data(spec, p1, w1, None)
         self.assertEqual(p1, p2)
 
@@ -240,11 +243,11 @@ class CheckDetectsFlagDrift(unittest.TestCase):
             r = self.enriched_repo(t)
             pj = r / "pack" / "pack.json"
             pack = json.loads(pj.read_text())
-            pack["pronUntilPrimer"] = True            # emitted by an older spec, dropped since (it has no script)
+            pack["levelExam"] = {"A1": "pinyin"}      # a port key the it spec never emits (it has no characters)
             pack["characters"] = {"learn": "lag", "label": "x"}
             pj.write_text(json.dumps(pack))
             lines = enrich.flag_drift(get_spec("it"), pack)
-            self.assertEqual(lines, ["pronUntilPrimer: shipped True, the spec no longer emits it", "characters.learn: shipped 'lag', the spec no longer emits it"])
+            self.assertEqual(lines, ["levelExam: shipped {'A1': 'pinyin'}, the spec no longer emits it", "characters.learn: shipped 'lag', the spec no longer emits it"])
             self.assertEqual(enrich.main("it", r, check=True), 1)
 
     def test_a_changed_value_and_a_missing_key_are_reported_with_the_diff(self):
