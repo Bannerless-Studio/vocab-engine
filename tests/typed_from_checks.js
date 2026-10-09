@@ -550,7 +550,8 @@ function walk(api, stopAt){
       api.setProg(atTierProg(ws.slice(0, 20)));
       out.items = ws.map(x => { const p = typePlan(x, 3); return p.map(api.itemFromPlan).map(it => it.label + it.html + it.reveal + (it.placeholder || "")).join("\n"); }).join("\n");
       out.reveals = ws.map(x => api.revealBlock(x) + api.wordRowHTML(x, "wl") + api.glossHTML(x.id, "", null)).join("\n");
-      api.wordsPage("1", 0); out.words = api.html("panel") + api.el("wl").children.map(c => c.innerHTML).join("|");
+      // fb53 59fd4d3: the Words tab opens on Learn's level; tap level 1 on both sides so they show the same level
+      api.wordsPage("1", 0); { const b1 = api.el("wl_1"); if(b1 && b1.click) b1.click(); } out.words = api.html("panel") + api.el("wl").children.map(c => c.innerHTML).join("|");
       return out;
     }
     if(baseHtml && baseCore){
@@ -558,6 +559,8 @@ function walk(api, stopAt){
       for(const [name, pk] of cases){
         const pe = Object.assign({}, pk, { eta: loadConst(path.join(ZH, "pack.js"), "PACK").eta }); // eta is required pack data now; both sides read the same curves
         const a = await screens(baseHtml, baseCore, withCollapsed(pe), 11), b = await screens(CUR_HTML, VC, pe, 11);
+        // 0ad8a97: hear-sentence items are centred (no "sent" class); the base still marks them
+        a.walk = a.walk.replace(/<div class="drill-body sent">(?=<p class="q">What did they say\?)/g, '<div class="drill-body">');
         for(const k of Object.keys(a)){
           let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
           check(`${name}: ${k} byte-identical to ${BASE_SHA} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: base ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);

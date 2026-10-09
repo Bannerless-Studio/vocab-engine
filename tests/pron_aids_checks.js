@@ -946,7 +946,8 @@ function walk(api, stopAt){
       out.walk = walked.map(x => x.where + "\n" + x.html).join("\n----\n");
       api.setProg(seedPF());
       out.rows = sents.slice(0, 120).map(s => api.sentenceRowHTML(s, BY_ID[(s.words || [])[0]])).join("\n");
-      api.wordsPage("1", 0); out.words = api.html("panel") + api.html("wbody") + api.el("wl").children.map(c => c.innerHTML).join("|");
+      // fb53 59fd4d3: the Words tab opens on Learn's level; tap level 1 on both sides so they show the same level
+      api.wordsPage("1", 0); { const b1 = api.el("wl_1"); if(b1 && b1.click) b1.click(); } out.words = api.html("panel") + api.html("wbody") + api.el("wl").children.map(c => c.innerHTML).join("|");
       api.startPassage(passages[0]); out.read = api.html("panel");
       out.sounds = (api.goto("sounds"), api.html("panel"));
       return out;
@@ -956,6 +957,8 @@ function walk(api, stopAt){
       for(const [name, pk, ss, ps] of cases){
         const a = await screens(baseHtml, baseCore, withCollapsed(pk), ss, ps, 11);
         const b = await screens(CUR_HTML, VC, pk, ss, ps, 11);
+        // 0ad8a97: hear-sentence items are centred (no "sent" class); the base still marks them
+        a.walk = a.walk.replace(/<div class="drill-body sent">(?=<p class="q">What did they say\?)/g, '<div class="drill-body">');
         for(const k of Object.keys(a)){
           const same = a[k] === b[k];
           let at = -1; if(!same){ for(let i = 0; i < Math.max(a[k].length, b[k].length); i++) if(a[k][i] !== b[k][i]){ at = i; break; } }
