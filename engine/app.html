@@ -3596,16 +3596,8 @@ function charProgress(o){
   const recs = VC.charRecs(prog);
   const streak = u => ((recs[u.id] || {}).s || 0);
   const unlocked = VC.charsUnlocked(PACK, WORDS, prog), started = VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU);
-  // characters.learn "lag": no stages; its own block (a wider label would narrow the word rows' value column), one row per
-  // level, a unit's level being its word's. Value text <= the longest word-row value (32 chars): bare shown drops "taught", then "mastered" -> "mast.".
-  const lag = () => `<p class="q" style="margin-top:14px">Characters</p><table class="stats nw">${LEVELS.map(lv => { const list = CHAR_LIST.filter(u => String(u.lv) === String(lv)); if(!list.length) return "";
-    const rec = list.filter(u => recs[u.id]), bare = rec.filter(u => VC.unitDone(recs[u.id], u, PACK)).length, mas = rec.filter(u => VC.charTier(streak(u), PACK) !== "pron").length;
-    // freqTiers: a unit is done at its target (bare, a peripheral unit mastered).
-    let v = `${rec.length} / ${list.length} taught · ${mas} mastered`;
-    if(bare){ v = `${rec.length} / ${list.length} · ${mas} mastered · ${bare} done`; if(v.length > 32) v = v.replace("mastered", "mast."); }
-    return `<tr><td>${escapeHtml(levelLabel(lv))}</td><td>${v}</td></tr>`; }).join("")}</table>`;
-  const block = started && CHAR_CFG.learn === "lag" ? lag() : "";
-  const rows = !started || block ? "" : stages.map(st => {
+  // characters.learn "lag": no stage rows (Progress puts "characters only X of Y" in each level row instead).
+  const rows = !started || CHAR_CFG.learn === "lag" ? "" : stages.map(st => {
     const list = VC.charStageUnits(st.levels, CHAR_LIST, PACK);
     const taught = VC.charSets(st.levels, CHAR_LIST, PACK).filter(set => VC.charSetTaught(set, prog)).reduce((n, set) => n + set.length, 0);
     const masteredN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) !== "pron").length;
@@ -3630,7 +3622,7 @@ function charProgress(o){
       $("ordAfter").onclick = () => { VC.setCharOrder(prog, true); store.save(); progressRender(); };
     }
   };
-  return { rows, block, controls, wire };
+  return { rows, controls, wire };
 }
 function scriptProgress(){
   const recs = VC.scriptRecs(prog);

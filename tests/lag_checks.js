@@ -168,7 +168,13 @@ return {
 }
 const fresh = () => ({ ls: memStore(), ss: memStore() });
 async function bootWith(pack, prog, seed, opts){ const st = fresh(); if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog)); return { api: await boot(pack, st, seed || 1, opts), st }; }
-const charRows = h => { const m = h.match(/>Characters<\/p><table class="stats nw">([\s\S]*?)<\/table>/); return m ? [...m[1].matchAll(/<tr>[\s\S]*?<\/tr>/g)].map(r => stripTags(r[0].replace("</td><td>", " | "))) : []; };
+// App v2 (engine default since the flag collapse): Progress shows a lag pack's characters inside each level row
+// ("characters only X of Y": units at target of the level's units) once Show all is open; "HSK n | X of Y" per row.
+const charRows = h => h.split('<div class="pvl').slice(1).map(c => { const l = c.match(/<div class="pvt"><span>([^<]*)<\/span>/), m = c.match(/characters only (\d+) of (\d+)/); return l && m ? `${stripTags(l[1])} | ${m[1]} of ${m[2]}` : null; }).filter(Boolean);
+// Owner export shape: HSK 1 taught and mastered, its 10 peripheral units at target (v1 said "10 done").
+const OWNER_ROWS = ["HSK 1 | 10 of 150", "HSK 2 | 0 of 147", "HSK 3 | 0 of 298", "HSK 4 | 0 of 598"];
+const MID1 = () => (() => { const p = VC.normalizeProg({ sets: { "1": 3 }, placedOnce: true, soundsOpened: true, sessions: 5 }, PACK); byLv["1"].slice(0, 30).forEach(w => { p.w[w.id] = { r: 3, w: 0, s: 3 }; }); ORDER.slice(0, 20).forEach((u, i) => { p.chars.c[u.id] = { r: 4, w: 0, s: i < 5 ? 6 : i < 12 ? 3 : 1 }; }); Object.assign(p.chars, { choiceSeen: true, turn: "w" }); return p; })();
+function progressAll(api){ api.goto("progress"); if(!/id="pvAll" aria-expanded="true"/.test(api.html("panel"))) api.el("pvAll").click(); return api.html("panel"); }
 const stripTags = h => String(h).replace(/<rt[^>]*>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+>/g, "").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&");
 const typedAnswer = it => { const w = BY_ID[String(it.key).slice(2)]; return it.label === "Type the pinyin" ? w.pron : it.label === "Type the meaning" ? VC.gloss(w) : w.w; };
 function answer(api, right, typed){
@@ -271,7 +277,7 @@ try {
   }
 
   const segs = h => [...h.matchAll(/<div class="seg">[\s\S]*?<\/i><\/div>([\s\S]*?)<\/div>/g)].map(m => stripTags(m[1]));
-  const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
+  const learnLine = h => stripTags((h.match(/<div class="tst"><span>Learn<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/) || ["", ""])[1]); // app v2 Today row
   const kind = l => /^字/.test(l) ? "C" : /^HSK/.test(l) ? "W" : "?";
   // Plays Today until stop(prog, panel) holds or the session ends.
   const play = (api, stop) => { if(!api.getD() && /id="go"/.test(api.panel())) api.el("go").click(); let guard = 0;
@@ -299,16 +305,14 @@ try {
     check(`8 sessions: Learn ${lines.map(kind).join("")} (${lines.slice(0, 4).join(" | ")} ...); no card; ${nRec(pf)} units, none before its word`, lines.map(kind).join("") === "WCWCWCWC" && card === 0 && early === 0 && nRec(pf) === 40);
     check(`stored chars keys ${Object.keys(pf.chars).join(",")}: no order, no turn written`, !("order" in pf.chars) && !("turn" in pf.chars));
     const { api } = await bootWith(PACK, ownerProg(250), 1); const h = api.panel();
-    check(`owner shape, Today: strip ${segs(h).join(" | ")}; Learn ${learnLine(h)}; no card`, segs(h).join("|") === "HSK 1|HSK 2|HSK 3|HSK 4" && /^字 HSK 2, set 11 of 15$/.test(learnLine(h)) && !/id="charChoice"/.test(h) && /id="go"/.test(h));
-    api.goto("progress"); const ph = api.html("panel");
+    const ph = progressAll(api); // app v2: the path strip is on Progress (Show all)
+    check(`owner shape, Today: strip ${segs(ph).join(" | ")}; Learn ${learnLine(h)}; no card`, segs(ph).join("|") === "HSK 1|HSK 2|HSK 3|HSK 4" && /^字 HSK 2, set 11 of 15$/.test(learnLine(h)) && !/id="charChoice"/.test(h) && /id="go"/.test(h));
     const rows = charRows(ph), row = rows.join("; ");
-    // freqTiers (engine default since the flag collapse): HSK 1's 10 peripheral units, mastered, are done.
-    check(`owner shape, Progress: "${row}"; no order chips; mix chip kept`, eq(rows, ["HSK 1 | 150 / 150 · 150 mast. · 10 done", "HSK 2 | 100 / 147 taught · 100 mastered", "HSK 3 | 0 / 298 taught · 0 mastered", "HSK 4 | 0 / 598 taught · 0 mastered"]) && !/id="ord(First|Before|After)"/.test(ph) && /id="toggleMix"/.test(ph));
-    { // per-level label: Today row and Learn card header agree with the per-level Progress counts
-      const pr = rows.map(r => { const m = r.match(/^(HSK \d) \| (\d+) \/ (\d+)/); return { lv: m[1], taught: +m[2], all: +m[3] }; });
-      const m = learnLine(h).match(/^字 (HSK \d), set (\d+) of (\d+)$/), r = m && pr.find(x => x.lv === m[1]);
-      check(`owner shape: Today "${learnLine(h)}" = Progress row ${r && r.lv}: set ${r && Math.floor(r.taught / 10) + 1} of ${r && Math.ceil(r.all / 10)}`, !!r && +m[2] === Math.floor(r.taught / 10) + 1 && +m[3] === Math.ceil(r.all / 10));
+    // freqTiers (engine default since the flag collapse): HSK 1's 10 peripheral units, mastered, are at target.
+    check(`owner shape, Progress: "${row}"; no order chips; mix chip kept`, eq(rows, OWNER_ROWS) && !/id="ord(First|Before|After)"/.test(ph) && /id="toggleMix"/.test(ph));
+    { // per-level label: the Today row agrees with lagCharSet's per-level position (app v2 Progress has no taught counts)
       const cs = VC.lagCharSet(PACK, WORDS, CHARACTERS, ownerProg(250));
+      check(`owner shape: Today "${learnLine(h)}" = lagCharSet HSK ${cs.lv}: set ${cs.lvIndex + 1} of ${cs.lvTotal}`, learnLine(h) === `字 HSK ${cs.lv}, set ${cs.lvIndex + 1} of ${cs.lvTotal}`);
       check("owner shape: lagCharSet keeps index/total (whole-pack counts) and adds lv/lvIndex/lvTotal", cs.index === 25 && cs.total === 120 && cs.lv === "2" && cs.lvIndex === 10 && cs.lvTotal === 15);
       const lf = VC.lagCharSet(PACK, WORDS, CHARACTERS, (() => { const q = VC.normalizeProg({ sets: { "1": 0 }, placedOnce: true }, PACK); byLv["1"].slice(0, 10).forEach(w => { q.w[w.id] = { r: 1, w: 0, s: 1 }; }); return q; })());
       check(`fresh learner first lag set: level ${lf.lv}, set ${lf.lvIndex + 1} of ${lf.lvTotal}`, lf.lv === "1" && lf.lvIndex === 0 && lf.lvTotal === 15);
@@ -319,10 +323,10 @@ try {
     }
     if(OLD){
       const { api: ob } = await bootWith(WITH, ownerProg(250), 1, { core: OLD, html: cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 }) });
-      const bh = ob.panel(); ob.goto("progress"); const bp = ob.html("panel");
+      const bh = ob.panel(); ob.goto("progress"); const bp = ob.html("panel"); // (an older sha: v1 Today strip)
       const brows = [...bp.matchAll(/<tr><td><bdi[^>]*>(字\d)<\/bdi><\/td><td>([^<]*)<\/td><\/tr>/g)].map(m => m[1] + " " + m[2]);
       console.log(`  owner shape before (${MAIN}): strip ${segs(bh).join(" | ")}; Learn ${learnLine(bh)}; Progress ${brows.join("; ")}; chips ${[...bp.matchAll(/id="ord\w+"[^>]*>([^<]*)</g)].map(m => m[1]).join(" / ")}`);
-      console.log(`  owner shape after: strip ${segs(h).join(" | ")}; Learn ${learnLine(h)}; Progress ${row}; no chips`);
+      console.log(`  owner shape after: strip ${segs(ph).join(" | ")}; Learn ${learnLine(h)}; Progress ${row}; no chips`);
     }
   }
 
@@ -350,11 +354,11 @@ try {
     const shown = teachUnits(api.panel());
     const cu = (() => { for(const s of [st2.ls, st2.ss]) for(const k of s.keys()){ const m = String(s.getItem(k)).match(/"cu":(\[[^\]]*\])/); if(m) return JSON.parse(m[1]); } return null; })();
     check(`teach screen: ${shown.join("")}; session record today.cu holds their ids (${(cu || []).join(",")})`, shown.length === 10 && !!cu && eq(cu.map(id => CHARACTERS.find(u => u.id === id).t), shown));
-    const head = h => stripTags((String(h).match(/<p class="q">([\s\S]*?)<\/p>/) || [])[1] || "").replace(/:.*$/, "");
-    check(`teach card header: "${head(api.panel())}"`, head(api.panel()) === "字 HSK 1, set 1 of 15");
+    const head = h => stripTags((String(h).match(/<p class="pva">([\s\S]*?)<\/p>/) || [])[1] || ""); // app v2 teach header
+    check(`teach card header: "${head(api.panel())}"`, head(api.panel()) === "HSK 1 characters, set 1 of 15");
     NOW += 60 * 1000; api = await boot(PACK, st2, 2);
     const again = teachUnits(api.panel());
-    check(`after reload (cset rebuilt from today.cu): header "${head(api.panel())}"`, head(api.panel()) === "字 HSK 1, set 1 of 15");
+    check(`after reload (cset rebuilt from today.cu): header "${head(api.panel())}"`, head(api.panel()) === "HSK 1 characters, set 1 of 15");
     check(`reload on the teach screen: the same set (${again.join("")})`, eq(again, shown));
     play(api, (_, h) => !!api.getD() && !!api.getCur() && /c:/.test(String(api.getCur().key)));
     NOW += 60 * 1000; api = await boot(PACK, st2, 3);
@@ -367,28 +371,25 @@ try {
 
   // [4] (flag off: the stage model as on main 590af86) deleted: 590af86 predates pairs, engine default since the flag collapse.
 
-  console.log("\n[5] Progress: one characters row per level");
+  console.log("\n[5] Progress: characters per level row (app v2)");
   {
-    const sum = rows => rows.reduce((a, r) => { const m = r.match(/\| (\d+) \/ (\d+)(?: taught)? · (\d+) (?:mastered|mast\.)(?: · (\d+) (?:bare|done))?$/); return { taught: a.taught + +m[1], all: a.all + +m[2], mastered: a.mastered + +m[3], bare: a.bare + +(m[4] || 0) }; }, { taught: 0, all: 0, mastered: 0, bare: 0 });
+    // App v2 (engine default since the flag collapse): the v1 "Characters" table (taught / mastered / done per level) is gone;
+    // each level row carries "characters only X of Y" under Show all: X units at target (VC.unitAtTarget) of the level's Y.
     const lvOk = CHARACTERS.every(u => String(u.lv) === String(BY_ID[u.words[0]].lv));
     check("every unit's level equals its word's level", lvOk);
-    const longest = "598 / 598 learned · 598 mastered".length;
-    const mid1 = (() => { const p = VC.normalizeProg({ sets: { "1": 3 }, placedOnce: true, soundsOpened: true, sessions: 5 }, PACK); byLv["1"].slice(0, 30).forEach(w => { p.w[w.id] = { r: 3, w: 0, s: 3 }; }); ORDER.slice(0, 20).forEach((u, i) => { p.chars.c[u.id] = { r: 4, w: 0, s: i < 5 ? 6 : i < 12 ? 3 : 1 }; }); Object.assign(p.chars, { choiceSeen: true, turn: "w" }); return p; })();
+    const want = p => ["1","2","3","4"].map(lv => { const us = CHARACTERS.filter(u => String(u.lv) === lv); return `HSK ${lv} | ${us.filter(u => VC.unitAtTarget((p.chars.c || {})[u.id], u, p, PACK)).length} of ${us.length}`; });
+    const mid1 = MID1();
     const allP = ownerProg(ORDER.length); byLv["4"].forEach(w => { allP.w[w.id] = { r: 5, w: 0, s: 5 }; });
-    const shapes = [["mid HSK 1", mid1, ["HSK 1 | 20 / 150 · 12 mastered · 5 done", "HSK 2 | 0 / 147 taught · 0 mastered", "HSK 3 | 0 / 298 taught · 0 mastered", "HSK 4 | 0 / 598 taught · 0 mastered"]],
-      ["owner", ownerProg(250), null], ["all taught", allP, null]];
-    for(const [name, p, want] of shapes){
-      const { api } = await bootWith(PACK, p, 1); api.goto("progress"); const rows = charRows(api.html("panel")); const s = sum(rows);
-      // the control vs 68930bd (its Progress html on this core) went with the flag collapse: 68930bd predates pairs; freqTiers rows say "done" (bare, or a peripheral unit mastered).
-      check(`${name}: ${rows.length} rows, sums taught ${s.taught} / ${s.all}, mastered ${s.mastered}, done ${s.bare}: ${rows.join("; ")}`, rows.length === 4 && s.taught <= s.all && (!want || eq(rows, want)));
-      check(`${name}: rows in level order, value text <= the longest word-row value (${longest})`, rows.every((r, i) => r.startsWith(`HSK ${i + 1} |`) && r.split(" | ")[1].length <= longest));
+    const every = ownerProg(ORDER.length); byLv["4"].forEach(x => { every.w[x.id] = { r: 5, w: 0, s: 5 }; }); ORDER.forEach(u => { every.chars.c[u.id] = { r: 8, w: 0, s: 8 }; });
+    for(const [name, p] of [["mid HSK 1", mid1], ["owner", ownerProg(250)], ["all taught", allP], ["every unit bare", every]]){
+      const { api } = await bootWith(PACK, p, 1); const rows = charRows(progressAll(api));
+      check(`${name}: ${rows.join("; ")}`, eq(rows, want(api.getProg())) && rows.every(r => !/^HSK \d \| 0 of 0$/.test(r)));
     }
-    { const w = ownerProg(ORDER.length); byLv["4"].forEach(x => { w.w[x.id] = { r: 5, w: 0, s: 5 }; }); ORDER.forEach(u => { w.chars.c[u.id] = { r: 8, w: 0, s: 8 }; });
-      const { api } = await bootWith(PACK, w, 1); api.goto("progress"); const rows = charRows(api.html("panel"));
-      check(`worst case, every unit bare (done): "${rows[3]}" (<= ${longest} chars in every row: ${rows.map(r => r.split(" | ")[1].length).join(", ")})`, rows.length === 4 && rows.every(r => r.split(" | ")[1].length <= longest) && /598 done$/.test(rows[3])); }
-    const fo = await bootWith(PACK, ownerProg(250), 1); fo.api.goto("progress");
-    const fresh0 = await bootWith(PACK, null, 1); fresh0.api.goto("progress");
-    check("fresh learner: no characters rows (not started)", charRows(fresh0.api.html("panel")).length === 0);
+    { const { api } = await bootWith(PACK, every, 1); const rows = charRows(progressAll(api));
+      check(`every unit bare: all at target (${rows.join("; ")})`, rows.length === 4 && rows.every(r => { const m = r.match(/(\d+) of (\d+)$/); return m[1] === m[2]; })); }
+    const fo = await bootWith(PACK, ownerProg(250), 1); progressAll(fo.api);
+    const fresh0 = await bootWith(PACK, null, 1);
+    check("fresh learner: no characters parts (not started)", charRows(progressAll(fresh0.api)).length === 0);
     check("boot + Progress write nothing new: stored chars keys unchanged", Object.keys(JSON.parse(fo.st.ls.getItem(VC.storageKey(PACK))).chars).sort().join() === Object.keys(ownerProg(250).chars).sort().join());
   }
 
