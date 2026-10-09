@@ -3,9 +3,8 @@
 // rotation (core.js typedKinds/typedSlotKind/typedKindOk), [2] typed-meaning matcher
 // (checkGlossTyped) and gloss formatter (glossParts), [3] app items on the zh pack: fallback
 // when characters are not displayed, stimulus leaks (audio, taps, ruby, readings, tags), the
-// renderer, choice fallback, miss kind, [4] glossFocus render sites, [5] control: with both
-// fields absent the zh markup is byte-identical to main ef44c6e's engine and plans are
-// unchanged. The fix round adds reading notes kept off stimuli, the truncated / lone-letter /
+// renderer, choice fallback, miss kind, [4] glossFocus render sites ([5], the control vs main
+// ef44c6e, went with the flag collapse: it predates pairs). The fix round adds reading notes kept off stimuli, the truncated / lone-letter /
 // "A or B" matcher rules, qualifier placement and the characters -> pinyin choice fallback
 // ([2], [3]). Boots engine/app.html in the fake DOM of tests/pron_aids_checks.js.
 // Run: node tests/typed_from_checks.js
@@ -20,7 +19,6 @@ const cp = require("child_process");
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
-const MAIN = "ef44c6e"; // main before typedFrom/glossFocus
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
@@ -428,7 +426,7 @@ function walk(api, stopAt){
     const r4 = run(0, "zzz not it");
     const rec = r4.prog.w[w.id];
     check(`renderer, a wrong meaning: 'you typed' shown, the miss is k="type" and the record keeps its shape (${JSON.stringify(rec)})`,
-      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov", "t", "u", "f"].includes(k)));
+      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov", "t", "u", "f", "p"].includes(k))); // p: pair streaks (pairs, engine default since the flag collapse)
     // Second miss: the silent choice counterpart with the same stimulus.
     api.setProg(atTierProg([w]));
     const plan = typePlan(w, 7); const mi = api.itemFromPlan(plan[0], 0, plan);
@@ -531,43 +529,9 @@ function walk(api, stopAt){
     check("glossFocus off: raw gloss everywhere, no dim span", off.glossOut(g) === raw && off.revealBlock(w).includes(raw) && !/class="dim"/.test(off.revealBlock(w) + off.wordRowHTML(w, "wl")) && off.readItem(w).optHtml === undefined);
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  // ---------------------------------------------------------------- [5] control vs main
-  console.log(`\n[5] control: typedFrom + glossFocus absent -> HTML byte-identical to main ${MAIN}`);
-  {
-    let mainHtml = null, mainCore = null;
-    try{
-      mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const src = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); mainCore = m.exports;
-    }catch(e){ console.log("    cannot read main: " + e.message); }
-    check(`main ${MAIN} engine loaded from git (a missing sha is a failure)`, !!mainHtml && !!mainCore);
-    async function screens(html, core, pack, seed){
-      const { api } = await boot({ html, core, pack, seed, words: WORDS_OFF });
-      const out = {};
-      api.setProg(seedPF()); api.today(); out.today = api.html("panel");
-      api.el("go").click();
-      let walked = []; try{ walked = walk(api, /id="again"/); }catch(e){ walked = [{ where: "ERR", html: e.message }]; }
-      out.walk = walked.map(x => x.where + "\n" + x.html).join("\n----\n");
-      const ws = WORDS_OFF.filter(x => x.lv === "1").slice(0, 40);
-      api.setProg(atTierProg(ws.slice(0, 20)));
-      out.items = ws.map(x => { const p = typePlan(x, 3); return p.map(api.itemFromPlan).map(it => it.label + it.html + it.reveal + (it.placeholder || "")).join("\n"); }).join("\n");
-      out.reveals = ws.map(x => api.revealBlock(x) + api.wordRowHTML(x, "wl") + api.glossHTML(x.id, "", null)).join("\n");
-      api.wordsPage("1", 0); out.words = api.html("panel") + api.el("wl").children.map(c => c.innerHTML).join("|");
-      return out;
-    }
-    if(mainHtml && mainCore){
-      const cases = [["zh, typing pron", PACK_BASE], ["zh, typing object", Object.assign({}, PACK_BASE, { typing: { caseSensitive: false, accents: "lenient", strictFromLevel: null } })]];
-      for(const [name, pk] of cases){
-        const a = await screens(mainHtml, mainCore, pk, 11), b = await screens(CUR_HTML, VC, pk, 11);
-        for(const k of Object.keys(a)){
-          let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
-          check(`${name}: ${k} byte-identical to main (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: main ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);
-        }
-      }
-    }
-  }
+  // [5] control vs main ef44c6e deleted: it predates pairs and dayAware, engine default since the flag collapse.
 
-  console.log("\n[6] typedFrom with pack.dayAware on (zh as shipped): two Today sessions in one day");
+  console.log("\n[6] typedFrom with the day-aware planner (engine default): two Today sessions in one day");
   try {
     const { api } = await boot({ seed: 9 });
     // Mid HSK 2 with characters put after the words: with one stage per level (fb2-write) 字1
@@ -580,7 +544,7 @@ function walk(api, stopAt){
     const rep = typed(s2).filter(x => done1.has(x.where + "|" + x.it.label));
     const labels = new Set(typed(s2).map(x => x.it.label));
     check(`session 2 still asks typed items from the target side (${[...labels].join(", ")}; ${typed(s1).length} / ${typed(s2).length} typed), none a word typed right in the same way in session 1 (${rep.length})`,
-      PACK.dayAware === true && typed(s1).length > 0 && typed(s2).length > 0 && rep.length === 0 && [...labels].some(l => l !== "Type the pinyin"));
+      typed(s1).length > 0 && typed(s2).length > 0 && rep.length === 0 && [...labels].some(l => l !== "Type the pinyin"));
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
