@@ -2327,8 +2327,9 @@ return {
       taught.includes(R.inserted) && taught.includes(R.swappedIn) && taught.every(id => !R.learnedIds.has(id)) && taught.length === R.size);
     api.wordsTab();
     const wb = api.getHtml("wbody");
-    check("app, reordered level: Words tab opens the slice holding the first unlearned word, not marked done",
-      /Set 1 \/ \d+<\/button>/.test(wb));
+    // frequency tiers: the learned sets come first (3 here), then the unlearned words in rank order
+    check("app, reordered level: Words tab opens the slice holding the first unlearned word (after the 3 learned sets), not marked done",
+      /Set 4 \/ \d+<\/button>/.test(wb));
   }catch(e){ check(`app reordered-level scenario does not throw (got: ${e.message})`, false); }
 
   // A leftover teach can be the level's last unlearned set (nothing fresh remains after it)
@@ -2340,8 +2341,6 @@ return {
     const scatter = [...new Set([5, Math.floor(l1.length/3), Math.floor(2*l1.length/3), l1.length-1])].filter(v => v >= 0 && v < l1.length);
     const pr = VC.normalizeProg({}, PACK);
     l1.forEach((w,i) => { if(!scatter.includes(i)) pr.w[w.id] = { r:1, w:0, s:1 }; });
-    check("precondition: leftover teach's rank-position label is short of the level's true set count",
-      VC.levelNewSet(WORDS, PACK, pr, "1").set + 1 < nSetsL1);
     const { api } = await bootApp([{ lang:"zh-CN", name:"x" }]);
     api.setProgT(pr);
     api.enterTodayStep(1);
@@ -2385,8 +2384,8 @@ return {
       l1.slice(0, size).every(w => !p1.w[w.id].d) && p1.sets["1"] === 2 && util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, p1).map(w => w.id), before));
     api.setWordsSet(4); api.clickId("dr"); api.finishDrill();
     const p2 = api.getProg();
-    check("app Words tab: drilling an untaught slice ahead flags exactly its words d, counter stops at the gap",
-      l1.slice(4*size, 5*size).every(w => p2.w[w.id] && p2.w[w.id].d === 1) && l1.slice(0, 2*size).every(w => !p2.w[w.id].d) && p2.sets["1"] === 2);
+    check("app Words tab: drilling an untaught slice ahead flags exactly its words d; the counter counts learned words (frequency tiers: 30 -> 3)",
+      l1.slice(4*size, 5*size).every(w => p2.w[w.id] && p2.w[w.id].d === 1) && l1.slice(0, 2*size).every(w => !p2.w[w.id].d) && p2.sets["1"] === 3);
   }catch(e){ check(`app Words-tab re-drill scenario does not throw (got: ${e.message})`, false); }
 })();
 
@@ -3097,8 +3096,8 @@ async function swChecks(){
   const span = VC.normalizeProg({ sets:{ "1": 0 } }, PACK);
   rec(span, l1.slice(0, size - 2)); rec(span, l1.slice(size, size + 2));
   const nnSpan = teach(span, "1");
-  check("teach spanning two sets (2 leftovers of set 1 + 8 of set 2) -> counter advances by two, not to nn.set+1",
-    nnSpan.set === 0 && VC.settleSetCounter(span, WORDS, PACK, "1") === 2 && span.sets["1"] === 2);
+  check("teach spanning two sets (2 leftovers of set 1 + 8 of set 2) -> counter advances by two (set = sets learned by count: 1)",
+    nnSpan.set === 1 && VC.settleSetCounter(span, WORDS, PACK, "1") === 2 && span.sets["1"] === 2);
   const within = VC.normalizeProg({ sets:{ "1": 1 } }, PACK);
   rec(within, l1.slice(0, size));
   const nnWithin = teach(within, "1");
@@ -3108,7 +3107,7 @@ async function swChecks(){
   check("partial set recorded -> counter unchanged", VC.settleSetCounter(partial, WORDS, PACK, "1") === 1);
   const ahead = VC.normalizeProg({ sets:{ "1": 1 } }, PACK);
   rec(ahead, l1.slice(0, size)); rec(ahead, l1.slice(2*size, 3*size));
-  check("a drilled-ahead set past a gap does not move the counter", VC.settleSetCounter(ahead, WORDS, PACK, "1") === 1);
+  check("a drilled-ahead set past a gap counts by learned words (frequency tiers: 20 learned -> 2)", VC.settleSetCounter(ahead, WORDS, PACK, "1") === 2);
   const kept = VC.normalizeProg({ sets:{ "1": 5 } }, PACK);
   rec(kept, l1.slice(0, size));
   check("never lowers a stored counter within the level's set count", VC.settleSetCounter(kept, WORDS, PACK, "1") === 5);
