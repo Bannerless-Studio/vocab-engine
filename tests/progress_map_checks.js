@@ -32,6 +32,7 @@ const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 function clone0(x){ return JSON.parse(JSON.stringify(x)); }
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
+// A goal-less progressMap: true (the whole-pack bar) is ignored since the flag collapse (stage 3): no progress map.
 const LEG = Object.assign(clone0(PACK), { progressMap: true });
 // fb21 changes optsMix picks (and stamps f), which the flag-off controls vs older shas do not measure: they run without it.
 const OFF = packAsOf(PACK, MAIN);
@@ -247,13 +248,12 @@ const NOCH = (p => { const q = clone(p); delete q.characters; return q; })(PACK)
 const bareOf = lvUnits => lvUnits.forEach(u => { u.s = VC.charsConfig(PACK).bare; });
 const pm14 = (p0, step, sn0) => Array.from({ length: 14 }, (_, i) => ({ sn: (sn0 || 20) + i, p: Math.round((p0 + step * i) * 1000) / 1000 }));
 // App v2 (engine default since the flag collapse): a goal-less progressMap keeps the bar line, the eta line only when there is one.
-const pmRow = h => { const m = String(h).match(/<div class="pmap" id="pmap"[^>]*><div class="pm1">[\s\S]*?<\/div>(?:<div class="pm2">[\s\S]*?<\/div>)?<\/div>/); return m ? m[0] : null; };
 const etaOf = n => { if(!n) return ""; const r = n >= 100 ? Math.round(n / 10) * 10 : n; return r > 999 ? "≈\u00a0999+ sessions" : `≈\u00a0${r} session${r === 1 ? "" : "s"}`; }; // app.html etaText
 
 (async function main(){
   console.log("\n[1] progressPosition");
   {
-    check("packs/zh ships 3 goals (upTo 2, 3, 4); progressMap: true stays the old bar", eq(PACK.progressMap.goals.map(g => g.upTo), ["2", "3", "4"]) && VC.progressMapOn(PACK) && VC.progressMapOn(LEG) && !VC.progressMapOn(OFF) && VC.progressMapGoals(LEG).length === 0);
+    check("packs/zh ships 3 goals (upTo 2, 3, 4); progressMap: true (no goals) is off since the flag collapse", eq(PACK.progressMap.goals.map(g => g.upTo), ["2", "3", "4"]) && VC.progressMapOn(PACK) && !VC.progressMapOn(LEG) && !VC.progressMapOn(OFF) && VC.progressMapGoals(LEG).length === 0);
     // "progressMapOn needs dayAware" deleted: dayAware is engine default since the flag collapse.
     const p = base(); const pos = (pr, pk, u, ps) => VC.progressPosition(pr, pk || LEG, WORDS, u === undefined ? CHARACTERS : u, ps === undefined ? PASSAGES : ps);
     check("nothing known: 0", pos(p) === 0);
@@ -283,10 +283,11 @@ const etaOf = n => { if(!n) return ""; const r = n >= 100 ? Math.round(n / 10) *
   {
     const p = allProg(); p.sn = 5;
     check("flag off: nothing written", VC.recordProgressMap(p, OFF, WORDS, CHARACTERS, PASSAGES) === false && !("pm" in p));
-    check("flag on: one { sn, p } entry, p to 3 decimals", VC.recordProgressMap(p, LEG, WORDS, CHARACTERS, PASSAGES) && p.pm.length === 1 && eq(Object.keys(p.pm[0]), ["sn", "p"]) && p.pm[0].sn === 5 && p.pm[0].p === Math.round(p.pm[0].p * 1000) / 1000);
-    VC.recordProgressMap(p, LEG, WORDS, CHARACTERS, PASSAGES);
+    check("progressMap: true (no goals): nothing written", VC.recordProgressMap(p, LEG, WORDS, CHARACTERS, PASSAGES) === false && !("pm" in p));
+    check("goals: one { sn, p, g } entry, p to 3 decimals", VC.recordProgressMap(p, PACK, WORDS, CHARACTERS, PASSAGES) && p.pm.length === 1 && eq(Object.keys(p.pm[0]), ["sn", "p", "g"]) && p.pm[0].sn === 5 && p.pm[0].p === Math.round(p.pm[0].p * 1000) / 1000);
+    VC.recordProgressMap(p, PACK, WORDS, CHARACTERS, PASSAGES);
     check("same sn replaces, no duplicate", p.pm.length === 1);
-    for(let i = 6; i <= 25; i++){ p.sn = i; VC.recordProgressMap(p, LEG, WORDS, CHARACTERS, PASSAGES); }
+    for(let i = 6; i <= 25; i++){ p.sn = i; VC.recordProgressMap(p, PACK, WORDS, CHARACTERS, PASSAGES); }
     check(`capped at 14 (sn ${p.pm[0].sn}..${p.pm[13].sn})`, p.pm.length === 14 && p.pm[0].sn === 12 && p.pm[13].sn === 25);
     check("validateProgShape accepts pm; a malformed pm is rejected", VC.validateProgShape(p, Object.keys(p.sets)).ok && !VC.validateProgShape(Object.assign(clone(p), { pm: [{ sn: "1", p: 0 }] }), Object.keys(p.sets)).ok && !VC.validateProgShape(Object.assign(clone(p), { pm: {} }), Object.keys(p.sets)).ok);
   }
@@ -304,33 +305,22 @@ const etaOf = n => { if(!n) return ""; const r = n >= 100 ? Math.round(n / 10) *
     check("p 1 at positive pace: 0", g(pm14(0.87, 0.01)) === 0);
   }
 
-  console.log("\n[4] Today row");
+  // [4] (the whole-pack Today bar of a goal-less progressMap: true) went with the flag collapse (stage 3); [10] covers the goal row.
+  console.log("\n[4] Today row: none without goals");
   {
-    const mk = pm => { const p = midProg(); if(pm) p.pm = pm; return p; };
-    for(const [label, pm] of [["no history", null], ["14 sessions", pm14(0.05, 0.01)], ["flat", pm14(0.2, 0)]]){
-      const { api } = await bootWith(LEG, mk(pm), 1);
-      const h = api.panel(), row = pmRow(h), pos = VC.progressPosition(api.getProg(), LEG, WORDS, CHARACTERS, PASSAGES), f = Math.round(10 * pos);
-      const l1 = stripTags((row.match(/<div class="pm1">([\s\S]*?)<\/div>/) || [])[1] || ""), l2 = stripTags((row.match(/<div class="pm2">([\s\S]*?)<\/div>/) || [])[1] || "");
-      const eta = etaOf(VC.sessionsToGoX(api.getProg()));
-      check(`${label}: "${l1}" / "${l2}"`, !!row && l1 === `You ▸ [${"■".repeat(f)}${"□".repeat(10 - f)}] ▸ follow a drama without pausing` && l2 === eta && /<div class="pm2">/.test(row) === !!eta);
-      check(`${label}: above the plan rows, no wrap (${l1.length} chars), aria with percent`, h.indexOf('class="pmap"') < h.indexOf('<section class="tsts">') && l1.length <= 52 && !/<br/.test(row) && new RegExp(`aria-label="${Math.round(pos * 100)}% of the way`).test(row));
-    }
-    const { api } = await bootWith(LEG, mk(null), 1);
-    api.el("pmap").click();
-    check("tap opens Progress", !/id="pmap"/.test(api.panel()) && /id="pvAll"/.test(api.panel()) && !/id="go"/.test(api.panel()));
-    const off = await bootWith(OFF, mk(null), 1);
-    check("flag off: no row", !/pmap|You ▸/.test(off.api.panel()));
+    const leg = await bootWith(LEG, midProg(), 1), off = await bootWith(OFF, midProg(), 1);
+    check("progressMap: true (no goals) and no progressMap: no row on Today", !/id="pmap"|You ▸/.test(leg.api.panel()) && !/id="pmap"|You ▸/.test(off.api.panel()));
   }
 
   console.log("\n[5] a session writes pm");
   {
-    const { api, st } = await bootWith(LEG, midProg(), 1);
+    const { api, st } = await bootWith(PACK, midProg(), 1);
     const sn0 = api.getProg().sn || 0; playSession(api);
-    const pr = JSON.parse(st.ls.getItem(VC.storageKey(LEG)));
-    check(`Session done appends { sn ${sn0 + 1}, p } (${JSON.stringify(pr.pm)})`, Array.isArray(pr.pm) && pr.pm.length === 1 && pr.pm[0].sn === sn0 + 1 && pr.pm[0].p === Math.round(VC.progressPosition(pr, LEG, WORDS, CHARACTERS, PASSAGES) * 1000) / 1000);
-    playSession(api); const p2 = JSON.parse(st.ls.getItem(VC.storageKey(LEG)));
+    const pr = JSON.parse(st.ls.getItem(VC.storageKey(PACK))), cg = VC.currentGoal(pr, PACK, WORDS, CHARACTERS, PASSAGES);
+    check(`Session done appends { sn ${sn0 + 1}, p, g } (${JSON.stringify(pr.pm)})`, Array.isArray(pr.pm) && pr.pm.length === 1 && pr.pm[0].sn === sn0 + 1 && pr.pm[0].g === cg.i && pr.pm[0].p === Math.round(cg.p * 1000) / 1000);
+    playSession(api); const p2 = JSON.parse(st.ls.getItem(VC.storageKey(PACK)));
     check("a second session appends a second entry", p2.pm.length === 2 && p2.pm[1].sn === sn0 + 2);
-    check("a stored pm survives reload and a re-save", (() => { const q = JSON.parse(st.ls.getItem(VC.storageKey(LEG))); const b = VC.bootProg(JSON.stringify(q), LEG); return b.backupRaw === null && eq(b.prog.pm, q.pm); })());
+    check("a stored pm survives reload and a re-save", (() => { const q = JSON.parse(st.ls.getItem(VC.storageKey(PACK))); const b = VC.bootProg(JSON.stringify(q), PACK); return b.backupRaw === null && eq(b.prog.pm, q.pm); })());
   }
   // flag-off control vs a2f2426 deleted: it predates pairs, engine default since the flag collapse.
 
@@ -387,8 +377,8 @@ const etaOf = n => { if(!n) return ""; const r = n >= 100 ? Math.round(n / 10) *
     const p = base(); p.sn = 7; WORDS.filter(w => ["1", "2"].includes(w.lv)).forEach(w => { p.w[w.id] = { r: 3, w: 0, s: 3 }; });
     VC.recordProgressMap(p, PACK, WORDS, [], []);
     check("goal pack writes { sn, p, g } with g = the current goal index (HSK 1-2 words all known, no units: goal 2)", eq(Object.keys(p.pm[0]), ["sn", "p", "g"]) && p.pm[0].g === 1);
-    const q = allProg(); q.sn = 3; VC.recordProgressMap(q, LEG, WORDS, CHARACTERS, PASSAGES);
-    check("progressMap: true still writes { sn, p } only", eq(Object.keys(q.pm[0]), ["sn", "p"]));
+    const q = allProg(); q.sn = 3;
+    check("progressMap: true (no goals) writes nothing since the flag collapse", VC.recordProgressMap(q, LEG, WORDS, CHARACTERS, PASSAGES) === false && !("pm" in q));
     const mk = (n, g, p0) => Array.from({ length: n }, (_, i) => Object.assign({ sn: 20 + i, p: Math.round((p0 + 0.01 * i) * 1000) / 1000 }, g === undefined ? {} : { g }));
     const s2g = (pm, g, n) => VC.sessionsToGo({ pm }, g, n);
     check("14 entries of goal 0: goal 0 has a pace (ceil((0.9 - 0.23)/0.01) = 67); goal 1 restarts (null)", s2g(mk(14, 0, 0.1), 0, 3) === 67 && s2g(mk(14, 0, 0.1), 1, 3) === null);
@@ -431,7 +421,7 @@ const etaOf = n => { if(!n) return ""; const r = n >= 100 ? Math.round(n / 10) *
     const gb = (api.panel().match(/<section class="pvls" id="pvGoals">([\s\S]*?)<\/section>/) || [])[1] || "", gr = [...gb.matchAll(/<span>(Goal \d)<\/span><span class="pvn">(\d+)%<\/span><\/div><p class="pvs">([^<]*)<\/p>/g)];
     const ps = VC.goalPositions(api.getProg(), PACK, WORDS, CHARACTERS, PASSAGES);
     check(`tap opens Progress; Show all lists the goals, one row per goal (${gr.map(m => m[1] + " " + m[2] + "%").join(", ")})`, !/id="pmap"/.test(api.panel()) && gr.length === 3 && gr.every((m, i) => +m[2] === Math.round(ps[i] * 100) && m[3] === G[i].label));
-    const lg = await bootWith(LEG, hsk12(), 1); lg.api.el("pmap").click(); lg.api.el("pvAll").click();
+    const lg = await bootWith(LEG, hsk12(), 1); lg.api.goto("progress"); lg.api.el("pvAll").click();
     check("progressMap: true: no goal section, no Goals list on Progress", !/id="pvGoals"|class="pvg"/.test(lg.api.panel()));
     const off = await bootWith(OFF, hsk12(), 1); off.api.goto("progress"); off.api.el("pvAll").click();
     check("flag off: no row, no goal section, no Goals list", !/pmap|id="pvGoals"|class="pvg"/.test(off.api.panel()));

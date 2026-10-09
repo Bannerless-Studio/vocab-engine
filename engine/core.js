@@ -2601,12 +2601,12 @@ function goalPositions(prog, pack, words, units, passages){
   return progressMapGoals(pack).map(g => goalPosition(prog, pack, g, words, units, passages));
 }
 // Optional prog.pm: older engines keep it on boot (validateProgShape ignores unknown top-level fields).
-// Goal packs add g (goal index) per entry, also optional.
+// Entries are {sn, p, g} (g = the current goal index); an older record's {sn, p} entries (the goal-less bar, gone with the
+// flag collapse) stay valid.
 function recordProgressMap(prog, pack, words, units, passages){
-  if(!progressMapOn(pack) || !prog) return false;
-  const cg = currentGoal(prog, pack, words, units, passages);
-  const e = cg ? { sn: daySn(prog), p: Math.round(cg.p * 1000) / 1000, g: cg.i }
-    : { sn: daySn(prog), p: Math.round(progressPosition(prog, pack, words, units, passages) * 1000) / 1000 };
+  const cg = prog ? currentGoal(prog, pack, words, units, passages) : null;
+  if(!cg) return false;
+  const e = { sn: daySn(prog), p: Math.round(cg.p * 1000) / 1000, g: cg.i };
   const pm = Array.isArray(prog.pm) ? prog.pm.filter(x => isObj(x) && x.sn !== e.sn) : [];
   pm.push(e);
   prog.pm = pm.slice(-PM_KEEP);
