@@ -39,7 +39,7 @@ function basePack(extra){
   return Object.assign({
     key: "synthchar", name: "Synth", tts: "en-US",
     levels: [{ id: "1", label: "One" }, { id: "2", label: "Two" }],
-    placement: [["1", 2], ["2", 2]],
+    placement: [["1", 2], ["2", 2]], placementItems: [2, 3], // the 3-word second bucket is under the [3, 4] default's 4-word minimum
     showPron: false, hasLessons: false, eta: {},
   }, extra);
 }

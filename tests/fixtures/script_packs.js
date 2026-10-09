@@ -15,7 +15,8 @@ function lvWords(prefix, lv, list){
 }
 function basePack(key, tts, extra){
   return Object.assign({ key, name: key, tts, levels: [{ id: "A1", label: "A1" }, { id: "A2", label: "A2" }],
-    placement: [["A1", 2], ["A2", 2]], typing: null, showPron: false, hasLessons: false, eta: {} }, extra); // eta: required pack data (validate_pack) since the flag collapse
+    // placementItems [2, 3]: the 13-word levels leave a 3-word bucket, under the [3, 4] default's 4-word minimum (validate_pack, placement-mix)
+    placement: [["A1", 2], ["A2", 2]], placementItems: [2, 3], typing: null, showPron: false, hasLessons: false, eta: {} }, extra); // eta: required pack data (validate_pack) since the flag collapse
 }
 
 // ------------------------------------------------------------------ ko-like
