@@ -144,7 +144,7 @@ return {
   hasScript: () => HAS_SCRIPT, scriptTab: () => SCRIPT_TAB, byId: () => SCRIPT_BYID,
   scriptDrillItem, scriptCtx, kindCtx: () => scriptKindCtx(), scriptTeachHTML, scriptChartHTML, scriptHL, drill,
   panelListeners: () => document.getElementById("panel")._listeners.click || [],
-  ui, tf, glossHTML, glossBox, revealBlock, wordRowHTML, readItem, recallItem, typeItem, sentenceRowHTML, sentenceRevealBlock, startPlacement,
+  ui, tf, glossHTML, glossBox, revealBlock, wordRowHTML, readItem, recallItem, typeItem, sentenceRowHTML, sentenceRevealBlock, startPlacement, getPL: () => PL,
   startPassage: (p, today, mode) => { tab = "read"; startPassage(p, today, mode); }, rd: () => RD,
 };`;
   const names = ["document","window","SpeechSynthesisUtterance","navigator","location","localStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","PACK","WORDS","SENTENCES","LESSONS","PASSAGES"];
@@ -773,7 +773,30 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     api.goto("progress"); sites.progress = api.html("panel");
     api.goto("test"); sites.testTab = api.html("panel");
     api.goto("words"); sites.wordsTab = api.html("panel") + (api.html("wbody") || "");
-    api.startPlacement(); sites.placement = api.html("panel") + optsMarkup(api);
+    // placement-mix: walk the placement; each kind's first card is an audited site (read-or-hear, recall, and typed on a typing copy).
+    const placeWalk = (a, typedRight) => {
+      a.startPlacement(); const out = {};
+      for(let i = 0; i < 80 && /Words \d+ \/ \d+/.test(a.html("panel")); i++){
+        const PLx = a.getPL(), it = PLx.vocab.items[PLx.vocab.i - 1], q = PLx.cur;
+        if(!out[it.kind]) out[it.kind] = { h: a.html("panel"), o: optsMarkup(a), label: q.label };
+        if(/id="tin"/.test(a.html("panel"))){
+          const r0 = PLx.res[it.b].r, ok = typedRight && !out.typeRv;
+          a.el("tin").value = ok ? it.w.w : "zzz"; a.el("submit").click();
+          if(!out.typeRv) out.typeRv = { rv: a.html("rv"), ok, counted: PLx.res[it.b].r - r0 };
+          a.el("nx").click();
+        } else a.el("o").children[0].click();
+      }
+      out.done = /Start at/.test(a.html("panel"));
+      return out;
+    };
+    const pw = placeWalk(api, false);
+    sites.placement = pw.read.h + pw.read.o; sites.placementRecall = pw.recall.h + pw.recall.o;
+    const FAT = Object.assign({}, FA, { pack: Object.assign({}, FA.pack, { typing: { caseSensitive: false, accents: "lenient", strictFromLevel: null } }) });
+    const pwt = placeWalk((await boot(FAT)).api, true);
+    sites.placementType = pwt.type.h; sites.placementTypeReveal = pwt.typeRv.rv;
+    check(`rtl placement walk: read, recall (${pw.recall.label}) and, on the typing copy, typed (${pwt.type && pwt.type.label}) cards; the typing:null fixture asks no typed card`,
+      pw.done && pwt.done && !pw.type && pw.recall.label === "Which word is this?" && /id="o"/.test(pw.recall.h) && pwt.type.label === "Type the word" && /id="tin"/.test(pwt.type.h));
+    check("rtl placement typed: the right answer counts once and its reveal shows the word row", pwt.typeRv.ok && pwt.typeRv.counted === 1 && /class="rw/.test(pwt.typeRv.rv));
     check("script notes render on the teach screen with their RTL fragment in the pack font (the fixture note is live)",
       /Short vowels are not written: <bdi data-tl lang="fa" dir="rtl" class="tlf">کتاب<\/bdi> is read ketâb\./.test(sites.scriptTeach));
     check("sentence translation: an RTL phrase with an ellipsis is one isolated run",
@@ -781,7 +804,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     const TLF = 'class="tlf">الفبا</bdi>';
     check("stage label as a pack fragment in UI lines is tf() (class tlf) at every site: Today plan, teach heading, Script chart, Progress row",
       sites.today.split(TLF).length - 1 >= 1 && sites.scriptTeach.includes(TLF) && sites.scriptTab.includes(TLF) && sites.progress.includes(TLF));
-    check("placement options: meaning glosses with RTL fragments rendered through ui()", /class="tlf">/.test(optsMarkup(api)));
+    check("placement options: meaning glosses with RTL fragments rendered through ui()", /class="tlf">/.test(pw.read.o));
     // Listening pass (engine-listen-mode) on an RTL pack: play rows, Play all / Show text,
     // the revealed text, an audio-only question before and after "Show question", results.
     {

@@ -139,7 +139,7 @@ def check_pack(pack, rep):
     if "placementItems" in pack:
         pi = pack["placementItems"]
         if not (isinstance(pi, list) and pi and all(isinstance(x, int) and not is_bool(x) and x > 0 for x in pi)):
-            rep.err("pack.placementItems must be a list of positive integers (default [2, 3])")
+            rep.err("pack.placementItems must be a list of positive integers (default [3, 4])")
     if "spaced" in pack and not is_bool(pack["spaced"]):
         rep.err("pack.spaced must be a boolean")
     if "compounds" in pack and not (isinstance(pack["compounds"], list) and all(is_str(c) for c in pack["compounds"])):
@@ -596,7 +596,15 @@ def check_synonyms(words, by_id, rep):
                 rep.err(f"{where}.{f} must be true when present")
 
 
-MIN_BUCKET_WORDS = 3  # placement draws up to 3 items per bucket (core.js placementItemCount)
+DEFAULT_PLACEMENT_ITEMS = [3, 4]  # core.js DEFAULT_PLACEMENT_ITEMS
+
+
+def min_bucket_words(pack):
+    """A bucket must hold the most items placement draws from it (core.js placementItemCount)."""
+    pi = pack.get("placementItems")
+    if isinstance(pi, list) and pi and all(isinstance(x, int) and not is_bool(x) and x > 0 for x in pi):
+        return max(pi)
+    return max(DEFAULT_PLACEMENT_ITEMS)
 
 
 def strata(words, spec, set_size):
@@ -634,9 +642,10 @@ def check_placement(pack, words, rep):
         nsets = -(-n // size)
         if nb > nsets:
             rep.err(f"placement level {lv}: {nb} buckets but only {nsets} sets")
+    need = min_bucket_words(pack)
     for i, b in enumerate(strata(words, spec, size)):
-        if b["n"] < MIN_BUCKET_WORDS:
-            rep.err(f"placement bucket {i} (level {b['lv']}, sets {b['s0'] + 1}-{b['s1']}) has {b['n']} words; needs >= {MIN_BUCKET_WORDS}")
+        if b["n"] < need:
+            rep.err(f"placement bucket {i} (level {b['lv']}, sets {b['s0'] + 1}-{b['s1']}) has {b['n']} words; needs >= {need}")
 
 
 def check_ruby(ruby, t, ws, char_word0, where, rep, null_ok=False):

@@ -907,12 +907,21 @@ function strata(pool, bucketSpec, setSize){
   });
   return out;
 }
-// Default matches the fixed 2/3 alternation shipped before this field existed, so a pack
-// without it renders byte-identically (flag-off proof).
-const DEFAULT_PLACEMENT_ITEMS = [2, 3];
+// 3 then 4 (was 2 then 3): every bucket asks each placement kind at least once (owner 2026-10-09: placed at the top of Italian,
+// then 4/15 in Review on typed basics, because placement asked recognition only).
+const DEFAULT_PLACEMENT_ITEMS = [3, 4];
 function placementItemCount(bucketIndex, pack){
   const items = (pack && Array.isArray(pack.placementItems) && pack.placementItems.length) ? pack.placementItems : DEFAULT_PLACEMENT_ITEMS;
   return items[bucketIndex % items.length];
+}
+// Placement measures what Review measures (TODO.md "placement leniency"): each bucket rotates read-or-hear, recall (meaning ->
+// word choice) and type (meaning -> typed word), starting one kind later per bucket; a pack without typing asks recall instead,
+// as Review does. No rng, so a seeded walk stays reproducible.
+const PLACEMENT_KINDS = ["read", "recall", "type"];
+function placementKinds(bucketIndex, n, pack){
+  const typing = typingEnabled(pack), out = [];
+  for(let j = 0; j < n; j++){ const k = PLACEMENT_KINDS[(bucketIndex + j) % PLACEMENT_KINDS.length]; out.push(k === "type" && !typing ? "recall" : k); }
+  return out;
 }
 
 // The placement stop (owner 2026-10-08: a 1/2 opening bucket zeroed a 22/30 test; the earlier 3-bucket window rule judged the
@@ -4564,7 +4573,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,
   findSurface, textForms, locateWord, packSurfaces, spannedByLonger, gapMatch, gapCandidateIndices, blankSentence,
-  strata, placementItemCount, placementEarlyStopAfter, placementNotAsked, placementStopIndex, placementSkipped, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
+  strata, placementItemCount, placementKinds, PLACEMENT_KINDS, placementEarlyStopAfter, placementNotAsked, placementStopIndex, placementSkipped, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,

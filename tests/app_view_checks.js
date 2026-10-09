@@ -871,15 +871,15 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
 console.log("\n[D2] fb48: placement reads the whole result (pack.placementWhole)");
 {
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
-  // right answers per bucket (zh asks 2,3,2,3,...); the first 12 are the owner-reported record
+  // right answers per bucket (zh asks 3,4,3,4,... since placement-mix); the first 12 are the owner-reported record
   const RECS = {
-    "reported record": [1, 3, 2, 0, 2, 2, 2, 2, 2, 3, 1, 2, 0, 0, 0, 0],
+    "reported record": [1, 3, 2, 0, 2, 2, 2, 2, 2, 3, 1, 2, 0, 0, 0, 0].map((r, i) => ({ r, n: i % 2 ? 3 : 2 })), // asked under the 2,3 counts of the time
     "all right": N.slice(),
     "first bucket 0": N.map((n, i) => i === 0 ? 0 : n),
     "poor": N.map((n, i) => i < 2 ? n : 0),
   };
   const place = async (pack, rec, r, o) => { const { api, st } = await bootWith(pack, rec, 13, o);
-    api.ev(`PL = { vocab:{items:[], i:0}, st: VC.strata(WORDS, PACK.placement, SIZE), res: ${JSON.stringify(r.map((x, i) => ({ r: x, n: N[i] })))} }; placeResult();`);
+    api.ev(`PL = { vocab:{items:[], i:0}, st: VC.strata(WORDS, PACK.placement, SIZE), res: ${JSON.stringify(r.map((x, i) => typeof x === "object" ? x : { r: x, n: N[i] }))} }; placeResult();`);
     return { html: api.panel(), rec: st.ls.getItem(VC.storageKey(pack)), prog: api.getProg() }; };
   const owner2 = owner ? () => clone(owner) : null;
   const sources = [["fresh record", () => null]].concat(owner2 ? [["owner export", owner2]] : []);
@@ -903,14 +903,14 @@ console.log("\n[D3] fb50: placement places the characters layer (characters.lear
   check("placementCharsOn: on for the shipped lag pack without a pack key (flag collapse), off without learn lag", !("placementChars" in PACK) && VC.placementCharsOn(PACK) && !VC.placementCharsOn(Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { learn: undefined }) })));
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
   const RECS = {
-    "reported record": [1, 3, 2, 0, 2, 2, 2, 2, 2, 3, 1, 2, 0, 0, 0, 0],
+    "reported record": [1, 3, 2, 0, 2, 2, 2, 2, 2, 3, 1, 2, 0, 0, 0, 0].map((r, i) => ({ r, n: i % 2 ? 3 : 2 })), // asked under the 2,3 counts of the time
     "all right": N.slice(),
     "first bucket 0": N.map((n, i) => i === 0 ? 0 : n),
     "first bucket only": N.map((n, i) => i === 0 ? n : 0),
     "poor": N.map((n, i) => i < 2 ? n : 0),
   };
   const place = async (pack, rec, r, o) => { const { api, st } = await bootWith(pack, rec, 13, o);
-    api.ev(`PL = { vocab:{items:[], i:0}, st: VC.strata(WORDS, PACK.placement, SIZE), res: ${JSON.stringify(r.map((x, i) => ({ r: x, n: N[i] })))} }; placeResult();`);
+    api.ev(`PL = { vocab:{items:[], i:0}, st: VC.strata(WORDS, PACK.placement, SIZE), res: ${JSON.stringify(r.map((x, i) => typeof x === "object" ? x : { r: x, n: N[i] }))} }; placeResult();`);
     const html = api.panel(), prog = api.getProg(), rec2 = st.ls.getItem(VC.storageKey(pack));
     api.clickTab("today");
     return { html, rec: rec2, prog, today: api.panel() }; };
@@ -947,17 +947,25 @@ console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack
     const { api, st } = await bootWith(pack, rec, 13, o);
     api.ev("placeFrom = null; placeRender()"); const screens = [api.panel()];
     api.el("go").click();
-    const seen = {}; let asked = 0;
-    for(let g = 0; g < 100 && api.el("o"); g++){
+    const seen = {}, kinds = {}, typed = []; let asked = 0;
+    for(let g = 0; g < 200; g++){
       if(!/Words \d+ \/ \d+/.test(api.panel())) break;
-      const b = api.ev("PL.vocab.items[PL.vocab.i - 1].b"), want = api.ev("glossOut(VC.gloss(PL.vocab.items[PL.vocab.i - 1].w))");
+      const b = api.ev("PL.vocab.items[PL.vocab.i - 1].b"), kind = api.ev("PL.vocab.items[PL.vocab.i - 1].kind"), q = api.ev("PL.cur");
       seen[b] = (seen[b] || 0) + 1; asked++;
-      const ok = seen[b] <= rightOf(b), btns = api.el("o").children;
-      screens.push(api.panel());
-      (ok ? btns.find(x => x.innerHTML === want) : btns.find(x => x.innerHTML !== want)).click();
+      const ok = seen[b] <= rightOf(b), h = api.panel();
+      kinds[kind] = (kinds[kind] || 0) + 1;
+      screens.push(h);
+      if(/id="tin"/.test(h)){
+        api.el("tin").value = ok ? typedAnswer(q) : "zzz not it"; api.el("submit").click();
+        typed.push({ ok, label: q.label, rv: api.el("rv").innerHTML, r: api.ev(`PL.res[${b}].r`), n: api.ev(`PL.res[${b}].n`), recs: Object.keys(api.getProg().w || {}).length });
+        api.el("nx").click();
+      } else {
+        const btns = api.el("o").children;
+        (ok ? btns.find(x => x.dataset.v === String(q.a)) : btns.find(x => x.dataset.v !== String(q.a))).click();
+      }
     }
     screens.push(api.panel());
-    return { asked, html: api.panel(), screens, rec: st.ls.getItem(VC.storageKey(pack)), prog: api.getProg() };
+    return { asked, kinds, typed, html: api.panel(), screens, rec: st.ls.getItem(VC.storageKey(pack)), prog: api.getProg() };
   };
   const RECS = {
     "beginner (all wrong)": () => 0,
@@ -971,7 +979,7 @@ console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack
   const sources = [["fresh record", () => null]].concat(owner2 ? [["owner export", owner2]] : []);
   for(const [sn, mk] of sources){
     const beg = await walk(PACK, mk(), RECS["beginner (all wrong)"]);
-    check(`${sn}, flag on, beginner: stops after bucket 3 with ${N[0] + N[1] + N[2]} items asked (asked ${beg.asked})`, beg.asked === N[0] + N[1] + N[2] && N[0] + N[1] + N[2] >= 7 && N[0] + N[1] + N[2] <= 8);
+    check(`${sn}, flag on, beginner: stops after bucket 3 with ${N[0] + N[1] + N[2]} items asked (asked ${beg.asked})`, beg.asked === N[0] + N[1] + N[2] && N[0] + N[1] + N[2] === 10);
     const lineOf = (html, nAsked) => { const na = VC.placementNotAsked(st0, st0.map((_, i) => i < nAsked ? { r:0, n:N[i] } : { r:0, n:0, skipped:true }));
       return { na, line: (html.match(/<tr id="plNotAsked"><td colspan="2" style="color:var\(--mute\)">([^<]*)<\/td><\/tr>/) || [])[1],
         want: "Not asked: " + na.map(e => e.whole ? lvLabel(e.lv) : `${lvLabel(e.lv)} ${e.s1 - e.s0 > 1 ? `sets ${e.s0 + 1}–${e.s1}` : `set ${e.s1}`}`).join(", ") }; };
@@ -981,6 +989,16 @@ console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack
     check(`${sn}, flag on, beginner: nothing stored for the unasked buckets (placed once, no word beyond the first level placed)`, beg.prog.placedOnce === true && !/skipped/.test(beg.rec || ""));
     const adv = await walk(PACK, mk(), RECS["advanced (all right)"]);
     check(`${sn}, flag on, advanced: all ${TOT} items asked, no "Not asked" line (asked ${adv.asked})`, adv.asked === TOT && !/plNotAsked/.test(adv.html));
+    // placement-mix: Review's kinds end to end (zh: typing "pron" + typedFrom, so the typed slot rotates pinyin / characters / meaning)
+    const wantK = st0.flatMap((_, i) => VC.placementKinds(i, N[i], PACK)).reduce((a, k) => (a[k] = (a[k] || 0) + 1, a), {});
+    check(`${sn}, advanced: kinds asked ${JSON.stringify(adv.kinds)} = placementKinds ${JSON.stringify(wantK)}; recall and typed cards shown`,
+      JSON.stringify(adv.kinds) === JSON.stringify(Object.fromEntries(Object.keys(adv.kinds).map(k => [k, wantK[k]]))) && adv.kinds.recall > 0 && adv.typed.length > 0 && adv.screens.some(h => /Which word is this\?/.test(h)));
+    check(`${sn}, advanced: every typed card right and revealed (${adv.typed.length} typed: ${[...new Set(adv.typed.map(t => t.label))].join(", ")}), no word record before the result`,
+      adv.typed.every(t => t.ok && /class="rw/.test(t.rv) && !/You typed/.test(t.rv) && t.r === t.n) && adv.typed.every(t => t.recs === Object.keys((mk() || { w: {} }).w || {}).length));
+    const tmiss = await walk(PACK, mk(), b => b === 0 ? 0 : N[b]);
+    const t0 = tmiss.typed.filter((_, i) => i === 0);
+    check(`${sn}, bucket 0 all wrong: its typed miss shows "You typed", counts once (${t0.length && t0[0].r}/${t0.length && t0[0].n} at that point), nothing re-asked (asked ${tmiss.asked} of ${TOT})`,
+      t0.length === 1 && !t0[0].ok && /You typed zzz not it/.test(t0[0].rv) && t0[0].r === 0 && tmiss.asked === TOT);
     const two = await walk(PACK, mk(), RECS["two empty buckets then right"]);
     check(`${sn}, flag on, two empty buckets then right: all asked (asked ${two.asked})`, two.asked === TOT && !/plNotAsked/.test(two.html));
     const mid = await walk(PACK, mk(), RECS["right to bucket 5, then empty"]);

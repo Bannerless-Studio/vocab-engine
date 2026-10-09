@@ -1359,12 +1359,21 @@ function strata(pool, bucketSpec, setSize){
   });
   return out;
 }
-// Default matches the fixed 2/3 alternation shipped before this field existed, so a pack
-// without it renders byte-identically (flag-off proof).
-const DEFAULT_PLACEMENT_ITEMS = [2, 3];
+// 3 then 4 (was 2 then 3): every bucket asks each placement kind at least once (owner 2026-10-09: placed at the top of Italian,
+// then 4/15 in Review on typed basics, because placement asked recognition only).
+const DEFAULT_PLACEMENT_ITEMS = [3, 4];
 function placementItemCount(bucketIndex, pack){
   const items = (pack && Array.isArray(pack.placementItems) && pack.placementItems.length) ? pack.placementItems : DEFAULT_PLACEMENT_ITEMS;
   return items[bucketIndex % items.length];
+}
+// Placement measures what Review measures (TODO.md "placement leniency"): each bucket rotates read-or-hear, recall (meaning ->
+// word choice) and type (meaning -> typed word), starting one kind later per bucket; a pack without typing asks recall instead,
+// as Review does. No rng, so a seeded walk stays reproducible.
+const PLACEMENT_KINDS = ["read", "recall", "type"];
+function placementKinds(bucketIndex, n, pack){
+  const typing = typingEnabled(pack), out = [];
+  for(let j = 0; j < n; j++){ const k = PLACEMENT_KINDS[(bucketIndex + j) % PLACEMENT_KINDS.length]; out.push(k === "type" && !typing ? "recall" : k); }
+  return out;
 }
 
 // The placement stop (owner 2026-10-08: a 1/2 opening bucket zeroed a 22/30 test; the earlier 3-bucket window rule judged the
@@ -5016,7 +5025,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,
   findSurface, textForms, locateWord, packSurfaces, spannedByLonger, gapMatch, gapCandidateIndices, blankSentence,
-  strata, placementItemCount, placementEarlyStopAfter, placementNotAsked, placementStopIndex, placementSkipped, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
+  strata, placementItemCount, placementKinds, PLACEMENT_KINDS, placementEarlyStopAfter, placementNotAsked, placementStopIndex, placementSkipped, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
@@ -5828,10 +5837,13 @@ function typedRequeue(it){
   it.typedMisses = (it.typedMisses || 0) + 1;
   return it.typedMisses >= 2 && it.choiceFallback ? rzFallback(it) : it;
 }
+// Shared with placement (placeProdItem), so a typed placement item is the Review card.
+const typeInputHTML = it => `<input type="text" id="tin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"${it.inputTA !== undefined ? it.inputTA : TA} placeholder="${escapeHtml(it.placeholder || (DISP.rtl ? "type the word" : "type the word…"))}">`;
+const typedRevealHTML = (it, val, ok) => revealHTML(it, (ok ? "" : `<div class="diff">You typed ${escapeHtml(val)}</div>`) + (it.feedback ? it.feedback(val) : "") + (it.reveal||""), ok);
 function renderTypeItem(it){
   const P = $("panel");
   P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}
-    <input type="text" id="tin" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"${it.inputTA !== undefined ? it.inputTA : TA} placeholder="${escapeHtml(it.placeholder || (DISP.rtl ? "type the word" : "type the word…"))}">
+    ${typeInputHTML(it)}
     <div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>`;
   if(it.mount) it.mount();
   const input = $("tin"); input.focus();
@@ -5842,7 +5854,7 @@ function renderTypeItem(it){
     const ok = it.check(input.value);
     D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(typedRequeue(it)); }
     ANS_IT = it; try { if(it.onAnswer) it.onAnswer(ok); } finally { ANS_IT = null; }
-    const rh = revealHTML(it, (ok ? "" : `<div class="diff">You typed ${escapeHtml(input.value)}</div>`) + (it.feedback ? it.feedback(input.value) : "") + (it.reveal||""), ok);
+    const rh = typedRevealHTML(it, input.value, ok);
     dropStimLinks(rh); showReveal(rh);
     playReveal(it);
     showNext(); setScore(D.seen, D.seen + D.q.length);
@@ -6234,7 +6246,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2725735968-2355778";
+const VE_BUILD = "2718069163-2359186";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -7941,7 +7953,7 @@ function placeRender(){
   const P = $("panel"); const lw = learnedWords();
   const first = levelLabel(PACK.placement[0][0]), last = levelLabel(PACK.placement[PACK.placement.length-1][0]);
   P.innerHTML = `<button class="ghost rback" id="back">${placeFrom === "progress" ? "Progress" : "Test"}</button>
-    <p class="q">${placementItemTotal()} words across ${escapeHtml(first)}–${escapeHtml(last)}: hear or read the word, pick the meaning. No feedback until the end. Places you inside a level; skipped words stay in review as provisional.</p>
+    <p class="q">${placementItemTotal()} words across ${escapeHtml(first)}–${escapeHtml(last)}: pick the meaning, pick the word, or type it, as in Review. Typed answers show the word; the rest wait for the end. Places you inside a level; skipped words stay in review as provisional.</p>
     ${lw.length ? `<p class="q">Current: ${lw.length} words learned. Retaking can only move you forward: nothing already learned is lost.</p>` : ""}
     <div class="actions"><button class="next" id="go">Start</button></div>`;
   $("back").onclick = leavePlacement;
@@ -7951,14 +7963,16 @@ function startPlacement(){
   D = null; drillKeyHandler = null; setScore(0,0);
   const st = VC.strata(WORDS, PACK.placement, SIZE);
   const bucketItems = [];
-  st.forEach((b,bi) => { pick(b.words, VC.placementItemCount(bi, PACK)).forEach(w=>bucketItems.push({b:bi, w})); });
+  st.forEach((b,bi) => { const ws = pick(b.words, VC.placementItemCount(bi, PACK)), ks = VC.placementKinds(bi, ws.length, PACK); ws.forEach((w, j) => bucketItems.push({b:bi, w, kind: ks[j]})); });
   // Early stop: asked bucket by bucket (shuffled inside a bucket) so the loop can stop after three empty buckets.
   const items = st.reduce((acc, _, bi) => acc.concat(shuffle(bucketItems.filter(x => x.b === bi))), []);
-  PL = { vocab:{items, i:0}, st, res: st.map(()=>({r:0,n:0})) };
+  PL = { vocab:{items, i:0}, st, res: st.map(()=>({r:0,n:0})), plan: [], cur: null };
   placeVocabNext();
 }
+function placeMark(it, ok){ PL.res[it.b].n++; if(ok) PL.res[it.b].r++; }
 function placeVocabNext(){
   stopSpeaking();
+  drillKeyHandler = null;
   const P = $("panel"); const V = PL.vocab;
   if(V.i > 0){
     const k = V.items[V.i - 1].b, nxt = V.items[V.i];
@@ -7969,6 +7983,8 @@ function placeVocabNext(){
   }
   if(V.i >= V.items.length){ placeResult(); return; }
   const it = V.items[V.i++]; const w = it.w; setScore(V.i - 1, V.items.length);
+  if(it.kind && it.kind !== "read"){ placeProdItem(it); return; }
+  PL.cur = { kind: "read", key: "w:" + w.id, a: VC.gloss(w) };
   const opts = shuffle([VC.gloss(w), ...VC.meaningOpts(w, WORDS).map(d => VC.gloss(d))]); // a measurement: level tiers, never optsMix (review M1)
   const asHear = canHearWord(w) && Math.random() < 0.5;
   P.innerHTML = `<p class="q">Words ${V.i} / ${V.items.length}</p>
@@ -7977,12 +7993,51 @@ function placeVocabNext(){
   if(asHear){ const btn = $("rp"); sayWord(w, btn); btn.onclick = ()=>sayWord(w, btn); }
   opts.forEach(o => {
     const b = document.createElement("button"); b.innerHTML = glossOut(o);
-    b.onclick = () => { PL.res[it.b].n++; if(o===VC.gloss(w)) PL.res[it.b].r++; placeVocabNext(); };
+    b.dataset.v = o;
+    b.onclick = () => { placeMark(it, o===VC.gloss(w)); placeVocabNext(); };
     $("o").appendChild(b);
   });
 }
+// Recall and type are Review's own items (itemFromPlan: option set, typed kind rotation, checker, reveal), built from a plan of the
+// placement's production items so the typed rotation advances as in Review. onAnswer is never called: placement writes no word
+// record before applyPlacement. A choice waits for the end; a typed answer shows its reveal (one attempt, no requeue, no choice fallback).
+function placeProdItem(it){
+  const P = $("panel"), V = PL.vocab, p = { kind: it.kind, word: it.w };
+  PL.plan.push(p);
+  const q = PL.cur = itemFromPlan(p, PL.plan.length - 1, PL.plan);
+  const head = `<p class="q">Words ${V.i} / ${V.items.length}</p><p class="q">${ui(q.label)}</p>${q.html || ""}`;
+  if(q.kind !== "type"){
+    P.innerHTML = `${head}<div class="opts ${q.optsClass || ""}" id="o"></div>`;
+    if(q.mount) q.mount();
+    const opts = shuffle(q.opts.slice()), optH = optsPrimary(opts, o => q.optHtml ? q.optHtml(o) : ui(o));
+    opts.forEach(o => {
+      const b = document.createElement("button"); b.innerHTML = optH(o);
+      if(q.optsT && DISP.rtl) b.dir = "rtl";
+      b.dataset.v = o;
+      b.onclick = () => { placeMark(it, o === q.a); placeVocabNext(); };
+      $("o").appendChild(b);
+    });
+    return;
+  }
+  P.innerHTML = `${head}${typeInputHTML(q)}<div class="reveal" id="rv"></div><div class="actions"><button class="next" id="submit">Check</button><button class="next" id="nx" style="display:none">Next</button></div>`;
+  if(q.mount) q.mount();
+  const input = $("tin"); input.focus();
+  let answered = false;
+  const submit = () => {
+    if(answered || !input.value.trim()) return;
+    answered = true; input.disabled = true; $("submit").style.display = "none";
+    const ok = !!q.check(input.value);
+    placeMark(it, ok);
+    const rh = typedRevealHTML(q, input.value, ok);
+    dropStimLinks(rh); showReveal(rh); playReveal(q); showNext();
+  };
+  $("submit").onclick = submit;
+  $("nx").onclick = placeVocabNext;
+  drillKeyHandler = e => { if(PL && PL.cur === q && e.key === "Enter"){ if(answered) placeVocabNext(); else submit(); } };
+}
 function placeResult(){
   stopSpeaking();
+  drillKeyHandler = null;
   setScore(0,0);
   const st = PL.st;
   const stop = VC.placementStopIndex(PL.res);
@@ -8340,4 +8395,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:854883540-2355102-->
+<!--ve-build:2911355697-2358510-->

@@ -872,9 +872,26 @@ Math.random = mulberry32(20261004);
     check("Test Listen: no hanzi in reveals or the result screen", seen.length > 20 && seen.every(x => !visHan(x.html)));
     { const q = api.getProg(); q.placedOnce = false; api.setProg(q); } // app v2: the placement button is gone after the first placement
     api.goto("test"); api.el("pl").click(); api.el("go").click();
-    let pbad = 0, pn = 0;
-    for(let i = 0; i < 100 && /id="o"/.test(api.html("panel")); i++){ pn++; if(visHan(api.html("panel"))) pbad++; api.el("o").children[0].click(); }
-    check(`Placement: ${pn} items, no hanzi (${pbad} bad)`, pn > 10 && pbad === 0);
+    // placement-mix: recall cards come too (this suite's pack has typing null, so the type slots ask recall); the typing "pron"
+    // copy below asks typed cards, whose reveal carries no hanzi either.
+    const placeWalk = a => {
+      let pbad = 0, pn = 0, prec = 0, ptyp = 0;
+      for(let i = 0; i < 200 && /id="o"|id="tin"/.test(a.html("panel")) && /Words \d+ \/ \d+/.test(a.html("panel")); i++){
+        pn++; const h = a.html("panel"); if(visHan(h)) pbad++;
+        if(/Which word is this\?/.test(h)) prec++;
+        if(/id="tin"/.test(h)){ ptyp++; a.el("tin").value = "zzz"; a.el("submit").click(); if(visHan(a.el("rv").innerHTML)) pbad++; a.el("nx").click(); }
+        else a.el("o").children[0].click();
+      }
+      return { pbad, pn, prec, ptyp };
+    };
+    const p1 = placeWalk(api);
+    check(`Placement: ${p1.pn} items (${p1.prec} recall, ${p1.ptyp} typed), no hanzi (${p1.pbad} bad)`, p1.pn > 10 && p1.prec > 0 && p1.ptyp === 0 && p1.pbad === 0);
+    {
+      const tp = (await boot({ pack: Object.assign({}, PF_ZH, { typing: "pron" }) })).api;
+      tp.setProg(Object.assign(seedPF(), { placedOnce: false })); tp.goto("test"); tp.el("pl").click(); tp.el("go").click();
+      const p2 = placeWalk(tp);
+      check(`Placement, typing "pron" copy: ${p2.pn} items (${p2.prec} recall, ${p2.ptyp} typed pinyin), no hanzi on the cards or typed reveals (${p2.pbad} bad)`, p2.pn > 10 && p2.prec > 0 && p2.ptyp > 0 && p2.pbad === 0);
+    }
     // Progress: weak rows.
     const pw = seedPF(); ["w0028","w0091","w0099"].forEach(id => { pw.w[id] = { r:1, w:3, s:0 }; });
     api.setProg(pw); progressAll(api); // app v2: Weakest words sit under Show all

@@ -201,18 +201,45 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const counts = st.map((b,i)=>VC.placementItemCount(i));
   const total = counts.reduce((a,b)=>a+b, 0);
   console.log(`    ${st.length} buckets, ${total} items; words per bucket: ${st.map(b=>b.words.length).join(",")}`);
-  check("zh placement: 16 buckets totalling 40 items", st.length === 16 && total === 40);
+  check("zh placement: 16 buckets totalling 56 items", st.length === 16 && total === 56);
   check("every bucket has enough words for its item count", st.every((b,i)=>b.words.length >= counts[i]));
   const byLv = VC.wordsByLevel(WORDS, PACK);
   const lastEnds = PACK.placement.every(([lv])=>{ const bs = st.filter(b=>b.lv===lv); return bs[bs.length-1].s1 === VC.nSets(byLv[lv], PACK.setSize); });
   check("each level's last bucket ends exactly at its set count", lastEnds);
   check("strata honours a non-10 setSize", (()=>{ const s = VC.strata(WORDS, [["1",2]], 5); return s.length===2 && s[1].s1 === Math.ceil(byLv["1"].length/5); })());
-  // pack.placementItems (TODO.md "placement has a fixed 2/3 alternating item count"): cycled
-  // per bucket; default (no field, or omitted pack arg) is today's fixed 2,3 alternation.
-  check("placementItemCount default (no pack arg): 2,3,2,3,... (flagoff must not drift)",
-    [0,1,2,3,4].every(i => VC.placementItemCount(i) === (i%2===0?2:3)));
-  check("placementItemCount with pack.placementItems unset: same as default", [0,1,2,3].every(i => VC.placementItemCount(i, PACK) === (i%2===0?2:3)));
+  // pack.placementItems: cycled per bucket; the default is 3 then 4 since placement-mix (was 2 then 3), so every bucket asks each kind.
+  check("placementItemCount default (no pack arg): 3,4,3,4,...",
+    [0,1,2,3,4].every(i => VC.placementItemCount(i) === (i%2===0?3:4)));
+  check("placementItemCount with pack.placementItems unset: same as default", [0,1,2,3].every(i => VC.placementItemCount(i, PACK) === (i%2===0?3:4)));
   check("placementItemCount cycles a custom pack.placementItems", [0,1,2,3,4,5].every(i => VC.placementItemCount(i, {placementItems:[4,1,2]}) === [4,1,2][i%3]));
+  // placement-mix (TODO.md "placement leniency"): placement asks what Review asks, read-or-hear, recall and typed.
+  const TYP = { typing: { accents: "lenient", strictFromLevel: "B1" } }, NOTYP = { typing: null };
+  check("placementKinds: bucket b starts at kind b mod 3 and rotates read, recall, type",
+    JSON.stringify([0,1,2,3].map(b => VC.placementKinds(b, 4, TYP))) === JSON.stringify([["read","recall","type","read"],["recall","type","read","recall"],["type","read","recall","type"],["read","recall","type","read"]]));
+  check("placementKinds: every 3- and 4-item bucket of a typing pack asks each kind at least once",
+    [0,1,2,3,4,5].every(b => [3,4].every(n => VC.PLACEMENT_KINDS.every(k => VC.placementKinds(b, n, TYP).includes(k)))));
+  check("placementKinds: a pack without typing asks recall in the type slot (Review's substitute), never type",
+    [0,1,2].every(b => { const k = VC.placementKinds(b, 4, NOTYP), t = VC.placementKinds(b, 4, TYP); return !k.includes("type") && k.every((x, j) => x === (t[j] === "type" ? "recall" : t[j])); }));
+  check("placementKinds: typing \"pron\" counts as typing; no rng (same output twice)", VC.placementKinds(2, 3, { typing: "pron" })[0] === "type" && JSON.stringify(VC.placementKinds(5, 4, TYP)) === JSON.stringify(VC.placementKinds(5, 4, TYP)));
+  check("zh placement (this suite's typing:null copy): 56 items, no type, a third or more recall",
+    (() => { const ks = st.flatMap((_, i) => VC.placementKinds(i, counts[i], PACK)); return ks.length === 56 && !ks.includes("type") && ks.filter(k => k === "recall").length >= 56 / 3; })());
+  {
+    let dir = process.env.LANG_REPOS_DIR || null;
+    if(!dir) for(let d = path.join(ROOT, ".."); ; d = path.dirname(d)){ if(fs.existsSync(path.join(d, "italian", "pack", "pack.js"))){ dir = d; break; } if(path.dirname(d) === d) break; }
+    const sib = lang => { const f = dir && path.join(dir, lang, "pack"); return f && fs.existsSync(path.join(f, "pack.js")) ? { pack: loadConst(path.join(f, "pack.js"), "PACK"), words: loadConst(path.join(f, "words.js"), "WORDS") } : null; };
+    const total = (pack, words) => { const s = VC.strata(words, pack.placement, VC.setSizeOf(pack)); const ks = s.flatMap((_, i) => VC.placementKinds(i, VC.placementItemCount(i, pack), pack));
+      return { buckets: s.length, n: ks.length, type: ks.filter(k => k === "type").length, recall: ks.filter(k => k === "recall").length, read: ks.filter(k => k === "read").length }; };
+    const it = sib("italian"), zh = sib("chinese");
+    if(!it || !zh) console.log("    skip: sibling italian/chinese packs not found (LANG_REPOS_DIR)");
+    else {
+      const ti = total(it.pack, it.words), tz = total(zh.pack, zh.words);
+      console.log(`    italian ${JSON.stringify(ti)}; chinese ${JSON.stringify(tz)}`);
+      check("italian (typing, strict from B1): 12 buckets, 42 items, 14 of each kind", ti.buckets === 12 && ti.n === 42 && ti.type === 14 && ti.recall === 14 && ti.read === 14);
+      check("chinese (typing \"pron\"): 16 buckets, 56 items, typed items asked", tz.buckets === 16 && tz.n === 56 && tz.type >= 18);
+      const nt = total(Object.assign({}, it.pack, { typing: null }), it.words);
+      check("italian copy without typing: 42 items, none typed, 28 recall", nt.n === 42 && nt.type === 0 && nt.recall === 28);
+    }
+  }
   const allRight = Array.from({length:6}, ()=>({r:3,n:3}));
   check("all buckets correct -> null", VC.placementStopIndex(allRight) === null);
   check("bucket 3 entirely wrong, right on both sides -> skipped (isolated zero), placement runs to the end", VC.placementStopIndex([{r:3,n:3},{r:3,n:3},{r:3,n:3},{r:0,n:3},{r:3,n:3},{r:3,n:3}]) === null);
@@ -746,7 +773,11 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const thin = run(base, [...mkw(20,"A1"), ...mkw(4,"A2")]);
   check("level with fewer words than one set is a warning, not an error", thin.status === 0 && /fewer than one set/.test(thin.stdout));
   const small = run(Object.assign({}, base, { setSize:2, placement:[["A1",3]] }), [...mkw(5,"A1"), ...mkw(12,"A2")]);
-  check("placement bucket with < 3 words (set-boundary math) is an error", small.status === 1 && /needs >= 3/.test(small.stdout));
+  check("placement bucket with < 4 words (set-boundary math; default items 3,4) is an error", small.status === 1 && /needs >= 4/.test(small.stdout));
+  const small3 = run(Object.assign({}, base, { setSize:3, placement:[["A1",3]], placementItems:[2,3] }), [...mkw(9,"A1"), ...mkw(12,"A2")]);
+  check("placementItems [2,3]: 3-word buckets validate (the need follows the pack's largest count)", small3.status === 0);
+  const small4 = run(Object.assign({}, base, { setSize:3, placement:[["A1",3]] }), [...mkw(9,"A1"), ...mkw(12,"A2")]);
+  check("default items: the same 3-word buckets are an error (needs >= 4)", small4.status === 1 && /needs >= 4/.test(small4.stdout));
   const wordsAB = [...mkw(20,"A1"), ...mkw(12,"A2")];
   const shOk = run(Object.assign({}, base, { soundsHint: "A few short lessons explain how Whistled Turkish sounds." }), wordsAB);
   check("pack.soundsHint: non-empty string validates", shOk.status === 0);
@@ -1724,7 +1755,7 @@ return {
   today: () => { tab = "today"; render(); },
   enterTodayStep: (step, read) => { todayStepState = read === undefined ? { step } : { step, read }; todayStep(); },
   testTab: () => { tab = "test"; testSel = null; render(); }, setProgT: p => { prog = p; },
-  enterPlacement: () => { tab = "test"; testSel = "placement"; startPlacement(); }, getPL: () => PL, getTodayStepState: () => todayStepState,
+  enterPlacement: () => { tab = "test"; testSel = "placement"; startPlacement(); }, getPL: () => PL, placeNext: () => placeVocabNext(), getTodayStepState: () => todayStepState,
   getHtml: id => { const e = document.getElementById(id); return e ? e.innerHTML : ""; },
   wordsTab: () => { tab = "words"; wordsSet = null; wordsQuery = ""; render(); }, getTaught: () => __taught,
   progressTab: () => { tab = "progress"; render(); },
@@ -1732,7 +1763,7 @@ return {
 };`;
     // PASSAGES only when env.passages is given (undefined -> no Read tab, as before).
     const fn = new Function("document","window","navigator","location","localStorage","matchMedia","requestAnimationFrame","PACK","WORDS","SENTENCES","LESSONS","PASSAGES", fnBody);
-    const api = fn(document, window, navigator, location, localStorage, matchMedia, requestAnimationFrame, pack, words, SENTENCES, LESSONS, env && env.passages);
+    const api = fn(document, window, navigator, location, localStorage, matchMedia, requestAnimationFrame, pack, words, (env && env.sentences) || SENTENCES, (env && env.lessons) || LESSONS, env && env.passages);
     return { api, document, ss, setItemCalls, window };
   }
   async function bootApp(getVoicesResult, env){
@@ -1833,6 +1864,65 @@ return {
     b2.ss.getVoices = () => [{ lang:"zh-CN", name:"y" }]; b2.ss.onvoiceschanged();
     check("voice change on a Today teach screen: no re-render, session kept", /id="dr"/.test(t0) && b2.api.getRenderCalls() === r2 && b2.api.getTodayStepState() && b2.document.getElementById("panel").innerHTML === t0);
   }catch(e){ check(`re-mount guard scenario does not throw (got: ${e.stack})`, false); }
+
+  // placement-mix (TODO.md "placement leniency"): Italian placement asks Review's kinds end to end. The typed item is Review's
+  // checker (B1 strict accents, A1 lenient), one attempt, no requeue; no word record is written before the result.
+  try{
+    let dir = process.env.LANG_REPOS_DIR || null;
+    if(!dir) for(let d = path.join(ROOT, ".."); ; d = path.dirname(d)){ if(fs.existsSync(path.join(d, "italian", "pack", "pack.js"))){ dir = d; break; } if(path.dirname(d) === d) break; }
+    const f = dir && path.join(dir, "italian", "pack");
+    if(!f || !fs.existsSync(path.join(f, "pack.js"))) console.log("    skip: italian pack not found (LANG_REPOS_DIR)");
+    else {
+      const IT = { pack: loadConst(path.join(f, "pack.js"), "PACK"), words: loadConst(path.join(f, "words.js"), "WORDS"), sentences: loadConst(path.join(f, "sentences.js"), "SENTENCES"), lessons: [] };
+      const panel = b => b.document.getElementById("panel").innerHTML, el = (b, id) => b.document.getElementById(id);
+      const fold = x => String(x).normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const walk = async (pack, answer) => {
+        const b = await bootApp([{ lang: "it-IT", name: "x" }], Object.assign({}, IT, { pack }));
+        const orig = Math.random; Math.random = require("./lib/port_sim.js").mulberry32(11);
+        try {
+          b.api.enterPlacement();
+          const pl = b.api.getPL(), seen = []; let recBefore = -1;
+          for(let g = 0; g < 200 && pl.cur; g++){
+            const q = pl.cur, it = pl.vocab.items[pl.vocab.i - 1], h = panel(b), last = pl.vocab.i === pl.vocab.items.length;
+            if(last) recBefore = Object.keys(b.api.getProg().w || {}).length;
+            const typed = !!el(b, "tin") && /id="tin"/.test(h);
+            seen.push({ kind: it.kind, typed, label: q.label || "", lv: it.w.lv, b: it.b });
+            if(typed){ el(b, "tin").value = answer(it, q) ? (q.label === "Type the meaning" ? VC.gloss(it.w) : it.w.w) : "zzz"; el(b, "submit").click(); seen[seen.length - 1].reveal = panel(b) + (el(b, "rv") ? el(b, "rv").innerHTML : ""); if(!el(b, "nx")) break; el(b, "nx").click(); }
+            else { const btns = el(b, "o").children; (answer(it, q) ? btns.find(x => x.dataset.v === String(q.a)) : btns.find(x => x.dataset.v !== String(q.a))).click(); }
+            if(/Start at/.test(panel(b))) break;
+          }
+          return { b, pl, seen, recBefore, html: panel(b) };
+        } finally { Math.random = orig; }
+      };
+      const all = await walk(IT.pack, () => true);
+      const n = all.seen.length, kinds = k => all.seen.filter(x => x.kind === k).length;
+      check(`italian placement walk, all right: ${n} items (read ${kinds("read")}, recall ${kinds("recall")}, type ${kinds("type")}), every bucket full marks`,
+        n === 42 && kinds("read") === 14 && kinds("recall") === 14 && kinds("type") === 14 && all.pl.res.every((r, i) => r.n === VC.placementItemCount(i, IT.pack) && r.r === r.n));
+      const tl = all.seen.filter(x => x.kind === "type").map(x => x.label);
+      check(`italian placement: recall is Review's card (Which word is this?), type is Review's typed card with its typedFrom rotation (${tl.filter(l => l === "Type the word").length} word, ${tl.filter(l => l === "Type the meaning").length} meaning)`,
+        all.seen.filter(x => x.kind === "recall").every(x => x.label === "Which word is this?" && !x.typed) && all.seen.filter(x => x.kind === "type").every(x => x.typed) && tl.every((l, i) => l === (i % 2 ? "Type the meaning" : "Type the word")));
+      check("italian placement: a typed answer shows the word (Review's reveal), no word record written before the result screen",
+        all.seen.filter(x => x.typed).every(x => /class="rw/.test(x.reveal)) && all.recBefore === 0 && /Start at/.test(all.html));
+      // a typed miss counts once: same item count, the bucket's n up and r not, no re-ask
+      const miss = await walk(IT.pack, it => it.kind !== "type" || it.b !== 0);
+      const t0 = miss.seen.filter(x => x.b === 0 && x.typed);
+      check(`italian placement: a typed miss in bucket 0 is one miss (${miss.pl.res[0].r}/${miss.pl.res[0].n}), shows "You typed", is not re-asked (${miss.seen.length} items)`,
+        t0.length === 1 && miss.pl.res[0].n === 3 && miss.pl.res[0].r === 2 && /You typed zzz/.test(t0[0].reveal) && miss.seen.length === 42);
+      // Review's checker per level: B1 strict, A1 lenient (typing.strictFromLevel "B1")
+      const acc = lv => IT.words.find(w => w.lv === lv && fold(w.w) !== w.w && !IT.words.some(v => v !== w && fold(v.w) === fold(w.w)));
+      const a1 = acc("A1"), b1 = acc("B1");
+      const st = await bootApp([{ lang: "it-IT", name: "x" }], IT);
+      st.api.enterPlacement(); const pl = st.api.getPL();
+      // one typed item per run, each the first type slot (typed the word, as the rotation starts)
+      pl.vocab.items = [{ b: 0, w: a1, kind: "type" }, { b: 11, w: b1, kind: "type" }]; pl.vocab.i = 0; pl.res.forEach(r => { r.r = 0; r.n = 0; });
+      st.api.placeNext(); el(st, "tin").value = fold(a1.w); el(st, "submit").click(); pl.plan = []; el(st, "nx").click();
+      el(st, "tin").value = fold(b1.w); el(st, "submit").click();
+      check(`italian placement typed: "${fold(a1.w)}" for A1 ${a1.w} right (lenient), "${fold(b1.w)}" for B1 ${b1.w} a miss (strict)`, pl.res[0].r === 1 && pl.res[0].n === 1 && pl.res[11].r === 0 && pl.res[11].n === 1);
+      const off = await walk(Object.assign({}, IT.pack, { typing: null }), () => true);
+      check(`italian copy without typing: ${off.seen.length} items, none typed, type slots asked as recall (${off.seen.filter(x => x.label === "Which word is this?").length} recall cards)`,
+        off.seen.length === 42 && off.seen.every(x => !x.typed && x.kind !== "type") && off.seen.filter(x => x.kind === "recall").length === 28);
+    }
+  }catch(e){ check(`italian placement walk does not throw (got: ${e.stack})`, false); }
 
   // Test tab: a free test held back by a threshold shows an unlock note in its place.
   try{
