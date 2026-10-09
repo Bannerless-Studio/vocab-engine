@@ -94,9 +94,9 @@ function derivedDiff(old, prog, P, hsk){
     const seen = new Set(out.map(v => v.w)); VOCAB.forEach(v => { if(!seen.has(v.w) && hp.w[v.w] && hp.w[v.w].d){ out.push(v); seen.add(v.w); } }); return out; };
   const views = [];
   const cmp = (name, a, b) => views.push({ name, hsk: a, engine: b, same: util.isDeepStrictEqual(a, b) });
-  // pack.freqTiers puts each level in frequency order, so the engine lists learned words in that
+  // Frequency tiers (engine default) put each level in frequency order, so the engine lists learned words in that
   // order; hsk's is id order, and both are compared in it.
-  const idOrder = a => P.pack.freqTiers ? a.slice().sort() : a;
+  const idOrder = a => a.slice().sort();
   const hL = idOrder(hskLearned().map(v => L.w[v.w] || "?" + v.w)), eL = idOrder(VC.learnedWords(P.words, P.pack, prog).map(w => w.id));
   cmp("learned words (ordered ids)", hL, eL);
   const lvOf = {}; P.words.forEach(w => { lvOf[w.id] = String(w.lv); });

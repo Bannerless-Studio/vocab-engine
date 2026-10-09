@@ -1371,48 +1371,13 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
 
   // passage done + stats
   VC.markPassageDone(prog, "p0001", 2, 3, "2026-09-24");
-  check("markPassageDone stores {sc,n,d,x}", util.isDeepStrictEqual(prog.read.done.p0001, { sc:2, n:3, d:"2026-09-24", x:1 }));
+  check("markPassageDone stores {sc,n,d,x} and the read rotation's s (session of the pass)", util.isDeepStrictEqual(prog.read.done.p0001, { sc:2, n:3, d:"2026-09-24", x:1, s: VC.daySn(prog) }));
   check("suggestPassage moves to the next not-done passage", VC.suggestPassage(PS, RW, RP, prog) === P2);
   VC.markPassageDone(prog, "p0002", 1, 1, "2026-09-25");
   check("all unlocked passages done -> no suggestion", VC.suggestPassage(PS, RW, RP, prog) === null);
   VC.markPassageDone(prog, "p0001", 3, 3, "2026-09-26");
   const st = VC.readingStats(PS, RP, prog);
   check("readingStats: A1 2/2 done, avg of latest scores (100%, 100%); A2 0/1, avg null", st.length === 2 && st[0].done === 2 && st[0].total === 2 && st[0].avg === 100 && st[1].done === 0 && st[1].avg === null && prog.read.done.p0001.x === 2);
-
-  // Today Read stage selection (nextReadItem): new first, then spaced re-reads of passages
-  // with a missed question, oldest completion first, >= READ_REREAD_DAYS after it.
-  {
-    const base = JSON.parse(JSON.stringify(prog)); delete base.read.done;
-    const rp = () => JSON.parse(JSON.stringify(base));
-    const at = (pr, now) => VC.nextReadItem(PS, RW, RP, pr, now);
-    const nr = at(rp(), "2026-09-26");
-    check("nextReadItem: a not-done passage at an unlocked level -> {p, reason:new} (suggestPassage's pick)", nr && nr.p === P1 && nr.reason === "new" && VC.suggestPassage(PS, RW, RP, rp()) === P1);
-    const locked = VC.normalizeProg({}, RP);
-    check("nextReadItem: nothing unlocked -> null; no passages -> null", at(locked, "2026-09-26") === null && VC.nextReadItem([], RW, RP, rp(), "2026-09-26") === null);
-    const clean = rp(); VC.markPassageDone(clean, "p0001", 3, 3, "2026-09-01"); VC.markPassageDone(clean, "p0002", 1, 1, "2026-09-01");
-    check("nextReadItem: every unlocked passage done, none missed -> null", at(clean, "2026-12-01") === null);
-    const miss = rp(); VC.markPassageDone(miss, "p0001", 3, 3, "2026-09-01"); VC.markPassageDone(miss, "p0002", 0, 1, "2026-09-20");
-    check("nextReadItem: missed passage 6 days ago -> null (7-day rule)", at(miss, "2026-09-26") === null);
-    const rr = at(miss, "2026-09-27");
-    check("nextReadItem: missed passage 7 days ago -> {p, reason:reread}", rr && rr.p === P2 && rr.reason === "reread" && VC.READ_REREAD_DAYS === 7);
-    check("nextReadItem: now as a Date (local day) works like the ISO string", at(miss, new Date(2026, 8, 27, 23, 30)).p === P2 && at(miss, new Date(2026, 8, 26, 0, 5)) === null);
-    check("nextReadItem: month/year boundaries count calendar days", at(Object.assign(rp(), { read: { unlocked: { A1: 1 }, done: { p0001: { sc:3, n:3, d:"2026-12-28", x:1 }, p0002: { sc:0, n:1, d:"2026-12-28", x:1 } } } }), "2027-01-04").p === P2);
-    const two = rp(); VC.markPassageDone(two, "p0001", 2, 3, "2026-09-10"); VC.markPassageDone(two, "p0002", 0, 1, "2026-09-05");
-    check("nextReadItem: oldest completion first among missed passages", at(two, "2026-09-26").p === P2);
-    two.read.done.p0002.d = "2026-09-10";
-    check("nextReadItem: equal dates -> pack order", at(two, "2026-09-26").p === P1);
-    two.read.done.p0002.d = "2026-09-24";
-    check("nextReadItem: a missed passage still inside 7 days is passed over for an older one", at(two, "2026-09-26").p === P1);
-    const snap = JSON.stringify(two);
-    const a1 = at(two, "2026-09-26"), a2 = at(two, "2026-09-26");
-    check("nextReadItem is pure: prog unchanged, same pick every call (skipping writes nothing, so it comes back)", JSON.stringify(two) === snap && a1.p === a2.p && a1.reason === a2.reason);
-    VC.markPassageDone(two, "p0001", 3, 3, "2026-09-26");
-    check("nextReadItem: a clean re-read (latest sc = n) drops the passage from re-reads", at(two, "2026-10-10").p === P2 && two.read.done.p0001.x === 2 && (two.read.done.p0002.sc = 1, at(two, "2026-10-10")) === null);
-    const lockedMiss = rp(); VC.markPassageDone(lockedMiss, "p0001", 3, 3, "2026-09-01"); VC.markPassageDone(lockedMiss, "p0002", 1, 1, "2026-09-01"); lockedMiss.read.done.p0003 = { sc:0, n:1, d:"2026-09-01", x:1 };
-    check("nextReadItem: a done entry at a locked level (A2) is never offered", at(lockedMiss, "2026-12-01") === null);
-    const odd = rp(); VC.markPassageDone(odd, "p0001", 3, 3, "2026-09-01"); odd.read.done.p0002 = { sc:0, n:1, x:1 };
-    check("nextReadItem: missing/invalid date or now -> no re-read (new passages unaffected)", at(odd, "2026-12-01") === null && at(miss, "not a date") === null && at(rp(), undefined).reason === "new");
-  }
 
   // progress shape and round trip
   const L = VC.levelIds(RP);

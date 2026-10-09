@@ -144,10 +144,13 @@ check("A empty: equals defaultProg plus the marker", eq(mig("A empty"), Object.a
 // unlocked 字 stage and the next word level take turns by prog.sessions parity; a stored
 // "after" (chars.defer) is "later": HSK 2 set 3, the stage before the split.
 const par = (p, n) => Object.assign(p, { sessions: n });
+// The level gate (LEVEL_GATE, engine default since the flag collapse) holds HSK 2 until HSK 1 is known; these checks walk the
+// stage model, so HSK 1's records are made placed-provisional (counted known for position) to open it.
+const gateOpen = p => { (VC.wordsByLevel(W, PACK)["1"] || []).forEach(w => { if(p.w && p.w[w.id]) p.w[w.id].prov = 1; }); return p; };
 const isChars1 = s => s && s.kind === "chars" && eq(s.levels, ["1"]);
 check("C mid-HSK2: no card; even sessions HSK 2 set 3, odd 字1; skipped (later), HSK 2 set 3 both",
   !VC.showCharChoice(PACK, W, U, mig("C mid-HSK2"))
-  && (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(mig("C mid-HSK2"), 2))) && isChars1(VC.nextStage(PACK, W, U, par(mig("C mid-HSK2"), 3)))
+  && (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(gateOpen(mig("C mid-HSK2")), 2))) && isChars1(VC.nextStage(PACK, W, U, par(gateOpen(mig("C mid-HSK2")), 3)))
   && [2, 3].every(n => (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(VC.answerCharChoice(mig("C mid-HSK2"), false), n)))));
 // R5 (owner 2026-10-02): a learner with character records (the old single stage, taught every
 // session) loads as chars.order "first": 字1 every session until done; "with" restores the turns.
@@ -220,7 +223,8 @@ console.log("\n[read.done.l] listening-pass marker");
   check("import of pre-listen read.done records: unchanged", im.ok && eq(im.prog.read, readOld));
   const p = clone(bo.prog);
   VC.markPassageDone(p, "p0001", 4, 5, "2026-09-27", true);
-  check("a listening pass writes l:1 on that record only", eq(p.read.done.p0001, { sc: 4, n: 5, d: "2026-09-27", x: 2, l: 1 }) && eq(p.read.done.p0002, readOld.done.p0002));
+  const rsn = VC.daySn(p);
+  check("a listening pass writes l:1 (and the read rotation's s / ls) on that record only", eq(p.read.done.p0001, { sc: 4, n: 5, d: "2026-09-27", x: 2, l: 1, s: rsn, ls: rsn }) && eq(p.read.done.p0002, readOld.done.p0002));
   const raw2 = JSON.stringify(p);
   const ps = VC.parseStored(raw2), v = VC.validateProgShape(ps.data, PACK.levels.map(l => l.id));
   check("parseStored + validateProgShape accept a record with l", ps.ok && v.ok);
@@ -229,7 +233,7 @@ console.log("\n[read.done.l] listening-pass marker");
   const i2 = VC.applyImport(null, raw2, PACK);
   check("record with l survives export/import", i2.ok && eq(i2.prog.read, p.read));
   VC.markPassageDone(p, "p0001", 5, 5, "2026-10-05");
-  check("a later reading pass replaces the record without l (no readRotation: l marks the latest pass, readPassMode alternates on it)", eq(p.read.done.p0001, { sc: 5, n: 5, d: "2026-10-05", x: 3 }));
+  check("a later reading pass keeps l (read rotation: l is credit, the alternation reads the pick's mode)", eq(p.read.done.p0001, { sc: 5, n: 5, d: "2026-10-05", x: 3, l: 1, s: rsn, ls: rsn }));
   const bad = JSON.stringify({ read: { done: { p0001: { sc: 1, n: 5, d: "2026-09-27", x: 1, l: "yes" } } } });
   check("a non-number l is rejected by validation (boot keeps a backup)", !VC.validateProgShape(JSON.parse(bad), []).ok && VC.bootProg(bad, PACK).backupRaw === bad);
   check("progress carrying read (with l) is native, not legacy", !VC.isLegacyRecord(PACK, LEGACY, p));
@@ -393,8 +397,8 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
   const b = mig("C mid-HSK2"), braw = JSON.stringify(b);
   // The first HSK 1 unit in pack order (c0001 before fb26 put each level in frequency order).
   const C1 = "chars:1 " + VC.charStageUnits(["1"], U, PACK)[0].id;
-  const bs = n => Object.assign(clone(b), { sessions: n });
-  check(`(b) mid HSK 2: old pack ${nextOf(OLD, b)}; now no card, sessions alternate ${nextOf(PACK, bs(4))} / ${nextOf(PACK, bs(5))}`, nextOf(OLD, b) === "words:2/3" && nextOf(PACK, bs(4)) === "words:2/3" && nextOf(PACK, bs(5)) === C1 && !VC.showCharChoice(PACK, W, U, b));
+  const bg = gateOpen(clone(b)), bs = n => Object.assign(clone(bg), { sessions: n });
+  check(`(b) mid HSK 2: old pack ${nextOf(OLD, bg)}; now no card, sessions alternate ${nextOf(PACK, bs(4))} / ${nextOf(PACK, bs(5))}`, nextOf(OLD, bg) === "words:2/3" && nextOf(PACK, bs(4)) === "words:2/3" && nextOf(PACK, bs(5)) === C1 && !VC.showCharChoice(PACK, W, U, b));
   // Stored choice mapping: chars.defer true ("after") is "later"; anything else is "with words".
   // The alternation reads prog.sessions only: no new field.
   check("(b) stored choice: defer true -> later (HSK 2 set 3 every session, one 字 stage last); seen + defer false or unseen -> with words",
@@ -439,7 +443,7 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
 
 console.log("\n[turn] characters.withWords Learn turn (chars.turn, fb2-write2): additive, kept by older engines");
 {
-  const b = mig("C mid-HSK2"); const at = (p, n, t) => Object.assign(clone(p), { sessions: n }, { chars: Object.assign({}, p.chars, t === undefined ? {} : { turn: t }) });
+  const b = gateOpen(mig("C mid-HSK2")); const at = (p, n, t) => Object.assign(clone(p), { sessions: n }, { chars: Object.assign({}, p.chars, t === undefined ? {} : { turn: t }) });
   const nx = p => (s => s ? s.kind : "done")(VC.nextStage(PACK, W, U, p));
   check("absent: session parity (even words, odd characters); turn \"c\" / \"w\" overrides parity both ways; any other value is parity",
     nx(at(b, 4)) === "words" && nx(at(b, 5)) === "chars" && nx(at(b, 4, "c")) === "chars" && nx(at(b, 5, "w")) === "words" && nx(at(b, 5, 7)) === "chars");
@@ -989,10 +993,9 @@ console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/bri
       check(`${L}: a pre-port record (legacy streaks, no p) boots here unchanged and every word pair bootstraps from its streak (3 from 3, else min(s, 2)), none written`, lm.backupRaw === null && JSON.stringify(lm.prog) === lraw && bad.length === 0 && Object.values(lm.prog.w).every(r => !("p" in r)));
       if(!lo){ skip(`${L}: known count needs engine ef44c6e`); return; }
       const oldKnown = G.words.filter(w => (lo.prog.w[w.id] || {}).s >= OLD[0].eng.WORD_MASTERED).length;
-      const noTiers = Object.assign(clone(G.pack), { freqTiers: false }), mainPairs = G.words.filter(w => VC.wordKnown(lm.prog.w[w.id], w, noTiers)).length;
       const mainTiers = G.words.filter(w => VC.wordKnown(lm.prog.w[w.id], w, G.pack)).length;
       const surplus = G.words.filter(w => w.ft === 2 && lm.prog.w[w.id] && lm.prog.w[w.id].s === 2).length;
-      check(`${L}: known count on the pre-port record: old engine ${oldKnown} = main with pairs ${mainPairs}; with freqTiers ${mainTiers} = ${oldKnown} + ${surplus} peripheral words at streak 2`, oldKnown === mainPairs && mainTiers === oldKnown + surplus);
+      check(`${L}: known count on the pre-port record: here (frequency tiers) ${mainTiers} = old engine ${oldKnown} + ${surplus} peripheral words at streak 2`, mainTiers === oldKnown + surplus);
     });
     // characters set (ja): the run above writes unit records with their own wm / ws streaks (p) and f; the old cores know them from zh
     if(G.characters && sim && sim.raw){
