@@ -5,12 +5,13 @@
 //   node tests/live_lock.js --capture            write the goldens (explained commit only)
 //   node tests/live_lock.js --check              compare, first differing path per pack; exit 1 on a difference
 //   node tests/live_lock.js --check --strip       boot with the COLLAPSED keys removed (tests/lib/pack_flags.js): differs until the collapse is done, exit 0
+//   node tests/live_lock.js --check --strip a,b   boot with only the named COLLAPSED keys removed (the keys a collapse stage made default): exit 1 on a difference
 //   --lang a,b limits the packs. Sibling packs come from ../<lang>/pack, or LANG_REPOS_DIR, or the nearest parent directory that holds them.
 const fs = require("fs");
 const crypto = require("crypto");
 const path = require("path");
 const S = require("./lib/port_sim.js");
-const { COLLAPSED, FLAG_SINCE, stripCollapsed } = require("./lib/pack_flags.js");
+const { COLLAPSED, COLLAPSED_DATA, FLAG_SINCE, stripCollapsed, stripFlags } = require("./lib/pack_flags.js");
 
 const ROOT = path.join(__dirname, "..");
 const GOLDEN_DIR = path.join(__dirname, "golden");
@@ -27,8 +28,12 @@ if (!process.env.LANG_REPOS_DIR) {
 
 const argv = process.argv.slice(2);
 const CAPTURE = argv.includes("--capture"), CHECK = argv.includes("--check"), STRIP = argv.includes("--strip");
+// --strip a,b (or --strip=a,b): the partial strip of a collapse stage; every name must be a COLLAPSED key
+const stripArg = (argv.find(a => a.startsWith("--strip=")) || "").slice(8) || (STRIP && argv[argv.indexOf("--strip") + 1] && !argv[argv.indexOf("--strip") + 1].startsWith("--") ? argv[argv.indexOf("--strip") + 1] : "");
+const STRIP_KEYS = stripArg ? stripArg.split(",").filter(Boolean) : null;
+if (STRIP_KEYS && STRIP_KEYS.some(k => !COLLAPSED.includes(k))) { console.error("--strip: not COLLAPSED keys: " + STRIP_KEYS.filter(k => !COLLAPSED.includes(k)).join(", ")); process.exit(2); }
 const only = (argv.find(a => a.startsWith("--lang=")) || "").slice(7) || (argv.includes("--lang") ? argv[argv.indexOf("--lang") + 1] : "");
-if (CAPTURE === CHECK || (STRIP && !CHECK)) { console.error("usage: node tests/live_lock.js --capture | --check [--strip] [--lang a,b]"); process.exit(2); }
+if (CAPTURE === CHECK || ((STRIP || STRIP_KEYS) && !CHECK)) { console.error("usage: node tests/live_lock.js --capture | --check [--strip] [--lang a,b]"); process.exit(2); }
 
 const clone = x => JSON.parse(JSON.stringify(x));
 const text = html => String(html == null ? "" : html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -114,7 +119,7 @@ async function captureRecord(site, pack, name, seedProg, seed) {
 async function captureLang(lang) {
   const site = S.loadSibling(lang);
   if (!site) return null;
-  const pack = STRIP ? stripCollapsed(site.pack) : clone(site.pack);
+  const pack = STRIP_KEYS ? stripFlags(site.pack, STRIP_KEYS.filter(k => !COLLAPSED_DATA.includes(k))) : STRIP ? stripCollapsed(site.pack) : clone(site.pack);
   const start = Object.assign(VC.defaultProg(pack), { placedOnce: true });
   const recs = [["fresh", VC.defaultProg(pack), 1]];
   // mid-course: 12 sessions played by the engine itself on one simulated day each, 85% right
@@ -160,8 +165,9 @@ const short = v => { const s = typeof v === "string" ? v : JSON.stringify(v); re
   }
   const secs = ((Date.now() - t0) / 1000).toFixed(0) + "s";
   if (CAPTURE) console.log(`\ncaptured ${total} packs, ${secs}`);
+  else if (STRIP_KEYS) console.log(`\nstrip ${STRIP_KEYS.length} keys: ${equal} passed, ${differ + missing} failed (${equal}/${total} packs equal, ${secs})`);
   else if (STRIP) console.log(`\nstrip: ${equal} of ${total} equal, ${secs}`);
   else console.log(`\n${equal} passed, ${differ + missing} failed (${equal}/${total} packs equal, ${secs})`);
-  if (STRIP) { console.log(`strip differs: ${differ} packs`); process.exit(0); }
+  if (STRIP && !STRIP_KEYS) { console.log(`strip differs: ${differ} packs`); process.exit(0); }
   process.exit(CAPTURE || (!differ && !missing) ? 0 : 1);
 })().catch(e => { console.error(e.stack || e); process.exit(1); });
