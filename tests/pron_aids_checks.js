@@ -348,16 +348,16 @@ function walk(api, stopAt){
     check("itemFromPlan as a map callback: type slots alternate Type the pinyin / Type the characters in plan order",
       tItems.map(x => x.label).join("|") === "Type the pinyin|Which word is this?|Type the characters|Type the pinyin");
     const it = bApi.itemFromPlan({ kind: "type", word: w });
-    check("pinyin item: gloss stimulus, 'pinyin · tones optional' tag, no audio markup (no replay/speaker, no mount), no written form, Latin input (lang=en)",
-      it.kind === "type" && it.label === "Type the pinyin" && it.html.includes(VC.escapeHtml(VC.gloss(w))) && /class="ktag"><b>pinyin<\/b> · tones optional</.test(it.html)
-      && !/id="rp2"|id="sp"|class="replay|class="speaker|data-wid/.test(it.html) && !it.mount && !HAN.test(stripTags(it.html)) && it.inputTA === ' lang="en"' && it.placeholder === "pinyin, tones optional…");
+    check("pinyin item: gloss stimulus, no kind tag (app v2), 'tones optional' placeholder, no audio markup (no replay/speaker, no mount), no written form, Latin input (lang=en)",
+      it.kind === "type" && it.label === "Type the pinyin" && stripTags(it.html).includes(VC.glossSenses(VC.gloss(w)).first) && !/class="ktag"/.test(it.html)
+      && !/id="rp2"|id="sp"|class="replay|class="speaker|data-wid/.test(it.html) && !it.mount && !HAN.test(stripTags(it.html)) && it.inputTA === ' lang="en"' && it.placeholder === "tones optional");
     check("pinyin check: marked, numbered, toneless and other tones right; other letters wrong", it.check("xuésheng") && it.check("xue2sheng") && it.check("xuesheng") && it.check("xue2sheng1") && it.check("XUE3 SHENG") && !it.check("xuexi") && !it.check("xueshen"));
     check("pinyin feedback: toneless or other tones -> a 'tones:' note with the coloured marked form; none when exact or wrong",
       it.feedback("xuesheng") === `<div class="diff">tones: <span class="tpron">${VC.toneHTML(w.pron)}</span></div>` && it.feedback("xue4sheng") === it.feedback("xuesheng") && it.feedback("xuexi") === "" && it.feedback("xue2sheng") === "" && it.feedback("xuésheng") === "");
     const wi = tItems[2];
-    check("characters item: gloss stimulus, 'characters' tag, replay button + autoplay mount, target-language input (no lang=en), characters placeholder",
-      wi.kind === "type" && wi.label === "Type the characters" && wi.html.includes(VC.escapeHtml(VC.gloss(w))) && /class="ktag"><b>characters<\/b>/.test(wi.html)
-      && /id="rp2"/.test(wi.html) && typeof wi.mount === "function" && !HAN.test(stripTags(wi.html)) && wi.inputTA === undefined && wi.placeholder === "characters…");
+    check("characters item: gloss stimulus, no kind tag, replay button + autoplay mount, target-language input (no lang=en), characters placeholder",
+      wi.kind === "type" && wi.label === "Type the characters" && stripTags(wi.html).includes(VC.glossSenses(VC.gloss(w)).first) && !/class="ktag"/.test(wi.html)
+      && /id="rp2"/.test(wi.html) && typeof wi.mount === "function" && !HAN.test(stripTags(wi.html)) && wi.inputTA == null && wi.placeholder === "characters");
     check("characters check: the written form (and alt forms) right, the reading or another word wrong", wi.check(w.w) && wi.check(" " + w.w + " ") && !wi.check(w.pron) && !wi.check("学习") && (w.alt || []).every(a => wi.check(a)));
     // Drive both items through the renderer, with the spoken log.
     const { api: a2, spoken } = await boot({ seed: 3, pack: PACK_BASE });
@@ -365,16 +365,16 @@ function walk(api, stopAt){
     const s0 = spoken.length;
     const r = runTyped(a2, w, "xuesheng", 0, spoken);
     check("renderer, pinyin: nothing spoken before the answer; toneless counted right, no 'you typed', tones note + coloured reading",
-      r.spokenBefore === 0 && !r.wrong && !/you typed/.test(r.rv) && /tones: /.test(r.rv) && r.rv.includes(VC.toneHTML(w.pron)) && /placeholder="pinyin, tones optional…"/.test(r.html) && /id="tin"[^>]*lang="en"/.test(r.html) && !/id="rp2"/.test(r.html));
+      r.spokenBefore === 0 && !r.wrong && !/You typed/.test(r.rv) && /tones: /.test(r.rv) && r.rv.includes(VC.toneHTML(w.pron)) && /placeholder="tones optional"/.test(r.html) && /id="tin"[^>]*lang="en"/.test(r.html) && !/id="rp2"/.test(r.html));
     const r2 = runTyped(a2, w, "xue4sheng1", 0, spoken);
     check("renderer, pinyin: other tones counted right with the tones note", !r2.wrong && /tones: /.test(r2.rv) && r2.spokenBefore === 0);
     const r3 = runTyped(a2, w, "xue2sheng5", 0, spoken);
     check("renderer, pinyin: numbered answer counted right, no note", !r3.wrong && !/tones: /.test(r3.rv));
     const r4 = runTyped(a2, w, "xuexi", 0, spoken);
-    check("renderer, pinyin: other letters counted wrong, 'you typed' shown", r4.wrong && /you typed: xuexi/.test(r4.rv));
+    check("renderer, pinyin: other letters counted wrong, 'you typed' shown", r4.wrong && /You typed xuexi/.test(r4.rv));
     const r5 = runTyped(a2, w, w.w, 1, spoken);
     check(`renderer, characters: the word spoken once on mount (autoplay), zh input attributes, placeholder; written form counted right (spoken before answer: ${r5.spokenBefore})`,
-      r5.spokenBefore === 1 && r5.spokenText[0] === w.w && !r5.wrong && /id="rp2"/.test(r5.html) && /id="tin"[^>]*data-tl lang="zh[^"]*"/.test(r5.html) && /placeholder="characters…"/.test(r5.html) && s0 >= 0);
+      r5.spokenBefore === 1 && r5.spokenText[0] === w.w && !r5.wrong && /id="rp2"/.test(r5.html) && /id="tin"[^>]*data-tl lang="zh[^"]*"/.test(r5.html) && /placeholder="characters"/.test(r5.html) && s0 >= 0);
     const r6 = runTyped(a2, w, w.pron, 1, spoken);
     check("renderer, characters: typing the reading counted wrong", r6.wrong);
     // A word with no pron gets the characters item in either slot.
@@ -483,8 +483,8 @@ function walk(api, stopAt){
     aj.setProg(atTier([g.id, affix.id]));
     const ri = aj.itemFromPlan({ kind: "type", word: g }, 0, two), wi = aj.itemFromPlan({ kind: "type", word: g }, 1, two);
     check("at tier: slots alternate Type the reading / Type the characters", !VC.displayForm(g, units, aj.getProg(), jp).isPron && ri.label === "Type the reading" && wi.label === "Type the characters");
-    check("reading item: gloss stimulus, tag 'reading' (no tones note), placeholder 'reading…', target-language input (not lang=en), no audio markup, no mount",
-      ri.html.includes(VC.escapeHtml(VC.gloss(g))) && /class="ktag"><b>reading<\/b><\/div>/.test(ri.html) && ri.placeholder === "reading…" && ri.inputTA === undefined
+    check("reading item: gloss stimulus, no kind tag, placeholder 'reading…', target-language input (not lang=en), no audio markup, no mount",
+      ri.html.includes(VC.escapeHtml(VC.gloss(g))) && !/class="ktag"/.test(ri.html) && ri.placeholder === "reading…" && ri.inputTA === undefined
       && !/id="rp2"|id="sp"|class="replay|class="speaker|data-wid/.test(ri.html) && !ri.mount && !stripTags(ri.html).includes(g.w) && !stripTags(ri.html).includes(g.pron));
     const kataPron = [...g.pron].map(c => String.fromCharCode(c.charCodeAt(0) + 0x60)).join("");
     check("reading item check: hiragana and its katakana right, the written form and other kana wrong; no feedback note",
@@ -493,10 +493,10 @@ function walk(api, stopAt){
     check("renderer, reading: nothing spoken before the answer; katakana counted right; kana input (data-tl lang=ja), no replay",
       r1.spokenBefore === 0 && !r1.wrong && /id="tin"[^>]*data-tl lang="ja[^"]*"/.test(r1.html) && !/id="tin"[^>]*lang="en"/.test(r1.html) && /placeholder="reading…"/.test(r1.html) && !/id="rp2"/.test(r1.html));
     const r2 = runTyped(aj, g, g.pron + "ー", 0, spoken);
-    check("renderer, reading: wrong kana counted wrong, 'you typed' shown", r2.wrong && /you typed/.test(r2.rv));
+    check("renderer, reading: wrong kana counted wrong, 'you typed' shown", r2.wrong && /You typed/.test(r2.rv));
     const r3 = runTyped(aj, g, g.w, 1, spoken);
     check(`renderer, characters: the word spoken once on mount, replay button, ja input; the written form right (spoken before answer: ${r3.spokenBefore})`,
-      r3.spokenBefore === 1 && !r3.wrong && /id="rp2"/.test(r3.html) && /id="tin"[^>]*data-tl lang="ja[^"]*"/.test(r3.html) && /placeholder="characters…"/.test(r3.html));
+      r3.spokenBefore === 1 && !r3.wrong && /id="rp2"/.test(r3.html) && /id="tin"[^>]*data-tl lang="ja[^"]*"/.test(r3.html) && /placeholder="characters"/.test(r3.html));
     check("characters check: w and its kana alt right (分かる / わかる), another word's form wrong", wi.check(g.w) && wi.check(g.pron) && !wi.check(J.words.find(w => w.id !== g.id && w.w !== g.w && w.w !== g.pron).w));
     const ka = aj.itemFromPlan({ kind: "type", word: kata }, 1, two), kr = aj.itemFromPlan({ kind: "type", word: kata }, 0, two);
     check("katakana word: reading accepts こーひー and コーヒー, rejects こうひい; characters takes the spelling コーヒー only (not こーひー)",
@@ -533,11 +533,11 @@ function walk(api, stopAt){
     api.tokTap(tok);
     check(`tap on ${s0.t.slice(s0.ruby[4][0], s0.ruby[4][1])}: popover = the Read-tab popover of the word, inside the row, token marked on`,
       appended.length === 1 && /gloss tokgloss/.test(appended[0].className) && appended[0].innerHTML.replace(HELPX, "") === api.glossHTML(wid, "", null) && cls.has("on") && appended[0].hidden === false);
-    check("the popover shows the coloured reading, the show-written tap and the gloss", tspans(appended[0].innerHTML) > 0 && /data-showw="学生"/.test(appended[0].innerHTML) && appended[0].innerHTML.includes(VC.escapeHtml(VC.gloss(tw0))));
+    check("the popover shows the coloured reading, the show-written tap and the gloss", tspans(appended[0].innerHTML) > 0 && /data-showw="学生"/.test(appended[0].innerHTML) && stripTags(appended[0].innerHTML).includes(VC.glossSenses(VC.gloss(tw0)).first));
     check(`the tap speaks the word only (${JSON.stringify(spoken)}), progress unchanged`, spoken.length === 1 && spoken[0] === tw0.w && JSON.stringify(api.getProg()) === progBefore);
     check("keyboard: one keydown listener on #panel (Enter/Space on a tap); drill shortcuts skip a focused tap",
       api.panelListeners("keydown").length === 1 && api.onTok({ target: { closest: s => s === "[data-tok]" ? {} : null } }) && /!onShowWritten\(e\) && !tokOwns\(e\)\) drillKeyHandler/.test(appHtml));
-    check("click delegation: still one bubbling click listener + the show-written capture listener", api.panelListeners("click").length === 2);
+    check("click delegation: two bubbling click listeners (taps; the app v2 Missed rows) + the show-written capture listener", api.panelListeners("click").length === 3);
     // Multi-token pack word highlight (hindi/TODO.md live check: "के लिए links as one
     // entry but only the tapped half highlights"). PACK_SCHEMA.md sentences/passages
     // spans: "a word may have several spans, one per occurrence" — a multi-token entry's
@@ -712,8 +712,9 @@ function walk(api, stopAt){
     const pr = seedPF(); pr.read = { unlocked: PASSAGES.map(p => p.lv).filter((v, i, a) => a.indexOf(v) === i) }; api.setProg(VC.normalizeProg(pr, PACK));
     // Today plan's Read row: the stage's passage title by its reading.
     api.today();
-    const hint = (api.html("panel").match(/<tr><td>6\. Read<\/td><td>([\s\S]*?)<\/td><\/tr>/) || [])[1];
-    check(`Today plan Read row: the title reads by its ruby, coloured, with a show-written tap (${hint ? stripTags(hint).slice(0, 60) : "no hint"})`, !!hint && !HAN.test(stripTags(hint)) && tspans(hint) > 0 && /data-showw=/.test(hint));
+    // app v2: the Today Read row names the title only (tf), without a show-written tap: the passage screen has it.
+    const hint = ([...api.html("panel").matchAll(/<div class="tst"><span>(?:Read|Listen)<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/g)].map(m => m[1]).filter(Boolean).pop());
+    check(`Today plan Read row: the passage title, no show-written tap (${hint ? stripTags(hint).slice(0, 60) : "no hint"})`, !!hint && !/data-showw=/.test(hint));
     // Passage list: titles as readings inside the list buttons, no show-written inside a button.
     api.goto("read");
     const list = api.html("panel");
