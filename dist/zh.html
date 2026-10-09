@@ -6232,7 +6232,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "3663668689-2355050";
+const VE_BUILD = "283122534-2355526";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -7595,6 +7595,9 @@ function pfRubyText(t, ruby){
   return { html, ruby: hasRuby, written: anyPron ? obj.t : false };
 }
 // No show-written tap inButton: option and list buttons are tap targets themselves.
+// A box holding pron-first ruby needs the tall ruby line box (.hasruby): at the plain line height a
+// wrapped line's annotations crowd the line above and an inline show-written tap.
+const rubyBoxCls = (t, ruby) => { const pf = pfRubyText(t, ruby); return pf && pf.ruby ? " hasruby" : ""; };
 function rubyTextOr(t, ruby, inButton){
   const pf = pfRubyText(t, ruby);
   return pf ? pf.html + (inButton ? "" : pfWrittenTap(pf)) : escapeHtml(t);
@@ -7650,7 +7653,7 @@ function listenScreen(){
   // Every way onto this screen has just stopped speech, so no chain survives a re-render.
   RD.playing = false;
   P.innerHTML = `${readBackHTML()}
-    <h2 class="ptitle"${TA}>${rubyTextOr(p.title, p.titleRuby)}</h2>
+    <h2 class="ptitle${rubyBoxCls(p.title, p.titleRuby)}"${TA}>${rubyTextOr(p.title, p.titleRuby)}</h2>
     <p class="q">Listening pass</p>
     <div class="row"><button id="lplay">Play all</button><button id="ltext" aria-expanded="${RD.textShown}">${RD.textShown ? "Hide text" : "Show text"}</button></div>
     ${glossBox()}
@@ -7692,7 +7695,7 @@ function readPassageScreen(){
   // appView: the dotted underline is the affordance once a passage has been read; the first time says it.
   const meta = PASSAGE_LIST.some(passageDone) ? "" : "Tap a word to see its meaning.";
   P.innerHTML = `${readBackHTML()}
-    <h2 class="ptitle"${TA}>${rubyTextOr(p.title, p.titleRuby)}</h2>
+    <h2 class="ptitle${rubyBoxCls(p.title, p.titleRuby)}"${TA}>${rubyTextOr(p.title, p.titleRuby)}</h2>
     ${meta ? `<p class="q">${meta}</p>` : ""}
     ${glossBox()}
     <div class="passage" id="pbox">${passageHTML(-1)}</div>
@@ -7720,7 +7723,7 @@ function readQuestionScreen(){
   setScore(qi, p.questions.length);
   // No per-question clip in the pack schema: TTS only, so it plays iff a voice is usable.
   const hearQ = hasSpeech;
-  const qText = () => `<div class="med wd"${TA}>${rubyTextOr(q.q, q.ruby)}</div>`;
+  const qText = () => `<div class="med wd${rubyBoxCls(q.q, q.ruby)}"${TA}>${rubyTextOr(q.q, q.ruby)}</div>`;
   const qTr = () => q.en ? `<div id="qtrwrap">${view.trShown ? `<div class="q cue">${ui(q.en)}</div>` : `<button class="ghost" id="qtr" style="margin:8px 0">Show translation</button>`}</div>` : "";
   const qHidden = RD.mode === "listen" && hearQ && RD.audioOnly.indexOf(qi) >= 0 && !view.qOpen && rec.ok === null;
   const nxBtn = `<button class="next" id="nx" style="display:none">${qi+1 < p.questions.length ? "Next" : "See results"}</button>`;
@@ -7848,12 +7851,12 @@ function readResults(){
   const anyWeak = weak.some(w => w.weight > 0);
   // appView: missed questions open, the right ones fold into one line that opens on a tap; no weak words is whitespace.
   const qBlock = (q, i) => { const a = RD.answers[i] || {}, s = p.sentences[q.sentence], seen = [a.qh && "question", a.tr && "translation"].filter(Boolean);
-    return `<div class="stmt"${TOKBOX}>${seen.length ? `<p class="pvs" style="margin:0 0 4px!important"${UIA}>${seen.join(" and ").replace(/^./, c => c.toUpperCase())} shown</p>` : ""}<div${TA}>${rubyTextOr(q.q, q.ruby)}</div><div style="margin-top:6px"${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:2px 0 0">${ui(s.en)}</div>${canHearSentence(s) ? `<button type="button" class="replay" id="rr${i}" aria-label="Replay">${REPLAY_SVG}</button>` : ""}</div>`; };
+    return `<div class="stmt"${TOKBOX}>${seen.length ? `<p class="pvs" style="margin:0 0 4px!important"${UIA}>${seen.join(" and ").replace(/^./, c => c.toUpperCase())} shown</p>` : ""}<div${rubyBoxCls(q.q, q.ruby) ? ' class="hasruby"' : ""}${TA}>${rubyTextOr(q.q, q.ruby)}</div><div style="margin-top:6px"${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:2px 0 0">${ui(s.en)}</div>${canHearSentence(s) ? `<button type="button" class="replay" id="rr${i}" aria-label="Replay">${REPLAY_SVG}</button>` : ""}</div>`; };
   const qIdx = p.questions.map((q, i) => i), qMiss = qIdx.filter(i => !(RD.answers[i] || {}).ok), qRight = qIdx.filter(i => (RD.answers[i] || {}).ok);
   const qList = () => `${qMiss.length ? `<p class="pvk">Missed</p>${qMiss.map(i => qBlock(p.questions[i], i)).join("")}` : ""}${qRight.length ? `<button class="pvc" id="rright" aria-expanded="false" aria-controls="rrbox"><span>${qRight.length} right</span></button><div id="rrbox" hidden>${qRight.map(i => qBlock(p.questions[i], i)).join("")}</div>` : ""}`;
   // Without RD.added a re-mount would offer "Add to review" again and apply the same words twice.
   P.innerHTML = `<div class="done"><h2>${sc} of ${p.questions.length}</h2>
-    ${RD.mode === "listen" ? `<p class="q" id="lmode" style="margin-bottom:4px">Listening pass</p>` : ""}<p class="q"${TA} style="margin-bottom:8px">${rubyTextOr(p.title, p.titleRuby)}</p>
+    ${RD.mode === "listen" ? `<p class="q" id="lmode" style="margin-bottom:4px">Listening pass</p>` : ""}<p class="q${rubyBoxCls(p.title, p.titleRuby)}"${TA} style="margin-bottom:8px">${rubyTextOr(p.title, p.titleRuby)}</p>
     ${qList()}
     ${anyWeak ? `<p class="q">Weak words from this passage${RD.today ? ". Ticked ones go to your next review." : ""}</p><div id="weak">${weak.map((w, i) => `<label class="wk"${DISP.rtl ? ' dir="rtl"' : ""}>${w.weight > 0 ? `<input type="checkbox" data-wi="${i}"${RD.unticked[i] ? "" : " checked"}${RD.added ? " disabled" : ""}> ` : ""}${glossHTML(w.id, RD.glosses && RD.glosses[w.id])} <span class="q"${UIA} style="margin:0;font-size:13px">${escapeHtml(w.why.map(x => WHY_LABEL[x]).join(", "))}</span></label>`).join("")}</div>
       ${RD.today ? "" : `<button class="next" id="addrev"${RD.added ? " disabled" : ""}>Add to review</button>`}` : ""}
@@ -8335,4 +8338,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:265986530-2354374-->
+<!--ve-build:424776598-2354849-->
