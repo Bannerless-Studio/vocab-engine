@@ -864,7 +864,7 @@ console.log("\n[pv] pack.progressView (fb37): optional top-level prog.pv = {sn, 
 }
 
 
-console.log("\n[pc] pack.placementChars (fb50): optional prov on prog.chars.c unit records; 143a674 and 806ad57 boot them unchanged, no backup, a unit mark there keeps prov, and back");
+console.log("\n[pc] placement places the characters layer (fb50; pack.placementChars until the flag collapse): optional prov on prog.chars.c unit records; 143a674 and 806ad57 boot them unchanged, no backup, a unit mark there keeps prov, and back");
 {
   const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog;
   const ids = ["c0001", "c0002", "c0003", "c0004"]; ids.forEach(id => { p.chars.c[id] = { r: 1, w: 0, s: 1, prov: 1 }; });
@@ -880,7 +880,7 @@ console.log("\n[pc] pack.placementChars (fb50): optional prov on prog.chars.c un
     } catch(e){ eng = null; }
     if(!eng){ skip(`[pc] engine ${sha} not in this checkout's history`); continue; }
     const o = eng.bootProg(raw, op), o2 = eng.bootProg(raw, LAG_PACK);
-    check(`[pc] engine ${sha} boots a record carrying prov units (its zh pack, and this pack with placementChars): no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw && o2.backupRaw === null && JSON.stringify(o2.prog) === raw);
+    check(`[pc] engine ${sha} boots a record carrying prov units (its zh pack, and this pack): no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw && o2.backupRaw === null && JSON.stringify(o2.prog) === raw);
     const q = clone(o.prog); eng.markChar ? eng.markChar(q, ids[0], true, op, false) : eng.markRec(q.chars.c, ids[0], true, false);
     check(`[pc] a unit mark on ${sha} keeps prov (it never reads it; s ${q.chars.c[ids[0]].s})`, q.chars.c[ids[0]].s === 2 && q.chars.c[ids[0]].prov === 1 && q.chars.c[ids[1]].prov === 1);
     const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
@@ -959,17 +959,17 @@ console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/bri
     const site = PS.loadSibling(lang);
     if(!site){ skip(`[port] ${lang}: ../${lang}/pack/*.js not present`); continue; }
     const G = PS.withG(site), L = `[port] ${lang}`;
-    // pre-fb45 engines write showPron on boot; a record written under pack.pronUntilPrimer carries none, main keeps it when it comes back (TODO "Open defects")
-    const tolFor = raw => site.pack.pronUntilPrimer && !("showPron" in JSON.parse(raw)) ? (p => { const c = clone(p); delete c.showPron; return c; }) : (p => p);
+    // pre-fb45 engines write showPron on boot; a record written for a script pack (pronUntilPrimerOn) carries none, main keeps it when it comes back (TODO "Open defects")
+    const tolFor = raw => VC.pronUntilPrimerOn(site.pack) && !("showPron" in JSON.parse(raw)) ? (p => { const c = clone(p); delete c.showPron; return c; }) : (p => p);
     const seed = PS.legacySeed(VC, site, 150, 7);
     // old engines boot a record written under G byte-equal, a mark keeps every new field, and back on main
     const boots = (raw, prog, L) => {
         for(const { sha, eng } of OLD){
           if(!eng){ skip(`${L}: engine ${sha} not in this checkout's history`); continue; }
           const o = eng.bootProg(raw, site.pack);
-          // pre-fb45 engines write showPron on boot; a record written under pack.pronUntilPrimer carries none (TODO "Open defects": old-build rollback adds showPron)
+          // pre-fb45 engines write showPron on boot; a record written for a script pack carries none (TODO "Open defects": old-build rollback adds showPron)
           const tol = tolFor(raw);
-          check(`${L}: engine ${sha} boots a record written under G: no _invalid/_reset backup, progress byte-equal after its own save (showPron tolerated under pronUntilPrimer)`, o.backupRaw === null && JSON.stringify(tol(o.prog)) === raw);
+          check(`${L}: engine ${sha} boots a record written under G: no _invalid/_reset backup, progress byte-equal after its own save (showPron tolerated on a script pack)`, o.backupRaw === null && JSON.stringify(tol(o.prog)) === raw);
           const q = clone(o.prog), id = Object.keys(q.w).find(k => q.w[k].p);
           eng.markRec(q.w, id, true, true);
           const others = Object.keys(tol(q)).filter(k => k !== "w").every(k => eq(q[k], prog[k])) && Object.keys(q.w).filter(k => k !== id).every(k => eq(q.w[k], prog.w[k]));
