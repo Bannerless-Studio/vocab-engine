@@ -142,8 +142,6 @@
   .wl .en{color:var(--mute);font-size:14px;text-align:left;display:block;margin:0}
   .pmap{cursor:pointer;margin:0 0 10px;white-space:nowrap;overflow:hidden}
   .pmap .pm1{font-size:12px;letter-spacing:0}
-  .pmap.pmg{white-space:normal}
-  .pmap .pmh{white-space:nowrap}
   .pmap .pm2{font-size:13px;color:var(--mute);margin-top:2px}
   table.stats{width:100%;border-collapse:collapse;font-size:15px}
   table.stats td{padding:8px 0;border-bottom:1px solid var(--line)}
@@ -2404,17 +2402,11 @@ function charChoiceHTML(){
   const top = deferred.length && next && deferred[0].after !== next.lv ? levelLabel(deferred[0].after) : "";
   return `<div class="stmt" id="charChoice">${L} next: learn to recognise the written form of the words you already know. Or go on to ${N} first and do ${L} after ${top ? ui(top) : "it"}. You can change this later in Progress.<button class="next" id="choiceStart" style="margin-top:8px">Start ${L}</button><button class="ghost" id="choiceSkip" style="margin-top:8px">Skip to ${N}</button></div>`;
 }
-// pack.progressMap: one bar line and one pace line; tap opens Progress.
+// pack.progressMap without goals (a legacy progressMap: true): one bar line and the eta line; tap opens Progress.
+// A pack with goals shows its current goal (pvGoalHTML) instead.
 function progressMapHTML(){
   if(!VC.progressMapOn(PACK)) return "";
-  const cg = VC.currentGoal(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST);
-  if(cg){
-    const f = Math.min(10, Math.round(10 * cg.p)), n = VC.sessionsToGo(prog, cg.i, cg.n), pc = Math.round(cg.p * 100);
-    const head = cg.all ? "All goals" : `Goal ${cg.i + 1} of ${cg.n}`;
-    const eta = etaText(goalEta(cg));
-    return `<div class="pmap pmg" id="pmap" role="button" tabindex="0" aria-label="${pc}% of ${cg.all ? "all goals" : `goal ${cg.i + 1} of ${cg.n}`}: ${escapeHtml(cg.goal.label)}"><div class="pm1"><span class="pmh">${ui(head + " ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸")}</span> ${ui(cg.goal.label)}</div>${(eta ? `<div class="pm2">${ui(eta)}</div>` : "")}</div>`;
-  }
-  const p = VC.progressPosition(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST), f = Math.round(10 * p), n = VC.sessionsToGo(prog);
+  const p = VC.progressPosition(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST), f = Math.round(10 * p);
   const aria = `${Math.round(p * 100)}% of the way to following a drama without pausing`;
   const eta = etaText(VC.sessionsToGoX(prog));
   return `<div class="pmap" id="pmap" role="button" tabindex="0" aria-label="${aria}"><div class="pm1">${ui("You ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸ follow a drama without pausing")}</div>${(eta ? `<div class="pm2">${ui(eta)}</div>` : "")}</div>`;

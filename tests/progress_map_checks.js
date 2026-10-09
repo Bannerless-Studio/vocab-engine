@@ -245,7 +245,9 @@ function playSession(api, tap){
 const NOCH = (p => { const q = clone(p); delete q.characters; return q; })(PACK);
 const bareOf = lvUnits => lvUnits.forEach(u => { u.s = VC.charsConfig(PACK).bare; });
 const pm14 = (p0, step, sn0) => Array.from({ length: 14 }, (_, i) => ({ sn: (sn0 || 20) + i, p: Math.round((p0 + step * i) * 1000) / 1000 }));
-const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div><div class="pm2">[\s\S]*?<\/div><\/div>/); return m ? m[0] : null; };
+// App v2 (engine default since the flag collapse): a goal-less progressMap keeps the bar line, the eta line only when there is one.
+const pmRow = h => { const m = String(h).match(/<div class="pmap" id="pmap"[^>]*><div class="pm1">[\s\S]*?<\/div>(?:<div class="pm2">[\s\S]*?<\/div>)?<\/div>/); return m ? m[0] : null; };
+const etaOf = n => { if(!n) return ""; const r = n >= 100 ? Math.round(n / 10) * 10 : n; return r > 999 ? "≈\u00a0999+ sessions" : `≈\u00a0${r} session${r === 1 ? "" : "s"}`; }; // app.html etaText
 
 (async function main(){
   console.log("\n[1] progressPosition");
@@ -308,13 +310,13 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
       const { api } = await bootWith(LEG, mk(pm), 1);
       const h = api.panel(), row = pmRow(h), pos = VC.progressPosition(api.getProg(), LEG, WORDS, CHARACTERS, PASSAGES), f = Math.round(10 * pos);
       const l1 = stripTags((row.match(/<div class="pm1">([\s\S]*?)<\/div>/) || [])[1] || ""), l2 = stripTags((row.match(/<div class="pm2">([\s\S]*?)<\/div>/) || [])[1] || "");
-      const n = VC.sessionsToGo(api.getProg());
-      check(`${label}: "${l1}" / "${l2}"`, l1 === `You ▸ [${"■".repeat(f)}${"□".repeat(10 - f)}] ▸ follow a drama without pausing` && l2 === (n == null ? "pace: — (after 14 sessions)" : `≈ ${n} sessions to go`));
-      check(`${label}: above the plan rows, two lines, no wrap (${l1.length} chars), aria with percent`, h.indexOf('class="pmap"') < h.indexOf('<table class="stats steps">') && l1.length <= 52 && !/<br/.test(row) && new RegExp(`aria-label="${Math.round(pos * 100)}% of the way`).test(row));
+      const eta = etaOf(VC.sessionsToGoX(api.getProg()));
+      check(`${label}: "${l1}" / "${l2}"`, !!row && l1 === `You ▸ [${"■".repeat(f)}${"□".repeat(10 - f)}] ▸ follow a drama without pausing` && l2 === eta && /<div class="pm2">/.test(row) === !!eta);
+      check(`${label}: above the plan rows, no wrap (${l1.length} chars), aria with percent`, h.indexOf('class="pmap"') < h.indexOf('<section class="tsts">') && l1.length <= 52 && !/<br/.test(row) && new RegExp(`aria-label="${Math.round(pos * 100)}% of the way`).test(row));
     }
     const { api } = await bootWith(LEG, mk(null), 1);
     api.el("pmap").click();
-    check("tap opens Progress", !/id="pmap"/.test(api.panel()) && /learned · \d+ mastered/.test(stripTags(api.panel())) && !/id="go"/.test(api.panel()));
+    check("tap opens Progress", !/id="pmap"/.test(api.panel()) && /id="pvAll"/.test(api.panel()) && !/id="go"/.test(api.panel()));
     const off = await bootWith(OFF, mk(null), 1);
     check("flag off: no row", !/pmap|You ▸/.test(off.api.panel()));
   }
@@ -404,31 +406,36 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
 
   console.log("\n[9] Today row and Progress Goals block");
   {
-    const goalText = h => { const m = String(h).match(/<div class="pmap pmg"[\s\S]*?<\/div><div class="pm2">[\s\S]*?<\/div><\/div>/); return m && { head: stripTags((m[0].match(/<span class="pmh">([\s\S]*?)<\/span>/) || [])[1] || ""), line1: stripTags((m[0].match(/<div class="pm1">([\s\S]*?)<\/div>/) || [])[1] || ""), line2: stripTags((m[0].match(/<div class="pm2">([\s\S]*?)<\/div>/) || [])[1] || ""), aria: (m[0].match(/aria-label="([^"]*)"/) || [])[1] }; };
-    const G = PACK.progressMap.goals, cells = p => { const f = Math.min(10, Math.round(10 * p)); return "■".repeat(f) + "□".repeat(10 - f); };
+    // App v2 (engine default since the flag collapse): Today shows the current goal as Progress's goal section
+    // (head, eta or percent, bar, label) inside the tappable #pmap.pmv.
+    const goalText = h => { const m = String(h).match(/<div class="pmv" id="pmap"[^>]*><section class="pvg">([\s\S]*?)<\/section><\/div>/); return m && { head: stripTags((m[1].match(/<div class="pvt"><span>([^<]*)<\/span>/) || [])[1] || ""), value: stripTags((m[1].match(/<span class="pvn">([^<]*)<\/span>/) || [])[1] || ""), label: stripTags((m[1].match(/<p class="pvs">([\s\S]*?)<\/p>/) || [])[1] || ""), html: m[0] }; };
+    const G = PACK.progressMap.goals;
     const hsk12 = (extra) => { const p = base({ sets: { "1": NS("1"), "2": NS("2") } }); WORDS.filter(w => ["1", "2"].includes(w.lv)).forEach(w => { p.w[w.id] = { r: 3, w: 0, s: 3 }; }); CHARACTERS.filter(u => ["1", "2"].includes(u.lv)).forEach(u => { p.chars.c[u.id] = { r: 5, w: 0, s: 3 }; }); return Object.assign(p, extra || {}); };
     for(const [label, mkp, pm] of [["mid HSK 1 (goal 1)", midProg, null], ["HSK 1-2 done (goal 2)", hsk12, null], ["goal 2 with 14 g=1 entries", hsk12, Array.from({ length: 14 }, (_, i) => ({ sn: 20 + i, p: 0.1 + 0.01 * i, g: 1 }))], ["goal 2, 14 entries without g", hsk12, pm14(0.1, 0.01)]]){
       const pr = mkp(); if(pm) pr.pm = pm;
       const { api } = await bootWith(PACK, pr, 1);
-      const h = api.panel(), t = goalText(h), cg = VC.currentGoal(api.getProg(), PACK, WORDS, CHARACTERS, PASSAGES), n = VC.sessionsToGo(api.getProg(), cg.i, cg.n);
-      check(`${label}: "${t && t.head} ${t && t.line1.slice((t.head || "").length)}" / "${t && t.line2}"`, !!t && t.head === `Goal ${cg.i + 1} of 3 ▸ [${cells(cg.p)}] ▸` && t.line1 === `${t.head} ${G[cg.i].label}` && t.line2 === (n == null ? "pace: — (after 14 sessions)" : `≈ ${n} sessions to go`));
-      check(`${label}: above the plan rows; bar and "Goal k of 3" in one nowrap span (${t.head.length} chars); aria carries percent and label`, h.indexOf('class="pmap pmg"') < h.indexOf('<table class="stats steps">') && t.head.length <= 36 && new RegExp(`aria-label="${Math.round(cg.p * 100)}% of goal ${cg.i + 1} of 3: `).test(h) && /\.pmap \.pmh\{white-space:nowrap\}/.test(appHtml));
+      const h = api.panel(), t = goalText(h), cg = VC.currentGoal(api.getProg(), PACK, WORDS, CHARACTERS, PASSAGES), pc = Math.round(cg.p * 100);
+      const eta = etaOf(VC.sessionsToGoX(api.getProg(), cg.i, cg.n, { pack: PACK, words: WORDS, units: CHARACTERS, passages: PASSAGES }));
+      check(`${label}: "${t && t.head}" "${t && t.value}" "${t && t.label}"`, !!t && t.head === `Goal ${cg.i + 1} of 3` && t.value === (eta || `${pc}%`) && t.label === G[cg.i].label);
+      check(`${label}: above the plan rows; aria carries the percent`, h.indexOf('id="pmap"') < h.indexOf('<section class="tsts">') && new RegExp(`aria-label="${pc}% of goal ${cg.i + 1} of 3"`).test(h));
     }
     check("goal 2 of an HSK 1-2 record, pace from the g=1 entries: a number", (() => { const pr = hsk12(); pr.pm = Array.from({ length: 14 }, (_, i) => ({ sn: 20 + i, p: 0.1 + 0.01 * i, g: 1 })); return VC.sessionsToGo(pr, 1, 3) === 67; })());
     const done = base({ sets: Object.fromEntries(VC.levelIds(PACK).map(lv => [lv, NS(lv)])) }); WORDS.forEach(w => { done.w[w.id] = { r: 3, w: 0, s: 3 }; }); CHARACTERS.forEach(u => { done.chars.c[u.id] = { r: 5, w: 0, s: 3 }; }); done.read = { done: Object.fromEntries(PASSAGES.map(x => [x.id, { sc: 4, n: 4, d: "2026-10-01", x: 1, l: 1 }])) };
-    { const { api } = await bootWith(PACK, done, 1), h = api.panel(), m = h.match(/<div class="pmap pmg"[\s\S]*?<\/div><\/div>/), l1 = stripTags((m[0].match(/<div class="pm1">([\s\S]*?)<\/div>/) || [])[1] || "");
-      check(`all goals passed: "${l1}", no pace line`, l1 === `All goals ▸ [${cells(1)}] ▸ ${G[2].label}` && !/pm2/.test(m[0]) && /aria-label="100% of all goals/.test(h)); }
-    { const d2 = clone(done); d2.pm = Array.from({ length: 14 }, (_, i) => ({ sn: 20 + i, p: 0.9 + 0.005 * i, g: 2 })); const { api } = await bootWith(PACK, d2, 1);
-      check("all goals passed with a rising history: still no pace line", /class="pmap pmg"/.test(api.panel()) && !/pm2/.test(api.panel().match(/<div class="pmap pmg"[\s\S]*?<\/div><\/div>/)[0])); }
+    { const { api } = await bootWith(PACK, done, 1), t = goalText(api.panel());
+      check(`all goals passed: "${t && t.head}" "${t && t.value}" "${t && t.label}", no eta`, !!t && t.head === "All goals" && t.value === "100%" && t.label === G[2].label && /aria-label="100% of all goals"/.test(t.html)); }
+    { const d2 = clone(done); d2.pm = Array.from({ length: 14 }, (_, i) => ({ sn: 20 + i, p: 0.9 + 0.005 * i, g: 2 })); const { api } = await bootWith(PACK, d2, 1), t = goalText(api.panel());
+      check("all goals passed with a rising history: still no eta", !!t && t.value === "100%"); }
     const { api } = await bootWith(PACK, hsk12(), 1);
-    api.el("pmap").click();
-    const g = stripTags(api.panel()), gb = (api.panel().match(/<p class="q">Goals<\/p><table class="stats">([\s\S]*?)<\/table>/) || [])[1] || "", gr = [...gb.matchAll(/<tr><td>(Goal \d)<\/td><td>(\d+)% · ([^<]*)<\/td><\/tr>/g)];
+    api.el("pmap").click(); api.el("pvAll").click(); // app v2: the Goals list sits under Show all
+    const gb = (api.panel().match(/<section class="pvls" id="pvGoals">([\s\S]*?)<\/section>/) || [])[1] || "", gr = [...gb.matchAll(/<span>(Goal \d)<\/span><span class="pvn">(\d+)%<\/span><\/div><p class="pvs">([^<]*)<\/p>/g)];
     const ps = VC.goalPositions(api.getProg(), PACK, WORDS, CHARACTERS, PASSAGES);
-    check(`tap opens Progress with a Goals block, one row per goal (${gr.map(m => m[1] + " " + m[2] + "%").join(", ")})`, !/id="pmap"/.test(api.panel()) && gr.length === 3 && gr.every((m, i) => +m[2] === Math.round(ps[i] * 100) && m[3] === G[i].label) && /learned · \d+ mastered/.test(g));
-    const lg = await bootWith(LEG, hsk12(), 1); lg.api.el("pmap").click();
-    check("progressMap: true: no Goals block on Progress", !/>Goals</.test(lg.api.panel()));
-    const off = await bootWith(OFF, hsk12(), 1); off.api.goto("progress");
-    check("flag off: no row, no Goals block", !/pmap|>Goals</.test(off.api.panel()));
+    check(`tap opens Progress; Show all lists the goals, one row per goal (${gr.map(m => m[1] + " " + m[2] + "%").join(", ")})`, !/id="pmap"/.test(api.panel()) && gr.length === 3 && gr.every((m, i) => +m[2] === Math.round(ps[i] * 100) && m[3] === G[i].label));
+    const lg = await bootWith(LEG, hsk12(), 1); lg.api.el("pmap").click(); lg.api.el("pvAll").click();
+    check("progressMap: true: no goal section, no Goals list on Progress", !/id="pvGoals"|class="pvg"/.test(lg.api.panel()));
+    const off = await bootWith(OFF, hsk12(), 1); off.api.goto("progress"); off.api.el("pvAll").click();
+    check("flag off: no row, no goal section, no Goals list", !/pmap|id="pvGoals"|class="pvg"/.test(off.api.panel()));
+    off.api.today();
+    check("flag off: no row on Today", !/id="pmap"/.test(off.api.panel()));
   }
 
   console.log("\n[10] a session writes pm with g; old pm entries");
