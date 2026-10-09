@@ -159,7 +159,7 @@ const __mc = renderMcItem; renderMcItem = function(it){ __cur = it; return __mc(
 const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; return __ty(it); };
 return {
   el: id => document.getElementById(id), html: id => { const e = document.getElementById(id); return e ? e.innerHTML : null; }, panel: () => document.getElementById("panel").innerHTML,
-  getProg: () => prog, setProg: p => { prog = p; }, getD: () => D, getCur: () => __cur,
+  getProg: () => prog, setProg: p => { prog = p; }, getD: () => D, getCur: () => __cur, getPrep: () => todayPrep,
   today: () => { tab = "today"; render(); }, goto: t => { tab = t; testSel = null; RD = null; soundsSel = null; render(); },
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
   readItem, recallItem, revealBlock, charDrillItem, wordRowHTML, itemFromPlan,
@@ -311,7 +311,8 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     // so it cannot settle the unit's charRecall miss (scheduler review 2026-10-02).
     check("day log: typed reading answers (pronMeaning, pron) log nothing under the unit", [band[3], band[4]].every(id => !((api.getProg().day.a["c:" + id] || {}).r || []).includes("type")));
     { const B = VC.charsConfig(PACK).bare, s = results[0][2];
-      check(`reveal shows the unit's streak as dots after the answer (${stripTags(results[0][3]).slice(0, 14)}; bare ${B} from the pack)`, results[0][3].includes(`aria-label="字 ${s}/${B}"`) && stripTags(results[0][3]).startsWith("字 " + "●".repeat(s) + "○".repeat(B - s))); }
+      const cue = (results[0][3].match(/<div class="ucue"[\s\S]*?<\/div>/) || [""])[0]; // app v2: the dots sit inside the answer row
+      check(`reveal shows the unit's streak as dots after the answer (${stripTags(cue)}; bare ${B} from the pack)`, cue.includes(`aria-label="字 ${s}/${B}"`) && stripTags(cue).startsWith("字 " + "●".repeat(s) + "○".repeat(B - s))); }
     // Miss, in-drill retry, second-miss choice fallback.
     { const id = band[5]; const it = api.silentWrittenTypeItem(wordOfUnit(id)); api.drill1(it); answer(api, false);
       const floored = rec(id).s; api.el("nx").click(); answer(api, true);
@@ -352,14 +353,16 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
   console.log("\n[5] stages per level, characters.withWords: Today for fresh, mid HSK 1, mid HSK 2, all words learned mid the old 字 stage, finished");
   { const PACK = WITH; // the stage model (main 590af86); zh ships characters.learn "lag" (lag_checks.js)
     const segs = h => [...h.matchAll(/<div class="seg">[\s\S]*?<\/i><\/div>([\s\S]*?)<\/div>/g)].map(m => stripTags(m[1]));
-    const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
+    const learnLine = h => stripTags((h.match(/<div class="tst"><span>Learn<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/) || ["", ""])[1]); // app v2 Today row
     const withS = (p, n) => Object.assign(clone(p), { sessions: n });
-    const today = async p => { const { api } = await bootWith(PACK, p, 1); const h = api.panel(); return { api, h, learn: learnLine(h), card: /id="charChoice"/.test(h), go: /id="go"/.test(h) }; };
+    // App v2: the path strip is on Progress (Show all), shown once characters are unlocked or started.
+    const stripOf = api => { api.goto("progress"); if(!/id="pvAll" aria-expanded="true"/.test(api.panel())) api.el("pvAll").click(); const s = segs(api.panel()); api.today(); return s; };
+    const today = async p => { const { api } = await bootWith(PACK, p, 1); const h = api.panel(); return { api, h, learn: learnLine(h), card: /id="charChoice"/.test(h), go: /id="go"/.test(h), strip: stripOf(api) }; };
     const RESULTS = [];
     // fresh
     let t = await today(null);
     RESULTS.push(["fresh", t.learn]);
-    check(`fresh: strip ${segs(t.h).join(" | ")}; Learn ${t.learn}; Start today`, segs(t.h).join("|") === "HSK 1|字1|HSK 2|字2|HSK 3|字3|HSK 4|字4" && /^HSK 1, set 1/.test(t.learn) && t.go && !t.card);
+    check(`fresh: strip ${t.strip.join(" | ") || "(none: characters locked)"}; Learn ${t.learn}; Start today`, t.strip.length === 0 && !VC.charsUnlocked(PACK, WORDS, t.api.getProg()) && /^HSK 1, set 1/.test(t.learn) && t.go && !t.card);
     // mid HSK 1: no 字 stage pending, words every session
     const m1 = VC.normalizeProg({ sets: { "1": 4 }, placedOnce: true, soundsOpened: true }, PACK);
     byLv["1"].slice(0, 40).forEach(w => { m1.w[w.id] = { r: 3, w: 0, s: 3 }; });
@@ -372,7 +375,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     const ev = await today(withS(mid, 6)), od = await today(withS(mid, 7));
     RESULTS.push(["mid HSK 2", ev.learn + " / " + od.learn]);
     check(`mid HSK 2: no card, Start today; sessions alternate (${ev.learn} | ${od.learn})`, !ev.card && !od.card && ev.go && od.go && /^HSK 2, set 3/.test(ev.learn) && /^字1, set 1 of \d+/.test(od.learn));
-    check(`mid HSK 2: strip ${segs(ev.h).join(" | ")}`, segs(ev.h).join("|") === "HSK 1|字1|HSK 2|字2|HSK 3|字3|HSK 4|字4");
+    check(`mid HSK 2: strip ${ev.strip.join(" | ")}`, ev.strip.join("|") === "HSK 1|字1|HSK 2|字2|HSK 3|字3|HSK 4|字4");
     // A whole character session, then the next session teaches words.
     { const { api } = await bootWith(PACK, withS(mid, 7), 1); api.el("go").click();
       let guard = 0; while(guard++ < 400){ const D = api.getD(); const h = api.panel();
@@ -389,7 +392,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
       check(`Progress chips: ${chips.join(" / ") || "(not rendered)"}`, chips.join("|") === "Characters: first|Characters: with words|Characters: later");
       const later = VC.setCharOrder(withS(mid, 7), true);
       const lt = await today(later);
-      check(`"later": Learn ${lt.learn} every session, strip ${segs(lt.h).join(" | ")}`, /^HSK 2, set 3/.test(lt.learn) && segs(lt.h).join("|") === "HSK 1|HSK 2|HSK 3|HSK 4|字" && VC.nextStage(PACK, WORDS, CHARACTERS, withS(later, 8)).kind === "words");
+      check(`"later": Learn ${lt.learn} every session, strip ${lt.strip.join(" | ")}`, /^HSK 2, set 3/.test(lt.learn) && lt.strip.join("|") === "HSK 1|HSK 2|HSK 3|HSK 4|字" && VC.nextStage(PACK, WORDS, CHARACTERS, withS(later, 8)).kind === "words");
       const back = await today(VC.setCharOrder(clone(later), false));
       check(`"with words" again: Learn ${back.learn}`, /^字1, set 1 of \d+/.test(back.learn)); }
     // all words learned, mid the old single 字 stage (levels 1-3 in one list): characters every
@@ -465,8 +468,8 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
 
   console.log("\n[9] withWords Learn turn (chars.turn): Today closed after Learn still alternates");
   { const PACK = WITH; // the stage model (main 590af86); zh ships characters.learn "lag" (lag_checks.js)
-    const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
-    const reviewLine = h => (stripTags((h.match(/<tr><td>1\. Review<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^1\. Review/, ""));
+    const learnLine = h => stripTags((h.match(/<div class="tst"><span>Learn<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/) || ["", ""])[1]); // app v2 Today row
+    const reviewLine = api => `${api.getPrep().review.length} items`; // app v2: the Review row has no count; read todayPrep
     const mid = VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, soundsOpened: true, sessions: 40 }, PACK);
     byLv["1"].forEach(w => { mid.w[w.id] = { r: 3, w: 0, s: 3 }; }); byLv["2"].slice(0, 20).forEach(w => { mid.w[w.id] = { r: 1, w: 0, s: 1 }; });
     // Plays Today until stop(prog) holds; the app is then closed without finishing.
@@ -482,7 +485,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     for(let d = 0; d < 10; d++){
       NOW = new Date(2026, 9, 3 + d, 8, 0, 0).getTime();
       const api = await boot(PACK, st, 1); const h = api.panel();
-      seq.push(learnLine(h)); rev.add(reviewLine(h));
+      seq.push(learnLine(h)); rev.add(reviewLine(api));
       const t0 = (api.getProg().chars || {}).turn;
       stopped = play(api, p => (p.chars || {}).turn !== t0 && p.chars.turn !== undefined) && stopped;
     }
@@ -622,7 +625,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
 
   console.log("\n[11] characters order (chars.order, R5): first / with words / later");
   { const PACK = WITH; // the stage model (main 590af86); zh ships characters.learn "lag" (lag_checks.js)
-    const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
+    const learnLine = h => stripTags((h.match(/<div class="tst"><span>Learn<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/) || ["", ""])[1]); // app v2 Today row
     const playSession = api => { const s0 = api.getProg().sessions; if(!api.getD()) api.el("go").click(); let guard = 0;
       while(guard++ < 800 && api.getProg().sessions === s0){ const D = api.getD(); const h = api.panel();
         if(D && api.getCur() && D.cur){ answer(api, true); api.el("nx").click(); continue; }
