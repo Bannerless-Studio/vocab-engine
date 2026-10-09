@@ -6220,7 +6220,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1892292152-2354417";
+const VE_BUILD = "1228613770-2354344";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6947,9 +6947,8 @@ function switchToTab(t, title){
 
 const HAS_STAGES = HAS_CHARACTERS || HAS_SCRIPT;
 function pathStrip(){
-  const stages = HAS_STAGES
-    ? VC.stagePath(PACK, WORDS, CHAR_LIST, prog, SU).map(s => ({ label: s.label, frac: s.frac, tl: s.kind === "chars" || s.kind === "script" }))
-    : VC.stagePath(PACK, WORDS, [], prog).filter(s => s.kind === "words").map(s => ({ label: s.label, frac: s.frac }));
+  // Shown by charProgress only (app v2), so HAS_STAGES holds.
+  const stages = VC.stagePath(PACK, WORDS, CHAR_LIST, prog, SU).map(s => ({ label: s.label, frac: s.frac, tl: s.kind === "chars" || s.kind === "script" }));
   return `<div class="path">${stages.map(s=>`<div class="seg"><div class="bar"><i style="width:${Math.round(s.frac*100)}%"></i></div>${s.tl ? tf(s.label) : escapeHtml(s.label)}</div>`).join("")}</div>`;
 }
 // Kept for the session, so finishing a stage mid-session changes neither what Learn teaches
@@ -8333,4 +8332,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3669922579-2353741-->
+<!--ve-build:798716594-2353668-->

@@ -2353,9 +2353,8 @@ function switchToTab(t, title){
 
 const HAS_STAGES = HAS_CHARACTERS || HAS_SCRIPT;
 function pathStrip(){
-  const stages = HAS_STAGES
-    ? VC.stagePath(PACK, WORDS, CHAR_LIST, prog, SU).map(s => ({ label: s.label, frac: s.frac, tl: s.kind === "chars" || s.kind === "script" }))
-    : VC.stagePath(PACK, WORDS, [], prog).filter(s => s.kind === "words").map(s => ({ label: s.label, frac: s.frac }));
+  // Shown by charProgress only (app v2), so HAS_STAGES holds.
+  const stages = VC.stagePath(PACK, WORDS, CHAR_LIST, prog, SU).map(s => ({ label: s.label, frac: s.frac, tl: s.kind === "chars" || s.kind === "script" }));
   return `<div class="path">${stages.map(s=>`<div class="seg"><div class="bar"><i style="width:${Math.round(s.frac*100)}%"></i></div>${s.tl ? tf(s.label) : escapeHtml(s.label)}</div>`).join("")}</div>`;
 }
 // Kept for the session, so finishing a stage mid-session changes neither what Learn teaches
