@@ -6,7 +6,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 
 const ROOT = path.join(__dirname, "..");
@@ -273,7 +273,7 @@ const WORDS_OFF = WORDS;
     async function screens(html, core, pack, seed){
       const { api } = await boot({ html, core, pack, seed, words: WORDS_OFF });
       const out = {};
-      api.setProg(seedPF()); api.today(); out.today = api.html("panel");
+      api.setProg(seedPF()); api.today(); out.today = api.html("panel").replace(/ · \S+ \d+ waits · \S+ \d+ at \d+% known/g, ""); // the level gate hint (engine default since the flag collapse) is newer than the control
       api.el("go").click();
       let walked = []; try{ walked = walk(api, /id="again"/); }catch(e){ walked = [{ where: "ERR", html: e.message }]; }
       out.walk = walked.map(x => x.where + "\n" + x.html).join("\n----\n");
@@ -285,7 +285,7 @@ const WORDS_OFF = WORDS;
       return out;
     }
     if(mainHtml && mainCore){
-      const a = await screens(mainHtml, mainCore, PACK_OFF, 11), b = await screens(CUR_HTML, VC, PACK_OFF, 11);
+      const a = await screens(mainHtml, mainCore, withCollapsed(PACK_OFF), 11), b = await screens(CUR_HTML, VC, PACK_OFF, 11);
       for(const k of Object.keys(a)){
         let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
         check(`zh without glossStyle: ${k} byte-identical to main (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: main ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);

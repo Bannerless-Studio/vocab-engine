@@ -987,17 +987,8 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
   }
 }
 
-const BASE_E = "f6481b8"; // main before fb48: the flag-off control for placementWhole
 console.log("\n[D2] fb48: placement reads the whole result (pack.placementWhole)");
 {
-  const oldOf = f => cp.execSync(`git -C "${ROOT}" show ${BASE_E}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-  let oldCore = null, oldHtml = null;
-  try {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avd-")); const f = path.join(dir, `core_${BASE_E}.js`);
-    fs.writeFileSync(f, oldOf("engine/core.js")); oldCore = require(f); oldHtml = oldOf("engine/app.html");
-    fs.rmSync(dir, { recursive: true, force: true });
-  } catch(e){ oldCore = null; }
-  const OFFW = packAsOf(PACK, BASE_E, { strip: [] });
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
   // right answers per bucket (zh asks 2,3,2,3,...); the first 12 are the owner-reported record
   const RECS = {
@@ -1020,11 +1011,7 @@ console.log("\n[D2] fb48: placement reads the whole result (pack.placementWhole)
     check(`${sn}, flag on, poor record: no muted cell`, !/var\(--mute\)/.test(poor.html));
     const first0 = await place(PACK, mk(), RECS["first bucket 0"]);
     check(`${sn}, flag on, first bucket 0: every cell bad (stop 0, nothing skipped)`, (first0.html.match(/color:var\(--bad\)/g) || []).length === 16 && !/var\(--mute\)/.test(first0.html));
-    if(!oldCore) { skip(`${BASE_E} not in this checkout's history`); continue; }
-    for(const [rn, r] of Object.entries(RECS)){
-      const a = await place(OFFW, mk(), r), b = await place(OFFW, mk(), r, { core: oldCore, html: oldHtml });
-      check(`${sn}, flag off, ${rn}: result screen and stored record byte-identical to ${BASE_E}`, a.html === b.html && a.rec === b.rec && !/var\(--mute\)/.test(a.html));
-    }
+    // flag-off control vs f6481b8 deleted: placementWhole is engine default since the flag collapse (the window rule is gone).
   }
 }
 
@@ -1081,18 +1068,9 @@ console.log("\n[D3] fb50: placement places the characters layer (pack.placementC
   }
 }
 
-const BASE_G = "8564258"; // fb50 head: the flag-off control for placementEarlyStop and the base of the fb51 reveal / meaning changes
-const oldOfG = f => cp.execSync(`git -C "${ROOT}" show ${BASE_G}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-let G_CORE = null, G_HTML = null;
-try {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avd-")); const f = path.join(dir, `core_${BASE_G}.js`);
-  fs.writeFileSync(f, oldOfG("engine/core.js")); G_CORE = require(f); G_HTML = oldOfG("engine/app.html");
-  fs.rmSync(dir, { recursive: true, force: true });
-} catch(e){ G_CORE = null; }
 console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack.placementEarlyStop)");
 {
-  const OFFE = packAsOf(PACK, BASE_G, { strip: [] });
-  check("pack.placementEarlyStop: on in the shipped pack, off in the control", PACK.placementEarlyStop === true && VC.placementEarlyStopOn(PACK) && OFFE.placementEarlyStop === undefined && !VC.placementEarlyStopOn(OFFE));
+  check("placementEarlyStop is engine default (flag collapse): zh carries no key", !("placementEarlyStop" in PACK));
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
   const TOT = N.reduce((a, b) => a + b, 0);
   // right = how many items of bucket b to get right
@@ -1139,14 +1117,7 @@ console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack
     const mid = await walk(PACK, mk(), RECS["right to bucket 5, then empty"]);
     const lm = lineOf(mid.html, 9);
     check(`${sn}, flag on, right to bucket 5 then empty: stops after bucket 9 (asked ${mid.asked} of ${TOT}); partial level by set range: "${lm.line}"`, mid.asked === N.slice(0, 9).reduce((a, b) => a + b, 0) && lm.line === lm.want && lm.na.some(e => !e.whole) && /^Not asked: HSK 3 sets? \d+(–\d+)?, HSK 4$/.test(lm.line || ""));
-    if(!G_CORE){ skip(`${BASE_G} not in this checkout's history`); continue; }
-    for(const [rn, f] of Object.entries(RECS)){
-      const a = await walk(OFFE, mk(), f), b = await walk(OFFE, mk(), f, { core: G_CORE, html: G_HTML });
-      check(`${sn}, flag off, ${rn}: ${a.screens.length} placement screens, result and stored record byte-identical to ${BASE_G}; all ${TOT} asked`, a.asked === TOT && a.screens.length === b.screens.length && a.screens.every((x, i) => x === b.screens[i]) && a.html === b.html && a.rec === b.rec && !/plNotAsked/.test(a.html));
-    }
-    // placement result of the same accuracy record equals flag on and off where the flag does not stop (advanced)
-    const advOff = await walk(OFFE, mk(), RECS["advanced (all right)"]);
-    check(`${sn}, advanced record: stored record and result screen equal flag on / off`, adv.rec === advOff.rec && adv.html === advOff.html);
+    // flag-off controls vs 8564258 deleted: placementEarlyStop is engine default since the flag collapse.
   }
   // the stop rules treat the unasked buckets as failed: whole and window
   const res = N.map((n, i) => i < 3 ? { r:0, n } : { r:0, n:0, skipped:true });
@@ -1194,7 +1165,6 @@ console.log("\n[D5] fb51: the reveal drops the stimulus hint links it makes redu
 
 console.log("\n[D6] fb51: a pattern below the placed level is not a first meeting (pack.placedRead)");
 {
-  const OFFP = packAsOf(PACK, BASE_G, { strip: [] });
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
   const placedRec = () => VC.applyPlacement(VC.normalizeProg({}, PACK), st0, st0.length, WORDS, PACK, CHARACTERS);
   const lvOf = lv => PATTERNS.find(p => String(p.lv) === lv).id;
@@ -1215,8 +1185,7 @@ console.log("\n[D6] fb51: a pattern below the placed level is not a first meetin
   check("placed record, a pattern at the placed level: first meeting, English open, the note rides the verdict", t.first === true && !tap(t.q) && note(t.rv));
   const f = await ask(PACK, VC.normalizeProg({}, PACK), lowId, true);
   check("fresh record: an HSK 2 pattern is a first meeting (English open, note)", f.first === true && !tap(f.q) && note(f.rv));
-  const o = await ask(OFFP, placedRec(), lowId, true);
-  check("flag off, placed record: the HSK 2 pattern is a first meeting as before (English open, note)", o.first === true && !tap(o.q) && note(o.rv));
+  // flag-off control (placedRead absent) deleted: placedRead is engine default since the flag collapse.
   check("patternFirstMeeting: a recorded pattern is never a first meeting; unknown pl or level counts as first", VC.patternFirstMeeting({ pt: { x: { s: 1, a: 1 } }, pl: "4" }, { id: "x", lv: "4" }, PACK) === false && VC.patternFirstMeeting({ pl: "zz" }, { id: "y", lv: "2" }, PACK) === true && VC.patternFirstMeeting({ pl: "4" }, { id: "y", lv: "9" }, PACK) === true);
   // the pattern is still drilled until known: it stays in the open list for a placed record
   check("placed record: the HSK 2 pattern still opens and is picked (drilled until known)", VC.openPatterns(placedRec(), PACK, PATTERNS, WORDS).some(p => p.id === lowId));

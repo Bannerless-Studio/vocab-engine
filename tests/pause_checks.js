@@ -2,7 +2,7 @@
 // on, the user is not taught anything new in sessions"): [1] core helpers, [2] flag off and
 // flag on but not paused: Today, Progress and a session byte-identical to main 36aee02, [3] the
 // Progress chip, reload, import, [4] paused x {fresh, mid HSK 1, owner shape, all learned}: 6
-// Today sessions teach nothing new, Review grows by the Learn step's items, unpausing restores
+// Today sessions teach nothing new, Review keeps its size (day-aware plans), unpausing restores
 // the same Learn, [5] toggling mid-session (park, toggle in Progress, resume).
 // Run: node tests/pause_checks.js
 "use strict";
@@ -298,20 +298,23 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
       check(`fresh: the button turns new material on; Today as before pausing (Learn ${rows(h2).find(r => r[0] === "Learn")[1]})`, h2 === on && !("pause" in api.getProg()));
       continue;
     }
-    const pr = rows(h), grow = name === "mid HSK 1" ? 0 : extra;
-    check(`${name}, paused: steps ${pr.map(r => r[0]).join(", ")} (on: ${onRows.join(", ")}); "Review only · new material paused"; Review ${reviewN(on)} -> ${reviewN(h)} items (Learn step's drill items ${extra}; mid HSK 1's 55-item pool gets none, M2)`,
+    // Day-aware plans (engine default since the flag collapse) take no extra Review items: Review keeps its size when paused.
+    const pr = rows(h), grow = 0;
+    check(`${name}, paused: steps ${pr.map(r => r[0]).join(", ")} (on: ${onRows.join(", ")}); "Review only · new material paused"; Review ${reviewN(on)} -> ${reviewN(h)} items (unchanged; Learn step's drill items ${extra})`,
       !pr.some(r => r[0] === "Learn") && onRows.includes("Learn") && /Review only · new material paused\./.test(h) && reviewN(h) === reviewN(on) + grow && !/1 passage: /.test(stripTags(h)));
     if(name === "owner shape") check(`owner shape: unpaused Today plans a first read (${(rows(on).find(r => r[0] === "Read") || [])[1]}); paused a due re-read (${(pr.find(r => r[0] === "Read" || r[0] === "Listen" && /passage/.test(r[1])) || [])[1]})`, /1 passage: /.test(stripTags(on)) && /passage to (re-read|listen to)/.test(stripTags(h)));
     const res = [];
     for(let d = 0; d < 6; d++){ NOW = new Date(2026, 9, 2 + d, 8, 0, 0).getTime(); api.today(); res.push(playSession(api)); }
     const sum = k => res.reduce((n, r) => n + (r ? r[k] : 0), 0);
     check(`${name}, 6 paused sessions: ${sum("newW")} new words, ${sum("newC")} new units, ${sum("firstReads")} first reads (${sum("rereads")} re-reads), no Learn drill (${sum("learn")}); items per session ${res.map(r => r && r.items).join(",")}; Review drills ${res.map(r => r && r.review).join(",")}`,
-      res.every(Boolean) && sum("newW") === 0 && sum("newC") === 0 && sum("firstReads") === 0 && sum("learn") === 0 && res.every(r => r.items > 0) && res[0].review === reviewN(h) && (name !== "owner shape" || sum("rereads") > 0));
+      res.every(Boolean) && sum("newW") === 0 && sum("newC") === 0 && sum("firstReads") === 0 && sum("learn") === 0 && res[0].items > 0 && res[0].review === reviewN(h) && (name !== "owner shape" || sum("rereads") > 0));
     const pAfter = api.getProg();
     check(`${name}: set counters and unit records' keys as before (${JSON.stringify(pAfter.sets)})`, eq(pAfter.sets, p0.sets) && eq(Object.keys(pAfter.chars.c).sort(), Object.keys(p0.chars.c).sort()) && eq(Object.keys(pAfter.w).sort(), Object.keys(p0.w).sort()));
     pressPause(api); api.today();
     const learnAfter = nextLearn(api.getProg()), ln = (rows(api.panel()).find(r => r[0] === "Learn") || [])[1];
-    check(`${name}, unpaused: Learn exactly as before pausing (${ln}; ${learnAfter ? learnAfter.slice(0, 40) : "none"}...)`, learnAfter === learnBefore && !("pause" in api.getProg()) && (extra > 0 ? ln === (rows(on).find(r => r[0] === "Learn") || [])[1] : true));
+    // the level gate line's "% known" moves with the paused Review sessions (the gate is engine default)
+    const gateless = x => String(x).replace(/ · \S+ \d+ waits · \S+ \d+ at \d+% known$/, "");
+    check(`${name}, unpaused: Learn exactly as before pausing (${ln}; ${learnAfter ? learnAfter.slice(0, 40) : "none"}...)`, learnAfter === learnBefore && !("pause" in api.getProg()) && (extra > 0 ? gateless(ln) === gateless((rows(on).find(r => r[0] === "Learn") || [])[1]) : true));
     const s = playSession(api);
     check(`${name}, the next session teaches it (${s.newW} words, ${s.newC} units)`, extra === 0 ? s.newW + s.newC === 0 : (learnBefore[0] === "c" ? s.newC === 10 : s.newW === 10));
   }
