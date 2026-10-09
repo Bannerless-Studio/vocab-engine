@@ -6220,7 +6220,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1228613770-2354344";
+const VE_BUILD = "1567857783-2354340";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -7849,11 +7849,11 @@ function readResults(){
   const qBlock = (q, i) => { const a = RD.answers[i] || {}, s = p.sentences[q.sentence], seen = [a.qh && "question", a.tr && "translation"].filter(Boolean);
     return `<div class="stmt"${TOKBOX}>${seen.length ? `<p class="pvs" style="margin:0 0 4px!important"${UIA}>${seen.join(" and ").replace(/^./, c => c.toUpperCase())} shown</p>` : ""}<div${TA}>${rubyTextOr(q.q, q.ruby)}</div><div style="margin-top:6px"${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:2px 0 0">${ui(s.en)}</div>${canHearSentence(s) ? `<button type="button" class="replay" id="rr${i}" aria-label="Replay">${REPLAY_SVG}</button>` : ""}</div>`; };
   const qIdx = p.questions.map((q, i) => i), qMiss = qIdx.filter(i => !(RD.answers[i] || {}).ok), qRight = qIdx.filter(i => (RD.answers[i] || {}).ok);
-  const qListV2 = () => `${qMiss.length ? `<p class="pvk">Missed</p>${qMiss.map(i => qBlock(p.questions[i], i)).join("")}` : ""}${qRight.length ? `<button class="pvc" id="rright" aria-expanded="false" aria-controls="rrbox"><span>${qRight.length} right</span></button><div id="rrbox" hidden>${qRight.map(i => qBlock(p.questions[i], i)).join("")}</div>` : ""}`;
+  const qList = () => `${qMiss.length ? `<p class="pvk">Missed</p>${qMiss.map(i => qBlock(p.questions[i], i)).join("")}` : ""}${qRight.length ? `<button class="pvc" id="rright" aria-expanded="false" aria-controls="rrbox"><span>${qRight.length} right</span></button><div id="rrbox" hidden>${qRight.map(i => qBlock(p.questions[i], i)).join("")}</div>` : ""}`;
   // Without RD.added a re-mount would offer "Add to review" again and apply the same words twice.
   P.innerHTML = `<div class="done"><h2>${sc} of ${p.questions.length}</h2>
     ${RD.mode === "listen" ? `<p class="q" id="lmode" style="margin-bottom:4px">Listening pass</p>` : ""}<p class="q"${TA} style="margin-bottom:8px">${rubyTextOr(p.title, p.titleRuby)}</p>
-    ${qListV2()}
+    ${qList()}
     ${anyWeak ? `<p class="q">Weak words from this passage${RD.today ? ". Ticked ones go to your next review." : ""}</p><div id="weak">${weak.map((w, i) => `<label class="wk"${DISP.rtl ? ' dir="rtl"' : ""}>${w.weight > 0 ? `<input type="checkbox" data-wi="${i}"${RD.unticked[i] ? "" : " checked"}${RD.added ? " disabled" : ""}> ` : ""}${glossHTML(w.id, RD.glosses && RD.glosses[w.id])} <span class="q"${UIA} style="margin:0;font-size:13px">${escapeHtml(w.why.map(x => WHY_LABEL[x]).join(", "))}</span></label>`).join("")}</div>
       ${RD.today ? "" : `<button class="next" id="addrev"${RD.added ? " disabled" : ""}>Add to review</button>`}` : ""}
     ${RD.today ? `<button class="next" id="rcont" style="margin-top:10px">Continue</button></div>` : `<div id="addmsg" class="q"${RD.added ? "" : " hidden"}>${RD.added ? escapeHtml(RD.added) : ""}</div>
@@ -8332,4 +8332,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:798716594-2353668-->
+<!--ve-build:1645442671-2353664-->

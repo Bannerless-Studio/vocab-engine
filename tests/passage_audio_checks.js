@@ -264,8 +264,9 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
       api.el("nx").click();
     }
     const results = api.html("panel");
-    const lines = [...results.matchAll(/(?:✓|✗) Question (\d+)[^<]*/g)].map(m => m[0]);
-    check("results: question 1's line has ' · translation shown'; no other question's does", /Question 1[^<]*· translation shown/.test(lines[0] || "") && lines.slice(1).every(l => !l.includes("translation shown")));
+    // App v2 results: one block per question (Missed open, right ones folded), "Translation shown" heads the block.
+    const blocks = results.split('<div class="stmt"').slice(1), trq = blocks.filter(b => />Translation shown</.test(b));
+    check("results: question 1's block says 'Translation shown'; no other question's does", trq.length === 1 && trq[0].includes(VC.escapeHtml(p.sentences[p.questions[0].sentence].en)));
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- translation peeked AFTER answering does not log
@@ -415,7 +416,7 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     await sleep(DEFER);
     const opts = api.el("o").children;
     check("voiceschanged after answering: reveal restored (source sentence, Next shown), nothing spoken",
-      /The answer is in this sentence/.test(api.html("rv")) && api.el("nx").style.display === "block" && spoken.length === k2);
+      /^<div class="q" style="margin:0 0 6px">(Right|Not quite)\.<\/div><div class="stmt hi"/.test(api.html("rv")) && api.el("nx").style.display === "block" && spoken.length === k2);
     check("restored reveal: options disabled, right one marked ok, the given wrong one bad",
       opts.every(b => b.disabled) && opts.find(b => b.dataset.v === String(q0.answer)).classList.contains("ok") && opts.find(b => b.dataset.v === String(api.rd().answers[0].given)).classList.contains("bad"));
     check("restored reveal: the answer is not re-graded (still wrong, still one record)", api.rd().answers[0].ok === false && api.rd().answers.length === 1);

@@ -190,7 +190,9 @@ function rereadProg(passages, missed, extra){
   if(pr.read.done[missed.id].l) pr.read.done[missed.id].ls = 4;
   return pr;
 }
-const planRow = (h, label) => (h.match(new RegExp(`<tr><td>6\\. ${label}</td><td>([\\s\\S]*?)</td></tr>`)) || [])[1];
+// App v2 Today: the passage row follows Sentences, <div class="tst"><span>Read|Listen</span><div class="tsd">title</div></div>.
+const planRow0 = (h, label) => (h.match(new RegExp(`<div class="tst"><span>${label}<\\/span><div class="tsd">([\\s\\S]*?)<\\/div><\\/div>`)) || [])[1];
+const planRow = (h, label) => { const rows = [...h.matchAll(/<div class="tst"><span>([^<]*)<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/g)], i = rows.findIndex(r => r[1] === "Sentences"), r = i >= 0 ? rows[i + 1] : null; return r && r[1] === label ? r[2] : undefined; };
 const answerAll = (api, p, wrong) => {
   for(let qi = api.rd().qi; qi < p.questions.length; qi++){
     const q = api.rd().p.questions[qi], os = api.el("o").children; // the pass's question order (passageForPass)
@@ -229,13 +231,13 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     const b = await boot();
     b.api.setProg(rereadProg(PASSAGES, P)); b.api.today();
     const lrow = planRow(b.api.html("panel"), "Listen");
-    check(`voice usable: plan row "6. Listen" names the passage (${lrow && lrow.replace(/<[^>]+>/g, "")})`, !!lrow && lrow.startsWith("1 passage to listen to: ") && lrow.includes(VC.escapeHtml(P.title)) && !planRow(b.api.html("panel"), "Read"));
+    check(`voice usable: the passage row "Listen" names the passage (${lrow && lrow.replace(/<[^>]+>/g, "")})`, !!lrow && lrow.includes(VC.escapeHtml(P.title)) && !planRow(b.api.html("panel"), "Read"));
     b.api.enterTodayStep(5);
     check("step 5 runs it as a listening pass (RD.mode listen, Skip today present)", b.api.rd() && b.api.rd().mode === "listen" && b.api.rd().p.id === P.id && /id="rskip"/.test(b.api.html("panel")));
     const nv = await boot({ voices: [{ lang: "en-US", name: "en" }] });
     nv.api.setProg(rereadProg(PASSAGES, P)); nv.api.today();
     const rrow = planRow(nv.api.html("panel"), "Read");
-    check("no voice, no clips: plain Read row (1 passage to re-read)", !!rrow && rrow.startsWith("1 passage to re-read: ") && !planRow(nv.api.html("panel"), "Listen"));
+    check("no voice, no clips: plain Read row", !!rrow && rrow.includes(VC.escapeHtml(P.title)) && !planRow(nv.api.html("panel"), "Listen"));
     nv.api.enterTodayStep(5);
     check("no voice, no clips: step 5 is a reading pass (no RD.mode)", nv.api.rd() && nv.api.rd().mode === undefined && /id="rdone">Done reading/.test(nv.api.html("panel")));
     const b2 = await boot();
@@ -396,9 +398,10 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("Show question before answering: reveals text + translation button, logs qh", tapOk);
     check("answering an audio-only question reveals its text + translation button (#qsh gone), qh not logged", lateOk);
     const res = b.api.html("panel");
-    const lines = [...res.matchAll(/(?:✓|✗) Question (\d+)[^<]*/g)].map(m => m[0]);
+    // App v2 results: one block per question in order (Missed first, then the folded right ones); "Question shown" heads a block.
+    const lines = res.split('<div class="stmt"').slice(1);
     check("results: 'Listening pass' alone even after Show text", /id="lmode"[^>]*>Listening pass<\/p>/.test(res) && !/Text shown while listening|looked back/.test(res) && !("peekText" in b.api.rd()));
-    check("results: ' · question shown' only on the tapped question's line", lines.length === n && lines.every((l, i) => l.includes("· question shown") === (i === tapIdx)));
+    check("results: 'Question shown' heads exactly one block, the tapped question's", lines.length === n && lines.filter(l => />Question( and translation)? shown</.test(l)).length === 1 && lines.findIndex(l => />Question( and translation)? shown</.test(l)) === tapIdx); // all answered right: blocks in question order
     const rec = pr.read.done[P.id];
     check("done record: l:1, x counts on, full score", rec.l === 1 && rec.x === 2 && rec.sc === n && rec.n === n);
     // A listen pass without Show text: header line only.
@@ -437,7 +440,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     const k = b.spoken.length, q0 = P.questions[0];
     if(rd.audioOnly.indexOf(0) >= 0) b.api.el("qsh").click();
     flip(); await sleep(DEFER);
-    check("question: voiceschanged keeps it (same question, nothing spoken again)", b.api.rd() === rd && rd.qi === 0 && b.spoken.length === k && /Question 1 \//.test(b.api.html("panel")));
+    check("question: voiceschanged keeps it (same question, nothing spoken again)", b.api.rd() === rd && rd.qi === 0 && b.spoken.length === k && /id="o"/.test(b.api.html("panel"))); // app v2: no "Question 1 / N" line (the header counts)
     check("question: an opened audio-only question stays open", rd.audioOnly.indexOf(0) < 0 || (/class="med wd"/.test(b.api.html("panel")) && !/id="qsh"/.test(b.api.html("panel"))));
     b.api.el("o").children.find(x => x.dataset.v === String(q0.answer)).click();
     b.document.querySelectorAll('#tabs button[data-t="words"]')[0].click();
@@ -497,7 +500,8 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     b.api.enterTodayStep(2);
     const afterListen = b.api.dq() || [];
     check(`Today Listen step is skipped: the next drill is Recall (${VC.recallSize(PACK)} production items), nothing heard or flagged`,
-      /no items until a voice or recording is available/.test(planHtml) && afterListen.length + 1 === VC.recallSize(PACK) && afterListen.every(x => !x[3] && !x[4]));
+      planRow0(planHtml, "Listen") === "" && // app v2: the plan lists Listen bare; the step skips when entered
+       afterListen.length + 1 === VC.recallSize(PACK) && afterListen.every(x => !x[3] && !x[4]));
     b.api.enterTodayStep(4);
     const sents = b.api.dq() || [];
     check("Sentences step: no hear sentence planned, none flagged", sents.every(x => !x[3]) && !/No voice for this language in this browser/.test(b.api.html("panel")));
@@ -542,7 +546,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("Today Listen: only clipped words, each with the speaker", listen.length > 0 && listen.every(x => x[4] && clipped.has(idOf(x[0]))));
     b.api.testTab();
     const nClipped = VC.learnedWords(words, pack, sessionProg()).filter(w => clipped.has(w.id)).length;
-    check(`Test Listen: button counts only clipped learned words (${Math.min(20, nClipped)})`, !!b.api.el("tListen") && new RegExp(`Listen ${Math.min(20, nClipped)}<`).test(b.api.html("panel")));
+    check(`Test Listen: button counts only clipped learned words (${Math.min(20, nClipped)})`, !!b.api.el("tListen") && new RegExp(`Listen${Math.min(20, nClipped) === 20 ? "" : " " + nClipped}<`).test(b.api.html("panel"))); // app v2: a test of 20 drops its count
     b.api.el("tListen").onclick({});
     const tl = b.api.dq() || [];
     check("Test Listen: every item a clipped word with the speaker", tl.length + 1 === Math.min(20, nClipped) && tl.every(x => x[4] && clipped.has(idOf(x[0]))));
