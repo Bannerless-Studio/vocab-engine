@@ -234,6 +234,8 @@ function faData(withAudio){
 }
 const NOVOICE = [{ lang: "en-US", name: "en" }], FAVOICE = [{ lang: "fa-IR", name: "fa" }];
 
+// The no-voice notice: v1 copy, or VOICE_NOTICE_V2 for packs on appView v2 (../persian ships v2).
+const VOICE_RE = /no text-to-speech voice|No voice for this language in this browser/i;
 async function appChecks(){
   if(!fs.existsSync(path.join(FA, "pack.js"))){ console.log("\nNOTE  ../persian/pack missing: app checks skipped"); return; }
   const D = faData(true);
@@ -267,7 +269,10 @@ async function appChecks(){
     check("panel data-wid tap plays the clip", log.played.join() === c2.audio);
     // Teach rows and the hint.
     api.vocabTeach([c1, plain], "A1", () => {});
-    check("vocabTeach: 'Tap a word to hear it.' shown when a listed word has a clip", /Tap a word to hear it\./.test(api.html("panel")));
+    // ../persian ships appView v2 (no teach hint line): there the clip word's row carries the play icon and the plain one none
+    const rowsIcon = api.el("tl").children.filter(c => c.className === "rowset").map(c => /<svg/.test(c.innerHTML));
+    check("vocabTeach: a listed word with a clip is marked hearable ('Tap a word to hear it.' in v1; the row's play icon in v2)",
+      D.pack.appView === "v2" ? rowsIcon[0] === true && rowsIcon[1] === false : /Tap a word to hear it\./.test(api.html("panel")));
     const tl = api.el("tl");
     log.played.length = 0; tl.children[0].onclick && tl.children[0].onclick();
     check("vocabTeach: a clip word's row is clickable and plays it; a plain word's row is not",
@@ -390,7 +395,7 @@ async function appChecks(){
     check("PACK_AUDIO off without pack.audio", api.packAudio() === false);
     api.readItem(c1).mount();
     check("a word clip still plays", log.played.join() === c1.audio);
-    check("speechNotice shows (pack does not declare audio)", /no text-to-speech voice/.test(api.speechNotice()));
+    check("speechNotice shows (pack does not declare audio)", VOICE_RE.test(api.speechNotice()));
   }
 
   console.log("\n[5] flag-off: the Persian pack as shipped (no audio) behaves as before");
@@ -400,9 +405,9 @@ async function appChecks(){
     const w0 = P.byId[P.clipIds[0]];
     check("no pack audio: PACK_AUDIO off, canHearWord false without a voice", api.packAudio() === false && api.canHearWord(w0) === false);
     check("hearItem degrades to read with the notice", api.hearItem(w0).needsNotice === true);
-    check("speechNotice shown", /no text-to-speech voice/.test(api.speechNotice()));
+    check("speechNotice shown", VOICE_RE.test(api.speechNotice()));
     api.goto("progress");
-    check("Progress warning shown", /No text-to-speech voice/.test(api.html("panel")));
+    check("Progress warning shown", VOICE_RE.test(api.html("panel")));
     api.readItem(w0).mount();
     check("nothing plays", log.played.length === 0 && log.spoken.length === 0);
     check("primer wordHear without a voice becomes wordRead (unchanged)", api.scriptDrillItem("wordHear", api.unit("fa-be")).label !== "Which word do you hear?");
