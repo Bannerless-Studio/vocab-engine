@@ -1,8 +1,8 @@
 // pack.progressMap (docs/PACK_SCHEMA.md "progressMap"; owner 2026-10-04: the learner feels no progress):
 // [1] progressPosition formula (with/without characters and passages), [2] prog.pm history (append,
 // replace by sn, cap 14, flag off writes nothing), [3] sessionsToGo (none / 14 / flat / negative / positive),
-// [4] Today row text under the flag, [5] a session writes pm; flag off: Today and the progress record
-// byte-identical to main a2f2426.
+// [4] Today row text under the flag, [5] a session writes pm (the flag-off control vs a2f2426 went with
+// the flag collapse: it predates pairs).
 // Run: node tests/progress_map_checks.js
 "use strict";
 const fs = require("fs");
@@ -17,7 +17,6 @@ const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "a2f2426"; // main before progressMap
-const MAIN2 = "2412992"; // fb20: progressMap true (whole-pack bar)
 // Progress characters rows are a per-level block since fb6-charrows (lag_checks [5] pins them); the rest of Progress still matches MAIN.
 const CHAR_ROWS = /<tr><td><bdi[^>]*>字[^<]*<\/bdi>[^<]*<\/td><td>[^<]*<\/td><\/tr>|<p class="q" style="margin-top:14px">Characters<\/p><table class="stats nw">[\s\S]*?<\/table>/g;
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
@@ -35,7 +34,6 @@ function clone0(x){ return JSON.parse(JSON.stringify(x)); }
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 const LEG = Object.assign(clone0(PACK), { progressMap: true });
 // fb21 changes optsMix picks (and stamps f), which the flag-off controls vs older shas do not measure: they run without it.
-const noMix = p => { const q = Object.assign({}, p); delete q.optsMix; return q; };
 const OFF = packAsOf(PACK, MAIN);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
@@ -253,21 +251,22 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
   console.log("\n[1] progressPosition");
   {
     check("packs/zh ships 3 goals (upTo 2, 3, 4); progressMap: true stays the old bar", eq(PACK.progressMap.goals.map(g => g.upTo), ["2", "3", "4"]) && VC.progressMapOn(PACK) && VC.progressMapOn(LEG) && !VC.progressMapOn(OFF) && VC.progressMapGoals(LEG).length === 0);
-    const nd = Object.assign(clone(LEG), { dayAware: false });
-    check("progressMapOn needs dayAware", !VC.progressMapOn(nd));
+    // "progressMapOn needs dayAware" deleted: dayAware is engine default since the flag collapse.
     const p = base(); const pos = (pr, pk, u, ps) => VC.progressPosition(pr, pk || LEG, WORDS, u === undefined ? CHARACTERS : u, ps === undefined ? PASSAGES : ps);
     check("nothing known: 0", pos(p) === 0);
     const half = base(); WORDS.slice(0, WORDS.length / 2 | 0).forEach(w => { half.w[w.id] = { r: 3, w: 0, s: 3 }; });
     const hk = (WORDS.length / 2 | 0) / WORDS.length;
     check(`half the words known, no units/passages: 0.5 x ${hk.toFixed(3)}`, Math.abs(pos(half) - 0.5 * hk) < 1e-12);
-    check("words at streak 2 (held) are not known", pos(Object.assign(base(), { w: Object.fromEntries(WORDS.map(w => [w.id, { r: 3, w: 0, s: 2 }])) })) === 0);
+    // freqTiers (engine default since the flag collapse): a peripheral word (ft 2) is known at streak 2, a peripheral unit past the pron tier.
+    const NONPERI = WORDS.filter(w => w.ft !== 2);
+    check("words at streak 2 (held, core / ambient tiers) are not known", pos(Object.assign(base(), { w: Object.fromEntries(NONPERI.map(w => [w.id, { r: 3, w: 0, s: 2 }])) })) === 0);
     const all = allProg(); all.read = { done: Object.fromEntries(PASSAGES.map(x => [x.id, { sc: 4, n: 4, d: "2026-10-01", x: 1, l: 1 }])) };
     WORDS.forEach(w => { all.w[w.id] = { r: 5, w: 0, s: 4 }; }); CHARACTERS.forEach(u => { all.chars.c[u.id] = { r: 9, w: 0, s: VC.charsConfig(LEG).bare }; });
     check("everything known, bare and listened: 1", pos(all) === 1);
     const w = base(); WORDS.forEach(x => { w.w[x.id] = { r: 5, w: 0, s: 4 }; });
     check("all words only (units and passages present): 0.5", Math.abs(pos(w) - 0.5) < 1e-12);
-    const u = base(); CHARACTERS.forEach(x => { u.chars.c[x.id] = { r: 9, w: 0, s: VC.charsConfig(LEG).bare }; }); CHARACTERS.forEach(x => { u.chars.c[x.id].s = VC.charsConfig(LEG).bare - 1; });
-    check("units at the ruby tier are not bare: 0", pos(u) === 0);
+    const u = base(); CHARACTERS.forEach(x => { u.chars.c[x.id] = { r: 9, w: 0, s: VC.charsConfig(LEG).bare }; }); CHARACTERS.forEach(x => { u.chars.c[x.id].s = VC.charsConfig(LEG).bare - 1; }); CHARACTERS.filter(x => x.ft === 2).forEach(x => { delete u.chars.c[x.id]; });
+    check("units at the ruby tier are not bare (core / ambient tiers): 0", pos(u) === 0);
     const r = base(); r.read = { done: Object.fromEntries(PASSAGES.map((x, i) => [x.id, i % 2 ? { sc: 4, n: 4, d: "2026-10-01", x: 1, l: 1 } : { sc: 4, n: 4, d: "2026-10-01", x: 1 }])) };
     const lis = PASSAGES.filter((x, i) => i % 2).length / PASSAGES.length;
     check(`passages count only when listened (${(lis * 100).toFixed(1)}%): 0.25 x share`, Math.abs(pos(r) - 0.25 * lis) < 1e-12);
@@ -320,7 +319,7 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
     check("flag off: no row", !/pmap|You ▸/.test(off.api.panel()));
   }
 
-  console.log(`\n[5] a session writes pm; flag off: as on main ${MAIN}`);
+  console.log("\n[5] a session writes pm");
   {
     const { api, st } = await bootWith(LEG, midProg(), 1);
     const sn0 = api.getProg().sn || 0; playSession(api);
@@ -330,34 +329,7 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
     check("a second session appends a second entry", p2.pm.length === 2 && p2.pm[1].sn === sn0 + 2);
     check("a stored pm survives reload and a re-save", (() => { const q = JSON.parse(st.ls.getItem(VC.storageKey(LEG))); const b = VC.bootProg(JSON.stringify(q), LEG); return b.backupRaw === null && eq(b.prog.pm, q.pm); })());
   }
-  let OLD2 = null, MAIN_HTML2 = null;
-  try {
-    const os = require("os");
-    MAIN_HTML2 = cp.execSync(`git -C "${ROOT}" show ${MAIN2}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "pm2-")), `core_${MAIN2}.js`);
-    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${MAIN2}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); OLD2 = require(f);
-  } catch(e){ OLD2 = null; MAIN_HTML2 = null; }
-  let OLD = null, MAIN_HTML = null;
-  try {
-    const os = require("os");
-    MAIN_HTML = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "pm-")), `core_${MAIN}.js`);
-    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); OLD = require(f);
-  } catch(e){ OLD = null; }
-  if(!OLD) console.log(`NOTE  engine ${MAIN} not in this checkout's history: control skipped`);
-  else for(const [name, mk] of [["fresh", () => base()], ["mid HSK 1", midProg], ["owner shape", ownerProg]]){
-    const out = [];
-    for(const [core, html] of [[VC, appHtml], [OLD, MAIN_HTML]]){
-      const stt = fresh(); stt.ls.setItem(VC.storageKey(OFF), JSON.stringify(mk()));
-      NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
-      const a = await boot(noMix(OFF), stt, 1, { core, html }); const t = a.panel(); a.goto("progress"); const g = a.html("panel");
-      a.today(); const s = playSession(a);
-      out.push({ t, g, s, prog: stt.ls.getItem(VC.storageKey(OFF)), after: a.panel() });
-    }
-    check(`${name}, flag off: Today, Progress, a whole session's progress record and the screen after it byte-identical to ${MAIN} (${out[0].t.length} chars, ${out[0].s ? out[0].s.items : 0} items)`,
-      out[0].t === out[1].t && out[0].g === out[1].g && out[0].prog === out[1].prog && out[0].after === out[1].after && !/"pm"/.test(out[0].prog));
-  }
-
+  // flag-off control vs a2f2426 deleted: it predates pairs, engine default since the flag collapse.
 
   console.log("\n[6] goalPosition: 0.6 words + 0.2 mastered units + 0.2 listened passages, scoped to levels <= upTo");
   {
@@ -370,8 +342,8 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
     check("same record: goal 2 = 0.6 x HSK 1-2 share of HSK 1-3, goal 3 likewise of all", Math.abs(gp(w12, 1) - 0.6 * wIn(0, 1).length / wIn(0, 2).length) < 1e-12 && Math.abs(gp(w12, 2) - 0.6 * wIn(0, 1).length / WORDS.length) < 1e-12);
     const w4 = base(); wIn(3, 3).forEach(w => { w4.w[w.id] = { r: 3, w: 0, s: 3 }; });
     check("HSK 4 words do not count toward goal 1 or 2", gp(w4, 0) === 0 && gp(w4, 1) === 0 && gp(w4, 2) > 0);
-    const held = base(); wIn(0, 1).forEach(w => { held.w[w.id] = { r: 3, w: 0, s: 2 }; });
-    check("words at streak 2 are not known", gp(held, 0) === 0);
+    const held = base(); wIn(0, 1).filter(w => w.ft !== 2).forEach(w => { held.w[w.id] = { r: 3, w: 0, s: 2 }; });
+    check("words at streak 2 are not known (core / ambient tiers; a peripheral word is known at 2)", gp(held, 0) === 0);
     const cfg = VC.charsConfig(PACK), u12 = base(); uIn(0, 1).forEach(u => { u12.chars.c[u.id] = { r: 5, w: 0, s: cfg.mastered }; });
     check(`units at the mastered tier (streak ${cfg.mastered}, ruby, not bare) count: goal 1 = 0.2`, Math.abs(gp(u12, 0) - 0.2) < 1e-12);
     const ub = base(); uIn(0, 1).forEach(u => { ub.chars.c[u.id] = { r: 9, w: 0, s: cfg.bare }; });
@@ -459,7 +431,7 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
     check("flag off: no row, no Goals block", !/pmap|>Goals</.test(off.api.panel()));
   }
 
-  console.log("\n[10] a session writes pm with g; old pm entries; flag off and progressMap: true vs older engines");
+  console.log("\n[10] a session writes pm with g; old pm entries");
   {
     const { api, st } = await bootWith(PACK, midProg(), 1);
     const sn0 = api.getProg().sn || 0; playSession(api);
@@ -471,19 +443,7 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
     check("an fb20 record (pm entries without g) boots, keeps its entries, appends one with g; its pace is ignored", po.pm.length === 14 && po.pm.slice(0, 13).every(e => e.g === undefined) && po.pm[13].g === 0 && VC.sessionsToGo(po, 0, 3) === null);
     const bt = VC.bootProg(JSON.stringify(po), PACK);
     check("a stored pm with g survives boot with no backup, byte-equal", bt.backupRaw === null && eq(bt.prog.pm, po.pm));
-    if(!MAIN_HTML2) console.log(`NOTE  engine ${MAIN2} not in this checkout's history: control skipped`);
-    else for(const [name, mk] of [["fresh", () => base()], ["mid HSK 1", midProg], ["owner shape", ownerProg]]){
-      const out = [];
-      for(const [core, html] of [[VC, appHtml], [OLD2, MAIN_HTML2]]){
-        const stt = fresh(); stt.ls.setItem(VC.storageKey(LEG), JSON.stringify(mk()));
-        NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
-        const a = await boot(noMix(LEG), stt, 1, { core, html }); const t = a.panel(); a.goto("progress"); const g = a.html("panel");
-        a.today(); const s = playSession(a);
-        out.push({ t, g, s, prog: stt.ls.getItem(VC.storageKey(LEG)), after: a.panel() });
-      }
-      check(`${name}, progressMap: true: Today row, Progress, a session's progress record and the screen after it byte-identical to ${MAIN2} (${out[0].t.length} chars, ${out[0].s ? out[0].s.items : 0} items)`,
-        out[0].t === out[1].t && out[0].g === out[1].g && out[0].prog === out[1].prog && out[0].after === out[1].after && /"pm"/.test(out[0].prog) && !/"g"/.test(out[0].prog));
-    }
+    // progressMap: true control vs 2412992 deleted: it predates pairs, engine default since the flag collapse.
   }
 
   console.log("\n[l kept] a reading pass after a listening pass keeps the goal position's passage share (fb41)");
@@ -494,7 +454,7 @@ const pmRow = h => { const m = String(h).match(/<div class="pmap"[\s\S]*?<\/div>
     const before = VC.progressPosition(p, PACK, WORDS, CHARACTERS, PASSAGES), gb = g ? VC.goalPosition(p, PACK, g, WORDS, CHARACTERS, PASSAGES) : null;
     VC.markPassageDone(p, ps[0].id, 1, 4, "2026-09-02", false, PACK);
     const after = VC.progressPosition(p, PACK, WORDS, CHARACTERS, PASSAGES), ga = g ? VC.goalPosition(p, PACK, g, WORDS, CHARACTERS, PASSAGES) : null;
-    check(`readRotation pack: position ${before.toFixed(4)} -> ${after.toFixed(4)} and goal ${gb} -> ${ga} unchanged by a reading pass; l kept`, PACK.readRotation === true && after === before && ga === gb && p.read.done[ps[0].id].l === 1);
+    check(`readRotation pack: position ${before.toFixed(4)} -> ${after.toFixed(4)} and goal ${gb} -> ${ga} unchanged by a reading pass; l kept`, after === before && ga === gb && p.read.done[ps[0].id].l === 1);
   }
 
   console.log("\n[11] owner export (read-only copy)");
