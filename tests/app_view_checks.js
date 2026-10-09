@@ -587,7 +587,7 @@ async function walkTabs(pack, rec, seed, o){
   api.ev(`startPassage(PASSAGE_LIST.find(x => passageDone(x)) || PASSAGE_LIST[0], false, "listen")`); put("listening pass");
   api.el("rdone").click(); put("listening question");
   api.clickTab("words"); put("words default");
-  api.el("pv").click(); put("words previous set");
+  api.el(api.ev("wordsSet") > 0 ? "pv" : "nx").click(); put("words previous set"); // fb53: the default level is the placed one, its next set can be set 1
   const lv2 = LEVELS_ZH[1]; (api.el("wl_" + lv2) && pack.appView ? api.el("wl_" + lv2) : null) ? api.el("wl_" + lv2).click() : api.ev(`wordsLv = ${JSON.stringify(lv2)}; wordsSet = null; renderWordBody()`); put("words level 2");
   api.el("wsearch").value = "tea"; api.el("wsearch").oninput(); await new Promise(r => setTimeout(r, 150)); put("words search");
   api.clickTab("test"); put("test home");
@@ -704,7 +704,7 @@ if(owner){
   check(`set nav on one line: "‹ Set ${sn && sn[1]} of ${sn && sn[2]} ›"`, !!sn && /<div class="row wnav"><button id="pv" aria-label="Previous set">‹<\/button><span class="pvn">Set \d+ of \d+( ✓)?<\/span><button id="nx" aria-label="Next set">›<\/button>/.test(d));
   check('"Next new" hidden on the next set (the default)', !/id="jump"/.test(d));
   const pv = get("words previous set");
-  check('"Next new" shows once the shown set is not the next set; tap returns to it', /<button id="jump">Next new<\/button>/.test(pv) && (api.clickTab("words"), api.el("pv").click(), api.el("jump").click(), !/id="jump"/.test(api.panel())));
+  check('"Next new" shows once the shown set is not the next set; tap returns to it', /<button id="jump">Next new<\/button>/.test(pv) && (api.clickTab("words"), api.el(api.ev("wordsSet") > 0 ? "pv" : "nx").click(), api.el("jump").click(), !/id="jump"/.test(api.panel())));
   check('"Review" as a ghost under "Drill this set"', /<div class="actions"><button class="next" id="dr">Drill this set<\/button><button class="ghost" id="rev">Review<\/button><\/div>/.test(d) && !/>review</.test(d));
   check('chip "Pinyin" (PRON_NOUN), labelled "Show pinyin"', /id="wsearch"[\s\S]*<button class="chip (on)?" id="wPron" aria-label="Show pinyin" aria-pressed="(true|false)">Pinyin<\/button>/.test(d) && !/>Pron</.test(d));
   const l2 = get("words level 2");
@@ -714,6 +714,19 @@ if(owner){
   sb.api.el("wsearch").value = "tea"; sb.api.el("wsearch").oninput(); await new Promise(r => setTimeout(r, 150));
   const hits = VC.searchWords(WORDS, "tea").length;
   check(`search: the matches listed (${hits}), level row and set nav gone`, hits > 0 && sb.api.el("wbody").innerHTML === '<div id="wl"></div>' && sb.api.el("wl").children.length === Math.min(150, hits) && s.endsWith('<div id="wl"></div>'));
+}
+
+console.log("\n[C4b] fb53: Words tab start level");
+{
+  const st1 = VC.strata(WORDS, PACK.placement, PACK.setSize), k4 = st1.findIndex(b => String(b.lv) === "4");
+  const placed4 = VC.applyPlacement(VC.normalizeProg({}, PACK), st1, k4, WORDS, PACK, CHARACTERS);
+  const pressed = api => (api.el("wbody").innerHTML.match(/id="wl_(\w+)" class="on"/) || [])[1];
+  const a = await bootWith(PACK, clone(placed4), 71); a.api.clickTab("words");
+  check(`placed record (pl ${placed4.pl}): Words opens on the level Learn's next set belongs to`, pressed(a.api) === VC.nextNewSetOpen(WORDS, PACK, a.api.getProg(), CHARACTERS).lv && pressed(a.api) === "4", pressed(a.api));
+  const f = await bootWith(PACK, null, 72); f.api.clickTab("words");
+  check("fresh record: Words opens on level 1", pressed(f.api) === LEVELS_ZH[0], pressed(f.api));
+  f.api.el("wl_" + LEVELS_ZH[1]).click(); f.api.clickTab("today"); f.api.clickTab("words");
+  check("a tapped level sticks across tab switches", pressed(f.api) === LEVELS_ZH[1], pressed(f.api));
 }
 
 console.log("\n[C5] Test tab");

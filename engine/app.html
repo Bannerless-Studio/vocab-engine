@@ -685,7 +685,10 @@ let tab = "today";
 let todayStepState = null;
 let todayPrep = null;          // pack.characters: the snapshot + Review plan Today last showed, run by Start today
 let soundsSel = null;
-let wordsLv = LEVELS[0], wordsSet = null, wordsQuery = "";
+// wordsLv: null until the Words tab first renders, then the level Learn's next new set belongs to (else the gated level's, else the last);
+// a level the learner taps sticks for the page lifetime, in memory only (fb53).
+let wordsLv = null, wordsSet = null, wordsQuery = "";
+const wordsStartLevel = () => { const nn = VC.nextNewSetOpen(WORDS, PACK, prog, CHAR_LIST) || VC.nextNewSet(WORDS, PACK, prog); return nn ? nn.lv : LEVELS[LEVELS.length - 1]; };
 let RD = null;
 let testSel = null, PL = null, placeFrom = null; // placeFrom "progress": placement was opened from Progress Settings (appView), so it returns there
 let legacyNotice = null;       // one-time notice after the boot migration (HTML), until dismissed
@@ -2751,6 +2754,7 @@ function soundsRefHTML(){
 
 function wordsRender(){
   stopSpeaking();
+  if(wordsLv == null) wordsLv = wordsStartLevel();
   setScore(0,0);
   const P = $("panel");
   // appView: one name for one setting, the same word as the Progress chip (PRON_NOUN).
