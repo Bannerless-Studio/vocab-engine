@@ -12,7 +12,7 @@
 const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
 // the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
 const PAIRS_ERA = "9eb6ecb~1";
 const cp = require("child_process");
@@ -921,7 +921,49 @@ function walk(api, stopAt){
     check(`ellipsis kept as written (no "..."), no capital after it (${q2})`, q2 === "Hǎo…… hǎo");
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  // [7] control vs main 55c843e deleted: that engine predates pairs (and the level gate), default since the flag collapse.
+  console.log("\n[7] control: BP2 fields absent -> HTML byte-identical to d3632b8 (the pre-collapse engine, booted withCollapsed)");
+  {
+    const BASE_SHA = "d3632b8";
+    let baseHtml = null, baseCore = null;
+    try{
+      baseHtml = cp.execSync(`git -C "${ROOT}" show ${BASE_SHA}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const src = cp.execSync(`git -C "${ROOT}" show ${BASE_SHA}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseCore = m.exports;
+    }catch(e){ console.log("    cannot read " + BASE_SHA + ": " + e.message); }
+    check(`${BASE_SHA} engine loaded from git`, !!baseHtml && !!baseCore && typeof baseCore.sentencePieces === "function");
+    // The fields BP2 gates on: pack.tones, typing "pron", soundsReference, sentence ruby (word
+    // taps), and pronFirst (phrase-span readings in passages). Characters block kept. eta is required
+    // pack data now; both sides read the same curves.
+    const offPack = Object.assign({}, PACK_BASE, { typing: null, eta: loadConst(path.join(ZH, "pack.js"), "PACK").eta }); delete offPack.tones; delete offPack.soundsReference; delete offPack.pronFirst;
+    const offSent = SENTENCES.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; });
+    const offPass = PASSAGES.map(p => Object.assign({}, p, { sentences: p.sentences.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; }) }));
+    async function screens(html, core, pack, sents, passages, seed){
+      const { api } = await boot({ html, core, pack, words: WORDS_OFF, sentences: sents, passages, seed });
+      const out = {};
+      api.setProg(seedPF()); api.today(); out.today = api.html("panel");
+      api.el("go").click();
+      let walked = []; try{ walked = walk(api, /id="again"/); }catch(e){ walked = [{ where: "ERR", html: e.message }]; }
+      out.walk = walked.map(x => x.where + "\n" + x.html).join("\n----\n");
+      api.setProg(seedPF());
+      out.rows = sents.slice(0, 120).map(s => api.sentenceRowHTML(s, BY_ID[(s.words || [])[0]])).join("\n");
+      api.wordsPage("1", 0); out.words = api.html("panel") + api.html("wbody") + api.el("wl").children.map(c => c.innerHTML).join("|");
+      api.startPassage(passages[0]); out.read = api.html("panel");
+      out.sounds = (api.goto("sounds"), api.html("panel"));
+      return out;
+    }
+    if(baseHtml && baseCore){
+      const cases = [["zh, BP2 fields + ruby + pronFirst absent", offPack, offSent, offPass]];
+      for(const [name, pk, ss, ps] of cases){
+        const a = await screens(baseHtml, baseCore, withCollapsed(pk), ss, ps, 11);
+        const b = await screens(CUR_HTML, VC, pk, ss, ps, 11);
+        for(const k of Object.keys(a)){
+          const same = a[k] === b[k];
+          let at = -1; if(!same){ for(let i = 0; i < Math.max(a[k].length, b[k].length); i++) if(a[k][i] !== b[k][i]){ at = i; break; } }
+          check(`${name}: ${k} byte-identical to ${BASE_SHA} (${a[k].length} chars)${same ? "" : ` first diff at ${at}: base ${JSON.stringify(a[k].slice(at - 40, at + 60))} vs ${JSON.stringify(b[k].slice(at - 40, at + 60))}`}`, same && a[k].length > 50);
+        }
+      }
+    }
+  }
 
   console.log("\n[12] replay rule (docs/AUDIO.md \"Playback reliability\"): every autoplay site shows a Replay button");
   try{

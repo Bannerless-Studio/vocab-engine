@@ -281,8 +281,25 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
   console.log(`\n[5] flag-off control vs ${MAIN}`);
   if(!OLD) skip(`${MAIN} not in this checkout's history`);
   else {
-    // The app walk byte-identical to 3044601 (Today, sessions, Read, Progress) compared the appView-off render, which went with
-    // the flag collapse (stage 2): 3044601 predates appView. The core control below stays.
+    // App walk (Today, two sessions, Read, Progress, records) vs the pre-collapse engine d3632b8 booted withCollapsed (boot does it for a core that is not VC).
+    const BASE_SHA = "d3632b8", baseHtml = git(BASE_SHA, "engine/app.html"), baseSrc = git(BASE_SHA, "engine/core.js");
+    check(`${BASE_SHA} engine loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseSrc);
+    if(baseHtml && baseSrc){
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "barepair-base-")), `core_${BASE_SHA}.js`); fs.writeFileSync(f, baseSrc); const BASE = require(f);
+      const ETA = loadConst(path.join(ZH, "pack.js"), "PACK").eta; // eta is required pack data now; both sides read the same curves
+      const walk = async (html, core) => {
+        NOW = new Date(2026, 9, 7, 8, 0, 0).getTime();
+        const pr = OWNER ? clone(OWNER) : synth();
+        const api = await boot(Object.assign({}, PACK_OFF, { eta: ETA }), pr, 31, { html, core: Object.assign({}, core) }); const rng = mulberry32(3);
+        const out = [api.panel()];
+        for(let k = 0; k < 2; k++){ NOW += 4 * 3600e3; out.push(JSON.stringify(await session(api, () => rng() < 0.8))); api.tab("today"); await tick(); out.push(api.panel()); }
+        for(const id of ["p0001", "p0017", "p0040"]){ api.startPassage(PASSAGES.find(x => x.id === id)); out.push(api.panel()); }
+        api.tab("progress"); await tick(); out.push(api.panel()); out.push(JSON.stringify(api.getProg()));
+        return out;
+      };
+      const ref = await walk(baseHtml, BASE), cur = await walk(appHtml, VC);
+      check(`flag off (bareByPair stripped): Today, two sessions, three Read passages, Progress and records byte-identical to ${BASE_SHA} (${ref.join("").length} chars)`, JSON.stringify(ref) === JSON.stringify(cur), cur.findIndex((x, i) => x !== ref[i]));
+    }
     const p = OWNER ? clone(OWNER) : synth();
     const ctl = core => JSON.stringify(passageSents().map(s => core.rubyTiers(s, CHARACTERS, p, PACK_OFF, true)).concat(WORDS.slice(0, 400).map(w => core.bareWord(w, CHARACTERS, p, PACK_OFF))));
     check("core rubyTiers on every passage sentence + bareWord on 400 words byte-identical (flag off)", ctl(VC) === ctl(OLD));

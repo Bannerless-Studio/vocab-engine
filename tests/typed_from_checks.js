@@ -11,10 +11,11 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
 // the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
 const PAIRS_ERA = "9eb6ecb~1";
 const cp = require("child_process");
+const BASE_SHA = "d3632b8"; // engine before the flag collapse: the off-path of typedFrom lives there
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
@@ -528,7 +529,42 @@ function walk(api, stopAt){
     // glossFocus-off control deleted: glossFocus is engine default since the flag collapse (stage 2).
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  // [5] control vs main ef44c6e deleted: it predates pairs and dayAware, engine default since the flag collapse.
+  // ---------------------------------------------------------------- [5] control vs the pre-collapse engine
+  console.log(`\n[5] control: typedFrom absent -> HTML byte-identical to ${BASE_SHA} (the pre-collapse engine, booted withCollapsed)`);
+  {
+    let baseHtml = null, baseCore = null;
+    try{
+      baseHtml = cp.execSync(`git -C "${ROOT}" show ${BASE_SHA}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const src = cp.execSync(`git -C "${ROOT}" show ${BASE_SHA}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseCore = m.exports;
+    }catch(e){ console.log("    cannot read " + BASE_SHA + ": " + e.message); }
+    check(`${BASE_SHA} engine loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseCore);
+    async function screens(html, core, pack, seed){
+      const { api } = await boot({ html, core, pack, seed, words: WORDS_OFF });
+      const out = {};
+      api.setProg(seedPF()); api.today(); out.today = api.html("panel");
+      api.el("go").click();
+      let walked = []; try{ walked = walk(api, /id="again"/); }catch(e){ walked = [{ where: "ERR", html: e.message }]; }
+      out.walk = walked.map(x => x.where + "\n" + x.html).join("\n----\n");
+      const ws = WORDS_OFF.filter(x => x.lv === "1").slice(0, 40);
+      api.setProg(atTierProg(ws.slice(0, 20)));
+      out.items = ws.map(x => { const p = typePlan(x, 3); return p.map(api.itemFromPlan).map(it => it.label + it.html + it.reveal + (it.placeholder || "")).join("\n"); }).join("\n");
+      out.reveals = ws.map(x => api.revealBlock(x) + api.wordRowHTML(x, "wl") + api.glossHTML(x.id, "", null)).join("\n");
+      api.wordsPage("1", 0); out.words = api.html("panel") + api.el("wl").children.map(c => c.innerHTML).join("|");
+      return out;
+    }
+    if(baseHtml && baseCore){
+      const cases = [["zh, typing pron", PACK_BASE], ["zh, typing object", Object.assign({}, PACK_BASE, { typing: { caseSensitive: false, accents: "lenient", strictFromLevel: null } })]];
+      for(const [name, pk] of cases){
+        const pe = Object.assign({}, pk, { eta: loadConst(path.join(ZH, "pack.js"), "PACK").eta }); // eta is required pack data now; both sides read the same curves
+        const a = await screens(baseHtml, baseCore, withCollapsed(pe), 11), b = await screens(CUR_HTML, VC, pe, 11);
+        for(const k of Object.keys(a)){
+          let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
+          check(`${name}: ${k} byte-identical to ${BASE_SHA} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: base ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);
+        }
+      }
+    }
+  }
 
   console.log("\n[6] typedFrom with the day-aware planner (engine default): two Today sessions in one day");
   try {

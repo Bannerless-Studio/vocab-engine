@@ -15,7 +15,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
 // the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
 const PAIRS_ERA = "9eb6ecb~1";
 const cp = require("child_process");
@@ -683,7 +683,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     check(`chip switches, stored and applied at the next Learn: ${res.join("; ")}`, !res.includes("BAD"));
   }
 
-  console.log("\n[7] control: markChar vs 7a21ccd");
+  console.log("\n[7] control: markChar vs 7a21ccd; the app (Today, a whole session, its progress) vs d3632b8, characters.bareBy absent");
   {
     // fb11 control: markChar on a non-typed pack, and on the zh pack below mastered or on a right answer, is unchanged from 7a21ccd.
     { let c11 = null; try { const src = cp.execSync(`git -C "${ROOT}" show 7a21ccd:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 }); const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); c11 = m.exports; } catch(e){ console.log("    cannot read 7a21ccd: " + e.message); }
@@ -693,7 +693,45 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
         n++; if(run(c11, pk, s0, ok, held) === run(VC, pk, s0, ok, held)) same++; else diff.push(`${name} s${s0} ${ok ? "right" : "miss"}`); }
       check(`markChar vs 7a21ccd over ${n} cases (2 packs x streak 0-8 x right/miss x held): only zh misses at streak >= ${M + 2} differ (at ${M + 1} the step lands on ${M} as before) (${diff.length}: ${[...new Set(diff.map(d => d.replace(/ s\d+/, "")))].join(", ")})`,
         !!c11 && diff.every(d => d.startsWith("zh s") && d.endsWith("miss") && +d.match(/s(\d+)/)[1] > M + 1) && diff.length === 2 * (8 - M - 1)); }
-    // The app control vs main 7fe35f7 (Today, a whole session, its progress) went with the flag collapse: 7fe35f7 predates pairs.
+    // The app control: the pre-collapse engine (d3632b8, booted withCollapsed) vs this one on the pack without characters.bareBy.
+    const BASE_SHA = "d3632b8";
+    let baseHtml = null, baseCore = null;
+    try {
+      baseHtml = cp.execSync(`git -C "${ROOT}" show ${BASE_SHA}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const src = cp.execSync(`git -C "${ROOT}" show ${BASE_SHA}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseCore = m.exports;
+    } catch(e){ console.log("    cannot read " + BASE_SHA + ": " + e.message); }
+    check(`${BASE_SHA} engine loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseCore);
+    const ETA = loadConst(path.join(ZH, "pack.js"), "PACK").eta; // eta is required pack data now; both sides read the same curves
+    async function run(html, core){
+      NOW = new Date(2026, 9, 2, 9, 0, 0).getTime();
+      const pk = Object.assign({}, PACK_OFF, { eta: ETA }), pack = html ? withCollapsed(pk) : pk;
+      const st = fresh(); st.ls.setItem(VC.storageKey(pack), JSON.stringify(seedC()));
+      const api = await boot(pack, st, 11, { html, core });
+      const out = { today: api.panel() };
+      api.el("go").click();
+      const ans = mulberry32(7); const seen = [];
+      for(let i = 0; i < 400; i++){
+        const h = api.panel();
+        if(api.getD() && api.getD().cur){ seen.push(h); answer(api, ans() < 0.8); seen.push(api.html("rv")); api.el("nx").click(); continue; }
+        if(api.rd()){ api.skipRead(); continue; }
+        seen.push(h);
+        if(/id="again"/.test(h)) break;
+        if(/id="ok"/.test(h)){ api.el("ok").click(); continue; }
+        if(/id="dr"/.test(h)){ api.el("dr").click(); continue; }
+        break;
+      }
+      out.walk = seen.join("\n----\n");
+      const p = api.getProg(); out.prog = JSON.stringify({ w: p.w, c: p.chars.c, s: p.s, sets: p.sets });
+      return out;
+    }
+    if(baseHtml && baseCore){
+      const a = await run(baseHtml, baseCore), b = await run(undefined, undefined);
+      for(const k of Object.keys(a)){
+        let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
+        check(`${k} byte-identical to ${BASE_SHA} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: base ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);
+      }
+    }
   }
 
   console.log(`\n${passes} passed, ${fails} failed`);

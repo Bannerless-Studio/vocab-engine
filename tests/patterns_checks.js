@@ -42,6 +42,12 @@ function skip(name){ skips++; console.log(`SKIP  ${name}`); }
 const git = (sha, f) => { try { return cp.execSync(`git -C "${ROOT}" show ${sha}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }); } catch(e){ return null; } };
 const mainCoreSrc = git(MAIN, "engine/core.js"), mainHtml = git(MAIN, "engine/app.html");
 const OLD = mainCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "patterns-")), `core_${MAIN}.js`); fs.writeFileSync(f, mainCoreSrc); return require(f); })() : null;
+// d3632b8: the engine before the flag collapse, whose off-paths (patterns absent, patternCue absent) the controls below pin;
+// it boots withCollapsed (the live values of the collapsed keys) and shares one eta with the current side.
+const BASE_SHA = "d3632b8";
+const baseCoreSrc = git(BASE_SHA, "engine/core.js"), baseHtml = git(BASE_SHA, "engine/app.html");
+const BASE = baseCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "patterns-base-")), `core_${BASE_SHA}.js`); fs.writeFileSync(f, baseCoreSrc); return require(f); })() : null;
+const ETA = loadConst(path.join(ZH, "pack.js"), "PACK").eta;
 
 // ------------------------------------------------------------------ fake DOM (copied from pairs_checks.js)
 // ------------------------------------------------------------------ fake DOM (copied from words_typed_checks.js)
@@ -414,7 +420,25 @@ const ptKey = it => String(it.key).startsWith("p:");
     if(c2 && ptKey(c2)){ answer(a2, true); check("reload mid-cloze: the first-meeting verdict carries the note", NOTE.test(a2.el("rv").innerHTML)); }
   }
 
-  // [9] (controls vs main before patterns) deleted in the flag collapse: that engine predates the level gate, now default, which these records reach.
+  console.log(`\n[9] flag-off control vs ${BASE_SHA} (the engine before the flag collapse, booted withCollapsed)`);
+  if(!BASE || !baseHtml) check(`${BASE_SHA} engine loaded from git (a missing sha is a failure)`, false);
+  else {
+    const walk = async (pack, html, core, pats) => {
+      const api = await boot(Object.assign({}, pack, { eta: ETA }), synth(["1", "2"], 2, 4, 5), 31, { html, core, patterns: pats });
+      const out = [api.panel()];
+      for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
+      api.tab("progress"); await tick(); out.push(api.panel());
+      return out;
+    };
+    const ref = await walk(PACK_OFF, baseHtml, BASE, undefined);
+    const off = await walk(PACK_OFF, appHtml, VC, PATTERNS);
+    check(`flag off (pack.patterns absent, PATTERNS present): two-session walk byte-identical to ${BASE_SHA}`, JSON.stringify(off) === JSON.stringify(ref), off.findIndex((x, i) => x !== ref[i]));
+    const nofile = await walk(PACK, appHtml, VC, undefined);
+    const refOn = await walk(PACK, baseHtml, BASE, undefined);
+    check(`flag on without patterns.json: byte-identical to ${BASE_SHA}`, JSON.stringify(nofile) === JSON.stringify(refOn), nofile.findIndex((x, i) => x !== refOn[i]));
+    const ctl = (core, pack) => { const p = synth(["1", "2", "3"], 2, 4, 9); return JSON.stringify([core.buildReviewPlan(VC.learnedWords(WORDS, pack, p), p, pack, { canHear: () => true, today: "2026-10-05", rng: mulberry32(4), sn: 10 }).map(x => [x.kind, x.word && x.word.id]), core.validateProgShape(p, ["1", "2", "3", "4"]).ok]); };
+    check("core plans unchanged (Review plan, validateProgShape)", ctl(VC, PACK) === ctl(BASE, withCollapsed(PACK)));
+  }
 
   console.log("\n[10] the owner's export (a48ee4d3, read-only; $PAIRS_OWNER overrides) under this pack");
   {
@@ -473,7 +497,20 @@ const ptKey = it => String(it.key).startsWith("p:");
     await session(b, (it, rec, rows) => { if(ptKey(it)) off.push(b.panel()); return rows.length % 4 !== 2; });
     check("patternCue absent: no meaning tap; the English cue shows before the answer", off.length >= 3 && off.every(h => !/data-pcue/.test(h) && /<div class="q cue">[^<]/.test(h)));
   }
-  // the patternCue-absent walk vs 3044601 went in the flag collapse: 3044601 predates the level gate (now default), which the walk reaches.
+  if(!BASE || !baseHtml) check(`${BASE_SHA} engine loaded from git (a missing sha is a failure)`, false);
+  else {
+    // patternCue absent (and the rest of the pack as the suite boots it): two-session walk + Sentences test against the pre-collapse engine.
+    const walk = async (html, core) => {
+      const api = await boot(Object.assign({}, packAsOf(PACK, "3044601"), { eta: ETA }), synth(["1", "2"], 2, 4, 5), 31, { html, core, patterns: PATTERNS }); // 3044601: patternCue and characters.bareByPair stripped
+      const out = [api.panel()];
+      for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
+      api.tab("test"); await tick(); const tb = api.el("tSentences"); if(tb){ tb.click(); const D = api.getD(); out.push([D.cur, ...D.q].filter(Boolean).map(x => x.html).join("\n")); }
+      api.tab("progress"); await tick(); out.push(api.panel());
+      return out;
+    };
+    const ref = await walk(baseHtml, BASE), cur = await walk(appHtml, VC);
+    check(`patternCue absent: two-session walk + Sentences test byte-identical to ${BASE_SHA} (patterns on)`, JSON.stringify(ref) === JSON.stringify(cur) && ref.length >= 7, cur.findIndex((x, i) => x !== ref[i]));
+  }
 
   console.log("\n[13] alphabetic packs (fb47): marks compare case-folded, options in the answer's case, per-sentence near, validator rules");
   {
