@@ -1761,7 +1761,7 @@ return {
   // unanswered hear items, the one on screen included, into read items with the no-voice notice; a list with
   // the voice leaves them hear items (nothing re-rendered, nothing restarted).
   try{
-    const NOTICE = "no text-to-speech voice";
+    const NOTICE = "No voice for this language in this browser";
     const b = await bootApp([]); const r0 = b.api.getRenderCalls();
     check("late voices: empty list at boot -> optimistic (hasSpeech true), no notice on Today", b.api.getHasSpeech() === true && !b.api.getHtml("panel").includes(NOTICE));
     const hearA = b.api.hearItem(WORDS[5]), hearB = b.api.hearItem(WORDS[6]);
@@ -1832,7 +1832,7 @@ return {
     const fresh = VC.normalizeProg({ sets: {}, placedOnce: true, sessions: 1 }, PACK);
     b.api.setProgT(fresh); b.api.testTab();
     const h0 = b.api.getHtml("panel");
-    check("Test tab, nothing learned: the learn-first card only (it covers every free test)", /id="needPlace"/.test(h0) && !/id="tSentLock"/.test(h0) && !/id="tSentences"/.test(h0));
+    check("Test tab, nothing learned (placed): the learn-first line only (it covers every free test)", /Free tests unlock at/.test(h0) && !/id="tSentLock"/.test(h0) && !/id="tSentences"/.test(h0));
     const lv = PACK.levels[0].id, pr = VC.normalizeProg({ sets: {}, placedOnce: true, sessions: 1 }, PACK);
     let k = 0; for(const w of WORDS){ if(w.lv !== lv) continue; pr.w[w.id] = { r: 3, w: 0, s: 3, d: 1 }; if(++k >= 8) break; }
     pr.sets[lv] = 1;
@@ -1856,14 +1856,14 @@ return {
     check("a plain type item is never flagged needsNotice", !typeItem.needsNotice);
     api.setQueueAndNext([typeItem, builtSecond, builtFirst], () => {});
     const typeHtml = document.getElementById("panel").innerHTML;
-    check("no notice on a type item shown first", !typeHtml.includes("no text-to-speech voice"));
+    check("no notice on a type item shown first", !typeHtml.includes("No voice for this language in this browser"));
     api.dnext(); // advance past the type item straight to the queue's next entry (bypassing its input UI)
     const shownFirstHtml = document.getElementById("panel").innerHTML;
-    check("notice appears on the first hear item actually shown (built second, after the type item)", shownFirstHtml.includes("no text-to-speech voice"));
+    check("notice appears on the first hear item actually shown (built second, after the type item)", shownFirstHtml.includes("No voice for this language in this browser"));
     document.getElementById("o").children[0].click();
     document.getElementById("nx").click();
     const shownSecondHtml = document.getElementById("panel").innerHTML;
-    check("notice does not repeat on the item shown second (built first)", !shownSecondHtml.includes("no text-to-speech voice"));
+    check("notice does not repeat on the item shown second (built first)", !shownSecondHtml.includes("No voice for this language in this browser"));
   }catch(e){ check(`notice-timing scenario does not throw (got: ${e.message})`, false); }
 
   try{
@@ -1872,7 +1872,7 @@ return {
     api.setHasSpeech(true); // voice arrives between build and display
     api.setQueueAndNext([flagged], () => {});
     const html = document.getElementById("panel").innerHTML;
-    check("a needsNotice item shows no notice if hasSpeech flips true before it's shown", !html.includes("no text-to-speech voice"));
+    check("a needsNotice item shows no notice if hasSpeech flips true before it's shown", !html.includes("No voice for this language in this browser"));
   }catch(e){ check(`hasSpeech-flips-before-show scenario does not throw (got: ${e.message})`, false); }
 
   // Every word item passes its own kind to markWord, so a miss is remembered as prog.w[id].k.
@@ -1946,12 +1946,12 @@ return {
     el("o").children.find(o => o.dataset.v === w.id).click();
     check("a pass on the recall fallback keeps k=type (production still owed)", pr.w[w.id].k === "type" && pr.w[w.id].r === 3);
     el("nx").click();
-    check("drill ends after the pass (1 right of 4 answers)", /<h2>1 \/ 4<\/h2>/.test(el("panel").innerHTML));
+    check("drill ends after the pass (first-time score: 0 of 1, the word was missed)", /<h2>0 of 1<\/h2>/.test(el("panel").innerHTML));
     // A pass on the first retry never reaches the fallback.
     const w2 = WORDS[61]; pr.w[w2.id] = { r:2, w:0, s:2 };
     b.api.setQueueAndNext([b.api.itemFromPlan({ kind:"type", word: w2 }, 0, [])], () => {});
     typeOnce("zzz"); el("nx").click(); typeOnce(w2.w); el("nx").click();
-    check("miss then typed right: done, k cleared", /<h2>1 \/ 2<\/h2>/.test(el("panel").innerHTML) && !("k" in pr.w[w2.id]));
+    check("miss then typed right: done (0 of 1), k cleared", /<h2>0 of 1<\/h2>/.test(el("panel").innerHTML) && !("k" in pr.w[w2.id]));
     // Typed gap -> choice gap on the second miss, same blank.
     const WB = Object.fromEntries(WORDS.map(x => [x.id, x]));
     const one = SENTENCES.find(x => VC.gapCandidateIndices(x, WB, typPack).length === 1);
@@ -1972,7 +1972,7 @@ return {
     const plainRead = api.readItem(WORDS[9]);
     api.setQueueAndNext([plainRead], () => {});
     const html = document.getElementById("panel").innerHTML;
-    check("a plain read item (not hearItem's no-speech fallback) never shows the notice", !html.includes("no text-to-speech voice"));
+    check("a plain read item (not hearItem's no-speech fallback) never shows the notice", !html.includes("No voice for this language in this browser"));
   }catch(e){ check(`plain read item scenario does not throw (got: ${e.message})`, false); }
 
   // The notice explains a replaced listening item; a drill with none replaced never shows it,
@@ -1987,11 +1987,11 @@ return {
       document.getElementById("o").children[0].click();
       document.getElementById("nx").click();
     }
-    check("no-voice drill with zero converted items: no notice on any item", htmls.length === 3 && htmls.every(h => !h.includes("no text-to-speech voice")));
+    check("no-voice drill with zero converted items: no notice on any item", htmls.length === 3 && htmls.every(h => !h.includes("No voice for this language in this browser")));
     api.progressTab();
-    check("Progress shows the no-voice line when hasSpeech is false and the pack has no clips", /No text-to-speech voice is available/.test(document.getElementById("panel").innerHTML));
+    check("Progress shows the no-voice line when hasSpeech is false and the pack has no clips", /No voice for this language in this browser/.test(document.getElementById("panel").innerHTML));
     api.setHasSpeech(true); api.progressTab();
-    check("Progress drops the line once a voice is usable", !/No text-to-speech voice is available/.test(document.getElementById("panel").innerHTML));
+    check("Progress drops the line once a voice is usable", !/No voice for this language in this browser/.test(document.getElementById("panel").innerHTML));
   }catch(e){ check(`zero-converted drill / Progress line scenario does not throw (got: ${e.message})`, false); }
 
   // A remembered hear miss (k) on a word the planner turned into read must still clear on a pass.
@@ -2073,11 +2073,11 @@ return {
     const panelOf = b => b.document.getElementById("panel").innerHTML;
     const screens = b => { const out = {}; const pr = b.api.getProg(); pr.read = Object.assign({ done: {} }, pr.read, { unlocked: Object.fromEntries(PACK.levels.map(l => [l.id, 1])) }); pr.read.done = { [PASSAGES[0].id]: { sc: 3, n: 4, date: "2026-09-26" } }; b.api.readRender(); out.readList = panelOf(b); b.api.startPassage(RPS[0]); out.passage = panelOf(b); b.api.readQuestion(0); { const qtr = b.document.getElementById("qtr"); if(qtr) qtr.click(); } out.question = panelOf(b) + b.api.optsMarkup() + (b.document.getElementById("qtrwrap") ? b.document.getElementById("qtrwrap").innerHTML : ""); b.api.getRD().tapped = WORDS.filter(w => JSON.stringify(RPS[0]).includes(`"${w.id}"`)).slice(0, 2).map(w => w.id); b.api.readResults(); out.results = panelOf(b); return out; };
     const rs = screens(rtlB), ls = screens(ltrB);
-    check("rtl pack: Read-list meta line is dir=ltr data-ui inside the dir=rtl title button",
-      /<button data-pid="[^"]+" dir="rtl"><span>[\s\S]*?<span class="q" dir="ltr" data-ui style="display:block;margin:0;font-size:13px">\d+ words<\/span>/.test(rs.readList));
+    // (The v1 Read-list meta line went with the app v2 collapse: v2 rows carry the title and the score only.)
+    check("rtl pack: Read-list title buttons are dir=rtl", /<button data-pid="[^"]+" dir="rtl"><span>/.test(rs.readList));
     Object.keys(rs).forEach(k => { const bad = rtlAudit(rs[k]); check(`rtl pack: ${k} has no UI text (Latin or digits) whose nearest dir is rtl, no RTL text outside data-tl (${bad.length})`, bad.length === 0, bad.slice(0, 3).join(" | ")); });
     check("rtl pack: results weak-word rows render (RTL flex rows, why label dir=ltr data-ui)", /<label class="wk" dir="rtl">/.test(rs.results) && /<span class="q" dir="ltr" data-ui style="margin:0;font-size:13px">/.test(rs.results));
-    check("rtl pack: Read-list done tick (✓ 3 / 4) is dir=ltr data-ui inside the dir=rtl button", /<span class="tick" dir="ltr" data-ui>✓ 3 \/ 4<\/span>/.test(rs.readList));
+    check("rtl pack: Read-list score (3 of 4) is dir=ltr data-ui inside the dir=rtl button", /<span class="rsc" dir="ltr" data-ui>3 of 4<\/span>/.test(rs.readList));
     check("rtl pack: read question translation isolates its RTL phrase as one run", /\(<bdi data-tl lang="zh" dir="rtl" class="tlf">از \.\.\. متنفرم<\/bdi>\)/.test(rs.question));
     check("ltr pack: Read screens carry no data-ui / tlf markup (unchanged)", Object.values(ls).every(h => !/data-ui|class="tlf"/.test(h)));
     await tick(); await tick();
@@ -2089,22 +2089,24 @@ return {
   try{
     const { rtlAudit } = require("./fixtures/rtl_audit.js");
     const unlockAll = pr => { pr.read = { unlocked: Object.fromEntries(PACK.levels.map(l => [l.id, 1])) }; };
-    const readRow = h => (h.match(/<tr><td>6\. Read<\/td><td>([\s\S]*?)<\/td><\/tr>/) || [])[1];
+    // Today plan rows (app v2): <div class="tst"><span>Step</span><div class="tsd">detail</div></div>; the passage row is the last, named by its title.
+    const stepRow = (h, name) => { const m = [...h.matchAll(/<div class="tst"><span>([^<]*)<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/g)].filter(x => x[1] === name && x[2]); return m.length ? m[m.length - 1][2] : undefined; };
+    const readRow = h => stepRow(h, "Read");
     const b = await bootApp([{ lang:"zh-CN", name:"x" }], { passages: PASSAGES });
     const pr = b.api.getProg();
     b.api.today();
     const lockedToday = b.api.getHtml("panel");
-    check("Today, no passage unlocked: no Read row, 5 plan rows, no old hint box", !readRow(lockedToday) && (lockedToday.match(/<tr>/g) || []).length === 5 && !/readHintBox|hintRead/.test(lockedToday));
+    check("Today, no passage unlocked: no Read row, 5 plan rows, no old hint box", !readRow(lockedToday) && (lockedToday.match(/class="tst"/g) || []).length === 5 && !/readHintBox|hintRead/.test(lockedToday));
     unlockAll(pr); b.api.today();
     const p0 = VC.suggestPassage(PASSAGES, WORDS, PACK, pr), row = readRow(b.api.getHtml("panel"));
-    check(`Today, passage available: plan row "6. Read" = 1 passage: <title> (level, N words) (${row && row.replace(/<[^>]+>/g, "")})`,
-      !!row && row === `1 passage: <bdi data-tl lang="zh">${VC.escapeHtml(p0.title)}</bdi> (${VC.escapeHtml(PACK.levels.find(l => l.id === p0.lv).label)}, ${VC.passageLength(p0, PACK)} words)`);
+    check(`Today, passage available: plan row "Read" = the passage title (${row && row.replace(/<[^>]+>/g, "")})`,
+      !!row && row.replace(/<[^>]+>/g, "") === VC.escapeHtml(p0.title));
     // Run the stage (step 5, as Start today reaches it after Sentences).
     b.api.enterTodayStep(5);
     const stageH = b.api.getHtml("panel");
     check("stage opens the suggested passage with Skip today (no passage-list link)", b.api.getRD() && b.api.getRD().p.id === p0.id && b.api.getRD().today === true && /<button id="rskip">Skip today<\/button>/.test(stageH) && !/id="rback"/.test(stageH));
     b.api.startPassage(p0); const tabH = b.api.getHtml("panel");
-    check("stage passage screen is the Read tab's screen apart from that one button", stageH.replace('<button id="rskip">Skip today</button>', "") === tabH.replace('<button id="rback">‹ passages</button>', "") && !b.api.getRD().today);
+    check("stage passage screen is the Read tab's screen apart from that one button", stageH.replace('<div class="row"><button id="rskip">Skip today</button></div>', "") === tabH.replace('<button class="ghost rback" id="rback">Passages</button>', "") && !b.api.getRD().today);
     // Answer: question 0 wrong, the rest right.
     b.api.enterTodayStep(5);
     const doc = b.document, qs = b.api.getRD().p.questions, s0 = pr.sessions || 0; // the pass's question order (passageForPass)
@@ -2117,28 +2119,28 @@ return {
     });
     const res = b.api.getHtml("panel");
     check(`results count the passage's questions (${qs.length - 1} / ${qs.length}), Continue instead of Add to review / Back to passages`,
-      res.includes(`<h2>${qs.length - 1} / ${qs.length}</h2>`) && /id="rcont"/.test(res) && !/id="addrev"|id="rlist"/.test(res) && (!wrongIds.length || /Ticked ones go to your next review/.test(res)));
+      res.includes(`<h2>${qs.length - 1} of ${qs.length}</h2>`) && /id="rcont"/.test(res) && !/id="addrev"|id="rlist"/.test(res) && (!wrongIds.length || /Ticked ones go to your next review/.test(res)));
     const rec = pr.read.done[p0.id];
     check("passage recorded in prog.read.done as a Read-tab completion ({sc, n, d, x:1})", rec && rec.sc === qs.length - 1 && rec.n === qs.length && rec.x === 1 && /^\d{4}-\d{2}-\d{2}$/.test(rec.d));
     doc.getElementById("rcont").click();
     check(`Continue: the missed question's words gain READ_WEIGHT.wrong misses in prog.w (${wrongIds.join(",")})`, wrongIds.length > 0 && wrongIds.every(id => pr.w[id].w === before[id] + VC.READ_WEIGHT.wrong && pr.w[id].s === 0));
-    check("Continue ends the session as usual (Session done, sessions + 1)", /Session done/.test(b.api.getHtml("panel")) && pr.sessions === s0 + 1 && b.api.getRD() === null);
+    check("Continue ends the session as usual (Session done, sessions + 1)", /Session \d+ done/.test(b.api.getHtml("panel")) && pr.sessions === s0 + 1 && b.api.getRD() === null);
     b.api.today();
     // Read rotation (default since the flag collapse): a reading pass is followed by a listening pass of it.
-    const listenRow = h => (h.match(/<tr><td>6\. Listen<\/td><td>([\s\S]*?)<\/td><\/tr>/) || [])[1];
+    const listenRow = h => stepRow(h, "Listen");
     const p1 = p0, lr1 = listenRow(b.api.getHtml("panel"));
-    check("next Today plan: the passage just read comes back as a listening pass (read rotation)", !!lr1 && lr1.startsWith("1 passage to listen to: ") && lr1.includes(VC.escapeHtml(p1.title)));
+    check("next Today plan: the passage just read comes back as a listening pass (read rotation)", !!lr1 && lr1.includes(VC.escapeHtml(p1.title)));
     // Skip: nothing recorded, session counts as usual, same passage next time.
     const doneBefore = JSON.stringify(pr.read.done), s1 = pr.sessions;
     b.api.enterTodayStep(5); doc.getElementById("rskip").click();
-    check("Skip today: session finishes (sessions + 1 as without the stage), passage not marked done", /Session done/.test(b.api.getHtml("panel")) && pr.sessions === s1 + 1 && JSON.stringify(pr.read.done) === doneBefore && b.api.getRD() === null);
+    check("Skip today: session finishes (sessions + 1 as without the stage), passage not marked done", /Session \d+ done/.test(b.api.getHtml("panel")) && pr.sessions === s1 + 1 && JSON.stringify(pr.read.done) === doneBefore && b.api.getRD() === null);
     b.api.today();
     check("Skip today: the same passage is offered next session", (listenRow(b.api.getHtml("panel")) || "").includes(VC.escapeHtml(p1.title)));
     // Start today carries the plan's pick: the stage runs the passage the plan named.
     b.api.enterTodayStep(5, { p: PASSAGES[3], reason: "new" });
     check("stage runs the passage picked at Start today (todayStepState.read)", b.api.getRD().p.id === PASSAGES[3].id);
     b.api.enterTodayStep(5, null);
-    check("Start today with no passage: step 5 goes straight to Session done", /Session done/.test(b.api.getHtml("panel")) && !/id="rskip"/.test(b.api.getHtml("panel")));
+    check("Start today with no passage: step 5 goes straight to Session done", /Session \d+ done/.test(b.api.getHtml("panel")) && !/id="rskip"/.test(b.api.getHtml("panel")));
     // (The legacy 7-day spaced re-read checks went with the readRotation flag: the rotation's picks are covered above and in tests/listen_mode_checks.js.)
     await tick(); await tick();
     // RTL: the plan line passes the shared RTL audit; UI parts isolated, title in pack font.
@@ -2147,7 +2149,7 @@ return {
     unlockAll(rb.api.getProg()); rb.api.today();
     const rtlToday = rb.api.getHtml("panel"), rrw = readRow(rtlToday), bad = rtlAudit(rtlToday);
     check(`rtl pack: Today plan with the Read row passes the RTL audit (${bad.length})`, !!rrw && bad.length === 0, bad.slice(0, 3).join(" | "));
-    check("rtl pack: Read row title is an isolated RTL run (tlf, ui() run split), level/length plain UI text", /^1 passage: <bdi data-tl lang="zh" dir="rtl" class="tlf">خانه \(آزمون<\/bdi>\) \(HSK 1, \d+ words\)$/.test(rrw));
+    check("rtl pack: Read row title is an isolated RTL run (tlf)", /<bdi data-tl lang="zh" dir="rtl" class="tlf">خانه \(آزمون/.test(rrw));
     check("ltr pack: Read row carries no data-ui / tlf markup", !/data-ui|class="tlf"/.test(row));
     await tick(); await tick();
     // (The no-passages byte-identity control against main 93f77a2 ran with dayAware off; dayAware is default since the flag collapse.)
@@ -2214,7 +2216,7 @@ return {
       const tapped0 = rd.tapped; rd.tapped = [];
       api.readResults(); const h1 = document.getElementById("panel").innerHTML;
       check("results, stale reopened flag only: no weak-word list, heading or Add to review; no look-back marker anywhere (owner 2026-10-03)",
-        !/id="weak"|Weak words from this passage|id="addrev"|data-wi=/.test(h1) && /No weak words from this passage/.test(h1) && !/looked back/.test(h1));
+        !/id="weak"|Weak words from this passage|id="addrev"|data-wi=/.test(h1) && !/looked back/.test(h1));
       rd.tapped = tapped0; api.readResults(); const h2 = document.getElementById("panel").innerHTML;
       const wk = (h2.match(/<div id="weak">[\s\S]*?<\/div>/) || [""])[0];
       const boxes = (wk.match(/data-wi="\d+"/g) || []).length, rows = (wk.match(/<label class="wk"/g) || []).length;
@@ -2270,8 +2272,8 @@ return {
     seedLearned(api.getProg(), 6);
     api.today();
     const html = api.getHtml("panel");
-    check("Today plan: no voice and no pack audio (WORDS carry no .audio) -> Listen line has no item count",
-      /<td>3\. Listen<\/td><td>[^<]*<\/td>/.test(html) && !/<td>3\. Listen<\/td><td>\d+ items<\/td>/.test(html));
+    // (app v2 plan rows carry no item counts; the count the v1 Listen line showed is VC.listenPlanCount with the session's canHear.)
+    check("Today plan: no voice and no pack audio (WORDS carry no .audio) -> Listen plans no item", /<span>Listen<\/span>/.test(html) && VC.listenPlanCount(WORDS.slice(0, 6), w => !!w.audio) === 0);
   }catch(e){ check(`Today plan Listen-line (no voice, no audio) scenario does not throw (got: ${e.message})`, false); }
   try{
     const clipPack = Object.assign({}, PACK, { audio: { voice: "rec", version: 1 } });
@@ -2280,8 +2282,7 @@ return {
     seedLearned(api.getProg(), 6);
     api.today();
     const html = api.getHtml("panel");
-    check("Today plan: no voice but the pack ships recorded clips for some weak words -> Listen line shows a count",
-      /<td>3\. Listen<\/td><td>\d+ items<\/td>/.test(html));
+    check("Today plan: no voice but the pack ships recorded clips for some weak words -> Listen plans those", /<span>Listen<\/span>/.test(html) && VC.listenPlanCount(clipWords.slice(0, 6), w => !!w.audio) > 0);
   }catch(e){ check(`Today plan Listen-line (clips, no voice) scenario does not throw (got: ${e.message})`, false); }
 
   // Republish that reorders level 1 (learnedWords from records, TODO.md 2026-09-28): Today's
@@ -2298,7 +2299,7 @@ return {
     const wb = api.getHtml("wbody");
     // frequency tiers: the learned sets come first (3 here), then the unlearned words in rank order
     check("app, reordered level: Words tab opens the slice holding the first unlearned word (after the 3 learned sets), not marked done",
-      /Set 4 \/ \d+<\/button>/.test(wb));
+      /Set 4 of \d+/.test(wb));
   }catch(e){ check(`app reordered-level scenario does not throw (got: ${e.message})`, false); }
 
   // A leftover teach can be the level's last unlearned set (nothing fresh remains after it)

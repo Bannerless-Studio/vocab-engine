@@ -229,7 +229,7 @@ const freshRec = () => VC.normalizeProg({}, PACK);
 
 (async () => {
 console.log("\n[A1] the flag");
-check("appViewOn: zh pack sets v2; absent / other values are off", VC.appViewOn(PACK) && !VC.appViewOn(OFF) && !VC.appViewOn(Object.assign({}, PACK, { appView: "v3" })) && !VC.appViewOn(null));
+check("appView is engine default (flag collapse stage 2): core has no appViewOn, the zh pack no appView key", VC.appViewOn === undefined && !("appView" in PACK));
 {
   const { api } = await bootWith(PACK, freshRec(), 1); const b = await bootWith(OFF, freshRec(), 1);
   check("boot sets data-appview=\"v2\" on <html> only when the flag is on", api.docAttr("data-appview") === "v2" && b.api.docAttr("data-appview") === undefined);

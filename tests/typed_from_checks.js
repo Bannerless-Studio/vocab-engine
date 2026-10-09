@@ -34,7 +34,7 @@ const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
 const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); };
-const PACK_BASE = packAsOf(preWrite(PACK), "34c5df3", { strip: ["typedFrom", "glossFocus", "helpClose", "readAnswerBlock", "optsOneScript", "optsMix", "progressMap"] });
+const PACK_BASE = packAsOf(preWrite(PACK), "34c5df3", { strip: ["typedFrom", "optsOneScript", "progressMap"] });
 // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields too.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });
 
@@ -225,7 +225,6 @@ function walk(api, stopAt){
     check("typedFromOn: off without the field, off without typing, invalid sides ignored",
       !VC.typedFromOn(PACK_BASE) && !VC.typedFromOn(Object.assign({}, PACK, { typing: null })) && !VC.typedFromOn({ typing: "pron", typedFrom: "written" })
       && JSON.stringify(VC.typedFromSides({ typing: "pron", typedFrom: ["pron", "x", "written"] })) === '["written","pron"]' && VC.typedFromOn(PACK));
-    check("glossFocusOn: only true turns it on", VC.glossFocusOn(PACK) && !VC.glossFocusOn(PACK_BASE) && !VC.glossFocusOn({ glossFocus: "yes" }));
     check("typedKinds zh: 9-slot cycle writtenMeaning, written, pron, writtenMeaning, written, pronMeaning, writtenMeaning, written, writtenPron (characters <-> meaning 6:3 against the pinyin kinds)",
       VC.typedKinds(PACK).join() === "writtenMeaning,written,pron,writtenMeaning,written,pronMeaning,writtenMeaning,written,writtenPron");
     check("typedKinds 2x share: writtenMeaning and written three times per cycle, pron, pronMeaning, writtenPron once", (() => {
@@ -446,11 +445,9 @@ function walk(api, stopAt){
       check(`rule 6: characters -> pinyin choice fallback "${fb.label}": characters stimulus, no reading on it, 4 distinct readings incl. the answer (${fb.opts.join(", ")})`,
         fb.kind === "mc" && fb.label === "How is it said?" && !fb.mount && HAN.test(stripTags(fb.html)) && !MARKED.test(stripTags(fb.html)) && !/data-wid|class="replay|<ruby/.test(fb.html)
         && fb.opts.length === 4 && keys.size === 4 && fb.a === w.pron && fb.opts[0] === w.pron && fb.opts.every(o => !HAN.test(o)));
-      // pack.optsMix (docs/PACK_SCHEMA.md "optsMix"): the answer's stage first (it is learned), drawn per set.
-      if(VC.optsMixOn(PACK)) check(`rule 6 (optsMix): distractors are learned words' readings with the answer's syllable count (${syl(w.pron)}) on two builds (${fb.opts.slice(1).join(", ")} | ${fb2.opts.slice(1).join(", ")})`,
+      // optsMix (engine default since the flag collapse): the answer's stage first (it is learned), drawn per set.
+      check(`rule 6 (optsMix): distractors are learned words' readings with the answer's syllable count (${syl(w.pron)}) on two builds (${fb.opts.slice(1).join(", ")} | ${fb2.opts.slice(1).join(", ")})`,
         [fb, fb2].every(f => f.opts.slice(1).every(o => learned.has(o) && syl(o) === syl(w.pron))));
-      else check(`rule 6: distractors are learned words' readings with the answer's syllable count (${syl(w.pron)}), chosen without rng (same on a second build)`,
-        fb.opts.slice(1).every(o => learned.has(o) && syl(o) === syl(w.pron)) && JSON.stringify(fb.opts) === JSON.stringify(fb2.opts));
       const k0 = spoken.length; api.drill1(fb); const before = spoken.length - k0;
       const btn = api.el("o").children.find(b => b.dataset.v === w.pron); btn.click();
       check("rule 6: renders silent before the answer; the reveal speaks; a pass records as the other fallbacks do", before === 0 && spoken.length - k0 > 0 && api.getD().miss.length === 0);

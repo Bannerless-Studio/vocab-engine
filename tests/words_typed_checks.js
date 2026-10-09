@@ -28,7 +28,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // fb27: the controls predate characters.start / ramp, so the pack is compared without them.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
 const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), PAIRS_ERA);
-const PACK_OFF = packAsOf(PACK, MAIN, { strip: ["optsMix"] });
+const PACK_OFF = packAsOf(PACK, MAIN, { strip: [] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");

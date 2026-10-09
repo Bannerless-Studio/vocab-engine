@@ -202,7 +202,7 @@ async function playSessions(pack, seedP, sessions, seed, acc, onSession, opts){
   }
   return api;
 }
-const SIM = stripFlags(PACK, ["appView"]); // appView is UI only: the planner is the same
+const SIM = stripFlags(PACK, []); // appView is UI only: the planner is the same
 const LV = VC.levelIds(PACK), BYLV = VC.wordsByLevel(WORDS, PACK), GOALS = VC.progressMapGoals(PACK);
 // Per session: every goal's position and every level's known share (passages counted as in the app; the sim skips reading).
 async function trace(start, n, seed, acc, opts){
@@ -537,7 +537,7 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
   if(!BASE_CORE) console.log("SKIP  base unavailable");
   else {
     const recs = [["fresh", freshStart()], ["owner", OWNER ? ownerStart() : seedKnown(2)], ["mid + 5 pm", (() => { const p = seedLevel(2, 30); p.pm = pmLine(5, 0, 0.3, 0.01); return p; })()]];
-    for(const [pk, pack] of [["appView off", stripFlags(PACK, ["appView"])], ["appView + progressView off", stripFlags(PACK, ["appView", "progressView"])]]){
+    for(const [pk, pack] of [["appView off", stripFlags(PACK, [])], ["appView + progressView off", stripFlags(PACK, [])]]){
       for(const [name, rec] of recs){
         // one app at a time: boot reseeds the shared Math.random
         const run = async (env, pk) => { const x = await bootWith(pk, clone(rec), 3, Object.assign({}, env, VIEW)); const t = x.panel(); x.clickTab("progress"); return [t, x.panel()]; };

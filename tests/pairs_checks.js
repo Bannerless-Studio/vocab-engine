@@ -25,7 +25,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // freqTiers (fb26) layers tier rules on the pair streaks; these checks pin the pairs rule itself, so the
 // zh pack runs without it (tests/freq_tiers_checks.js covers the tiers).
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["progressView"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: [] });
 const PACK_OFF = packAsOf(PACK, MAIN);
 // Frequency tiers are engine default since the flag collapse (tests/freq_tiers_checks.js covers them): this suite's
 // words drop their ft, so every word reads core and the pair checks keep their pre-tier numbers.

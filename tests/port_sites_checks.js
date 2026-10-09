@@ -75,7 +75,6 @@ async function site(dirName, code){
       && P.characters.learn === "lag" && P.characters.start === 60 && JSON.stringify(P.characters.ramp) === "[3,5,8]" && P.characters.bareBy === "typed" && P.characters.bareWords === true && P.characters.bareByPair === true && P.placementChars === true
       : !P.levelExam && !P.characters && P.placementChars === undefined));
   check(`${code}: pronUntilPrimer on exactly for script sites (${P.script ? "script" : "no script"}: ${JSON.stringify(P.pronUntilPrimer)}), engine reads it`, P.script ? P.pronUntilPrimer === true && VC.pronUntilPrimerOn(P) : P.pronUntilPrimer === undefined && !VC.pronUntilPrimerOn(P));
-  check(`${code}: engine reads progressView, appView as on`, VC.progressViewOn(P) && VC.appViewOn(P));
 
   const val = require("child_process").spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), E.dir], { encoding: "utf8" });
   const errs = (val.stdout + val.stderr).split("\n").filter(l => /^ERROR/.test(l));

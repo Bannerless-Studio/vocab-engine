@@ -72,7 +72,7 @@ const SIBLINGS = ["arabic", "french", "german", "hindi", "indonesian", "italian"
 const SIBLING_ALLOW = [];
 const unlistedNewKeys = (work, committed) => Object.keys(work).filter(k => !(k in committed) && !topFlags.has(k) && !SIBLING_ALLOW.includes(k));
 check("sibling drift rule: a new unlisted key is caught, a FLAG_SINCE key and an allow-listed one pass", (() => {
-  const u = unlistedNewKeys({ key: "x", appView: "v2", bogusNew: 1 }, { key: "x" });
+  const u = unlistedNewKeys({ key: "x", levelExam: {}, bogusNew: 1 }, { key: "x" });
   return u.length === 1 && u[0] === "bogusNew";
 })());
 SIBLINGS.forEach(lang => {
@@ -91,8 +91,8 @@ check("packBefore(first flag): no flag key left", FLAG_SINCE.every(f => !flagPre
 check("packAsOf(pack, HEAD) is the pack unchanged", JSON.stringify(packAsOf(PACK, "HEAD")) === JSON.stringify(PACK));
 check("packAsOf never mutates its input", (() => { const c = JSON.stringify(PACK); packAsOf(PACK, "3044601"); stripFlags(PACK, ["pairs"]); return JSON.stringify(PACK) === c; })());
 check("keep leaves a newer flag on; strip drops an older one", (() => {
-  const p = packAsOf(PACK, "3044601", { keep: ["appView"], strip: ["glossFocus"] });
-  return "appView" in p && !("glossFocus" in p) && !("progressView" in p);
+  const p = packAsOf(PACK, "3044601", { keep: ["levelExam"], strip: ["typedFrom"] });
+  return "levelExam" in p && !("typedFrom" in p) && !("eta" in p);
 })());
 check("stripFlags removes a nested flag and keeps its siblings", (() => {
   const p = stripFlags(PACK, ["characters.start"]);

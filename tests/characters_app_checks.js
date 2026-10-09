@@ -48,7 +48,7 @@ const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const LEGACY = loadConst(path.join(ZH, "legacy.js"), "LEGACY");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // pack.glossFocus renders the gloss as glossParts pieces, qualifiers dimmed (app.html glossOut).
-const glossShown = g => VC.glossFocusOn(PACK) ? VC.glossParts(g).pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join("") : VC.escapeHtml(g);
+const glossShown = g => VC.glossParts(g).pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join(""); // glossFocus: engine default
 const CFG = VC.charsConfig(PACK);
 console.log(`Loaded zh pack: ${WORDS.length} words, ${SENTENCES.length} sentences, ${CHARACTERS.length} units, label ${CFG.label}`);
 

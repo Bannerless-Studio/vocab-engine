@@ -16,7 +16,7 @@ const ZH = path.join(ROOT, "packs", "zh");
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["progressView"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: [] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -213,8 +213,7 @@ const WORDS_OFF = WORDS;
   check("glossSenses: one sense -> no rest; reading note is not a sense; empty is safe",
     VC.glossSenses("to study").rest.length === 0 && VC.glossSenses("who; also pr. [shuí]").rest.length === 0 && VC.glossSenses("").first === "");
   check("glossSenses: a ';' inside (...) does not split", VC.glossSenses("to be (a; b) here; to stay").rest.join("|") === "to stay");
-  check("glossStyleOn: zh ships it; absent, other value, or no glossFocus is off",
-    VC.glossStyleOn(PACK) && !VC.glossStyleOn(PACK_OFF) && !VC.glossStyleOn(Object.assign({}, PACK, { glossStyle: "yes" })) && !VC.glossStyleOn(Object.assign({}, PACK, { glossFocus: false })));
+  check("glossStyle is engine default (flag collapse stage 2): core has no glossStyleOn, the zh pack no glossStyle key", VC.glossStyleOn === undefined && !("glossStyle" in PACK));
   check("typedSynWords(帮助) = [帮忙]; a word without typedSyn has none", VC.typedSynWords(bang, BY_ID).map(x => x.w).join() === "帮忙" && VC.typedSynWords(bie, BY_ID).length === 0);
   const synOnly = WORDS.filter(x => x.syn && !x.typedSyn);
   check(`syn-only words (${synOnly.length}) list no partners (false friends stay out)`, synOnly.length > 0 && synOnly.every(x => VC.typedSynWords(x, BY_ID).length === 0));

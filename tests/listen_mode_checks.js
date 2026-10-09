@@ -19,12 +19,12 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // this suite is about listening, so it runs the zh pack with them off.
 // dayAware (docs/PACK_SCHEMA.md) post-dates the pinned controls and is not what this suite checks.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK_DAY = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["progressView"] });
+const PACK_DAY = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: [] });
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
 const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); };
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")), "34c5df3", { strip: ["progressView", "typedFrom", "glossFocus", "helpClose", "readAnswerBlock", "optsOneScript", "optsMix", "progressMap"] });
+const PACK = packAsOf(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")), "34c5df3", { strip: ["typedFrom", "optsOneScript", "progressMap"] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });
@@ -485,7 +485,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     b.api.enterTodayStep(0);
     const review = b.api.dq() || [];
     const reviewScreen = b.api.html("panel");
-    check("Review: zero hear kinds and no item flagged for the notice", review.length > 0 && review.every(x => !x[3]) && !/no text-to-speech voice/.test(reviewScreen));
+    check("Review: zero hear kinds and no item flagged for the notice", review.length > 0 && review.every(x => !x[3]) && !/No voice for this language in this browser/.test(reviewScreen));
     const lw = VC.learnedWords(WORDS, PACK, pr);
     const plan = VC.buildReviewPlan(lw, pr, PACK, { canHear: () => false });
     check("buildReviewPlan with canHear false: zero hear kinds, production share kept", plan.every(x => x.kind !== "hear") && plan.filter(x => x.kind === "recall" || x.kind === "type").length === Math.ceil(plan.length * 0.4 - 1e-9));
@@ -500,7 +500,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
       /no items until a voice or recording is available/.test(planHtml) && afterListen.length + 1 === VC.recallSize(PACK) && afterListen.every(x => !x[3] && !x[4]));
     b.api.enterTodayStep(4);
     const sents = b.api.dq() || [];
-    check("Sentences step: no hear sentence planned, none flagged", sents.every(x => !x[3]) && !/no text-to-speech voice/.test(b.api.html("panel")));
+    check("Sentences step: no hear sentence planned, none flagged", sents.every(x => !x[3]) && !/No voice for this language in this browser/.test(b.api.html("panel")));
     b.api.testTab();
     const th = b.api.html("panel");
     check("Test tab: Listen button replaced by its no-items note; Recall stays", !b.api.el("tListen") && /Listen test: no items until a voice or recording is available/.test(th) && !!b.api.el("tRecall"));

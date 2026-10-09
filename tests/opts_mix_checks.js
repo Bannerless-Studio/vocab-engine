@@ -24,7 +24,7 @@ const BASE = "68930bd"; // main before optsMix: level-tier options everywhere
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // fb27: the fresh-learner scenarios and the control predate characters.start / ramp (sets of 10 from the first Learn).
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["characters.start", "characters.ramp", "progressView"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["characters.start", "characters.ramp"] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -402,7 +402,7 @@ async function sec4(){
   const SHAPES = [["fresh, first set", 0, false], ["30 learned", 30, false], ["140/150 of HSK 1", 140, true], ["HSK 1-3 (owner)", 595, true], ["all learned", WORDS.length, true]];
   const N = 2000;
   console.log("\n[1] core builders: guess success of a learner ruling out never-taught options and options of another stage, before (level tiers) vs after (optsMix)");
-  check(`zh ships optsMix; the flag reads true only (PACK_OFF: off)`, VC.optsMixOn(PACK) && !VC.optsMixOn(PACK_OFF) && !VC.optsMixOn({ optsMix: 1 }));
+  check(`optsMix is engine default (flag collapse stage 2): core has no optsMixOn, the zh pack no optsMix key`, VC.optsMixOn === undefined && !("optsMix" in PACK));
   const agg = new Map(BUILDERS.map(b => [b.name, { cells: 0, held: 0, bad: [], guardBad: 0, short: 0, leak: 0, leakN: 0 }]));
   const rows = [];
   let sentOut = { b: 0, a: 0, n: 0 }, ownerLeak = null;

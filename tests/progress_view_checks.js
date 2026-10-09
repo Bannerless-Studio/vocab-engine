@@ -174,7 +174,7 @@ const owner = fs.existsSync(OWNER) ? JSON.parse(fs.readFileSync(OWNER, "utf8")) 
 (async () => {
 console.log("\n[1] core: totals, pv, deltas, recent misses");
 {
-  check("progressViewOn: zh pack sets v2; absent / other values are off", VC.progressViewOn(PACK) && !VC.progressViewOn(OFF) && !VC.progressViewOn(Object.assign({}, PACK, { progressView: "v3" })));
+  check("progressView is engine default (flag collapse stage 2): core has no progressViewOn, the zh pack no progressView key", VC.progressViewOn === undefined && !("progressView" in PACK));
   const p = midProg(); p.sessions = 12;
   const t = totals(p);
   check("progressTotals: sessions, mastered (wordKnownX, the exam rule), units at target, passages", t.sn === 12 && t.m === VC.learnedWords(WORDS, PACK, p).filter(w => known(p, w)).length && t.co === 0 && t.p === 0);

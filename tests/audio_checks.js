@@ -283,7 +283,7 @@ async function appChecks(){
     log.played.length = 0; wl._c[1].onclick();
     check("Words tab rows: clickable and playing only for a word with a clip", wl._c[0].onclick === null && log.played.join() === c3.audio);
     api.goto("progress");
-    check("Progress: no 'No text-to-speech voice' warning when the pack ships audio", !/No text-to-speech voice/.test(api.html("panel")));
+    check("Progress: no no-voice warning when the pack ships audio", !/No voice for this language in this browser/.test(api.html("panel")));
     // Script primer: every example word of fa-be has a clip, so wordHear survives without a voice.
     const be = api.unit("fa-be");
     const it = api.scriptDrillItem("wordHear", be);
