@@ -1,9 +1,8 @@
-// Checks for pack.helpClose (docs/PACK_SCHEMA.md "helpClose") and the Read verdict scroll:
-// [1] core.js helpCloseOn, [2] validate_pack.py accepts only true, [3] zh (flag on): the
+// Checks for the help overlays (docs/PACK_SCHEMA.md "helpClose", engine default since the flag collapse) and the Read verdict scroll:
+// [1] no helpCloseOn / readAnswerBlockOn left, [2] validate_pack.py warns on the stale keys, [3] zh: the
 // passage word popover, the sentence word popover and the audio toast each get a close
 // button, close on a tap outside, on Escape and after the timer (held while a pointer or
-// finger is on it), one at a time, [4] flag off (zh without the field): popover markup and
-// behaviour as before, [5] a Read question answered with the passage open brings the
+// finger is on it), one at a time, [5] a Read question answered with the passage open brings the
 // verdict and Next (one button, above the passage toggle) into view, never scrolling past the passage.
 // Boots engine/app.html in the fake DOM of tests/session_resume_checks.js with a fake clock.
 // Run: node tests/help_close_checks.js   (PYTHON3 overrides the interpreter)
@@ -201,9 +200,10 @@ async function onPassage(pack){
       return { status: r.status, out: (r.stdout || "") + (r.stderr || "") };
     };
     const a = run({}), b = run({ helpClose: true, readAnswerBlock: true }), c = run({ helpClose: false }), d = run({ readAnswerBlock: "yes" });
-    check("absent or true: no helpClose error", a.status === 0 && b.status === 0 && !/helpClose/.test(a.out + b.out), a.out + b.out);
-    check("false: error 'pack.helpClose must be true when present'", c.status === 1 && /pack\.helpClose must be true when present/.test(c.out), c.out);
-    check("readAnswerBlock not true: error", d.status === 1 && /pack\.readAnswerBlock must be true when present/.test(d.out), d.out);
+    // Collapsed keys (flag collapse stage 2): any value is a stale-key warning, never an error.
+    const stale = (r, k) => r.status === 0 && new RegExp(`no longer reads[^\\n]*${k}`).test(r.out);
+    check("absent: no helpClose / readAnswerBlock mention", a.status === 0 && !/helpClose|readAnswerBlock/.test(a.out), a.out);
+    check("present (true, false or not a boolean): no error, a stale-key warning naming the key", stale(b, "helpClose") && stale(b, "readAnswerBlock") && stale(c, "helpClose") && stale(d, "readAnswerBlock"), b.out + c.out + d.out);
   }
 
   console.log("\n[3] zh, flag on");
@@ -277,15 +277,7 @@ async function onPassage(pack){
     check("Escape closes the toast", !api.helpCur());
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  console.log("\n[4] flag off");
-  try {
-    const off = Object.assign({}, PACK); delete off.helpClose;
-    const { api, gloss, docClick, tapWord } = await onPassage(off);
-    tapWord();
-    check("passage word tap: no close button, no overlay tracking", !gloss.hidden && !/helpx/.test(gloss.innerHTML) && !gloss.classList.contains("hasx") && !api.helpCur());
-    clock.run(60000); docClick({ closest: () => null });
-    check("no timer, a tap outside leaves it open (as before)", !gloss.hidden);
-  } catch(e){ check(`section threw: ${e.stack}`, false); }
+  // [4] (helpClose flag-off popover controls) deleted: helpClose is engine default since the flag collapse.
 
   console.log("\n[5] Read question: verdict and Next above the passage toggle");
   try {
@@ -301,16 +293,7 @@ async function onPassage(pack){
       check(`passage open, answered ${right ? "right" : "wrong"}: verdict and Next brought into view together, no scroll to the bottom (scrolled: ${scrolled.join(", ")})`, scrolled.join() === "qans" && api.el("nx").style.display === "block" && /Right\.|Not quite\./.test(api.html("rv")));
       api.el("nx").click(); if(!api.rd().shown) api.el("ptoggle").click();
     }
-    // Flag off: Next in the bottom bar; an open passage brings the verdict into view.
-    const off = Object.assign({}, PACK); delete off.readAnswerBlock;
-    const o = await onPassage(off);
-    o.api.el("rdone").click();
-    const h2 = o.api.html("panel"), at2 = id => h2.indexOf(`id="${id}"`);
-    check("flag off: Next stays below the passage in the bottom bar", at2("rv") < at2("ptoggle") && at2("pbox") < at2("nx") && /<div class="actions"><button class="next" id="nx"/.test(h2));
-    o.api.el("ptoggle").click(); scrolled.length = 0; o.api.el("o").children[0].click();
-    check(`flag off, passage open: the verdict is brought into view, not Next (scrolled: ${scrolled.join(", ")})`, scrolled.join() === "rv");
-    o.api.el("nx").click(); scrolled.length = 0; o.api.el("o").children[0].click();
-    check(`flag off, passage closed: scrolls to Next as before (scrolled: ${scrolled.join(", ")})`, scrolled.join() === "nx");
+    // (readAnswerBlock flag-off controls deleted: engine default since the flag collapse)
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
