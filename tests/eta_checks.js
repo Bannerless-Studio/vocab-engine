@@ -276,18 +276,18 @@ async function calibrate(){
   const jobs = [5, 6, 7, 8, 9, 10].map(s => ["fresh", s, N]).concat(OWNER ? [5, 6, 7].map(s => ["owner", s, NO]) : [], [2, 3].flatMap(lv => [5, 6, 7, 8, 9, 10].map(s => ["placed" + lv, s, NO + 40])));
   const runs = await runTraces(jobs);
   const pos = (r, g) => r.rows.map(x => x.g[g]);
-  runs.forEach(r => console.log(`${r.who} seed ${r.seed} (${r.secs} s): goals from ${r.rows[0].g.map(x => x.toFixed(3)).join("/")} reach ${VC.GOAL_DONE} after ${GOALS.map((_, g) => { const c = EC.crossOf(pos(r, g)); return c === null ? `>${r.N}` : c; }).join("/")} sessions; holds ${EC.holdsOf(r.rows, PACK.levelGate).map(h => `${(h[0] * 100).toFixed(1)}% open after ${h.length - 1}`).join(", ") || "none"}`));
+  runs.forEach(r => console.log(`${r.who} seed ${r.seed} (${r.secs} s): goals from ${r.rows[0].g.map(x => x.toFixed(3)).join("/")} reach ${VC.GOAL_DONE} after ${GOALS.map((_, g) => { const c = EC.crossOf(pos(r, g)); return c === null ? `>${r.N}` : c; }).join("/")} sessions; holds ${EC.holdsOf(r.rows, VC.LEVEL_GATE).map(h => `${(h[0] * 100).toFixed(1)}% open after ${h.length - 1}`).join(", ") || "none"}`));
   const placed = runs.filter(r => r.who.startsWith("placed"));
   const fit = runs.filter(r => r.who === "fresh" && r.seed <= 7), oos = runs.filter(r => r.who === "fresh" && r.seed > 7), own = runs.filter(r => r.who === "owner");
-  const eta = { curve: GOALS.map((_, g) => EC.goalCurve(fit.map(r => pos(r, g)))), knownCurve: EC.knownCurve(fit.flatMap(r => EC.holdsOf(r.rows, PACK.levelGate)), PACK.levelGate) };
+  const eta = { curve: GOALS.map((_, g) => EC.goalCurve(fit.map(r => pos(r, g)))), knownCurve: EC.knownCurve(fit.flatMap(r => EC.holdsOf(r.rows, VC.LEVEL_GATE)), VC.LEVEL_GATE) };
   // knownCurve vs a linear hold: each hold's rate in its first and last third against its mean
-  fit.forEach(r => EC.holdsOf(r.rows, PACK.levelGate).forEach(h => { const n = h.length - 1, t = Math.max(1, Math.floor(n / 3)), m = (h[n] - h[0]) / n;
+  fit.forEach(r => EC.holdsOf(r.rows, VC.LEVEL_GATE).forEach(h => { const n = h.length - 1, t = Math.max(1, Math.floor(n / 3)), m = (h[n] - h[0]) / n;
     console.log(`  hold seed ${r.seed} from ${(h[0] * 100).toFixed(1)}%: first third ${((h[t] - h[0]) / t / m).toFixed(2)}x, last third ${((h[n] - h[n - t]) / t / m).toFixed(2)}x the mean rate`); }));
   GOALS.forEach((_, g) => console.log(`curve goal ${g + 1}: ${fmtCurve(eta.curve[g])}`));
   console.log(`knownCurve: ${eta.knownCurve ? Object.entries(eta.knownCurve).map(([lv, c]) => `${lv}: ${fmtCurve(c)}`).join("; ") : "null"}`);
   const verdict = (what, v) => { console.log(`GATE  ${what}: ${v.ok === null ? "no curve" : v.ok ? (v.tail ? "PASS (tail rule)" : "PASS") : "FAIL"}`); (v.probes || []).forEach(p => console.log(`        at ${p.q}: ${p.ok ? "pass" : p.tail ? "tail" : "fail"} ${p.per.map(x => x.note).join(" | ")}`)); (v.per || []).forEach(x => console.log(`        ${x.note}`)); return v.ok; };
   const gates = GOALS.map((_, g) => verdict(`goal ${g + 1} out of sample (seeds 8/9/10)`, EC.goalGate(eta.curve[g], oos.map(r => pos(r, g)))));
-  gates.push(verdict("gate out of sample (seeds 8/9/10)", EC.knownGate(eta.knownCurve, oos.map(r => EC.holdsOf(r.rows, PACK.levelGate)))));
+  gates.push(verdict("gate out of sample (seeds 8/9/10)", EC.knownGate(eta.knownCurve, oos.map(r => EC.holdsOf(r.rows, VC.LEVEL_GATE)))));
   // Placed starts (a fresh record the Test tab placed into HSK 2 / HSK 3: prog.pl, core.js etaPlaced). Seeds 5/6/7 fit a
   // placed curve set only where the fresh curves fail them in sample (the start's current goal; the placed levels' own gate
   // holds); seeds 8/9/10 check the set as the app reads it: the goal every 25 sessions up to the crossing plus the first
@@ -301,7 +301,7 @@ async function calibrate(){
     return EC.tailRule([...new Set(offs)].sort((x, y) => x - y).map(off => ({ q: `+${off}`, at: Math.min(...rs.map(r => pos(r, g)[off])),
       per: rs.map(r => { const t = pos(r, g), c = EC.crossOf(t);
         return c === null ? { ok: false, near: false, stall: false, note: "no crossing" } : EC.probeRun(estOf(r, g, off), c - off, `p ${t[off].toFixed(3)}: `); }) }))); };
-  const placedHolds = r => { const pl = r.who.slice(6), below = LV.slice(0, LV.indexOf(pl)); return EC.holdsOf(r.rows, PACK.levelGate).filter(h => below.includes(String(h.prev)) && h.from === 0); };
+  const placedHolds = r => { const pl = r.who.slice(6), below = LV.slice(0, LV.indexOf(pl)); return EC.holdsOf(r.rows, VC.LEVEL_GATE).filter(h => below.includes(String(h.prev)) && h.from === 0); };
   const holdProbe = (rs, kcOf) => { const per = rs.map(r => { const hs = placedHolds(r); if(!hs.length) return { ok: false, note: "no placed hold" };
       const h = hs[0], n = h.length - 1, offs = []; for(let o = 0; o < n; o += 25) offs.push(o);
       const z = provZero(r, r.who.slice(6)); if(z > 0 && z < n) offs.push(z);
@@ -317,7 +317,7 @@ async function calibrate(){
     // by sessions since placement: a placed start's position sits on a plateau (.80-.89) for ~70 sessions before it crosses,
     // where no position curve can place it; its crossing itself varies by a few sessions (153-159)
     if(!fg.ok){ const cs = rs.map(r => EC.crossOf(pos(r, g0))).filter(c => c !== null); if(cs.length >= 2){ const m = Math.round(cs.reduce((a, b) => a + b, 0) / cs.length * 10) / 10; set.bySessions[g0] = [[0, m], [m, 0]]; } }
-    if(!fk.ok){ const kc = EC.knownCurve(rs.flatMap(placedHolds), PACK.levelGate) || {}; Object.keys(kc).forEach(k => { if(kc[k]) set.knownCurve[k] = kc[k]; }); }
+    if(!fk.ok){ const kc = EC.knownCurve(rs.flatMap(placedHolds), VC.LEVEL_GATE) || {}; Object.keys(kc).forEach(k => { if(kc[k]) set.knownCurve[k] = kc[k]; }); }
     if(set.bySessions.some(Boolean) || Object.keys(set.knownCurve).length) placedSets[pl] = set;
     if(placedSets[pl]){ GOALS.forEach((_, g) => { if(set.bySessions[g]) console.log(`placed ${pl} goal ${g + 1} by sessions since placement: ${fmtCurve(set.bySessions[g])}`); });
       Object.entries(set.knownCurve).forEach(([k, c]) => console.log(`placed ${pl} knownCurve ${k}: ${fmtCurve(c)}`)); }
@@ -333,7 +333,7 @@ async function calibrate(){
     const gate = v => { if(what.startsWith("out")) gates.push(v); };   // in sample = the fit data: report only, as for the fresh curves
     gate(verdict(`placed at HSK ${lv} ${what}, goal ${g + 1} every 25 sessions + first session without provisional records (crossed ${rs.map(r => EC.crossOf(pos(r, g))).join("/")})`, goalProbe(rs, g, goalAt)));
     gate(verdict(`placed at HSK ${lv} ${what}, the placed level's hold every 25 sessions + first session without provisional records`, holdProbe(rs, kcAt)));
-    verdict(`placed at HSK ${lv} ${what}, every gate hold from its first session (report)`, EC.knownGate(h => EC.est(kcAt(h.run, h.prev), h[0]), rs.map(r => EC.holdsOf(r.rows, PACK.levelGate).map(h => Object.assign(h, { run: r })))));
+    verdict(`placed at HSK ${lv} ${what}, every gate hold from its first session (report)`, EC.knownGate(h => EC.est(kcAt(h.run, h.prev), h[0]), rs.map(r => EC.holdsOf(r.rows, VC.LEVEL_GATE).map(h => Object.assign(h, { run: r })))));
   }
   if(own.length){
     const o = ownerStart(), cg = VC.currentGoal(o, PACK, WORDS, CHARACTERS, PASSAGES), p = VC.goalPositions(o, PACK, WORDS, CHARACTERS, PASSAGES);
@@ -377,7 +377,7 @@ async function packMode(){
     const t0 = Date.now(), rows = [];
     await S.playSessions(P, start(), N, seed, ACC, (sn, api) => { const q = api.getProg();
       rows.push({ sn: sn + 1, g: VC.goalPositions(q, P, D.WORDS, units, pass), k: Object.fromEntries(LVS.map(lv => [lv, VC.levelKnownPct(D.WORDS, P, q, lv, units)])), gate: VC.levelGateHold(D.WORDS, P, q, units) }); }, { read: true, patterns: false });
-    const tr = goals.map((_, g) => rows.map(r => r.g[g])), holds = EC.holdsOf(rows, P.levelGate);
+    const tr = goals.map((_, g) => rows.map(r => r.g[g])), holds = EC.holdsOf(rows, VC.LEVEL_GATE);
     runs.push({ seed, tr, holds, secs: Math.round((Date.now() - t0) / 1000) });
     console.log(`seed ${seed} (${runs[runs.length - 1].secs} s): goals from ${rows[0].g.map(x => x.toFixed(3)).join("/")} reach ${VC.GOAL_DONE} after ${tr.map(t => { const c = EC.crossOf(t); return c === null ? `>${N}` : c; }).join("/")} sessions; holds ${holds.map(h => `from ${(h[0] * 100).toFixed(1)}% open after ${h.length - 1}`).join(", ") || "none"}; typed asks answered right as intended ${S.stats.typedMatched}/${S.stats.typedRight}`);
   }
@@ -385,7 +385,7 @@ async function packMode(){
   const legacyCurve = (g, p0) => { const v = VC.etaGain(P, g); return v == null ? null : [[p0, (VC.GOAL_DONE - p0) / v], [VC.GOAL_DONE, 0]]; };
   const pe = P.eta || {};
   const eta = calibrateMode
-    ? { curve: goals.map((_, g) => EC.goalCurve(runs.map(r => r.tr[g]))), knownCurve: EC.knownCurve(runs.flatMap(r => r.holds), P.levelGate) }
+    ? { curve: goals.map((_, g) => EC.goalCurve(runs.map(r => r.tr[g]))), knownCurve: EC.knownCurve(runs.flatMap(r => r.holds), VC.LEVEL_GATE) }
     : { curve: Array.isArray(pe.curve) ? pe.curve : goals.map((_, g) => legacyCurve(g, 0)), knownCurve: "knownCurve" in pe ? pe.knownCurve : null, legacyKnown: "knownCurve" in pe ? null : VC.etaKnown(P) };
   const out = { curve: eta.curve.slice(), knownCurve: eta.knownCurve };
   const verdicts = goals.map((_, g) => {
@@ -393,7 +393,7 @@ async function packMode(){
     if(v.ok === false) out.curve[g] = null;
     return Object.assign({ what: `goal ${g + 1}`, curve: eta.curve[g] }, v);
   });
-  const kc = eta.knownCurve || (eta.legacyKnown ? h => Math.max(1, Math.ceil((P.levelGate - h[0]) * BYL[h.prev].length / eta.legacyKnown - 1e-9)) : null);
+  const kc = eta.knownCurve || (eta.legacyKnown ? h => Math.max(1, Math.ceil((VC.LEVEL_GATE - h[0]) * BYL[h.prev].length / eta.legacyKnown - 1e-9)) : null);
   const kv = EC.knownGate(kc, runs.map(r => r.holds));
   if(kv.ok === false) out.knownCurve = null;
   verdicts.push(Object.assign({ what: "gate", curve: typeof kc === "function" ? [[0, "legacy known " + eta.legacyKnown]] : kc }, kv));
@@ -471,13 +471,13 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
       check("sessionsToGo untouched: equal to base on 7 pm shapes x goals", recs.every(r => [[], [0, 3], [1, 3], [2, 3]].every(a => BASE_CORE.sessionsToGo(r, ...a) === VC.sessionsToGo(r, ...a))));
     } else console.log("SKIP  base core unavailable");
     // levelOpensIn
-    const lv2 = BYLV[LV[1]].length, near = seedLevel(2, Math.ceil(PACK.levelGate * lv2) - 1), far = seedLevel(2, 10), open = seedLevel(2, Math.ceil(PACK.levelGate * lv2));
+    const lv2 = BYLV[LV[1]].length, near = seedLevel(2, Math.ceil(VC.LEVEL_GATE * lv2) - 1), far = seedLevel(2, 10), open = seedLevel(2, Math.ceil(VC.LEVEL_GATE * lv2));
     const kNear = VC.levelKnownPct(WORDS, PACK, near, LV[1], CHARACTERS);
     const kcAt = p => Math.max(1, Math.ceil(VC.etaCurveAt(PACK.eta.knownCurve[LV[1]], VC.levelKnownPct(WORDS, PACK, p, LV[1], CHARACTERS)) - 1e-9));
     check(`levelOpensIn on knownCurve: one word short of the gate -> 1; 10 of ${lv2} known -> ceil(knownCurve at ${(VC.levelKnownPct(WORDS, PACK, far, LV[1], CHARACTERS) * 100).toFixed(1)}%) = ${VC.levelOpensIn(WORDS, PACK, far, CHARACTERS)}`,
       VC.levelOpensIn(WORDS, PACK, near, CHARACTERS) === 1 && VC.levelOpensIn(WORDS, PACK, far, CHARACTERS) === kcAt(far));
     const leg = Object.assign(clone(PACK), { eta: { gain: [0.01, 0.01, 0.01], known: 5.2 } }), noE = stripFlags(PACK, ["eta"]), nullK = Object.assign(clone(PACK), { eta: { curve: PACK.eta.curve, knownCurve: null } });
-    const lin = Math.ceil((PACK.levelGate - VC.levelKnownPct(WORDS, PACK, far, LV[1], CHARACTERS)) * lv2 / 5.2 - 1e-9);
+    const lin = Math.ceil((VC.LEVEL_GATE - VC.levelKnownPct(WORDS, PACK, far, LV[1], CHARACTERS)) * lv2 / 5.2 - 1e-9);
     check(`levelOpensIn: legacy known 5.2 and no pack.eta -> words / 5.2 = ${lin}; knownCurve null -> null`, VC.levelOpensIn(WORDS, leg, far, CHARACTERS) === lin && VC.levelOpensIn(WORDS, noE, far, CHARACTERS) === lin && VC.levelOpensIn(WORDS, nullK, far, CHARACTERS) === null);
     check("levelOpensIn: open gate -> null; pack without levelGate -> null", VC.levelOpensIn(WORDS, PACK, open, CHARACTERS) === null && VC.levelOpensIn(WORDS, stripFlags(PACK, []), far, CHARACTERS) === null);
   }
@@ -523,7 +523,7 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
     const M = await bootWith(PACK, mp, 1, VIEW), mh = M.panel(), mN = VC.sessionsToGoX(mp, 0, 3, ctx);
     check(`14 pm entries rising 0.01: still the model (${mN}, not the measured 27) on Today and Progress`, mN === VC.sessionsToGoX(ownerStart(), 0, 3, ctx) && mN !== 27 && pvn(mh, "Goal 1 of 3") === SIG2(mN) && (M.clickTab("progress"), pvn(M.panel(), "Goal 1 of 3") === SIG2(mN)));
     // open gate: no sentence, no estimate on level rows
-    const og = seedLevel(2, Math.ceil(PACK.levelGate * BYLV[LV[1]].length) + 5); og.chars.choiceSeen = true;
+    const og = seedLevel(2, Math.ceil(VC.LEVEL_GATE * BYLV[LV[1]].length) + 5); og.chars.choiceSeen = true;
     const O = await bootWith(PACK, og, 1, VIEW); const oh = O.panel(); O.clickTab("progress"); const oph = O.panel();
     check("open gate: no gate sentence on Today or Progress, no level-row estimate", !VC.levelGateHold(WORDS, PACK, og, CHARACTERS) && !/opens at/.test(oh + oph) && !/<p class="pvs">≈/.test(oph));
     // every goal done: no estimate anywhere

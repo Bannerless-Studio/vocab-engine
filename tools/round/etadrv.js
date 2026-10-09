@@ -12,6 +12,8 @@ const dir = arg("--pack"), N = +(arg("--sessions") || 240), ACC = 0.85;
 const calibrateMode = argv.includes("--calibrate");
 const seeds = (arg("--seeds") || (calibrateMode ? "5,6,7" : "8,9,10")).split(",").map(Number);
 const D = sim.loadPackDir(dir), P = D.PACK, units = D.CHARACTERS || [], pass = D.PASSAGES || [];
+// the level gate share: engine constant since the flag collapse (pack.levelGate before it, for an older engine)
+const GATE = VC.LEVEL_GATE || P.levelGate;
 const LVS = VC.levelIds(P), BYL = VC.wordsByLevel(D.WORDS, P), goals = VC.progressMapGoals(P);
 const start = () => VC.normalizeProg({ placedOnce: true, soundsOpened: true }, P);
 const RD = arg("--runsdir");
@@ -19,7 +21,7 @@ async function worker(seed){
   const S = sim.createSim(D); const t0 = Date.now(), rows = [];
   await S.playSessions(P, start(), N, seed, ACC, (sn, api) => { const q = api.getProg();
     rows.push({ sn: sn + 1, g: VC.goalPositions(q, P, D.WORDS, units, pass), k: Object.fromEntries(LVS.map(lv => [lv, VC.levelKnownPct(D.WORDS, P, q, lv, units)])), gate: VC.levelGateHold(D.WORDS, P, q, units) }); }, { read: true, patterns: false });
-  const tr = goals.map((_, g) => rows.map(r => r.g[g])), holds = EC.holdsOf(rows, P.levelGate);
+  const tr = goals.map((_, g) => rows.map(r => r.g[g])), holds = EC.holdsOf(rows, GATE);
   const out = `${RD}/seed${seed}.json`;
   fs.writeFileSync(out + ".part", JSON.stringify({ seed, tr, holds: holds.map(h => ({ ks: Array.from(h), prev: h.prev, from: h.from })), secs: Math.round((Date.now() - t0) / 1000), first: rows[0].g, typed: [S.stats.typedMatched, S.stats.typedRight] }));
   fs.renameSync(out + ".part", out);
@@ -35,7 +37,7 @@ async function main(){
   const legacyCurve = (g, p0) => { const v = VC.etaGain(P, g); return v == null ? null : [[p0, (VC.GOAL_DONE - p0) / v], [VC.GOAL_DONE, 0]]; };
   const pe = P.eta || {};
   const eta = calibrateMode
-    ? { curve: goals.map((_, g) => EC.goalCurve(runs.map(r => r.tr[g]))), knownCurve: EC.knownCurve(runs.flatMap(r => r.holds), P.levelGate) }
+    ? { curve: goals.map((_, g) => EC.goalCurve(runs.map(r => r.tr[g]))), knownCurve: EC.knownCurve(runs.flatMap(r => r.holds), GATE) }
     : { curve: Array.isArray(pe.curve) ? pe.curve : goals.map((_, g) => legacyCurve(g, 0)), knownCurve: "knownCurve" in pe ? pe.knownCurve : null, legacyKnown: "knownCurve" in pe ? null : VC.etaKnown(P) };
   const out = { curve: eta.curve.slice(), knownCurve: eta.knownCurve };
   const verdicts = goals.map((_, g) => {
@@ -43,7 +45,7 @@ async function main(){
     if(v.ok === false) out.curve[g] = null;
     return Object.assign({ what: `goal ${g + 1}`, curve: eta.curve[g] }, v);
   });
-  const kc = eta.knownCurve || (eta.legacyKnown ? h => Math.max(1, Math.ceil((P.levelGate - h[0]) * BYL[h.prev].length / eta.legacyKnown - 1e-9)) : null);
+  const kc = eta.knownCurve || (eta.legacyKnown ? h => Math.max(1, Math.ceil((GATE - h[0]) * BYL[h.prev].length / eta.legacyKnown - 1e-9)) : null);
   const kv = EC.knownGate(kc, runs.map(r => r.holds));
   if(kv.ok === false) out.knownCurve = null;
   verdicts.push(Object.assign({ what: "gate", curve: typeof kc === "function" ? [[0, "legacy known " + eta.legacyKnown]] : kc }, kv));

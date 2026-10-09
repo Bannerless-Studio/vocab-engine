@@ -361,7 +361,9 @@ function suite(F){
     const untouched = util.isDeepStrictEqual(p.chars.c, before.chars.c) && util.isDeepStrictEqual(p.w, before.w) && util.isDeepStrictEqual(p.sets, before.sets) && p.chars.choiceSeen === before.chars.choiceSeen;
     const flipped = pathB.map(LBL).join(" ") !== pathA.map(LBL).join(" ") && stB.kind !== stA.kind;
     const back = util.isDeepStrictEqual(pathB, pathBack) && util.isDeepStrictEqual(stB, stBack);
-    const q1 = VC.answerCharChoice(P(full(i1), {}), true), q2 = VC.answerCharChoice(P(full(i1), {}), false);
+    // level gate (engine default since the flag collapse): the counted words carry placed records, so the next level is open
+    const opened = q => { q.w = {}; VC.pinPrefixRecords(q, words, pack); Object.values(q.w).forEach(r => { r.prov = 1; }); return q; };
+    const q1 = VC.answerCharChoice(opened(P(full(i1), {})), true), q2 = VC.answerCharChoice(opened(P(full(i1), {})), false);
     const choiceOk = q1.chars.choiceSeen && !q1.chars.defer && q2.chars.choiceSeen && q2.chars.defer
       && VC.nextStage(pack, words, units, q1).kind === "chars" && VC.nextStage(pack, words, units, q2).lv === ids[i1+1];
     console.log(`\n[32] ${F.name}: flip records untouched ${untouched}, order flips ${flipped}, round-trips ${back}; choice start/skip ${choiceOk}`);

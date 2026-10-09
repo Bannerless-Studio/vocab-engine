@@ -159,16 +159,12 @@ function seedW(){
       fs.writeFileSync(path.join(dir, "pack.json"), JSON.stringify(pack)); fs.writeFileSync(path.join(dir, "words.json"), JSON.stringify(words)); fs.writeFileSync(path.join(dir, "sentences.json"), "[]");
       cp.spawnSync(PY, [path.join(ROOT, "tools", "jsonify_pack.py"), dir], { cwd: ROOT });
       const r = cp.spawnSync(PY, [path.join(ROOT, "tools", "validate_pack.py"), dir], { cwd: ROOT, encoding: "utf8" }); return { status: r.status, out: (r.stdout || "") + (r.stderr || "") }; };
-    const ok = run(Object.assign({}, base, { wordsBy: "typed" }));
-    check("validator: wordsBy \"typed\" with typing and dayAware passes", ok.status === 0 && !/wordsBy/.test(ok.out), ok.out);
-    const bad = run(Object.assign({}, base, { wordsBy: "choice" }));
-    check("validator: another wordsBy value is an error", bad.status !== 0 && /pack\.wordsBy must be "typed"/.test(bad.out), bad.out);
-    const nt = Object.assign({}, base, { wordsBy: "typed" }); delete nt.typing;
-    const r2 = run(nt);
-    check("validator: wordsBy without typing is an error (a held word could never move up)", r2.status !== 0 && /wordsBy needs pack\.typing/.test(r2.out), r2.out);
-    const nd = Object.assign({}, base, { wordsBy: "typed" }); delete nd.dayAware;
-    const r3 = run(nd);
-    check("validator: wordsBy without dayAware warns", r3.status === 0 && /wordsBy without pack\.dayAware/.test(r3.out), r3.out);
+    // flag collapse: wordsBy "typed" is engine default; a pack still carrying the key (or dayAware) validates with a stale-key warning
+    const plain = Object.assign({}, base); delete plain.dayAware;
+    const ok = run(plain);
+    check("validator: a pack without wordsBy / dayAware passes, no wordsBy message", ok.status === 0 && !/wordsBy/.test(ok.out), ok.out);
+    const stale = run(Object.assign({}, base, { wordsBy: "typed" }));
+    check("validator: a pack still carrying wordsBy and dayAware passes with the stale-key warning", stale.status === 0 && /WARN  pack\.json keys the engine no longer reads[^\n]*dayAware, wordsBy/.test(stale.out), stale.out);
   }
 
   console.log("\n[2] streak table with the flag (kind x streak -> new streak; r/w counts; prov)");
@@ -201,20 +197,15 @@ function seedW(){
     const lw = VC.learnedWords(WORDS, PACK, p);
     const held = new Set(lw.filter(w => p.w[w.id].s === 2).map(w => w.id));
     const plan = (pack, o, core) => (core || VC).buildReviewPlan(lw, clone(p), pack, Object.assign({ today: TODAY, rng: mulberry32(5), size: 20 }, o || {}));
-    const on = plan(PACK), off = plan(PACK_OFF);
-    const onW = on.filter(it => it.word), offW = off.filter(it => it.word);
+    const on = plan(PACK);
+    const onW = on.filter(it => it.word);
     const heldOn = onW.filter(it => held.has(it.word.id));
     // A held word no typed kind fits (北京, pronInGloss, while shown by its reading) keeps the old rule; fb26's
     // frequency order put it in this seed's plan.
     const typable = w => VC.typedKinds(PACK).some(k => VC.typedKindOk(k, w, false));
-    check(`Review: as many items as flag off (${on.length}); every typable held word is asked typed (${heldOn.length} held of ${onW.length} words)`, on.length === off.length && heldOn.length > 0 && heldOn.filter(it => typable(it.word)).every(it => it.kind === "type"));
+    check(`Review: a full plan (${on.length}); every typable held word is asked typed (${heldOn.length} held of ${onW.length} words)`, on.length === 20 && heldOn.length > 0 && heldOn.filter(it => typable(it.word)).every(it => it.kind === "type"));
     // Many words below 2: the weak floor (lowest streak first) alone leaves held words out.
-    const pS = clone(p); lw.filter(w => pS.w[w.id].s === 4).slice(0, 30).forEach(w => { pS.w[w.id].s = 1; });
-    const planS = (pack, o) => VC.buildReviewPlan(lw, clone(pS), pack, Object.assign({ today: TODAY, rng: mulberry32(5), size: 20 }, o || {}));
-    const hc = pl => pl.filter(it => it.word && held.has(it.word.id)), rf = pl => pl.filter(it => it.word && pS.w[it.word.id].s >= 3);
-    const sOn = planS(PACK), sOff = planS(PACK_OFF), want = Math.round(20 * VC.DAY_HELD_SHARE_REVIEW);
-    check(`Review, 30 more words at 1: held words still get ${want} slots (DAY_HELD_SHARE_REVIEW ${VC.DAY_HELD_SHARE_REVIEW}), all typed (${hc(sOn).length}; flag off ${hc(sOff).length}), and the refresh share keeps its ${Math.ceil(20 * VC.DAY_REFRESH_SHARE)} (${rf(sOn).length})`,
-      hc(sOn).length >= want && hc(sOn).length > hc(sOff).length && hc(sOn).every(it => it.kind === "type") && rf(sOn).length >= Math.ceil(20 * VC.DAY_REFRESH_SHARE));
+    // (the held-share check under the day planner's Review went with pack.pairs off: pairs plan Review since the flag collapse)
     const pR = clone(p); Object.values(pR.w).forEach(r => { if(r.s === 1) r.s = 4; });
     const rc = VC.buildRecallPlan(lw, pR, PACK, 8, { today: TODAY, rng: mulberry32(9) }).filter(it => it.word && held.has(it.word.id));
     const rk = Math.ceil(8 * VC.DAY_REFRESH_SHARE);
@@ -241,15 +232,9 @@ function seedW(){
     check(`default typedOk: a held pronInGloss word shown by its reading (${pig ? pig.w : "none"}) is not planned typed`, !!pig && !VC.typedWordDue(pig, p, PACK, TODAY, ["recall", "type"]) && VC.typedWordDue(BY_ID[[...held].find(id => !BY_ID[id].pronInGloss)], p, PACK, TODAY, ["recall", "type"]));
     const w0 = heldOn[0].word; const q = clone(p); VC.noteDay(q, PACK, TODAY, "w:" + w0.id, "type", true);
     check("a word right typed recently (reached 2 by it) keeps the day rule: no same-kind repeat", VC.typedWordDue(w0, p, PACK, TODAY, ["type"]) && !VC.typedWordDue(w0, q, PACK, TODAY, ["type"]));
-    check("streak 1 and streak 3 words, a planner without \"type\" (Listen), and dayAware off are never forced",
+    check("streak 1 and streak 3 words, a planner without \"type\" (Listen), are never forced",
       !VC.typedWordDue(BY_ID[Object.keys(p.w).find(id => p.w[id].s === 1)], p, PACK, TODAY, ["type"]) && !VC.typedWordDue(BY_ID[Object.keys(p.w).find(id => p.w[id].s === 4)], p, PACK, TODAY, ["type"])
-      && !VC.typedWordDue(w0, p, PACK, TODAY, ["hear"]) && !VC.typedWordDue(w0, p, Object.assign({}, PACK, { dayAware: false }), TODAY, ["type"]));
-    if(!OLD) skip(`${MAIN} plan control`);
-    else {
-      const o1 = plan(PACK_OFF, {}, OLD), o2 = VC.buildRecallPlan(lw, clone(p), PACK_OFF, 8, { today: TODAY, rng: mulberry32(9) }), o3 = OLD.buildRecallPlan(lw, clone(p), PACK_OFF, 8, { today: TODAY, rng: mulberry32(9) });
-      const sig = pl => JSON.stringify(pl.map(it => [it.word && it.word.id, it.unit && it.unit.id, it.kind, it.tu]));
-      check(`flag off: Review and Recall plans identical to ${MAIN}`, sig(o1) === sig(off) && sig(o2) === sig(o3));
-    }
+      && !VC.typedWordDue(w0, p, PACK, TODAY, ["hear"]));
   }
 
   console.log("\n[5] app on zh: one Today session");
@@ -257,8 +242,7 @@ function seedW(){
     NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
     const p0 = seedW();
     const api = await boot(PACK, p0, 3);
-    check(`Today plan: Recall ${VC.RECALL_SIZE_HELD} items under wordsBy (${VC.RECALL_SIZE} without; the typed rule's extra production slots)`, VC.recallSize(PACK) === 12 && VC.recallSize(PACK_OFF) === 8 && new RegExp(`${VC.RECALL_SIZE_HELD} items`).test(api.panel()));
-    check("Recall stays 8 for wordsBy without dayAware (held routing needs dayAware)", VC.recallSize(Object.assign({}, PACK, { dayAware: false })) === 8);
+    check(`Today plan: Recall ${VC.RECALL_SIZE_HELD} items under wordsBy (${VC.RECALL_SIZE} without; the typed rule's extra production slots)`, VC.recallSize(PACK) === 12 && new RegExp(`${VC.RECALL_SIZE_HELD} items`).test(api.panel()));
     // Held words: typed answers wrong, choice answers right; everything else right.
     const rows = await session(api, (it, rec) => !(rec && rec.s === 2 && it.kind === "type"));
     { const rq = rows.filter(r => r.step === 3), firsts = rq.filter((r, i) => rq.findIndex(x => x.key === r.key) === i).length; check(`Recall drill asks ${firsts} items (${VC.RECALL_SIZE_HELD} planned)`, firsts === VC.RECALL_SIZE_HELD); }
@@ -377,24 +361,7 @@ function seedW(){
     const replay = all.filter(r => r.step > 0 && missedT.has(r.key));
     check(`the miss replay of words missed typed asks recall, never type (${replay.length}: ${[...new Set(replay.map(r => r.label))]})`, replay.length > 0 && replay.every(r => r.kind !== "type" && r.label === "Which word is this?"));
   }
-  if(!OLD || !mainHtml) skip(`flag-off app control vs ${MAIN}`);
-  else {
-    const run = async (html, core) => {
-      NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
-      const api = await boot(PACK_OFF, seedW(), 11, { html, core });
-      const out = { today: api.panel() }; const ans = mulberry32(7);
-      const rows = await session(api, () => ans() < 0.75);
-      out.walk = JSON.stringify(rows.map(r => [r.key, r.kind, r.label, r.ok]));
-      NOW = new Date(2026, 9, 4, 13, 0, 0).getTime();
-      const rows2 = await session(api, () => ans() < 0.75);
-      out.walk2 = JSON.stringify(rows2.map(r => [r.key, r.kind, r.label, r.ok]));
-      const p = api.getProg(); out.prog = JSON.stringify({ w: p.w, c: p.chars.c, s: p.s, day: p.day });
-      return out;
-    };
-    const a = await run(mainHtml, OLD), b = await run(undefined, undefined);
-    for(const k of Object.keys(a)){ let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
-      check(`flag off, two sessions: ${k} byte-identical to ${MAIN} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}`}`, a[k] === b[k] && a[k].length > 100); }
-  }
+  // flag-off app control vs main deleted: wordsBy "typed" is engine default since the flag collapse.
 
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
   process.exit(fails ? 1 : 0);

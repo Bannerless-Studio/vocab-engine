@@ -411,25 +411,7 @@ const ptKey = it => String(it.key).startsWith("p:");
     if(c2 && ptKey(c2)){ answer(a2, true); check("reload mid-cloze: the first-meeting verdict carries the note", NOTE.test(a2.el("rv").innerHTML)); }
   }
 
-  console.log(`\n[9] flag-off control vs ${MAIN}`);
-  if(!OLD || !mainHtml) skip(`${MAIN} not in this checkout's history`);
-  else {
-    const walk = async (pack, html, core, pats) => {
-      const api = await boot(pack, synth(["1", "2"], 2, 4, 5), 31, { html, core, patterns: pats });
-      const out = [api.panel()];
-      for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
-      api.tab("progress"); await tick(); out.push(api.panel());
-      return out;
-    };
-    const ref = await walk(PACK_OFF, mainHtml, OLD, undefined);
-    const off = await walk(PACK_OFF, appHtml, VC, PATTERNS);
-    check("flag off (pack.patterns absent, PATTERNS present): two-session walk byte-identical to main", JSON.stringify(off) === JSON.stringify(ref), off.findIndex((x, i) => x !== ref[i]));
-    const nofile = await walk(PACK, appHtml, VC, undefined);
-    const refOn = await walk(PACK, mainHtml, OLD, undefined);
-    check("flag on without patterns.json: byte-identical to main", JSON.stringify(nofile) === JSON.stringify(refOn), nofile.findIndex((x, i) => x !== refOn[i]));
-    const ctl = (core, pack) => { const p = synth(["1", "2", "3"], 2, 4, 9); return JSON.stringify([core.buildReviewPlan(VC.learnedWords(WORDS, pack, p), p, pack, { canHear: () => true, today: "2026-10-05", rng: mulberry32(4), sn: 10 }).map(x => [x.kind, x.word && x.word.id]), core.validateProgShape(p, ["1", "2", "3", "4"]).ok]); };
-    check("core plans unchanged (Review plan, validateProgShape)", ctl(VC, PACK) === ctl(OLD, withCollapsed(PACK)));
-  }
+  // [9] (controls vs main before patterns) deleted in the flag collapse: that engine predates the level gate, now default, which these records reach.
 
   console.log("\n[10] the owner's export (a48ee4d3, read-only; $PAIRS_OWNER overrides) under this pack");
   {
@@ -484,26 +466,7 @@ const ptKey = it => String(it.key).startsWith("p:");
     await session(b, (it, rec, rows) => { if(ptKey(it)) off.push(b.panel()); return rows.length % 4 !== 2; });
     check("patternCue absent: no meaning tap; the English cue shows before the answer", off.length >= 3 && off.every(h => !/data-pcue/.test(h) && /<div class="q cue">[^<]/.test(h)));
   }
-  const CUE_MAIN = "3044601"; // main before fb31
-  const cueHtml = git(CUE_MAIN, "engine/app.html"), cueCore = git(CUE_MAIN, "engine/core.js");
-  if(!cueHtml || !cueCore) skip(`${CUE_MAIN} not in this checkout's history`);
-  else {
-    const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "patterns-cue-")), `core_${CUE_MAIN}.js`); fs.writeFileSync(f, cueCore); const C0 = require(f);
-    // Both fb31 fields stripped (characters.bareByPair has its own control in tests/bare_pair_checks.js).
-    const P0 = packAsOf(PACK, CUE_MAIN);
-    const walk = async (html, core) => {
-      const api = await boot(P0, synth(["1", "2"], 2, 4, 5), 31, { html, core, patterns: PATTERNS });
-      const out = [api.panel()];
-      for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
-      api.tab("test"); await tick(); const tb = api.el("tSentences"); if(tb){ tb.click(); const D = api.getD(); out.push([D.cur, ...D.q].filter(Boolean).map(x => x.html).join("\n")); }
-      api.tab("progress"); await tick(); out.push(api.panel());
-      return out;
-    };
-    // fb44 moved the note from the question to the verdict, so it is stripped from both sides; everything else is compared as before.
-    const noNote = o => o.map(x => String(x).replace(/<div class="pnote">.*?<\/div>/g, ""));
-    const ref = noNote(await walk(cueHtml, C0)), cur = noNote(await walk(appHtml, VC));
-    check(`patternCue absent: two-session walk + Sentences test byte-identical to ${CUE_MAIN} (patterns on; pnote stripped, fb44)`, JSON.stringify(ref) === JSON.stringify(cur) && ref.length >= 7, cur.findIndex((x, i) => x !== ref[i]));
-  }
+  // the patternCue-absent walk vs 3044601 went in the flag collapse: 3044601 predates the level gate (now default), which the walk reaches.
 
   console.log("\n[13] alphabetic packs (fb47): marks compare case-folded, options in the answer's case, per-sentence near, validator rules");
   {

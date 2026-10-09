@@ -26,7 +26,6 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
 const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["glossStyle", "progressView"] });
 // levelGate and levelExam (fb38) came after ff760d8: the flag-off controls drop them too (tests/level_gate_checks.js covers it).
-const PACK_OFF = packAsOf(PACK, MAIN);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -172,8 +171,6 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       cp.execSync(`${PY} "${path.join(ROOT, "tools", "jsonify_pack.py")}" "${d}"`, { stdio: "ignore" });
       try { cp.execSync(`${PY} "${path.join(ROOT, "tools", "validate_pack.py")}" "${d}"`, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); return ""; } catch(e){ return String(e.stdout || "") + String(e.stderr || ""); } };
     check("validate_pack: zh as shipped passes", run() === "");
-    check("validate_pack: freqTiers not a boolean is an error", /pack\.freqTiers must be a boolean/.test(run(p => { p.freqTiers = 1; })));
-    check("validate_pack: freqTiers without pairs is an error", /pack\.freqTiers needs pack\.pairs/.test(run(p => { delete p.pairs; })));
     check("validate_pack: a word ft outside 0/1/2 is an error", /word w\d+\.ft must be 0, 1 or 2/.test(run(null, w => { w[0].ft = 3; })));
     check("validate_pack: a unit ft other than its words' lowest is an error", /\.ft 2 is not the lowest ft of its words/.test(run(null, null, c => { const u = c.find(x => x.ft === 1); u.ft = 2; })));
     fs.rmSync(tmp, { recursive: true, force: true });
@@ -239,7 +236,6 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const r1 = pick(two, 1), r2 = pick(two, 2);
     check(`equal streak: the core typed ask before the older peripheral one (${JSON.stringify(r1)}); the peripheral one, when drawn, is typed (${JSON.stringify(r2)})`, r1.length === 1 && r1[0][0] === 1 && r1[0][1] === "type" && r2.length === 2 && r2[1][0] === 2 && r2[1][1] === "type");
     const cOff = [cand(undefined, 30, "虽然"), cand(undefined, 5, "爬山")];
-    check("flag off: the older typed ask first (no tier)", pick(cOff, 1, PACK_OFF)[0] && VC.pairPick(cOff, 1, { a: {} }, mulberry32(1), 40, PACK_OFF, fits)[0].c.key === "w:" + BY_W["爬山"].id);
     // A peripheral pair below its streak still comes before a core one higher up: streak first.
     const lowP = [cand(1, 30, "虽然"), Object.assign(cand(2, 5, "爬山"), { rec: { s: 0, u: 5, p: { wm: [0, 5] } } })];
     check("streak first: a peripheral pair at 0 before a core pair at 1", VC.pairPick(lowP, 1, { a: {} }, mulberry32(1), 40, PACK, fits)[0].c.tier === 2);
@@ -307,12 +303,9 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       check(`peripheral refresh, even plans (sn 40, 42): no reserved slot, oldest by age (${ev.join(" ")} / ${ev2.join(" ")}); sn 43 reserves again (${od.join(" ")})`, ev.join() === "w:c0" && ev2.join() === "w:c0" && od.join() === "w:p2");
       const n20 = ref([...low(18), ...cs.slice(9)], 20);
       check(`two refresh slots: the peripheral pair, then the oldest core (${n20.join(" ")})`, n20.join() === "w:p2,w:c0");
-      const off = ref(cs.map(c => Object.assign({}, c, { tier: undefined })), 10, PACK_OFF);
-      check(`flag off: the oldest pair (${off.join(" ")})`, off.join() === "w:c0");
       const none = ref([...low(9), ...Array.from({ length: 10 }, (_, i) => cand(1, i, "c" + i))], 10);
       check(`no known peripheral pair: the share fills as before (${none.join(" ")})`, none.join() === "w:c0");
     }
-    check("flag off: candidates carry no tier effect (known at 3, oldest first)", (() => { const cs = [cand(undefined, 10, "p"), cand(undefined, 20, "c")]; return VC.pairPick(cs, 10, { a: {} }, mulberry32(1), 40, PACK_OFF, {}).map(e => e.c.key)[0] === "w:p"; })());
   }
 
   console.log("\n[6] known per tier (core.js wordKnown)");
@@ -325,14 +318,13 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check("core: wm 3 and sm 3 but ws at boot 2 (legacy 2): not known; ws 3: known", !K({ r: 4, w: 0, s: 2, p: { wm: [3, 1], sm: [4, 2] } }, wc) && K({ r: 4, w: 0, s: 2, p: { wm: [3, 1], sm: [4, 2], ws: [3, 2] } }, wc));
     check("a missed pair (0) takes a word out of known in every tier", [wp, wc, wa].every(w => !K({ r: 4, w: 1, s: 5, p: { sm: [0, 3] } }, w)));
     check("peripheral: every pair at 2 (choice answers): known; core at 2 not", K({ r: 4, w: 0, s: 1, p: { wm: [2, 3], sm: [2, 4], ws: [2, 4] } }, wp) && !K({ r: 4, w: 0, s: 1, p: { wm: [2, 3], sm: [2, 4], ws: [2, 4] } }, wc));
-    check("flag off: the legacy streak alone (3+), pairs ignored", K({ r: 4, w: 0, s: 3, p: { wm: [0, 3] } }, wc, PACK_OFF) && !K({ r: 3, w: 0, s: 2 }, wp, PACK_OFF) && !K(undefined, wc, PACK_OFF));
     const pr = { r: 3, w: 0, s: 2, prov: 1, p: { wm: [2, 3], sm: [2, 3], ws: [2, 3] } };
-    check("settleProv: a peripheral placement word known by pairs drops prov; flag off keeps it", (() => { const a = clone(pr), b = clone(pr); return VC.settleProv(a, wp, PACK) && !a.prov && !VC.settleProv(b, wp, PACK_OFF) && b.prov === 1; })());
+    check("settleProv: a peripheral placement word known by pairs drops prov", (() => { const a = clone(pr); return VC.settleProv(a, wp, PACK) && !a.prov; })());
     // Goal / progress positions read the same rule.
     const p = synth(2, 3, 6), lv1 = byLv["1"];
-    const g = VC.progressMapGoals(PACK)[0], gp = VC.goalPosition(p, PACK, g, WORDS, [], []), gpOff = VC.goalPosition(p, PACK_OFF, g, WORDS, [], []);
+    const g = VC.progressMapGoals(PACK)[0], gp = VC.goalPosition(p, PACK, g, WORDS, [], []);
     const nP = lv1.filter(w => tierOf(w) === 2).length, inG = WORDS.filter(w => +w.lv <= 2).length;
-    check(`goalPosition: HSK 1 at legacy 2 counts its ${nP} peripheral words known (${gp.toFixed(3)} = ${nP}/${inG} words; flag off ${gpOff.toFixed(3)})`, Math.abs(gp - nP / inG) < 1e-9 && gpOff === 0);
+    check(`goalPosition: HSK 1 at legacy 2 counts its ${nP} peripheral words known (${gp.toFixed(3)} = ${nP}/${inG} words)`, Math.abs(gp - nP / inG) < 1e-9);
   }
 
   console.log("\n[7] unit tier from mixed words; unit target");
@@ -344,7 +336,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check("unitTier without words reads the unit's own ft (the generator's minimum), else core", VC.unitTier(U([wp.id], 2), null, PACK) === 2 && VC.unitTier(U([wp.id]), null, PACK) === 1);
     const cfg = PACK.characters, at = s => ({ r: s + 1, w: 0, s });
     check(`unitDone: core needs bare (${cfg.bare}), peripheral mastered (${cfg.mastered}); a mixed unit is core`,
-      !VC.unitDone(at(cfg.mastered), U([wc.id]), PACK, BY_ID) && VC.unitDone(at(cfg.bare), U([wc.id]), PACK, BY_ID) && VC.unitDone(at(cfg.mastered), U([wp.id]), PACK, BY_ID) && !VC.unitDone(at(cfg.mastered - 1), U([wp.id]), PACK, BY_ID) && !VC.unitDone(at(cfg.mastered), U([wp.id, wc.id]), PACK, BY_ID) && !VC.unitDone(at(cfg.mastered), U([wp.id]), PACK_OFF, BY_ID));
+      !VC.unitDone(at(cfg.mastered), U([wc.id]), PACK, BY_ID) && VC.unitDone(at(cfg.bare), U([wc.id]), PACK, BY_ID) && VC.unitDone(at(cfg.mastered), U([wp.id]), PACK, BY_ID) && !VC.unitDone(at(cfg.mastered - 1), U([wp.id]), PACK, BY_ID) && !VC.unitDone(at(cfg.mastered), U([wp.id, wc.id]), PACK, BY_ID));
   }
 
   console.log("\n[8] Learn order on the owner export: nothing re-taught");
@@ -374,8 +366,6 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check(`records-less HSK 2 at counter 3: learned = the first 30 in id order (${lw.length}), not the first 30 by frequency`, lw.join() === want.join() && want.join() !== L2.slice(0, 30).map(w => w.id).join());
     const pin = VC.pinPrefixRecords(clone(oldP), WORDS, PACK);
     check("pinPrefixRecords pins the same 30 (id order)", Object.keys(pin.w).sort().join() === want.slice().sort().join());
-    const off = VC.learnedWords(WORDS, PACK_OFF, oldP).map(w => w.id);
-    check("flag off: the counter prefix is the file order", off.join() === L2.slice(0, 30).map(w => w.id).join());
     const nn = VC.levelNewSet(WORDS, PACK, VC.pinPrefixRecords(clone(oldP), WORDS, PACK), "2"), settled = VC.pinPrefixRecords(clone(oldP), WORDS, PACK);
     VC.settleSetCounter(settled, WORDS, PACK, "2");
     check(`set label and counter count learned words: next HSK 2 set ${nn && nn.set + 1} (4), counter ${settled.sets["2"]} (3); its words are the first 10 unrecorded by frequency`,
@@ -390,10 +380,8 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const p0 = OWNER ? clone(OWNER) : synth(2, 3, 6); delete p0.pause;
     const api = await boot(PACK, p0, 5);
     const lw = VC.learnedWords(WORDS, PACK, p0);
-    const k0 = lw.filter(w => VC.wordKnown(p0.w[w.id], w, PACK)).length, k0off = lw.filter(w => VC.wordKnown(p0.w[w.id], w, PACK_OFF)).length;
+    const k0 = lw.filter(w => VC.wordKnown(p0.w[w.id], w, PACK)).length;
     const perAt2 = lw.filter(w => tierOf(w) === 2 && (p0.w[w.id].s || 0) === 2).length;
-    console.log(`    known at boot: ${k0off} (legacy rule) -> ${k0} (tiers); peripheral words at legacy 2: ${perAt2}`);
-    check(`known at boot rises: the peripheral words at legacy 2 are known (+${k0 - k0off}; ${perAt2} such words)`, k0 > k0off && k0 - k0off <= perAt2 + lw.filter(w => tierOf(w) === 2 && (p0.w[w.id].s || 0) < 2).length);
     const ans = mulberry32(9); const all = [];
     for(const h of [8, 13, 20]){ NOW = new Date(2026, 9, 6, h, 0, 0).getTime();
       const sn = (api.getProg().sn || 0) + 1;
@@ -425,7 +413,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const idOrd = byLv["1"].slice().sort((a, b) => a.id < b.id ? -1 : 1).slice(0, 35);
     const mk = () => { const p = VC.normalizeProg({ placedOnce: true, soundsOpened: true, sessions: 10 }, PACK); p.sets = { "1": 3, "2": 0, "3": 0, "4": 0 }; p.sn = 6;
       idOrd.forEach(w => { p.w[w.id] = { r: 1, w: 0, s: 1 }; }); return p; };
-    for(const [label, pk] of [["flag on", PACK], ["flag off", PACK_OFF]]){
+    for(const [label, pk] of [["frequency tiers", PACK]]){
       const p0 = mk(), api = await boot(pk, clone(p0), 7); api.goto("words");
       const nn = VC.nextNewSet(WORDS, pk, p0), btn = (api.el("wbody").innerHTML.match(/<button class="on">Set (\d+) \/ (\d+)/) || []);
       const rows = (api.el("wl") ? api.el("wl").children : []).map(c => c.innerHTML), learned = new Set(idOrd.map(w => w.id));
@@ -434,8 +422,6 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
         check(`${label}: the shown set is the next Learn set, so Drill this set marks no learned word`, rows.length === nn.words.length && nn.words.every((w, i) => rows[i].includes(w.w)) && nn.words.every(w => !learned.has(w.id)));
         api.el("nx").click(); api.el("jump").click();
         check(`${label}: "next new" returns to the same set`, +(api.el("wbody").innerHTML.match(/<button class="on">Set (\d+)/) || [])[1] === nn.set + 1);
-      } else {
-        check(`${label}: Words tab keeps the position numbering (set ${btn[1]}, first unrecorded word's slice)`, +btn[1] === Math.floor(byLv["1"].findIndex(w => !learned.has(w.id)) / 10) + 1);
       }
     }
   }

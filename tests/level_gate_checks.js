@@ -19,7 +19,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // appView "v2" (fb40a) words the gate as a sentence on Today and Progress; tests/app_view_checks.js covers it.
 const PACK_V2 = stripFlags(loadConst(path.join(ZH, "pack.js"), "PACK"), ["appView"]);
 const PACK = stripFlags(PACK_V2, ["progressView"]);
-const G = PACK.levelGate; // zh ships 0.7 (owner, w32 brief)
+const G = VC.LEVEL_GATE; // 0.7, engine default since the flag collapse (owner, w32 brief)
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
