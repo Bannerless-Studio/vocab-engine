@@ -2,13 +2,12 @@
 // on the owner export (anchor, paused anchor, step rows without counts, gate sentence, goal line); [A3] header
 // title per step and per test; [A4] drill end (Missed rows, No misses.); [A5] Session done (deltas from Start,
 // title only after a reload); [A6] Progress (gate sentence, Show pinyin, Dark theme chip writes prog.theme only);
-// [A7] flag off: Today, drill end, session done, Progress and header byte-identical to main 8604b17 on 3 records.
+// [A7] (flag-off control vs 8604b17) deleted: appView is engine default since the flag collapse (stage 2).
 // Stage B, the drill card: [B1] CSS (--stim-top, flex-start, centred label, option numbers hidden on coarse pointers
 // only); [B2] every item kind under v2 (no kind tag, placeholders, copy); [B3] the stimulus, option and reading-aid
 // markup equal flag off minus the chrome (plan §14); [B4] options primary sense only + the collision guard, and the
 // guard count on the owner export's drills; [B5] reveal by verdict (answer row, inline Replay, unit dots, Examples
-// fold); [B6] teach cards; [B7] flag off: every item kind (question, options, typed field, reveal right and wrong),
-// teach cards and the drill items of a whole session byte-identical to 6c591c9 on 3 records.
+// fold); [B6] teach cards; [B7] (flag-off control vs 6c591c9) deleted with the flag collapse.
 // Stage C, the tabs: [C1] CSS (page font on passage/lesson rows, segmented level row, muted contrast); [C2] Read list
 // (anchor level, unread first, tick vs "4 of 5", finished levels folded + tap opens + refold on leaving, locked line);
 // [C3] reader, listening pass, question, verdict, results (missed open, right folded) and storage equal flag off; [C4] Words

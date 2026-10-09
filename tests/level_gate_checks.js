@@ -1,7 +1,7 @@
 // pack.levelGate (docs/PACK_SCHEMA.md "levelGate"; owner 2026-10-07: the next HSK level opens only when 70% (was 80%; w32)
 // of the previous one is known): [1] core (validator-shaped reads, levelKnownPct, hold just under / at the gate, note text),
-// [2] Today plan row and Learn step (note, characters still taught, pauseNew), [3] Progress note, [4] flag-off /
-// gate-open / no-pairs controls byte-identical to main 9667a81, [5] owner export measurement (read-only),
+// [2] Today Learn step (gate sentence, characters still taught, pauseNew), [3] Progress gate line, [4] (flag-off
+// controls vs 9667a81 deleted in the flag collapse), [5] owner export measurement (read-only),
 // [6] sessions until the next level opens on a seeded HSK 1-3 learned record at 85% right.
 // [7] pack.levelExam (pinyin / characters levels: known needs the unit's meaning pair on characters levels).
 // Run: node tests/level_gate_checks.js [--sessions N] [--acc 0.85] [--noexam]
