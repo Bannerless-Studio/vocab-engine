@@ -19,24 +19,17 @@ const FLAG_SINCE = [
   { key: "soundsReference", sha: "3343dcb", path: ["soundsReference"] },
   { key: "audio", sha: "e5ebb11", path: ["audio"] },
   { key: "typedFrom", sha: "5f5fd1f", path: ["typedFrom"] },
-  { key: "glossFocus", sha: "5f5fd1f", path: ["glossFocus"] },
-  { key: "helpClose", sha: "266adae", path: ["helpClose"] },
-  { key: "readAnswerBlock", sha: "2562b98", path: ["readAnswerBlock"] },
   { key: "optsOneScript", sha: "e957fe7", path: ["optsOneScript"] },
-  { key: "optsMix", sha: "8bba19e", path: ["optsMix"] },
   { key: "characters.learn", sha: "f004799", path: ["characters", "learn"] },
   { key: "characters.bareBy", sha: "a2159fa", path: ["characters", "bareBy"] },
   { key: "characters.bareWords", sha: "a2159fa", path: ["characters", "bareWords"] },
   { key: "progressMap", sha: "8dc8fd6", path: ["progressMap"] },
   { key: "characters.start", sha: "a20398c", path: ["characters", "start"] },
   { key: "characters.ramp", sha: "a20398c", path: ["characters", "ramp"] },
-  { key: "progressView", sha: "633820d", path: ["progressView"] },
   { key: "levelExam", sha: "a2dd814", path: ["levelExam"] },
   { key: "patterns", sha: "b41a85b", path: ["patterns"] },
-  { key: "glossStyle", sha: "34c5df3", path: ["glossStyle"] },
   { key: "patternCue", sha: "34c5df3", path: ["patternCue"] },
   { key: "characters.bareByPair", sha: "34c5df3", path: ["characters", "bareByPair"] },
-  { key: "appView", sha: "d39eda2", path: ["appView"] },
   { key: "eta", sha: "77e046a", path: ["eta"] },
   { key: "pronUntilPrimer", sha: "a6f2cc5", path: ["pronUntilPrimer"] },
   { key: "gapGender", sha: "cd94707", path: ["gapGender"] },
@@ -53,12 +46,14 @@ const COLLAPSED = [
   "placedKnown", "pronUntilPrimer", "placementChars", "progressMap", "rereadPerfectDays",
 ];
 const COLLAPSED_DATA = ["progressMap"];
-// The value every live pack shipped for each key collapsed so far (stage 1). An engine older than the collapse
+// The value every live pack shipped for each key collapsed so far (stages 1 and 2). An engine older than the collapse
 // reads them; the current engine ignores them. A control that compares this engine with an older sha boots the
 // older side with withCollapsed(pack), so both run the behaviour that is now default.
 const COLLAPSED_LIVE = {
   dayAware: true, pauseNew: true, listenQuestions: "all", readRotation: true, wordsBy: "typed", pairs: true, freqTiers: true,
   levelGate: 0.7, placementWhole: true, placementEarlyStop: true, placedRead: true, placedKnown: true,
+  // stage 2
+  appView: "v2", progressView: "v2", glossFocus: true, glossStyle: "primary", helpClose: true, readAnswerBlock: true, optsMix: true,
 };
 function withCollapsed(pack) { return Object.assign(JSON.parse(JSON.stringify(pack)), COLLAPSED_LIVE); }
 
