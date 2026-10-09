@@ -2064,7 +2064,7 @@ return {
   try{
     const { rtlAudit } = require("./fixtures/rtl_audit.js");
     // A copy of the first passage whose question translation embeds an RTL phrase.
-    const P0 = JSON.parse(JSON.stringify(PASSAGES[0])); P0.questions[0].en = "Where did he go? (از ... متنفرم)";
+    const P0 = JSON.parse(JSON.stringify(PASSAGES[0])); P0.questions.forEach(q => { q.en = "Where did he go? (از ... متنفرم)"; }); // every question: the pass asks them in its own order (passageForPass)
     const RPS = [P0, ...PASSAGES.slice(1)];
     const rtlB = await bootApp([{ lang:"zh-CN", name:"x" }], { passages: RPS, pack: Object.assign({}, PACK, { rtl: true }) });
     const ltrB = await bootApp([{ lang:"zh-CN", name:"x" }], { passages: PASSAGES });
@@ -2100,12 +2100,12 @@ return {
     // Run the stage (step 5, as Start today reaches it after Sentences).
     b.api.enterTodayStep(5);
     const stageH = b.api.getHtml("panel");
-    check("stage opens the suggested passage with Skip today (no passage-list link)", b.api.getRD() && b.api.getRD().p === p0 && b.api.getRD().today === true && /<button id="rskip">Skip today<\/button>/.test(stageH) && !/id="rback"/.test(stageH));
+    check("stage opens the suggested passage with Skip today (no passage-list link)", b.api.getRD() && b.api.getRD().p.id === p0.id && b.api.getRD().today === true && /<button id="rskip">Skip today<\/button>/.test(stageH) && !/id="rback"/.test(stageH));
     b.api.startPassage(p0); const tabH = b.api.getHtml("panel");
     check("stage passage screen is the Read tab's screen apart from that one button", stageH.replace('<button id="rskip">Skip today</button>', "") === tabH.replace('<button id="rback">‹ passages</button>', "") && !b.api.getRD().today);
     // Answer: question 0 wrong, the rest right.
     b.api.enterTodayStep(5);
-    const doc = b.document, qs = p0.questions, s0 = pr.sessions || 0;
+    const doc = b.document, qs = b.api.getRD().p.questions, s0 = pr.sessions || 0; // the pass's question order (passageForPass)
     const wrongIds = qs[0].words || [], before = Object.fromEntries(wrongIds.map(id => [id, (pr.w[id] && pr.w[id].w) || 0]));
     doc.getElementById("rdone").click();
     qs.forEach((q, i) => {
@@ -2132,7 +2132,7 @@ return {
     check("Skip today: the same passage is offered next session", readRow(b.api.getHtml("panel")).includes(VC.escapeHtml(p1.title)));
     // Start today carries the plan's pick: the stage runs the passage the plan named.
     b.api.enterTodayStep(5, { p: PASSAGES[3], reason: "new" });
-    check("stage runs the passage picked at Start today (todayStepState.read)", b.api.getRD().p === PASSAGES[3]);
+    check("stage runs the passage picked at Start today (todayStepState.read)", b.api.getRD().p.id === PASSAGES[3].id);
     b.api.enterTodayStep(5, null);
     check("Start today with no passage: step 5 goes straight to Session done", /Session done/.test(b.api.getHtml("panel")) && !/id="rskip"/.test(b.api.getHtml("panel")));
     // Everything done: a spaced re-read, then nothing.
