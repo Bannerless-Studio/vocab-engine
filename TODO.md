@@ -45,6 +45,7 @@ Wave 0 review follow-ups (w35-review 2026-10-08, LOW, not blocking wave 1): pack
 | Indonesian passages PROPN rescue | `id.tag_texts` (`lowc`/`capc`, `lowpos`) | `packbuilder passages` tags only passage texts, less evidence than the corpus build; when id passages are authored, compare their PROPN tags with corpus tagging (passage texts appended to a corpus sample), seed the rescue counts from the tagged corpus if they differ |
 | Swahili `taratibu` clause-final after an object tags NOUN | sw spec tagger | add a rule |
 | Swahili RAISING_VERBS passive detection misses elezwa/ambiwa lemmas | sw spec | extend the set (no shipped row affected) |
+| day_sim_checks planner thresholds demoted to INFO in the flag collapse (13 checks plus the pause Review-size floor): same-kind repeats <= 2% (dayAware and pause), production misses back in a production kind, mastered longest-unseen units all drilled (dayAware, rotation x3), after-the-day no item in a kind already right, pause large pool keeps Learn's items, rollover repeats, voiceless hear misses settle within 2 sessions, backlog settles within 4, 20-word pool fills Review 15 / Recall 8. Pre-pairs thresholds, never met on live packs (the pairs planner does not enforce them); the INFO met/not-met lines equal d3632b8's with every live flag on | tests/day_sim_checks.js `info(` rows | decide per threshold: re-derive for the pairs planner and make it a check, or delete the row; pause learnNew === 0 stays a check |
 
 ## Parked features (owner decisions)
 
