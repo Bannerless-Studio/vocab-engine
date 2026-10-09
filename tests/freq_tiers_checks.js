@@ -399,12 +399,14 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     // the unit's ask, not a refresh of the word
     const ambKnown = all.filter(r => r.tier === 0 && !r.retry && !r.tu && !(r.kind === "type" && r.us && r.us.slice(0, 2).some(x => x < 3)) && r.ws && r.ws.every(s => s >= 3) && r.key[0] === "w");
     check(`no ask of an ambient word whose every pair is known (refresh) (${ambKnown.length}; ${all.filter(r => r.tier === 0).length} ambient asks)`, ambKnown.length === 0);
-    api.goto("progress"); const ph = api.panel(), prog = api.getProg();
-    const rows = [...(ph.match(/>Characters<\/p><table class="stats nw">([\s\S]*?)<\/table>/) || ["", ""])[1].matchAll(/<td>([^<]*)<\/td><\/tr>/g)].map(m => m[1]);
-    const doneOf = lv => { const us = CHARACTERS.filter(u => u.lv === lv && prog.chars.c[u.id]); return us.filter(u => VC.unitDone(prog.chars.c[u.id], u, PACK)).length; };
-    console.log("    Progress characters rows: " + rows.join(" | "));
-    check("Progress characters rows count units at their target as done (a peripheral unit at mastered)", rows.length === 4 && rows.every((r, i) => { const n = doneOf(String(i + 1)); return n ? r.endsWith(` · ${n} done`) : !/done|bare/.test(r); }) && rows.every(r => r.length <= 32));
-    const lvRows = VC.levelIds(PACK).map(lv => (ph.match(new RegExp(`HSK ${lv}</td><td>(\\d+) / \\d+ learned · (\\d+) mastered`)) || [])[2]);
+    // App v2 (engine default since the flag collapse): with Show all open, each level row carries "characters only X of Y"
+    // (units at their target) and its bar's aria-label "HSK n: L of S learned, M mastered".
+    api.goto("progress"); api.el("pvAll").click(); const ph = api.panel(), prog = api.getProg();
+    const rows = VC.levelIds(PACK).map(lv => (ph.match(new RegExp(`aria-label="HSK ${lv}: [^"]*"[\\s\\S]*?characters only (\\d+) of (\\d+)`)) || []).slice(1).join(" of "));
+    const doneOf = lv => CHARACTERS.filter(u => String(u.lv) === lv).filter(u => VC.unitAtTarget(prog.chars.c[u.id], u, prog, PACK)).length;
+    console.log("    Progress characters parts: " + rows.join(" | "));
+    check("Progress level rows count characters at their target (a peripheral unit at mastered)", rows.length === 4 && rows.every((r, i) => r === `${doneOf(String(i + 1))} of ${CHARACTERS.filter(u => String(u.lv) === String(i + 1)).length}`) && rows.some(r => !/^0 of/.test(r)));
+    const lvRows = VC.levelIds(PACK).map(lv => (ph.match(new RegExp(`aria-label="HSK ${lv}: (\\d+) of \\d+ learned, (\\d+) mastered"`)) || [])[2]);
     check(`Progress level rows count known by the tier rule (${lvRows.join(" / ")})`, VC.levelIds(PACK).every((lv, i) => +lvRows[i] === VC.learnedWords(WORDS, PACK, prog).filter(w => w.lv === lv && VC.wordKnownX(prog.w[w.id], w, PACK, prog, VC.knownCtx(PACK, CHARACTERS))).length)); check("nothing new stored: records carry only fields older engines know (r w s k t u f d prov p)", Object.values(prog.w).every(r => Object.keys(r).every(k => ["r", "w", "s", "k", "t", "u", "f", "d", "prov", "p"].includes(k))));
   }
 
@@ -416,13 +418,13 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       idOrd.forEach(w => { p.w[w.id] = { r: 1, w: 0, s: 1 }; }); return p; };
     for(const [label, pk] of [["frequency tiers", PACK]]){
       const p0 = mk(), api = await boot(pk, clone(p0), 7); api.goto("words");
-      const nn = VC.nextNewSet(WORDS, pk, p0), btn = (api.el("wbody").innerHTML.match(/<button class="on">Set (\d+) \/ (\d+)/) || []);
+      const nn = VC.nextNewSet(WORDS, pk, p0), btn = (api.el("wbody").innerHTML.match(/<span class="pvn">Set (\d+) of (\d+)/) || []); // app v2 Words nav
       const rows = (api.el("wl") ? api.el("wl").children : []).map(c => c.innerHTML), learned = new Set(idOrd.map(w => w.id));
       if(pk === PACK){
         check(`${label}: Words tab opens on Today's set number (${btn[1]} vs ${nn.set + 1})`, +btn[1] === nn.set + 1 && nn.set === 3);
         check(`${label}: the shown set is the next Learn set, so Drill this set marks no learned word`, rows.length === nn.words.length && nn.words.every((w, i) => rows[i].includes(w.w)) && nn.words.every(w => !learned.has(w.id)));
         api.el("nx").click(); api.el("jump").click();
-        check(`${label}: "next new" returns to the same set`, +(api.el("wbody").innerHTML.match(/<button class="on">Set (\d+)/) || [])[1] === nn.set + 1);
+        check(`${label}: "next new" returns to the same set`, +(api.el("wbody").innerHTML.match(/<span class="pvn">Set (\d+)/) || [])[1] === nn.set + 1);
       }
     }
   }
