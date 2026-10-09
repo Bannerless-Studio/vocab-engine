@@ -145,8 +145,9 @@ check("A empty: equals defaultProg plus the marker", eq(mig("A empty"), Object.a
 // "after" (chars.defer) is "later": HSK 2 set 3, the stage before the split.
 const par = (p, n) => Object.assign(p, { sessions: n });
 // The level gate (LEVEL_GATE, engine default since the flag collapse) holds HSK 2 until HSK 1 is known; these checks walk the
-// stage model, so HSK 1's records are made placed-provisional (counted known for position) to open it.
-const gateOpen = p => { (VC.wordsByLevel(W, PACK)["1"] || []).forEach(w => { if(p.w && p.w[w.id]) p.w[w.id].prov = 1; }); return p; };
+// stage model, so HSK 1's counter prefix is pinned as records (as the first teach would) and made placed-provisional (counted
+// known for position) to open it.
+const gateOpen = p => { VC.pinPrefixRecords(p, W, PACK, "1"); (VC.wordsByLevel(W, PACK)["1"] || []).forEach(w => { if(p.w[w.id]) p.w[w.id].prov = 1; }); return p; };
 const isChars1 = s => s && s.kind === "chars" && eq(s.levels, ["1"]);
 check("C mid-HSK2: no card; even sessions HSK 2 set 3, odd 字1; skipped (later), HSK 2 set 3 both",
   !VC.showCharChoice(PACK, W, U, mig("C mid-HSK2"))
