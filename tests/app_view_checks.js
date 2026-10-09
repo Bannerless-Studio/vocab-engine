@@ -879,18 +879,11 @@ console.log("\n[D2] fb48: placement reads the whole result (pack.placementWhole)
   }
 }
 
-const BASE_F = "143a674"; // main before fb50: the flag-off control for placementChars
-console.log("\n[D3] fb50: placement places the characters layer (pack.placementChars) + Today's Sounds hint");
+// The flag-off control vs 143a674 is deleted: placementChars is engine default for a characters.learn "lag" pack since the flag
+// collapse (stage 3), so no lag pack runs the old placement any more.
+console.log("\n[D3] fb50: placement places the characters layer (characters.learn \"lag\") + Today's Sounds hint");
 {
-  const oldOf = f => cp.execSync(`git -C "${ROOT}" show ${BASE_F}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-  let oldCore = null, oldHtml = null;
-  try {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avd-")); const f = path.join(dir, `core_${BASE_F}.js`);
-    fs.writeFileSync(f, oldOf("engine/core.js")); oldCore = require(f); oldHtml = oldOf("engine/app.html");
-    fs.rmSync(dir, { recursive: true, force: true });
-  } catch(e){ oldCore = null; }
-  const OFFC = packAsOf(PACK, BASE_F, { strip: ["placementChars"] });
-  check("pack.placementChars: on in the shipped pack, off in the control", PACK.placementChars === true && OFFC.placementChars === undefined && VC.placementCharsOn(PACK) && !VC.placementCharsOn(OFFC));
+  check("placementCharsOn: on for the shipped lag pack without a pack key (flag collapse), off without learn lag", !("placementChars" in PACK) && VC.placementCharsOn(PACK) && !VC.placementCharsOn(Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { learn: undefined }) })));
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
   const RECS = {
     "reported record": [1, 3, 2, 0, 2, 2, 2, 2, 2, 3, 1, 2, 0, 0, 0, 0],
@@ -923,13 +916,6 @@ console.log("\n[D3] fb50: placement places the characters layer (pack.placementC
       const f = await bootWith(PACK, null, 3); check("flag on, fresh record, no placement: the hint is shown", /id="hintSounds"/.test(f.api.panel()));
       const o1 = await place(PACK, null, RECS["first bucket only"]);
       check("flag on, placement passing only the first bucket: the hint is still shown", /id="hintSounds"/.test(o1.today));
-    }
-    if(!oldCore) { skip(`${BASE_F} not in this checkout's history`); continue; }
-    // fresh-record control deleted: its placement reaches placedKnown / placedRead, engine default since the flag collapse, which 143a674 predates.
-    if(sn === "fresh record") continue;
-    for(const [rn, r] of Object.entries(RECS)){
-      const a = await place(OFFC, mk(), r), b = await place(OFFC, mk(), r, { core: oldCore, html: oldHtml });
-      check(`${sn}, flag off, ${rn}: result screen, stored record and Today byte-identical to ${BASE_F} (hint ${/id="hintSounds"/.test(a.today) ? "shown" : "hidden"})`, a.html === b.html && a.rec === b.rec && a.today === b.today && !/plChars/.test(a.html));
     }
   }
 }
