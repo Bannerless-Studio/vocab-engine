@@ -212,7 +212,6 @@
   :root[data-appview="v2"] .drill-body:not(.top){justify-content:flex-start;padding-top:max(0px, calc(var(--stim-top) - 18px))}
   :root[data-appview="v2"] .drill-body:not(.top)>.q:first-child{text-align:center;margin-bottom:6px}
   :root[data-appview="v2"] .drill-body.sent>.q:first-child{text-align:start}
-  :root[data-appview="v2"] .drill-body.sent .hear-stage{justify-content:flex-start}
   @media (hover: none) and (pointer: coarse){ :root[data-appview="v2"] .opts button b.num{display:none} }
   /* Tighter vertical rhythm so a right answer's Next sits above the tab bar at 360x780 without scrolling. */
   :root[data-appview="v2"] .drill-body .opts-hero button{padding:14px 18px;min-height:52px}
@@ -1154,7 +1153,8 @@ function firstTimeScore(seen, miss){
   return `${n - VC.dedupeMisses(miss).length} of ${n}`;
 }
 // v2: sentence and pattern items (cloze, hear-sentence, pattern) left-align label and stimulus together.
-const sentClass = it => /^[sp]:/.test(it.key || "") ? " sent" : "";
+// sentence-text items (cloze, pattern, read-sentence) left-align label + stimulus; a hear-sentence item has only the speaker, so it stays centred like word items (owner 2026-10-09)
+const sentClass = it => /^[sp]:/.test(it.key || "") && !/hear-stage/.test(it.html || "") ? " sent" : "";
 function renderMcItem(it){
   const P = $("panel");
   P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>`;

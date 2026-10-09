@@ -828,11 +828,11 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
       check(`drill end, ${what}: v2 "${want}" over distinct items`, on.includes(`<h2>${want}</h2>`));
       if(wrongTimes) check(`drill end, ${what}: the Missed rows list the one missed item`, (on.match(/data-mopen=/g) || []).length === 1); }
     // 3. sentence and pattern items left-align label + stimulus; word and character items stay centred
-    { const ONk = ON || {}, sentK = ["hear sentence", "gap", "gap typed", "pattern, first meeting", "pattern, met before"].filter(n => ONk[n] && ONk[n].right);
-      const wordK = ["meaning MC", "recall", "hear word", "typed pinyin", "typed characters", "charPick", "charRead", "charSound"].filter(n => ONk[n] && ONk[n].right);
-      check(`sentence and pattern items carry the sent class on the drill body (${sentK.join(", ")})`, sentK.length >= 4 && sentK.every(n => ONk[n].right.q.startsWith('<div class="drill-body sent">') && ONk[n].wrong.q.startsWith('<div class="drill-body sent">')));
-      check(`word, character and unit items keep the centred label (${wordK.length} kinds)`, wordK.length >= 7 && wordK.every(n => ONk[n].right.q.startsWith('<div class="drill-body"><p class="q">')));
-      check("the CSS left-aligns the label and the hear stage under .sent, scoped to v2, after the centred rule", /:root\[data-appview="v2"\] \.drill-body\.sent>\.q:first-child\{text-align:start\}/.test(appHtml) && /:root\[data-appview="v2"\] \.drill-body\.sent \.hear-stage\{justify-content:flex-start\}/.test(appHtml)
+    { const ONk = ON || {}, sentK = ["gap", "gap typed", "pattern, first meeting", "pattern, met before"].filter(n => ONk[n] && ONk[n].right);
+      const wordK = ["meaning MC", "recall", "hear word", "hear sentence", "typed pinyin", "typed characters", "charPick", "charRead", "charSound"].filter(n => ONk[n] && ONk[n].right);
+      check(`sentence and pattern items carry the sent class on the drill body (${sentK.join(", ")})`, sentK.length >= 3 && sentK.every(n => ONk[n].right.q.startsWith('<div class="drill-body sent">') && ONk[n].wrong.q.startsWith('<div class="drill-body sent">')));
+      check(`word, character and unit items keep the centred label (${wordK.length} kinds)`, wordK.length >= 8 && wordK.every(n => ONk[n].right.q.startsWith('<div class="drill-body"><p class="q">')));
+      check("the CSS left-aligns the label under .sent, scoped to v2, after the centred rule; the hear stage is never left-aligned (hear-sentence items are centred)", /:root\[data-appview="v2"\] \.drill-body\.sent>\.q:first-child\{text-align:start\}/.test(appHtml) && !/\.sent \.hear-stage/.test(appHtml)
         && appHtml.indexOf(".drill-body.sent>.q:first-child") > appHtml.indexOf(".drill-body:not(.top)>.q:first-child{text-align:center"));
     }
     // 4. the Today Read row shows the title in characters only under v2 (the v2 plan block, todayPlanV2)
