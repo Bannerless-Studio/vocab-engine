@@ -63,15 +63,27 @@ function mulberry32(seed) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+// Wall-clock freeze: boot_* goldens carry the progress "day" stamp, so the capture and the
+// check both run with Date pinned to one fixed local day (noon, away from tz edges).
+const FROZEN_NOW = new Date(2026, 9, 9, 12, 0, 0).getTime();
+function freezeDate() {
+  const Orig = Date;
+  class FrozenDate extends Orig {
+    constructor(...a) { if (a.length === 0) super(FROZEN_NOW); else super(...a); }
+    static now() { return FROZEN_NOW; }
+  }
+  global.Date = FrozenDate;
+  return () => { global.Date = Orig; };
+}
 function withSeededRandom(seed, fn) {
-  const orig = Math.random;
+  const orig = Math.random, thaw = freezeDate();
   Math.random = mulberry32(seed);
-  try { return fn(); } finally { Math.random = orig; }
+  try { return fn(); } finally { Math.random = orig; thaw(); }
 }
 async function withSeededRandomAsync(seed, fn) {
-  const orig = Math.random;
+  const orig = Math.random, thaw = freezeDate();
   Math.random = mulberry32(seed);
-  try { return await fn(); } finally { Math.random = orig; }
+  try { return await fn(); } finally { Math.random = orig; thaw(); }
 }
 
 // ------------------------------------------------------------------ golden I/O
