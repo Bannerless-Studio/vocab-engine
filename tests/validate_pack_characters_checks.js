@@ -40,7 +40,7 @@ function basePack(extra){
     key: "synthchar", name: "Synth", tts: "en-US",
     levels: [{ id: "1", label: "One" }, { id: "2", label: "Two" }],
     placement: [["1", 2], ["2", 2]],
-    showPron: false, hasLessons: false,
+    showPron: false, hasLessons: false, eta: {},
   }, extra);
 }
 function baseCharUnits(words, extra){

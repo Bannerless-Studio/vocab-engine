@@ -729,7 +729,7 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     cp.spawnSync("python3", [path.join(ROOT, "tools", "jsonify_pack.py"), tmp]);
     return cp.spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), tmp], { encoding:"utf8" });
   };
-  const base = { key:"t", name:"T", tts:"it-IT", levels:[{id:"A1",label:"A1"},{id:"A2",label:"A2"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false };
+  const base = { key:"t", name:"T", tts:"it-IT", levels:[{id:"A1",label:"A1"},{id:"A2",label:"A2"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false, eta:{} };
   const mkw = (n, lv, off) => Array.from({length:n}, (_,i)=>({ id:`${lv}${i+(off||0)}`, w:`w${lv}${i}`, en:`gloss ${lv} ${i}`, lv }));
   const ok = run(base, [...mkw(20,"A1"), ...mkw(12,"A2")]);
   check("synthetic pack (setSize/typing defaults) validates", ok.status === 0);
@@ -1018,7 +1018,7 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     cp.spawnSync("python3", [path.join(ROOT, "tools", "jsonify_pack.py"), tmp]);
     return cp.spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), tmp], { encoding:"utf8" });
   };
-  const base = { key:"t", name:"T", tts:"fa-IR", levels:[{id:"A1",label:"A1"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false };
+  const base = { key:"t", name:"T", tts:"fa-IR", levels:[{id:"A1",label:"A1"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false, eta:{} };
   const good = run(Object.assign({}, base, { rtl:true, langTag:"fa", fontFamily:'"Noto Naskh Arabic", serif', fonts:["Noto Naskh Arabic:wght@400;700"], lineHeight:2 }));
   check("validator: valid rtl/langTag/fontFamily/fonts/lineHeight -> 0 errors, no rtl-font warning", good.status === 0 && !/rtl is true/.test(good.stdout));
   const bad = run(Object.assign({}, base, { rtl:"yes", langTag:'"><x', fontFamily:"x; color:red", fonts:["x&family=y"], lineHeight:9 }));
@@ -1310,7 +1310,7 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
 
 (function(){
   console.log("\n[22] reading passages: unlock, grading, weak words, progress, validator");
-  const RP = { key:"rp", name:"RP", tts:"it-IT", levels:[{id:"A1",label:"A1"},{id:"A2",label:"A2"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false };
+  const RP = { key:"rp", name:"RP", tts:"it-IT", levels:[{id:"A1",label:"A1"},{id:"A2",label:"A2"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false, eta:{} };
   const RW = [...Array.from({length:20}, (_,i)=>({ id:`a${i}`, w:`parola${i}`, en:`word a ${i}`, lv:"A1" })),
               ...Array.from({length:10}, (_,i)=>({ id:`b${i}`, w:`voce${i}`, en:`word b ${i}`, lv:"A2" }))];
   RW[0].w = "casa"; RW[1].w = "andare"; RW[1].alt = ["vado"]; RW[2].w = "il gatto"; RW[2].alt = ["gatto"]; RW[3].w = "correre";
@@ -2930,7 +2930,7 @@ async function swChecks(){
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "vocab_pack_forms_"));
   const run = extra => {
     const words = Array.from({length:20}, (_,i)=>Object.assign({ id:`a${i}`, w:`w${i}`, en:`gloss ${i}`, lv:"A1" }, i === 0 ? extra : {}));
-    fs.writeFileSync(path.join(tmp, "pack.json"), JSON.stringify({ key:"t", name:"T", tts:"ja-JP", levels:[{id:"A1",label:"A1"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false }));
+    fs.writeFileSync(path.join(tmp, "pack.json"), JSON.stringify({ key:"t", name:"T", tts:"ja-JP", levels:[{id:"A1",label:"A1"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false, eta:{} }));
     fs.writeFileSync(path.join(tmp, "words.json"), JSON.stringify(words));
     fs.writeFileSync(path.join(tmp, "sentences.json"), "[]");
     cp.spawnSync("python3", [path.join(ROOT, "tools", "jsonify_pack.py"), tmp]);

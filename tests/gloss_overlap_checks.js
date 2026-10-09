@@ -363,7 +363,7 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
   {
     const tmp = [];
     const fixture = () => ({
-      pack: { key: "t", name: "T", tts: "en-GB", levels: [{ id: "A1", label: "A1" }], placement: [["A1", 2]], typing: null, showPron: false, hasLessons: false },
+      pack: { key: "t", name: "T", tts: "en-GB", levels: [{ id: "A1", label: "A1" }], placement: [["A1", 2]], typing: null, showPron: false, hasLessons: false, eta: {} },
       words: Array.from({ length: 20 }, (_, i) => ({ id: `x${i}`, w: `w${i}`, en: `gloss ${i}`, lv: "A1" })),
       sentences: [{ id: "s1", t: "w0 w1", en: "x", lv: "A1", words: ["x0", "x1"] }],
     });

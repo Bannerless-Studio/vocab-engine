@@ -191,7 +191,7 @@ async function onPassage(pack){
     const run = extra => {
       const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ve_help_"));
       const w = (stem, data) => fs.writeFileSync(path.join(dir, stem + ".json"), JSON.stringify(data));
-      w("pack", Object.assign({ key:"t", name:"T", tts:"sw-KE", levels:[{ id:"A1", label:"A1" }], placement:[["A1", 2]], typing:null, showPron:false, hasLessons:false }, extra));
+      w("pack", Object.assign({ key:"t", name:"T", tts:"sw-KE", levels:[{ id:"A1", label:"A1" }], placement:[["A1", 2]], typing:null, showPron:false, hasLessons:false, eta:{} }, extra));
       w("words", Array.from({ length: 20 }, (_, i) => ({ id:`x${i}`, w:`x${i}`, en:`gloss ${i}`, lv:"A1" })));
       w("sentences", [{ id:"s1", t:"x0 x1.", en:"x.", lv:"A1", words:["x0", "x1"] }]);
       cp.spawnSync(PY, [path.join(ROOT, "tools", "jsonify_pack.py"), dir], { cwd: ROOT });

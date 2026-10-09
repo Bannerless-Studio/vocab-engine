@@ -29,7 +29,7 @@ function fixture(){
     { id:"s1", t:T, en:"She uses a phone.", lv:"A1", words:["sw-yeye", "sw-tumia", "sw-simu"], spans:[[0, 4, "sw-yeye"], [5, 13, "sw-tumia"], [14, 18, "sw-simu"]] },
     { id:"s2", t:"Simu.", en:"Phone.", lv:"A1", words:["sw-simu"] },
   ];
-  const pack = { key:"t", name:"T", tts:"sw-KE", levels:[{ id:"A1", label:"A1" }], placement:[["A1", 2]], typing:null, showPron:false, hasLessons:false };
+  const pack = { key:"t", name:"T", tts:"sw-KE", levels:[{ id:"A1", label:"A1" }], placement:[["A1", 2]], typing:null, showPron:false, hasLessons:false, eta:{} };
   return { pack, words, sentences };
 }
 function run(fx){

@@ -154,7 +154,7 @@ function seedW(){
   console.log("[1] config and validation");
   check(`wordsBy "typed" is engine default (flag collapse); WORD_HOLD ${VC.WORD_HOLD}, WORD_MASTERED ${VC.WORD_MASTERED}`, !("wordsBy" in PACK) && VC.WORD_HOLD === 2 && VC.WORD_MASTERED === 3);
   {
-    const base = { key: "synthwb", name: "Synth", tts: "en-US", levels: [{ id: "1", label: "One" }], placement: [["1", 1]], showPron: false, hasLessons: false, typing: {}, dayAware: true };
+    const base = { key: "synthwb", name: "Synth", tts: "en-US", levels: [{ id: "1", label: "One" }], placement: [["1", 1]], showPron: false, hasLessons: false, typing: {}, dayAware: true, eta: {} };
     const words = Array.from({ length: 12 }, (_, i) => ({ id: `w${i + 1}`, w: `word${i + 1}`, en: `gloss${i + 1}`, lv: "1" }));
     const run = pack => { const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ve_wordsby_"));
       fs.writeFileSync(path.join(dir, "pack.json"), JSON.stringify(pack)); fs.writeFileSync(path.join(dir, "words.json"), JSON.stringify(words)); fs.writeFileSync(path.join(dir, "sentences.json"), "[]");
