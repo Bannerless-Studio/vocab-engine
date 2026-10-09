@@ -401,6 +401,11 @@ const ptKey = it => String(it.key).startsWith("p:");
     await session(api3, (it) => { if(!ptKey(it)) return true; const k = it.key; seq[k] = (seq[k] || []); return seq[k].length > 0; }, { after: (it, ok, h) => { if(ptKey(it)) seq[it.key].push({ ok, note: NOTE.test(it.reveal) }); } });
     const retried = Object.values(seq).filter(a => a.length > 1);
     check("miss then right retry in one session: note on the miss, none on the retry", retried.length >= 1 && retried.every(a => !a[0].ok && a[0].note && a[1].ok && !a[1].note), JSON.stringify(retried));
+    // fb53: the English cue on the retry. First ask open, retry the tap link only (item html was built once).
+    const api5 = await boot(PACK, clone(base), 53, { patterns: PATTERNS }); const cue = {};
+    await session(api5, (it) => { if(!ptKey(it)) return true; const k = it.key; cue[k] = cue[k] || []; const h = api5.panel(); cue[k].push({ open: /<div class="q cue">[^<]+<\/div>/.test(h), tap: /data-pcue=/.test(h) }); return cue[k].length > 1; });
+    const cr = Object.values(cue).filter(a => a.length > 1);
+    check("fb53: first-meeting miss then retry: English open on the first ask, tap link only on the retry", cr.length >= 1 && cr.every(a => a[0].open && !a[0].tap && !a[1].open && a[1].tap), JSON.stringify(cr));
     // Sentences test: same rule.
     const api4 = await boot(PACK, clone(base), 54, { patterns: PATTERNS });
     api4.tab("test"); await tick();

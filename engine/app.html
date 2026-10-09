@@ -2076,13 +2076,15 @@ function patternItem(pid, si, mi){
   if(!mk) return null;
   const ans = VC.patternMarkText(s, mk), t = String(s.t);
   const pf = pfSentence(s, null, { start: mk[0], end: mk[1], text: ans });
-  const body = (pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div>`
-    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s, VC.patternFirstMeeting(prog, p, PACK));
+  const bodyFor = first => (pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div>`
+    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s, first);
+  const body = bodyFor(VC.patternFirstMeeting(prog, p, PACK));
   const note = patternNoteHTML(p), rv = sentenceRevealBlock(s);
   const base = { key: "p:" + pid, html: body, reveal: rv, onReveal: b => saySentence(s, b), revealHear: canHearSentence(s), mrowSent: s };
   // The note names the answer, so it rides with the verdict (owner 2026-10-08): on a first meeting right or
   // wrong, and on a miss any time. Read before notePattern writes the record.
-  base.onAnswer = function(ok){ const first = VC.patternFirstMeeting(prog, p, PACK); VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); this.reveal = ok && !first ? rv : note + rv; };
+  base.onAnswer = function(ok){ const first = VC.patternFirstMeeting(prog, p, PACK); VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); if(first) this.html = bodyFor(false); // a re-queued miss is not a first meeting (fb53)
+    this.reveal = ok && !first ? rv : note + rv; };
   const choice = () => ({ kind: "mc", label: "What's the missing word?", optsClass: "opts-hero opts-w", opts: [ans, ...VC.patternOpts(p, s, mi, PATTERN_LIST)], a: ans, optHtml: patternOptHTML, optsT: true });
   if(TYPING) return Object.assign(base, { kind: "type", label: "Type the missing word", check: v => VC.normKey(String(v).normalize("NFC")) === VC.normKey(ans.normalize("NFC")),
     choiceFallback(){ const c = Object.assign({}, this, choice()); c.onAnswer = base.onAnswer; return c; } });
