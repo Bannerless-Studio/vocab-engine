@@ -3335,7 +3335,7 @@ function placeRender(){
   const P = $("panel"); const lw = learnedWords();
   const first = levelLabel(PACK.placement[0][0]), last = levelLabel(PACK.placement[PACK.placement.length-1][0]);
   P.innerHTML = `<button class="ghost rback" id="back">${placeFrom === "progress" ? "Progress" : "Test"}</button>
-    <p class="q">${placementItemTotal()} words across ${escapeHtml(first)}–${escapeHtml(last)}: pick the meaning, pick the word, or type it, as in Review. Typed answers show the word; the rest wait for the end. Places you inside a level; skipped words stay in review as provisional.</p>
+    <p class="q">${placementItemTotal()} words across ${escapeHtml(first)}–${escapeHtml(last)}: Pick the meaning, pick the word, or type it. Typed answers are shown at once; the rest at the end. Places you inside a level; skipped words stay in review as provisional.</p>
     ${lw.length ? `<p class="q">Current: ${lw.length} words learned. Retaking can only move you forward: nothing already learned is lost.</p>` : ""}
     <div class="actions"><button class="next" id="go">Start</button></div>`;
   $("back").onclick = leavePlacement;

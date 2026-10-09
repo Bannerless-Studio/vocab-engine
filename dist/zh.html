@@ -6246,7 +6246,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2718069163-2359186";
+const VE_BUILD = "1628315921-2359170";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -7953,7 +7953,7 @@ function placeRender(){
   const P = $("panel"); const lw = learnedWords();
   const first = levelLabel(PACK.placement[0][0]), last = levelLabel(PACK.placement[PACK.placement.length-1][0]);
   P.innerHTML = `<button class="ghost rback" id="back">${placeFrom === "progress" ? "Progress" : "Test"}</button>
-    <p class="q">${placementItemTotal()} words across ${escapeHtml(first)}–${escapeHtml(last)}: pick the meaning, pick the word, or type it, as in Review. Typed answers show the word; the rest wait for the end. Places you inside a level; skipped words stay in review as provisional.</p>
+    <p class="q">${placementItemTotal()} words across ${escapeHtml(first)}–${escapeHtml(last)}: Pick the meaning, pick the word, or type it. Typed answers are shown at once; the rest at the end. Places you inside a level; skipped words stay in review as provisional.</p>
     ${lw.length ? `<p class="q">Current: ${lw.length} words learned. Retaking can only move you forward: nothing already learned is lost.</p>` : ""}
     <div class="actions"><button class="next" id="go">Start</button></div>`;
   $("back").onclick = leavePlacement;
@@ -8395,4 +8395,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2911355697-2358510-->
+<!--ve-build:1317555615-2358494-->

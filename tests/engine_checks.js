@@ -1914,10 +1914,10 @@ return {
       const st = await bootApp([{ lang: "it-IT", name: "x" }], IT);
       st.api.enterPlacement(); const pl = st.api.getPL();
       // one typed item per run, each the first type slot (typed the word, as the rotation starts)
-      pl.vocab.items = [{ b: 0, w: a1, kind: "type" }, { b: 11, w: b1, kind: "type" }]; pl.vocab.i = 0; pl.res.forEach(r => { r.r = 0; r.n = 0; });
+      pl.vocab.items = [{ b: 0, w: a1, kind: "type" }, { b: 11, w: b1, kind: "type" }]; pl.vocab.i = 0; pl.plan = []; pl.res.forEach(r => { r.r = 0; r.n = 0; }); // the item already on screen may have joined the plan
       st.api.placeNext(); el(st, "tin").value = fold(a1.w); el(st, "submit").click(); pl.plan = []; el(st, "nx").click();
       el(st, "tin").value = fold(b1.w); el(st, "submit").click();
-      check(`italian placement typed: "${fold(a1.w)}" for A1 ${a1.w} right (lenient), "${fold(b1.w)}" for B1 ${b1.w} a miss (strict)`, pl.res[0].r === 1 && pl.res[0].n === 1 && pl.res[11].r === 0 && pl.res[11].n === 1);
+      check(`italian placement typed: "${fold(a1.w)}" for A1 ${a1.w} right (lenient), "${fold(b1.w)}" for B1 ${b1.w} a miss (strict)`, pl.cur.label === "Type the word" && pl.res[0].r === 1 && pl.res[0].n === 1 && pl.res[11].r === 0 && pl.res[11].n === 1);
       const off = await walk(Object.assign({}, IT.pack, { typing: null }), () => true);
       check(`italian copy without typing: ${off.seen.length} items, none typed, type slots asked as recall (${off.seen.filter(x => x.label === "Which word is this?").length} recall cards)`,
         off.seen.length === 42 && off.seen.every(x => !x.typed && x.kind !== "type") && off.seen.filter(x => x.kind === "recall").length === 28);

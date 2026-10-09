@@ -957,7 +957,7 @@ console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack
       screens.push(h);
       if(/id="tin"/.test(h)){
         api.el("tin").value = ok ? typedAnswer(q) : "zzz not it"; api.el("submit").click();
-        typed.push({ ok, label: q.label, rv: api.el("rv").innerHTML, r: api.ev(`PL.res[${b}].r`), n: api.ev(`PL.res[${b}].n`), recs: Object.keys(api.getProg().w || {}).length });
+        typed.push({ ok, label: q.label, han: /\p{Script=Han}/u.test(h.replace(/<[^>]+>/g, "")), rv: api.el("rv").innerHTML, r: api.ev(`PL.res[${b}].r`), n: api.ev(`PL.res[${b}].n`), recs: Object.keys(api.getProg().w || {}).length });
         api.el("nx").click();
       } else {
         const btns = api.el("o").children;
@@ -995,6 +995,12 @@ console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack
       JSON.stringify(adv.kinds) === JSON.stringify(Object.fromEntries(Object.keys(adv.kinds).map(k => [k, wantK[k]]))) && adv.kinds.recall > 0 && adv.typed.length > 0 && adv.screens.some(h => /Which word is this\?/.test(h)));
     check(`${sn}, advanced: every typed card right and revealed (${adv.typed.length} typed: ${[...new Set(adv.typed.map(t => t.label))].join(", ")}), no word record before the result`,
       adv.typed.every(t => t.ok && /class="rw/.test(t.rv) && !/You typed/.test(t.rv) && t.r === t.n) && adv.typed.every(t => t.recs === Object.keys((mk() || { w: {} }).w || {}).length));
+    // zh typed kinds follow what the learner is shown (typedKindOk shownWritten): before any characters only pinyin or meaning
+    // from the reading, no hanzi on the card; with characters learned (owner export) a written kind appears.
+    const tlabels = [...new Set(adv.typed.map(t => t.label))];
+    if(sn === "fresh record") check(`fresh record: typed placement cards are pinyin/meaning only (${tlabels.join(", ")}), no hanzi on any typed card`,
+      tlabels.includes("Type the pinyin") && tlabels.every(l => l === "Type the pinyin" || l === "Type the meaning") && adv.typed.every(t => !t.han));
+    else check(`owner export (characters learned): a written typed kind appears (${tlabels.join(", ")})`, tlabels.includes("Type the characters"));
     const tmiss = await walk(PACK, mk(), b => b === 0 ? 0 : N[b]);
     const t0 = tmiss.typed.filter((_, i) => i === 0);
     check(`${sn}, bucket 0 all wrong: its typed miss shows "You typed", counts once (${t0.length && t0[0].r}/${t0.length && t0[0].n} at that point), nothing re-asked (asked ${tmiss.asked} of ${TOT})`,
