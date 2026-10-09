@@ -660,12 +660,12 @@ if(owner){
   const { tr, api } = await walkTabs(PACK, clone(owner), 52);
   const get = n => (tr.find(x => x[0].startsWith(n)) || [])[1] || "";
   const rd = get("reader ");
-  check('reader: ghost "Passages" back button, title, no level/word-count line once a passage is done', /^<button class="ghost rback" id="rback">Passages<\/button>/.test(rd) && /class="ptitle"/.test(rd) && !/words\. Tap a word|Tap a word to see/.test(rd) && !/‹/.test(rd));
+  check('reader: ghost "Passages" back button, title, no level/word-count line once a passage is done', /^<button class="ghost rback" id="rback">Passages<\/button>/.test(rd) && /class="ptitle(?: hasruby)?"/.test(rd) && !/words\. Tap a word|Tap a word to see/.test(rd) && !/‹/.test(rd));
   const f = await bootWith(PACK, freshRec(), 52);
   f.api.ev(`startPassage(PASSAGE_LIST[0])`);
   check('first passage ever: "Tap a word to see its meaning." with no level or count', f.api.panel().includes('<p class="q">Tap a word to see its meaning.</p>') && !/ · /.test(f.api.panel()));
   const q = get("question 1");
-  check('question screen: no "Question 1 / N" line (the header counts)', !/Question \d+ \//.test(q) && /<div class="drill-body top">\s*<div class="med wd"/.test(q));
+  check('question screen: no "Question 1 / N" line (the header counts)', !/Question \d+ \//.test(q) && /<div class="drill-body top">\s*<div class="med wd(?: hasruby)?"/.test(q));
   const vw = get("verdict wrong"), vr = get("verdict right");
   check('verdict: "Right." / "Not quite." then the highlighted sentence, no "The answer is in this sentence:"', /^<div class="q" style="margin:0 0 6px">Not quite\.<\/div><div class="stmt hi"/.test(vw) && /^<div class="q" style="margin:0 0 6px">Right\.<\/div><div class="stmt hi"/.test(vr) && !/answer is in this sentence/.test(vw + vr));
   const res = get("results one miss"), n = (res.match(/<h2>(\d+) of (\d+)<\/h2>/) || []);
