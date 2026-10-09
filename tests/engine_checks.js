@@ -213,12 +213,12 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("placementItemCount cycles a custom pack.placementItems", [0,1,2,3,4,5].every(i => VC.placementItemCount(i, {placementItems:[4,1,2]}) === [4,1,2][i%3]));
   const allRight = Array.from({length:6}, ()=>({r:3,n:3}));
   check("all buckets correct -> null", VC.placementStopIndex(allRight) === null);
-  check("bucket 3 entirely wrong -> stops at 3", VC.placementStopIndex([{r:3,n:3},{r:3,n:3},{r:3,n:3},{r:0,n:3},{r:3,n:3},{r:3,n:3}]) === 3);
+  check("bucket 3 entirely wrong, right on both sides -> skipped (isolated zero), placement runs to the end", VC.placementStopIndex([{r:3,n:3},{r:3,n:3},{r:3,n:3},{r:0,n:3},{r:3,n:3},{r:3,n:3}]) === null);
   check("a single miss in a big-enough bucket 0 still passes", VC.placementStopIndex([{r:3,n:4},{r:3,n:3},{r:3,n:3},{r:3,n:3}]) === null);
   // pack.placementWhole (fb48, docs/PACK_SCHEMA.md "placementWhole"): the largest passed prefix of the whole result.
   const W = { whole: true }, rn = (r, n) => r.map((x, i) => ({ r: x, n: n[i] }));
   const REPORTED = rn([1,3,2,0,2,2,2,2,2,3,1,2], [2,3,2,3,2,3,2,3,2,3,2,3]);
-  check("whole: the reported record (19/25 over buckets 0-9, bucket 3 isolated) -> 10; the window rule -> 0", VC.placementStopIndex(REPORTED, W) === 10 && VC.placementStopIndex(REPORTED) === 0);
+  check("whole: the reported record (19/25 over buckets 0-9, bucket 3 isolated) -> 10 (the old 3-bucket window rule gave 0)", VC.placementStopIndex(REPORTED, W) === 10 && VC.placementStopIndex(REPORTED) === 10);
   check("whole: the skipped bucket of the reported record is [3]", JSON.stringify(VC.placementSkipped(REPORTED, 10)) === "[3]");
   check("whole: all buckets right -> null", VC.placementStopIndex(allRight, W) === null);
   check("whole: a 0/n first bucket -> 0 (no left neighbour, never skipped)", VC.placementStopIndex(rn([0,3,3,3,3,3], [3,3,3,3,3,3]), W) === 0);
@@ -228,9 +228,9 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("whole: a zero bucket followed by a zero is not isolated even when accuracy holds", VC.placementStopIndex(rn([6,6,6,6,0,0], [6,6,6,6,3,3]), W) === 4);
   check("whole: accuracy exactly 0.75 passes (3/4 over one bucket)", VC.placementStopIndex(rn([3], [4]), W) === null);
   check("whole: 0.75 exactly passes, just under stops (3/4+3/4 = 6/8 passes; 3/4+2/4 = 5/8 stops at 1)", VC.placementStopIndex(rn([3,3], [4,4]), W) === null && VC.placementStopIndex(rn([3,2], [4,4]), W) === 1);
-  check("whole: the largest k wins over a smaller passing prefix (a later recovery)", VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3]), W) === null && VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3])) === 1);
+  check("whole: the largest k wins over a smaller passing prefix (a later recovery)", VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3]), W) === null);
   check("whole: empty result -> null", VC.placementStopIndex([], W) === null);
-  check("whole off (opts absent, whole false): window rule untouched", VC.placementStopIndex(REPORTED, { whole: false }) === 0 && VC.placementStopIndex(rn([3,3,3,0,3,3], [3,3,3,3,3,3])) === 3);
+  check("opts are ignored since the flag collapse (the whole-result rule is the only one)", VC.placementStopIndex(REPORTED, { whole: false }) === 10 && VC.placementStopIndex(rn([3,3,3,0,3,3], [3,3,3,3,3,3])) === null);
   check("whole: applyPlacement at the stop seeds provisional, prog.pl is the landing bucket's level", (() => {
     const st = VC.strata(WORDS, PACK.placement, PACK.setSize), n = st.length;
     const res = st.map((_, i) => ({ r: i === 3 ? 0 : 3, n: 3 })); res[n-1] = { r: 0, n: 3 }; res[n-2] = { r: 0, n: 3 };
@@ -504,7 +504,8 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("sets {1:2} -> first 20 level-1 words learned", lw.length === 20 && lw.every(w=>w.lv==="1"));
   const byLv = VC.wordsByLevel(WORDS, PACK);
   const nnOf = p => { const nn = VC.nextNewSet(WORDS, PACK, p); return nn && { lv: nn.lv, set: nn.set, ids: nn.words.map(w => w.id) }; };
-  check("nextNewSet -> level 1, set index 2, the counter prefix's next 10 words", util.isDeepStrictEqual(nnOf(prog), {lv:"1", set:2, ids: byLv["1"].slice(20, 30).map(w => w.id)}));
+  const pre20 = new Set(VC.counterOrder(byLv["1"], PACK).slice(0, 20).map(w => w.id));
+  check("nextNewSet -> level 1, set index 2, the next 10 words past the counter prefix (id order)", util.isDeepStrictEqual(nnOf(prog), {lv:"1", set:2, ids: byLv["1"].filter(w => !pre20.has(w.id)).slice(0, 10).map(w => w.id)}));
   const doneL1 = VC.normalizeProg({ sets:{"1": VC.nSets(byLv["1"], 10)} }, PACK);
   check("level 1 complete -> next set is level 2 set 0", util.isDeepStrictEqual(nnOf(doneL1), {lv:"2", set:0, ids: byLv["2"].slice(0, 10).map(w => w.id)}));
   const all = {}; VC.levelIds(PACK).forEach(lv=>{ all[lv] = VC.nSets(byLv[lv], 10); });
@@ -525,8 +526,8 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const gapRecs = {}; [1,2,3,4,5,6,7,8,11,12].forEach(rank => { gapRecs[`g${rank}`] = { r:1, w:0, s:1 }; });
   const gapProg = VC.normalizeProg({ w: gapRecs }, gapPack);
   const gapNn = VC.nextNewSet(gapWords, gapPack, gapProg);
-  check("Set N label: taught ranks 1-8, 11-12 (gap at 9-10) -> fresh starts at rank 9, set 1 (not set 2)",
-    gapNn && gapNn.words[0].id === "g9" && gapNn.set === 0);
+  check("Set N label: taught ranks 1-8, 11-12 (gap at 9-10) -> fresh starts at rank 9; set = sets learned by count (1, frequency tiers)",
+    gapNn && gapNn.words[0].id === "g9" && gapNn.set === 1);
 
   const insWords = Array.from({length: 29}, (_, i) => ({ id: `i${i+1}`, lv: "1" }));
   insWords.splice(29, 0, { id: "iNew", lv: "1" }); // inserted untaught word at rank 30
@@ -1324,6 +1325,8 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const prog = VC.normalizeProg({}, RP);
   const lv0 = VC.readingLevels(PS, RW, RP, prog);
   check("fresh learner: no level unlocked; A1 needs ceil(0.7*20)=14", lv0.every(l => !l.unlocked) && lv0[0].need === 14 && lv0[0].count === 2 && lv0[1].need === 7);
+  // ten taught records (a counter prefix would be read in id order, a0 a1 a10..., since the frequency tiers)
+  for(let i = 0; i < 10; i++) prog.w["a" + i] = { r:1, w:0, s:1 };
   prog.sets.A1 = 1;
   check("10/20 learned (50%) -> A1 still locked, suggestion null", !VC.readingLevels(PS, RW, RP, prog)[0].unlocked && VC.suggestPassage(PS, RW, RP, prog) === null);
   prog.w.a10 = { r:1, w:0, s:1, d:1 }; prog.w.a11 = { r:1, w:0, s:1, d:1 }; prog.w.a12 = { r:1, w:0, s:1, d:1 };
@@ -1331,7 +1334,7 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   prog.w.a13 = { r:1, w:0, s:1, d:1 };
   check("14/20 (70%) -> A1 unlocked", VC.readingLevels(PS, RW, RP, prog)[0].met);
   check("updateReadUnlocks records A1 once (sticky in prog.read.unlocked)", util.isDeepStrictEqual(VC.updateReadUnlocks(PS, RW, RP, prog), ["A1"]) && prog.read.unlocked.A1 === 1 && VC.updateReadUnlocks(PS, RW, RP, prog).length === 0);
-  const dropped = JSON.parse(JSON.stringify(prog)); dropped.sets.A1 = 0;
+  const dropped = JSON.parse(JSON.stringify(prog)); dropped.sets.A1 = 0; for(let i = 0; i < 10; i++) delete dropped.w["a" + i];
   check("stored unlock survives a drop below the threshold", VC.readingLevels(PS, RW, RP, dropped)[0].unlocked && !VC.readingLevels(PS, RW, RP, dropped)[0].met);
   check("A2 stays locked (0 learned)", !VC.readingLevels(PS, RW, RP, prog)[1].unlocked);
   check("suggestPassage -> first not-done passage at an unlocked level", VC.suggestPassage(PS, RW, RP, prog) === P1);
@@ -1518,8 +1521,8 @@ function reorderedLevel(pack, words){
   const after = VC.learnedWords(R.words, PACK, R.prog);
   check("reorder: insert at rank 2 + swap ranks 5/35 -> learnedWords identical to before", util.isDeepStrictEqual(ids(after), R.before));
   const nn = VC.nextNewSet(R.words, PACK, R.prog);
-  check("reorder: nextNewSet holds the inserted word and the swapped-in unlearned word, no learned word, set is the inserted word's rank position (0), not the counter (3)",
-    nn && nn.lv === "1" && nn.set === 0 && nn.words.length === R.size && nn.words.some(w => w.id === R.inserted)
+  check("reorder: nextNewSet holds the inserted word and the swapped-in unlearned word, no learned word, set is the count of sets learned (3, frequency tiers)",
+    nn && nn.lv === "1" && nn.set === 3 && nn.words.length === R.size && nn.words.some(w => w.id === R.inserted)
     && nn.words.some(w => w.id === R.swappedIn) && nn.words.every(w => !R.learnedIds.has(w.id)));
   const l1n = R.words.filter(w => w.lv === "1");
   check("reorder: nextNewSet is the next unlearned words in rank order", util.isDeepStrictEqual(nn.words.map(w => w.id), l1n.filter(w => !R.learnedIds.has(w.id)).slice(0, R.size).map(w => w.id)));
@@ -1533,23 +1536,26 @@ function reorderedLevel(pack, words){
   check("removed learned word: nextNewSet still starts after every learned word", nnLess && nnLess.words.every(w => !R.learnedIds.has(w.id)));
 
   const size = VC.setSizeOf(PACK), l1 = WORDS.filter(w => w.lv === "1");
+  // a counter prefix is read in id order (VC.counterOrder; the counters were written before the frequency order)
+  const co = VC.counterOrder(l1, PACK), pre2 = co.slice(0, 2*size);
   const legacy = VC.normalizeProg({ sets:{ "1": 2 } }, PACK);
-  check("legacy sets {1:2}, no records -> learnedWords is the counter prefix", util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, legacy).map(w => w.id), l1.slice(0, 2*size).map(w => w.id)));
+  check("legacy sets {1:2}, no records -> learnedWords is the counter prefix (id order)", util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, legacy).map(w => w.id), pre2.map(w => w.id)));
   const raw = JSON.parse(JSON.stringify(legacy));
   l1.slice(2*size, 3*size).forEach(w => { raw.w[w.id] = { r:1, w:0, s:1 }; });
   check("legacy + one set's records written directly -> the records rule applies (just those words)", util.isDeepStrictEqual(ids(VC.learnedWords(WORDS, PACK, raw)), ids(l1.slice(2*size, 3*size))));
   const viaApp = JSON.parse(JSON.stringify(legacy));
   l1.slice(2*size, 3*size).forEach(w => { VC.ensureWordRec(viaApp, WORDS, PACK, w.id); VC.markRec(viaApp.w, w.id, true, true, "hear"); });
   viaApp.sets["1"] = 3;
-  check("legacy + one set drilled via ensureWordRec -> prefix pinned as prov records, records rule, 3 sets learned",
-    util.isDeepStrictEqual(ids(VC.learnedWords(WORDS, PACK, viaApp)), ids(l1.slice(0, 3*size))) && l1.slice(0, 2*size).every(w => viaApp.w[w.id].prov === 1)
-    && util.isDeepStrictEqual(VC.nextNewSet(WORDS, PACK, viaApp).words.map(w => w.id), l1.slice(3*size, 4*size).map(w => w.id)));
+  const unionIds = [...new Set([...pre2, ...l1.slice(2*size, 3*size)].map(w => w.id))];
+  check("legacy + one set drilled via ensureWordRec -> prefix pinned as prov records, records rule (prefix + drilled set)",
+    util.isDeepStrictEqual(ids(VC.learnedWords(WORDS, PACK, viaApp)), unionIds.slice().sort()) && pre2.every(w => viaApp.w[w.id].prov === 1)
+    && util.isDeepStrictEqual(VC.nextNewSet(WORDS, PACK, viaApp).words.map(w => w.id), l1.filter(w => !unionIds.includes(w.id)).slice(0, size).map(w => w.id)));
 
   const dp = JSON.parse(JSON.stringify(R.prog)); const ahead = l1[6*size];
   dp.w[ahead.id] = { r:0, w:0, s:0, d:1 };
   check("drilled-ahead d word counts under the records rule", VC.learnedWords(WORDS, PACK, dp).some(w => w.id === ahead.id) && !VC.nextNewSet(WORDS, PACK, dp).words.some(w => w.id === ahead.id));
   const donly = JSON.parse(JSON.stringify(legacy)); donly.w[ahead.id] = { r:0, w:0, s:0, d:1 };
-  check("d-only level: counter prefix plus the d word (d says nothing about the prefix)", util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, donly).map(w => w.id), [...l1.slice(0, 2*size).map(w => w.id), ahead.id]));
+  check("d-only level: counter prefix plus the d word (d says nothing about the prefix)", util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, donly).map(w => w.id), [...pre2.map(w => w.id), ahead.id]));
 
   const st = VC.strata(WORDS, PACK.placement, size);
   const placed = VC.applyPlacement(VC.defaultProg(PACK), st, 2, WORDS, PACK);
@@ -1898,8 +1904,8 @@ return {
     const g1 = api.gapSentence(one, false); g1.onAnswer(false);
     const afterMiss = JSON.stringify(pr.w[bid]);
     api.gapSentence(one, false).onAnswer(true);
-    // t: the day of the last answer, written under pack.dayAware (zh).
-    const noT = j => { const r = Object.assign({}, typeof j === "string" ? JSON.parse(j) : j); delete r.t; return JSON.stringify(r); };
+    // t / u: the day and session of the last answer (day log); p: the word's pairs (a cloze miss is a written<->meaning miss).
+    const noT = j => { const r = Object.assign({}, typeof j === "string" ? JSON.parse(j) : j); delete r.t; delete r.u; delete r.p; return JSON.stringify(r); };
     check(`cloze (choice) miss sets k=recall on the blank word ${bid}, r/w/s untouched; a gap pass clears it`,
       noT(afterMiss) === JSON.stringify({ r:4, w:1, s:2, k:"recall" }) && noT(pr.w[bid]) === JSON.stringify({ r:4, w:1, s:2 }) && pr.s[one.id] && pr.s[one.id].w === 1);
     const saved = pr.w[bid]; delete pr.w[bid]; api.gapSentence(one, false).onAnswer(false);
@@ -3143,15 +3149,13 @@ async function swChecks(){
 (function(){
   console.log("\n[33] pack.placedRead: the new-passage pick starts from the placed level (fb51)");
   const ids = VC.levelIds(PACK), top = ids[ids.length - 1];
-  // The suite's PACK is pre-pairs era (flags stripped above); the flag is added on a copy, the control is the pack itself.
+  // placedRead is engine default since the flag collapse (ON / OFFR are the same behaviour; kept as names).
   const OFFR = PACK, ON = Object.assign({}, PACK, { placedRead: true }), SHIPPED = loadConst(path.join(ZH, "pack.js"), "PACK");
-  check("pack.placedRead: on in the shipped pack, off in the control", SHIPPED.placedRead === true && VC.placedReadOn(SHIPPED) && VC.placedReadOn(ON) && !VC.placedReadOn(OFFR));
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
   const placedTop = VC.applyPlacement(VC.normalizeProg({}, PACK), st0, st0.length, WORDS, PACK, undefined);
   check(`placed record: pl is the top level "${placedTop.pl}"`, placedTop.pl === top);
   const sTop = VC.suggestPassage(PASSAGES, WORDS, ON, placedTop);
   check(`placed at the top: the first unread passage of the top level (${sTop && sTop.id})`, sTop === PASSAGES.find(p => p.lv === top) && sTop.lv === top);
-  check("placed at the top, flag off: pack order (the first level's first passage)", VC.suggestPassage(PASSAGES, WORDS, OFFR, placedTop) === PASSAGES.find(p => p.lv === ids[0]));
   // reading down: finish the top level, the next pick is the level below
   const pr = JSON.parse(JSON.stringify(placedTop)); VC.readState(pr);
   const seq = []; for(let g = 0; g < 100; g++){ const p = VC.suggestPassage(PASSAGES, WORDS, ON, pr); if(!p) break; seq.push(p.lv); pr.read.done[p.id] = { sc: 3, n: 3, d: "2026-10-07", x: 1 }; }
@@ -3173,22 +3177,6 @@ async function swChecks(){
   check("placed words but no pl: pack order, equal to the flag-off pick", VC.suggestPassage(PASSAGES, WORDS, ON, noPl) === VC.suggestPassage(PASSAGES, WORDS, OFFR, noPl) && VC.suggestPassage(PASSAGES, WORDS, ON, noPl).lv === ids[0]);
   const unk = JSON.parse(JSON.stringify(placedTop)); unk.pl = "zz";
   check("unknown pl: pack order", VC.suggestPassage(PASSAGES, WORDS, ON, unk) === VC.suggestPassage(PASSAGES, WORDS, OFFR, unk));
-  // flag-off equality with the pre-fb51 core on 5 records
-  let oldCore = null;
-  try { const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ec-")); const f = path.join(dir, "core_8564258.js");
-    fs.writeFileSync(f, require("child_process").execSync(`git -C "${ROOT}" show 8564258:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
-    oldCore = require(f); fs.rmSync(dir, { recursive: true, force: true }); } catch(e){ oldCore = null; }
-  if(!oldCore) console.log("SKIP  8564258 not in this checkout's history");
-  else {
-    const recs = [frs, placedTop, noPl, prm, prl];
-    check("flag off: suggestPassage and nextReadItem (both modes) equal 8564258 on 5 records", recs.every(r => {
-      const a = JSON.parse(JSON.stringify(r)), b = JSON.parse(JSON.stringify(r));
-      const rot = Object.assign({}, OFFR, { dayAware: true, readRotation: true });
-      return VC.suggestPassage(PASSAGES, WORDS, OFFR, a) === oldCore.suggestPassage(PASSAGES, WORDS, OFFR, b)
-        && util.isDeepStrictEqual(VC.nextReadItem(PASSAGES, WORDS, OFFR, a, "2026-10-08"), oldCore.nextReadItem(PASSAGES, WORDS, OFFR, b, "2026-10-08"))
-        && util.isDeepStrictEqual(VC.nextReadItem(PASSAGES, WORDS, rot, a, "2026-10-08", false, 5, seededOnce()), oldCore.nextReadItem(PASSAGES, WORDS, rot, b, "2026-10-08", false, 5, seededOnce()));
-    }));
-  }
   function seededOnce(){ let a = 7; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   // rotation: the new pick under the flag is the placed-level passage; re-read picks are the done ones (unchanged)
   const rotOn = Object.assign({}, ON, { dayAware: true, readRotation: true });

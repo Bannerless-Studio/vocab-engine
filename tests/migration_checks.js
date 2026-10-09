@@ -152,7 +152,7 @@ const isChars1 = s => s && s.kind === "chars" && eq(s.levels, ["1"]);
 check("C mid-HSK2: no card; even sessions HSK 2 set 3, odd 字1; skipped (later), HSK 2 set 3 both",
   !VC.showCharChoice(PACK, W, U, mig("C mid-HSK2"))
   && (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(gateOpen(mig("C mid-HSK2")), 2))) && isChars1(VC.nextStage(PACK, W, U, par(gateOpen(mig("C mid-HSK2")), 3)))
-  && [2, 3].every(n => (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(VC.answerCharChoice(mig("C mid-HSK2"), false), n)))));
+  && [2, 3].every(n => (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(VC.answerCharChoice(gateOpen(mig("C mid-HSK2")), false), n)))));
 // R5 (owner 2026-10-02): a learner with character records (the old single stage, taught every
 // session) loads as chars.order "first": 字1 every session until done; "with" restores the turns.
 const withO = p => VC.setCharMode(p, "with");
