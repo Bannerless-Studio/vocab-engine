@@ -321,7 +321,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     NOW = new Date(2026, 9, 5, 8, 0, 0).getTime();
     const notes = [], p0 = OWNER ? JSON.parse(JSON.stringify(OWNER)) : synth(40, 2, 4, 6);
     const api = await boot(PACK, p0, 5, { core: coreWith(notes) });
-    check("Today's Review and Recall lines say \"weakest pairs first\"; Sentences keeps its order", /items, weakest pairs first/.test(api.panel()) && /Recall<\/td><td>\d+ items, weakest pairs first/.test(api.panel()) && /Sentences<\/td><td>8 items, misses and due first/.test(api.panel()));
+    // (the v1 Today lines "N items, weakest pairs first" went with appView v1 in the flag collapse; app v2 rows carry no counts or order copy)
     const ans = mulberry32(9); const all = [];
     for(const h of [8, 13, 20]){ NOW = new Date(2026, 9, 5, h, 0, 0).getTime(); const sn = (api.getProg().sn || 0) + 1; (await sessionP(api, () => ans() < 0.85, notes)).forEach(r => all.push(Object.assign(r, { sn }))); }
     const p = api.getProg();

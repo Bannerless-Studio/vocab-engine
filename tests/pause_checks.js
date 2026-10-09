@@ -152,7 +152,7 @@ const __drills = []; const __dr = drill; drill = function(items, ...a){ __drills
 const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; return __ty(it); };
 return {
   el: id => document.getElementById(id), html: id => { const e = document.getElementById(id); return e ? e.innerHTML : null; }, panel: () => document.getElementById("panel").innerHTML,
-  getProg: () => prog, setProg: p => { prog = p; }, getD: () => D, getCur: () => __cur,
+  getProg: () => prog, setProg: p => { prog = p; }, getD: () => D, getCur: () => __cur, getPrep: () => todayPrep, readNext: () => todayReadItem(false),
   today: () => { tab = "today"; render(); }, goto: t => { tab = t; testSel = null; RD = null; soundsSel = null; render(); },
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
   readItem, recallItem, revealBlock, charDrillItem, wordRowHTML, itemFromPlan,
@@ -208,8 +208,10 @@ function learnItems(p){
   return st.kind === "chars" ? VC.lagCharSet(PACK, WORDS, CHARACTERS, p).units.length * LEARN_KINDS : VC.levelNewSet(WORDS, PACK, p, st.lv).words.length * 2;
 }
 function nextLearn(p){ const st = VC.nextStage(PACK, WORDS, CHARACTERS, p); return !st ? null : st.kind === "chars" ? "c:" + VC.lagCharSet(PACK, WORDS, CHARACTERS, p).ids.join(",") : "w:" + VC.levelNewSet(WORDS, PACK, p, st.lv).words.map(w => w.id).join(","); }
-const rows = h => [...String(h).matchAll(/<tr><td>(\d+)\. (\w+)<\/td><td>([\s\S]*?)<\/td><\/tr>/g)].map(m => [m[2], stripTags(m[3])]);
-const reviewN = h => { const r = rows(h).find(x => x[0] === "Review"); const m = r && r[1].match(/^(\d+) items/); return m ? +m[1] : null; };
+const rows = h => [...String(h).matchAll(/<div class="tst"><span>(\w+)<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/g)].map(m => [m[1], stripTags(m[2].replace(/<div class="pvs pvgate">[\s\S]*$/, ""))]); // app v2 Today rows (Learn's gate sentence dropped)
+// App v2: Today rows carry no counts; the Review size is read from todayPrep, the passage from todayReadItem.
+const reviewN = api => (api.getPrep() && api.getPrep().review) ? api.getPrep().review.length : null;
+const readOf = api => { const r = api.readNext(); return r ? { title: r.p.title, reread: !!((api.getProg().read || {}).done || {})[r.p.id], mode: r.mode } : null; };
 const keysOf = p => ({ w: new Set(Object.keys(p.w)), c: new Set(Object.keys((p.chars || {}).c || {})) });
 // Plays the Today session on screen to its end (every answer right; passages skipped).
 // The Read stage is played for real: every question answered with the first option, opts.tap word
@@ -290,7 +292,7 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
     const p0 = mk(), st = fresh(); st.ls.setItem(VC.storageKey(PACK), JSON.stringify(p0));
     NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
     const api = await boot(PACK, st, 3);
-    const on = api.panel(), onRows = rows(on).map(r => r[0]), learnBefore = nextLearn(api.getProg());
+    const on = api.panel(), onRows = rows(on).map(r => r[0]), learnBefore = nextLearn(api.getProg()), onReview = reviewN(api), onRead = readOf(api);
     pressPause(api); api.today();
     const h = api.panel(), extra = learnItems(p0);
     if(name === "fresh"){
@@ -301,14 +303,15 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
     }
     // Day-aware plans (engine default since the flag collapse) take no extra Review items: Review keeps its size when paused.
     const pr = rows(h), grow = 0;
-    check(`${name}, paused: steps ${pr.map(r => r[0]).join(", ")} (on: ${onRows.join(", ")}); "Review only · new material paused"; Review ${reviewN(on)} -> ${reviewN(h)} items (unchanged; Learn step's drill items ${extra})`,
-      !pr.some(r => r[0] === "Learn") && onRows.includes("Learn") && /Review only · new material paused\./.test(h) && reviewN(h) === reviewN(on) + grow && !/1 passage: /.test(stripTags(h)));
-    if(name === "owner shape") check(`owner shape: unpaused Today plans a first read (${(rows(on).find(r => r[0] === "Read") || [])[1]}); paused a due re-read (${(pr.find(r => r[0] === "Read" || r[0] === "Listen" && /passage/.test(r[1])) || [])[1]})`, /1 passage: /.test(stripTags(on)) && /passage to (re-read|listen to)/.test(stripTags(h)));
+    const hReview = reviewN(api), hRead = readOf(api);
+    check(`${name}, paused: steps ${pr.map(r => r[0]).join(", ")} (on: ${onRows.join(", ")}); "Session N, review only"; Review ${onReview} -> ${hReview} items (unchanged; Learn step's drill items ${extra})`,
+      !pr.some(r => r[0] === "Learn") && onRows.includes("Learn") && /<p class="pva">Session \d+, review only<\/p>/.test(h) && hReview === onReview + grow && !(hRead && !hRead.reread));
+    if(name === "owner shape") check(`owner shape: unpaused Today plans a first read (${onRead && onRead.title}); paused a due re-read (${hRead && hRead.title})`, !!onRead && !onRead.reread && !!hRead && hRead.reread);
     const res = [];
     for(let d = 0; d < 6; d++){ NOW = new Date(2026, 9, 2 + d, 8, 0, 0).getTime(); api.today(); res.push(playSession(api)); }
     const sum = k => res.reduce((n, r) => n + (r ? r[k] : 0), 0);
     check(`${name}, 6 paused sessions: ${sum("newW")} new words, ${sum("newC")} new units, ${sum("firstReads")} first reads (${sum("rereads")} re-reads), no Learn drill (${sum("learn")}); items per session ${res.map(r => r && r.items).join(",")}; Review drills ${res.map(r => r && r.review).join(",")}`,
-      res.every(Boolean) && sum("newW") === 0 && sum("newC") === 0 && sum("firstReads") === 0 && sum("learn") === 0 && res[0].items > 0 && res[0].review === reviewN(h) && (name !== "owner shape" || sum("rereads") > 0));
+      res.every(Boolean) && sum("newW") === 0 && sum("newC") === 0 && sum("firstReads") === 0 && sum("learn") === 0 && res[0].items > 0 && res[0].review === hReview && (name !== "owner shape" || sum("rereads") > 0));
     const pAfter = api.getProg();
     check(`${name}: set counters and unit records' keys as before (${JSON.stringify(pAfter.sets)})`, eq(pAfter.sets, p0.sets) && eq(Object.keys(pAfter.chars.c).sort(), Object.keys(p0.chars.c).sort()) && eq(Object.keys(pAfter.w).sort(), Object.keys(p0.w).sort()));
     pressPause(api); api.today();
