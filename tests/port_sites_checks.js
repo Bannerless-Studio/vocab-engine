@@ -176,10 +176,11 @@ async function site(dirName, code){
   const allNull = legacy && P.eta.gain.length === goalsN && P.eta.gain.every(v => v === null) && P.eta.known === null;
   const gateEst = VC.levelOpensIn(D.WORDS, P, gp, units), goalEst = Array.from({ length: goalsN }, (_, g) => VC.sessionsToGoX({}, g, goalsN, ctx));
   const freshPanel = (await S.bootWith(P, fresh, 1, { passages: D.PASSAGES })).panel();
-  if(shipped) check(`${code}: tools/eta.json shipped: pack eta = the committed file (${JSON.stringify(P.eta)}), finite goal ${goalEst[0]} and gate ${gateEst} estimates, gate sentence carries "≈ N sessions"`,
+  // the queue writes a goal that failed its gate as null (japanese goal 1 since round 8745de1): Today shows "≈" iff goal 1 has a curve
+  if(shipped) check(`${code}: tools/eta.json shipped: pack eta = the committed file (${JSON.stringify(P.eta)}), goal estimates ${JSON.stringify(goalEst)} (some finite; Today "≈" iff goal 1 has one), finite gate ${gateEst}, gate sentence carries "≈ N sessions"`,
     !!P.eta && (legacy ? JSON.stringify(P.eta.gain) === JSON.stringify(shipped.gain) && P.eta.known === shipped.known && P.eta.gain.length === goalsN
       : JSON.stringify(P.eta) === JSON.stringify(shipped))
-    && Number.isFinite(goalEst[0]) && Number.isFinite(gateEst) && /≈\s\d+ sessions?\./.test(gs) && freshPanel.includes("≈"));
+    && goalEst.some(Number.isFinite) && Number.isFinite(gateEst) && /≈\s\d+ sessions?\./.test(gs) && freshPanel.includes("≈") === Number.isFinite(goalEst[0]));
   else check(`${code}: enriched eta without tools/eta.json = ${JSON.stringify(P.eta)}: no goal estimate (goal ${cg && cg.i + 1}), no gate estimate, Today / Progress carry no "≈"`,
     allNull && goalEst.every(v => v === null) && gateEst === null && !freshPanel.includes("≈"));
   const withEta = Object.assign(clone(P), { eta: { gain: [0.01, null, 0.02], known: null } });
