@@ -6,7 +6,7 @@
 // options and options of another stage than the answer, before (flag off, level tiers) vs after;
 // the owner's leak (new answer, every wrong choice known); sentence length outliers; every old
 // guard; progress untouched. [2] app: each site, a Learn drill's options, one script per set,
-// placement as flag off, nothing written, answer position uniform. [3] flag off: core results and
+// nothing written, answer position uniform. [3] flag off: core results and
 // the draw after them byte-identical to main 68930bd. Seeded throughout (mulberry32).
 // Run: node tests/opts_mix_checks.js [--table]
 "use strict";
@@ -392,9 +392,7 @@ async function sec4(){
     const rp = keep.map(sum);
     console.log(`NOTE  identical wrong-choice set seen again within a week (cohort, one draw per session): ${SHAPES4.map(([n], i) => `${n}: units ${pct(rp[i][0], rp[i][1])}${rp[i][3] ? `, words ${pct(rp[i][2], rp[i][3])}` : ""} (skipped as forced: ${rp[i][4]} units, ${rp[i][5]} words)`).join("; ")}`);
     check(`weak units seeing the same three wrong choices again across sessions: ${rp.map(r => pct(r[0], r[1])).join(" / ")}; words ${pct(rp[0][2], rp[0][3])}`, rp.every(r => r[1] > 10) && rp[0][3] > 10 && rp.every(r => r[0] / r[1] <= REPEAT_BOUND) && rp[0][2] / rp[0][3] <= REPEAT_BOUND);
-    const offRun = await lagWeek(VC, appHtml, PACK_OFF, 5);
-    check(`flag off: no record ever gets f over 7 sessions (${Object.keys(offRun.pr.w).length} word, ${Object.keys(offRun.pr.chars.c).length} unit records)`,
-      Object.values(offRun.pr.w).every(v => v.f === undefined) && Object.values(offRun.pr.chars.c).every(v => v.f === undefined) && !/"f":/.test(offRun.prog));
+    // (flag-off control "no record ever gets f" deleted: optsMix is engine default since the flag collapse)
   }
 }
 (async function main(){
@@ -558,7 +556,7 @@ async function sec4(){
     check(`guess by length elimination <= 0.27 there${over.length ? "; over: " + over.join(", ") : ""}`, over.length === 0);
   }
 
-  console.log("\n[2] app: every site by stage, a Learn drill, one script per set, placement as flag off, nothing written, answer position uniform");
+  console.log("\n[2] app: every site by stage, a Learn drill, one script per set, nothing written, answer position uniform");
   {
     const r = mulberry32(99);
     const p0 = shape(595, 0.7, () => Math.floor(r() * 7)); // mixed unit tiers: pron / ruby / bare
@@ -664,16 +662,8 @@ async function sec4(){
         learnSet.size === 10 && n >= 10 && never === 0 && viol === 0 && (fam === "c" || (allOld === 0 && old === 0)));
     }
   }
-  {
-    const shots = [];
-    for(const pack of [PACK, PACK_OFF]){
-      const st = fresh(); st.ls.setItem(VC.storageKey(pack), JSON.stringify(shape(140)));
-      const api = await boot(pack, st, 21); api.goto("test"); api.startPlacement(); const seen = [];
-      for(let i = 0; i < 30 && api.el("o"); i++){ seen.push(api.panel()); const b = api.el("o").children[0]; if(!b) break; b.click(); }
-      shots.push(seen.join("\n"));
-    }
-    check(`placement options exactly as with the flag off (same seed, 30 screens, ${shots[0].length} chars)`, shots[0].length > 1000 && shots[0] === shots[1]);
-  }
+  // (placement vs optsMix off control deleted: optsMix is engine default since the flag collapse)
+
 
   console.log(`\n[3] flag off: byte-identical to ${BASE}`);
   if(!OLD) console.log(`NOTE  ${BASE} not in this checkout's history: control skipped`);
