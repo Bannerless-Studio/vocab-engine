@@ -139,7 +139,8 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
   const stripped = Array.isArray(wordsJson)
     ? wordsJson.map(w => { if(!w || !NEW_WORD_FIELDS.some(k => k in w)) return w; const c = Object.assign({}, w); NEW_WORD_FIELDS.forEach(k => delete c[k]); return c; })
     : wordsJson;
-  const words = Array.isArray(stripped) && packJson && packJson.freqTiers !== undefined && !stripped.some(w => w && "rank" in w)
+  // (freqTiers is default since the flag collapse, so a word carrying ft marks the frequency-ordered file, not the pack key.)
+  const words = Array.isArray(stripped) && Array.isArray(wordsJson) && wordsJson.some(w => w && "ft" in w) && !stripped.some(w => w && "rank" in w)
     ? stripped.map((w, i) => [w, i]).sort((a, b) => (a[0].id < b[0].id ? -1 : a[0].id > b[0].id ? 1 : a[1] - b[1])).map(x => x[0])
     : stripped;
   const sentences = Array.isArray(sentencesJson)

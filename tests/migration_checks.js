@@ -294,7 +294,6 @@ console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"
   if(!Object.keys(p.s).length) p.s.x1 = { r: 1, w: 0, s: 1 };
   const W0 = Object.keys(p.w)[0], S0 = Object.keys(p.s)[0], C0 = Object.keys(p.chars.c)[0];
   const today = "2026-10-02";
-  check("pack.dayAware is on for zh", VC.dayAwareOn(PACK) === true);
   VC.dayStart(p, PACK, today);
   VC.noteDay(p, PACK, today, "w:" + W0, "hear", true);
   VC.noteDay(p, PACK, today, "s:" + S0, "gap", false);
@@ -320,12 +319,6 @@ console.log("\n[day] dayAware: prog.day log and record t (docs/PACK_SCHEMA.md \"
   VC.noteDay(p, PACK, today, "s:" + S0, "gap", true);
   check("a right answer in the missed kind settles it (mk removed)", !("mk" in p.day.a["s:" + S0]) && VC.dayPending(p.day.a["s:" + S0]) === null);
   check("a day log from another date reads as a fresh day", eq(VC.dayLog(p, "2026-10-03"), { d: "2026-10-03", n: 0, a: {} }));
-  const off = Object.assign({}, PACK); delete off.dayAware;
-  const q = mig("C mid-HSK2"), before = JSON.stringify(q);
-  VC.dayStart(q, off, today); VC.noteDay(q, off, today, "w:" + Object.keys(q.w)[0], "hear", true);
-  check("without pack.dayAware, dayStart/noteDay write nothing", JSON.stringify(q) === before);
-  VC.daySessionStart(q, off); VC.dayStart(q, off, today, true);
-  check("without pack.dayAware, no session ordinal (prog.sn) is written", JSON.stringify(q) === before);
 
   // Session clock: prog.sn, u on records and log entries, misses carried over midnight.
   const z = mig("C mid-HSK2"); const ZW = Object.keys(z.w);
@@ -548,7 +541,7 @@ console.log("\n[pause] pack.pauseNew (fb4-pause): one additive field prog.pause 
   const LAG = LAG_PACK, OLDP = (p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); })(clone(LAG_PACK));
   const mine = VC.setPause(mig("HEAD"), true), raw = JSON.stringify(mine);
   const here = VC.bootProg(raw, LAG);
-  check("this engine: paused progress boots with no backup, pause 1 kept, byte-identical", LAG.pauseNew === true && here.backupRaw === null && VC.pauseOn(LAG, here.prog) && JSON.stringify(here.prog) === raw);
+  check("this engine: paused progress boots with no backup, pause 1 kept, byte-identical", here.backupRaw === null && VC.pauseOn(LAG, here.prog) && JSON.stringify(here.prog) === raw);
   check("defaultProg has no pause field (absent = new material on)", !("pause" in VC.defaultProg(LAG)) && !VC.pauseOn(LAG, VC.defaultProg(LAG)));
   // 36aee02: main before pauseNew (the lag rule, live next); the rest as in [lag].
   for(const [sha, pk] of [["36aee02", LAG], ["590af86", PACK], ["ea62a45", PACK], ["3d66aea", OLDP]]){
@@ -597,7 +590,7 @@ console.log("\n[rotation-s] pack.readRotation (fb16): optional read.done s / ls 
   const old = { unlocked: { "1": 1 }, done: { p0001: { sc: 3, n: 5, d: "2026-09-01", x: 1 }, p0002: { sc: 5, n: 5, d: "2026-09-02", x: 2, l: 1 } } };
   const base = Object.assign(mig("HEAD"), { read: clone(old), sn: 6 });
   const bo = VC.bootProg(JSON.stringify(base), RR);
-  check("records without s/ls boot unchanged here (no backup, nothing added)", RR.readRotation === true && bo.backupRaw === null && eq(bo.prog.read, old));
+  check("records without s/ls boot unchanged here (no backup, nothing added)", bo.backupRaw === null && eq(bo.prog.read, old));
   const p = clone(bo.prog);
   VC.markPassageDone(p, "p0001", 4, 5, "2026-10-03", true, RR);
   VC.markPassageDone(p, "p0002", 5, 5, "2026-10-03", false, RR);
@@ -627,7 +620,6 @@ console.log("\n[rotation-s] pack.readRotation (fb16): optional read.done s / ls 
 
 console.log("\n[wordsBy] pack.wordsBy \"typed\" (fb18): word streak semantics only, no field added; records read on a8e9c08 unchanged; words at 3+ stay known");
 {
-  check(`zh ships wordsBy "typed" (${LAG_PACK.wordsBy})`, LAG_PACK.wordsBy === "typed" && VC.wordsTypedOn(LAG_PACK));
   const seed = mig("HEAD"); const ids = Object.keys(seed.w);
   const known0 = ids.filter(id => (seed.w[id].s || 0) >= VC.WORD_MASTERED);
   const ownerBoot = VC.bootProg(JSON.stringify(seed), LAG_PACK);
