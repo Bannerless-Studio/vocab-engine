@@ -10,7 +10,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
 const os = require("os");
 const cp = require("child_process");
 
@@ -82,6 +82,8 @@ let NOW = new Date(2026, 9, 7, 8, 0, 0).getTime();
 class FakeDate extends Date { constructor(...a){ if(a.length) super(...a); else super(NOW); } static now(){ return NOW; } }
 async function boot(pack, prog, seed, opts){
   const o = opts || {};
+  // an engine older than the flag collapse reads the collapsed keys: give it the values every live pack shipped
+  if(o.core && o.core !== VC) pack = withCollapsed(pack);
   Math.random = mulberry32(seed);
   const st = o.st || { ls: memStore(), ss: memStore() }; if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog));
   const document = makeFakeDom();
@@ -164,7 +166,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
 (async () => {
   console.log("[1] config: characters.bareByPair on zh, needs pairs; validator");
   check("packs/zh sets characters.bareByPair with pairs", PACK.characters.bareByPair === true && VC.bareByPairOn(PACK));
-  check("bareByPairOn: off without the field, without pairs, without dayAware, or not true", !VC.bareByPairOn(PACK_OFF) && !VC.bareByPairOn(Object.assign({}, PACK, { pairs: false })) && !VC.bareByPairOn(Object.assign({}, PACK, { dayAware: false })) &&
+  check("bareByPairOn: off without the field or not true (pairs / dayAware are engine default since the flag collapse)", !VC.bareByPairOn(PACK_OFF) &&
     !VC.bareByPairOn(Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { bareByPair: "yes" }) })));
   {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "barepair-val-"));
@@ -174,7 +176,6 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
       try { cp.execSync(`${PY} "${path.join(ROOT, "tools", "validate_pack.py")}" "${d}"`, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); return ""; } catch(e){ return String(e.stdout || "") + String(e.stderr || ""); } };
     check("validate_pack: zh as shipped passes", run(() => {}) === "");
     check("validate_pack: bareByPair not a boolean is an error", /pack\.characters\.bareByPair must be a boolean/.test(run(p => { p.characters.bareByPair = 1; })));
-    check("validate_pack: bareByPair without pairs is an error", /pack\.characters\.bareByPair needs pack\.pairs/.test(run(p => { delete p.pairs; })));
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 
@@ -208,7 +209,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
   T.forEach(([name, rec, wrec, want]) => console.log(`    ${name.padEnd(72)} ${want ? "bare" : "-"}`));
   check(`${T.length} rule cases`, T.every(([, rec, wrec, want]) => pb(rec, wrec) === want), T.filter(([, rec, wrec, want]) => pb(rec, wrec) !== want).map(x => x[0]).join("\n"));
   check("bare (5) stays bare by its streak; pairBare adds nothing there", pb({ r: 5, w: 0, s: 5 }) === false && VC.charTier(5, PACK) === "bare");
-  check("flag off (bareByPair stripped, or pairs off): never", T.every(([, rec, wrec]) => !pb(rec, wrec, PACK_OFF) && !pb(rec, wrec, Object.assign({}, PACK, { pairs: false }))));
+  check("flag off (bareByPair stripped): never", T.every(([, rec, wrec]) => !pb(rec, wrec, PACK_OFF)));
   {
     const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 9], ws: [2, 9] } }), r = p.chars.c[U0.id];
     const was = VC.pairBare(r, U0, p, PACK);
@@ -253,11 +254,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     check("bareWord: the pair-bare unit's word is asked without its reading; off, with it", VC.bareWord(W0, CHARACTERS, p, PACK) && !VC.bareWord(W0, CHARACTERS, p, PACK_OFF));
     const pm = withRec({ r: 5, w: 1, s: 3, p: { wm: [0, 9] } });
     check("bareWord after a miss on the pair: reading back", !VC.bareWord(W0, CHARACTERS, pm, PACK));
-    const NF = (pk => { const q = Object.assign({}, pk); delete q.freqTiers; return q; });
-    const prow = async pk => { const api = await boot(pk, p, 3); api.tab("progress"); await tick(); const h = api.panel(), i = h.indexOf(">Characters</p>"), m = i < 0 ? null : h.slice(i).match(/<tr><td>HSK 1<\/td><td>([^<]*)<\/td><\/tr>/); return m ? m[1] : ""; };
-    const a = await prow(NF(PACK)), b = await prow(NF(PACK_OFF)), c = await prow(PACK);
-    console.log(`    Progress characters row, no freqTiers: on "${a}" | off "${b}" | zh (freqTiers) "${c}"`);
-    check("Progress characters row without freqTiers counts the pair-bare unit as bare; with freqTiers (zh) it counts done, unchanged", /· 1 bare/.test(a) && !/bare/.test(b) && !/bare/.test(c) && a !== b);
+    // the no-freqTiers Progress row check went with the freqTiers flag (frequency tiers are engine default since the flag collapse)
   }
 
   console.log("\n[4] the app with the flag: drill word and passage token lose the reading; a miss brings it back; records unchanged");
@@ -379,7 +376,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     if(!PRE) skip("806ad57 not in this checkout's history");
     else {
       const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "barepair-pre-")), "core_806ad57.js"); fs.writeFileSync(f, PRE); const OLD2 = require(f);
-      const cmp = (p, pk) => { const out = []; for(let sd = 1; sd <= 12; sd++){ out.push(JSON.stringify(OLD2.buildReviewPlan(OLD2.learnedWords(WORDS, pk, p), p, pk, po(sd, { size: 20 }))), JSON.stringify(OLD2.buildRecallPlan(OLD2.learnedWords(WORDS, pk, p), p, pk, 12, po(sd)))); } return out.join("|"); };
+      const cmp = (p, pk0) => { const pk = withCollapsed(pk0), out = []; for(let sd = 1; sd <= 12; sd++){ out.push(JSON.stringify(OLD2.buildReviewPlan(OLD2.learnedWords(WORDS, pk, p), p, pk, po(sd, { size: 20 }))), JSON.stringify(OLD2.buildRecallPlan(OLD2.learnedWords(WORDS, pk, p), p, pk, 12, po(sd)))); } return out.join("|"); };
       const cur = (p, pk) => { const out = []; for(let sd = 1; sd <= 12; sd++){ out.push(JSON.stringify(VC.buildReviewPlan(lw(p), p, pk, po(sd, { size: 20 }))), JSON.stringify(VC.buildRecallPlan(lw(p), p, pk, 12, po(sd)))); } return out.join("|"); };
       check("flag off (bareByPair stripped): 12 Review + 12 Recall plans on three records byte-identical to 806ad57", [p1, mk(8, () => ({})), synth()].every(p => cmp(p, PACK_OFF) === cur(p, PACK_OFF)));
       check("flag on, no candidate (synthetic, no pair answered): plans byte-identical to 806ad57", [pNone, pNone2, pW].every(p => cmp(p, PACK) === cur(p, PACK)));

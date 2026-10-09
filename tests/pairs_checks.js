@@ -180,8 +180,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
 
 (async () => {
   console.log("[1] config: pack.pairs on zh, needs dayAware; validator");
-  check("packs/zh sets pairs: true and dayAware", PACK.pairs === true && PACK.dayAware === true && VC.pairsOn(PACK));
-  check("pairsOn: off without dayAware, off with pairs missing or not true", !VC.pairsOn(Object.assign({}, PACK, { dayAware: false })) && !VC.pairsOn(PACK_OFF) && !VC.pairsOn(Object.assign({}, PACK, { pairs: "yes" })));
+  check("pairs are engine default (flag collapse): zh carries no pairs / dayAware key", !("pairs" in PACK) && !("dayAware" in PACK));
   {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "pairs-val-"));
     const run = pk => { const d = path.join(tmp, String(Math.random()).slice(2)); fs.mkdirSync(d); for(const f of fs.readdirSync(ZH)) if(f.endsWith(".json")) fs.copyFileSync(path.join(ZH, f), path.join(d, f));
@@ -315,42 +314,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     }
   }
 
-  console.log(`\n[6] flag-off control: plans byte-identical to ${MAIN}`);
-  if(!OLD) skip(`engine ${MAIN} not in this checkout's history`);
-  else {
-    const progs = [["owner export", OWNER], ["synthetic 40 at 2", synth(40, 2, 4, 6)], ["synthetic 30 at 1 + misses", (() => { const p = synth(30, 1, 3, 5); p.day = { d: TODAY, n: 2, a: { ["w:" + byLv["1"][2].id]: { mk: ["recall"], ms: 4, m: 1 } } }; return p; })()]].filter(x => x[1]);
-    let n = 0; const bad = [];
-    for(const [name, p0] of progs) for(const sd of [1, 2, 3]){
-      const lw = VC.learnedWords(WORDS, PACK_OFF, p0); const TU = VC.typedUnitWords(CHARACTERS, WORDS, PACK_OFF);
-      const o = () => ({ canHear: () => true, today: TODAY, rng: mulberry32(sd), units: CHARACTERS, typedUnits: TU, typedOk: () => true, typedSeen: () => false, typedKindFits: () => true, sn: 3 });
-      const pairs = [
-        ["Review", c => sigPlan(c.buildReviewPlan(lw, JSON.parse(JSON.stringify(p0)), PACK_OFF, Object.assign(o(), { size: 20, extra: 4 })))],
-        ["Recall", c => sigPlan(c.buildRecallPlan(lw, JSON.parse(JSON.stringify(p0)), PACK_OFF, 12, o()))],
-        ["Listen", c => c.dayPickList(lw, 12, JSON.parse(JSON.stringify(p0)), PACK_OFF, TODAY, "w:", ["hear"], mulberry32(sd), undefined, { sn: 3 }).map(w => w.id).join()],
-        ["Test chars", c => sigPlan(c.charTestPlan(CHARACTERS, lw, JSON.parse(JSON.stringify(p0)), PACK_OFF, 20, mulberry32(sd), TODAY, { sn: 3 }))],
-        ["dayPick", c => { const p = JSON.parse(JSON.stringify(p0)); return c.dayPick(lw.map(w => ({ x: w, key: "w:" + w.id, rec: p.w[w.id], mastered: 3, kinds: ["recall", "hear"] })), 15, c.dayLog(p, TODAY), mulberry32(sd), c.daySn(p)).map(x => x.key).join(); }],
-        ["pairs on, dayAware off", c => { const pk = Object.assign({}, PACK, { dayAware: false }); return sigPlan(c.buildReviewPlan(lw, JSON.parse(JSON.stringify(p0)), pk, Object.assign(o(), { size: 20 }))); }],
-      ];
-      for(const [k, f] of pairs){ n++; const a = f(OLD), b = f(VC); if(a !== b || !a.length) bad.push(`${name} seed ${sd} ${k}`); }
-    }
-    check(`${n} plans (Review, Recall, Listen, Test chars, dayPick, pairs without dayAware) x ${progs.length} progress shapes x 3 seeds byte-identical to ${MAIN}`, bad.length === 0, bad.slice(0, 6).join("\n"));
-  }
-  if(!OLD || !mainHtml) skip(`flag-off app control vs ${MAIN}`);
-  else {
-    const run = async (html, core) => {
-      NOW = new Date(2026, 9, 5, 8, 0, 0).getTime();
-      const api = await boot(PACK_OFF, OWNER || synth(40, 2, 4, 6), 11, { html, core: core ? core : Object.assign({}, VC) });
-      const out = { today: api.panel() }; const ans = mulberry32(7);
-      out.walk = JSON.stringify((await session(api, () => ans() < 0.8)).map(r => [r.key, r.kind, r.label, r.ok]));
-      NOW = new Date(2026, 9, 5, 13, 0, 0).getTime();
-      out.walk2 = JSON.stringify((await session(api, () => ans() < 0.8)).map(r => [r.key, r.kind, r.label, r.ok]));
-      const p = api.getProg(); out.prog = JSON.stringify(p);
-      return out;
-    };
-    const a = await run(mainHtml, Object.assign({}, OLD)), b = await run(undefined, undefined);
-    for(const k of Object.keys(a)){ let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
-      check(`flag off (pairs stripped), two sessions on ${OWNER ? "the owner export" : "a synthetic record"}: ${k} byte-identical to ${MAIN} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}`}`, a[k] === b[k] && a[k].length > 100); }
-  }
+  // [6] (flag-off control vs main) deleted: pairs is engine default since the flag collapse.
 
   console.log("\n[7] app on zh with pairs: three Today sessions on " + (OWNER ? "the owner export" : "a synthetic record"));
   {
@@ -420,7 +384,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const ids = plan => xs(plan).map(it => it.unit.id).sort().join(",");
     for(const x of recs){
       const name = x.fx.lang || x.pk.key, units = x.fx.script.units, kctx = { units, words: x.fx.words, tts: VC.scriptConfig(x.pk).tts };
-      check(`${name}: pairs on with the script primer (pairsOn, scriptConfig)`, VC.pairsOn(x.pk) && !!VC.scriptConfig(x.pk));
+      check(`${name}: script primer configured (scriptConfig)`, !!VC.scriptConfig(x.pk));
       let same = 0, shares = [], fit = true, noPair = true, wordsPaired = true, miss = 0, full = 0;
       for(const seed of [1, 2, 3]){
         const n = 20;

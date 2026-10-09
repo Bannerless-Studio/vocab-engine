@@ -11,7 +11,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
 const os = require("os");
 const cp = require("child_process");
 
@@ -81,6 +81,8 @@ let NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
 class FakeDate extends Date { constructor(...a){ if(a.length) super(...a); else super(NOW); } static now(){ return NOW; } }
 async function boot(pack, prog, seed, opts){
   const o = opts || {};
+  // an engine older than the flag collapse reads the collapsed keys: give it the values every live pack shipped
+  if(o.core && o.core !== VC) pack = withCollapsed(pack);
   Math.random = mulberry32(seed);
   const st = o.st || { ls: memStore(), ss: memStore() }; if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog));
   const document = makeFakeDom();
@@ -156,7 +158,7 @@ const ptKey = it => String(it.key).startsWith("p:");
 (async () => {
   console.log("[1] config: pack.patterns on zh with pairs; patterns.json; validator");
   check("packs/zh sets patterns: true with pairs and dayAware; sentences.js carries PATTERNS", PACK.patterns === true && VC.patternsOn(PACK) && Array.isArray(PATTERNS) && PATTERNS.length === 27);
-  check("patternsOn: off without pairs, without dayAware, with patterns missing or not true", !VC.patternsOn(Object.assign({}, PACK, { pairs: false })) && !VC.patternsOn(Object.assign({}, PACK, { dayAware: false })) && !VC.patternsOn(PACK_OFF) && !VC.patternsOn(Object.assign({}, PACK, { patterns: "yes" })));
+  check("patternsOn: off with patterns missing or not true (pairs / dayAware are engine default since the flag collapse)", !VC.patternsOn(PACK_OFF) && !VC.patternsOn(Object.assign({}, PACK, { patterns: "yes" })));
   const lvN = { "2": 0, "3": 0, "4": 0 }; PATTERNS.forEach(p => { lvN[p.lv]++; });
   check(`27 patterns: ${lvN["2"]} HSK 2, ${lvN["3"]} HSK 3, ${lvN["4"]} HSK 4; 6-8 sentences each; every sentence <= 14 characters`, lvN["2"] + lvN["3"] === 14 && lvN["4"] === 13 &&
     PATTERNS.every(p => p.sentences.length >= 6 && p.sentences.length <= 8) && PATTERNS.every(p => p.sentences.every(s => s.t.replace(/[，。？！]/g, "").length <= 14)));
@@ -172,7 +174,6 @@ const ptKey = it => String(it.key).startsWith("p:");
       try { const out = cp.execSync(`${PY} "${path.join(ROOT, "tools", "validate_pack.py")}" "${d}"`, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); return /WARN {2}patterns/.test(out) ? out : ""; } catch(e){ return String(e.stdout || "") + String(e.stderr || ""); } };
     check("validate_pack: zh as shipped passes", run() === "");
     check("validate_pack: patterns not a boolean is an error", /pack\.patterns must be a boolean/.test(run(p => { p.patterns = 1; })));
-    check("validate_pack: patterns without pairs is an error", /pack\.patterns needs pack\.pairs/.test(run(p => { delete p.pairs; })));
     check("validate_pack: patterns on without patterns.json is an error", /patterns\.json is missing/.test(run(null, null, true)));
     check("validate_pack: patterns.json without the flag warns", /patterns\.json present but pack\.patterns is not true/.test(run(p => { delete p.patterns; })));
     check("validate_pack: a key not in the pattern's words is an error", /keys must list word ids/.test(run(null, t => { t[0].keys = ["w9999"]; })));
@@ -198,7 +199,7 @@ const ptKey = it => String(it.key).startsWith("p:");
     const prog = id => { const q = synth([], 0, 0, 5); ws.slice(0, id).forEach(w => { q.w[w] = { r: 1, w: 0, s: 0 }; }); return q; };
     console.log(`    ${p.id} ${p.label}: ${ws.length} distinct words, opens at ${need}`);
     check(`${p.id} closed at ${need - 1} of ${ws.length} learned, open at ${need}`, !VC.openPatterns(prog(need - 1), PACK, [p], WORDS).length && VC.openPatterns(prog(need), PACK, [p], WORDS).length === 1);
-    check("flag off (pack without patterns, or pairs off): nothing opens", !VC.openPatterns(prog(ws.length), PACK_OFF, [p], WORDS).length && !VC.openPatterns(prog(ws.length), Object.assign({}, PACK, { pairs: false }), [p], WORDS).length);
+    check("flag off (pack without patterns): nothing opens", !VC.openPatterns(prog(ws.length), PACK_OFF, [p], WORDS).length);
     {
       // keys and level gate: p = first pattern, its own words (keys) and the level reached
       const k = PATTERNS.find(x => (x.keys || []).length), kws = patternWordIds(k);
@@ -427,7 +428,7 @@ const ptKey = it => String(it.key).startsWith("p:");
     const refOn = await walk(PACK, mainHtml, OLD, undefined);
     check("flag on without patterns.json: byte-identical to main", JSON.stringify(nofile) === JSON.stringify(refOn), nofile.findIndex((x, i) => x !== refOn[i]));
     const ctl = (core, pack) => { const p = synth(["1", "2", "3"], 2, 4, 9); return JSON.stringify([core.buildReviewPlan(VC.learnedWords(WORDS, pack, p), p, pack, { canHear: () => true, today: "2026-10-05", rng: mulberry32(4), sn: 10 }).map(x => [x.kind, x.word && x.word.id]), core.validateProgShape(p, ["1", "2", "3", "4"]).ok]); };
-    check("core plans unchanged (Review plan, validateProgShape)", ctl(VC, PACK) === ctl(OLD, PACK));
+    check("core plans unchanged (Review plan, validateProgShape)", ctl(VC, PACK) === ctl(OLD, withCollapsed(PACK)));
   }
 
   console.log("\n[10] the owner's export (a48ee4d3, read-only; $PAIRS_OWNER overrides) under this pack");

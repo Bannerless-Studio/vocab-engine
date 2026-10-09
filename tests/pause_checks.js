@@ -33,9 +33,6 @@ const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // The lag Learn row's set label changed after 36aee02 (per-level, fb9): both sides compared with it masked.
-// optsMix (docs/PACK_SCHEMA.md "optsMix"), readRotation and wordsBy came after 36aee02: the controls drop them too.
-const NOMIX = packAsOf(PACK, MAIN, { keep: [] });
-const OFF = stripFlags(NOMIX, []);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
 
@@ -247,9 +244,9 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
 (async function main(){
   console.log("\n[1] core");
   {
-    check("packs/zh sets pauseNew: true", PACK.pauseNew === true);
+    check("pause is engine default (flag collapse): zh carries no pauseNew key", !("pauseNew" in PACK));
     const p = base();
-    check("pauseOn: needs pack.pauseNew and prog.pause 1", !VC.pauseOn(PACK, p) && VC.pauseOn(PACK, VC.setPause(clone(p), true)) && !VC.pauseOn(OFF, VC.setPause(clone(p), true)) && !VC.pauseOn(PACK, Object.assign(clone(p), { pause: true })));
+    check("pauseOn: needs prog.pause 1", !VC.pauseOn(PACK, p) && VC.pauseOn(PACK, VC.setPause(clone(p), true)) && !VC.pauseOn(PACK, Object.assign(clone(p), { pause: true })));
     const q = VC.setPause(clone(p), true);
     check("setPause: on writes pause 1; off deletes the field (the record is as before)", q.pause === 1 && eq(VC.setPause(q, false), p) && !("pause" in q));
     const o = ownerProg();
@@ -268,24 +265,7 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
     fs.writeFileSync(f, withDayRules(cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }), MAIN)); OLD = require(f);
   } catch(e){ OLD = null; }
 
-  console.log(`\n[2] flag off, and on but not paused: as on main ${MAIN}`);
-  if(!OLD) console.log(`NOTE  engine ${MAIN} not in this checkout's history: control skipped`);
-  else for(const [name, mk] of SCEN){
-    for(const [label, pack, pz] of [["flag off", OFF, false], ["flag off, stored pause 1", OFF, true], ["flag on, not paused", NOMIX, false]]){
-      const out = [];
-      for(const [core, html] of [[VC, appHtml], [OLD, MAIN_HTML]]){
-        const p = mk(); if(pz) p.pause = 1;
-        const st = fresh(); st.ls.setItem(VC.storageKey(pack), JSON.stringify(p));
-        NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
-        const api = await boot(pack, st, 1, { core, html }); const t = api.panel(); api.goto("progress"); const g = api.html("panel");
-        api.today(); const s = playSession(api);
-        out.push({ t: t.replace(/(<bdi[^>]*>字<\/bdi>|字)(?: [^,<]*)?, set \d+ of \d+/, "$1 SET"), g: g.replace(CHAR_ROWS, "").replace('<table class="stats nw">', '<table class="stats">'), s, prog: st.ls.getItem(VC.storageKey(pack)) });
-      }
-      const sameProgress = label === "flag on, not paused" ? out[0].g.replace(/<div class="row" style="margin-top:14px"><button class="chip on" id="togglePause" aria-pressed="true">New material: on<\/button><\/div>/, "") === out[1].g && /id="togglePause"/.test(out[0].g) : out[0].g === out[1].g && !/togglePause/.test(out[0].g);
-      check(`${name}, ${label}: Today and a whole session's progress byte-identical to ${MAIN}; Progress ${label === "flag on, not paused" ? "identical but the chip" : "identical, no chip"} (${out[0].t.length} chars, ${out[0].s ? out[0].s.items : 0} items)`,
-        out[0].t === out[1].t && out[0].prog === out[1].prog && sameProgress);
-    }
-  }
+  // [2] (flag off / not paused vs main 36aee02) deleted: pauseNew is engine default since the flag collapse.
 
   console.log("\n[3] the chip: toggle, reload, import");
   {

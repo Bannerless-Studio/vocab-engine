@@ -72,7 +72,7 @@ const SIBLINGS = ["arabic", "french", "german", "hindi", "indonesian", "italian"
 const SIBLING_ALLOW = [];
 const unlistedNewKeys = (work, committed) => Object.keys(work).filter(k => !(k in committed) && !topFlags.has(k) && !SIBLING_ALLOW.includes(k));
 check("sibling drift rule: a new unlisted key is caught, a FLAG_SINCE key and an allow-listed one pass", (() => {
-  const u = unlistedNewKeys({ key: "x", pairs: true, bogusNew: 1 }, { key: "x" });
+  const u = unlistedNewKeys({ key: "x", appView: "v2", bogusNew: 1 }, { key: "x" });
   return u.length === 1 && u[0] === "bogusNew";
 })());
 SIBLINGS.forEach(lang => {

@@ -163,9 +163,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
 
 (async () => {
   console.log("[1] config: pack.freqTiers on zh, needs pairs; validator");
-  check("packs/zh sets freqTiers: true with pairs and dayAware", PACK.freqTiers === true && VC.freqTiersOn(PACK));
-  check("freqTiersOn: off without pairs, without dayAware, with the field missing or not true", !VC.freqTiersOn(Object.assign({}, PACK, { pairs: false })) && !VC.freqTiersOn(Object.assign({}, PACK, { dayAware: false })) && !VC.freqTiersOn(PACK_OFF) && !VC.freqTiersOn(Object.assign({}, PACK, { freqTiers: 1 })));
-  check("flag off: every word and unit reads core (ft ignored)", WORDS.every(w => VC.wordTier(w, PACK_OFF) === VC.FT_CORE) && CHARACTERS.every(u => VC.unitTier(u, BY_ID, PACK_OFF) === VC.FT_CORE && VC.unitTier(u, null, PACK_OFF) === VC.FT_CORE));
+  check("frequency tiers are engine default (flag collapse): zh carries no freqTiers key, its words read their ft", !("freqTiers" in PACK) && WORDS.some(w => VC.wordTier(w, PACK) !== VC.FT_CORE));
   {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "ft-val-"));
     const run = (pk, wk, ck) => { const d = path.join(tmp, String(Math.random()).slice(2)); fs.mkdirSync(d); for(const f of fs.readdirSync(ZH)) if(f.endsWith(".json")) fs.copyFileSync(path.join(ZH, f), path.join(d, f));
@@ -384,45 +382,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       nn && nn.lv === "2" && nn.set === 3 && settled.sets["2"] === 3 && nn.words.map(w => w.id).join() === L2.filter(w => !want.includes(w.id)).slice(0, 10).map(w => w.id).join());
   }
 
-  console.log(`\n[9] flag-off control: byte-identical to ${MAIN}`);
-  if(!OLD) skip(`engine ${MAIN} not in this checkout's history`);
-  else {
-    const progs = [["owner export", OWNER], ["synthetic HSK 1 at 2", synth(2, 3, 6)], ["synthetic known, aged", synth(3, (w, i) => i % 30, 40)]].filter(x => x[1]);
-    let n = 0; const bad = [];
-    for(const [name, p0] of progs) for(const sd of [1, 2, 3]){
-      const lw = VC.learnedWords(WORDS, PACK_OFF, p0); const TU = VC.typedUnitWords(CHARACTERS, WORDS, PACK_OFF);
-      const sn = (p0.sn || 0) + 1, o = () => ({ canHear: () => true, today: TODAY, rng: mulberry32(sd), units: CHARACTERS, typedUnits: TU, typedOk: () => true, typedSeen: () => false, typedKindFits: () => true, sn });
-      const runs = [
-        ["Review", c => sigPlan(c.buildReviewPlan(lw, clone(p0), PACK_OFF, Object.assign(o(), { size: 20 })))],
-        ["Recall", c => sigPlan(c.buildRecallPlan(lw, clone(p0), PACK_OFF, 12, o()))],
-        ["Listen", c => c.dayPickList(lw, 12, clone(p0), PACK_OFF, TODAY, "w:", ["hear"], mulberry32(sd), undefined, { sn }).map(w => w.id).join()],
-        ["Test chars", c => sigPlan(c.charTestPlan(CHARACTERS, lw, clone(p0), PACK_OFF, 20, mulberry32(sd), TODAY, { sn }))],
-        ["goals", c => JSON.stringify(c.goalPositions(clone(p0), PACK_OFF, WORDS, CHARACTERS, []))],
-        ["progress", c => String(c.progressPosition(clone(p0), Object.assign({}, PACK_OFF, { progressMap: true }), WORDS, CHARACTERS, []))],
-        ["notePair", c => { const r = clone(p0.w[lw[0].id]); c.notePair(r, "wm", true, false, sn, r.s); c.notePair(r, "sm", true, false, sn, r.s); return JSON.stringify(r); }],
-      ];
-      for(const [k, f] of runs){ n++; const a = f(OLD), b = f(VC); if(a !== b || !a.length) bad.push(`${name} seed ${sd} ${k}`); }
-    }
-    check(`${n} results (Review, Recall, Listen, Test chars, goal / progress positions, notePair) x ${progs.length} progress shapes x 3 seeds byte-identical to ${MAIN}`, bad.length === 0, bad.slice(0, 6).join("\n"));
-  }
-  if(!OLD || !mainHtml) skip(`flag-off app control vs ${MAIN}`);
-  else {
-    const run = async (html, core) => {
-      NOW = new Date(2026, 9, 6, 8, 0, 0).getTime();
-      // characters.bareByPair (fb31) postdates ff760d8: stripped too (tests/bare_pair_checks.js controls it).
-      const pk = Object.assign({}, PACK_OFF, { characters: (c => { const q = Object.assign({}, c); delete q.bareByPair; return q; })(PACK_OFF.characters) });
-      const api = await boot(pk, OWNER || synth(2, 3, 6), 11, { html, core: core ? core : Object.assign({}, VC) });
-      const out = { today: api.panel() }; const ans = mulberry32(7);
-      out.walk = JSON.stringify((await session(api, () => ans() < 0.8)).map(r => [r.key, r.kind, r.label, r.ok]));
-      NOW = new Date(2026, 9, 6, 13, 0, 0).getTime();
-      out.walk2 = JSON.stringify((await session(api, () => ans() < 0.8)).map(r => [r.key, r.kind, r.label, r.ok]));
-      api.goto("progress"); out.progress = api.panel(); out.prog = JSON.stringify(api.getProg());
-      return out;
-    };
-    const a = await run(mainHtml, Object.assign({}, OLD)), b = await run(undefined, undefined);
-    for(const k of Object.keys(a)){ let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
-      check(`flag off (freqTiers stripped), two sessions on ${OWNER ? "the owner export" : "a synthetic record"}: ${k} byte-identical to ${MAIN} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}`}`, a[k] === b[k] && a[k].length > 100); }
-  }
+  // [9] (flag-off control vs ff760d8) deleted: freqTiers is engine default since the flag collapse.
 
   console.log("\n[10] the app with freqTiers: three Today sessions on " + (OWNER ? "the owner export" : "a synthetic record"));
   {

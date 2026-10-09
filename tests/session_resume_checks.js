@@ -215,7 +215,7 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
   // ---------------------------------------------------------------- [1] core rules
   console.log("\n[1] core.js: key, fingerprint, staleness");
   // Every app check below runs with the day-aware planner on (its drills write prog.day / sn / u).
-  check("zh pack runs with dayAware on", PACK.dayAware === true);
+  check("zh pack: dayAware is engine default (flag collapse), no key", !("dayAware" in PACK));
   {
     check("sessionKey: vocab_<pack>_session beside the progress key", VC.sessionKey(PACK) === "vocab_zh_session" && VC.sessionKey({ key: "it" }) === "vocab_it_session");
     check("sessionHash: deterministic 8-hex fingerprint, differs on a one-char change", VC.sessionHash("abc") === VC.sessionHash("abc") && /^[0-9a-f]{8}$/.test(VC.sessionHash("abc")) && VC.sessionHash("abc") !== VC.sessionHash("abd") && VC.sessionHash(null) === VC.sessionHash(""));
@@ -446,7 +446,7 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       api.el("go").onclick({});
       api.todayJump(5);
       const r0 = api.rd(), pid = r0 && r0.p.id, qs = r0 && r0.p.questions.map(q => q.q).join("|");
-      check(`readRotation: Today plans a listening pass of a done passage (${pid})`, PACK.readRotation === true && row && !!r0 && r0.mode === "listen" && done.some(x => x.id === pid));
+      check(`readRotation: Today plans a listening pass of a done passage (${pid})`, row && !!r0 && r0.mode === "listen" && done.some(x => x.id === pid));
       api.el("rdone").click();
       ({ api } = await boot(Object.assign({ seed: 25 }, st)));
       const r1 = api.rd();

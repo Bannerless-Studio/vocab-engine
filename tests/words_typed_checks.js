@@ -151,8 +151,7 @@ function seedW(){
 
 (async function main(){
   console.log("[1] config and validation");
-  check(`zh ships wordsBy "typed"; WORD_HOLD ${VC.WORD_HOLD}, WORD_MASTERED ${VC.WORD_MASTERED}`, PACK.wordsBy === "typed" && VC.wordsTypedOn(PACK) && VC.WORD_HOLD === 2 && VC.WORD_MASTERED === 3);
-  check("off without the field or with another value", !VC.wordsTypedOn(PACK_OFF) && !VC.wordsTypedOn(Object.assign({}, PACK, { wordsBy: "choice" })) && !VC.wordsTypedOn(null));
+  check(`wordsBy "typed" is engine default (flag collapse); WORD_HOLD ${VC.WORD_HOLD}, WORD_MASTERED ${VC.WORD_MASTERED}`, !("wordsBy" in PACK) && VC.WORD_HOLD === 2 && VC.WORD_MASTERED === 3);
   {
     const base = { key: "synthwb", name: "Synth", tts: "en-US", levels: [{ id: "1", label: "One" }], placement: [["1", 1]], showPron: false, hasLessons: false, typing: {}, dayAware: true };
     const words = Array.from({ length: 12 }, (_, i) => ({ id: `w${i + 1}`, w: `word${i + 1}`, en: `gloss${i + 1}`, lv: "1" }));
@@ -193,26 +192,7 @@ function seedW(){
     check("a word without a record yet is created as markRec does", (() => { const a = {}, b = {}; VC.markWordRec(a, "x", true, "recall", undefined, PACK); VC.markRec(b, "x", true, true, "recall"); return JSON.stringify(a) === JSON.stringify(b); })());
   }
 
-  console.log(`\n[3] flag-off control: markWordRec vs ${MAIN} markRec, every word kind, both outcomes`);
-  if(!OLD) skip(`${MAIN} not in this checkout's history`);
-  else {
-    const KINDS = ["recall", "read", "hear", "type", "gap", "gapType", undefined];
-    let n = 0; const diff = [];
-    for(const kind of KINDS) for(let s = 0; s <= 5; s++) for(const ok of [true, false]) for(const extra of [{}, { prov: 1 }, { k: "recall" }, { k: "type", t: 20001, u: 3 }]) for(const req of [undefined, "type", "recall"]){
-      const rec = Object.assign({ r: 4, w: 2, s }, extra);
-      const a = { x: clone(rec) }, b = { x: clone(rec) }, c = { x: clone(rec) };
-      OLD.markRec(a, "x", ok, true, kind, req); VC.markWordRec(b, "x", ok, kind, req, PACK_OFF); VC.markRec(c, "x", ok, true, kind, req); n++;
-      if(JSON.stringify(a) !== JSON.stringify(b) || JSON.stringify(a) !== JSON.stringify(c)) diff.push(`${kind} s${s} ${ok} ${JSON.stringify(extra)} ${req}: ${JSON.stringify(a.x)} vs ${JSON.stringify(b.x)}`);
-    }
-    check(`${n} cases byte-identical (flag off, and markRec itself)`, diff.length === 0, diff.slice(0, 5).join("\n"));
-    let n2 = 0; const d2 = [];
-    for(const kind of KINDS) for(let s = 0; s < VC.WORD_HOLD; s++) for(const ok of [true, false]){ const a = { x: { r: 1, w: 0, s } }, b = { x: { r: 1, w: 0, s } }; OLD.markRec(a, "x", ok, true, kind); VC.markWordRec(b, "x", ok, kind, undefined, PACK); n2++; if(JSON.stringify(a) !== JSON.stringify(b)) d2.push(`${kind} s${s} ${ok}`); }
-    check(`flag on, below WORD_HOLD: ${n2} cases byte-identical to ${MAIN}`, d2.length === 0, d2.join("\n"));
-    const gapLine = h => (h.match(/^function markGapWord\(.*$/m) || [""])[0];
-    // pack.pairs (fb23) adds a pair note for a cloze miss; the streak line is otherwise main's.
-    const noPairs = l => l.replace(' if(PAIRS_ON && !ok && prog.w[id]) VC.notePair(prog.w[id], "wm", false, false, VC.daySn(prog));', "");
-    check("cloze (markGapWord) unchanged: a blanked word's streak never moves, flag on or off", !!mainHtml && noPairs(gapLine(appHtml)) === gapLine(mainHtml) && !/markRec|markWordRec/.test(gapLine(appHtml)));
-  }
+  // [3] (flag-off control vs main markRec) deleted: wordsBy "typed" is engine default since the flag collapse.
 
   console.log("\n[4] planner: held words planned typed");
   {

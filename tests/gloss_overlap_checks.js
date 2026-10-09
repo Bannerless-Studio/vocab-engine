@@ -442,7 +442,6 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
   console.log("\n[9] dayAware routing keeps noTypedMeaning; a synonym answer is logged for the asked word");
   {
     const today = "2026-10-02", wk = VC.dayWordKinds(PACK), ck = VC.dayCharKinds(PACK);
-    check("zh pack is dayAware (the routing below is live)", VC.dayAwareOn(PACK));
     const marked = WORDS.filter(w => w.noTypedMeaning);
     const { api } = await boot({ seed: 7 });
     const labels = new Set(); let routed = 0;

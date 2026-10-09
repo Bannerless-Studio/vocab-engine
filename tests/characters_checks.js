@@ -350,6 +350,8 @@ function suite(F){
     const p = P(full(i1), { [units[0].id]: rec(2, 1) });
     // Records for every counted word, as real progress has; learnedWords reads records.
     p.w = {}; VC.pinPrefixRecords(p, words, pack); p.w[words[0].id] = rec(3);
+    // level gate (engine default since the flag collapse): the counted words read known (placed), so the gate is open
+    Object.values(p.w).forEach(r => { r.prov = 1; });
     const before = clone(p);
     const pathB = VC.stagePath(pack, words, units, p), stB = VC.nextStage(pack, words, units, p);
     VC.setCharOrder(p, true);

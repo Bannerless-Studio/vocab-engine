@@ -604,7 +604,7 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
     const k = VC.placementStopIndex(st.map((_, i) => i < 10 ? { r: i === 3 ? 0 : 3, n: 3 } : { r: 0, n: 3 }), { whole: true });
     const placedOwner = () => VC.applyPlacement(freshStart(), st, k, WORDS, PACK, CHARACTERS);
     const placedA2 = () => VC.applyPlacement(freshStart(), st, st.findIndex(b => String(b.lv) === "3"), WORDS, PACK, CHARACTERS);
-    check(`zh ships placedKnown; the owner fixture gives k = ${k} (lands ${st[k] && st[k].lv})`, PACK.placedKnown === true && VC.placedKnownOn(PACK) && !VC.placedKnownOn(PK0) && k === 10 && String(st[k].lv) === "4");
+    check(`the owner fixture gives k = ${k} (lands ${st[k] && st[k].lv})`, k === 10 && String(st[k].lv) === "4");
     const freshEta = VC.sessionsToGoX(freshStart(), 0, 3, ctx);
     for(const [name, mk] of [["owner k=10 (HSK 4)", placedOwner], ["A2-equivalent (HSK 3)", placedA2]]){
       const p = mk(), land = st[name.startsWith("owner") ? k : st.findIndex(b => String(b.lv) === "3")];

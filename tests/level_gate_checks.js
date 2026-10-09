@@ -289,9 +289,8 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
 
 (async () => {
   const L2 = BYLV[LV[1]].length, need = Math.ceil(G * L2 - 1e-9);
-  console.log(`\n[1] core: levelGateOn, levelKnownPct, hold just under / at ${G * 100}%`);
-  check("levelGateOn: zh ships 0.7 and reads on", PACK.levelGate === 0.7 && VC.levelGateOn(PACK));
-  check("levelGateOn: off without pairs, without the field, for 0, 1.5, true, a string", !VC.levelGateOn(Object.assign({}, PACK, { pairs: false })) && !VC.levelGateOn((p => { delete p.levelGate; return p; })(Object.assign({}, PACK))) && [0, 1.5, true, "0.8", -1].every(v => !VC.levelGateOn(Object.assign({}, PACK, { levelGate: v }))) && VC.levelGateOn(Object.assign({}, PACK, { levelGate: 1 })));
+  console.log(`\n[1] core: LEVEL_GATE, levelKnownPct, hold just under / at ${G * 100}%`);
+  check("level gate is engine default at 0.7 (flag collapse): VC.LEVEL_GATE, zh carries no levelGate key", VC.LEVEL_GATE === 0.7 && !("levelGate" in PACK));
   const hold = seed(2, need - 1, PACK), open = seed(2, need, PACK);
   const pctHold = Math.floor(VC.levelKnownPct(WORDS, PACK, hold, LV[1]) * 100);
   check(`levelKnownPct: ${need - 1} of ${L2} known = ${(VC.levelKnownPct(WORDS, PACK, hold, LV[1]) * 100).toFixed(1)}%, ${need} = ${(VC.levelKnownPct(WORDS, PACK, open, LV[1]) * 100).toFixed(1)}%`, VC.levelKnownPct(WORDS, PACK, hold, LV[1]) < G && VC.levelKnownPct(WORDS, PACK, open, LV[1]) >= G);
@@ -355,28 +354,7 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
   const PO = await todayHtml(PACK, open, null); PO.api.clickTab("progress");
   check("gate open: no note", !/waits/.test(PO.api.panel()));
 
-  console.log(`\n[4] controls vs main ${MAIN} (flag off, gate open, no pairs)`);
-  if(!OLD) check("main core readable via git", false);
-  else {
-    const OFF = packAsOf(PACK, MAIN);
-    const NOPAIRS = Object.assign({}, PACK, { pairs: false, freqTiers: false });
-    const OLDNP = packAsOf(NOPAIRS, MAIN);
-    const recs = [["fresh", () => VC.normalizeProg({}, PACK)], ["HSK 1-2 held-shaped", () => hold], ["HSK 1-2 open-shaped", () => open], ["HSK 1-3 learned", () => seed(3, 100, PACK)]];
-    const sig = (C, pack, p) => JSON.stringify([C.todaySnapshot(pack, WORDS, CHARACTERS, clone(p), []), C.stagePath(pack, WORDS, CHARACTERS, clone(p), []), C.nextNewSet(WORDS, pack, clone(p))]);
-    for(const [name, mk] of recs){
-      const p = mk();
-      check(`flag off: core snapshot, path, next set identical to main on ${name}`, sig(VC, OFF, p) === sig(OLD, OFF, p));
-      check(`no pairs (levelGate ignored): identical to main on ${name}`, sig(VC, Object.assign({}, NOPAIRS), p) === sig(OLD, OLDNP, p));
-    }
-    for(const [name, p] of [["fresh", VC.normalizeProg({}, PACK)], ["open-shaped", open], ["HSK 1-3 learned", seed(3, 100, PACK)]]){
-      const cur = strip((await todayHtml(OFF, p, null)).html), old = strip((await todayHtml(OFF, p, { app: OLD_APP, core: OLD })).html);
-      check(`flag off: Today HTML byte-identical to main on ${name}`, cur === old);
-      const gOpen = strip((await todayHtml(PACK, p, null)).html);
-      if(name !== "HSK 1-3 learned") check(`gate open (flag on): Today HTML byte-identical to flag off on ${name}`, gOpen === cur);
-      const a = await todayHtml(OFF, p, null), b = await todayHtml(OFF, p, { app: OLD_APP, core: OLD }); a.api.clickTab("progress"); b.api.clickTab("progress");
-      check(`flag off: Progress HTML byte-identical to main on ${name}`, strip(a.api.panel()) === strip(b.api.panel()));
-    }
-  }
+  // [4] (flag-off controls vs main) deleted: the level gate is engine default since the flag collapse.
 
   console.log(`\n[5] owner export (read-only)`);
   if(!OWNER) console.log("  (no owner export: skipped)");

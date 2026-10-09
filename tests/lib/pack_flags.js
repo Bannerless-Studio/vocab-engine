@@ -53,6 +53,14 @@ const COLLAPSED = [
   "placedKnown", "pronUntilPrimer", "placementChars", "progressMap", "rereadPerfectDays",
 ];
 const COLLAPSED_DATA = ["progressMap"];
+// The value every live pack shipped for each key collapsed so far (stage 1). An engine older than the collapse
+// reads them; the current engine ignores them. A control that compares this engine with an older sha boots the
+// older side with withCollapsed(pack), so both run the behaviour that is now default.
+const COLLAPSED_LIVE = {
+  dayAware: true, pauseNew: true, listenQuestions: "all", readRotation: true, wordsBy: "typed", pairs: true, freqTiers: true,
+  levelGate: 0.7, placementWhole: true, placementEarlyStop: true, placedRead: true, placedKnown: true,
+};
+function withCollapsed(pack) { return Object.assign(JSON.parse(JSON.stringify(pack)), COLLAPSED_LIVE); }
 
 const byKey = new Map(FLAG_SINCE.map(f => [f.key, f]));
 const ancestorCache = new Map();
@@ -113,4 +121,4 @@ function packBefore(pack, key, opts) {
   return packAsOf(pack, f.sha + "~1", opts);
 }
 
-module.exports = { FLAG_SINCE, COLLAPSED, COLLAPSED_DATA, stripCollapsed, packAsOf, packBefore, stripFlags, isAncestor };
+module.exports = { FLAG_SINCE, COLLAPSED, COLLAPSED_DATA, COLLAPSED_LIVE, withCollapsed, stripCollapsed, packAsOf, packBefore, stripFlags, isAncestor };
