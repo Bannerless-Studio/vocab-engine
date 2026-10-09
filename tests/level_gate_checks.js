@@ -15,10 +15,8 @@ const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
-// progressView "v2" (fb37) replaces the Progress layout [3] / [7] pin (the old rows, still the flag-off layout); [8] checks v2.
-// appView "v2" (fb40a) words the gate as a sentence on Today and Progress; tests/app_view_checks.js covers it.
-const PACK_V2 = stripFlags(loadConst(path.join(ZH, "pack.js"), "PACK"), ["appView"]);
-const PACK = stripFlags(PACK_V2, ["progressView"]);
+// appView / progressView v2 are engine default since the flag collapse: the gate is a sentence on Today and Progress.
+const PACK = loadConst(path.join(ZH, "pack.js"), "PACK"), PACK_V2 = PACK;
 const G = VC.LEVEL_GATE; // 0.7, engine default since the flag collapse (owner, w32 brief)
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
