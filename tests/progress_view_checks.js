@@ -7,7 +7,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 const os = require("os");
 
@@ -329,7 +329,7 @@ console.log(`\n[3] flag off: Progress HTML byte-identical to ${MAIN}, nothing wr
     const rec = mk(); if(!rec){ skip(`${name}: owner export not found`); continue; }
     // One app at a time: Math.random is reseeded per boot and the Weakest words list draws from it.
     const a = await bootWith(OFF, clone(rec), 7); a.api.clickTab("progress"); const ha = a.api.panel();
-    const b = await bootWith(OFF, clone(rec), 7, { core: oldCore, html: oldHtml }); b.api.clickTab("progress");
+    const b = await bootWith(withCollapsed(OFF), clone(rec), 7, { core: oldCore, html: oldHtml }); b.api.clickTab("progress"); // old engine: collapsed keys at their live values
     const same = ha === b.api.panel();
     a.api.clickTab("today"); b.api.clickTab("today"); a.api.clickTab("progress"); a.api.hide();
     check(`${name}: Progress HTML byte-identical to ${MAIN}; leaving the tab writes no pv; stored records equal`, same && !("pv" in a.api.getProg()) && a.st.ls.getItem(VC.storageKey(OFF)) === b.st.ls.getItem(VC.storageKey(OFF)));

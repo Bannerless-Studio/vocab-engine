@@ -169,7 +169,7 @@ const byLv = VC.wordsByLevel(WORDS, PACK);
 const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
 // Mid HSK 2 before any character stage: with one stage per level (fb2-write) that is a learner who
 // put characters after the words (chars.defer), else 字1 would come before HSK 2.
-const seedPF = () => VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PACK);
+const seedPF = () => { const p = VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PACK); VC.pinPrefixRecords(p, WORDS, PACK); Object.values(p.w).forEach(r => { r.prov = 1; }); return p; }; // counted words placed: the level gate (engine default) reads records
 const KEY = VC.storageKey(PACK), SKEY = VC.sessionKey(PACK);
 function fresh(){ const ls = memStore(), ss = memStore(); ls.setItem(KEY, JSON.stringify(seedPF())); return { ls, ss }; }
 function typedAnswer(it){
@@ -239,15 +239,9 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     check("Today Review drill started", !!api.getD() && api.tab() === "today");
     const kinds = new Set([api.getCur(), ...api.getD().q].map(x => x.label));
     play(api, [true, false, true]);
-    // Move on to a choice item so its option order is checked, typed items are covered below.
-    for(let i = 0; i < 20 && api.getCur().kind !== "mc"; i++) play(api, [true]);
-    const before = snapOf(api);
     const rec = sess(st.ls);
     check(`session recorded in localStorage under ${SKEY}, not in sessionStorage (items: ${rec && rec.drill.q.length}; kinds in drill: ${[...kinds].join(", ")})`, !!rec && rec.tab === "today" && !!rec.drill && st.ss.getItem(SKEY) === null);
-    ({ api } = await boot(Object.assign({ seed: 99 }, st)));
-    const after = snapOf(api);
-    const diff = same(before, after);
-    check(`reload on a choice item: same tab, item, option order, queue (keys, kinds, labels), counts, misses and panel markup (${diff.join(", ") || "all equal"}; item ${before.cur})`, diff.length === 0 && before.opts.length > 0);
+    // Review asks typed pairs first (pairs, engine default since the flag collapse): the choice-item reload runs in the Learn drill below.
     // Typed item on screen.
     for(let i = 0; i < 20 && api.getCur().kind !== "type"; i++) play(api, [true]);
     const t0 = snapOf(api);
@@ -275,6 +269,14 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     if(/id="dr"/.test(teach) && !api.getD()){
       ({ api } = await boot(Object.assign({ seed: 10 }, st)));
       check("reload on the Learn teach screen shows it again (stage 1 re-run)", api.tss() && api.tss().at === 1 && api.html("panel") === teach);
+      // A choice item in the Learn drill, so its option order is checked.
+      api.el("dr").click();
+      for(let i = 0; i < 40 && api.getD() && api.getCur() && api.getCur().kind !== "mc"; i++) play(api, [true]);
+      const before = snapOf(api);
+      ({ api } = await boot(Object.assign({ seed: 99 }, st)));
+      const after = snapOf(api);
+      const diff = same(before, after);
+      check(`reload on a choice item (Learn drill): same tab, item, option order, queue (keys, kinds, labels), counts, misses and panel markup (${diff.join(", ") || "all equal"}; item ${before.cur})`, diff.length === 0 && !!before.cur && before.opts.length > 0);
     } else check("Learn stage has a teach screen to reload on", false);
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
@@ -285,7 +287,10 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     const { api } = await boot(Object.assign({ seed: 4 }, st));
     api.el("go").click();
     play(api, [true, true]);
-    for(let i = 0; i < 20 && api.getCur().kind !== "mc"; i++) play(api, [true]);
+    // Review asks typed pairs first (pairs, engine default since the flag collapse): the choice item comes from the Learn drill.
+    finishDrill(api); api.el("ok").click(); if(/id="dr"/.test(api.html("panel"))) api.el("dr").click();
+    for(let i = 0; i < 40 && api.getD() && api.getCur() && api.getCur().kind !== "mc"; i++) play(api, [true]);
+    check(`a choice item on screen in the Learn drill (${api.getD() && api.getCur() ? sig(api.getCur()) : "none"})`, !!api.getD() && !!api.getCur() && api.getCur().kind === "mc");
     const a = snapOf(api);
     api.clickTab("words");
     check("switched to Words: the Words tab renders, no drill", api.tab() === "words" && !api.getD() && /Drill this set/.test(api.html("wbody")));

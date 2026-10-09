@@ -7,7 +7,7 @@
 // the owner's leak (new answer, every wrong choice known); sentence length outliers; every old
 // guard; progress untouched. [2] app: each site, a Learn drill's options, one script per set,
 // placement as flag off, nothing written, answer position uniform. [3] flag off: core results and
-// a whole app session byte-identical to main 68930bd. Seeded throughout (mulberry32).
+// the draw after them byte-identical to main 68930bd. Seeded throughout (mulberry32).
 // Run: node tests/opts_mix_checks.js [--table]
 "use strict";
 const fs = require("fs");
@@ -177,13 +177,12 @@ function answer(api, right, typed){
   (right ? btns.find(b => b.dataset.v === String(it.a)) : btns.find(b => b.dataset.v !== String(it.a))).click();
 }
 
-let OLD = null, OLD_HTML = null;
+let OLD = null;
 try {
   const os = require("os");
   const src = cp.execSync(`git -C "${ROOT}" show ${BASE}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
   const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "optsmix-")), `core_${BASE}.js`); fs.writeFileSync(f, withDayRules(src, BASE)); OLD = require(f);
-  OLD_HTML = cp.execSync(`git -C "${ROOT}" show ${BASE}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-} catch(e){ OLD = null; OLD_HTML = null; }
+} catch(e){ OLD = null; }
 
 const byLv = VC.wordsByLevel(WORDS, PACK);
 // Learners here carry records without f, taught before pack.freqTiers reordered the levels: in id order (VC.counterOrder).
@@ -676,7 +675,7 @@ async function sec4(){
   }
 
   console.log(`\n[3] flag off: byte-identical to ${BASE}`);
-  if(!OLD || !OLD_HTML) console.log(`NOTE  ${BASE} not in this checkout's history: control skipped`);
+  if(!OLD) console.log(`NOTE  ${BASE} not in this checkout's history: control skipped`);
   else {
     for(const [sname, n] of [["30 learned", 30], ["HSK 1-3", 595]]){
       const p = shape(n), P = stages(p), outs = [];
@@ -693,25 +692,7 @@ async function sec4(){
       }
       check(`core, ${sname}: 300 words x 8 builders + 300 sentences without mix, results and the draw after them identical to ${BASE}`, outs[0] === outs[1]);
     }
-    // wordsBy (docs/PACK_SCHEMA.md "wordsBy") came after 68930bd: this control drops it too.
-    // pack.pairs (fb23) replaces the day planner this control walks; tests/pairs_checks.js covers it.
-    const PACK_CTL = packAsOf(PACK_OFF, BASE);
-    for(const [name, p] of [["fresh", null], ["HSK 1-3", shape(595)]]){
-      const out = [];
-      for(const [core, html] of [[VC, appHtml], [OLD, OLD_HTML]]){
-        const st = fresh(); if(p) st.ls.setItem(VC.storageKey(PACK_CTL), JSON.stringify(p));
-        NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
-        const api = await boot(PACK_CTL, st, 11, { core, html });
-        const items = ORDER_W.slice(0, 120).flatMap(w => [api.readItem(w).opts, api.recallItem(w).opts, api.writtenPronTypeItem(w).choiceFallback().opts]);
-        SENTENCES.slice(0, 60).forEach(s => { items.push(api.readSentence(s).opts); const g = api.gapSentence(s); if(g) items.push(g.opts); });
-        CHARACTERS.slice(0, 60).forEach(u => ["charRead", "charSound", "charPick", "charRecall"].forEach(k => items.push(api.charDrillItem(k, u).opts)));
-        // the lag Learn row's set label changed after 68930bd (per-level, fb9): masked on both sides
-        api.today(); const mask = h => h.replace(/(<bdi[^>]*>字<\/bdi>|字)(?: [^,<]*)?, set \d+ of \d+/g, "$1 SET"), t = mask(api.panel()); play(api);
-        out.push({ items: JSON.stringify(items), t, end: mask(api.panel()), prog: st.ls.getItem(VC.storageKey(PACK_CTL)) });
-      }
-      check(`app on PACK minus optsMix, ${name}: ${out[0].items.length} chars of options, Today, a whole session and its progress byte-identical to ${BASE}`,
-        out[0].items === out[1].items && out[0].t === out[1].t && out[0].end === out[1].end && out[0].prog === out[1].prog);
-    }
+    // app control vs 68930bd deleted: 68930bd predates pairs, an engine default since the flag collapse (the core control above stays).
   }
 
   await sec4();
