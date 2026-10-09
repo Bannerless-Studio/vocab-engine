@@ -165,8 +165,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const q0 = p.questions[0];
     check("question screen mount speaks q.q exactly once", spoken.length === 1 && spoken[0] === q0.q);
@@ -182,8 +182,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken, cancelCount } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES.find(x => x.questions.some(q => x.sentences[q.sentence])) || PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES.find(x => x.questions.some(q => x.sentences[q.sentence])) || PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const q0 = p.questions[0];
     const s0 = p.sentences[q0.sentence];
@@ -207,13 +207,13 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   console.log("\n[2b] reveal: a source sentence carrying audio plays its clip, not TTS");
   try{
     const passages = JSON.parse(JSON.stringify(PASSAGES));
-    const p = passages.find(x => x.questions.some(q => x.sentences[q.sentence])) || passages[0];
+    let p = passages.find(x => x.questions.some(q => x.sentences[q.sentence])) || passages[0];
     const q0 = p.questions[0];
     const s0 = p.sentences[q0.sentence];
     s0.audio = "https://example.test/clip.mp3";
     const { api, spoken, audioInstances } = await boot({ passages });
     api.setProg(seedPF());
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const k = spoken.length;
     const opts = api.el("o").children;
@@ -228,8 +228,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken } = await boot({ voices: [{ lang: "en-US", name: "en" }] }); // wrong lang for zh pack.tts
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     check("question screen: no Replay (#rpa), nothing spoken at mount (no voice for this language)", !RPA.test(api.html("panel")) && spoken.length === 0);
     const q0 = p.questions[0];
@@ -244,10 +244,10 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES[0];
+    let p = PASSAGES[0];
     const q0 = p.questions[0];
     check("setup: this question carries an English translation", !!q0.en);
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const panel0 = api.html("panel");
     check("translation absent on mount, 'Show translation' button present", !panel0.includes(VC.escapeHtml(q0.en)) && /id="qtr"/.test(panel0) && /Show translation/.test(panel0));
@@ -273,10 +273,10 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES[0];
+    let p = PASSAGES[0];
     const q0 = p.questions[0];
     check("setup: this question carries an English translation", !!q0.en);
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const opts = api.el("o").children;
     opts.find(b => b.dataset.v === String(q0.answer)).click(); // answer first
@@ -288,8 +288,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     let k;
     for(let qi = 0; qi < p.questions.length; qi++){
@@ -322,9 +322,9 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES.find(x => x.questions.length > 1) || PASSAGES[0];
+    let p = PASSAGES.find(x => x.questions.length > 1) || PASSAGES[0];
     check("setup: a passage with more than one question", p.questions.length > 1);
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const q0 = p.questions[0];
     const oldBtn = api.el("rpa");
@@ -340,9 +340,9 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken } = await boot({ neverStarts: true }); // engine never reports "speaking" -> every say() times out and arms a retry
     api.setProg(seedPF());
-    const p = PASSAGES.find(x => x.questions.length > 1) || PASSAGES[0];
+    let p = PASSAGES.find(x => x.questions.length > 1) || PASSAGES[0];
     check("setup: a passage with more than one question", p.questions.length > 1);
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click(); // question 1 mounts and speaks q0.q; watchdog armed
     const q0 = p.questions[0];
     const s0text = p.sentences[q0.sentence].t;
@@ -364,8 +364,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken } = await boot({ neverStarts: true });
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     for(let qi = 0; qi < p.questions.length; qi++){
       const q = p.questions[qi];
@@ -394,9 +394,9 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     const voices = [{ lang: "zh-CN", name: "x" }];
     const { api, spoken, document, ss } = await boot({ voices });
     api.setProg(seedPF());
-    const p = PASSAGES.find(x => x.questions[0].en && x.questions.length > 1);
+    let p = PASSAGES.find(x => x.questions[0].en && x.questions.length > 1);
     const q0 = p.questions[0];
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const ord = optOrder(api);
     api.el("qtr").click(); api.el("ptoggle").click();
@@ -428,8 +428,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     const voices = [{ lang: "en-US", name: "en" }];
     const { api, spoken, ss } = await boot({ voices });
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     check("setup: no voice, nothing spoken on the question", spoken.length === 0);
     voices.length = 0; voices.push({ lang: "zh-CN", name: "x" }); ss.onvoiceschanged();
@@ -444,8 +444,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, document } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     for(let qi = 0; qi < p.questions.length; qi++){
       const q = p.questions[qi];

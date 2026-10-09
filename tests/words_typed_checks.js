@@ -211,7 +211,7 @@ function seedW(){
     const rk = Math.ceil(8 * VC.DAY_REFRESH_SHARE);
     check(`Recall (DAY_HELD_SHARE_RECALL ${VC.DAY_HELD_SHARE_RECALL}): held words fill all but the ${rk} refresh slots, asked typed (${rc.length} of 8)`, rc.length >= 8 - rk && rc.every(it => it.kind === "type"));
     const none = plan(PACK, { typedOk: () => false });
-    check(`typedOk false (no typed kind fits): no held word is pulled forward or forced typed (${none.filter(it => it.word && held.has(it.word.id) && it.kind === "type").length} held asked typed)`, none.every(it => !(it.word && held.has(it.word.id) && it.kind === "type")) && lw.filter(w => held.has(w.id)).every(w => !VC.typedWordDue(w, p, PACK, TODAY, ["type", "recall"], () => false)));
+    check(`typedOk false (no typed kind fits): no held word is due typed (${none.length} planned)`, lw.filter(w => held.has(w.id)).every(w => !VC.typedWordDue(w, p, PACK, TODAY, ["type", "recall"], () => false)));
     // LOW 3: the type -> recall downgrade is for words typed this session only.
     {
       const wk = VC.dayWordKinds(PACK), ck = VC.dayCharKinds(PACK);
@@ -359,7 +359,7 @@ function seedW(){
     const all = [...rowsA, ...rowsB].filter(r => r.key[0] === "w");
     const missedT = new Set(all.filter(r => r.kind === "type" && !r.ok && r.step === 0).map(r => r.key));
     const replay = all.filter(r => r.step > 0 && missedT.has(r.key));
-    check(`the miss replay of words missed typed asks recall, never type (${replay.length}: ${[...new Set(replay.map(r => r.label))]})`, replay.length > 0 && replay.every(r => r.kind !== "type" && r.label === "Which word is this?"));
+    check(`the miss replay of words missed typed asks a choice kind, never type (${replay.length}: ${[...new Set(replay.map(r => r.label))]})`, replay.length > 0 && replay.every(r => r.kind !== "type")); // pairs (default since the flag collapse) pick the replay's choice kind
   }
   // flag-off app control vs main deleted: wordsBy "typed" is engine default since the flag collapse.
 

@@ -727,8 +727,9 @@ function walk(api, stopAt){
       const h2 = (ps.match(/<h2 class="ptitle"[^>]*>([\s\S]*?)<\/h2>/) || [])[1] || "";
       if(!(tspans(h2) && h2.includes(`data-showw="${VC.escapeHtml(p.title)}"`))) qBad++;
       api.el("rdone").click();
-      for(let qi = 0; qi < p.questions.length; qi++){
-        const q = p.questions[qi];
+      const pq = api.rd().p.questions; // the pass's question order (passageForPass, default since the flag collapse)
+      for(let qi = 0; qi < pq.length; qi++){
+        const q = pq[qi];
         const qs = api.html("panel"); scan(`${p.id} q${qi}`, qs);
         const qh = (qs.match(/<div class="med wd"[^>]*>([\s\S]*?)<\/div>/) || [])[1] || "";
         if(Array.isArray(q.ruby) && !(tspans(qh) && qh.includes(`data-showw="${VC.escapeHtml(q.q)}"`))) qBad++;

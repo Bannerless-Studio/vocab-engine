@@ -186,13 +186,14 @@ function rereadProg(passages, missed, extra){
   pr.sn = 5;
   passages.forEach(p => Object.assign(pr.read.done[p.id], { s: 3, ls: 3 }));
   Object.assign(pr.read.done[missed.id], { s: 4 }, extra || {});
+  delete pr.read.done[missed.id].ls; // never listened to: the rotation's first listening pick
   if(pr.read.done[missed.id].l) pr.read.done[missed.id].ls = 4;
   return pr;
 }
 const planRow = (h, label) => (h.match(new RegExp(`<tr><td>6\\. ${label}</td><td>([\\s\\S]*?)</td></tr>`)) || [])[1];
 const answerAll = (api, p, wrong) => {
   for(let qi = api.rd().qi; qi < p.questions.length; qi++){
-    const q = p.questions[qi], os = api.el("o").children;
+    const q = api.rd().p.questions[qi], os = api.el("o").children; // the pass's question order (passageForPass)
     (wrong ? os.find(b => b.dataset.v !== String(q.answer)) : os.find(b => b.dataset.v === String(q.answer))).click();
     api.el("nx").click();
   }
@@ -373,7 +374,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     const tapIdx = ao[0], lateIdx = ao.length > 1 ? ao[1] : null;
     let hiddenOk = true, shownOk = true, spokeOk = true, tapOk = false, lateOk = lateIdx === null;
     for(let qi = 0; qi < n; qi++){
-      const q = P.questions[qi], h = b.api.html("panel");
+      const q = b.api.rd().p.questions[qi], h = b.api.html("panel"); // the pass's question order (passageForPass)
       spokeOk = spokeOk && b.spoken[b.spoken.length - 1] === q.q;
       if(ao.indexOf(qi) >= 0){
         hiddenOk = hiddenOk && /id="qsh"[^>]*>Show question</.test(h) && !/class="med wd"/.test(h) && !/id="qtr"/.test(h) && /id="rpa"/.test(h) && !(q.en && h.includes(VC.escapeHtml(q.en)));
@@ -495,8 +496,8 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("Learn drill asks each word's meaning once (one item per word, none flagged)", learn.length + 1 === 10 && new Set(keys).size === keys.length && learn.every(x => !x[3]));
     b.api.enterTodayStep(2);
     const afterListen = b.api.dq() || [];
-    check("Today Listen step is skipped: the next drill is Recall (8 production items), nothing heard or flagged",
-      /no items until a voice or recording is available/.test(planHtml) && afterListen.length + 1 === 8 && afterListen.every(x => !x[3] && !x[4]));
+    check(`Today Listen step is skipped: the next drill is Recall (${VC.recallSize(PACK)} production items), nothing heard or flagged`,
+      /no items until a voice or recording is available/.test(planHtml) && afterListen.length + 1 === VC.recallSize(PACK) && afterListen.every(x => !x[3] && !x[4]));
     b.api.enterTodayStep(4);
     const sents = b.api.dq() || [];
     check("Sentences step: no hear sentence planned, none flagged", sents.every(x => !x[3]) && !/no text-to-speech voice/.test(b.api.html("panel")));
