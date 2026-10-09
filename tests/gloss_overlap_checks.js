@@ -433,10 +433,12 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     check(`gloss fixes accept the common answer (${typedOkCases.map(([v, w]) => w + " " + v).join(", ")}): ${JSON.stringify(tf)}`, tf.length === 0 && has("词典", "字典") && has("字典", "词典"));
     const { api } = await boot({ seed: 3 });
     const ry = api.optHtml(BY_W["容易"].en), yx = api.optHtml("impression (sth that stays in one's mind); a memory");
-    check(`option buttons: first alternatives only (容易 -> ${ry}), a long (...) explanation as (…) (${yx})`,
-      ry === "easy; straightforward" && /impression <span class="dim">\(…\)<\/span>/.test(yx) && !/stays/.test(yx) && api.optHtml("(classifier for flat objects, sheets); to open").startsWith("(classifier for flat objects, sheets)"));
+    // glossStyle (engine default since the flag collapse): first sense, the other senses quiet in one (…) span.
+    const gxOut = h => h.replace(/ ?<span class="gx">[\s\S]*?<\/span>/g, "");
+    check(`option buttons: first sense, the rest in the quiet span (容易 -> ${ry}), a long (...) explanation as (…) (${yx})`,
+      ry === 'easy <span class="gx">(straightforward; likely; liable to; apt to)</span>' && /impression <span class="dim">\(…\)<\/span>/.test(yx) && !/stays/.test(yx) && api.optHtml("(classifier for flat objects, sheets); to open").startsWith("(classifier for flat objects, sheets)"));
     const note = api.pronTypeItem(zj).feedback(dx.pron);
-    check(`"also right" note: the synonym's first meaning only (${note.replace(/<[^>]+>/g, "")})`, /also right/.test(note) && /to worry/.test(note) && !/anxious|worried/.test(note));
+    check(`"also right" note: the synonym's first meaning, the rest in the quiet span (${note.replace(/<[^>]+>/g, "")})`, /also right/.test(note) && /to worry/.test(note) && !/anxious|worried/.test(gxOut(note)));
   }
 
   // ---------------------------------------------------------------- [9] with dayAware (zh)
