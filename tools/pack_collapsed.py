@@ -7,6 +7,8 @@ Mirrors tests/lib/pack_flags.js COLLAPSED for the stages done so far; a later st
 COLLAPSED = (
     "dayAware", "pairs", "freqTiers", "wordsBy", "levelGate", "pauseNew", "readRotation", "listenQuestions",
     "placementWhole", "placementEarlyStop", "placedRead", "placedKnown", "rereadPerfectDays",
+    # stage 2: app v2 (the v2 Today / header / Progress, gloss display, help overlays, read answer block, option mix)
+    "appView", "progressView", "glossFocus", "glossStyle", "helpClose", "readAnswerBlock", "optsMix",
 )
 
 

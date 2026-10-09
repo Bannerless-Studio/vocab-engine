@@ -185,10 +185,8 @@ class LanguageSpec:
     def port_flags(self):
         ids = [b[0] for b in self.bands]
         flags = {
-            "typedFrom": list(self.port_typed_from), "glossFocus": True, "glossStyle": "primary",
-            "helpClose": True, "readAnswerBlock": True, "optsMix": True,
+            "typedFrom": list(self.port_typed_from),
             "progressMap": {"goals": [{"upTo": lv, "label": lab} for lv, lab in zip(ids, self.port_goals)]},
-            "progressView": "v2", "appView": "v2",
         }   # the collapsed flags (tools/pack_collapsed.py) are engine defaults, never emitted
         if self.emit_gender:
             flags["gapGender"] = True

@@ -63,12 +63,7 @@
   "written",
   "pron"
  ],
- "glossFocus": true,
- "glossStyle": "primary",
- "helpClose": true,
- "readAnswerBlock": true,
  "optsOneScript": true,
- "optsMix": true,
  "showPron": true,
  "hasLessons": true,
  "spaced": false,
@@ -175,8 +170,6 @@
    }
   ]
  },
- "progressView": "v2",
- "appView": "v2",
  "placementChars": true,
  "levelExam": {
   "1": "pinyin",

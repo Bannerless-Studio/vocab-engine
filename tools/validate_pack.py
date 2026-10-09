@@ -172,10 +172,6 @@ def check_pack(pack, rep):
                         rep.err(f"pack.progressMap.goals[{i}].label must be a non-empty string")
         elif not is_bool(pm):
             rep.err("pack.progressMap must be a boolean or {goals: [...]}")
-    if "progressView" in pack and pack["progressView"] != "v2":
-        rep.err('pack.progressView must be "v2" when present')
-    if "appView" in pack and pack["appView"] != "v2":
-        rep.err('pack.appView must be "v2" when present')
     if pack.get("typing") in (None, False):
         rep.warn("pack.typing is off: a held word (streak 2) moves up only by typed answers (docs/PACK_SCHEMA.md \"wordsBy\"), so it stays held")
     if "pronUntilPrimer" in pack and not is_bool(pack["pronUntilPrimer"]):
@@ -278,13 +274,8 @@ def check_pack(pack, rep):
                             per_goal(ps["bySessions"], f"pack.eta.placed[{lv!r}].bySessions")
                         if "knownCurve" in ps:
                             known_map(ps["knownCurve"], f"pack.eta.placed[{lv!r}].knownCurve")
-    # glossStyle (docs/PACK_SCHEMA.md "glossStyle"): a display style of the glossFocus renderer.
     if "gapGender" in pack and pack["gapGender"] is not True:
         rep.err("pack.gapGender must be true when present")
-    if "glossStyle" in pack and pack["glossStyle"] != "primary":
-        rep.err('pack.glossStyle must be "primary"')
-    elif pack.get("glossStyle") == "primary" and pack.get("glossFocus") is not True:
-        rep.err("pack.glossStyle needs pack.glossFocus")
     if "patterns" in pack and not is_bool(pack["patterns"]):
         rep.err("pack.patterns must be a boolean")
     if "patternCue" in pack and pack["patternCue"] != "after":
@@ -350,12 +341,11 @@ TONE_SYSTEMS = ("pinyin",)
 
 
 def check_pron_aids_pack(pack, rep):
-    """pack.tones, pack.soundsReference, pack.helpClose, pack.readAnswerBlock, pack.optsOneScript, pack.optsMix (pack.typing "pron" is checked with typing)."""
+    """pack.tones, pack.soundsReference, pack.optsOneScript (pack.typing "pron" is checked with typing)."""
     if "tones" in pack and pack["tones"] not in TONE_SYSTEMS:
         rep.err(f"pack.tones must be one of {list(TONE_SYSTEMS)} (got {pack['tones']!r})")
-    for f in ("helpClose", "readAnswerBlock", "optsOneScript", "optsMix"):
-        if f in pack and pack[f] is not True:
-            rep.err(f"pack.{f} must be true when present")
+    if "optsOneScript" in pack and pack["optsOneScript"] is not True:
+        rep.err("pack.optsOneScript must be true when present")
     if "soundsReference" in pack:
         if pack["soundsReference"] is not True:
             rep.err("pack.soundsReference must be true when present")

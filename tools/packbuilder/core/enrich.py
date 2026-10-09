@@ -66,9 +66,7 @@ def assign_tiers(words, overrides=None, shares=None, ambient_rank=AMBIENT_RANK):
 # Every top-level key LanguageSpec.port_flags() has ever been able to emit, and the `characters` sub-keys it merges.
 # --check reads them as port-era: one the spec no longer emits must not linger in a shipped pack.json. The collapsed
 # flags (tools/pack_collapsed.py) are not here: enrich drops them, and --check notes a shipped one without failing.
-PORT_KEYS = ("typedFrom", "glossFocus", "glossStyle", "helpClose", "readAnswerBlock", "optsMix",
-             "progressMap", "progressView", "appView",
-             "levelExam", "pronUntilPrimer", "placementChars")
+PORT_KEYS = ("typedFrom", "progressMap", "levelExam", "pronUntilPrimer", "placementChars")
 PORT_CHARACTERS_KEYS = ("learn", "start", "ramp", "bareBy", "bareWords", "bareByPair")
 
 
@@ -113,7 +111,7 @@ def enrich_data(spec, pack, words, units=None, overrides=None, eta=None):
             pack[k] = v
     pack.pop("eta", None)
     goals = (pack.get("progressMap") or {}).get("goals") if isinstance(pack.get("progressMap"), dict) else None
-    if eta is None and goals and pack.get("appView") == "v2":
+    if eta is None and goals:
         # no measured constants: absent would fall back to the zh pace (a sibling would promise ~830 sessions), null shows none
         eta = {"gain": [None] * len(goals), "known": None}
     if eta is not None:

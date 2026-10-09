@@ -85,9 +85,6 @@ class Flags(unittest.TestCase):
         f = get_spec("it").port_flags()
         self.assertEqual(f["typedFrom"], ["written"])
         self.assertEqual([g["upTo"] for g in f["progressMap"]["goals"]], ["A1", "A2", "B1"])
-        for k in ("glossFocus", "optsMix"):
-            self.assertIs(f[k], True)
-        self.assertEqual((f["glossStyle"], f["progressView"], f["appView"]), ("primary", "v2", "v2"))
         self.assertNotIn("characters", f)
         self.assertNotIn("levelExam", f)
 
@@ -141,10 +138,9 @@ class Pure(unittest.TestCase):
         p, _, _ = enrich.enrich_data(spec, {"key": "it", "eta": {"gain": [1]}}, words(), None, None, {"gain": [0.01, None, 0.02], "known": None})
         self.assertEqual(p["eta"], {"gain": [0.01, None, 0.02], "known": None})
         p, _, _ = enrich.enrich_data(spec, {"key": "it", "eta": {"gain": [1]}}, words(), None, None, None)
-        self.assertEqual(p["eta"], {"gain": [None, None, None], "known": None})      # flag block has goals + appView v2: no estimate, not zh's pace
+        self.assertEqual(p["eta"], {"gain": [None, None, None], "known": None})      # flag block has goals: no estimate, not zh's pace
         p, _, _ = enrich.enrich_data(spec, {"key": "it"}, words(), None, None, None)
         self.assertEqual(p["eta"], {"gain": [None] * len(p["progressMap"]["goals"]), "known": None})
-        self.assertEqual(p["appView"], "v2")
 
     def test_eta_curve_copied_from_file(self):
         crv = [[0, 90.0], [0.5, 30.5], [0.9, 0]]
@@ -255,11 +251,10 @@ class CheckDetectsFlagDrift(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t:
             r = self.enriched_repo(t)
             pack = json.loads((r / "pack" / "pack.json").read_text())
-            pack["glossStyle"] = "all"
-            del pack["optsMix"]
-            pack["progressMap"]["goals"][0]["label"] = "other"
+            pack["typedFrom"] = ["pron"]
+            del pack["progressMap"]
             lines = enrich.flag_drift(get_spec("it"), pack)
-            self.assertEqual(sorted(l.split(":")[0] for l in lines), ["glossStyle", "optsMix", "progressMap"])
+            self.assertEqual(sorted(l.split(":")[0] for l in lines), ["progressMap", "typedFrom"])
             self.assertTrue(all("shipped" in l and "spec" in l for l in lines))
 
     def test_check_passes_a_shipped_pack_with_collapsed_flags(self):

@@ -522,27 +522,12 @@ def main(argv):
         # word slot recall uses, never a stand-alone pinyin drill.
         "typing": "pron",
         # Typed items from the target side too (characters -> pinyin, characters -> meaning,
-        # pinyin -> meaning) and focused gloss display; zh only until it is perfected
-        # (docs/PACK_SCHEMA.md "typedFrom and glossFocus", TODO.md).
+        # pinyin -> meaning) (docs/PACK_SCHEMA.md "typedFrom and glossFocus", TODO.md).
         "typedFrom": ["written", "pron"],
-        "glossFocus": True,
-        # First sense plain, the others in brackets, and an "also:" line of typedSyn partners
-        # (docs/PACK_SCHEMA.md "glossStyle"; owner 2026-10-07).
-        "glossStyle": "primary",
-        # Help overlays (word popovers, audio toast) get a close button, tap-outside, Escape
-        # and an 8 s timer (docs/PACK_SCHEMA.md "helpClose"; owner feedback 2026-10-02).
-        "helpClose": True,
-        # Read questions: verdict and Next above the passage toggle (docs/PACK_SCHEMA.md
-        # "readAnswerBlock"; owner feedback 2026-10-02).
-        "readAnswerBlock": True,
         # Word option sets labelled in one mode (all readings or all characters): one option
         # in characters among readings gave the answer away (docs/PACK_SCHEMA.md "optsOneScript";
         # owner browser check 2026-10-02).
         "optsOneScript": True,
-        # Wrong choices from the answer's stage (new/weak by learn-order set, known, never
-        # taught last), no level tiers: same-level ones near the end of a level let a new word
-        # be found by elimination (docs/PACK_SCHEMA.md "optsMix"; owner feedback 2026-10-02).
-        "optsMix": True,
         "showPron": True,
         "hasLessons": True,
         "spaced": False,
@@ -595,11 +580,6 @@ def main(argv):
             {"upTo": "3", "label": "daily life: directions, simple chat, short notices"},
             {"upTo": "4", "label": "follow a slow drama with subtitles"},
         ]},
-        # Progress tab: since-last-visit deltas, one bar per level, rows at their expected state behind
-        # Show all (docs/PACK_SCHEMA.md "progressView"; owner 2026-10-07).
-        "progressView": "v2",
-        # Today, header, drill end and session done in the Progress v2 direction (docs/PACK_SCHEMA.md "appView"; owner 2026-10-07).
-        "appView": "v2",
         # Placement also places the characters layer (docs/PACK_SCHEMA.md "placementChars"; owner 2026-10-08).
         "placementChars": True,
         # What each level's exam asks (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): HSK 1-2 are pinyin papers, HSK 3-4 read hanzi.
