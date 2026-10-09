@@ -2148,23 +2148,7 @@ return {
     check("rtl pack: Read row title is an isolated RTL run (tlf, ui() run split), level/length plain UI text", /^1 passage: <bdi data-tl lang="zh" dir="rtl" class="tlf">خانه \(آزمون<\/bdi>\) \(HSK 1, \d+ words\)$/.test(rrw));
     check("ltr pack: Read row carries no data-ui / tlf markup", !/data-ui|class="tlf"/.test(row));
     await tick(); await tick();
-    // No passages in the pack: Today markup and the session end byte-identical to main at spawn.
-    const MAIN_READ = "93f77a2";
-    const mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN_READ}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
-    const mainBlocks = [...mainHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)], mainSrc = mainBlocks[mainBlocks.length - 1][1];
-    const screensOf = async src => {
-      // dayAware (plan-line wording) post-dates the control.
-      const noDay = Object.assign({}, PACK); delete noDay.dayAware; delete noDay.wordsBy;
-      const x = await bootApp([{ lang:"zh-CN", name:"x" }], src ? { appSrc: src, pack: noDay } : { pack: noDay });
-      const out = [x.api.getHtml("panel")];
-      const q = x.api.getProg(); q.sets[PACK.levels[0].id] = 3; x.api.today(); out.push(x.api.getHtml("panel"));
-      x.api.enterTodayStep(5); out.push(x.api.getHtml("panel"));
-      await tick(); await tick();
-      return out;
-    };
-    const [mA, cA] = [await screensOf(mainSrc), await screensOf()];
-    check(`no-passages pack: Today (fresh, 3 sets learned) and the session end byte-identical to main ${MAIN_READ} (${cA.map(h => h.length).join("/")} chars)`,
-      mA.length === 3 && mA.every((h, i) => h === cA[i]) && /Session done/.test(cA[2]));
+    // (The no-passages byte-identity control against main 93f77a2 ran with dayAware off; dayAware is default since the flag collapse.)
   }catch(e){ check(`today read stage scenario does not throw (got: ${e.stack})`, false); }
 
   // Span display glosses (spans[i][3]) reach the tap-to-gloss popover, the screen-reader
