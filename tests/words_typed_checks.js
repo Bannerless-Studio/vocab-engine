@@ -242,7 +242,7 @@ function seedW(){
     NOW = new Date(2026, 9, 4, 8, 0, 0).getTime();
     const p0 = seedW();
     const api = await boot(PACK, p0, 3);
-    check(`Today plan: Recall ${VC.RECALL_SIZE_HELD} items under wordsBy (${VC.RECALL_SIZE} without; the typed rule's extra production slots)`, VC.recallSize(PACK) === 12 && new RegExp(`${VC.RECALL_SIZE_HELD} items`).test(api.panel()));
+    check(`Today plan: Recall ${VC.RECALL_SIZE_HELD} items under wordsBy (${VC.RECALL_SIZE} without; the typed rule's extra production slots)`, VC.recallSize(PACK) === VC.RECALL_SIZE_HELD && /<div class="tst"><span>Recall<\/span>/.test(api.panel())); // app v2: Today rows carry no counts
     // Held words: typed answers wrong, choice answers right; everything else right.
     const rows = await session(api, (it, rec) => !(rec && rec.s === 2 && it.kind === "type"));
     { const rq = rows.filter(r => r.step === 3), firsts = rq.filter((r, i) => rq.findIndex(x => x.key === r.key) === i).length; check(`Recall drill asks ${firsts} items (${VC.RECALL_SIZE_HELD} planned)`, firsts === VC.RECALL_SIZE_HELD); }

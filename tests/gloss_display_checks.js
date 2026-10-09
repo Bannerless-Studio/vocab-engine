@@ -1,17 +1,15 @@
 // Checks for pack.glossStyle "primary" (docs/PACK_SCHEMA.md "glossStyle"): [1] glossSenses /
 // typedSynWords, [2] render helpers on 别 and 帮助 at every word-gloss site, [3] matching keeps the
-// raw en, [4] control: glossStyle absent -> HTML byte-identical to main 3044601's engine.
+// raw en. glossStyle is engine default since the flag collapse (stage 2); its flag-off control went with it.
 // Boots engine/app.html in the fake DOM of tests/typed_from_checks.js.
 // Run: node tests/gloss_display_checks.js
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
-const cp = require("child_process");
+const { packAsOf } = require("./lib/pack_flags.js");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
-const MAIN = "3044601"; // main before glossStyle
 const ZH = path.join(ROOT, "packs", "zh");
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
@@ -23,7 +21,6 @@ const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
-const PACK_OFF = (p => { delete p.glossStyle; return p; })(JSON.parse(JSON.stringify(PACK)));
 let fails = 0, passes = 0;
 function check(name, cond){
   if(cond){ passes++; console.log(`PASS  ${name}`); }
@@ -204,7 +201,6 @@ function walk(api, stopAt){
 
 const W = ch => WORDS.find(x => x.w === ch);
 const esc = VC.escapeHtml;
-const WORDS_OFF = WORDS;
 (async () => {
   console.log("\n[1] core helpers");
   const bie = W("别"), bang = W("帮助"), bangmang = W("帮忙");
@@ -260,39 +256,7 @@ const WORDS_OFF = WORDS;
     check("typedSyn matching still finds 帮忙 for 帮助 typed", VC.typedSynHit(bang, BY_ID, s => s.w === "帮忙").w === "帮忙");
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  console.log(`\n[4] control: glossStyle absent -> HTML byte-identical to main ${MAIN}`);
-  {
-    let mainHtml = null, mainCore = null;
-    try{
-      mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const src = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); mainCore = m.exports;
-    }catch(e){ console.log("    cannot read main: " + e.message); }
-    check(`main ${MAIN} engine loaded from git (a missing sha is a failure)`, !!mainHtml && !!mainCore);
-    async function screens(html, core, pack, seed){
-      const { api } = await boot({ html, core, pack, seed, words: WORDS_OFF });
-      const out = {};
-      api.setProg(seedPF()); api.today(); out.today = api.html("panel").replace(/ · \S+ \d+ waits · \S+ \d+ at \d+% known/g, ""); // the level gate hint (engine default since the flag collapse) is newer than the control
-      api.el("go").click();
-      let walked = []; try{ walked = walk(api, /id="again"/); }catch(e){ walked = [{ where: "ERR", html: e.message }]; }
-      out.walk = walked.map(x => x.where + "\n" + x.html).join("\n----\n");
-      const ws = WORDS_OFF.filter(x => x.lv === "1").slice(0, 60).concat([bie, bang, bangmang]);
-      api.setProg(atTierProg(ws.slice(0, 20).filter(unitOf)));
-      out.reveals = ws.map(x => api.revealBlock(x) + api.wordRowHTML(x, "wl") + api.glossHTML(x.id, "", null)).join("\n");
-      out.items = ws.map(x => api.readItem(x)).map(it => it.opts.map(o => it.optHtml ? it.optHtml(o) : o).join("|")).join("\n");
-      api.wordsPage("1", 0); out.words = api.html("panel") + api.el("wl").children.map(c => c.innerHTML).join("|");
-      return out;
-    }
-    if(mainHtml && mainCore){
-      const a = await screens(mainHtml, mainCore, withCollapsed(PACK_OFF), 11), b = await screens(CUR_HTML, VC, PACK_OFF, 11);
-      for(const k of Object.keys(a)){
-        let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
-        check(`zh without glossStyle: ${k} byte-identical to main (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: main ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);
-      }
-      const on = await screens(CUR_HTML, VC, PACK, 11);
-      check("zh with glossStyle differs from flag off (the flag does something)", on.reveals !== b.reveals && /also: /.test(on.reveals) && !/also: /.test(b.reveals));
-    }
-  }
+  // [4] (control: glossStyle absent = main 3044601 byte for byte) deleted: glossStyle is engine default since the flag collapse (stage 2).
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);
 })();
