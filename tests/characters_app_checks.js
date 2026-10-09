@@ -7,7 +7,7 @@
 // Boots app.html's inline script for real against the zh pack WITH its characters.js,
 // using the same fake DOM as tests/engine_checks.js check [23] (id registry + regex
 // scan of innerHTML; no jsdom, no dependencies).
-// Seeds: A = fresh; B = levels 1-3 taught, nothing recorded; C = B + choice answered
+// Seeds: A = fresh; B = levels 1-3 taught (words placed, no unit recorded); C = B + choice answered
 // + unit records (characters started).
 // Run: node tests/characters_app_checks.js
 "use strict";
@@ -39,7 +39,7 @@ const PACK_ZH = (p => { const q = packAsOf(p, PAIRS_ERA, { strip: ["tones", "sou
 const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); };
 const PACK = preWrite(Object.assign({}, PACK_ZH, { pronFirst: false }));
 // The plan lines' order wording follows pack.dayAware (docs/PACK_SCHEMA.md "dayAware").
-const ORDER = PACK.dayAware ? "misses and due first" : "weakest first";
+const ORDER = "weakest pairs first"; // the Review line under pairs (engine default since the flag collapse)
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = tryLoadConst(path.join(ZH, "sentences.js"), "PASSAGES") || [];
@@ -177,7 +177,8 @@ return {
 // ------------------------------------------------------------------ seeds
 const byLv = VC.wordsByLevel(WORDS, PACK);
 const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
-function seedB(){ return VC.normalizeProg({ sets: { "1": NS("1"), "2": NS("2"), "3": NS("3"), "4": 0 }, placedOnce: true, sessions: 30 }, PACK); }
+// counted words placed (recipe: the level gate, engine default since the flag collapse, reads word records)
+function seedB(){ const p = VC.normalizeProg({ sets: { "1": NS("1"), "2": NS("2"), "3": NS("3"), "4": 0 }, placedOnce: true, sessions: 30 }, PACK); VC.pinPrefixRecords(p, WORDS, PACK); Object.values(p.w).forEach(r => { r.prov = 1; }); return p; }
 // Seed C: B + choice answered, the first 40 stage-1 units recorded: 10 weak (w=3, s=0,
 // outranking the unrecorded learned words) and 30 mastered (s=3, ranked below them), so
 // the unified Review mixes units and words.
@@ -318,7 +319,9 @@ Math.random = mulberry32(20261004);
     check("Start today runs exactly the Review plan the line was computed from", items.map(x => x.key).sort().join() === prep.map(keyOf).sort().join() && api.getState().review === null);
     const nUnit = items.filter(x => x.key.startsWith("c:")).length;
     check(`Review builds 20 items containing unit items (${nUnit} unit, ${20 - nUnit} word)`, items.length === 20 && nUnit > 0 && nUnit < 20);
-    check("Review unit items use the pack reviewKinds (form stimulus)", items.filter(x => x.key.startsWith("c:")).every(x => /class="big wd"/.test(x.html)));
+    // pairs (engine default since the flag collapse) picks a unit's kind by pair: any of the four unit renderers.
+    const UNIT_LABELS = ["What does it mean?", "How is it said?", "How is it written?"];
+    check(`Review unit items are unit renderers (${[...new Set(items.filter(x => x.key.startsWith("c:")).map(x => x.label))].join(" / ")})`, items.filter(x => x.key.startsWith("c:")).every(x => UNIT_LABELS.includes(x.label)));
     let err = null, shown = [];
     try{ shown = playDrill(api); }catch(e){ err = e; }
     check(`Review renders and plays every item without error${err ? ` (${err.message})` : ""}`, !err && shown.length === 20);
@@ -327,11 +330,12 @@ Math.random = mulberry32(20261004);
     api.stepFrom(3);
     const R = api.getD();
     const ritems = [api.getCur(), ...R.q];
-    check(`Recall: 8 items, unit items are charRecall (${ritems.filter(x => x.key.startsWith("c:")).length} unit)`,
-      ritems.length === 8 && ritems.filter(x => x.key.startsWith("c:")).every(x => x.label === "How is it written?" && !/class="big/.test(x.html)));
+    const RN = VC.recallSize(PACK);
+    check(`Recall: ${RN} items (recallSize), unit items are unit renderers (${ritems.filter(x => x.key.startsWith("c:")).length} unit: ${[...new Set(ritems.filter(x => x.key.startsWith("c:")).map(x => x.label))].join(" / ")})`,
+      ritems.length === RN && ritems.filter(x => x.key.startsWith("c:")).every(x => UNIT_LABELS.includes(x.label)));
     err = null;
     try{ shown = playDrill(api); }catch(e){ err = e; }
-    check(`Recall plays through without error${err ? ` (${err.message})` : ""}`, !err && shown.length === 8);
+    check(`Recall plays through without error${err ? ` (${err.message})` : ""}`, !err && shown.length === RN);
   }
   {
     // Characters started and units recorded, but every recorded unit is bare (well below
@@ -343,7 +347,7 @@ Math.random = mulberry32(20261004);
     VC.charStageUnits(["1","2","3"], CHARACTERS, PACK).slice(0, 40).forEach(u => { q.chars.c[u.id] = { r:9, w:0, s:9 }; });
     api.setProg(q); api.today();
     const h = api.html("panel"), prep = api.getPrep().review;
-    check("units recorded but crowded out of the plan: Review line says words only", VC.recordedUnits(CHARACTERS, q, PACK).length === 40 && !prep.some(x => x.unit) && /1\. Review<\/td><td>20 items, weakest first, words<\/td>/.test(h));
+    check("units recorded but crowded out of the plan: Review line says words only", VC.recordedUnits(CHARACTERS, q, PACK).length === 40 && !prep.some(x => x.unit) && new RegExp(`1\\. Review</td><td>20 items, ${ORDER}, words</td>`).test(h));
     if(PACK.dayAware){
       const { api: a2 } = await boot();
       a2.setProg(JSON.parse(JSON.stringify(q))); a2.today();
@@ -508,7 +512,9 @@ Math.random = mulberry32(20261004);
     api.el("tChars").click();
     items = [api.getCur(), ...api.getD().q];
     const recs = api.getProg().chars.c;
-    check("Characters test: 20 unit items, all recorded units", items.length === 20 && items.every(x => x.key.startsWith("c:") && recs[x.key.slice(2)]));
+    // pairs (engine default since the flag collapse): recorded units by weakest pair (a known pair of an ambient unit is not asked), topped up with unrecorded ones.
+    const recN = items.filter(x => recs[x.key.slice(2)]).length;
+    check(`Characters test: 20 unit items, ${recN} recorded, the rest unrecorded`, items.length === 20 && items.every(x => x.key.startsWith("c:")) && recN >= 10);
     check("Characters test kinds come from testKinds (charRead, charSound, charPick; never charRecall)",
       items.every(x => x.label === "What does it mean?" || x.label === "How is it said?" || (x.label === "How is it written?" && /hear-stage|class="med"/.test(x.html) && !x.html.includes(VC.escapeHtml(VC.unitGloss(CHARACTERS.find(u => "c:" + u.id === x.key), BY_ID))))));
     check("Characters test draws the weakest first (all 10 weak units included)",
@@ -532,13 +538,13 @@ Math.random = mulberry32(20261004);
     api.setProg(seedC()); api.goto("progress");
     h = api.html("panel");
     const n1 = VC.charStageUnits(["1","2","3"], CHARACTERS, PACK).length, n4 = VC.charStageUnits(["4"], CHARACTERS, PACK).length;
-    check(`seed C rows: 字 40 / ${n1} taught · 40 recorded · 30 mastered · 0 bare; 字4 0 / ${n4}`,
-      h.includes(`>字</bdi></td><td>40 / ${n1} taught · 40 recorded · 30 mastered · 0 bare</td>`) && h.includes(`>字4</bdi></td><td>0 / ${n4} taught · 0 recorded · 0 mastered · 0 bare</td>`));
+    check(`seed C rows: 字 40 / ${n1} taught · 40 recorded · 30 mastered · 0 done; 字4 0 / ${n4}`,
+      h.includes(`>字</bdi></td><td>40 / ${n1} taught · 40 recorded · 30 mastered · 0 done</td>`) && h.includes(`>字4</bdi></td><td>0 / ${n4} taught · 0 recorded · 0 mastered · 0 done</td>`)); // freqTiers: "done"
     const p = seedC(); const us = VC.charStageUnits(["1","2","3"], CHARACTERS, PACK);
     p.chars.c[us[0].id] = { r:6, w:0, s:6 }; delete p.chars.c[us[39].id]; p.chars.c[us[45].id] = { r:1, w:0, s:1 };
     api.setProg(p); api.goto("progress");
     check("taught counts whole sets only, recorded every record, bare by streak",
-      api.html("panel").includes(`>字</bdi></td><td>30 / ${n1} taught · 40 recorded · 30 mastered · 1 bare</td>`));
+      api.html("panel").includes(`>字</bdi></td><td>30 / ${n1} taught · 40 recorded · 30 mastered · 1 done</td>`));
     api.setProg(seedB()); api.goto("progress");
     h = api.html("panel");
     check("levels 1-3 taught: order chips 'Characters before/after HSK 4' + mix chip + strip", /id="ordBefore"[^>]*>Characters before HSK 4</.test(h) && /id="ordAfter"[^>]*>Characters after HSK 4</.test(h) && /id="toggleMix"/.test(h) && /id="charCtl"/.test(h));
@@ -779,7 +785,7 @@ Math.random = mulberry32(20261004);
   const NSZ = lv => VC.nSets(VC.wordsByLevel(WORDS, PF_ZH)[lv], VC.setSizeOf(PF_ZH));
   // Mid HSK 2 before any character stage: with one stage per level (fb2-write) that is a learner
   // who put characters after the words (chars.defer), else 字1 would come before HSK 2.
-  const seedPF = () => VC.normalizeProg({ sets: { "1": NSZ("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PF_ZH);
+  const seedPF = () => { const p = VC.normalizeProg({ sets: { "1": NSZ("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PF_ZH); VC.pinPrefixRecords(p, WORDS, PF_ZH); Object.values(p.w).forEach(r => { r.prov = 1; }); return p; }; // counted words placed: the level gate (engine default) reads records
   const seedPFLag = () => { const p = seedPF(); const lw = new Set(VC.learnedWords(WORDS, PF_ZH, p).map(w => w.id)); CHARACTERS.filter(u => lw.has(u.words[0])).forEach(u => { p.chars.c[u.id] = { r: 1, w: 1, s: 0 }; }); return p; };
   check("zh pack.json ships pronFirst: true", PF_ZH.pronFirst === true);
   // Walks the active screen flow: answers every drill item right, presses Continue /
