@@ -239,6 +239,14 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     const k = VC.placementStopIndex(res, W), out = VC.applyPlacement(VC.defaultProg(PACK), st, k, WORDS, PACK);
     return k === n - 2 && out.placedOnce === true && out.pl === String(st[k].lv) && Object.values(out.w).every(r => r.prov === 1);
   })());
+  check("fb53: a retake landing lower keeps prog.pl and the placed records; a higher one raises pl", (() => {
+    const st = VC.strata(WORDS, PACK.placement, PACK.setSize);
+    const hi = VC.applyPlacement(VC.defaultProg(PACK), st, 10, WORDS, PACK);
+    const lo = VC.applyPlacement(hi, st, 0, WORDS, PACK);
+    const up = VC.applyPlacement(VC.applyPlacement(VC.defaultProg(PACK), st, 3, WORDS, PACK), st, 10, WORDS, PACK);
+    return hi.pl === String(st[10].lv) && lo.pl === hi.pl && util.isDeepStrictEqual(lo.w, hi.w) && up.pl === hi.pl
+      && util.isDeepStrictEqual(lo.sets, hi.sets);
+  })());
 })();
 
 (function(){

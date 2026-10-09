@@ -988,7 +988,11 @@ function applyPlacement(prog, st, passed, words, pack, units){
   out.placedOnce = true;
   // prog.pl: the level this placement landed in, for pack.eta.placed (docs/PACK_SCHEMA.md "ETA model"); only when no
   // session came before it, since a record with sessions is not a placed start.
-  if(!(prog.sessions > 0)){ const land = st[passed] || st[st.length - 1]; if(land) out.pl = String(land.lv); }
+  if(!(prog.sessions > 0)){ const land = st[passed] || st[st.length - 1]; if(land){
+    const was = ids.indexOf(String(prog.pl)), now = ids.indexOf(String(land.lv));
+    // A retake landing lower keeps the stored level (fb53); an unknown stored pl is replaced.
+    if(!(was >= 0 && now <= was)) out.pl = String(land.lv);
+  } }
   return out;
 }
 
