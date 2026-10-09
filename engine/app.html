@@ -140,9 +140,6 @@
   .wl .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
   .wl .pr{font-size:15px;display:block}
   .wl .en{color:var(--mute);font-size:14px;text-align:left;display:block;margin:0}
-  .pmap{cursor:pointer;margin:0 0 10px;white-space:nowrap;overflow:hidden}
-  .pmap .pm1{font-size:12px;letter-spacing:0}
-  .pmap .pm2{font-size:13px;color:var(--mute);margin-top:2px}
   table.stats{width:100%;border-collapse:collapse;font-size:15px}
   table.stats td{padding:8px 0;border-bottom:1px solid var(--line)}
   table.stats td:last-child{text-align:right;font-variant-numeric:tabular-nums}
@@ -848,8 +845,8 @@ const TEACH_PLAY_SVG = speakerSVG(14);
 // Read items autoplay beside shown text: the text stays the stimulus, the button replays.
 const REPLAY_STAGE = `<div class="listen-stage"><button class="replay" id="rpa" aria-label="Replay">${REPLAY_SVG}</button></div>`;
 
-const PRON_UNTIL_PRIMER = VC.pronUntilPrimerOn(PACK);
-const showPron = PRON_UNTIL_PRIMER ? () => VC.showPronOn(PACK, SUNITS, prog) : () => PACK.showPron !== false && prog.showPron !== false;
+// A script pack turns pronunciation off once the primer is done (VC.pronUntilPrimerOn); a stored choice always wins.
+const showPron = () => VC.showPronOn(PACK, SUNITS, prog);
 const pronOf = x => showPron() ? VC.pronShown(x) : "";
 // pronFirst (core.js displayForm). Off, dispWord returns the written form and every helper
 // below renders exactly the pre-pronFirst markup.
@@ -2402,15 +2399,6 @@ function charChoiceHTML(){
   const top = deferred.length && next && deferred[0].after !== next.lv ? levelLabel(deferred[0].after) : "";
   return `<div class="stmt" id="charChoice">${L} next: learn to recognise the written form of the words you already know. Or go on to ${N} first and do ${L} after ${top ? ui(top) : "it"}. You can change this later in Progress.<button class="next" id="choiceStart" style="margin-top:8px">Start ${L}</button><button class="ghost" id="choiceSkip" style="margin-top:8px">Skip to ${N}</button></div>`;
 }
-// pack.progressMap without goals (a legacy progressMap: true): one bar line and the eta line; tap opens Progress.
-// A pack with goals shows its current goal (pvGoalHTML) instead.
-function progressMapHTML(){
-  if(!VC.progressMapOn(PACK)) return "";
-  const p = VC.progressPosition(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST), f = Math.round(10 * p);
-  const aria = `${Math.round(p * 100)}% of the way to following a drama without pausing`;
-  const eta = etaText(VC.sessionsToGoX(prog));
-  return `<div class="pmap" id="pmap" role="button" tabindex="0" aria-label="${aria}"><div class="pm1">${ui("You ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸ follow a drama without pausing")}</div>${(eta ? `<div class="pm2">${ui(eta)}</div>` : "")}</div>`;
-}
 function todayRender(){
   stopSpeaking();
   todayStepState = null;
@@ -2481,7 +2469,7 @@ function todayPlanV2(o){
   if(pz) steps.splice(1, 1);
   if(readNext){ const p = readNext.p; steps.push([readNext.mode === "listen" ? "Listen" : "Read", tf(p.title)]); }
   const goal = pvGoalHTML();
-  return `<div class="pv tdv"><p class="pva">Session ${n}${pz ? ", review only" : ""}</p>${goal ? `<div class="pmv" id="pmap" role="button" tabindex="0" aria-label="Open Progress">${goal}</div>` : progressMapHTML()}<section class="tsts">${steps.map(s => `<div class="tst"><span>${s[0]}</span><div class="tsd">${s[1]}</div></div>`).join("")}</section></div>`;
+  return `<div class="pv tdv"><p class="pva">Session ${n}${pz ? ", review only" : ""}</p>${goal ? `<div class="pmv" id="pmap" role="button" tabindex="0" aria-label="Open Progress">${goal}</div>` : ""}<section class="tsts">${steps.map(s => `<div class="tst"><span>${s[0]}</span><div class="tsd">${s[1]}</div></div>`).join("")}</section></div>`;
 }
 // inSession: Go has started the session (prog.sn is its number); the home plan is for the next one.
 function todayReadItem(inSession){

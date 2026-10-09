@@ -992,15 +992,16 @@ function applyPlacement(prog, st, passed, words, pack, units){
   return out;
 }
 
-// pack.placementChars (fb50; owner 2026-10-08: placed at the top level, then taught the first level's characters from set 1): under characters.learn
-// "lag" the units are taught separately from the words and the set position is the count of unit records, so a placement
+// Placement places the characters layer (fb50; owner 2026-10-08: placed at the top level, then taught the first level's characters
+// from set 1; pack.placementChars until the flag collapse, now every characters.learn "lag" pack): under "lag" the units
+// are taught separately from the words and the set position is the count of unit records, so a placement
 // that seeds 1650 word records leaves the characters layer at 0. The unit sets of the lag plan (ramp chunks per level, else
 // setSize chunks of the pack order) whose units all have a unit record or all their words in the prefix this placement
 // asserts (placed now, or learned before inside it; a word learned beyond the prefix never counts, so a retake that
 // places nothing leaves a learner whose characters lag behind their words alone) are seeded the way a placed word is: {r:1,w:0,s:1,prov:1}, kept in review until known (markChar / unifiedReviewPlan). Only the
 // contiguous run of such sets from the start is seeded, so the next ramp chunk stays aligned; a set with one unplaced unit and
 // everything after it stay unplaced. Adds records only: a retake never removes or lowers one.
-const placementCharsOn = pack => !!(pack && pack.placementChars === true) && lagOn(pack);
+const placementCharsOn = pack => lagOn(pack);
 function charPlanSets(pack, units){
   const cfg = charsConfig(pack), list = charStageUnits(levelIds(pack), units, pack), out = [];
   if(cfg.ramp){
@@ -1044,7 +1045,7 @@ function placedCharsThrough(pack, units, prog){
   const last = run[run.length - 1];
   return last ? { lv: last.lv, set: last.k + 1 } : null;
 }
-// Today's Sounds hint under pack.placementChars (fb50; owner 2026-10-08: placed at the top level, Today still said "Start the first lesson"):
+// Today's Sounds hint when placement places the characters layer (fb50; owner 2026-10-08: placed at the top level, Today still said "Start the first lesson"):
 // derived from the counters, nothing stored. A placement that passed at least two buckets has raised the second bucket's level to
 // its end; the first bucket alone (or none) leaves the learner at the start, where the hint still helps.
 function placedPastFirstBucket(prog, words, pack){
@@ -1071,8 +1072,8 @@ function storageKey(pack){ return `vocab_${pack.key}`; }
 function defaultProg(pack){
   const sets = {}; levelIds(pack).forEach(id=>{ sets[id] = 0; });
   const p = { v:PROG_VERSION, w:{}, s:{}, sets, lessons:{}, sessions:0, theme:null, showPron: pack.showPron !== false, placedOnce:false };
-  // pack.pronUntilPrimer: no stored showPron means the learner never chose, so showPronOn derives the default.
-  if(pack.pronUntilPrimer === true && pack.script) delete p.showPron;
+  // A script pack (pronUntilPrimerOn): no stored showPron means the learner never chose, so showPronOn derives the default.
+  if(pronUntilPrimerOn(pack)) delete p.showPron;
   if(charsConfig(pack)) p.chars = seedCharOrder(defaultCharsProg(), pack); // absent without pack.characters: flag-off shape unchanged
   if(scriptConfig(pack)) p.script = defaultScriptProg(); // absent without pack.script: likewise
   return p;
@@ -2547,11 +2548,11 @@ function markPassageDone(prog, pid, sc, n, d, listen, pack, t){
   else if(prev && typeof prev.ls === "number") st.done[pid].ls = prev.ls;
   return st.done[pid];
 }
-// pack.progressMap (owner 2026-10-04: the learner feels no progress): one 0..1 number toward
-// following a drama without pausing. An absent part's weight goes to words.
+// pack.progressMap.goals (owner 2026-10-04: the learner feels no progress): one 0..1 position per goal. A pack without goals
+// has no progress map (the goal-less `progressMap: true` bar went with the flag collapse). An absent part's weight goes to words.
 const PM_KEEP = 14;
 function progressMapGoals(pack){ const m = pack && pack.progressMap; return (m && typeof m === "object" && Array.isArray(m.goals)) ? m.goals : []; }
-function progressMapOn(pack){ return !!(pack && (pack.progressMap === true || progressMapGoals(pack).length > 0)); }
+function progressMapOn(pack){ return progressMapGoals(pack).length > 0; }
 function progressPosition(prog, pack, words, units, passages){
   const ws = words || [], us = units || [], ps = passages || [];
   const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, us);
@@ -2694,9 +2695,8 @@ function sessionsToGo(prog, g, n){
 // share rises 0.3x a hold's mean rate in its first third and up to 2x in its last (fresh sims), past +-30% of linear, and
 // one curve pooled over levels missed the zh level with twice the words of the two before it by -38%.
 // Legacy shape {gain: [g...], known: k} (sites published before fb42): a constant slope, kept until the site republishes.
-// No pack.eta key: the zh constants below (fb41 owner-export slopes), the shape every pack had before pack.eta. A pack.eta
-// without the sub-key a call needs gives no estimate (a site never inherits zh's pace by omission).
-const ETA_GAIN = [0.00109, 0.00188, 0.00335], ETA_KNOWN = 5.2;
+// pack.eta is required pack data (tools/validate_pack.py; the zh-constant fallback for a pack without it went with the flag
+// collapse): a pack.eta without the sub-key a call needs gives no estimate (a site never inherits another's pace by omission).
 function etaCurveAt(curve, x){
   if(!Array.isArray(curve) || !curve.length) return null;
   if(x <= curve[0][0]) return curve[0][1];
@@ -2707,15 +2707,13 @@ function etaCurveAt(curve, x){
   return 0;
 }
 function etaGain(pack, g){
-  if(!pack || !("eta" in pack)) return ETA_GAIN[Math.min(g, ETA_GAIN.length - 1)];
-  const e = pack.eta;
+  const e = pack && pack.eta;
   if(!isObj(e) || !Array.isArray(e.gain) || !e.gain.length) return null;
   const v = e.gain[Math.min(g, e.gain.length - 1)];
   return typeof v === "number" && v > 0 ? v : null;
 }
 function etaKnown(pack){
-  if(!pack || !("eta" in pack)) return ETA_KNOWN;
-  const e = pack.eta;
+  const e = pack && pack.eta;
   return isObj(e) && typeof e.known === "number" && e.known > 0 ? e.known : null;
 }
 const etaRound = r => r === null ? null : Math.max(1, Math.ceil(r - 1e-9));
@@ -3452,7 +3450,7 @@ function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx, opts){
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = rng || Math.random;
   const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
   const pvSet = new Set(pv.map(w => w.id));
-  // Placed units (pack.placementChars) are kept in review like placed words; with none, no slot is taken and no rng drawn.
+  // Placed units (placementCharsOn) are kept in review like placed words; with none, no slot is taken and no rng drawn.
   const pu = ru.some(u => (charRecs(prog)[u.id] || {}).prov) ? provPick(ru, Math.min(REVIEW_PROV, n - pv.length), charRecs(prog)) : [];
   const puSet = new Set(pu.map(u => u.id));
   const ranked = rankUnified(learned.filter(x => !pvSet.has(x.id)), prog.w, pu.length ? ru.filter(u => !puSet.has(u.id)) : ru, charRecs(prog), n - pv.length - pu.length, pack, rng, rs, scriptRecs(prog));
@@ -3602,9 +3600,10 @@ function nextScriptSets(key, units, pack, prog, n){
 // done = every unit recorded, so a missed review never pulls the stage back into the path.
 // pack.script without units is the primer off everywhere, exactly the flag-off output.
 function scriptActive(pack, units){ return !!scriptConfig(pack) && Array.isArray(units) && units.length > 0; }
-// pack.pronUntilPrimer (docs/PACK_SCHEMA.md "pronUntilPrimer"): the primer is done when it was skipped or every
-// unit of every stage still on has a record (the stage `done` rule); a pack with no active primer never is.
-function pronUntilPrimerOn(pack){ return !!pack && pack.pronUntilPrimer === true && !!scriptConfig(pack); }
+// Pronunciation off once the primer is done (fb45; pack.pronUntilPrimer until the flag collapse, now every pack.script pack):
+// the primer is done when it was skipped or every unit of every stage still on has a record (the stage `done` rule); a pack
+// with no active primer never is.
+function pronUntilPrimerOn(pack){ return !!scriptConfig(pack); }
 function scriptPrimerDone(pack, units, prog){
   if(!scriptActive(pack, units)) return false;
   if(scriptSkipped(prog)) return true;
@@ -4560,7 +4559,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,
