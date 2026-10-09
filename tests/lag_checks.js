@@ -3,7 +3,7 @@
 // stored order / turn / defer ignored, all words learned + the last partial set, holes oldest
 // first), before (main 590af86) vs after for the owner's shape, [2] app: fresh learner over 8
 // sessions (W C W C ...), the Progress line and the strip, no chips, no card, [3] closing after
-// Learn and reloading mid-Learn (the same units resume), [4] flag off: the stage model as before.
+// Learn and reloading mid-Learn (the same units resume), [5] Progress rows per level.
 // Run: node tests/lag_checks.js
 "use strict";
 const fs = require("fs");
@@ -18,7 +18,6 @@ const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const withDayRules = require("./day_rules_patch.js"); // fb10-weak-floor planner rules on old cores
 const ZH = path.join(ROOT, "packs", "zh");
-const PREV = "68930bd"; // main before the per-level Progress rows
 const MAIN = "590af86"; // main before characters.learn (stage model: withWords, order chips, turn)
 const clone0 = x => JSON.parse(JSON.stringify(x));
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
@@ -302,7 +301,8 @@ try {
     check(`owner shape, Today: strip ${segs(h).join(" | ")}; Learn ${learnLine(h)}; no card`, segs(h).join("|") === "HSK 1|HSK 2|HSK 3|HSK 4" && /^字 HSK 2, set 11 of 15$/.test(learnLine(h)) && !/id="charChoice"/.test(h) && /id="go"/.test(h));
     api.goto("progress"); const ph = api.html("panel");
     const rows = charRows(ph), row = rows.join("; ");
-    check(`owner shape, Progress: "${row}"; no order chips; mix chip kept`, eq(rows, ["HSK 1 | 150 / 150 taught · 150 mastered", "HSK 2 | 100 / 147 taught · 100 mastered", "HSK 3 | 0 / 298 taught · 0 mastered", "HSK 4 | 0 / 598 taught · 0 mastered"]) && !/id="ord(First|Before|After)"/.test(ph) && /id="toggleMix"/.test(ph));
+    // freqTiers (engine default since the flag collapse): HSK 1's 10 peripheral units, mastered, are done.
+    check(`owner shape, Progress: "${row}"; no order chips; mix chip kept`, eq(rows, ["HSK 1 | 150 / 150 · 150 mast. · 10 done", "HSK 2 | 100 / 147 taught · 100 mastered", "HSK 3 | 0 / 298 taught · 0 mastered", "HSK 4 | 0 / 598 taught · 0 mastered"]) && !/id="ord(First|Before|After)"/.test(ph) && /id="toggleMix"/.test(ph));
     { // per-level label: Today row and Learn card header agree with the per-level Progress counts
       const pr = rows.map(r => { const m = r.match(/^(HSK \d) \| (\d+) \/ (\d+)/); return { lv: m[1], taught: +m[2], all: +m[3] }; });
       const m = learnLine(h).match(/^字 (HSK \d), set (\d+) of (\d+)$/), r = m && pr.find(x => x.lv === m[1]);
@@ -364,48 +364,27 @@ try {
     check(`resumed session records exactly those units (${Object.keys(fin.chars.c).join(",")})`, eq(Object.keys(fin.chars.c).sort(), cu.slice().sort()));
   }
 
-  console.log("\n[4] flag off: the stage model as on main " + MAIN);
-  if(!OLD) console.log(`NOTE  engine ${MAIN} not in this checkout's history: control skipped`);
-  else {
-    const mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
-    const mid = VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, soundsOpened: true, sessions: 7 }, WITH);
-    byLv["1"].forEach(w => { mid.w[w.id] = { r: 3, w: 0, s: 3 }; }); byLv["2"].slice(0, 20).forEach(w => { mid.w[w.id] = { r: 1, w: 0, s: 1 }; });
-    for(const [name, p] of [["fresh", null], ["mid HSK 2", mid], ["owner shape", ownerProg(250)], ["owner, later", ownerProg(250, { defer: true })]]){
-      const out = [];
-      for(const [core, html] of [[VC, appHtml], [OLD, mainHtml]]){
-        const st = fresh(); if(p) st.ls.setItem(VC.storageKey(WITH), JSON.stringify(p));
-        NOW = new Date(2026, 11, 1, 8, 0, 0).getTime();
-        const api = await boot(WITH, st, 1, { core, html }); const t = api.panel(); api.goto("progress"); const g = api.html("panel");
-        api.today(); play(api);
-        out.push({ t, g, prog: st.ls.getItem(VC.storageKey(WITH)) });
-      }
-      check(`withWords pack (no learn), ${name}: Today, Progress and a whole session's progress byte-identical to ${MAIN} (${out[0].t.length} + ${out[0].g.length} chars)`, out[0].t === out[1].t && out[0].g === out[1].g && out[0].prog === out[1].prog);
-    }
-  }
+  // [4] (flag off: the stage model as on main 590af86) deleted: 590af86 predates pairs, engine default since the flag collapse.
 
-  console.log("\n[5] Progress: one characters row per level (control " + PREV + ")");
+  console.log("\n[5] Progress: one characters row per level");
   {
-    const prevHtml = cp.execSync(`git -C "${ROOT}" show ${PREV}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
-    const oldRow = h => { const m = (h.match(/<tr><td><bdi[^>]*>字<\/bdi><\/td><td>([^<]*)<\/td><\/tr>/) || [])[1]; return m ? (x => ({ taught: +x[1], ready: +x[2], all: +x[3], mastered: +x[4], bare: +x[5] }))(m.match(/^(\d+) \/ (\d+) taught · (\d+) in all · (\d+) mastered · (\d+) bare$/)) : null; };
-    const sum = rows => rows.reduce((a, r) => { const m = r.match(/\| (\d+) \/ (\d+)(?: taught)? · (\d+) (?:mastered|mast\.)(?: · (\d+) bare)?$/); return { taught: a.taught + +m[1], all: a.all + +m[2], mastered: a.mastered + +m[3], bare: a.bare + +(m[4] || 0) }; }, { taught: 0, all: 0, mastered: 0, bare: 0 });
+    const sum = rows => rows.reduce((a, r) => { const m = r.match(/\| (\d+) \/ (\d+)(?: taught)? · (\d+) (?:mastered|mast\.)(?: · (\d+) (?:bare|done))?$/); return { taught: a.taught + +m[1], all: a.all + +m[2], mastered: a.mastered + +m[3], bare: a.bare + +(m[4] || 0) }; }, { taught: 0, all: 0, mastered: 0, bare: 0 });
     const lvOk = CHARACTERS.every(u => String(u.lv) === String(BY_ID[u.words[0]].lv));
     check("every unit's level equals its word's level", lvOk);
     const longest = "598 / 598 learned · 598 mastered".length;
     const mid1 = (() => { const p = VC.normalizeProg({ sets: { "1": 3 }, placedOnce: true, soundsOpened: true, sessions: 5 }, PACK); byLv["1"].slice(0, 30).forEach(w => { p.w[w.id] = { r: 3, w: 0, s: 3 }; }); ORDER.slice(0, 20).forEach((u, i) => { p.chars.c[u.id] = { r: 4, w: 0, s: i < 5 ? 6 : i < 12 ? 3 : 1 }; }); Object.assign(p.chars, { choiceSeen: true, turn: "w" }); return p; })();
     const allP = ownerProg(ORDER.length); byLv["4"].forEach(w => { allP.w[w.id] = { r: 5, w: 0, s: 5 }; });
-    const shapes = [["mid HSK 1", mid1, ["HSK 1 | 20 / 150 · 12 mastered · 5 bare", "HSK 2 | 0 / 147 taught · 0 mastered", "HSK 3 | 0 / 298 taught · 0 mastered", "HSK 4 | 0 / 598 taught · 0 mastered"]],
+    const shapes = [["mid HSK 1", mid1, ["HSK 1 | 20 / 150 · 12 mastered · 5 done", "HSK 2 | 0 / 147 taught · 0 mastered", "HSK 3 | 0 / 298 taught · 0 mastered", "HSK 4 | 0 / 598 taught · 0 mastered"]],
       ["owner", ownerProg(250), null], ["all taught", allP, null]];
     for(const [name, p, want] of shapes){
       const { api } = await bootWith(PACK, p, 1); api.goto("progress"); const rows = charRows(api.html("panel")); const s = sum(rows);
-      const { api: ob } = await bootWith(PACK, p, 1, { html: prevHtml }); ob.goto("progress"); const o = oldRow(ob.html("panel"));
-      check(`${name}: ${rows.length} rows, sums taught ${s.taught} / ${s.all}, mastered ${s.mastered}, bare ${s.bare} equal the ${PREV} row (${o.taught} / ${o.all}, ${o.mastered}, ${o.bare})`, rows.length === 4 && s.taught === o.taught && s.all === o.all && s.mastered === o.mastered && s.bare === o.bare && (!want || eq(rows, want)));
+      // the control vs 68930bd (its Progress html on this core) went with the flag collapse: 68930bd predates pairs; freqTiers rows say "done" (bare, or a peripheral unit mastered).
+      check(`${name}: ${rows.length} rows, sums taught ${s.taught} / ${s.all}, mastered ${s.mastered}, done ${s.bare}: ${rows.join("; ")}`, rows.length === 4 && s.taught <= s.all && (!want || eq(rows, want)));
       check(`${name}: rows in level order, value text <= the longest word-row value (${longest})`, rows.every((r, i) => r.startsWith(`HSK ${i + 1} |`) && r.split(" | ")[1].length <= longest));
-      check(`${name}: everything outside the characters rows (word rows, controls) byte-identical but the word table's nw class (nowrap values), to ${PREV}`, api.html("panel").replace(/<p class="q">Goals<\/p><table class="stats">[\s\S]*?<\/table>/, "").replace(/<p class="q" style="margin-top:14px">Characters<\/p><table class="stats nw">[\s\S]*?<\/table>/, "").replace('<table class="stats nw">', '<table class="stats">') === ob.html("panel").replace(/<tr><td><bdi[^>]*>字<\/bdi><\/td><td>[^<]*<\/td><\/tr>/, ""));
-      console.log(`  ${name}: before ${PREV}: ${(h => { const m = h.match(/<tr><td><bdi[^>]*>字<\/bdi><\/td><td>([^<]*)</); return m ? m[1] : ""; })(ob.html("panel"))}; after: ${rows.join("; ")}`);
     }
     { const w = ownerProg(ORDER.length); byLv["4"].forEach(x => { w.w[x.id] = { r: 5, w: 0, s: 5 }; }); ORDER.forEach(u => { w.chars.c[u.id] = { r: 8, w: 0, s: 8 }; });
       const { api } = await bootWith(PACK, w, 1); api.goto("progress"); const rows = charRows(api.html("panel"));
-      check(`worst case, every unit bare: "${rows[3]}" (<= ${longest} chars in every row: ${rows.map(r => r.split(" | ")[1].length).join(", ")})`, rows.length === 4 && rows.every(r => r.split(" | ")[1].length <= longest) && /598 bare$/.test(rows[3])); }
+      check(`worst case, every unit bare (done): "${rows[3]}" (<= ${longest} chars in every row: ${rows.map(r => r.split(" | ")[1].length).join(", ")})`, rows.length === 4 && rows.every(r => r.split(" | ")[1].length <= longest) && /598 done$/.test(rows[3])); }
     const fo = await bootWith(PACK, ownerProg(250), 1); fo.api.goto("progress");
     const fresh0 = await bootWith(PACK, null, 1); fresh0.api.goto("progress");
     check("fresh learner: no characters rows (not started)", charRows(fresh0.api.html("panel")).length === 0);
