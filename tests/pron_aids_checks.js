@@ -20,7 +20,6 @@ const cp = require("child_process");
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
-const MAIN = "55c843e"; // BP merged: the engine before BP2
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
@@ -203,7 +202,10 @@ const byLv = VC.wordsByLevel(WORDS, PACK);
 const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
 // Mid HSK 2 before any character stage: with one stage per level (fb2-write) that is a learner who
 // put characters after the words (chars.defer), else 字1 would come before HSK 2.
-const seedPF = () => VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PACK);
+// The level gate (default since the flag collapse) counts placed records: the counted words get them, so HSK 2 stays open;
+// at streak 0, so Review's pairs (lowest streak first, typed first) still reach typed readings, not only character units.
+const seedPF = () => { const p = VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PACK);
+  VC.pinPrefixRecords(p, WORDS, PACK); Object.values(p.w).forEach(r => { r.prov = 1; r.s = 0; }); return p; };
 // Under characters.learn "lag" (zh since fb3-lag) a words Learn needs the learned words' units
 // taught: recorded at streak 0, the pron tier, so words still show by their readings.
 const seedPFLag = () => { const p = seedPF(); const lw = new Set(VC.learnedWords(WORDS, PACK, p).map(w => w.id)); CHARACTERS.filter(u => lw.has(u.words[0])).forEach(u => { p.chars.c[u.id] = { r: 1, w: 1, s: 0 }; }); return p; };
@@ -259,7 +261,7 @@ function walk(api, stopAt){
       VC.toneHTML("Xī'ān") === '<span class="t1">Xī</span>&#39;<span class="t1">ān</span>' && VC.toneHTML("yìdiǎnr") === '<span class="t4">yì</span><span class="t3">diǎnr</span>');
     check("toneHTML escapes everything and leaves non-readings uncoloured", VC.toneHTML('<b>"OK"</b> 我') === "&lt;b&gt;&quot;OK&quot;&lt;/b&gt; 我");
     check("splitReading: a run with a/o/e inside prefers the apostrophe-less split (fāngàn = fān|gàn)", VC.splitReading("fāngàn").map(p => p.text).join("|") === "fān|gàn");
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log("\n[2] typed reading: core (pack.typing \"pron\")");
   try {
@@ -293,7 +295,7 @@ function walk(api, stopAt){
     const rc = VC.buildRecallPlan(learned, prog, PACK, 8);
     check(`Review/Recall plans: the production slots alternate recall and type as for other typing packs (review type ${typeSeen}, recall ${recallSeen}; recall step ${rc.map(p => p.kind).join(",")})`,
       typeSeen > 0 && recallSeen > 0 && rc.filter(p => p.kind === "type").length === 4 && rc.filter(p => p.kind === "recall").length === 4);
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log("\n[3] app: colouring on every screen, the typed-reading item");
   try {
@@ -382,7 +384,7 @@ function walk(api, stopAt){
     a2.setProg(atTier());
     check("no pron: both type slots give the characters item", [0, 1].every(i => a2.itemFromPlan({ kind: "type", word: np }, i, [{ kind: "type" }, { kind: "type" }]).label === "Type the characters"));
 
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- [3j] typed items, ja-like (no tones, kana prons)
   // pronFirst, no pack.tones, kana prons: the reading item is silent and checks kana by
@@ -501,7 +503,7 @@ function walk(api, stopAt){
       kr.check("こーひー") && kr.check("コーヒー") && !kr.check("こうひい") && ka.check("コーヒー") && !ka.check("こーひー"));
     const aw = aj.itemFromPlan({ kind: "type", word: affix }, 1, two), ar = aj.itemFromPlan({ kind: "type", word: affix }, 0, two);
     check("affix word 〜X: characters accepts X and 〜X, reading accepts ねん and 〜ねん", aw.label === "Type the characters" && aw.check("濿") && aw.check(affix.w) && !aw.check("〜") && ar.check("ねん") && ar.check("〜ねん"));
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log("\n[3b] app: word taps inside sentences (sentences with ruby)");
   try {
@@ -590,7 +592,7 @@ function walk(api, stopAt){
     check(`Words list rows show coloured readings (${wl.length} rows)`, wl.length === 10 && wl.every(h => tspans(h) > 0 && !uncoloured(h).length));
     const pb = WORDS.filter(w => { const g = api.glossHTML(w.id, "", null); return !tspans(g) || uncoloured(g).length; });
     check(`popover of every word: reading coloured (${pb.length} bad)`, pb.length === 0);
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log("\n[4] Sounds Reference card (pack.soundsReference)");
   try {
@@ -617,7 +619,7 @@ function walk(api, stopAt){
     const { api: off } = await boot({ pack: Object.assign({}, PACK, { soundsReference: undefined }) });
     off.goto("sounds");
     check("without soundsReference: no card", !/refcard/.test(off.html("panel")));
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- [5] passages: phrase spans
   console.log("\n[5a] passages: rendered sentences keep every character");
@@ -632,7 +634,7 @@ function walk(api, stopAt){
       if(visHan + visSyl !== hanCount(s.t)) bad.push(`${p.id}:${si} rendered ${visSyl}+${visHan} != ${hanCount(s.t)} (${vis})`);
     }));
     check(`every rendered passage sentence: syllables + characters left written = its characters (${n} sentences, ${bad.length} bad${bad[0] ? ": " + bad.slice(0, 2).join(" | ") : ""})`, bad.length === 0);
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log("\n[5] passage spans longer than their word; popover heads");
   try {
@@ -679,7 +681,7 @@ function walk(api, stopAt){
     const pm = seedPF(); VC.ensureChars(pm).c["c" + m[1].slice(1)] = { r: 5, w: 0, s: 5 }; api.setProg(pm);
     const h3 = stripTags(api.passageSentenceHTML(f2.s, f2.si, false).replace(/<button[\s\S]*?<\/button>/g, ""));
     check(`linked word mastered: the span is written as a whole (${h3})`, /越来越/.test(h3));
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log("\n[6] a reading that starts a sentence is capitalised");
   try {
@@ -699,7 +701,7 @@ function walk(api, stopAt){
       if(m.some(x => { const ch = x.slice(-1); return ch === ch.toLowerCase() && !HAN.test(ch); })) badCap.push(vis);
     }));
     check(`passage sentences with an internal . ! ? (${n}): every reading after one is capitalised (${badCap.length} bad${badCap[0] ? ": " + badCap[0] : ""})`, n > 0 && badCap.length === 0);
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log("\n[8] passage titleRuby, questions[].ruby, optionsRuby under pronFirst; no hanzi in the Read tab");
   try {
@@ -747,7 +749,9 @@ function walk(api, stopAt){
     // Names (null wordId) show their reading.
     const q0 = PASSAGES[0].questions[0];
     const qn = q0.ruby.find(r => r[3] === null);
-    api.startPassage(PASSAGES[0]); api.el("rdone").click();
+    // one-question copy: passageForPass (default since the flag collapse) keeps a single question first
+    const P1 = Object.assign({}, PASSAGES[0], { questions: [q0] });
+    api.startPassage(P1); api.el("rdone").click();
     const q0h = api.html("panel");
     check(`a null-wordId token (a name) shows its reading (${qn && qn[2]} in "${stripTags((q0h.match(/<div class="med wd"[^>]*>([\s\S]*?)<\/div>/) || [])[1] || "").slice(0, 40)}")`, !!qn && stripTags((q0h.match(/<div class="med wd"[^>]*>([\s\S]*?)<\/div>/) || [])[1] || "").startsWith(qn[2]));
     // Ruby first: 越来越 / 一下 read from the passage ruby (as the builder wrote it); the
@@ -771,9 +775,9 @@ function walk(api, stopAt){
     a3.setProg(VC.normalizeProg(seedPF(), off)); a3.goto("read");
     const offList = [...a3.html("panel").matchAll(/<button data-pid="([^"]*)"[^>]*>([\s\S]*?)<\/button>/g)];
     check(`without pronFirst the list titles stay written, ruby unused (${offList.length} titles)`, offList.length > 0 && offList.every(m => m[2].includes(PASSAGES.find(p => p.id === m[1]).title) && !tspans(m[2])));
-    a3.startPassage(PASSAGES[0]); a3.el("rdone").click();
+    a3.startPassage(P1); a3.el("rdone").click();
     check("without pronFirst the heading, question and options stay written", a3.el("o").children.some(b => b.innerHTML.includes(PASSAGES[0].questions[0].options[0])) && a3.html("panel").includes(VC.escapeHtml(PASSAGES[0].questions[0].q)));
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log("\n[9] sentence tokens longer than their word (这个 for 这): popover head and speech");
   try {
@@ -835,7 +839,7 @@ function walk(api, stopAt){
       if(i % 2 === 0 ? t.ts !== undefined : (t.ts !== x.t || t.tr !== w.pron + "たち")) jb.push(x.t);
     });
     check(`ja-like: a stem-only token keeps the word's headword; a token longer than the word heads with its surface and kana reading (${jsents.length} sentences, ${jb.length} bad)`, jw.length === 4 && jb.length === 0);
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- [11] characters.compose
   // A span longer than its word composes per-character readings only with
@@ -913,62 +917,9 @@ function walk(api, stopAt){
     check(`capital after a colon and an opening quote (${q1})`, q1 === "Tā shuō: “Hǎo.”");
     const q2 = L("好……好", [[0,1,"hǎo"],[3,4,"hǎo"]]);
     check(`ellipsis kept as written (no "..."), no capital after it (${q2})`, q2 === "Hǎo…… hǎo");
-  } catch(e){ check(`section threw: ${e.message}`, false); }
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  console.log(`\n[7] control: BP2 fields absent -> HTML byte-identical to main ${MAIN}`);
-  {
-    let mainHtml = null, mainCore = null;
-    try{
-      mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const src = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); mainCore = m.exports;
-    }catch(e){ console.log("    cannot read main: " + e.message); }
-    check(`main ${MAIN} engine loaded from git`, !!mainHtml && !!mainCore && typeof mainCore.sentencePieces === "function");
-    // The fields BP2 gates on: pack.tones, typing "pron", soundsReference, sentence ruby (word
-    // taps), and pronFirst (phrase-span readings in passages). Characters block kept.
-    const offPack = Object.assign({}, PACK_BASE, { typing: null }); delete offPack.tones; delete offPack.soundsReference; delete offPack.pronFirst; delete offPack.dayAware; // dayAware post-dates the control
-    const offSent = SENTENCES.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; });
-    const offPass = PASSAGES.map(p => Object.assign({}, p, { sentences: p.sentences.map(s => { const c = Object.assign({}, s); delete c.ruby; return c; }) }));
-    async function screens(html, core, pack, sents, passages, seed){
-      const { api } = await boot({ html, core, pack, words: WORDS_OFF, sentences: sents, passages, seed });
-      const out = {};
-      api.setProg(seedPF()); api.today(); out.today = api.html("panel");
-      api.el("go").click();
-      let walked = []; try{ walked = walk(api, /id="again"/); }catch(e){ walked = [{ where: "ERR", html: e.message }]; }
-      out.walk = walked.map(x => x.where + "\n" + x.html).join("\n----\n");
-      api.setProg(seedPF());
-      out.rows = sents.slice(0, 120).map(s => api.sentenceRowHTML(s, BY_ID[(s.words || [])[0]])).join("\n");
-      api.wordsPage("1", 0); out.words = api.html("panel") + api.html("wbody") + api.el("wl").children.map(c => c.innerHTML).join("|");
-      api.startPassage(passages[0]); out.read = api.html("panel");
-      out.sounds = (api.goto("sounds"), api.html("panel"));
-      return out;
-    }
-    if(mainHtml && mainCore){
-      const cases = [["zh, BP2 fields + ruby + pronFirst absent", offPack, offSent, offPass]];
-      for(const [name, pk, ss, ps] of cases){
-        const a = await screens(mainHtml, mainCore, pk, ss, ps, 11);
-        const b0 = await screens(CUR_HTML, VC, pk, ss, ps, 11);
-        // The Replay buttons (docs/AUDIO.md "Playback reliability": read items' #rpa stage,
-        // the reveal's #rvp row) postdate main; exactly that markup is dropped before the
-        // compare, and it must have been there to drop (walk).
-        const REPLAY_RE = /<div class="(?:rvsay|listen-stage)"><button (?:type="button" )?class="replay" id="(?:rvp|rpa)" aria-label="Replay"><svg[\s\S]*?<\/svg><\/button><\/div>/g;
-        const b = {}; let dropped = 0;
-        for(const k of Object.keys(b0)) b[k] = b0[k].replace(REPLAY_RE, () => { dropped++; return ""; });
-        check(`${name}: replay buttons present in the current walk (${dropped} dropped before the compare)`, dropped > 0);
-        // Intended since the Today Read stage: main's Read hint box became the plan's Read
-        // row; both are cut before comparing (the walk skips the stage, see walk()).
-        a.today = a.today.replace(/<div class="stmt" id="readHintBox">[\s\S]*?<\/button><\/div>/, "");
-        b.today = b.today.replace(/<tr><td>6\. Read<\/td><td>[\s\S]*?<\/td><\/tr>/, "");
-        // Intended since the cue-line style: cue content carries an extra class token.
-        for(const k of Object.keys(b)) b[k] = b[k].replace(/class="q cue"/g, 'class="q"');
-        for(const k of Object.keys(a)){
-          const same = a[k] === b[k];
-          let at = -1; if(!same){ for(let i = 0; i < Math.max(a[k].length, b[k].length); i++) if(a[k][i] !== b[k][i]){ at = i; break; } }
-          check(`${name}: ${k} byte-identical to main (${a[k].length} chars)${same ? "" : ` first diff at ${at}: main ${JSON.stringify(a[k].slice(at - 40, at + 60))} vs ${JSON.stringify(b[k].slice(at - 40, at + 60))}`}`, same && a[k].length > 50);
-        }
-      }
-    }
-  }
+  // [7] control vs main 55c843e deleted: that engine predates pairs (and the level gate), default since the flag collapse.
 
   console.log("\n[12] replay rule (docs/AUDIO.md \"Playback reliability\"): every autoplay site shows a Replay button");
   try{
@@ -1063,7 +1014,7 @@ function walk(api, stopAt){
   }catch(e){ check(`dnext cancel section threw: ${e.stack}`, false); }
 
   Math.random = REAL_RANDOM;
-  console.log("\n[14] pack.dayAware on (zh as shipped): a second Today session the same day keeps colouring and typed readings");
+  console.log("\n[14] the day log (dayAware, engine default since the flag collapse): a second Today session the same day keeps colouring and typed readings");
   try {
     const { api } = await boot({ seed: 8 });
     api.setProg(seedPF()); api.today(); api.el("go").click();
@@ -1073,7 +1024,7 @@ function walk(api, stopAt){
     const unc = seen.filter(x => uncoloured(x.html).length);
     const typed = seen.filter(x => x.kind === "type");
     check(`session 2: every reading coloured (${seen.length} screens, ${unc.length} uncoloured), typed reading items present (${typed.length})${err ? " ERROR " + err.message : ""}`,
-      PACK.dayAware === true && !err && unc.length === 0 && typed.length > 0 && !!api.getProg().day);
+      !err && unc.length === 0 && typed.length > 0 && !!api.getProg().day);
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);

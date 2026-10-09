@@ -208,12 +208,12 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const passages = JSON.parse(JSON.stringify(PASSAGES));
     let p = passages.find(x => x.questions.some(q => x.sentences[q.sentence])) || passages[0];
-    const q0 = p.questions[0];
-    const s0 = p.sentences[q0.sentence];
-    s0.audio = "https://example.test/clip.mp3";
+    let q0 = p.questions[0];
     const { api, spoken, audioInstances } = await boot({ passages });
     api.setProg(seedPF());
-    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
+    api.startPassage(p); p = api.rd().p; q0 = p.questions[0]; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
+    const s0 = p.sentences[q0.sentence];
+    s0.audio = "https://example.test/clip.mp3";
     api.el("rdone").click();
     const k = spoken.length;
     const opts = api.el("o").children;
@@ -245,9 +245,9 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     const { api } = await boot();
     api.setProg(seedPF());
     let p = PASSAGES[0];
-    const q0 = p.questions[0];
+    let q0 = p.questions[0];
     check("setup: this question carries an English translation", !!q0.en);
-    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
+    api.startPassage(p); p = api.rd().p; q0 = p.questions[0]; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const panel0 = api.html("panel");
     check("translation absent on mount, 'Show translation' button present", !panel0.includes(VC.escapeHtml(q0.en)) && /id="qtr"/.test(panel0) && /Show translation/.test(panel0));
@@ -274,9 +274,9 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     const { api } = await boot();
     api.setProg(seedPF());
     let p = PASSAGES[0];
-    const q0 = p.questions[0];
+    let q0 = p.questions[0];
     check("setup: this question carries an English translation", !!q0.en);
-    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
+    api.startPassage(p); p = api.rd().p; q0 = p.questions[0]; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const opts = api.el("o").children;
     opts.find(b => b.dataset.v === String(q0.answer)).click(); // answer first
@@ -395,8 +395,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     const { api, spoken, document, ss } = await boot({ voices });
     api.setProg(seedPF());
     let p = PASSAGES.find(x => x.questions[0].en && x.questions.length > 1);
-    const q0 = p.questions[0];
-    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
+    let q0 = p.questions[0];
+    api.startPassage(p); p = api.rd().p; q0 = p.questions[0]; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const ord = optOrder(api);
     api.el("qtr").click(); api.el("ptoggle").click();

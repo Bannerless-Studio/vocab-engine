@@ -524,8 +524,10 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     const heard = q => q.filter(x => x[4]);
     b.api.enterTodayStep(0);
     const review = b.api.dq() || [];
-    check("Review: hear items only on clipped words, at least one planned, unclipped words present, none flagged",
-      heard(review).length > 0 && review.some(x => !clipped.has(idOf(x[0]))) && heard(review).every(x => clipped.has(idOf(x[0]))) && review.every(x => !x[3]));
+    // pairs (default since the flag collapse): Review asks the sm pair typed (Type the pinyin) when a typed kind fits, so a
+    // Review may plan no hear item; the at-least-one hear check lives on Today Listen below.
+    check("Review: hear items only on clipped words, unclipped words present, none flagged",
+      review.length > 0 && review.some(x => !clipped.has(idOf(x[0]))) && heard(review).every(x => clipped.has(idOf(x[0]))) && review.every(x => !x[3]));
     b.api.enterTodayStep(1); b.api.el("dr").onclick({});
     const learn = b.api.dq() || [];
     const perWord = {}; learn.forEach(x => { perWord[x[0]] = (perWord[x[0]] || 0) + 1; });
