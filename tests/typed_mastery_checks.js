@@ -1,13 +1,13 @@
 // Typed mastery and per-level character stages (docs/PACK_SCHEMA.md "bareBy"; owner feedback
 // 2026-10-02: "writing practice should score more than selection practice", "it takes more than
 // 3/6 attempts for mastery"): [1] pack config and validation, [2] core credit / hold / miss floor /
-// exemption, [3] planner (typed unit items through dayPlanKinds, their share, no duplicates),
+// exemption, [3] planner (plan shape, the miss-floor tier; the typed-unit share went with pairs),
 // [4] app on zh as shipped: typed credit per kind, retry and choice fallback give none, choice
 // items held, the reveal's streak dots, bare words asked without pinyin, [5] stages per level and
 // characters.withWords: Today for fresh, mid HSK 1, mid HSK 2, all words learned mid the old 字
 // stage, finished; the Progress chips,
-// [6] session resume with typed unit items, [7] control: without the new fields the zh markup
-// and progress are byte-identical to main 7fe35f7, [8] gloss fields in typed unit items, [9] the
+// [6] session resume with typed unit items, [7] control: markChar vs 7a21ccd (the app control vs
+// main 7fe35f7 went with the flag collapse), [8] gloss fields in typed unit items, [9] the
 // withWords Learn turn, [10] answer giveaways (browser check 2026-10-02): a pronInGloss word's
 // reading and meaning are never stimulus and answer for each other; pack.optsOneScript option
 // sets never have one option in another script.
@@ -15,20 +15,21 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf, packBefore } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
+// the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
+const PAIRS_ERA = "9eb6ecb~1";
 const cp = require("child_process");
 const util = require("util");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
-const withDayRules = require("./day_rules_patch.js"); // fb10-weak-floor planner rules on old cores
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "7fe35f7"; // main before typed mastery and per-level stages (fb2-gloss merged)
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packBefore(loadConst(path.join(ZH, "pack.js"), "PACK"), "pairs");
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), PAIRS_ERA);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -58,7 +59,8 @@ function extractAttrs(tag){
   let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; }
   return attrs;
 }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){
@@ -107,10 +109,10 @@ function makeFakeDom(){
     const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
     let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); }
   }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
   const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return {
     title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); },
@@ -147,7 +149,7 @@ class FakeDate extends Date {
 async function boot(pack, st, seed, opts){
   const o = opts || {};
   Math.random = mulberry32(seed);
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const voices = o.voices || [{ lang:"zh-CN", name:"x" }];
   const ss = { getVoices: () => voices, onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
@@ -158,7 +160,7 @@ const __mc = renderMcItem; renderMcItem = function(it){ __cur = it; return __mc(
 const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; return __ty(it); };
 return {
   el: id => document.getElementById(id), html: id => { const e = document.getElementById(id); return e ? e.innerHTML : null; }, panel: () => document.getElementById("panel").innerHTML,
-  getProg: () => prog, setProg: p => { prog = p; }, getD: () => D, getCur: () => __cur,
+  getProg: () => prog, setProg: p => { prog = p; }, getD: () => D, getCur: () => __cur, getPrep: () => todayPrep,
   today: () => { tab = "today"; render(); }, goto: t => { tab = t; testSel = null; RD = null; soundsSel = null; render(); },
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
   readItem, recallItem, revealBlock, charDrillItem, wordRowHTML, itemFromPlan,
@@ -207,8 +209,8 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
 
   console.log("\n[1] pack config and validation");
   {
-    check("zh ships characters.bareBy \"typed\", bareWords, one stage per level labelled 字1..字4, dayAware",
-      CFG.bareBy === "typed" && CFG.bareWords === true && CFG.learn === "lag" && CFG.withWords === false && CFG.stages.map(st => st.after + ":" + st.levels.join() + ":" + st.label).join() === "1:1:字1,2:2:字2,3:3:字3,4:4:字4" && PACK.dayAware === true);
+    check("zh ships characters.bareBy \"typed\", bareWords, one stage per level labelled 字1..字4",
+      CFG.bareBy === "typed" && CFG.bareWords === true && CFG.learn === "lag" && CFG.withWords === false && CFG.stages.map(st => st.after + ":" + st.levels.join() + ":" + st.label).join() === "1:1:字1,2:2:字2,3:3:字3,4:4:字4");
     check("charsConfig: bareBy only \"typed\", bareWords only true, a stage label only a non-empty string",
       VC.charsConfig({ characters: { bareBy: "yes", bareWords: 1, stages: [{ after: "1", levels: ["1"], label: "" }] } }).bareBy === null
       && VC.charsConfig({ characters: { bareWords: 1 } }).bareWords === false && !("label" in VC.charsConfig({ characters: { stages: [{ after: "1", levels: ["1"], label: "" }] } }).stages[0]));
@@ -264,73 +266,27 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
   }
 
   console.log("\n[3] planner: typed unit items in Review / Recall");
+  // The day planner's typed-unit share (DAY_TYPED_CONSOLIDATE_SHARE per plan, the floored / aged-out unit
+  // first) went with the flag collapse: pairs is engine default and plans by pair (tests/pairs_checks.js
+  // covers typed unit items there). Kept: the plan shape and the miss-floor tier.
   {
     const p = seedC(); const lw = VC.learnedWords(WORDS, PACK, p);
     const o = { size: 20, units: CHARACTERS, canHear: () => true, today: DAY, typedUnits: TU };
-    let tuN = 0, dup = 0, mcBand = 0, n = 0;
+    let dup = 0;
     for(let seed = 1; seed <= 20; seed++){
       const pl = VC.buildReviewPlan(lw, p, PACK, Object.assign({ rng: mulberry32(seed) }, o));
-      n += pl.length; tuN += pl.filter(x => x.tu).length;
       const ids = pl.filter(x => x.word).map(x => x.word.id); dup += ids.length - new Set(ids).size;
-      mcBand += pl.filter(x => x.unit && TU.has(x.unit.id) && p.chars.c[x.unit.id].s >= M && p.chars.c[x.unit.id].s < B).length;
       if(seed === 1) check(`Review plan: ${pl.length} items, typed unit items { kind: "type", word, tu } (${pl.filter(x => x.tu).map(x => x.tu).join(" ")})`, pl.length === 20 && pl.filter(x => x.tu).every(x => x.kind === "type" && x.word === TU.get(x.tu)));
     }
-    const SH = VC.DAY_TYPED_CONSOLIDATE_SHARE;
-    check(`20 Review plans: >= ${Math.ceil(20 * SH)} typed unit items each (share ${SH}; ${tuN / 20} on average), no word twice (${dup}), no choice item for a unit between mastered and bare (${mcBand})`, tuN >= 20 * Math.ceil(20 * SH) && dup === 0 && mcBand === 0 && n === 400);
-    const rc = VC.buildRecallPlan(lw, p, PACK, 8, Object.assign({ rng: mulberry32(2) }, o, { size: undefined }));
-    check(`Recall plan (8): ${rc.filter(x => x.tu).length} typed unit items (>= ${Math.ceil(8 * SH)})`, rc.length === 8 && rc.filter(x => x.tu).length >= Math.ceil(8 * SH));
-    // Typing a word's pinyin logs "type" under w: only: its unit's typed written item stays due.
-    { const q = clone(p); VC.dayStart(q, PACK, DAY, true);
-      const due = VC.buildReviewPlan(lw, q, PACK, Object.assign({ rng: mulberry32(1) }, o)).filter(x => x.tu).map(x => x.tu);
-      due.forEach(id => VC.noteDay(q, PACK, DAY, "w:" + UNIT[id].words[0], "type", true)); VC.dayStart(q, PACK, DAY, true);
-      const again = VC.buildReviewPlan(lw, q, PACK, Object.assign({ rng: mulberry32(1) }, o)).filter(x => x.tu).map(x => x.tu);
-      const z = clone(p); VC.dayStart(z, PACK, DAY, true); VC.dayStart(z, PACK, DAY, true);
-      const ctl = VC.buildReviewPlan(lw, z, PACK, Object.assign({ rng: mulberry32(1) }, o)).filter(x => x.tu).map(x => x.tu);
-      const kept = due.filter(id => again.includes(id)).length, kc = due.filter(id => ctl.includes(id)).length;
-      check(`pinyin typed right today on the words of ${due.length} due units: ${kept} still planned typed (${kc} with nothing answered; the consolidating share is ${Math.ceil(20 * SH)}), records unchanged`, due.length > 0 && kept >= Math.min(kc, Math.ceil(20 * SH)) && JSON.stringify(q.chars.c) === JSON.stringify(p.chars.c)); }
-    // A word with a pending hear/read miss is asked in a kind that settles it: its own item, or the
-    // unit's typed item (since fb10-weak-floor a typed answer settles any miss).
-    { const q = clone(p); VC.dayStart(q, PACK, DAY, true);
-      const ids = unitsAt(q, 4).slice(0, 8);
-      ids.forEach(id => VC.noteDay(q, PACK, DAY, "w:" + UNIT[id].words[0], "hear", false)); VC.dayStart(q, PACK, DAY, true);
-      const pl = VC.buildReviewPlan(lw, q, PACK, Object.assign({ rng: mulberry32(3) }, o));
-      const words = ids.map(id => UNIT[id].words[0]);
-      const asTu = pl.filter(x => x.tu && words.includes(x.word.id)).length, own = pl.filter(x => x.word && !x.tu && words.includes(x.word.id));
-      check(`8 band units whose words have a pending hear miss: all asked (${own.length} word items, kinds ${[...new Set(own.map(x => x.kind))].join(",")}; ${asTu} as the unit's typed item), each in a kind that settles it`, own.length + asTu === 8 && own.every(x => VC.daySettles(["hear"], x.kind))); }
+    check(`20 Review plans: no word twice (${dup})`, dup === 0);
     const noTU = VC.buildReviewPlan(lw, p, PACK, Object.assign({ rng: mulberry32(1) }, o, { typedUnits: undefined }));
     check("without opts.typedUnits the planner asks those units by choice, as before", !noTU.some(x => x.tu) && noTU.some(x => x.unit));
-    // A unit typed right today is not asked again while others are due.
-    const q = clone(p); VC.dayStart(q, PACK, DAY, true);
-    const first = VC.buildReviewPlan(lw, q, PACK, Object.assign({ rng: mulberry32(1) }, o)).filter(x => x.tu).map(x => x.tu);
-    first.forEach(id => { VC.markUnitTyped(q, CHARACTERS, PACK, UNIT[id].words[0], true); VC.noteDay(q, PACK, DAY, "c:" + id, "type", true); VC.noteDay(q, PACK, DAY, "w:" + UNIT[id].words[0], "type", true); });
-    VC.dayStart(q, PACK, DAY, true);
-    const second = VC.buildReviewPlan(lw, q, PACK, Object.assign({ rng: mulberry32(1) }, o)).filter(x => x.tu).map(x => x.tu);
-    check(`next session: units typed right are not asked again (${first.join(" ")} | ${second.join(" ")})`, first.length > 0 && second.length > 0 && !second.some(id => first.includes(id)));
-    // A floored unit (missed today) comes first, typed.
+    // Miss floor: a floored unit never reaches the weak tier, so its pending miss must be settleable by the typed item.
     const r = clone(p); VC.dayStart(r, PACK, DAY, true); const fl = unitsAt(r, 6)[0]; r.chars.c[fl].s = B;
     VC.markChar(r, fl, false, PACK, true); VC.noteDay(r, PACK, DAY, "c:" + fl, "charRead", false); VC.dayStart(r, PACK, DAY, true);
-    const rp = VC.buildReviewPlan(lw, r, PACK, Object.assign({ rng: mulberry32(1) }, o));
-    check(`a bare unit (${B}) missed by choice steps down to ${B - 1} and comes back typed next drill (${fl} s=${r.chars.c[fl].s})`, r.chars.c[fl].s === B - 1 && rp.some(x => x.tu === fl));
-    // Miss floor: a floored unit never reaches the weak tier, so its pending miss must be settleable
-    // by the typed item, and after the miss ages out it must still get its consolidating share.
-    const cand = VC.dayLog(r, DAY).a["c:" + fl]; const cc = { key: "c:" + fl, rec: r.chars.c[fl], mastered: M, bare: B, kinds: ["type"], alias: "w:" + wordOfUnit(fl).id };
+    check(`a bare unit (${B}) missed by choice steps down to ${B - 1} (${fl} s=${r.chars.c[fl].s})`, r.chars.c[fl].s === B - 1);
+    const cc = { key: "c:" + fl, rec: r.chars.c[fl], mastered: M, bare: B, kinds: ["type"], alias: "w:" + wordOfUnit(fl).id };
     check(`floored unit with a pending charRead miss: tier 0 for its typed item (${VC.dayTier(cc, VC.dayLog(r, DAY), VC.daySn(r))})`, VC.dayTier(cc, VC.dayLog(r, DAY), VC.daySn(r)) === 0);
-    const ag = clone(r); const ae = ag.day.a["c:" + fl]; ae.ma = 1; ae.ms = VC.daySn(ag) - VC.DAY_MISS_MAX_SESSIONS;
-    const agTier = VC.dayTier(cc, VC.dayLog(ag, DAY), VC.daySn(ag)); let at = 0;
-    for(let k = 1; k <= 30 && !at; k++){
-      const pl = VC.buildReviewPlan(lw, ag, PACK, Object.assign({ rng: mulberry32(k) }, o)).filter(x => x.tu);
-      if(pl.some(x => x.tu === fl)) at = k;
-      pl.forEach(x => { VC.noteDay(ag, PACK, DAY, "c:" + x.tu, "type", true); VC.noteDay(ag, PACK, DAY, "w:" + x.word.id, "type", true); });
-      VC.dayStart(ag, PACK, DAY, true);
-    }
-    check(`after the miss ages out (${VC.DAY_MISS_MAX_SESSIONS} sessions): tier ${agTier} (consolidating), asked typed again in session ${at} (41 units in the band; aged-out first in the consolidating share)`, agTier === 2 && at > 0 && at <= 4);
-    // The aged-out mark survives midnight (dayCarry "ag") until a right answer.
-    { const z = clone(r); const ze = z.day.a["c:" + fl]; ze.ma = 1; ze.ms = VC.daySn(z) - VC.DAY_MISS_MAX_SESSIONS;
-      const nd = VC.dayLog(z, "2026-10-03"); const ne = nd.a["c:" + fl];
-      VC.dayStart(z, PACK, "2026-10-03", true);
-      const zp = VC.buildReviewPlan(lw, z, PACK, Object.assign({ rng: mulberry32(1) }, o, { today: "2026-10-03" }));
-      VC.noteDay(z, PACK, "2026-10-03", "c:" + fl, "type", true);
-      check(`after midnight: entry ${JSON.stringify(ne)} (mk dropped, ag kept), first in the consolidating share, cleared by a right answer`, ne && ne.ag === 1 && !ne.mk && zp.some(x => x.tu === fl) && !("ag" in z.day.a["c:" + fl])); }
   }
 
   console.log("\n[4] app (zh as shipped): typed credit, hold, fallback, reveal dots, bare words");
@@ -356,7 +312,8 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     // so it cannot settle the unit's charRecall miss (scheduler review 2026-10-02).
     check("day log: typed reading answers (pronMeaning, pron) log nothing under the unit", [band[3], band[4]].every(id => !((api.getProg().day.a["c:" + id] || {}).r || []).includes("type")));
     { const B = VC.charsConfig(PACK).bare, s = results[0][2];
-      check(`reveal shows the unit's streak as dots after the answer (${stripTags(results[0][3]).slice(0, 14)}; bare ${B} from the pack)`, results[0][3].includes(`aria-label="字 ${s}/${B}"`) && stripTags(results[0][3]).startsWith("字 " + "●".repeat(s) + "○".repeat(B - s))); }
+      const cue = (results[0][3].match(/<div class="ucue"[\s\S]*?<\/div>/) || [""])[0]; // app v2: the dots sit inside the answer row
+      check(`reveal shows the unit's streak as dots after the answer (${stripTags(cue)}; bare ${B} from the pack)`, cue.includes(`aria-label="字 ${s}/${B}"`) && stripTags(cue).startsWith("字 " + "●".repeat(s) + "○".repeat(B - s))); }
     // Miss, in-drill retry, second-miss choice fallback.
     { const id = band[5]; const it = api.silentWrittenTypeItem(wordOfUnit(id)); api.drill1(it); answer(api, false);
       const floored = rec(id).s; api.el("nx").click(); answer(api, true);
@@ -397,14 +354,16 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
   console.log("\n[5] stages per level, characters.withWords: Today for fresh, mid HSK 1, mid HSK 2, all words learned mid the old 字 stage, finished");
   { const PACK = WITH; // the stage model (main 590af86); zh ships characters.learn "lag" (lag_checks.js)
     const segs = h => [...h.matchAll(/<div class="seg">[\s\S]*?<\/i><\/div>([\s\S]*?)<\/div>/g)].map(m => stripTags(m[1]));
-    const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
+    const learnLine = h => stripTags((h.match(/<div class="tst"><span>Learn<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/) || ["", ""])[1]); // app v2 Today row
     const withS = (p, n) => Object.assign(clone(p), { sessions: n });
-    const today = async p => { const { api } = await bootWith(PACK, p, 1); const h = api.panel(); return { api, h, learn: learnLine(h), card: /id="charChoice"/.test(h), go: /id="go"/.test(h) }; };
+    // App v2: the path strip is on Progress (Show all), shown once characters are unlocked or started.
+    const stripOf = api => { api.goto("progress"); if(!/id="pvAll" aria-expanded="true"/.test(api.panel())) api.el("pvAll").click(); const s = segs(api.panel()); api.today(); return s; };
+    const today = async p => { const { api } = await bootWith(PACK, p, 1); const h = api.panel(); return { api, h, learn: learnLine(h), card: /id="charChoice"/.test(h), go: /id="go"/.test(h), strip: stripOf(api) }; };
     const RESULTS = [];
     // fresh
     let t = await today(null);
     RESULTS.push(["fresh", t.learn]);
-    check(`fresh: strip ${segs(t.h).join(" | ")}; Learn ${t.learn}; Start today`, segs(t.h).join("|") === "HSK 1|字1|HSK 2|字2|HSK 3|字3|HSK 4|字4" && /^HSK 1, set 1/.test(t.learn) && t.go && !t.card);
+    check(`fresh: strip ${t.strip.join(" | ") || "(none: characters locked)"}; Learn ${t.learn}; Start today`, t.strip.length === 0 && !VC.charsUnlocked(PACK, WORDS, t.api.getProg()) && /^HSK 1, set 1/.test(t.learn) && t.go && !t.card);
     // mid HSK 1: no 字 stage pending, words every session
     const m1 = VC.normalizeProg({ sets: { "1": 4 }, placedOnce: true, soundsOpened: true }, PACK);
     byLv["1"].slice(0, 40).forEach(w => { m1.w[w.id] = { r: 3, w: 0, s: 3 }; });
@@ -417,7 +376,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     const ev = await today(withS(mid, 6)), od = await today(withS(mid, 7));
     RESULTS.push(["mid HSK 2", ev.learn + " / " + od.learn]);
     check(`mid HSK 2: no card, Start today; sessions alternate (${ev.learn} | ${od.learn})`, !ev.card && !od.card && ev.go && od.go && /^HSK 2, set 3/.test(ev.learn) && /^字1, set 1 of \d+/.test(od.learn));
-    check(`mid HSK 2: strip ${segs(ev.h).join(" | ")}`, segs(ev.h).join("|") === "HSK 1|字1|HSK 2|字2|HSK 3|字3|HSK 4|字4");
+    check(`mid HSK 2: strip ${ev.strip.join(" | ")}`, ev.strip.join("|") === "HSK 1|字1|HSK 2|字2|HSK 3|字3|HSK 4|字4");
     // A whole character session, then the next session teaches words.
     { const { api } = await bootWith(PACK, withS(mid, 7), 1); api.el("go").click();
       let guard = 0; while(guard++ < 400){ const D = api.getD(); const h = api.panel();
@@ -434,7 +393,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
       check(`Progress chips: ${chips.join(" / ") || "(not rendered)"}`, chips.join("|") === "Characters: first|Characters: with words|Characters: later");
       const later = VC.setCharOrder(withS(mid, 7), true);
       const lt = await today(later);
-      check(`"later": Learn ${lt.learn} every session, strip ${segs(lt.h).join(" | ")}`, /^HSK 2, set 3/.test(lt.learn) && segs(lt.h).join("|") === "HSK 1|HSK 2|HSK 3|HSK 4|字" && VC.nextStage(PACK, WORDS, CHARACTERS, withS(later, 8)).kind === "words");
+      check(`"later": Learn ${lt.learn} every session, strip ${lt.strip.join(" | ")}`, /^HSK 2, set 3/.test(lt.learn) && lt.strip.join("|") === "HSK 1|HSK 2|HSK 3|HSK 4|字" && VC.nextStage(PACK, WORDS, CHARACTERS, withS(later, 8)).kind === "words");
       const back = await today(VC.setCharOrder(clone(later), false));
       check(`"with words" again: Learn ${back.learn}`, /^字1, set 1 of \d+/.test(back.learn)); }
     // all words learned, mid the old single 字 stage (levels 1-3 in one list): characters every
@@ -510,8 +469,8 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
 
   console.log("\n[9] withWords Learn turn (chars.turn): Today closed after Learn still alternates");
   { const PACK = WITH; // the stage model (main 590af86); zh ships characters.learn "lag" (lag_checks.js)
-    const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
-    const reviewLine = h => (stripTags((h.match(/<tr><td>1\. Review<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^1\. Review/, ""));
+    const learnLine = h => stripTags((h.match(/<div class="tst"><span>Learn<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/) || ["", ""])[1]); // app v2 Today row
+    const reviewLine = api => `${api.getPrep().review.length} items`; // app v2: the Review row has no count; read todayPrep
     const mid = VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, soundsOpened: true, sessions: 40 }, PACK);
     byLv["1"].forEach(w => { mid.w[w.id] = { r: 3, w: 0, s: 3 }; }); byLv["2"].slice(0, 20).forEach(w => { mid.w[w.id] = { r: 1, w: 0, s: 1 }; });
     // Plays Today until stop(prog) holds; the app is then closed without finishing.
@@ -527,7 +486,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     for(let d = 0; d < 10; d++){
       NOW = new Date(2026, 9, 3 + d, 8, 0, 0).getTime();
       const api = await boot(PACK, st, 1); const h = api.panel();
-      seq.push(learnLine(h)); rev.add(reviewLine(h));
+      seq.push(learnLine(h)); rev.add(reviewLine(api));
       const t0 = (api.getProg().chars || {}).turn;
       stopped = play(api, p => (p.chars || {}).turn !== t0 && p.chars.turn !== undefined) && stopped;
     }
@@ -667,7 +626,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
 
   console.log("\n[11] characters order (chars.order, R5): first / with words / later");
   { const PACK = WITH; // the stage model (main 590af86); zh ships characters.learn "lag" (lag_checks.js)
-    const learnLine = h => (stripTags((h.match(/<tr><td>2\. Learn<\/td><td>[\s\S]*?<\/td><\/tr>/) || [""])[0]).replace(/^2\. Learn/, ""));
+    const learnLine = h => stripTags((h.match(/<div class="tst"><span>Learn<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/) || ["", ""])[1]); // app v2 Today row
     const playSession = api => { const s0 = api.getProg().sessions; if(!api.getD()) api.el("go").click(); let guard = 0;
       while(guard++ < 800 && api.getProg().sessions === s0){ const D = api.getD(); const h = api.panel();
         if(D && api.getCur() && D.cur){ answer(api, true); api.el("nx").click(); continue; }
@@ -724,15 +683,8 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     check(`chip switches, stored and applied at the next Learn: ${res.join("; ")}`, !res.includes("BAD"));
   }
 
-  console.log(`\n[7] control: without the new fields the zh markup and progress match main ${MAIN} (with the fb10 day rules, tests/day_rules_patch.js)`);
+  console.log("\n[7] control: markChar vs 7a21ccd; the app (Today, a whole session, its progress) vs d3632b8, characters.bareBy absent");
   {
-    let mainHtml = null, mainCore = null;
-    try {
-      mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const src = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", withDayRules(src, MAIN))(m, m.exports, undefined, {}); mainCore = m.exports;
-    } catch(e){ console.log("    cannot read main: " + e.message); }
-    check(`main ${MAIN} engine loaded from git (a missing sha is a failure)`, !!mainHtml && !!mainCore);
     // fb11 control: markChar on a non-typed pack, and on the zh pack below mastered or on a right answer, is unchanged from 7a21ccd.
     { let c11 = null; try { const src = cp.execSync(`git -C "${ROOT}" show 7a21ccd:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 }); const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); c11 = m.exports; } catch(e){ console.log("    cannot read 7a21ccd: " + e.message); }
       const u0 = CHARACTERS[0], run = (core, pk, s0, ok, held) => { const p = core.normalizeProg({}, pk); p.chars.c[u0.id] = { r: s0 + 1, w: 0, s: s0 }; core.markChar(p, u0.id, ok, pk, held); return JSON.stringify(p.chars.c[u0.id]); };
@@ -741,10 +693,21 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
         n++; if(run(c11, pk, s0, ok, held) === run(VC, pk, s0, ok, held)) same++; else diff.push(`${name} s${s0} ${ok ? "right" : "miss"}`); }
       check(`markChar vs 7a21ccd over ${n} cases (2 packs x streak 0-8 x right/miss x held): only zh misses at streak >= ${M + 2} differ (at ${M + 1} the step lands on ${M} as before) (${diff.length}: ${[...new Set(diff.map(d => d.replace(/ s\d+/, "")))].join(", ")})`,
         !!c11 && diff.every(d => d.startsWith("zh s") && d.endsWith("miss") && +d.match(/s(\d+)/)[1] > M + 1) && diff.length === 2 * (8 - M - 1)); }
+    // The app control: the pre-collapse engine (d3632b8, booted withCollapsed) vs this one on the pack without characters.bareBy.
+    const BASE_SHA = "d3632b8";
+    let baseHtml = null, baseCore = null;
+    try {
+      baseHtml = cp.execSync(`git -C "${ROOT}" show ${BASE_SHA}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const src = cp.execSync(`git -C "${ROOT}" show ${BASE_SHA}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseCore = m.exports;
+    } catch(e){ console.log("    cannot read " + BASE_SHA + ": " + e.message); }
+    check(`${BASE_SHA} engine loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseCore);
+    const ETA = loadConst(path.join(ZH, "pack.js"), "PACK").eta; // eta is required pack data now; both sides read the same curves
     async function run(html, core){
       NOW = new Date(2026, 9, 2, 9, 0, 0).getTime();
-      const st = fresh(); st.ls.setItem(VC.storageKey(PACK_OFF), JSON.stringify(seedC()));
-      const api = await boot(PACK_OFF, st, 11, { html, core });
+      const pk = Object.assign({}, PACK_OFF, { eta: ETA }), pack = html ? withCollapsed(pk) : pk;
+      const st = fresh(); st.ls.setItem(VC.storageKey(pack), JSON.stringify(seedC()));
+      const api = await boot(pack, st, 11, { html, core });
       const out = { today: api.panel() };
       api.el("go").click();
       const ans = mulberry32(7); const seen = [];
@@ -762,14 +725,11 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
       const p = api.getProg(); out.prog = JSON.stringify({ w: p.w, c: p.chars.c, s: p.s, sets: p.sets });
       return out;
     }
-    if(mainHtml && mainCore){
-      const a = await run(mainHtml, mainCore), b = await run(undefined, undefined);
-      // fb21 (d): the unit hint's pinyin takes the tone colours; main plain-escapes it. Strip the tone spans inside every hint block, nothing else.
-      const flatHints = s => { let out = "", i = 0; for(;;){ const j = s.indexOf('<span class="chint">', i); if(j < 0) return out + s.slice(i); let d = 0, k = j; for(const m of s.slice(j).matchAll(/<(\/?)span\b/g)){ d += m[1] ? -1 : 1; if(!d){ k = j + m.index + 7; break; } } out += s.slice(i, j) + s.slice(j, k).replace(/<span class="t\d">([^<]*)<\/span>/g, "$1"); i = k; } };
-      a.walk = flatHints(a.walk); b.walk = flatHints(b.walk);
+    if(baseHtml && baseCore){
+      const a = await run(baseHtml, baseCore), b = await run(undefined, undefined);
       for(const k of Object.keys(a)){
         let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
-        check(`${k} byte-identical to main (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: main ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);
+        check(`${k} byte-identical to ${BASE_SHA} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: base ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);
       }
     }
   }

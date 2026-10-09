@@ -179,28 +179,20 @@ class LanguageSpec:
         "daily life: directions, simple chat, short notices",
         "follow a slow drama with subtitles",
     ]
-    port_level_gate = 0.7
 
     emit_gender = False                 # words.json `g` on nouns whose gender the lexicon knows (it es fr de; pack.gapGender)
 
     def port_flags(self):
         ids = [b[0] for b in self.bands]
         flags = {
-            "dayAware": True, "typedFrom": list(self.port_typed_from), "glossFocus": True, "glossStyle": "primary",
-            "helpClose": True, "readAnswerBlock": True, "optsMix": True, "pauseNew": True, "listenQuestions": "all",
-            "readRotation": True, "wordsBy": "typed",
+            "typedFrom": list(self.port_typed_from),
             "progressMap": {"goals": [{"upTo": lv, "label": lab} for lv, lab in zip(ids, self.port_goals)]},
-            "pairs": True, "freqTiers": True, "progressView": "v2", "appView": "v2", "levelGate": self.port_level_gate,
-            "placementWhole": True, "placementEarlyStop": True, "placedRead": True, "placedKnown": True,
-        }
+        }   # the collapsed flags (tools/pack_collapsed.py) are engine defaults, never emitted
         if self.emit_gender:
             flags["gapGender"] = True
         if self.port_characters:
             flags["characters"] = {"learn": "lag", "start": 60, "ramp": [3, 5, 8], "bareBy": "typed", "bareWords": True, "bareByPair": True}
             flags["levelExam"] = {ids[0]: "pinyin", ids[1]: "characters", ids[2]: "characters"}
-            flags["placementChars"] = True      # placement places the lag characters layer too (fb50)
-        if self.script:                 # script primer sites: pron off by default once the primer is done (fb45)
-            flags["pronUntilPrimer"] = True
         return flags
     target_len = {"A1": 5, "A2": 7, "B1": 8}     # preferred sentence length per level
     min_len = {"A1": 4, "A2": 4, "B1": 5}

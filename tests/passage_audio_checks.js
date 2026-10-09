@@ -18,7 +18,7 @@ const ZH = path.join(ROOT, "packs", "zh");
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // readRotation (fb16) shuffles questions and picks by session; its checks are listen_mode_checks [14].
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["readRotation", "progressView"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: [] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -165,8 +165,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const q0 = p.questions[0];
     check("question screen mount speaks q.q exactly once", spoken.length === 1 && spoken[0] === q0.q);
@@ -182,8 +182,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken, cancelCount } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES.find(x => x.questions.some(q => x.sentences[q.sentence])) || PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES.find(x => x.questions.some(q => x.sentences[q.sentence])) || PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const q0 = p.questions[0];
     const s0 = p.sentences[q0.sentence];
@@ -207,13 +207,13 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   console.log("\n[2b] reveal: a source sentence carrying audio plays its clip, not TTS");
   try{
     const passages = JSON.parse(JSON.stringify(PASSAGES));
-    const p = passages.find(x => x.questions.some(q => x.sentences[q.sentence])) || passages[0];
-    const q0 = p.questions[0];
-    const s0 = p.sentences[q0.sentence];
-    s0.audio = "https://example.test/clip.mp3";
+    let p = passages.find(x => x.questions.some(q => x.sentences[q.sentence])) || passages[0];
+    let q0 = p.questions[0];
     const { api, spoken, audioInstances } = await boot({ passages });
     api.setProg(seedPF());
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; q0 = p.questions[0]; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
+    const s0 = p.sentences[q0.sentence];
+    s0.audio = "https://example.test/clip.mp3";
     api.el("rdone").click();
     const k = spoken.length;
     const opts = api.el("o").children;
@@ -228,8 +228,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken } = await boot({ voices: [{ lang: "en-US", name: "en" }] }); // wrong lang for zh pack.tts
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     check("question screen: no Replay (#rpa), nothing spoken at mount (no voice for this language)", !RPA.test(api.html("panel")) && spoken.length === 0);
     const q0 = p.questions[0];
@@ -244,10 +244,10 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    const q0 = p.questions[0];
+    let p = PASSAGES[0];
+    let q0 = p.questions[0];
     check("setup: this question carries an English translation", !!q0.en);
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; q0 = p.questions[0]; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const panel0 = api.html("panel");
     check("translation absent on mount, 'Show translation' button present", !panel0.includes(VC.escapeHtml(q0.en)) && /id="qtr"/.test(panel0) && /Show translation/.test(panel0));
@@ -264,8 +264,9 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
       api.el("nx").click();
     }
     const results = api.html("panel");
-    const lines = [...results.matchAll(/(?:✓|✗) Question (\d+)[^<]*/g)].map(m => m[0]);
-    check("results: question 1's line has ' · translation shown'; no other question's does", /Question 1[^<]*· translation shown/.test(lines[0] || "") && lines.slice(1).every(l => !l.includes("translation shown")));
+    // App v2 results: one block per question (Missed open, right ones folded), "Translation shown" heads the block.
+    const blocks = results.split('<div class="stmt"').slice(1), trq = blocks.filter(b => />Translation shown</.test(b));
+    check("results: question 1's block says 'Translation shown'; no other question's does", trq.length === 1 && trq[0].includes(VC.escapeHtml(p.sentences[p.questions[0].sentence].en)));
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- translation peeked AFTER answering does not log
@@ -273,10 +274,10 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    const q0 = p.questions[0];
+    let p = PASSAGES[0];
+    let q0 = p.questions[0];
     check("setup: this question carries an English translation", !!q0.en);
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; q0 = p.questions[0]; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const opts = api.el("o").children;
     opts.find(b => b.dataset.v === String(q0.answer)).click(); // answer first
@@ -288,8 +289,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     let k;
     for(let qi = 0; qi < p.questions.length; qi++){
@@ -322,9 +323,9 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES.find(x => x.questions.length > 1) || PASSAGES[0];
+    let p = PASSAGES.find(x => x.questions.length > 1) || PASSAGES[0];
     check("setup: a passage with more than one question", p.questions.length > 1);
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const q0 = p.questions[0];
     const oldBtn = api.el("rpa");
@@ -340,9 +341,9 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken } = await boot({ neverStarts: true }); // engine never reports "speaking" -> every say() times out and arms a retry
     api.setProg(seedPF());
-    const p = PASSAGES.find(x => x.questions.length > 1) || PASSAGES[0];
+    let p = PASSAGES.find(x => x.questions.length > 1) || PASSAGES[0];
     check("setup: a passage with more than one question", p.questions.length > 1);
-    api.startPassage(p);
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click(); // question 1 mounts and speaks q0.q; watchdog armed
     const q0 = p.questions[0];
     const s0text = p.sentences[q0.sentence].t;
@@ -364,8 +365,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, spoken } = await boot({ neverStarts: true });
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     for(let qi = 0; qi < p.questions.length; qi++){
       const q = p.questions[qi];
@@ -394,9 +395,9 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     const voices = [{ lang: "zh-CN", name: "x" }];
     const { api, spoken, document, ss } = await boot({ voices });
     api.setProg(seedPF());
-    const p = PASSAGES.find(x => x.questions[0].en && x.questions.length > 1);
-    const q0 = p.questions[0];
-    api.startPassage(p);
+    let p = PASSAGES.find(x => x.questions[0].en && x.questions.length > 1);
+    let q0 = p.questions[0];
+    api.startPassage(p); p = api.rd().p; q0 = p.questions[0]; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     const ord = optOrder(api);
     api.el("qtr").click(); api.el("ptoggle").click();
@@ -415,7 +416,7 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     await sleep(DEFER);
     const opts = api.el("o").children;
     check("voiceschanged after answering: reveal restored (source sentence, Next shown), nothing spoken",
-      /The answer is in this sentence/.test(api.html("rv")) && api.el("nx").style.display === "block" && spoken.length === k2);
+      /^<div class="q" style="margin:0 0 6px">(Right|Not quite)\.<\/div><div class="stmt hi"/.test(api.html("rv")) && api.el("nx").style.display === "block" && spoken.length === k2);
     check("restored reveal: options disabled, right one marked ok, the given wrong one bad",
       opts.every(b => b.disabled) && opts.find(b => b.dataset.v === String(q0.answer)).classList.contains("ok") && opts.find(b => b.dataset.v === String(api.rd().answers[0].given)).classList.contains("bad"));
     check("restored reveal: the answer is not re-graded (still wrong, still one record)", api.rd().answers[0].ok === false && api.rd().answers.length === 1);
@@ -428,8 +429,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
     const voices = [{ lang: "en-US", name: "en" }];
     const { api, spoken, ss } = await boot({ voices });
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     check("setup: no voice, nothing spoken on the question", spoken.length === 0);
     voices.length = 0; voices.push({ lang: "zh-CN", name: "x" }); ss.onvoiceschanged();
@@ -444,8 +445,8 @@ const DEFER = VC.TTS_TIMING.deferMs + 30;
   try{
     const { api, document } = await boot();
     api.setProg(seedPF());
-    const p = PASSAGES[0];
-    api.startPassage(p);
+    let p = PASSAGES[0];
+    api.startPassage(p); p = api.rd().p; // the pass asks its own question order (passageForPass; read rotation is default since the flag collapse)
     api.el("rdone").click();
     for(let qi = 0; qi < p.questions.length; qi++){
       const q = p.questions[qi];

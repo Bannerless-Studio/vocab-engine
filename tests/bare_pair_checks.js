@@ -10,7 +10,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
 const os = require("os");
 const cp = require("child_process");
 
@@ -22,11 +22,10 @@ const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn typeof ${name} !== "undefined" ? ${name} : undefined;`)(); }
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
 // levelGate and levelExam (fb38) came after 3044601; tests/level_gate_checks.js covers them.
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["progressView", "levelGate", "levelExam"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["levelExam"] });
 const noBBP = p => Object.assign({}, p, { characters: (c => { const q = Object.assign({}, c); delete q.bareByPair; return q; })(p.characters) });
 const PACK_OFF = noBBP(PACK);
 // The 3044601 control strips every field that postdates it (fb31 patternCue, fb32 glossStyle); each has its own control.
-const PACK_OFF_ALL = packAsOf(PACK_OFF, MAIN);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -42,14 +41,15 @@ function check(name, cond, extra){
 }
 function skip(name){ skips++; console.log(`SKIP  ${name}`); }
 const git = (sha, f) => { try { return cp.execSync(`git -C "${ROOT}" show ${sha}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }); } catch(e){ return null; } };
-const mainCoreSrc = git(MAIN, "engine/core.js"), mainHtml = git(MAIN, "engine/app.html");
+const mainCoreSrc = git(MAIN, "engine/core.js");
 const OLD = mainCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "barepair-")), `core_${MAIN}.js`); fs.writeFileSync(f, mainCoreSrc); return require(f); })() : null;
 
 // ------------------------------------------------------------------ fake DOM (copied from patterns_checks.js)
 const appHtml = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
 const scriptOf = html => { const b = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]; return b[b.length - 1][1]; };
 function extractAttrs(tag){ const attrs = {}; const re = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)(?:\s*=\s*"([^"]*)")?/g; let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; } return attrs; }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){ this.tagName = (tag||"div").toUpperCase(); this._attrs = Object.assign({}, attrs); this._classes = new Set((this._attrs.class||"").split(/\s+/).filter(Boolean));
@@ -66,9 +66,9 @@ function makeFakeDom(){
     remove(){} focus(){} click(){ if(this.onclick) this.onclick({}); (this._listeners.click||[]).forEach(f=>f({})); } closest(){ return null; } querySelector(){ return null; } querySelectorAll(){ return []; }
   }
   function registerIdsFromHtml(html){ const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g; let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); } }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/); const btnRe = /<button([^>]*)>/g;
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/); const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return { title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); }, getElementById(id){ return registry.get(id) || null; },
     querySelector(sel){ return this.querySelectorAll(sel)[0] || null; },
@@ -82,9 +82,11 @@ let NOW = new Date(2026, 9, 7, 8, 0, 0).getTime();
 class FakeDate extends Date { constructor(...a){ if(a.length) super(...a); else super(NOW); } static now(){ return NOW; } }
 async function boot(pack, prog, seed, opts){
   const o = opts || {};
+  // an engine older than the flag collapse reads the collapsed keys: give it the values every live pack shipped
+  if(o.core && o.core !== VC) pack = withCollapsed(pack);
   Math.random = mulberry32(seed);
   const st = o.st || { ls: memStore(), ss: memStore() }; if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog));
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
   const fnBody = scriptOf(o.html || appHtml) + `
@@ -164,7 +166,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
 (async () => {
   console.log("[1] config: characters.bareByPair on zh, needs pairs; validator");
   check("packs/zh sets characters.bareByPair with pairs", PACK.characters.bareByPair === true && VC.bareByPairOn(PACK));
-  check("bareByPairOn: off without the field, without pairs, without dayAware, or not true", !VC.bareByPairOn(PACK_OFF) && !VC.bareByPairOn(Object.assign({}, PACK, { pairs: false })) && !VC.bareByPairOn(Object.assign({}, PACK, { dayAware: false })) &&
+  check("bareByPairOn: off without the field or not true (pairs / dayAware are engine default since the flag collapse)", !VC.bareByPairOn(PACK_OFF) &&
     !VC.bareByPairOn(Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { bareByPair: "yes" }) })));
   {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "barepair-val-"));
@@ -174,7 +176,6 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
       try { cp.execSync(`${PY} "${path.join(ROOT, "tools", "validate_pack.py")}" "${d}"`, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); return ""; } catch(e){ return String(e.stdout || "") + String(e.stderr || ""); } };
     check("validate_pack: zh as shipped passes", run(() => {}) === "");
     check("validate_pack: bareByPair not a boolean is an error", /pack\.characters\.bareByPair must be a boolean/.test(run(p => { p.characters.bareByPair = 1; })));
-    check("validate_pack: bareByPair without pairs is an error", /pack\.characters\.bareByPair needs pack\.pairs/.test(run(p => { delete p.pairs; })));
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 
@@ -208,7 +209,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
   T.forEach(([name, rec, wrec, want]) => console.log(`    ${name.padEnd(72)} ${want ? "bare" : "-"}`));
   check(`${T.length} rule cases`, T.every(([, rec, wrec, want]) => pb(rec, wrec) === want), T.filter(([, rec, wrec, want]) => pb(rec, wrec) !== want).map(x => x[0]).join("\n"));
   check("bare (5) stays bare by its streak; pairBare adds nothing there", pb({ r: 5, w: 0, s: 5 }) === false && VC.charTier(5, PACK) === "bare");
-  check("flag off (bareByPair stripped, or pairs off): never", T.every(([, rec, wrec]) => !pb(rec, wrec, PACK_OFF) && !pb(rec, wrec, Object.assign({}, PACK, { pairs: false }))));
+  check("flag off (bareByPair stripped): never", T.every(([, rec, wrec]) => !pb(rec, wrec, PACK_OFF)));
   {
     const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 9], ws: [2, 9] } }), r = p.chars.c[U0.id];
     const was = VC.pairBare(r, U0, p, PACK);
@@ -253,11 +254,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     check("bareWord: the pair-bare unit's word is asked without its reading; off, with it", VC.bareWord(W0, CHARACTERS, p, PACK) && !VC.bareWord(W0, CHARACTERS, p, PACK_OFF));
     const pm = withRec({ r: 5, w: 1, s: 3, p: { wm: [0, 9] } });
     check("bareWord after a miss on the pair: reading back", !VC.bareWord(W0, CHARACTERS, pm, PACK));
-    const NF = (pk => { const q = Object.assign({}, pk); delete q.freqTiers; return q; });
-    const prow = async pk => { const api = await boot(pk, p, 3); api.tab("progress"); await tick(); const h = api.panel(), i = h.indexOf(">Characters</p>"), m = i < 0 ? null : h.slice(i).match(/<tr><td>HSK 1<\/td><td>([^<]*)<\/td><\/tr>/); return m ? m[1] : ""; };
-    const a = await prow(NF(PACK)), b = await prow(NF(PACK_OFF)), c = await prow(PACK);
-    console.log(`    Progress characters row, no freqTiers: on "${a}" | off "${b}" | zh (freqTiers) "${c}"`);
-    check("Progress characters row without freqTiers counts the pair-bare unit as bare; with freqTiers (zh) it counts done, unchanged", /· 1 bare/.test(a) && !/bare/.test(b) && !/bare/.test(c) && a !== b);
+    // the no-freqTiers Progress row check went with the freqTiers flag (frequency tiers are engine default since the flag collapse)
   }
 
   console.log("\n[4] the app with the flag: drill word and passage token lose the reading; a miss brings it back; records unchanged");
@@ -282,20 +279,27 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
   }
 
   console.log(`\n[5] flag-off control vs ${MAIN}`);
-  if(!OLD || !mainHtml) skip(`${MAIN} not in this checkout's history`);
+  if(!OLD) skip(`${MAIN} not in this checkout's history`);
   else {
-    const walk = async (html, core) => {
-      NOW = new Date(2026, 9, 7, 8, 0, 0).getTime();
-      const pr = OWNER ? clone(OWNER) : synth();
-      const api = await boot(PACK_OFF_ALL, pr, 31, { html, core: Object.assign({}, core) }); const rng = mulberry32(3);
-      const out = [api.panel()];
-      for(let k = 0; k < 2; k++){ NOW += 4 * 3600e3; out.push(JSON.stringify(await session(api, () => rng() < 0.8))); api.tab("today"); await tick(); out.push(api.panel()); }
-      for(const id of ["p0001", "p0017", "p0040"]){ api.startPassage(PASSAGES.find(x => x.id === id)); out.push(api.panel()); }
-      api.tab("progress"); await tick(); out.push(api.panel()); out.push(JSON.stringify(api.getProg()));
-      return out;
-    };
-    const ref = await walk(mainHtml, OLD), cur = await walk(appHtml, VC);
-    check(`flag off (bareByPair stripped): Today, two sessions, three Read passages, Progress and records byte-identical to ${MAIN} (${ref.join("").length} chars)`, JSON.stringify(ref) === JSON.stringify(cur), cur.findIndex((x, i) => x !== ref[i]));
+    // App walk (Today, two sessions, Read, Progress, records) vs the pre-collapse engine d3632b8 booted withCollapsed (boot does it for a core that is not VC).
+    const BASE_SHA = "d3632b8", baseHtml = git(BASE_SHA, "engine/app.html"), baseSrc = git(BASE_SHA, "engine/core.js");
+    check(`${BASE_SHA} engine loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseSrc);
+    if(baseHtml && baseSrc){
+      const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "barepair-base-")), `core_${BASE_SHA}.js`); fs.writeFileSync(f, baseSrc); const BASE = require(f);
+      const ETA = loadConst(path.join(ZH, "pack.js"), "PACK").eta; // eta is required pack data now; both sides read the same curves
+      const walk = async (html, core) => {
+        NOW = new Date(2026, 9, 7, 8, 0, 0).getTime();
+        const pr = OWNER ? clone(OWNER) : synth();
+        const api = await boot(Object.assign({}, PACK_OFF, { eta: ETA }), pr, 31, { html, core: Object.assign({}, core) }); const rng = mulberry32(3);
+        const out = [api.panel()];
+        for(let k = 0; k < 2; k++){ NOW += 4 * 3600e3; out.push(JSON.stringify(await session(api, () => rng() < 0.8))); api.tab("today"); await tick(); out.push(api.panel()); }
+        for(const id of ["p0001", "p0017", "p0040"]){ api.startPassage(PASSAGES.find(x => x.id === id)); out.push(api.panel()); }
+        api.tab("progress"); await tick(); out.push(api.panel()); out.push(JSON.stringify(api.getProg()));
+        return out;
+      };
+      const ref = await walk(baseHtml, BASE), cur = await walk(appHtml, VC);
+      check(`flag off (bareByPair stripped): Today, two sessions, three Read passages, Progress and records byte-identical to ${BASE_SHA} (${ref.join("").length} chars)`, JSON.stringify(ref) === JSON.stringify(cur), cur.findIndex((x, i) => x !== ref[i]));
+    }
     const p = OWNER ? clone(OWNER) : synth();
     const ctl = core => JSON.stringify(passageSents().map(s => core.rubyTiers(s, CHARACTERS, p, PACK_OFF, true)).concat(WORDS.slice(0, 400).map(w => core.bareWord(w, CHARACTERS, p, PACK_OFF))));
     check("core rubyTiers on every passage sentence + bareWord on 400 words byte-identical (flag off)", ctl(VC) === ctl(OLD));
@@ -379,7 +383,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     if(!PRE) skip("806ad57 not in this checkout's history");
     else {
       const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "barepair-pre-")), "core_806ad57.js"); fs.writeFileSync(f, PRE); const OLD2 = require(f);
-      const cmp = (p, pk) => { const out = []; for(let sd = 1; sd <= 12; sd++){ out.push(JSON.stringify(OLD2.buildReviewPlan(OLD2.learnedWords(WORDS, pk, p), p, pk, po(sd, { size: 20 }))), JSON.stringify(OLD2.buildRecallPlan(OLD2.learnedWords(WORDS, pk, p), p, pk, 12, po(sd)))); } return out.join("|"); };
+      const cmp = (p, pk0) => { const pk = withCollapsed(pk0), out = []; for(let sd = 1; sd <= 12; sd++){ out.push(JSON.stringify(OLD2.buildReviewPlan(OLD2.learnedWords(WORDS, pk, p), p, pk, po(sd, { size: 20 }))), JSON.stringify(OLD2.buildRecallPlan(OLD2.learnedWords(WORDS, pk, p), p, pk, 12, po(sd)))); } return out.join("|"); };
       const cur = (p, pk) => { const out = []; for(let sd = 1; sd <= 12; sd++){ out.push(JSON.stringify(VC.buildReviewPlan(lw(p), p, pk, po(sd, { size: 20 }))), JSON.stringify(VC.buildRecallPlan(lw(p), p, pk, 12, po(sd)))); } return out.join("|"); };
       check("flag off (bareByPair stripped): 12 Review + 12 Recall plans on three records byte-identical to 806ad57", [p1, mk(8, () => ({})), synth()].every(p => cmp(p, PACK_OFF) === cur(p, PACK_OFF)));
       check("flag on, no candidate (synthetic, no pair answered): plans byte-identical to 806ad57", [pNone, pNone2, pW].every(p => cmp(p, PACK) === cur(p, PACK)));

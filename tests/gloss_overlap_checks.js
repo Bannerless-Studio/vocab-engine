@@ -27,7 +27,7 @@ const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // glossStyle (fb32) rebrackets option and also-right glosses; tests/gloss_display_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["glossStyle", "progressView"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: [] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -54,7 +54,8 @@ function extractAttrs(tag){
   let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; }
   return attrs;
 }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){
@@ -101,10 +102,10 @@ function makeFakeDom(){
     const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
     let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); }
   }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
   const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return {
     title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); },
@@ -133,7 +134,7 @@ async function boot(opts){
   const o = opts || {};
   Math.random = o.seed ? mulberry32(o.seed) : REAL_RANDOM;
   appHtml = o.html || CUR_HTML;
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const spoken = [];
   // neverSpeaking: a boolean-reporting engine that never confirms speaking (ttsDriver's
   // watchdog retry path, docs/AUDIO.md "Playback reliability"; the default mock below has
@@ -362,7 +363,7 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
   {
     const tmp = [];
     const fixture = () => ({
-      pack: { key: "t", name: "T", tts: "en-GB", levels: [{ id: "A1", label: "A1" }], placement: [["A1", 2]], typing: null, showPron: false, hasLessons: false },
+      pack: { key: "t", name: "T", tts: "en-GB", levels: [{ id: "A1", label: "A1" }], placement: [["A1", 2]], typing: null, showPron: false, hasLessons: false, eta: {} },
       words: Array.from({ length: 20 }, (_, i) => ({ id: `x${i}`, w: `w${i}`, en: `gloss ${i}`, lv: "A1" })),
       sentences: [{ id: "s1", t: "w0 w1", en: "x", lv: "A1", words: ["x0", "x1"] }],
     });
@@ -432,17 +433,18 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     check(`gloss fixes accept the common answer (${typedOkCases.map(([v, w]) => w + " " + v).join(", ")}): ${JSON.stringify(tf)}`, tf.length === 0 && has("词典", "字典") && has("字典", "词典"));
     const { api } = await boot({ seed: 3 });
     const ry = api.optHtml(BY_W["容易"].en), yx = api.optHtml("impression (sth that stays in one's mind); a memory");
-    check(`option buttons: first alternatives only (容易 -> ${ry}), a long (...) explanation as (…) (${yx})`,
-      ry === "easy; straightforward" && /impression <span class="dim">\(…\)<\/span>/.test(yx) && !/stays/.test(yx) && api.optHtml("(classifier for flat objects, sheets); to open").startsWith("(classifier for flat objects, sheets)"));
+    // glossStyle (engine default since the flag collapse): first sense, the other senses quiet in one (…) span.
+    const gxOut = h => h.replace(/ ?<span class="gx">[\s\S]*?<\/span>/g, "");
+    check(`option buttons: first sense, the rest in the quiet span (容易 -> ${ry}), a long (...) explanation as (…) (${yx})`,
+      ry === 'easy <span class="gx">(straightforward; likely; liable to; apt to)</span>' && /impression <span class="dim">\(…\)<\/span>/.test(yx) && !/stays/.test(yx) && api.optHtml("(classifier for flat objects, sheets); to open").startsWith("(classifier for flat objects, sheets)"));
     const note = api.pronTypeItem(zj).feedback(dx.pron);
-    check(`"also right" note: the synonym's first meaning only (${note.replace(/<[^>]+>/g, "")})`, /also right/.test(note) && /to worry/.test(note) && !/anxious|worried/.test(note));
+    check(`"also right" note: the synonym's first meaning, the rest in the quiet span (${note.replace(/<[^>]+>/g, "")})`, /also right/.test(note) && /to worry/.test(note) && !/anxious|worried/.test(gxOut(note)));
   }
 
   // ---------------------------------------------------------------- [9] with dayAware (zh)
   console.log("\n[9] dayAware routing keeps noTypedMeaning; a synonym answer is logged for the asked word");
   {
     const today = "2026-10-02", wk = VC.dayWordKinds(PACK), ck = VC.dayCharKinds(PACK);
-    check("zh pack is dayAware (the routing below is live)", VC.dayAwareOn(PACK));
     const marked = WORDS.filter(w => w.noTypedMeaning);
     const { api } = await boot({ seed: 7 });
     const labels = new Set(); let routed = 0;

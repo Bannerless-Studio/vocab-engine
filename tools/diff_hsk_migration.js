@@ -27,8 +27,8 @@ const USAGE = "usage: node tools/diff_hsk_migration.js <hsk_pinyin_progress.json
 const readJSON = f => JSON.parse(fs.readFileSync(f, "utf8"));
 function loadPack(dir){
   const opt = f => fs.existsSync(path.join(dir, f)) ? readJSON(path.join(dir, f)) : [];
-  // The old hsk app has no level gate or exam profile (docs/PACK_SCHEMA.md "levelGate", "levelExam"): compare without them.
-  const pack = packAsOf(readJSON(path.join(dir, "pack.json")), "34c5df3", { strip: ["levelGate", "levelExam"] });
+  // The old hsk app has no exam profile (docs/PACK_SCHEMA.md "levelExam"): compare without it (the level gate: see "next stage").
+  const pack = packAsOf(readJSON(path.join(dir, "pack.json")), "34c5df3", { strip: ["levelExam"] });
   return { pack, words: readJSON(path.join(dir, "words.json")),
     units: opt("characters.json"), sentences: opt("sentences.json"), legacy: readJSON(path.join(dir, "legacy.json")) };
 }
@@ -94,9 +94,9 @@ function derivedDiff(old, prog, P, hsk){
     const seen = new Set(out.map(v => v.w)); VOCAB.forEach(v => { if(!seen.has(v.w) && hp.w[v.w] && hp.w[v.w].d){ out.push(v); seen.add(v.w); } }); return out; };
   const views = [];
   const cmp = (name, a, b) => views.push({ name, hsk: a, engine: b, same: util.isDeepStrictEqual(a, b) });
-  // pack.freqTiers puts each level in frequency order, so the engine lists learned words in that
+  // Frequency tiers (engine default) put each level in frequency order, so the engine lists learned words in that
   // order; hsk's is id order, and both are compared in it.
-  const idOrder = a => P.pack.freqTiers ? a.slice().sort() : a;
+  const idOrder = a => a.slice().sort();
   const hL = idOrder(hskLearned().map(v => L.w[v.w] || "?" + v.w)), eL = idOrder(VC.learnedWords(P.words, P.pack, prog).map(w => w.id));
   cmp("learned words (ordered ids)", hL, eL);
   const lvOf = {}; P.words.forEach(w => { lvOf[w.id] = String(w.lv); });
@@ -111,7 +111,9 @@ function derivedDiff(old, prog, P, hsk){
   // hsk's layout and choice card: one stage after HSK 3, no withWords alternation, no learn "lag" (docs/HSK_MERGE.md §8).
   const SP = P.pack.characters ? Object.assign({}, P.pack, { characters: Object.assign({}, P.pack.characters, { stages: HSK_STAGES, withWords: false, learn: undefined }) }) : P.pack;
   cmp("stage path (kind, levels, fraction, done)", PC.stagePath(hp, nsets, VOCAB).map(hStage), VC.stagePath(SP, P.words, P.units, prog).map(hStage));
-  cmp("next stage", hStage(PC.nextStage(hp, nsets, VOCAB)), hStage(VC.nextStage(SP, P.words, P.units, prog)));
+  // hsk has no level gate, and the engine's (LEVEL_GATE) is not a pack key since the flag collapse: the engine's next stage is
+  // read off its path without the gate (SP has no withWords / lag, so nextStage is the first stage not done and not gated).
+  cmp("next stage", hStage(PC.nextStage(hp, nsets, VOCAB)), hStage(VC.stagePath(SP, P.words, P.units, prog).find(s => !s.done) || null));
   cmp("characters started", PC.charsStarted(hp, nsets, VOCAB), VC.charsStarted(SP, P.words, P.units, prog));
   cmp("choice card shown", PC.showCharChoice(hp, nsets, VOCAB), VC.showCharChoice(SP, P.words, P.units, prog));
   if(hsk.SENTENCES){

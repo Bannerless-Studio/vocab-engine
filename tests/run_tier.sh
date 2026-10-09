@@ -25,6 +25,7 @@ migration_checks||base
 export_checks||base
 flagoff_snapshot|--check|base
 live_lock|--check|base
+live_lock|--check --strip|-
 pron_aids_checks||-
 characters_checks||characters
 characters_app_checks||characters

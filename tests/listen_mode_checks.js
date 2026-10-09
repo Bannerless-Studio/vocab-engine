@@ -19,13 +19,12 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // this suite is about listening, so it runs the zh pack with them off.
 // dayAware (docs/PACK_SCHEMA.md) post-dates the pinned controls and is not what this suite checks.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK_DAY = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["progressView"] });
-const PACK_DAY_NR = (p => { const q = Object.assign({}, p); delete q.readRotation; return q; })(PACK_DAY);
+const PACK_DAY = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: [] });
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
 const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); };
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")), "34c5df3", { strip: ["progressView", "typedFrom", "glossFocus", "dayAware", "helpClose", "readAnswerBlock", "optsOneScript", "optsMix", "listenQuestions", "rereadPerfectDays", "readRotation", "wordsBy", "progressMap"] });
+const PACK = packAsOf(preWrite(loadConst(path.join(ZH, "pack.js"), "PACK")), "34c5df3", { strip: ["typedFrom", "optsOneScript", "progressMap"] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });
@@ -62,7 +61,8 @@ function extractAttrs(tag){
   let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; }
   return attrs;
 }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){
@@ -109,10 +109,10 @@ function makeFakeDom(){
     const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
     let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); }
   }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
   const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return {
     title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); },
@@ -138,7 +138,7 @@ function mulberry32(a){ return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t 
 async function boot(opts){
   const o = opts || {};
   const src = o.html || appHtml;
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const spoken = [], utts = [], plays = [];
   let audio = null;
   const ss = {
@@ -182,13 +182,21 @@ function rereadProg(passages, missed, extra){
   pr.read = { unlocked: Object.fromEntries(PACK.levels.map(l => [l.id, 1])),
     done: Object.fromEntries(passages.map(p => [p.id, { sc: p.questions.length, n: p.questions.length, d: daysAgo(8), x: 1 }])) };
   pr.read.done[missed.id].sc = 0;
-  Object.assign(pr.read.done[missed.id], extra || {});
+  // read rotation (default since the flag collapse): every passage read and listened to in session 3, the missed one read
+  // again in session 4, so session 6 (sn 5 + 1) owes it a listening pass; extra.l = that listening pass already made
+  pr.sn = 5;
+  passages.forEach(p => Object.assign(pr.read.done[p.id], { s: 3, ls: 3 }));
+  Object.assign(pr.read.done[missed.id], { s: 4 }, extra || {});
+  delete pr.read.done[missed.id].ls; // never listened to: the rotation's first listening pick
+  if(pr.read.done[missed.id].l) pr.read.done[missed.id].ls = 4;
   return pr;
 }
-const planRow = (h, label) => (h.match(new RegExp(`<tr><td>6\\. ${label}</td><td>([\\s\\S]*?)</td></tr>`)) || [])[1];
+// App v2 Today: the passage row follows Sentences, <div class="tst"><span>Read|Listen</span><div class="tsd">title</div></div>.
+const planRow0 = (h, label) => (h.match(new RegExp(`<div class="tst"><span>${label}<\\/span><div class="tsd">([\\s\\S]*?)<\\/div><\\/div>`)) || [])[1];
+const planRow = (h, label) => { const rows = [...h.matchAll(/<div class="tst"><span>([^<]*)<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/g)], i = rows.findIndex(r => r[1] === "Sentences"), r = i >= 0 ? rows[i + 1] : null; return r && r[1] === label ? r[2] : undefined; };
 const answerAll = (api, p, wrong) => {
   for(let qi = api.rd().qi; qi < p.questions.length; qi++){
-    const q = p.questions[qi], os = api.el("o").children;
+    const q = api.rd().p.questions[qi], os = api.el("o").children; // the pass's question order (passageForPass)
     (wrong ? os.find(b => b.dataset.v !== String(q.answer)) : os.find(b => b.dataset.v === String(q.answer))).click();
     api.el("nx").click();
   }
@@ -200,29 +208,21 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
   console.log("\n[1] core: readPassMode, listenAudioOnly, markPassageDone l:1, progress shape");
   {
     const pr = rereadProg(PASSAGES, P);
-    const rr = { p: P, reason: "reread" }, nw = { p: P, reason: "new" };
-    check("first pass (reason new) is a reading pass even when listening is possible", VC.readPassMode(nw, pr, true) === "read");
-    check("spaced re-read + canListen -> listen", VC.readPassMode(rr, pr, true) === "listen");
-    check("spaced re-read without canListen -> read", VC.readPassMode(rr, pr, false) === "read");
+    const rr = { p: P, reason: "reread", mode: "listen" }, nw = { p: P, reason: "new", mode: "read" };
+    check("a reading pick (reason new) is a reading pass even when listening is possible", VC.readPassMode(nw, pr, true) === "read");
+    check("the rotation's listening pick + canListen -> listen", VC.readPassMode(rr, pr, true) === "listen");
+    check("the rotation's listening pick without canListen -> read", VC.readPassMode(rr, pr, false) === "read");
     check("null item -> read", VC.readPassMode(null, pr, true) === "read");
-    pr.read.done[P.id].l = 1;
-    check("alternation: latest attempt was a listening pass (l:1) -> read", VC.readPassMode(rr, pr, true) === "read");
-    delete pr.read.done[P.id].l;
-    check("nextReadItem still reports reason reread for it", (VC.nextReadItem(PASSAGES, WORDS, PACK, pr, daysAgo(0)) || {}).reason === "reread");
-    const a = VC.listenAudioOnly("p0006", 1, 5);
-    check("listenAudioOnly: ceil(n/2) distinct ascending indexes in range", a.length === 3 && new Set(a).size === 3 && a.every((x, i) => x >= 0 && x < 5 && (i === 0 || a[i-1] < x)));
-    check("listenAudioOnly: deterministic for the same id + attempt count", JSON.stringify(a) === JSON.stringify(VC.listenAudioOnly("p0006", 1, 5)));
-    const sets = [0,1,2,3,4,5,6,7,8,9].map(x => JSON.stringify(VC.listenAudioOnly("p0006", x, 5)));
-    check(`listenAudioOnly n=5, attempts 0..9: no two consecutive sets equal`, sets.every((x, i) => i === 0 || x !== sets[i-1]), sets.join(" "));
-    const allIds = PASSAGES.every(p => { const n = p.questions.length; return [0,1,2,3,4,5].every(x => JSON.stringify(VC.listenAudioOnly(p.id, x, n)) !== JSON.stringify(VC.listenAudioOnly(p.id, x + 1, n))); });
-    check("listenAudioOnly: for every zh passage, attempts x and x+1 (x=0..5) never pick the same set", allIds);
-    check("listenAudioOnly n=2: alternates between the two questions", JSON.stringify([0,1,2].map(x => VC.listenAudioOnly("q", x, 2))) === JSON.stringify([VC.listenAudioOnly("q", 0, 2), VC.listenAudioOnly("q", 1, 2), VC.listenAudioOnly("q", 0, 2)]) && VC.listenAudioOnly("q", 0, 2)[0] !== VC.listenAudioOnly("q", 1, 2)[0]);
-    check("listenAudioOnly: n=4 -> 2, n=1 -> 1, n=0 -> []", VC.listenAudioOnly("x", 0, 4).length === 2 && VC.listenAudioOnly("x", 0, 1).length === 1 && VC.listenAudioOnly("x", 0, 0).length === 0);
-    const q = VC.normalizeProg({}, PACK);
+    const it = VC.nextReadItem(PASSAGES, WORDS, PACK, pr, daysAgo(0), false, undefined, undefined, () => true) || {};
+    check("nextReadItem: after a reading pass the rotation owes a listening pass of it (reason reread, mode listen)", it.p === P && it.reason === "reread" && it.mode === "listen");
+    check("listenAudioOnly: every question audio-only (listenQuestions all, default): n=5 -> 0..4, n=1 -> [0], n=0 -> []",
+      JSON.stringify(VC.listenAudioOnly("p0006", 1, 5)) === "[0,1,2,3,4]" && JSON.stringify(VC.listenAudioOnly("x", 0, 1)) === "[0]" && VC.listenAudioOnly("x", 0, 0).length === 0);
+    const q = VC.normalizeProg({}, PACK); q.sn = 7;
     const r1 = VC.markPassageDone(q, "p1", 2, 5, "2026-09-27", true);
-    check("markPassageDone listen -> {sc,n,d,x,l:1}", JSON.stringify(r1) === JSON.stringify({ sc:2, n:5, d:"2026-09-27", x:1, l:1 }));
+    check("markPassageDone listen -> {sc,n,d,x,l:1,s,ls}", JSON.stringify(r1) === JSON.stringify({ sc:2, n:5, d:"2026-09-27", x:1, l:1, s:7, ls:7 }));
+    q.sn = 8;
     const r2 = VC.markPassageDone(q, "p1", 3, 5, "2026-10-05");
-    check("markPassageDone read after a listen -> no l (record replaced; readPassMode alternates on it), x counts on", JSON.stringify(r2) === JSON.stringify({ sc:3, n:5, d:"2026-10-05", x:2 }));
+    check("markPassageDone read after a listen -> l and ls kept, s moves on, x counts on", JSON.stringify(r2) === JSON.stringify({ sc:3, n:5, d:"2026-10-05", x:2, l:1, s:8, ls:7 }));
     check("validateProgShape accepts done.l:1 and a record without l", VC.validateProgShape({ read: { done: { a: { sc:1, n:2, d:"2026-01-01", x:1, l:1 }, b: { sc:1, n:2, d:"2026-01-01", x:1 } } } }, []).ok);
     check("validateProgShape rejects a non-number l", !VC.validateProgShape({ read: { done: { a: { sc:1, n:2, l:"yes" } } } }, []).ok);
   }
@@ -232,13 +232,13 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     const b = await boot();
     b.api.setProg(rereadProg(PASSAGES, P)); b.api.today();
     const lrow = planRow(b.api.html("panel"), "Listen");
-    check(`voice usable: plan row "6. Listen" names the passage (${lrow && lrow.replace(/<[^>]+>/g, "")})`, !!lrow && lrow.startsWith("1 passage to listen to: ") && lrow.includes(VC.escapeHtml(P.title)) && !planRow(b.api.html("panel"), "Read"));
+    check(`voice usable: the passage row "Listen" names the passage (${lrow && lrow.replace(/<[^>]+>/g, "")})`, !!lrow && lrow.includes(VC.escapeHtml(P.title)) && !planRow(b.api.html("panel"), "Read"));
     b.api.enterTodayStep(5);
-    check("step 5 runs it as a listening pass (RD.mode listen, Skip today present)", b.api.rd() && b.api.rd().mode === "listen" && b.api.rd().p === P && /id="rskip"/.test(b.api.html("panel")));
+    check("step 5 runs it as a listening pass (RD.mode listen, Skip today present)", b.api.rd() && b.api.rd().mode === "listen" && b.api.rd().p.id === P.id && /id="rskip"/.test(b.api.html("panel")));
     const nv = await boot({ voices: [{ lang: "en-US", name: "en" }] });
     nv.api.setProg(rereadProg(PASSAGES, P)); nv.api.today();
     const rrow = planRow(nv.api.html("panel"), "Read");
-    check("no voice, no clips: plain Read row (1 passage to re-read)", !!rrow && rrow.startsWith("1 passage to re-read: ") && !planRow(nv.api.html("panel"), "Listen"));
+    check("no voice, no clips: plain Read row", !!rrow && rrow.includes(VC.escapeHtml(P.title)) && !planRow(nv.api.html("panel"), "Listen"));
     nv.api.enterTodayStep(5);
     check("no voice, no clips: step 5 is a reading pass (no RD.mode)", nv.api.rd() && nv.api.rd().mode === undefined && /id="rdone">Done reading/.test(nv.api.html("panel")));
     const b2 = await boot();
@@ -323,7 +323,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     t.api.el("lplay").click();
     const cur = t.utts[t.utts.length - 1], c0 = t.ss.cancels, t0 = t.spoken.length;
     t.document.querySelectorAll('#tabs button[data-t="words"]')[0].click();
-    check("tab switch: the playing sentence is cancelled at once (the Read-tab passage is kept for the return)", t.ss.cancels === c0 + 1 && t.api.rd() && t.api.rd().p === P);
+    check("tab switch: the playing sentence is cancelled at once (the Read-tab passage is kept for the return)", t.ss.cancels === c0 + 1 && t.api.rd() && t.api.rd().p.id === P.id);
     fire(t.ss, cur); await sleep(DEFER);
     check("tab switch: the cancelled sentence's late end starts nothing", t.spoken.length === t0);
     // A re-render of the listening screen (readRender stops speech) resets Play all.
@@ -365,19 +365,19 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check(`clips: ${n} plays in order, no TTS`, d.plays.length === n && d.plays.every((s, i) => s === `audio/p/${i}.mp3`) && d.spoken.length === 0);
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  console.log("\n[5] questions: seeded half audio-only behind Show question; results lines; done record l:1");
+  console.log("\n[5] questions: every one audio-only behind Show question; results lines; done record l:1");
   try{
     const b = await boot();
     const pr = rereadProg(PASSAGES, P); b.api.setProg(pr);
     b.api.startPassage(P, true, "listen");
     const ao = b.api.rd().audioOnly, n = P.questions.length;
-    check(`audioOnly = VC.listenAudioOnly(id, previous attempts=1, ${n}) (${ao.join(",")})`, JSON.stringify(ao) === JSON.stringify(VC.listenAudioOnly(P.id, 1, n)) && ao.length === Math.ceil(n / 2));
+    check(`audioOnly = VC.listenAudioOnly(id, previous attempts=1, ${n}) (${ao.join(",")})`, JSON.stringify(ao) === JSON.stringify(VC.listenAudioOnly(P.id, 1, n)) && ao.length === n); // listenQuestions "all", default since the flag collapse
     b.api.el("ltext").click();
     b.api.el("rdone").click();
     const tapIdx = ao[0], lateIdx = ao.length > 1 ? ao[1] : null;
     let hiddenOk = true, shownOk = true, spokeOk = true, tapOk = false, lateOk = lateIdx === null;
     for(let qi = 0; qi < n; qi++){
-      const q = P.questions[qi], h = b.api.html("panel");
+      const q = b.api.rd().p.questions[qi], h = b.api.html("panel"); // the pass's question order (passageForPass)
       spokeOk = spokeOk && b.spoken[b.spoken.length - 1] === q.q;
       if(ao.indexOf(qi) >= 0){
         hiddenOk = hiddenOk && /id="qsh"[^>]*>Show question</.test(h) && !/class="med wd"/.test(h) && !/id="qtr"/.test(h) && /id="rpa"/.test(h) && !(q.en && h.includes(VC.escapeHtml(q.en)));
@@ -399,9 +399,10 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("Show question before answering: reveals text + translation button, logs qh", tapOk);
     check("answering an audio-only question reveals its text + translation button (#qsh gone), qh not logged", lateOk);
     const res = b.api.html("panel");
-    const lines = [...res.matchAll(/(?:✓|✗) Question (\d+)[^<]*/g)].map(m => m[0]);
+    // App v2 results: one block per question in order (Missed first, then the folded right ones); "Question shown" heads a block.
+    const lines = res.split('<div class="stmt"').slice(1);
     check("results: 'Listening pass' alone even after Show text", /id="lmode"[^>]*>Listening pass<\/p>/.test(res) && !/Text shown while listening|looked back/.test(res) && !("peekText" in b.api.rd()));
-    check("results: ' · question shown' only on the tapped question's line", lines.length === n && lines.every((l, i) => l.includes("· question shown") === (i === tapIdx)));
+    check("results: 'Question shown' heads exactly one block, the tapped question's", lines.length === n && lines.filter(l => />Question( and translation)? shown</.test(l)).length === 1 && lines.findIndex(l => />Question( and translation)? shown</.test(l)) === tapIdx); // all answered right: blocks in question order
     const rec = pr.read.done[P.id];
     check("done record: l:1, x counts on, full score", rec.l === 1 && rec.x === 2 && rec.sc === n && rec.n === n);
     // A listen pass without Show text: header line only.
@@ -422,36 +423,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("clips but no voice: the questions cannot be spoken, so none is audio-only", noneHidden);
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  console.log(`\n[6] control: no voice, no clips -> Today + reading pass markup byte-identical to ${BASE}`);
-  try{
-    let baseHtml = null;
-    try{ baseHtml = cp.execSync(`git show ${BASE}:engine/app.html`, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }); }catch(e){}
-    check(`base ${BASE} engine/app.html loaded from git (a missing sha is a failure)`, !!baseHtml);
-    if(baseHtml){
-      const NV = [{ lang: "en-US", name: "en" }];
-      const run = async html => {
-        const b = await boot({ voices: NV, html });
-        const pr = rereadProg(PASSAGES, P); b.api.setProg(pr);
-        const out = [];
-        b.api.today(); out.push(b.api.html("panel"));
-        b.api.enterTodayStep(5); out.push(b.api.html("panel"));
-        b.api.el("rdone").click();
-        for(let qi = 0; qi < P.questions.length; qi++){
-          out.push(b.api.html("panel"));
-          const os = b.api.el("o").children; os[qi % os.length].click(); out.push(b.api.html("rv")); b.api.el("nx").click();
-        }
-        out.push(b.api.html("panel"));
-        out.push(JSON.stringify(pr.read.done[P.id]));
-        return out;
-      };
-      // The app's shuffles (core.js shuffle) use the global Math.random: seed it per run.
-      const real = Math.random;
-      const seeded = async html => { Math.random = mulberry32(11); try{ return await run(html); } finally { Math.random = real; } };
-      const cur = await seeded(appHtml), base = await seeded(baseHtml);
-      const diff = cur.findIndex((h, i) => h !== base[i]);
-      check(`Today plan, passage, ${P.questions.length} questions + reveals, results, done record: identical (${cur.length} captures)`, cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
-    }
-  }catch(e){ check(`section threw: ${e.stack}`, false); }
+  // [6] (control vs ea5dcbc, flags off) deleted: dayAware, listenQuestions and readRotation are engine default since the flag collapse.
 
   console.log("\n[7] re-mount: a voiceschanged during the Today Read stage restores it; a tab switch ends it");
   try{
@@ -469,7 +441,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     const k = b.spoken.length, q0 = P.questions[0];
     if(rd.audioOnly.indexOf(0) >= 0) b.api.el("qsh").click();
     flip(); await sleep(DEFER);
-    check("question: voiceschanged keeps it (same question, nothing spoken again)", b.api.rd() === rd && rd.qi === 0 && b.spoken.length === k && /Question 1 \//.test(b.api.html("panel")));
+    check("question: voiceschanged keeps it (same question, nothing spoken again)", b.api.rd() === rd && rd.qi === 0 && b.spoken.length === k && /id="o"/.test(b.api.html("panel"))); // app v2: no "Question 1 / N" line (the header counts)
     check("question: an opened audio-only question stays open", rd.audioOnly.indexOf(0) < 0 || (/class="med wd"/.test(b.api.html("panel")) && !/id="qsh"/.test(b.api.html("panel"))));
     b.api.el("o").children.find(x => x.dataset.v === String(q0.answer)).click();
     b.document.querySelectorAll('#tabs button[data-t="words"]')[0].click();
@@ -505,25 +477,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
   const real = Math.random;
   const seededWalk = async opts => { Math.random = mulberry32(7); try{ return await walk(opts); } finally { Math.random = real; } };
 
-  console.log(`\n[8] control: with a voice (or clips), Today + Test plans and screens byte-identical to ${BASE_W7}`);
-  try{
-    let baseHtml = null, baseVC = null;
-    try{
-      baseHtml = cp.execSync(`git show ${BASE_W7}:engine/app.html`, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
-      const src = cp.execSync(`git show ${BASE_W7}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseVC = m.exports;
-    }catch(e){}
-    check(`base ${BASE_W7} engine/app.html + core.js loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseVC);
-    if(baseHtml && baseVC){
-      const cur = await seededWalk({ words: WORDS_OFF }), base = await seededWalk({ html: baseHtml, vc: baseVC, words: WORDS_OFF });
-      const diff = cur.findIndex((h, i) => h !== base[i]);
-      check(`zh voice: Today steps 0-4 (plans, screens) + Test Listen/Recall/Sentences identical (${cur.length} captures)`,
-        cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
-      const hearN = cur.map(h => { try{ const q = JSON.parse(h); return Array.isArray(q) ? q.filter(x => x[4] || x[2] === "What did they say?").length : 0; }catch(e){ return 0; } }).reduce((a, n) => a + n, 0);
-      const hasHear = hearN > 0 && cur.some(h => /id="tSentences"/.test(h));
-      check("control is not vacuous: the with-voice walk plans hear items", hasHear);
-    }
-  }catch(e){ check(`section threw: ${e.stack}`, false); }
+  // [8] (control vs 4303f59, flags off) deleted: engine default since the flag collapse.
 
   console.log("\n[9] no voice, no clips: no hear item is planned, so no drill shows the notice");
   try{
@@ -535,7 +489,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     b.api.enterTodayStep(0);
     const review = b.api.dq() || [];
     const reviewScreen = b.api.html("panel");
-    check("Review: zero hear kinds and no item flagged for the notice", review.length > 0 && review.every(x => !x[3]) && !/no text-to-speech voice/.test(reviewScreen));
+    check("Review: zero hear kinds and no item flagged for the notice", review.length > 0 && review.every(x => !x[3]) && !/No voice for this language in this browser/.test(reviewScreen));
     const lw = VC.learnedWords(WORDS, PACK, pr);
     const plan = VC.buildReviewPlan(lw, pr, PACK, { canHear: () => false });
     check("buildReviewPlan with canHear false: zero hear kinds, production share kept", plan.every(x => x.kind !== "hear") && plan.filter(x => x.kind === "recall" || x.kind === "type").length === Math.ceil(plan.length * 0.4 - 1e-9));
@@ -546,11 +500,12 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("Learn drill asks each word's meaning once (one item per word, none flagged)", learn.length + 1 === 10 && new Set(keys).size === keys.length && learn.every(x => !x[3]));
     b.api.enterTodayStep(2);
     const afterListen = b.api.dq() || [];
-    check("Today Listen step is skipped: the next drill is Recall (8 production items), nothing heard or flagged",
-      /no items until a voice or recording is available/.test(planHtml) && afterListen.length + 1 === 8 && afterListen.every(x => !x[3] && !x[4]));
+    check(`Today Listen step is skipped: the next drill is Recall (${VC.recallSize(PACK)} production items), nothing heard or flagged`,
+      planRow0(planHtml, "Listen") === "" && // app v2: the plan lists Listen bare; the step skips when entered
+       afterListen.length + 1 === VC.recallSize(PACK) && afterListen.every(x => !x[3] && !x[4]));
     b.api.enterTodayStep(4);
     const sents = b.api.dq() || [];
-    check("Sentences step: no hear sentence planned, none flagged", sents.every(x => !x[3]) && !/no text-to-speech voice/.test(b.api.html("panel")));
+    check("Sentences step: no hear sentence planned, none flagged", sents.every(x => !x[3]) && !/No voice for this language in this browser/.test(b.api.html("panel")));
     b.api.testTab();
     const th = b.api.html("panel");
     check("Test tab: Listen button replaced by its no-items note; Recall stays", !b.api.el("tListen") && /Listen test: no items until a voice or recording is available/.test(th) && !!b.api.el("tRecall"));
@@ -574,8 +529,10 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     const heard = q => q.filter(x => x[4]);
     b.api.enterTodayStep(0);
     const review = b.api.dq() || [];
-    check("Review: hear items only on clipped words, at least one planned, unclipped words present, none flagged",
-      heard(review).length > 0 && review.some(x => !clipped.has(idOf(x[0]))) && heard(review).every(x => clipped.has(idOf(x[0]))) && review.every(x => !x[3]));
+    // pairs (default since the flag collapse): Review asks the sm pair typed (Type the pinyin) when a typed kind fits, so a
+    // Review may plan no hear item; the at-least-one hear check lives on Today Listen below.
+    check("Review: hear items only on clipped words, unclipped words present, none flagged",
+      review.length > 0 && review.some(x => !clipped.has(idOf(x[0]))) && heard(review).every(x => clipped.has(idOf(x[0]))) && review.every(x => !x[3]));
     b.api.enterTodayStep(1); b.api.el("dr").onclick({});
     const learn = b.api.dq() || [];
     const perWord = {}; learn.forEach(x => { perWord[x[0]] = (perWord[x[0]] || 0) + 1; });
@@ -590,166 +547,13 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("Today Listen: only clipped words, each with the speaker", listen.length > 0 && listen.every(x => x[4] && clipped.has(idOf(x[0]))));
     b.api.testTab();
     const nClipped = VC.learnedWords(words, pack, sessionProg()).filter(w => clipped.has(w.id)).length;
-    check(`Test Listen: button counts only clipped learned words (${Math.min(20, nClipped)})`, !!b.api.el("tListen") && new RegExp(`Listen ${Math.min(20, nClipped)}<`).test(b.api.html("panel")));
+    check(`Test Listen: button counts only clipped learned words (${Math.min(20, nClipped)})`, !!b.api.el("tListen") && new RegExp(`Listen${Math.min(20, nClipped) === 20 ? "" : " " + nClipped}<`).test(b.api.html("panel"))); // app v2: a test of 20 drops its count
     b.api.el("tListen").onclick({});
     const tl = b.api.dq() || [];
     check("Test Listen: every item a clipped word with the speaker", tl.length + 1 === Math.min(20, nClipped) && tl.every(x => x[4] && clipped.has(idOf(x[0]))));
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  console.log("\n[11] pack.dayAware on (zh as shipped): listening pass, no-voice plans, Test Sentences logs the kind it asks");
-  try{
-    // readRotation picks by session, not by day ([14]); this section is about dayAware alone.
-    const b = await boot({ pack: PACK_DAY_NR });
-    b.api.setProg(rereadProg(PASSAGES, P)); b.api.today();
-    const lrow = planRow(b.api.html("panel"), "Listen");
-    b.api.enterTodayStep(5);
-    check("dayAware: a listenable re-read is still a listening pass (plan row and step 5)", PACK_DAY.dayAware === true && !!lrow && b.api.rd() && b.api.rd().mode === "listen");
-    const NV = [{ lang: "en-US", name: "en" }];
-    const nv = await boot({ pack: PACK_DAY, voices: NV });
-    const pr = sessionProg(); nv.api.setProg(pr);
-    nv.api.enterTodayStep(0);
-    const review = nv.api.dq() || [];
-    check("dayAware, no voice: Review plans no hear item and flags none", review.length > 0 && review.every(x => !x[3]) && !/no text-to-speech voice/.test(nv.api.html("panel")));
-    nv.api.testTab();
-    nv.api.el("tSentences").onclick({});
-    const it = nv.api.cur();
-    nv.api.el("o").children.find(x => x.dataset.v === String(it.a)).click();
-    const e = (nv.api.getProg().day || { a: {} }).a[it.key];
-    check(`dayAware, no voice: Test Sentences asks by sight and logs "read" (${JSON.stringify(e)}), nothing flagged`, !!e && JSON.stringify(e.r) === '["read"]' && (nv.api.dq() || []).every(x => !x[3]));
-  }catch(e){ check(`section threw: ${e.stack}`, false); }
-
-  console.log(`\n[12] pack.listenQuestions "all": every question of a listening pass audio-only; flag off = ${BASE_LQ}`);
-  try{
-    for(const n of [0, 1, 2, 3, 4, 5, 6]){
-      const all = VC.listenAudioOnly("pz", 3, n, { listenQuestions: "all" });
-      check(`flag on: n=${n} -> all indexes 0..n-1`, JSON.stringify(all) === JSON.stringify(Array.from({ length: n }, (_, i) => i)));
-    }
-    check("flag on is independent of passage id and attempt count", JSON.stringify(VC.listenAudioOnly("a", 0, 4, { listenQuestions: "all" })) === JSON.stringify(VC.listenAudioOnly("b", 7, 4, { listenQuestions: "all" })));
-    check("zh as shipped sets listenQuestions: all; the suite's flag-off PACK does not", PACK_DAY.listenQuestions === "all" && !("listenQuestions" in PACK));
-    let baseHtml = null, baseVC = null;
-    try{
-      baseHtml = cp.execSync(`git show ${BASE_LQ}:engine/app.html`, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
-      const src = cp.execSync(`git show ${BASE_LQ}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseVC = m.exports;
-    }catch(e){}
-    check(`base ${BASE_LQ} engine/app.html + core.js loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseVC);
-    if(baseHtml && baseVC){
-      let same = true;
-      for(const pid of ["p0006", "q", "x9"]) for(const n of [0, 1, 2, 3, 4, 5, 6]) for(const a of [0, 1, 2, 5, 9]){
-        const want = JSON.stringify(baseVC.listenAudioOnly(pid, a, n));
-        same = same && want === JSON.stringify(VC.listenAudioOnly(pid, a, n)) && want === JSON.stringify(VC.listenAudioOnly(pid, a, n, PACK)) && want === JSON.stringify(VC.listenAudioOnly(pid, a, n, { listenQuestions: undefined }));
-      }
-      check("flag off: listenAudioOnly identical to base for 3 ids x n=0..6 x 5 attempt counts (no pack, flagless pack)", same);
-      const walk = async o => {
-        const b = await boot(o); b.api.setProg(rereadProg(PASSAGES, P)); b.api.startPassage(P, true, "listen");
-        const out = [JSON.stringify(b.api.rd().audioOnly), b.api.html("panel")];
-        b.api.el("rdone").click();
-        for(let qi = 0; qi < P.questions.length; qi++){
-          out.push(b.api.html("panel"), b.spoken[b.spoken.length - 1]);
-          b.api.el("o").children.find(x => x.dataset.v === String(P.questions[qi].answer)).click();
-          out.push(b.api.html("panel")); b.api.el("nx").click(); await sleep(DEFER);
-        }
-        out.push(b.api.html("panel")); return out;
-      };
-      const cur = await walk({}), base = await walk({ html: baseHtml, vc: baseVC });
-      const diff = cur.findIndex((h, i) => h !== base[i]);
-      check(`flag off: listening pass walk (plan screen, each question before/after answering, results) byte-identical to base (${cur.length} captures)`, cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
-    }
-    const n = P.questions.length;
-    // Pack question order: readRotation's shuffle is checked in [14].
-    const b = await boot({ pack: PACK_DAY_NR });
-    const pr = rereadProg(PASSAGES, P); b.api.setProg(pr);
-    b.api.startPassage(P, true, "listen");
-    check(`zh: audioOnly covers all ${n} questions`, JSON.stringify(b.api.rd().audioOnly) === JSON.stringify(Array.from({ length: n }, (_, i) => i)));
-    b.api.el("rdone").click();
-    const tapIdx = 0, lateIdx = n > 1 ? 1 : null;
-    let hiddenOk = true, spokeOk = true, tapOk = false, lateOk = lateIdx === null;
-    for(let qi = 0; qi < n; qi++){
-      const q = P.questions[qi], h = b.api.html("panel");
-      spokeOk = spokeOk && b.spoken[b.spoken.length - 1] === q.q;
-      hiddenOk = hiddenOk && /id="qsh"[^>]*>Show question</.test(h) && !/class="med wd"/.test(h) && !/id="qtr"/.test(h) && !(q.en && h.includes(VC.escapeHtml(q.en)));
-      if(qi === tapIdx){ b.api.el("qsh").click(); tapOk = b.api.rd().answers[qi].qh === true && /class="med wd"/.test(b.api.html("qshwrap")); }
-      b.api.el("o").children.find(x => x.dataset.v === String(q.answer)).click();
-      if(qi === lateIdx){ lateOk = !b.api.rd().answers[qi].qh && /class="med wd"/.test(b.api.html("qshwrap")) && !/id="qsh"/.test(b.api.html("qshwrap")); }
-      b.api.el("nx").click(); await sleep(DEFER);
-    }
-    check("zh: every question hides its text behind Show question until tapped or answered", hiddenOk);
-    check("zh: every question is spoken on mount", spokeOk);
-    check("zh: tapping Show question before answering logs qh on that question only; answering first logs none", tapOk && lateOk);
-    const res = b.api.html("panel");
-    const lines = [...res.matchAll(/(?:✓|✗) Question (\d+)[^<]*/g)].map(m => m[0]);
-    check("zh results: ' · question shown' only on the tapped question's line", lines.length === n && lines.every((l, i) => l.includes("· question shown") === (i === tapIdx)));
-    const rec = pr.read.done[P.id];
-    check("zh done record: l:1, same fields as before (no new keys)", rec.l === 1 && rec.sc === n && rec.n === n && JSON.stringify(Object.keys(rec).sort()) === JSON.stringify(["d", "l", "n", "sc", "x"]), JSON.stringify(rec));
-    const cv = await boot({ pack: PACK_DAY_NR, voices: [{ lang: "en-US", name: "en" }], passages: PASSAGES.map(p => p.id === P.id ? Object.assign({}, P, { sentences: P.sentences.map((s, i) => Object.assign({}, s, { audio: `audio/p/${i}.mp3` })) }) : p) });
-    cv.api.setProg(rereadProg(PASSAGES, P)); cv.api.startPassage(PASSAGES.find(p => p.id === P.id), true, "listen");
-    cv.api.el("rdone").click();
-    check("zh with clips but no voice: still no audio-only question", !/id="qsh"/.test(cv.api.html("panel")) && /class="med wd"/.test(cv.api.html("panel")));
-  }catch(e){ check(`section threw: ${e.stack}`, false); }
-
-  console.log(`\n[13] pack.rereadPerfectDays: a perfect passage re-reads after N days, imperfect first; flag off = ${BASE_RP}`);
-  try{
-    const PON = Object.assign({}, PACK, { rereadPerfectDays: 30 });
-    const A = PASSAGES[0], B = PASSAGES[1], C = PASSAGES[2];
-    const full = p => p.questions.length;
-    // Every passage done perfectly twice, yesterday (not due) except the given [passage, score, days ago].
-    const mk = spec => {
-      const pr = rereadProg(PASSAGES, A, { sc: full(A), d: daysAgo(1) });
-      PASSAGES.forEach(p => { pr.read.done[p.id] = { sc: full(p), n: full(p), d: daysAgo(1), x: 2 }; });
-      spec.forEach(([p, sc, ago, l, x]) => { pr.read.done[p.id] = Object.assign({ sc: sc === "full" ? full(p) : sc, n: full(p), d: daysAgo(ago), x: x || 2 }, l ? { l: 1 } : {}); });
-      return pr;
-    };
-    const next = (pack, pr, paused) => VC.nextReadItem(PASSAGES, WORDS, pack, pr, daysAgo(0), paused);
-    check("perfect at 29 days -> nothing", next(PON, mk([[A, "full", 29]])) === null);
-    const r30 = next(PON, mk([[A, "full", 30]]));
-    check("perfect at 30 days -> reread", !!r30 && r30.p.id === A.id && r30.reason === "reread");
-    check("flagless pack: perfect at 60 days -> nothing", next(PACK, mk([[A, "full", 60]])) === null);
-    const mix = next(PON, mk([[A, "full", 60], [B, 0, 7]]));
-    check("imperfect at 7 days beats perfect at 60", !!mix && mix.p.id === B.id);
-    check("imperfect at 6 days is not due, perfect at 60 is", (next(PON, mk([[A, "full", 60], [B, 0, 6]])) || {}).p.id === A.id);
-    check("oldest perfect wins among perfect candidates", (next(PON, mk([[A, "full", 40], [B, "full", 90], [C, "full", 50]])) || {}).p.id === B.id);
-    check("paused (reviewOnly) still offers the perfect re-read", (next(PON, mk([[A, "full", 31]]), true) || {}).p.id === A.id);
-    check("a first read still wins over a perfect re-read", (() => { const pr = mk([[A, "full", 31]]); delete pr.read.done[C.id]; const r = next(PON, pr); return r && r.reason === "new" && r.p.id === C.id; })());
-    // First listening pass: perfect, read once (x 1), never listened.
-    check("perfect x=1 no l at 6 days -> nothing", next(PON, mk([[A, "full", 6, false, 1]])) === null);
-    const f7 = next(PON, mk([[A, "full", 7, false, 1]]));
-    check("perfect x=1 no l at 7 days -> reread", !!f7 && f7.p.id === A.id && f7.reason === "reread");
-    check("... and a listening pass with a voice", VC.readPassMode(f7, mk([[A, "full", 7, false, 1]]), true) === "listen");
-    check("... a reading pass without one", VC.readPassMode(f7, mk([[A, "full", 7, false, 1]]), false) === "read");
-    check("perfect x=1 with l at 7 days -> 30-day rule (nothing)", next(PON, mk([[A, "full", 7, true, 1]])) === null);
-    check("perfect x=1 with l at 30 days -> reread", (next(PON, mk([[A, "full", 30, true, 1]])) || {}).p.id === A.id);
-    check("perfect x=2 no l at 7 days -> nothing", next(PON, mk([[A, "full", 7, false, 2]])) === null);
-    check("perfect x=2 no l at 30 days -> reread", (next(PON, mk([[A, "full", 30, false, 2]])) || {}).p.id === A.id);
-    check("perfect x=1 at 7 days vs imperfect at 9: older d wins", (next(PON, mk([[A, "full", 7, false, 1], [B, 0, 9]])) || {}).p.id === B.id);
-    check("perfect x=1 at 9 days vs imperfect at 7: older d wins", (next(PON, mk([[A, "full", 9, false, 1], [B, 0, 7]])) || {}).p.id === A.id);
-    check("paused still offers the first listening pass", (next(PON, mk([[A, "full", 7, false, 1]]), true) || {}).p.id === A.id);
-    check("flagless pack: perfect x=1 at 7 days -> nothing", next(PACK, mk([[A, "full", 7, false, 1]])) === null);
-    check("a first read still wins over the first listening pass", (() => { const pr = mk([[A, "full", 9, false, 1]]); delete pr.read.done[C.id]; const r = next(PON, pr); return r && r.reason === "new" && r.p.id === C.id; })());
-    for(const bad of [0, -1, 1.5, "30", null, true]) check(`rereadPerfectDays ${JSON.stringify(bad)} reads as off`, next(Object.assign({}, PACK, { rereadPerfectDays: bad }), mk([[A, "full", 90]])) === null);
-    const pl = mk([[A, "full", 31]]), it = next(PON, pl);
-    check("first attempt after a reading pass -> listening pass", VC.readPassMode(it, pl, true) === "listen");
-    check("after a listening pass (l:1) -> reading pass", VC.readPassMode(it, mk([[A, "full", 31, true]]), true) === "read");
-    check("no way to listen -> reading pass", VC.readPassMode(it, pl, false) === "read");
-    check("zh as shipped drops rereadPerfectDays for readRotation; the suite's flag-off PACK sets neither", !("rereadPerfectDays" in PACK_DAY) && PACK_DAY.readRotation === true && !("rereadPerfectDays" in PACK) && !("readRotation" in PACK));
-    let baseVC = null;
-    try{
-      const src = cp.execSync(`git show ${BASE_RP}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseVC = m.exports;
-    }catch(e){}
-    check(`base ${BASE_RP} core.js loaded from git (a missing sha is a failure)`, !!baseVC);
-    if(baseVC){
-      const ago = [0, 1, 6, 7, 8, 29, 30, 31, 90];
-      let same = true, n = 0;
-      for(const sc of [0, 1, "full"]) for(const x of [1, 2]) for(const a of ago) for(const b of ago) for(const paused of [false, true]){
-        const pr = mk([[A, sc, a, false, x], [B, "full", b, false, x], [C, 0, b]]);
-        for(const pack of [PACK, Object.assign({}, PACK, { rereadPerfectDays: undefined })]){
-          const w = baseVC.nextReadItem(PASSAGES, WORDS, PACK, pr, daysAgo(0), paused), g = VC.nextReadItem(PASSAGES, WORDS, pack, pr, daysAgo(0), paused);
-          same = same && (w ? w.p.id + w.reason : null) === (g ? g.p.id + g.reason : null); n++;
-        }
-      }
-      check(`flag off: nextReadItem identical to base over ${n} progress shapes`, same);
-    }
-  }catch(e){ check(`section threw: ${e.stack}`, false); }
+  // [11] (dayAware without readRotation), [12] (listenQuestions flag-off) and [13] (rereadPerfectDays, removed) deleted in the flag collapse.
 
   console.log(`\n[14] pack.readRotation: reading and listening passes alternate by session, random picks, shuffled questions; flag off = ${BASE_RR}`);
   try{
@@ -809,13 +613,11 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     check("paused, listening turn: a listening pass", tag(nx(lt([[A, "full", 1, 2]]), { paused: true })) === "listen");
     check("paused, nothing read: no Read stage", nx(blank(), { paused: true }) === null);
     check("no rng given: the pick is stable across calls (plan re-renders)", (() => { const pr = lt([]); pr.read.done[A.id].ls = 0; pr.read.done[B.id].ls = 0; pr.read.done[C.id].ls = 0; const a = nx(pr), b = nx(pr); return a && b && a.p.id === b.p.id; })());
-    check("readRotation without dayAware is off (day-gated path)", (() => { const p = Object.assign({}, RON); delete p.dayAware; return !VC.readRotationOn(p) && VC.readRotationOn(RON) && !VC.readRotationOn(Object.assign({}, RON, { readRotation: 1 })); })());
     // Question order.
     const P4 = PASSAGES.find(p => p.questions.length >= 4);
     const ord = x => VC.passageForPass(P4, x, RON).questions.map(q => P4.questions.indexOf(q)).join();
     check(`question order: a permutation, stable for the same attempt count (${ord(0)})`, ord(0) === ord(0) && ord(0).split(",").map(Number).sort((a, b) => a - b).join() === P4.questions.map((_, i) => i).join());
     check(`question order changes between attempts (${[0, 1, 2, 3].map(ord).join(" | ")})`, new Set([0, 1, 2, 3].map(ord)).size > 1);
-    check("flag off: passageForPass returns the passage itself", VC.passageForPass(P4, 2, PACK) === P4 && VC.passageForPass(P4, 2, PACK_DAY_NR) === P4);
     // App: the pass runs in the shuffled order; answers, weak words, done record follow it.
     {
       const b = await boot({ pack: RON });
@@ -844,34 +646,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
       b.api.today();
       check("app: Today plan shows the listening turn, same row after a re-render", !!lrow && lrow === planRow(b.api.html("panel"), "Listen"));
     }
-    let baseVC = null;
-    try{
-      const src = cp.execSync(`git show ${BASE_RR}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseVC = m.exports;
-    }catch(e){}
-    check(`base ${BASE_RR} core.js loaded from git (a missing sha is a failure)`, !!baseVC);
-    if(baseVC){
-      const PON = Object.assign({}, PACK, { rereadPerfectDays: 30 });
-      const ago = [0, 1, 6, 7, 8, 29, 30, 31, 90];
-      let same = true, n = 0;
-      for(const pk of [PACK, PON, PACK_DAY_NR, Object.assign({}, RON, { dayAware: false }), Object.assign({}, RON, { readRotation: false })])
-      for(const sc of [0, 1, "full"]) for(const x of [1, 2]) for(const a of ago) for(const bb of ago) for(const paused of [false, true]){
-        const pr = rereadProg(PASSAGES, A, { sc: full(A), d: daysAgo(1) });
-        PASSAGES.forEach(p => { pr.read.done[p.id] = { sc: full(p), n: full(p), d: daysAgo(1), x: 2, s: 3 }; });
-        pr.read.done[A.id] = { sc: sc === "full" ? full(A) : sc, n: full(A), d: daysAgo(a), x, s: 2, ls: 1 };
-        pr.read.done[B.id] = { sc: full(B), n: full(B), d: daysAgo(bb), x };
-        pr.read.done[C.id] = { sc: 0, n: full(C), d: daysAgo(bb), x: 1, l: 1 };
-        const w = baseVC.nextReadItem(PASSAGES, WORDS, pk, pr, daysAgo(0), paused), g = VC.nextReadItem(PASSAGES, WORDS, pk, pr, daysAgo(0), paused, 3, Math.random, yes);
-        const wm = w && baseVC.readPassMode(w, pr, true), gm = g && VC.readPassMode(g, pr, true, pk);
-        same = same && (w ? w.p.id + w.reason + wm : null) === (g ? g.p.id + g.reason + gm : null); n++;
-      }
-      check(`flag off (absent, false, or no dayAware): nextReadItem + readPassMode identical to base over ${n} progress shapes`, same);
-      const recs = [PACK, PACK_DAY_NR, undefined].map(pk => { const a = rereadProg(PASSAGES, A), bp = rereadProg(PASSAGES, A); a.sn = bp.sn = 4;
-        VC.markPassageDone(a, A.id, 1, 2, "2026-10-03", true, pk); baseVC.markPassageDone(bp, A.id, 1, 2, "2026-10-03", true);
-        VC.markPassageDone(a, B.id, 2, 2, "2026-10-03", false, pk); baseVC.markPassageDone(bp, B.id, 2, 2, "2026-10-03", false);
-        return JSON.stringify(a) === JSON.stringify(bp); });
-      check("flag off: markPassageDone writes the base record (no s/ls)", recs.every(Boolean));
-    }
+    // flag-off controls vs 491d470 deleted: readRotation is engine default since the flag collapse.
     check("validateProgShape: numeric s/ls accepted, a string rejected", VC.validateProgShape({ v: VC.PROG_VERSION, sets: {}, read: { done: { a: { sc: 1, n: 2, d: "2026-10-03", x: 1, s: 3, ls: 2 } } } }, VC.levelIds(RON)).ok
       && !VC.validateProgShape({ v: VC.PROG_VERSION, sets: {}, read: { done: { a: { sc: 1, n: 2, d: "2026-10-03", x: 1, s: "3" } } } }, VC.levelIds(RON)).ok);
   }catch(e){ check(`section threw: ${e.stack}`, false); }
@@ -880,7 +655,7 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
   try{
     const n = P.questions.length;
     const textRe = h => /data-pw/.test(h) && /class="ptxt/.test(h);
-    const b = await boot({ pack: PACK_DAY_NR });
+    const b = await boot({ pack: PACK_DAY });
     const flip = () => { b.ss.getVoices = () => [{ lang: "en-US", name: "en" }]; b.ss.onvoiceschanged(); b.ss.getVoices = () => [{ lang: "zh-CN", name: "x" }]; b.ss.onvoiceschanged(); };
     const pr = rereadProg(PASSAGES, P); b.api.setProg(pr);
     b.api.startPassage(P, true, "listen"); b.api.el("rdone").click();
@@ -914,49 +689,21 @@ const fire = (ss, u) => { ss.speaking = false; u.onend({}); };
     b.api.el("o").children.find(x => x.dataset.v === String(P.questions[0].answer)).click();
     b.api.el("nx").click(); await sleep(DEFER);
     // Looking back is not tracked: Show text after answering is a plain toggle.
-    { const t = await boot({ pack: PACK_DAY_NR }); t.api.setProg(rereadProg(PASSAGES, P)); t.api.startPassage(P, true, "listen"); t.api.el("rdone").click();
+    { const t = await boot({ pack: PACK_DAY }); t.api.setProg(rereadProg(PASSAGES, P)); t.api.startPassage(P, true, "listen"); t.api.el("rdone").click();
       t.api.el("o").children.find(x => x.dataset.v === String(P.questions[0].answer)).click(); t.api.el("ptoggle").click(); t.api.el("ltext").click();
       check("Show text after answering: a plain toggle, nothing logged", /data-pw/.test(t.api.html("pbox")) && !("peekText" in t.api.rd()) && !("reopened" in t.api.rd().answers[0]));
-      const t2 = await boot({ pack: PACK_DAY_NR }); t2.api.setProg(rereadProg(PASSAGES, P)); t2.api.startPassage(P, true, "listen"); t2.api.el("rdone").click();
+      const t2 = await boot({ pack: PACK_DAY }); t2.api.setProg(rereadProg(PASSAGES, P)); t2.api.startPassage(P, true, "listen"); t2.api.el("rdone").click();
       t2.api.el("ptoggle").click(); t2.api.el("lplay").click(); t2.api.el("o").children.find(x => x.dataset.v === String(P.questions[0].answer)).click();
       check("answering during Play all clears Stop", t2.api.el("lplay").textContent === "Play all" && t2.api.rd().playing === false); }
     check("next question: look-back closed again", n < 2 || (b.api.rd().shown === false && /id="pbox" hidden/.test(b.api.html("panel")) && />Replay passage</.test(b.api.html("panel"))));
     answerAll(b.api, P, false);
     const res = b.api.html("panel");
     check("results: no 'looked back' and no 'Text shown while listening' though the look-back was opened and text shown; no look-back flag in the record", !/looked back|Text shown while listening/.test(res) && /Listening pass<\/p>/.test(res) && b.api.rd().answers.every(a => !("reopened" in a)) && !("peekText" in b.api.rd()));
-    const rd1 = await boot({ pack: PACK_DAY_NR }); rd1.api.setProg(rereadProg(PASSAGES, P));
+    const rd1 = await boot({ pack: PACK_DAY }); rd1.api.setProg(rereadProg(PASSAGES, P));
     rd1.api.startPassage(P, true, "read"); rd1.api.el("rdone").click();
     const hr = rd1.api.html("panel");
     check("reading pass unchanged: 'Show passage', no replay bar, passage is written text", />Show passage</.test(hr) && !/lkbar|Replay passage/.test(hr) && /data-pw/.test(hr));
-    let baseHtml = null, baseVC = null;
-    try{
-      baseHtml = cp.execSync(`git show ${BASE_LB}:engine/app.html`, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
-      const src = cp.execSync(`git show ${BASE_LB}:engine/core.js`, { cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseVC = m.exports;
-    }catch(e){}
-    check(`base ${BASE_LB} engine/app.html + core.js loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseVC);
-    if(baseHtml && baseVC){
-      const walk = async (o, mode) => {
-        const t = await boot(o); t.api.setProg(rereadProg(PASSAGES, P)); t.api.startPassage(P, true, mode);
-        const norm = x => x.replace(/ · looked back/g, "").replace("<br>Text shown while listening", ""); // owner 2026-10-03: no look-back marker on results
-        const out = [t.api.html("panel")]; t.api.el("rdone").click();
-        for(let qi = 0; qi < n; qi++){
-          out.push(t.api.html("panel")); t.api.el("ptoggle").click(); out.push(t.api.html("panel"), t.api.html("pbox"));
-          t.api.el("o").children.find(x => x.dataset.v === String(P.questions[qi].answer)).click();
-          out.push(t.api.html("panel")); t.api.el("nx").click(); await sleep(DEFER);
-        }
-        out.push(t.api.html("panel")); return o.html ? out.map(norm) : out;
-      };
-      for(const [label, pk] of [["flag off, listening pass", PACK], ["flag off (readRotation only), listening pass", Object.assign({}, PACK, { readRotation: true })]]){
-        const cur = await walk({ pack: pk }, "listen"), base = await walk({ pack: pk, html: baseHtml, vc: baseVC }, "listen");
-        const diff = cur.findIndex((x, i) => x !== base[i]);
-        check(`${label}: no results screen mentions looking back (any pack)`, cur.every(x => !/looked back|Text shown while listening/.test(x)));
-        check(`${label}: look-back walk byte-identical to base (${cur.length} captures)`, cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
-      }
-      const cur = await walk({ pack: PACK_DAY_NR }, "read"), base = await walk({ pack: PACK_DAY_NR, html: baseHtml, vc: baseVC }, "read");
-      const diff = cur.findIndex((x, i) => x !== base[i]);
-      check(`flag on, reading pass: look-back walk byte-identical to base (${cur.length} captures)`, cur.length === base.length && diff < 0, diff >= 0 ? `first diff at capture ${diff}` : "");
-    }
+    // look-back walks vs a8e9c08 with the flags off deleted: listenQuestions / readRotation are engine default since the flag collapse.
   }catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);

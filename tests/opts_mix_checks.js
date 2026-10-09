@@ -6,8 +6,8 @@
 // options and options of another stage than the answer, before (flag off, level tiers) vs after;
 // the owner's leak (new answer, every wrong choice known); sentence length outliers; every old
 // guard; progress untouched. [2] app: each site, a Learn drill's options, one script per set,
-// placement as flag off, nothing written, answer position uniform. [3] flag off: core results and
-// a whole app session byte-identical to main 68930bd. Seeded throughout (mulberry32).
+// nothing written, answer position uniform. [3] flag off: core results and
+// the draw after them byte-identical to main 68930bd. Seeded throughout (mulberry32).
 // Run: node tests/opts_mix_checks.js [--table]
 "use strict";
 const fs = require("fs");
@@ -24,7 +24,7 @@ const BASE = "68930bd"; // main before optsMix: level-tier options everywhere
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // fb27: the fresh-learner scenarios and the control predate characters.start / ramp (sets of 10 from the first Learn).
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["characters.start", "characters.ramp", "progressView"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["characters.start", "characters.ramp"] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -50,7 +50,8 @@ function extractAttrs(tag){
   let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; }
   return attrs;
 }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){
@@ -99,10 +100,10 @@ function makeFakeDom(){
     const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
     let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); }
   }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
   const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return {
     title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); },
@@ -139,7 +140,7 @@ class FakeDate extends Date {
 async function boot(pack, st, seed, opts){
   const o = opts || {};
   Math.random = mulberry32(seed);
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const voices = o.voices || [{ lang:"zh-CN", name:"x" }];
   const ss = { getVoices: () => voices, onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
@@ -177,13 +178,12 @@ function answer(api, right, typed){
   (right ? btns.find(b => b.dataset.v === String(it.a)) : btns.find(b => b.dataset.v !== String(it.a))).click();
 }
 
-let OLD = null, OLD_HTML = null;
+let OLD = null;
 try {
   const os = require("os");
   const src = cp.execSync(`git -C "${ROOT}" show ${BASE}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
   const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "optsmix-")), `core_${BASE}.js`); fs.writeFileSync(f, withDayRules(src, BASE)); OLD = require(f);
-  OLD_HTML = cp.execSync(`git -C "${ROOT}" show ${BASE}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-} catch(e){ OLD = null; OLD_HTML = null; }
+} catch(e){ OLD = null; }
 
 const byLv = VC.wordsByLevel(WORDS, PACK);
 // Learners here carry records without f, taught before pack.freqTiers reordered the levels: in id order (VC.counterOrder).
@@ -392,9 +392,7 @@ async function sec4(){
     const rp = keep.map(sum);
     console.log(`NOTE  identical wrong-choice set seen again within a week (cohort, one draw per session): ${SHAPES4.map(([n], i) => `${n}: units ${pct(rp[i][0], rp[i][1])}${rp[i][3] ? `, words ${pct(rp[i][2], rp[i][3])}` : ""} (skipped as forced: ${rp[i][4]} units, ${rp[i][5]} words)`).join("; ")}`);
     check(`weak units seeing the same three wrong choices again across sessions: ${rp.map(r => pct(r[0], r[1])).join(" / ")}; words ${pct(rp[0][2], rp[0][3])}`, rp.every(r => r[1] > 10) && rp[0][3] > 10 && rp.every(r => r[0] / r[1] <= REPEAT_BOUND) && rp[0][2] / rp[0][3] <= REPEAT_BOUND);
-    const offRun = await lagWeek(VC, appHtml, PACK_OFF, 5);
-    check(`flag off: no record ever gets f over 7 sessions (${Object.keys(offRun.pr.w).length} word, ${Object.keys(offRun.pr.chars.c).length} unit records)`,
-      Object.values(offRun.pr.w).every(v => v.f === undefined) && Object.values(offRun.pr.chars.c).every(v => v.f === undefined) && !/"f":/.test(offRun.prog));
+    // (flag-off control "no record ever gets f" deleted: optsMix is engine default since the flag collapse)
   }
 }
 (async function main(){
@@ -403,7 +401,7 @@ async function sec4(){
   const SHAPES = [["fresh, first set", 0, false], ["30 learned", 30, false], ["140/150 of HSK 1", 140, true], ["HSK 1-3 (owner)", 595, true], ["all learned", WORDS.length, true]];
   const N = 2000;
   console.log("\n[1] core builders: guess success of a learner ruling out never-taught options and options of another stage, before (level tiers) vs after (optsMix)");
-  check(`zh ships optsMix; the flag reads true only (PACK_OFF: off)`, VC.optsMixOn(PACK) && !VC.optsMixOn(PACK_OFF) && !VC.optsMixOn({ optsMix: 1 }));
+  check(`optsMix is engine default (flag collapse stage 2): core has no optsMixOn, the zh pack no optsMix key`, VC.optsMixOn === undefined && !("optsMix" in PACK));
   const agg = new Map(BUILDERS.map(b => [b.name, { cells: 0, held: 0, bad: [], guardBad: 0, short: 0, leak: 0, leakN: 0 }]));
   const rows = [];
   let sentOut = { b: 0, a: 0, n: 0 }, ownerLeak = null;
@@ -558,7 +556,7 @@ async function sec4(){
     check(`guess by length elimination <= 0.27 there${over.length ? "; over: " + over.join(", ") : ""}`, over.length === 0);
   }
 
-  console.log("\n[2] app: every site by stage, a Learn drill, one script per set, placement as flag off, nothing written, answer position uniform");
+  console.log("\n[2] app: every site by stage, a Learn drill, one script per set, nothing written, answer position uniform");
   {
     const r = mulberry32(99);
     const p0 = shape(595, 0.7, () => Math.floor(r() * 7)); // mixed unit tiers: pron / ruby / bare
@@ -664,19 +662,11 @@ async function sec4(){
         learnSet.size === 10 && n >= 10 && never === 0 && viol === 0 && (fam === "c" || (allOld === 0 && old === 0)));
     }
   }
-  {
-    const shots = [];
-    for(const pack of [PACK, PACK_OFF]){
-      const st = fresh(); st.ls.setItem(VC.storageKey(pack), JSON.stringify(shape(140)));
-      const api = await boot(pack, st, 21); api.goto("test"); api.startPlacement(); const seen = [];
-      for(let i = 0; i < 30 && api.el("o"); i++){ seen.push(api.panel()); const b = api.el("o").children[0]; if(!b) break; b.click(); }
-      shots.push(seen.join("\n"));
-    }
-    check(`placement options exactly as with the flag off (same seed, 30 screens, ${shots[0].length} chars)`, shots[0].length > 1000 && shots[0] === shots[1]);
-  }
+  // (placement vs optsMix off control deleted: optsMix is engine default since the flag collapse)
+
 
   console.log(`\n[3] flag off: byte-identical to ${BASE}`);
-  if(!OLD || !OLD_HTML) console.log(`NOTE  ${BASE} not in this checkout's history: control skipped`);
+  if(!OLD) console.log(`NOTE  ${BASE} not in this checkout's history: control skipped`);
   else {
     for(const [sname, n] of [["30 learned", 30], ["HSK 1-3", 595]]){
       const p = shape(n), P = stages(p), outs = [];
@@ -693,25 +683,7 @@ async function sec4(){
       }
       check(`core, ${sname}: 300 words x 8 builders + 300 sentences without mix, results and the draw after them identical to ${BASE}`, outs[0] === outs[1]);
     }
-    // wordsBy (docs/PACK_SCHEMA.md "wordsBy") came after 68930bd: this control drops it too.
-    // pack.pairs (fb23) replaces the day planner this control walks; tests/pairs_checks.js covers it.
-    const PACK_CTL = packAsOf(PACK_OFF, BASE);
-    for(const [name, p] of [["fresh", null], ["HSK 1-3", shape(595)]]){
-      const out = [];
-      for(const [core, html] of [[VC, appHtml], [OLD, OLD_HTML]]){
-        const st = fresh(); if(p) st.ls.setItem(VC.storageKey(PACK_CTL), JSON.stringify(p));
-        NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
-        const api = await boot(PACK_CTL, st, 11, { core, html });
-        const items = ORDER_W.slice(0, 120).flatMap(w => [api.readItem(w).opts, api.recallItem(w).opts, api.writtenPronTypeItem(w).choiceFallback().opts]);
-        SENTENCES.slice(0, 60).forEach(s => { items.push(api.readSentence(s).opts); const g = api.gapSentence(s); if(g) items.push(g.opts); });
-        CHARACTERS.slice(0, 60).forEach(u => ["charRead", "charSound", "charPick", "charRecall"].forEach(k => items.push(api.charDrillItem(k, u).opts)));
-        // the lag Learn row's set label changed after 68930bd (per-level, fb9): masked on both sides
-        api.today(); const mask = h => h.replace(/(<bdi[^>]*>字<\/bdi>|字)(?: [^,<]*)?, set \d+ of \d+/g, "$1 SET"), t = mask(api.panel()); play(api);
-        out.push({ items: JSON.stringify(items), t, end: mask(api.panel()), prog: st.ls.getItem(VC.storageKey(PACK_CTL)) });
-      }
-      check(`app on PACK minus optsMix, ${name}: ${out[0].items.length} chars of options, Today, a whole session and its progress byte-identical to ${BASE}`,
-        out[0].items === out[1].items && out[0].t === out[1].t && out[0].end === out[1].end && out[0].prog === out[1].prog);
-    }
+    // app control vs 68930bd deleted: 68930bd predates pairs, an engine default since the flag collapse (the core control above stays).
   }
 
   await sec4();

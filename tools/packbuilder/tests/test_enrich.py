@@ -85,12 +85,19 @@ class Flags(unittest.TestCase):
         f = get_spec("it").port_flags()
         self.assertEqual(f["typedFrom"], ["written"])
         self.assertEqual([g["upTo"] for g in f["progressMap"]["goals"]], ["A1", "A2", "B1"])
-        for k in ("dayAware", "pairs", "freqTiers", "glossFocus", "readRotation", "optsMix", "pauseNew", "placementWhole", "placedKnown"):
-            self.assertIs(f[k], True)
-        self.assertEqual((f["glossStyle"], f["progressView"], f["appView"], f["levelGate"], f["wordsBy"], f["listenQuestions"]),
-                         ("primary", "v2", "v2", 0.7, "typed", "all"))
         self.assertNotIn("characters", f)
         self.assertNotIn("levelExam", f)
+
+    def test_collapsed_flags_never_emitted_and_dropped_by_enrich(self):
+        from pack_collapsed import COLLAPSED
+        for code in ("it", "ja", "ar"):
+            f = get_spec(code).port_flags()
+            self.assertEqual([k for k in COLLAPSED if k in f], [], code)
+        self.assertEqual([k for k in COLLAPSED if k in enrich.PORT_KEYS], [])
+        stale = {k: True for k in COLLAPSED}
+        p, _, _ = enrich.enrich_data(get_spec("it"), dict(stale, key="it"), words(), None)
+        self.assertEqual([k for k in COLLAPSED if k in p], [])
+        self.assertEqual(enrich.flag_drift(get_spec("it"), dict(p, **stale)), [])
 
     def test_ja_typed_from_and_characters_set(self):
         ja = get_spec("ja")
@@ -131,10 +138,9 @@ class Pure(unittest.TestCase):
         p, _, _ = enrich.enrich_data(spec, {"key": "it", "eta": {"gain": [1]}}, words(), None, None, {"gain": [0.01, None, 0.02], "known": None})
         self.assertEqual(p["eta"], {"gain": [0.01, None, 0.02], "known": None})
         p, _, _ = enrich.enrich_data(spec, {"key": "it", "eta": {"gain": [1]}}, words(), None, None, None)
-        self.assertEqual(p["eta"], {"gain": [None, None, None], "known": None})      # flag block has goals + appView v2: no estimate, not zh's pace
+        self.assertEqual(p["eta"], {"gain": [None, None, None], "known": None})      # flag block has goals: no estimate, not zh's pace
         p, _, _ = enrich.enrich_data(spec, {"key": "it"}, words(), None, None, None)
         self.assertEqual(p["eta"], {"gain": [None] * len(p["progressMap"]["goals"]), "known": None})
-        self.assertEqual(p["appView"], "v2")
 
     def test_eta_curve_copied_from_file(self):
         crv = [[0, 90.0], [0.5, 30.5], [0.9, 0]]
@@ -203,17 +209,20 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class PronUntilPrimer(unittest.TestCase):
-    def test_script_sites_emit_the_flag_others_do_not(self):
-        for code in ("ar", "fa", "hi", "ja", "ko", "ru", "ur"):
-            self.assertIs(get_spec(code).port_flags().get("pronUntilPrimer"), True, code)
-        for code in ("de", "es", "fr", "id", "it", "sw"):
-            self.assertNotIn("pronUntilPrimer", get_spec(code).port_flags(), code)
+class DerivedFlagsCollapsed(unittest.TestCase):
+    # pronUntilPrimer (= a pack.script pack) and placementChars (= characters.learn "lag") are engine defaults since the
+    # flag collapse stage 3: no spec emits them, and enrich drops a shipped one.
+    def test_no_spec_emits_them(self):
+        for code in ("ar", "fa", "hi", "ja", "ko", "ru", "ur", "de", "es", "fr", "id", "it", "sw"):
+            f = get_spec(code).port_flags()
+            self.assertNotIn("pronUntilPrimer", f, code)
+            self.assertNotIn("placementChars", f, code)
 
-    def test_enrich_writes_it_and_is_idempotent(self):
+    def test_enrich_drops_them_and_is_idempotent(self):
         spec = get_spec("ko")
-        p1, w1, _ = enrich.enrich_data(spec, {"key": "ko"}, words(), None)
-        self.assertIs(p1["pronUntilPrimer"], True)
+        p1, w1, _ = enrich.enrich_data(spec, {"key": "ko", "pronUntilPrimer": True, "placementChars": True}, words(), None)
+        self.assertNotIn("pronUntilPrimer", p1)
+        self.assertNotIn("placementChars", p1)
         p2, _, _ = enrich.enrich_data(spec, p1, w1, None)
         self.assertEqual(p1, p2)
 
@@ -234,23 +243,33 @@ class CheckDetectsFlagDrift(unittest.TestCase):
             r = self.enriched_repo(t)
             pj = r / "pack" / "pack.json"
             pack = json.loads(pj.read_text())
-            pack["pronUntilPrimer"] = True            # emitted by an older spec, dropped since (it has no script)
+            pack["levelExam"] = {"A1": "pinyin"}      # a port key the it spec never emits (it has no characters)
             pack["characters"] = {"learn": "lag", "label": "x"}
             pj.write_text(json.dumps(pack))
             lines = enrich.flag_drift(get_spec("it"), pack)
-            self.assertEqual(lines, ["pronUntilPrimer: shipped True, the spec no longer emits it", "characters.learn: shipped 'lag', the spec no longer emits it"])
+            self.assertEqual(lines, ["levelExam: shipped {'A1': 'pinyin'}, the spec no longer emits it", "characters.learn: shipped 'lag', the spec no longer emits it"])
             self.assertEqual(enrich.main("it", r, check=True), 1)
 
     def test_a_changed_value_and_a_missing_key_are_reported_with_the_diff(self):
         with tempfile.TemporaryDirectory() as t:
             r = self.enriched_repo(t)
             pack = json.loads((r / "pack" / "pack.json").read_text())
-            pack["levelGate"] = 0.5
-            del pack["pairs"]
-            pack["progressMap"]["goals"][0]["label"] = "other"
+            pack["typedFrom"] = ["pron"]
+            del pack["progressMap"]
             lines = enrich.flag_drift(get_spec("it"), pack)
-            self.assertEqual(sorted(l.split(":")[0] for l in lines), ["levelGate", "pairs", "progressMap"])
+            self.assertEqual(sorted(l.split(":")[0] for l in lines), ["progressMap", "typedFrom"])
             self.assertTrue(all("shipped" in l and "spec" in l for l in lines))
+
+    def test_check_passes_a_shipped_pack_with_collapsed_flags(self):
+        # the live packs carry the collapsed flags until the next republish round's enrich drops them
+        from pack_collapsed import COLLAPSED
+        with tempfile.TemporaryDirectory() as t:
+            r = self.enriched_repo(t)
+            pj = r / "pack" / "pack.json"
+            pack = json.loads(pj.read_text())
+            pack.update({k: True for k in COLLAPSED})
+            pj.write_text(json.dumps(pack))
+            self.assertEqual(enrich.main("it", r, check=True), 0)
 
     def test_eta_and_non_port_keys_are_ignored(self):
         with tempfile.TemporaryDirectory() as t:

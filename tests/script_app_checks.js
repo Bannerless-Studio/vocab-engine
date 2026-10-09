@@ -138,7 +138,8 @@ return {
   el: id => document.getElementById(id),
   getProg: () => prog, setProg: p => { prog = p; },
   today: () => { tab = "today"; render(); },
-  getD: () => D, getCur: () => __cur, getState: () => todayStepState,
+  getD: () => D, getCur: () => __cur, getState: () => todayStepState, getPrep: () => todayPrep,
+  stageLabels: () => VC.stagePath(PACK, WORDS, CHAR_LIST, prog, SU).map(s => s.label),
   goto: t => { tab = t; testSel = null; RD = null; render(); },
   hasScript: () => HAS_SCRIPT, scriptTab: () => SCRIPT_TAB, byId: () => SCRIPT_BYID,
   scriptDrillItem, scriptCtx, kindCtx: () => scriptKindCtx(), scriptTeachHTML, scriptChartHTML, scriptHL, drill,
@@ -161,9 +162,12 @@ const count = (s, re) => (s.match(re) || []).length;
 const { rtlAudit, elsMarkup } = require("./fixtures/rtl_audit.js");
 const optsMarkup = api => elsMarkup(api.el("o") ? api.el("o").children : []);
 const stripTags = h => h.replace(/<[^>]+>/g, "").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,"&");
-const segsOf = h => [...h.matchAll(/<div class="seg">[\s\S]*?<\/i><\/div>([\s\S]*?)<\/div>/g)].map(m => stripTags(m[1]));
-const learnLine = h => stripTags((h.match(/2\. Learn<\/td><td>([\s\S]*?)<\/td>/) || [])[1] || "");
-const reviewLine = h => stripTags((h.match(/1\. Review<\/td><td>([\s\S]*?)<\/td>/) || [])[1] || "");
+// App v2 (engine default since the flag collapse): Today rows are <div class="tst"><span>Step</span><div class="tsd">detail</div></div>
+// (Review's detail is empty unless skipped: its size is read from todayPrep); the path strip shows on Progress for
+// character packs only, so the stage order is read from VC.stagePath (stageLabels).
+const tstRow = (h, name) => stripTags((h.match(new RegExp(`<div class="tst"><span>${name}<\\/span><div class="tsd">([\\s\\S]*?)<\\/div><\\/div>`)) || [])[1] || "");
+const learnLine = h => tstRow(h, "Learn");
+const reviewLine = h => tstRow(h, "Review");
 // Answers the current item right (mc: the button with the answer; type: the first accepted
 // string) or wrong (the first other option). Returns the item.
 function answer(api, right){
@@ -202,7 +206,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("fresh learner: the script choice card shows, Start today is replaced", /id="scriptChoice"/.test(h) && !/id="go"/.test(h));
     check("choice card offers Learn the script / I can read it, skip", /id="scriptLearn"[^>]*>Learn the script</.test(h) && /id="scriptSkip"[^>]*>I can read it, skip</.test(h));
     check("choice card sits above the placement hint", h.indexOf('id="scriptChoice"') < h.indexOf("Take the placement test") && h.indexOf("Take the placement test") > 0);
-    check(`strip starts with the script stage (got ${segsOf(h).join(" | ")})`, segsOf(h).join("|") === "한글|A1|A2");
+    check(`stage path starts with the script stage (got ${api.stageLabels().join(" | ")})`, api.stageLabels().join("|") === "한글|A1|A2");
     check("script stage label carries the target-language markup", /<bdi data-tl lang="[^"]+">한글<\/bdi>/.test(h));
     check(`Learn line names the sets (got "${learnLine(h)}")`, learnLine(h) === `한글, sets 1–2 of ${koSets.length}`);
     check(`Review line: skipped until a set is learned (got "${reviewLine(h)}")`, reviewLine(h) === "skipped until a set is learned");
@@ -250,13 +254,13 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("no third set offered (setsPerSession 2)", !/id="moreSet"/.test(h));
     api.el("ok").click();
     h = api.html("panel");
-    check("Continue: Listen/Recall/Sentences skip without words, session finishes", /Session done/.test(h) && api.getProg().sessions === 1);
+    check("Continue: Listen/Recall/Sentences skip without words, session finishes", /Session \d+ done/.test(h) && api.getProg().sessions === 1);
     check("both sets recorded (14 units)", Object.keys(api.getProg().script.u).length === 14);
     afterLearn = JSON.parse(JSON.stringify(api.getProg()));
     api.today();
     h = api.html("panel");
     check(`next Today: Learn is set 3 (got "${learnLine(h)}")`, learnLine(h) === "한글, set 3 of 3");
-    check(`next Today: Review is 12 script items (got "${reviewLine(h)}")`, reviewLine(h) === "12 items, weakest first, script");
+    check(`next Today: Review is 12 script items (got ${api.getPrep().review.length})`, reviewLine(h) === "" && api.getPrep().review.length === 12);
     api.el("go").click();
     const rv = [api.getCur(), ...api.getD().q];
     check("Review drill: 12 script items, every one a script key", rv.length === 12 && rv.every(x => x.key.startsWith("x:")));
@@ -296,11 +300,11 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("off: skipped flag only; records and sets untouched", api.getProg().script.skipped === true && JSON.stringify({ w: api.getProg().w, sets: api.getProg().sets, u: api.getProg().script.u }) === before);
     api.today();
     h = api.html("panel");
-    check(`off: Learn is A1 set 1 (got "${learnLine(h)}"), strip without the script stage`, learnLine(h) === "A1, set 1" && segsOf(h).join("|") === "A1|A2");
+    check(`off: Learn is A1 set 1 (got "${learnLine(h)}"), strip without the script stage`, learnLine(h) === "A1, set 1" && api.stageLabels().join("|") === "A1|A2");
     check("off: Review has no script items (skipped until words)", reviewLine(h) === "skipped until 5+ words are learned");
     api.goto("progress"); api.el("xOn").click(); api.today();
     h = api.html("panel");
-    check(`on again: script stage first, Learn set 3 (got "${learnLine(h)}")`, segsOf(h)[0] === "한글" && learnLine(h) === "한글, set 3 of 3");
+    check(`on again: script stage first, Learn set 3 (got "${learnLine(h)}")`, api.stageLabels()[0] === "한글" && learnLine(h) === "한글, set 3 of 3");
     // all mastered: the Script mastered line
     const q = api.getProg(); KO.script.units.forEach(u => { q.script.u[u.id] = { r:3, w:0, s:3 }; });
     api.goto("progress"); h = api.html("panel");
@@ -496,7 +500,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     let b = await boot(KO, { storage });
     let h = b.api.html("panel");
     check("stored progress with words, no script field: primer skipped, choice answered", b.api.getProg().script.skipped === true && b.api.getProg().script.choiceSeen === true);
-    check("the notice shows once on Today, no choice card, no script stage", count(h, /id="scriptNotice"/g) === 1 && /A script primer is available\. Turn it on in Progress\./.test(h) && !/scriptChoice/.test(h) && segsOf(h)[0] === "A1");
+    check("the notice shows once on Today, no choice card, no script stage", count(h, /id="scriptNotice"/g) === 1 && /A script primer is available\. Turn it on in Progress\./.test(h) && !/scriptChoice/.test(h) && b.api.stageLabels()[0] === "A1");
     b.api.el("scriptNoticeOk").click();
     h = b.api.html("panel");
     check("dismissed: gone, stored notice false", !/scriptNotice/.test(h) && JSON.parse(storage.getItem(key)).script.notice === false);
@@ -533,7 +537,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     const n0 = b.spoken.length;
     lis.forEach(f => f({ target: { closest: () => cell } }));
     check(`a cell tap plays exactly one utterance (${b.spoken.length - n0}) and opens its teach card`, b.spoken.length - n0 === 1 && b.spoken[b.spoken.length - 1] === "어" && /class="xteach"/.test(b.api.html("xcard")));
-    check("exactly one panel click listener handles it", lis.length === 1);
+    check("two panel click listeners (taps, the app v2 Missed rows); one utterance above, so only the taps one acts", lis.length === 2);
     b.api.el("xPractise").click();
     const q = [b.api.getCur(), ...b.api.getD().q];
     check("practice drill: the 6 recorded units", q.length === 6 && q.every(x => x.key.startsWith("x:")));
@@ -547,14 +551,14 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     const b = await boot(JA);
     let h = b.api.html("panel");
     check("choice card names both stages", /<bdi[^>]*>ひらがな<\/bdi> and <bdi[^>]*>カタカナ<\/bdi> first/.test(h));
-    check(`strip: ひらがな, カタカナ, A1, A2 (got ${segsOf(h).join(" | ")})`, segsOf(h).join("|") === "ひらがな|カタカナ|A1|A2");
+    check(`stage path: ひらがな, カタカナ, A1, A2 (got ${b.api.stageLabels().join(" | ")})`, b.api.stageLabels().join("|") === "ひらがな|カタカナ|A1|A2");
     b.api.el("scriptLearn").click();
     b.api.goto("progress"); h = b.api.html("panel");
     check("per-stage chips while the primer is on", /id="xSt0" aria-pressed="true"><bdi[^>]*>ひらがな/.test(h) && /id="xSt1" aria-pressed="true"><bdi[^>]*>カタカナ/.test(h));
     b.api.el("xSt0").click();
     check("hira chip off: skip.hira only", b.api.getProg().script.skip.hira === true && b.api.getProg().script.skipped === false);
     b.api.today(); h = b.api.html("panel");
-    check(`hira off: the path starts with カタカナ, Learn is kata sets (got "${learnLine(h)}")`, segsOf(h)[0] === "カタカナ" && learnLine(h) === "カタカナ, sets 1–2 of 2");
+    check(`hira off: the path starts with カタカナ, Learn is kata sets (got "${learnLine(h)}")`, b.api.stageLabels()[0] === "カタカナ" && learnLine(h) === "カタカナ, sets 1–2 of 2");
   }
 
   console.log("\n[11] flag-off: no pack.script, no script markup");
@@ -563,7 +567,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     const b = await boot(off, { script: false });
     const h = b.api.html("panel");
     const sb = b.document.tabButtons.find(x => x.dataset.t === "sounds");
-    check("no pack.script: HAS_SCRIPT off, Sounds hidden (no lessons), no choice card, strip is the levels", !b.api.hasScript() && sb.hidden === true && !/script/i.test(h.replace(/<\/?script/g, "")) && segsOf(h).join("|") === "A1|A2" && /id="go"/.test(h));
+    check("no pack.script: HAS_SCRIPT off, Sounds hidden (no lessons), no choice card, strip is the levels", !b.api.hasScript() && sb.hidden === true && !/script/i.test(h.replace(/<\/?script/g, "")) && b.api.stageLabels().join("|") === "A1|A2" && /id="go"/.test(h));
     const noData = await boot(KO, { script: false });
     check("pack.script without script.js: primer off, no choice card", !noData.api.hasScript() && !/scriptChoice/.test(noData.api.html("panel")));
     check("engine/app.html: dev loader lists script.js", /\["pack","words","sentences","lessons","characters","script","legacy"\]/.test(appHtml));
@@ -775,8 +779,8 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("sentence translation: an RTL phrase with an ellipsis is one isolated run",
       /\(<bdi data-tl lang="fa" dir="rtl" class="tlf">کتاب \.\.\. من<\/bdi>\)/.test(sites.sentenceRow) && /class="tlf">کتاب \.\.\. من</.test(sites.sentenceReveal));
     const TLF = 'class="tlf">الفبا</bdi>';
-    check("stage label as a pack fragment in UI lines is tf() (class tlf) at every site: Today plan + path strip, teach heading, Script chart, Progress row",
-      sites.today.split(TLF).length - 1 >= 2 && sites.scriptTeach.includes(TLF) && sites.scriptTab.includes(TLF) && sites.progress.includes(TLF));
+    check("stage label as a pack fragment in UI lines is tf() (class tlf) at every site: Today plan, teach heading, Script chart, Progress row",
+      sites.today.split(TLF).length - 1 >= 1 && sites.scriptTeach.includes(TLF) && sites.scriptTab.includes(TLF) && sites.progress.includes(TLF));
     check("placement options: meaning glosses with RTL fragments rendered through ui()", /class="tlf">/.test(optsMarkup(api)));
     // Listening pass (engine-listen-mode) on an RTL pack: play rows, Play all / Show text,
     // the revealed text, an audio-only question before and after "Show question", results.
@@ -798,13 +802,13 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
         la.el("o").children[0].click(); la.el("nx").click();
       }
       sites.listenResults = la.html("panel");
-      check("rtl pack listening pass: play rows, a hidden question, results lines rendered (audited below)",
-        /id="ls1"/.test(sites.listenScreen) && /id="qsh"/.test(sites.listenQHidden || "") && /Listening pass<\/p>/.test(sites.listenResults) && !/Text shown while listening/.test(sites.listenResults) && /· question shown/.test(sites.listenResults));
+        check("rtl pack listening pass: play rows, a hidden question, results lines rendered (audited below)",
+        /id="ls1"/.test(sites.listenScreen) && /id="qsh"/.test(sites.listenQHidden || "") && /Listening pass<\/p>/.test(sites.listenResults) && !/Text shown while listening/.test(sites.listenResults) && />Question shown</.test(sites.listenResults));
     }
     Object.keys(sites).forEach(k => { const bad = rtlAudit(sites[k]); check(`rtl audit: ${k} has no bidi/font violations (${bad.length})`, bad.length === 0, bad.slice(0, 4).join("; ")); });
     check("gloss popover box is an LTR line (dir=ltr), the word inside it an isolated dir=rtl span", /^<div class="gloss" id="gloss" dir="ltr" hidden>/.test(sites.glossBox) && /<span class="gw" data-tl lang="fa" dir="rtl">/.test(sites.gloss));
-    check("Today Learn line: the stage label is a tf() fragment (pack font, capped line-height)", /2\. Learn<\/td><td><bdi data-tl lang="fa" dir="rtl" class="tlf">الفبا<\/bdi>, set/.test(sites.today));
-    check("meaning options with an RTL fragment: button stays LTR, fragment isolated", /<button><b class="num">\d<\/b>book \(<bdi data-tl lang="fa" dir="rtl" class="tlf">/.test(optsMarkup(api)) || /book \(<bdi[^>]*class="tlf">/.test(sites.meaningItem));
+    check("Today Learn line: the stage label is a tf() fragment (pack font, capped line-height)", /<div class="tst"><span>Learn<\/span><div class="tsd"><bdi data-tl lang="fa" dir="rtl" class="tlf">الفبا<\/bdi>, set/.test(sites.today));
+    check("meaning options with an RTL fragment: button stays LTR, fragment isolated", /<button><b class="num"[^>]*>\d<\/b>book <span class="dim">\(<bdi data-tl lang="fa" dir="rtl" class="tlf">/.test(sites.meaningItem));
     // Deliberately broken markup trips the audit (the audit itself is live).
     check("rtl audit catches Latin in a dir=rtl block, RTL outside data-tl, and Latin inside data-tl",
       rtlAudit('<div dir="rtl">79 words</div>').length === 1 && rtlAudit('<button dir="rtl"><span>✓ 3 / 4</span></button>').length === 1 && rtlAudit('<div dir="rtl">3 / 4 <bdi>x</bdi></div>').length === 1 && rtlAudit("<p>learn کتاب</p>").length === 2 && rtlAudit('<div data-tl lang="fa" dir="rtl">ketâb</div>').length === 2);
@@ -852,7 +856,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       api.el("scriptLearn").click(); api.el("go").click();
       let err = null; try{ playDrillFrom(api, "dr"); api.el("moreSet").click(); playDrillFrom(api, "dr"); api.el("ok").click(); }catch(e){ err = e; }
       const p = api.getProg();
-      check(`ko pairs: Learn sets 1-2 run (${Object.keys(p.script.u).length} units recorded)${err ? ` (${err.message})` : ""}`, !err && Object.keys(p.script.u).length === 14 && /Session done/.test(api.html("panel")));
+      check(`ko pairs: Learn sets 1-2 run (${Object.keys(p.script.u).length} units recorded)${err ? ` (${err.message})` : ""}`, !err && Object.keys(p.script.u).length === 14 && /Session \d+ done/.test(api.html("panel")));
       api.today(); api.el("go").click();
       const rv = [api.getCur(), ...api.getD().q];
       check(`ko pairs: next Review is 12 script items (${rv.length})`, rv.length === 12 && rv.every(x => x.key.startsWith("x:")));
@@ -896,12 +900,13 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     }
   }
 
-  console.log("\n[16] pack.pronUntilPrimer (fb45): pronunciation off by default once the primer is done; the learner's own toggle wins");
+  // pack.pronUntilPrimer until the flag collapse (stage 3): every pack with a script config runs it; the key is ignored.
+  console.log("\n[16] pronunciation off by default once the script primer is done (fb45); the learner's own toggle wins");
   {
-    const K = FX.ko(), pk = Object.assign({}, K.pack, { showPron: true, pronUntilPrimer: true }), units = K.script.units;
-    const offPk = Object.assign({}, K.pack, { showPron: true });
-    check("pronUntilPrimerOn: needs the flag and a script config", VC.pronUntilPrimerOn(pk) && !VC.pronUntilPrimerOn(offPk) && !VC.pronUntilPrimerOn(Object.assign({}, pk, { script: undefined })));
-    check("defaultProg: flag on writes no showPron (nothing chosen yet); flag off writes true as before", !("showPron" in VC.defaultProg(pk)) && VC.defaultProg(offPk).showPron === true);
+    const K = FX.ko(), pk = Object.assign({}, K.pack, { showPron: true }), units = K.script.units;
+    const noScript = Object.assign({}, pk, { script: undefined });
+    check("pronUntilPrimerOn: a script config, no pack key needed; off without one (a stale false key is ignored)", !("pronUntilPrimer" in pk) && VC.pronUntilPrimerOn(pk) && VC.pronUntilPrimerOn(Object.assign({}, pk, { pronUntilPrimer: false })) && !VC.pronUntilPrimerOn(noScript));
+    check("defaultProg: a script pack writes no showPron (nothing chosen yet); a pack without script writes true as before", !("showPron" in VC.defaultProg(pk)) && VC.defaultProg(noScript).showPron === true);
     const rec = ids => { const p = VC.defaultProg(pk); p.script = VC.defaultProg(pk).script || { v: 1, u: {}, skipped: false, skip: {}, choiceSeen: false, notice: false }; ids.forEach(id => { p.script.u[id] = { r: 1, w: 0, s: 1 }; }); return p; };
     const allIds = units.map(u => u.id);
     const fresh = rec([]), part = rec(allIds.slice(0, 3)), full = rec(allIds), skipped = rec([]); skipped.script.skipped = true;
@@ -910,7 +915,7 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
     check("a skipped primer counts as done: off by default", VC.scriptPrimerDone(pk, units, skipped) === true && VC.showPronOn(pk, units, skipped) === false);
     const onFull = Object.assign(rec(allIds), { showPron: true }), offFresh = Object.assign(rec([]), { showPron: false });
     check("an explicit showPron wins both ways: on after completion, off before it", VC.showPronOn(pk, units, onFull) === true && VC.showPronOn(pk, units, offFresh) === false);
-    check("pack.showPron false still hides it; flag off keeps stored-or-default behaviour; no active primer (no units) leaves the default on", VC.showPronOn(Object.assign({}, pk, { showPron: false }), units, fresh) === false && VC.showPronOn(offPk, units, full) === true && VC.showPronOn(pk, [], full) === true);
+    check("pack.showPron false still hides it; a pack without script keeps stored-or-default behaviour; no active primer (no units) leaves the default on", VC.showPronOn(Object.assign({}, pk, { showPron: false }), units, fresh) === false && VC.showPronOn(noScript, units, full) === true && VC.showPronOn(pk, [], full) === true);
     check("a record written by an older engine (showPron true stored) keeps showing it after completion", VC.showPronOn(pk, units, Object.assign(rec(allIds), { showPron: true })) === true);
     // the app: Progress chip state and the toggle
     const pressed = api => (api.html("panel").match(/id="togglePron" aria-pressed="(true|false)"/) || [])[1];
@@ -920,11 +925,10 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       api.el("togglePron").click(); const p2 = pressed(api), stored = api.getProg().showPron;
       api.goto("today"); api.goto("progress"); const p3 = pressed(api);
       check(`app: chip on before the primer is done (${p0}), off once skipped (${p1}), the tap turns it on and stores showPron ${stored} (${p2}), kept on re-entry (${p3})`, p0 === "true" && p1 === "false" && p2 === "true" && stored === true && p3 === "true"); }
-    { const { api } = await boot({ pack: offPk, words: K.words, script: K.script }); api.getProg().script.skipped = true; api.goto("progress");
-      check("flag off: the chip stays on after the primer is skipped (stored default true)", pressed(api) === "true" && api.getProg().showPron === true); }
+    // the flag-off app control (a script pack without the key kept the chip on after a skip) went with the flag collapse.
   }
 
-  console.log("\n[17] pack.placedKnown (fb52): a placement past the first bucket skips the script primer as the learner's own skip does");
+  console.log("\n[17] placedKnown (fb52; engine default): a placement past the first bucket skips the script primer as the learner's own skip does");
   {
     const fixtures = [["fa", FX.fa()], ["ko", FX.ko()]];
     // A real script sibling (ur) when checked out next to the engine.
@@ -935,20 +939,18 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       if(P.script) fixtures.push(["ur (sibling)", { pack: P, words: load(uf("words"), "WORDS"), script: load(uf("script"), "SCRIPT") }]);
     } else console.log("SKIP  ur sibling: no ../urdu/pack/script.js");
     for(const [name, F] of fixtures){
-      const on = Object.assign({}, F.pack, { placedKnown: true, pronUntilPrimer: true, showPron: true }), off = Object.assign({}, F.pack, { pronUntilPrimer: true, showPron: true });
-      delete off.placedKnown;
+      // placedKnown is engine default since the flag collapse: the flag-off checks went with it.
+      const on = Object.assign({}, F.pack, { showPron: true });
       const units = F.script.units, st = VC.strata(F.words, on.placement, VC.setSizeOf(on));
       // The learner's own skip, through the app: fresh boot, "I can read it, skip".
       const own = await boot({ pack: on, words: F.words, script: F.script }); own.api.el("scriptSkip").click();
       const ownScript = JSON.stringify(own.api.getProg().script);
       const base = () => { const b = VC.normalizeProg({}, on); b.script = JSON.parse(JSON.stringify(VC.normalizeProg({}, on).script)); return b; };
       const p1 = VC.applyPlacement(base(), st, 1, F.words, on), p0 = VC.applyPlacement(base(), st, 0, F.words, on);
-      const f1 = VC.applyPlacement(base(), st, 1, F.words, off);
       check(`${name}: landing past bucket 0 writes the learner's skip (${ownScript})`, JSON.stringify(p1.script) === ownScript && VC.scriptSkipped(p1) && VC.scriptPrimerDone(on, units, p1));
-      check(`${name}: pronUntilPrimer then turns pron off by its own rule (no showPron stored)`, !("showPron" in p1) && VC.showPronOn(on, units, p1) === false && VC.showPronOn(on, units, base()) === true);
+      check(`${name}: the primer rule then turns pron off by itself (no showPron stored)`, !("showPron" in p1) && VC.showPronOn(on, units, p1) === false && VC.showPronOn(on, units, base()) === true);
       check(`${name}: a placement landing in bucket 0 leaves the primer as it was`, JSON.stringify(p0.script) === JSON.stringify(base().script) && !VC.scriptSkipped(p0));
       check(`${name}: applyPlacement stays pure (input script untouched)`, (() => { const b = base(), s0 = JSON.stringify(b); VC.applyPlacement(b, st, 1, F.words, on); return JSON.stringify(b) === s0; })());
-      check(`${name}: flag off, the placement leaves the primer as it was (applyPlacement output = flag-off pack)`, JSON.stringify(f1.script) === JSON.stringify(base().script) && JSON.stringify(f1) === JSON.stringify(VC.applyPlacement(base(), st, 1, F.words, F.pack)));
       // The app on the placed record: Today does not open with the primer; the Script tab stays reachable.
       const mk = pr => { const m = memStore(); m.setItem(VC.storageKey(on), JSON.stringify(pr)); return m; };
       const A = await boot({ pack: on, words: F.words, script: F.script }, { storage: mk(p1) }), h = A.api.html("panel");
@@ -963,8 +965,6 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
       check(`${name}: prior "learn" choice + placement: Today still carries the script stage "${on.script.stages[0].label}" and no choice card`, lh.includes(on.script.stages[0].label) && !/id="scriptChoice"/.test(lh));
       const sk = base(); VC.answerScriptChoice(sk, false);
       check(`${name}: prior "skip" choice + placement: stays skipped`, VC.scriptSkipped(VC.applyPlacement(sk, st, 1, F.words, on)));
-      const B = await boot({ pack: off, words: F.words, script: F.script }, { storage: mk(f1) });
-      check(`${name}: flag off, Today after placement still offers the choice card`, /id="scriptChoice"/.test(B.api.html("panel")));
     }
   }
 

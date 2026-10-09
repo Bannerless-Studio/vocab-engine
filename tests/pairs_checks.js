@@ -12,7 +12,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
 const os = require("os");
 const cp = require("child_process");
 
@@ -25,9 +25,11 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // freqTiers (fb26) layers tier rules on the pair streaks; these checks pin the pairs rule itself, so the
 // zh pack runs without it (tests/freq_tiers_checks.js covers the tiers).
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["freqTiers", "progressView"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: [] });
 const PACK_OFF = packAsOf(PACK, MAIN);
-const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
+// Frequency tiers are engine default since the flag collapse (tests/freq_tiers_checks.js covers them): this suite's
+// words drop their ft, so every word reads core and the pair checks keep their pre-tier numbers.
+const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS").map(w => { const c = Object.assign({}, w); delete c.ft; return c; });
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
@@ -47,7 +49,8 @@ const OLD = mainCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(
 const appHtml = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
 const scriptOf = html => { const b = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]; return b[b.length - 1][1]; };
 function extractAttrs(tag){ const attrs = {}; const re = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)(?:\s*=\s*"([^"]*)")?/g; let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; } return attrs; }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){ this.tagName = (tag||"div").toUpperCase(); this._attrs = Object.assign({}, attrs); this._classes = new Set((this._attrs.class||"").split(/\s+/).filter(Boolean));
@@ -64,9 +67,9 @@ function makeFakeDom(){
     remove(){} focus(){} click(){ if(this.onclick) this.onclick({}); (this._listeners.click||[]).forEach(f=>f({})); } closest(){ return null; } querySelector(){ return null; } querySelectorAll(){ return []; }
   }
   function registerIdsFromHtml(html){ const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g; let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); } }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/); const btnRe = /<button([^>]*)>/g;
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/); const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return { title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); }, getElementById(id){ return registry.get(id) || null; },
     querySelector(sel){ return this.querySelectorAll(sel)[0] || null; },
@@ -82,7 +85,7 @@ async function boot(pack, prog, seed, opts){
   const o = opts || {};
   Math.random = mulberry32(seed);
   const st = o.st || { ls: memStore(), ss: memStore() }; if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog));
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
   const fnBody = scriptOf(o.html || appHtml) + `
@@ -180,8 +183,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
 
 (async () => {
   console.log("[1] config: pack.pairs on zh, needs dayAware; validator");
-  check("packs/zh sets pairs: true and dayAware", PACK.pairs === true && PACK.dayAware === true && VC.pairsOn(PACK));
-  check("pairsOn: off without dayAware, off with pairs missing or not true", !VC.pairsOn(Object.assign({}, PACK, { dayAware: false })) && !VC.pairsOn(PACK_OFF) && !VC.pairsOn(Object.assign({}, PACK, { pairs: "yes" })));
+  check("pairs are engine default (flag collapse): zh carries no pairs / dayAware key", !("pairs" in PACK) && !("dayAware" in PACK));
   {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "pairs-val-"));
     const run = pk => { const d = path.join(tmp, String(Math.random()).slice(2)); fs.mkdirSync(d); for(const f of fs.readdirSync(ZH)) if(f.endsWith(".json")) fs.copyFileSync(path.join(ZH, f), path.join(d, f));
@@ -189,8 +191,6 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       cp.execSync(`${PY} "${path.join(ROOT, "tools", "jsonify_pack.py")}" "${d}"`, { stdio: "ignore" });
       try { cp.execSync(`${PY} "${path.join(ROOT, "tools", "validate_pack.py")}" "${d}"`, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); return ""; } catch(e){ return String(e.stdout || "") + String(e.stderr || ""); } };
     check("validate_pack: zh as shipped passes", run(() => {}) === "");
-    check("validate_pack: pairs not a boolean is an error", /pack\.pairs must be a boolean/.test(run(p => { p.pairs = 1; })));
-    check("validate_pack: pairs without dayAware is an error", /pack\.pairs needs pack\.dayAware/.test(run(p => { delete p.dayAware; })));
     // Port E3: pairs with a script primer is valid (a real script pack, ../russian, with the flags on).
     const ruPack = path.join(ROOT, "..", "russian", "pack");
     if(fs.existsSync(path.join(ruPack, "script.json"))){
@@ -307,57 +307,21 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const tp2 = VC.buildReviewPlan(lwOf(T2), T2, PACK, Object.assign(planOpts(4), { size: 20, units: CHARACTERS, typedUnits: TU, typedKindFits: (w, k) => VC.typedKindOk(k, w, true) }));
     check("a unit is not typed as its word when that word's pair was answered this session", !tp2.some(it => it.tu && typedU.some(u => u.tu === it.tu && u.pair === it.pair)));
     check("typedSeen: a word typed this Today session gets no typed ask", !VC.buildReviewPlan(lwOf(r), r, PACK, Object.assign(planOpts(5), { size: 20, sn: 7, typedSeen: () => true })).some(it => it.kind === "type"));
-    { // fb25: owner 2026-10-06, a paused session's Review stays at 20 under pairs; flag off still grows (pause_checks)
+    { // fb25: owner 2026-10-06, a paused session's Review stays at 20 under pairs (engine default since the flag collapse)
       const big = synth(220, 2, 4, 6), po = x => Object.assign(planOpts(3), { size: 20, units: CHARACTERS, sn: 7 }, x);
       const on = VC.buildReviewPlan(lwOf(big), JSON.parse(JSON.stringify(big)), PACK, po({ extra: 20 }));
-      const off = VC.buildReviewPlan(VC.learnedWords(WORDS, PACK_OFF, big), JSON.parse(JSON.stringify(big)), PACK_OFF, po({ extra: 20 }));
-      check(`pairs: a paused Review (extra 20) stays at 20 items (${on.length}); flag off grows (${off.length})`, on.length === 20 && off.length > 20);
+      check(`pairs: a paused Review (extra 20) stays at 20 items (${on.length})`, on.length === 20);
     }
   }
 
-  console.log(`\n[6] flag-off control: plans byte-identical to ${MAIN}`);
-  if(!OLD) skip(`engine ${MAIN} not in this checkout's history`);
-  else {
-    const progs = [["owner export", OWNER], ["synthetic 40 at 2", synth(40, 2, 4, 6)], ["synthetic 30 at 1 + misses", (() => { const p = synth(30, 1, 3, 5); p.day = { d: TODAY, n: 2, a: { ["w:" + byLv["1"][2].id]: { mk: ["recall"], ms: 4, m: 1 } } }; return p; })()]].filter(x => x[1]);
-    let n = 0; const bad = [];
-    for(const [name, p0] of progs) for(const sd of [1, 2, 3]){
-      const lw = VC.learnedWords(WORDS, PACK_OFF, p0); const TU = VC.typedUnitWords(CHARACTERS, WORDS, PACK_OFF);
-      const o = () => ({ canHear: () => true, today: TODAY, rng: mulberry32(sd), units: CHARACTERS, typedUnits: TU, typedOk: () => true, typedSeen: () => false, typedKindFits: () => true, sn: 3 });
-      const pairs = [
-        ["Review", c => sigPlan(c.buildReviewPlan(lw, JSON.parse(JSON.stringify(p0)), PACK_OFF, Object.assign(o(), { size: 20, extra: 4 })))],
-        ["Recall", c => sigPlan(c.buildRecallPlan(lw, JSON.parse(JSON.stringify(p0)), PACK_OFF, 12, o()))],
-        ["Listen", c => c.dayPickList(lw, 12, JSON.parse(JSON.stringify(p0)), PACK_OFF, TODAY, "w:", ["hear"], mulberry32(sd), undefined, { sn: 3 }).map(w => w.id).join()],
-        ["Test chars", c => sigPlan(c.charTestPlan(CHARACTERS, lw, JSON.parse(JSON.stringify(p0)), PACK_OFF, 20, mulberry32(sd), TODAY, { sn: 3 }))],
-        ["dayPick", c => { const p = JSON.parse(JSON.stringify(p0)); return c.dayPick(lw.map(w => ({ x: w, key: "w:" + w.id, rec: p.w[w.id], mastered: 3, kinds: ["recall", "hear"] })), 15, c.dayLog(p, TODAY), mulberry32(sd), c.daySn(p)).map(x => x.key).join(); }],
-        ["pairs on, dayAware off", c => { const pk = Object.assign({}, PACK, { dayAware: false }); return sigPlan(c.buildReviewPlan(lw, JSON.parse(JSON.stringify(p0)), pk, Object.assign(o(), { size: 20 }))); }],
-      ];
-      for(const [k, f] of pairs){ n++; const a = f(OLD), b = f(VC); if(a !== b || !a.length) bad.push(`${name} seed ${sd} ${k}`); }
-    }
-    check(`${n} plans (Review, Recall, Listen, Test chars, dayPick, pairs without dayAware) x ${progs.length} progress shapes x 3 seeds byte-identical to ${MAIN}`, bad.length === 0, bad.slice(0, 6).join("\n"));
-  }
-  if(!OLD || !mainHtml) skip(`flag-off app control vs ${MAIN}`);
-  else {
-    const run = async (html, core) => {
-      NOW = new Date(2026, 9, 5, 8, 0, 0).getTime();
-      const api = await boot(PACK_OFF, OWNER || synth(40, 2, 4, 6), 11, { html, core: core ? core : Object.assign({}, VC) });
-      const out = { today: api.panel() }; const ans = mulberry32(7);
-      out.walk = JSON.stringify((await session(api, () => ans() < 0.8)).map(r => [r.key, r.kind, r.label, r.ok]));
-      NOW = new Date(2026, 9, 5, 13, 0, 0).getTime();
-      out.walk2 = JSON.stringify((await session(api, () => ans() < 0.8)).map(r => [r.key, r.kind, r.label, r.ok]));
-      const p = api.getProg(); out.prog = JSON.stringify(p);
-      return out;
-    };
-    const a = await run(mainHtml, Object.assign({}, OLD)), b = await run(undefined, undefined);
-    for(const k of Object.keys(a)){ let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
-      check(`flag off (pairs stripped), two sessions on ${OWNER ? "the owner export" : "a synthetic record"}: ${k} byte-identical to ${MAIN} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}`}`, a[k] === b[k] && a[k].length > 100); }
-  }
+  // [6] (flag-off control vs main) deleted: pairs is engine default since the flag collapse.
 
   console.log("\n[7] app on zh with pairs: three Today sessions on " + (OWNER ? "the owner export" : "a synthetic record"));
   {
     NOW = new Date(2026, 9, 5, 8, 0, 0).getTime();
     const notes = [], p0 = OWNER ? JSON.parse(JSON.stringify(OWNER)) : synth(40, 2, 4, 6);
     const api = await boot(PACK, p0, 5, { core: coreWith(notes) });
-    check("Today's Review and Recall lines say \"weakest pairs first\"; Sentences keeps its order", /items, weakest pairs first/.test(api.panel()) && /Recall<\/td><td>\d+ items, weakest pairs first/.test(api.panel()) && /Sentences<\/td><td>8 items, misses and due first/.test(api.panel()));
+    // (the v1 Today lines "N items, weakest pairs first" went with appView v1 in the flag collapse; app v2 rows carry no counts or order copy)
     const ans = mulberry32(9); const all = [];
     for(const h of [8, 13, 20]){ NOW = new Date(2026, 9, 5, h, 0, 0).getTime(); const sn = (api.getProg().sn || 0) + 1; (await sessionP(api, () => ans() < 0.85, notes)).forEach(r => all.push(Object.assign(r, { sn }))); }
     const p = api.getProg();
@@ -420,7 +384,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const ids = plan => xs(plan).map(it => it.unit.id).sort().join(",");
     for(const x of recs){
       const name = x.fx.lang || x.pk.key, units = x.fx.script.units, kctx = { units, words: x.fx.words, tts: VC.scriptConfig(x.pk).tts };
-      check(`${name}: pairs on with the script primer (pairsOn, scriptConfig)`, VC.pairsOn(x.pk) && !!VC.scriptConfig(x.pk));
+      check(`${name}: script primer configured (scriptConfig)`, !!VC.scriptConfig(x.pk));
       let same = 0, shares = [], fit = true, noPair = true, wordsPaired = true, miss = 0, full = 0;
       for(const seed of [1, 2, 3]){
         const n = 20;
@@ -441,15 +405,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       check(`${name}: a script unit with a pending miss is asked (3 of 3 seeds, got ${miss})`, miss === 3);
       const rc = VC.buildRecallPlan(x.learned, x.p, x.pk, 8, opts(x, 4));
       check(`${name}: Recall asks no script unit (as without pairs)`, xs(rc).length === 0 && rc.length > 0);
-      // A script pack with pairs off: the refactored non-pairs Review is byte-identical to d5952d9 (dayAware on and off).
-      if(OLD3){
-        const dayOff = Object.assign({}, offPairs(x.pk)); delete dayOff.dayAware;
-        const eqOld = pk => [1, 2, 3].every(seed => JSON.stringify(VC.buildReviewPlan(x.learned, x.p, pk, opts(x, seed, { size: 15 }))) === JSON.stringify(OLD3.buildReviewPlan(x.learned, x.p, pk, opts(x, seed, { size: 15 }))));
-        // fb46: dayAware script units (x:) take their kind from dayItemKind, so with dayAware on only the kinds of script items may differ.
-        const maskX = plan => JSON.stringify(plan.map(it => it.unit && VC.SCRIPT_KINDS.includes(it.kind) ? Object.assign({}, it, { kind: "x" }) : it));
-        const eqMasked = pk => [1, 2, 3].every(seed => maskX(VC.buildReviewPlan(x.learned, x.p, pk, opts(x, seed, { size: 15 }))) === maskX(OLD3.buildReviewPlan(x.learned, x.p, pk, opts(x, seed, { size: 15 }))));
-        check(`${name}: pairs off Review plans byte-identical to ${E3} with dayAware off, and with it on up to the kind of script items (fb46) (3 seeds)`, eqMasked(offPairs(x.pk)) && eqOld(dayOff));
-      } else skip(`${name}: no git ${E3}`);
+      // (the pairs-off / dayAware-off script controls vs d5952d9 went with those flags in the flag collapse)
     }
     {
       // In the primer (no learned words yet): Review is the 12 script items it was without pairs.
@@ -469,8 +425,8 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
         const z = zrec(seed, nw);
         for(const o of [planOpts(seed), planOpts(seed, { script: [], size: 20 })]){
           tot += 2;
-          if(JSON.stringify(VC.buildReviewPlan(z.lw, z.p, PACK, Object.assign({}, o, { rng: mulberry32(seed) }))) === JSON.stringify(OLD3.buildReviewPlan(z.lw, z.p, PACK, Object.assign({}, o, { rng: mulberry32(seed) })))) same++;
-          if(JSON.stringify(VC.buildRecallPlan(z.lw, z.p, PACK, 8, Object.assign({}, o, { rng: mulberry32(seed) }))) === JSON.stringify(OLD3.buildRecallPlan(z.lw, z.p, PACK, 8, Object.assign({}, o, { rng: mulberry32(seed) })))) same++;
+          if(JSON.stringify(VC.buildReviewPlan(z.lw, z.p, PACK, Object.assign({}, o, { rng: mulberry32(seed) }))) === JSON.stringify(OLD3.buildReviewPlan(z.lw, z.p, withCollapsed(PACK), Object.assign({}, o, { rng: mulberry32(seed) })))) same++;
+          if(JSON.stringify(VC.buildRecallPlan(z.lw, z.p, PACK, 8, Object.assign({}, o, { rng: mulberry32(seed) }))) === JSON.stringify(OLD3.buildRecallPlan(z.lw, z.p, withCollapsed(PACK), 8, Object.assign({}, o, { rng: mulberry32(seed) })))) same++;
         }
       }
       check(`zh (pairs on, no script): Review + Recall plans byte-identical to ${E3} on 3 seeded records (${same}/${tot})`, same === tot);

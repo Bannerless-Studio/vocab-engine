@@ -8,7 +8,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { stripFlags, FLAG_SINCE } = require("./lib/pack_flags.js");
+const { stripFlags, FLAG_SINCE, COLLAPSED } = require("./lib/pack_flags.js");
 const util = require("util");
 
 const ROOT = path.join(__dirname, "..");
@@ -293,15 +293,15 @@ section("[9] flag-off: pack.script stripped by the harness; outputs unchanged wi
   // (and exits) on require, which must fail this check, not end this file.
   const cp = require("child_process");
   const r = cp.spawnSync(process.execPath, ["-e", `const m = require(${JSON.stringify(path.join(__dirname, "flagoff_snapshot.js"))});
-    process.stdout.write(JSON.stringify({ ok: typeof m.stripFlagOnFields === "function", src: m.stripFlagOnFields ? String(m.stripFlagOnFields) : "", packs: m.FLAGOFF_PACKS || [] }));`], { encoding: "utf8" });
+    process.stdout.write(JSON.stringify({ ok: typeof m.stripFlagOnFields === "function", src: m.stripFlagOnFields ? String(m.stripFlagOnFields) : "", packs: m.DRIFT_PACKS || [] }));`], { encoding: "utf8" });
   let mod = null; try{ mod = JSON.parse(r.stdout); }catch(e){ mod = null; }
   check("flagoff_snapshot.js exports stripFlagOnFields when required", !!(mod && mod.ok), (r.stdout || "") + (r.stderr || ""));
   if(!(mod && mod.ok)) return;
-  const stripFlagOnFields = new Function("stripFlags", "FLAG_SINCE", `return (${mod.src});`)(stripFlags, FLAG_SINCE); const FLAGOFF_PACKS = mod.packs;
+  const stripFlagOnFields = new Function("stripFlags", "FLAG_SINCE", "COLLAPSED", `return (${mod.src});`)(stripFlags, FLAG_SINCE, COLLAPSED); const DRIFT_PACKS = mod.packs;
   const synth = FX.ko().pack.script;
   const sunits = FX.ko().script.units;
   let checked = 0;
-  FLAGOFF_PACKS.forEach(({ name, dir }) => {
+  DRIFT_PACKS.forEach(({ name, dir }) => {
     const pj = path.join(dir, "pack.json");
     if(!fs.existsSync(pj)){ console.log(`NOTE  ${name}: ${dir} missing, skipped`); return; }
     const pack = JSON.parse(fs.readFileSync(pj, "utf8"));

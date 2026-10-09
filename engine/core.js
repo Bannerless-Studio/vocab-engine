@@ -55,7 +55,7 @@ function typedSynHit(entry, byId, test){
   for(const id of (Array.isArray(entry && entry.typedSyn) ? entry.typedSyn : [])){ const s = byId && byId[id]; if(s && test(s)) return s; }
   return null;
 }
-// pack.optsMix (docs/PACK_SCHEMA.md "optsMix"; owner 2026-10-02): same-level-first wrong
+// Option mix (docs/PACK_SCHEMA.md "optsMix", engine default since the flag collapse; owner 2026-10-02): same-level-first wrong
 // choices near the end of a level are all known words, so a new answer is found by
 // elimination; a learned/unlearned mix let the learner rule out the other familiarity class
 // (review 2026-10-02: guess success 0.40). Wrong choices come from the answer's own stage
@@ -68,7 +68,6 @@ function typedSynHit(entry, byId, test){
 // rank(v) orders hard preferences ahead of the stage (one script, article agreement); near(v)
 // orders the class preference inside a stage (lower first). accept(strict) returns a fresh
 // guard that records what it lets through.
-function optsMixOn(pack){ return !!(pack && pack.optsMix === true); }
 // The idx-th k-combination of 0..m-1 in lexicographic order.
 function nthCombination(m, k, idx){
   const out = []; let x = 0;
@@ -916,21 +915,9 @@ function placementItemCount(bucketIndex, pack){
   return items[bucketIndex % items.length];
 }
 
-function placementStopIndex(res, opts){
-  if(opts && opts.whole) return placementStopWhole(res);
-  for(let i=0;i<res.length;i++){
-    const lo = Math.max(0, i-2);
-    let wr = 0, wn = 0;
-    for(let j=lo;j<=i;j++){ wr += res[j].r; wn += res[j].n; }
-    const windowAcc = wn ? wr/wn : 1;
-    if(!(windowAcc >= 0.75 && res[i].r >= 1)) return i;
-  }
-  return null;
-}
-
-// pack.placementWhole (owner 2026-10-08: a 1/2 opening bucket zeroed a 22/30 test): the window rule judges the first
-// buckets on 2-5 items, so one early miss stops placement at 0 while the later buckets are asked and discarded.
-// Here the largest passed prefix k wins: accuracy over buckets 0..k-1 >= 0.75 (integers, so exactly 0.75 passes) and
+// The placement stop (owner 2026-10-08: a 1/2 opening bucket zeroed a 22/30 test; the earlier 3-bucket window rule judged the
+// first buckets on 2-5 items, so one early miss stopped placement at 0 while the later buckets were asked and discarded; pack
+// key placementWhole, default since the flag collapse). The largest passed prefix k wins: accuracy over buckets 0..k-1 >= 0.75 (integers, so exactly 0.75 passes) and
 // every bucket in it has a right answer, except an isolated zero (right answers on both sides, the bucket k itself for
 // the last one) which is skipped: counted in the accuracy, its words provisional like the rest.
 function placementSkipped(res, k){
@@ -942,7 +929,7 @@ function placementSkipped(res, k){
   }
   return out;
 }
-function placementStopWhole(res){
+function placementStopIndex(res){
   for(let k=res.length;k>=0;k--){
     let r = 0, n = 0;
     for(let j=0;j<k;j++){ r += res[j].r; n += res[j].n; }
@@ -952,10 +939,9 @@ function placementStopWhole(res){
   return 0;
 }
 
-// pack.placementEarlyStop (fb51; owner 2026-10-08: a beginner answered 35 words to learn they know none): the items are asked
-// bucket by bucket, and the asking stops once three consecutive asked buckets have no right answer. The buckets not asked
-// are in-memory entries {r:0, n:0, skipped:true} (never stored) that both stop rules read as failed.
-const placementEarlyStopOn = pack => !!(pack && pack.placementEarlyStop === true);
+// Early stop (fb51; owner 2026-10-08: a beginner answered 35 words to learn they know none; pack key placementEarlyStop, default
+// since the flag collapse): the items are asked bucket by bucket, and the asking stops once three consecutive asked buckets have
+// no right answer. The buckets not asked are in-memory entries {r:0, n:0, skipped:true} (never stored) that the stop rule reads as failed.
 // res[0..k] are all asked; true when the last three of them are all zero (so at least three buckets were asked).
 function placementEarlyStopAfter(res, k){
   return k >= 2 && res[k].r === 0 && res[k - 1].r === 0 && res[k - 2].r === 0;
@@ -993,9 +979,9 @@ function applyPlacement(prog, st, passed, words, pack, units){
   Object.keys(seed).forEach(lv => (byLv[lv]||[]).slice(0, seed[lv]*size).forEach(w => { covered.add(w.id); if(!out.w[w.id]) out.w[w.id] = {r:1,w:0,s:1,prov:1}; }));
   ids.forEach(lv => settleSetCounter(out, words, pack, lv));
   placeCharUnits(out, pack, units, covered);
-  // pack.placedKnown: a placement past the first bucket reads the script, so the primer is skipped exactly as the learner's own
-  // skip writes it (answerScriptChoice); pronUntilPrimer then turns the reading aid off by its own rule.
-  if(placedKnownOn(pack) && passed >= 1 && scriptConfig(pack)){
+  // A placement past the first bucket reads the script (fb52, pack key placedKnown), so the primer is skipped exactly as the learner's
+  // own skip writes it (answerScriptChoice); pronUntilPrimer then turns the reading aid off by its own rule.
+  if(passed >= 1 && scriptConfig(pack)){
     out.script = isObj(prog.script) ? Object.assign({}, prog.script) : defaultScriptProg();
     if(out.script.choiceSeen !== true) answerScriptChoice(out, false);
   }
@@ -1006,15 +992,16 @@ function applyPlacement(prog, st, passed, words, pack, units){
   return out;
 }
 
-// pack.placementChars (fb50; owner 2026-10-08: placed at the top level, then taught the first level's characters from set 1): under characters.learn
-// "lag" the units are taught separately from the words and the set position is the count of unit records, so a placement
+// Placement places the characters layer (fb50; owner 2026-10-08: placed at the top level, then taught the first level's characters
+// from set 1; pack.placementChars until the flag collapse, now every characters.learn "lag" pack): under "lag" the units
+// are taught separately from the words and the set position is the count of unit records, so a placement
 // that seeds 1650 word records leaves the characters layer at 0. The unit sets of the lag plan (ramp chunks per level, else
 // setSize chunks of the pack order) whose units all have a unit record or all their words in the prefix this placement
 // asserts (placed now, or learned before inside it; a word learned beyond the prefix never counts, so a retake that
 // places nothing leaves a learner whose characters lag behind their words alone) are seeded the way a placed word is: {r:1,w:0,s:1,prov:1}, kept in review until known (markChar / unifiedReviewPlan). Only the
 // contiguous run of such sets from the start is seeded, so the next ramp chunk stays aligned; a set with one unplaced unit and
 // everything after it stay unplaced. Adds records only: a retake never removes or lowers one.
-const placementCharsOn = pack => !!(pack && pack.placementChars === true) && lagOn(pack);
+const placementCharsOn = pack => lagOn(pack);
 function charPlanSets(pack, units){
   const cfg = charsConfig(pack), list = charStageUnits(levelIds(pack), units, pack), out = [];
   if(cfg.ramp){
@@ -1058,7 +1045,7 @@ function placedCharsThrough(pack, units, prog){
   const last = run[run.length - 1];
   return last ? { lv: last.lv, set: last.k + 1 } : null;
 }
-// Today's Sounds hint under pack.placementChars (fb50; owner 2026-10-08: placed at the top level, Today still said "Start the first lesson"):
+// Today's Sounds hint when placement places the characters layer (fb50; owner 2026-10-08: placed at the top level, Today still said "Start the first lesson"):
 // derived from the counters, nothing stored. A placement that passed at least two buckets has raised the second bucket's level to
 // its end; the first bucket alone (or none) leaves the learner at the start, where the hint still helps.
 function placedPastFirstBucket(prog, words, pack){
@@ -1085,8 +1072,8 @@ function storageKey(pack){ return `vocab_${pack.key}`; }
 function defaultProg(pack){
   const sets = {}; levelIds(pack).forEach(id=>{ sets[id] = 0; });
   const p = { v:PROG_VERSION, w:{}, s:{}, sets, lessons:{}, sessions:0, theme:null, showPron: pack.showPron !== false, placedOnce:false };
-  // pack.pronUntilPrimer: no stored showPron means the learner never chose, so showPronOn derives the default.
-  if(pack.pronUntilPrimer === true && pack.script) delete p.showPron;
+  // A script pack (pronUntilPrimerOn): no stored showPron means the learner never chose, so showPronOn derives the default.
+  if(pronUntilPrimerOn(pack)) delete p.showPron;
   if(charsConfig(pack)) p.chars = seedCharOrder(defaultCharsProg(), pack); // absent without pack.characters: flag-off shape unchanged
   if(scriptConfig(pack)) p.script = defaultScriptProg(); // absent without pack.script: likewise
   return p;
@@ -1210,19 +1197,18 @@ function markRec(map, key, ok, isWord, kind, reqKind){
   if(isWord) setMissKind(p, ok, kind, reqKind);
   map[key] = p; return p;
 }
-// pack.wordsBy "typed" (docs/PACK_SCHEMA.md "wordsBy"; owner 2026-10-03: selecting a word does not
+// Words by typed (docs/PACK_SCHEMA.md "wordsBy", default since the flag collapse; owner 2026-10-03: selecting a word does not
 // count the same as writing it). From WORD_HOLD a word moves up only by a typed answer (kind "type":
 // characters, reading or meaning typed); a right choice or ear answer holds it and a miss steps it
-// down one, the characters.bareBy rule for words. Below WORD_HOLD, and with the flag off, markRec.
+// down one, the characters.bareBy rule for words. Below WORD_HOLD, markRec.
 // o.typable false (no typed kind fits the word as shown: 北京 while shown by its reading): markRec,
 // as typedUnitWords exempts such units. o.retry (a miss earlier in this drill stepped the word down
 // from WORD_HOLD+; app.html wordRetry): no streak credit, as markUnitTyped gives the in-drill retry none
 // (review fb18 HIGH 1), but it settles the missed kind k as markRec does (engine_checks typed-fallback drill).
 const WORD_HOLD = 2;
-function wordsTypedOn(pack){ return !!(pack && pack.wordsBy === "typed"); }
 function markWordRec(map, key, ok, kind, reqKind, pack, o){
   const p = map[key], x = o || {};
-  if(!wordsTypedOn(pack) || !isObj(p) || x.typable === false) return markRec(map, key, ok, true, kind, reqKind);
+  if(!isObj(p) || x.typable === false) return markRec(map, key, ok, true, kind, reqKind);
   if(x.retry){ if(ok) p.r++; else p.w++; setMissKind(p, ok, kind, reqKind); return p; }
   if((p.s || 0) < WORD_HOLD) return markRec(map, key, ok, true, kind, reqKind);
   if(ok){ p.r++; if(kind === "type") p.s++; } else { p.w++; p.s--; }
@@ -1259,11 +1245,11 @@ function provPick(list, n, wrecs){
 // exports and seeds carry sets without word records, and `d` (drilled ahead of the counter)
 // says nothing about the counter's own prefix.
 const taughtRec = (r, w) => !!(r[w.id] && !r[w.id].d);
-// pack.freqTiers reorders each level by frequency, but every stored counter was written against
+// Frequency tiers reorder each level by frequency, but every stored counter was written against
 // the earlier order, which is id order (ids are append-only and were assigned in it), so a
 // counter prefix is read in id order (docs/PACK_SCHEMA.md "freqTiers").
 function counterOrder(list, pack){
-  return freqTiersOn(pack) ? list.slice().sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0) : list;
+  return list.slice().sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 }
 function levelLearned(list, sets, size, recs, pack){
   const r = recs || {};
@@ -1286,11 +1272,9 @@ function levelNewSet(words, pack, prog, lv){
   const got = new Set(levelLearned(list, done, size, prog.w, pack).map(w => w.id));
   const fresh = list.filter(w => !got.has(w.id)).slice(0, size);
   if(!fresh.length) return null;
-  // Under pack.freqTiers learned words sit anywhere in the frequency order (taught under the
-  // earlier order), so the set is the count of sets already learned.
-  if(freqTiersOn(pack)) return { lv, set: Math.min(Math.floor(got.size / size), nSets(list, size) - 1), words: fresh };
-  const idx = list.findIndex(w => w.id === fresh[0].id);
-  return { lv, set: Math.floor((idx < 0 ? 0 : idx) / size), words: fresh };
+  // Learned words sit anywhere in the frequency order (taught under the earlier order), so the
+  // set is the count of sets already learned.
+  return { lv, set: Math.min(Math.floor(got.size / size), nSets(list, size) - 1), words: fresh };
 }
 // The counter only feeds bars and labels, so it follows the records: a teach that finishes one
 // set's leftovers and then most of the next must move it past both (TODO.md, set counter lag).
@@ -1300,9 +1284,7 @@ function settleSetCounter(prog, words, pack, lv){
   if(!isObj(prog.sets)) prog.sets = {};
   if(!levelNewSet(words, pack, prog, lv)) return (prog.sets[lv] = n);
   const r = prog.w || {};
-  let lead = 0;
-  if(freqTiersOn(pack)) lead = Math.min(n, Math.floor(list.filter(w => r[w.id]).length / size));
-  else while(lead < n && list.slice(lead*size, (lead+1)*size).every(w => r[w.id])) lead++;
+  const lead = Math.min(n, Math.floor(list.filter(w => r[w.id]).length / size));
   return (prog.sets[lv] = Math.max(Math.min(prog.sets[lv] || 0, n), lead));
 }
 function nextNewSet(words, pack, prog){
@@ -1312,10 +1294,10 @@ function nextNewSet(words, pack, prog){
   }
   return null;
 }
-// pack.levelGate (docs/PACK_SCHEMA.md "levelGate"; owner 2026-10-07): the first level with untaught
-// words opens only when the level before it is known to the fraction. Evaluated where Today plans;
+// Level gate (docs/PACK_SCHEMA.md "levelGate", a constant since the flag collapse; owner 2026-10-07): the first level with untaught
+// words opens only when the level before it is known to LEVEL_GATE. Evaluated where Today plans;
 // nothing is stored, and the word level keeps its own order inside.
-const levelGateOn = pack => !!(pack && typeof pack.levelGate === "number" && pack.levelGate > 0 && pack.levelGate <= 1) && pairsOn(pack);
+const LEVEL_GATE = 0.7;
 function levelKnownPct(words, pack, prog, lv, units){
   const list = wordsByLevel(words, pack)[lv] || [], r = (prog && prog.w) || {}, bw = knownCtx(pack, units);
   return list.length ? list.filter(w => wordKnownP(r[w.id], w, pack, prog, bw)).length / list.length : 1;
@@ -1327,7 +1309,7 @@ function levelKnownPct(words, pack, prog, lv, units){
 // pairState does for words, else every existing learner would drop to 0 and, the booted pair being
 // "known", never be asked again. Any other level, or a word with no unit, keeps the word rule.
 // wordKnown itself (prov, mastered) is untouched.
-const levelExamOn = pack => !!(pack && isObj(pack.levelExam) && Object.values(pack.levelExam).includes("characters") && charsConfig(pack)) && pairsOn(pack);
+const levelExamOn = pack => !!(pack && isObj(pack.levelExam) && Object.values(pack.levelExam).includes("characters") && charsConfig(pack));
 const knownCtx = (pack, units) => levelExamOn(pack) ? unitByWord(units) : null;
 function wordKnownX(rec, word, pack, prog, byWord){
   if(!wordKnown(rec, word, pack)) return false;
@@ -1336,29 +1318,27 @@ function wordKnownX(rec, word, pack, prog, byWord){
   const ur = charRecs(prog)[u.id], own = isObj(ur) && isObj(ur.p) ? pairEntry(ur.p.wm) : null;
   return (own ? own[0] : isObj(ur) ? pairState(ur, "wm").s : 0) >= BARE_PAIR;
 }
-// pack.placedKnown (docs/PACK_SCHEMA.md "placedKnown"; fb52, owner 2026-10-08: placed at the top level, Today read
+// Placed known (docs/PACK_SCHEMA.md "placedKnown", default since the flag collapse; fb52, owner 2026-10-08: placed at the top level, Today read
 // "Goal 1 of 3 ≈ 96 sessions" on an empty bar and the gate "Now 0%"): a record placement seeded provisional (prov, from
 // applyPlacement / pinPrefixRecords / placeCharUnits; dropped by the first miss and at mastered / known) counts as known for
 // position only: the level gate and its sentence, the goal bars, the progress map and the ETA position. Review picks,
 // mastered counts (Progress rows, totals), typed tiers, Still shaky, Test pools and wordKnownX (levelExam) keep it provisional.
-const placedKnownOn = pack => !!(pack && pack.placedKnown === true);
 const placedProv = rec => isObj(rec) && !!rec.prov;
-const posKnown = (pack, rec) => placedKnownOn(pack) && placedProv(rec);
+const posKnown = (pack, rec) => placedProv(rec);
 // On a levelExam "characters" level a word whose prov settled at known (settleProv) still waits on its unit's exam; while that
 // unit is itself placed-provisional the word keeps counting, so the gate does not close again between the two.
 function wordKnownP(rec, word, pack, prog, byWord){
   if(posKnown(pack, rec) || wordKnownX(rec, word, pack, prog, byWord)) return true;
-  const u = placedKnownOn(pack) && byWord && word ? byWord.get(word.id) : null;
+  const u = byWord && word ? byWord.get(word.id) : null;
   return !!u && posKnown(pack, charRecs(prog)[u.id]) && wordKnown(rec, word, pack);
 }
 // { lv, prev, pct } while the first level with untaught words waits; else null.
 function levelGateHold(words, pack, prog, units){
-  if(!levelGateOn(pack)) return null;
   const nn = nextNewSet(words, pack, prog), ids = levelIds(pack);
   const i = nn ? ids.indexOf(nn.lv) : -1;
   if(i < 1) return null;
   const pct = levelKnownPct(words, pack, prog, ids[i - 1], units);
-  return pct + 1e-9 >= pack.levelGate ? null : { lv: nn.lv, prev: ids[i - 1], pct: Math.floor(pct * 100) };
+  return pct + 1e-9 >= LEVEL_GATE ? null : { lv: nn.lv, prev: ids[i - 1], pct: Math.floor(pct * 100) };
 }
 const levelGateNote = (words, pack, prog, units) => { const h = levelGateHold(words, pack, prog, units); return h ? `${levelLabel(pack, h.lv)} waits · ${levelLabel(pack, h.prev)} at ${h.pct}% known` : null; };
 // What Today teaches: nextNewSet unless the gate holds.
@@ -1393,9 +1373,9 @@ function availableSentences(sentences, words, pack, prog, known){
   const cur = currentLevelIndex(words, pack, prog); const idx = levelIndexMap(pack);
   return (sentences||[]).filter(s => (!known && cur > idx[s.lv]) || (s.words||[]).every(id=>lw.has(id)));
 }
-// pack.pauseNew (docs/PACK_SCHEMA.md "pauseNew"; owner 2026-10-02: "stop progression"): with
+// Pause new material (docs/PACK_SCHEMA.md "pauseNew", default since the flag collapse; owner 2026-10-02: "stop progression"): with
 // prog.pause 1, Today teaches nothing new. Unpausing deletes the field, so the record is as before.
-const pauseOn = (pack, prog) => !!(pack && pack.pauseNew === true && prog && prog.pause === 1);
+const pauseOn = (pack, prog) => !!(prog && prog.pause === 1);
 function setPause(prog, on){ if(on) prog.pause = 1; else delete prog.pause; return prog; }
 
 // Plans live here, DOM-free, so composition rules are testable under Node.
@@ -1413,7 +1393,7 @@ function kindMix(n, share, typing, rng){
 // word-only code runs unchanged, so the output is identical to a word-only plan.
 function buildReviewPlan(learned, prog, pack, opts){
   // o.extra (pauseNew): more items; day-aware plans take them only where no same-day repeat results.
-  const o = opts || {}; const day = dayAwareOn(pack) && o.today; const n = (o.size || REVIEW_SIZE) + (day ? 0 : o.extra || 0);
+  const o = opts || {}; const day = o.today; const n = (o.size || REVIEW_SIZE) + (day ? 0 : o.extra || 0);
   if(day) return dayReviewPlan(learned, prog, pack, n, o);
   const ru = recordedUnits(o.units, prog, pack);
   const rs = recordedScriptUnits(o.script, prog, pack);
@@ -1427,7 +1407,7 @@ function buildReviewPlan(learned, prog, pack, opts){
 }
 function buildRecallPlan(learned, prog, pack, n, opts){
   const o = opts || {};
-  if(dayAwareOn(pack) && o.today) return dayRecallPlan(learned, prog, pack, n, o);
+  if(o.today) return dayRecallPlan(learned, prog, pack, n, o);
   const ru = recordedUnits(o.units, prog, pack);
   if(ru.length) return hearableKinds(unifiedRecallPlan(learned, ru, prog, pack, n, o.rng, o), o.canHear);
   const pool = weakFirst(learned, n, prog.w);
@@ -1477,12 +1457,12 @@ function applyMissedKinds(plan, prog, pack, production, opts){
   }
   return out;
 }
-// Day-aware planning (docs/PACK_SCHEMA.md "dayAware"; owner feedback 2026-10-02: with many
+// Day-aware planning (docs/PACK_SCHEMA.md "dayAware", default since the flag collapse; owner feedback 2026-10-02: with many
 // sessions a day the same items came back while important recalls never did). weakScore has
 // no notion of today or of time: every session ranked the same lifetime-weak units first and a
 // mastered unit was never refreshed. prog.day logs today's answers per item key ("w:", "c:",
 // "s:", "x:"): r the kinds answered right, c / m the drill ordinal of the last right answer /
-// miss. Records gain t, the day number of the last answer. Both are written only with the flag.
+// miss. Records gain t, the day number of the last answer.
 // The planner's clock is the session ordinal prog.sn (owner 2026-10-02: "count by sessions rather
 // than days?"): records and log entries keep u, the session of the last answer, so "longest
 // unseen" means something within one day of many sessions; the date is the tie-break.
@@ -1501,7 +1481,6 @@ const DAY_MISS_SHARE = 0.6;
 // Safety net for a miss no planner can settle: once asked again at least once and still pending
 // DAY_MISS_MAX_SESSIONS sessions after it, it is dropped (the broken streak keeps the unit weak).
 const DAY_MISS_MAX_SESSIONS = 6;
-function dayAwareOn(pack){ return !!(pack && pack.dayAware === true); }
 // A log from another day, or one an older engine or an import mangled, is a fresh day: the log
 // is never validated at boot, so it can never reset the progress record.
 // A new day carries over every unsettled miss (it stays first however many days pass) and the
@@ -1528,12 +1507,12 @@ function daySn(prog){ return prog && Number.isInteger(prog.sn) && prog.sn > 0 ? 
 // A Today session counts once (app.html Start today), any other drill once; Today's own steps and
 // a resumed session never do.
 function daySessionStart(prog, pack){
-  if(!dayAwareOn(pack) || !prog) return false;
+  if(!prog) return false;
   prog.sn = daySn(prog) + 1;
   return true;
 }
 function dayStart(prog, pack, today, newSession){
-  if(!dayAwareOn(pack) || !prog) return false;
+  if(!prog) return false;
   const d = prog.day = dayLog(prog, today); d.n++;
   if(newSession) daySessionStart(prog, pack);
   return true;
@@ -1550,7 +1529,7 @@ function dayRecOf(prog, key){
 // can: the kinds this unit can be shown in on this device (dayWordCan, daySentenceCan); a miss in
 // a kind outside it is settled as daySettles says.
 function noteDay(prog, pack, today, key, kind, ok, can){
-  if(!dayAwareOn(pack) || !prog) return false;
+  if(!prog) return false;
   const d = prog.day = dayLog(prog, today); const sn = daySn(prog);
   const e = isObj(d.a[key]) ? d.a[key] : (d.a[key] = {});
   if(Array.isArray(e.mk) && e.mk.length && e.m !== d.n) e.ma = 1;
@@ -1643,19 +1622,19 @@ const dayC = (c, d) => { const e = d.a[c.key]; return isObj(e) && typeof e.c ===
 // misses, consolidation and refresh; Recall gave them 0.5 of 8, fb8-weak-analysis). The floor leaves
 // consolidating units at least ⌈DAY_CONSOLIDATE_SHARE n⌉ slots: on a day of many unit misses it took
 // them all (fb10 review M1).
-// pack.wordsBy "typed": held words that can be asked typed now (c.held, dayHeldMark) come right after
+// Words by typed: held words that can be asked typed now (c.held, dayHeldMark) come right after
 // the misses, up to hshare of the plan: a held word moves only by one typed ask per session, and by the
 // weak floor alone (lowest streak first) the words at 2 piled up (fb18 review: 129 and rising). They
 // reserve only the consolidating units min(⌈DAY_HELD_UNIT_SHARE n⌉, units there) (the fb10 M1 cap; at
 // cshare 0.35 the words at 2 still rose, owner export; units may still fall to the floor cap on days
 // of many unit misses, as flag off); the floor then counts them with the word misses, as it counts misses
 // without the flag, and refresh is taken once after the units (fb18 review 2 M2, M3).
-const DAY_EXTRA_POOL = 4, DAY_WEAK_FLOOR = 0.4, DAY_HELD_SHARE_REVIEW = 0.3, DAY_HELD_SHARE_RECALL = 1, DAY_HELD_UNIT_SHARE = 0.25;
+const DAY_WEAK_FLOOR = 0.4, DAY_HELD_SHARE_REVIEW = 0.3, DAY_HELD_SHARE_RECALL = 1, DAY_HELD_UNIT_SHARE = 0.25;
 // Today's Recall size. Under wordsBy a held word moves only by a typed ask, and after the misses and
 // the units' share Recall left it ~1 slot: the pile at 2 rose all week (fb18 review 2; the extra
 // production slots are what the typed rule costs, team decision 2026-10-04).
 const RECALL_SIZE = 8, RECALL_SIZE_HELD = 12;
-const recallSize = pack => wordsTypedOn(pack) && dayAwareOn(pack) ? RECALL_SIZE_HELD : RECALL_SIZE;
+const recallSize = pack => RECALL_SIZE_HELD;
 function dayPick(cands, n, d, rng, sn, cshare, t4max, hshare){
   const r = rng || Math.random; const T = [[], [], [], [], []], C = [];
   (cands || []).forEach(c => { const t = dayTier(c, d, sn); (t === 2 && c.bare && dayS(c.rec) < c.bare ? C : T[t]).push(Object.assign({ j: r() }, c)); });
@@ -1703,7 +1682,6 @@ function daySentenceKinds(pack){ return [typingEnabled(pack) && !pronTypingOn(pa
 // every kind done, keep the planned kind. The one place a unit's kind is decided per day.
 // can (optional): the kinds the unit can be shown in here (daySettles).
 function dayItemKind(prog, pack, today, key, planned, kinds, can){
-  if(!dayAwareOn(pack)) return planned;
   const e = dayLog(prog, today).a[key];
   if(!isObj(e)) return planned;
   const r = dayRight(e, daySn(prog)), ks = kinds || [];
@@ -1721,10 +1699,10 @@ function dayItemKind(prog, pack, today, key, planned, kinds, can){
 }
 // wordCan (optional): word -> the kinds it can be shown in here (dayWordCan).
 // typedOk (optional): word -> a typed kind fits it on this device (app: typedKindOk with the word's
-// shown side); default: one fits with the written form hidden. typedSeen (optional, pack.wordsBy):
+// shown side); default: one fits with the written form hidden. typedSeen (optional):
 // word -> already asked typed in the running Today session (app.html typedSession).
 function dayPlanKinds(plan, prog, pack, today, wordKinds, charKinds, wordCan, typedUnits, typedOk, typedSeen){
-  const seen = w => !!w && wordsTypedOn(pack) && typeof typedSeen === "function" && !!typedSeen(w);
+  const seen = w => !!w && typeof typedSeen === "function" && !!typedSeen(w);
   return plan.map(it => {
     const tu = it.unit && CHAR_KINDS.includes(it.kind) ? it.unit : it.tuUnit;
     // wordsBy: a unit's typed item types its word, so a word typed this session is not its unit's typed item again (browser fb18 check 4).
@@ -1747,12 +1725,12 @@ function typedUnitDue(unit, prog, pack, typedUnits){
   const cfg = charsConfig(pack), s = dayS(charRecs(prog)[unit.id]);
   return s >= cfg.mastered && s < cfg.bare;
 }
-// pack.wordsBy "typed": a held word (WORD_HOLD <= s < WORD_MASTERED) moves on only by a typed answer,
+// Words by typed: a held word (WORD_HOLD <= s < WORD_MASTERED) moves on only by a typed answer,
 // so a planner that may ask "type" asks it typed, as typedUnitDue does for units. A word right typed
 // recently (it reached 2 by that answer) keeps the day rule: no same-kind repeat; a word asked typed
 // in the running Today session (typedSeen) waits for the next one.
 function typedWordDue(word, prog, pack, today, kinds, typedOk, typedSeen){
-  if(!wordsTypedOn(pack) || !dayAwareOn(pack) || !(kinds || []).includes("type") || (typeof typedSeen === "function" && typedSeen(word))) return false;
+  if(!(kinds || []).includes("type") || (typeof typedSeen === "function" && typedSeen(word))) return false;
   const s = dayS((prog.w || {})[word.id]);
   if(s < WORD_HOLD || s >= WORD_MASTERED || dayRight(dayLog(prog, today).a["w:" + word.id], daySn(prog)).includes("type")) return false;
   return typeof typedOk === "function" ? !!typedOk(word) : typedKinds(pack).some(k => typedKindOk(k, word, false));
@@ -1771,24 +1749,24 @@ const dayCharCand = (prog, pack, kinds, typedUnits) => { const cfg = charsConfig
 // For the app's own pickers (Listen, Sentences, Test): the n list entries to drill, by dayPick.
 // keyPrefix "w:" or "s:"; kinds: what the picker asks (or a function of the entry).
 // can (optional): entry -> the kinds it can be shown in here (dayWordCan / daySentenceCan).
-// o (optional, pack.pairs): pairPick's options (sn).
+// o (optional): pairPick's options (sn).
 function dayPickList(list, n, prog, pack, today, keyPrefix, kinds, rng, can, o){
   const d = dayLog(prog, today); const sent = keyPrefix === "s:";
-  // pack.pairs: words by their pairs (Listen: sound <-> meaning); sentences keep dayPick.
-  if(pairsOn(pack) && keyPrefix === "w:") return pairPick((list || []).map(x => pairWordCand(prog, typeof kinds === "function" ? kinds(x) : kinds, can, pack)(x)), n, d, rng, daySn(prog), pack, o || {}).map(e => e.c.x);
+  // Words by their pairs (Listen: sound <-> meaning); sentences keep dayPick.
+  if(keyPrefix === "w:") return pairPick((list || []).map(x => pairWordCand(prog, typeof kinds === "function" ? kinds(x) : kinds, can, pack)(x)), n, d, rng, daySn(prog), pack, o || {}).map(e => e.c.x);
   const recs = (sent ? prog.s : prog.w) || {};
   const cands = (list || []).map(x => { const c = can ? can(x) : undefined; return { x, key: keyPrefix + x.id, rec: recs[x.id], mastered: sent ? SENTENCE_MASTERED : WORD_MASTERED, kinds: dayCanKinds(typeof kinds === "function" ? kinds(x) : kinds, c), can: c }; });
   return dayPick(cands, n, d, rng, daySn(prog)).map(c => c.x);
 }
-const dayHeldMark = (cands, prog, pack, o) => { if(wordsTypedOn(pack)) cands.forEach(c => { if(c.t === "w" && typedWordDue(c.x, prog, pack, o.today, c.kinds, o.typedOk, o.typedSeen)) c.held = true; }); return cands; };
-// Today's Review candidates without pack.pairs: words, recorded character units, recorded script units.
+const dayHeldMark = (cands, prog, pack, o) => { cands.forEach(c => { if(c.t === "w" && typedWordDue(c.x, prog, pack, o.today, c.kinds, o.typedOk, o.typedSeen)) c.held = true; }); return cands; };
+// Today's Review candidates for the script pre-pick (pairScriptPre): words, recorded character units, recorded script units.
 function dayReviewCands(learned, prog, pack, o, rs){
   const scfg = scriptConfig(pack), wk = dayWordKinds(pack), ck = dayCharKinds(pack), srecs = scriptRecs(prog);
   const ru = recordedUnits(o.units, prog, pack), wc = dayWordCan(pack, o.canHear);
   return [...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits)),
     ...rs.map(u => ({ t: "x", x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: scfg ? scfg.mastered : SCRIPT_MASTERED, kinds: scfg ? scfg.reviewKinds : [] }))];
 }
-// The script items of a Review, kinds drawn as without pairs, then routed by dayScriptKind.
+// The script items of a Review (script units have no pairs), then routed by dayScriptKind.
 function dayScriptItems(pool, pack, o, r, prog){
   const scfg = scriptConfig(pack), ctx = Object.assign({ units: o.script }, o.scriptCtx || {});
   return pool.filter(c => c.t === "x").map(c => { const fit = scriptFitKinds(scfg.reviewKinds, c.x, scfg, ctx);
@@ -1800,7 +1778,7 @@ function dayScriptItems(pool, pack, o, r, prog){
 // draw left 3 of 5 asks of a pending unit unable to settle it on the live script packs (tests/lib/script_day_sim.js).
 // fit: the kinds that fit the unit here (scriptFitKinds).
 function dayScriptKind(prog, pack, today, unit, planned, fit, cfg, ctx){
-  if(!dayAwareOn(pack) || !today || !planned || !isObj(unit)) return planned;
+  if(!today || !planned || !isObj(unit)) return planned;
   const e = dayLog(prog, today).a["x:" + unit.id];
   if(!isObj(e)) return planned;
   const ks = fit.slice(), mk = dayPending(e, daySn(prog)) || [];
@@ -1808,38 +1786,14 @@ function dayScriptKind(prog, pack, today, unit, planned, fit, cfg, ctx){
   return ks.length ? dayItemKind(prog, pack, today, "x:" + unit.id, planned, ks) : planned;
 }
 function dayReviewPlan(learned, prog, pack, n, o){
-  if(pairsOn(pack)) return pairPlan(learned, prog, pack, n, o, dayWordKinds(pack), dayCharKinds(pack), true, pairScriptPre(learned, prog, pack, n, o));
-  const cfg = charsConfig(pack); const r = o.rng || Math.random;
-  const d = dayLog(prog, o.today); const wk = dayWordKinds(pack), ck = dayCharKinds(pack);
-  const wc = dayWordCan(pack, o.canHear);
-  const cands = dayReviewCands(learned, prog, pack, o, recordedScriptUnits(o.script, prog, pack));
-  const share = typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined;
-  // o.extra (pauseNew): extra items never come from tier 4 (right recently in every kind), and the
-  // grown plan takes at most a quarter of the items not right recently (tiers 0-2), so a small pool
-  // gets no extra and later sessions of the day keep their share (fb4-pause review M2).
-  const x = o.extra > 0 ? Math.max(0, Math.min(o.extra, Math.floor(cands.filter(c => dayTier(c, d, daySn(prog)) < 3).length / DAY_EXTRA_POOL) - n)) : 0;
-  const pool = shuffle(dayPick(dayHeldMark(cands, prog, pack, o), n + x, d, o.rng, daySn(prog), share, x ? n : undefined, wordsTypedOn(pack) ? DAY_HELD_SHARE_REVIEW : undefined), o.rng);
-  const kinds = kindMix(pool.filter(c => c.t === "w").length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
-  let wi = 0;
-  const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {})
-    : c.t === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: c.x }
-    : { kind: dayScriptItems([c], pack, o, r, prog)[0].kind, unit: c.x });
-  return hearableKinds(dayPlanKinds(applyMissedKinds(plan.filter(it => it.kind), prog, pack, false, o), prog, pack, o.today, wk, ck, wc, o.typedUnits, o.typedOk, o.typedSeen), o.canHear);
+  return pairPlan(learned, prog, pack, n, o, dayWordKinds(pack), dayCharKinds(pack), true, pairScriptPre(learned, prog, pack, n, o));
 }
 function dayRecallPlan(learned, prog, pack, n, o){
-  if(pairsOn(pack)) return pairPlan(learned, prog, pack, n, o, typingEnabled(pack) ? ["recall", "type"] : ["recall"], ["charRecall", "charPick"]);
-  const d = dayLog(prog, o.today); const typing = typingEnabled(pack);
-  const wk = typing ? ["recall", "type"] : ["recall"], ck = ["charRecall", "charPick"];
-  const ru = recordedUnits(o.units, prog, pack); const wc = dayWordCan(pack, o.canHear);
-  const pool = dayPick(dayHeldMark([...(learned || []).map(dayWordCand(prog, wk, wc)), ...ru.map(dayCharCand(prog, pack, ck, o.typedUnits))], prog, pack, o), n, d, o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined, undefined, wordsTypedOn(pack) ? DAY_HELD_SHARE_RECALL : undefined);
-  const kinds = kindMix(pool.filter(c => c.t === "w").length, 1, typing, o.rng);
-  let wi = 0;
-  const plan = pool.map(c => c.t === "w" ? Object.assign({ kind: kinds[wi++], word: c.x }, c.tu ? { tuUnit: c.tu } : {}) : { kind: "charRecall", unit: c.x });
-  return hearableKinds(dayPlanKinds(applyMissedKinds(plan, prog, pack, true, o), prog, pack, o.today, wk, ck, wc, o.typedUnits, o.typedOk, o.typedSeen), o.canHear);
+  return pairPlan(learned, prog, pack, n, o, typingEnabled(pack) ? ["recall", "type"] : ["recall"], ["charRecall", "charPick"]);
 }
 
 // ------------------------------------------------------------------ pairs
-// pack.pairs (docs/PACK_SCHEMA.md "pairs"; owner 2026-10-05: missed characters did not come back
+// Pairs (docs/PACK_SCHEMA.md "pairs", default since the flag collapse; owner 2026-10-05: missed characters did not come back
 // enough while long-past ones did, and "why not treat every pair equally"). An item is asked in
 // pairs: wm written<->meaning, sm sound<->meaning, ws written<->sound. Each pair keeps its own
 // streak and last session in the record (p: {wm: [s, a], ...}); Review, Recall, Listen and the
@@ -1850,8 +1804,7 @@ const PAIRS = ["wm", "sm", "ws"];
 // (owner-confirmed 2026-10-05). PAIR_REFRESH: the plan's share for known pairs, oldest first; 0.1, not
 // the 0.2 first planned: at 0.2 words reaching known per week fell below main (fb23 measure, owner export).
 const PAIR_KNOWN = 3, PAIR_HOLD = 2, PAIR_REFRESH = 0.1;
-function pairsOn(pack){ return !!(pack && pack.pairs === true) && dayAwareOn(pack); }
-// pack.freqTiers (docs/PACK_SCHEMA.md "freqTiers"; owner 2026-10-06: "give more priority to words that
+// Frequency tiers (docs/PACK_SCHEMA.md "freqTiers", default since the flag collapse; owner 2026-10-06: "give more priority to words that
 // come up more in real life and the exam ... mastery requirements as well", then "why not typed asks
 // but much less frequent?"): words.json ft sets how often a word is practised and its known bar; pair
 // and unit mechanics are the same for every tier. Ambient (0, the pack's ~100 commonest words): every
@@ -1861,13 +1814,12 @@ function pairsOn(pack){ return !!(pack && pack.pairs === true) && dayAwareOn(pac
 // at PAIR_HOLD, its unit done for Progress at mastered (it still reaches bare by typed credit).
 const FT_AMBIENT = 0, FT_CORE = 1, FT_PERIPHERAL = 2;
 const ftOf = v => v === FT_AMBIENT || v === FT_CORE || v === FT_PERIPHERAL ? v : FT_CORE;
-function freqTiersOn(pack){ return !!(pack && pack.freqTiers === true) && pairsOn(pack); }
-function wordTier(word, pack){ return freqTiersOn(pack) && word ? ftOf(word.ft) : FT_CORE; }
+function wordTier(word, pack){ return word ? ftOf(word.ft) : FT_CORE; }
 // A unit shared by words of different tiers takes the highest-demand one (lowest ft). words: a Map,
 // an array or an object by id; without it the unit's own ft (the generator writes that minimum, so
 // planners need no word lookup).
 function unitTier(unit, words, pack){
-  if(!freqTiersOn(pack) || !unit) return FT_CORE;
+  if(!unit) return FT_CORE;
   const look = id => words instanceof Map ? words.get(id) : Array.isArray(words) ? words.find(w => w && w.id === id) : words ? words[id] : undefined;
   const ts = words ? (unit.words || []).map(look).filter(Boolean).map(w => wordTier(w, pack)) : [];
   return ts.length ? Math.min(...ts) : ftOf(unit.ft);
@@ -1923,7 +1875,6 @@ function wordPairs(word, pack){
 // pair of wordPairs at its tier's bar (knownBarAt: peripheral 2, else PAIR_KNOWN). wordsBy holds and optsMix stages keep the
 // legacy streak.
 function wordKnown(rec, word, pack){
-  if(!freqTiersOn(pack)) return !!rec && (rec.s || 0) >= WORD_MASTERED;
   if(!isObj(rec)) return false;
   const k = knownBarAt(wordTier(word, pack));
   return wordPairs(word, pack).every(p => pairState(rec, p).s >= k);
@@ -1931,7 +1882,7 @@ function wordKnown(rec, word, pack){
 // A placement word stays provisional (kept in review) until known; markRec drops prov at the legacy
 // streak, this drops it at known under freqTiers (app.html markWord, after the pair is noted).
 function settleProv(rec, word, pack){
-  if(!freqTiersOn(pack) || !isObj(rec) || !rec.prov || !wordKnown(rec, word, pack)) return false;
+  if(!isObj(rec) || !rec.prov || !wordKnown(rec, word, pack)) return false;
   delete rec.prov; return true;
 }
 // A unit counts as done at bare; under freqTiers a peripheral unit at mastered (it still reaches bare
@@ -2039,7 +1990,7 @@ function bareBoost(cands, prog, pack, sn, d, o){
   out.sort((x, y) => x.s - y.s || x.a - y.a);
   return out.slice(0, BARE_BOOST);
 }
-// pack.pairs with pack.script (port plan E3; script units have no pairs, docs/PACK_SCHEMA.md "pairs"):
+// Pairs with pack.script (port plan E3; script units have no pairs, docs/PACK_SCHEMA.md "pairs"):
 // Review keeps the script units the Review without pairs would ask. dayPick runs over that plan's
 // candidates (dayReviewCands: words, units and script units, its shares and held mark) and the k script
 // units it takes keep k slots, kinds drawn as there; pairPick fills the other n - k. So the reserved
@@ -2048,16 +1999,16 @@ function bareBoost(cands, prog, pack, sn, d, o){
 function pairScriptPre(learned, prog, pack, n, o){
   const rs = recordedScriptUnits(o.script, prog, pack); if(!rs.length) return [];
   const cands = dayHeldMark(dayReviewCands(learned, prog, pack, o, rs), prog, pack, o);
-  const pool = dayPick(cands, n, dayLog(prog, o.today), o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined, undefined, wordsTypedOn(pack) ? DAY_HELD_SHARE_REVIEW : undefined);
+  const pool = dayPick(cands, n, dayLog(prog, o.today), o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined, undefined, DAY_HELD_SHARE_REVIEW);
   return dayScriptItems(pool, pack, o, o.rng || Math.random, prog).filter(e => e.kind);
 }
-// Review and Recall under pack.pairs. o.extra (pauseNew) is ignored: a paused Review stays at n items.
+// Review and Recall by pairs. o.extra (paused) is ignored: a paused Review stays at n items.
 // sx: pairScriptPre's script items, taken first.
 function pairPlan(learned, prog, pack, n, o, wk, ck, boost, sx){
   const d = dayLog(prog, o.today), sn = daySn(prog), wc = dayWordCan(pack, o.canHear);
   const cands = [...(learned || []).map(pairWordCand(prog, wk, wc, pack)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
   // Owner 2026-10-06: a paused session's 40-item Review is too long to keep focus and remember mistakes,
-  // so under pairs the pauseNew growth (o.extra) is ignored and Review keeps its normal size.
+  // so the paused growth (o.extra) is ignored and Review keeps its normal size.
   const bb = boost ? bareBoost(cands, prog, pack, sn, d, o) : undefined;
   const pre = sx && sx.length ? [...sx, ...(bb || []).slice(0, Math.max(0, n - sx.length))] : bb;
   const pool = shuffle(pairPick(cands, n, d, o.rng, sn, pack, o, pre), o.rng);
@@ -2075,7 +2026,7 @@ function pairPlan(learned, prog, pack, n, o, wk, ck, boost, sx){
 // PATTERN_OPEN: share of a pattern's distinct sentence words that must be learned before it opens.
 // PATTERN_SHARE: 3 of the step's 8 items. PATTERN_DONE: the streak a pattern is done at (as PAIR_KNOWN).
 const PATTERN_DONE = 3, PATTERN_OPEN = 0.8, PATTERN_SHARE = 3 / 8;
-function patternsOn(pack){ return !!(pack && pack.patterns === true) && pairsOn(pack); }
+function patternsOn(pack){ return !!(pack && pack.patterns === true); }
 const patternCount = n => Math.round(n * PATTERN_SHARE);
 const patternWords = p => [...new Set(((p && p.sentences) || []).flatMap(s => s.words || []))];
 const patternEntry = v => isObj(v) && Number.isInteger(v.s) && v.s >= 0 && typeof v.a === "number" && isFinite(v.a) ? v : null;
@@ -2084,12 +2035,12 @@ function patternState(prog, id){
   const e = patternEntry(prog && isObj(prog.pt) ? prog.pt[id] : null);
   return e ? { s: e.s, a: e.a } : { s: 0, a: -1, fresh: true };
 }
-// A pattern's first meeting: the opening meaning and the verdict note ride with it (fb44, fb51). Under pack.placedRead a pattern
+// A pattern's first meeting: the opening meaning and the verdict note ride with it (fb44, fb51). A pattern
 // of a level strictly below the placed level (prog.pl) is not one: the placement vouched for it, so its first ask is a later
 // meeting, still drilled until known (owner 2026-10-09).
 function patternFirstMeeting(prog, pattern, pack){
   if(!pattern || !patternState(prog, pattern.id).fresh) return false;
-  if(placedReadOn(pack) && prog && prog.pl != null){
+  if(prog && prog.pl != null){
     const ids = levelIds(pack), pi = ids.indexOf(String(prog.pl)), li = ids.indexOf(String(pattern.lv));
     if(pi >= 0 && li >= 0 && li < pi) return false;
   }
@@ -2406,15 +2357,14 @@ function updateReadUnlocks(passages, words, pack, prog){
   if(fresh.length){ const st = readState(prog); fresh.forEach(l => { st.unlocked[l.lv] = 1; }); }
   return fresh.map(l => l.lv);
 }
-// pack.placedRead (fb51; owner 2026-10-08: placed at the top level, Read still began at the first level): with prog.pl
+// Placed read (fb51, pack key placedRead, default since the flag collapse; owner 2026-10-08: placed at the top level, Read still began at the first level): with prog.pl
 // the unread passages of the placed level come first, then the levels below it from the top down, then the levels above
 // in pack order. Rotation, listening and re-read logic only ever call this for the new-passage pick.
-const placedReadOn = pack => !!(pack && pack.placedRead === true);
 function suggestPassage(passages, words, pack, prog){
   const open = new Set(readingLevels(passages, words, pack, prog).filter(l => l.unlocked).map(l => l.lv));
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
   const list = passages || [];
-  const ids = levelIds(pack), pi = placedReadOn(pack) && prog.pl != null ? ids.indexOf(String(prog.pl)) : -1;
+  const ids = levelIds(pack), pi = prog.pl != null ? ids.indexOf(String(prog.pl)) : -1;
   if(pi < 0) return list.find(p => open.has(p.lv) && !done[p.id]) || null;
   const rank = p => { const i = ids.indexOf(String(p.lv)); return i <= pi ? pi - i : i; };
   let best = null;
@@ -2429,40 +2379,15 @@ function isoDayNumber(d){
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d == null ? "" : d));
   return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) / 864e5 : NaN;
 }
-// reviewOnly (pauseNew paused): a spaced re-read only, never a first read.
+// reviewOnly (paused): a spaced re-read only, never a first read. now: unused since the read rotation became the only rule.
 function nextReadItem(passages, words, pack, prog, now, reviewOnly, sn, rng, canListen){
-  if(readRotationOn(pack)) return nextReadRotation(passages, words, pack, prog, reviewOnly, sn, rng, canListen);
-  const fresh = reviewOnly ? null : suggestPassage(passages, words, pack, prog);
-  if(fresh) return { p: fresh, reason: "new" };
-  const today = isoDayNumber(now);
-  if(!isFinite(today)) return null;
-  const open = new Set(readingLevels(passages, words, pack, prog).filter(l => l.unlocked).map(l => l.lv));
-  const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
-  // pack.rereadPerfectDays: a perfect passage returns after that many days, only when no imperfect one is due.
-  // A perfect passage read once and never listened to (x 1, no l) is due at READ_REREAD_DAYS like an imperfect one: a good read says little about listening.
-  const perfDays = pack && Number.isInteger(pack.rereadPerfectDays) && pack.rereadPerfectDays > 0 ? pack.rereadPerfectDays : 0;
-  let best = null, bestDay = Infinity, perf = null, perfDay = Infinity;
-  (passages||[]).forEach(p => {
-    const r = done[p.id];
-    if(!open.has(p.lv) || !isObj(r) || typeof r.sc !== "number" || typeof r.n !== "number") return;
-    const day = isoDayNumber(r.d);
-    if(!isFinite(day)) return;
-    if(r.sc < r.n || (perfDays && r.x === 1 && !r.l)){
-      if(today - day < READ_REREAD_DAYS || day >= bestDay) return;
-      best = p; bestDay = day;
-    } else if(perfDays && today - day >= perfDays && day < perfDay){
-      perf = p; perfDay = day;
-    }
-  });
-  if(!best) best = perf;
-  return best ? { p: best, reason: "reread" } : null;
+  return nextReadRotation(passages, words, pack, prog, reviewOnly, sn, rng, canListen);
 }
-// pack.readRotation (owner 2026-10-03): day gates say little when 60 passages can fit in one
+// Read rotation (pack key readRotation, default since the flag collapse; owner 2026-10-03): day gates say little when 60 passages can fit in one
 // day, so stages alternate by pass instead: after a reading pass a listening pass, after a
 // listening pass a reading one. sn is the session being planned: the Today plan is made before
 // Go starts it (daySn + 1), a replan inside the session uses daySn. A passage passed in that
 // session (a Read-tab pass before the stage) is not picked; the previous session's is.
-function readRotationOn(pack){ return !!(pack && pack.readRotation === true && dayAwareOn(pack)); }
 function randomMin(list, key, rng){
   if(!list.length) return null;
   const k = Math.min(...list.map(key));
@@ -2494,14 +2419,9 @@ function nextReadRotation(passages, words, pack, prog, reviewOnly, sn, rng, canL
   const p = randomMin(weak.length ? weak : cands, q => done[q.id].x || 0, rng);
   return p ? { p, reason: "reread", mode: "read" } : null;
 }
-// Listen mode (docs/PACK_SCHEMA.md "passages.json", Listening pass). Only a spaced re-read
-// whose latest attempt was not a listening pass, so re-reads alternate listen, read, listen.
+// Listen mode (docs/PACK_SCHEMA.md "passages.json", Listening pass): the rotation's pick says the mode.
 function readPassMode(r, prog, canListen, pack){
-  if(r && readRotationOn(pack)) return r.mode === "listen" && canListen ? "listen" : "read";
-  if(!r || !r.p || r.reason !== "reread" || !canListen) return "read";
-  const done = (isObj(prog && prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
-  const rec = done[r.p.id];
-  return isObj(rec) && rec.l ? "read" : "listen";
+  return r && r.mode === "listen" && canListen ? "listen" : "read";
 }
 // Seeded by the passage id and rotated by attempt count: stable across re-renders, and
 // consecutive attempts never hide the same question set.
@@ -2517,15 +2437,13 @@ function seededRng(seed){
 function listenAudioOnly(pid, attempts, n, pack){
   const k = Math.ceil((n || 0) / 2);
   if(!(k > 0)) return [];
-  if(pack && pack.listenQuestions === "all") return Array.from({ length: n }, (_, i) => i);
-  const idx = shuffle(Array.from({ length: n }, (_, i) => i), seededRng(hashSeed(String(pid))));
-  const r = (((attempts || 0) % n) + n) % n;
-  return idx.slice(r).concat(idx.slice(0, r)).slice(0, k).sort((a, b) => a - b);
+  // every question audio-only (pack key listenQuestions "all", default since the flag collapse)
+  return Array.from({ length: n }, (_, i) => i);
 }
-// pack.readRotation: each pass asks the questions in a new order, stable within the pass
+// Each pass asks the questions in a new order, stable within the pass
 // (seeded by the passage id and the attempt count, as listenAudioOnly).
 function passageForPass(p, attempts, pack){
-  if(!p || !readRotationOn(pack) || !Array.isArray(p.questions) || p.questions.length < 2) return p;
+  if(!p || !Array.isArray(p.questions) || p.questions.length < 2) return p;
   const qs = shuffle(p.questions.slice(), seededRng(hashSeed(String(p.id) + ":" + (attempts || 0))));
   return Object.assign({}, p, { questions: qs });
 }
@@ -2611,35 +2529,30 @@ function applyWeakWords(prog, entries, words, pack){
   });
   return prog;
 }
-// l is absent for a reading pass, so reading-only records are unchanged. Under readRotation (zh) l is credit only
-// (alternation reads r.mode) and stays once earned: a later reading pass must not take back what a listening pass
-// earned (the goal position's passage share fell .87 -> .57, fb41). Without it l marks "latest pass was a listen"
-// and readPassMode alternates on it, so those packs keep the replaced record.
-// pack.readRotation adds s (session of the latest pass) and ls (of the latest listening pass).
-// t (fb46, progressView v2 only): whole seconds from opening the passage to its results, the LATEST reading pass only
+// l is absent for a reading pass, so reading-only records are unchanged. l is credit only (the read rotation's
+// alternation reads r.mode) and stays once earned: a later reading pass must not take back what a listening pass
+// earned (the goal position's passage share fell .87 -> .57, fb41).
+// s: session of the latest pass; ls: of the latest listening pass.
+// t (fb46): whole seconds from opening the passage to its results, the LATEST reading pass only
 // (a listen pass, or a reading pass that ran over READ_MAX_S or was hidden over READ_HIDE_MAX_MS, keeps the previous t:
 // all ported packs alternate read/listen, so dropping it would make the Reading row vanish as listen passes land).
 function markPassageDone(prog, pid, sc, n, d, listen, pack, t){
   const st = readState(prog); const prev = st.done[pid];
   st.done[pid] = { sc, n, d: String(d), x: ((prev && prev.x) || 0) + 1 };
-  if(progressViewOn(pack)){
-    if(!listen && typeof t === "number" && t > 0) st.done[pid].t = Math.round(t);
-    else if(prev && typeof prev.t === "number") st.done[pid].t = prev.t;
-  }
-  if(listen || (prev && prev.l && readRotationOn(pack))) st.done[pid].l = 1;
-  if(readRotationOn(pack)){
-    const sn = daySn(prog);
-    st.done[pid].s = sn;
-    if(listen) st.done[pid].ls = sn;
-    else if(prev && typeof prev.ls === "number") st.done[pid].ls = prev.ls;
-  }
+  if(!listen && typeof t === "number" && t > 0) st.done[pid].t = Math.round(t);
+  else if(prev && typeof prev.t === "number") st.done[pid].t = prev.t;
+  if(listen || (prev && prev.l)) st.done[pid].l = 1;
+  const sn = daySn(prog);
+  st.done[pid].s = sn;
+  if(listen) st.done[pid].ls = sn;
+  else if(prev && typeof prev.ls === "number") st.done[pid].ls = prev.ls;
   return st.done[pid];
 }
-// pack.progressMap (owner 2026-10-04: the learner feels no progress): one 0..1 number toward
-// following a drama without pausing. An absent part's weight goes to words.
+// pack.progressMap.goals (owner 2026-10-04: the learner feels no progress): one 0..1 position per goal. A pack without goals
+// has no progress map (the goal-less `progressMap: true` bar went with the flag collapse). An absent part's weight goes to words.
 const PM_KEEP = 14;
 function progressMapGoals(pack){ const m = pack && pack.progressMap; return (m && typeof m === "object" && Array.isArray(m.goals)) ? m.goals : []; }
-function progressMapOn(pack){ return !!(pack && (pack.progressMap === true || progressMapGoals(pack).length > 0) && dayAwareOn(pack)); }
+function progressMapOn(pack){ return progressMapGoals(pack).length > 0; }
 function progressPosition(prog, pack, words, units, passages){
   const ws = words || [], us = units || [], ps = passages || [];
   const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, us);
@@ -2647,7 +2560,7 @@ function progressPosition(prog, pack, words, units, passages){
   let wu = us.length ? 0.25 : 0, wp = ps.length ? 0.25 : 0;
   const ww = 1 - wu - wp;
   let x = ws.length ? ww * known / ws.length : 0;
-  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (posKnown(pack, cr[u.id]) || (freqTiersOn(pack) ? unitDone(cr[u.id], u, pack) : charTier(cr[u.id].s, pack) === "bare"))).length / us.length; }
+  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (posKnown(pack, cr[u.id]) || unitDone(cr[u.id], u, pack))).length / us.length; }
   if(ps.length){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
   return Math.max(0, Math.min(1, x));
 }
@@ -2663,10 +2576,10 @@ function goalPosition(prog, pack, goal, words, units, passages){
   const ps = (passages || []).filter(p => inR(p.lv));
   const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, units);
   const known = ws.filter(w => wordKnownP(recs[w.id], w, pack, prog, bw)).length;
-  // pack.placedKnown (owner 2026-10-09): a goal whose levels all lie at or below the placed level (prog.pl) is positioned from
+  // Placed known (owner 2026-10-09): a goal whose levels all lie at or below the placed level (prog.pl) is positioned from
   // its words and units only, never its passages and with no "still placed" condition, so one miss moves the bar by one word
   // and a covered goal stays full (no estimate, currentGoal on the next unmet goal) after its provisional records settle or drop.
-  const plIdx = placedKnownOn(pack) && prog && typeof prog.pl === "string" ? idx[prog.pl] : undefined;
+  const plIdx = prog && typeof prog.pl === "string" ? idx[prog.pl] : undefined;
   const placedGoal = plIdx !== undefined && top <= plIdx;
   const wu = us.length ? 0.2 : 0, wp = ps.length && !placedGoal ? 0.2 : 0;
   let x = ws.length ? (1 - wu - wp) * known / ws.length : 0;
@@ -2688,29 +2601,25 @@ function goalPositions(prog, pack, words, units, passages){
   return progressMapGoals(pack).map(g => goalPosition(prog, pack, g, words, units, passages));
 }
 // Optional prog.pm: older engines keep it on boot (validateProgShape ignores unknown top-level fields).
-// Goal packs add g (goal index) per entry, also optional.
+// Entries are {sn, p, g} (g = the current goal index); an older record's {sn, p} entries (the goal-less bar, gone with the
+// flag collapse) stay valid.
 function recordProgressMap(prog, pack, words, units, passages){
-  if(!progressMapOn(pack) || !prog) return false;
-  const cg = currentGoal(prog, pack, words, units, passages);
-  const e = cg ? { sn: daySn(prog), p: Math.round(cg.p * 1000) / 1000, g: cg.i }
-    : { sn: daySn(prog), p: Math.round(progressPosition(prog, pack, words, units, passages) * 1000) / 1000 };
+  const cg = prog ? currentGoal(prog, pack, words, units, passages) : null;
+  if(!cg) return false;
+  const e = { sn: daySn(prog), p: Math.round(cg.p * 1000) / 1000, g: cg.i };
   const pm = Array.isArray(prog.pm) ? prog.pm.filter(x => isObj(x) && x.sn !== e.sn) : [];
   pm.push(e);
   prog.pm = pm.slice(-PM_KEEP);
   return true;
 }
-// pack.progressView "v2" (docs/PACK_SCHEMA.md "progressView"; owner 2026-10-07): the Progress tab leads
+// Progress v2 (docs/PACK_SCHEMA.md "progressView", engine default since the flag collapse; owner 2026-10-07): the Progress tab leads
 // with what moved since the learner last left it. prog.pv = {sn, m, co, p} (sessions, mastered words,
 // character units at their target, passages done) is written when the tab is left (app.html), never at
 // boot; older engines keep it (validateProgShape ignores unknown top-level fields).
-function progressViewOn(pack){ return !!(pack && pack.progressView === "v2"); }
-// pack.appView "v2" (docs/PACK_SCHEMA.md "appView"; owner 2026-10-07): the Progress v2 direction on Today, the
-// header, drill end and session done. UI only: no progress field, no planner change.
-function appViewOn(pack){ return !!(pack && pack.appView === "v2"); }
-// The Progress "done" count: under freqTiers unitDone, else bare by streak or by pairs.
+// The Progress "done" count: unitDone (frequency tiers).
 function unitAtTarget(rec, unit, prog, pack){
   if(!isObj(rec)) return false;
-  return freqTiersOn(pack) ? unitDone(rec, unit, pack) : (charTier(rec.s || 0, pack) === "bare" || pairBare(rec, unit, prog, pack));
+  return unitDone(rec, unit, pack);
 }
 function progressTotals(prog, pack, words, units, passages){
   const w = (prog && prog.w) || {}, recs = charRecs(prog), bw = knownCtx(pack, units);
@@ -2738,7 +2647,7 @@ function progressDeltas(prog, cur){
 }
 // Returns whether pv changed (the caller saves only then).
 function noteProgressVisit(prog, pack, cur){
-  if(!progressViewOn(pack) || !prog) return false;
+  if(!prog) return false;
   const v = progressVisit(prog);
   if(v && PV_KEYS.every(k => v[k] === cur[k])) return false;
   prog.pv = { sn: cur.sn, m: cur.m, co: cur.co, p: cur.p };
@@ -2776,7 +2685,7 @@ function sessionsToGo(prog, g, n){
   if(!(rate > 0) || !isFinite(rate)) return null;
   return Math.max(0, Math.ceil(((g !== undefined ? GOAL_DONE : 1) - z.p) / rate - 1e-9));
 }
-// pack.appView "v2" ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"; owner 2026-10-08: an estimate from the first
+// App v2 ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"; owner 2026-10-08: an estimate from the first
 // session). Goal packs: a calibrated curve, never the measured pace (pm.p rounds to 0.001 and the pace at PM_KEEP entries
 // missed the actual crossing by -57% to +195% on owner-export sims). A whole-pack bar has no model: sessionsToGo or nothing.
 // pack.eta.curve[g] = [[position, sessions remaining until the goal first reaches GOAL_DONE], ...] sampled from fresh-record
@@ -2786,9 +2695,8 @@ function sessionsToGo(prog, g, n){
 // share rises 0.3x a hold's mean rate in its first third and up to 2x in its last (fresh sims), past +-30% of linear, and
 // one curve pooled over levels missed the zh level with twice the words of the two before it by -38%.
 // Legacy shape {gain: [g...], known: k} (sites published before fb42): a constant slope, kept until the site republishes.
-// No pack.eta key: the zh constants below (fb41 owner-export slopes), the shape every pack had before pack.eta. A pack.eta
-// without the sub-key a call needs gives no estimate (a site never inherits zh's pace by omission).
-const ETA_GAIN = [0.00109, 0.00188, 0.00335], ETA_KNOWN = 5.2;
+// pack.eta is required pack data (tools/validate_pack.py; the zh-constant fallback for a pack without it went with the flag
+// collapse): a pack.eta without the sub-key a call needs gives no estimate (a site never inherits another's pace by omission).
 function etaCurveAt(curve, x){
   if(!Array.isArray(curve) || !curve.length) return null;
   if(x <= curve[0][0]) return curve[0][1];
@@ -2799,15 +2707,13 @@ function etaCurveAt(curve, x){
   return 0;
 }
 function etaGain(pack, g){
-  if(!pack || !("eta" in pack)) return ETA_GAIN[Math.min(g, ETA_GAIN.length - 1)];
-  const e = pack.eta;
+  const e = pack && pack.eta;
   if(!isObj(e) || !Array.isArray(e.gain) || !e.gain.length) return null;
   const v = e.gain[Math.min(g, e.gain.length - 1)];
   return typeof v === "number" && v > 0 ? v : null;
 }
 function etaKnown(pack){
-  if(!pack || !("eta" in pack)) return ETA_KNOWN;
-  const e = pack.eta;
+  const e = pack && pack.eta;
   return isObj(e) && typeof e.known === "number" && e.known > 0 ? e.known : null;
 }
 const etaRound = r => r === null ? null : Math.max(1, Math.ceil(r - 1e-9));
@@ -2818,13 +2724,12 @@ const etaRound = r => r === null ? null : Math.max(1, Math.ceil(r - 1e-9));
 // since placement), since such a start's goal position sits on a plateau for ~70 sessions before it crosses. The set
 // applies for the whole record (its provisional records clear 50-80 sessions before the crossing); an entry it lacks, a
 // level without a set, or no prog.pl: the fresh curves.
-// pack.placedKnown: a prog.pl without a set reads the nearest lower level's set (zh has sets for the second and third level
+// Placed known: a prog.pl without a set reads the nearest lower level's set (zh has sets for the second and third level
 // only, so a top-level landing read the fresh curves at a position of 0).
 function etaPlaced(prog, pack){
   const e = pack && pack.eta, pl = prog && prog.pl;
   if(!(isObj(e) && isObj(e.placed) && typeof pl === "string")) return null;
   if(isObj(e.placed[pl])) return e.placed[pl];
-  if(!placedKnownOn(pack)) return null;
   const ids = levelIds(pack);
   for(let i = ids.indexOf(pl) - 1; i >= 0; i--) if(isObj(e.placed[ids[i]])) return e.placed[ids[i]];
   return null;
@@ -2835,9 +2740,8 @@ function sessionsToGoX(prog, g, n, ctx){
   const p = goalPosition(prog, ctx.pack, goal, ctx.words, ctx.units, ctx.passages);
   if(p >= GOAL_DONE) return 0;
   const e = ctx.pack && ctx.pack.eta, ps = etaPlaced(prog, ctx.pack);
-  // bySessions models the plateau a placed start sat on while its provisional records were not known; under
-  // pack.placedKnown they count at once, so the goal reads the fresh curve at its position.
-  if(ps && !placedKnownOn(ctx.pack) && Array.isArray(ps.bySessions) && Array.isArray(ps.bySessions[g])) return etaRound(etaCurveAt(ps.bySessions[g], prog.sessions || 0));
+  // A placed start's provisional records count as known at once (placed known), so a goal reads the fresh curve at its
+  // position; eta.placed bySessions (the plateau such a start sat on before) is no longer read.
   if(isObj(e) && Array.isArray(e.curve)) return etaRound(etaCurveAt(e.curve[g], p));
   const gain = etaGain(ctx.pack, g);
   return gain === null ? null : Math.ceil((GOAL_DONE - p) / gain - 1e-9);
@@ -2852,7 +2756,7 @@ function levelOpensIn(words, pack, prog, units){
   const k = etaKnown(pack);
   if(k === null) return null;
   const n = (wordsByLevel(words, pack)[h.prev] || []).length;
-  return Math.max(1, Math.ceil((pack.levelGate - pct) * n / k - 1e-9));
+  return Math.max(1, Math.ceil((LEVEL_GATE - pct) * n / k - 1e-9));
 }
 function readingStats(passages, pack, prog){
   const done = (isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {};
@@ -2873,7 +2777,7 @@ function passageUnits(p, pack){
   return { n: text.split(/\s+/).filter(Boolean).length, unit: "words" };
 }
 function readingSpeed(passages, pack, prog){
-  if(!progressViewOn(pack) || !isObj(prog) || !isObj(prog.read) || !isObj(prog.read.done)) return null;
+  if(!isObj(prog) || !isObj(prog.read) || !isObj(prog.read.done)) return null;
   const rates = []; let unit = "words";
   for(const p of passages || []){
     const r = prog.read.done[p.id];
@@ -3064,7 +2968,7 @@ function bareWord(word, units, prog, pack){
 // the legacy streak, which would make every mastered unit bare at once). Display only: unitDone, goals and
 // the typed credit keep rec.s.
 const BARE_PAIR = 2;
-function bareByPairOn(pack){ const c = charsConfig(pack); return !!(c && c.bareByPair) && pairsOn(pack); }
+function bareByPairOn(pack){ const c = charsConfig(pack); return !!(c && c.bareByPair); }
 function pairBare(rec, unit, prog, pack){
   if(!bareByPairOn(pack) || !isObj(rec) || charTier(rec.s || 0, pack) !== "ruby") return false;
   return (pairJudge(rec, unit, prog, "wm") || { s: 0 }).s >= BARE_PAIR && (pairJudge(rec, unit, prog, "ws") || { s: 0 }).s >= BARE_PAIR;
@@ -3513,7 +3417,7 @@ function charItem(kind, unit, ctx){
   const w = unitWord(unit, byId), t = String(unit.t), reading = unitReading(unit, byId), g = unitGloss(unit, byId);
   const base = { kind, key: "c:" + unit.id, unitId: unit.id, wordId: w ? w.id : null, t, reading, gloss: g };
   let show, audio = false, answer, others;
-  // ctx.mix { word(w), unit(u), wordBucket?, unitBucket?, rng? } (pack.optsMix): word options by word stage, unit options by unit stage.
+  // ctx.mix { word(w), unit(u), wordBucket?, unitBucket?, rng? } (option mix): word options by word stage, unit options by unit stage.
   const wm = c.mix ? { stage: c.mix.word, bucket: c.mix.wordBucket, rng: c.mix.rng, rot: c.mix.rot } : undefined, um = c.mix ? { stage: c.mix.unit, bucket: c.mix.unitBucket, rng: c.mix.rng, rot: c.mix.rot } : undefined;
   if(kind === "charRead"){ show = "t"; answer = g; others = charReadOpts(unit, c.words, byId, wm).map(gloss); }
   else if(kind === "charSound"){ show = "t"; answer = reading; others = charSoundOpts(unit, c.units, byId, um); }
@@ -3546,7 +3450,7 @@ function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx, opts){
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = rng || Math.random;
   const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
   const pvSet = new Set(pv.map(w => w.id));
-  // Placed units (pack.placementChars) are kept in review like placed words; with none, no slot is taken and no rng drawn.
+  // Placed units (placementCharsOn) are kept in review like placed words; with none, no slot is taken and no rng drawn.
   const pu = ru.some(u => (charRecs(prog)[u.id] || {}).prov) ? provPick(ru, Math.min(REVIEW_PROV, n - pv.length), charRecs(prog)) : [];
   const puSet = new Set(pu.map(u => u.id));
   const ranked = rankUnified(learned.filter(x => !pvSet.has(x.id)), prog.w, pu.length ? ru.filter(u => !puSet.has(u.id)) : ru, charRecs(prog), n - pv.length - pu.length, pack, rng, rs, scriptRecs(prog));
@@ -3587,17 +3491,14 @@ function newCharUnits(units, learned, prog, pack, n){
 }
 function charTestPlan(units, learned, prog, pack, n, rng, today, o){
   const cfg = charsConfig(pack); if(!cfg) return [];
-  const day = dayAwareOn(pack) && today;
-  // pack.pairs: each unit asked in the kind its weakest pair picks.
-  if(day && pairsOn(pack)){
+  // With a day: each unit asked in the kind its weakest pair picks.
+  if(today){
     const picked = pairPick(recordedUnits(units, prog, pack).map(pairCharCand(prog, pack, Object.keys(cfg.testKinds))), n, dayLog(prog, today), rng, daySn(prog), pack, o || {});
     return picked.map(e => ({ kind: e.kind, unit: e.c.x, pair: e.pair })).concat(newCharUnits(units, learned, prog, pack, n - picked.length).map(unit => ({ kind: pickWeighted(cfg.testKinds, rng), unit })));
   }
-  const rec = day ? dayPick(recordedUnits(units, prog, pack).map(dayCharCand(prog, pack, Object.keys(cfg.testKinds))), n, dayLog(prog, today), rng, daySn(prog)).map(c => c.x)
-    : weakFirst(recordedUnits(units, prog, pack), n, charRecs(prog), undefined, rng);
+  const rec = weakFirst(recordedUnits(units, prog, pack), n, charRecs(prog), undefined, rng);
   const pool = rec.length >= n ? rec : rec.concat(newCharUnits(units, learned, prog, pack, n - rec.length));
-  const plan = pool.map(unit => ({ kind: pickWeighted(cfg.testKinds, rng), unit }));
-  return day ? dayPlanKinds(plan, prog, pack, today, [], Object.keys(cfg.testKinds)) : plan;
+  return pool.map(unit => ({ kind: pickWeighted(cfg.testKinds, rng), unit }));
 }
 
 // Script primer (docs/SCRIPT_PRIMER.md, docs/PACK_SCHEMA.md "Script primer"). Taught, done
@@ -3699,9 +3600,10 @@ function nextScriptSets(key, units, pack, prog, n){
 // done = every unit recorded, so a missed review never pulls the stage back into the path.
 // pack.script without units is the primer off everywhere, exactly the flag-off output.
 function scriptActive(pack, units){ return !!scriptConfig(pack) && Array.isArray(units) && units.length > 0; }
-// pack.pronUntilPrimer (docs/PACK_SCHEMA.md "pronUntilPrimer"): the primer is done when it was skipped or every
-// unit of every stage still on has a record (the stage `done` rule); a pack with no active primer never is.
-function pronUntilPrimerOn(pack){ return !!pack && pack.pronUntilPrimer === true && !!scriptConfig(pack); }
+// Pronunciation off once the primer is done (fb45; pack.pronUntilPrimer until the flag collapse, now every pack.script pack):
+// the primer is done when it was skipped or every unit of every stage still on has a record (the stage `done` rule); a pack
+// with no active primer never is.
+function pronUntilPrimerOn(pack){ return !!scriptConfig(pack); }
 function scriptPrimerDone(pack, units, prog){
   if(!scriptActive(pack, units)) return false;
   if(scriptSkipped(prog)) return true;
@@ -4018,7 +3920,7 @@ function scriptReviewScore(rec, pack){
 function scriptTestPlan(units, prog, pack, n, rng, ctx){
   const cfg = scriptConfig(pack); if(!cfg) return [];
   const kctx = Object.assign({ units }, ctx || {});
-  const today = dayAwareOn(pack) && ctx && ctx.today; const srecs = scriptRecs(prog);
+  const today = ctx && ctx.today; const srecs = scriptRecs(prog);
   const rec = today ? dayPick(recordedScriptUnits(units, prog, pack).map(u => ({ x: u, key: "x:" + u.id, rec: srecs[u.id], mastered: cfg.mastered, kinds: Object.keys(cfg.testKinds) })), n, dayLog(prog, today), rng, daySn(prog)).map(c => c.x)
     : weakFirst(recordedScriptUnits(units, prog, pack), n, srecs, undefined, rng);
   const out = [];
@@ -4219,7 +4121,7 @@ function typeSlotKind(plan, i){
 }
 
 // ------------------------------------------------------------------ typed from the target side
-// pack.typedFrom / pack.glossFocus (docs/PACK_SCHEMA.md "typedFrom and glossFocus"). Off unless
+// pack.typedFrom (docs/PACK_SCHEMA.md "typedFrom and glossFocus"; glossFocus is engine default since the flag collapse). Off unless
 // the pack sets them; typeSlotKind above stays the rule for every pack without typedFrom.
 const TYPED_FROM_SIDES = ["written", "pron"];
 function typedFromSides(pack){
@@ -4463,7 +4365,7 @@ function pronChoiceOpts(entry, pool, all, mix){
   const ansT = new Set(surfaces(entry)), used = new Set([pronKey(entry.pron)]);
   (all || []).forEach(v => { if(v && v.pron && surfaces(v).some(x => ansT.has(x))) used.add(pronKey(v.pron)); });
   const syl = s => splitReading(s).filter(x => x.tone !== undefined).length || 1, n = syl(entry.pron);
-  // pack.optsMix: by the answer's stage (mix.stage); draws (rng).
+  // option mix: by the answer's stage (mix.stage); draws (rng).
   if(mix){
     const ids = new Set(), cands = [...(pool || []), ...(all || [])].filter(v => v && v.id !== entry.id && v.pron && !ids.has(v.id) && ids.add(v.id));
     return mixPick(entry, cands, mix, () => 0, v => { let k = PRON_SYL.get(v); if(k === undefined) PRON_SYL.set(v, k = syl(v.pron)); return k === n ? 0 : 1; }, () => {
@@ -4493,10 +4395,8 @@ function checkGlossTyped(val, en, pack){
   const parts = splitTopLevel(v, [";", ","]).map(glossKey).filter(Boolean);
   return parts.length > 0 && parts.every(k => keys.has(k));
 }
-function glossFocusOn(pack){ return !!(pack && pack.glossFocus === true); }
-// pack.glossStyle "primary" (docs/PACK_SCHEMA.md "glossStyle"; owner 2026-10-07: 别 shows its most
-// used sense, the others in brackets). Display only; needs glossFocus, matching keeps the raw gloss.
-function glossStyleOn(pack){ return !!(pack && pack.glossStyle === "primary" && pack.glossFocus === true); }
+// Gloss style (docs/PACK_SCHEMA.md "glossStyle", engine default since the flag collapse; owner 2026-10-07: 别 shows its most
+// used sense, the others in brackets). Display only; matching keeps the raw gloss.
 // The ";"-separated senses of a gloss, reading notes out: the first is the primary one.
 function glossSenses(en){
   const a = splitTopLevel(String(en == null ? "" : en).replace(/\s+/g, " ").trim(), [";"]).map(x => x.trim()).filter(x => x && !isPronNote(x));
@@ -4506,10 +4406,6 @@ function glossSenses(en){
 function typedSynWords(entry, byId){
   return (Array.isArray(entry && entry.typedSyn) ? entry.typedSyn : []).map(id => byId && byId[id]).filter(Boolean);
 }
-// pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): help overlays get explicit dismissal.
-function helpCloseOn(pack){ return !!(pack && pack.helpClose === true); }
-// pack.readAnswerBlock (docs/PACK_SCHEMA.md "readAnswerBlock"): Next sits under the verdict.
-function readAnswerBlockOn(pack){ return !!(pack && pack.readAnswerBlock === true); }
 function optsOneScriptOn(pack){ return !!(pack && pack.optsOneScript === true); }
 function joinReadings(a, b, pack){
   if(!a) return b; if(!b) return a;
@@ -4652,23 +4548,23 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,
   findSurface, textForms, locateWord, packSurfaces, spannedByLonger, gapMatch, gapCandidateIndices, blankSentence,
-  strata, placementItemCount, placementEarlyStopOn, placementEarlyStopAfter, placementNotAsked, placementStopIndex, placementSkipped, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
+  strata, placementItemCount, placementEarlyStopAfter, placementNotAsked, placementStopIndex, placementSkipped, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
-  FT_AMBIENT, FT_CORE, FT_PERIPHERAL, freqTiersOn, wordTier, unitTier, knownBarAt, wordPairs, wordKnown, settleProv, unitDone,
+  FT_AMBIENT, FT_CORE, FT_PERIPHERAL, wordTier, unitTier, knownBarAt, wordPairs, wordKnown, settleProv, unitDone,
   PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, patternFirstMeeting, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
-  PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairsOn, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
-  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayAwareOn, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
-  markRec, WORD_HOLD, wordsTypedOn, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, levelGateOn, placedKnownOn, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
+  DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
+  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
-  READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, placedReadOn, suggestPassage, nextReadItem, readPassMode, readRotationOn, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, etaPlaced, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
+  READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,
   charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
-  charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
+  charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   pronUntilPrimerOn, scriptPrimerDone, showPronOn, SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
   defaultScriptProg, validateScriptShape, normalizeScriptProg, ensureScript, scriptRecs, scriptSkipped, setScriptSkipped, answerScriptChoice,
@@ -4676,7 +4572,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
   scriptOpts, scriptRomanOpts, scriptExamples, scriptWordOpts, scriptJoinedForms, scriptItem, learnScriptPlan, scriptReviewScore, scriptTestPlan,
   tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings,
-  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, glossStyleOn, glossSenses, typedSynWords, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, helpCloseOn, readAnswerBlockOn, optsOneScriptOn, composeSpanReading, spanReadingText,
+  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, glossSenses, typedSynWords, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, optsOneScriptOn, composeSpanReading, spanReadingText,
   LEGACY_DROPPED, legacyBackupKey, isLegacyRecord, migrateLegacy };
 if(typeof module!=="undefined" && module.exports) module.exports = API;
 if(root) root.VocabCore = API;

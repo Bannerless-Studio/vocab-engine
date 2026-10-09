@@ -1,9 +1,8 @@
-// Checks for pack.helpClose (docs/PACK_SCHEMA.md "helpClose") and the Read verdict scroll:
-// [1] core.js helpCloseOn, [2] validate_pack.py accepts only true, [3] zh (flag on): the
+// Checks for the help overlays (docs/PACK_SCHEMA.md "helpClose", engine default since the flag collapse) and the Read verdict scroll:
+// [1] no helpCloseOn / readAnswerBlockOn left, [2] validate_pack.py warns on the stale keys, [3] zh: the
 // passage word popover, the sentence word popover and the audio toast each get a close
 // button, close on a tap outside, on Escape and after the timer (held while a pointer or
-// finger is on it), one at a time, [4] flag off (zh without the field): popover markup and
-// behaviour as before, [5] a Read question answered with the passage open brings the
+// finger is on it), one at a time, [5] a Read question answered with the passage open brings the
 // verdict and Next (one button, above the passage toggle) into view, never scrolling past the passage.
 // Boots engine/app.html in the fake DOM of tests/session_resume_checks.js with a fake clock.
 // Run: node tests/help_close_checks.js   (PYTHON3 overrides the interpreter)
@@ -20,7 +19,7 @@ const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["progressView"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: [] });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -49,7 +48,8 @@ function extractAttrs(tag){
   return attrs;
 }
 const scrolled = [];
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){
@@ -100,10 +100,10 @@ function makeFakeDom(){
     const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
     let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); }
   }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
   const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   new El("nav", { id: "tabs" }); // bringIntoView measures against the tab bar
   return {
     title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
@@ -134,7 +134,7 @@ function memStore(){
 async function boot(o){
   Math.random = mulberry32(o.seed || 1);
   appHtml = o.html || CUR_HTML; clock.timers.length = 0;
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   if(o.mark) document.lastChild = { nodeType: 8, nodeValue: o.mark, previousSibling: null };
   const spoken = [];
   const voices = o.voices || [{ lang:"zh-CN", name:"x" }];
@@ -183,17 +183,15 @@ async function onPassage(pack){
 }
 
 (async function main(){
-  console.log("\n[1] core.js helpCloseOn");
-  check("helpCloseOn: true only for helpClose === true", VC.helpCloseOn({ helpClose: true }) && !VC.helpCloseOn({}) && !VC.helpCloseOn({ helpClose: "yes" }) && !VC.helpCloseOn(null));
-  check("zh ships helpClose: true", PACK.helpClose === true);
-  check("readAnswerBlockOn: true only for readAnswerBlock === true; zh ships it", VC.readAnswerBlockOn({ readAnswerBlock: true }) && !VC.readAnswerBlockOn({}) && !VC.readAnswerBlockOn({ readAnswerBlock: 1 }) && PACK.readAnswerBlock === true);
+  console.log("\n[1] engine default (flag collapse stage 2)");
+  check("helpClose and readAnswerBlock are engine default: core has no helpCloseOn / readAnswerBlockOn, the zh pack neither key", VC.helpCloseOn === undefined && VC.readAnswerBlockOn === undefined && !("helpClose" in PACK) && !("readAnswerBlock" in PACK));
 
   console.log("\n[2] validate_pack.py");
   {
     const run = extra => {
       const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ve_help_"));
       const w = (stem, data) => fs.writeFileSync(path.join(dir, stem + ".json"), JSON.stringify(data));
-      w("pack", Object.assign({ key:"t", name:"T", tts:"sw-KE", levels:[{ id:"A1", label:"A1" }], placement:[["A1", 2]], typing:null, showPron:false, hasLessons:false }, extra));
+      w("pack", Object.assign({ key:"t", name:"T", tts:"sw-KE", levels:[{ id:"A1", label:"A1" }], placement:[["A1", 2]], typing:null, showPron:false, hasLessons:false, eta:{} }, extra));
       w("words", Array.from({ length: 20 }, (_, i) => ({ id:`x${i}`, w:`x${i}`, en:`gloss ${i}`, lv:"A1" })));
       w("sentences", [{ id:"s1", t:"x0 x1.", en:"x.", lv:"A1", words:["x0", "x1"] }]);
       cp.spawnSync(PY, [path.join(ROOT, "tools", "jsonify_pack.py"), dir], { cwd: ROOT });
@@ -202,13 +200,14 @@ async function onPassage(pack){
       return { status: r.status, out: (r.stdout || "") + (r.stderr || "") };
     };
     const a = run({}), b = run({ helpClose: true, readAnswerBlock: true }), c = run({ helpClose: false }), d = run({ readAnswerBlock: "yes" });
-    check("absent or true: no helpClose error", a.status === 0 && b.status === 0 && !/helpClose/.test(a.out + b.out), a.out + b.out);
-    check("false: error 'pack.helpClose must be true when present'", c.status === 1 && /pack\.helpClose must be true when present/.test(c.out), c.out);
-    check("readAnswerBlock not true: error", d.status === 1 && /pack\.readAnswerBlock must be true when present/.test(d.out), d.out);
+    // Collapsed keys (flag collapse stage 2): any value is a stale-key warning, never an error.
+    const stale = (r, k) => r.status === 0 && new RegExp(`no longer reads[^\\n]*${k}`).test(r.out);
+    check("absent: no helpClose / readAnswerBlock mention", a.status === 0 && !/helpClose|readAnswerBlock/.test(a.out), a.out);
+    check("present (true, false or not a boolean): no error, a stale-key warning naming the key", stale(b, "helpClose") && stale(b, "readAnswerBlock") && stale(c, "helpClose") && stale(d, "readAnswerBlock"), b.out + c.out + d.out);
   }
 
   console.log("\n[3] zh, flag on");
-  check("zh pack runs with dayAware on as well", PACK.dayAware === true);
+  check("zh pack: dayAware is engine default (flag collapse), no key", !("dayAware" in PACK));
   try {
     const { api, gloss, docClick, tapWord, fire, esc } = await onPassage();
     tapWord();
@@ -278,15 +277,7 @@ async function onPassage(pack){
     check("Escape closes the toast", !api.helpCur());
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  console.log("\n[4] flag off");
-  try {
-    const off = Object.assign({}, PACK); delete off.helpClose;
-    const { api, gloss, docClick, tapWord } = await onPassage(off);
-    tapWord();
-    check("passage word tap: no close button, no overlay tracking", !gloss.hidden && !/helpx/.test(gloss.innerHTML) && !gloss.classList.contains("hasx") && !api.helpCur());
-    clock.run(60000); docClick({ closest: () => null });
-    check("no timer, a tap outside leaves it open (as before)", !gloss.hidden);
-  } catch(e){ check(`section threw: ${e.stack}`, false); }
+  // [4] (helpClose flag-off popover controls) deleted: helpClose is engine default since the flag collapse.
 
   console.log("\n[5] Read question: verdict and Next above the passage toggle");
   try {
@@ -302,16 +293,7 @@ async function onPassage(pack){
       check(`passage open, answered ${right ? "right" : "wrong"}: verdict and Next brought into view together, no scroll to the bottom (scrolled: ${scrolled.join(", ")})`, scrolled.join() === "qans" && api.el("nx").style.display === "block" && /Right\.|Not quite\./.test(api.html("rv")));
       api.el("nx").click(); if(!api.rd().shown) api.el("ptoggle").click();
     }
-    // Flag off: Next in the bottom bar; an open passage brings the verdict into view.
-    const off = Object.assign({}, PACK); delete off.readAnswerBlock;
-    const o = await onPassage(off);
-    o.api.el("rdone").click();
-    const h2 = o.api.html("panel"), at2 = id => h2.indexOf(`id="${id}"`);
-    check("flag off: Next stays below the passage in the bottom bar", at2("rv") < at2("ptoggle") && at2("pbox") < at2("nx") && /<div class="actions"><button class="next" id="nx"/.test(h2));
-    o.api.el("ptoggle").click(); scrolled.length = 0; o.api.el("o").children[0].click();
-    check(`flag off, passage open: the verdict is brought into view, not Next (scrolled: ${scrolled.join(", ")})`, scrolled.join() === "rv");
-    o.api.el("nx").click(); scrolled.length = 0; o.api.el("o").children[0].click();
-    check(`flag off, passage closed: scrolls to Next as before (scrolled: ${scrolled.join(", ")})`, scrolled.join() === "nx");
+    // (readAnswerBlock flag-off controls deleted: engine default since the flag collapse)
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

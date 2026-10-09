@@ -1,10 +1,10 @@
-// Flag-off golden harness (HSK_MERGE.md §6 row B0, "Flag-off proof").
+// Characters-off golden harness (HSK_MERGE.md §6 row B0, "Flag-off proof"), plus the pack-drift hashes of the live packs.
 //
 // The hsk/characters merge (see docs/HSK_MERGE.md) must be a no-op for every pack
 // that never sets pack.characters. Since engine code is inlined into dist/*.html and
 // sw.js carries a build id, literal dist bytes always change on any engine edit —
 // so the flag-off proof is behavioural instead:
-//   1. flag-off pack sources (and the fields their generated .js encode) are
+//   1. pack sources (pack_drift_<pack> goldens; and the fields their generated .js encode) are
 //      unchanged, once the `characters`/`ruby`/`legacy` fields the merge adds exist;
 //   2. defaultProg, normalizeProg and the plan builders deep-equal goldens captured
 //      here, under a seeded random generator;
@@ -28,7 +28,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { stripFlags, FLAG_SINCE } = require("./lib/pack_flags.js");
+const { stripFlags, FLAG_SINCE, COLLAPSED } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 const util = require("util");
 const crypto = require("crypto");
@@ -95,8 +95,8 @@ function handleGolden(name, actual) {
   else checkGolden(name, actual);
 }
 
-// ================================================================== [1] flag-off
-// pack sources unchanged. "Unchanged" for a field that the merge adds (pack.json's
+// ================================================================== [1] pack drift
+// pack sources unchanged (tests/golden/pack_drift_<pack>.json). "Unchanged" for a field that the merge adds (pack.json's
 // `characters`, `legacy`, `pronFirst`, `tones`, `soundsReference` and typing "pron", a
 // sentence's `ruby`) means the merge is not allowed to change the
 // value of any field that predates it — so this strips those fields (once they
@@ -104,7 +104,7 @@ function handleGolden(name, actual) {
 // than requiring a literal empty `git diff` (which the merge itself will violate by
 // design once B1/B3/B7 add those fields). See HSK_MERGE.md §6 "Flag-off proof" item 1
 // and its "packs/zh with a stripped characters block once it exists" parenthetical.
-const FLAGOFF_PACKS = [
+const DRIFT_PACKS = [
   { name: "zh", dir: path.join(ROOT, "packs", "zh") },
   { name: "italian", dir: path.join(ROOT, "..", "italian", "pack") },
   { name: "spanish", dir: path.join(ROOT, "..", "spanish", "pack") },
@@ -125,7 +125,9 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
   // Every pack-gated flag (tests/lib/pack_flags.js FLAG_SINCE, so a new flag is stripped without an edit here)
   // plus the pre-flag fields: pack.legacy; typing "pron" replaced the pre-merge typing: null (typed reading is flag-on).
   // Only pack.json, words.json and sentences.json are hashed, so script.json / audio files need nothing here.
-  const pack = packJson ? stripFlags(packJson, FLAG_SINCE.map(f => f.key).concat(["legacy"])) : null;
+  // Collapsed keys (engine default since the flag collapse; the engine ignores them, enrich stops emitting them) are
+  // stripped too, so a republish that drops them is no drift.
+  const pack = packJson ? stripFlags(packJson, FLAG_SINCE.map(f => f.key).concat(COLLAPSED.filter(k => !FLAG_SINCE.some(f => f.key === k)), ["legacy"])) : null;
   if (pack && pack.typing === "pron") pack.typing = null;
   // words[].say (TTS carriers, docs/ZH_SAY.md) is new and only ever spoken; stripped like audio.
   // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are new, flag-on.
@@ -139,7 +141,8 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
   const stripped = Array.isArray(wordsJson)
     ? wordsJson.map(w => { if(!w || !NEW_WORD_FIELDS.some(k => k in w)) return w; const c = Object.assign({}, w); NEW_WORD_FIELDS.forEach(k => delete c[k]); return c; })
     : wordsJson;
-  const words = Array.isArray(stripped) && packJson && packJson.freqTiers !== undefined && !stripped.some(w => w && "rank" in w)
+  // (freqTiers is default since the flag collapse, so a word carrying ft marks the frequency-ordered file, not the pack key.)
+  const words = Array.isArray(stripped) && Array.isArray(wordsJson) && wordsJson.some(w => w && "ft" in w) && !stripped.some(w => w && "rank" in w)
     ? stripped.map((w, i) => [w, i]).sort((a, b) => (a[0].id < b[0].id ? -1 : a[0].id > b[0].id ? 1 : a[1] - b[1])).map(x => x[0])
     : stripped;
   const sentences = Array.isArray(sentencesJson)
@@ -147,7 +150,7 @@ function stripFlagOnFields(packJson, wordsJson, sentencesJson) {
     : sentencesJson;
   return { pack, words, sentences };
 }
-function flagOffSnapshotOf(dir) {
+function driftSnapshotOf(dir) {
   return stripFlagOnFields(
     readJsonIfPresent(path.join(dir, "pack.json")),
     readJsonIfPresent(path.join(dir, "words.json")),
@@ -158,18 +161,18 @@ function flagOffSnapshotOf(dir) {
 // and this golden only ever needs to answer "did it change", not "what changed" (a
 // real diff, if this fails, is one `git diff -- <sibling>/pack` away).
 function sha256(obj) { return crypto.createHash("sha256").update(JSON.stringify(obj)).digest("hex"); }
-function runFlagOffPackChecks() {
-  console.log("\n[1] flag-off pack sources unchanged (characters/ruby stripped, once they exist)");
-  FLAGOFF_PACKS.forEach(({ name, dir }) => {
-    if (!fs.existsSync(dir)) { note(`flag-off pack "${name}": ${dir} does not exist, skipped`); return; }
-    handleGolden(`flagoff_pack_${name}`, { sha256: sha256(flagOffSnapshotOf(dir)) });
+function runPackDriftChecks() {
+  console.log("\n[1] pack drift: pack sources unchanged (fields added since, and the collapsed keys, stripped)");
+  DRIFT_PACKS.forEach(({ name, dir }) => {
+    if (!fs.existsSync(dir)) { note(`pack "${name}": ${dir} does not exist, skipped`); return; }
+    handleGolden(`pack_drift_${name}`, { sha256: sha256(driftSnapshotOf(dir)) });
   });
   // Synthetic packs kept as standalone files under tests/ (as opposed to the inline
   // pack objects engine_checks.js builds in-memory, e.g. its FA/JA/RP consts, which
   // have no file to diff): none exist on this HEAD, so there is nothing to snapshot
   // yet. A future synthetic-pack directory under tests/ should be added here.
   const testsSynthetic = path.join(__dirname, "packs");
-  if (fs.existsSync(testsSynthetic)) note(`found ${testsSynthetic} — wire it into FLAGOFF_PACKS`);
+  if (fs.existsSync(testsSynthetic)) note(`found ${testsSynthetic} — wire it into DRIFT_PACKS`);
   else note('no standalone synthetic pack files under tests/ on this HEAD (engine_checks.js\' synthetic packs are inline JS objects, not files) — nothing to snapshot for that part of proof item 1');
 }
 
@@ -434,9 +437,9 @@ async function runBootGoldens() {
 }
 
 // ================================================================== main
-if (AS_MODULE) module.exports = { stripFlagOnFields, FLAGOFF_PACKS, REAL_PACKS };
+if (AS_MODULE) module.exports = { stripFlagOnFields, DRIFT_PACKS, REAL_PACKS };
 else (async function main() {
-  runFlagOffPackChecks();
+  runPackDriftChecks();
   runPureFunctionGoldens();
   await runBootGoldens();
   if (notCapturable.length) {

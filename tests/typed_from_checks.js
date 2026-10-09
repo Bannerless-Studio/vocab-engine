@@ -3,27 +3,28 @@
 // rotation (core.js typedKinds/typedSlotKind/typedKindOk), [2] typed-meaning matcher
 // (checkGlossTyped) and gloss formatter (glossParts), [3] app items on the zh pack: fallback
 // when characters are not displayed, stimulus leaks (audio, taps, ruby, readings, tags), the
-// renderer, choice fallback, miss kind, [4] glossFocus render sites, [5] control: with both
-// fields absent the zh markup is byte-identical to main ef44c6e's engine and plans are
-// unchanged. The fix round adds reading notes kept off stimuli, the truncated / lone-letter /
+// renderer, choice fallback, miss kind, [4] glossFocus render sites ([5], the control vs main
+// ef44c6e, went with the flag collapse: it predates pairs). The fix round adds reading notes kept off stimuli, the truncated / lone-letter /
 // "A or B" matcher rules, qualifier placement and the characters -> pinyin choice fallback
 // ([2], [3]). Boots engine/app.html in the fake DOM of tests/pron_aids_checks.js.
 // Run: node tests/typed_from_checks.js
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf, packBefore } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
+// the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
+const PAIRS_ERA = "9eb6ecb~1";
 const cp = require("child_process");
+const BASE_SHA = "d3632b8"; // engine before the flag collapse: the off-path of typedFrom lives there
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
-const MAIN = "ef44c6e"; // main before typedFrom/glossFocus
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packBefore(loadConst(path.join(ZH, "pack.js"), "PACK"), "pairs");
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), PAIRS_ERA);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -34,7 +35,7 @@ const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // checks written against the earlier zh keep its shape (tests/typed_mastery_checks.js covers the new one).
 const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); };
-const PACK_BASE = packAsOf(preWrite(PACK), "34c5df3", { strip: ["typedFrom", "glossFocus", "dayAware", "helpClose", "readAnswerBlock", "optsOneScript", "optsMix", "wordsBy", "progressMap"] });
+const PACK_BASE = packAsOf(preWrite(PACK), "34c5df3", { strip: ["typedFrom", "optsOneScript", "progressMap"] });
 // words[].syn / typedSyn / noTypedMeaning / pronInGloss (docs/PACK_SCHEMA.md "Synonyms") are flag-on fields too.
 const WORDS_OFF = WORDS.map(w => { const c = Object.assign({}, w); delete c.syn; delete c.typedSyn; delete c.noTypedMeaning; delete c.pronInGloss; return c; });
 
@@ -53,7 +54,8 @@ function extractAttrs(tag){
   let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; }
   return attrs;
 }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){
@@ -100,10 +102,10 @@ function makeFakeDom(){
     const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
     let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); }
   }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
   const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return {
     title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); },
@@ -132,7 +134,7 @@ async function boot(opts){
   const o = opts || {};
   Math.random = o.seed ? mulberry32(o.seed) : REAL_RANDOM;
   appHtml = o.html || CUR_HTML;
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const spoken = [];
   // neverSpeaking: a boolean-reporting engine that never confirms speaking (ttsDriver's
   // watchdog retry path, docs/AUDIO.md "Playback reliability"; the default mock below has
@@ -221,11 +223,10 @@ function walk(api, stopAt){
   // ---------------------------------------------------------------- [1] config + rotation
   console.log("\n[1] config and kind rotation");
   {
-    check("zh ships typedFrom [written, pron] + glossFocus on top of typing pron", JSON.stringify(PACK.typedFrom) === '["written","pron"]' && PACK.glossFocus === true && PACK.typing === "pron");
+    check("zh ships typedFrom [written, pron] on top of typing pron (glossFocus: engine default, no pack key)", JSON.stringify(PACK.typedFrom) === '["written","pron"]' && !("glossFocus" in PACK) && PACK.typing === "pron");
     check("typedFromOn: off without the field, off without typing, invalid sides ignored",
       !VC.typedFromOn(PACK_BASE) && !VC.typedFromOn(Object.assign({}, PACK, { typing: null })) && !VC.typedFromOn({ typing: "pron", typedFrom: "written" })
       && JSON.stringify(VC.typedFromSides({ typing: "pron", typedFrom: ["pron", "x", "written"] })) === '["written","pron"]' && VC.typedFromOn(PACK));
-    check("glossFocusOn: only true turns it on", VC.glossFocusOn(PACK) && !VC.glossFocusOn(PACK_BASE) && !VC.glossFocusOn({ glossFocus: "yes" }));
     check("typedKinds zh: 9-slot cycle writtenMeaning, written, pron, writtenMeaning, written, pronMeaning, writtenMeaning, written, writtenPron (characters <-> meaning 6:3 against the pinyin kinds)",
       VC.typedKinds(PACK).join() === "writtenMeaning,written,pron,writtenMeaning,written,pronMeaning,writtenMeaning,written,writtenPron");
     check("typedKinds 2x share: writtenMeaning and written three times per cycle, pron, pronMeaning, writtenPron once", (() => {
@@ -374,7 +375,6 @@ function walk(api, stopAt){
       && bItems.filter(x => x.label === "Type the meaning").every(x => !HAN.test(stripTags(x.html)) && x.html.includes(VC.toneHTML(w.pron))));
     const at = atTierProg([w]); api.setProg(at);
     const items = typePlan(w, 9).map(api.itemFromPlan);
-    const tagOf = x => (x.html.match(/class="ktag"[^>]*><b>([^<]*)<\/b>/) || [])[1];
     const byStim = x => HAN.test(stripTags(x.html)) ? "chars" : x.html.includes(VC.toneHTML(w.pron)) ? "pinyin" : "gloss";
     const sig = items.map(x => `${x.label}/${byStim(x)}`);
     check(`at tier: the nine slots in rotation order (${sig.join(", ")})`,
@@ -391,14 +391,15 @@ function walk(api, stopAt){
       if(byStim(it) === "chars" && (MARKED.test(stripTags(h)) || /class="t[1-5]"/.test(h) || /class="pron"/.test(h))) leaks.push("reading on characters");
       if(byStim(it) === "pinyin" && HAN.test(stripTags(h))) leaks.push("characters under pinyin");
       const answerBits = it === wChars ? [w.w, VC.stripMarks(w.pron)] : it.label === "Type the meaning" ? VC.glossParts(w.en).primary.split(/[;,]/).map(s => s.trim().replace(/^to /, "")).filter(s => s.length > 2) : [VC.stripMarks(w.pron)];
-      const meta = [it.label, it.placeholder || "", tagOf(it) || "", stripTags(h.replace(/<div class="big wd"[\s\S]*$/, ""))].join(" ").toLowerCase();
+      const meta = [it.label, it.placeholder || "", stripTags(h.replace(/<div class="big wd"[\s\S]*$/, ""))].join(" ").toLowerCase();
       answerBits.forEach(b => { if(meta.includes(b.toLowerCase())) leaks.push("answer in label/tag/placeholder: " + b); });
       if(it.label === "Type the meaning" && stripTags(h).includes(VC.glossParts(w.en).primary)) leaks.push("gloss on card");
       check(`${name}: no audio, no taps, no ruby, no reading/characters leak, answer not in label/tag/placeholder (${leaks.join("; ") || "clean"})`, leaks.length === 0);
     }
-    check("tags and placeholders: meaning items 'meaning · any one' + 'meaning…' + Latin input; characters->pinyin 'pinyin · tones optional'",
-      [wMean, pMean].every(x => /class="ktag"[^>]*><b>meaning<\/b> · any one</.test(x.html) && x.placeholder === "meaning…" && x.inputTA === ' lang="en"')
-      && /class="ktag"[^>]*><b>pinyin<\/b> · tones optional</.test(wPron.html) && wPron.placeholder === "pinyin, tones optional…" && wPron.inputTA === ' lang="en"');
+    // App v2 (engine default since the flag collapse): no kind tag; the placeholder names what to type.
+    check("placeholders: meaning items 'any one meaning' + Latin input; characters->pinyin 'tones optional'; no kind tag",
+      [wMean, pMean].every(x => !/class="ktag"/.test(x.html) && x.placeholder === "any one meaning" && x.inputTA === ' lang="en"')
+      && !/class="ktag"/.test(wPron.html) && wPron.placeholder === "tones optional" && wPron.inputTA === ' lang="en"');
     // Renderer: nothing spoken before the answer; reveal plays the word and has Replay.
     const primary1 = VC.glossParts(w.en).primary.split(";")[0].trim();
     const run = (slot, value, prog) => {
@@ -410,23 +411,23 @@ function walk(api, stopAt){
       return { html, before, after: spoken.length - k0 - before, rv: api.html("rv"), wrong: api.getD().miss.length > 0, prog: api.getProg() };
     };
     const r1 = run(0, primary1);
-    check(`renderer, characters -> meaning: silent before the answer, "${primary1}" right, reveal speaks + Replay`, r1.before === 0 && !r1.wrong && r1.after > 0 && /id="rvp"/.test(r1.rv) && /id="tin"[^>]*lang="en"/.test(r1.html) && /placeholder="meaning…"/.test(r1.html));
+    check(`renderer, characters -> meaning: silent before the answer, "${primary1}" right, reveal speaks + Replay`, r1.before === 0 && !r1.wrong && r1.after > 0 && /id="rvp"/.test(r1.rv) && /id="tin"[^>]*lang="en"/.test(r1.html) && /placeholder="any one meaning"/.test(r1.html));
     const r2 = run(5, primary1.toUpperCase() + "!");
     check("renderer, pinyin -> meaning: silent before the answer, case/punctuation-insensitive right", r2.before === 0 && !r2.wrong && r2.after > 0);
     const r3 = run(8, VC.stripMarks(w.pron));
     check("renderer, characters -> pinyin: silent before the answer, toneless right with the tones note", r3.before === 0 && !r3.wrong && /tones: /.test(r3.rv));
     const r5 = run(1, w.w);
-    check(`meaning -> characters (typedFrom): kind tag "characters" without "listen", no Replay before the answer, nothing spoken on mount; right; the reveal speaks + Replay (tag ${JSON.stringify(stripTags((wChars.html.match(/<div class="ktag"[\s\S]*?<\/div>/) || [""])[0]))})`,
-      tagOf(wChars) === "characters" && !/listen/.test(wChars.html) && !/id="rp2"/.test(r5.html) && !wChars.mount && r5.before === 0 && !r5.wrong && r5.after > 0 && /id="rvp"/.test(r5.rv));
+    check(`meaning -> characters (typedFrom): placeholder "characters", no Replay before the answer, nothing spoken on mount; right; the reveal speaks + Replay (placeholder ${JSON.stringify(wChars.placeholder)})`,
+      wChars.placeholder === "characters" && !/class="ktag"/.test(wChars.html) && !/id="rp2"/.test(r5.html) && !wChars.mount && r5.before === 0 && !r5.wrong && r5.after > 0 && /id="rvp"/.test(r5.rv));
     {
       const pr = atTierProg([w]); api.setProg(pr);
       const ctl = api.writtenTypeItem(w);
-      check("control: without typedFrom the characters item (writtenTypeItem) keeps its listen tag, Replay and mount", /<b>characters<\/b> · listen/.test(ctl.html) && /id="rp2"/.test(ctl.html) && typeof ctl.mount === "function");
+      check("control: without typedFrom the characters item (writtenTypeItem) keeps its Replay and mount", ctl.placeholder === "characters" && /id="rp2"/.test(ctl.html) && typeof ctl.mount === "function");
     }
     const r4 = run(0, "zzz not it");
     const rec = r4.prog.w[w.id];
-    check(`renderer, a wrong meaning: 'you typed' shown, the miss is k="type" and the record keeps its shape (${JSON.stringify(rec)})`,
-      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov", "t", "u", "f"].includes(k)));
+    check(`renderer, a wrong meaning: 'You typed' shown, the miss is k="type" and the record keeps its shape (${JSON.stringify(rec)})`,
+      r4.wrong && /You typed zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov", "t", "u", "f", "p"].includes(k))); // p: pair streaks (pairs, engine default since the flag collapse)
     // Second miss: the silent choice counterpart with the same stimulus.
     api.setProg(atTierProg([w]));
     const plan = typePlan(w, 7); const mi = api.itemFromPlan(plan[0], 0, plan);
@@ -446,11 +447,9 @@ function walk(api, stopAt){
       check(`rule 6: characters -> pinyin choice fallback "${fb.label}": characters stimulus, no reading on it, 4 distinct readings incl. the answer (${fb.opts.join(", ")})`,
         fb.kind === "mc" && fb.label === "How is it said?" && !fb.mount && HAN.test(stripTags(fb.html)) && !MARKED.test(stripTags(fb.html)) && !/data-wid|class="replay|<ruby/.test(fb.html)
         && fb.opts.length === 4 && keys.size === 4 && fb.a === w.pron && fb.opts[0] === w.pron && fb.opts.every(o => !HAN.test(o)));
-      // pack.optsMix (docs/PACK_SCHEMA.md "optsMix"): the answer's stage first (it is learned), drawn per set.
-      if(VC.optsMixOn(PACK)) check(`rule 6 (optsMix): distractors are learned words' readings with the answer's syllable count (${syl(w.pron)}) on two builds (${fb.opts.slice(1).join(", ")} | ${fb2.opts.slice(1).join(", ")})`,
+      // optsMix (engine default since the flag collapse): the answer's stage first (it is learned), drawn per set.
+      check(`rule 6 (optsMix): distractors are learned words' readings with the answer's syllable count (${syl(w.pron)}) on two builds (${fb.opts.slice(1).join(", ")} | ${fb2.opts.slice(1).join(", ")})`,
         [fb, fb2].every(f => f.opts.slice(1).every(o => learned.has(o) && syl(o) === syl(w.pron))));
-      else check(`rule 6: distractors are learned words' readings with the answer's syllable count (${syl(w.pron)}), chosen without rng (same on a second build)`,
-        fb.opts.slice(1).every(o => learned.has(o) && syl(o) === syl(w.pron)) && JSON.stringify(fb.opts) === JSON.stringify(fb2.opts));
       const k0 = spoken.length; api.drill1(fb); const before = spoken.length - k0;
       const btn = api.el("o").children.find(b => b.dataset.v === w.pron); btn.click();
       check("rule 6: renders silent before the answer; the reveal speaks; a pass records as the other fallbacks do", before === 0 && spoken.length - k0 > 0 && api.getD().miss.length === 0);
@@ -490,8 +489,11 @@ function walk(api, stopAt){
     const { api } = await boot({ seed: 9 });
     const w = WORDS.find(x => x.lv === "1" && /^\(/.test(x.en) && VC.glossParts(x.en).qualifiers.length && unitOf(x));
     const g = VC.gloss(w), gp = VC.glossParts(g);
-    const want = gp.pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join("");
-    check(`glossOut("${g}") -> the leading qualifier dimmed at the end of its alternative (${want})`, api.glossOut(g) === want && (g !== "(joining two nouns) and; together with; with…" || want === 'and <span class="dim">(joining two nouns)</span>; together with; with…'));
+    // glossStyle (engine default since the flag collapse): the first sense focused, the rest in a gx span (app.html glossOut).
+    const focus = t => VC.glossParts(t).pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join("");
+    const sense = t => VC.parenPieces(t).every(x => x.g || !x.t.trim()) && VC.parenPieces(t).some(x => x.g) ? `<span class="dim">${VC.escapeHtml(t)}</span>` : focus(t);
+    const sn = VC.glossSenses(g), want = sn.rest.length ? `${sense(sn.first)} <span class="gx">(${sn.rest.map(sense).join("; ")})</span>` : focus(g);
+    check(`glossOut("${g}") -> the leading qualifier dimmed at the end of its alternative, the other senses in gx (${want})`, api.glossOut(g) === want && (g !== "(joining two nouns) and; together with; with" || want === 'and <span class="dim">(joining two nouns)</span> <span class="gx">(together with; with)</span>'));
     check("glossOut with notes (reveal, popover) appends the reading note dimmed; without, it is gone",
       api.glossOut("who; also pr. [shuí]") === "who" && api.glossOut("who; also pr. [shuí]", true) === 'who <span class="dim">also pr. [shuí]</span>');
     check("glossOut: a gloss with no qualifier is plain escaped text", api.glossOut("to study") === "to study" && api.glossOut("(completed action marker)") === "(completed action marker)");
@@ -524,21 +526,19 @@ function walk(api, stopAt){
     const hits = sweep.filter(([, h]) => moved.some(m => h.includes(m)));
     check(`sweep of ${sweep.length} screens (tabs, Test recall, Today): no raw gloss with qualifiers left${hits.length ? ` (${hits.slice(0, 3).map(x => x[0]).join(", ")})` : ""}; dim spans seen`,
       sweep.length > 20 && hits.length === 0 && sweep.some(([, h]) => /class="dim"/.test(h)) && !sweep.some(([k]) => /ERR/.test(k)));
-    const { api: off } = await boot({ seed: 9, pack: PACK_BASE });
-    off.setProg(atTierProg([w]));
-    check("glossFocus off: raw gloss everywhere, no dim span", off.glossOut(g) === raw && off.revealBlock(w).includes(raw) && !/class="dim"/.test(off.revealBlock(w) + off.wordRowHTML(w, "wl")) && off.readItem(w).optHtml === undefined);
+    // glossFocus-off control deleted: glossFocus is engine default since the flag collapse (stage 2).
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  // ---------------------------------------------------------------- [5] control vs main
-  console.log(`\n[5] control: typedFrom + glossFocus absent -> HTML byte-identical to main ${MAIN}`);
+  // ---------------------------------------------------------------- [5] control vs the pre-collapse engine
+  console.log(`\n[5] control: typedFrom absent -> HTML byte-identical to ${BASE_SHA} (the pre-collapse engine, booted withCollapsed)`);
   {
-    let mainHtml = null, mainCore = null;
+    let baseHtml = null, baseCore = null;
     try{
-      mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const src = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
-      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); mainCore = m.exports;
-    }catch(e){ console.log("    cannot read main: " + e.message); }
-    check(`main ${MAIN} engine loaded from git (a missing sha is a failure)`, !!mainHtml && !!mainCore);
+      baseHtml = cp.execSync(`git -C "${ROOT}" show ${BASE_SHA}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const src = cp.execSync(`git -C "${ROOT}" show ${BASE_SHA}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26 });
+      const m = { exports: {} }; new Function("module", "exports", "window", "globalThis", src)(m, m.exports, undefined, {}); baseCore = m.exports;
+    }catch(e){ console.log("    cannot read " + BASE_SHA + ": " + e.message); }
+    check(`${BASE_SHA} engine loaded from git (a missing sha is a failure)`, !!baseHtml && !!baseCore);
     async function screens(html, core, pack, seed){
       const { api } = await boot({ html, core, pack, seed, words: WORDS_OFF });
       const out = {};
@@ -553,19 +553,20 @@ function walk(api, stopAt){
       api.wordsPage("1", 0); out.words = api.html("panel") + api.el("wl").children.map(c => c.innerHTML).join("|");
       return out;
     }
-    if(mainHtml && mainCore){
+    if(baseHtml && baseCore){
       const cases = [["zh, typing pron", PACK_BASE], ["zh, typing object", Object.assign({}, PACK_BASE, { typing: { caseSensitive: false, accents: "lenient", strictFromLevel: null } })]];
       for(const [name, pk] of cases){
-        const a = await screens(mainHtml, mainCore, pk, 11), b = await screens(CUR_HTML, VC, pk, 11);
+        const pe = Object.assign({}, pk, { eta: loadConst(path.join(ZH, "pack.js"), "PACK").eta }); // eta is required pack data now; both sides read the same curves
+        const a = await screens(baseHtml, baseCore, withCollapsed(pe), 11), b = await screens(CUR_HTML, VC, pe, 11);
         for(const k of Object.keys(a)){
           let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
-          check(`${name}: ${k} byte-identical to main (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: main ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);
+          check(`${name}: ${k} byte-identical to ${BASE_SHA} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: base ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);
         }
       }
     }
   }
 
-  console.log("\n[6] typedFrom with pack.dayAware on (zh as shipped): two Today sessions in one day");
+  console.log("\n[6] typedFrom with the day-aware planner (engine default): two Today sessions in one day");
   try {
     const { api } = await boot({ seed: 9 });
     // Mid HSK 2 with characters put after the words: with one stage per level (fb2-write) 字1
@@ -578,7 +579,7 @@ function walk(api, stopAt){
     const rep = typed(s2).filter(x => done1.has(x.where + "|" + x.it.label));
     const labels = new Set(typed(s2).map(x => x.it.label));
     check(`session 2 still asks typed items from the target side (${[...labels].join(", ")}; ${typed(s1).length} / ${typed(s2).length} typed), none a word typed right in the same way in session 1 (${rep.length})`,
-      PACK.dayAware === true && typed(s1).length > 0 && typed(s2).length > 0 && rep.length === 0 && [...labels].some(l => l !== "Type the pinyin"));
+      typed(s1).length > 0 && typed(s2).length > 0 && rep.length === 0 && [...labels].some(l => l !== "Type the pinyin"));
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

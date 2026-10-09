@@ -2,13 +2,15 @@
 // on, the user is not taught anything new in sessions"): [1] core helpers, [2] flag off and
 // flag on but not paused: Today, Progress and a session byte-identical to main 36aee02, [3] the
 // Progress chip, reload, import, [4] paused x {fresh, mid HSK 1, owner shape, all learned}: 6
-// Today sessions teach nothing new, Review grows by the Learn step's items, unpausing restores
+// Today sessions teach nothing new, Review keeps its size (day-aware plans), unpausing restores
 // the same Learn, [5] toggling mid-session (park, toggle in Progress, resume).
 // Run: node tests/pause_checks.js
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf, packBefore, stripFlags } = require("./lib/pack_flags.js");
+const { packAsOf, stripFlags } = require("./lib/pack_flags.js");
+// the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
+const PAIRS_ERA = "9eb6ecb~1";
 const cp = require("child_process");
 const util = require("util");
 
@@ -23,7 +25,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packBefore(loadConst(path.join(ZH, "pack.js"), "PACK"), "pairs");
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), PAIRS_ERA);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -31,9 +33,6 @@ const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // The lag Learn row's set label changed after 36aee02 (per-level, fb9): both sides compared with it masked.
-// optsMix (docs/PACK_SCHEMA.md "optsMix"), readRotation and wordsBy came after 36aee02: the controls drop them too.
-const NOMIX = packAsOf(PACK, MAIN, { keep: ["pauseNew"] });
-const OFF = stripFlags(NOMIX, ["pauseNew"]);
 const eq = util.isDeepStrictEqual;
 const clone = x => JSON.parse(JSON.stringify(x));
 
@@ -51,7 +50,8 @@ function extractAttrs(tag){
   let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; }
   return attrs;
 }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){
@@ -100,10 +100,10 @@ function makeFakeDom(){
     const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
     let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); }
   }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
   const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return {
     title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); },
@@ -140,7 +140,7 @@ class FakeDate extends Date {
 async function boot(pack, st, seed, opts){
   const o = opts || {};
   Math.random = mulberry32(seed);
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const voices = o.voices || [{ lang:"zh-CN", name:"x" }];
   const ss = { getVoices: () => voices, onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
@@ -152,7 +152,7 @@ const __drills = []; const __dr = drill; drill = function(items, ...a){ __drills
 const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; return __ty(it); };
 return {
   el: id => document.getElementById(id), html: id => { const e = document.getElementById(id); return e ? e.innerHTML : null; }, panel: () => document.getElementById("panel").innerHTML,
-  getProg: () => prog, setProg: p => { prog = p; }, getD: () => D, getCur: () => __cur,
+  getProg: () => prog, setProg: p => { prog = p; }, getD: () => D, getCur: () => __cur, getPrep: () => todayPrep, readNext: () => todayReadItem(false),
   today: () => { tab = "today"; render(); }, goto: t => { tab = t; testSel = null; RD = null; soundsSel = null; render(); },
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
   readItem, recallItem, revealBlock, charDrillItem, wordRowHTML, itemFromPlan,
@@ -208,8 +208,10 @@ function learnItems(p){
   return st.kind === "chars" ? VC.lagCharSet(PACK, WORDS, CHARACTERS, p).units.length * LEARN_KINDS : VC.levelNewSet(WORDS, PACK, p, st.lv).words.length * 2;
 }
 function nextLearn(p){ const st = VC.nextStage(PACK, WORDS, CHARACTERS, p); return !st ? null : st.kind === "chars" ? "c:" + VC.lagCharSet(PACK, WORDS, CHARACTERS, p).ids.join(",") : "w:" + VC.levelNewSet(WORDS, PACK, p, st.lv).words.map(w => w.id).join(","); }
-const rows = h => [...String(h).matchAll(/<tr><td>(\d+)\. (\w+)<\/td><td>([\s\S]*?)<\/td><\/tr>/g)].map(m => [m[2], stripTags(m[3])]);
-const reviewN = h => { const r = rows(h).find(x => x[0] === "Review"); const m = r && r[1].match(/^(\d+) items/); return m ? +m[1] : null; };
+const rows = h => [...String(h).matchAll(/<div class="tst"><span>(\w+)<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/g)].map(m => [m[1], stripTags(m[2].replace(/<div class="pvs pvgate">[\s\S]*$/, ""))]); // app v2 Today rows (Learn's gate sentence dropped)
+// App v2: Today rows carry no counts; the Review size is read from todayPrep, the passage from todayReadItem.
+const reviewN = api => (api.getPrep() && api.getPrep().review) ? api.getPrep().review.length : null;
+const readOf = api => { const r = api.readNext(); return r ? { title: r.p.title, reread: !!((api.getProg().read || {}).done || {})[r.p.id], mode: r.mode } : null; };
 const keysOf = p => ({ w: new Set(Object.keys(p.w)), c: new Set(Object.keys((p.chars || {}).c || {})) });
 // Plays the Today session on screen to its end (every answer right; passages skipped).
 // The Read stage is played for real: every question answered with the first option, opts.tap word
@@ -245,9 +247,9 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
 (async function main(){
   console.log("\n[1] core");
   {
-    check("packs/zh sets pauseNew: true", PACK.pauseNew === true);
+    check("pause is engine default (flag collapse): zh carries no pauseNew key", !("pauseNew" in PACK));
     const p = base();
-    check("pauseOn: needs pack.pauseNew and prog.pause 1", !VC.pauseOn(PACK, p) && VC.pauseOn(PACK, VC.setPause(clone(p), true)) && !VC.pauseOn(OFF, VC.setPause(clone(p), true)) && !VC.pauseOn(PACK, Object.assign(clone(p), { pause: true })));
+    check("pauseOn: needs prog.pause 1", !VC.pauseOn(PACK, p) && VC.pauseOn(PACK, VC.setPause(clone(p), true)) && !VC.pauseOn(PACK, Object.assign(clone(p), { pause: true })));
     const q = VC.setPause(clone(p), true);
     check("setPause: on writes pause 1; off deletes the field (the record is as before)", q.pause === 1 && eq(VC.setPause(q, false), p) && !("pause" in q));
     const o = ownerProg();
@@ -266,24 +268,7 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
     fs.writeFileSync(f, withDayRules(cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }), MAIN)); OLD = require(f);
   } catch(e){ OLD = null; }
 
-  console.log(`\n[2] flag off, and on but not paused: as on main ${MAIN}`);
-  if(!OLD) console.log(`NOTE  engine ${MAIN} not in this checkout's history: control skipped`);
-  else for(const [name, mk] of SCEN){
-    for(const [label, pack, pz] of [["flag off", OFF, false], ["flag off, stored pause 1", OFF, true], ["flag on, not paused", NOMIX, false]]){
-      const out = [];
-      for(const [core, html] of [[VC, appHtml], [OLD, MAIN_HTML]]){
-        const p = mk(); if(pz) p.pause = 1;
-        const st = fresh(); st.ls.setItem(VC.storageKey(pack), JSON.stringify(p));
-        NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
-        const api = await boot(pack, st, 1, { core, html }); const t = api.panel(); api.goto("progress"); const g = api.html("panel");
-        api.today(); const s = playSession(api);
-        out.push({ t: t.replace(/(<bdi[^>]*>字<\/bdi>|字)(?: [^,<]*)?, set \d+ of \d+/, "$1 SET"), g: g.replace(CHAR_ROWS, "").replace('<table class="stats nw">', '<table class="stats">'), s, prog: st.ls.getItem(VC.storageKey(pack)) });
-      }
-      const sameProgress = label === "flag on, not paused" ? out[0].g.replace(/<div class="row" style="margin-top:14px"><button class="chip on" id="togglePause" aria-pressed="true">New material: on<\/button><\/div>/, "") === out[1].g && /id="togglePause"/.test(out[0].g) : out[0].g === out[1].g && !/togglePause/.test(out[0].g);
-      check(`${name}, ${label}: Today and a whole session's progress byte-identical to ${MAIN}; Progress ${label === "flag on, not paused" ? "identical but the chip" : "identical, no chip"} (${out[0].t.length} chars, ${out[0].s ? out[0].s.items : 0} items)`,
-        out[0].t === out[1].t && out[0].prog === out[1].prog && sameProgress);
-    }
-  }
+  // [2] (flag off / not paused vs main 36aee02) deleted: pauseNew is engine default since the flag collapse.
 
   console.log("\n[3] the chip: toggle, reload, import");
   {
@@ -307,7 +292,7 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
     const p0 = mk(), st = fresh(); st.ls.setItem(VC.storageKey(PACK), JSON.stringify(p0));
     NOW = new Date(2026, 9, 2, 8, 0, 0).getTime();
     const api = await boot(PACK, st, 3);
-    const on = api.panel(), onRows = rows(on).map(r => r[0]), learnBefore = nextLearn(api.getProg());
+    const on = api.panel(), onRows = rows(on).map(r => r[0]), learnBefore = nextLearn(api.getProg()), onReview = reviewN(api), onRead = readOf(api);
     pressPause(api); api.today();
     const h = api.panel(), extra = learnItems(p0);
     if(name === "fresh"){
@@ -316,20 +301,24 @@ const pressPause = api => { api.clickTab("progress"); api.el("togglePause").clic
       check(`fresh: the button turns new material on; Today as before pausing (Learn ${rows(h2).find(r => r[0] === "Learn")[1]})`, h2 === on && !("pause" in api.getProg()));
       continue;
     }
-    const pr = rows(h), grow = name === "mid HSK 1" ? 0 : extra;
-    check(`${name}, paused: steps ${pr.map(r => r[0]).join(", ")} (on: ${onRows.join(", ")}); "Review only · new material paused"; Review ${reviewN(on)} -> ${reviewN(h)} items (Learn step's drill items ${extra}; mid HSK 1's 55-item pool gets none, M2)`,
-      !pr.some(r => r[0] === "Learn") && onRows.includes("Learn") && /Review only · new material paused\./.test(h) && reviewN(h) === reviewN(on) + grow && !/1 passage: /.test(stripTags(h)));
-    if(name === "owner shape") check(`owner shape: unpaused Today plans a first read (${(rows(on).find(r => r[0] === "Read") || [])[1]}); paused a due re-read (${(pr.find(r => r[0] === "Read" || r[0] === "Listen" && /passage/.test(r[1])) || [])[1]})`, /1 passage: /.test(stripTags(on)) && /passage to (re-read|listen to)/.test(stripTags(h)));
+    // Day-aware plans (engine default since the flag collapse) take no extra Review items: Review keeps its size when paused.
+    const pr = rows(h), grow = 0;
+    const hReview = reviewN(api), hRead = readOf(api);
+    check(`${name}, paused: steps ${pr.map(r => r[0]).join(", ")} (on: ${onRows.join(", ")}); "Session N, review only"; Review ${onReview} -> ${hReview} items (unchanged; Learn step's drill items ${extra})`,
+      !pr.some(r => r[0] === "Learn") && onRows.includes("Learn") && /<p class="pva">Session \d+, review only<\/p>/.test(h) && hReview === onReview + grow && !(hRead && !hRead.reread));
+    if(name === "owner shape") check(`owner shape: unpaused Today plans a first read (${onRead && onRead.title}); paused a due re-read (${hRead && hRead.title})`, !!onRead && !onRead.reread && !!hRead && hRead.reread);
     const res = [];
     for(let d = 0; d < 6; d++){ NOW = new Date(2026, 9, 2 + d, 8, 0, 0).getTime(); api.today(); res.push(playSession(api)); }
     const sum = k => res.reduce((n, r) => n + (r ? r[k] : 0), 0);
     check(`${name}, 6 paused sessions: ${sum("newW")} new words, ${sum("newC")} new units, ${sum("firstReads")} first reads (${sum("rereads")} re-reads), no Learn drill (${sum("learn")}); items per session ${res.map(r => r && r.items).join(",")}; Review drills ${res.map(r => r && r.review).join(",")}`,
-      res.every(Boolean) && sum("newW") === 0 && sum("newC") === 0 && sum("firstReads") === 0 && sum("learn") === 0 && res.every(r => r.items > 0) && res[0].review === reviewN(h) && (name !== "owner shape" || sum("rereads") > 0));
+      res.every(Boolean) && sum("newW") === 0 && sum("newC") === 0 && sum("firstReads") === 0 && sum("learn") === 0 && res[0].items > 0 && res[0].review === hReview && (name !== "owner shape" || sum("rereads") > 0));
     const pAfter = api.getProg();
     check(`${name}: set counters and unit records' keys as before (${JSON.stringify(pAfter.sets)})`, eq(pAfter.sets, p0.sets) && eq(Object.keys(pAfter.chars.c).sort(), Object.keys(p0.chars.c).sort()) && eq(Object.keys(pAfter.w).sort(), Object.keys(p0.w).sort()));
     pressPause(api); api.today();
     const learnAfter = nextLearn(api.getProg()), ln = (rows(api.panel()).find(r => r[0] === "Learn") || [])[1];
-    check(`${name}, unpaused: Learn exactly as before pausing (${ln}; ${learnAfter ? learnAfter.slice(0, 40) : "none"}...)`, learnAfter === learnBefore && !("pause" in api.getProg()) && (extra > 0 ? ln === (rows(on).find(r => r[0] === "Learn") || [])[1] : true));
+    // the level gate line's "% known" moves with the paused Review sessions (the gate is engine default)
+    const gateless = x => String(x).replace(/ · \S+ \d+ waits · \S+ \d+ at \d+% known$/, "");
+    check(`${name}, unpaused: Learn exactly as before pausing (${ln}; ${learnAfter ? learnAfter.slice(0, 40) : "none"}...)`, learnAfter === learnBefore && !("pause" in api.getProg()) && (extra > 0 ? gateless(ln) === gateless((rows(on).find(r => r[0] === "Learn") || [])[1]) : true));
     const s = playSession(api);
     check(`${name}, the next session teaches it (${s.newW} words, ${s.newC} units)`, extra === 0 ? s.newW + s.newC === 0 : (learnBefore[0] === "c" ? s.newC === 10 : s.newW === 10));
   }

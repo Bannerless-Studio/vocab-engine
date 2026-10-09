@@ -5,7 +5,9 @@
 const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
-const { packBefore } = require("./lib/pack_flags.js");
+const { packAsOf } = require("./lib/pack_flags.js");
+// the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
+const PAIRS_ERA = "9eb6ecb~1";
 const os = require("os");
 const cp = require("child_process");
 const util = require("util");
@@ -22,7 +24,7 @@ function loadConst(file, name){
 // readRotation (fb16) shuffles questions and picks by session; its checks are listen_mode_checks [14].
 // pack.pairs (fb23) has its own suite (tests/pairs_checks.js); the app checks here run the day planner.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = Object.assign(packBefore(loadConst(path.join(ZH, "pack.js"), "PACK"), "pairs", { strip: ["readRotation"] }), { typing: null });
+const PACK = Object.assign(packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), PAIRS_ERA, { strip: [] }), { typing: null });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -213,12 +215,12 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("placementItemCount cycles a custom pack.placementItems", [0,1,2,3,4,5].every(i => VC.placementItemCount(i, {placementItems:[4,1,2]}) === [4,1,2][i%3]));
   const allRight = Array.from({length:6}, ()=>({r:3,n:3}));
   check("all buckets correct -> null", VC.placementStopIndex(allRight) === null);
-  check("bucket 3 entirely wrong -> stops at 3", VC.placementStopIndex([{r:3,n:3},{r:3,n:3},{r:3,n:3},{r:0,n:3},{r:3,n:3},{r:3,n:3}]) === 3);
+  check("bucket 3 entirely wrong, right on both sides -> skipped (isolated zero), placement runs to the end", VC.placementStopIndex([{r:3,n:3},{r:3,n:3},{r:3,n:3},{r:0,n:3},{r:3,n:3},{r:3,n:3}]) === null);
   check("a single miss in a big-enough bucket 0 still passes", VC.placementStopIndex([{r:3,n:4},{r:3,n:3},{r:3,n:3},{r:3,n:3}]) === null);
   // pack.placementWhole (fb48, docs/PACK_SCHEMA.md "placementWhole"): the largest passed prefix of the whole result.
   const W = { whole: true }, rn = (r, n) => r.map((x, i) => ({ r: x, n: n[i] }));
   const REPORTED = rn([1,3,2,0,2,2,2,2,2,3,1,2], [2,3,2,3,2,3,2,3,2,3,2,3]);
-  check("whole: the reported record (19/25 over buckets 0-9, bucket 3 isolated) -> 10; the window rule -> 0", VC.placementStopIndex(REPORTED, W) === 10 && VC.placementStopIndex(REPORTED) === 0);
+  check("whole: the reported record (19/25 over buckets 0-9, bucket 3 isolated) -> 10 (the old 3-bucket window rule gave 0)", VC.placementStopIndex(REPORTED, W) === 10 && VC.placementStopIndex(REPORTED) === 10);
   check("whole: the skipped bucket of the reported record is [3]", JSON.stringify(VC.placementSkipped(REPORTED, 10)) === "[3]");
   check("whole: all buckets right -> null", VC.placementStopIndex(allRight, W) === null);
   check("whole: a 0/n first bucket -> 0 (no left neighbour, never skipped)", VC.placementStopIndex(rn([0,3,3,3,3,3], [3,3,3,3,3,3]), W) === 0);
@@ -228,9 +230,9 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("whole: a zero bucket followed by a zero is not isolated even when accuracy holds", VC.placementStopIndex(rn([6,6,6,6,0,0], [6,6,6,6,3,3]), W) === 4);
   check("whole: accuracy exactly 0.75 passes (3/4 over one bucket)", VC.placementStopIndex(rn([3], [4]), W) === null);
   check("whole: 0.75 exactly passes, just under stops (3/4+3/4 = 6/8 passes; 3/4+2/4 = 5/8 stops at 1)", VC.placementStopIndex(rn([3,3], [4,4]), W) === null && VC.placementStopIndex(rn([3,2], [4,4]), W) === 1);
-  check("whole: the largest k wins over a smaller passing prefix (a later recovery)", VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3]), W) === null && VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3])) === 1);
+  check("whole: the largest k wins over a smaller passing prefix (a later recovery)", VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3]), W) === null);
   check("whole: empty result -> null", VC.placementStopIndex([], W) === null);
-  check("whole off (opts absent, whole false): window rule untouched", VC.placementStopIndex(REPORTED, { whole: false }) === 0 && VC.placementStopIndex(rn([3,3,3,0,3,3], [3,3,3,3,3,3])) === 3);
+  check("opts are ignored since the flag collapse (the whole-result rule is the only one)", VC.placementStopIndex(REPORTED, { whole: false }) === 10 && VC.placementStopIndex(rn([3,3,3,0,3,3], [3,3,3,3,3,3])) === null);
   check("whole: applyPlacement at the stop seeds provisional, prog.pl is the landing bucket's level", (() => {
     const st = VC.strata(WORDS, PACK.placement, PACK.setSize), n = st.length;
     const res = st.map((_, i) => ({ r: i === 3 ? 0 : 3, n: 3 })); res[n-1] = { r: 0, n: 3 }; res[n-2] = { r: 0, n: 3 };
@@ -504,7 +506,8 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("sets {1:2} -> first 20 level-1 words learned", lw.length === 20 && lw.every(w=>w.lv==="1"));
   const byLv = VC.wordsByLevel(WORDS, PACK);
   const nnOf = p => { const nn = VC.nextNewSet(WORDS, PACK, p); return nn && { lv: nn.lv, set: nn.set, ids: nn.words.map(w => w.id) }; };
-  check("nextNewSet -> level 1, set index 2, the counter prefix's next 10 words", util.isDeepStrictEqual(nnOf(prog), {lv:"1", set:2, ids: byLv["1"].slice(20, 30).map(w => w.id)}));
+  const pre20 = new Set(VC.counterOrder(byLv["1"], PACK).slice(0, 20).map(w => w.id));
+  check("nextNewSet -> level 1, set index 2, the next 10 words past the counter prefix (id order)", util.isDeepStrictEqual(nnOf(prog), {lv:"1", set:2, ids: byLv["1"].filter(w => !pre20.has(w.id)).slice(0, 10).map(w => w.id)}));
   const doneL1 = VC.normalizeProg({ sets:{"1": VC.nSets(byLv["1"], 10)} }, PACK);
   check("level 1 complete -> next set is level 2 set 0", util.isDeepStrictEqual(nnOf(doneL1), {lv:"2", set:0, ids: byLv["2"].slice(0, 10).map(w => w.id)}));
   const all = {}; VC.levelIds(PACK).forEach(lv=>{ all[lv] = VC.nSets(byLv[lv], 10); });
@@ -525,8 +528,8 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const gapRecs = {}; [1,2,3,4,5,6,7,8,11,12].forEach(rank => { gapRecs[`g${rank}`] = { r:1, w:0, s:1 }; });
   const gapProg = VC.normalizeProg({ w: gapRecs }, gapPack);
   const gapNn = VC.nextNewSet(gapWords, gapPack, gapProg);
-  check("Set N label: taught ranks 1-8, 11-12 (gap at 9-10) -> fresh starts at rank 9, set 1 (not set 2)",
-    gapNn && gapNn.words[0].id === "g9" && gapNn.set === 0);
+  check("Set N label: taught ranks 1-8, 11-12 (gap at 9-10) -> fresh starts at rank 9; set = sets learned by count (1, frequency tiers)",
+    gapNn && gapNn.words[0].id === "g9" && gapNn.set === 1);
 
   const insWords = Array.from({length: 29}, (_, i) => ({ id: `i${i+1}`, lv: "1" }));
   insWords.splice(29, 0, { id: "iNew", lv: "1" }); // inserted untaught word at rank 30
@@ -726,7 +729,7 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     cp.spawnSync("python3", [path.join(ROOT, "tools", "jsonify_pack.py"), tmp]);
     return cp.spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), tmp], { encoding:"utf8" });
   };
-  const base = { key:"t", name:"T", tts:"it-IT", levels:[{id:"A1",label:"A1"},{id:"A2",label:"A2"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false };
+  const base = { key:"t", name:"T", tts:"it-IT", levels:[{id:"A1",label:"A1"},{id:"A2",label:"A2"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false, eta:{} };
   const mkw = (n, lv, off) => Array.from({length:n}, (_,i)=>({ id:`${lv}${i+(off||0)}`, w:`w${lv}${i}`, en:`gloss ${lv} ${i}`, lv }));
   const ok = run(base, [...mkw(20,"A1"), ...mkw(12,"A2")]);
   check("synthetic pack (setSize/typing defaults) validates", ok.status === 0);
@@ -1015,7 +1018,7 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     cp.spawnSync("python3", [path.join(ROOT, "tools", "jsonify_pack.py"), tmp]);
     return cp.spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), tmp], { encoding:"utf8" });
   };
-  const base = { key:"t", name:"T", tts:"fa-IR", levels:[{id:"A1",label:"A1"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false };
+  const base = { key:"t", name:"T", tts:"fa-IR", levels:[{id:"A1",label:"A1"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false, eta:{} };
   const good = run(Object.assign({}, base, { rtl:true, langTag:"fa", fontFamily:'"Noto Naskh Arabic", serif', fonts:["Noto Naskh Arabic:wght@400;700"], lineHeight:2 }));
   check("validator: valid rtl/langTag/fontFamily/fonts/lineHeight -> 0 errors, no rtl-font warning", good.status === 0 && !/rtl is true/.test(good.stdout));
   const bad = run(Object.assign({}, base, { rtl:"yes", langTag:'"><x', fontFamily:"x; color:red", fonts:["x&family=y"], lineHeight:9 }));
@@ -1307,7 +1310,7 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
 
 (function(){
   console.log("\n[22] reading passages: unlock, grading, weak words, progress, validator");
-  const RP = { key:"rp", name:"RP", tts:"it-IT", levels:[{id:"A1",label:"A1"},{id:"A2",label:"A2"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false };
+  const RP = { key:"rp", name:"RP", tts:"it-IT", levels:[{id:"A1",label:"A1"},{id:"A2",label:"A2"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false, eta:{} };
   const RW = [...Array.from({length:20}, (_,i)=>({ id:`a${i}`, w:`parola${i}`, en:`word a ${i}`, lv:"A1" })),
               ...Array.from({length:10}, (_,i)=>({ id:`b${i}`, w:`voce${i}`, en:`word b ${i}`, lv:"A2" }))];
   RW[0].w = "casa"; RW[1].w = "andare"; RW[1].alt = ["vado"]; RW[2].w = "il gatto"; RW[2].alt = ["gatto"]; RW[3].w = "correre";
@@ -1324,6 +1327,8 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const prog = VC.normalizeProg({}, RP);
   const lv0 = VC.readingLevels(PS, RW, RP, prog);
   check("fresh learner: no level unlocked; A1 needs ceil(0.7*20)=14", lv0.every(l => !l.unlocked) && lv0[0].need === 14 && lv0[0].count === 2 && lv0[1].need === 7);
+  // ten taught records (a counter prefix would be read in id order, a0 a1 a10..., since the frequency tiers)
+  for(let i = 0; i < 10; i++) prog.w["a" + i] = { r:1, w:0, s:1 };
   prog.sets.A1 = 1;
   check("10/20 learned (50%) -> A1 still locked, suggestion null", !VC.readingLevels(PS, RW, RP, prog)[0].unlocked && VC.suggestPassage(PS, RW, RP, prog) === null);
   prog.w.a10 = { r:1, w:0, s:1, d:1 }; prog.w.a11 = { r:1, w:0, s:1, d:1 }; prog.w.a12 = { r:1, w:0, s:1, d:1 };
@@ -1331,7 +1336,7 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   prog.w.a13 = { r:1, w:0, s:1, d:1 };
   check("14/20 (70%) -> A1 unlocked", VC.readingLevels(PS, RW, RP, prog)[0].met);
   check("updateReadUnlocks records A1 once (sticky in prog.read.unlocked)", util.isDeepStrictEqual(VC.updateReadUnlocks(PS, RW, RP, prog), ["A1"]) && prog.read.unlocked.A1 === 1 && VC.updateReadUnlocks(PS, RW, RP, prog).length === 0);
-  const dropped = JSON.parse(JSON.stringify(prog)); dropped.sets.A1 = 0;
+  const dropped = JSON.parse(JSON.stringify(prog)); dropped.sets.A1 = 0; for(let i = 0; i < 10; i++) delete dropped.w["a" + i];
   check("stored unlock survives a drop below the threshold", VC.readingLevels(PS, RW, RP, dropped)[0].unlocked && !VC.readingLevels(PS, RW, RP, dropped)[0].met);
   check("A2 stays locked (0 learned)", !VC.readingLevels(PS, RW, RP, prog)[1].unlocked);
   check("suggestPassage -> first not-done passage at an unlocked level", VC.suggestPassage(PS, RW, RP, prog) === P1);
@@ -1371,48 +1376,13 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
 
   // passage done + stats
   VC.markPassageDone(prog, "p0001", 2, 3, "2026-09-24");
-  check("markPassageDone stores {sc,n,d,x}", util.isDeepStrictEqual(prog.read.done.p0001, { sc:2, n:3, d:"2026-09-24", x:1 }));
+  check("markPassageDone stores {sc,n,d,x} and the read rotation's s (session of the pass)", util.isDeepStrictEqual(prog.read.done.p0001, { sc:2, n:3, d:"2026-09-24", x:1, s: VC.daySn(prog) }));
   check("suggestPassage moves to the next not-done passage", VC.suggestPassage(PS, RW, RP, prog) === P2);
   VC.markPassageDone(prog, "p0002", 1, 1, "2026-09-25");
   check("all unlocked passages done -> no suggestion", VC.suggestPassage(PS, RW, RP, prog) === null);
   VC.markPassageDone(prog, "p0001", 3, 3, "2026-09-26");
   const st = VC.readingStats(PS, RP, prog);
   check("readingStats: A1 2/2 done, avg of latest scores (100%, 100%); A2 0/1, avg null", st.length === 2 && st[0].done === 2 && st[0].total === 2 && st[0].avg === 100 && st[1].done === 0 && st[1].avg === null && prog.read.done.p0001.x === 2);
-
-  // Today Read stage selection (nextReadItem): new first, then spaced re-reads of passages
-  // with a missed question, oldest completion first, >= READ_REREAD_DAYS after it.
-  {
-    const base = JSON.parse(JSON.stringify(prog)); delete base.read.done;
-    const rp = () => JSON.parse(JSON.stringify(base));
-    const at = (pr, now) => VC.nextReadItem(PS, RW, RP, pr, now);
-    const nr = at(rp(), "2026-09-26");
-    check("nextReadItem: a not-done passage at an unlocked level -> {p, reason:new} (suggestPassage's pick)", nr && nr.p === P1 && nr.reason === "new" && VC.suggestPassage(PS, RW, RP, rp()) === P1);
-    const locked = VC.normalizeProg({}, RP);
-    check("nextReadItem: nothing unlocked -> null; no passages -> null", at(locked, "2026-09-26") === null && VC.nextReadItem([], RW, RP, rp(), "2026-09-26") === null);
-    const clean = rp(); VC.markPassageDone(clean, "p0001", 3, 3, "2026-09-01"); VC.markPassageDone(clean, "p0002", 1, 1, "2026-09-01");
-    check("nextReadItem: every unlocked passage done, none missed -> null", at(clean, "2026-12-01") === null);
-    const miss = rp(); VC.markPassageDone(miss, "p0001", 3, 3, "2026-09-01"); VC.markPassageDone(miss, "p0002", 0, 1, "2026-09-20");
-    check("nextReadItem: missed passage 6 days ago -> null (7-day rule)", at(miss, "2026-09-26") === null);
-    const rr = at(miss, "2026-09-27");
-    check("nextReadItem: missed passage 7 days ago -> {p, reason:reread}", rr && rr.p === P2 && rr.reason === "reread" && VC.READ_REREAD_DAYS === 7);
-    check("nextReadItem: now as a Date (local day) works like the ISO string", at(miss, new Date(2026, 8, 27, 23, 30)).p === P2 && at(miss, new Date(2026, 8, 26, 0, 5)) === null);
-    check("nextReadItem: month/year boundaries count calendar days", at(Object.assign(rp(), { read: { unlocked: { A1: 1 }, done: { p0001: { sc:3, n:3, d:"2026-12-28", x:1 }, p0002: { sc:0, n:1, d:"2026-12-28", x:1 } } } }), "2027-01-04").p === P2);
-    const two = rp(); VC.markPassageDone(two, "p0001", 2, 3, "2026-09-10"); VC.markPassageDone(two, "p0002", 0, 1, "2026-09-05");
-    check("nextReadItem: oldest completion first among missed passages", at(two, "2026-09-26").p === P2);
-    two.read.done.p0002.d = "2026-09-10";
-    check("nextReadItem: equal dates -> pack order", at(two, "2026-09-26").p === P1);
-    two.read.done.p0002.d = "2026-09-24";
-    check("nextReadItem: a missed passage still inside 7 days is passed over for an older one", at(two, "2026-09-26").p === P1);
-    const snap = JSON.stringify(two);
-    const a1 = at(two, "2026-09-26"), a2 = at(two, "2026-09-26");
-    check("nextReadItem is pure: prog unchanged, same pick every call (skipping writes nothing, so it comes back)", JSON.stringify(two) === snap && a1.p === a2.p && a1.reason === a2.reason);
-    VC.markPassageDone(two, "p0001", 3, 3, "2026-09-26");
-    check("nextReadItem: a clean re-read (latest sc = n) drops the passage from re-reads", at(two, "2026-10-10").p === P2 && two.read.done.p0001.x === 2 && (two.read.done.p0002.sc = 1, at(two, "2026-10-10")) === null);
-    const lockedMiss = rp(); VC.markPassageDone(lockedMiss, "p0001", 3, 3, "2026-09-01"); VC.markPassageDone(lockedMiss, "p0002", 1, 1, "2026-09-01"); lockedMiss.read.done.p0003 = { sc:0, n:1, d:"2026-09-01", x:1 };
-    check("nextReadItem: a done entry at a locked level (A2) is never offered", at(lockedMiss, "2026-12-01") === null);
-    const odd = rp(); VC.markPassageDone(odd, "p0001", 3, 3, "2026-09-01"); odd.read.done.p0002 = { sc:0, n:1, x:1 };
-    check("nextReadItem: missing/invalid date or now -> no re-read (new passages unaffected)", at(odd, "2026-12-01") === null && at(miss, "not a date") === null && at(rp(), undefined).reason === "new");
-  }
 
   // progress shape and round trip
   const L = VC.levelIds(RP);
@@ -1553,8 +1523,8 @@ function reorderedLevel(pack, words){
   const after = VC.learnedWords(R.words, PACK, R.prog);
   check("reorder: insert at rank 2 + swap ranks 5/35 -> learnedWords identical to before", util.isDeepStrictEqual(ids(after), R.before));
   const nn = VC.nextNewSet(R.words, PACK, R.prog);
-  check("reorder: nextNewSet holds the inserted word and the swapped-in unlearned word, no learned word, set is the inserted word's rank position (0), not the counter (3)",
-    nn && nn.lv === "1" && nn.set === 0 && nn.words.length === R.size && nn.words.some(w => w.id === R.inserted)
+  check("reorder: nextNewSet holds the inserted word and the swapped-in unlearned word, no learned word, set is the count of sets learned (3, frequency tiers)",
+    nn && nn.lv === "1" && nn.set === 3 && nn.words.length === R.size && nn.words.some(w => w.id === R.inserted)
     && nn.words.some(w => w.id === R.swappedIn) && nn.words.every(w => !R.learnedIds.has(w.id)));
   const l1n = R.words.filter(w => w.lv === "1");
   check("reorder: nextNewSet is the next unlearned words in rank order", util.isDeepStrictEqual(nn.words.map(w => w.id), l1n.filter(w => !R.learnedIds.has(w.id)).slice(0, R.size).map(w => w.id)));
@@ -1568,23 +1538,26 @@ function reorderedLevel(pack, words){
   check("removed learned word: nextNewSet still starts after every learned word", nnLess && nnLess.words.every(w => !R.learnedIds.has(w.id)));
 
   const size = VC.setSizeOf(PACK), l1 = WORDS.filter(w => w.lv === "1");
+  // a counter prefix is read in id order (VC.counterOrder; the counters were written before the frequency order)
+  const co = VC.counterOrder(l1, PACK), pre2 = co.slice(0, 2*size);
   const legacy = VC.normalizeProg({ sets:{ "1": 2 } }, PACK);
-  check("legacy sets {1:2}, no records -> learnedWords is the counter prefix", util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, legacy).map(w => w.id), l1.slice(0, 2*size).map(w => w.id)));
+  check("legacy sets {1:2}, no records -> learnedWords is the counter prefix (id order)", util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, legacy).map(w => w.id), pre2.map(w => w.id)));
   const raw = JSON.parse(JSON.stringify(legacy));
   l1.slice(2*size, 3*size).forEach(w => { raw.w[w.id] = { r:1, w:0, s:1 }; });
   check("legacy + one set's records written directly -> the records rule applies (just those words)", util.isDeepStrictEqual(ids(VC.learnedWords(WORDS, PACK, raw)), ids(l1.slice(2*size, 3*size))));
   const viaApp = JSON.parse(JSON.stringify(legacy));
   l1.slice(2*size, 3*size).forEach(w => { VC.ensureWordRec(viaApp, WORDS, PACK, w.id); VC.markRec(viaApp.w, w.id, true, true, "hear"); });
   viaApp.sets["1"] = 3;
-  check("legacy + one set drilled via ensureWordRec -> prefix pinned as prov records, records rule, 3 sets learned",
-    util.isDeepStrictEqual(ids(VC.learnedWords(WORDS, PACK, viaApp)), ids(l1.slice(0, 3*size))) && l1.slice(0, 2*size).every(w => viaApp.w[w.id].prov === 1)
-    && util.isDeepStrictEqual(VC.nextNewSet(WORDS, PACK, viaApp).words.map(w => w.id), l1.slice(3*size, 4*size).map(w => w.id)));
+  const unionIds = [...new Set([...pre2, ...l1.slice(2*size, 3*size)].map(w => w.id))];
+  check("legacy + one set drilled via ensureWordRec -> prefix pinned as prov records, records rule (prefix + drilled set)",
+    util.isDeepStrictEqual(ids(VC.learnedWords(WORDS, PACK, viaApp)), unionIds.slice().sort()) && pre2.every(w => viaApp.w[w.id].prov === 1)
+    && util.isDeepStrictEqual(VC.nextNewSet(WORDS, PACK, viaApp).words.map(w => w.id), l1.filter(w => !unionIds.includes(w.id)).slice(0, size).map(w => w.id)));
 
   const dp = JSON.parse(JSON.stringify(R.prog)); const ahead = l1[6*size];
   dp.w[ahead.id] = { r:0, w:0, s:0, d:1 };
   check("drilled-ahead d word counts under the records rule", VC.learnedWords(WORDS, PACK, dp).some(w => w.id === ahead.id) && !VC.nextNewSet(WORDS, PACK, dp).words.some(w => w.id === ahead.id));
   const donly = JSON.parse(JSON.stringify(legacy)); donly.w[ahead.id] = { r:0, w:0, s:0, d:1 };
-  check("d-only level: counter prefix plus the d word (d says nothing about the prefix)", util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, donly).map(w => w.id), [...l1.slice(0, 2*size).map(w => w.id), ahead.id]));
+  check("d-only level: counter prefix plus the d word (d says nothing about the prefix)", util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, donly).map(w => w.id), [...pre2.map(w => w.id), ahead.id]));
 
   const st = VC.strata(WORDS, PACK.placement, size);
   const placed = VC.applyPlacement(VC.defaultProg(PACK), st, 2, WORDS, PACK);
@@ -1788,7 +1761,7 @@ return {
   // unanswered hear items, the one on screen included, into read items with the no-voice notice; a list with
   // the voice leaves them hear items (nothing re-rendered, nothing restarted).
   try{
-    const NOTICE = "no text-to-speech voice";
+    const NOTICE = "No voice for this language in this browser";
     const b = await bootApp([]); const r0 = b.api.getRenderCalls();
     check("late voices: empty list at boot -> optimistic (hasSpeech true), no notice on Today", b.api.getHasSpeech() === true && !b.api.getHtml("panel").includes(NOTICE));
     const hearA = b.api.hearItem(WORDS[5]), hearB = b.api.hearItem(WORDS[6]);
@@ -1859,7 +1832,7 @@ return {
     const fresh = VC.normalizeProg({ sets: {}, placedOnce: true, sessions: 1 }, PACK);
     b.api.setProgT(fresh); b.api.testTab();
     const h0 = b.api.getHtml("panel");
-    check("Test tab, nothing learned: the learn-first card only (it covers every free test)", /id="needPlace"/.test(h0) && !/id="tSentLock"/.test(h0) && !/id="tSentences"/.test(h0));
+    check("Test tab, nothing learned (placed): the learn-first line only (it covers every free test)", /Free tests unlock at/.test(h0) && !/id="tSentLock"/.test(h0) && !/id="tSentences"/.test(h0));
     const lv = PACK.levels[0].id, pr = VC.normalizeProg({ sets: {}, placedOnce: true, sessions: 1 }, PACK);
     let k = 0; for(const w of WORDS){ if(w.lv !== lv) continue; pr.w[w.id] = { r: 3, w: 0, s: 3, d: 1 }; if(++k >= 8) break; }
     pr.sets[lv] = 1;
@@ -1883,14 +1856,14 @@ return {
     check("a plain type item is never flagged needsNotice", !typeItem.needsNotice);
     api.setQueueAndNext([typeItem, builtSecond, builtFirst], () => {});
     const typeHtml = document.getElementById("panel").innerHTML;
-    check("no notice on a type item shown first", !typeHtml.includes("no text-to-speech voice"));
+    check("no notice on a type item shown first", !typeHtml.includes("No voice for this language in this browser"));
     api.dnext(); // advance past the type item straight to the queue's next entry (bypassing its input UI)
     const shownFirstHtml = document.getElementById("panel").innerHTML;
-    check("notice appears on the first hear item actually shown (built second, after the type item)", shownFirstHtml.includes("no text-to-speech voice"));
+    check("notice appears on the first hear item actually shown (built second, after the type item)", shownFirstHtml.includes("No voice for this language in this browser"));
     document.getElementById("o").children[0].click();
     document.getElementById("nx").click();
     const shownSecondHtml = document.getElementById("panel").innerHTML;
-    check("notice does not repeat on the item shown second (built first)", !shownSecondHtml.includes("no text-to-speech voice"));
+    check("notice does not repeat on the item shown second (built first)", !shownSecondHtml.includes("No voice for this language in this browser"));
   }catch(e){ check(`notice-timing scenario does not throw (got: ${e.message})`, false); }
 
   try{
@@ -1899,7 +1872,7 @@ return {
     api.setHasSpeech(true); // voice arrives between build and display
     api.setQueueAndNext([flagged], () => {});
     const html = document.getElementById("panel").innerHTML;
-    check("a needsNotice item shows no notice if hasSpeech flips true before it's shown", !html.includes("no text-to-speech voice"));
+    check("a needsNotice item shows no notice if hasSpeech flips true before it's shown", !html.includes("No voice for this language in this browser"));
   }catch(e){ check(`hasSpeech-flips-before-show scenario does not throw (got: ${e.message})`, false); }
 
   // Every word item passes its own kind to markWord, so a miss is remembered as prog.w[id].k.
@@ -1933,8 +1906,8 @@ return {
     const g1 = api.gapSentence(one, false); g1.onAnswer(false);
     const afterMiss = JSON.stringify(pr.w[bid]);
     api.gapSentence(one, false).onAnswer(true);
-    // t: the day of the last answer, written under pack.dayAware (zh).
-    const noT = j => { const r = Object.assign({}, typeof j === "string" ? JSON.parse(j) : j); delete r.t; return JSON.stringify(r); };
+    // t / u: the day and session of the last answer (day log); p: the word's pairs (a cloze miss is a written<->meaning miss).
+    const noT = j => { const r = Object.assign({}, typeof j === "string" ? JSON.parse(j) : j); delete r.t; delete r.u; delete r.p; return JSON.stringify(r); };
     check(`cloze (choice) miss sets k=recall on the blank word ${bid}, r/w/s untouched; a gap pass clears it`,
       noT(afterMiss) === JSON.stringify({ r:4, w:1, s:2, k:"recall" }) && noT(pr.w[bid]) === JSON.stringify({ r:4, w:1, s:2 }) && pr.s[one.id] && pr.s[one.id].w === 1);
     const saved = pr.w[bid]; delete pr.w[bid]; api.gapSentence(one, false).onAnswer(false);
@@ -1973,12 +1946,12 @@ return {
     el("o").children.find(o => o.dataset.v === w.id).click();
     check("a pass on the recall fallback keeps k=type (production still owed)", pr.w[w.id].k === "type" && pr.w[w.id].r === 3);
     el("nx").click();
-    check("drill ends after the pass (1 right of 4 answers)", /<h2>1 \/ 4<\/h2>/.test(el("panel").innerHTML));
+    check("drill ends after the pass (first-time score: 0 of 1, the word was missed)", /<h2>0 of 1<\/h2>/.test(el("panel").innerHTML));
     // A pass on the first retry never reaches the fallback.
     const w2 = WORDS[61]; pr.w[w2.id] = { r:2, w:0, s:2 };
     b.api.setQueueAndNext([b.api.itemFromPlan({ kind:"type", word: w2 }, 0, [])], () => {});
     typeOnce("zzz"); el("nx").click(); typeOnce(w2.w); el("nx").click();
-    check("miss then typed right: done, k cleared", /<h2>1 \/ 2<\/h2>/.test(el("panel").innerHTML) && !("k" in pr.w[w2.id]));
+    check("miss then typed right: done (0 of 1), k cleared", /<h2>0 of 1<\/h2>/.test(el("panel").innerHTML) && !("k" in pr.w[w2.id]));
     // Typed gap -> choice gap on the second miss, same blank.
     const WB = Object.fromEntries(WORDS.map(x => [x.id, x]));
     const one = SENTENCES.find(x => VC.gapCandidateIndices(x, WB, typPack).length === 1);
@@ -1999,7 +1972,7 @@ return {
     const plainRead = api.readItem(WORDS[9]);
     api.setQueueAndNext([plainRead], () => {});
     const html = document.getElementById("panel").innerHTML;
-    check("a plain read item (not hearItem's no-speech fallback) never shows the notice", !html.includes("no text-to-speech voice"));
+    check("a plain read item (not hearItem's no-speech fallback) never shows the notice", !html.includes("No voice for this language in this browser"));
   }catch(e){ check(`plain read item scenario does not throw (got: ${e.message})`, false); }
 
   // The notice explains a replaced listening item; a drill with none replaced never shows it,
@@ -2014,11 +1987,11 @@ return {
       document.getElementById("o").children[0].click();
       document.getElementById("nx").click();
     }
-    check("no-voice drill with zero converted items: no notice on any item", htmls.length === 3 && htmls.every(h => !h.includes("no text-to-speech voice")));
+    check("no-voice drill with zero converted items: no notice on any item", htmls.length === 3 && htmls.every(h => !h.includes("No voice for this language in this browser")));
     api.progressTab();
-    check("Progress shows the no-voice line when hasSpeech is false and the pack has no clips", /No text-to-speech voice is available/.test(document.getElementById("panel").innerHTML));
+    check("Progress shows the no-voice line when hasSpeech is false and the pack has no clips", /No voice for this language in this browser/.test(document.getElementById("panel").innerHTML));
     api.setHasSpeech(true); api.progressTab();
-    check("Progress drops the line once a voice is usable", !/No text-to-speech voice is available/.test(document.getElementById("panel").innerHTML));
+    check("Progress drops the line once a voice is usable", !/No voice for this language in this browser/.test(document.getElementById("panel").innerHTML));
   }catch(e){ check(`zero-converted drill / Progress line scenario does not throw (got: ${e.message})`, false); }
 
   // A remembered hear miss (k) on a word the planner turned into read must still clear on a pass.
@@ -2093,18 +2066,18 @@ return {
   try{
     const { rtlAudit } = require("./fixtures/rtl_audit.js");
     // A copy of the first passage whose question translation embeds an RTL phrase.
-    const P0 = JSON.parse(JSON.stringify(PASSAGES[0])); P0.questions[0].en = "Where did he go? (از ... متنفرم)";
+    const P0 = JSON.parse(JSON.stringify(PASSAGES[0])); P0.questions.forEach(q => { q.en = "Where did he go? (از ... متنفرم)"; }); // every question: the pass asks them in its own order (passageForPass)
     const RPS = [P0, ...PASSAGES.slice(1)];
     const rtlB = await bootApp([{ lang:"zh-CN", name:"x" }], { passages: RPS, pack: Object.assign({}, PACK, { rtl: true }) });
     const ltrB = await bootApp([{ lang:"zh-CN", name:"x" }], { passages: PASSAGES });
     const panelOf = b => b.document.getElementById("panel").innerHTML;
     const screens = b => { const out = {}; const pr = b.api.getProg(); pr.read = Object.assign({ done: {} }, pr.read, { unlocked: Object.fromEntries(PACK.levels.map(l => [l.id, 1])) }); pr.read.done = { [PASSAGES[0].id]: { sc: 3, n: 4, date: "2026-09-26" } }; b.api.readRender(); out.readList = panelOf(b); b.api.startPassage(RPS[0]); out.passage = panelOf(b); b.api.readQuestion(0); { const qtr = b.document.getElementById("qtr"); if(qtr) qtr.click(); } out.question = panelOf(b) + b.api.optsMarkup() + (b.document.getElementById("qtrwrap") ? b.document.getElementById("qtrwrap").innerHTML : ""); b.api.getRD().tapped = WORDS.filter(w => JSON.stringify(RPS[0]).includes(`"${w.id}"`)).slice(0, 2).map(w => w.id); b.api.readResults(); out.results = panelOf(b); return out; };
     const rs = screens(rtlB), ls = screens(ltrB);
-    check("rtl pack: Read-list meta line is dir=ltr data-ui inside the dir=rtl title button",
-      /<button data-pid="[^"]+" dir="rtl"><span>[\s\S]*?<span class="q" dir="ltr" data-ui style="display:block;margin:0;font-size:13px">\d+ words<\/span>/.test(rs.readList));
+    // (The v1 Read-list meta line went with the app v2 collapse: v2 rows carry the title and the score only.)
+    check("rtl pack: Read-list title buttons are dir=rtl", /<button data-pid="[^"]+" dir="rtl"><span>/.test(rs.readList));
     Object.keys(rs).forEach(k => { const bad = rtlAudit(rs[k]); check(`rtl pack: ${k} has no UI text (Latin or digits) whose nearest dir is rtl, no RTL text outside data-tl (${bad.length})`, bad.length === 0, bad.slice(0, 3).join(" | ")); });
     check("rtl pack: results weak-word rows render (RTL flex rows, why label dir=ltr data-ui)", /<label class="wk" dir="rtl">/.test(rs.results) && /<span class="q" dir="ltr" data-ui style="margin:0;font-size:13px">/.test(rs.results));
-    check("rtl pack: Read-list done tick (✓ 3 / 4) is dir=ltr data-ui inside the dir=rtl button", /<span class="tick" dir="ltr" data-ui>✓ 3 \/ 4<\/span>/.test(rs.readList));
+    check("rtl pack: Read-list score (3 of 4) is dir=ltr data-ui inside the dir=rtl button", /<span class="rsc" dir="ltr" data-ui>3 of 4<\/span>/.test(rs.readList));
     check("rtl pack: read question translation isolates its RTL phrase as one run", /\(<bdi data-tl lang="zh" dir="rtl" class="tlf">از \.\.\. متنفرم<\/bdi>\)/.test(rs.question));
     check("ltr pack: Read screens carry no data-ui / tlf markup (unchanged)", Object.values(ls).every(h => !/data-ui|class="tlf"/.test(h)));
     await tick(); await tick();
@@ -2116,25 +2089,27 @@ return {
   try{
     const { rtlAudit } = require("./fixtures/rtl_audit.js");
     const unlockAll = pr => { pr.read = { unlocked: Object.fromEntries(PACK.levels.map(l => [l.id, 1])) }; };
-    const readRow = h => (h.match(/<tr><td>6\. Read<\/td><td>([\s\S]*?)<\/td><\/tr>/) || [])[1];
+    // Today plan rows (app v2): <div class="tst"><span>Step</span><div class="tsd">detail</div></div>; the passage row is the last, named by its title.
+    const stepRow = (h, name) => { const m = [...h.matchAll(/<div class="tst"><span>([^<]*)<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/g)].filter(x => x[1] === name && x[2]); return m.length ? m[m.length - 1][2] : undefined; };
+    const readRow = h => stepRow(h, "Read");
     const b = await bootApp([{ lang:"zh-CN", name:"x" }], { passages: PASSAGES });
     const pr = b.api.getProg();
     b.api.today();
     const lockedToday = b.api.getHtml("panel");
-    check("Today, no passage unlocked: no Read row, 5 plan rows, no old hint box", !readRow(lockedToday) && (lockedToday.match(/<tr>/g) || []).length === 5 && !/readHintBox|hintRead/.test(lockedToday));
+    check("Today, no passage unlocked: no Read row, 5 plan rows, no old hint box", !readRow(lockedToday) && (lockedToday.match(/class="tst"/g) || []).length === 5 && !/readHintBox|hintRead/.test(lockedToday));
     unlockAll(pr); b.api.today();
     const p0 = VC.suggestPassage(PASSAGES, WORDS, PACK, pr), row = readRow(b.api.getHtml("panel"));
-    check(`Today, passage available: plan row "6. Read" = 1 passage: <title> (level, N words) (${row && row.replace(/<[^>]+>/g, "")})`,
-      !!row && row === `1 passage: <bdi data-tl lang="zh">${VC.escapeHtml(p0.title)}</bdi> (${VC.escapeHtml(PACK.levels.find(l => l.id === p0.lv).label)}, ${VC.passageLength(p0, PACK)} words)`);
+    check(`Today, passage available: plan row "Read" = the passage title (${row && row.replace(/<[^>]+>/g, "")})`,
+      !!row && row.replace(/<[^>]+>/g, "") === VC.escapeHtml(p0.title));
     // Run the stage (step 5, as Start today reaches it after Sentences).
     b.api.enterTodayStep(5);
     const stageH = b.api.getHtml("panel");
-    check("stage opens the suggested passage with Skip today (no passage-list link)", b.api.getRD() && b.api.getRD().p === p0 && b.api.getRD().today === true && /<button id="rskip">Skip today<\/button>/.test(stageH) && !/id="rback"/.test(stageH));
+    check("stage opens the suggested passage with Skip today (no passage-list link)", b.api.getRD() && b.api.getRD().p.id === p0.id && b.api.getRD().today === true && /<button id="rskip">Skip today<\/button>/.test(stageH) && !/id="rback"/.test(stageH));
     b.api.startPassage(p0); const tabH = b.api.getHtml("panel");
-    check("stage passage screen is the Read tab's screen apart from that one button", stageH.replace('<button id="rskip">Skip today</button>', "") === tabH.replace('<button id="rback">‹ passages</button>', "") && !b.api.getRD().today);
+    check("stage passage screen is the Read tab's screen apart from that one button", stageH.replace('<div class="row"><button id="rskip">Skip today</button></div>', "") === tabH.replace('<button class="ghost rback" id="rback">Passages</button>', "") && !b.api.getRD().today);
     // Answer: question 0 wrong, the rest right.
     b.api.enterTodayStep(5);
-    const doc = b.document, qs = p0.questions, s0 = pr.sessions || 0;
+    const doc = b.document, qs = b.api.getRD().p.questions, s0 = pr.sessions || 0; // the pass's question order (passageForPass)
     const wrongIds = qs[0].words || [], before = Object.fromEntries(wrongIds.map(id => [id, (pr.w[id] && pr.w[id].w) || 0]));
     doc.getElementById("rdone").click();
     qs.forEach((q, i) => {
@@ -2144,46 +2119,29 @@ return {
     });
     const res = b.api.getHtml("panel");
     check(`results count the passage's questions (${qs.length - 1} / ${qs.length}), Continue instead of Add to review / Back to passages`,
-      res.includes(`<h2>${qs.length - 1} / ${qs.length}</h2>`) && /id="rcont"/.test(res) && !/id="addrev"|id="rlist"/.test(res) && (!wrongIds.length || /Ticked ones go to your next review/.test(res)));
+      res.includes(`<h2>${qs.length - 1} of ${qs.length}</h2>`) && /id="rcont"/.test(res) && !/id="addrev"|id="rlist"/.test(res) && (!wrongIds.length || /Ticked ones go to your next review/.test(res)));
     const rec = pr.read.done[p0.id];
     check("passage recorded in prog.read.done as a Read-tab completion ({sc, n, d, x:1})", rec && rec.sc === qs.length - 1 && rec.n === qs.length && rec.x === 1 && /^\d{4}-\d{2}-\d{2}$/.test(rec.d));
     doc.getElementById("rcont").click();
     check(`Continue: the missed question's words gain READ_WEIGHT.wrong misses in prog.w (${wrongIds.join(",")})`, wrongIds.length > 0 && wrongIds.every(id => pr.w[id].w === before[id] + VC.READ_WEIGHT.wrong && pr.w[id].s === 0));
-    check("Continue ends the session as usual (Session done, sessions + 1)", /Session done/.test(b.api.getHtml("panel")) && pr.sessions === s0 + 1 && b.api.getRD() === null);
+    check("Continue ends the session as usual (Session done, sessions + 1)", /Session \d+ done/.test(b.api.getHtml("panel")) && pr.sessions === s0 + 1 && b.api.getRD() === null);
     b.api.today();
-    const p1 = VC.suggestPassage(PASSAGES, WORDS, PACK, pr);
-    check("next Today plan names the next passage", p1 && p1 !== p0 && readRow(b.api.getHtml("panel")).includes(VC.escapeHtml(p1.title)));
+    // Read rotation (default since the flag collapse): a reading pass is followed by a listening pass of it.
+    const listenRow = h => stepRow(h, "Listen");
+    const p1 = p0, lr1 = listenRow(b.api.getHtml("panel"));
+    check("next Today plan: the passage just read comes back as a listening pass (read rotation)", !!lr1 && lr1.includes(VC.escapeHtml(p1.title)));
     // Skip: nothing recorded, session counts as usual, same passage next time.
     const doneBefore = JSON.stringify(pr.read.done), s1 = pr.sessions;
     b.api.enterTodayStep(5); doc.getElementById("rskip").click();
-    check("Skip today: session finishes (sessions + 1 as without the stage), passage not marked done", /Session done/.test(b.api.getHtml("panel")) && pr.sessions === s1 + 1 && JSON.stringify(pr.read.done) === doneBefore && b.api.getRD() === null);
+    check("Skip today: session finishes (sessions + 1 as without the stage), passage not marked done", /Session \d+ done/.test(b.api.getHtml("panel")) && pr.sessions === s1 + 1 && JSON.stringify(pr.read.done) === doneBefore && b.api.getRD() === null);
     b.api.today();
-    check("Skip today: the same passage is offered next session", readRow(b.api.getHtml("panel")).includes(VC.escapeHtml(p1.title)));
+    check("Skip today: the same passage is offered next session", (listenRow(b.api.getHtml("panel")) || "").includes(VC.escapeHtml(p1.title)));
     // Start today carries the plan's pick: the stage runs the passage the plan named.
     b.api.enterTodayStep(5, { p: PASSAGES[3], reason: "new" });
-    check("stage runs the passage picked at Start today (todayStepState.read)", b.api.getRD().p === PASSAGES[3]);
+    check("stage runs the passage picked at Start today (todayStepState.read)", b.api.getRD().p.id === PASSAGES[3].id);
     b.api.enterTodayStep(5, null);
-    check("Start today with no passage: step 5 goes straight to Session done", /Session done/.test(b.api.getHtml("panel")) && !/id="rskip"/.test(b.api.getHtml("panel")));
-    // Everything done: a spaced re-read, then nothing.
-    const today = new Date(), iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    const old = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 8)), recent = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 2));
-    pr.read.done = Object.fromEntries(PASSAGES.map(p => [p.id, { sc: p.questions.length, n: p.questions.length, d: old, x: 2 }]));
-    b.api.today();
-    check("all done, none missed: no Read row", !readRow(b.api.getHtml("panel")));
-    pr.read.done[PASSAGES[2].id].sc = 0; pr.read.done[PASSAGES[2].id].d = recent;
-    b.api.today();
-    check("all done, missed one 2 days ago: no Read row yet (7-day rule)", !readRow(b.api.getHtml("panel")));
-    pr.read.done[PASSAGES[5].id].sc = 0;
-    b.api.today();
-    // A voice is usable here, so the spaced re-read is a listening pass (VC.readPassMode);
-    // after a listening attempt (l: 1) the next re-read is a reading pass again.
-    const lrow = (b.api.getHtml("panel").match(/<tr><td>6\. Listen<\/td><td>([\s\S]*?)<\/td><\/tr>/) || [])[1];
-    check(`all done, missed one 8 days ago, voice usable: Listen row offers it as a listening pass (${lrow && lrow.replace(/<[^>]+>/g, "")})`, !!lrow && !readRow(b.api.getHtml("panel")) && lrow.startsWith("1 passage to listen to: ") && lrow.includes(VC.escapeHtml(PASSAGES[5].title)));
-    pr.read.done[PASSAGES[5].id].l = 1;
-    b.api.today();
-    const rrow = readRow(b.api.getHtml("panel"));
-    check(`all done, missed one 8 days ago, last attempt a listening pass: Read row offers it as a re-read (${rrow && rrow.replace(/<[^>]+>/g, "")})`, !!rrow && rrow.startsWith("1 passage to re-read: ") && rrow.includes(VC.escapeHtml(PASSAGES[5].title)));
-    delete pr.read.done[PASSAGES[5].id].l;
+    check("Start today with no passage: step 5 goes straight to Session done", /Session \d+ done/.test(b.api.getHtml("panel")) && !/id="rskip"/.test(b.api.getHtml("panel")));
+    // (The legacy 7-day spaced re-read checks went with the readRotation flag: the rotation's picks are covered above and in tests/listen_mode_checks.js.)
     await tick(); await tick();
     // RTL: the plan line passes the shared RTL audit; UI parts isolated, title in pack font.
     const RP0 = JSON.parse(JSON.stringify(PASSAGES[0])); RP0.title = "خانه (آزمون)";
@@ -2191,26 +2149,10 @@ return {
     unlockAll(rb.api.getProg()); rb.api.today();
     const rtlToday = rb.api.getHtml("panel"), rrw = readRow(rtlToday), bad = rtlAudit(rtlToday);
     check(`rtl pack: Today plan with the Read row passes the RTL audit (${bad.length})`, !!rrw && bad.length === 0, bad.slice(0, 3).join(" | "));
-    check("rtl pack: Read row title is an isolated RTL run (tlf, ui() run split), level/length plain UI text", /^1 passage: <bdi data-tl lang="zh" dir="rtl" class="tlf">خانه \(آزمون<\/bdi>\) \(HSK 1, \d+ words\)$/.test(rrw));
+    check("rtl pack: Read row title is an isolated RTL run (tlf)", /<bdi data-tl lang="zh" dir="rtl" class="tlf">خانه \(آزمون/.test(rrw));
     check("ltr pack: Read row carries no data-ui / tlf markup", !/data-ui|class="tlf"/.test(row));
     await tick(); await tick();
-    // No passages in the pack: Today markup and the session end byte-identical to main at spawn.
-    const MAIN_READ = "93f77a2";
-    const mainHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN_READ}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26 });
-    const mainBlocks = [...mainHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)], mainSrc = mainBlocks[mainBlocks.length - 1][1];
-    const screensOf = async src => {
-      // dayAware (plan-line wording) post-dates the control.
-      const noDay = Object.assign({}, PACK); delete noDay.dayAware; delete noDay.wordsBy;
-      const x = await bootApp([{ lang:"zh-CN", name:"x" }], src ? { appSrc: src, pack: noDay } : { pack: noDay });
-      const out = [x.api.getHtml("panel")];
-      const q = x.api.getProg(); q.sets[PACK.levels[0].id] = 3; x.api.today(); out.push(x.api.getHtml("panel"));
-      x.api.enterTodayStep(5); out.push(x.api.getHtml("panel"));
-      await tick(); await tick();
-      return out;
-    };
-    const [mA, cA] = [await screensOf(mainSrc), await screensOf()];
-    check(`no-passages pack: Today (fresh, 3 sets learned) and the session end byte-identical to main ${MAIN_READ} (${cA.map(h => h.length).join("/")} chars)`,
-      mA.length === 3 && mA.every((h, i) => h === cA[i]) && /Session done/.test(cA[2]));
+    // (The no-passages byte-identity control against main 93f77a2 ran with dayAware off; dayAware is default since the flag collapse.)
   }catch(e){ check(`today read stage scenario does not throw (got: ${e.stack})`, false); }
 
   // Span display glosses (spans[i][3]) reach the tap-to-gloss popover, the screen-reader
@@ -2274,7 +2216,7 @@ return {
       const tapped0 = rd.tapped; rd.tapped = [];
       api.readResults(); const h1 = document.getElementById("panel").innerHTML;
       check("results, stale reopened flag only: no weak-word list, heading or Add to review; no look-back marker anywhere (owner 2026-10-03)",
-        !/id="weak"|Weak words from this passage|id="addrev"|data-wi=/.test(h1) && /No weak words from this passage/.test(h1) && !/looked back/.test(h1));
+        !/id="weak"|Weak words from this passage|id="addrev"|data-wi=/.test(h1) && !/looked back/.test(h1));
       rd.tapped = tapped0; api.readResults(); const h2 = document.getElementById("panel").innerHTML;
       const wk = (h2.match(/<div id="weak">[\s\S]*?<\/div>/) || [""])[0];
       const boxes = (wk.match(/data-wi="\d+"/g) || []).length, rows = (wk.match(/<label class="wk"/g) || []).length;
@@ -2330,8 +2272,8 @@ return {
     seedLearned(api.getProg(), 6);
     api.today();
     const html = api.getHtml("panel");
-    check("Today plan: no voice and no pack audio (WORDS carry no .audio) -> Listen line has no item count",
-      /<td>3\. Listen<\/td><td>[^<]*<\/td>/.test(html) && !/<td>3\. Listen<\/td><td>\d+ items<\/td>/.test(html));
+    // (app v2 plan rows carry no item counts; the count the v1 Listen line showed is VC.listenPlanCount with the session's canHear.)
+    check("Today plan: no voice and no pack audio (WORDS carry no .audio) -> Listen plans no item", /<span>Listen<\/span>/.test(html) && VC.listenPlanCount(WORDS.slice(0, 6), w => !!w.audio) === 0);
   }catch(e){ check(`Today plan Listen-line (no voice, no audio) scenario does not throw (got: ${e.message})`, false); }
   try{
     const clipPack = Object.assign({}, PACK, { audio: { voice: "rec", version: 1 } });
@@ -2340,8 +2282,7 @@ return {
     seedLearned(api.getProg(), 6);
     api.today();
     const html = api.getHtml("panel");
-    check("Today plan: no voice but the pack ships recorded clips for some weak words -> Listen line shows a count",
-      /<td>3\. Listen<\/td><td>\d+ items<\/td>/.test(html));
+    check("Today plan: no voice but the pack ships recorded clips for some weak words -> Listen plans those", /<span>Listen<\/span>/.test(html) && VC.listenPlanCount(clipWords.slice(0, 6), w => !!w.audio) > 0);
   }catch(e){ check(`Today plan Listen-line (clips, no voice) scenario does not throw (got: ${e.message})`, false); }
 
   // Republish that reorders level 1 (learnedWords from records, TODO.md 2026-09-28): Today's
@@ -2356,8 +2297,9 @@ return {
       taught.includes(R.inserted) && taught.includes(R.swappedIn) && taught.every(id => !R.learnedIds.has(id)) && taught.length === R.size);
     api.wordsTab();
     const wb = api.getHtml("wbody");
-    check("app, reordered level: Words tab opens the slice holding the first unlearned word, not marked done",
-      /Set 1 \/ \d+<\/button>/.test(wb));
+    // frequency tiers: the learned sets come first (3 here), then the unlearned words in rank order
+    check("app, reordered level: Words tab opens the slice holding the first unlearned word (after the 3 learned sets), not marked done",
+      /Set 4 of \d+/.test(wb));
   }catch(e){ check(`app reordered-level scenario does not throw (got: ${e.message})`, false); }
 
   // A leftover teach can be the level's last unlearned set (nothing fresh remains after it)
@@ -2369,8 +2311,6 @@ return {
     const scatter = [...new Set([5, Math.floor(l1.length/3), Math.floor(2*l1.length/3), l1.length-1])].filter(v => v >= 0 && v < l1.length);
     const pr = VC.normalizeProg({}, PACK);
     l1.forEach((w,i) => { if(!scatter.includes(i)) pr.w[w.id] = { r:1, w:0, s:1 }; });
-    check("precondition: leftover teach's rank-position label is short of the level's true set count",
-      VC.levelNewSet(WORDS, PACK, pr, "1").set + 1 < nSetsL1);
     const { api } = await bootApp([{ lang:"zh-CN", name:"x" }]);
     api.setProgT(pr);
     api.enterTodayStep(1);
@@ -2414,8 +2354,8 @@ return {
       l1.slice(0, size).every(w => !p1.w[w.id].d) && p1.sets["1"] === 2 && util.isDeepStrictEqual(VC.learnedWords(WORDS, PACK, p1).map(w => w.id), before));
     api.setWordsSet(4); api.clickId("dr"); api.finishDrill();
     const p2 = api.getProg();
-    check("app Words tab: drilling an untaught slice ahead flags exactly its words d, counter stops at the gap",
-      l1.slice(4*size, 5*size).every(w => p2.w[w.id] && p2.w[w.id].d === 1) && l1.slice(0, 2*size).every(w => !p2.w[w.id].d) && p2.sets["1"] === 2);
+    check("app Words tab: drilling an untaught slice ahead flags exactly its words d; the counter counts learned words (frequency tiers: 30 -> 3)",
+      l1.slice(4*size, 5*size).every(w => p2.w[w.id] && p2.w[w.id].d === 1) && l1.slice(0, 2*size).every(w => !p2.w[w.id].d) && p2.sets["1"] === 3);
   }catch(e){ check(`app Words-tab re-drill scenario does not throw (got: ${e.message})`, false); }
 })();
 
@@ -2990,7 +2930,7 @@ async function swChecks(){
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "vocab_pack_forms_"));
   const run = extra => {
     const words = Array.from({length:20}, (_,i)=>Object.assign({ id:`a${i}`, w:`w${i}`, en:`gloss ${i}`, lv:"A1" }, i === 0 ? extra : {}));
-    fs.writeFileSync(path.join(tmp, "pack.json"), JSON.stringify({ key:"t", name:"T", tts:"ja-JP", levels:[{id:"A1",label:"A1"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false }));
+    fs.writeFileSync(path.join(tmp, "pack.json"), JSON.stringify({ key:"t", name:"T", tts:"ja-JP", levels:[{id:"A1",label:"A1"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false, eta:{} }));
     fs.writeFileSync(path.join(tmp, "words.json"), JSON.stringify(words));
     fs.writeFileSync(path.join(tmp, "sentences.json"), "[]");
     cp.spawnSync("python3", [path.join(ROOT, "tools", "jsonify_pack.py"), tmp]);
@@ -3126,8 +3066,8 @@ async function swChecks(){
   const span = VC.normalizeProg({ sets:{ "1": 0 } }, PACK);
   rec(span, l1.slice(0, size - 2)); rec(span, l1.slice(size, size + 2));
   const nnSpan = teach(span, "1");
-  check("teach spanning two sets (2 leftovers of set 1 + 8 of set 2) -> counter advances by two, not to nn.set+1",
-    nnSpan.set === 0 && VC.settleSetCounter(span, WORDS, PACK, "1") === 2 && span.sets["1"] === 2);
+  check("teach spanning two sets (2 leftovers of set 1 + 8 of set 2) -> counter advances by two (set = sets learned by count: 1)",
+    nnSpan.set === 1 && VC.settleSetCounter(span, WORDS, PACK, "1") === 2 && span.sets["1"] === 2);
   const within = VC.normalizeProg({ sets:{ "1": 1 } }, PACK);
   rec(within, l1.slice(0, size));
   const nnWithin = teach(within, "1");
@@ -3137,7 +3077,7 @@ async function swChecks(){
   check("partial set recorded -> counter unchanged", VC.settleSetCounter(partial, WORDS, PACK, "1") === 1);
   const ahead = VC.normalizeProg({ sets:{ "1": 1 } }, PACK);
   rec(ahead, l1.slice(0, size)); rec(ahead, l1.slice(2*size, 3*size));
-  check("a drilled-ahead set past a gap does not move the counter", VC.settleSetCounter(ahead, WORDS, PACK, "1") === 1);
+  check("a drilled-ahead set past a gap counts by learned words (frequency tiers: 20 learned -> 2)", VC.settleSetCounter(ahead, WORDS, PACK, "1") === 2);
   const kept = VC.normalizeProg({ sets:{ "1": 5 } }, PACK);
   rec(kept, l1.slice(0, size));
   check("never lowers a stored counter within the level's set count", VC.settleSetCounter(kept, WORDS, PACK, "1") === 5);
@@ -3178,15 +3118,13 @@ async function swChecks(){
 (function(){
   console.log("\n[33] pack.placedRead: the new-passage pick starts from the placed level (fb51)");
   const ids = VC.levelIds(PACK), top = ids[ids.length - 1];
-  // The suite's PACK is pre-pairs era (flags stripped above); the flag is added on a copy, the control is the pack itself.
+  // placedRead is engine default since the flag collapse (ON / OFFR are the same behaviour; kept as names).
   const OFFR = PACK, ON = Object.assign({}, PACK, { placedRead: true }), SHIPPED = loadConst(path.join(ZH, "pack.js"), "PACK");
-  check("pack.placedRead: on in the shipped pack, off in the control", SHIPPED.placedRead === true && VC.placedReadOn(SHIPPED) && VC.placedReadOn(ON) && !VC.placedReadOn(OFFR));
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
   const placedTop = VC.applyPlacement(VC.normalizeProg({}, PACK), st0, st0.length, WORDS, PACK, undefined);
   check(`placed record: pl is the top level "${placedTop.pl}"`, placedTop.pl === top);
   const sTop = VC.suggestPassage(PASSAGES, WORDS, ON, placedTop);
   check(`placed at the top: the first unread passage of the top level (${sTop && sTop.id})`, sTop === PASSAGES.find(p => p.lv === top) && sTop.lv === top);
-  check("placed at the top, flag off: pack order (the first level's first passage)", VC.suggestPassage(PASSAGES, WORDS, OFFR, placedTop) === PASSAGES.find(p => p.lv === ids[0]));
   // reading down: finish the top level, the next pick is the level below
   const pr = JSON.parse(JSON.stringify(placedTop)); VC.readState(pr);
   const seq = []; for(let g = 0; g < 100; g++){ const p = VC.suggestPassage(PASSAGES, WORDS, ON, pr); if(!p) break; seq.push(p.lv); pr.read.done[p.id] = { sc: 3, n: 3, d: "2026-10-07", x: 1 }; }
@@ -3208,22 +3146,6 @@ async function swChecks(){
   check("placed words but no pl: pack order, equal to the flag-off pick", VC.suggestPassage(PASSAGES, WORDS, ON, noPl) === VC.suggestPassage(PASSAGES, WORDS, OFFR, noPl) && VC.suggestPassage(PASSAGES, WORDS, ON, noPl).lv === ids[0]);
   const unk = JSON.parse(JSON.stringify(placedTop)); unk.pl = "zz";
   check("unknown pl: pack order", VC.suggestPassage(PASSAGES, WORDS, ON, unk) === VC.suggestPassage(PASSAGES, WORDS, OFFR, unk));
-  // flag-off equality with the pre-fb51 core on 5 records
-  let oldCore = null;
-  try { const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ec-")); const f = path.join(dir, "core_8564258.js");
-    fs.writeFileSync(f, require("child_process").execSync(`git -C "${ROOT}" show 8564258:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
-    oldCore = require(f); fs.rmSync(dir, { recursive: true, force: true }); } catch(e){ oldCore = null; }
-  if(!oldCore) console.log("SKIP  8564258 not in this checkout's history");
-  else {
-    const recs = [frs, placedTop, noPl, prm, prl];
-    check("flag off: suggestPassage and nextReadItem (both modes) equal 8564258 on 5 records", recs.every(r => {
-      const a = JSON.parse(JSON.stringify(r)), b = JSON.parse(JSON.stringify(r));
-      const rot = Object.assign({}, OFFR, { dayAware: true, readRotation: true });
-      return VC.suggestPassage(PASSAGES, WORDS, OFFR, a) === oldCore.suggestPassage(PASSAGES, WORDS, OFFR, b)
-        && util.isDeepStrictEqual(VC.nextReadItem(PASSAGES, WORDS, OFFR, a, "2026-10-08"), oldCore.nextReadItem(PASSAGES, WORDS, OFFR, b, "2026-10-08"))
-        && util.isDeepStrictEqual(VC.nextReadItem(PASSAGES, WORDS, rot, a, "2026-10-08", false, 5, seededOnce()), oldCore.nextReadItem(PASSAGES, WORDS, rot, b, "2026-10-08", false, 5, seededOnce()));
-    }));
-  }
   function seededOnce(){ let a = 7; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   // rotation: the new pick under the flag is the placed-level passage; re-read picks are the done ones (unchanged)
   const rotOn = Object.assign({}, ON, { dayAware: true, readRotation: true });

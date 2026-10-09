@@ -7,7 +7,7 @@
 // Boots app.html's inline script for real against the zh pack WITH its characters.js,
 // using the same fake DOM as tests/engine_checks.js check [23] (id registry + regex
 // scan of innerHTML; no jsdom, no dependencies).
-// Seeds: A = fresh; B = levels 1-3 taught, nothing recorded; C = B + choice answered
+// Seeds: A = fresh; B = levels 1-3 taught (words placed, no unit recorded); C = B + choice answered
 // + unit records (characters started).
 // Run: node tests/characters_app_checks.js
 "use strict";
@@ -15,7 +15,9 @@
 const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
-const { packBefore } = require("./lib/pack_flags.js");
+const { packAsOf } = require("./lib/pack_flags.js");
+// the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
+const PAIRS_ERA = "9eb6ecb~1";
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
@@ -29,7 +31,7 @@ function tryLoadConst(file, name){ try{ return loadConst(file, name); }catch(e){
 // these checks keep testing BP's markup; tests/pron_aids_checks.js checks the pack with them.
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
-const PACK_ZH = (p => { const q = packBefore(p, "pairs", { strip: ["tones", "soundsReference", "wordsBy", "progressMap"] }); if(q.typing === "pron") q.typing = null; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
+const PACK_ZH = (p => { const q = packAsOf(p, PAIRS_ERA, { strip: ["tones", "soundsReference", "progressMap"] }); if(q.typing === "pron") q.typing = null; return q; })(loadConst(path.join(ZH, "pack.js"), "PACK"));
 // fb2-write (2026-10-02) split zh's characters stage per level and added characters.bareBy/bareWords/withWords;
 // [1]-[13] keep the earlier stage layout (one stage after HSK 3 for 1-3, one after HSK 4) and choice
 // crediting: they test the stage machinery, which is unchanged for it. tests/typed_mastery_checks.js
@@ -37,7 +39,7 @@ const PACK_ZH = (p => { const q = packBefore(p, "pairs", { strip: ["tones", "sou
 const preWrite = p => { const c = Object.assign({}, p.characters, { stages: [{ after: "3", levels: ["1", "2", "3"] }, { after: "4", levels: ["4"] }] }); delete c.bareBy; delete c.bareWords; delete c.withWords; delete c.learn; return Object.assign({}, p, { characters: c }); };
 const PACK = preWrite(Object.assign({}, PACK_ZH, { pronFirst: false }));
 // The plan lines' order wording follows pack.dayAware (docs/PACK_SCHEMA.md "dayAware").
-const ORDER = PACK.dayAware ? "misses and due first" : "weakest first";
+const ORDER = "weakest pairs first"; // the Review line under pairs (engine default since the flag collapse)
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = tryLoadConst(path.join(ZH, "sentences.js"), "PASSAGES") || [];
@@ -46,7 +48,10 @@ const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
 const LEGACY = loadConst(path.join(ZH, "legacy.js"), "LEGACY");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // pack.glossFocus renders the gloss as glossParts pieces, qualifiers dimmed (app.html glossOut).
-const glossShown = g => VC.glossFocusOn(PACK) ? VC.glossParts(g).pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join("") : VC.escapeHtml(g);
+// glossFocus + glossStyle (engine default since the flag collapse): the first sense, the rest in a gx span (app.html glossOut).
+const glossPieces = g => VC.glossParts(g).pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join("");
+const glossSense = g => VC.parenPieces(g).every(x => x.g || !x.t.trim()) && VC.parenPieces(g).some(x => x.g) ? `<span class="dim">${VC.escapeHtml(g)}</span>` : glossPieces(g);
+const glossShown = g => { const sn = VC.glossSenses(g); return sn.rest.length ? `${glossSense(sn.first)} <span class="gx">(${sn.rest.map(glossSense).join("; ")})</span>` : glossPieces(g); };
 const CFG = VC.charsConfig(PACK);
 console.log(`Loaded zh pack: ${WORDS.length} words, ${SENTENCES.length} sentences, ${CHARACTERS.length} units, label ${CFG.label}`);
 
@@ -175,7 +180,8 @@ return {
 // ------------------------------------------------------------------ seeds
 const byLv = VC.wordsByLevel(WORDS, PACK);
 const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
-function seedB(){ return VC.normalizeProg({ sets: { "1": NS("1"), "2": NS("2"), "3": NS("3"), "4": 0 }, placedOnce: true, sessions: 30 }, PACK); }
+// counted words placed (recipe: the level gate, engine default since the flag collapse, reads word records)
+function seedB(){ const p = VC.normalizeProg({ sets: { "1": NS("1"), "2": NS("2"), "3": NS("3"), "4": 0 }, placedOnce: true, sessions: 30 }, PACK); VC.pinPrefixRecords(p, WORDS, PACK); Object.values(p.w).forEach(r => { r.prov = 1; }); return p; }
 // Seed C: B + choice answered, the first 40 stage-1 units recorded: 10 weak (w=3, s=0,
 // outranking the unrecorded learned words) and 30 mastered (s=3, ranked below them), so
 // the unified Review mixes units and words.
@@ -185,6 +191,13 @@ function seedC(){
   return p;
 }
 const count = (s, re) => (s.match(re) || []).length;
+// App v2 (engine default since the flag collapse): a Today step is <div class="tst"><span>Step</span><div class="tsd">detail</div></div>
+// (no counts: the Review plan is read from todayPrep), and the stage path strip sits on Progress under "Show all".
+const tstRow = (h, name) => { const m = [...h.matchAll(/<div class="tst"><span>([^<]*)<\/span><div class="tsd">([\s\S]*?)<\/div><\/div>/g)].filter(x => x[1] === name); return m.length ? stripTags(m[m.length - 1][2]) : null; };
+const stripSegs = h => [...h.matchAll(/<div class="seg">[\s\S]*?<\/i><\/div>([\s\S]*?)<\/div>/g)].map(m => stripTags(m[1]));
+// Progress with Show all open: the panel html (the strip and the character rows); Show all closes again when the tab is left.
+function progressAll(api){ api.goto("progress"); if(!/id="pvAll" aria-expanded="true"/.test(api.html("panel"))) api.el("pvAll").click(); return api.html("panel"); }
+const reviewKinds = plan => plan.some(x => x.unit) ? (plan.some(x => x.word) ? "words and units" : "units") : "words";
 // Plays the active drill to the end answering right (the current item's `a`), then
 // presses Continue. Returns every item shown (by key), or throws on a stuck drill.
 function playDrill(api, maxItems){
@@ -210,11 +223,14 @@ Math.random = mulberry32(20261004);
   {
     const { api } = await boot();
     check("HAS_CHARACTERS is on for zh + characters.js", api.hasChars());
+    const ph = progressAll(api); api.today();
     const h = api.html("panel");
-    const segs = [...h.matchAll(/<div class="seg">[\s\S]*?<\/i><\/div>([\s\S]*?)<\/div>/g)].map(m => stripTags(m[1]));
-    check(`strip is the stage path HSK 1, HSK 2, HSK 3, ${CFG.label}, HSK 4, ${CFG.label}4 (got ${segs.join(" | ")})`,
+    check("fresh learner (characters locked): Progress has no path strip (app v2: the strip sits with the character controls)", !/id="charCtl"/.test(ph) && !/class="seg"/.test(ph));
+    api.setProg(seedB()); const ph2 = progressAll(api); api.today();
+    const segs = stripSegs(ph2);
+    check(`seed B: strip is the stage path HSK 1, HSK 2, HSK 3, ${CFG.label}, HSK 4, ${CFG.label}4 (got ${segs.join(" | ")})`,
       segs.join("|") === ["HSK 1","HSK 2","HSK 3",CFG.label,"HSK 4",CFG.label+"4"].join("|"));
-    check("character stage labels carry the target-language markup", /<bdi data-tl lang="[^"]+">字<\/bdi>/.test(h));
+    check("character stage labels carry the target-language markup", /<bdi data-tl lang="[^"]+">字<\/bdi>/.test(ph2));
     check("fresh learner: no choice card, Start today shown", !/id="charChoice"/.test(h) && /id="go"/.test(h));
   }
 
@@ -226,12 +242,12 @@ Math.random = mulberry32(20261004);
     check("seed B (levels 1-3 taught) shows the choice card", /id="charChoice"/.test(h));
     check("the choice card replaces Start today", !/id="go"/.test(h));
     check("choice card offers the stage and the next word level", /Start <bdi[^>]*>字<\/bdi>/.test(h) && /Skip to HSK 4/.test(h));
-    check("Learn line names the character set", /2\. Learn<\/td><td>字, set 1 of \d+/.test(h));
+    check(`Learn line names the character set (${tstRow(h, "Learn")})`, /^字[^,]*, set 1 of \d+/.test(tstRow(h, "Learn") || ""));
     api.el("choiceStart").click();
     h = api.html("panel");
     check("characters next: choiceSeen set, not deferred", api.getProg().chars.choiceSeen === true && api.getProg().chars.defer === false);
     check("after answering: card gone, Start today back", !/id="charChoice"/.test(h) && /id="go"/.test(h));
-    check("before any unit record: Review line is 20 items, words only (no unit in the plan yet)", new RegExp(`1\\. Review</td><td>20 items, ${ORDER}, words</td>`).test(h) && !api.getPrep().review.some(x => x.unit));
+    check("before any unit record: Review is 20 items, words only (no unit in the plan yet)", api.getPrep().review.length === 20 && reviewKinds(api.getPrep().review) === "words");
 
     // Start today: snapshot taken, Review (word-only: no records yet) is 20 items.
     api.el("go").click();
@@ -250,7 +266,7 @@ Math.random = mulberry32(20261004);
       cs.units.every(u => h.includes(`>${u.t}</span>`) && h.includes(VC.unitReading(u, BY_ID)) && h.includes(glossShown(VC.unitGloss(u, BY_ID)))));
     const withEx = cs.units.filter(u => VC.exampleSentences(BY_ID[u.words[0]], SENTENCES, PACK, 1).length).length;
     check(`teach cards carry the linked word's example sentence (${withEx} of 10 have one)`, count(h, /class="sent[" ]/g) === withEx && withEx > 0);
-    check("teach heading uses the stage label and set position", /<bdi[^>]*>字<\/bdi>, set 1 of \d+: the written form/.test(h));
+    check("teach heading names the set position", /<p class="pva">(HSK \d+ characters|Characters), set 1 of \d+<\/p>/.test(h));
     api.el("dr").click();
     const first = api.getD();
     const items = [api.getCur(), ...first.q];
@@ -274,8 +290,8 @@ Math.random = mulberry32(20261004);
     api.setProg(seedB()); api.today();
     api.el("choiceSkip").click();
     const h = api.html("panel");
-    const segs = [...h.matchAll(/<div class="seg">[\s\S]*?<\/i><\/div>([\s\S]*?)<\/div>/g)].map(m => stripTags(m[1]));
-    check("skip: deferred, card gone, Learn is HSK 4 set 1", api.getProg().chars.defer === true && !/id="charChoice"/.test(h) && /2\. Learn<\/td><td>HSK 4, set 1</.test(h));
+    const segs = stripSegs(progressAll(api)); api.today();
+    check("skip: deferred, card gone, Learn is HSK 4 set 1", api.getProg().chars.defer === true && !/id="charChoice"/.test(h) && tstRow(h, "Learn") === "HSK 4, set 1");
     check(`skip: strip puts one merged stage last (got ${segs.join(" | ")})`, segs.join("|") === ["HSK 1","HSK 2","HSK 3","HSK 4",CFG.label].join("|"));
   }
 
@@ -294,7 +310,7 @@ Math.random = mulberry32(20261004);
     check("charSound: form only, 4 reading options, answer = reading", sd.html.includes(u.t) && !sd.html.includes(reading) && sd.opts.length === 4 && sd.a === reading);
     check("charPick: reading + speaker (audio), 4 written-form options, answer = form",
       pk.html.includes(reading) && /id="sp"/.test(pk.html) && pk.opts.length === 4 && pk.a === u.t && typeof pk.mount === "function");
-    check("charRecall: meaning shown, 4 written-form options, answer = form", rc.html.includes(VC.escapeHtml(g)) && rc.opts.length === 4 && rc.a === u.t && !rc.html.includes(reading));
+    check("charRecall: meaning shown, 4 written-form options, answer = form", rc.html.includes(glossShown(g)) && rc.opts.length === 4 && rc.a === u.t && !rc.html.includes(reading));
     check("all four: key c:<unit>, reveal has form + reading + gloss", [rd, sd, pk, rc].every(x => x.key === "c:" + u.id && x.reveal.includes(u.t) && x.reveal.includes(reading)));
     const before = JSON.stringify(api.getProg().w);
     rd.onAnswer(true); sd.onAnswer(false);
@@ -307,7 +323,7 @@ Math.random = mulberry32(20261004);
     const { api } = await boot();
     api.setProg(seedC()); api.today();
     const h = api.html("panel");
-    check("seed C: no choice card, Review line 20 items with units", !/id="charChoice"/.test(h) && new RegExp(`20 items, ${ORDER}, words and 字`).test(h));
+    check("seed C: no choice card, Review 20 items with units", !/id="charChoice"/.test(h) && api.getPrep().review.length === 20 && reviewKinds(api.getPrep().review) === "words and units");
     const prep = api.getPrep().review;
     api.el("go").click();
     const D = api.getD();
@@ -316,7 +332,9 @@ Math.random = mulberry32(20261004);
     check("Start today runs exactly the Review plan the line was computed from", items.map(x => x.key).sort().join() === prep.map(keyOf).sort().join() && api.getState().review === null);
     const nUnit = items.filter(x => x.key.startsWith("c:")).length;
     check(`Review builds 20 items containing unit items (${nUnit} unit, ${20 - nUnit} word)`, items.length === 20 && nUnit > 0 && nUnit < 20);
-    check("Review unit items use the pack reviewKinds (form stimulus)", items.filter(x => x.key.startsWith("c:")).every(x => /class="big wd"/.test(x.html)));
+    // pairs (engine default since the flag collapse) picks a unit's kind by pair: any of the four unit renderers.
+    const UNIT_LABELS = ["What does it mean?", "How is it said?", "How is it written?"];
+    check(`Review unit items are unit renderers (${[...new Set(items.filter(x => x.key.startsWith("c:")).map(x => x.label))].join(" / ")})`, items.filter(x => x.key.startsWith("c:")).every(x => UNIT_LABELS.includes(x.label)));
     let err = null, shown = [];
     try{ shown = playDrill(api); }catch(e){ err = e; }
     check(`Review renders and plays every item without error${err ? ` (${err.message})` : ""}`, !err && shown.length === 20);
@@ -325,11 +343,12 @@ Math.random = mulberry32(20261004);
     api.stepFrom(3);
     const R = api.getD();
     const ritems = [api.getCur(), ...R.q];
-    check(`Recall: 8 items, unit items are charRecall (${ritems.filter(x => x.key.startsWith("c:")).length} unit)`,
-      ritems.length === 8 && ritems.filter(x => x.key.startsWith("c:")).every(x => x.label === "How is it written?" && !/class="big/.test(x.html)));
+    const RN = VC.recallSize(PACK);
+    check(`Recall: ${RN} items (recallSize), unit items are unit renderers (${ritems.filter(x => x.key.startsWith("c:")).length} unit: ${[...new Set(ritems.filter(x => x.key.startsWith("c:")).map(x => x.label))].join(" / ")})`,
+      ritems.length === RN && ritems.filter(x => x.key.startsWith("c:")).every(x => UNIT_LABELS.includes(x.label)));
     err = null;
     try{ shown = playDrill(api); }catch(e){ err = e; }
-    check(`Recall plays through without error${err ? ` (${err.message})` : ""}`, !err && shown.length === 8);
+    check(`Recall plays through without error${err ? ` (${err.message})` : ""}`, !err && shown.length === RN);
   }
   {
     // Characters started and units recorded, but every recorded unit is bare (well below
@@ -341,7 +360,7 @@ Math.random = mulberry32(20261004);
     VC.charStageUnits(["1","2","3"], CHARACTERS, PACK).slice(0, 40).forEach(u => { q.chars.c[u.id] = { r:9, w:0, s:9 }; });
     api.setProg(q); api.today();
     const h = api.html("panel"), prep = api.getPrep().review;
-    check("units recorded but crowded out of the plan: Review line says words only", VC.recordedUnits(CHARACTERS, q, PACK).length === 40 && !prep.some(x => x.unit) && /1\. Review<\/td><td>20 items, weakest first, words<\/td>/.test(h));
+    check("units recorded but crowded out of the plan: Review line says words only", VC.recordedUnits(CHARACTERS, q, PACK).length === 40 && !prep.some(x => x.unit) && prep.length === 20);
     if(PACK.dayAware){
       const { api: a2 } = await boot();
       a2.setProg(JSON.parse(JSON.stringify(q))); a2.today();
@@ -354,7 +373,7 @@ Math.random = mulberry32(20261004);
     const { api } = await boot();
     const p = VC.normalizeProg({ sets: { "1": 2 }, placedOnce: true }, PACK);
     api.setProg(p); api.today();
-    check("before characters: Review line is 15 items", new RegExp(`1\\. Review</td><td>15 items, ${ORDER}<`).test(api.html("panel")));
+    check("before characters: Review is 15 items", api.getPrep().review.length === 15);
     api.el("go").click();
     check("before characters: snapshot reviewSize 15, Review 15 word items",
       api.getState().snap.reviewSize === 15 && [api.getCur(), ...api.getD().q].length === 15 && [api.getCur(), ...api.getD().q].every(x => x.key.startsWith("w:")));
@@ -482,7 +501,7 @@ Math.random = mulberry32(20261004);
     check("not started: an unlock note in its place", /id="tCharsLock"[^>]*>Characters test: unlocks when the characters stage starts on Today\.</.test(api.html("panel")), api.html("panel").slice(0, 600));
     api.setProg(seedB()); api.goto("test");
     check("started: no unlock note", !/id="tCharsLock"/.test(api.html("panel")));
-    check("started, no unit recorded yet: Characters 20 (hsk parity: shown once started)", /id="tChars">Characters 20</.test(api.html("panel")));
+    check("started, no unit recorded yet: Characters 20 (hsk parity: shown once started)", /id="tChars">Characters</.test(api.html("panel")));
     api.el("tChars").click();
     let items = [api.getCur(), ...api.getD().q];
     const lw0 = VC.learnedWords(WORDS, PACK, seedB());
@@ -494,7 +513,7 @@ Math.random = mulberry32(20261004);
     const rec5 = VC.charStageUnits(["1","2","3"], CHARACTERS, PACK).slice(100, 105);
     rec5.forEach(u => { p5.chars.c[u.id] = { r:1, w:0, s:1 }; });
     api.setProg(p5); api.goto("test");
-    check("5 recorded units: Characters 20 (topped up with learned words' unrecorded units)", /id="tChars">Characters 20</.test(api.html("panel")));
+    check("5 recorded units: Characters 20 (topped up with learned words' unrecorded units)", /id="tChars">Characters</.test(api.html("panel")));
     api.el("tChars").click();
     items = [api.getCur(), ...api.getD().q];
     const top = VC.newCharUnits(CHARACTERS, VC.learnedWords(WORDS, PACK, p5), p5, PACK, 15);
@@ -502,19 +521,21 @@ Math.random = mulberry32(20261004);
       items.length === 20 && rec5.every(u => items.some(x => x.key === "c:" + u.id)) && top.every(u => items.some(x => x.key === "c:" + u.id)) && top.every(u => !p5.chars.c[u.id]));
     api.goto("test");
     api.setProg(seedC()); api.goto("test");
-    check("40 recorded units: Characters 20 (capped like the other free tests)", /id="tChars">Characters 20</.test(api.html("panel")));
+    check("40 recorded units: Characters 20 (capped like the other free tests)", /id="tChars">Characters</.test(api.html("panel")));
     api.el("tChars").click();
     items = [api.getCur(), ...api.getD().q];
     const recs = api.getProg().chars.c;
-    check("Characters test: 20 unit items, all recorded units", items.length === 20 && items.every(x => x.key.startsWith("c:") && recs[x.key.slice(2)]));
+    // pairs (engine default since the flag collapse): recorded units by weakest pair (a known pair of an ambient unit is not asked), topped up with unrecorded ones.
+    const recN = items.filter(x => recs[x.key.slice(2)]).length;
+    check(`Characters test: 20 unit items, ${recN} recorded, the rest unrecorded`, items.length === 20 && items.every(x => x.key.startsWith("c:")) && recN >= 10);
     check("Characters test kinds come from testKinds (charRead, charSound, charPick; never charRecall)",
       items.every(x => x.label === "What does it mean?" || x.label === "How is it said?" || (x.label === "How is it written?" && /hear-stage|class="med"/.test(x.html) && !x.html.includes(VC.escapeHtml(VC.unitGloss(CHARACTERS.find(u => "c:" + u.id === x.key), BY_ID))))));
     check("Characters test draws the weakest first (all 10 weak units included)",
       VC.charStageUnits(["1","2","3"], CHARACTERS, PACK).slice(0, 10).every(u => items.some(x => x.key === "c:" + u.id)));
     let err = null, r = null;
     try{ r = playToResult(api); }catch(e){ err = e; }
-    check(`Characters test plays to the shared result screen (20 / 20, Continue)${err ? ` (${err.message})` : ""}`,
-      !err && r.shown.length === 20 && /<div class="done"><h2>20 \/ 20<\/h2>/.test(r.result) && /id="ok"/.test(r.result));
+    check(`Characters test plays to the shared result screen (20 of 20, Continue)${err ? ` (${err.message})` : ""}`,
+      !err && r.shown.length === 20 && /<div class="done"><h2>20 of 20<\/h2>/.test(r.result) && /id="ok"/.test(r.result));
     api.el("ok").click();
     check("Continue returns to the Test tab", /id="tChars"/.test(api.html("panel")));
   }
@@ -530,26 +551,25 @@ Math.random = mulberry32(20261004);
     api.setProg(seedC()); api.goto("progress");
     h = api.html("panel");
     const n1 = VC.charStageUnits(["1","2","3"], CHARACTERS, PACK).length, n4 = VC.charStageUnits(["4"], CHARACTERS, PACK).length;
-    check(`seed C rows: 字 40 / ${n1} taught · 40 recorded · 30 mastered · 0 bare; 字4 0 / ${n4}`,
-      h.includes(`>字</bdi></td><td>40 / ${n1} taught · 40 recorded · 30 mastered · 0 bare</td>`) && h.includes(`>字4</bdi></td><td>0 / ${n4} taught · 0 recorded · 0 mastered · 0 bare</td>`));
+    check(`seed C rows: 字 40 / ${n1} taught · 40 recorded · 30 mastered · 0 characters only; 字4 0 / ${n4}`,
+      h.includes(`>字</bdi></td><td>40 / ${n1} taught · 40 recorded · 30 mastered · 0 characters only</td>`) && h.includes(`>字4</bdi></td><td>0 / ${n4} taught · 0 recorded · 0 mastered · 0 characters only</td>`)); // progressView v2: bare is "characters only"
     const p = seedC(); const us = VC.charStageUnits(["1","2","3"], CHARACTERS, PACK);
     p.chars.c[us[0].id] = { r:6, w:0, s:6 }; delete p.chars.c[us[39].id]; p.chars.c[us[45].id] = { r:1, w:0, s:1 };
     api.setProg(p); api.goto("progress");
     check("taught counts whole sets only, recorded every record, bare by streak",
-      api.html("panel").includes(`>字</bdi></td><td>30 / ${n1} taught · 40 recorded · 30 mastered · 1 bare</td>`));
-    api.setProg(seedB()); api.goto("progress");
-    h = api.html("panel");
+      api.html("panel").includes(`>字</bdi></td><td>30 / ${n1} taught · 40 recorded · 30 mastered · 1 characters only</td>`));
+    api.setProg(seedB()); h = progressAll(api);
     check("levels 1-3 taught: order chips 'Characters before/after HSK 4' + mix chip + strip", /id="ordBefore"[^>]*>Characters before HSK 4</.test(h) && /id="ordAfter"[^>]*>Characters after HSK 4</.test(h) && /id="toggleMix"/.test(h) && /id="charCtl"/.test(h));
     check("default order: 'before' on, strip has 字 before HSK 4", /class="chip on" id="ordBefore"/.test(h) && segsOf(h).join("|") === "HSK 1|HSK 2|HSK 3|字|HSK 4|字4");
     const before = JSON.stringify({ w: api.getProg().w, sets: api.getProg().sets, c: api.getProg().chars.c, cs: api.getProg().chars.choiceSeen });
     api.el("ordAfter").click();
-    h = api.html("panel");
+    h = progressAll(api);
     check("order chip 'after': defer on, strip re-rendered with one merged stage last", api.getProg().chars.defer === true && /class="chip on" id="ordAfter"/.test(h) && segsOf(h).join("|") === "HSK 1|HSK 2|HSK 3|HSK 4|字");
     check("deferred with no unit record (unlocked, not started): order chips but no mix chip", !VC.charsStarted(PACK, WORDS, CHARACTERS, api.getProg()) && /id="ordBefore"/.test(h) && !/id="toggleMix"/.test(h));
     api.goto("today");
-    check("deferred: Today's Learn is HSK 4 set 1", /2\. Learn<\/td><td>HSK 4, set 1</.test(api.html("panel")));
-    api.goto("progress"); api.el("ordBefore").click();
-    h = api.html("panel");
+    check("deferred: Today's Learn is HSK 4 set 1", tstRow(api.html("panel"), "Learn") === "HSK 4, set 1");
+    progressAll(api); api.el("ordBefore").click();
+    h = progressAll(api);
     check("order chip 'before': reversible, strip back", api.getProg().chars.defer === false && segsOf(h).join("|") === "HSK 1|HSK 2|HSK 3|字|HSK 4|字4");
     check("order flips touch no record, set counter or choice state", JSON.stringify({ w: api.getProg().w, sets: api.getProg().sets, c: api.getProg().chars.c, cs: api.getProg().chars.choiceSeen }) === before);
     // mix chip toggles ruby in a sentence row
@@ -667,7 +687,7 @@ Math.random = mulberry32(20261004);
       check(`${name}: no migration, Today renders with the not-imported notice (${why.source})`,
         Object.keys(x.api.getProg().w).length === 0 && /id="go"/.test(h0) && /id="legacyFail"/.test(h0) && /found but not imported/.test(h0) && why.test(h0) && x.api.readOnly());
       const before = st.writes.slice();
-      x.api.el("themebtn").click(); await tick();
+      x.api.goto("progress"); x.api.el("toggleTheme").click(); await tick(); // a save attempt (the theme chip)
       x.api.getProg().sessions = 5; x.api.today();
       check(`${name}: nothing persisted this session (no ${SKEY}; writes ${JSON.stringify(expectWrites)})`,
         !st.map.has(SKEY) && JSON.stringify(st.writes) === JSON.stringify(expectWrites) && JSON.stringify(before) === JSON.stringify(expectWrites) && !st.writes.includes(LKEY));
@@ -777,7 +797,7 @@ Math.random = mulberry32(20261004);
   const NSZ = lv => VC.nSets(VC.wordsByLevel(WORDS, PF_ZH)[lv], VC.setSizeOf(PF_ZH));
   // Mid HSK 2 before any character stage: with one stage per level (fb2-write) that is a learner
   // who put characters after the words (chars.defer), else 字1 would come before HSK 2.
-  const seedPF = () => VC.normalizeProg({ sets: { "1": NSZ("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PF_ZH);
+  const seedPF = () => { const p = VC.normalizeProg({ sets: { "1": NSZ("1"), "2": 2 }, placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true } }, PF_ZH); VC.pinPrefixRecords(p, WORDS, PF_ZH); Object.values(p.w).forEach(r => { r.prov = 1; }); return p; }; // counted words placed: the level gate (engine default) reads records
   const seedPFLag = () => { const p = seedPF(); const lw = new Set(VC.learnedWords(WORDS, PF_ZH, p).map(w => w.id)); CHARACTERS.filter(u => lw.has(u.words[0])).forEach(u => { p.chars.c[u.id] = { r: 1, w: 1, s: 0 }; }); return p; };
   check("zh pack.json ships pronFirst: true", PF_ZH.pronFirst === true);
   // Walks the active screen flow: answers every drill item right, presses Continue /
@@ -806,10 +826,10 @@ Math.random = mulberry32(20261004);
     // each is recorded at streak 0 (pron tier: its word still shows by its reading). The unit's
     // own drill items (c: keys) show the written form by design and are left out below.
     const { api } = await boot({ pack: PF_ZH });
-    check("PRON_FIRST on for zh, show-written capture listener attached", api.pronFirst() && api.panelListeners().length === 2);
+    check("PRON_FIRST on for zh, show-written capture listener attached", api.pronFirst() && api.panelListeners().length === 3); // taps, the Missed rows, the show-written capture
     api.setProg(seedPFLag()); api.today();
     // The plan's Read row names a passage by its title, which has no reading data here (reported residual).
-    const todayH = api.html("panel").replace(/<tr><td>6\. Read<\/td><td>[\s\S]*?<\/td><\/tr>/, "");
+    const todayH = api.html("panel").replace(/<div class="tst"><span>Read<\/span><div class="tsd">[\s\S]*?<\/div><\/div>/, "");
     check(`Today: no written form besides the stage label and the Read row's passage title (${visHan(todayH)})`, onlyLabel(todayH));
     api.el("go").click();
     let seen = [], err = null;
@@ -849,13 +869,14 @@ Math.random = mulberry32(20261004);
     check(`Test Recall ${seen.filter(x => x.where.startsWith("w:") && !x.where.endsWith("reveal")).length}: pinyin options and reveals`, seen.length > 20 && seen.every(x => !visHan(x.html)));
     api.goto("test"); api.el("tListen").click(); seen = walk(api);
     check("Test Listen: no hanzi in reveals or the result screen", seen.length > 20 && seen.every(x => !visHan(x.html)));
+    { const q = api.getProg(); q.placedOnce = false; api.setProg(q); } // app v2: the placement button is gone after the first placement
     api.goto("test"); api.el("pl").click(); api.el("go").click();
     let pbad = 0, pn = 0;
     for(let i = 0; i < 100 && /id="o"/.test(api.html("panel")); i++){ pn++; if(visHan(api.html("panel"))) pbad++; api.el("o").children[0].click(); }
     check(`Placement: ${pn} items, no hanzi (${pbad} bad)`, pn > 10 && pbad === 0);
     // Progress: weak rows.
     const pw = seedPF(); ["w0028","w0091","w0099"].forEach(id => { pw.w[id] = { r:1, w:3, s:0 }; });
-    api.setProg(pw); api.goto("progress");
+    api.setProg(pw); progressAll(api); // app v2: Weakest words sit under Show all
     check("Progress: weakest-word rows in pinyin", onlyLabel(api.html("panel")) && api.html("panel").includes(BY_ID["w0091"].pron));
     // Read: tap spans and question reveals.
     if(PASSAGES.length){
@@ -957,7 +978,7 @@ Math.random = mulberry32(20261004);
     const a = await boot({ pack: PACK }), b = await boot({ pack: noKey });
     a.api.setProg(seedC()); b.api.setProg(seedC());
     const pages = api => ["today","words","test","progress","read"].map(t => { api.goto(t); return api.html("panel") + (api.el("wl") ? api.el("wl").children.map(c => c.innerHTML).join("") : ""); });
-    check("pronFirst absent = pronFirst false: every tab identical, no show-written tap anywhere", JSON.stringify(pages(a.api)) === JSON.stringify(pages(b.api)) && !pages(b.api).some(h => /data-showw/.test(h)) && a.api.panelListeners().length === 1);
+    check("pronFirst absent = pronFirst false: every tab identical, no show-written tap anywhere", JSON.stringify(pages(a.api)) === JSON.stringify(pages(b.api)) && !pages(b.api).some(h => /data-showw/.test(h)) && a.api.panelListeners().length === 2); // taps and the Missed rows
   }
   {
     // ja-like synthetic pack: kanji words read in kana, kana words as they are.
@@ -1127,7 +1148,7 @@ Math.random = mulberry32(20261004);
     b2.api.charTeach({ units: bare.slice(0, 10), index: 0, total: 1 }, { label: "字" }, () => {});
     const it2 = b2.api.charDrillItem("charRead", bare[0]);
     check("units without hint: no hint markup on teach cards or reveals", !/class="chint"/.test(b2.api.html("panel")) && !/class="chint"/.test(it2.reveal));
-    const stripHint = h => h.replace(/<span class="chint">(?:<span>(?:<span[^>]*>[^<]*<\/span>|[^<])*<\/span>)+<\/span>/g, "");
+    const stripHint = h => h.replace(/(<div>)?<span class="chint">(?:<span>(?:<span[^>]*>[^<]*<\/span>|[^<])*<\/span>)+<\/span>(?:<\/div>)?/g, ""); // app v2: a reveal wraps the hint in a div
     api.charTeach({ units: CHARACTERS.slice(0, 10), index: 0, total: 1 }, { label: "字" }, () => {});
     check("hinted teach cards and reveals equal the hint-free ones with the hint block removed",
       stripHint(api.html("panel")) === b2.api.html("panel") && stripHint(api.charDrillItem("charRead", CHARACTERS[0]).reveal) === it2.reveal);

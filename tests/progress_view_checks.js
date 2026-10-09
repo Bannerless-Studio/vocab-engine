@@ -1,20 +1,16 @@
 // pack.progressView "v2" (docs/PACK_SCHEMA.md "progressView"; owner 2026-10-07): [1] core totals, visit
 // record pv, deltas, recent misses; [2] the tab on the owner export: anchor, hidden rows, Show all, bars,
 // "characters only", hero first visit / after a session / no change, pv written on leaving (tab switch and
-// visibilitychange) and never at boot, recent misses; [3] flag off: the Progress HTML byte-identical to
-// main 9667a81 on 3 records, nothing written.
+// visibilitychange) and never at boot, recent misses; [4] reading speed. progressView is engine default since the
+// flag collapse (stage 2): its flag-off checks and the [3] control vs main 9667a81 went with it.
 // Run: node tests/progress_view_checks.js [owner export path]
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
-const cp = require("child_process");
-const os = require("os");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
-const MAIN = "9667a81"; // main before progressView
 const OWNER = process.argv[2] || process.env.PROGRESS_OWNER || "/Users/ishmum/.claude/uploads/9e41e879-e4d7-4530-b040-c9be1286edd7/a48ee4d3-vocab_zh_progress_8.json";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 const PACK = loadConst(path.join(ZH, "pack.js"), "PACK");
@@ -23,8 +19,6 @@ const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
-// levelGate and levelExam (fb38) came after 9667a81: the flag-off control drops them too (tests/level_gate_checks.js covers them).
-const OFF = packAsOf(PACK, MAIN);
 const clone = x => JSON.parse(JSON.stringify(x));
 
 let fails = 0, passes = 0, skips = 0;
@@ -42,7 +36,8 @@ function extractAttrs(tag){
   let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; }
   return attrs;
 }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){
@@ -91,10 +86,10 @@ function makeFakeDom(){
     const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
     let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); }
   }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
   const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return {
     title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); },
@@ -129,7 +124,7 @@ class FakeDate extends Date {
 async function boot(pack, st, seed, opts){
   const o = opts || {};
   Math.random = mulberry32(seed);
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const voices = [{ lang:"zh-CN", name:"x" }];
   const ss = { getVoices: () => voices, onvoiceschanged: null, cancel(){}, speak(){} };
   const wl = {};
@@ -174,7 +169,7 @@ const owner = fs.existsSync(OWNER) ? JSON.parse(fs.readFileSync(OWNER, "utf8")) 
 (async () => {
 console.log("\n[1] core: totals, pv, deltas, recent misses");
 {
-  check("progressViewOn: zh pack sets v2; absent / other values are off", VC.progressViewOn(PACK) && !VC.progressViewOn(OFF) && !VC.progressViewOn(Object.assign({}, PACK, { progressView: "v3" })));
+  check("progressView is engine default (flag collapse stage 2): core has no progressViewOn, the zh pack no progressView key", VC.progressViewOn === undefined && !("progressView" in PACK));
   const p = midProg(); p.sessions = 12;
   const t = totals(p);
   check("progressTotals: sessions, mastered (wordKnownX, the exam rule), units at target, passages", t.sn === 12 && t.m === VC.learnedWords(WORDS, PACK, p).filter(w => known(p, w)).length && t.co === 0 && t.p === 0);
@@ -183,7 +178,6 @@ console.log("\n[1] core: totals, pv, deltas, recent misses");
   const q = clone(p); q.sessions = 15; q.read = { done: { [PASSAGES[0].id]: { sc: 4, n: 4, d: DAY, x: 1 } } };
   const d = VC.progressDeltas(q, totals(q));
   check("deltas = current - pv", d.sn === 3 && d.p === 1 && d.m === 0 && d.co === 0);
-  check("flag off: noteProgressVisit writes nothing", (() => { const r = midProg(); return !VC.noteProgressVisit(r, OFF, totals(r)) && !("pv" in r); })());
   check("a malformed pv reads as no visit", [{ sn: "1", m: 0, co: 0, p: 0 }, { sn: 1, m: 0, co: 0 }, [1, 2], null, 4].every(v => VC.progressVisit(Object.assign({}, p, { pv: v })) === null));
   const r = midProg(); r.sn = 20; const L = VC.learnedWords(WORDS, PACK, r);
   const [a, b, c, e, f] = L;
@@ -315,37 +309,17 @@ else {
   check("HSK 2 learner, HSK 1 at 92% mastered: collapsed line HSK 1, 138 of 150 mastered; HSK 2 row kept", /id="pvLow"[^>]*><span>HSK 1<\/span><span class="pvn">138 of 150 mastered<\/span>/.test(h92) && /<span>HSK 2<\/span>/.test(h92) && !/<span>HSK 1<\/span><span class="pvn">138 of 150 mastered<\/span><\/div>/.test(h92));
 }
 
-console.log(`\n[3] flag off: Progress HTML byte-identical to ${MAIN}, nothing written`);
-{
-  let oldCore = null, oldHtml = null;
-  try {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "pv-"));
-    const f = path.join(dir, `core_${MAIN}.js`);
-    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); oldCore = require(f);
-    oldHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-  } catch(e){ oldCore = null; }
-  if(!oldCore) skip(`${MAIN} not in this checkout's history`);
-  else for(const [name, mk] of [["fresh", () => base()], ["mid HSK 1", midProg], ["owner export", () => owner && clone(owner)]]){
-    const rec = mk(); if(!rec){ skip(`${name}: owner export not found`); continue; }
-    // One app at a time: Math.random is reseeded per boot and the Weakest words list draws from it.
-    const a = await bootWith(OFF, clone(rec), 7); a.api.clickTab("progress"); const ha = a.api.panel();
-    const b = await bootWith(OFF, clone(rec), 7, { core: oldCore, html: oldHtml }); b.api.clickTab("progress");
-    const same = ha === b.api.panel();
-    a.api.clickTab("today"); b.api.clickTab("today"); a.api.clickTab("progress"); a.api.hide();
-    check(`${name}: Progress HTML byte-identical to ${MAIN}; leaving the tab writes no pv; stored records equal`, same && !("pv" in a.api.getProg()) && a.st.ls.getItem(VC.storageKey(OFF)) === b.st.ls.getItem(VC.storageKey(OFF)));
-  }
-}
+// [3] (flag off: Progress HTML byte-identical to 9667a81) deleted: progressView is engine default since the flag collapse.
 
 console.log("\n[4] reading speed row (fb46): t stored at completion, guards, median after 3 passages");
 {
   const rp = (done) => { const p = base({ sets: { "1": 1 } }); p.read = { done }; return p; };
   const mk = (pack, listen, t, prev) => { const p = rp(prev || {}); VC.markPassageDone(p, "p0001", 3, 4, "2026-10-04", listen, pack, t); return p.read.done.p0001; };
   check("core: t stored on a reading pass under v2, rounded", mk(PACK, false, 41.6).t === 42);
-  check("core: no t for a listening pass, flag off, undefined or 0", mk(PACK, true, 40).t === undefined && mk(OFF, false, 40).t === undefined && mk(PACK, false, undefined).t === undefined && mk(PACK, false, 0).t === undefined);
+  check("core: no t for a listening pass, undefined or 0", mk(PACK, true, 40).t === undefined && mk(PACK, false, undefined).t === undefined && mk(PACK, false, 0).t === undefined);
   const prevT = { p0001: { sc: 1, n: 4, d: "x", x: 1, t: 50 } };
   check("core: a listening pass keeps the previous t, so the Reading row survives alternating read/listen passes", mk(PACK, true, 40, prevT).t === 50);
   check("core: a reading pass with its timing dropped keeps the previous t; a timed reading pass replaces it", mk(PACK, false, undefined, prevT).t === 50 && mk(PACK, false, 0, prevT).t === 50 && mk(PACK, false, 30, prevT).t === 30);
-  check("core: flag off writes no t even over a record that has one", mk(OFF, true, 40, prevT).t === undefined);
   {
     const pk = Object.assign({}, PACK), ps = PASSAGES.slice(0, 3), prog3 = rp(Object.fromEntries(ps.map(p => [p.id, { sc: 1, n: 1, d: "x", x: 1, t: 60 }])));
     ps.forEach(p => VC.markPassageDone(prog3, p.id, 1, 1, "2026-10-05", true, pk));
@@ -365,7 +339,6 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
   const zhp = PASSAGES.slice(0, 3);
   const zs = VC.readingSpeed(zhp, PACK, rp(Object.fromEntries(zhp.map(p => [p.id, { sc: 1, n: 1, d: "x", x: 1, t: 60 }]))));
   check("speed: zh counts characters", zs && zs.unit === "characters" && zs.rate === Math.round(([...zhp.map(p => VC.passageUnits(p, PACK).n)].sort((a, b) => a - b))[1]) && zs.rate > 20);
-  check("speed: flag off is null", VC.readingSpeed(en, OFF, dn([30, 60, 120])) === null);
 
   // The app: a pass opened, read, finished.
   const { api, st } = await bootWith(PACK, midProg(), 5);
@@ -393,9 +366,6 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
   const fewer = await bootWith(PACK, (() => { const p = midProg(); p.read = { done: { [ids[0]]: { sc: 1, n: 1, d: "x", x: 1, t: 60 }, [ids[1]]: { sc: 1, n: 1, d: "x", x: 1, t: 60 } } }; return p; })(), 5);
   fewer.api.clickTab("progress");
   check("app: two timed passages show no Reading row", !/Reading \d/.test(stripTags(fewer.api.panel())));
-  const off = await bootWith(OFF, midProg(), 5);
-  off.api.startPassage(pid); NOW += 60000; off.api.finishPassage();
-  check("app: flag off stores no t and creates no t0", off.api.getProg().read.done[pid].t === undefined && off.api.rd().t0 === undefined);
 }
 
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);

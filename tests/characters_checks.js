@@ -56,7 +56,8 @@ function suite(F){
   const i1 = idx[cfg.stages[0].after], i2 = idx[cfg.stages[cfg.stages.length-1].after];
   const stageLv = cfg.stages.map(st => st.levels);
   const recAll = levels => { const c = {}; units.filter(u => levels.includes(u.lv)).forEach(u => { c[u.id] = rec(1); }); return c; };
-  const P = (sets, c, extra) => VC.normalizeProg({ sets, chars: Object.assign({ c: c || {} }, extra || {}) }, pack);
+  // The counted words carry placed records (prov): the level gate (engine default since the flag collapse) reads them known, so it never holds a level these fixtures open by set counters.
+  const P = (sets, c, extra) => { const q = VC.normalizeProg({ sets, chars: Object.assign({ c: c || {} }, extra || {}) }, pack); VC.pinPrefixRecords(q, words, pack); Object.values(q.w).forEach(r => { r.prov = 1; }); return q; };
   const tag = s => `${F.name}: ${s}`;
   console.log(`\n================ ${F.name}: ${words.length} words, ${units.length} units, levels ${ids.join(",")}, sets ${JSON.stringify(N)}`);
 
@@ -350,6 +351,8 @@ function suite(F){
     const p = P(full(i1), { [units[0].id]: rec(2, 1) });
     // Records for every counted word, as real progress has; learnedWords reads records.
     p.w = {}; VC.pinPrefixRecords(p, words, pack); p.w[words[0].id] = rec(3);
+    // level gate (engine default since the flag collapse): the counted words read known (placed), so the gate is open
+    Object.values(p.w).forEach(r => { r.prov = 1; });
     const before = clone(p);
     const pathB = VC.stagePath(pack, words, units, p), stB = VC.nextStage(pack, words, units, p);
     VC.setCharOrder(p, true);
@@ -359,7 +362,9 @@ function suite(F){
     const untouched = util.isDeepStrictEqual(p.chars.c, before.chars.c) && util.isDeepStrictEqual(p.w, before.w) && util.isDeepStrictEqual(p.sets, before.sets) && p.chars.choiceSeen === before.chars.choiceSeen;
     const flipped = pathB.map(LBL).join(" ") !== pathA.map(LBL).join(" ") && stB.kind !== stA.kind;
     const back = util.isDeepStrictEqual(pathB, pathBack) && util.isDeepStrictEqual(stB, stBack);
-    const q1 = VC.answerCharChoice(P(full(i1), {}), true), q2 = VC.answerCharChoice(P(full(i1), {}), false);
+    // level gate (engine default since the flag collapse): the counted words carry placed records, so the next level is open
+    const opened = q => { q.w = {}; VC.pinPrefixRecords(q, words, pack); Object.values(q.w).forEach(r => { r.prov = 1; }); return q; };
+    const q1 = VC.answerCharChoice(opened(P(full(i1), {})), true), q2 = VC.answerCharChoice(opened(P(full(i1), {})), false);
     const choiceOk = q1.chars.choiceSeen && !q1.chars.defer && q2.chars.choiceSeen && q2.chars.defer
       && VC.nextStage(pack, words, units, q1).kind === "chars" && VC.nextStage(pack, words, units, q2).lv === ids[i1+1];
     console.log(`\n[32] ${F.name}: flip records untouched ${untouched}, order flips ${flipped}, round-trips ${back}; choice start/skip ${choiceOk}`);
@@ -442,7 +447,7 @@ function flagOffEquality(){
   const loadConst = (file, name) => new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)();
   const ZH = path.join(ROOT, "packs", "zh");
   // levelGate / levelExam (fb38) gate nextStage; they came after the base engine, tests/level_gate_checks.js covers them.
-  const real = { name: "zh (real pack)", pack: packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["levelGate", "levelExam"] }), words: loadConst(path.join(ZH, "words.js"), "WORDS"), units: [] };
+  const real = { name: "zh (real pack)", pack: packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["levelExam"] }), words: loadConst(path.join(ZH, "words.js"), "WORDS"), units: [] };
   const z = zhLike(), j = jaLike();
   // Variants: [label, pack, words, units passed to the plan builders, whether to give records]
   const variants = [
@@ -497,7 +502,7 @@ function flagOffEquality(){
       if(!packHasChars){
         const sp = VC.stagePath(pack, words, units || [], prog);
         const strip = ids.map(lv => ({ label: VC.levelLabel(pack, lv), frac: VC.nSets(byLv[lv], 10) ? (prog.sets[lv]||0)/VC.nSets(byLv[lv], 10) : 1 }));
-        const nn = OLD.nextNewSet(words, pack, prog), ns = VC.nextStage(pack, words, units || [], prog);
+        const nn = VC.nextNewSetOpen(words, pack, prog), ns = VC.nextStage(pack, words, units || [], prog);
         const snap = VC.todaySnapshot(pack, words, units || [], prog);
         if(!util.isDeepStrictEqual(sp.map(s => ({ label: s.label, frac: s.frac })), strip) || sp.some(s => s.kind !== "words")
           || (nn ? !(ns && ns.lv === nn.lv && ns.set === nn.set) : ns !== null)
@@ -724,9 +729,10 @@ function teachExampleChecks(){
   }
 }
 
-// fb50: pack.placementChars. Real zh pack (and the shipped ja pack when its checkout is present) against the pre-fb50 engine.
+// fb50: placement places the characters layer (pack.placementChars until the flag collapse; now every characters.learn "lag" pack).
+// Real zh pack (and the shipped ja pack when its checkout is present); a pack without learn lag against the pre-fb50 engine.
 function placeCharsChecks(){
-  console.log("\n================ [placeChars] placement places the characters layer (pack.placementChars)");
+  console.log("\n================ [placeChars] placement places the characters layer (characters.learn \"lag\")");
   const loadConst = (file, name) => new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)();
   const ZH = path.join(ROOT, "packs", "zh");
   const PACK = loadConst(path.join(ZH, "pack.js"), "PACK"), WORDS = loadConst(path.join(ZH, "words.js"), "WORDS"), UNITS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
@@ -743,7 +749,7 @@ function placeCharsChecks(){
   // The owner's record shape (docs/PACK_SCHEMA.md "placementWhole"): every bucket answered, one isolated zero, k = 10 of 16.
   const ownerRes = st.map((_, i) => i < 10 ? { r: i === 3 ? 0 : 3, n: 3 } : { r: 0, n: 3 });
   const k = VC.placementStopIndex(ownerRes, W);
-  check(`[placeChars] zh fixture: whole rule gives k = 10 (got ${k}), flag on in the shipped pack`, k === 10 && PACK.placementChars === true && VC.placementCharsOn(PACK));
+  check(`[placeChars] zh fixture: whole rule gives k = 10 (got ${k}), on for the shipped pack without a key`, k === 10 && !("placementChars" in PACK) && VC.placementCharsOn(PACK));
   const fresh = () => VC.defaultProg(PACK);
   const snap = JSON.stringify(fresh());
   const out = VC.applyPlacement(fresh(), st, k, WORDS, PACK, UNITS);
@@ -811,44 +817,34 @@ function placeCharsChecks(){
   const hint = p => VC.placedPastFirstBucket(p, WORDS, PACK);
   const k0 = VC.applyPlacement(fresh(), st, 0, WORDS, PACK, UNITS), k1 = VC.applyPlacement(fresh(), st, 1, WORDS, PACK, UNITS), k2 = VC.applyPlacement(fresh(), st, 2, WORDS, PACK, UNITS);
   check(`[placeChars] Sounds hint: hidden once a placement passed 2+ buckets (k=10 ${hint(out)}, k=2 ${hint(k2)}); shown on a fresh record, after 0 and after 1 bucket (${!hint(fresh())} ${!hint(k0)} ${!hint(k1)})`, hint(out) && hint(k2) && !hint(fresh()) && !hint(k1) && !hint(k0));
-  const off = Object.assign({}, PACK); delete off.placementChars;
-  check("[placeChars] flag off: no hint hiding, placementCharsOn false; a pack without learn lag never turns it on", !VC.placedPastFirstBucket(out, WORDS, off) && !VC.placementCharsOn(off) && !VC.placementCharsOn(Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { learn: undefined }) })));
-  // Flag off byte identity against the pre-fb50 engine.
+  // off = zh without learn lag: the only pack shape that does not place the characters layer (the zh-without-key control
+  // vs the pre-fb50 engine went with the flag collapse: a lag pack always places it).
+  const off = Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { learn: undefined }) });
+  check("[placeChars] without learn lag: no hint hiding, placementCharsOn false", !VC.placedPastFirstBucket(out, WORDS, off) && !VC.placementCharsOn(off));
   if(OLD){
-    const bad = [];
-    [0, 1, 2, 5, 10, 16].forEach(kk => {
-      const o1 = OLD.applyPlacement(OLD.defaultProg(off), st, kk, WORDS, off), o2 = VC.applyPlacement(VC.defaultProg(off), st, kk, WORDS, off, UNITS);
-      if(JSON.stringify(o1) !== JSON.stringify(o2)) bad.push(`zh k=${kk}`);
-    });
-    const withRecs = VC.defaultProg(off); withRecs.chars.c.c0125 = { r: 3, w: 0, s: 3 };
-    const q1 = OLD.applyPlacement(JSON.parse(JSON.stringify(withRecs)), st, 6, WORDS, off), q2 = VC.applyPlacement(JSON.parse(JSON.stringify(withRecs)), st, 6, WORDS, off, UNITS);
-    if(JSON.stringify(q1) !== JSON.stringify(q2)) bad.push("zh with a unit record");
-    check(`[placeChars] flag off (zh without the key): applyPlacement byte-identical to ${PREV} at 6 passed counts + a record with units (${bad.length} differ${bad[0] ? ": " + bad.join(", ") : ""})`, bad.length === 0);
-    const noLag = Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { learn: undefined }) });
-    const n1 = OLD.applyPlacement(OLD.defaultProg(noLag), st, 8, WORDS, noLag), n2 = VC.applyPlacement(VC.defaultProg(noLag), st, 8, WORDS, noLag, UNITS);
-    check("[placeChars] flag on without characters.learn lag: identical to the pre-fb50 engine", JSON.stringify(n1) === JSON.stringify(n2));
-    const lw = zhLike(), lagPk = Object.assign({}, lw.pack, { placementChars: true });
+    const n1 = OLD.applyPlacement(OLD.defaultProg(off), st, 8, WORDS, off), n2 = VC.applyPlacement(VC.defaultProg(off), st, 8, WORDS, off, UNITS);
+    check("[placeChars] without characters.learn lag: identical to the pre-fb50 engine", JSON.stringify(n1) === JSON.stringify(n2));
+    const lw = zhLike();
     const stz = VC.strata(lw.words, lw.pack.placement, VC.setSizeOf(lw.pack));
     const z1 = OLD.applyPlacement(OLD.defaultProg(lw.pack), stz, 2, lw.words, lw.pack), z2 = VC.applyPlacement(VC.defaultProg(lw.pack), stz, 2, lw.words, lw.pack, lw.units);
-    check("[placeChars] zh-like fixture (no key): byte-identical to the pre-fb50 engine", JSON.stringify(z1) === JSON.stringify(z2));
-    check("[placeChars] zh-like fixture with the key but no learn lag: no unit seeded", Object.keys(VC.charRecs(VC.applyPlacement(VC.defaultProg(lagPk), stz, 2, lw.words, lagPk, lw.units))).length === 0);
+    check("[placeChars] zh-like fixture (no learn lag): byte-identical to the pre-fb50 engine, no unit seeded", JSON.stringify(z1) === JSON.stringify(z2) && Object.keys(VC.charRecs(z2)).length === 0);
   }
-  // ja: the shipped pack, flag added.
+  // ja: the shipped pack (learn lag).
   const JA = path.join(ROOT, "..", "japanese", "pack");
   if(fs.existsSync(path.join(JA, "characters.js"))){
     const jp = loadConst(path.join(JA, "pack.js"), "PACK"), jw = loadConst(path.join(JA, "words.js"), "WORDS"), ju = loadConst(path.join(JA, "characters.js"), "CHARACTERS");
-    const on = Object.assign({}, jp, { placementChars: true }), sj = VC.strata(jw, jp.placement, VC.setSizeOf(jp));
+    const on = jp, sj = VC.strata(jw, jp.placement, VC.setSizeOf(jp));
     const kj = Math.floor(sj.length * 0.75), oj = VC.applyPlacement(VC.defaultProg(on), sj, kj, jw, on, ju), rj = VC.charRecs(oj), pj = new Set(Object.keys(oj.w));
     const runJ = VC.placedCharSets(on, ju, pj, {});
     const csj = VC.lagCharSet(on, jw, ju, oj);
     check(`[placeChars] ja: ${Object.keys(rj).length} units seeded in ${runJ.length} sets at ${kj}/${sj.length} buckets, all words placed, next set index ${csj && csj.index} = ${runJ.length}`, Object.keys(rj).length > 0 && ju.filter(u => rj[u.id]).every(u => u.words.every(i => pj.has(i)) && rj[u.id].prov === 1) && (!csj || csj.index === runJ.length) && VC.placedCharsThrough(on, ju, oj) != null);
     if(OLD){
       const ja1 = OLD.applyPlacement(OLD.defaultProg(jp), sj, kj, jw, jp), ja2 = VC.applyPlacement(VC.defaultProg(jp), sj, kj, jw, jp, ju);
-      check("[placeChars] ja without the key: applyPlacement byte-identical to the pre-fb50 engine", JSON.stringify(ja1) === JSON.stringify(ja2));
+      // (the byte-identity with the pre-fb50 engine went in the flag collapse: placedKnown, now default, postdates it)
     }
   } else console.log("    ../japanese/pack not present: ja checks skipped");
   const thr = VC.placedCharsThrough(PACK, UNITS, out), lastSet = run[run.length - 1];
-  check(`[placeChars] zh: placedCharsThrough names the last placed set (level ${thr && thr.lv}, set ${thr && thr.set}); null without records and without the flag`, !!thr && thr.lv === lastSet.lv && thr.set === lastSet.k + 1 && VC.placedCharsThrough(PACK, UNITS, fresh()) === null && VC.placedCharsThrough(off, UNITS, out) === null);
+  check(`[placeChars] zh: placedCharsThrough names the last placed set (level ${thr && thr.lv}, set ${thr && thr.set}); null without records and without learn lag`, !!thr && thr.lv === lastSet.lv && thr.set === lastSet.k + 1 && VC.placedCharsThrough(PACK, UNITS, fresh()) === null && VC.placedCharsThrough(off, UNITS, out) === null);
 }
 
 suite(zhLike());

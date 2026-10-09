@@ -5,7 +5,8 @@ allowed places. Exit 1 and print every offending key otherwise.
   pack_diff_guard.py --repo SITE --prev REV [--pack-dir pack] [--lang CODE --engine-tools DIR]
         [--pack-keys a,b] [--word-fields ft] [--unit-fields ft] [--free-files x.json,y.json]
 
-Allowed: pack.json top-level keys = spec.port_flags() keys (needs --lang/--engine-tools) + eta + --pack-keys;
+Allowed: pack.json top-level keys = spec.port_flags() keys (needs --lang/--engine-tools) + eta + --pack-keys, and the removal
+of a collapsed flag (tools/pack_collapsed.py: the engine ignores it, enrich drops it);
 words.json per-word fields = --word-fields; characters.json per-unit fields = --unit-fields; any other *.json
 byte-equal after parsing, unless listed in --free-files. Same ids, same order, same length everywhere else."""
 import argparse
@@ -13,6 +14,9 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from pack_collapsed import COLLAPSED  # noqa: E402  (tools/)
 
 
 def git_show(repo, rev, rel):
@@ -79,7 +83,7 @@ def main():
             notes.append(f"{n}: changed (free)")
         elif n == "pack.json":
             keys = sorted(k for k in set(old) | set(new) if old.get(k, "<absent>") != new.get(k, "<absent>"))
-            off = [k for k in keys if k not in allow_keys]
+            off = [k for k in keys if k not in allow_keys and not (k in COLLAPSED and k not in new)]
             bad += [f"pack.json: key {k!r} changed and is not an allowed key" for k in off]
             notes.append("pack.json keys changed: " + ", ".join(keys))
         elif n == "words.json":

@@ -24,9 +24,8 @@ const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // glossStyle (fb32) changes every gloss the controls render; tests/gloss_display_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["glossStyle", "progressView"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: [] });
 // levelGate and levelExam (fb38) came after ff760d8: the flag-off controls drop them too (tests/level_gate_checks.js covers it).
-const PACK_OFF = packAsOf(PACK, MAIN);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -51,7 +50,8 @@ const OLD_WORDS = constOf(git(MAIN, "packs/zh/words.js"), "WORDS");
 const appHtml = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
 const scriptOf = html => { const b = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]; return b[b.length - 1][1]; };
 function extractAttrs(tag){ const attrs = {}; const re = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)(?:\s*=\s*"([^"]*)")?/g; let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; } return attrs; }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){ this.tagName = (tag||"div").toUpperCase(); this._attrs = Object.assign({}, attrs); this._classes = new Set((this._attrs.class||"").split(/\s+/).filter(Boolean));
@@ -68,9 +68,9 @@ function makeFakeDom(){
     remove(){} focus(){} click(){ if(this.onclick) this.onclick({}); (this._listeners.click||[]).forEach(f=>f({})); } closest(){ return null; } querySelector(){ return null; } querySelectorAll(){ return []; }
   }
   function registerIdsFromHtml(html){ const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g; let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); } }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/); const btnRe = /<button([^>]*)>/g;
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/); const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return { title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); }, getElementById(id){ return registry.get(id) || null; },
     querySelector(sel){ return this.querySelectorAll(sel)[0] || null; },
@@ -86,7 +86,7 @@ async function boot(pack, prog, seed, opts){
   const o = opts || {};
   Math.random = mulberry32(seed);
   const st = o.st || { ls: memStore(), ss: memStore() }; if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog));
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
   const fnBody = scriptOf(o.html || appHtml) + `
@@ -163,9 +163,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
 
 (async () => {
   console.log("[1] config: pack.freqTiers on zh, needs pairs; validator");
-  check("packs/zh sets freqTiers: true with pairs and dayAware", PACK.freqTiers === true && VC.freqTiersOn(PACK));
-  check("freqTiersOn: off without pairs, without dayAware, with the field missing or not true", !VC.freqTiersOn(Object.assign({}, PACK, { pairs: false })) && !VC.freqTiersOn(Object.assign({}, PACK, { dayAware: false })) && !VC.freqTiersOn(PACK_OFF) && !VC.freqTiersOn(Object.assign({}, PACK, { freqTiers: 1 })));
-  check("flag off: every word and unit reads core (ft ignored)", WORDS.every(w => VC.wordTier(w, PACK_OFF) === VC.FT_CORE) && CHARACTERS.every(u => VC.unitTier(u, BY_ID, PACK_OFF) === VC.FT_CORE && VC.unitTier(u, null, PACK_OFF) === VC.FT_CORE));
+  check("frequency tiers are engine default (flag collapse): zh carries no freqTiers key, its words read their ft", !("freqTiers" in PACK) && WORDS.some(w => VC.wordTier(w, PACK) !== VC.FT_CORE));
   {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "ft-val-"));
     const run = (pk, wk, ck) => { const d = path.join(tmp, String(Math.random()).slice(2)); fs.mkdirSync(d); for(const f of fs.readdirSync(ZH)) if(f.endsWith(".json")) fs.copyFileSync(path.join(ZH, f), path.join(d, f));
@@ -174,8 +172,6 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       cp.execSync(`${PY} "${path.join(ROOT, "tools", "jsonify_pack.py")}" "${d}"`, { stdio: "ignore" });
       try { cp.execSync(`${PY} "${path.join(ROOT, "tools", "validate_pack.py")}" "${d}"`, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); return ""; } catch(e){ return String(e.stdout || "") + String(e.stderr || ""); } };
     check("validate_pack: zh as shipped passes", run() === "");
-    check("validate_pack: freqTiers not a boolean is an error", /pack\.freqTiers must be a boolean/.test(run(p => { p.freqTiers = 1; })));
-    check("validate_pack: freqTiers without pairs is an error", /pack\.freqTiers needs pack\.pairs/.test(run(p => { delete p.pairs; })));
     check("validate_pack: a word ft outside 0/1/2 is an error", /word w\d+\.ft must be 0, 1 or 2/.test(run(null, w => { w[0].ft = 3; })));
     check("validate_pack: a unit ft other than its words' lowest is an error", /\.ft 2 is not the lowest ft of its words/.test(run(null, null, c => { const u = c.find(x => x.ft === 1); u.ft = 2; })));
     fs.rmSync(tmp, { recursive: true, force: true });
@@ -241,7 +237,6 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const r1 = pick(two, 1), r2 = pick(two, 2);
     check(`equal streak: the core typed ask before the older peripheral one (${JSON.stringify(r1)}); the peripheral one, when drawn, is typed (${JSON.stringify(r2)})`, r1.length === 1 && r1[0][0] === 1 && r1[0][1] === "type" && r2.length === 2 && r2[1][0] === 2 && r2[1][1] === "type");
     const cOff = [cand(undefined, 30, "虽然"), cand(undefined, 5, "爬山")];
-    check("flag off: the older typed ask first (no tier)", pick(cOff, 1, PACK_OFF)[0] && VC.pairPick(cOff, 1, { a: {} }, mulberry32(1), 40, PACK_OFF, fits)[0].c.key === "w:" + BY_W["爬山"].id);
     // A peripheral pair below its streak still comes before a core one higher up: streak first.
     const lowP = [cand(1, 30, "虽然"), Object.assign(cand(2, 5, "爬山"), { rec: { s: 0, u: 5, p: { wm: [0, 5] } } })];
     check("streak first: a peripheral pair at 0 before a core pair at 1", VC.pairPick(lowP, 1, { a: {} }, mulberry32(1), 40, PACK, fits)[0].c.tier === 2);
@@ -309,12 +304,9 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       check(`peripheral refresh, even plans (sn 40, 42): no reserved slot, oldest by age (${ev.join(" ")} / ${ev2.join(" ")}); sn 43 reserves again (${od.join(" ")})`, ev.join() === "w:c0" && ev2.join() === "w:c0" && od.join() === "w:p2");
       const n20 = ref([...low(18), ...cs.slice(9)], 20);
       check(`two refresh slots: the peripheral pair, then the oldest core (${n20.join(" ")})`, n20.join() === "w:p2,w:c0");
-      const off = ref(cs.map(c => Object.assign({}, c, { tier: undefined })), 10, PACK_OFF);
-      check(`flag off: the oldest pair (${off.join(" ")})`, off.join() === "w:c0");
       const none = ref([...low(9), ...Array.from({ length: 10 }, (_, i) => cand(1, i, "c" + i))], 10);
       check(`no known peripheral pair: the share fills as before (${none.join(" ")})`, none.join() === "w:c0");
     }
-    check("flag off: candidates carry no tier effect (known at 3, oldest first)", (() => { const cs = [cand(undefined, 10, "p"), cand(undefined, 20, "c")]; return VC.pairPick(cs, 10, { a: {} }, mulberry32(1), 40, PACK_OFF, {}).map(e => e.c.key)[0] === "w:p"; })());
   }
 
   console.log("\n[6] known per tier (core.js wordKnown)");
@@ -327,14 +319,13 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check("core: wm 3 and sm 3 but ws at boot 2 (legacy 2): not known; ws 3: known", !K({ r: 4, w: 0, s: 2, p: { wm: [3, 1], sm: [4, 2] } }, wc) && K({ r: 4, w: 0, s: 2, p: { wm: [3, 1], sm: [4, 2], ws: [3, 2] } }, wc));
     check("a missed pair (0) takes a word out of known in every tier", [wp, wc, wa].every(w => !K({ r: 4, w: 1, s: 5, p: { sm: [0, 3] } }, w)));
     check("peripheral: every pair at 2 (choice answers): known; core at 2 not", K({ r: 4, w: 0, s: 1, p: { wm: [2, 3], sm: [2, 4], ws: [2, 4] } }, wp) && !K({ r: 4, w: 0, s: 1, p: { wm: [2, 3], sm: [2, 4], ws: [2, 4] } }, wc));
-    check("flag off: the legacy streak alone (3+), pairs ignored", K({ r: 4, w: 0, s: 3, p: { wm: [0, 3] } }, wc, PACK_OFF) && !K({ r: 3, w: 0, s: 2 }, wp, PACK_OFF) && !K(undefined, wc, PACK_OFF));
     const pr = { r: 3, w: 0, s: 2, prov: 1, p: { wm: [2, 3], sm: [2, 3], ws: [2, 3] } };
-    check("settleProv: a peripheral placement word known by pairs drops prov; flag off keeps it", (() => { const a = clone(pr), b = clone(pr); return VC.settleProv(a, wp, PACK) && !a.prov && !VC.settleProv(b, wp, PACK_OFF) && b.prov === 1; })());
+    check("settleProv: a peripheral placement word known by pairs drops prov", (() => { const a = clone(pr); return VC.settleProv(a, wp, PACK) && !a.prov; })());
     // Goal / progress positions read the same rule.
     const p = synth(2, 3, 6), lv1 = byLv["1"];
-    const g = VC.progressMapGoals(PACK)[0], gp = VC.goalPosition(p, PACK, g, WORDS, [], []), gpOff = VC.goalPosition(p, PACK_OFF, g, WORDS, [], []);
+    const g = VC.progressMapGoals(PACK)[0], gp = VC.goalPosition(p, PACK, g, WORDS, [], []);
     const nP = lv1.filter(w => tierOf(w) === 2).length, inG = WORDS.filter(w => +w.lv <= 2).length;
-    check(`goalPosition: HSK 1 at legacy 2 counts its ${nP} peripheral words known (${gp.toFixed(3)} = ${nP}/${inG} words; flag off ${gpOff.toFixed(3)})`, Math.abs(gp - nP / inG) < 1e-9 && gpOff === 0);
+    check(`goalPosition: HSK 1 at legacy 2 counts its ${nP} peripheral words known (${gp.toFixed(3)} = ${nP}/${inG} words)`, Math.abs(gp - nP / inG) < 1e-9);
   }
 
   console.log("\n[7] unit tier from mixed words; unit target");
@@ -346,7 +337,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check("unitTier without words reads the unit's own ft (the generator's minimum), else core", VC.unitTier(U([wp.id], 2), null, PACK) === 2 && VC.unitTier(U([wp.id]), null, PACK) === 1);
     const cfg = PACK.characters, at = s => ({ r: s + 1, w: 0, s });
     check(`unitDone: core needs bare (${cfg.bare}), peripheral mastered (${cfg.mastered}); a mixed unit is core`,
-      !VC.unitDone(at(cfg.mastered), U([wc.id]), PACK, BY_ID) && VC.unitDone(at(cfg.bare), U([wc.id]), PACK, BY_ID) && VC.unitDone(at(cfg.mastered), U([wp.id]), PACK, BY_ID) && !VC.unitDone(at(cfg.mastered - 1), U([wp.id]), PACK, BY_ID) && !VC.unitDone(at(cfg.mastered), U([wp.id, wc.id]), PACK, BY_ID) && !VC.unitDone(at(cfg.mastered), U([wp.id]), PACK_OFF, BY_ID));
+      !VC.unitDone(at(cfg.mastered), U([wc.id]), PACK, BY_ID) && VC.unitDone(at(cfg.bare), U([wc.id]), PACK, BY_ID) && VC.unitDone(at(cfg.mastered), U([wp.id]), PACK, BY_ID) && !VC.unitDone(at(cfg.mastered - 1), U([wp.id]), PACK, BY_ID) && !VC.unitDone(at(cfg.mastered), U([wp.id, wc.id]), PACK, BY_ID));
   }
 
   console.log("\n[8] Learn order on the owner export: nothing re-taught");
@@ -376,53 +367,13 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check(`records-less HSK 2 at counter 3: learned = the first 30 in id order (${lw.length}), not the first 30 by frequency`, lw.join() === want.join() && want.join() !== L2.slice(0, 30).map(w => w.id).join());
     const pin = VC.pinPrefixRecords(clone(oldP), WORDS, PACK);
     check("pinPrefixRecords pins the same 30 (id order)", Object.keys(pin.w).sort().join() === want.slice().sort().join());
-    const off = VC.learnedWords(WORDS, PACK_OFF, oldP).map(w => w.id);
-    check("flag off: the counter prefix is the file order", off.join() === L2.slice(0, 30).map(w => w.id).join());
     const nn = VC.levelNewSet(WORDS, PACK, VC.pinPrefixRecords(clone(oldP), WORDS, PACK), "2"), settled = VC.pinPrefixRecords(clone(oldP), WORDS, PACK);
     VC.settleSetCounter(settled, WORDS, PACK, "2");
     check(`set label and counter count learned words: next HSK 2 set ${nn && nn.set + 1} (4), counter ${settled.sets["2"]} (3); its words are the first 10 unrecorded by frequency`,
       nn && nn.lv === "2" && nn.set === 3 && settled.sets["2"] === 3 && nn.words.map(w => w.id).join() === L2.filter(w => !want.includes(w.id)).slice(0, 10).map(w => w.id).join());
   }
 
-  console.log(`\n[9] flag-off control: byte-identical to ${MAIN}`);
-  if(!OLD) skip(`engine ${MAIN} not in this checkout's history`);
-  else {
-    const progs = [["owner export", OWNER], ["synthetic HSK 1 at 2", synth(2, 3, 6)], ["synthetic known, aged", synth(3, (w, i) => i % 30, 40)]].filter(x => x[1]);
-    let n = 0; const bad = [];
-    for(const [name, p0] of progs) for(const sd of [1, 2, 3]){
-      const lw = VC.learnedWords(WORDS, PACK_OFF, p0); const TU = VC.typedUnitWords(CHARACTERS, WORDS, PACK_OFF);
-      const sn = (p0.sn || 0) + 1, o = () => ({ canHear: () => true, today: TODAY, rng: mulberry32(sd), units: CHARACTERS, typedUnits: TU, typedOk: () => true, typedSeen: () => false, typedKindFits: () => true, sn });
-      const runs = [
-        ["Review", c => sigPlan(c.buildReviewPlan(lw, clone(p0), PACK_OFF, Object.assign(o(), { size: 20 })))],
-        ["Recall", c => sigPlan(c.buildRecallPlan(lw, clone(p0), PACK_OFF, 12, o()))],
-        ["Listen", c => c.dayPickList(lw, 12, clone(p0), PACK_OFF, TODAY, "w:", ["hear"], mulberry32(sd), undefined, { sn }).map(w => w.id).join()],
-        ["Test chars", c => sigPlan(c.charTestPlan(CHARACTERS, lw, clone(p0), PACK_OFF, 20, mulberry32(sd), TODAY, { sn }))],
-        ["goals", c => JSON.stringify(c.goalPositions(clone(p0), PACK_OFF, WORDS, CHARACTERS, []))],
-        ["progress", c => String(c.progressPosition(clone(p0), Object.assign({}, PACK_OFF, { progressMap: true }), WORDS, CHARACTERS, []))],
-        ["notePair", c => { const r = clone(p0.w[lw[0].id]); c.notePair(r, "wm", true, false, sn, r.s); c.notePair(r, "sm", true, false, sn, r.s); return JSON.stringify(r); }],
-      ];
-      for(const [k, f] of runs){ n++; const a = f(OLD), b = f(VC); if(a !== b || !a.length) bad.push(`${name} seed ${sd} ${k}`); }
-    }
-    check(`${n} results (Review, Recall, Listen, Test chars, goal / progress positions, notePair) x ${progs.length} progress shapes x 3 seeds byte-identical to ${MAIN}`, bad.length === 0, bad.slice(0, 6).join("\n"));
-  }
-  if(!OLD || !mainHtml) skip(`flag-off app control vs ${MAIN}`);
-  else {
-    const run = async (html, core) => {
-      NOW = new Date(2026, 9, 6, 8, 0, 0).getTime();
-      // characters.bareByPair (fb31) postdates ff760d8: stripped too (tests/bare_pair_checks.js controls it).
-      const pk = Object.assign({}, PACK_OFF, { characters: (c => { const q = Object.assign({}, c); delete q.bareByPair; return q; })(PACK_OFF.characters) });
-      const api = await boot(pk, OWNER || synth(2, 3, 6), 11, { html, core: core ? core : Object.assign({}, VC) });
-      const out = { today: api.panel() }; const ans = mulberry32(7);
-      out.walk = JSON.stringify((await session(api, () => ans() < 0.8)).map(r => [r.key, r.kind, r.label, r.ok]));
-      NOW = new Date(2026, 9, 6, 13, 0, 0).getTime();
-      out.walk2 = JSON.stringify((await session(api, () => ans() < 0.8)).map(r => [r.key, r.kind, r.label, r.ok]));
-      api.goto("progress"); out.progress = api.panel(); out.prog = JSON.stringify(api.getProg());
-      return out;
-    };
-    const a = await run(mainHtml, Object.assign({}, OLD)), b = await run(undefined, undefined);
-    for(const k of Object.keys(a)){ let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
-      check(`flag off (freqTiers stripped), two sessions on ${OWNER ? "the owner export" : "a synthetic record"}: ${k} byte-identical to ${MAIN} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}`}`, a[k] === b[k] && a[k].length > 100); }
-  }
+  // [9] (flag-off control vs ff760d8) deleted: freqTiers is engine default since the flag collapse.
 
   console.log("\n[10] the app with freqTiers: three Today sessions on " + (OWNER ? "the owner export" : "a synthetic record"));
   {
@@ -430,10 +381,8 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const p0 = OWNER ? clone(OWNER) : synth(2, 3, 6); delete p0.pause;
     const api = await boot(PACK, p0, 5);
     const lw = VC.learnedWords(WORDS, PACK, p0);
-    const k0 = lw.filter(w => VC.wordKnown(p0.w[w.id], w, PACK)).length, k0off = lw.filter(w => VC.wordKnown(p0.w[w.id], w, PACK_OFF)).length;
+    const k0 = lw.filter(w => VC.wordKnown(p0.w[w.id], w, PACK)).length;
     const perAt2 = lw.filter(w => tierOf(w) === 2 && (p0.w[w.id].s || 0) === 2).length;
-    console.log(`    known at boot: ${k0off} (legacy rule) -> ${k0} (tiers); peripheral words at legacy 2: ${perAt2}`);
-    check(`known at boot rises: the peripheral words at legacy 2 are known (+${k0 - k0off}; ${perAt2} such words)`, k0 > k0off && k0 - k0off <= perAt2 + lw.filter(w => tierOf(w) === 2 && (p0.w[w.id].s || 0) < 2).length);
     const ans = mulberry32(9); const all = [];
     for(const h of [8, 13, 20]){ NOW = new Date(2026, 9, 6, h, 0, 0).getTime();
       const sn = (api.getProg().sn || 0) + 1;
@@ -450,12 +399,14 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     // the unit's ask, not a refresh of the word
     const ambKnown = all.filter(r => r.tier === 0 && !r.retry && !r.tu && !(r.kind === "type" && r.us && r.us.slice(0, 2).some(x => x < 3)) && r.ws && r.ws.every(s => s >= 3) && r.key[0] === "w");
     check(`no ask of an ambient word whose every pair is known (refresh) (${ambKnown.length}; ${all.filter(r => r.tier === 0).length} ambient asks)`, ambKnown.length === 0);
-    api.goto("progress"); const ph = api.panel(), prog = api.getProg();
-    const rows = [...(ph.match(/>Characters<\/p><table class="stats nw">([\s\S]*?)<\/table>/) || ["", ""])[1].matchAll(/<td>([^<]*)<\/td><\/tr>/g)].map(m => m[1]);
-    const doneOf = lv => { const us = CHARACTERS.filter(u => u.lv === lv && prog.chars.c[u.id]); return us.filter(u => VC.unitDone(prog.chars.c[u.id], u, PACK)).length; };
-    console.log("    Progress characters rows: " + rows.join(" | "));
-    check("Progress characters rows count units at their target as done (a peripheral unit at mastered)", rows.length === 4 && rows.every((r, i) => { const n = doneOf(String(i + 1)); return n ? r.endsWith(` · ${n} done`) : !/done|bare/.test(r); }) && rows.every(r => r.length <= 32));
-    const lvRows = VC.levelIds(PACK).map(lv => (ph.match(new RegExp(`HSK ${lv}</td><td>(\\d+) / \\d+ learned · (\\d+) mastered`)) || [])[2]);
+    // App v2 (engine default since the flag collapse): with Show all open, each level row carries "characters only X of Y"
+    // (units at their target) and its bar's aria-label "HSK n: L of S learned, M mastered".
+    api.goto("progress"); api.el("pvAll").click(); const ph = api.panel(), prog = api.getProg();
+    const rows = VC.levelIds(PACK).map(lv => (ph.match(new RegExp(`aria-label="HSK ${lv}: [^"]*"[\\s\\S]*?characters only (\\d+) of (\\d+)`)) || []).slice(1).join(" of "));
+    const doneOf = lv => CHARACTERS.filter(u => String(u.lv) === lv).filter(u => VC.unitAtTarget(prog.chars.c[u.id], u, prog, PACK)).length;
+    console.log("    Progress characters parts: " + rows.join(" | "));
+    check("Progress level rows count characters at their target (a peripheral unit at mastered)", rows.length === 4 && rows.every((r, i) => r === `${doneOf(String(i + 1))} of ${CHARACTERS.filter(u => String(u.lv) === String(i + 1)).length}`) && rows.some(r => !/^0 of/.test(r)));
+    const lvRows = VC.levelIds(PACK).map(lv => (ph.match(new RegExp(`aria-label="HSK ${lv}: (\\d+) of \\d+ learned, (\\d+) mastered"`)) || [])[2]);
     check(`Progress level rows count known by the tier rule (${lvRows.join(" / ")})`, VC.levelIds(PACK).every((lv, i) => +lvRows[i] === VC.learnedWords(WORDS, PACK, prog).filter(w => w.lv === lv && VC.wordKnownX(prog.w[w.id], w, PACK, prog, VC.knownCtx(PACK, CHARACTERS))).length)); check("nothing new stored: records carry only fields older engines know (r w s k t u f d prov p)", Object.values(prog.w).every(r => Object.keys(r).every(k => ["r", "w", "s", "k", "t", "u", "f", "d", "prov", "p"].includes(k))));
   }
 
@@ -465,17 +416,15 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const idOrd = byLv["1"].slice().sort((a, b) => a.id < b.id ? -1 : 1).slice(0, 35);
     const mk = () => { const p = VC.normalizeProg({ placedOnce: true, soundsOpened: true, sessions: 10 }, PACK); p.sets = { "1": 3, "2": 0, "3": 0, "4": 0 }; p.sn = 6;
       idOrd.forEach(w => { p.w[w.id] = { r: 1, w: 0, s: 1 }; }); return p; };
-    for(const [label, pk] of [["flag on", PACK], ["flag off", PACK_OFF]]){
+    for(const [label, pk] of [["frequency tiers", PACK]]){
       const p0 = mk(), api = await boot(pk, clone(p0), 7); api.goto("words");
-      const nn = VC.nextNewSet(WORDS, pk, p0), btn = (api.el("wbody").innerHTML.match(/<button class="on">Set (\d+) \/ (\d+)/) || []);
+      const nn = VC.nextNewSet(WORDS, pk, p0), btn = (api.el("wbody").innerHTML.match(/<span class="pvn">Set (\d+) of (\d+)/) || []); // app v2 Words nav
       const rows = (api.el("wl") ? api.el("wl").children : []).map(c => c.innerHTML), learned = new Set(idOrd.map(w => w.id));
       if(pk === PACK){
         check(`${label}: Words tab opens on Today's set number (${btn[1]} vs ${nn.set + 1})`, +btn[1] === nn.set + 1 && nn.set === 3);
         check(`${label}: the shown set is the next Learn set, so Drill this set marks no learned word`, rows.length === nn.words.length && nn.words.every((w, i) => rows[i].includes(w.w)) && nn.words.every(w => !learned.has(w.id)));
         api.el("nx").click(); api.el("jump").click();
-        check(`${label}: "next new" returns to the same set`, +(api.el("wbody").innerHTML.match(/<button class="on">Set (\d+)/) || [])[1] === nn.set + 1);
-      } else {
-        check(`${label}: Words tab keeps the position numbering (set ${btn[1]}, first unrecorded word's slice)`, +btn[1] === Math.floor(byLv["1"].findIndex(w => !learned.has(w.id)) / 10) + 1);
+        check(`${label}: "next new" returns to the same set`, +(api.el("wbody").innerHTML.match(/<span class="pvn">Set (\d+)/) || [])[1] === nn.set + 1);
       }
     }
   }

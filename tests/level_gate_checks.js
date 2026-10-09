@@ -1,7 +1,7 @@
 // pack.levelGate (docs/PACK_SCHEMA.md "levelGate"; owner 2026-10-07: the next HSK level opens only when 70% (was 80%; w32)
 // of the previous one is known): [1] core (validator-shaped reads, levelKnownPct, hold just under / at the gate, note text),
-// [2] Today plan row and Learn step (note, characters still taught, pauseNew), [3] Progress note, [4] flag-off /
-// gate-open / no-pairs controls byte-identical to main 9667a81, [5] owner export measurement (read-only),
+// [2] Today Learn step (gate sentence, characters still taught, pauseNew), [3] Progress gate line, [4] (flag-off
+// controls vs 9667a81 deleted in the flag collapse), [5] owner export measurement (read-only),
 // [6] sessions until the next level opens on a seeded HSK 1-3 learned record at 85% right.
 // [7] pack.levelExam (pinyin / characters levels: known needs the unit's meaning pair on characters levels).
 // Run: node tests/level_gate_checks.js [--sessions N] [--acc 0.85] [--noexam]
@@ -15,11 +15,9 @@ const VC = require(path.join(ROOT, "engine", "core.js"));
 const ZH = path.join(ROOT, "packs", "zh");
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
-// progressView "v2" (fb37) replaces the Progress layout [3] / [7] pin (the old rows, still the flag-off layout); [8] checks v2.
-// appView "v2" (fb40a) words the gate as a sentence on Today and Progress; tests/app_view_checks.js covers it.
-const PACK_V2 = stripFlags(loadConst(path.join(ZH, "pack.js"), "PACK"), ["appView"]);
-const PACK = stripFlags(PACK_V2, ["progressView"]);
-const G = PACK.levelGate; // zh ships 0.7 (owner, w32 brief)
+// appView / progressView v2 are engine default since the flag collapse: the gate is a sentence on Today and Progress.
+const PACK = loadConst(path.join(ZH, "pack.js"), "PACK"), PACK_V2 = PACK;
+const G = VC.LEVEL_GATE; // 0.7, engine default since the flag collapse (owner, w32 brief)
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -140,7 +138,7 @@ const __ty = renderTypeItem; renderTypeItem = function(it){ __cur = it; __log.pu
 ${NO_EXTRA ? "learnDrillCount = () => 0;" : ""}
 return {
   el: id => document.getElementById(id), panel: () => document.getElementById("panel").innerHTML,
-  getProg: () => prog, getD: () => D, getCur: () => __cur, log: __log, rd: () => RD,
+  getProg: () => prog, getD: () => D, gs: () => gateSentence(), getCur: () => __cur, log: __log, rd: () => RD,
   skipRead: () => { RD = null; todayStep(); },
   lesson: i => { switchToTab("sounds", "Sounds"); soundsSel = i; soundsRender(); },
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(), quit: () => quitDrill(),
@@ -270,7 +268,9 @@ const gapWord = () => undefined;
 const clone = x => JSON.parse(JSON.stringify(x));
 const LV = VC.levelIds(PACK), BYLV = VC.wordsByLevel(WORDS, PACK), SIZE = VC.setSizeOf(PACK);
 const todayHtml = async (pack, prog, env) => { const st = { ls: memStore(), ss: memStore() }; st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog)); NOW = new Date(2026, 9, 2, 9, 0, 0).getTime(); const api = await boot(pack, st, 3, env); return { api, html: api.panel() }; };
-const learnRow = html => { const m = html.match(/<tr><td>\d\. Learn<\/td><td>([^<]*)<\/td><\/tr>/); return m ? m[1] : null; };
+// appView v2 Today: the Learn step is the set line plus the gate sentence as one quiet line under it.
+const learnRow = html => { const m = html.match(/<div class="tst"><span>Learn<\/span><div class="tsd">([^<]*)(?:<div class="pvs pvgate">([^<]*)<\/div>)?<\/div><\/div>/); return m ? { line: m[1], gate: m[2] || "" } : null; };
+const gateWords = (lv, prev, pct) => `${VC.levelLabel(PACK, lv)} opens at ${G * 100}% of ${VC.levelLabel(PACK, prev)} known. Now ${pct}%`;
 const strip = h => h.replace(/<!--[\s\S]*?-->/g, "");
 
 // A record with levels 1..upTo fully taught; the last of them has exactly `known` words at streak 5 (known), the rest at 0.
@@ -289,9 +289,8 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
 
 (async () => {
   const L2 = BYLV[LV[1]].length, need = Math.ceil(G * L2 - 1e-9);
-  console.log(`\n[1] core: levelGateOn, levelKnownPct, hold just under / at ${G * 100}%`);
-  check("levelGateOn: zh ships 0.7 and reads on", PACK.levelGate === 0.7 && VC.levelGateOn(PACK));
-  check("levelGateOn: off without pairs, without the field, for 0, 1.5, true, a string", !VC.levelGateOn(Object.assign({}, PACK, { pairs: false })) && !VC.levelGateOn((p => { delete p.levelGate; return p; })(Object.assign({}, PACK))) && [0, 1.5, true, "0.8", -1].every(v => !VC.levelGateOn(Object.assign({}, PACK, { levelGate: v }))) && VC.levelGateOn(Object.assign({}, PACK, { levelGate: 1 })));
+  console.log(`\n[1] core: LEVEL_GATE, levelKnownPct, hold just under / at ${G * 100}%`);
+  check("level gate is engine default at 0.7 (flag collapse): VC.LEVEL_GATE, zh carries no levelGate key", VC.LEVEL_GATE === 0.7 && !("levelGate" in PACK));
   const hold = seed(2, need - 1, PACK), open = seed(2, need, PACK);
   const pctHold = Math.floor(VC.levelKnownPct(WORDS, PACK, hold, LV[1]) * 100);
   check(`levelKnownPct: ${need - 1} of ${L2} known = ${(VC.levelKnownPct(WORDS, PACK, hold, LV[1]) * 100).toFixed(1)}%, ${need} = ${(VC.levelKnownPct(WORDS, PACK, open, LV[1]) * 100).toFixed(1)}%`, VC.levelKnownPct(WORDS, PACK, hold, LV[1]) < G && VC.levelKnownPct(WORDS, PACK, open, LV[1]) >= G);
@@ -312,14 +311,16 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
   console.log(`\n[2] Today: plan row, Learn step, characters, pauseNew`);
   const T1 = await todayHtml(PACK, charsAll(hold) || hold, null);
   const note = VC.levelGateNote(WORDS, PACK, hold);
-  check(`Learn row says why: "${learnRow(T1.html)}"`, learnRow(T1.html) === note);
+  const r1 = learnRow(T1.html) || {};
+  check(`Learn row says why: "${r1.gate}"`, r1.line === "" && r1.gate === T1.api.gs() && r1.gate.startsWith(gateWords(LV[2], LV[1], pctHold)));
   const T0 = await todayHtml(PACK, (q => { charsAll(q); return q; })(seed(2, need, PACK)), null);
-  check(`gate open: the Learn row names the level set ("${learnRow(T0.html)}")`, /^HSK 3, set 1/.test(learnRow(T0.html) || "") && !/waits/.test(T0.html));
+  const r0 = learnRow(T0.html) || {};
+  check(`gate open: the Learn row names the level set ("${r0.line}")`, /^HSK 3, set 1/.test(r0.line || "") && !r0.gate && !/pvgate/.test(T0.html));
   // characters: the lag rule still teaches a set of characters while the words wait
   const cp_ = seed(2, need - 1, PACK);
   const T2 = await todayHtml(PACK, cp_, null);
   const sc = VC.todaySnapshot(PACK, WORDS, CHARACTERS, cp_, []);
-  check(`characters still taught: stage ${sc.stage && sc.stage.kind}, ${sc.cset ? sc.cset.units.length : 0} units; row "${learnRow(T2.html)}"`, !!sc.stage && sc.stage.kind === "chars" && !!sc.cset && sc.cset.units.length > 0 && (learnRow(T2.html) || "").endsWith(note) && (learnRow(T2.html) || "").length > note.length);
+  check(`characters still taught: stage ${sc.stage && sc.stage.kind}, ${sc.cset ? sc.cset.units.length : 0} units; row "${(learnRow(T2.html) || {}).line}"`, !!sc.stage && sc.stage.kind === "chars" && !!sc.cset && sc.cset.units.length > 0 && !!(learnRow(T2.html) || {}).line && (learnRow(T2.html) || {}).gate === T2.api.gs() && !!T2.api.gs());
   T2.api.el("go").click();
   await tick();
   const before = Object.keys(T2.api.getProg().w).length;
@@ -337,46 +338,25 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
   // pauseNew: paused drops the Learn row (and the note); the pause chip still toggles it back
   const pz = clone(hold); charsAll(pz); pz.pause = 1;
   const TP = await todayHtml(PACK, pz, null);
-  check("paused + held: no Learn row, no note on Today", learnRow(TP.html) === null && !/waits/.test(TP.html));
+  check("paused + held: no Learn row, no note on Today", learnRow(TP.html) === null && !/pvgate/.test(TP.html));
   const pu = clone(pz); delete pu.pause;
-  check("unpaused: the note is back", /waits/.test((await todayHtml(PACK, pu, null)).html));
-  check("paused run is the paused control: same Today HTML as the same record with the gate off", await (async () => { const off = Object.assign({}, PACK); delete off.levelGate; return strip((await todayHtml(off, pz, null)).html) === strip(TP.html); })());
+  check("unpaused: the note is back", ((learnRow((await todayHtml(PACK, pu, null)).html) || {}).gate || "").startsWith(gateWords(LV[2], LV[1], pctHold)));
+  // (paused vs gate-off control deleted: pack.levelGate went in the flag collapse, there is no gate off)
 
   console.log(`\n[3] Progress note`);
   const PR = await todayHtml(PACK, hold, null); PR.api.clickTab("progress");
   const ph = PR.api.panel();
-  check("Progress shows the same note on the waiting level's row", ph.includes(`<tr><td colspan="2">${note}</td></tr>`) && ph.indexOf(note) > ph.indexOf(`<td>${VC.levelLabel(PACK, LV[1])}</td>`) );
+  // (the v1 Progress table row check went with progressView v1 in the flag collapse; v2 below)
   {
     // progressView v2: one quiet line inside the waiting level's block, nothing from the old rows.
     const V = await todayHtml(PACK_V2, hold, null); V.api.clickTab("progress"); const vh = V.api.panel();
-    const at = vh.indexOf(`<span>${VC.levelLabel(PACK, LV[2])}</span>`), gi = vh.indexOf(`<p class="pvs pvgate">${note}</p>`);
-    check("v2: the note is one quiet line inside the waiting level's block, after its bar", at >= 0 && gi > at && vh.slice(at, gi).indexOf("<div class=\"pvl") < 0 && (vh.match(/waits/g) || []).length === 1 && !/<table class="stats"><tr><td>HSK/.test(vh));
+    const at = vh.indexOf(`<span>${VC.levelLabel(PACK, LV[2])}</span>`), gi = vh.indexOf(`<p class="pvs pvgate">${V.api.gs()}</p>`);
+    check("v2: the note is one quiet line inside the waiting level's block, after its bar", at >= 0 && gi > at && vh.slice(at, gi).indexOf("<div class=\"pvl") < 0 && (vh.match(/pvgate/g) || []).length === 1 && V.api.gs().startsWith(gateWords(LV[2], LV[1], pctHold)) && !/<table class="stats"><tr><td>HSK/.test(vh));
   }
   const PO = await todayHtml(PACK, open, null); PO.api.clickTab("progress");
   check("gate open: no note", !/waits/.test(PO.api.panel()));
 
-  console.log(`\n[4] controls vs main ${MAIN} (flag off, gate open, no pairs)`);
-  if(!OLD) check("main core readable via git", false);
-  else {
-    const OFF = packAsOf(PACK, MAIN);
-    const NOPAIRS = Object.assign({}, PACK, { pairs: false, freqTiers: false });
-    const OLDNP = packAsOf(NOPAIRS, MAIN);
-    const recs = [["fresh", () => VC.normalizeProg({}, PACK)], ["HSK 1-2 held-shaped", () => hold], ["HSK 1-2 open-shaped", () => open], ["HSK 1-3 learned", () => seed(3, 100, PACK)]];
-    const sig = (C, pack, p) => JSON.stringify([C.todaySnapshot(pack, WORDS, CHARACTERS, clone(p), []), C.stagePath(pack, WORDS, CHARACTERS, clone(p), []), C.nextNewSet(WORDS, pack, clone(p))]);
-    for(const [name, mk] of recs){
-      const p = mk();
-      check(`flag off: core snapshot, path, next set identical to main on ${name}`, sig(VC, OFF, p) === sig(OLD, OFF, p));
-      check(`no pairs (levelGate ignored): identical to main on ${name}`, sig(VC, Object.assign({}, NOPAIRS), p) === sig(OLD, OLDNP, p));
-    }
-    for(const [name, p] of [["fresh", VC.normalizeProg({}, PACK)], ["open-shaped", open], ["HSK 1-3 learned", seed(3, 100, PACK)]]){
-      const cur = strip((await todayHtml(OFF, p, null)).html), old = strip((await todayHtml(OFF, p, { app: OLD_APP, core: OLD })).html);
-      check(`flag off: Today HTML byte-identical to main on ${name}`, cur === old);
-      const gOpen = strip((await todayHtml(PACK, p, null)).html);
-      if(name !== "HSK 1-3 learned") check(`gate open (flag on): Today HTML byte-identical to flag off on ${name}`, gOpen === cur);
-      const a = await todayHtml(OFF, p, null), b = await todayHtml(OFF, p, { app: OLD_APP, core: OLD }); a.api.clickTab("progress"); b.api.clickTab("progress");
-      check(`flag off: Progress HTML byte-identical to main on ${name}`, strip(a.api.panel()) === strip(b.api.panel()));
-    }
-  }
+  // [4] (flag-off controls vs main) deleted: the level gate is engine default since the flag collapse.
 
   console.log(`\n[5] owner export (read-only)`);
   if(!OWNER) console.log("  (no owner export: skipped)");
@@ -388,7 +368,7 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
     check("owner export: HSK 3 known share equals an independent count of known words over the level", Math.abs(VC.levelKnownPct(WORDS, PACK, o, LV[2], CHARACTERS) - known3 / BYLV[LV[2]].length) < 1e-9 && LV.every(lv => { const v = VC.levelKnownPct(WORDS, PACK, o, lv, CHARACTERS); return v >= 0 && v <= 1; }) && (known3 / BYLV[LV[2]].length >= G) === (hd === null));
     const ou = clone(o); delete ou.pause; // the export is paused: unpaused, as the learner would see the plan
     const T = await todayHtml(PACK, ou, null);
-    check("owner export Today: the Learn row matches the gate decision", hd ? (learnRow(T.html) || "").endsWith(VC.levelGateNote(WORDS, PACK, o, CHARACTERS)) : !/waits/.test(T.html));
+    check("owner export Today: the Learn row matches the gate decision", hd ? (learnRow(T.html) || {}).gate === T.api.gs() && T.api.gs().startsWith(gateWords(hd.lv, hd.prev, hd.pct)) : !/pvgate/.test(T.html));
   }
 
   console.log(`\n[6] seeded HSK 1-3 learned record (595 words + 595 units, streak 0-8), ${N_SESSIONS} Today sessions at ${Math.round(ACC * 100)}% right, 7 a day`);
@@ -410,7 +390,7 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
   }
   console.log(`\n[7] levelExam: pinyin vs characters levels`);
   const NOEXAM = (p => { delete p.levelExam; return p; })(Object.assign({}, PACK));
-  check("levelExamOn: zh ships it and reads on; off without pairs, without characters, without a characters level, absent", PACK.levelExam && VC.levelExamOn(PACK) && !VC.levelExamOn(Object.assign({}, PACK, { pairs: false })) && !VC.levelExamOn((p => { delete p.characters; return p; })(Object.assign({}, PACK))) && !VC.levelExamOn(Object.assign({}, PACK, { levelExam: { "1": "pinyin", "3": "pinyin" } })) && !VC.levelExamOn(NOEXAM));
+  check("levelExamOn: zh ships it and reads on; off without characters, without a characters level, absent", PACK.levelExam && VC.levelExamOn(PACK) && !VC.levelExamOn((p => { delete p.characters; return p; })(Object.assign({}, PACK))) && !VC.levelExamOn(Object.assign({}, PACK, { levelExam: { "1": "pinyin", "3": "pinyin" } })) && !VC.levelExamOn(NOEXAM));
   // HSK 1-3 taught, every word known; unit records vary
   const exam = unitRec => { const p = seed(3, BYLV[LV[2]].length, PACK); LV.slice(0, 3).forEach(lv => BYLV[lv].forEach(w => { const u = CHARACTERS.find(c => c.words[0] === w.id); if(u && unitRec) p.chars.c[u.id] = clone(unitRec); })); return p; };
   const W3 = BYLV[LV[2]], W1 = BYLV[LV[0]], UBW = new Map(CHARACTERS.map(u => [u.words[0], u]));
@@ -437,9 +417,10 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
   const gh = VC.levelGateHold(WORDS, PACK, gatedP, CHARACTERS);
   check(`levelGate on HSK 4 holds while HSK 3's hanzi are unread (${gh && gh.pct}% known), opens once they are`, !!gh && gh.lv === LV[3] && VC.levelGateHold(WORDS, NOEXAM, gatedP, CHARACTERS) === null && VC.levelGateHold(WORDS, PACK, openP, CHARACTERS) === null);
   // Progress rows count known on the characters level
-  const PRx = await todayHtml(PACK, gatedP, null); PRx.api.clickTab("progress");
-  const PRn = await todayHtml(NOEXAM, gatedP, null); PRn.api.clickTab("progress");
-  const mrow = (html, lv) => +(html.match(new RegExp(`<tr><td>${VC.levelLabel(PACK, lv)}</td><td>\\d+ / \\d+ learned · (\\d+) mastered`)) || [])[1];
+  const PRx = await todayHtml(PACK, gatedP, null); PRx.api.clickTab("progress"); PRx.api.el("pvAll").click();
+  const PRn = await todayHtml(NOEXAM, gatedP, null); PRn.api.clickTab("progress"); PRn.api.el("pvAll").click();
+  // v2 level bars (Show all): aria-label "HSK n: L of S learned, M mastered"
+  const mrow = (html, lv) => +(html.match(new RegExp(`aria-label="${VC.levelLabel(PACK, lv)}: \\d+ of \\d+ learned, (\\d+) mastered"`)) || [])[1];
   check(`Progress rows: HSK 3 mastered count drops (${mrow(PRn.api.panel(), LV[2])} -> ${mrow(PRx.api.panel(), LV[2])}), HSK 1 unchanged`, mrow(PRx.api.panel(), LV[2]) < mrow(PRn.api.panel(), LV[2]) && mrow(PRx.api.panel(), LV[0]) === mrow(PRn.api.panel(), LV[0]));
   {
     // progressView v2 rows and folded line count mastered by the exam rule too; the gate note sits in HSK 4's block.
@@ -451,7 +432,7 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
     check(`v2: HSK 3 bar is the exam count (${kn(LV[2])} of ${size(LV[2])}, word rule ${kw(LV[2])})`, kn(LV[2]) < kw(LV[2]) && bar(LV[2]) === pct(kn(LV[2]), size(LV[2])));
     const low = (vh.match(/id="pvLow"[^>]*><span>[^<]*<\/span><span class="pvn">(\d+) of (\d+) mastered/) || []).slice(1).map(Number);
     check(`v2: folded line counts by the exam rule (${low.join(" of ")})`, low.length === 2 && low[0] === kn(LV[0]) + kn(LV[1]) && low[1] === lw.filter(w => w.lv === LV[0] || w.lv === LV[1]).length);
-    const n4 = VC.levelGateNote(WORDS, PACK, gatedP, CHARACTERS), a4 = vh.indexOf(`<span>${VC.levelLabel(PACK, LV[3])}</span>`), g4 = vh.indexOf(`<p class="pvs pvgate">${n4}</p>`);
+    const n4 = V.api.gs(), a4 = vh.indexOf(`<span>${VC.levelLabel(PACK, LV[3])}</span>`), g4 = vh.indexOf(`<p class="pvs pvgate">${n4}</p>`);
     check(`v2: "${n4}" inside the HSK 4 block`, !!n4 && a4 >= 0 && g4 > a4 && vh.slice(a4, g4).indexOf("<div class=\"pvl") < 0);
     const tot = VC.progressTotals(gatedP, PACK_V2, WORDS, CHARACTERS, []).m;
     check(`v2 hero mastered total is the exam count (${tot})`, tot === lw.filter(w => k(gatedP, w)).length);
@@ -462,7 +443,7 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
       const sg = C => JSON.stringify([(PACK.progressMap.goals || []).map(g => C.goalPosition(clone(p), NOEXAM, g, WORDS, CHARACTERS, [])), C.progressPosition(clone(p), NOEXAM, WORDS, CHARACTERS, [])]);
       check(`flag off (no levelExam): goal and progress positions identical to main on ${name}`, sg(VC) === sg(OLD));
     }
-    check("flag off: Progress rows HTML identical to main (no levelExam, no levelGate)", await (async () => { const OFF2 = packAsOf(PACK, MAIN); const a = await todayHtml(OFF2, unanswered, null), b = await todayHtml(OFF2, unanswered, { app: OLD_APP, core: OLD }); a.api.clickTab("progress"); b.api.clickTab("progress"); return strip(a.api.panel()) === strip(b.api.panel()); })());
+    // (the flag-off Progress control vs main went with pack.levelGate in the flag collapse)
     check("levelGate alone (no levelExam) is the word rule: levelKnownPct equals the pre-exam value", VC.levelKnownPct(WORDS, NOEXAM, unanswered, LV[2], CHARACTERS) === VC.levelKnownPct(WORDS, NOEXAM, unanswered, LV[2]));
   }
   if(OWNER){

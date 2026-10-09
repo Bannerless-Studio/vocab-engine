@@ -8,7 +8,9 @@ const path = require("path");
 const ROOT = path.join(__dirname, "..", "..");
 
 // sha = first commit on main's history carrying the flag in packs/zh/pack.json (or the schema doc for
-// flags the zh pack does not use). Order = time order; append new flags at the end.
+// flags the zh pack does not use). Order = time order; append new flags at the end. A collapsed flag
+// (COLLAPSED below, default engine behaviour) loses its row once its collapse stage lands: no suite
+// builds a pack without it any more.
 const FLAG_SINCE = [
   { key: "characters", sha: "1753d44", path: ["characters"] },
   { key: "pronFirst", sha: "6e8fec5", path: ["pronFirst"] },
@@ -17,41 +19,19 @@ const FLAG_SINCE = [
   { key: "soundsReference", sha: "3343dcb", path: ["soundsReference"] },
   { key: "audio", sha: "e5ebb11", path: ["audio"] },
   { key: "typedFrom", sha: "5f5fd1f", path: ["typedFrom"] },
-  { key: "glossFocus", sha: "5f5fd1f", path: ["glossFocus"] },
-  { key: "dayAware", sha: "eac9960", path: ["dayAware"] },
-  { key: "pauseNew", sha: "173c0e7", path: ["pauseNew"] },
-  { key: "helpClose", sha: "266adae", path: ["helpClose"] },
-  { key: "readAnswerBlock", sha: "2562b98", path: ["readAnswerBlock"] },
   { key: "optsOneScript", sha: "e957fe7", path: ["optsOneScript"] },
-  { key: "optsMix", sha: "8bba19e", path: ["optsMix"] },
   { key: "characters.learn", sha: "f004799", path: ["characters", "learn"] },
   { key: "characters.bareBy", sha: "a2159fa", path: ["characters", "bareBy"] },
   { key: "characters.bareWords", sha: "a2159fa", path: ["characters", "bareWords"] },
-  { key: "listenQuestions", sha: "6c067b4", path: ["listenQuestions"] },
-  { key: "rereadPerfectDays", sha: "812511a", path: ["rereadPerfectDays"] },
-  { key: "readRotation", sha: "82fb371", path: ["readRotation"] },
-  { key: "wordsBy", sha: "240f127", path: ["wordsBy"] },
   { key: "progressMap", sha: "8dc8fd6", path: ["progressMap"] },
-  { key: "pairs", sha: "9eb6ecb", path: ["pairs"] },
   { key: "characters.start", sha: "a20398c", path: ["characters", "start"] },
   { key: "characters.ramp", sha: "a20398c", path: ["characters", "ramp"] },
-  { key: "freqTiers", sha: "4fa1f38", path: ["freqTiers"] },
-  { key: "progressView", sha: "633820d", path: ["progressView"] },
-  { key: "levelGate", sha: "a2dd814", path: ["levelGate"] },
   { key: "levelExam", sha: "a2dd814", path: ["levelExam"] },
   { key: "patterns", sha: "b41a85b", path: ["patterns"] },
-  { key: "glossStyle", sha: "34c5df3", path: ["glossStyle"] },
   { key: "patternCue", sha: "34c5df3", path: ["patternCue"] },
   { key: "characters.bareByPair", sha: "34c5df3", path: ["characters", "bareByPair"] },
-  { key: "appView", sha: "d39eda2", path: ["appView"] },
   { key: "eta", sha: "77e046a", path: ["eta"] },
-  { key: "pronUntilPrimer", sha: "a6f2cc5", path: ["pronUntilPrimer"] },
-  { key: "placementWhole", sha: "c44a6c8", path: ["placementWhole"] },
   { key: "gapGender", sha: "cd94707", path: ["gapGender"] },
-  { key: "placementChars", sha: "742c02a", path: ["placementChars"] },
-  { key: "placedRead", sha: "6e49031", path: ["placedRead"] },
-  { key: "placementEarlyStop", sha: "2c12d5c", path: ["placementEarlyStop"] },
-  { key: "placedKnown", sha: "a18d6e2", path: ["placedKnown"] },
 ];
 
 // Flag collapse (TODO.md "Flag collapse"): the pack keys that read the same in all 14 live packs (scout: .cache/briefs/flag-collapse-scout.md),
@@ -64,6 +44,25 @@ const COLLAPSED = [
   "placedKnown", "pronUntilPrimer", "placementChars", "progressMap", "rereadPerfectDays",
 ];
 const COLLAPSED_DATA = ["progressMap"];
+// The value every live pack shipped for each collapsed key. An engine older than the collapse reads them; the current engine
+// ignores them. A control that compares this engine with an older sha boots the older side with withCollapsed(pack), so both
+// run the behaviour that is now default. The derived keys (stage 3) follow the pack: pronUntilPrimer on a script pack,
+// placementChars on a characters.learn "lag" pack (COLLAPSED_DERIVED); progressMap stays the pack's goals data.
+const COLLAPSED_LIVE = {
+  dayAware: true, pauseNew: true, listenQuestions: "all", readRotation: true, wordsBy: "typed", pairs: true, freqTiers: true,
+  levelGate: 0.7, placementWhole: true, placementEarlyStop: true, placedRead: true, placedKnown: true,
+  // stage 2
+  appView: "v2", progressView: "v2", glossFocus: true, glossStyle: "primary", helpClose: true, readAnswerBlock: true, optsMix: true,
+};
+const COLLAPSED_DERIVED = {
+  pronUntilPrimer: p => !!(p.script && typeof p.script === "object"),
+  placementChars: p => !!(p.characters && typeof p.characters === "object" && p.characters.learn === "lag"),
+};
+function withCollapsed(pack) {
+  const out = Object.assign(JSON.parse(JSON.stringify(pack)), COLLAPSED_LIVE);
+  Object.keys(COLLAPSED_DERIVED).forEach(k => { if (COLLAPSED_DERIVED[k](out)) out[k] = true; else delete out[k]; });
+  return out;
+}
 
 const byKey = new Map(FLAG_SINCE.map(f => [f.key, f]));
 const ancestorCache = new Map();
@@ -124,4 +123,4 @@ function packBefore(pack, key, opts) {
   return packAsOf(pack, f.sha + "~1", opts);
 }
 
-module.exports = { FLAG_SINCE, COLLAPSED, COLLAPSED_DATA, stripCollapsed, packAsOf, packBefore, stripFlags, isAncestor };
+module.exports = { FLAG_SINCE, COLLAPSED, COLLAPSED_DATA, COLLAPSED_LIVE, COLLAPSED_DERIVED, withCollapsed, stripCollapsed, packAsOf, packBefore, stripFlags, isAncestor };

@@ -8,6 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const sim = require("./lib/sim_app.js");
 const S2 = require("./lib/port_sim.js");
+const { COLLAPSED, COLLAPSED_DATA } = require("./lib/pack_flags.js");
 const { VC, ROOT, clone } = sim;
 
 const SITES = [["arabic", "ar"], ["french", "fr"], ["german", "de"], ["hindi", "hi"], ["indonesian", "id"], ["italian", "it"], ["japanese", "ja"],
@@ -64,15 +65,15 @@ async function site(dirName, code){
   const periph = LV.map(lv => cnt(lv)[2]), want = LV.map(lv => Math.floor((SHARE[lv] || 0) * BY[lv].length + 0.5));
   check(`${code}: tiers per level [ambient core peripheral] ${LV.map(lv => `${lv} ${cnt(lv)}`).join("  ")}; peripheral = ${want.join("/")}`, JSON.stringify(periph) === JSON.stringify(want) && D.WORDS.filter(w => w.ft === 0).every(w => w.rank <= 100));
   if(units.length) check(`${code}: unit ft = lowest ft of its words (${units.length} units)`, units.every(u => u.ft === Math.min(...u.words.map(i => S.BY_ID[i].ft))));
-  const flags = ["dayAware", "glossFocus", "helpClose", "readAnswerBlock", "optsMix", "pauseNew", "readRotation", "pairs", "freqTiers", "placementWhole", "placementEarlyStop", "placedRead", "placedKnown"];
-  check(`${code}: generic flag set (typedFrom ${JSON.stringify(P.typedFrom)}, goals ${P.progressMap && P.progressMap.goals.map(g => g.upTo)}, levelGate ${P.levelGate})`,
-    flags.every(k => P[k] === true) && P.glossStyle === "primary" && P.wordsBy === "typed" && P.listenQuestions === "all" && P.progressView === "v2" && P.appView === "v2" && P.levelGate === 0.7
+  // the collapsed keys (engine default since the flag collapse; progressMap stays goals data) are no longer emitted
+  const gone = COLLAPSED.filter(k => !COLLAPSED_DATA.includes(k) && k in P);
+  check(`${code}: generic flag set (typedFrom ${JSON.stringify(P.typedFrom)}, goals ${P.progressMap && P.progressMap.goals.map(g => g.upTo)}; collapsed keys emitted: ${gone.join(",") || "none"})`,
+    gone.length === 0
     && JSON.stringify(P.typedFrom) === JSON.stringify(code === "ja" ? ["written", "pron"] : ["written"]) && P.progressMap.goals.length === 3
     && (code === "ja" ? JSON.stringify(P.levelExam) === JSON.stringify({ [LV[0]]: "pinyin", [LV[1]]: "characters", [LV[2]]: "characters" })
-      && P.characters.learn === "lag" && P.characters.start === 60 && JSON.stringify(P.characters.ramp) === "[3,5,8]" && P.characters.bareBy === "typed" && P.characters.bareWords === true && P.characters.bareByPair === true && P.placementChars === true
-      : !P.levelExam && !P.characters && P.placementChars === undefined));
-  check(`${code}: pronUntilPrimer on exactly for script sites (${P.script ? "script" : "no script"}: ${JSON.stringify(P.pronUntilPrimer)}), engine reads it`, P.script ? P.pronUntilPrimer === true && VC.pronUntilPrimerOn(P) : P.pronUntilPrimer === undefined && !VC.pronUntilPrimerOn(P));
-  check(`${code}: engine reads pairs, freqTiers, levelGate, progressView, appView as on`, VC.pairsOn(P) && VC.freqTiersOn(P) && VC.levelGateOn(P) && VC.progressViewOn(P) && VC.appViewOn(P));
+      && P.characters.learn === "lag" && P.characters.start === 60 && JSON.stringify(P.characters.ramp) === "[3,5,8]" && P.characters.bareBy === "typed" && P.characters.bareWords === true && P.characters.bareByPair === true && VC.placementCharsOn(P)
+      : !P.levelExam && !P.characters && !VC.placementCharsOn(P)));
+  check(`${code}: the primer pron rule on exactly for script sites (${P.script ? "script" : "no script"}), no pronUntilPrimer key`, !("pronUntilPrimer" in P) && VC.pronUntilPrimerOn(P) === !!P.script);
 
   const val = require("child_process").spawnSync("python3", [path.join(ROOT, "tools", "validate_pack.py"), E.dir], { encoding: "utf8" });
   const errs = (val.stdout + val.stderr).split("\n").filter(l => /^ERROR/.test(l));
@@ -186,10 +187,10 @@ async function site(dirName, code){
   const withEta = Object.assign(clone(P), { eta: { gain: [0.01, null, 0.02], known: null } });
   const ctx2 = Object.assign({}, ctx, { pack: withEta });
   const measured = Object.assign(clone(P), { eta: { gain: [0.01, 0.01, 0.01], known: 5 } });
-  check(`${code}: measured eta -> estimates (goal ${VC.sessionsToGoX({}, 0, goalsN, Object.assign({}, ctx, { pack: measured }))}, gate ${VC.levelOpensIn(D.WORDS, measured, gp, units)}); null gain / known -> none; eta key absent -> the zh constants`,
+  check(`${code}: measured eta -> estimates (goal ${VC.sessionsToGoX({}, 0, goalsN, Object.assign({}, ctx, { pack: measured }))}, gate ${VC.levelOpensIn(D.WORDS, measured, gp, units)}); null gain / known -> none; eta key absent -> none (eta is required data since the flag collapse, no zh fallback)`,
     Number.isFinite(VC.sessionsToGoX({}, 0, goalsN, Object.assign({}, ctx, { pack: measured }))) && VC.levelOpensIn(D.WORDS, measured, gp, units) >= 1
     && VC.sessionsToGoX({}, 0, 3, ctx2) !== null && VC.sessionsToGoX({}, 1, 3, ctx2) === null && VC.levelOpensIn(D.WORDS, withEta, gp, units) === null
-    && Number.isFinite(VC.sessionsToGoX({}, 0, goalsN, Object.assign({}, ctx, { pack: (({ eta, ...rest }) => rest)(P) }))));
+    && VC.sessionsToGoX({}, 0, goalsN, Object.assign({}, ctx, { pack: (({ eta, ...rest }) => rest)(P) })) === null);
   const M = await S.bootWith(measured, gp, 2, { passages: D.PASSAGES });
   check(`${code}: gate sentence with a measured estimate ends "≈ N sessions"`, /^\S+ opens at 70% of \S+ known\. Now \d+%, ≈ \d+ sessions?\.$/.test(M.gate()), M.gate());
   const N = await S.bootWith(withEta, gp, 2, { passages: D.PASSAGES });
