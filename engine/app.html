@@ -51,10 +51,6 @@
   header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex:0 0 auto}
   h1{font-size:18px;font-weight:600;margin:0}
   .score{color:var(--mute);font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .hdrbar{height:3px;border-radius:2px;background:transparent;margin-bottom:12px;flex:0 0 auto;overflow:hidden}
-  .hdrbar i{display:block;height:100%;width:0;background:var(--ink);transition:width 0.2s ease}
-  @media (prefers-reduced-motion: reduce){ .hdrbar i{transition:none} }
-  .themebtn{border:1px solid var(--line);background:transparent;border-radius:999px;width:44px;height:44px;font-size:16px;color:var(--ink);flex:0 0 auto}
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 16px;flex:1 1 auto;display:flex;flex-direction:column}
   #panel > .done{display:flex;flex-direction:column;flex:1 1 auto}
   .next:last-child, .primary:last-child, .done .next{margin-top:auto}
@@ -133,10 +129,8 @@
   .row button, .chip{padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:transparent;font-size:14px;color:var(--ink);min-height:44px;font-family:var(--font)}
   .row button.on, .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
   .replay{border:1px solid var(--line);background:transparent;border-radius:999px;width:44px;height:44px;font-size:17px;color:var(--ink);flex:0 0 auto}
-  .ktag{text-align:center;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
-  .ktag b{font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
-  .gx{color:var(--mute);font-size:.86em;font-weight:400} /* pack.glossStyle: the other senses */
-  .dim{opacity:.6} /* pack.glossFocus: a gloss's (...) qualifiers */
+  .gx{color:var(--mute);font-size:.86em;font-weight:400} /* glossStyle: the other senses */
+  .dim{opacity:.6} /* glossFocus: a gloss's (...) qualifiers */
   .listen-stage{display:flex;flex-direction:column;align-items:center;gap:10px;margin:18px 0}
   input[type=text]{width:100%;padding:14px 14px;border:1px solid var(--line);border-radius:12px;font-size:19px;background:var(--card);color:var(--ink);font-family:var(--wfont)}
   input[type=text]:focus{outline:3px solid #7AA7D9;outline-offset:1px}
@@ -159,7 +153,7 @@
   table.steps td:first-child{white-space:nowrap;padding-right:12px;vertical-align:top}
   .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;flex:1}
   .bar i{display:block;height:100%;background:var(--ink)}
-  /* pack.progressView "v2": sections separated by space, not rules; one bar per level (level size the
+  /* Progress v2 (docs/PACK_SCHEMA.md "progressView"): sections separated by space, not rules; one bar per level (level size the
      faint track, learned the middle tone, mastered the ink fill); the hero numbers are the one large type. */
   .pv{display:flex;flex-direction:column;gap:22px;font-variant-numeric:tabular-nums}
   .pv section{display:flex;flex-direction:column}
@@ -188,10 +182,9 @@
   .pvw{font-family:var(--wfont);font-size:20px;line-height:1.6;word-spacing:.35em}
   .pvall{width:auto;align-self:flex-start;padding:10px 16px}
   .pvset .row{margin-bottom:8px}
-  /* pack.appView "v2" (docs/PACK_SCHEMA.md "appView"): the Progress v2 direction on Today, the header,
-     drill end and session done. Every rule is scoped to the attribute boot sets only when the flag is on. */
+  /* App v2 (docs/PACK_SCHEMA.md "appView", engine default since the flag collapse): the Progress v2 direction on Today, the
+     header, drill end and session done. Boot always sets the attribute; it keeps these rules' cascade over the base rules. */
   :root[data-appview="v2"]{--sect:22px;--stim-top:clamp(12px, 8vh, 64px)}
-  :root[data-appview="v2"] .themebtn,:root[data-appview="v2"] .hdrbar{display:none}
   :root[data-appview="v2"] header{min-height:44px;margin-bottom:12px}
   :root[data-appview="v2"] .tdv{gap:var(--sect)}
   :root[data-appview="v2"] .tsts{display:flex;flex-direction:column;gap:12px}
@@ -369,7 +362,7 @@
   .tk{border-bottom:1px dotted var(--line);cursor:pointer}
   .tk.on{background:var(--ok-bg);border-bottom-color:var(--ok)}
   .gloss.tokgloss{position:static;margin:6px 0 2px;font-family:var(--font)}
-  /* pack.helpClose: the close button sits in the overlay's top-right corner, clear of its text. */
+  /* helpClose: the close button sits in the overlay's top-right corner, clear of its text. */
   .gloss.hasx{padding-right:44px} .gloss.tokgloss.hasx{position:relative} .swtoast.hasx{padding-right:40px}
   .helpx{position:absolute;top:2px;right:2px;width:40px;height:40px;border:0;background:transparent;color:inherit;font-size:22px;line-height:1;cursor:pointer;padding:0}
   .swtoast .helpx{top:50%;right:4px;width:32px;height:32px;margin-top:-16px;font-size:18px;border-radius:50%} /* inside the ~39px pill */
@@ -420,10 +413,8 @@
     <h1 id="htitle">Today</h1>
     <div style="display:flex;align-items:center;gap:8px">
       <span class="score" id="score"></span>
-      <button class="themebtn" id="themebtn" aria-label="Toggle theme">◐</button>
     </div>
   </header>
-  <div class="hdrbar" id="hdrbar"><i id="hdrbarfill"></i></div>
   <div id="storeWarn" class="warn" hidden></div>
   <div id="panel" class="card"></div>
   <div id="live" aria-live="polite" class="sr-only"></div>
@@ -587,7 +578,7 @@ function wordRetry(id, ok){
   if(!D) return false; const dn = D.down || (D.down = []); if(dn.includes(id)) return true;
   if(!ok && ((prog.w[id] || {}).s || 0) >= VC.WORD_HOLD) dn.push(id); return false;
 }
-function markWord(id, ok, kind, reqKind){ const fresh = !prog.w[id]; VC.ensureWordRec(prog, WORDS, PACK, id); if(fresh && OPTS_MIX && VC.daySn(prog)) prog.w[id].f = VC.daySn(prog); const s0 = prog.w[id].s; VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) }); if(kind === "type" && todayStepState) typedSession.add(id); pairNoteWord(id, ok, kind, s0); VC.settleProv(prog.w[id], WORDS_BY_ID[id], PACK); dayNote("w:" + id, kind, ok); store.save(); }
+function markWord(id, ok, kind, reqKind){ const fresh = !prog.w[id]; VC.ensureWordRec(prog, WORDS, PACK, id); if(fresh && VC.daySn(prog)) prog.w[id].f = VC.daySn(prog); const s0 = prog.w[id].s; VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) }); if(kind === "type" && todayStepState) typedSession.add(id); pairNoteWord(id, ok, kind, s0); VC.settleProv(prog.w[id], WORDS_BY_ID[id], PACK); dayNote("w:" + id, kind, ok); store.save(); }
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
 // Pairs: a cloze miss is a miss of the word's meaning -> written pair; a right cloze moves no pair.
 function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(!ok && prog.w[id]) VC.notePair(prog.w[id], "wm", false, false, VC.daySn(prog)); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
@@ -596,7 +587,7 @@ function markSentence(id, ok, kind){ VC.markRec(prog.s, id, ok, false); dayNote(
 function markChar(unitId, ok, kind){
   const held = !!(TYPED_UNITS && TYPED_UNITS.has(unitId)), rec = VC.charRecs(prog)[unitId];
   const moves = !(held && rec && (rec.s || 0) >= CHAR_CFG.mastered);
-  if(OPTS_MIX && VC.daySn(prog) && !VC.charRecs(prog)[unitId]) VC.ensureChars(prog).c[unitId] = {r:0,w:0,s:0,f:VC.daySn(prog)};
+  if(VC.daySn(prog) && !VC.charRecs(prog)[unitId]) VC.ensureChars(prog).c[unitId] = {r:0,w:0,s:0,f:VC.daySn(prog)};
   const s0 = rec ? rec.s : 0, due = held && !!rec && (rec.s || 0) >= CHAR_CFG.mastered && (rec.s || 0) < CHAR_CFG.bare;
   VC.markChar(prog, unitId, ok, PACK, held);
   // Pairs: a hard choice is the production answer of a pair the unit cannot be typed in now.
@@ -679,12 +670,11 @@ const goalEta = cg => cg && !cg.all ? VC.sessionsToGoX(prog, cg.i, cg.n, { pack:
 const availableSentences = () => VC.availableSentences(SENTENCES, WORDS, PACK, prog);
 // docs/PACK_SCHEMA.md "pauseNew" (default since the flag collapse): paused, Today teaches nothing new (no Learn, no first read,
 // no sentence with an unlearned word); manual teaching outside Today is unchanged.
-const PROGRESS_V2 = VC.progressViewOn(PACK);
-// pack.appView "v2" (docs/PACK_SCHEMA.md "appView"): every v2 branch reads APP_V2; the attribute scopes the v2 CSS.
-const APP_V2 = VC.appViewOn(PACK);
-if(APP_V2) document.documentElement.setAttribute("data-appview", "v2");
+// App v2 (docs/PACK_SCHEMA.md "appView", engine default since the flag collapse): the attribute stays the scope of the v2 CSS
+// rules, so their cascade over the base rules is unchanged.
+document.documentElement.setAttribute("data-appview", "v2");
 // appView: the header names what is on screen (a Today step, a test); render() puts the tab name back.
-const setTitle = t => { if(APP_V2) $("htitle").textContent = t; };
+const setTitle = t => { $("htitle").textContent = t; };
 const VOICE_NOTICE_V2 = "No voice for this language in this browser. Listening items show the word instead.";
 const TODAY_STEP_TITLE = ["Review", "Learn", "Listen", "Recall", "Sentences", "Read"];
 const todayStepTitle = (s, listen) => s === 5 && listen ? "Listen" : TODAY_STEP_TITLE[s] || "Today";
@@ -717,7 +707,7 @@ let booted = false;
 // Shown every visit (no dismiss: the problem persists until the learner switches browser).
 // todayRender() reads it, so it is declared before the voice probe can call render() (TDZ).
 const samsungNoticeHTML = VC.isSamsungBrowser(navigator.userAgent)
-  ? `<div class="warn">Audio doesn't play in Samsung Internet. Open this page in Chrome or Firefox to hear ${APP_V2 ? "" : "the "}words.</div>` : "";
+  ? `<div class="warn">Audio doesn't play in Samsung Internet. Open this page in Chrome or Firefox to hear words.</div>` : "";
 
 const SS = window.speechSynthesis || null;
 const speechAPI = !!(SS && window.SpeechSynthesisUtterance);
@@ -801,8 +791,7 @@ function audioHint(msg){
   const old = document.getElementById("audiohint"); if(old) old.remove();
   const t = document.createElement("div"); t.id = "audiohint"; t.className = "swtoast"; t.setAttribute("role", "status"); t.textContent = msg;
   document.body.appendChild(t);
-  if(HELP_CLOSE){ t.innerHTML = escapeHtml(msg) + HELP_X; helpOpen(t, TOAST_MS, () => { if(t.parentNode) t.remove(); }); return; }
-  setTimeout(() => { if(t.parentNode) t.remove(); }, TOAST_MS);
+  t.innerHTML = escapeHtml(msg) + HELP_X; helpOpen(t, TOAST_MS, () => { if(t.parentNode) t.remove(); });
 }
 // The voice is re-checked per utterance (VC.liveVoice): the list can change between calls.
 function speakTTS(text, btn, onEnd){
@@ -851,7 +840,7 @@ function listenLine(lw){
 function speechNotice(){
   if(hasSpeech || PACK_AUDIO || noticeShown) return "";
   noticeShown = true;
-  return `<div class="warn">${APP_V2 ? VOICE_NOTICE_V2 : "This browser has no text-to-speech voice for this language, so listening items show the word instead of playing audio."}</div>`;
+  return `<div class="warn">${VOICE_NOTICE_V2}</div>`;
 }
 // Items are built in plan order, then shuffled, so the one-time notice is attached on the
 // render path: it lands on whichever needsNotice item is shown first.
@@ -891,29 +880,24 @@ const TONES = VC.tonesOn(PACK);
 const readingHTML = s => TONES ? VC.toneHTML(s) : escapeHtml(s);
 const twReading = s => TONES ? `<bdi${TA}>${VC.toneHTML(s)}</bdi>` : tw(s);
 const PRON_TYPING = VC.pronTypingOn(PACK);
-// pack.glossFocus (docs/PACK_SCHEMA.md "typedFrom and glossFocus"): a word gloss leads with its
+// Gloss focus (docs/PACK_SCHEMA.md "typedFrom and glossFocus"; engine default since the flag collapse): a word gloss leads with its
 // meanings; a (...) qualifier is dimmed, and one that opens its alternative moves to that
-// alternative's end. Off, glossOut is ui().
-const GLOSS_FOCUS = VC.glossFocusOn(PACK);
-// pack.glossStyle (docs/PACK_SCHEMA.md "glossStyle"): the first sense plain, the others in
+// alternative's end. Gloss style (docs/PACK_SCHEMA.md "glossStyle"): the first sense plain, the others in
 // brackets; also the "also:" line of typedSyn partners. Display only.
-const GLOSS_STYLE = VC.glossStyleOn(PACK);
-// pack.helpClose (docs/PACK_SCHEMA.md "helpClose"; owner feedback 2026-10-02 "passage help
+// Help close (docs/PACK_SCHEMA.md "helpClose"; owner feedback 2026-10-02 "passage help
 // should have close button or timer"): a help overlay (word popover, audio toast) gets a close
 // button, closes on a tap outside it and on Escape, and closes itself after HELP_MS unless a
 // pointer or finger is on it. One at a time: opening one closes the one before.
-const HELP_CLOSE = VC.helpCloseOn(PACK);
-const READ_BLOCK = VC.readAnswerBlockOn(PACK);
 const HELP_MS = 15000; // owner 2026-10-03: one 15 s for every popover (was 20 s, 8 s before)
 const TOAST_MS = 3500; // status flash, not help to read
-const HELP_X = HELP_CLOSE ? `<button type="button" class="helpx" aria-label="Close">×</button>` : "";
+const HELP_X = `<button type="button" class="helpx" aria-label="Close">×</button>`;
 let helpCur = null;   // { el, close, ms, timer }
 function helpShut(){
   const h = helpCur; helpCur = null;
   if(h){ clearTimeout(h.timer); h.close(); }
 }
 function helpOpen(el, ms, close){
-  if(!HELP_CLOSE || !el) return;
+  if(!el) return;
   if(helpCur && helpCur.el !== el) helpShut();
   if(helpCur) clearTimeout(helpCur.timer);
   const h = helpCur = { el, close, ms, timer: setTimeout(() => { if(helpCur === h) helpShut(); }, ms) };
@@ -935,16 +919,14 @@ function helpOutside(e){
   if(t && t.closest && t.closest(".helpx,[data-pw],[data-tok]")) return;
   if(!(c.el.contains && t && c.el.contains(t))) helpShut();
 }
-if(HELP_CLOSE){
-  document.addEventListener("click", e => {
-    const t = e.target, c = helpCur; if(!c) return;
-    const x = t && t.closest ? t.closest(".helpx") : null;
-    if(x){ if(c.el.contains && c.el.contains(x)){ e.preventDefault(); e.stopPropagation(); helpShut(); } return; }
-    helpOutside(e);
-  }, true);
-  document.addEventListener("pointerdown", helpOutside, true);
-  document.addEventListener("touchstart", helpOutside, { capture: true, passive: true });
-}
+document.addEventListener("click", e => {
+  const t = e.target, c = helpCur; if(!c) return;
+  const x = t && t.closest ? t.closest(".helpx") : null;
+  if(x){ if(c.el.contains && c.el.contains(x)){ e.preventDefault(); e.stopPropagation(); helpShut(); } return; }
+  helpOutside(e);
+}, true);
+document.addEventListener("pointerdown", helpOutside, true);
+document.addEventListener("touchstart", helpOutside, { capture: true, passive: true });
 // withNotes: reading notes ("also pr. [shuí]") are shown after the answer only; they would
 // give a reading away on a stimulus, an option or a Words row.
 const glossPiecesHTML = s => VC.glossParts(s).pieces.map(x => x.dim ? `<span class="dim">${ui(x.t)}</span>` : ui(x.t)).join("");
@@ -952,9 +934,8 @@ const glossPiecesHTML = s => VC.glossParts(s).pieces.map(x => x.dim ? `<span cla
 // leaves a qualifier-only text undimmed).
 const glossSenseHTML = s => VC.parenPieces(s).every(x => x.g || !x.t.trim()) && VC.parenPieces(s).some(x => x.g) ? `<span class="dim">${ui(s)}</span>` : glossPiecesHTML(s);
 function glossOut(s, withNotes){
-  if(!GLOSS_FOCUS) return ui(s);
-  const p = VC.glossParts(s), sn = GLOSS_STYLE ? VC.glossSenses(s) : null;
-  const body = sn && sn.rest.length ? `${glossSenseHTML(sn.first)} <span class="gx">(${sn.rest.map(glossSenseHTML).join("; ")})</span>` : glossPiecesHTML(s);
+  const p = VC.glossParts(s), sn = VC.glossSenses(s);
+  const body = sn.rest.length ? `${glossSenseHTML(sn.first)} <span class="gx">(${sn.rest.map(glossSenseHTML).join("; ")})</span>` : glossPiecesHTML(s);
   return withNotes && p.notes.length ? `${body} <span class="dim">${ui(p.notes.join("; "))}</span>` : body;
 }
 // An option button or an "also right" note shows the first alternatives only (the reveal shows
@@ -973,14 +954,13 @@ function glossShort(s, maxAlts, maxLen){
 }
 // glossStyle: the first sense (shortened) and the rest in brackets, every sense shortened alike.
 function glossBrief(s, maxAlts, maxLen){
-  const sn = GLOSS_STYLE ? VC.glossSenses(s) : null;
-  if(!sn || !sn.rest.length) return glossShort(s, maxAlts, maxLen);
+  const sn = VC.glossSenses(s);
+  if(!sn.rest.length) return glossShort(s, maxAlts, maxLen);
   return `${glossShort(sn.first, 1, 0)} <span class="gx">(${glossShort(sn.rest.join("; "), sn.rest.length, 1e9)})</span>`;
 }
-const GLOSS_OPT = GLOSS_FOCUS ? (o => glossBrief(o, 2, 32)) : undefined;
+const GLOSS_OPT = o => glossBrief(o, 2, 32);
 // glossStyle: a word's typedSyn partners ("also: 帮忙"), the words its whole gloss also fits.
 function synAlsoHTML(w){
-  if(!GLOSS_STYLE) return "";
   const ps = VC.typedSynWords(w, WORDS_BY_ID);
   return ps.length ? `also: ${ps.map(s => `<bdi${TA}>${wordFormHTML(s, false)}</bdi>`).join(", ")}` : "";
 }
@@ -1006,14 +986,13 @@ function wordOptHtml(byKey, written, noPron, mode){
 // in the written form (callers drop the readings beside it).
 const OPTS_ONE_SCRIPT = PRON_FIRST && VC.optsOneScriptOn(PACK);
 const optLike = entry => { if(!OPTS_ONE_SCRIPT) return null; const a = dispWord(entry).isPron; return v => dispWord(v).isPron === a; };
-// pack.optsMix (docs/PACK_SCHEMA.md "optsMix"): wrong choices from the answer's stage (core.js
+// Option mix (docs/PACK_SCHEMA.md "optsMix", engine default since the flag collapse): wrong choices from the answer's stage (core.js
 // mixPick): 0 new/weak, 1 known (mastered), 2 never taught. A Learn set's words and units have
-// no record until answered, so the drill being built names them (withLearn). Off, every
-// builder gets undefined and keeps its level tiers.
-const OPTS_MIX = VC.optsMixOn(PACK);
+// no record until answered, so the drill being built names them (withLearn). Placement passes no
+// mix and keeps its level tiers.
 let learnNow = null;
 function withLearn(ids, f){ const o = learnNow; learnNow = new Set(ids); try { return f(); } finally { learnNow = o; } }
-// Learn order. A record made under optsMix carries f, the session ordinal it was learned in
+// Learn order. A record carries f, the session ordinal it was learned in
 // (prog.sn), so "own set" means taught together wherever and whenever it is asked: bucket 0 the
 // same f, 1 the adjacent learn session (the next distinct f, review sessions between do not
 // count), 2 the rest; against a record without f (older, seeded, flagged d) 1 for the earliest stamped session, else 2. Two records without f fall back to position: a
@@ -1048,17 +1027,14 @@ const mixBucket = (sets, ln, recs) => { const rk = learnRank(), sn = VC.daySn(pr
     const x = sets.get(a.id), y = sets.get(v.id), d = x == null || y == null ? 2 : Math.min(2, Math.abs(x - y));
     return ln && ln.has(a.id) ? (ln.has(v.id) ? 0 : Math.max(1, d)) : d; }; };
 function wordMix(){
-  if(!OPTS_MIX) return undefined;
   const ids = new Set(learnedWords().map(w => w.id)), ln = learnNow;
   return { stage: v => ln && ln.has(v.id) ? 0 : !ids.has(v.id) ? 2 : (((prog.w[v.id] || {}).s || 0) >= VC.WORD_MASTERED ? 1 : 0), bucket: mixBucket(mixSetOf().w, ln, prog.w), rot: VC.daySn(prog) };
 }
 function sentMix(){
-  if(!OPTS_MIX) return undefined;
   const open = new Set(availableSentences().map(s => s.id));
   return { stage: s => prog.s[s.id] ? 1 : open.has(s.id) ? 0 : 2 };
 }
 function charCtx(){
-  if(!OPTS_MIX) return CHAR_CTX;
   const recs = VC.charRecs(prog), ln = learnNow;
   const unit = u => ln && ln.has(u.id) ? 0 : !(Object.prototype.hasOwnProperty.call(recs, u.id) && recs[u.id]) ? 2 : ((recs[u.id].s || 0) >= CHAR_CFG.mastered ? 1 : 0);
   const wm = wordMix();
@@ -1075,11 +1051,6 @@ function drill(items, onDone, summary, onShown){ if(VC.dayStart(prog, PACK, toda
 function setScore(answered, total){
   const left = total ? Math.max(0, total - answered) : 0;
   $("score").textContent = (total && left > 0) ? `${left} left` : "";
-  const fill = $("hdrbarfill");
-  if(!fill) return;
-  if(!total){ fill.style.display = "none"; fill.style.width = "0%"; return; }
-  fill.style.display = "block";
-  fill.style.width = `${Math.min(100, Math.max(0, Math.round((answered/total)*100)))}%`;
 }
 function announce(html){
   const el = $("live"); if(!el) return;
@@ -1115,7 +1086,7 @@ function screenTop(){
 // the characters, or its own show-written link; a reveal without that row (the unit and script kinds) leaves them.
 // Called before showReveal, so every link in the panel is still a stimulus link.
 function dropStimLinks(rh){
-  if(!APP_V2 || !/class="rw[ "]/.test(rh)) return;
+  if(!/class="rw[ "]/.test(rh)) return;
   const p = $("panel");
   if(p && typeof p.querySelectorAll === "function") p.querySelectorAll("[data-pcue],[data-showw]").forEach(x => x.remove());
 }
@@ -1140,10 +1111,8 @@ function unitCue(it){
   const rec = VC.charRecs(prog)[it.cueUnit];
   if(!rec) return "";
   const n = CHAR_CFG.bare, k = Math.min(n, Math.max(0, rec.s || 0));
-  if(APP_V2) return `<div class="ucue" aria-label="${escapeHtml(CHAR_CFG.label)} ${k}/${n}"><span${TA}>${escapeHtml(CHAR_CFG.label)}</span> ${"\u25cf".repeat(k)}${"\u25cb".repeat(n - k)}</div>`;
-  return `<div class="q ucue" aria-label="${escapeHtml(CHAR_CFG.label)} ${k}/${n}" style="margin:0 0 4px;letter-spacing:2px"><span${TA}>${escapeHtml(CHAR_CFG.label)}</span> ${"\u25cf".repeat(k)}${"\u25cb".repeat(n - k)}</div>`;
+  return `<div class="ucue" aria-label="${escapeHtml(CHAR_CFG.label)} ${k}/${n}"><span${TA}>${escapeHtml(CHAR_CFG.label)}</span> ${"\u25cf".repeat(k)}${"\u25cb".repeat(n - k)}</div>`;
 }
-const revealHTML = (it, html, ok) => { if(APP_V2) return revealHTMLv2(it, html, ok); const h = unitCue(it) + html; return it.onReveal && it.revealHear ? h + REVEAL_REPLAY : h; };
 // appView: a word or character reveal is one answer row (revealRow). The unit dots fill its second line,
 // Replay sits at its end (the row's own speaker icon goes, one control), and the examples
 // show on a right answer as on a miss (owner 2026-10-08). A reveal with no row (sentences, script) keeps the dots on top and
@@ -1152,9 +1121,9 @@ const RV_CUE = '<i class="rvk"></i>', RV_PLAY = '<i class="rvr"></i>', RV_ICON =
 function revealRow(form, reading, gloss, wid, below){
   return `<div class="rvrow"><div class="rvm"${wid ? ` data-wid="${escapeHtml(wid)}" style="cursor:pointer"` : ""}><span class="rw"${TA}>${form}</span>${reading ? `<span class="rp">${reading}</span>` : ""}<span class="rg">${gloss}</span>${wid ? RV_ICON : ""}</div>${RV_PLAY}</div>${RV_CUE}${below || ""}`;
 }
-// A row's cue/play slots are filled only by revealHTMLv2; any other copy of the block (the drill-end Missed list) drops them.
+// A row's cue/play slots are filled only by revealHTML; any other copy of the block (the drill-end Missed list) drops them.
 const stripRvSlots = h => h.split(RV_CUE).join("").split(RV_PLAY).join("");
-function revealHTMLv2(it, html, ok){
+function revealHTML(it, html, ok){
   const cue = unitCue(it), play = !!(it.onReveal && it.revealHear), row = html.includes(RV_PLAY);
   let h = row ? html.replace(RV_CUE, cue) : cue + html;
   // The row's speaker icon goes when Replay takes its place or the card already has a speaker.
@@ -1179,7 +1148,7 @@ function dnext(){
     const { right, seen, miss, onDone, summary, onShown } = D;
     setScore(0, 0);
     screenTop();
-    P.innerHTML = `<div class="done"><h2>${APP_V2 ? firstTimeScore(seen, miss) : `${right} / ${seen}`}</h2>${summary ? summary(miss) : ""}<button class="next" id="ok">Continue</button></div>`;
+    P.innerHTML = `<div class="done"><h2>${firstTimeScore(seen, miss)}</h2>${summary ? summary(miss) : ""}<button class="next" id="ok">Continue</button></div>`;
     rzFin = D; D = null; drillKeyHandler = null;
     $("ok").onclick = () => { rzFin = null; sessionClear(); onDone(); };
     if(onShown) onShown();
@@ -1199,7 +1168,7 @@ function firstTimeScore(seen, miss){
   return `${n - VC.dedupeMisses(miss).length} of ${n}`;
 }
 // v2: sentence and pattern items (cloze, hear-sentence, pattern) left-align label and stimulus together.
-const sentClass = it => APP_V2 && /^[sp]:/.test(it.key || "") ? " sent" : "";
+const sentClass = it => /^[sp]:/.test(it.key || "") ? " sent" : "";
 function renderMcItem(it){
   const P = $("panel");
   P.innerHTML = `<div class="drill-body${sentClass(it)}"><p class="q">${ui(it.label)}</p>${noticeFor(it)}${it.html||""}<div class="opts ${it.optsClass||""}" id="o"></div><div class="reveal" id="rv"></div></div><div class="actions"><button class="next" id="nx" style="display:none">Next</button></div>`;
@@ -1208,7 +1177,7 @@ function renderMcItem(it){
   it.rzShown = opts;
   const container = $("o");
   let answered = false;
-  const optH = APP_V2 ? optsPrimary(opts, o => it.optHtml ? it.optHtml(o) : ui(o)) : null;
+  const optH = optsPrimary(opts, o => it.optHtml ? it.optHtml(o) : ui(o));
   opts.forEach((o,i)=>{
     const b = document.createElement("button");
     b.innerHTML = `<b class="num"${UIA}>${i+1}</b>${optH ? optH(o) : it.optHtml ? it.optHtml(o) : ui(o)}`;
@@ -1274,7 +1243,7 @@ function renderTypeItem(it){
     const ok = it.check(input.value);
     D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(typedRequeue(it)); }
     ANS_IT = it; try { if(it.onAnswer) it.onAnswer(ok); } finally { ANS_IT = null; }
-    const rh = revealHTML(it, (ok ? "" : `<div class="diff">${APP_V2 ? "You typed " : "you typed: "}${escapeHtml(input.value)}</div>`) + (it.feedback ? it.feedback(input.value) : "") + (it.reveal||""), ok);
+    const rh = revealHTML(it, (ok ? "" : `<div class="diff">You typed ${escapeHtml(input.value)}</div>`) + (it.feedback ? it.feedback(input.value) : "") + (it.reveal||""), ok);
     dropStimLinks(rh); showReveal(rh);
     playReveal(it);
     showNext(); setScore(D.seen, D.seen + D.q.length);
@@ -1369,7 +1338,7 @@ $("panel").addEventListener("click", e => {
   if(t.dataset.tok !== undefined){ tokTap(t); return; }
   if(t.dataset.xs !== undefined){ const u = SUNIT_BY_ID[t.dataset.xs]; if(!u) return; if(t.dataset.xopen !== undefined) scriptOpenCard(u, e); sayUnitSound(u, t); return; }
   if(t.dataset.xw !== undefined){ const w = SCRIPT_BYID[t.dataset.xw]; if(w && (wordAudio(w) || scriptVoice())) sayWord(w); return; }
-  const rb = APP_V2 && t.classList && t.classList.contains("replay") ? t : undefined; // Missed-row replay pulses like the drill replays
+  const rb = t.classList && t.classList.contains("replay") ? t : undefined; // Missed-row replay pulses like the drill replays
   if(t.dataset.wid !== undefined){ const w = WORDS_BY_ID[t.dataset.wid]; if(w) sayWord(w, rb); return; }
   const s = SENT_ALL[+t.dataset.sent]; if(s) saySentence(s, rb);
 });
@@ -1479,10 +1448,8 @@ function exampleSentencesHTML(entry){
 function revealBlock(entry){
   const p = pronBeside(entry), hear = canHearWord(entry);
   // The examples carry no "Examples:" heading in a reveal.
-  if(APP_V2){ const ex = exampleSentencesHTML(entry).replace(/^<p class="q" style="margin-top:12px">Examples?:<\/p>/, "");
-    return revealRow(wordFormHTML(entry), p ? readingHTML(p) : "", glossOut(VC.gloss(entry), true), hear ? entry.id : null, GLOSS_STYLE && VC.typedSynWords(entry, WORDS_BY_ID).length ? `<div class="syn" style="color:var(--mute);font-size:15px">${synAlsoHTML(entry)}</div>` : "") + (ex ? `<div class="rvx">${ex}</div>` : ""); }
-  const icon = hear ? ` <span style="color:var(--mute);vertical-align:middle">${TEACH_PLAY_SVG}</span>` : "";
-  return `<div${hear ? ` data-wid="${escapeHtml(entry.id)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${wordFormHTML(entry)}${icon}</div>${p ? `<div class="rp">${readingHTML(p)}</div>` : ""}<div style="color:var(--mute)">${glossOut(VC.gloss(entry), true)}</div>${GLOSS_STYLE && VC.typedSynWords(entry, WORDS_BY_ID).length ? `<div class="syn" style="color:var(--mute);font-size:15px">${synAlsoHTML(entry)}</div>` : ""}</div>${exampleSentencesHTML(entry)}`;
+  const ex = exampleSentencesHTML(entry).replace(/^<p class="q" style="margin-top:12px">Examples?:<\/p>/, "");
+  return revealRow(wordFormHTML(entry), p ? readingHTML(p) : "", glossOut(VC.gloss(entry), true), hear ? entry.id : null, VC.typedSynWords(entry, WORDS_BY_ID).length ? `<div class="syn" style="color:var(--mute);font-size:15px">${synAlsoHTML(entry)}</div>` : "") + (ex ? `<div class="rvx">${ex}</div>` : "");
 }
 const meaningChoices = entry => [VC.gloss(entry), ...VC.meaningOpts(entry, WORDS, wordMix()).map(d=>VC.gloss(d))];
 // Plans skip unplayable words (hearableKinds, learnPair); this fallback covers a voice lost
@@ -1491,7 +1458,7 @@ function hearItem(entry){
   if(!canHearWord(entry)) return Object.assign(readItem(entry), { needsNotice: true, reqKind: "hear" });
   return { kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero",
     html: `<div class="hear-stage"><button class="speaker" id="sp" aria-label="Replay">${SPEAKER_SVG}</button></div>`,
-    opts: meaningChoices(entry), a: VC.gloss(entry), optHtml: GLOSS_OPT, reveal: `<div class="q">${APP_V2 ? "You heard" : "You heard:"}</div>${revealBlock(entry)}`,
+    opts: meaningChoices(entry), a: VC.gloss(entry), optHtml: GLOSS_OPT, reveal: `<div class="q">You heard</div>${revealBlock(entry)}`,
     onAnswer(ok){ markWord(entry.id, ok, "hear", this.reqKind); },
     mount: () => { const btn = $("sp"); sayWord(entry, btn); btn.onclick = ()=>sayWord(entry, btn); },
     };
@@ -1550,14 +1517,13 @@ function typedRecallFallback(entry){
 // (pronFirst: a word still shown by its reading gets the reading item in both slots).
 const PRON_NOUN = TONES ? PACK.tones : "reading";
 const LATIN_PRON = /\p{Script=Latin}/u; // a Latin-script reading gets a Latin input; any other (e.g. kana) the target-language one
-// appView: no tag; its words are in the input's placeholder.
-const kindTag = (tag, sub) => APP_V2 ? "" : `<div class="ktag"${UIA}><b>${escapeHtml(tag)}</b>${sub ? ` · ${escapeHtml(sub)}` : ""}</div>`;
+// No kind tag: the input's placeholder names what to type.
 const pronFeedback = entry => val => { const v = VC.checkPronTyped(val, entry.pron, PACK); return v === "tones" || v === "tonesDiff" ? `<div class="diff">tones: <span class="tpron">${readingHTML(entry.pron)}</span></div>` : ""; };
 function pronTypeItem(entry){
   const syn = synTyped(entry, (e, val) => !!e.pron && VC.checkPronTyped(val, e.pron, PACK) !== "wrong", e => `<span class="tpron">${readingHTML(e.pron)}</span>`), tones = pronFeedback(entry);
   return { kind:"type", key:"w:"+entry.id, label:`Type the ${PRON_NOUN}`,
-    html: `${kindTag(PRON_NOUN, TONES ? "tones optional" : "")}<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>`,
-    placeholder: APP_V2 && TONES ? "tones optional" : TONES ? `${PRON_NOUN}, tones optional…` : `${PRON_NOUN}…`, inputTA: LATIN_PRON.test(entry.pron) ? ' lang="en"' : undefined,
+    html: `<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>`,
+    placeholder: TONES ? "tones optional" : `${PRON_NOUN}…`, inputTA: LATIN_PRON.test(entry.pron) ? ' lang="en"' : undefined,
     check: syn.check,
     feedback: val => tones(val) + syn.note(val),
     reveal: revealBlock(entry), onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
@@ -1570,8 +1536,8 @@ function writtenTypeItem(entry){
   const foldTyped = !TONES && !LATIN_PRON.test(entry.pron || "") ? VC.writtenTypedFold : (v => v);
   const syn = synTyped(entry, (e, val) => VC.acceptTyped(foldTyped(val), e, PACK, VC.affixAlts(e.w), WORDS), e => `<bdi${TA}>${escapeHtml(e.w)}</bdi>`);
   return { kind:"type", key:"w:"+entry.id, label:"Type the characters",
-    html: `${kindTag("characters", hear ? "listen" : "")}<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>${hear ? `<div class="listen-stage"><button class="replay" id="rp2" aria-label="Replay">${REPLAY_SVG}</button></div>` : ""}`,
-    placeholder: APP_V2 ? "characters" : "characters…",
+    html: `<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>${hear ? `<div class="listen-stage"><button class="replay" id="rp2" aria-label="Replay">${REPLAY_SVG}</button></div>` : ""}`,
+    placeholder: "characters",
     mount: () => { if(hear){ const b = $("rp2"); sayWord(entry, b); b.onclick = () => sayWord(entry, b); } },
     // A synonym's characters (typedSyn) are right for the word, but the learner did not write this
     // word's characters: no unit moves and no c: answer is logged (review 2026-10-02).
@@ -1597,8 +1563,8 @@ const stimWritten = e => `<div class="big wd"${TA}>${escapeHtml(e.w)}</div>`;
 const stimPron = e => `<div class="big wd"${TA}>${readingHTML(e.pron)}</div>`;
 function meaningTypeItem(entry, fromPron){
   const stim = fromPron ? stimPron(entry) : stimWritten(entry);
-  return { kind:"type", key:"w:"+entry.id, label:"Type the meaning", html: kindTag("meaning", "any one") + stim,
-    placeholder: APP_V2 ? "any one meaning" : "meaning…", inputTA: ' lang="en"',
+  return { kind:"type", key:"w:"+entry.id, label:"Type the meaning", html: stim,
+    placeholder: "any one meaning", inputTA: ' lang="en"',
     check: val => VC.checkGlossTyped(val, VC.gloss(entry), PACK), reveal: revealBlock(entry),
     onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); if(!fromPron) markUnitTyped(this, entry.id, ok); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry),
     choiceFallback: () => ({ kind:"mc", key:"w:"+entry.id, label:"What does it mean?", optsClass:"opts-hero", html: stim,
@@ -1611,7 +1577,7 @@ function writtenPronTypeItem(entry){
       opts: [entry.pron, ...opts], a: entry.pron, optHtml: o => `<bdi>${readingHTML(o)}</bdi>`, reveal: revealBlock(entry),
       onAnswer(ok){ markWord(entry.id, ok, typedFallbackKind(ok)); }, onReveal: b => sayWord(entry, b), revealHear: canHearWord(entry) };
   // The characters stimulus is this word alone: no synonym fits it.
-  return Object.assign(pronTypeItem(entry), { html: kindTag(PRON_NOUN, TONES ? "tones optional" : "") + stimWritten(entry),
+  return Object.assign(pronTypeItem(entry), { html: stimWritten(entry),
     check: val => VC.checkPronTyped(val, entry.pron, PACK) !== "wrong", feedback: pronFeedback(entry),
     onAnswer(ok){ markWord(entry.id, ok, "type", this.reqKind); markUnitTyped(this, entry.id, ok); },
     choiceFallback: () => choice(VC.pronChoiceOpts(entry, learnedWords(), WORDS, wordMix())) });
@@ -1620,7 +1586,7 @@ function writtenPronTypeItem(entry){
 // reading, so the card is silent and the reveal plays it as on every typed item (owner feedback
 // 2026-10-01). Packs without typedFrom keep writtenTypeItem's listen card.
 function silentWrittenTypeItem(entry){
-  return Object.assign(writtenTypeItem(entry), { html: `${kindTag("characters", "")}<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>`, mount: undefined });
+  return Object.assign(writtenTypeItem(entry), { html: `<div class="med" style="text-align:center">${glossOut(VC.gloss(entry))}</div>`, mount: undefined });
 }
 // ------------------------------------------------------------------ session resume
 // The drill or passage in progress survives an app-tab switch and a reload (docs/PACK_SCHEMA.md
@@ -1946,8 +1912,8 @@ function sessionResume(forTab){
   switchToTab(rec.tab, tabTitle(rec.tab));
   stopSpeaking(); drillKeyHandler = null; rzFin = null;
   todayStepState = today;
-  if(APP_V2 && today && (rec.drill || rd)) setTitle(todayStepTitle(today.at, !!(rd && rd.mode === "listen")));
-  if(APP_V2 && rec.tab === "test" && testName && (rec.drill || rd)) setTitle(testName);
+  if(today && (rec.drill || rd)) setTitle(todayStepTitle(today.at, !!(rd && rd.mode === "listen")));
+  if(rec.tab === "test" && testName && (rec.drill || rd)) setTitle(testName);
   if(rec.drill){
     const o = rec.drill.o;
     if(o.o === "wordsSet"){ wordsQuery = ""; wordsLv = o.lv; wordsSet = o.set; }
@@ -1966,11 +1932,9 @@ function sessionResume(forTab){
 const RZ_TAB_OK = t => t === "today" || t === "test" || t === "words" || t === "sounds" || t === "read";
 document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden") sessionSave(); });
 if(typeof window.addEventListener === "function") window.addEventListener("pagehide", () => sessionSave());
-// pack.progressView: closing the app on Progress ends the visit too.
-if(PROGRESS_V2){
-  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden" && tab === "progress") progressVisit(); });
-  if(typeof window.addEventListener === "function") window.addEventListener("pagehide", () => { if(tab === "progress") progressVisit(); });
-}
+// Progress v2: closing the app on Progress ends the visit too.
+document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden" && tab === "progress") progressVisit(); });
+if(typeof window.addEventListener === "function") window.addEventListener("pagehide", () => { if(tab === "progress") progressVisit(); });
 const TYPED_ITEM = { word: typeItem, pron: pronTypeItem, written: silentWrittenTypeItem, writtenPron: writtenPronTypeItem,
   writtenMeaning: e => meaningTypeItem(e, false), pronMeaning: e => meaningTypeItem(e, true) };
 // Words by typed: a held word is planned typed only when some typed kind fits it as shown, and
@@ -1989,13 +1953,12 @@ const WORD_ITEM = { hear: hearItem, read: readItem, recall: recallItem, type: (e
 const itemFromPlan = (p, i, plan) => withReq(TYPED_FROM && p.kind === "type" ? (plan && plan[i] === p ? typedFromSlotItem(plan, i) : typedFromSlotItem([p], 0)) : WORD_ITEM[p.kind](p.word, p.kind === "type" && PRON_TYPING ? (p.tu || (p.pair && p.pair !== "sm") ? "written" : p.pair ? "pron" : VC.typeSlotKind(plan, i)) : undefined), p.reqKind || p.kind);
 function missSummary(miss){
   const u = VC.dedupeMisses(miss);
-  if(APP_V2) return u.length ? `<p class="pvk">Missed</p>${u.map(({item, count}, i) => missRowHTML(item, count, i)).join("")}` : `<p class="pvk">No misses.</p>`;
-  return u.length ? `<p class="q">Missed:</p>${u.map(({item, count})=>`<div class="stmt rvb">${count > 1 ? `<div class="q" style="margin:0 0 4px">missed ${count}×</div>` : ""}${item.reveal}</div>`).join("")}` : "<p class='q'>Clean.</p>";
+  return u.length ? `<p class="pvk">Missed</p>${u.map(({item, count}, i) => missRowHTML(item, count, i)).join("")}` : `<p class="pvk">No misses.</p>`;
 }
 
 // appView: one 44px row per missed item (the form as the drill showed it, reading, primary sense, replay);
 // a tap opens that item's full reveal in place. An item with no row form keeps the full block.
-const glossPrimary = s => glossShort(GLOSS_STYLE ? VC.glossSenses(s).first : s, 1, 0);
+const glossPrimary = s => glossShort(VC.glossSenses(s).first, 1, 0);
 let sentById = null;
 function missRowParts(item){
   const k = String(item.key || ""), id = k.slice(2);
@@ -2019,7 +1982,7 @@ function missRowHTML(item, count, i){
   const play = r.wid != null ? ` data-wid="${escapeHtml(r.wid)}"` : r.sent != null ? ` data-sent="${r.sent}"` : "";
   return `<div class="mrow"><button class="mtap" data-mopen="${i}" aria-expanded="false" aria-controls="mf${i}"><span class="mt">${r.form}${r.reading ? `<span class="mp">${r.reading}</span>` : ""}<span class="mg"${r.form ? "" : ' style="color:var(--ink)"'}>${r.gloss}</span>${count > 1 ? `<span class="mn">${count} misses</span>` : ""}</span></button>${play ? `<button class="replay"${play} aria-label="Replay ${escapeHtml(String(r.say || ""))}">${REPLAY_SVG}</button>` : ""}</div><div class="stmt rvb mfull" id="mf${i}" hidden>${stripRvSlots(item.reveal)}</div>`;
 }
-if(APP_V2) $("panel").addEventListener("click", e => {
+$("panel").addEventListener("click", e => {
   const b = e.target && e.target.closest ? e.target.closest("[data-mopen]") : null;
   const box = b ? $("mf" + b.dataset.mopen) : null; if(!box) return;
   box.hidden = !box.hidden; b.setAttribute("aria-expanded", String(!box.hidden));
@@ -2060,7 +2023,7 @@ function hearSentence(s){
   if(!canHearSentence(s)) return Object.assign(readSentence(s), { needsNotice: true });
   return { kind:"mc", key:"s:"+s.id, label:"What did they say?", optsClass:"opts-hero",
     html: `<div class="hear-stage"><button class="speaker" id="sp" aria-label="Replay">${SPEAKER_SVG}</button></div>`,
-    opts: sentenceChoices(s), a: s.en, reveal: `<div class="q">${APP_V2 ? "You heard" : "You heard:"}</div>${sentenceRevealBlock(s)}`,
+    opts: sentenceChoices(s), a: s.en, reveal: `<div class="q">You heard</div>${sentenceRevealBlock(s)}`,
     onAnswer: ok=>markSentence(s.id, ok, "hear"),
     mount: () => { const btn = $("sp"); saySentence(s, btn); btn.onclick = ()=>saySentence(s, btn); },
     };
@@ -2112,7 +2075,7 @@ const patternNoteHTML = p => `<div class="pnote">${p.note.map(ui).join("<br>")}<
 // recorded; a reload hides it again); the reveal always carries it (sentenceRevealBlock).
 const PATTERN_CUE_AFTER = PATTERNS_ON && PACK.patternCue === "after";
 // first (fb51; owner 2026-10-08, appView v2): a pattern's first meeting shows the English open, as the note does; later meetings keep the tap.
-const patternCueHTML = (s, first) => PATTERN_CUE_AFTER && !(APP_V2 && first) ? `<div class="q cue"><button type="button" class="showw" style="margin:0" data-pcue="${escapeHtml(s.en)}" aria-label="Show meaning">${APP_V2 ? "Show meaning" : "meaning"}</button></div>` : `<div class="q cue">${ui(s.en)}</div>`;
+const patternCueHTML = (s, first) => PATTERN_CUE_AFTER && !first ? `<div class="q cue"><button type="button" class="showw" style="margin:0" data-pcue="${escapeHtml(s.en)}" aria-label="Show meaning">Show meaning</button></div>` : `<div class="q cue">${ui(s.en)}</div>`;
 if(PATTERN_CUE_AFTER) $("panel").addEventListener("click", e => {
   const b = e.target && e.target.closest ? e.target.closest("[data-pcue]") : null;
   if(!b) return;
@@ -2185,9 +2148,8 @@ function charHintHTML(u, skip){
 function charRevealBlock(it, unit){
   const tap = WORDS_BY_ID[it.wordId] && canHearWord(WORDS_BY_ID[it.wordId]);
   // The hints stay open: they are how a character is remembered, and a character reveal has no examples.
-  if(APP_V2){ const hint = charHintHTML(unit); return revealRow(escapeHtml(it.t), it.reading ? readingHTML(it.reading) : "", glossOut(it.gloss, true), tap ? it.wordId : null, hint ? `<div>${hint}</div>` : ""); }
-  const icon = tap ? ` <span style="color:var(--mute);vertical-align:middle">${TEACH_PLAY_SVG}</span>` : "";
-  return `<div${tap ? ` data-wid="${escapeHtml(it.wordId)}" style="cursor:pointer"` : ""}><div class="rw"${TA}>${escapeHtml(it.t)}${icon}</div>${it.reading ? `<div class="rp">${readingHTML(it.reading)}</div>` : ""}<div style="color:var(--mute)">${glossOut(it.gloss, true)}</div>${charHintHTML(unit)}</div>`;
+  const hint = charHintHTML(unit);
+  return revealRow(escapeHtml(it.t), it.reading ? readingHTML(it.reading) : "", glossOut(it.gloss, true), tap ? it.wordId : null, hint ? `<div>${hint}</div>` : "");
 }
 function charDrillItem(kind, unit){
   const it = VC.charItem(kind, unit, charCtx());
@@ -2343,7 +2305,7 @@ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{
   // coming back resumes it. Tapping the tab already open is the way out of a drill without a
   // keyboard: it shows the tab's home screen, which offers to resume (rzResumeRow).
   const same = b.dataset.t === tab;
-  // pack.progressView: leaving Progress is the visit the next one is measured against.
+  // Progress v2: leaving Progress is the visit the next one is measured against.
   if(tab === "progress" && !same) progressLeave();
   if(tab === "read" && !same) readOpen = false;
   // A finished drill or passage (its results on screen) ends on a re-tap, as render() ends
@@ -2474,20 +2436,13 @@ function progressMapHTML(){
   if(cg){
     const f = Math.min(10, Math.round(10 * cg.p)), n = VC.sessionsToGo(prog, cg.i, cg.n), pc = Math.round(cg.p * 100);
     const head = cg.all ? "All goals" : `Goal ${cg.i + 1} of ${cg.n}`;
-    const eta = APP_V2 ? etaText(goalEta(cg)) : "";
-    return `<div class="pmap pmg" id="pmap" role="button" tabindex="0" aria-label="${pc}% of ${cg.all ? "all goals" : `goal ${cg.i + 1} of ${cg.n}`}: ${escapeHtml(cg.goal.label)}"><div class="pm1"><span class="pmh">${ui(head + " ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸")}</span> ${ui(cg.goal.label)}</div>${APP_V2 ? (eta ? `<div class="pm2">${ui(eta)}</div>` : "") : cg.all ? "" : `<div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div>`}</div>`;
+    const eta = etaText(goalEta(cg));
+    return `<div class="pmap pmg" id="pmap" role="button" tabindex="0" aria-label="${pc}% of ${cg.all ? "all goals" : `goal ${cg.i + 1} of ${cg.n}`}: ${escapeHtml(cg.goal.label)}"><div class="pm1"><span class="pmh">${ui(head + " ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸")}</span> ${ui(cg.goal.label)}</div>${(eta ? `<div class="pm2">${ui(eta)}</div>` : "")}</div>`;
   }
   const p = VC.progressPosition(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST), f = Math.round(10 * p), n = VC.sessionsToGo(prog);
   const aria = `${Math.round(p * 100)}% of the way to following a drama without pausing`;
-  const eta = APP_V2 ? etaText(VC.sessionsToGoX(prog)) : "";
-  return `<div class="pmap" id="pmap" role="button" tabindex="0" aria-label="${aria}"><div class="pm1">${ui("You ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸ follow a drama without pausing")}</div>${APP_V2 ? (eta ? `<div class="pm2">${ui(eta)}</div>` : "") : `<div class="pm2">${n == null ? ui("pace: — (after 14 sessions)") : ui(`≈ ${n} sessions to go`)}</div>`}</div>`;
-}
-// Progress tab: every goal, one row each.
-function goalsBlockHTML(){
-  const gs = VC.progressMapGoals(PACK);
-  if(!VC.progressMapOn(PACK) || !gs.length) return "";
-  const ps = VC.goalPositions(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST);
-  return `<p class="q">Goals</p><table class="stats">${gs.map((g, i) => `<tr><td>Goal ${i + 1}</td><td>${Math.round(ps[i] * 100)}% · ${escapeHtml(g.label)}</td></tr>`).join("")}</table>`;
+  const eta = etaText(VC.sessionsToGoX(prog));
+  return `<div class="pmap" id="pmap" role="button" tabindex="0" aria-label="${aria}"><div class="pm1">${ui("You ▸ [")}${"■".repeat(f)}${"□".repeat(10 - f)}${ui("] ▸ follow a drama without pausing")}</div>${(eta ? `<div class="pm2">${ui(eta)}</div>` : "")}</div>`;
 }
 function todayRender(){
   stopSpeaking();
@@ -2526,14 +2481,13 @@ function todayRender(){
   // Paused with nothing to review: no empty drill, one way back.
   const idle = pz && !g.review && !g.listen && !g.recall && !g.sentences && !readNext && !sessStore.get("today");
   const xNotice = showScriptNotice();
-  if(APP_V2) setTitle("Today");
-  P.innerHTML = `<div class="drill-body top">${samsungNoticeHTML}${legacyNotice ? `<div class="stmt" id="legacyNotice">${legacyNotice}<button class="ghost" id="legacyOk" style="margin-top:8px">OK</button></div>` : ""}${legacyFail ? `<div class="stmt" id="legacyFail">${legacyFailHTML(legacyFail)}<button class="ghost" id="legacySkip" style="margin-top:8px">Start without it</button></div>` : ""}${xNotice ? `<div class="stmt" id="scriptNotice">A script primer is available. Turn it on in Progress.<button class="ghost" id="scriptNoticeOk" style="margin-top:8px">OK</button></div>` : ""}${APP_V2 ? "" : pathStrip()}${xChoice ? scriptChoiceHTML() : ""}
+  setTitle("Today");
+  P.innerHTML = `<div class="drill-body top">${samsungNoticeHTML}${legacyNotice ? `<div class="stmt" id="legacyNotice">${legacyNotice}<button class="ghost" id="legacyOk" style="margin-top:8px">OK</button></div>` : ""}${legacyFail ? `<div class="stmt" id="legacyFail">${legacyFailHTML(legacyFail)}<button class="ghost" id="legacySkip" style="margin-top:8px">Start without it</button></div>` : ""}${xNotice ? `<div class="stmt" id="scriptNotice">A script primer is available. Turn it on in Progress.<button class="ghost" id="scriptNoticeOk" style="margin-top:8px">OK</button></div>` : ""}${xChoice ? scriptChoiceHTML() : ""}
     ${showPlaceHint ?`<div class="stmt">New here? Placement finds where to start.<button class="next" id="hintPlace" style="margin-top:8px">Take the placement test</button></div>` : ""}${choice && !xChoice ? charChoiceHTML() : ""}
     ${showSoundsHint ? `<div class="stmt">${PACK.soundsHint ? ui(PACK.soundsHint) : `A few short lessons explain how ${ui(PACK.name)} sounds and is written.`}<button class="next" id="hintSounds" style="margin-top:8px">Start the first lesson</button></div>` : ""}
-    ${""}
-    ${idle ? `<p class="q">Nothing to review yet.</p>` : APP_V2 ? todayPlanV2({ n, pz, g, snap, nn, pk, readNext }) : `${progressMapHTML()}<p class="q">Session ${n}, about 15 minutes.<br>${lw.length} words learned so far.${pz ? "<br>Review only · new material paused." : ""}</p>
-    <table class="stats steps">${steps.map((s,i)=>`<tr><td>${i+1}. ${s[0]}</td><td>${s[2] != null ? s[2] : ui(s[1])}</td></tr>`).join("")}</table>`}
-    </div>${choice ? "" : idle ? `<div class="actions"><button class="next" id="unpause">Turn new material on</button></div>` : `<div class="actions"><button class="next" id="go">${APP_V2 ? "Start" : "Start today"}</button></div>`}`;
+    
+    ${idle ? `<p class="q">Nothing to review yet.</p>` : todayPlanV2({ n, pz, g, snap, nn, pk, readNext })}
+    </div>${choice ? "" : idle ? `<div class="actions"><button class="next" id="unpause">Turn new material on</button></div>` : `<div class="actions"><button class="next" id="go">Start</button></div>`}`;
   if(legacyNotice) $("legacyOk").onclick = () => { legacyNotice = null; todayRender(); };
   if(legacyFail) $("legacySkip").onclick = () => { legacyFail = null; storeReadOnly = false; store.save(); todayRender(); };
   if($("pmap")){ const go = () => document.querySelector('#tabs button[data-t="progress"]').click(); $("pmap").onclick = go; $("pmap").onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } }; }
@@ -2552,9 +2506,9 @@ function todayRender(){
     return;
   }
   if(idle){ $("unpause").onclick = () => { VC.setPause(prog, false); store.save(); todayRender(); }; return; }
-  $("go").onclick = () => { if(APP_V2) sessBase = pvTotals(); todayStepState = HAS_STAGES ? (todayPrep ? { step:0, snap: todayPrep.snap, review: todayPrep.review } : { step:0, snap: takeSnapshot() }) : { step:0 }; todayStepState.read = readNext; todayPrep = null; typedSession.clear(); patternSession.clear(); if(VC.daySessionStart(prog, PACK)) store.save(); todayStep(); };
+  $("go").onclick = () => { sessBase = pvTotals(); todayStepState = HAS_STAGES ? (todayPrep ? { step:0, snap: todayPrep.snap, review: todayPrep.review } : { step:0, snap: takeSnapshot() }) : { step:0 }; todayStepState.read = readNext; todayPrep = null; typedSession.clear(); patternSession.clear(); if(VC.daySessionStart(prog, PACK)) store.save(); todayStep(); };
   // A parked Today session (Today re-tapped, Escape) is resumed, never restarted.
-  if(sessStore.get("today")){ const start = $("go").onclick; $("go").textContent = APP_V2 ? "Resume" : "Resume today"; $("go").onclick = () => { if(!sessionResume("today")) start(); }; }
+  if(sessStore.get("today")){ const start = $("go").onclick; $("go").textContent = "Resume"; $("go").onclick = () => { if(!sessionResume("today")) start(); }; }
 }
 // appView: the session number is the anchor; a step shows only what moves (the Learn set, the gate,
 // patterns, the passage title, without its show-written tap: the passage has it) or why it is skipped. Counts are in the header while a step runs; the path
@@ -2613,7 +2567,7 @@ function todayStep(){
   const units = snap && snap.charsStarted ? CHAR_LIST : undefined;
   const s = todayStepState.step++;
   todayStepState.at = s; sessionSave(true);
-  if(APP_V2) setTitle(todayStepTitle(s));
+  setTitle(todayStepTitle(s));
   if(s === 0){
     if(g.review && snap){
       const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), typedUnits: TYPED_UNITS });
@@ -2660,7 +2614,7 @@ function todayStep(){
     // A first read planned before pausing is not started; a spaced re-read is offered instead.
     if(r && r.reason !== "reread" && paused()) r = todayReadItem(true);
     // The voice can go between the plan and this step (voiceschanged): re-check it.
-    if(r){ const m = r.mode === "listen" && canListenPassage(r.p) ? "listen" : "read"; if(APP_V2) setTitle(todayStepTitle(5, m === "listen")); startPassage(r.p, true, m); return; }
+    if(r){ const m = r.mode === "listen" && canListenPassage(r.p) ? "listen" : "read"; setTitle(todayStepTitle(5, m === "listen")); startPassage(r.p, true, m); return; }
     return todayStep();
   }
   todayFinish();
@@ -2671,30 +2625,27 @@ function todayFinish(){
   D = null; rzFin = null; todayStepState = null; drillKeyHandler = null; setScore(0,0); sessionClear();
   prog.sessions = (prog.sessions||0) + 1; VC.recordProgressMap(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST); store.save();
   const P = $("panel");
-  if(APP_V2){
-    // What moved since Start, in the Progress hero's words; nothing moved, or no baseline (a reload): the title alone.
-    const b = sessBase; sessBase = null; setTitle("Today");
-    const d = b ? VC.progressDeltas({ pv: b }, pvTotals()) : null;
-    const items = [["m", () => "mastered"]];
-    if(HAS_CHARACTERS) items.push(["co", () => "characters only"]);
-    if(HAS_PASSAGES) items.push(["p", n => Math.abs(n) === 1 ? "passage" : "passages"]);
-    const shown = d ? items.filter(([k]) => d[k] !== 0) : [];
-    P.innerHTML = `<div class="done"><h2>Session ${prog.sessions} done</h2>${shown.length ? `<div class="pvds pvh pvin" id="sdd">${shown.map(([k, lab]) => `<span class="pvd"><b>${pvSigned(d[k])}</b> ${lab(d[k])}</span>`).join("")}</div>` : ""}<button class="next" id="again">Back to Today</button></div>`;
-  } else
-  P.innerHTML = `<div class="done"><h2>Session done</h2><p class="q">${learnedWords().length} words learned so far.</p><button class="next" id="again">Back to Today</button></div>`;
+  // What moved since Start, in the Progress hero's words; nothing moved, or no baseline (a reload): the title alone.
+  const b = sessBase; sessBase = null; setTitle("Today");
+  const d = b ? VC.progressDeltas({ pv: b }, pvTotals()) : null;
+  const items = [["m", () => "mastered"]];
+  if(HAS_CHARACTERS) items.push(["co", () => "characters only"]);
+  if(HAS_PASSAGES) items.push(["p", n => Math.abs(n) === 1 ? "passage" : "passages"]);
+  const shown = d ? items.filter(([k]) => d[k] !== 0) : [];
+  P.innerHTML = `<div class="done"><h2>Session ${prog.sessions} done</h2>${shown.length ? `<div class="pvds pvh pvin" id="sdd">${shown.map(([k, lab]) => `<span class="pvd"><b>${pvSigned(d[k])}</b> ${lab(d[k])}</span>`).join("")}</div>` : ""}<button class="next" id="again">Back to Today</button></div>`;
   $("again").onclick = todayRender;
 }
 function wordRowHTML(w, cls){
   // Pron + gloss share one .info column: a pron shrunk to width:0 beside a long gloss made
   // unbreakable transliterations ("budan") overlap the gloss text.
   const p = pronBeside(w);
-  return `<span class="wd${dispWord(w).isPron ? " pf" : ""}"${TA}>${wordFormHTML(w)}</span><span class="info">${p ? `<span class="pr">${readingHTML(p)}</span>` : ""}<span class="en">${glossOut(VC.gloss(w))}</span>${GLOSS_STYLE && VC.typedSynWords(w, WORDS_BY_ID).length ? `<span class="en syn">${synAlsoHTML(w)}</span>` : ""}</span>`;
+  return `<span class="wd${dispWord(w).isPron ? " pf" : ""}"${TA}>${wordFormHTML(w)}</span><span class="info">${p ? `<span class="pr">${readingHTML(p)}</span>` : ""}<span class="en">${glossOut(VC.gloss(w))}</span>${VC.typedSynWords(w, WORDS_BY_ID).length ? `<span class="en syn">${synAlsoHTML(w)}</span>` : ""}</span>`;
 }
 function vocabTeach(list, lv, onDrill, set){
   setScore(0,0); screenTop();
   const P = $("panel");
   const hint = hasSpeech || list.some(canHearWord) ? " Tap a word to hear it." : "";
-  P.innerHTML = `${APP_V2 ? `<p class="pva">${escapeHtml(levelLabel(lv))}${set != null ? `, set ${set+1}` : ", new set"}</p>` : `<p class="q">${escapeHtml(levelLabel(lv))}, new set.${hint}</p>`}
+  P.innerHTML = `<p class="pva">${escapeHtml(levelLabel(lv))}${set != null ? `, set ${set+1}` : ", new set"}</p>
     <div id="tl"></div><div class="actions"><button class="next" id="dr">Drill this set</button></div>`;
   const tl = $("tl");
   list.forEach(w => {
@@ -2724,8 +2675,8 @@ function charTeach(cs, stage, onDrill){
     const ex = VC.unitExampleSentences(u, w, SENTENCES, PACK, 1);
     return `<div class="charteach"><div class="chead"${tap ? ` data-wid="${escapeHtml(w.id)}" style="cursor:pointer"` : ""}><span class="cform"${TA}>${escapeHtml(u.t)}</span><span class="info">${reading ? `<span class="pr">${readingHTML(reading)}</span>` : ""}<span class="en">${glossOut(VC.unitGloss(u, WORDS_BY_ID))}</span>${charHintHTML(u, hinted)}</span>${tap ? `<span style="color:var(--mute);flex:0 0 auto">${TEACH_PLAY_SVG}</span>` : ""}</div>${ex.map(s => sentenceRowHTML(s, w, u.words)).join("")}</div>`;
   }).join("");
-  P.innerHTML = `${APP_V2 ? `<p class="pva">${cs.lv !== undefined ? `${escapeHtml(levelLabel(cs.lv))} characters, set ${cs.lvIndex+1} of ${cs.lvTotal}` : `Characters, set ${cs.index+1} of ${cs.total}`}</p>` : `<p class="q">${csetLabel(tf(stage.label), cs)}: the written form of words you already know.${hint}</p>`}
-    <div id="ctl">${cards}</div><div class="actions"><button class="next" id="dr">${APP_V2 ? "Drill this set" : "Drill these"}</button></div>`;
+  P.innerHTML = `<p class="pva">${cs.lv !== undefined ? `${escapeHtml(levelLabel(cs.lv))} characters, set ${cs.lvIndex+1} of ${cs.lvTotal}` : `Characters, set ${cs.index+1} of ${cs.total}`}</p>
+    <div id="ctl">${cards}</div><div class="actions"><button class="next" id="dr">Drill this set</button></div>`;
   $("dr").onclick = onDrill;
 }
 function scriptTeach(ss, stage, onDrill){
@@ -2733,7 +2684,7 @@ function scriptTeach(ss, stage, onDrill){
   const P = $("panel");
   const set = ss.units.length ? ss.units[0].set : null;
   P.innerHTML = `<p class="q">${tf(stage.label)}, set ${ss.index+1} of ${ss.total}: ${ss.units.length} new symbol${ss.units.length === 1 ? "" : "s"}.${scriptVoice() || ss.units.some(u => u.audio) ? " Tap the speaker to hear one." : ""}</p>
-    <div id="xtl">${scriptNotesHTML(stage.key, set)}${ss.units.map(scriptTeachHTML).join("")}</div><div class="actions"><button class="next" id="dr">${APP_V2 ? "Drill this set" : "Drill these"}</button></div>`;
+    <div id="xtl">${scriptNotesHTML(stage.key, set)}${ss.units.map(scriptTeachHTML).join("")}</div><div class="actions"><button class="next" id="dr">Drill this set</button></div>`;
   paintScriptHL($("xtl"));
   $("dr").onclick = onDrill;
 }
@@ -2764,7 +2715,7 @@ function lessonTeach(lesson, onDone, onBack){
   setScore(0,0); screenTop();
   if(!prog.soundsOpened){ prog.soundsOpened = true; store.save(); }
   const P = $("panel");
-  P.innerHTML = `${onBack ? (APP_V2 ? '<button class="ghost rback" id="back">Lessons</button>' : '<div class="row"><button id="back">‹ lessons</button></div>') : ""}<p class="q">${ui(lesson.blurb)}</p>
+  P.innerHTML = `${onBack ? ('<button class="ghost rback" id="back">Lessons</button>') : ""}<p class="q">${ui(lesson.blurb)}</p>
     <div id="cards"></div><div class="actions"><button class="next" id="dr">Drill</button></div>`;
   if(onBack) $("back").onclick = onBack;
   const cw = $("cards");
@@ -2783,7 +2734,7 @@ function lessonTeach(lesson, onDone, onBack){
   // One notice per lesson screen: the drill shuffles, so a per-item notice could land anywhere.
   const hasSay = lesson.items.some(it => it.say);
   if(!hasSpeech && hasSay){
-    $("cards").insertAdjacentHTML("beforebegin", `<div class="warn">${APP_V2 ? "No voice for this language in this browser. Listening items show the text instead." : "This browser has no voice for this language, so listening items show the text instead of playing audio."}${skipped ? ` ${skipped} item${skipped>1?"s were":" was"} skipped because the text would give the answer away.` : ""}</div>`);
+    $("cards").insertAdjacentHTML("beforebegin", `<div class="warn">No voice for this language in this browser. Listening items show the text instead.${skipped ? ` ${skipped} item${skipped>1?"s were":" was"} skipped because the text would give the answer away.` : ""}</div>`);
   }
   $("dr").onclick = () => drill(planned.map(x => lessonItem(x.it, VC.lessonItemKey(lesson.id, x.i), x.mode)), onDone, missSummary);
 }
@@ -2802,7 +2753,7 @@ function soundsRender(){
   }
   const done = LESSON_LIST.filter(l=>prog.lessons[l.id]).length;
   // appView: the pack name without a trailing parenthetical (its level range).
-  P.innerHTML = `${APP_V2 ? `<p class="q">${LESSON_LIST.length} short lesson${LESSON_LIST.length === 1 ? "" : "s"} on how ${ui(String(PACK.name || "").replace(/\s*\([^)]*\)\s*$/, ""))} sounds and is written.</p>` : `<p class="q">Optional: how ${ui(PACK.name)} sounds and is written. ${LESSON_LIST.length} lessons, ${done} done.</p>`}
+  P.innerHTML = `<p class="q">${LESSON_LIST.length} short lesson${LESSON_LIST.length === 1 ? "" : "s"} on how ${ui(String(PACK.name || "").replace(/\s*\([^)]*\)\s*$/, ""))} sounds and is written.</p>
     ${HAS_SCRIPT ? scriptTabHTML() : ""}<div class="plist">${LESSON_LIST.map((l,i)=>`<button data-i="${i}"><span>${ui(l.title)}</span>${prog.lessons[l.id]?'<span class="tick">✓</span>':''}</button>`).join("")}</div>${SOUNDS_REF ? soundsRefHTML() : ""}`;
   P.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{ soundsSel = +b.dataset.i; soundsRender(); });
   if(SOUNDS_REF) P.querySelectorAll("[data-rs]").forEach(b=>b.onclick=()=>speak(b.dataset.rs, b));
@@ -2864,7 +2815,7 @@ function wordsRender(){
   setScore(0,0);
   const P = $("panel");
   // appView: one name for one setting, the same word as the Progress chip (PRON_NOUN).
-  const pronChip = PACK.showPron !== false ? `<button class="chip ${showPron()?'on':''}" id="wPron" aria-label="Show ${APP_V2 ? escapeHtml(PRON_NOUN) : "pronunciation"}" aria-pressed="${showPron()}">${APP_V2 ? escapeHtml(PRON_NOUN.charAt(0).toUpperCase() + PRON_NOUN.slice(1)) : "Pron"}</button>` : "";
+  const pronChip = PACK.showPron !== false ? `<button class="chip ${showPron()?'on':''}" id="wPron" aria-label="Show ${escapeHtml(PRON_NOUN)}" aria-pressed="${showPron()}">${escapeHtml(PRON_NOUN.charAt(0).toUpperCase() + PRON_NOUN.slice(1))}</button>` : "";
   P.innerHTML = `<div class="row">
       <input type="text" id="wsearch" autocomplete="off" dir="auto" placeholder="Search word or meaning…" style="flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-size:15px" value="${escapeHtml(wordsQuery)}">
       ${pronChip}
@@ -2921,16 +2872,13 @@ function renderWordBody(){
   const setDone = set.length > 0 && set.every(w => got.has(w.id));
   const canReview = lwAll.length >= 5;
   // appView: "Next new" only away from the next set; Review sits under Drill.
-  body.innerHTML = APP_V2 ? `<div class="wseg" role="group" aria-label="Level">${LEVELS.map(lv=>`<button data-l="${escapeHtml(lv)}" id="wl_${escapeHtml(lv)}" class="${lv===wordsLv?'on':''}" aria-pressed="${lv===wordsLv}">${escapeHtml(levelLabel(lv))}</button>`).join("")}</div>
+  body.innerHTML = `<div class="wseg" role="group" aria-label="Level">${LEVELS.map(lv=>`<button data-l="${escapeHtml(lv)}" id="wl_${escapeHtml(lv)}" class="${lv===wordsLv?'on':''}" aria-pressed="${lv===wordsLv}">${escapeHtml(levelLabel(lv))}</button>`).join("")}</div>
     <div class="row wnav"><button id="pv" aria-label="Previous set">‹</button><span class="pvn">Set ${wordsSet+1} of ${total}${setDone?' ✓':''}</span><button id="nx" aria-label="Next set">›</button>${wordsSet !== next ? `<button id="jump">Next new</button>` : ""}</div>
-    <div id="wl"></div><div class="actions"><button class="next" id="dr">Drill this set</button>${canReview ? `<button class="ghost" id="rev">Review</button>` : ""}</div>`
-  : `<div class="row">${LEVELS.map(lv=>`<button data-l="${escapeHtml(lv)}" class="${lv===wordsLv?'on':''}">${escapeHtml(levelLabel(lv))}</button>`).join("")}</div>
-    <div class="row"><button id="pv">‹</button><button class="on">Set ${wordsSet+1} / ${total}${setDone?' ✓':''}</button><button id="nx">›</button><button id="jump">next new</button>${canReview ? `<button id="rev">review</button>` : ""}</div>
-    <div id="wl"></div><div class="actions"><button class="next" id="dr">Drill this set</button></div>`;
-  (APP_V2 ? LEVELS.map(lv => $("wl_" + lv)) : body.querySelectorAll("[data-l]")).forEach(b=>b.onclick=()=>{ wordsLv = b.dataset.l; wordsSet = null; renderWordBody(); });
+    <div id="wl"></div><div class="actions"><button class="next" id="dr">Drill this set</button>${canReview ? `<button class="ghost" id="rev">Review</button>` : ""}</div>`;
+  (LEVELS.map(lv => $("wl_" + lv))).forEach(b=>b.onclick=()=>{ wordsLv = b.dataset.l; wordsSet = null; renderWordBody(); });
   $("pv").onclick = () => { wordsSet = Math.max(0, wordsSet-1); renderWordBody(); };
   $("nx").onclick = () => { wordsSet = Math.min(total-1, wordsSet+1); renderWordBody(); };
-  if(!APP_V2 || wordsSet !== next) $("jump").onclick = () => { wordsSet = next; renderWordBody(); };
+  if(wordsSet !== next) $("jump").onclick = () => { wordsSet = next; renderWordBody(); };
   wordListInto($("wl"), set);
   $("dr").onclick = () => {
     const items = []; withLearn(set.map(w => w.id), () => set.forEach(w => items.push(...learnPair(w))));
@@ -2954,18 +2902,7 @@ function readRender(){
   const P = $("panel");
   const pct = Math.round(VC.READ_UNLOCK * 100);
   const levels = readLevelsNow().filter(l => l.count > 0);
-  if(APP_V2){ readListV2(P, levels, pct); return; }
-  P.innerHTML = `<p class="q">Short passages built from this course's words. Tap any underlined word for its meaning, then answer a few questions.</p>
-    ${levels.map(l => {
-      const L = escapeHtml(levelLabel(l.lv));
-      if(!l.unlocked) return `<div class="rlv"><div class="rlh">${L}<span class="q" style="margin:0">locked</span></div>
-        <div class="stmt" data-locked="${escapeHtml(l.lv)}">Unlocks at ${pct}% of ${L} words learned: ${l.learned} / ${l.total} so far, ${l.need} needed.</div></div>`;
-      const ps = PASSAGE_LIST.filter(p => p.lv === l.lv);
-      return `<div class="rlv"><div class="rlh">${L}<span class="q" style="margin:0">${ps.filter(passageDone).length} / ${ps.length} done</span></div>
-        <div class="plist">${ps.map(p => { const d = passageDone(p);
-          return `<button data-pid="${escapeHtml(p.id)}"${DISP.rtl ? ' dir="rtl"' : ""}><span>${rubyTw(p.title, p.titleRuby, true)}<span class="q"${UIA} style="display:block;margin:0;font-size:13px">${VC.passageLength(p, PACK)} words</span></span>${d ? `<span class="tick"${UIA}>✓ ${d.sc} / ${d.n}</span>` : ""}</button>`; }).join("")}</div></div>`;
-    }).join("")}`;
-  P.querySelectorAll("[data-pid]").forEach(b => b.onclick = () => startPassage(PASSAGE_LIST.find(p => p.id === b.dataset.pid)));
+  readListV2(P, levels, pct);
 }
 // appView: the anchor is the highest open level with its unread passages first; levels read to the end fold into
 // one line that opens on a tap (view state, folded again when the tab is left); a locked level is one quiet line.
@@ -3000,7 +2937,7 @@ function startPassage(p, today, mode){
   p = VC.passageForPass(p, qx, PACK);
   RD = { p, tapped: [], glosses: {}, answers: [], qv: [], qi: null, shown: false, resultsDone: false, today: !!today, unticked: {}, added: null };
   // fb46: reading time. t0 = open (kept in the session record, so a resume keeps it), hid = ms the tab was hidden, hs = hidden since.
-  if(PROGRESS_V2 && mode !== "listen"){ RD.t0 = Date.now(); RD.hid = 0; RD.hs = null; }
+  if(mode !== "listen"){ RD.t0 = Date.now(); RD.hid = 0; RD.hs = null; }
   // Read rotation: the attempt count that seeded the question order, so a resume after the pass is marked done keeps it.
   RD.qx = qx;
   if(mode === "listen"){
@@ -3162,7 +3099,7 @@ function listenScreen(){
   RD.playing = false;
   P.innerHTML = `${readBackHTML()}
     <h2 class="ptitle"${TA}>${rubyTextOr(p.title, p.titleRuby)}</h2>
-    <p class="q">${APP_V2 ? "Listening pass" : `Listening pass · ${escapeHtml(levelLabel(p.lv))} · ${p.sentences.length} sentence${p.sentences.length === 1 ? "" : "s"}. Listen, then answer the questions.`}</p>
+    <p class="q">Listening pass</p>
     <div class="row"><button id="lplay">Play all</button><button id="ltext" aria-expanded="${RD.textShown}">${RD.textShown ? "Hide text" : "Show text"}</button></div>
     ${glossBox()}
     <div class="passage" id="pbox">${RD.textShown ? passageHTML(-1) : listenRowsHTML()}</div>
@@ -3195,13 +3132,13 @@ function listenScreen(){
   $("rdone").onclick = () => { leave(); RD.qi = 0; RD.shown = false; readQuestionScreen(); };
   sessionSave(true);
 }
-const readBackHTML = () => RD.today ? `<div class="row"><button id="rskip">Skip today</button></div>` : APP_V2 ? `<button class="ghost rback" id="rback">Passages</button>` : `<div class="row"><button id="rback">‹ passages</button></div>`;
+const readBackHTML = () => RD.today ? `<div class="row"><button id="rskip">Skip today</button></div>` : `<button class="ghost rback" id="rback">Passages</button>`;
 function readPassageScreen(){
   setScore(0,0); screenTop();
   if(RD.mode === "listen"){ listenScreen(); return; }
   const p = RD.p, P = $("panel");
   // appView: the dotted underline is the affordance once a passage has been read; the first time says it.
-  const meta = !APP_V2 ? `${escapeHtml(levelLabel(p.lv))} · ${VC.passageLength(p, PACK)} words. Tap a word to see its meaning.` : PASSAGE_LIST.some(passageDone) ? "" : "Tap a word to see its meaning.";
+  const meta = PASSAGE_LIST.some(passageDone) ? "" : "Tap a word to see its meaning.";
   P.innerHTML = `${readBackHTML()}
     <h2 class="ptitle"${TA}>${rubyTextOr(p.title, p.titleRuby)}</h2>
     ${meta ? `<p class="q">${meta}</p>` : ""}
@@ -3235,14 +3172,14 @@ function readQuestionScreen(){
   const qTr = () => q.en ? `<div id="qtrwrap">${view.trShown ? `<div class="q cue">${ui(q.en)}</div>` : `<button class="ghost" id="qtr" style="margin:8px 0">Show translation</button>`}</div>` : "";
   const qHidden = RD.mode === "listen" && hearQ && RD.audioOnly.indexOf(qi) >= 0 && !view.qOpen && rec.ok === null;
   const nxBtn = `<button class="next" id="nx" style="display:none">${qi+1 < p.questions.length ? "Next" : "See results"}</button>`;
-  P.innerHTML = `<div class="drill-body top">${APP_V2 ? "" : `<p class="q">Question ${qi+1} / ${p.questions.length}</p>`}
+  P.innerHTML = `<div class="drill-body top">
     ${qHidden ? `<div id="qshwrap"><button class="ghost" id="qsh" style="margin:8px 0">Show question</button></div>${REPLAY_STAGE}` : `${qText()}${hearQ ? REPLAY_STAGE : ""}${qTr()}`}
     <div class="opts ${tf ? "" : "opts-w"}" id="o"></div>
-    ${READ_BLOCK ? `<div id="qans"><div class="reveal" id="rv"></div>${nxBtn}</div>` : `<div class="reveal" id="rv"></div>`}
+    <div id="qans"><div class="reveal" id="rv"></div>${nxBtn}</div>
     <button class="ghost" id="ptoggle" aria-expanded="${RD.shown}" style="margin-top:12px">${RD.shown ? "Hide passage" : LB ? "Replay passage" : "Show passage"}</button>${LB ? `<div class="row" id="lkbar"${RD.shown ? "" : " hidden"}><button id="lplay">Play all</button><button id="ltext" aria-expanded="${!!view.lkText}">${view.lkText ? "Hide text" : "Show text"}</button></div>` : ""}
     ${glossBox()}
     <div class="passage" id="pbox"${RD.shown ? "" : " hidden"}>${LB && !view.lkText ? listenRowsHTML() : passageHTML(-1)}</div>
-    </div>${READ_BLOCK ? "" : `<div class="actions">${nxBtn}</div>`}`;
+    </div>`;
   wirePassage($("pbox"), $("gloss"));
   // Spoken once per question: a re-mount, or a voice arriving after answering, only offers Replay.
   if(hearQ){
@@ -3296,15 +3233,13 @@ function readQuestionScreen(){
     [...box.children].forEach(x => { x.disabled = true; if(x.dataset.v === String(q.answer)) x.classList.add("ok"); if(!rec.ok && x.dataset.v === String(rec.given)) x.classList.add("bad"); });
     const s = p.sentences[q.sentence];
     const hearS = canHearSentence(s);
-    showReveal(`<div class="q" style="margin:0 0 6px">${rec.ok ? "Right." : "Not quite."}${APP_V2 ? "" : " The answer is in this sentence:"}</div><div class="stmt hi" style="margin:0"${TOKBOX}><div${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:4px 0 0">${ui(s.en)}</div></div>${hearS ? REVEAL_REPLAY : ""}`);
+    showReveal(`<div class="q" style="margin:0 0 6px">${rec.ok ? "Right." : "Not quite."}</div><div class="stmt hi" style="margin:0"${TOKBOX}><div${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:4px 0 0">${ui(s.en)}</div></div>${hearS ? REVEAL_REPLAY : ""}`);
     // speak() cancels the question's TTS, so the source sentence never overlaps it.
     if(hearS){ const rb = $("rvp"); if(fresh) saySentence(s, rb); rb.onclick = () => saySentence(s, rb); }
     const hs = $("pbox").querySelector(`[data-si="${q.sentence}"]`); if(hs) hs.classList.add("hi");
-    // pack.readAnswerBlock: verdict and Next stay together above the passage toggle, so an
-    // open passage never pushes them off screen (owner feedback 2026-10-02). Without it Next
-    // sits below the passage, and an open passage brings the verdict into view instead.
-    if(READ_BLOCK){ $("nx").style.display = "block"; if(fresh) bringIntoView($("qans")); }
-    else if(RD.shown){ $("nx").style.display = "block"; if(fresh) bringIntoView($("rv")); } else showNext();
+    // Read answer block (docs/PACK_SCHEMA.md "readAnswerBlock", engine default since the flag collapse): verdict and Next stay
+    // together above the passage toggle, so an open passage never pushes them off screen (owner feedback 2026-10-02).
+    $("nx").style.display = "block"; if(fresh) bringIntoView($("qans"));
     setScore(qi+1, p.questions.length);
   };
   order.forEach((v, i) => {
@@ -3334,7 +3269,7 @@ function readQuestionScreen(){
 }
 // Whole seconds of this pass, or undefined when it ran over 20 minutes or the tab was hidden over 2 minutes of it.
 function readSecs(){
-  if(!PROGRESS_V2 || !RD || RD.mode === "listen" || typeof RD.t0 !== "number") return undefined;
+  if(!RD || RD.mode === "listen" || typeof RD.t0 !== "number") return undefined;
   const now = Date.now(), secs = Math.round((now - RD.t0) / 1000), hid = (RD.hid || 0) + (RD.hs != null ? now - RD.hs : 0);
   return VC.readTimeKeep(secs, hid) ? secs : undefined;
 }
@@ -3365,17 +3300,16 @@ function readResults(){
   const qIdx = p.questions.map((q, i) => i), qMiss = qIdx.filter(i => !(RD.answers[i] || {}).ok), qRight = qIdx.filter(i => (RD.answers[i] || {}).ok);
   const qListV2 = () => `${qMiss.length ? `<p class="pvk">Missed</p>${qMiss.map(i => qBlock(p.questions[i], i)).join("")}` : ""}${qRight.length ? `<button class="pvc" id="rright" aria-expanded="false" aria-controls="rrbox"><span>${qRight.length} right</span></button><div id="rrbox" hidden>${qRight.map(i => qBlock(p.questions[i], i)).join("")}</div>` : ""}`;
   // Without RD.added a re-mount would offer "Add to review" again and apply the same words twice.
-  P.innerHTML = `<div class="done"><h2>${sc} ${APP_V2 ? "of" : "/"} ${p.questions.length}</h2>
+  P.innerHTML = `<div class="done"><h2>${sc} of ${p.questions.length}</h2>
     ${RD.mode === "listen" ? `<p class="q" id="lmode" style="margin-bottom:4px">Listening pass</p>` : ""}<p class="q"${TA} style="margin-bottom:8px">${rubyTextOr(p.title, p.titleRuby)}</p>
-    ${APP_V2 ? qListV2() : p.questions.map((q, i) => { const a = RD.answers[i] || {}; const s = p.sentences[q.sentence]; const hearS = canHearSentence(s);
-      return `<div class="stmt"${TOKBOX}><div class="q" style="margin:0 0 4px;color:${a.ok ? "var(--ok)" : "var(--bad)"}">${a.ok ? "✓" : "✗"} Question ${i+1}${a.qh ? " · question shown" : ""}${a.tr ? " · translation shown" : ""}</div><div${TA}>${rubyTextOr(q.q, q.ruby)}</div><div style="margin-top:6px"${TA}><mark>${passagePlainHTML(s)}</mark></div><div class="q cue" style="margin:2px 0 0">${ui(s.en)}</div>${hearS ? `<button type="button" class="replay" id="rr${i}" aria-label="Replay">${REPLAY_SVG}</button>` : ""}</div>`; }).join("")}
+    ${qListV2()}
     ${anyWeak ? `<p class="q">Weak words from this passage${RD.today ? ". Ticked ones go to your next review." : ""}</p><div id="weak">${weak.map((w, i) => `<label class="wk"${DISP.rtl ? ' dir="rtl"' : ""}>${w.weight > 0 ? `<input type="checkbox" data-wi="${i}"${RD.unticked[i] ? "" : " checked"}${RD.added ? " disabled" : ""}> ` : ""}${glossHTML(w.id, RD.glosses && RD.glosses[w.id])} <span class="q"${UIA} style="margin:0;font-size:13px">${escapeHtml(w.why.map(x => WHY_LABEL[x]).join(", "))}</span></label>`).join("")}</div>
-      ${RD.today ? "" : `<button class="next" id="addrev"${RD.added ? " disabled" : ""}>Add to review</button>`}` : APP_V2 ? "" : `<p class="q">No weak words from this passage.</p>`}
+      ${RD.today ? "" : `<button class="next" id="addrev"${RD.added ? " disabled" : ""}>Add to review</button>`}` : ""}
     ${RD.today ? `<button class="next" id="rcont" style="margin-top:10px">Continue</button></div>` : `<div id="addmsg" class="q"${RD.added ? "" : " hidden"}>${RD.added ? escapeHtml(RD.added) : ""}</div>
     <button class="ghost" id="rlist" style="margin-top:10px">Back to passages</button></div>`}`;
   // Replay only: results is a review screen, nothing autoplays here.
   p.questions.forEach((q, i) => { const s = p.sentences[q.sentence]; if(canHearSentence(s)){ const rb = $("rr"+i); rb.onclick = () => saySentence(s, rb); } });
-  if(APP_V2 && qRight.length) $("rright").onclick = () => { const box = $("rrbox"), b = $("rright"); box.hidden = !box.hidden; b.setAttribute("aria-expanded", String(!box.hidden)); };
+  if(qRight.length) $("rright").onclick = () => { const box = $("rrbox"), b = $("rright"); box.hidden = !box.hidden; b.setAttribute("aria-expanded", String(!box.hidden)); };
   const rd = RD;
   P.querySelectorAll("[data-wi]").forEach(x => { x.onchange = () => { rd.unticked[x.dataset.wi] = !x.checked; }; });
   if(RD.today){
@@ -3420,24 +3354,15 @@ function testRender(){
   // appView: placement leads before the first placement and is gone after it (owner 2026-10-08; Reset all progress
   // brings it back); a test of 20 drops its count.
   const placed = !!prog.placedOnce, cnt = n => n === 20 ? "" : ` ${n}`;
-  P.innerHTML = APP_V2 ? `${placed ? "" : `<p class="q">Placement finds where to start. Free tests draw from what's already learned.</p>`}
+  P.innerHTML = `${placed ? "" : `<p class="q">Placement finds where to start. Free tests draw from what's already learned.</p>`}
     <div class="actions tacts">
       ${needMore ? (placed ? `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far).</div>` : `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far). Learn ${VC.TEST_MIN_WORDS} words first, or let placement find where to start.<button class="next" id="needPlace" style="margin-top:8px">Take the placement test</button></div>`) : placed ? "" : `<button class="next" id="pl">Take the placement test</button>`}
       ${tg.words ? `${hearN ? `<button class="ghost" id="tListen">Listen${cnt(hearN)}</button>` : lockNote("tListenLock", "Listen test: no items until a voice or recording is available.")}
       <button class="ghost" id="tRecall">Recall${cnt(n20)}</button>` : ""}
       ${tg.sentences ? `<button class="ghost" id="tSentences">Sentences${cnt(sentN)}</button>` : sentNote}${charN ? `
       <button class="ghost" id="tChars">Characters${cnt(charN)}</button>` : charNote}
-    </div>` : `<p class="q">Placement finds where to start. Free tests draw from what's already learned.</p>
-    <div class="actions">
-      ${needMore ? `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far). Learn ${VC.TEST_MIN_WORDS} words first, or let placement find where to start.<button class="next" id="needPlace" style="margin-top:8px">Take the placement test</button></div>` : `<button class="next" id="pl">Take Placement</button>`}
-      ${tg.words ? `<div class="row" style="margin-top:8px;margin-bottom:0">
-        ${hearN ? `<button class="ghost" id="tListen" style="flex:1">Listen ${hearN}</button>` : ""}
-        <button class="ghost" id="tRecall" style="flex:1">Recall ${n20}</button>
-      </div>${hearN ? "" : lockNote("tListenLock", "Listen test: no items until a voice or recording is available.")}` : ""}
-      ${tg.sentences ? `<button class="ghost" id="tSentences">Sentences ${sentN}</button>` : sentNote}${charN ? `
-      <button class="ghost" id="tChars">Characters ${charN}</button>` : charNote}
     </div>`;
-  if(!(APP_V2 && placed)){
+  if(!placed){
     if(needMore) $("needPlace").onclick = enterPlacementFromToday;
     else $("pl").onclick = () => { placeFrom = null; testSel = "placement"; testRender(); };
   }
@@ -3449,10 +3374,8 @@ function testRender(){
     $("tSentences").onclick = () => { const pi = PATTERNS_ON ? patternItems(VC.patternCount(20), planSn()) : []; drill(pickSentences(availSent, 20 - pi.length, s => [canHearSentence(s) ? "hear" : "read"]).map(sentenceByEar).concat(pi), testRender, missSummary); };
   }
   if(charN) $("tChars").onclick = () => drill(charPlan().map(planItem), testRender, missSummary);
-  if(APP_V2){
-    setTitle("Test"); testName = null;
-    [["tListen", "Listen"], ["tRecall", "Recall"], ["tSentences", "Sentences"], ["tChars", "Characters"]].forEach(([id, t]) => { const b = $(id); const f = b && b.onclick; if(f) b.onclick = () => { testName = t; setTitle(t); f(); }; });
-  }
+  setTitle("Test"); testName = null;
+  [["tListen", "Listen"], ["tRecall", "Recall"], ["tSentences", "Sentences"], ["tChars", "Characters"]].forEach(([id, t]) => { const b = $(id); const f = b && b.onclick; if(f) b.onclick = () => { testName = t; setTitle(t); f(); }; });
 }
 function placementItemTotal(){ return VC.strata(WORDS, PACK.placement, SIZE).reduce((n,_,i)=>n+VC.placementItemCount(i, PACK), 0); }
 function placeRender(){
@@ -3460,10 +3383,10 @@ function placeRender(){
   D = null; drillKeyHandler = null; PL = null; setScore(0,0);
   const P = $("panel"); const lw = learnedWords();
   const first = levelLabel(PACK.placement[0][0]), last = levelLabel(PACK.placement[PACK.placement.length-1][0]);
-  P.innerHTML = `${APP_V2 ? `<button class="ghost rback" id="back">${placeFrom === "progress" ? "Progress" : "Test"}</button>` : `<div class="row"><button id="back">‹ test</button></div>`}
+  P.innerHTML = `<button class="ghost rback" id="back">${placeFrom === "progress" ? "Progress" : "Test"}</button>
     <p class="q">${placementItemTotal()} words across ${escapeHtml(first)}–${escapeHtml(last)}: hear or read the word, pick the meaning. No feedback until the end. Places you inside a level; skipped words stay in review as provisional.</p>
     ${lw.length ? `<p class="q">Current: ${lw.length} words learned. Retaking can only move you forward: nothing already learned is lost.</p>` : ""}
-    <div class="actions"><button class="next" id="go">${APP_V2 ? "Start" : "Start placement"}</button></div>`;
+    <div class="actions"><button class="next" id="go">Start</button></div>`;
   $("back").onclick = leavePlacement;
   $("go").onclick = startPlacement;
 }
@@ -3512,7 +3435,7 @@ function placeResult(){
   prog = VC.applyPlacement(prog, st, passed, WORDS, PACK, CHAR_LIST);
   const na = VC.placementNotAsked(st, PL.res);
   const notAskedRow = na.length ? `<tr id="plNotAsked"><td colspan="2" style="color:var(--mute)">Not asked: ${na.map(e => e.whole ? escapeHtml(levelLabel(e.lv)) : `${escapeHtml(levelLabel(e.lv))} ${e.s1 - e.s0 > 1 ? `sets ${e.s0 + 1}–${e.s1}` : `set ${e.s1}`}`).join(", ")}</td></tr>` : "";
-  const charsLine = APP_V2 && Object.keys(VC.charRecs(prog)).length > charsBefore ? VC.placedCharsThrough(PACK, CHAR_LIST, prog) : null;
+  const charsLine = Object.keys(VC.charRecs(prog)).length > charsBefore ? VC.placedCharsThrough(PACK, CHAR_LIST, prog) : null;
   store.save();
   // Where the learner actually is now (a poor retake never moves them back), not where
   // this attempt stopped.
@@ -3522,8 +3445,8 @@ function placeResult(){
   P.innerHTML = `<div class="done"><h2>Start at ${escapeHtml(pos)}</h2>
     <table class="stats">${st.map((b,i)=>{ const r = PL.res[i]; if(r.skipped) return ""; return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${skipped.includes(i)?'var(--mute)':i<passed?'var(--ok)':'var(--bad)'}">${r.r}/${r.n}</td></tr>`; }).join("")}${notAskedRow}</table>
     ${charsLine ? `<p class="q" id="plChars">Characters: placed through ${escapeHtml(levelLabel(charsLine.lv))}, set ${charsLine.set}</p>` : ""}<p class="q">${learnedWords().length} words learned; newly placed ones are provisional and kept in review.</p>
-    <button class="next" id="ok">${APP_V2 && placeFrom === "progress" ? "Back to Progress" : "Go to Today"}</button></div>`;
-  $("ok").onclick = () => { if(APP_V2 && placeFrom === "progress"){ leavePlacement(); return; } placeFrom = null; switchToTab("today", "Today"); testSel = null; render(); };
+    <button class="next" id="ok">${placeFrom === "progress" ? "Back to Progress" : "Go to Today"}</button></div>`;
+  $("ok").onclick = () => { if(placeFrom === "progress"){ leavePlacement(); return; } placeFrom = null; switchToTab("today", "Today"); testSel = null; render(); };
 }
 
 const progressToolsHTML = () => `
@@ -3538,43 +3461,12 @@ const progressToolsHTML = () => `
       <div id="impErr" class="warn" style="display:none;margin-top:8px"></div>${HAS_LEGACY ? `
       <div id="impSum" class="stmt" style="display:none;margin-top:8px"></div>` : ""}
     </div>
-    ${APP_V2 ? `<button class="ghost" id="placeRow" style="margin-top:16px">Placement test</button>` : ""}<button class="ghost" id="reset" style="margin-top:16px;color:var(--bad);border-color:var(--bad)">Reset all progress</button>`;
-const patternRowHTML = () => { const st = VC.patternStats(prog, PACK, PATTERN_LIST, WORDS); return `<tr><td>Patterns</td><td>${st.done} done / ${st.open} open (of ${st.total})</td></tr>`; };
-function progressRender(){
-  if(PROGRESS_V2) return progressRenderV2();
-  stopSpeaking();
-  setScore(0,0);
-  const P = $("panel");
-  const lwAll = learnedWords();
-  const availSent = availableSentences();
-  const gateHold = VC.levelGateHold(WORDS, PACK, prog, CHAR_LIST), knownBw = VC.knownCtx(PACK, CHAR_LIST);
-  const rows = LEVELS.map(lv => {
-    const list = levelList(lv); const learnedList = lwAll.filter(w=>w.lv===lv);
-    const masteredN = learnedList.filter(w => VC.wordKnownX(prog.w[w.id], w, PACK, prog, knownBw)).length;
-    const sentLv = SENTENCES.filter(s=>s.lv===lv); const sentAvailLv = availSent.filter(s=>s.lv===lv);
-    const sentMasteredN = sentAvailLv.filter(s=>sentenceMastered(s.id)).length;
-    const L = escapeHtml(levelLabel(lv));
-    return `<tr><td>${L}</td><td>${learnedList.length} / ${list.length} learned · ${masteredN} mastered</td></tr>
-      ${gateHold && gateHold.lv === lv ? `<tr><td colspan="2">${escapeHtml(gateNote())}</td></tr>` : ""}${sentLv.length ? `<tr><td>${L} sentences</td><td>${sentAvailLv.length} / ${sentLv.length} available · ${sentMasteredN} mastered</td></tr>` : ""}`;
-  }).join("");
-  const weak = weakFirst(lwAll.filter(w=>VC.weakScore(prog.w[w.id])>0), 10);
-  const cp = HAS_CHARACTERS ? charProgress() : null;
-  const xp = HAS_SCRIPT ? scriptProgress() : null;
-  P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">${APP_V2 ? VOICE_NOTICE_V2 : "No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound."}</div>`}${goalsBlockHTML()}
-    <table class="stats${cp && cp.block ? " nw" : ""}">${xp ? xp.rows : ""}${rows}${PATTERNS_ON ? patternRowHTML() : ""}${cp ? cp.rows : ""}
-      ${HAS_PASSAGES ? VC.readingStats(PASSAGE_LIST, PACK, prog).map(r => `<tr><td>${escapeHtml(levelLabel(r.lv))} reading</td><td>${r.done} / ${r.total} passages${r.avg != null ? ` · avg ${r.avg}%` : ""}</td></tr>`).join("") : ""}
-      ${HAS_LESSONS ? `<tr><td>Sounds</td><td>${LESSON_LIST.filter(l=>prog.lessons[l.id]).length} / ${LESSON_LIST.length} lessons done</td></tr>` : ""}
-      <tr><td>Sessions</td><td>${prog.sessions||0}</td></tr></table>${cp ? cp.block : ""}
-    ${PACK.showPron !== false ? `<div class="row" style="margin-top:14px"><button class="chip ${showPron()?'on':''}" id="togglePron" aria-pressed="${showPron()}">${APP_V2 ? `Show ${escapeHtml(PRON_NOUN)}` : "Show pronunciation"}</button></div>` : ""}${APP_V2 ? `<div class="row" style="margin-top:14px">${themeChipHTML()}</div>` : ""}${`<div class="row" style="margin-top:14px"><button class="chip ${paused() ? "" : "on"}" id="togglePause" aria-pressed="${!paused()}">New material: ${paused() ? "paused" : "on"}</button></div>`}${xp ? xp.controls : ""}${cp ? cp.controls : ""}
-    <p class="q" style="margin-top:14px">${weak.length ? "Weakest words" : "No weak words yet — nice."}</p>
-    ${weak.map(w=>`<div class="rowset">${wordRowHTML(w, "rowset")}</div>`).join("")}${progressToolsHTML()}`;
-  progressWire(xp, cp);
-}
-// Progress controls (both layouts): chips, character and script controls, export / import / reset.
+    <button class="ghost" id="placeRow" style="margin-top:16px">Placement test</button><button class="ghost" id="reset" style="margin-top:16px;color:var(--bad);border-color:var(--bad)">Reset all progress</button>`;
+// Progress controls: chips, character and script controls, export / import / reset.
 function progressWire(xp, cp){
   if(PACK.showPron !== false) $("togglePron").onclick = () => { prog.showPron = !showPron(); store.save(); progressRender(); };
   $("togglePause").onclick = () => { VC.setPause(prog, !paused()); store.save(); progressRender(); };
-  if(APP_V2) $("toggleTheme").onclick = () => { prog.theme = themeDark() ? "light" : "dark"; applyTheme(); store.save(); progressRender(); };
+  $("toggleTheme").onclick = () => { prog.theme = themeDark() ? "light" : "dark"; applyTheme(); store.save(); progressRender(); };
   if(xp) xp.wire();
   if(cp) cp.wire();
   $("exp").onclick = () => {
@@ -3618,7 +3510,7 @@ function progressWire(xp, cp){
       showImportError("That doesn't look like valid exported progress: " + (e && e.message ? e.message : "could not be read"));
     }
   };
-  if(APP_V2) $("placeRow").onclick = enterPlacementFromProgress;
+  $("placeRow").onclick = enterPlacementFromProgress;
   $("reset").onclick = async () => {
     if(!confirm(`Reset all progress? A copy is kept under ${STORE_KEY}_reset_backup until the next reset.`)) return;
     if(!(await store.backup("reset_backup", JSON.stringify(prog)))){ alert("Reset cancelled: the current progress couldn't be backed up first (storage unavailable)."); return; }
@@ -3627,14 +3519,14 @@ function progressWire(xp, cp){
     store.save(); progressRender();
   };
 }
-// pack.progressView "v2" (docs/PACK_SCHEMA.md "progressView"; owner 2026-10-07, surprisal layout): one
+// Progress v2 (docs/PACK_SCHEMA.md "progressView", engine default since the flag collapse; owner 2026-10-07, surprisal layout): one
 // anchor line, what moved since the last visit, the current goal, one bar per level, recent misses, then
 // every setting. A row whose value is the expected state (zero, locked, never started) is left out of the
 // view and comes back with Show all, so nothing is out of reach.
 let pvAll = false, pvLow = false, pvBase;
 const pvTotals = () => VC.progressTotals(prog, PACK, WORDS, HAS_CHARACTERS ? CHAR_LIST : [], PASSAGE_LIST);
 // A phone lock or page hide only writes the visit; the expanded view and the hero stay while Progress is on screen.
-function progressVisit(){ if(PROGRESS_V2 && VC.noteProgressVisit(prog, PACK, pvTotals())) store.save(); }
+function progressVisit(){ if(VC.noteProgressVisit(prog, PACK, pvTotals())) store.save(); }
 function progressLeave(){ pvAll = false; pvLow = false; progressVisit(); pvBase = undefined; }
 const pvPct = (n, d) => d > 0 ? `${Math.round(Math.min(1, Math.max(0, n / d)) * 1000) / 10}%` : "0%";
 const pvSigned = n => n > 0 ? `+${n}` : n < 0 ? `−${-n}` : "0";
@@ -3655,9 +3547,9 @@ function pvGoalHTML(){
   if(!VC.progressMapOn(PACK)) return "";
   const cg = VC.currentGoal(prog, PACK, WORDS, CHAR_LIST, PASSAGE_LIST);
   if(!cg) return "";
-  const pc = Math.round(cg.p * 100), n = cg.all ? null : VC.sessionsToGo(prog, cg.i, cg.n), eta = APP_V2 ? etaText(goalEta(cg)) : "";
+  const pc = Math.round(cg.p * 100), n = cg.all ? null : VC.sessionsToGo(prog, cg.i, cg.n), eta = etaText(goalEta(cg));
   const head = cg.all ? "All goals" : `Goal ${cg.i + 1} of ${cg.n}`;
-  return `<section class="pvg"><div class="pvt"><span>${head}</span><span class="pvn">${APP_V2 ? eta || `${pc}%` : n == null ? `${pc}%` : `≈ ${n} sessions to go`}</span></div><div class="pvb" role="img" aria-label="${pc}% of ${escapeHtml(head.toLowerCase())}"><i class="pvm" style="width:${pvPct(cg.p, 1)}"></i></div><p class="pvs">${escapeHtml(cg.goal.label)}</p></section>`;
+  return `<section class="pvg"><div class="pvt"><span>${head}</span><span class="pvn">${eta || `${pc}%`}</span></div><div class="pvb" role="img" aria-label="${pc}% of ${escapeHtml(head.toLowerCase())}"><i class="pvm" style="width:${pvPct(cg.p, 1)}"></i></div><p class="pvs">${escapeHtml(cg.goal.label)}</p></section>`;
 }
 // Show all: every goal, one line each, in the level rows' form.
 function pvGoalsHTML(){
@@ -3668,7 +3560,7 @@ function pvGoalsHTML(){
 }
 // "Level 1" + "Level 2" -> "Level 1–2": a shared leading word is written once.
 const pvRange = (a, b) => { const i = a.lastIndexOf(" ") + 1; return i > 0 && b.slice(0, i) === a.slice(0, i) ? `${a}–${b.slice(i)}` : `${a}–${b}`; };
-function progressRenderV2(){
+function progressRender(){
   stopSpeaking();
   setScore(0,0);
   const P = $("panel"), all = pvAll, anim = !document.getElementById("pvh");
@@ -3701,7 +3593,7 @@ function progressRenderV2(){
   const lowLine = () => { const L = low.length === 1 ? levelLabel(low[0].lv) : pvRange(levelLabel(low[0].lv), levelLabel(low[low.length - 1].lv));
     return `<button class="pvc" id="pvLow" aria-expanded="false"><span>${escapeHtml(L)}</span><span class="pvn">${low.reduce((n, d) => n + d.mas, 0)} of ${low.reduce((n, d) => n + d.learned, 0)} mastered</span></button>`; };
   // One quiet row under the waiting level (under the folded line when that level is folded).
-  const gateRow = () => `<p class="pvs pvgate">${escapeHtml(APP_V2 ? gateSentence() : gateNote())}</p>`;
+  const gateRow = () => `<p class="pvs pvgate">${escapeHtml(gateSentence())}</p>`;
   const levelRow = (d, i) => {
     if(!all && i > lastShown) return "";
     if(folded && low.includes(d)) return d === low[0] ? lowLine() : "";
@@ -3727,17 +3619,17 @@ function progressRenderV2(){
   const missed = VC.recentMisses(prog, lwAll).slice(0, 12);
   const weak = all ? weakFirst(lwAll.filter(w => VC.weakScore(prog.w[w.id]) > 0), 10) : [];
   const N = VC.WEEK_SESSIONS;
-  P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">${APP_V2 ? VOICE_NOTICE_V2 : "No text-to-speech voice is available in this browser, so listening and audio-replay features show the word instead of playing sound."}</div>`}<div class="pv">
+  P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">${VOICE_NOTICE_V2}</div>`}<div class="pv">
     <p class="pva">${prog.sessions || 0} session${prog.sessions === 1 ? "" : "s"}, ${escapeHtml(levelLabel(LEVELS[at]))}</p>
     ${pvHeroHTML(cur, anim)}${pvGoalHTML()}${all ? pvGoalsHTML() : ""}
     <section class="pvls">${all ? `<div class="pvl" id="pvLearned"><div class="pvt"><span>Learned</span><span class="pvn">${lwAll.length} of ${WORDS.length}</span></div></div>` : ""}${xp ? `<table class="stats">${xp.rows}</table>` : ""}${lvData.map(levelRow).join("")}${cp && !lag && cp.rows ? `<table class="stats">${cp.rows}</table>` : ""}${sounds}${rspd}</section>
-    ${missed.length ? `<section class="pvx"><p class="pvk">${APP_V2 ? "Still shaky" : `Missed in your last ${N} sessions`}</p><p class="pvw">${missed.map(w => `<span${TA}>${wordFormHTML(w, false)}</span>`).join(" ")}</p></section>` : ""}
+    ${missed.length ? `<section class="pvx"><p class="pvk">Still shaky</p><p class="pvw">${missed.map(w => `<span${TA}>${wordFormHTML(w, false)}</span>`).join(" ")}</p></section>` : ""}
     ${all && weak.length ? `<section><p class="pvk">Weakest words</p>${weak.map(w => `<div class="rowset">${wordRowHTML(w, "rowset")}</div>`).join("")}</section>` : ""}
     <button class="ghost pvall" id="pvAll" aria-expanded="${all}">${all ? "Show less" : "Show all"}</button>
     <section class="pvset"><p class="pvk">Settings</p>
-    <div class="row">${PACK.showPron !== false ? `<button class="chip ${showPron()?'on':''}" id="togglePron" aria-pressed="${showPron()}">${APP_V2 ? `Show ${escapeHtml(PRON_NOUN)}` : "Show pronunciation"}</button>` : ""}${`<button class="chip ${paused() ? "" : "on"}" id="togglePause" aria-pressed="${!paused()}">New material: ${paused() ? "paused" : "on"}</button>`}${APP_V2 ? themeChipHTML() : ""}</div>${xp ? xp.controls : ""}${cp ? cp.controls : ""}${progressToolsHTML()}</section></div>`;
-  $("pvAll").onclick = () => { pvAll = !pvAll; progressRenderV2(); };
-  if(folded) $("pvLow").onclick = () => { pvLow = true; progressRenderV2(); };
+    <div class="row">${PACK.showPron !== false ? `<button class="chip ${showPron()?'on':''}" id="togglePron" aria-pressed="${showPron()}">Show ${escapeHtml(PRON_NOUN)}</button>` : ""}<button class="chip ${paused() ? "" : "on"}" id="togglePause" aria-pressed="${!paused()}">New material: ${paused() ? "paused" : "on"}</button>${themeChipHTML()}</div>${xp ? xp.controls : ""}${cp ? cp.controls : ""}${progressToolsHTML()}</section></div>`;
+  $("pvAll").onclick = () => { pvAll = !pvAll; progressRender(); };
+  if(folded) $("pvLow").onclick = () => { pvLow = true; progressRender(); };
   progressWire(xp, cp);
 }
 function charProgress(o){
@@ -3760,7 +3652,7 @@ function charProgress(o){
     const taught = VC.charSets(st.levels, CHAR_LIST, PACK).filter(set => VC.charSetTaught(set, prog)).reduce((n, set) => n + set.length, 0);
     const masteredN = list.filter(u => recs[u.id] && VC.charTier(streak(u), PACK) !== "pron").length;
     const bareN = list.filter(u => recs[u.id] && VC.unitDone(recs[u.id], u, PACK)).length;
-    return `<tr><td>${tf(st.label)}</td><td>${taught} / ${list.length} taught · ${st.recorded} recorded · ${masteredN} mastered · ${PROGRESS_V2 ? `${bareN} characters only` : `${bareN} done`}</td></tr>`;
+    return `<tr><td>${tf(st.label)}</td><td>${taught} / ${list.length} taught · ${st.recorded} recorded · ${masteredN} mastered · ${bareN} characters only</td></tr>`;
   }).join("");
   const defer = !!(prog.chars && prog.chars.defer === true), order = VC.charOrder(PACK, prog);
   const deferred = VC.charStages(PACK, Object.assign({}, prog, { chars: Object.assign({}, prog.chars, { defer: true }) }));
@@ -3818,15 +3710,10 @@ function legacySummaryHTML(m, kept){
   return `<div>Progress from the older app: ${parts.join(", ")}.</div>${umHTML}${drHTML}`;
 }
 
-// appView: the header theme button moves here, as a Settings chip on Progress (same prog.theme).
+// appView: the theme is a Settings chip on Progress (prog.theme); the header has no theme button.
 const themeDark = () => document.documentElement.getAttribute("data-theme") === "dark";
 const themeChipHTML = () => `<button class="chip ${themeDark() ? "on" : ""}" id="toggleTheme" aria-pressed="${themeDark()}">Dark theme</button>`;
 function applyTheme(){ document.documentElement.setAttribute("data-theme", prog.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")); }
-$("themebtn").onclick = () => {
-  const cur = document.documentElement.getAttribute("data-theme");
-  prog.theme = cur === "dark" ? "light" : "dark";
-  applyTheme(); store.save();
-};
 
 // The legacy key itself is only read; the first backup is never overwritten.
 async function legacyBootMigration(){

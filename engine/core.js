@@ -55,7 +55,7 @@ function typedSynHit(entry, byId, test){
   for(const id of (Array.isArray(entry && entry.typedSyn) ? entry.typedSyn : [])){ const s = byId && byId[id]; if(s && test(s)) return s; }
   return null;
 }
-// pack.optsMix (docs/PACK_SCHEMA.md "optsMix"; owner 2026-10-02): same-level-first wrong
+// Option mix (docs/PACK_SCHEMA.md "optsMix", engine default since the flag collapse; owner 2026-10-02): same-level-first wrong
 // choices near the end of a level are all known words, so a new answer is found by
 // elimination; a learned/unlearned mix let the learner rule out the other familiarity class
 // (review 2026-10-02: guess success 0.40). Wrong choices come from the answer's own stage
@@ -68,7 +68,6 @@ function typedSynHit(entry, byId, test){
 // rank(v) orders hard preferences ahead of the stage (one script, article agreement); near(v)
 // orders the class preference inside a stage (lower first). accept(strict) returns a fresh
 // guard that records what it lets through.
-function optsMixOn(pack){ return !!(pack && pack.optsMix === true); }
 // The idx-th k-combination of 0..m-1 in lexicographic order.
 function nthCombination(m, k, idx){
   const out = []; let x = 0;
@@ -2533,16 +2532,14 @@ function applyWeakWords(prog, entries, words, pack){
 // alternation reads r.mode) and stays once earned: a later reading pass must not take back what a listening pass
 // earned (the goal position's passage share fell .87 -> .57, fb41).
 // s: session of the latest pass; ls: of the latest listening pass.
-// t (fb46, progressView v2 only): whole seconds from opening the passage to its results, the LATEST reading pass only
+// t (fb46): whole seconds from opening the passage to its results, the LATEST reading pass only
 // (a listen pass, or a reading pass that ran over READ_MAX_S or was hidden over READ_HIDE_MAX_MS, keeps the previous t:
 // all ported packs alternate read/listen, so dropping it would make the Reading row vanish as listen passes land).
 function markPassageDone(prog, pid, sc, n, d, listen, pack, t){
   const st = readState(prog); const prev = st.done[pid];
   st.done[pid] = { sc, n, d: String(d), x: ((prev && prev.x) || 0) + 1 };
-  if(progressViewOn(pack)){
-    if(!listen && typeof t === "number" && t > 0) st.done[pid].t = Math.round(t);
-    else if(prev && typeof prev.t === "number") st.done[pid].t = prev.t;
-  }
+  if(!listen && typeof t === "number" && t > 0) st.done[pid].t = Math.round(t);
+  else if(prev && typeof prev.t === "number") st.done[pid].t = prev.t;
   if(listen || (prev && prev.l)) st.done[pid].l = 1;
   const sn = daySn(prog);
   st.done[pid].s = sn;
@@ -2614,14 +2611,10 @@ function recordProgressMap(prog, pack, words, units, passages){
   prog.pm = pm.slice(-PM_KEEP);
   return true;
 }
-// pack.progressView "v2" (docs/PACK_SCHEMA.md "progressView"; owner 2026-10-07): the Progress tab leads
+// Progress v2 (docs/PACK_SCHEMA.md "progressView", engine default since the flag collapse; owner 2026-10-07): the Progress tab leads
 // with what moved since the learner last left it. prog.pv = {sn, m, co, p} (sessions, mastered words,
 // character units at their target, passages done) is written when the tab is left (app.html), never at
 // boot; older engines keep it (validateProgShape ignores unknown top-level fields).
-function progressViewOn(pack){ return !!(pack && pack.progressView === "v2"); }
-// pack.appView "v2" (docs/PACK_SCHEMA.md "appView"; owner 2026-10-07): the Progress v2 direction on Today, the
-// header, drill end and session done. UI only: no progress field, no planner change.
-function appViewOn(pack){ return !!(pack && pack.appView === "v2"); }
 // The Progress "done" count: unitDone (frequency tiers).
 function unitAtTarget(rec, unit, prog, pack){
   if(!isObj(rec)) return false;
@@ -2653,7 +2646,7 @@ function progressDeltas(prog, cur){
 }
 // Returns whether pv changed (the caller saves only then).
 function noteProgressVisit(prog, pack, cur){
-  if(!progressViewOn(pack) || !prog) return false;
+  if(!prog) return false;
   const v = progressVisit(prog);
   if(v && PV_KEYS.every(k => v[k] === cur[k])) return false;
   prog.pv = { sn: cur.sn, m: cur.m, co: cur.co, p: cur.p };
@@ -2691,7 +2684,7 @@ function sessionsToGo(prog, g, n){
   if(!(rate > 0) || !isFinite(rate)) return null;
   return Math.max(0, Math.ceil(((g !== undefined ? GOAL_DONE : 1) - z.p) / rate - 1e-9));
 }
-// pack.appView "v2" ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"; owner 2026-10-08: an estimate from the first
+// App v2 ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"; owner 2026-10-08: an estimate from the first
 // session). Goal packs: a calibrated curve, never the measured pace (pm.p rounds to 0.001 and the pace at PM_KEEP entries
 // missed the actual crossing by -57% to +195% on owner-export sims). A whole-pack bar has no model: sessionsToGo or nothing.
 // pack.eta.curve[g] = [[position, sessions remaining until the goal first reaches GOAL_DONE], ...] sampled from fresh-record
@@ -2786,7 +2779,7 @@ function passageUnits(p, pack){
   return { n: text.split(/\s+/).filter(Boolean).length, unit: "words" };
 }
 function readingSpeed(passages, pack, prog){
-  if(!progressViewOn(pack) || !isObj(prog) || !isObj(prog.read) || !isObj(prog.read.done)) return null;
+  if(!isObj(prog) || !isObj(prog.read) || !isObj(prog.read.done)) return null;
   const rates = []; let unit = "words";
   for(const p of passages || []){
     const r = prog.read.done[p.id];
@@ -3426,7 +3419,7 @@ function charItem(kind, unit, ctx){
   const w = unitWord(unit, byId), t = String(unit.t), reading = unitReading(unit, byId), g = unitGloss(unit, byId);
   const base = { kind, key: "c:" + unit.id, unitId: unit.id, wordId: w ? w.id : null, t, reading, gloss: g };
   let show, audio = false, answer, others;
-  // ctx.mix { word(w), unit(u), wordBucket?, unitBucket?, rng? } (pack.optsMix): word options by word stage, unit options by unit stage.
+  // ctx.mix { word(w), unit(u), wordBucket?, unitBucket?, rng? } (option mix): word options by word stage, unit options by unit stage.
   const wm = c.mix ? { stage: c.mix.word, bucket: c.mix.wordBucket, rng: c.mix.rng, rot: c.mix.rot } : undefined, um = c.mix ? { stage: c.mix.unit, bucket: c.mix.unitBucket, rng: c.mix.rng, rot: c.mix.rot } : undefined;
   if(kind === "charRead"){ show = "t"; answer = g; others = charReadOpts(unit, c.words, byId, wm).map(gloss); }
   else if(kind === "charSound"){ show = "t"; answer = reading; others = charSoundOpts(unit, c.units, byId, um); }
@@ -4129,7 +4122,7 @@ function typeSlotKind(plan, i){
 }
 
 // ------------------------------------------------------------------ typed from the target side
-// pack.typedFrom / pack.glossFocus (docs/PACK_SCHEMA.md "typedFrom and glossFocus"). Off unless
+// pack.typedFrom (docs/PACK_SCHEMA.md "typedFrom and glossFocus"; glossFocus is engine default since the flag collapse). Off unless
 // the pack sets them; typeSlotKind above stays the rule for every pack without typedFrom.
 const TYPED_FROM_SIDES = ["written", "pron"];
 function typedFromSides(pack){
@@ -4373,7 +4366,7 @@ function pronChoiceOpts(entry, pool, all, mix){
   const ansT = new Set(surfaces(entry)), used = new Set([pronKey(entry.pron)]);
   (all || []).forEach(v => { if(v && v.pron && surfaces(v).some(x => ansT.has(x))) used.add(pronKey(v.pron)); });
   const syl = s => splitReading(s).filter(x => x.tone !== undefined).length || 1, n = syl(entry.pron);
-  // pack.optsMix: by the answer's stage (mix.stage); draws (rng).
+  // option mix: by the answer's stage (mix.stage); draws (rng).
   if(mix){
     const ids = new Set(), cands = [...(pool || []), ...(all || [])].filter(v => v && v.id !== entry.id && v.pron && !ids.has(v.id) && ids.add(v.id));
     return mixPick(entry, cands, mix, () => 0, v => { let k = PRON_SYL.get(v); if(k === undefined) PRON_SYL.set(v, k = syl(v.pron)); return k === n ? 0 : 1; }, () => {
@@ -4403,10 +4396,8 @@ function checkGlossTyped(val, en, pack){
   const parts = splitTopLevel(v, [";", ","]).map(glossKey).filter(Boolean);
   return parts.length > 0 && parts.every(k => keys.has(k));
 }
-function glossFocusOn(pack){ return !!(pack && pack.glossFocus === true); }
-// pack.glossStyle "primary" (docs/PACK_SCHEMA.md "glossStyle"; owner 2026-10-07: 别 shows its most
-// used sense, the others in brackets). Display only; needs glossFocus, matching keeps the raw gloss.
-function glossStyleOn(pack){ return !!(pack && pack.glossStyle === "primary" && pack.glossFocus === true); }
+// Gloss style (docs/PACK_SCHEMA.md "glossStyle", engine default since the flag collapse; owner 2026-10-07: 别 shows its most
+// used sense, the others in brackets). Display only; matching keeps the raw gloss.
 // The ";"-separated senses of a gloss, reading notes out: the first is the primary one.
 function glossSenses(en){
   const a = splitTopLevel(String(en == null ? "" : en).replace(/\s+/g, " ").trim(), [";"]).map(x => x.trim()).filter(x => x && !isPronNote(x));
@@ -4416,10 +4407,6 @@ function glossSenses(en){
 function typedSynWords(entry, byId){
   return (Array.isArray(entry && entry.typedSyn) ? entry.typedSyn : []).map(id => byId && byId[id]).filter(Boolean);
 }
-// pack.helpClose (docs/PACK_SCHEMA.md "helpClose"): help overlays get explicit dismissal.
-function helpCloseOn(pack){ return !!(pack && pack.helpClose === true); }
-// pack.readAnswerBlock (docs/PACK_SCHEMA.md "readAnswerBlock"): Next sits under the verdict.
-function readAnswerBlockOn(pack){ return !!(pack && pack.readAnswerBlock === true); }
 function optsOneScriptOn(pack){ return !!(pack && pack.optsOneScript === true); }
 function joinReadings(a, b, pack){
   if(!a) return b; if(!b) return a;
@@ -4573,12 +4560,12 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, etaPlaced, progressViewOn, appViewOn, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, ETA_GAIN, ETA_KNOWN, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,
   charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
-  charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, optsMixOn, mixPick,
+  charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   pronUntilPrimerOn, scriptPrimerDone, showPronOn, SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
   defaultScriptProg, validateScriptShape, normalizeScriptProg, ensureScript, scriptRecs, scriptSkipped, setScriptSkipped, answerScriptChoice,
@@ -4586,7 +4573,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
   scriptOpts, scriptRomanOpts, scriptExamples, scriptWordOpts, scriptJoinedForms, scriptItem, learnScriptPlan, scriptReviewScore, scriptTestPlan,
   tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings,
-  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, glossStyleOn, glossSenses, typedSynWords, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, glossFocusOn, helpCloseOn, readAnswerBlockOn, optsOneScriptOn, composeSpanReading, spanReadingText,
+  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, glossSenses, typedSynWords, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, optsOneScriptOn, composeSpanReading, spanReadingText,
   LEGACY_DROPPED, legacyBackupKey, isLegacyRecord, migrateLegacy };
 if(typeof module!=="undefined" && module.exports) module.exports = API;
 if(root) root.VocabCore = API;
