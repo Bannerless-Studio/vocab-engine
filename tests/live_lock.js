@@ -1,11 +1,12 @@
 "use strict";
 // Behaviour lock for the flag collapse (TODO.md "Flag collapse"): every live pack, as shipped (all flags on), booted headless on a fixed set of
 // records; Today / Progress / Words text, the 3-session drill traces, the first reveals, the ETA numbers, the level gate and the passage pick go
-// into tests/golden/live_lock_<lang>.json. The collapse stages must leave these byte-equal.
+// into tests/golden/live_lock_<lang>.json. The collapse stages left these byte-equal; the collapse is done, so a pack booted without every
+// collapsed key (--strip) must equal them too.
 //   node tests/live_lock.js --capture            write the goldens (explained commit only)
 //   node tests/live_lock.js --check              compare, first differing path per pack; exit 1 on a difference
-//   node tests/live_lock.js --check --strip       boot with the COLLAPSED keys removed (tests/lib/pack_flags.js): differs until the collapse is done, exit 0
-//   node tests/live_lock.js --check --strip a,b   boot with only the named COLLAPSED keys removed (the keys a collapse stage made default): exit 1 on a difference
+//   node tests/live_lock.js --check --strip       boot with every COLLAPSED key removed (tests/lib/pack_flags.js; progressMap keeps its goals): exit 1 on a difference
+//   node tests/live_lock.js --check --strip a,b   boot with only the named COLLAPSED keys removed: exit 1 on a difference
 //   --lang a,b limits the packs. Sibling packs come from ../<lang>/pack, or LANG_REPOS_DIR, or the nearest parent directory that holds them.
 const fs = require("fs");
 const crypto = require("crypto");
@@ -167,8 +168,7 @@ const short = v => { const s = typeof v === "string" ? v : JSON.stringify(v); re
   const secs = ((Date.now() - t0) / 1000).toFixed(0) + "s";
   if (CAPTURE) console.log(`\ncaptured ${total} packs, ${secs}`);
   else if (STRIP_KEYS) console.log(`\nstrip ${STRIP_KEYS.length} keys: ${equal} passed, ${differ + missing} failed (${equal}/${total} packs equal, ${secs})`);
-  else if (STRIP) console.log(`\nstrip: ${equal} of ${total} equal, ${secs}`);
+  else if (STRIP) console.log(`\nstrip all ${COLLAPSED.length} collapsed keys: ${equal} passed, ${differ + missing} failed (${equal}/${total} packs equal, ${secs})`);
   else console.log(`\n${equal} passed, ${differ + missing} failed (${equal}/${total} packs equal, ${secs})`);
-  if (STRIP && !STRIP_KEYS) { console.log(`strip differs: ${differ} packs`); process.exit(0); }
   process.exit(CAPTURE || (!differ && !missing) ? 0 : 1);
 })().catch(e => { console.error(e.stack || e); process.exit(1); });

@@ -31,9 +31,7 @@ const FLAG_SINCE = [
   { key: "patternCue", sha: "34c5df3", path: ["patternCue"] },
   { key: "characters.bareByPair", sha: "34c5df3", path: ["characters", "bareByPair"] },
   { key: "eta", sha: "77e046a", path: ["eta"] },
-  { key: "pronUntilPrimer", sha: "a6f2cc5", path: ["pronUntilPrimer"] },
   { key: "gapGender", sha: "cd94707", path: ["gapGender"] },
-  { key: "placementChars", sha: "742c02a", path: ["placementChars"] },
 ];
 
 // Flag collapse (TODO.md "Flag collapse"): the pack keys that read the same in all 14 live packs (scout: .cache/briefs/flag-collapse-scout.md),
@@ -46,16 +44,25 @@ const COLLAPSED = [
   "placedKnown", "pronUntilPrimer", "placementChars", "progressMap", "rereadPerfectDays",
 ];
 const COLLAPSED_DATA = ["progressMap"];
-// The value every live pack shipped for each key collapsed so far (stages 1 and 2). An engine older than the collapse
-// reads them; the current engine ignores them. A control that compares this engine with an older sha boots the
-// older side with withCollapsed(pack), so both run the behaviour that is now default.
+// The value every live pack shipped for each collapsed key. An engine older than the collapse reads them; the current engine
+// ignores them. A control that compares this engine with an older sha boots the older side with withCollapsed(pack), so both
+// run the behaviour that is now default. The derived keys (stage 3) follow the pack: pronUntilPrimer on a script pack,
+// placementChars on a characters.learn "lag" pack (COLLAPSED_DERIVED); progressMap stays the pack's goals data.
 const COLLAPSED_LIVE = {
   dayAware: true, pauseNew: true, listenQuestions: "all", readRotation: true, wordsBy: "typed", pairs: true, freqTiers: true,
   levelGate: 0.7, placementWhole: true, placementEarlyStop: true, placedRead: true, placedKnown: true,
   // stage 2
   appView: "v2", progressView: "v2", glossFocus: true, glossStyle: "primary", helpClose: true, readAnswerBlock: true, optsMix: true,
 };
-function withCollapsed(pack) { return Object.assign(JSON.parse(JSON.stringify(pack)), COLLAPSED_LIVE); }
+const COLLAPSED_DERIVED = {
+  pronUntilPrimer: p => !!(p.script && typeof p.script === "object"),
+  placementChars: p => !!(p.characters && typeof p.characters === "object" && p.characters.learn === "lag"),
+};
+function withCollapsed(pack) {
+  const out = Object.assign(JSON.parse(JSON.stringify(pack)), COLLAPSED_LIVE);
+  Object.keys(COLLAPSED_DERIVED).forEach(k => { if (COLLAPSED_DERIVED[k](out)) out[k] = true; else delete out[k]; });
+  return out;
+}
 
 const byKey = new Map(FLAG_SINCE.map(f => [f.key, f]));
 const ancestorCache = new Map();
@@ -116,4 +123,4 @@ function packBefore(pack, key, opts) {
   return packAsOf(pack, f.sha + "~1", opts);
 }
 
-module.exports = { FLAG_SINCE, COLLAPSED, COLLAPSED_DATA, COLLAPSED_LIVE, withCollapsed, stripCollapsed, packAsOf, packBefore, stripFlags, isAncestor };
+module.exports = { FLAG_SINCE, COLLAPSED, COLLAPSED_DATA, COLLAPSED_LIVE, COLLAPSED_DERIVED, withCollapsed, stripCollapsed, packAsOf, packBefore, stripFlags, isAncestor };
