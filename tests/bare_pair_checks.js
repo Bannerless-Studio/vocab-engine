@@ -26,7 +26,6 @@ const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { 
 const noBBP = p => Object.assign({}, p, { characters: (c => { const q = Object.assign({}, c); delete q.bareByPair; return q; })(p.characters) });
 const PACK_OFF = noBBP(PACK);
 // The 3044601 control strips every field that postdates it (fb31 patternCue, fb32 glossStyle); each has its own control.
-const PACK_OFF_ALL = packAsOf(PACK_OFF, MAIN);
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
@@ -42,7 +41,7 @@ function check(name, cond, extra){
 }
 function skip(name){ skips++; console.log(`SKIP  ${name}`); }
 const git = (sha, f) => { try { return cp.execSync(`git -C "${ROOT}" show ${sha}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }); } catch(e){ return null; } };
-const mainCoreSrc = git(MAIN, "engine/core.js"), mainHtml = git(MAIN, "engine/app.html");
+const mainCoreSrc = git(MAIN, "engine/core.js");
 const OLD = mainCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "barepair-")), `core_${MAIN}.js`); fs.writeFileSync(f, mainCoreSrc); return require(f); })() : null;
 
 // ------------------------------------------------------------------ fake DOM (copied from patterns_checks.js)
@@ -280,20 +279,10 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
   }
 
   console.log(`\n[5] flag-off control vs ${MAIN}`);
-  if(!OLD || !mainHtml) skip(`${MAIN} not in this checkout's history`);
+  if(!OLD) skip(`${MAIN} not in this checkout's history`);
   else {
-    const walk = async (html, core) => {
-      NOW = new Date(2026, 9, 7, 8, 0, 0).getTime();
-      const pr = OWNER ? clone(OWNER) : synth();
-      const api = await boot(PACK_OFF_ALL, pr, 31, { html, core: Object.assign({}, core) }); const rng = mulberry32(3);
-      const out = [api.panel()];
-      for(let k = 0; k < 2; k++){ NOW += 4 * 3600e3; out.push(JSON.stringify(await session(api, () => rng() < 0.8))); api.tab("today"); await tick(); out.push(api.panel()); }
-      for(const id of ["p0001", "p0017", "p0040"]){ api.startPassage(PASSAGES.find(x => x.id === id)); out.push(api.panel()); }
-      api.tab("progress"); await tick(); out.push(api.panel()); out.push(JSON.stringify(api.getProg()));
-      return out;
-    };
-    const ref = await walk(mainHtml, OLD), cur = await walk(appHtml, VC);
-    check(`flag off (bareByPair stripped): Today, two sessions, three Read passages, Progress and records byte-identical to ${MAIN} (${ref.join("").length} chars)`, JSON.stringify(ref) === JSON.stringify(cur), cur.findIndex((x, i) => x !== ref[i]));
+    // The app walk byte-identical to 3044601 (Today, sessions, Read, Progress) compared the appView-off render, which went with
+    // the flag collapse (stage 2): 3044601 predates appView. The core control below stays.
     const p = OWNER ? clone(OWNER) : synth();
     const ctl = core => JSON.stringify(passageSents().map(s => core.rubyTiers(s, CHARACTERS, p, PACK_OFF, true)).concat(WORDS.slice(0, 400).map(w => core.bareWord(w, CHARACTERS, p, PACK_OFF))));
     check("core rubyTiers on every passage sentence + bareWord on 400 words byte-identical (flag off)", ctl(VC) === ctl(OLD));
