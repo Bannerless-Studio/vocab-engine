@@ -14,6 +14,8 @@
 // [C3] reader, listening pass, question, verdict, results (missed open, right folded) and storage equal flag off; [C4] Words
 // (segmented levels, set nav, Next new rule, Review ghost, Pinyin chip, search); [C5] Test order by placedOnce; [C6] Sounds;
 // [C7] notices; [C8] flag off: those screens byte-identical to 9bf0e78 on 4 records.
+// appView is engine default since the flag collapse (stage 2): every flag-off control ([A7], [B3], [B7], [C8], the D1 and
+// D5 flag-off checks) went with it; the rest checks the v2 render on its own.
 // Run: node tests/app_view_checks.js [owner export path]
 "use strict";
 const fs = require("fs");
@@ -233,7 +235,7 @@ console.log("\n[A1] the flag");
 check("appView is engine default (flag collapse stage 2): core has no appViewOn, the zh pack no appView key", VC.appViewOn === undefined && !("appView" in PACK));
 {
   const { api } = await bootWith(PACK, freshRec(), 1); const b = await bootWith(OFF, freshRec(), 1);
-  check("boot sets data-appview=\"v2\" on <html> only when the flag is on", api.docAttr("data-appview") === "v2" && b.api.docAttr("data-appview") === undefined);
+  check("boot sets data-appview=\"v2\" on <html> for every pack (engine default since the flag collapse)", api.docAttr("data-appview") === "v2" && b.api.docAttr("data-appview") === "v2");
   const css = appHtml.slice(0, appHtml.indexOf("</style>")).replace(/\/\*[\s\S]*?\*\//g, "");
   const v2rules = [...css.matchAll(/([^{}]+)\{[^{}]*\}/g)].map(m => m[1].trim()).filter(sel => /appview/.test(sel));
   check(`every appView rule is scoped to :root[data-appview="v2"] (${v2rules.length} rules)`, v2rules.length > 5 && v2rules.every(sel => sel.split(",").every(x => x.trim().startsWith(':root[data-appview="v2"]'))));
@@ -241,7 +243,7 @@ check("appView is engine default (flag collapse stage 2): core has no appViewOn,
     /@supports \(grid-template-columns: subgrid\)\{\s*:root\[data-appview="v2"\] #wl\{display:grid;grid-template-columns:fit-content\(50%\) minmax\(0,1fr\)/.test(css) &&
     /:root\[data-appview="v2"\] #wl \.wl\{display:grid;grid-column:1\/-1;grid-template-columns:subgrid;[^}]*min-height:44px/.test(css) &&
     /:root\[data-appview="v2"\] #wl \.wl \.wd\{max-width:none;min-width:0;white-space:normal;overflow-wrap:anywhere\}/.test(css) && !/(^|\})\s*#wl\{/.test(css));
-  check("the hdrbar and the theme button are hidden under v2 (CSS)", /:root\[data-appview="v2"\] \.themebtn,:root\[data-appview="v2"\] \.hdrbar\{display:none\}/.test(css));
+  check("the hdrbar and the header theme button are gone (markup and CSS; the flag collapse)", !/themebtn|hdrbar/.test(appHtml));
   check("new tokens: --sect and --stim-top only (no new colour)", /:root\[data-appview="v2"\]\{--sect:22px;--stim-top:clamp\(12px, 8vh, 64px\)\}/.test(css) && !/data-appview[^{]*\{[^}]*#[0-9A-Fa-f]{3,6}/.test(css));
   const fresh0 = api.panel();
   check("fresh record under v2: first-run hints stay (placement), Start, anchor Session 1", /id="hintPlace"/.test(fresh0) && /<p class="pva">Session 1<\/p>/.test(fresh0) && />Start<\/button>/.test(fresh0));
@@ -385,44 +387,12 @@ if(owner){
   check(`Dark theme chip: prog.theme ${th0} -> ${flip}, the page attribute follows, nothing else in the record changes`, after.theme === flip && api.docAttr("data-theme") === flip && JSON.stringify(Object.assign({}, before, { theme: flip })) === JSON.stringify(after));
   api.el("toggleTheme").click();
   check("Dark theme chip again: back", stored(st, PACK).theme === th0 && api.docAttr("data-theme") === th0);
-  check("the header theme button is still in the page (hidden by CSS), the hdrbar too", !!api.el("themebtn") && !!api.el("hdrbar"));
+  check("no header theme button, no hdrbar (the flag collapse removed them)", !api.el("themebtn") && !api.el("hdrbar"));
 }
 
-console.log(`\n[A7] flag off: byte-identical to ${MAIN} on 3 records (Today, drill ends, Session done, Progress, header)`);
-{
-  let oldCore = null, oldHtml = null;
-  try {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "av-"));
-    const f = path.join(dir, `core_${MAIN}.js`);
-    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); oldCore = require(f);
-    oldHtml = cp.execSync(`git -C "${ROOT}" show ${MAIN}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-  } catch(e){ oldCore = null; }
-  if(!oldCore) skip(`${MAIN} not in this checkout's history`);
-  else {
-    const hdr = h => h.slice(h.indexOf("<body>"), h.indexOf("<nav"));
-    check("static header markup identical", hdr(appHtml) === hdr(oldHtml));
-    for(const [name, mk] of [["fresh", freshRec], ["owner export (paused)", () => owner && clone(owner)], ["owner, unpaused copy", () => owner && unpaused()]]){
-      const rec = mk(); if(!rec){ skip(`${name}: owner export not found`); continue; }
-      const run = async (o) => {
-        const { api, st } = await bootWith(OFF, clone(rec), 13, o);
-        const tr = [["home", api.title(), api.panel(), api.docAttr("data-appview")]];
-        api.el("go").click();
-        let k = 0;
-        await play(api, { wrong: (it, n) => n % 4 === 1, onItem: a => { if(k++ % 7 === 0) tr.push(["item", a.title()]); }, trace: (kind, a) => tr.push([kind, a.title(), a.panel()]) });
-        api.clickTab("progress"); tr.push(["progress", api.title(), api.panel()]);
-        api.clickTab("test"); tr.push(["test", api.title(), api.panel()]);
-        return { tr, rec: st.ls.getItem(VC.storageKey(OFF)) };
-      };
-      const a = await run(), b = await run({ core: oldCore, html: oldHtml });
-      const diff = a.tr.findIndex((x, i) => JSON.stringify(x) !== JSON.stringify(b.tr[i]));
-      if(diff >= 0) console.log(`INFO  first difference at ${diff}: ${JSON.stringify(a.tr[diff]).slice(0, 300)} vs ${JSON.stringify(b.tr[diff]).slice(0, 300)}`);
-      check(`${name}: ${a.tr.length} screens byte-identical (home, ${a.tr.filter(x => x[0] === "end").length} drill ends, Session done, Progress, Test, header titles); stored records equal`, diff < 0 && a.tr.length === b.tr.length && a.rec === b.rec);
-    }
-  }
-}
+// [A7] (flag off: byte-identical to 8604b17) deleted: appView is engine default since the flag collapse (stage 2).
 
 // ------------------------------------------------------------------ stage B: the drill card
-const BASE_B = "6c591c9"; // stage A head: the flag-off control for the drill card
 const PICK = `(() => {
   const ub = VC.unitByWord(CHAR_LIST), cr = VC.charRecs(prog);
   const ok = w => w.w && w.pron && VC.glossSenses(VC.gloss(w)).rest.length > 0 && wordExampleSentences(w, 2).length > 0 && canHearWord(w);
@@ -483,9 +453,9 @@ console.log("\n[B1] drill card CSS");
   check("no new radius, no all-caps, no letter-spacing, no new motion in v2 rules", ![...css.matchAll(/(:root\[data-appview="v2"\][^{]*)\{([^}]*)\}/g)].some(m => /text-transform|letter-spacing|animation|transition/.test(m[2]) || [...m[2].matchAll(/border-radius:([^;}]+)/g)].some(r => !baseRadii.has(r[1].trim()))));
 }
 
-let ON = null, OFFK = null;
+let ON = null;
 if(owner){
-  ON = (await runKinds(PACK, unpaused(), 21)).out; OFFK = (await runKinds(OFF, unpaused(), 21)).out;
+  ON = (await runKinds(PACK, unpaused(), 21)).out;
   console.log(`INFO  word / unit picked: ${ON.pick}`);
 }
 console.log("\n[B2] every item kind under v2: no kind tag, placeholders, copy");
@@ -497,32 +467,18 @@ else {
   check("the label is the first line of the drill body", all.every(x => /^<div class="drill-body( sent)?"><p class="q">/.test(x.right.q) && !/<p class="q">/.test(x.right.q.slice(34))));
   const ph = n => (ON[n].right.q.match(/placeholder="([^"]*)"/) || [])[1];
   check(`placeholders: pinyin "${ph("typed pinyin")}", meaning "${ph("typed meaning")}", characters "${ph("typed characters")}"`, ph("typed pinyin") === "tones optional" && ph("typed pinyin from characters") === "tones optional" && ph("typed meaning") === "any one meaning" && ph("typed meaning from pinyin") === "any one meaning" && ph("typed characters") === "characters" && ph("typed characters, listen") === "characters");
-  check("flag off keeps the old placeholders and tags", /placeholder="pinyin, tones optional…"/.test(OFFK["typed pinyin"].right.q) && /<div class="ktag"/.test(OFFK["typed meaning"].right.q) && /placeholder="characters…"/.test(OFFK["typed characters"].right.q));
   const typed = KINDS.map(([n]) => n).filter(n => ON[n].right.kind === "type");
   check(`every typed miss: "You typed zzz" (${typed.length} typed kinds)`, typed.every(n => ON[n].wrong.rv.includes('<div class="diff">You typed zzz</div>') && !/you typed:/.test(ON[n].wrong.rv)));
   check('hear items: "You heard" (no colon)', ["hear word", "hear sentence"].every(n => ON[n].right.rv.startsWith('<div class="q">You heard</div>') && !/You heard:/.test(ON[n].right.rv)));
-  check('pattern cue on a later meeting: "Show meaning" button, aria-label kept; flag off ">meaning<"', /<button type="button" class="showw" style="margin:0" data-pcue="[^"]+" aria-label="Show meaning">Show meaning<\/button>/.test(ON["pattern, met before"].right.q) && />meaning<\/button>/.test(OFFK["pattern, met before"].right.q));
-  { const q = ON["pattern, first meeting"].right.q, en = (OFFK["pattern, first meeting"].right.q.match(/data-pcue="([^"]*)"/) || [])[1];
-    check("pattern cue on the first meeting: the English open in the cue block, no link; flag off keeps the tap", !!en && q.includes(`<div class="q cue">${en}</div>`) && !/data-pcue/.test(q) && !/Show meaning/.test(q) && /data-pcue/.test(OFFK["pattern, first meeting"].right.q)); }
+  check('pattern cue on a later meeting: "Show meaning" button, aria-label kept', /<button type="button" class="showw" style="margin:0" data-pcue="[^"]+" aria-label="Show meaning">Show meaning<\/button>/.test(ON["pattern, met before"].right.q));
+  { const q = ON["pattern, first meeting"].right.q;
+    check("pattern cue on the first meeting: the English open in the cue block, no link", /<div class="q cue">[^<]+<\/div>/.test(q) && !/data-pcue/.test(q) && !/Show meaning/.test(q)); }
 }
 
-console.log("\n[B3] stimulus, options and reading aids equal flag off minus the chrome (plan §14)");
+// [B3] (stimulus, options and reading aids equal flag off minus the chrome) deleted: appView is engine default since the flag collapse.
+console.log("\n[B3] reveal gloss");
 if(ON){
-  const bad = [];
-  let primN = 0, keptN = 0;
-  for(const [n] of KINDS) for(const v of ["right", "wrong"]){
-    const a = ON[n][v], b = OFFK[n][v];
-    if(a.label !== b.label) bad.push(`${n} label`);
-    // fb51: a pattern's first meeting shows the English open (checked in B2); the rest of its stimulus still equals flag off
-    const noCue = h => n === "pattern, first meeting" ? h.replace(/<div class="q cue">[\s\S]*?<\/div>/, "") : h;
-    if(noCue(stimOf(a.q).replace(">Show meaning</button>", ">meaning</button>")) !== noCue(noKtag(stimOf(b.q)))) bad.push(`${n} stimulus`);
-    if(a.opts.length !== b.opts.length || a.opts.some((o, i) => { if(o === b.opts[i]){ if(o.includes(GX)) keptN++; return false; } if(o === primOf(b.opts[i])){ primN++; return false; } return true; })) bad.push(`${n} options`);
-    if(JSON.stringify(aids(a.q)) !== JSON.stringify(aids(b.q)) || JSON.stringify(aids(a.rv)) !== JSON.stringify(aids(b.rv))) bad.push(`${n} reading aids`);
-    if(JSON.stringify(a.marks) !== JSON.stringify(b.marks) || a.score !== b.score || a.score2 !== b.score2 || a.nx !== b.nx) bad.push(`${n} marks/score/Next`);
-  }
-  if(bad.length) console.log("INFO  " + bad.join("; "));
-  check(`${KINDS.length} kinds x right/wrong: label, stimulus (minus the kind tag), options (bracket-free primary or equal), ruby/tone markup in stimulus and reveal, option marks, score, Next equal (${primN} options lost brackets)`, !bad.length && primN > 0);
-  check("reveal text keeps the full gloss with brackets on a right answer", /class="gx"/.test(ON["meaning MC"].right.rv) && /class="gx"/.test(OFFK["meaning MC"].right.rv));
+  check("reveal text keeps the full gloss with brackets on a right answer", /class="gx"/.test(ON["meaning MC"].right.rv));
 }
 
 console.log("\n[B4] options: primary sense, the collision guard");
@@ -568,16 +524,15 @@ if(ON){
   check(`Replay at the row's end, the same button and id, once, no centred Replay row, no second speaker icon (${hears.length} kinds)`, hears.length >= 5 && hears.every(n => ["right", "wrong"].every(v => { const h = ON[n][v].rv; return (h.match(/id="rvp"/g) || []).length === 1 && /<\/div><button type="button" class="replay" id="rvp" aria-label="Replay">[\s\S]*?<\/button><\/div>/.test(h) && !/rvsay/.test(h) && !/class="rvi"/.test(h); })));
   check("hear word: no Replay and no row icon in the reveal (the card has its speaker); the row still plays on tap", !ON["hear word"].right.hear && !/class="rvi"|id="rvp"/.test(ON["hear word"].right.rv) && /<div class="rvm" data-wid=/.test(ON["hear word"].right.rv));
   check("a word reveal outside the drill (the drill-end Missed box) keeps the row's speaker icon", /<span class="rvi">/.test(ON.rawReveal));
-  check("flag off: the centred Replay row as before", /<div class="rvsay"><button type="button" class="replay" id="rvp"/.test(OFFK["recall"].right.rv));
   check("right answer (fb45): the examples open under the row, as on a miss, no Examples button, nothing hidden", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].right.rv) && !/rvxb|\shidden[\s>=]|Examples/.test(ON[n].right.rv)));
   check("reveal order after any answer (fb51, reverses fb45): answer row then the open examples, both in #rv; no tail slot", words.every(n => ["right", "wrong"].every(v => { const x = ON[n][v]; return /class="rvrow"/.test(x.head) && x.head.indexOf('class="rvrow"') < x.head.indexOf('<div class="rvx"><div class="sent') && x.tail === ""; })));
   { const { api } = await bootWith(PACK, unpaused(), 21, { patterns: true }); api.ev(PICK); runItem(api, "recallItem(__W)", true);
     const h = api.panel(), pos = id => h.indexOf(`id="${id}"`);
     check("DOM order: answer row and examples (#rv), then Next (#nx) last, no #rvtail", pos("rv") > 0 && pos("rv") < pos("nx") && !/rvtail/.test(h) && api.el("rv").innerHTML.includes('class="rvx"') && h.indexOf('id="nx"') > h.indexOf('id="rv"'));
     check("a missed item's reveal (typed, wrong) keeps the same order", (() => { const r = runItem(api, "typeItem(__W)", false); const g = api.panel(); return !!r && g.indexOf('id="rv"') < g.indexOf('id="nx"') && api.el("rv").innerHTML.includes('class="rvx"') && !/rvtail/.test(g); })()); }
-  { const { api } = await bootWith(OFF, unpaused(), 21, { patterns: true }); api.ev(PICK); runItem(api, "recallItem(__W)", true);
+  {
     check("no dead .rvtail rules: the examples sit in .reveal, which carries the font size and the data-tlrtl right-align rule", !/rvtail/.test(appHtml) && /\.reveal\{[^}]*font-size:15px/.test(appHtml) && /:root\[data-tlrtl\] \.reveal,:root\[data-tlrtl\] \.rvb\{text-align:right\}/.test(appHtml));
-    check("flag off: no rvtail slot, the reveal block as before", !/rvtail/.test(api.panel())); }
+  }
   check("wrong answer (and every You typed): the examples open", words.every(n => /<div class="rvx"><div class="sent/.test(ON[n].wrong.rv) && !/Examples?:/.test(ON[n].wrong.rv) && !/rvxb/.test(ON[n].wrong.rv)));
   const cued = KINDS.map(([n]) => n).filter(n => ON[n].right.cue || ON[n].wrong.cue);
   const cueOk = v => !v.cue || /<\/div><div class="ucue" aria-label="字 \d\/5"><span data-tl lang="zh">字<\/span> [●○]{5}<\/div>/.test(v.rv) && !/letter-spacing/.test(v.rv) && v.rv.indexOf("ucue") > v.rv.indexOf("rvrow");
@@ -598,42 +553,9 @@ console.log("\n[B6] teach cards");
 if(ON){
   check('words: anchor "HSK 3, set 12", no instruction line, Drill this set', ON.teachWords.startsWith('<p class="pva">HSK 3, set 12</p>') && !/Tap a word/.test(ON.teachWords) && /id="dr">Drill this set</.test(ON.teachWords));
   check('characters: anchor "HSK 3 characters, set 20 of 30", Drill this set', ON.teachChars.startsWith('<p class="pva">HSK 3 characters, set 20 of 30</p>') && !/Tap one|the written form/.test(ON.teachChars) && /id="dr">Drill this set</.test(ON.teachChars));
-  check("teach cards keep the example English and the card body (flag off minus the intro and button)", ON.teachChars.replace(/^<p class="pva">[^<]*<\/p>/, "").replace("Drill this set", "Drill these") === OFFK.teachChars.replace(/^<p class="q">[\s\S]*?<\/p>/, ""));
 }
 
-console.log(`\n[B7] flag off: every item kind, teach cards and a session's drill items byte-identical to ${BASE_B} on 3 records`);
-{
-  let oldCore = null, oldHtml = null;
-  try {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avb-"));
-    const f = path.join(dir, `core_${BASE_B}.js`);
-    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${BASE_B}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); oldCore = require(f);
-    oldHtml = cp.execSync(`git -C "${ROOT}" show ${BASE_B}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-  } catch(e){ oldCore = null; }
-  if(!oldCore) skip(`${BASE_B} not in this checkout's history`);
-  else for(const [name, mk] of [["fresh", freshRec], ["owner export (paused)", () => owner && clone(owner)], ["owner, unpaused copy", () => owner && unpaused()]]){
-    const rec = mk(); if(!rec){ skip(`${name}: owner export not found`); continue; }
-    const a = (await runKinds(OFF, clone(rec), 41)).out, b = (await runKinds(OFF, clone(rec), 41, { core: oldCore, html: oldHtml })).out;
-    const walk = async o => {
-      const { api } = await bootWith(OFF, clone(rec), 43, Object.assign({ patterns: true }, o)); const tr = [];
-      api.el("go").click();
-      await play(api, { wrong: (it, n) => n % 4 === 1, onItem: x => tr.push(["q", x.panel(), x.el("score").textContent, x.el("o") ? x.el("o").children.map(c => c.innerHTML) : []]),
-        afterAnswer: x => tr.push(["a", x.el("rv").innerHTML, x.el("nx").style.display]), trace: (k, x) => tr.push([k, x.panel()]) });
-      return tr;
-    };
-    const w1 = await walk(), w2 = await walk({ core: oldCore, html: oldHtml });
-    // fb44 moved the pattern note from the question to the verdict (placement only), so the note div is stripped from both sides.
-    const J = x => JSON.stringify(x).replace(/<div class=\\"pnote\\">.*?<\/div>/g, "");
-    const kindsSame = KINDS.every(([n]) => J(a[n]) === J(b[n]));
-    const diff = w1.findIndex((x, i) => J(x) !== J(w2[i]));
-    if(!kindsSame) console.log("INFO  differs: " + KINDS.map(([n]) => n).filter(n => J(a[n]) !== J(b[n])).join(", "));
-    if(diff >= 0) console.log(`INFO  walk first difference at ${diff}: ${JSON.stringify(w1[diff]).slice(0, 300)} vs ${JSON.stringify(w2[diff]).slice(0, 300)}`);
-    check(`${name}: ${KINDS.length} kinds (question, options, typed field, reveal right + wrong), word + character teach cards, and a Today session's ${w1.filter(x => x[0] === "q").length} items + ${w1.filter(x => x[0] === "teach").length} teach screens byte-identical`, kindsSame && a.teachWords === b.teachWords && a.teachChars === b.teachChars && diff < 0 && w1.length === w2.length);
-  }
-}
-
-// ------------------------------------------------------------------ stage C: Read, Words, Test, Sounds, notices
-const BASE_C = "9bf0e78"; // stage B head: the flag-off control for the tabs
+// [B7] (flag off: every item kind byte-identical to 6c591c9) deleted: appView is engine default since the flag collapse.
 const LV_LABEL = lv => `HSK ${lv}`;
 const pidsIn = h => [...h.matchAll(/<button data-pid="([^"]+)"/g)].map(m => m[1]);
 // Answers every question of the passage on screen: wrongAt(i) answers question i wrong. Returns the results html.
@@ -874,8 +796,6 @@ console.log("\n[C9] review fixes: Read rule line, Placement in Progress Settings
   }
   const fr = await bootWith(PACK, freshRec(), 73); fr.api.clickTab("progress");
   check("fresh record: the row is present too (one Placement test, nothing else added)", (fr.api.panel().match(/id="placeRow"/g) || []).length === 1);
-  const off = await bootWith(OFF, freshRec(), 73); off.api.clickTab("progress");
-  check("flag off: no placement row on Progress", !/placeRow/.test(off.api.panel()));
   // No voice under v2 (the harness otherwise always has one).
   const nv = await bootWith(PACK, freshRec(), 74, noV); nv.api.clickTab("progress");
   const ph = nv.api.panel();
@@ -884,53 +804,13 @@ console.log("\n[C9] review fixes: Read rule line, Placement in Progress Settings
   const lh = nv.api.panel() + JSON.stringify(nv.api.ev(`document.getElementById("cards")._ins || []`));
   console.log("INFO  lesson no voice: " + stripTags(lh).slice(0, 160).replace(/\s+/g, " "));
   check('no voice, lesson: the trimmed notice copy "No voice for this language in this browser. Listening items show the text instead."', lh.includes("No voice for this language in this browser. Listening items show the text instead.") && !/This browser has no voice/.test(lh));
-  // flag-off equality with 9bf0e78 on the same no-voice render.
-  let oc = null, oh = null;
-  try {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avc9-")); const f = path.join(dir, `core_${BASE_C}.js`);
-    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${BASE_C}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); oc = require(f);
-    oh = cp.execSync(`git -C "${ROOT}" show ${BASE_C}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-  } catch(e){ oc = null; }
-  if(!oc) skip(`${BASE_C} not in this checkout's history`);
-  else for(const [name, mk] of [["fresh", freshRec], ["owner", () => owner && clone(owner)]]){
-    const rec = mk(); if(!rec){ skip(`${name}: owner export not found`); continue; }
-    const shots = async o2 => { const { api } = await bootWith(OFF, clone(rec), 75, Object.assign({}, noV, o2)); const out = []; api.clickTab("progress"); out.push(api.panel()); api.clickTab("sounds"); api.ev(`soundsSel = 0; soundsRender()`); out.push(api.panel() + JSON.stringify(api.ev(`document.getElementById("cards")._ins || []`))); return out; };
-    const a = await shots({}), b = await shots({ core: oc, html: oh });
-    check(`flag off, no voice, ${name}: Progress and a lesson byte-identical to ${BASE_C} (${a.length} screens)`, JSON.stringify(a) === JSON.stringify(b) && /text-to-speech|no voice/i.test(a[0] + a[1]));
-  }
+  // (flag-off equality with 9bf0e78 on the no-voice render deleted: appView is engine default since the flag collapse.)
 }
 
-console.log(`\n[C8] flag off: Read, Words, Test, Sounds and notices byte-identical to ${BASE_C} on 4 records, plain and Samsung user agents`);
-{
-  let oldCore = null, oldHtml = null;
-  try {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avc-"));
-    const f = path.join(dir, `core_${BASE_C}.js`);
-    fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${BASE_C}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); oldCore = require(f);
-    oldHtml = cp.execSync(`git -C "${ROOT}" show ${BASE_C}:engine/app.html`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-  } catch(e){ oldCore = null; }
-  if(!oldCore) skip(`${BASE_C} not in this checkout's history`);
-  else for(const [name, mk] of [["fresh", freshRec], ["owner export (paused)", () => owner && clone(owner)], ["owner, unpaused copy", () => owner && unpaused()], ["owner, never placed", () => owner && (r => { delete r.placedOnce; return r; })(clone(owner))]]){
-    const rec = mk(); if(!rec){ skip(`${name}: owner export not found`); continue; }
-    for(const ua of [undefined, "Mozilla/5.0 (Linux; Android 14) SamsungBrowser/25.0 Chrome/121 Mobile Safari/537.36"]){
-      const a = await walkTabs(OFF, clone(rec), 61, { ua }), b = await walkTabs(OFF, clone(rec), 61, { ua, core: oldCore, html: oldHtml });
-      const diff = a.tr.findIndex((x, i) => JSON.stringify(x) !== JSON.stringify(b.tr[i]));
-      if(diff >= 0) console.log(`INFO  first difference at ${a.tr[diff][0]}: ${JSON.stringify(a.tr[diff]).slice(0, 300)} vs ${JSON.stringify(b.tr[diff]).slice(0, 300)}`);
-      check(`${name}${ua ? ", Samsung UA" : ""}: ${a.tr.length} screens byte-identical (${a.tr.map(x => x[0].replace(/ [a-z]\d+$/, "")).join(", ")})`, diff < 0 && a.tr.length === b.tr.length && a.tr.length >= 18);
-    }
-  }
-}
+// [C8] (flag off: tabs byte-identical to 9bf0e78) deleted: appView is engine default since the flag collapse.
 
-const BASE_D = "0d542de"; // main before fb45: the flag-off control for the v2 fixes
 console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignment, Read row title");
 {
-  const oldOf = f => cp.execSync(`git -C "${ROOT}" show ${BASE_D}:${f}`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
-  let oldCore = null, oldHtml = null;
-  try {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "avd-")); const f = path.join(dir, `core_${BASE_D}.js`);
-    fs.writeFileSync(f, oldOf("engine/core.js")); oldCore = require(f); oldHtml = oldOf("engine/app.html");
-    fs.rmSync(dir, { recursive: true, force: true });
-  } catch(e){ oldCore = null; }
   if(!owner) skip("owner export not found");
   else {
     // 1. the Progress heading
@@ -938,17 +818,15 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
       await play(api, { wrong: (it, n) => n % 4 === 1 }); api.clickTab("progress");
       const h = api.panel();
       check("Progress under v2: the recent-misses block is headed Still shaky, never Missed in your last", /<p class="pvk">Still shaky<\/p><p class="pvw">/.test(h) && !/Missed in your last/.test(h));
-      const o = await bootWith(OFF, unpaused(), 13); o.api.el("go").click(); await play(o.api, { wrong: (it, n) => n % 4 === 1 }); o.api.clickTab("progress");
-      check("flag off: no Still shaky", !/Still shaky/.test(o.api.panel())); }
+    }
     // 2. the drill-end score: right first time over distinct items
-    for(const [what, wrongTimes, want, wantOff] of [["one miss re-asked", 1, "2 of 3", "3 / 4"], ["the same item missed twice", 2, "2 of 3", "3 / 5"], ["no miss", 0, "3 of 3", "3 / 3"]]){
+    for(const [what, wrongTimes, want] of [["one miss re-asked", 1, "2 of 3"], ["the same item missed twice", 2, "2 of 3"], ["no miss", 0, "3 of 3"]]){
       const run = async pack => { const { api } = await bootWith(pack, unpaused(), 13); const first = api.ev("WORDS.slice(0, 3).map(w => w.id)")[0]; let k = 0;
         api.ev("drill(WORDS.slice(0, 3).map(w => readItem(w)), () => {}, missSummary)");
         await play(api, { wrong: it => it.key === "w:" + first && ++k <= wrongTimes, until: a => /id="ok"/.test(a.panel()) && !a.getD() });
         return api.panel(); };
-      const on = await run(PACK), off = await run(OFF);
+      const on = await run(PACK);
       check(`drill end, ${what}: v2 "${want}" over distinct items`, on.includes(`<h2>${want}</h2>`));
-      check(`drill end, ${what}: flag off keeps "${wantOff}"`, off.includes(`<h2>${wantOff}</h2>`));
       if(wrongTimes) check(`drill end, ${what}: the Missed rows list the one missed item`, (on.match(/data-mopen=/g) || []).length === 1); }
     // 3. sentence and pattern items left-align label + stimulus; word and character items stay centred
     { const ONk = ON || {}, sentK = ["hear sentence", "gap", "gap typed", "pattern, first meeting", "pattern, met before"].filter(n => ONk[n] && ONk[n].right);
@@ -957,8 +835,7 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
       check(`word, character and unit items keep the centred label (${wordK.length} kinds)`, wordK.length >= 7 && wordK.every(n => ONk[n].right.q.startsWith('<div class="drill-body"><p class="q">')));
       check("the CSS left-aligns the label and the hear stage under .sent, scoped to v2, after the centred rule", /:root\[data-appview="v2"\] \.drill-body\.sent>\.q:first-child\{text-align:start\}/.test(appHtml) && /:root\[data-appview="v2"\] \.drill-body\.sent \.hear-stage\{justify-content:flex-start\}/.test(appHtml)
         && appHtml.indexOf(".drill-body.sent>.q:first-child") > appHtml.indexOf(".drill-body:not(.top)>.q:first-child{text-align:center"));
-      const offK = OFFK || {};
-      check("flag off: no sent class anywhere", Object.keys(offK).every(n => !offK[n] || !offK[n].right || !/ sent"/.test(offK[n].right.q.slice(0, 40)))); }
+    }
     // 4. the Today Read row shows the title in characters only under v2 (the v2 plan block, todayPlanV2)
     { const row = async pack => { const { api } = await bootWith(pack, unpaused(), 13); const h = api.panel(); const i = h.search(/>Read</); return i < 0 ? null : h.slice(i, i + 700); };
       const a = await row(PACK);
@@ -971,21 +848,7 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
         check(`document.title for the ${nm} has no "(" and no level range ("${t}")`, !/\(/.test(t) && t.length > 0 && !/HSK 1|A1/.test(t)); }
       const t2 = (await bootWith(Object.assign({}, PACK, { name: "Mandarin (HSK 1–4)" }), unpaused(), 13)).api.ev("document.title");
       check(`"Mandarin (HSK 1–4)" shows as "Mandarin"`, t2 === "Mandarin"); }
-    // 6. flag off byte-identical to the base on 3 records
-    if(!oldCore) skip(`${BASE_D} not in this checkout's history`);
-    else for(const [name, mk] of [["fresh", freshRec], ["owner export (paused)", () => clone(owner)], ["owner, unpaused copy", unpaused]]){
-      const run = async o => { const { api, st } = await bootWith(OFF, mk(), 13, o); const tr = [["home", api.title(), api.panel()]]; api.el("go").click(); let k = 0;
-        await play(api, { wrong: (it, n) => n % 4 === 1, trace: (kind, a) => tr.push([kind, a.title(), a.panel()]) });
-        api.clickTab("progress"); tr.push(["progress", api.panel()]); api.clickTab("test"); tr.push(["test", api.panel()]);
-        return { tr, rec: st.ls.getItem(VC.storageKey(OFF)) }; };
-      const a = await run(), b = await run({ core: oldCore, html: oldHtml });
-      const diff = a.tr.findIndex((x, i) => JSON.stringify(x) !== JSON.stringify(b.tr[i]));
-      if(diff >= 0) console.log(`INFO  first difference at ${diff}: ${JSON.stringify(a.tr[diff]).slice(0, 300)} vs ${JSON.stringify(b.tr[diff]).slice(0, 300)}`);
-      check(`flag off, ${name}: ${a.tr.length} screens (Today, drill ends, Session done, Progress, Test) byte-identical to ${BASE_D}; stored records equal`, diff < 0 && a.tr.length === b.tr.length && a.rec === b.rec);
-      const ta = await walkTabs(OFF, mk(), 61, {}), tb = await walkTabs(OFF, mk(), 61, { core: oldCore, html: oldHtml });
-      const d2 = ta.tr.findIndex((x, i) => JSON.stringify(x) !== JSON.stringify(tb.tr[i]));
-      check(`flag off, ${name}: ${ta.tr.length} tab screens (Read, Words, Test, Sounds) byte-identical to ${BASE_D}`, d2 < 0 && ta.tr.length === tb.tr.length);
-    }
+    // 6. (flag off byte-identical to 0d542de deleted: appView is engine default since the flag collapse.)
   }
 }
 
@@ -1144,17 +1007,15 @@ console.log("\n[D5] fb51: the reveal drops the stimulus hint links it makes redu
   const sources = owner ? [["owner export", unpaused], ["fresh record", freshRec]] : [["fresh record", freshRec]];
   const table = {};
   for(const [sn, mk] of sources){
-    const on = await probe(PACK, mk(), 21), off = await probe(OFF, mk(), 21);
+    const on = await probe(PACK, mk(), 21);
     for(const [name] of K5){
-      const a = on[name], b = off[name];
+      const a = on[name];
       if(!a.right || !a.wrong) continue;
       const row = (table[name] = table[name] || {});
       const pre = n(a.right.q), postR = n(a.right.after), postW = n(a.wrong.after), rvLinks = n(a.right.rv), rvRow = /class="rw[ "]/.test(a.right.rv);
-      row[sn] = { pre, postR, postW, rvLinks, rvRow, offPost: n(b.right.after) };
+      row[sn] = { pre, postR, postW, rvLinks, rvRow };
       // a link the reveal makes redundant is gone after a right and a wrong answer; one it does not is kept
       check(`${sn}, ${name}: stimulus links ${pre} -> ${postR} (right) / ${postW} (wrong); the reveal ${rvRow ? "shows the form row (the characters or its own link)" : "has no form row, links stay"}`, rvRow ? postR === 0 && postW === 0 : postR === pre && postW === pre);
-      check(`${sn}, ${name}: flag off keeps all ${n(b.right.q)} stimulus link(s) after a right and a wrong answer`, n(b.right.after) === n(b.right.q) && n(b.wrong.after) === n(b.wrong.q));
-      check(`${sn}, ${name}: the question screen is unchanged by the drop (links present before answering equal flag off, minus the first-meeting cue)`, name === "pattern, first meeting" || n(a.right.q) === n(b.right.q));
     }
   }
   const kinds = Object.keys(table);
