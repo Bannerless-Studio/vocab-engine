@@ -607,10 +607,8 @@ function markUnitTyped(it, id, ok){
 }
 // docs/PACK_SCHEMA.md "dayAware": today's answers steer the day's later plans.
 const dayToday = () => todayISO();
-const PLAN_ORDER = "misses and due first";
 // Pairs (docs/PACK_SCHEMA.md "pairs", default since the flag collapse): every answer moves its pair's streak; Review, Recall,
 // Listen and the characters Test ask the weakest pairs first.
-const PAIR_ORDER = "weakest pairs first";
 // Frequency tiers (docs/PACK_SCHEMA.md "freqTiers"): a unit takes its own ft (its words' lowest); known
 // reads core.js wordKnown.
 const unitTierOf = id => VC.unitTier(CHAR_LIST.find(u => u.id === id), null, PACK);
@@ -660,7 +658,6 @@ const learnedWords = () => VC.learnedWords(WORDS, PACK, prog);
 const nextNewSetRaw = () => VC.nextNewSet(WORDS, PACK, prog);
 // Level gate: Today teaches no new word of a level whose predecessor is not known enough.
 const nextNewSet = () => VC.nextNewSetOpen(WORDS, PACK, prog, CHAR_LIST);
-const gateNote = () => VC.levelGateNote(WORDS, PACK, prog, CHAR_LIST);
 // appView: the gate as one sentence, the same on Today and Progress.
 const gateSentence = () => { const h = VC.levelGateHold(WORDS, PACK, prog, CHAR_LIST); if(!h) return null; const e = etaText(VC.levelOpensIn(WORDS, PACK, prog, CHAR_LIST)); return `${levelLabel(h.lv)} opens at ${Math.round(VC.LEVEL_GATE * 100)}% of ${levelLabel(h.prev)} known. Now ${h.pct}%${e ? ", " + e : ""}.`; };
 // appView ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"): "≈" marks every estimate; a done goal or an open gate (0 / null) shows nothing.
@@ -831,12 +828,6 @@ const wordAudio = VC.wordAudio;
 const sayWord = (w, btn) => speak(VC.wordSay(w), btn, wordAudio(w));
 const canHearWord = w => hasSpeech || !!wordAudio(w);
 const PACK_AUDIO = VC.packAudio(PACK);
-// Counted with the session's own canHearWord, so a pack with no voice and no clips never
-// promises Listen items the session can't serve.
-function listenLine(lw){
-  const n = VC.listenPlanCount(lw, canHearWord);
-  return n ? `${n} items` : "no items until a voice or recording is available";
-}
 function speechNotice(){
   if(hasSpeech || PACK_AUDIO || noticeShown) return "";
   noticeShown = true;
@@ -2396,11 +2387,6 @@ function snapLearnLine(snap){
   }
   return st.kind === "words" ? `${levelLabel(st.lv)}, set ${st.set+1}` : csetLabel(st.label, snap.cset);
 }
-// The note replaces "everything covered" and trails a character set, so the row says why no word is taught.
-const learnGateLine = snap => {
-  const note = escapeHtml(gateNote());
-  return snap && snapLearns(snap) ? `${snapLearnLine(snap)} · ${note}` : note;
-};
 const scriptCount = () => HAS_SCRIPT ? VC.recordedScriptUnits(SUNITS, prog, PACK).length : undefined;
 // docs/SCRIPT_PRIMER.md §1.
 function scriptChoiceHTML(){
@@ -2408,16 +2394,6 @@ function scriptChoiceHTML(){
   return `<div class="stmt" id="scriptChoice">${L} first: learn to read the script, symbol by symbol, before ${escapeHtml(levelLabel(LEVELS[0]))}. If you can already read it, skip it. You can change this later in Progress.<button class="next" id="scriptLearn" style="margin-top:8px">Learn the script</button><button class="ghost" id="scriptSkip" style="margin-top:8px">I can read it, skip</button></div>`;
 }
 const showScriptNotice = () => HAS_SCRIPT && VC.scriptNotice(PACK, prog) && VC.scriptSkipped(prog);
-function reviewWhat(snap, plan){
-  const xs = !!(plan && plan.some(isScriptPlan));
-  // A typed unit item (tu, characters.bareBy) is a word item that practises the unit.
-  if(!xs) return snap.charsStarted ? (plan && plan.some(x => x.unit || x.tu) ? `, words and ${CHAR_CFG.label}` : ", words") : "";
-  const parts = [];
-  if(plan.some(x => x.word)) parts.push("words");
-  if(plan.some(x => (x.unit && !isScriptPlan(x)) || x.tu)) parts.push(CHAR_CFG.label);
-  parts.push("script");
-  return ", " + (parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}` : parts[0]);
-}
 function charChoiceHTML(){
   const path = VC.stagePath(PACK, WORDS, CHAR_LIST, prog, SU);
   const first = path.findIndex(s => s.kind === "chars");
@@ -2454,27 +2430,14 @@ function todayRender(){
   const pz = paused();
   const availSent = todaySentences();
   const snap = takeSnapshot();
-  const gate = gateNote();
   const g = VC.todayGates(lw.length, !pz && (snap ? snapLearns(snap) : !!nn), availSent.length, scriptCount());
   // Start today runs exactly this plan, so the line names units only when the plan holds
   // some (a first character day has no unit records yet).
   todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), typedUnits: TYPED_UNITS }) : null } : null;
-  const reviewLine = snap
-    ? `${snap.reviewExtra && todayPrep.review ? todayPrep.review.length : snap.reviewSize} items, ${PAIR_ORDER}${reviewWhat(snap, todayPrep.review)}`
-    : `${pz && g.review ? VC.buildReviewPlan(lw, prog, PACK, { extra: learnDrillCount(null), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), rng: () => 0.5 }).length : VC.REVIEW_SIZE} items, ${PAIR_ORDER}`;
   const pk = PATTERNS_ON && g.sentences ? patternPlanCount() : 0;
-  const steps = [
-    ["Review", g.review ? reviewLine : (snap && snap.stage && snap.stage.kind === "script" ? "skipped until a set is learned" : "skipped until 5+ words are learned")],
-    ["Learn", snap ? snapLearnLine(snap) : (nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered"), gate ? learnGateLine(snap) : null],
-    ["Listen", g.listen ? listenLine(lw) : "skipped until something is learned"],
-    ["Recall", g.recall ? `${RECALL_N} items, ${PAIR_ORDER}` : "skipped until something is learned"],
-    ["Sentences", g.sentences ? (pk ? `8 items · ${pk} pattern${pk > 1 ? "s" : ""}` : `8 items, ${PLAN_ORDER}`) : "skipped until 8+ sentences are available"]
-  ];
-  if(pz) steps.splice(1, 1);
   const showPlaceHint = !prog.placedOnce;
   const showSoundsHint = HAS_LESSONS && !prog.soundsOpened && !VC.placedPastFirstBucket(prog, WORDS, PACK);
   const readNext = todayReadItem(false);
-  if(readNext) steps.push([readNext.mode === "listen" ? "Listen" : "Read", null, readPlanLine(readNext)]);
   // Paused: a choice of what Learn teaches next waits, so it cannot block review.
   const choice = !pz && !!(snap && snap.choice);
   const xChoice = !pz && HAS_SCRIPT && !!(snap && snap.choice === "script");
@@ -2536,11 +2499,6 @@ function todayReadItem(inSession){
   const r = VC.nextReadItem(PASSAGE_LIST, WORDS, PACK, prog, todayISO(), paused(), VC.daySn(prog) + (inSession ? 0 : 1), undefined, canListenPassage);
   if(r) r.mode = VC.readPassMode(r, prog, canListenPassage(r.p), PACK);
   return r;
-}
-function readPlanLine(r){
-  const p = r.p;
-  const t = pfRubyText(p.title, p.titleRuby) ? rubyTw(p.title, p.titleRuby) : tf(p.title);
-  return `${ui(r.mode === "listen" ? "1 passage to listen to: " : r.reason === "reread" ? "1 passage to re-read: " : "1 passage: ")}${t}${ui(` (${levelLabel(p.lv)}, ${VC.passageLength(p, PACK)} words)`)}`;
 }
 function enterPlacementFromToday(){ placeFrom = null; switchToTab("test", "Test"); testSel = "placement"; startPlacement(); }
 function enterPlacementFromProgress(){ placeFrom = "progress"; switchToTab("test", "Test"); testSel = "placement"; testRender(); }
