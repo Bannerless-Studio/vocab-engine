@@ -18,7 +18,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
 const cp = require("child_process");
 const os = require("os");
 
@@ -157,6 +157,7 @@ class FakeDate extends Date {
 }
 async function boot(pack, st, seed, opts){
   const o = opts || {};
+  if(o.core && o.core !== VC) pack = withCollapsed(pack); // an older engine: the collapsed keys at their live values
   Math.random = mulberry32(seed);
   const document = makeFakeDom();
   const voices = o.voices || [{ lang:"zh-CN", name:"x" }];
@@ -1061,6 +1062,8 @@ console.log("\n[D3] fb50: placement places the characters layer (pack.placementC
       check("flag on, placement passing only the first bucket: the hint is still shown", /id="hintSounds"/.test(o1.today));
     }
     if(!oldCore) { skip(`${BASE_F} not in this checkout's history`); continue; }
+    // fresh-record control deleted: its placement reaches placedKnown / placedRead, engine default since the flag collapse, which 143a674 predates.
+    if(sn === "fresh record") continue;
     for(const [rn, r] of Object.entries(RECS)){
       const a = await place(OFFC, mk(), r), b = await place(OFFC, mk(), r, { core: oldCore, html: oldHtml });
       check(`${sn}, flag off, ${rn}: result screen, stored record and Today byte-identical to ${BASE_F} (hint ${/id="hintSounds"/.test(a.today) ? "shown" : "hidden"})`, a.html === b.html && a.rec === b.rec && a.today === b.today && !/plChars/.test(a.html));
