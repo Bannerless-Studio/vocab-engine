@@ -406,7 +406,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const doneOf = lv => CHARACTERS.filter(u => String(u.lv) === lv).filter(u => VC.unitAtTarget(prog.chars.c[u.id], u, prog, PACK)).length;
     console.log("    Progress characters parts: " + rows.join(" | "));
     check("Progress level rows count characters at their target (a peripheral unit at mastered)", rows.length === 4 && rows.every((r, i) => r === `${doneOf(String(i + 1))} of ${CHARACTERS.filter(u => String(u.lv) === String(i + 1)).length}`) && rows.some(r => !/^0 of/.test(r)));
-    const lvRows = VC.levelIds(PACK).map(lv => (ph.match(new RegExp(`aria-label="HSK ${lv}: (\\d+) of \\d+ learned, (\\d+) mastered"`)) || [])[2]);
+    const lvRows = VC.levelIds(PACK).map(lv => (ph.match(new RegExp(`aria-label="HSK ${lv}: \\d+% known, (\\d+) of \\d+ learned, (\\d+) mastered"`)) || [])[2]);
     check(`Progress level rows count known by the tier rule (${lvRows.join(" / ")})`, VC.levelIds(PACK).every((lv, i) => +lvRows[i] === VC.learnedWords(WORDS, PACK, prog).filter(w => w.lv === lv && VC.wordKnownX(prog.w[w.id], w, PACK, prog, VC.knownCtx(PACK, CHARACTERS))).length)); check("nothing new stored: records carry only fields older engines know (r w s k t u f d prov p)", Object.values(prog.w).every(r => Object.keys(r).every(k => ["r", "w", "s", "k", "t", "u", "f", "d", "prov", "p"].includes(k))));
   }
 

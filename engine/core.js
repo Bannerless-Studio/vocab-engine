@@ -988,7 +988,11 @@ function applyPlacement(prog, st, passed, words, pack, units){
   out.placedOnce = true;
   // prog.pl: the level this placement landed in, for pack.eta.placed (docs/PACK_SCHEMA.md "ETA model"); only when no
   // session came before it, since a record with sessions is not a placed start.
-  if(!(prog.sessions > 0)){ const land = st[passed] || st[st.length - 1]; if(land) out.pl = String(land.lv); }
+  if(!(prog.sessions > 0)){ const land = st[passed] || st[st.length - 1]; if(land){
+    const was = ids.indexOf(String(prog.pl)), now = ids.indexOf(String(land.lv));
+    // A retake landing lower keeps the stored level (fb53); an unknown stored pl is replaced.
+    if(!(was >= 0 && now <= was)) out.pl = String(land.lv);
+  } }
   return out;
 }
 
@@ -2566,6 +2570,17 @@ function progressPosition(prog, pack, words, units, passages){
 }
 // Goal ladder (owner 2026-10-04: the whole-pack bar read 2/10): one goal scoped to levels <= goal.upTo.
 // A unit's level is its own lv, else the level of its first word.
+// Shared position predicate (goal bars and level bars): words known (wordKnownP) weigh 0.8, units posKnown or past the pron tier 0.2,
+// passages (goal bars only, ps empty for a level) 0.2; one helper so the two bars cannot drift.
+function positionOf(prog, pack, ws, us, ps, units, wpOn){
+  const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, units);
+  const known = ws.filter(w => wordKnownP(recs[w.id], w, pack, prog, bw)).length;
+  const wu = us.length ? 0.2 : 0, wp = ps.length && wpOn ? 0.2 : 0;
+  let x = ws.length ? (1 - wu - wp) * known / ws.length : 0;
+  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (posKnown(pack, cr[u.id]) || charTier(cr[u.id].s, pack) !== "pron")).length / us.length; }
+  if(wp){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
+  return Math.max(0, Math.min(1, x));
+}
 function goalPosition(prog, pack, goal, words, units, passages){
   const idx = levelIndexMap(pack), top = idx[String(goal && goal.upTo)];
   if(top === undefined) return 0;
@@ -2574,18 +2589,19 @@ function goalPosition(prog, pack, goal, words, units, passages){
   const byId = {}; for(const w of (words || [])) byId[w.id] = w;
   const us = (units || []).filter(u => inR(u.lv !== undefined ? u.lv : (byId[(u.words || [])[0]] || {}).lv));
   const ps = (passages || []).filter(p => inR(p.lv));
-  const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, units);
-  const known = ws.filter(w => wordKnownP(recs[w.id], w, pack, prog, bw)).length;
   // Placed known (owner 2026-10-09): a goal whose levels all lie at or below the placed level (prog.pl) is positioned from
   // its words and units only, never its passages and with no "still placed" condition, so one miss moves the bar by one word
   // and a covered goal stays full (no estimate, currentGoal on the next unmet goal) after its provisional records settle or drop.
   const plIdx = prog && typeof prog.pl === "string" ? idx[prog.pl] : undefined;
   const placedGoal = plIdx !== undefined && top <= plIdx;
-  const wu = us.length ? 0.2 : 0, wp = ps.length && !placedGoal ? 0.2 : 0;
-  let x = ws.length ? (1 - wu - wp) * known / ws.length : 0;
-  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (posKnown(pack, cr[u.id]) || charTier(cr[u.id].s, pack) !== "pron")).length / us.length; }
-  if(wp){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
-  return Math.max(0, Math.min(1, x));
+  return positionOf(prog, pack, ws, us, ps, units, !placedGoal);
+}
+// One level's position for its Progress row bar (fb53; owner 2026-10-09): the goal bar's predicate (positionOf) over this level only, passages left out.
+function levelPosition(prog, pack, lv, words, units){
+  const byId = {}; for(const w of (words || [])) byId[w.id] = w;
+  const ws = (words || []).filter(w => String(w.lv) === String(lv));
+  const us = (units || []).filter(u => String(u.lv !== undefined ? u.lv : (byId[(u.words || [])[0]] || {}).lv) === String(lv));
+  return positionOf(prog, pack, ws, us, [], units, false);
 }
 const GOAL_DONE = 0.9;
 function currentGoal(prog, pack, words, units, passages){
@@ -4559,7 +4575,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, levelPosition, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,

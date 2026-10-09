@@ -167,7 +167,6 @@
   .pvn{text-align:right}
   .pvb{position:relative;height:6px;border-radius:3px;background:color-mix(in srgb,var(--line) 60%,transparent);overflow:hidden;margin-top:6px}
   .pvb i{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
-  .pvb .pvlr{background:color-mix(in srgb,var(--mute) 45%,transparent)}
   .pvb .pvm{background:var(--ink)}
   .pvs{color:var(--mute);font-size:13px;margin-top:6px!important}
   /* A locked or paused level reads quieter by colour (var(--mute), 4.88:1 light / 6.68:1 dark); text opacity would put the gate note and the paused value under 4.5:1. */
@@ -685,7 +684,10 @@ let tab = "today";
 let todayStepState = null;
 let todayPrep = null;          // pack.characters: the snapshot + Review plan Today last showed, run by Start today
 let soundsSel = null;
-let wordsLv = LEVELS[0], wordsSet = null, wordsQuery = "";
+// wordsLv: null until the Words tab first renders, then the level Learn's next new set belongs to (else the gated level's, else the last);
+// a level the learner taps sticks for the page lifetime, in memory only (fb53).
+let wordsLv = null, wordsSet = null, wordsQuery = "", wordsTapped = false;
+const wordsStartLevel = () => { const nn = VC.nextNewSetOpen(WORDS, PACK, prog, CHAR_LIST) || VC.nextNewSet(WORDS, PACK, prog); return nn ? nn.lv : LEVELS[LEVELS.length - 1]; };
 let RD = null;
 let testSel = null, PL = null, placeFrom = null; // placeFrom "progress": placement was opened from Progress Settings (appView), so it returns there
 let legacyNotice = null;       // one-time notice after the boot migration (HTML), until dismissed
@@ -1902,7 +1904,7 @@ function sessionResume(forTab){
   if(rec.tab === "test" && testName && (rec.drill || rd)) setTitle(testName);
   if(rec.drill){
     const o = rec.drill.o;
-    if(o.o === "wordsSet"){ wordsQuery = ""; wordsLv = o.lv; wordsSet = o.set; }
+    if(o.o === "wordsSet"){ wordsQuery = ""; wordsLv = o.lv; wordsTapped = true; wordsSet = o.set; }
     if(o.o === "lesson") soundsSel = o.i;
     D = { q: items, right: rec.drill.right, seen: rec.drill.seen, miss: misses, onDone, summary: results.summary, onShown: results.onShown, rzo: o, rzs: results.summary.rzs };
     if(Array.isArray(rec.drill.dn)) D.down = rec.drill.dn.filter(id => typeof id === "string");
@@ -2076,13 +2078,15 @@ function patternItem(pid, si, mi){
   if(!mk) return null;
   const ans = VC.patternMarkText(s, mk), t = String(s.t);
   const pf = pfSentence(s, null, { start: mk[0], end: mk[1], text: ans });
-  const body = (pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div>`
-    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s, VC.patternFirstMeeting(prog, p, PACK));
+  const bodyFor = first => (pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div>`
+    : `<div class="med wd"${TA}>${escapeHtml(t.slice(0, mk[0]))}<span class="blank">____</span>${escapeHtml(t.slice(mk[1]))}</div>`) + patternCueHTML(s, first);
+  const body = bodyFor(VC.patternFirstMeeting(prog, p, PACK));
   const note = patternNoteHTML(p), rv = sentenceRevealBlock(s);
   const base = { key: "p:" + pid, html: body, reveal: rv, onReveal: b => saySentence(s, b), revealHear: canHearSentence(s), mrowSent: s };
   // The note names the answer, so it rides with the verdict (owner 2026-10-08): on a first meeting right or
   // wrong, and on a miss any time. Read before notePattern writes the record.
-  base.onAnswer = function(ok){ const first = VC.patternFirstMeeting(prog, p, PACK); VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); this.reveal = ok && !first ? rv : note + rv; };
+  base.onAnswer = function(ok){ const first = VC.patternFirstMeeting(prog, p, PACK); VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); if(first) this.html = bodyFor(false); // a re-queued miss is not a first meeting (fb53)
+    this.reveal = ok && !first ? rv : note + rv; };
   const choice = () => ({ kind: "mc", label: "What's the missing word?", optsClass: "opts-hero opts-w", opts: [ans, ...VC.patternOpts(p, s, mi, PATTERN_LIST)], a: ans, optHtml: patternOptHTML, optsT: true });
   if(TYPING) return Object.assign(base, { kind: "type", label: "Type the missing word", check: v => VC.normKey(String(v).normalize("NFC")) === VC.normKey(ans.normalize("NFC")),
     choiceFallback(){ const c = Object.assign({}, this, choice()); c.onAnswer = base.onAnswer; return c; } });
@@ -2749,6 +2753,8 @@ function soundsRefHTML(){
 
 function wordsRender(){
   stopSpeaking();
+  // Only a tapped level sticks; an untapped default re-derives on each render (Learn's level may move after a placement or advance).
+  if(wordsLv == null || !wordsTapped){ const d = wordsStartLevel(); if(d !== wordsLv){ wordsLv = d; wordsSet = null; } }
   setScore(0,0);
   const P = $("panel");
   // appView: one name for one setting, the same word as the Progress chip (PRON_NOUN).
@@ -2812,7 +2818,7 @@ function renderWordBody(){
   body.innerHTML = `<div class="wseg" role="group" aria-label="Level">${LEVELS.map(lv=>`<button data-l="${escapeHtml(lv)}" id="wl_${escapeHtml(lv)}" class="${lv===wordsLv?'on':''}" aria-pressed="${lv===wordsLv}">${escapeHtml(levelLabel(lv))}</button>`).join("")}</div>
     <div class="row wnav"><button id="pv" aria-label="Previous set">‹</button><span class="pvn">Set ${wordsSet+1} of ${total}${setDone?' ✓':''}</span><button id="nx" aria-label="Next set">›</button>${wordsSet !== next ? `<button id="jump">Next new</button>` : ""}</div>
     <div id="wl"></div><div class="actions"><button class="next" id="dr">Drill this set</button>${canReview ? `<button class="ghost" id="rev">Review</button>` : ""}</div>`;
-  (LEVELS.map(lv => $("wl_" + lv))).forEach(b=>b.onclick=()=>{ wordsLv = b.dataset.l; wordsSet = null; renderWordBody(); });
+  (LEVELS.map(lv => $("wl_" + lv))).forEach(b=>b.onclick=()=>{ wordsLv = b.dataset.l; wordsTapped = true; wordsSet = null; renderWordBody(); });
   $("pv").onclick = () => { wordsSet = Math.max(0, wordsSet-1); renderWordBody(); };
   $("nx").onclick = () => { wordsSet = Math.min(total-1, wordsSet+1); renderWordBody(); };
   if(wordsSet !== next) $("jump").onclick = () => { wordsSet = next; renderWordBody(); };
@@ -3518,7 +3524,7 @@ function progressRender(){
   const lvData = LEVELS.map(lv => {
     const list = levelList(lv), learned = lwAll.filter(w => w.lv === lv);
     // pack.levelExam: a characters level counts a word mastered only by the exam rule (core.js wordKnownX).
-    return { lv, list, learned: learned.length, mas: learned.filter(w => VC.wordKnownX(prog.w[w.id], w, PACK, prog, knownBw)).length };
+    return { lv, list, learned: learned.length, mas: learned.filter(w => VC.wordKnownX(prog.w[w.id], w, PACK, prog, knownBw)).length, pos: VC.levelPosition(prog, PACK, lv, WORDS, CHAR_LIST) };
   });
   // The current level is the one Learn teaches words from (paused or not); the one below it keeps its
   // row until settled, every level further below folds into one line that opens on a tap (owner 2026-10-07).
@@ -3528,7 +3534,9 @@ function progressRender(){
   const low = lvData.filter((d, i) => i < ci - 1 || (i === ci - 1 && VC.levelSettled(d.learned, d.mas)));
   const folded = !all && !pvLow && low.length > 0;
   const lowLine = () => { const L = low.length === 1 ? levelLabel(low[0].lv) : pvRange(levelLabel(low[0].lv), levelLabel(low[low.length - 1].lv));
-    return `<button class="pvc" id="pvLow" aria-expanded="false"><span>${escapeHtml(L)}</span><span class="pvn">${low.reduce((n, d) => n + d.mas, 0)} of ${low.reduce((n, d) => n + d.learned, 0)} mastered</span></button>`; };
+    // The folded levels draw one bar too: the size-weighted position of the levels it holds (fb53).
+    const sz = low.reduce((n, d) => n + d.list.length, 0), pos = sz ? low.reduce((n, d) => n + d.pos * d.list.length, 0) / sz : 0;
+    return `<div class="pvl"><button class="pvc" id="pvLow" aria-expanded="false"><span>${escapeHtml(L)}</span><span class="pvn">${low.reduce((n, d) => n + d.mas, 0)} of ${low.reduce((n, d) => n + d.learned, 0)} mastered</span></button><div class="pvb" role="img" aria-label="${escapeHtml(L)}: ${Math.round(pos * 100)}% known"><i class="pvm" style="width:${pvPct(pos, 1)}"></i></div></div>`; };
   // One quiet row under the waiting level (under the folded line when that level is folded).
   const gateRow = () => `<p class="pvs pvgate">${escapeHtml(gateSentence())}</p>`;
   const levelRow = (d, i) => {
@@ -3546,8 +3554,8 @@ function progressRender(){
       if(PATTERNS_ON){ const ps = PATTERN_LIST.filter(p => String(p.lv) === String(d.lv)); const st = VC.patternStats(prog, PACK, ps, WORDS); if(st.open || (all && ps.length)) parts.push(`patterns ${st.done} of ${st.open}`); }
     }
     const value = open ? `${d.mas} of ${size} mastered` : `${pausedAt(d.lv) ? "paused, " : ""}${d.learned} learned`;
-    const aria = `${levelLabel(d.lv)}: ${d.learned} of ${size} learned, ${d.mas} mastered`;
-    return `<div class="pvl${open ? "" : " pvo"}"><div class="pvt"><span>${L}</span><span class="pvn">${value}</span></div><div class="pvb" role="img" aria-label="${escapeHtml(aria)}"><i class="pvlr" style="width:${pvPct(d.learned, size)}"></i><i class="pvm" style="width:${pvPct(d.mas, size)}"></i></div>${parts.length ? `<p class="pvs">${parts.join(" · ")}</p>` : ""}${gate && String(gate.lv) === String(d.lv) ? gateRow() : ""}</div>`;
+    const aria = `${levelLabel(d.lv)}: ${Math.round(d.pos * 100)}% known, ${d.learned} of ${size} learned, ${d.mas} mastered`;
+    return `<div class="pvl${open ? "" : " pvo"}"><div class="pvt"><span>${L}</span><span class="pvn">${value}</span></div><div class="pvb" role="img" aria-label="${escapeHtml(aria)}"><i class="pvm" style="width:${pvPct(d.pos, 1)}"></i></div>${parts.length ? `<p class="pvs">${parts.join(" · ")}</p>` : ""}${gate && String(gate.lv) === String(d.lv) ? gateRow() : ""}</div>`;
   };
   const lessonsDone = HAS_LESSONS ? LESSON_LIST.filter(l => prog.lessons[l.id]).length : 0;
   const rsp = HAS_PASSAGES ? VC.readingSpeed(PASSAGE_LIST, PACK, prog) : null;

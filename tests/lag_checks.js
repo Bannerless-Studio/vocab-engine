@@ -381,6 +381,8 @@ try {
       const cur = Object.assign({}, WITH, { eta: ETA }), old = withCollapsed(cur);
       const mid = VC.normalizeProg({ sets: { "1": NS("1"), "2": 2 }, placedOnce: true, soundsOpened: true, sessions: 7 }, WITH);
       byLv["1"].forEach(w => { mid.w[w.id] = { r: 3, w: 0, s: 3 }; }); byLv["2"].slice(0, 20).forEach(w => { mid.w[w.id] = { r: 1, w: 0, s: 1 }; });
+      // fb53: Progress level rows draw a position bar (and the folded line a bar of its own); the control compares the screens without them.
+      const noBars = h => h.replace(/<div class="pvb"[^>]*>(?:<i[^>]*><\/i>)+<\/div>/g, "").replace(/<div class="pvl">(<button class="pvc"[\s\S]*?<\/button>)<\/div>/g, "$1");
       for(const [name, p] of [["fresh", null], ["mid HSK 2", mid], ["owner shape", ownerProg(250)], ["owner, later", ownerProg(250, { defer: true })]]){
         const out = [];
         for(const [core, html, pk] of [[VC, appHtml, cur], [BASE, baseHtml, old]]){
@@ -390,7 +392,7 @@ try {
           api.today(); play(api);
           out.push({ t, g: gp, prog: st.ls.getItem(VC.storageKey(pk)) });
         }
-        check(`withWords pack (no learn), ${name}: Today, Progress and a whole session's progress byte-identical to ${BASE_SHA} (${out[0].t.length} + ${out[0].g.length} chars)`, out[0].t === out[1].t && out[0].g === out[1].g && out[0].prog === out[1].prog);
+        check(`withWords pack (no learn), ${name}: Today, Progress and a whole session's progress byte-identical to ${BASE_SHA} (${out[0].t.length} + ${out[0].g.length} chars)`, out[0].t === out[1].t && noBars(out[0].g) === noBars(out[1].g) && out[0].prog === out[1].prog);
       }
     }
   }

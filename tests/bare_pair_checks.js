@@ -146,6 +146,8 @@ const NS = lv => VC.nSets(byLv[lv], VC.setSizeOf(PACK));
 
 // The owner's export (private, never committed): $PAIRS_OWNER, else the 2026-10-04 upload; without one the
 // app sections run on a synthetic record and [6] is skipped.
+// fb53: Progress level rows draw a position bar (and the folded line a bar of its own); controls against the old engine compare the screens without them.
+const noBars = h => h.replace(/<div class="pvb"[^>]*>(?:<i[^>]*><\/i>)+<\/div>/g, "").replace(/<div class="pvl">(<button class="pvc"[\s\S]*?<\/button>)<\/div>/g, "$1");
 const OWNER_FILE = [process.env.PAIRS_OWNER, "/Users/ishmum/.claude/uploads/9e41e879-e4d7-4530-b040-c9be1286edd7/a48ee4d3-vocab_zh_progress_8.json"].find(f => f && fs.existsSync(f));
 const OWNER = OWNER_FILE ? JSON.parse(fs.readFileSync(OWNER_FILE, "utf8")) : null;
 // HSK 1 learned (streak 4) and its first 40 units taught: 20 at ruby (3, 4), 20 below (2).
@@ -294,7 +296,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
         const out = [api.panel()];
         for(let k = 0; k < 2; k++){ NOW += 4 * 3600e3; out.push(JSON.stringify(await session(api, () => rng() < 0.8))); api.tab("today"); await tick(); out.push(api.panel()); }
         for(const id of ["p0001", "p0017", "p0040"]){ api.startPassage(PASSAGES.find(x => x.id === id)); out.push(api.panel()); }
-        api.tab("progress"); await tick(); out.push(api.panel()); out.push(JSON.stringify(api.getProg()));
+        api.tab("progress"); await tick(); out.push(noBars(api.panel())); out.push(JSON.stringify(api.getProg()));
         return out;
       };
       const ref = await walk(baseHtml, BASE), cur = await walk(appHtml, VC);

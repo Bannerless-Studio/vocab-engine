@@ -47,6 +47,8 @@ const OLD = mainCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(
 const BASE_SHA = "d3632b8";
 const baseCoreSrc = git(BASE_SHA, "engine/core.js"), baseHtml = git(BASE_SHA, "engine/app.html");
 const BASE = baseCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "patterns-base-")), `core_${BASE_SHA}.js`); fs.writeFileSync(f, baseCoreSrc); return require(f); })() : null;
+// fb53: Progress level rows draw a position bar (and the folded line a bar of its own); controls against the old engine compare the screens without them.
+const noBars = h => h.replace(/<div class="pvb"[^>]*>(?:<i[^>]*><\/i>)+<\/div>/g, "").replace(/<div class="pvl">(<button class="pvc"[\s\S]*?<\/button>)<\/div>/g, "$1");
 const ETA = loadConst(path.join(ZH, "pack.js"), "PACK").eta;
 
 // ------------------------------------------------------------------ fake DOM (copied from pairs_checks.js)
@@ -401,6 +403,11 @@ const ptKey = it => String(it.key).startsWith("p:");
     await session(api3, (it) => { if(!ptKey(it)) return true; const k = it.key; seq[k] = (seq[k] || []); return seq[k].length > 0; }, { after: (it, ok, h) => { if(ptKey(it)) seq[it.key].push({ ok, note: NOTE.test(it.reveal) }); } });
     const retried = Object.values(seq).filter(a => a.length > 1);
     check("miss then right retry in one session: note on the miss, none on the retry", retried.length >= 1 && retried.every(a => !a[0].ok && a[0].note && a[1].ok && !a[1].note), JSON.stringify(retried));
+    // fb53: the English cue on the retry. First ask open, retry the tap link only (item html was built once).
+    const api5 = await boot(PACK, clone(base), 53, { patterns: PATTERNS }); const cue = {};
+    await session(api5, (it) => { if(!ptKey(it)) return true; const k = it.key; cue[k] = cue[k] || []; const h = api5.panel(); cue[k].push({ open: /<div class="q cue">[^<]+<\/div>/.test(h), tap: /data-pcue=/.test(h) }); return cue[k].length > 1; });
+    const cr = Object.values(cue).filter(a => a.length > 1);
+    check("fb53: first-meeting miss then retry: English open on the first ask, tap link only on the retry", cr.length >= 1 && cr.every(a => a[0].open && !a[0].tap && !a[1].open && a[1].tap), JSON.stringify(cr));
     // Sentences test: same rule.
     const api4 = await boot(PACK, clone(base), 54, { patterns: PATTERNS });
     api4.tab("test"); await tick();
@@ -427,7 +434,7 @@ const ptKey = it => String(it.key).startsWith("p:");
       const api = await boot(Object.assign({}, pack, { eta: ETA }), synth(["1", "2"], 2, 4, 5), 31, { html, core, patterns: pats });
       const out = [api.panel()];
       for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
-      api.tab("progress"); await tick(); out.push(api.panel());
+      api.tab("progress"); await tick(); out.push(noBars(api.panel()));
       return out;
     };
     const ref = await walk(PACK_OFF, baseHtml, BASE, undefined);
@@ -505,7 +512,7 @@ const ptKey = it => String(it.key).startsWith("p:");
       const out = [api.panel()];
       for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
       api.tab("test"); await tick(); const tb = api.el("tSentences"); if(tb){ tb.click(); const D = api.getD(); out.push([D.cur, ...D.q].filter(Boolean).map(x => x.html).join("\n")); }
-      api.tab("progress"); await tick(); out.push(api.panel());
+      api.tab("progress"); await tick(); out.push(noBars(api.panel()));
       return out;
     };
     const ref = await walk(baseHtml, BASE), cur = await walk(appHtml, VC);
