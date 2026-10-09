@@ -2591,6 +2591,19 @@ function goalPosition(prog, pack, goal, words, units, passages){
   if(wp){ const dn = (prog && isObj(prog.read) && isObj(prog.read.done)) ? prog.read.done : {}; x += wp * ps.filter(p => dn[p.id] && dn[p.id].l).length / ps.length; }
   return Math.max(0, Math.min(1, x));
 }
+// One level's position for its Progress row bar (fb53; owner 2026-10-09: the bars were mastered shares under a goal bar that counts placed
+// words): the goal bar's predicate (wordKnownP, units posKnown or past the pron tier) over this level only, passages left out.
+function levelPosition(prog, pack, lv, words, units){
+  const byId = {}; for(const w of (words || [])) byId[w.id] = w;
+  const ws = (words || []).filter(w => String(w.lv) === String(lv));
+  const us = (units || []).filter(u => String(u.lv !== undefined ? u.lv : (byId[(u.words || [])[0]] || {}).lv) === String(lv));
+  const recs = (prog && isObj(prog.w)) ? prog.w : {}, bw = knownCtx(pack, units);
+  const known = ws.filter(w => wordKnownP(recs[w.id], w, pack, prog, bw)).length;
+  const wu = us.length ? 0.2 : 0;
+  let x = ws.length ? (1 - wu) * known / ws.length : 0;
+  if(us.length){ const cr = charRecs(prog); x += wu * us.filter(u => cr[u.id] && (posKnown(pack, cr[u.id]) || charTier(cr[u.id].s, pack) !== "pron")).length / us.length; }
+  return Math.max(0, Math.min(1, x));
+}
 const GOAL_DONE = 0.9;
 function currentGoal(prog, pack, words, units, passages){
   const gs = progressMapGoals(pack); if(!gs.length) return null;
@@ -4563,7 +4576,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
-  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
+  gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, levelPosition, currentGoal, levelPosition, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,

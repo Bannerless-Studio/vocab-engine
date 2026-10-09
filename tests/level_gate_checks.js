@@ -420,7 +420,7 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
   const PRx = await todayHtml(PACK, gatedP, null); PRx.api.clickTab("progress"); PRx.api.el("pvAll").click();
   const PRn = await todayHtml(NOEXAM, gatedP, null); PRn.api.clickTab("progress"); PRn.api.el("pvAll").click();
   // v2 level bars (Show all): aria-label "HSK n: L of S learned, M mastered"
-  const mrow = (html, lv) => +(html.match(new RegExp(`aria-label="${VC.levelLabel(PACK, lv)}: \\d+ of \\d+ learned, (\\d+) mastered"`)) || [])[1];
+  const mrow = (html, lv) => +(html.match(new RegExp(`aria-label="${VC.levelLabel(PACK, lv)}: \\d+% known, \\d+ of \\d+ learned, (\\d+) mastered"`)) || [])[1];
   check(`Progress rows: HSK 3 mastered count drops (${mrow(PRn.api.panel(), LV[2])} -> ${mrow(PRx.api.panel(), LV[2])}), HSK 1 unchanged`, mrow(PRx.api.panel(), LV[2]) < mrow(PRn.api.panel(), LV[2]) && mrow(PRx.api.panel(), LV[0]) === mrow(PRn.api.panel(), LV[0]));
   {
     // progressView v2 rows and folded line count mastered by the exam rule too; the gate note sits in HSK 4's block.

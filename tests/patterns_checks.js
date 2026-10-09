@@ -47,6 +47,8 @@ const OLD = mainCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(
 const BASE_SHA = "d3632b8";
 const baseCoreSrc = git(BASE_SHA, "engine/core.js"), baseHtml = git(BASE_SHA, "engine/app.html");
 const BASE = baseCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "patterns-base-")), `core_${BASE_SHA}.js`); fs.writeFileSync(f, baseCoreSrc); return require(f); })() : null;
+// fb53: Progress level rows draw a position bar (and the folded line a bar of its own); controls against the old engine compare the screens without them.
+const noBars = h => h.replace(/<div class="pvb"[^>]*>(?:<i[^>]*><\/i>)+<\/div>/g, "").replace(/<div class="pvl">(<button class="pvc"[\s\S]*?<\/button>)<\/div>/g, "$1");
 const ETA = loadConst(path.join(ZH, "pack.js"), "PACK").eta;
 
 // ------------------------------------------------------------------ fake DOM (copied from pairs_checks.js)
@@ -432,7 +434,7 @@ const ptKey = it => String(it.key).startsWith("p:");
       const api = await boot(Object.assign({}, pack, { eta: ETA }), synth(["1", "2"], 2, 4, 5), 31, { html, core, patterns: pats });
       const out = [api.panel()];
       for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
-      api.tab("progress"); await tick(); out.push(api.panel());
+      api.tab("progress"); await tick(); out.push(noBars(api.panel()));
       return out;
     };
     const ref = await walk(PACK_OFF, baseHtml, BASE, undefined);
@@ -510,7 +512,7 @@ const ptKey = it => String(it.key).startsWith("p:");
       const out = [api.panel()];
       for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
       api.tab("test"); await tick(); const tb = api.el("tSentences"); if(tb){ tb.click(); const D = api.getD(); out.push([D.cur, ...D.q].filter(Boolean).map(x => x.html).join("\n")); }
-      api.tab("progress"); await tick(); out.push(api.panel());
+      api.tab("progress"); await tick(); out.push(noBars(api.panel()));
       return out;
     };
     const ref = await walk(baseHtml, BASE), cur = await walk(appHtml, VC);

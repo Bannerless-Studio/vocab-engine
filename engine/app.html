@@ -167,7 +167,6 @@
   .pvn{text-align:right}
   .pvb{position:relative;height:6px;border-radius:3px;background:color-mix(in srgb,var(--line) 60%,transparent);overflow:hidden;margin-top:6px}
   .pvb i{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
-  .pvb .pvlr{background:color-mix(in srgb,var(--mute) 45%,transparent)}
   .pvb .pvm{background:var(--ink)}
   .pvs{color:var(--mute);font-size:13px;margin-top:6px!important}
   /* A locked or paused level reads quieter by colour (var(--mute), 4.88:1 light / 6.68:1 dark); text opacity would put the gate note and the paused value under 4.5:1. */
@@ -3524,7 +3523,7 @@ function progressRender(){
   const lvData = LEVELS.map(lv => {
     const list = levelList(lv), learned = lwAll.filter(w => w.lv === lv);
     // pack.levelExam: a characters level counts a word mastered only by the exam rule (core.js wordKnownX).
-    return { lv, list, learned: learned.length, mas: learned.filter(w => VC.wordKnownX(prog.w[w.id], w, PACK, prog, knownBw)).length };
+    return { lv, list, learned: learned.length, mas: learned.filter(w => VC.wordKnownX(prog.w[w.id], w, PACK, prog, knownBw)).length, pos: VC.levelPosition(prog, PACK, lv, WORDS, CHAR_LIST) };
   });
   // The current level is the one Learn teaches words from (paused or not); the one below it keeps its
   // row until settled, every level further below folds into one line that opens on a tap (owner 2026-10-07).
@@ -3534,7 +3533,9 @@ function progressRender(){
   const low = lvData.filter((d, i) => i < ci - 1 || (i === ci - 1 && VC.levelSettled(d.learned, d.mas)));
   const folded = !all && !pvLow && low.length > 0;
   const lowLine = () => { const L = low.length === 1 ? levelLabel(low[0].lv) : pvRange(levelLabel(low[0].lv), levelLabel(low[low.length - 1].lv));
-    return `<button class="pvc" id="pvLow" aria-expanded="false"><span>${escapeHtml(L)}</span><span class="pvn">${low.reduce((n, d) => n + d.mas, 0)} of ${low.reduce((n, d) => n + d.learned, 0)} mastered</span></button>`; };
+    // The folded levels draw one bar too: the size-weighted position of the levels it holds (fb53).
+    const sz = low.reduce((n, d) => n + d.list.length, 0), pos = sz ? low.reduce((n, d) => n + d.pos * d.list.length, 0) / sz : 0;
+    return `<div class="pvl"><button class="pvc" id="pvLow" aria-expanded="false"><span>${escapeHtml(L)}</span><span class="pvn">${low.reduce((n, d) => n + d.mas, 0)} of ${low.reduce((n, d) => n + d.learned, 0)} mastered</span></button><div class="pvb" role="img" aria-label="${escapeHtml(L)}: ${Math.round(pos * 100)}% known"><i class="pvm" style="width:${pvPct(pos, 1)}"></i></div></div>`; };
   // One quiet row under the waiting level (under the folded line when that level is folded).
   const gateRow = () => `<p class="pvs pvgate">${escapeHtml(gateSentence())}</p>`;
   const levelRow = (d, i) => {
@@ -3552,8 +3553,8 @@ function progressRender(){
       if(PATTERNS_ON){ const ps = PATTERN_LIST.filter(p => String(p.lv) === String(d.lv)); const st = VC.patternStats(prog, PACK, ps, WORDS); if(st.open || (all && ps.length)) parts.push(`patterns ${st.done} of ${st.open}`); }
     }
     const value = open ? `${d.mas} of ${size} mastered` : `${pausedAt(d.lv) ? "paused, " : ""}${d.learned} learned`;
-    const aria = `${levelLabel(d.lv)}: ${d.learned} of ${size} learned, ${d.mas} mastered`;
-    return `<div class="pvl${open ? "" : " pvo"}"><div class="pvt"><span>${L}</span><span class="pvn">${value}</span></div><div class="pvb" role="img" aria-label="${escapeHtml(aria)}"><i class="pvlr" style="width:${pvPct(d.learned, size)}"></i><i class="pvm" style="width:${pvPct(d.mas, size)}"></i></div>${parts.length ? `<p class="pvs">${parts.join(" · ")}</p>` : ""}${gate && String(gate.lv) === String(d.lv) ? gateRow() : ""}</div>`;
+    const aria = `${levelLabel(d.lv)}: ${Math.round(d.pos * 100)}% known, ${d.learned} of ${size} learned, ${d.mas} mastered`;
+    return `<div class="pvl${open ? "" : " pvo"}"><div class="pvt"><span>${L}</span><span class="pvn">${value}</span></div><div class="pvb" role="img" aria-label="${escapeHtml(aria)}"><i class="pvm" style="width:${pvPct(d.pos, 1)}"></i></div>${parts.length ? `<p class="pvs">${parts.join(" · ")}</p>` : ""}${gate && String(gate.lv) === String(d.lv) ? gateRow() : ""}</div>`;
   };
   const lessonsDone = HAS_LESSONS ? LESSON_LIST.filter(l => prog.lessons[l.id]).length : 0;
   const rsp = HAS_PASSAGES ? VC.readingSpeed(PASSAGE_LIST, PACK, prog) : null;

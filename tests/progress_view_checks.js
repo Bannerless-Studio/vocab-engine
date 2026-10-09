@@ -233,13 +233,11 @@ else {
   const hx = api.panel();
   check("collapse: tapping the line expands HSK 1 and HSK 2 rows", /<span>HSK 1<\/span>/.test(hx) && /<span>HSK 2<\/span>/.test(hx) && !/id="pvLow"/.test(hx));
   h = hx;
-  const bars = [...h.matchAll(/<span>(HSK \d)<\/span>[\s\S]*?<i class="pvlr" style="width:([\d.]+)%"><\/i><i class="pvm" style="width:([\d.]+)%"><\/i>/g)];
-  const okBars = bars.length === 4 && bars.every(([, L, lw, mw]) => {
-    const lv = L.slice(4), size = byLv[lv].length, lw0 = learned.filter(w => w.lv === lv), m0 = lw0.filter(w => known(P, w)).length;
-    return Math.abs(+lw - lw0.length / size * 100) < 0.06 && Math.abs(+mw - m0 / size * 100) < 0.06;
-  });
-  check("bars: learned and mastered widths proportional to the level size, 4 levels", okBars);
-  console.log("INFO  bars " + bars.map(([, L, lw, mw]) => `${L} ${lw}/${mw}`).join(", "));
+  // fb53: a level row's bar is the level's position (wordKnownP share, units share on a characters level), one layer.
+  const bars = [...h.matchAll(/<span>(HSK \d)<\/span>[\s\S]*?<i class="pvm" style="width:([\d.]+)%"><\/i>/g)];
+  const okBars = bars.length === 4 && bars.every(([, L, w]) => Math.abs(+w - VC.levelPosition(P, PACK, L.slice(4), WORDS, CHARACTERS) * 100) < 0.06);
+  check("bars: one position layer per level row (VC.levelPosition), 4 levels", okBars && !/pvlr/.test(h));
+  console.log("INFO  bars " + bars.map(([, L, w]) => `${L} ${w}`).join(", "));
   check("wording: \"characters only\", never done / bare", /characters only \d+ of \d+/.test(t) && !/\b(done|bare)\b/.test(t));
   api.el("pvAll").click();
   h = api.panel(); t = stripTags(h);
@@ -366,6 +364,30 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
   const fewer = await bootWith(PACK, (() => { const p = midProg(); p.read = { done: { [ids[0]]: { sc: 1, n: 1, d: "x", x: 1, t: 60 }, [ids[1]]: { sc: 1, n: 1, d: "x", x: 1, t: 60 } } }; return p; })(), 5);
   fewer.api.clickTab("progress");
   check("app: two timed passages show no Reading row", !/Reading \d/.test(stripTags(fewer.api.panel())));
+}
+
+{
+  console.log("\n[5] fb53: level row bars show position, placed words counted (spanish, owner shape)");
+  const sim = require("./lib/sim_app.js"), repo = path.join(ROOT, "..", "spanish");
+  if(!fs.existsSync(path.join(repo, "pack", "words.json"))){ skips++; console.log("SKIP  ../spanish/pack not found"); }
+  else {
+    const E = sim.enrichedDir("es", repo), D = sim.loadPackDir(E.dir), SP = D.PACK, S = sim.createSim(D);
+    const LV = VC.levelIds(SP), BY = VC.wordsByLevel(D.WORDS, SP), size = VC.setSizeOf(SP);
+    const mk = (through) => { const p = VC.normalizeProg({}, SP); p.placedOnce = true; p.pl = LV[LV.length - 1];
+      LV.forEach((lv, i) => { const n = i < LV.length - 1 ? BY[lv].length : through * size; BY[lv].slice(0, n).forEach(w => { p.w[w.id] = { r: 1, w: 0, s: 1, prov: 1 }; }); });
+      LV.forEach(lv => VC.settleSetCounter(p, D.WORDS, SP, lv)); return p; };
+    const rows = html => [...html.matchAll(/<span>([^<]+)<\/span><span class="pvn">([^<]*)<\/span>[\s\S]*?<i class="pvm" style="width:([\d.]+)%"/g)].map(m => ({ L: m[1], txt: m[2], w: +m[3] }));
+    const { api } = { api: await S.bootWith(SP, mk(35), 3) }; api.clickTab("progress");
+    const r = rows(api.panel()).filter(x => LV.includes(x.L));
+    console.log("INFO  " + JSON.stringify(r));
+    const by = Object.fromEntries(r.map(x => [x.L, x]));
+    check(`${LV[0]} and ${LV[1]} bars full, ${LV[2]} about half (35 of ${Math.ceil(BY[LV[2]].length / size)} sets)`, by[LV[0]] && by[LV[1]] && by[LV[2]] && by[LV[0]].w === 100 && by[LV[1]].w === 100 && Math.abs(by[LV[2]].w - 100 * 35 * size / BY[LV[2]].length) < 0.6, JSON.stringify(r));
+    check("row texts stay literal (mastered counts on open levels, learned on a level not open for reading), not position", r.every(x => /^\d+ of \d+ mastered$|^\d+ learned$/.test(x.txt)) && by[LV[0]].txt === "0 of 600 mastered" && by[LV[1]].txt === "0 of 700 mastered", JSON.stringify(r));
+    check("aria label carries the position", /aria-label="[^"]*: 100% known/.test(api.panel()));
+    const f = await S.bootWith(SP, null, 4); f.clickTab("progress");
+    const fr = rows(f.panel()).filter(x => LV.includes(x.L));
+    check("fresh record: the first level row draws a 0% bar", fr.length >= 1 && fr[0].w === 0, JSON.stringify(fr));
+  }
 }
 
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
