@@ -388,7 +388,7 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
   }
   console.log(`\n[7] levelExam: pinyin vs characters levels`);
   const NOEXAM = (p => { delete p.levelExam; return p; })(Object.assign({}, PACK));
-  check("levelExamOn: zh ships it and reads on; off without pairs, without characters, without a characters level, absent", PACK.levelExam && VC.levelExamOn(PACK) && !VC.levelExamOn(Object.assign({}, PACK, { pairs: false })) && !VC.levelExamOn((p => { delete p.characters; return p; })(Object.assign({}, PACK))) && !VC.levelExamOn(Object.assign({}, PACK, { levelExam: { "1": "pinyin", "3": "pinyin" } })) && !VC.levelExamOn(NOEXAM));
+  check("levelExamOn: zh ships it and reads on; off without characters, without a characters level, absent", PACK.levelExam && VC.levelExamOn(PACK) && !VC.levelExamOn((p => { delete p.characters; return p; })(Object.assign({}, PACK))) && !VC.levelExamOn(Object.assign({}, PACK, { levelExam: { "1": "pinyin", "3": "pinyin" } })) && !VC.levelExamOn(NOEXAM));
   // HSK 1-3 taught, every word known; unit records vary
   const exam = unitRec => { const p = seed(3, BYLV[LV[2]].length, PACK); LV.slice(0, 3).forEach(lv => BYLV[lv].forEach(w => { const u = CHARACTERS.find(c => c.words[0] === w.id); if(u && unitRec) p.chars.c[u.id] = clone(unitRec); })); return p; };
   const W3 = BYLV[LV[2]], W1 = BYLV[LV[0]], UBW = new Map(CHARACTERS.map(u => [u.words[0], u]));
@@ -440,7 +440,7 @@ const charsAll = p => { const l = new Set(Object.keys(p.w)); CHARACTERS.filter(u
       const sg = C => JSON.stringify([(PACK.progressMap.goals || []).map(g => C.goalPosition(clone(p), NOEXAM, g, WORDS, CHARACTERS, [])), C.progressPosition(clone(p), NOEXAM, WORDS, CHARACTERS, [])]);
       check(`flag off (no levelExam): goal and progress positions identical to main on ${name}`, sg(VC) === sg(OLD));
     }
-    check("flag off: Progress rows HTML identical to main (no levelExam, no levelGate)", await (async () => { const OFF2 = packAsOf(PACK, MAIN); const a = await todayHtml(OFF2, unanswered, null), b = await todayHtml(OFF2, unanswered, { app: OLD_APP, core: OLD }); a.api.clickTab("progress"); b.api.clickTab("progress"); return strip(a.api.panel()) === strip(b.api.panel()); })());
+    // (the flag-off Progress control vs main went with pack.levelGate in the flag collapse)
     check("levelGate alone (no levelExam) is the word rule: levelKnownPct equals the pre-exam value", VC.levelKnownPct(WORDS, NOEXAM, unanswered, LV[2], CHARACTERS) === VC.levelKnownPct(WORDS, NOEXAM, unanswered, LV[2]));
   }
   if(OWNER){

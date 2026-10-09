@@ -56,7 +56,8 @@ function suite(F){
   const i1 = idx[cfg.stages[0].after], i2 = idx[cfg.stages[cfg.stages.length-1].after];
   const stageLv = cfg.stages.map(st => st.levels);
   const recAll = levels => { const c = {}; units.filter(u => levels.includes(u.lv)).forEach(u => { c[u.id] = rec(1); }); return c; };
-  const P = (sets, c, extra) => VC.normalizeProg({ sets, chars: Object.assign({ c: c || {} }, extra || {}) }, pack);
+  // The counted words carry placed records (prov): the level gate (engine default since the flag collapse) reads them known, so it never holds a level these fixtures open by set counters.
+  const P = (sets, c, extra) => { const q = VC.normalizeProg({ sets, chars: Object.assign({ c: c || {} }, extra || {}) }, pack); VC.pinPrefixRecords(q, words, pack); Object.values(q.w).forEach(r => { r.prov = 1; }); return q; };
   const tag = s => `${F.name}: ${s}`;
   console.log(`\n================ ${F.name}: ${words.length} words, ${units.length} units, levels ${ids.join(",")}, sets ${JSON.stringify(N)}`);
 
@@ -501,7 +502,7 @@ function flagOffEquality(){
       if(!packHasChars){
         const sp = VC.stagePath(pack, words, units || [], prog);
         const strip = ids.map(lv => ({ label: VC.levelLabel(pack, lv), frac: VC.nSets(byLv[lv], 10) ? (prog.sets[lv]||0)/VC.nSets(byLv[lv], 10) : 1 }));
-        const nn = OLD.nextNewSet(words, pack, prog), ns = VC.nextStage(pack, words, units || [], prog);
+        const nn = VC.nextNewSetOpen(words, pack, prog), ns = VC.nextStage(pack, words, units || [], prog);
         const snap = VC.todaySnapshot(pack, words, units || [], prog);
         if(!util.isDeepStrictEqual(sp.map(s => ({ label: s.label, frac: s.frac })), strip) || sp.some(s => s.kind !== "words")
           || (nn ? !(ns && ns.lv === nn.lv && ns.set === nn.set) : ns !== null)
@@ -848,7 +849,7 @@ function placeCharsChecks(){
     check(`[placeChars] ja: ${Object.keys(rj).length} units seeded in ${runJ.length} sets at ${kj}/${sj.length} buckets, all words placed, next set index ${csj && csj.index} = ${runJ.length}`, Object.keys(rj).length > 0 && ju.filter(u => rj[u.id]).every(u => u.words.every(i => pj.has(i)) && rj[u.id].prov === 1) && (!csj || csj.index === runJ.length) && VC.placedCharsThrough(on, ju, oj) != null);
     if(OLD){
       const ja1 = OLD.applyPlacement(OLD.defaultProg(jp), sj, kj, jw, jp), ja2 = VC.applyPlacement(VC.defaultProg(jp), sj, kj, jw, jp, ju);
-      check("[placeChars] ja without the key: applyPlacement byte-identical to the pre-fb50 engine", JSON.stringify(ja1) === JSON.stringify(ja2));
+      // (the byte-identity with the pre-fb50 engine went in the flag collapse: placedKnown, now default, postdates it)
     }
   } else console.log("    ../japanese/pack not present: ja checks skipped");
   const thr = VC.placedCharsThrough(PACK, UNITS, out), lastSet = run[run.length - 1];

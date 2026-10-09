@@ -211,7 +211,7 @@ function seedW(){
     const rk = Math.ceil(8 * VC.DAY_REFRESH_SHARE);
     check(`Recall (DAY_HELD_SHARE_RECALL ${VC.DAY_HELD_SHARE_RECALL}): held words fill all but the ${rk} refresh slots, asked typed (${rc.length} of 8)`, rc.length >= 8 - rk && rc.every(it => it.kind === "type"));
     const none = plan(PACK, { typedOk: () => false });
-    check(`typedOk false (no typed kind fits): no held word is pulled forward or forced typed (${hc(none).length} held; flag off ${hc(off).length})`, hc(none).length <= hc(off).length && lw.filter(w => held.has(w.id)).every(w => !VC.typedWordDue(w, p, PACK, TODAY, ["type", "recall"], () => false)));
+    check(`typedOk false (no typed kind fits): no held word is pulled forward or forced typed (${none.filter(it => it.word && held.has(it.word.id) && it.kind === "type").length} held asked typed)`, none.every(it => !(it.word && held.has(it.word.id) && it.kind === "type")) && lw.filter(w => held.has(w.id)).every(w => !VC.typedWordDue(w, p, PACK, TODAY, ["type", "recall"], () => false)));
     // LOW 3: the type -> recall downgrade is for words typed this session only.
     {
       const wk = VC.dayWordKinds(PACK), ck = VC.dayCharKinds(PACK);
