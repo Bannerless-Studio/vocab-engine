@@ -727,6 +727,8 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
     }
     if(baseHtml && baseCore){
       const a = await run(baseHtml, baseCore), b = await run(undefined, undefined);
+      // 0ad8a97: hear-sentence items are centred (no "sent" class); the base still marks them
+      a.walk = a.walk.replace(/<div class="drill-body sent">(?=<p class="q">What did they say\?)/g, '<div class="drill-body">');
       for(const k of Object.keys(a)){
         let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
         check(`${k} byte-identical to ${BASE_SHA} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: base ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);
