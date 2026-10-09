@@ -488,14 +488,14 @@ function missesCarried(drilled0){
     api = await boot(PACK_ON, st, 99);
     check(`reload: same queue, day log unchanged (drill ordinal ${api.getProg().day.n}, not counted again)`, !!api.getD() && qsig(api) === before.q && JSON.stringify(api.getProg().day) === before.day);
     check(`reload: session ordinal prog.sn unchanged (${before.sn} -> ${api.getProg().sn})`, before.sn === 1 && api.getProg().sn === 1);
-    // Another tab and back resumes; re-tapping Today parks it behind "Resume today".
+    // Another tab and back resumes; re-tapping Today parks it behind "Resume".
     const mid = { q: qsig(api), n: api.getProg().day.n };
     api.clickTab("test"); api.clickTab("today");
     check(`tab away and back: same queue, prog.sn and day.n not counted again (${api.getProg().sn}, ${api.getProg().day.n})`, !!api.getD() && qsig(api) === mid.q && api.getProg().sn === 1 && api.getProg().day.n === mid.n);
     api.clickTab("today");
     const label = api.el("go") ? api.el("go").textContent : "(no button)";
     if(!api.getD() && api.el("go")) api.el("go").click();
-    check(`"${label}" button: same queue, prog.sn and day.n not counted again (${api.getProg().sn}, ${api.getProg().day.n})`, label === "Resume today" && !!api.getD() && qsig(api) === mid.q && api.getProg().sn === 1 && api.getProg().day.n === mid.n);
+    check(`"${label}" button: same queue, prog.sn and day.n not counted again (${api.getProg().sn}, ${api.getProg().day.n})`, label === "Resume" && !!api.getD() && qsig(api) === mid.q && api.getProg().sn === 1 && api.getProg().day.n === mid.n);
     // A Test drill counts one session; its Resume drill button does not count another.
     api.quit(); api.clickTab("test"); api.el("tRecall").click();
     const t0 = { sn: api.getProg().sn, n: api.getProg().day.n };
@@ -528,7 +528,7 @@ function missesCarried(drilled0){
     api.clickTab("today");
     const label = api.el("go") ? api.el("go").textContent : "(no button)";
     if(!api.getD() && api.el("go")) api.el("go").click();
-    check(`parked Today, a Test drill writes sn/day/u/t (${wrote}), "${label}": the same queue, nothing counted (sn ${api.getProg().sn}, day.n ${api.getProg().day.n})`, wrote && label === "Resume today" && !!api.getD() && qsig(api) === parked && api.getProg().sn === 2 && api.getProg().day.n === 2);
+    check(`parked Today, a Test drill writes sn/day/u/t (${wrote}), "${label}": the same queue, nothing counted (sn ${api.getProg().sn}, day.n ${api.getProg().day.n})`, wrote && label === "Resume" && !!api.getD() && qsig(api) === parked && api.getProg().sn === 2 && api.getProg().day.n === 2);
     api = await boot(PACK_ON, st, 77);
     check("reload after those writes: the session resumes (fingerprint followed them)", !!api.getD() && qsig(api) === parked && api.getProg().sn === 2);
   }
