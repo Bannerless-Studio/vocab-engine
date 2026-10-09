@@ -3154,7 +3154,7 @@ function sessionsToGo(prog, g, n){
 // App v2 ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"; owner 2026-10-08: an estimate from the first
 // session). Goal packs: a calibrated curve, never the measured pace (pm.p rounds to 0.001 and the pace at PM_KEEP entries
 // missed the actual crossing by -57% to +195% on owner-export sims). A whole-pack bar has no model: sessionsToGo or nothing.
-// pack.eta.curve[g] = [[position, sessions remaining until the goal first reaches GOAL_DONE], ...] sampled from fresh-record
+// pack.eta.curve[g] = [[position, sessions remaining until the goal reaches GOAL_DONE and holds it to the end of the trace], ...] sampled from fresh-record
 // sims (tests/eta_checks.js --calibrate): a goal gains ~9x faster early (new words count at once) than late (mastery
 // streaks), so one constant slope cannot fit both ends (fb42; the fb41 constant read "≈ 830" on a fresh zh record).
 // pack.eta.knownCurve = {<level id>: [[known share of that level, sessions until the next level's gate opens], ...]}: the
@@ -6232,7 +6232,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1268707447-2355019";
+const VE_BUILD = "3663668689-2355050";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -8335,4 +8335,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3777872545-2354343-->
+<!--ve-build:265986530-2354374-->

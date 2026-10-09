@@ -22,6 +22,7 @@ tail -f .cache/round/queue.log          # one progress line per site and stage
 ```
 
 - Process cap: 2 sites in parallel x 3 seed processes = 6 (`--sites-parallel`, `--procs`; the product may not exceed 6). The machine has 8 cores and a 7 GB Chrome; 16 GB.
+- A goal "crosses" 0.9 at the first session from which its position stays at 0.9 or more through the end of the trace (sustained, `crossOf` in tests/lib/eta_curve.js, shared by calibration, the gate and etadrv), so a touch that drops back does not count and a goal that ends the trace below 0.9 has no crossing.
 - `--sessions N` calibration sessions per seed (default 600, site.env `ETA_SESSIONS`; japanese needed 400 and its goals 2 and 3 never cross: they ship null). `--gate-sessions N` for the gate (default 400).
 - Per site, default layout: `<site>/tools/eta.json` (curve shape, `{curve, knownCurve}`; failed goals and gates are written null), `<site>/.cache/eta/{calibrate.log,gate.log,verdict.txt}` and per-seed runs in `runs-*` there. With `--out DIR` the same files go to `DIR/<site>/` and the repo is untouched.
 - `verdict.txt`, one line: `sha=<engine> sessions=<cal>/<gate> result=OK|FAIL cal[goal_1=PASS goal_2=none ... gate=PASS] oos[...] at=<time>`. `none` = no estimate (a goal that never crossed, or fewer than two seeds did). `result=FAIL` = an out-of-sample gate failed (some curve outside +-30% on 2 of 3 seeds).

@@ -2704,7 +2704,7 @@ function sessionsToGo(prog, g, n){
 // App v2 ETA (docs/PACK_SCHEMA.md "appView" > "ETA model"; owner 2026-10-08: an estimate from the first
 // session). Goal packs: a calibrated curve, never the measured pace (pm.p rounds to 0.001 and the pace at PM_KEEP entries
 // missed the actual crossing by -57% to +195% on owner-export sims). A whole-pack bar has no model: sessionsToGo or nothing.
-// pack.eta.curve[g] = [[position, sessions remaining until the goal first reaches GOAL_DONE], ...] sampled from fresh-record
+// pack.eta.curve[g] = [[position, sessions remaining until the goal reaches GOAL_DONE and holds it to the end of the trace], ...] sampled from fresh-record
 // sims (tests/eta_checks.js --calibrate): a goal gains ~9x faster early (new words count at once) than late (mastery
 // streaks), so one constant slope cannot fit both ends (fb42; the fb41 constant read "≈ 830" on a fresh zh record).
 // pack.eta.knownCurve = {<level id>: [[known share of that level, sessions until the next level's gate opens], ...]}: the
