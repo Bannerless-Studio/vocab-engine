@@ -1,0 +1,2478 @@
+{
+ "lang": "spanish",
+ "packKey": "es",
+ "words": 2000,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "c19c74271403fc61"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     179,
+     278,
+     335
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": 179,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy A1 0 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy A1 30 learned Still shaky tener su decir Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 1 of 60 › Drill this set",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "el the (el, la, los, las)",
+        "de of",
+        "a to, at",
+        "ser to be (identity, nature, time)",
+        "no not",
+        "en in, on, at",
+        "un a, an (some (un, una, unos, unas) )",
+        "y and",
+        "que that (than)",
+        "estar to be (state, location)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "el negocio business, enterprise",
+        "regresar to go back, to come back, to return",
+        "acordar to remember, to recall",
+        "la fiesta party",
+        "ofrecer to offer, to offer up, to provide",
+        "utilizar to use",
+        "moverse to move",
+        "el auto car",
+        "social social",
+        "cuánto how much"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "matar to kill, to slay",
+        "el arma weapon, arm (f)",
+        "la sangre blood",
+        "el sexo sex",
+        "disparar to shoot, to fire",
+        "el asesinato murder",
+        "la droga drug",
+        "asesinar to murder",
+        "sexual sexual",
+        "la bomba bomb"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 4 of 60",
+       "rows": 10,
+       "first": [
+        "más more",
+        "saber to know, to understand",
+        "como as, like",
+        "querer to want, to want to, to desire",
+        "ver to see, to spot",
+        "todo all",
+        "yo I",
+        "le to him, to her (to you (formal) )",
+        "ese that",
+        "tu your"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "el negocio business, enterprise",
+        "regresar to go back, to come back, to return",
+        "acordar to remember, to recall",
+        "la fiesta party",
+        "ofrecer to offer, to offer up, to provide",
+        "utilizar to use",
+        "moverse to move",
+        "el auto car",
+        "social social",
+        "cuánto how much"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "matar to kill, to slay",
+        "el arma weapon, arm (f)",
+        "la sangre blood",
+        "el sexo sex",
+        "disparar to shoot, to fire",
+        "el asesinato murder",
+        "la droga drug",
+        "asesinar to murder",
+        "sexual sexual",
+        "la bomba bomb"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0001",
+     "mc:w:w0009",
+     "mc:w:w0009",
+     "mc:w:w0008",
+     "mc:w:w0004",
+     "mc:w:w0002",
+     "mc:w:w0008",
+     "mc:w:w0010",
+     "mc:w:w0005",
+     "mc:w:w0006",
+     "mc:w:w0005",
+     "mc:w:w0006",
+     "mc:w:w0007",
+     "mc:w:w0007",
+     "mc:w:w0003",
+     "mc:w:w0010",
+     "mc:w:w0003",
+     "mc:w:w0001",
+     "mc:w:w0002",
+     "mc:w:w0004",
+     "mc:w:w0002",
+     "mc:w:w0010",
+     "mc:w:w0002"
+    ],
+    [
+     "type:w:w0006",
+     "mc:w:w0004",
+     "mc:w:w0010",
+     "type:w:w0008",
+     "mc:w:w0001",
+     "mc:w:w0002",
+     "mc:w:w0005",
+     "type:w:w0009",
+     "mc:w:w0007",
+     "mc:w:w0003",
+     "mc:w:w0011",
+     "mc:w:w0019",
+     "mc:w:w0014",
+     "mc:w:w0013",
+     "mc:w:w0015",
+     "mc:w:w0017",
+     "mc:w:w0012",
+     "mc:w:w0018",
+     "mc:w:w0018",
+     "mc:w:w0012",
+     "mc:w:w0016",
+     "mc:w:w0013",
+     "mc:w:w0019",
+     "mc:w:w0016",
+     "mc:w:w0017",
+     "mc:w:w0020",
+     "mc:w:w0014",
+     "mc:w:w0015",
+     "mc:w:w0011",
+     "mc:w:w0020",
+     "mc:w:w0014",
+     "mc:w:w0010",
+     "mc:w:w0009",
+     "mc:w:w0006",
+     "mc:w:w0008",
+     "type:w:w0007",
+     "type:w:w0002",
+     "type:w:w0003",
+     "type:w:w0004",
+     "type:w:w0001",
+     "type:w:w0005"
+    ],
+    [
+     "type:w:w0016",
+     "type:w:w0010",
+     "mc:w:w0019",
+     "type:w:w0012",
+     "mc:w:w0017",
+     "mc:w:w0011",
+     "type:w:w0002",
+     "type:w:w0009",
+     "mc:w:w0013",
+     "mc:w:w0018",
+     "type:w:w0020",
+     "mc:w:w0014",
+     "type:w:w0008",
+     "type:w:w0015",
+     "type:w:w0006",
+     "type:w:w0020",
+     "mc:w:w0028",
+     "mc:w:w0027",
+     "mc:w:w0029",
+     "mc:w:w0024",
+     "mc:w:w0023",
+     "mc:w:w0021",
+     "mc:w:w0030",
+     "mc:w:w0027",
+     "mc:w:w0025",
+     "mc:w:w0022",
+     "mc:w:w0023",
+     "mc:w:w0030",
+     "mc:w:w0025",
+     "mc:w:w0024",
+     "mc:w:w0029",
+     "mc:w:w0022",
+     "mc:w:w0021",
+     "mc:w:w0026",
+     "mc:w:w0026",
+     "mc:w:w0028",
+     "mc:w:w0026",
+     "mc:w:w0012",
+     "mc:w:w0016",
+     "mc:w:w0010",
+     "mc:w:w0005",
+     "mc:w:w0002",
+     "mc:w:w0020",
+     "mc:w:w0004",
+     "mc:w:w0007",
+     "mc:w:w0001",
+     "mc:w:w0003",
+     "mc:w:w0015",
+     "mc:w:w0020",
+     "mc:w:w0015",
+     "type:w:w0014",
+     "type:w:w0019",
+     "type:w:w0018",
+     "type:w:w0011",
+     "type:w:w0013",
+     "type:w:w0017"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">el</span><span class=\"rg\">the <span class=\"dim\">(el, la, los, las)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"33\"><div class=\"st\" data-tl lang=\"es\">¿Cómo provocar el deseo de una mujer?</div><div class=\"se\">How to arouse a woman&#39;s desire?</div></div><div class=\"sent\" data-sent=\"13\"><div class=\"st\" data-tl lang=\"es\">¿Realmente necesitas preguntar para saber la respuesta?</div><div class=\"se\">Do you really need to ask the question to know the answer?</div></div></div>"
+    },
+    {
+     "key": "w:w0009",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0009\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">que</span><span class=\"rg\">that <span class=\"gx\">(than)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"4\"><div class=\"st\" data-tl lang=\"es\">Creo <b>que</b> tengo una teoría sobre eso.</div><div class=\"se\">I think I have a theory about that.</div></div><div class=\"sent\" data-sent=\"7\"><div class=\"st\" data-tl lang=\"es\">Mi ordenador tiene <b>que</b> ser útil para algo.</div><div class=\"se\">My computer has got to be useful for something.</div></div></div>"
+    },
+    {
+     "key": "w:w0009",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0009\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">que</span><span class=\"rg\">that <span class=\"gx\">(than)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"4\"><div class=\"st\" data-tl lang=\"es\">Creo <b>que</b> tengo una teoría sobre eso.</div><div class=\"se\">I think I have a theory about that.</div></div><div class=\"sent\" data-sent=\"7\"><div class=\"st\" data-tl lang=\"es\">Mi ordenador tiene <b>que</b> ser útil para algo.</div><div class=\"se\">My computer has got to be useful for something.</div></div></div>"
+    },
+    {
+     "key": "w:w0008",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0008\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">y</span><span class=\"rg\">and</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"36\"><div class=\"st\" data-tl lang=\"es\">La palabra es plata <b>y</b> el silencio oro.</div><div class=\"se\">Speech is silver, but silence is golden.</div></div><div class=\"sent\" data-sent=\"54\"><div class=\"st\" data-tl lang=\"es\">Mañana es mi cumpleaños, <b>y</b> cumpliré 17.</div><div class=\"se\">Tomorrow is my birthday and I will be seventeen.</div></div></div>"
+    },
+    {
+     "key": "w:w0004",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0004\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">ser</span><span class=\"rg\">to be <span class=\"dim\">(identity, nature, time)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2\"><div class=\"st\" data-tl lang=\"es\">Si yo pudiera <b>ser</b> así...</div><div class=\"se\">If I could be like that...</div></div><div class=\"sent\" data-sent=\"7\"><div class=\"st\" data-tl lang=\"es\">Mi ordenador tiene que <b>ser</b> útil para algo.</div><div class=\"se\">My computer has got to be useful for something.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "1723e653a04bbf66"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "f107366016e18375"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "3d2c15200d7aa718"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "be34f914b5e7f215"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "23eb3140fde16cba"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.010667,
+     0.004923,
+     0.0032
+    ],
+    "toGo": [
+     177,
+     276,
+     332
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.010667,
+     "all": false
+    },
+    "eta": 177,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.003
+   },
+   "items": {
+    "items": 120,
+    "right": 112
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "day": {
+     "n": 3,
+     "sha": "a198e192016bdfb9"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "d17f0acbf34e19c9"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "438f93ca72b641ce"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 27,
+     "sha": "86d1d088e4e7837f"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 3,
+     "sha": "e3f9f0c08da51372"
+    },
+    "showPron": false,
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 120,
+     "sha": "9b8aebb1e96bd35f"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.05,
+     0.023462,
+     0.015333
+    ],
+    "toGo": [
+     168,
+     266,
+     320
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.05,
+     "all": false
+    },
+    "eta": 168,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.015417
+   },
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "today": [
+    "Session 13 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, A1 In 6 sessions since your last visit +15 mastered Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy A1 120 learned Still shaky decir saber ver dónde la casa seguir necesitar ni conocer entre Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy A1 150 learned Still shaky no ir yo ahora el año el tiempo llegar entender mí buscar Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 13 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 13 of 60",
+       "rows": 10,
+       "first": [
+        "antes before",
+        "mirar to look at",
+        "el trabajo work, job",
+        "el mundo world, earth",
+        "la mujer woman",
+        "el lugar place",
+        "les to them",
+        "alguien someone, somebody",
+        "mucho a lot, much",
+        "mismo same"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "el negocio business, enterprise",
+        "regresar to go back, to come back, to return",
+        "acordar to remember, to recall",
+        "la fiesta party",
+        "ofrecer to offer, to offer up, to provide",
+        "utilizar to use",
+        "moverse to move",
+        "el auto car",
+        "social social",
+        "cuánto how much"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "matar to kill, to slay",
+        "el arma weapon, arm (f)",
+        "la sangre blood",
+        "el sexo sex",
+        "disparar to shoot, to fire",
+        "el asesinato murder",
+        "la droga drug",
+        "asesinar to murder",
+        "sexual sexual",
+        "la bomba bomb"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 16 of 60",
+       "rows": 10,
+       "first": [
+        "el caso case",
+        "último last",
+        "tres three",
+        "usar to use",
+        "poco little",
+        "luego then",
+        "el señor man, gentleman (sir, Mr.)",
+        "ahí there",
+        "el nombre name",
+        "perder to lose"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "el negocio business, enterprise",
+        "regresar to go back, to come back, to return",
+        "acordar to remember, to recall",
+        "la fiesta party",
+        "ofrecer to offer, to offer up, to provide",
+        "utilizar to use",
+        "moverse to move",
+        "el auto car",
+        "social social",
+        "cuánto how much"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "matar to kill, to slay",
+        "el arma weapon, arm (f)",
+        "la sangre blood",
+        "el sexo sex",
+        "disparar to shoot, to fire",
+        "el asesinato murder",
+        "la droga drug",
+        "asesinar to murder",
+        "sexual sexual",
+        "la bomba bomb"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0120",
+     "mc:w:w0093",
+     "mc:w:w0102",
+     "type:w:w0098",
+     "mc:w:w0116",
+     "type:w:w0105",
+     "type:w:w0034",
+     "mc:w:w0077",
+     "type:w:w0115",
+     "type:w:w0032",
+     "mc:w:w0119",
+     "type:w:w0005",
+     "type:w:w0026",
+     "type:w:w0118",
+     "type:w:w0035",
+     "type:w:w0115",
+     "mc:w:w0119",
+     "type:w:w0026",
+     "type:w:w0118",
+     "mc:w:w0115",
+     "mc:w:w0126",
+     "mc:w:w0125",
+     "mc:w:w0125",
+     "mc:w:w0130",
+     "mc:w:w0123",
+     "mc:w:w0128",
+     "mc:w:w0127",
+     "mc:w:w0128",
+     "mc:w:w0129",
+     "mc:w:w0121",
+     "mc:w:w0127",
+     "mc:w:w0124",
+     "mc:w:w0126",
+     "mc:w:w0121",
+     "mc:w:w0122",
+     "mc:w:w0123",
+     "mc:w:w0124",
+     "mc:w:w0130",
+     "mc:w:w0122",
+     "mc:w:w0129",
+     "mc:w:w0130",
+     "mc:w:w0130",
+     "mc:w:w0103",
+     "mc:w:w0119",
+     "mc:w:w0053",
+     "mc:w:w0116",
+     "mc:w:w0113",
+     "mc:w:w0048",
+     "mc:w:w0111",
+     "mc:w:w0112",
+     "mc:w:w0120",
+     "mc:w:w0081",
+     "mc:w:w0105",
+     "mc:w:w0044",
+     "mc:w:w0119",
+     "type:w:w0064",
+     "type:w:w0073",
+     "type:w:w0051",
+     "type:w:w0068",
+     "type:w:w0070",
+     "type:w:w0084",
+     "type:w:w0114",
+     "type:w:w0117",
+     "type:w:w0072",
+     "type:w:w0087",
+     "type:w:w0082",
+     "type:w:w0079",
+     "type:w:w0051",
+     "type:s:s1500",
+     "mc:s:s0558",
+     "type:s:s0506",
+     "type:s:s0249",
+     "mc:s:s0892",
+     "mc:s:s2967",
+     "mc:s:s1362",
+     "type:s:s0002",
+     "type:s:s1500",
+     "type:s:s0506",
+     "type:s:s0249",
+     "type:s:s0002",
+     "mc:s:s1500",
+     "mc:s:s0506",
+     "mc:s:s0249",
+     "mc:s:s0002"
+    ],
+    [
+     "type:w:w0051",
+     "type:w:w0074",
+     "type:w:w0026",
+     "type:w:w0041",
+     "type:w:w0126",
+     "type:w:w0118",
+     "mc:w:w0119",
+     "type:w:w0116",
+     "type:w:w0102",
+     "mc:w:w0130",
+     "type:w:w0032",
+     "type:w:w0097",
+     "type:w:w0115",
+     "type:w:w0055",
+     "type:w:w0121",
+     "type:w:w0074",
+     "type:w:w0026",
+     "type:w:w0041",
+     "type:w:w0102",
+     "type:w:w0032",
+     "type:w:w0115",
+     "mc:w:w0136",
+     "mc:w:w0137",
+     "mc:w:w0131",
+     "mc:w:w0133",
+     "mc:w:w0135",
+     "mc:w:w0132",
+     "mc:w:w0140",
+     "mc:w:w0140",
+     "mc:w:w0139",
+     "mc:w:w0138",
+     "mc:w:w0138",
+     "mc:w:w0137",
+     "mc:w:w0133",
+     "mc:w:w0135",
+     "mc:w:w0132",
+     "mc:w:w0131",
+     "mc:w:w0136",
+     "mc:w:w0134",
+     "mc:w:w0139",
+     "mc:w:w0134",
+     "mc:w:w0123",
+     "mc:w:w0077",
+     "mc:w:w0036",
+     "mc:w:w0127",
+     "mc:w:w0093",
+     "mc:w:w0124",
+     "mc:w:w0060",
+     "mc:w:w0125",
+     "mc:w:w0122",
+     "mc:w:w0057",
+     "mc:w:w0018",
+     "mc:w:w0130",
+     "type:w:w0024",
+     "type:w:w0098",
+     "type:w:w0077",
+     "type:w:w0075",
+     "type:w:w0080",
+     "type:w:w0089",
+     "type:w:w0035",
+     "type:w:w0119",
+     "type:w:w0078",
+     "type:w:w0120",
+     "type:w:w0128",
+     "type:w:w0129",
+     "type:w:w0024",
+     "type:w:w0098",
+     "type:w:w0078",
+     "type:w:w0120",
+     "mc:w:w0120",
+     "mc:s:s0710",
+     "mc:s:s2250",
+     "type:s:s0195",
+     "type:s:s0447",
+     "mc:s:s1199",
+     "mc:s:s0841",
+     "type:s:s0341",
+     "type:s:s0001",
+     "type:s:s0195",
+     "type:s:s0447",
+     "mc:s:s1199",
+     "type:s:s0341",
+     "type:s:s0001",
+     "mc:s:s0195",
+     "mc:s:s0447",
+     "mc:s:s0341",
+     "mc:s:s0001"
+    ],
+    [
+     "type:w:w0058",
+     "type:w:w0098",
+     "type:w:w0032",
+     "type:w:w0024",
+     "type:w:w0055",
+     "type:w:w0051",
+     "type:w:w0041",
+     "type:w:w0102",
+     "type:w:w0120",
+     "type:w:w0005",
+     "type:w:w0078",
+     "type:w:w0118",
+     "type:w:w0026",
+     "type:w:w0115",
+     "type:w:w0074",
+     "type:w:w0058",
+     "type:w:w0074",
+     "mc:w:w0144",
+     "mc:w:w0150",
+     "mc:w:w0145",
+     "mc:w:w0143",
+     "mc:w:w0150",
+     "mc:w:w0144",
+     "mc:w:w0149",
+     "mc:w:w0143",
+     "mc:w:w0142",
+     "mc:w:w0148",
+     "mc:w:w0142",
+     "mc:w:w0145",
+     "mc:w:w0147",
+     "mc:w:w0148",
+     "mc:w:w0149",
+     "mc:w:w0141",
+     "mc:w:w0147",
+     "mc:w:w0141",
+     "mc:w:w0146",
+     "mc:w:w0146",
+     "mc:w:w0144",
+     "mc:w:w0142",
+     "mc:w:w0147",
+     "mc:w:w0132",
+     "mc:w:w0068",
+     "mc:w:w0051",
+     "mc:w:w0065",
+     "mc:w:w0131",
+     "mc:w:w0023",
+     "mc:w:w0119",
+     "mc:w:w0055",
+     "mc:w:w0135",
+     "mc:w:w0136",
+     "mc:w:w0037",
+     "mc:w:w0133",
+     "mc:w:w0037",
+     "type:w:w0094",
+     "type:w:w0119",
+     "type:w:w0097",
+     "type:w:w0140",
+     "type:w:w0134",
+     "type:w:w0139",
+     "type:w:w0137",
+     "type:w:w0085",
+     "type:w:w0130",
+     "type:w:w0138",
+     "type:w:w0090",
+     "type:w:w0099",
+     "type:w:w0099",
+     "mc:w:w0099",
+     "mc:s:s3017",
+     "type:s:s1500",
+     "type:s:s0001",
+     "type:s:s0195",
+     "mc:s:s1665",
+     "mc:s:s0434",
+     "mc:s:s1393",
+     "type:s:s0002",
+     "mc:s:s3017",
+     "type:s:s1500",
+     "type:s:s0001",
+     "type:s:s0195",
+     "mc:s:s0434",
+     "type:s:s0002",
+     "mc:s:s3017",
+     "mc:s:s1500",
+     "mc:s:s0001",
+     "mc:s:s0195",
+     "mc:s:s0002"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0120",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0120\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">entre</span><span class=\"rg\">between</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"267\"><div class=\"st\" data-tl lang=\"es\"><b>Entre</b> nosotros no hay problema.</div><div class=\"se\">Between us there is no problem.</div></div><div class=\"sent\" data-sent=\"661\"><div class=\"st\" data-tl lang=\"es\">¿Encontraste la diferencia <b>entre</b> estas dos fotos?</div><div class=\"se\">Did you find the difference between these two photos?</div></div></div>"
+    },
+    {
+     "key": "w:w0093",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0093\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">la casa</span><span class=\"rg\">house</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"63\"><div class=\"st\" data-tl lang=\"es\">La casa de la esquina es la nuestra.</div><div class=\"se\">The house on the corner is ours.</div></div><div class=\"sent\" data-sent=\"402\"><div class=\"st\" data-tl lang=\"es\">El caballo está lejos de la casa.</div><div class=\"se\">The horse is far from the house.</div></div></div>"
+    },
+    {
+     "key": "w:w0102",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0102\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">necesitar</span><span class=\"rg\">to need</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2171\"><div class=\"st\" data-tl lang=\"es\">Voy a <b>necesitar</b> tu ayuda.</div><div class=\"se\">I&#39;m going to need your help.</div></div><div class=\"sent\" data-sent=\"2201\"><div class=\"st\" data-tl lang=\"es\">Voy a <b>necesitar</b> su ayuda.</div><div class=\"se\">I&#39;m going to need your help.</div></div></div>"
+    },
+    {
+     "key": "w:w0098",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0098\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">seguir</span><span class=\"rg\">to follow</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1140\"><div class=\"st\" data-tl lang=\"es\">Voy a <b>seguir</b> vuestro consejo.</div><div class=\"se\">I&#39;ll act on your advice.</div></div><div class=\"sent\" data-sent=\"1170\"><div class=\"st\" data-tl lang=\"es\">Debemos <b>seguir</b> estudiando mientras vivamos.</div><div class=\"se\">We must continue to study as long as we live.</div></div></div>"
+    },
+    {
+     "key": "w:w0116",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0116\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">ni</span><span class=\"rg\">nor, not even</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"251\"><div class=\"st\" data-tl lang=\"es\">No dijo <b>ni</b> una palabra.</div><div class=\"se\">Not a word did he speak.</div></div><div class=\"sent\" data-sent=\"446\"><div class=\"st\" data-tl lang=\"es\">Tom no vino, <b>ni</b> Jane.</div><div class=\"se\">Tom didn&#39;t come, nor did Jane.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "38a170abe1aec5af"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "f4af957e92a23081"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "aae8ec8c3a5764df"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 39,
+     "sha": "25cfb9439ba10871"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 3,
+     "sha": "ee6cab66e6ea9238"
+    },
+    "showPron": false,
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "062bb18175fb7d89"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.060667,
+     0.028385,
+     0.018533
+    ],
+    "toGo": [
+     166,
+     263,
+     317
+    ],
+    "toGoTotal": 201,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.060667,
+     "all": false
+    },
+    "eta": 166,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.018417
+   },
+   "items": {
+    "items": 257,
+    "right": 223
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "1792538b2931d0d0"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.730769,
+     0.38
+    ],
+    "toGo": [
+     0,
+     88,
+     166
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.730769,
+     "all": false
+    },
+    "eta": 88,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.35625
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Mi día Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Mi día Start",
+    "Session 2 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Mi día Start",
+    "Session 3 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Mi día Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices A1 2 of 600 mastered sentences 3 · reading 1 of 20 A2 380 learned Still shaky el día el problema ayudar meter aparecer cuarenta detener disfrutar ocupar producir la corte común Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "naranja orange (fruit, colour)",
+        "perdón sorry, pardon me",
+        "por cierto by the way",
+        "por favor please",
+        "por fin finally, at last",
+        "por supuesto of course",
+        "sin embargo however, nevertheless",
+        "sobre todo above all, especially",
+        "tal vez maybe, perhaps",
+        "uno one"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "el golpe stroke, shot (blow, hit, strike)",
+        "el caballo horse",
+        "depender to depend, to be subject to",
+        "negar to deny (to refuse)",
+        "el juez judge",
+        "firmar to sign",
+        "enfrentar to face, to confront",
+        "especialmente especially",
+        "declarar to declare",
+        "suyo his, hers, theirs (yours (formal) )"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "matar to kill, to slay",
+        "el arma weapon, arm (f)",
+        "la sangre blood",
+        "el sexo sex",
+        "disparar to shoot, to fire",
+        "el asesinato murder",
+        "la droga drug",
+        "asesinar to murder",
+        "sexual sexual",
+        "la bomba bomb"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "naranja orange (fruit, colour)",
+        "perdón sorry, pardon me",
+        "por cierto by the way",
+        "por favor please",
+        "por fin finally, at last",
+        "por supuesto of course",
+        "sin embargo however, nevertheless",
+        "sobre todo above all, especially",
+        "tal vez maybe, perhaps",
+        "uno one"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 39 of 70",
+       "rows": 10,
+       "first": [
+        "el crimen crime",
+        "recoger to pick up, to collect, to gather",
+        "el piso floor, ground",
+        "el colegio school",
+        "superior superior",
+        "el sentimiento feeling",
+        "el destino fate, destiny (destination)",
+        "el hogar home",
+        "la época time, era, epoch",
+        "la ciencia science"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "matar to kill, to slay",
+        "el arma weapon, arm (f)",
+        "la sangre blood",
+        "el sexo sex",
+        "disparar to shoot, to fire",
+        "el asesinato murder",
+        "la droga drug",
+        "asesinar to murder",
+        "sexual sexual",
+        "la bomba bomb"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0799",
+     "type:w:w0673",
+     "type:w:w0502",
+     "type:w:w0088",
+     "type:w:w0071",
+     "type:w:w0331",
+     "type:w:w0878",
+     "type:w:w0294",
+     "type:w:w0188",
+     "type:w:w0504",
+     "type:w:w0796",
+     "type:w:w0181",
+     "type:w:w0018",
+     "type:w:w0744",
+     "type:w:w0681",
+     "type:w:w0088",
+     "mc:w:w0959",
+     "mc:w:w0965",
+     "mc:w:w0967",
+     "mc:w:w0961",
+     "mc:w:w0959",
+     "mc:w:w0964",
+     "mc:w:w0966",
+     "mc:w:w0958",
+     "mc:w:w0966",
+     "mc:w:w0960",
+     "mc:w:w0958",
+     "mc:w:w0962",
+     "mc:w:w0968",
+     "mc:w:w0961",
+     "mc:w:w0965",
+     "mc:w:w0962",
+     "mc:w:w0964",
+     "mc:w:w0968",
+     "mc:w:w0960",
+     "mc:w:w0967",
+     "mc:w:w0959",
+     "mc:w:w0958",
+     "mc:w:w0968",
+     "mc:w:w0961",
+     "mc:w:w0965",
+     "mc:w:w0967",
+     "mc:w:w0961",
+     "mc:w:w0965",
+     "mc:w:w0576",
+     "mc:w:w0516",
+     "mc:w:w0493",
+     "mc:w:w0831",
+     "mc:w:w0135",
+     "mc:w:w0444",
+     "mc:w:w0800",
+     "mc:w:w0429",
+     "mc:w:w0650",
+     "mc:w:w0375",
+     "mc:w:w0764",
+     "mc:w:w0674",
+     "mc:w:w0764",
+     "type:w:w0462",
+     "type:w:w0162",
+     "type:w:w0363",
+     "type:w:w0845",
+     "type:w:w0401",
+     "type:w:w0426",
+     "type:w:w0466",
+     "type:w:w0095",
+     "type:w:w0875",
+     "type:w:w0415",
+     "type:w:w0695",
+     "type:w:w0662",
+     "type:w:w0415",
+     "type:s:s3045",
+     "mc:s:s0870",
+     "mc:s:s1008",
+     "mc:s:s3268",
+     "mc:s:s2590",
+     "mc:s:s0362",
+     "mc:s:s1480",
+     "mc:s:s0604",
+     "type:s:s3045",
+     "mc:s:s1008",
+     "mc:s:s3268",
+     "mc:s:s0362",
+     "mc:s:s3045"
+    ],
+    [
+     "mc:w:w0958",
+     "type:w:w0100",
+     "type:w:w0415",
+     "mc:w:w0961",
+     "mc:w:w0965",
+     "mc:w:w0967",
+     "type:w:w0620",
+     "type:w:w0088",
+     "mc:w:w0968",
+     "mc:w:w0764",
+     "type:w:w0253",
+     "type:w:w0237",
+     "mc:w:w0959",
+     "type:w:w0227",
+     "type:w:w0659",
+     "mc:w:w0967",
+     "mc:w:w0968",
+     "mc:w:w0959",
+     "mc:w:w0967",
+     "mc:w:w0968",
+     "mc:w:w0959",
+     "mc:w:w0971",
+     "mc:w:w0969",
+     "mc:w:w0976",
+     "mc:w:w0969",
+     "mc:w:w0973",
+     "mc:w:w0975",
+     "mc:w:w0973",
+     "mc:w:w0976",
+     "mc:w:w0977",
+     "mc:w:w0978",
+     "mc:w:w0977",
+     "mc:w:w0975",
+     "mc:w:w0970",
+     "mc:w:w0978",
+     "mc:w:w0971",
+     "mc:w:w0974",
+     "mc:w:w0972",
+     "mc:w:w0974",
+     "mc:w:w0970",
+     "mc:w:w0972",
+     "mc:w:w0432",
+     "mc:w:w0298",
+     "mc:w:w0678",
+     "mc:w:w0698",
+     "mc:w:w0075",
+     "mc:w:w0307",
+     "mc:w:w0304",
+     "mc:w:w0405",
+     "mc:w:w0538",
+     "mc:w:w0746",
+     "mc:w:w0793",
+     "mc:w:w0731",
+     "mc:w:w0698",
+     "mc:w:w0304",
+     "mc:w:w0746",
+     "type:w:w0274",
+     "type:w:w0654",
+     "type:w:w0083",
+     "type:w:w0397",
+     "type:w:w0199",
+     "type:w:w0778",
+     "type:w:w0368",
+     "type:w:w0844",
+     "type:w:w0099",
+     "type:w:w0366",
+     "type:w:w0016",
+     "type:w:w0736",
+     "type:w:w0083",
+     "type:w:w0099",
+     "type:s:s0708",
+     "mc:s:s3268",
+     "mc:s:s0362",
+     "mc:s:s1500",
+     "mc:s:s1008",
+     "mc:s:s0070",
+     "type:s:s3045",
+     "mc:s:s1741",
+     "type:s:s0708",
+     "mc:s:s1500",
+     "type:s:s3045",
+     "mc:s:s1741",
+     "mc:s:s0708",
+     "mc:s:s3045"
+    ],
+    [
+     "mc:w:w0967",
+     "type:w:w0717",
+     "type:w:w0191",
+     "type:w:w0848",
+     "type:w:w0083",
+     "type:w:w0099",
+     "type:w:w0659",
+     "mc:w:w0746",
+     "mc:w:w0698",
+     "mc:w:w0968",
+     "type:w:w0928",
+     "mc:w:w0304",
+     "type:w:w0903",
+     "type:w:w0385",
+     "mc:w:w0959",
+     "type:w:w0659",
+     "mc:w:w0659",
+     "mc:w:w0987",
+     "mc:w:w0988",
+     "mc:w:w0983",
+     "mc:w:w0988",
+     "mc:w:w0982",
+     "mc:w:w0981",
+     "mc:w:w0982",
+     "mc:w:w0984",
+     "mc:w:w0985",
+     "mc:w:w0983",
+     "mc:w:w0986",
+     "mc:w:w0986",
+     "mc:w:w0980",
+     "mc:w:w0980",
+     "mc:w:w0985",
+     "mc:w:w0979",
+     "mc:w:w0984",
+     "mc:w:w0981",
+     "mc:w:w0979",
+     "mc:w:w0987",
+     "mc:w:w0981",
+     "mc:w:w0983",
+     "mc:w:w0981",
+     "mc:w:w0987",
+     "mc:w:w0593",
+     "mc:w:w0057",
+     "mc:w:w0860",
+     "mc:w:w0686",
+     "mc:w:w0910",
+     "mc:w:w0503",
+     "mc:w:w0549",
+     "mc:w:w0382",
+     "mc:w:w0038",
+     "mc:w:w0148",
+     "mc:w:w0464",
+     "mc:w:w0495",
+     "mc:w:w0057",
+     "mc:w:w0549",
+     "mc:w:w0382",
+     "mc:w:w0057",
+     "mc:w:w0549",
+     "type:w:w0137",
+     "type:w:w0680",
+     "type:w:w0291",
+     "type:w:w0166",
+     "type:w:w0421",
+     "type:w:w0229",
+     "type:w:w0142",
+     "type:w:w0498",
+     "type:w:w0312",
+     "type:w:w0894",
+     "type:w:w0893",
+     "type:w:w0358",
+     "type:w:w0137",
+     "type:w:w0893",
+     "mc:w:w0137",
+     "type:s:s0250",
+     "type:s:s0708",
+     "type:s:s2571",
+     "type:s:s3045",
+     "mc:s:s1500",
+     "type:s:s1741",
+     "mc:s:s0278",
+     "mc:s:s0249",
+     "type:s:s0250",
+     "type:s:s0708",
+     "type:s:s2571",
+     "type:s:s3045",
+     "type:s:s1741",
+     "mc:s:s0250",
+     "mc:s:s0708",
+     "mc:s:s2571",
+     "mc:s:s3045",
+     "mc:s:s1741"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0799",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0799\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">nacer</span><span class=\"rg\">to be born, to sprout, to begin to grow</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1385\"><div class=\"st\" data-tl lang=\"es\">Si volviera a <b>nacer</b> otra vez, sería músico.</div><div class=\"se\">If I were to be born again, I would be a musician.</div></div><div class=\"sent\" data-sent=\"3178\"><div class=\"st\" data-tl lang=\"es\">¿Cuándo van a <b>nacer</b> los gatos?</div><div class=\"se\">When are the kittens going to be born?</div></div></div>"
+    },
+    {
+     "key": "w:w0673",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0673\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">referirse</span><span class=\"rg\">to refer to</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2454\"><div class=\"st\" data-tl lang=\"es\">¿A qué podría <b>referirse</b>?</div><div class=\"se\">What could he mean?</div></div><div class=\"sent\" data-sent=\"3211\"><div class=\"st\" data-tl lang=\"es\">¿A qué se <b>refiere</b> el diario?</div><div class=\"se\">What is the newspaper referring to?</div></div></div>"
+    },
+    {
+     "key": "w:w0502",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0502\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">el reloj</span><span class=\"rg\">watch, wristwatch</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1656\"><div class=\"st\" data-tl lang=\"es\">El reloj acaba de marcar las tres.</div><div class=\"se\">The clock has just struck three.</div></div><div class=\"sent\" data-sent=\"189\"><div class=\"st\" data-tl lang=\"es\">Ella le dio un <b>reloj</b>.</div><div class=\"se\">She gave him a watch.</div></div></div>"
+    },
+    {
+     "key": "w:w0088",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0088\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">tú</span><span class=\"rg\">you</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"257\"><div class=\"st\" data-tl lang=\"es\">No puedes levantar el piano <b>tú</b> solo.</div><div class=\"se\">You cannot lift the piano alone.</div></div><div class=\"sent\" data-sent=\"517\"><div class=\"st\" data-tl lang=\"es\">Si yo fuera <b>tú</b>, seguiría su consejo.</div><div class=\"se\">If I were you, I&#39;d follow his advice.</div></div></div>"
+    },
+    {
+     "key": "w:w0071",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0071\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">la cosa</span><span class=\"rg\">thing</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1400\"><div class=\"st\" data-tl lang=\"es\">Esto es justo la cosa que necesitas.</div><div class=\"se\">This is the very thing that you need.</div></div><div class=\"sent\" data-sent=\"241\"><div class=\"st\" data-tl lang=\"es\">¡Esta tecnología es una <b>cosa</b> increíble!</div><div class=\"se\">This technology is an incredible thing!</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "b29297fcfa30c06e"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "23a75742e1c46a4e"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d9b7082dcbad7ea0"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 16,
+     "sha": "c6ee301e69454ba2"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "986c1e752ab32447"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 980,
+     "sha": "c46d62d138485945"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.985,
+     0.72,
+     0.3744
+    ],
+    "toGo": [
+     0,
+     89,
+     167
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.72,
+     "all": false
+    },
+    "eta": 89,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.351
+   },
+   "items": {
+    "items": 258,
+    "right": 215
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "8fcbc2be9e778562"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     1,
+     1
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 1,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.75
+   },
+   "todayFirst": "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Una decisión difícil Start",
+   "today": [
+    "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Una decisión difícil Start",
+    "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Una decisión difícil Start",
+    "Session 3 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Una decisión difícil Start"
+   ],
+   "progress": {
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles A1 1 of 600 mastered A2 5 of 700 mastered reading 0 of 20 B1 5 of 700 mastered sentences 1 · reading 0 of 20 Still shaky de no querer caer la seguridad comprender destruir Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "naranja orange (fruit, colour)",
+        "perdón sorry, pardon me",
+        "por cierto by the way",
+        "por favor please",
+        "por fin finally, at last",
+        "por supuesto of course",
+        "sin embargo however, nevertheless",
+        "sobre todo above all, especially",
+        "tal vez maybe, perhaps",
+        "uno one"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "el teatro theater",
+        "la pérdida loss",
+        "el empleo job, employment",
+        "el enfermo sick person, patient",
+        "el crédito credit",
+        "el vestido dress",
+        "aprovechar to take advantage of, to leverage",
+        "el héroe hero",
+        "juzgar to judge, to adjudicate",
+        "presente present"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "universitario university",
+        "el signo sign, indication",
+        "la cura cure",
+        "japonés Japanese, of Japan",
+        "prohibido forbidden",
+        "el templo temple",
+        "el reconocimiento recognition",
+        "el pájaro bird, especially a perching bird",
+        "la oscuridad darkness",
+        "la meta goal, target"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 70 of 70 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "naranja orange (fruit, colour)",
+        "perdón sorry, pardon me",
+        "por cierto by the way",
+        "por favor please",
+        "por fin finally, at last",
+        "por supuesto of course",
+        "sin embargo however, nevertheless",
+        "sobre todo above all, especially",
+        "tal vez maybe, perhaps",
+        "uno one"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "el teatro theater",
+        "la pérdida loss",
+        "el empleo job, employment",
+        "el enfermo sick person, patient",
+        "el crédito credit",
+        "el vestido dress",
+        "aprovechar to take advantage of, to leverage",
+        "el héroe hero",
+        "juzgar to judge, to adjudicate",
+        "presente present"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "universitario university",
+        "el signo sign, indication",
+        "la cura cure",
+        "japonés Japanese, of Japan",
+        "prohibido forbidden",
+        "el templo temple",
+        "el reconocimiento recognition",
+        "el pájaro bird, especially a perching bird",
+        "la oscuridad darkness",
+        "la meta goal, target"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0377",
+     "type:w:w1592",
+     "type:w:w0171",
+     "type:w:w0033",
+     "type:w:w1574",
+     "type:w:w1086",
+     "type:w:w0497",
+     "type:w:w1130",
+     "type:w:w1500",
+     "type:w:w0746",
+     "type:w:w0503",
+     "type:w:w0909",
+     "type:w:w0529",
+     "type:w:w0650",
+     "type:w:w0820",
+     "mc:w:w1966",
+     "mc:w:w1366",
+     "mc:w:w1413",
+     "mc:w:w1306",
+     "mc:w:w0121",
+     "mc:w:w0351",
+     "mc:w:w0356",
+     "mc:w:w1234",
+     "mc:w:w0859",
+     "mc:w:w1762",
+     "mc:w:w0741",
+     "mc:w:w1945",
+     "mc:w:w1366",
+     "type:w:w0313",
+     "type:w:w0689",
+     "type:w:w0036",
+     "type:w:w0706",
+     "type:w:w0294",
+     "type:w:w1037",
+     "type:w:w1386",
+     "type:w:w0879",
+     "type:w:w0895",
+     "type:w:w1564",
+     "type:w:w1313",
+     "type:w:w0774",
+     "type:w:w0313",
+     "type:w:w0689",
+     "type:w:w1386",
+     "mc:s:s1485",
+     "mc:s:s0157",
+     "type:s:s0373",
+     "mc:s:s1736",
+     "mc:s:s0744",
+     "mc:s:s0777",
+     "mc:s:s0225",
+     "mc:s:s2910",
+     "type:s:s0373",
+     "mc:s:s2910",
+     "mc:s:s0373"
+    ],
+    [
+     "type:w:w1565",
+     "type:w:w0313",
+     "type:w:w1475",
+     "type:w:w1451",
+     "type:w:w0072",
+     "type:w:w0719",
+     "type:w:w0264",
+     "type:w:w0005",
+     "type:w:w0257",
+     "type:w:w1386",
+     "mc:w:w1366",
+     "type:w:w1012",
+     "type:w:w0747",
+     "type:w:w0181",
+     "type:w:w0689",
+     "type:w:w1451",
+     "type:w:w0257",
+     "mc:w:w1451",
+     "mc:w:w0257",
+     "mc:w:w1451",
+     "mc:w:w1451",
+     "mc:w:w1238",
+     "mc:w:w1357",
+     "mc:w:w1128",
+     "mc:w:w0599",
+     "mc:w:w1302",
+     "mc:w:w1076",
+     "mc:w:w1198",
+     "mc:w:w1992",
+     "mc:w:w1681",
+     "mc:w:w1767",
+     "mc:w:w1013",
+     "mc:w:w0999",
+     "mc:w:w1198",
+     "mc:w:w1681",
+     "type:w:w0168",
+     "type:w:w1114",
+     "type:w:w1387",
+     "type:w:w0742",
+     "type:w:w1480",
+     "type:w:w0768",
+     "type:w:w0862",
+     "type:w:w0127",
+     "type:w:w0800",
+     "type:w:w0131",
+     "type:w:w0407",
+     "type:w:w1578",
+     "type:w:w0742",
+     "type:w:w0127",
+     "type:s:s0373",
+     "mc:s:s0379",
+     "mc:s:s3219",
+     "mc:s:s1930",
+     "mc:s:s0996",
+     "type:s:s2910",
+     "mc:s:s1089",
+     "mc:s:s1593",
+     "type:s:s0373",
+     "mc:s:s3219",
+     "type:s:s2910",
+     "mc:s:s0373",
+     "mc:s:s2910",
+     "mc:s:s2910"
+    ],
+    [
+     "type:w:w0520",
+     "type:w:w0002",
+     "type:w:w1451",
+     "type:w:w0215",
+     "type:w:w0293",
+     "type:w:w0257",
+     "type:w:w1672",
+     "type:w:w0284",
+     "type:w:w0428",
+     "mc:w:w1198",
+     "type:w:w0127",
+     "type:w:w1040",
+     "type:w:w1456",
+     "type:w:w0742",
+     "mc:w:w1681",
+     "type:w:w0002",
+     "type:w:w0284",
+     "mc:w:w1067",
+     "mc:w:w0617",
+     "mc:w:w0413",
+     "mc:w:w0034",
+     "mc:w:w0910",
+     "mc:w:w0378",
+     "mc:w:w0039",
+     "mc:w:w1180",
+     "mc:w:w0856",
+     "mc:w:w0854",
+     "mc:w:w0775",
+     "mc:w:w0995",
+     "mc:w:w0034",
+     "mc:w:w0910",
+     "mc:w:w0910",
+     "type:w:w0891",
+     "type:w:w0961",
+     "type:w:w0925",
+     "type:w:w1118",
+     "type:w:w0492",
+     "type:w:w0270",
+     "type:w:w0360",
+     "type:w:w0065",
+     "type:w:w1600",
+     "type:w:w0234",
+     "type:w:w0491",
+     "type:w:w1102",
+     "type:w:w0891",
+     "type:w:w0360",
+     "mc:w:w0360",
+     "mc:s:s1819",
+     "type:s:s0373",
+     "mc:s:s0560",
+     "type:s:s2910",
+     "mc:s:s0135",
+     "mc:s:s3219",
+     "mc:s:s2624",
+     "mc:s:s2190",
+     "type:s:s0373",
+     "type:s:s2910",
+     "mc:s:s0373",
+     "mc:s:s2910"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0377",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0377\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">muerto</span><span class=\"rg\">dead</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"475\"><div class=\"st\" data-tl lang=\"es\">Ella encontró un hombre <b>muerto</b>.</div><div class=\"se\">She found a man dead.</div></div><div class=\"sent\" data-sent=\"1038\"><div class=\"st\" data-tl lang=\"es\">Ellos le dieron por <b>muerto</b>.</div><div class=\"se\">They left him for dead.</div></div></div>"
+    },
+    {
+     "key": "w:w1592",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1592\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">la prisa</span><span class=\"rg\">hurry, rush, urgency</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"698\"><div class=\"st\" data-tl lang=\"es\">Cometes errores si haces las cosas con <b>prisa</b>.</div><div class=\"se\">You make mistakes if you do things in a hurry.</div></div><div class=\"sent\" data-sent=\"877\"><div class=\"st\" data-tl lang=\"es\">Si no te das <b>prisa</b> perderás el tren.</div><div class=\"se\">If you don&#39;t hurry, you&#39;ll miss the train.</div></div></div>"
+    },
+    {
+     "key": "w:w0171",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0171\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">cuándo</span><span class=\"rg\">when</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"649\"><div class=\"st\" data-tl lang=\"es\">¿<b>Cuándo</b> empezaste a estudiar inglés?</div><div class=\"se\">When did you start studying English?</div></div><div class=\"sent\" data-sent=\"721\"><div class=\"st\" data-tl lang=\"es\">¿<b>Cuándo</b> empezaste a aprender alemán?</div><div class=\"se\">When did you begin learning German?</div></div></div>"
+    },
+    {
+     "key": "w:w0033",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0033\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">como</span><span class=\"rg\">as, like</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"14\"><div class=\"st\" data-tl lang=\"es\">¡Deja de mirarme <b>como</b> una persona &quot;normal&quot;!</div><div class=\"se\">Stop seeing me as a &quot;normal&quot; person!</div></div><div class=\"sent\" data-sent=\"90\"><div class=\"st\" data-tl lang=\"es\">Así es <b>como</b> aprendí inglés.</div><div class=\"se\">This is how I learned English.</div></div></div>"
+    },
+    {
+     "key": "w:w1574",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1574\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">básico</span><span class=\"rg\">basic</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"536\"><div class=\"st\" data-tl lang=\"es\">Su significado <b>básico</b> permanece igual.</div><div class=\"se\">The basic meaning of it remains the same.</div></div><div class=\"sent\" data-sent=\"3262\"><div class=\"st\" data-tl lang=\"es\">Mi gato habla el francés <b>básico</b>.</div><div class=\"se\">My cat speaks basic French.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "799011179715f747"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "6743c9c5af37eacb"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "53cb218d3d45b435"
+    },
+    "read": {
+     "n": 2,
+     "sha": "07e71869e4c43a0d"
+    },
+    "s": {
+     "n": 19,
+     "sha": "0fa7a782329eb748"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "a0cdbfa6ef8d0345"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.988333,
+     0.990769,
+     0.992
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 0.992,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.744
+   },
+   "items": {
+    "items": 176,
+    "right": 150
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "8b48431cc0dfc6ae"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.2,
+     0.092308,
+     0.06
+    ],
+    "toGo": [
+     125,
+     228,
+     284
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.2,
+     "all": false
+    },
+    "eta": 125,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 33,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.05625
+   },
+   "todayFirst": "Session 21 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Listen Recall Sentences Read Mi día Start",
+   "today": [
+    "Session 21 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Listen Recall Sentences Read Mi día Start",
+    "Session 22 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Listen Recall Sentences Read Mi día Start",
+    "Session 23 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Listen Recall Sentences Read Mi día Start"
+   ],
+   "progress": {
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy A1 151 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Still shaky y deber creer pasar tratar la madre el pueblo la cara cero Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "naranja orange (fruit, colour)",
+        "perdón sorry, pardon me",
+        "por cierto by the way",
+        "por favor please",
+        "por fin finally, at last",
+        "por supuesto of course",
+        "sin embargo however, nevertheless",
+        "sobre todo above all, especially",
+        "tal vez maybe, perhaps",
+        "uno one"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "el negocio business, enterprise",
+        "regresar to go back, to come back, to return",
+        "acordar to remember, to recall",
+        "la fiesta party",
+        "ofrecer to offer, to offer up, to provide",
+        "utilizar to use",
+        "moverse to move",
+        "el auto car",
+        "social social",
+        "cuánto how much"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "matar to kill, to slay",
+        "el arma weapon, arm (f)",
+        "la sangre blood",
+        "el sexo sex",
+        "disparar to shoot, to fire",
+        "el asesinato murder",
+        "la droga drug",
+        "asesinar to murder",
+        "sexual sexual",
+        "la bomba bomb"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "naranja orange (fruit, colour)",
+        "perdón sorry, pardon me",
+        "por cierto by the way",
+        "por favor please",
+        "por fin finally, at last",
+        "por supuesto of course",
+        "sin embargo however, nevertheless",
+        "sobre todo above all, especially",
+        "tal vez maybe, perhaps",
+        "uno one"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "el negocio business, enterprise",
+        "regresar to go back, to come back, to return",
+        "acordar to remember, to recall",
+        "la fiesta party",
+        "ofrecer to offer, to offer up, to provide",
+        "utilizar to use",
+        "moverse to move",
+        "el auto car",
+        "social social",
+        "cuánto how much"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "matar to kill, to slay",
+        "el arma weapon, arm (f)",
+        "la sangre blood",
+        "el sexo sex",
+        "disparar to shoot, to fire",
+        "el asesinato murder",
+        "la droga drug",
+        "asesinar to murder",
+        "sexual sexual",
+        "la bomba bomb"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0112",
+     "type:w:w0253",
+     "type:w:w0431",
+     "type:w:w0370",
+     "type:w:w0539",
+     "type:w:w0010",
+     "type:w:w0394",
+     "type:w:w0172",
+     "type:w:w0532",
+     "type:w:w0237",
+     "mc:w:w0577",
+     "type:w:w0229",
+     "mc:w:w0222",
+     "type:w:w0472",
+     "type:w:w0006",
+     "mc:w:w0222",
+     "mc:w:w0351",
+     "mc:w:w0460",
+     "mc:w:w0589",
+     "mc:w:w0336",
+     "mc:w:w0164",
+     "mc:w:w0016",
+     "mc:w:w0558",
+     "mc:w:w0159",
+     "mc:w:w0559",
+     "mc:w:w0003",
+     "mc:w:w0120",
+     "mc:w:w0337",
+     "type:w:w0122",
+     "type:w:w0490",
+     "type:w:w0318",
+     "type:w:w0557",
+     "type:w:w0139",
+     "type:w:w0038",
+     "type:w:w0504",
+     "type:w:w0023",
+     "type:w:w0518",
+     "type:w:w0002",
+     "type:w:w0377",
+     "type:w:w0217",
+     "mc:s:s2758",
+     "mc:s:s0028",
+     "type:s:s0341",
+     "mc:s:s1073",
+     "mc:s:s2674",
+     "mc:s:s1025",
+     "mc:s:s2254",
+     "mc:s:s0346",
+     "type:s:s0341",
+     "mc:s:s0341"
+    ],
+    [
+     "type:w:w0152",
+     "type:w:w0058",
+     "mc:w:w0222",
+     "type:w:w0094",
+     "type:w:w0202",
+     "type:w:w0022",
+     "mc:w:w0218",
+     "mc:w:w0226",
+     "type:w:w0287",
+     "type:w:w0174",
+     "type:w:w0426",
+     "type:w:w0357",
+     "type:w:w0163",
+     "type:w:w0047",
+     "type:w:w0102",
+     "mc:w:w0270",
+     "mc:w:w0500",
+     "mc:w:w0335",
+     "mc:w:w0519",
+     "mc:w:w0489",
+     "mc:w:w0586",
+     "mc:w:w0442",
+     "mc:w:w0323",
+     "mc:w:w0390",
+     "mc:w:w0556",
+     "mc:w:w0566",
+     "mc:w:w0480",
+     "mc:w:w0489",
+     "mc:w:w0556",
+     "mc:w:w0489",
+     "type:w:w0358",
+     "type:w:w0158",
+     "type:w:w0018",
+     "type:w:w0283",
+     "type:w:w0167",
+     "type:w:w0132",
+     "type:w:w0134",
+     "type:w:w0195",
+     "type:w:w0290",
+     "type:w:w0238",
+     "type:w:w0050",
+     "type:w:w0196",
+     "type:w:w0050",
+     "mc:s:s1393",
+     "mc:s:s2869",
+     "mc:s:s1493",
+     "mc:s:s0536",
+     "type:s:s0341",
+     "type:s:s0708",
+     "mc:s:s1496",
+     "mc:s:s0613",
+     "type:s:s0341",
+     "type:s:s0708",
+     "mc:s:s0341",
+     "mc:s:s0708",
+     "mc:s:s0341",
+     "mc:s:s0708"
+    ],
+    [
+     "type:w:w0382",
+     "mc:w:w0489",
+     "mc:w:w0556",
+     "type:w:w0565",
+     "type:w:w0530",
+     "type:w:w0183",
+     "type:w:w0467",
+     "mc:w:w0441",
+     "type:w:w0163",
+     "type:w:w0005",
+     "type:w:w0440",
+     "type:w:w0168",
+     "type:w:w0272",
+     "type:w:w0050",
+     "type:w:w0514",
+     "mc:w:w0556",
+     "type:w:w0272",
+     "type:w:w0050",
+     "mc:w:w0107",
+     "mc:w:w0597",
+     "mc:w:w0284",
+     "mc:w:w0396",
+     "mc:w:w0212",
+     "mc:w:w0138",
+     "mc:w:w0399",
+     "mc:w:w0173",
+     "mc:w:w0126",
+     "mc:w:w0074",
+     "mc:w:w0444",
+     "mc:w:w0233",
+     "type:w:w0549",
+     "type:w:w0140",
+     "type:w:w0179",
+     "type:w:w0269",
+     "type:w:w0008",
+     "type:w:w0156",
+     "type:w:w0052",
+     "type:w:w0353",
+     "type:w:w0175",
+     "type:w:w0055",
+     "type:w:w0452",
+     "type:w:w0461",
+     "type:w:w0140",
+     "type:w:w0008",
+     "type:w:w0353",
+     "type:w:w0055",
+     "type:s:s0708",
+     "mc:s:s1168",
+     "type:s:s0341",
+     "mc:s:s3196",
+     "mc:s:s0574",
+     "type:s:s1187",
+     "mc:s:s1480",
+     "mc:s:s2789",
+     "type:s:s0708",
+     "type:s:s0341",
+     "type:s:s1187",
+     "mc:s:s0708",
+     "mc:s:s0341",
+     "mc:s:s1187"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0112",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0112\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">la persona</span><span class=\"rg\">person</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"14\"><div class=\"st\" data-tl lang=\"es\">¡Deja de mirarme como una <b>persona</b> &quot;normal&quot;!</div><div class=\"se\">Stop seeing me as a &quot;normal&quot; person!</div></div><div class=\"sent\" data-sent=\"30\"><div class=\"st\" data-tl lang=\"es\">Cada <b>persona</b> es un mundo.</div><div class=\"se\">Each person is a world.</div></div></div>"
+    },
+    {
+     "key": "w:w0253",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0253\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">la clase</span><span class=\"rg\">class</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"126\"><div class=\"st\" data-tl lang=\"es\">Me herí durante la clase de educación física.</div><div class=\"se\">I injured myself during the physical education lesson.</div></div><div class=\"sent\" data-sent=\"330\"><div class=\"st\" data-tl lang=\"es\">Un nuevo estudiante entró en la clase.</div><div class=\"se\">A new student came into the class.</div></div></div>"
+    },
+    {
+     "key": "w:w0431",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0431\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">el sol</span><span class=\"rg\">sun</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"440\"><div class=\"st\" data-tl lang=\"es\">Nada nuevo bajo el sol.</div><div class=\"se\">Nothing new under the sun.</div></div><div class=\"sent\" data-sent=\"1510\"><div class=\"st\" data-tl lang=\"es\">El sol brilla con fuerza.</div><div class=\"se\">The sun is shining brightly.</div></div></div>"
+    },
+    {
+     "key": "w:w0370",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0370\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">el modo</span><span class=\"rg\">way, manner</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"160\"><div class=\"st\" data-tl lang=\"es\">Lo preguntaré de otro <b>modo</b>.</div><div class=\"se\">Let me rephrase it.</div></div><div class=\"sent\" data-sent=\"1738\"><div class=\"st\" data-tl lang=\"es\">No hay <b>modo</b> de confirmar que él esté vivo.</div><div class=\"se\">There is no way to confirm that he is alive.</div></div></div>"
+    },
+    {
+     "key": "w:w0539",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0539\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"es\">el ordenador</span><span class=\"rg\">computer <span class=\"dim\">(Spain)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1128\"><div class=\"st\" data-tl lang=\"es\">No puedo reparar el ordenador.</div><div class=\"se\">I&#39;m not able to fix the computer.</div></div><div class=\"sent\" data-sent=\"1304\"><div class=\"st\" data-tl lang=\"es\">No soy capaz de arreglar el ordenador.</div><div class=\"se\">I&#39;m not able to fix the computer.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "11f8fe8d862cae9d"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "be7bbe0b3f7871b2"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "9f3d054bda846141"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 21,
+     "sha": "a4c17b9860b8e2ff"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "ce412b21e21ec42a"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.201333,
+     0.092923,
+     0.0604
+    ],
+    "toGo": [
+     125,
+     228,
+     284
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.201333,
+     "all": false
+    },
+    "eta": 125,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 33,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.056625
+   },
+   "items": {
+    "items": 167,
+    "right": 152
+   }
+  }
+ ]
+}

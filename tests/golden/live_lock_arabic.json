@@ -1,0 +1,2502 @@
+{
+ "lang": "arabic",
+ "packKey": "ar",
+ "words": 2000,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "c19c74271403fc61"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     168,
+     275,
+     332
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": 168,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "الأبجدية first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until a set is learned Learn الأبجدية , sets 1–2 of 7 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 0 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 30 learned Still shaky أن في آخر Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 1 of 60 › Drill this set",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "أن that (to (+ verb) )",
+        "في in, at",
+        "من from",
+        "هذا this ( هذه : f.)",
+        "كان to be (past) (used to ( كان + present) )",
+        "على on (about; must ( عليه أن ) )",
+        "لا not (+ present tense) (there is not)",
+        "إلى to, towards",
+        "ما what (that which)",
+        "إن indeed, truly ( إنّ ) (if ( إنْ ) )"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "أثناء during, in the course of",
+        "ذو possessor of, owner of",
+        "شعب people, nation",
+        "قدر to be able (to estimate; to be destined ( قُدِّر ) )",
+        "صنع to make, to do",
+        "سياسي political",
+        "تعلم to learn",
+        "لعبة game",
+        "فرقة band, group, party",
+        "حماية protection"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "قتل to kill",
+        "سلاح weapon, arm",
+        "دم blood",
+        "جنس gender, sex (kind, type)",
+        "قاتل killer, murderer, assassin",
+        "جنسي sexual",
+        "مخدر drug, narcotic",
+        "قنبلة bomb, grenade",
+        "أحضر to bring",
+        "أصدر to issue"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 4 of 60",
+       "rows": 10,
+       "first": [
+        "أي which, any",
+        "أو or",
+        "هل (yes/no question)",
+        "إذا if, when",
+        "بعد after",
+        "هي she (it)",
+        "أمكن to be possible ( يمكن : can, may)",
+        "نفس self (same (the) )",
+        "هناك there (there is, there are)",
+        "بعض some (each other ( بعضهم بعضا ) )"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "أثناء during, in the course of",
+        "ذو possessor of, owner of",
+        "شعب people, nation",
+        "قدر to be able (to estimate; to be destined ( قُدِّر ) )",
+        "صنع to make, to do",
+        "سياسي political",
+        "تعلم to learn",
+        "لعبة game",
+        "فرقة band, group, party",
+        "حماية protection"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "قتل to kill",
+        "سلاح weapon, arm",
+        "دم blood",
+        "جنس gender, sex (kind, type)",
+        "قاتل killer, murderer, assassin",
+        "جنسي sexual",
+        "مخدر drug, narcotic",
+        "قنبلة bomb, grenade",
+        "أحضر to bring",
+        "أصدر to issue"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0001",
+     "mc:w:w0005",
+     "mc:w:w0002",
+     "mc:w:w0002",
+     "mc:w:w0001",
+     "mc:w:w0010",
+     "mc:w:w0008",
+     "mc:w:w0004",
+     "mc:w:w0005",
+     "mc:w:w0010",
+     "mc:w:w0004",
+     "mc:w:w0006",
+     "mc:w:w0006",
+     "mc:w:w0007",
+     "mc:w:w0008",
+     "mc:w:w0007",
+     "mc:w:w0009",
+     "mc:w:w0009",
+     "mc:w:w0003",
+     "mc:w:w0003",
+     "mc:w:w0010",
+     "mc:w:w0004",
+     "mc:w:w0003"
+    ],
+    [
+     "type:w:w0002",
+     "mc:w:w0003",
+     "mc:w:w0007",
+     "mc:w:w0010",
+     "mc:w:w0004",
+     "type:w:w0009",
+     "mc:w:w0006",
+     "mc:w:w0008",
+     "type:w:w0005",
+     "mc:w:w0001",
+     "mc:w:w0015",
+     "mc:w:w0017",
+     "mc:w:w0017",
+     "mc:w:w0019",
+     "mc:w:w0012",
+     "mc:w:w0013",
+     "mc:w:w0012",
+     "mc:w:w0019",
+     "mc:w:w0014",
+     "mc:w:w0013",
+     "mc:w:w0016",
+     "mc:w:w0015",
+     "mc:w:w0011",
+     "mc:w:w0014",
+     "mc:w:w0016",
+     "mc:w:w0018",
+     "mc:w:w0020",
+     "mc:w:w0020",
+     "mc:w:w0018",
+     "mc:w:w0011",
+     "mc:w:w0020",
+     "mc:w:w0009",
+     "mc:w:w0002",
+     "mc:w:w0003",
+     "mc:w:w0004",
+     "mc:w:w0005",
+     "type:w:w0001",
+     "type:w:w0008",
+     "type:w:w0007",
+     "type:w:w0006",
+     "type:w:w0010"
+    ],
+    [
+     "mc:w:w0020",
+     "mc:w:w0019",
+     "mc:w:w0010",
+     "type:w:w0004",
+     "type:w:w0009",
+     "mc:w:w0018",
+     "mc:w:w0011",
+     "mc:w:w0013",
+     "type:w:w0017",
+     "mc:w:w0015",
+     "type:w:w0002",
+     "type:w:w0016",
+     "type:w:w0003",
+     "type:w:w0014",
+     "type:w:w0012",
+     "type:w:w0002",
+     "mc:w:w0021",
+     "mc:w:w0026",
+     "mc:w:w0024",
+     "mc:w:w0028",
+     "mc:w:w0023",
+     "mc:w:w0021",
+     "mc:w:w0022",
+     "mc:w:w0023",
+     "mc:w:w0026",
+     "mc:w:w0025",
+     "mc:w:w0027",
+     "mc:w:w0029",
+     "mc:w:w0024",
+     "mc:w:w0025",
+     "mc:w:w0029",
+     "mc:w:w0027",
+     "mc:w:w0030",
+     "mc:w:w0030",
+     "mc:w:w0028",
+     "mc:w:w0022",
+     "mc:w:w0030",
+     "mc:w:w0016",
+     "mc:w:w0017",
+     "mc:w:w0014",
+     "mc:w:w0012",
+     "mc:w:w0003",
+     "mc:w:w0001",
+     "mc:w:w0004",
+     "mc:w:w0008",
+     "mc:w:w0007",
+     "mc:w:w0006",
+     "mc:w:w0001",
+     "mc:w:w0001",
+     "type:w:w0013",
+     "type:w:w0011",
+     "type:w:w0015",
+     "type:w:w0018",
+     "type:w:w0005",
+     "type:w:w0020",
+     "type:w:w0019",
+     "type:w:w0010"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">أن</span><span class=\"rg\">that <span class=\"gx\">(to <span class=\"dim\">(+ verb)</span>)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"15\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">أتمنّى <b>أن</b> تأتي مرّة أخرى.</div><div class=\"se\">I do hope you&#39;ll come again.</div></div><div class=\"sent\" data-sent=\"22\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">على المرء <b>أن</b> يفعل كلّ ما بوسعه.</div><div class=\"se\">One must do one&#39;s best.</div></div></div>"
+    },
+    {
+     "key": "w:w0005",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0005\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">كان</span><span class=\"rg\">to be <span class=\"dim\">(past)</span> <span class=\"gx\">(used to <span class=\"dim\">(<bdi data-tl lang=\"ar\" dir=\"rtl\" class=\"tlf\">كان</bdi> + present)</span>)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"24\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\"><b>كان</b> الجو حاراً جداً عصر اليوم.</div><div class=\"se\">It was very hot this afternoon.</div></div><div class=\"sent\" data-sent=\"3\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">إنه جدير بأن <b>يكون</b> قائد فريقنا.</div><div class=\"se\">He is worthy to be captain of our team.</div></div></div>"
+    },
+    {
+     "key": "w:w0002",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0002\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">في</span><span class=\"rg\">in, at</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"0\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">تستطيع معالجة السرطان اذا أكتشف <b>في</b> المراحل الأولى.</div><div class=\"se\">Cancer can be cured easily if it is found in its first phase.</div></div><div class=\"sent\" data-sent=\"2\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">عيادة الطبيب <b>في</b> الدور الثاني.</div><div class=\"se\">The doctor&#39;s office is on the second floor.</div></div></div>"
+    },
+    {
+     "key": "w:w0002",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0002\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">في</span><span class=\"rg\">in, at</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"0\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">تستطيع معالجة السرطان اذا أكتشف <b>في</b> المراحل الأولى.</div><div class=\"se\">Cancer can be cured easily if it is found in its first phase.</div></div><div class=\"sent\" data-sent=\"2\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">عيادة الطبيب <b>في</b> الدور الثاني.</div><div class=\"se\">The doctor&#39;s office is on the second floor.</div></div></div>"
+    },
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">أن</span><span class=\"rg\">that <span class=\"gx\">(to <span class=\"dim\">(+ verb)</span>)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"15\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">أتمنّى <b>أن</b> تأتي مرّة أخرى.</div><div class=\"se\">I do hope you&#39;ll come again.</div></div><div class=\"sent\" data-sent=\"22\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">على المرء <b>أن</b> يفعل كلّ ما بوسعه.</div><div class=\"se\">One must do one&#39;s best.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "d6cfe3c807a8e18a"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "ce254cc73e85073b"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "8d20d825ed4e9211"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "be34f914b5e7f215"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "980fdd1f20ae3187"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.006667,
+     0.003077,
+     0.002
+    ],
+    "toGo": [
+     166,
+     273,
+     330
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.006667,
+     "all": false
+    },
+    "eta": 166,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.001875
+   },
+   "items": {
+    "items": 121,
+    "right": 113
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "day": {
+     "n": 3,
+     "sha": "301304ebf2ad3eca"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "41fc0e217a63e893"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "3ed3cd5629080997"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 18,
+     "sha": "9e65201c45de60d9"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 3,
+     "sha": "e3f9f0c08da51372"
+    },
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 120,
+     "sha": "11f5674e5878ecdb"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.060667,
+     0.028385,
+     0.018533
+    ],
+    "toGo": [
+     153,
+     259,
+     315
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.060667,
+     "all": false
+    },
+    "eta": 153,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.018417
+   },
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "today": [
+    "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, A1 In 6 sessions since your last visit +17 mastered Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 120 learned Still shaky كان قال تم علم فعل استطاع أب خاص عمل أصبح كذلك Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 150 learned Still shaky قال عمل قام علم من أجل عالم ساعة حد ابن Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 13 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 13 of 60",
+       "rows": 10,
+       "first": [
+        "صغير small, little (young)",
+        "نظر to look ( نظر إلى )",
+        "خلال during (through)",
+        "امرأة woman",
+        "سوف will (future)",
+        "أخذ to take (to begin to ( أخذ في ) , to start)",
+        "صورة picture, photo, image",
+        "بدا to seem, to appear",
+        "زال to be still ( ما زال / لا يزال )",
+        "قوة strength, power, force"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "أثناء during, in the course of",
+        "ذو possessor of, owner of",
+        "شعب people, nation",
+        "قدر to be able (to estimate; to be destined ( قُدِّر ) )",
+        "صنع to make, to do",
+        "سياسي political",
+        "تعلم to learn",
+        "لعبة game",
+        "فرقة band, group, party",
+        "حماية protection"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "قتل to kill",
+        "سلاح weapon, arm",
+        "دم blood",
+        "جنس gender, sex (kind, type)",
+        "قاتل killer, murderer, assassin",
+        "جنسي sexual",
+        "مخدر drug, narcotic",
+        "قنبلة bomb, grenade",
+        "أحضر to bring",
+        "أصدر to issue"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 16 of 60",
+       "rows": 10,
+       "first": [
+        "منزل house, home",
+        "سيارة car",
+        "أتى to come",
+        "أرض earth, ground, land",
+        "تحدث to speak, to talk ( تحدث عن )",
+        "حاول to try",
+        "طريقة way, method",
+        "حين time, moment (when ( حين ) )",
+        "بقي to stay, to remain",
+        "احتاج to need ( احتاج إلى )"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "أثناء during, in the course of",
+        "ذو possessor of, owner of",
+        "شعب people, nation",
+        "قدر to be able (to estimate; to be destined ( قُدِّر ) )",
+        "صنع to make, to do",
+        "سياسي political",
+        "تعلم to learn",
+        "لعبة game",
+        "فرقة band, group, party",
+        "حماية protection"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "قتل to kill",
+        "سلاح weapon, arm",
+        "دم blood",
+        "جنس gender, sex (kind, type)",
+        "قاتل killer, murderer, assassin",
+        "جنسي sexual",
+        "مخدر drug, narcotic",
+        "قنبلة bomb, grenade",
+        "أحضر to bring",
+        "أصدر to issue"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0101",
+     "mc:w:w0096",
+     "mc:w:w0120",
+     "type:w:w0052",
+     "type:w:w0065",
+     "type:w:w0005",
+     "type:w:w0080",
+     "type:w:w0110",
+     "type:w:w0061",
+     "type:w:w0114",
+     "type:w:w0027",
+     "type:w:w0085",
+     "mc:w:w0102",
+     "type:w:w0118",
+     "type:w:w0111",
+     "type:w:w0061",
+     "type:w:w0027",
+     "mc:w:w0102",
+     "type:w:w0118",
+     "mc:w:w0061",
+     "mc:w:w0128",
+     "mc:w:w0129",
+     "mc:w:w0122",
+     "mc:w:w0123",
+     "mc:w:w0126",
+     "mc:w:w0122",
+     "mc:w:w0121",
+     "mc:w:w0121",
+     "mc:w:w0125",
+     "mc:w:w0130",
+     "mc:w:w0127",
+     "mc:w:w0124",
+     "mc:w:w0127",
+     "mc:w:w0123",
+     "mc:w:w0130",
+     "mc:w:w0128",
+     "mc:w:w0124",
+     "mc:w:w0126",
+     "mc:w:w0125",
+     "mc:w:w0129",
+     "mc:w:w0126",
+     "mc:w:w0126",
+     "mc:w:w0052",
+     "mc:w:w0062",
+     "mc:w:w0093",
+     "mc:w:w0078",
+     "mc:w:w0113",
+     "mc:w:w0056",
+     "mc:w:w0064",
+     "mc:w:w0103",
+     "mc:w:w0087",
+     "mc:w:w0069",
+     "mc:w:w0115",
+     "mc:w:w0098",
+     "mc:w:w0062",
+     "type:w:w0050",
+     "type:w:w0120",
+     "type:w:w0047",
+     "type:w:w0119",
+     "type:w:w0117",
+     "type:w:w0041",
+     "type:w:w0079",
+     "type:w:w0116",
+     "type:w:w0072",
+     "type:w:w0067",
+     "type:w:w0045",
+     "type:w:w0112",
+     "type:w:w0047",
+     "mc:s:s0217",
+     "type:s:s0099",
+     "mc:s:s1683",
+     "type:s:s0014",
+     "type:s:s1258",
+     "mc:s:s1737",
+     "mc:s:s0855",
+     "type:s:s1858",
+     "type:s:s0099",
+     "type:s:s0014",
+     "type:s:s1258",
+     "type:s:s1858",
+     "mc:s:s0099",
+     "mc:s:s0014",
+     "mc:s:s1258",
+     "mc:s:s1858"
+    ],
+    [
+     "type:w:w0124",
+     "type:w:w0050",
+     "type:w:w0027",
+     "type:w:w0128",
+     "mc:w:w0126",
+     "type:w:w0049",
+     "mc:w:w0102",
+     "type:w:w0129",
+     "type:w:w0052",
+     "type:w:w0130",
+     "mc:w:w0062",
+     "type:w:w0085",
+     "type:w:w0061",
+     "type:w:w0118",
+     "type:w:w0047",
+     "type:w:w0050",
+     "type:w:w0027",
+     "type:w:w0128",
+     "type:w:w0052",
+     "mc:w:w0062",
+     "type:w:w0061",
+     "mc:w:w0135",
+     "mc:w:w0136",
+     "mc:w:w0135",
+     "mc:w:w0137",
+     "mc:w:w0137",
+     "mc:w:w0134",
+     "mc:w:w0138",
+     "mc:w:w0138",
+     "mc:w:w0133",
+     "mc:w:w0140",
+     "mc:w:w0131",
+     "mc:w:w0132",
+     "mc:w:w0131",
+     "mc:w:w0136",
+     "mc:w:w0139",
+     "mc:w:w0140",
+     "mc:w:w0132",
+     "mc:w:w0139",
+     "mc:w:w0134",
+     "mc:w:w0133",
+     "mc:w:w0031",
+     "mc:w:w0047",
+     "mc:w:w0121",
+     "mc:w:w0120",
+     "mc:w:w0101",
+     "mc:w:w0059",
+     "mc:w:w0068",
+     "mc:w:w0122",
+     "mc:w:w0127",
+     "mc:w:w0096",
+     "mc:w:w0126",
+     "mc:w:w0123",
+     "type:w:w0075",
+     "type:w:w0080",
+     "type:w:w0005",
+     "type:w:w0094",
+     "type:w:w0086",
+     "type:w:w0073",
+     "type:w:w0083",
+     "type:w:w0074",
+     "type:w:w0110",
+     "type:w:w0087",
+     "type:w:w0125",
+     "type:w:w0077",
+     "type:w:w0075",
+     "type:w:w0080",
+     "type:w:w0110",
+     "type:w:w0087",
+     "mc:w:w0087",
+     "type:s:s0099",
+     "mc:s:s0396",
+     "mc:s:s0229",
+     "type:s:s1258",
+     "mc:s:s1285",
+     "type:s:s0014",
+     "type:s:s1858",
+     "mc:s:s1390",
+     "type:s:s0099",
+     "type:s:s1258",
+     "mc:s:s1285",
+     "type:s:s0014",
+     "type:s:s1858",
+     "mc:s:s0099",
+     "mc:s:s1258",
+     "mc:s:s0014",
+     "mc:s:s1858"
+    ],
+    [
+     "type:w:w0133",
+     "type:w:w0139",
+     "type:w:w0087",
+     "type:w:w0128",
+     "mc:w:w0062",
+     "type:w:w0005",
+     "type:w:w0049",
+     "type:w:w0110",
+     "type:w:w0027",
+     "type:w:w0050",
+     "type:w:w0080",
+     "type:w:w0075",
+     "type:w:w0052",
+     "type:w:w0135",
+     "type:w:w0061",
+     "type:w:w0133",
+     "type:w:w0061",
+     "mc:w:w0143",
+     "mc:w:w0141",
+     "mc:w:w0143",
+     "mc:w:w0148",
+     "mc:w:w0149",
+     "mc:w:w0144",
+     "mc:w:w0149",
+     "mc:w:w0150",
+     "mc:w:w0145",
+     "mc:w:w0141",
+     "mc:w:w0144",
+     "mc:w:w0147",
+     "mc:w:w0150",
+     "mc:w:w0147",
+     "mc:w:w0142",
+     "mc:w:w0146",
+     "mc:w:w0142",
+     "mc:w:w0145",
+     "mc:w:w0146",
+     "mc:w:w0148",
+     "mc:w:w0144",
+     "mc:w:w0144",
+     "mc:w:w0142",
+     "mc:w:w0067",
+     "mc:w:w0131",
+     "mc:w:w0077",
+     "mc:w:w0033",
+     "mc:w:w0102",
+     "mc:w:w0134",
+     "mc:w:w0136",
+     "mc:w:w0066",
+     "mc:w:w0140",
+     "mc:w:w0132",
+     "mc:w:w0075",
+     "mc:w:w0057",
+     "mc:w:w0075",
+     "type:w:w0078",
+     "type:w:w0098",
+     "type:w:w0084",
+     "type:w:w0091",
+     "type:w:w0138",
+     "type:w:w0081",
+     "type:w:w0126",
+     "type:w:w0047",
+     "type:w:w0099",
+     "type:w:w0118",
+     "type:w:w0137",
+     "type:w:w0088",
+     "type:w:w0088",
+     "mc:w:w0088",
+     "type:s:s2192",
+     "type:s:s0646",
+     "mc:s:s0871",
+     "mc:s:s0567",
+     "mc:s:s1939",
+     "type:s:s1088",
+     "mc:s:s0227",
+     "mc:s:s0726",
+     "type:s:s2192",
+     "type:s:s0646",
+     "type:s:s1088",
+     "mc:s:s2192",
+     "mc:s:s0646",
+     "mc:s:s1088"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0101",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0101\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">خاص</span><span class=\"rg\">private <span class=\"gx\">(special; own <span class=\"dim\">(<bdi data-tl lang=\"ar\" dir=\"rtl\" class=\"tlf\">خاص بـ</bdi>)</span>)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"133\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">كلٌّ منهم لديه سيارته <b>الخاصة</b>.</div><div class=\"se\">Each of them has his own car.</div></div><div class=\"sent\" data-sent=\"1729\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">بدأت عائلة سامي تحقيقها <b>الخاص</b>.</div><div class=\"se\">Sami&#39;s family launched their own investigation.</div></div></div>"
+    },
+    {
+     "key": "w:w0096",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0096\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">أب</span><span class=\"rg\">father</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"11\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\"><b>أبي</b> لا يقرأ كتاباً الآن.</div><div class=\"se\">My father isn&#39;t reading a book now.</div></div><div class=\"sent\" data-sent=\"451\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">لم يسبق <b>لأبي</b> أن سافر إلى الخارج.</div><div class=\"se\">My father has never been abroad.</div></div></div>"
+    },
+    {
+     "key": "w:w0120",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0120\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">كذلك</span><span class=\"rg\">also, likewise</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"181\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">أصل هذه الكلمة فرنسي <b>كذلك</b>.</div><div class=\"se\">This word is also French in origin.</div></div><div class=\"sent\" data-sent=\"219\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">إنها ذكية جداً ، أليس <b>كذلك</b>؟</div><div class=\"se\">She&#39;s really smart, isn&#39;t she?</div></div></div>"
+    },
+    {
+     "key": "w:w0052",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0052\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">تم</span><span class=\"rg\">to be completed <span class=\"gx\">(was done <span class=\"dim\">(<bdi data-tl lang=\"ar\" dir=\"rtl\" class=\"tlf\">تم</bdi> + verbal noun)</span>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"842\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\"><b>تم</b> تغيير عنواني الإلكتروني إلى ما يلي.</div><div class=\"se\">My e-mail address has been changed as follows.</div></div><div class=\"sent\" data-sent=\"58\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">يجب أن <b>تتم</b> هذا التقرير قبل يوم الأثنين.</div><div class=\"se\">You must have the report done by Monday.</div></div></div>"
+    },
+    {
+     "key": "w:w0065",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0065\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">من فضلك</span><span class=\"rg\">please</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"6\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">من فضلك إلغِ هذا الملفّ.</div><div class=\"se\">Please delete this file.</div></div><div class=\"sent\" data-sent=\"154\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">من فضلك فكر في الموضوع.</div><div class=\"se\">Please think about it.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "366e065afaeced75"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "94f05bd30a00dd11"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "6a840fb800d11538"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 30,
+     "sha": "5889baf8b102f789"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 3,
+     "sha": "ee6cab66e6ea9238"
+    },
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "bfa699c671e9aaeb"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.071333,
+     0.033308,
+     0.021733
+    ],
+    "toGo": [
+     150,
+     257,
+     312
+    ],
+    "toGoTotal": 171,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.071333,
+     "all": false
+    },
+    "eta": 150,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.021417
+   },
+   "items": {
+    "items": 252,
+    "right": 218
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "542b479e33244985"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.730769,
+     0.38
+    ],
+    "toGo": [
+     0,
+     89,
+     167
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.730769,
+     "all": false
+    },
+    "eta": 89,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.35625
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read يوم أحمد Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read يوم أحمد Start",
+    "Session 2 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read يوم أحمد Start",
+    "Session 3 Goal 2 of 3 ≈ 90 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read يوم أحمد Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 91 sessions daily life: directions, simple chat, short notices الأبجدية 0 / 36 taught · 0 mastered A1 1 of 600 mastered sentences 1 · reading 1 of 20 A2 380 learned Still shaky أمكن علم رئيس حقيقي ألف رجا بيان انبغى دار وسط هجوم رجاء Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "إن شاء الله God willing, hopefully",
+        "برتقالي orange (colour)",
+        "ثمانون eighty",
+        "بنفسجي purple, violet",
+        "تسعون ninety",
+        "ثلاثة عشر thirteen",
+        "ثم then, and then",
+        "دكان shop, store",
+        "سبعون seventy",
+        "لا no"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "تأثير influence, impression",
+        "منع to prevent, to hinder, to repel",
+        "محل store, shop",
+        "كشف to expose",
+        "إلكتروني electronic",
+        "حضور attendance, presence",
+        "سياسة policy (politics)",
+        "بطاقة card",
+        "ضمن within, among, as part of",
+        "قضاء spending (time) (judiciary, judgement)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "قتل to kill",
+        "سلاح weapon, arm",
+        "دم blood",
+        "جنس gender, sex (kind, type)",
+        "قاتل killer, murderer, assassin",
+        "جنسي sexual",
+        "مخدر drug, narcotic",
+        "قنبلة bomb, grenade",
+        "أحضر to bring",
+        "أصدر to issue"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "إن شاء الله God willing, hopefully",
+        "برتقالي orange (colour)",
+        "ثمانون eighty",
+        "بنفسجي purple, violet",
+        "تسعون ninety",
+        "ثلاثة عشر thirteen",
+        "ثم then, and then",
+        "دكان shop, store",
+        "سبعون seventy",
+        "لا no"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 39 of 70",
+       "rows": 10,
+       "first": [
+        "إنقاذ rescue, saving, salvation",
+        "رد reply",
+        "بدلا من instead of",
+        "اختبار test",
+        "شراء buying",
+        "بدء beginning, start",
+        "مستحيل impossible",
+        "مفهوم concept (understood)",
+        "تفصيل detail",
+        "أوقف to stop, to arrest, to halt"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "قتل to kill",
+        "سلاح weapon, arm",
+        "دم blood",
+        "جنس gender, sex (kind, type)",
+        "قاتل killer, murderer, assassin",
+        "جنسي sexual",
+        "مخدر drug, narcotic",
+        "قنبلة bomb, grenade",
+        "أحضر to bring",
+        "أصدر to issue"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0050",
+     "type:w:w0855",
+     "type:w:w0794",
+     "type:w:w0092",
+     "type:w:w0393",
+     "type:w:w0134",
+     "type:w:w0084",
+     "type:w:w0034",
+     "type:w:w0809",
+     "type:w:w0842",
+     "type:w:w0191",
+     "type:w:w0419",
+     "type:w:w0773",
+     "type:w:w0691",
+     "type:w:w0913",
+     "type:w:w0092",
+     "mc:w:w0957",
+     "mc:w:w0951",
+     "mc:w:w0955",
+     "mc:w:w0957",
+     "mc:w:w0958",
+     "mc:w:w0951",
+     "mc:w:w0956",
+     "mc:w:w0950",
+     "mc:w:w0959",
+     "mc:w:w0954",
+     "mc:w:w0950",
+     "mc:w:w0952",
+     "mc:w:w0956",
+     "mc:w:w0958",
+     "mc:w:w0952",
+     "mc:w:w0954",
+     "mc:w:w0953",
+     "mc:w:w0953",
+     "mc:w:w0959",
+     "mc:w:w0955",
+     "mc:w:w0957",
+     "mc:w:w0950",
+     "mc:w:w0956",
+     "mc:w:w0958",
+     "mc:w:w0952",
+     "mc:w:w0955",
+     "mc:w:w0958",
+     "mc:w:w0952",
+     "mc:w:w0832",
+     "mc:w:w0296",
+     "mc:w:w0495",
+     "mc:w:w0116",
+     "mc:w:w0375",
+     "mc:w:w0676",
+     "mc:w:w0219",
+     "mc:w:w0431",
+     "mc:w:w0890",
+     "mc:w:w0675",
+     "mc:w:w0557",
+     "mc:w:w0914",
+     "mc:w:w0557",
+     "type:w:w0673",
+     "type:w:w0692",
+     "type:w:w0854",
+     "type:w:w0844",
+     "type:w:w0453",
+     "type:w:w0168",
+     "type:w:w0344",
+     "type:w:w0348",
+     "type:w:w0148",
+     "type:w:w0739",
+     "type:w:w0150",
+     "type:w:w0845",
+     "type:w:w0739",
+     "mc:s:s1905",
+     "type:s:s1053",
+     "mc:s:s1581",
+     "mc:s:s0094",
+     "mc:s:s2588",
+     "mc:s:s1695",
+     "mc:s:s0150",
+     "mc:s:s1379",
+     "mc:s:s1905",
+     "type:s:s1053",
+     "mc:s:s1581",
+     "mc:s:s0094",
+     "mc:s:s1695",
+     "mc:s:s1053"
+    ],
+    [
+     "mc:w:w0957",
+     "type:w:w0092",
+     "mc:w:w0557",
+     "mc:w:w0956",
+     "type:w:w0130",
+     "mc:w:w0950",
+     "type:w:w0898",
+     "type:w:w0101",
+     "type:w:w0282",
+     "type:w:w0739",
+     "type:w:w0467",
+     "mc:w:w0955",
+     "type:w:w0777",
+     "mc:w:w0958",
+     "mc:w:w0952",
+     "type:w:w0130",
+     "type:w:w0101",
+     "mc:w:w0955",
+     "mc:w:w0952",
+     "mc:w:w0130",
+     "mc:w:w0101",
+     "mc:w:w0968",
+     "mc:w:w0967",
+     "mc:w:w0965",
+     "mc:w:w0964",
+     "mc:w:w0960",
+     "mc:w:w0965",
+     "mc:w:w0962",
+     "mc:w:w0966",
+     "mc:w:w0960",
+     "mc:w:w0963",
+     "mc:w:w0967",
+     "mc:w:w0968",
+     "mc:w:w0966",
+     "mc:w:w0961",
+     "mc:w:w0969",
+     "mc:w:w0963",
+     "mc:w:w0969",
+     "mc:w:w0961",
+     "mc:w:w0962",
+     "mc:w:w0964",
+     "mc:w:w0892",
+     "mc:w:w0837",
+     "mc:w:w0230",
+     "mc:w:w0500",
+     "mc:w:w0247",
+     "mc:w:w0570",
+     "mc:w:w0102",
+     "mc:w:w0147",
+     "mc:w:w0813",
+     "mc:w:w0730",
+     "mc:w:w0126",
+     "mc:w:w0193",
+     "mc:w:w0230",
+     "mc:w:w0570",
+     "mc:w:w0813",
+     "type:w:w0081",
+     "type:w:w0194",
+     "type:w:w0368",
+     "type:w:w0123",
+     "type:w:w0256",
+     "type:w:w0690",
+     "type:w:w0477",
+     "type:w:w0474",
+     "type:w:w0114",
+     "type:w:w0201",
+     "type:w:w0213",
+     "type:w:w0087",
+     "type:w:w0194",
+     "type:w:w0474",
+     "type:s:s1053",
+     "mc:s:s1695",
+     "mc:s:s1401",
+     "type:s:s1004",
+     "mc:s:s1581",
+     "type:s:s0094",
+     "mc:s:s2048",
+     "mc:s:s1753",
+     "type:s:s1053",
+     "mc:s:s1401",
+     "type:s:s1004",
+     "type:s:s0094",
+     "mc:s:s2048",
+     "mc:s:s1053",
+     "mc:s:s1004",
+     "mc:s:s0094"
+    ],
+    [
+     "type:w:w0101",
+     "type:w:w0724",
+     "type:w:w0777",
+     "type:w:w0704",
+     "mc:w:w0952",
+     "type:w:w0252",
+     "mc:w:w0955",
+     "type:w:w0474",
+     "mc:w:w0570",
+     "type:w:w0447",
+     "type:w:w0095",
+     "type:w:w0130",
+     "mc:w:w0813",
+     "type:w:w0194",
+     "mc:w:w0230",
+     "type:w:w0704",
+     "mc:w:w0813",
+     "mc:w:w0973",
+     "mc:w:w0974",
+     "mc:w:w0975",
+     "mc:w:w0973",
+     "mc:w:w0971",
+     "mc:w:w0971",
+     "mc:w:w0972",
+     "mc:w:w0976",
+     "mc:w:w0979",
+     "mc:w:w0975",
+     "mc:w:w0970",
+     "mc:w:w0970",
+     "mc:w:w0977",
+     "mc:w:w0977",
+     "mc:w:w0974",
+     "mc:w:w0976",
+     "mc:w:w0978",
+     "mc:w:w0979",
+     "mc:w:w0972",
+     "mc:w:w0978",
+     "mc:w:w0975",
+     "mc:w:w0972",
+     "mc:w:w0974",
+     "mc:w:w0978",
+     "mc:w:w0974",
+     "mc:w:w0069",
+     "mc:w:w0568",
+     "mc:w:w0061",
+     "mc:w:w0251",
+     "mc:w:w0030",
+     "mc:w:w0159",
+     "mc:w:w0777",
+     "mc:w:w0757",
+     "mc:w:w0115",
+     "mc:w:w0420",
+     "mc:w:w0406",
+     "mc:w:w0605",
+     "mc:w:w0061",
+     "mc:w:w0251",
+     "mc:w:w0115",
+     "mc:w:w0420",
+     "mc:w:w0251",
+     "type:w:w0160",
+     "type:w:w0245",
+     "type:w:w0466",
+     "type:w:w0072",
+     "type:w:w0711",
+     "type:w:w0129",
+     "type:w:w0759",
+     "type:w:w0465",
+     "type:w:w0787",
+     "type:w:w0625",
+     "type:w:w0483",
+     "type:w:w0771",
+     "type:w:w0759",
+     "type:w:w0787",
+     "type:w:w0771",
+     "type:s:s1053",
+     "mc:s:s0406",
+     "type:s:s1004",
+     "mc:s:s1558",
+     "mc:s:s0301",
+     "type:s:s0094",
+     "mc:s:s1736",
+     "mc:s:s1905",
+     "type:s:s1053",
+     "type:s:s1004",
+     "type:s:s0094",
+     "mc:s:s1053",
+     "mc:s:s1004",
+     "mc:s:s0094"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0050",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0050\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">وقت</span><span class=\"rg\">time</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"13\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">لم يكن لديّ <b>وقت</b> للأكل.</div><div class=\"se\">I had no time to eat.</div></div><div class=\"sent\" data-sent=\"67\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">أحتاج لمزيد من <b>الوقت</b> لأنهي واجبي.</div><div class=\"se\">I need more time to finish my homework.</div></div></div>"
+    },
+    {
+     "key": "w:w0855",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0855\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">مشاركة</span><span class=\"rg\">participation, involvement</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"952\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">بإمكانك <b>المشاركة</b> في الاجتماع بغض النظر عن سنك.</div><div class=\"se\">You can take part in the meeting regardless of your age.</div></div><div class=\"sent\" data-sent=\"2282\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">هل تريد <b>المشاركة</b> في ذلك؟</div><div class=\"se\">Do you want to participate in that?</div></div></div>"
+    },
+    {
+     "key": "w:w0794",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0794\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">عميل</span><span class=\"rg\">agent <span class=\"gx\">(customer, client, patron)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2666\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">هل <b>العميل</b> دائمًا على حق؟</div><div class=\"se\">Is the customer always right?</div></div><div class=\"sent\" data-sent=\"2935\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">تحدث <b>العميل</b> مع المدير عن الخدمة.</div><div class=\"se\">The customer spoke with the manager about the service.</div></div></div>"
+    },
+    {
+     "key": "w:w0092",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0092\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">نحن</span><span class=\"rg\">we</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"414\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\"><b>نحن</b> لا نعرف الحقيقة بعد.</div><div class=\"se\">We don&#39;t know the truth yet.</div></div><div class=\"sent\" data-sent=\"700\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">إنه فنان عظيم <b>نحن</b> معجبون به جميعًا.</div><div class=\"se\">He is such a great artist that we all admire.</div></div></div>"
+    },
+    {
+     "key": "w:w0393",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0393\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">أربعة</span><span class=\"rg\">four</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"599\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">أقصى مدة انتظار يمكنني تحملها هي <b>أربعة</b> أيام.</div><div class=\"se\">I can wait four days at the longest.</div></div><div class=\"sent\" data-sent=\"2322\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">كان النمر على مسافة <b>أربعة</b> أمتار من زيري.</div><div class=\"se\">The leopard stood about four meters away from Ziri.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "d41aafdbf91eb77b"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "fd35e68f7fe52007"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "539ce46534b46326"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 16,
+     "sha": "58a8ade814588598"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "986c1e752ab32447"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 980,
+     "sha": "3fd87b146c1329a4"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.98,
+     0.716154,
+     0.3724
+    ],
+    "toGo": [
+     0,
+     91,
+     169
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.716154,
+     "all": false
+    },
+    "eta": 91,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.349125
+   },
+   "items": {
+    "items": 258,
+    "right": 215
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "65cf88f257a900f5"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     1,
+     1
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 1,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.75
+   },
+   "todayFirst": "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read عطلة على الشاطئ Start",
+   "today": [
+    "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read عطلة على الشاطئ Start",
+    "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read عطلة على الشاطئ Start",
+    "Session 3 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read عطلة على الشاطئ Start"
+   ],
+   "progress": {
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles الأبجدية 0 / 36 taught · 0 mastered A1 1 of 600 mastered A2 4 of 700 mastered sentences 2 · reading 0 of 20 B1 6 of 700 mastered reading 0 of 20 Still shaky قال بنت تقرير نائب نجاح جنس انتهاء علمي أسهل Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "إن شاء الله God willing, hopefully",
+        "برتقالي orange (colour)",
+        "ثمانون eighty",
+        "بنفسجي purple, violet",
+        "تسعون ninety",
+        "ثلاثة عشر thirteen",
+        "ثم then, and then",
+        "دكان shop, store",
+        "سبعون seventy",
+        "لا no"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "جنوبي southern",
+        "بوابة gate",
+        "سهولة ease, facility, comfortableness",
+        "جرب to try, to test (to experience)",
+        "احتوى to contain",
+        "مدرب coach, trainer",
+        "إعلام media (informing; computing ( إعلام آلي ) )",
+        "كلي universal",
+        "تخيل to imagine, to take into one&#39;s head, to fancy",
+        "حرف letter, piece of type"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "مسجل registered (tape recorder)",
+        "دل to show, to indicate, to direct",
+        "حشرة insect",
+        "صداقة friendship",
+        "حرق to burn",
+        "عجلة hurry, haste, speed",
+        "تصديق believing",
+        "نقاش discussion",
+        "هدد to pose a threat to",
+        "راتب salary, pay, wages"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 70 of 70 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "إن شاء الله God willing, hopefully",
+        "برتقالي orange (colour)",
+        "ثمانون eighty",
+        "بنفسجي purple, violet",
+        "تسعون ninety",
+        "ثلاثة عشر thirteen",
+        "ثم then, and then",
+        "دكان shop, store",
+        "سبعون seventy",
+        "لا no"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "جنوبي southern",
+        "بوابة gate",
+        "سهولة ease, facility, comfortableness",
+        "جرب to try, to test (to experience)",
+        "احتوى to contain",
+        "مدرب coach, trainer",
+        "إعلام media (informing; computing ( إعلام آلي ) )",
+        "كلي universal",
+        "تخيل to imagine, to take into one&#39;s head, to fancy",
+        "حرف letter, piece of type"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "مسجل registered (tape recorder)",
+        "دل to show, to indicate, to direct",
+        "حشرة insect",
+        "صداقة friendship",
+        "حرق to burn",
+        "عجلة hurry, haste, speed",
+        "تصديق believing",
+        "نقاش discussion",
+        "هدد to pose a threat to",
+        "راتب salary, pay, wages"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0111",
+     "type:w:w1698",
+     "type:w:w1369",
+     "type:w:w0160",
+     "type:w:w0499",
+     "type:w:w1063",
+     "type:w:w1666",
+     "type:w:w1326",
+     "type:w:w1338",
+     "type:w:w1653",
+     "type:w:w0614",
+     "type:w:w0780",
+     "type:w:w0644",
+     "type:w:w1639",
+     "type:w:w0209",
+     "mc:w:w0534",
+     "mc:w:w1902",
+     "mc:w:w1165",
+     "mc:w:w1218",
+     "mc:w:w0696",
+     "mc:w:w1060",
+     "mc:w:w1051",
+     "mc:w:w1850",
+     "mc:w:w0598",
+     "mc:w:w0478",
+     "mc:w:w0809",
+     "mc:w:w1589",
+     "mc:w:w1902",
+     "type:w:w1056",
+     "type:w:w1411",
+     "type:w:w0149",
+     "type:w:w0942",
+     "type:w:w1380",
+     "type:w:w0212",
+     "type:w:w0740",
+     "type:w:w1410",
+     "type:w:w1068",
+     "type:w:w1467",
+     "type:w:w1609",
+     "type:w:w1048",
+     "type:w:w1056",
+     "type:w:w1411",
+     "type:w:w0740",
+     "mc:s:s1352",
+     "mc:s:s2165",
+     "mc:s:s2510",
+     "mc:s:s2599",
+     "type:s:s1209",
+     "mc:s:s1407",
+     "mc:s:s2560",
+     "mc:s:s2532",
+     "type:s:s1209",
+     "mc:s:s2532",
+     "mc:s:s1209"
+    ],
+    [
+     "type:w:w1056",
+     "type:w:w1411",
+     "type:w:w0690",
+     "type:w:w0658",
+     "type:w:w0033",
+     "type:w:w1553",
+     "type:w:w1558",
+     "type:w:w1580",
+     "type:w:w0740",
+     "type:w:w0389",
+     "type:w:w0908",
+     "type:w:w0395",
+     "mc:w:w1902",
+     "type:w:w1022",
+     "type:w:w0225",
+     "type:w:w0658",
+     "type:w:w0740",
+     "mc:w:w0658",
+     "mc:w:w0740",
+     "mc:w:w0658",
+     "mc:w:w0658",
+     "mc:w:w1055",
+     "mc:w:w1372",
+     "mc:w:w1216",
+     "mc:w:w1859",
+     "mc:w:w0791",
+     "mc:w:w0839",
+     "mc:w:w1424",
+     "mc:w:w0264",
+     "mc:w:w1419",
+     "mc:w:w0051",
+     "mc:w:w1572",
+     "mc:w:w1816",
+     "mc:w:w1424",
+     "mc:w:w1419",
+     "type:w:w0647",
+     "type:w:w1088",
+     "type:w:w1038",
+     "type:w:w0221",
+     "type:w:w0280",
+     "type:w:w0269",
+     "type:w:w0082",
+     "type:w:w1677",
+     "type:w:w0118",
+     "type:w:w1521",
+     "type:w:w0754",
+     "type:w:w1474",
+     "type:w:w0221",
+     "type:w:w1677",
+     "type:s:s1209",
+     "mc:s:s0347",
+     "mc:s:s0124",
+     "type:s:s0378",
+     "mc:s:s2814",
+     "type:s:s2768",
+     "mc:s:s2532",
+     "mc:s:s2551",
+     "type:s:s1209",
+     "mc:s:s0124",
+     "type:s:s0378",
+     "type:s:s2768",
+     "mc:s:s1209",
+     "mc:s:s0378",
+     "mc:s:s2768",
+     "mc:s:s1209",
+     "mc:s:s1209"
+    ],
+    [
+     "type:w:w0797",
+     "type:w:w0338",
+     "type:w:w0740",
+     "type:w:w0979",
+     "mc:w:w1419",
+     "type:w:w0907",
+     "type:w:w1677",
+     "type:w:w0221",
+     "type:w:w0069",
+     "type:w:w0703",
+     "type:w:w0658",
+     "type:w:w0384",
+     "type:w:w0611",
+     "mc:w:w1424",
+     "type:w:w0203",
+     "mc:w:w1419",
+     "mc:w:w0962",
+     "mc:w:w1020",
+     "mc:w:w1460",
+     "mc:w:w1920",
+     "mc:w:w1397",
+     "mc:w:w1245",
+     "mc:w:w1367",
+     "mc:w:w1199",
+     "mc:w:w1916",
+     "mc:w:w0766",
+     "mc:w:w1964",
+     "mc:w:w1953",
+     "mc:w:w1020",
+     "mc:w:w1460",
+     "mc:w:w1953",
+     "mc:w:w1460",
+     "type:w:w0404",
+     "type:w:w0831",
+     "type:w:w0830",
+     "type:w:w0468",
+     "type:w:w0242",
+     "type:w:w1327",
+     "type:w:w1541",
+     "type:w:w0410",
+     "type:w:w0148",
+     "type:w:w0288",
+     "type:w:w1304",
+     "type:w:w0460",
+     "type:w:w0468",
+     "type:w:w1304",
+     "mc:w:w1304",
+     "type:s:s0378",
+     "mc:s:s0239",
+     "type:s:s1209",
+     "mc:s:s0681",
+     "type:s:s2768",
+     "mc:s:s1657",
+     "mc:s:s2737",
+     "mc:s:s0124",
+     "type:s:s0378",
+     "type:s:s1209",
+     "type:s:s2768",
+     "mc:s:s0378",
+     "mc:s:s1209",
+     "mc:s:s2768"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0111",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0111\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">عنى</span><span class=\"rg\">to mean</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"112\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">لا تتدخل في ما لا <b>يعنيك</b>!</div><div class=\"se\">Mind your own business!</div></div><div class=\"sent\" data-sent=\"661\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">مجرد كونها في قاعدة بيانات تتويبا لا <b>يعني</b> أنها جملةٌ.</div><div class=\"se\">Just because it&#39;s in Tatoeba.org&#39;s database, doesn&#39;t mean it&#39;s a sentence.</div></div></div>"
+    },
+    {
+     "key": "w:w1698",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1698\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">متعة</span><span class=\"rg\">fun, pleasure</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"614\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">تتويبا: أسمعت بحروب الجُمَل سابقًا؟ أجل، هذه <b>متعتنا</b>.</div><div class=\"se\">Tatoeba: Ever heard of sentence fights? Yeah, that&#39;s what we do for fun.</div></div><div class=\"sent\" data-sent=\"1026\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">أنا أريد فقط الحصول على <b>المتعة</b>.</div><div class=\"se\">I just want to have fun.</div></div></div>"
+    },
+    {
+     "key": "w:w1369",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1369\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">ظهور</span><span class=\"rg\">appearance, emergence</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2958\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">كان <b>ظهور</b> المرض في المدينة سريعا.</div><div class=\"se\">The disease appeared quickly in the city.</div></div><div class=\"sent\" data-sent=\"2093\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">حلما منّاد و باية سويّا <b>بالظّهور</b> على التّلفاز.</div><div class=\"se\">Mennad and Baya dreamed together of being on TV.</div></div></div>"
+    },
+    {
+     "key": "w:w0160",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0160\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">احتاج</span><span class=\"rg\">to need <span class=\"dim\">(<bdi data-tl lang=\"ar\" dir=\"rtl\" class=\"tlf\">احتاج إلى</bdi>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"33\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">هم <b>يحتاجون</b> المزيد من المساعدة.</div><div class=\"se\">They require extra help.</div></div><div class=\"sent\" data-sent=\"47\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\"><b>نحتاج</b> إلى العمل وليس الكلام.</div><div class=\"se\">We need action, not words.</div></div></div>"
+    },
+    {
+     "key": "w:w0499",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0499\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">حديقة</span><span class=\"rg\">garden <span class=\"gx\">(park)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"240\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">يا لها من <b>حديقة</b> جميلة.</div><div class=\"se\">What a beautiful garden!</div></div><div class=\"sent\" data-sent=\"311\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">هناك الكثير من الحيوانات في <b>الحديقة</b>.</div><div class=\"se\">There are lots of animals in the park.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "e5a6208b8ff5482a"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "b251df9274a6e5a4"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "53cb218d3d45b435"
+    },
+    "read": {
+     "n": 2,
+     "sha": "07e71869e4c43a0d"
+    },
+    "s": {
+     "n": 18,
+     "sha": "a3de4d968c0f14f0"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "aee886861c561087"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.996667,
+     0.995385,
+     0.993
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 0.993,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.74475
+   },
+   "items": {
+    "items": 181,
+    "right": 155
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "49ebda37754b95d6"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.2,
+     0.092308,
+     0.06
+    ],
+    "toGo": [
+     116,
+     225,
+     282
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.2,
+     "all": false
+    },
+    "eta": 116,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 31,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.05625
+   },
+   "todayFirst": "الأبجدية first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn الأبجدية , sets 1–2 of 7 A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read يوم أحمد",
+   "today": [
+    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read يوم أحمد Start",
+    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read يوم أحمد Start",
+    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read يوم أحمد Start"
+   ],
+   "progress": {
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 154 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Still shaky فعل حدث جميل أم هيا أمس قطار Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "إن شاء الله God willing, hopefully",
+        "برتقالي orange (colour)",
+        "ثمانون eighty",
+        "بنفسجي purple, violet",
+        "تسعون ninety",
+        "ثلاثة عشر thirteen",
+        "ثم then, and then",
+        "دكان shop, store",
+        "سبعون seventy",
+        "لا no"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "أثناء during, in the course of",
+        "ذو possessor of, owner of",
+        "شعب people, nation",
+        "قدر to be able (to estimate; to be destined ( قُدِّر ) )",
+        "صنع to make, to do",
+        "سياسي political",
+        "تعلم to learn",
+        "لعبة game",
+        "فرقة band, group, party",
+        "حماية protection"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "قتل to kill",
+        "سلاح weapon, arm",
+        "دم blood",
+        "جنس gender, sex (kind, type)",
+        "قاتل killer, murderer, assassin",
+        "جنسي sexual",
+        "مخدر drug, narcotic",
+        "قنبلة bomb, grenade",
+        "أحضر to bring",
+        "أصدر to issue"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "إن شاء الله God willing, hopefully",
+        "برتقالي orange (colour)",
+        "ثمانون eighty",
+        "بنفسجي purple, violet",
+        "تسعون ninety",
+        "ثلاثة عشر thirteen",
+        "ثم then, and then",
+        "دكان shop, store",
+        "سبعون seventy",
+        "لا no"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "أثناء during, in the course of",
+        "ذو possessor of, owner of",
+        "شعب people, nation",
+        "قدر to be able (to estimate; to be destined ( قُدِّر ) )",
+        "صنع to make, to do",
+        "سياسي political",
+        "تعلم to learn",
+        "لعبة game",
+        "فرقة band, group, party",
+        "حماية protection"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "قتل to kill",
+        "سلاح weapon, arm",
+        "دم blood",
+        "جنس gender, sex (kind, type)",
+        "قاتل killer, murderer, assassin",
+        "جنسي sexual",
+        "مخدر drug, narcotic",
+        "قنبلة bomb, grenade",
+        "أحضر to bring",
+        "أصدر to issue"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0343",
+     "type:w:w0144",
+     "type:w:w0322",
+     "type:w:w0208",
+     "type:w:w0118",
+     "mc:w:w0521",
+     "type:w:w0331",
+     "type:w:w0503",
+     "type:w:w0577",
+     "type:w:w0399",
+     "type:w:w0092",
+     "type:w:w0244",
+     "type:w:w0220",
+     "type:w:w0075",
+     "type:w:w0284",
+     "type:w:w0220",
+     "mc:w:w0141",
+     "mc:w:w0023",
+     "mc:w:w0178",
+     "mc:w:w0587",
+     "mc:w:w0043",
+     "mc:w:w0020",
+     "mc:w:w0056",
+     "mc:w:w0549",
+     "mc:w:w0519",
+     "mc:w:w0211",
+     "mc:w:w0384",
+     "mc:w:w0520",
+     "type:w:w0154",
+     "type:w:w0510",
+     "type:w:w0307",
+     "type:w:w0442",
+     "type:w:w0300",
+     "type:w:w0122",
+     "type:w:w0361",
+     "type:w:w0226",
+     "type:w:w0268",
+     "type:w:w0569",
+     "type:w:w0251",
+     "type:w:w0206",
+     "mc:s:s0989",
+     "mc:s:s0589",
+     "mc:s:s2935",
+     "mc:s:s0405",
+     "mc:s:s0214",
+     "mc:s:s1736",
+     "mc:s:s2427",
+     "mc:s:s0867"
+    ],
+    [
+     "type:w:w0496",
+     "type:w:w0042",
+     "type:w:w0046",
+     "type:w:w0379",
+     "type:w:w0328",
+     "type:w:w0133",
+     "type:w:w0110",
+     "type:w:w0119",
+     "type:w:w0495",
+     "mc:w:w0285",
+     "type:w:w0391",
+     "type:w:w0252",
+     "type:w:w0286",
+     "type:w:w0220",
+     "type:w:w0223",
+     "type:w:w0496",
+     "mc:w:w0323",
+     "mc:w:w0317",
+     "mc:w:w0459",
+     "mc:w:w0222",
+     "mc:w:w0337",
+     "mc:w:w0156",
+     "mc:w:w0263",
+     "mc:w:w0356",
+     "mc:w:w0062",
+     "mc:w:w0292",
+     "mc:w:w0595",
+     "mc:w:w0452",
+     "mc:w:w0156",
+     "mc:w:w0595",
+     "mc:w:w0595",
+     "type:w:w0030",
+     "type:w:w0489",
+     "type:w:w0272",
+     "type:w:w0405",
+     "type:w:w0067",
+     "type:w:w0114",
+     "type:w:w0310",
+     "type:w:w0120",
+     "type:w:w0006",
+     "type:w:w0436",
+     "type:w:w0408",
+     "type:w:w0148",
+     "type:w:w0148",
+     "mc:s:s1054",
+     "mc:s:s1107",
+     "mc:s:s1310",
+     "type:s:s1303",
+     "mc:s:s0016",
+     "mc:s:s0270",
+     "mc:s:s1729",
+     "mc:s:s0587",
+     "type:s:s1303",
+     "mc:s:s1303"
+    ],
+    [
+     "type:w:w0176",
+     "type:w:w0458",
+     "type:w:w0428",
+     "mc:w:w0156",
+     "type:w:w0528",
+     "type:w:w0104",
+     "type:w:w0496",
+     "type:w:w0108",
+     "type:w:w0015",
+     "type:w:w0581",
+     "type:w:w0148",
+     "type:w:w0275",
+     "type:w:w0304",
+     "mc:w:w0281",
+     "mc:w:w0595",
+     "type:w:w0458",
+     "type:w:w0428",
+     "type:w:w0108",
+     "mc:w:w0108",
+     "mc:w:w0108",
+     "mc:w:w0318",
+     "mc:w:w0068",
+     "mc:w:w0499",
+     "mc:w:w0586",
+     "mc:w:w0566",
+     "mc:w:w0048",
+     "mc:w:w0575",
+     "mc:w:w0561",
+     "mc:w:w0180",
+     "mc:w:w0125",
+     "mc:w:w0394",
+     "mc:w:w0246",
+     "type:w:w0541",
+     "type:w:w0170",
+     "type:w:w0139",
+     "type:w:w0294",
+     "type:w:w0502",
+     "type:w:w0054",
+     "type:w:w0327",
+     "type:w:w0255",
+     "type:w:w0512",
+     "type:w:w0447",
+     "type:w:w0080",
+     "type:w:w0469",
+     "type:w:w0502",
+     "type:w:w0255",
+     "type:w:w0080",
+     "mc:w:w0502",
+     "mc:s:s1178",
+     "type:s:s1303",
+     "mc:s:s1443",
+     "mc:s:s0432",
+     "mc:s:s1134",
+     "mc:s:s2647",
+     "mc:s:s0301",
+     "mc:s:s0378",
+     "type:s:s1303",
+     "mc:s:s1303"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0343",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0343\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">حكومة</span><span class=\"rg\">government</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"527\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">باتت <b>حكوماتنا</b> كائناً فضائياً يعيش وسط شعب أرضي.</div><div class=\"se\">Our governments have become space aliens living among a human population.</div></div><div class=\"sent\" data-sent=\"1737\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">في تلك الدولة <b>الحكومة</b> تتحكم بالاسعار.</div><div class=\"se\">In that country the government controls prices.</div></div></div>"
+    },
+    {
+     "key": "w:w0144",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0144\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">ابن</span><span class=\"rg\">son</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"195\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">جون ليس أخي ، بل <b>ابن</b> عمي.</div><div class=\"se\">John is not my brother, but my cousin.</div></div><div class=\"sent\" data-sent=\"439\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\"><b>ابني</b> الآن في المرحلة الثانوية.</div><div class=\"se\">My son entered high school.</div></div></div>"
+    },
+    {
+     "key": "w:w0322",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0322\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">ودع</span><span class=\"rg\">to let, to let be, to suffer</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"350\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\"><b>دعني</b> أساعدك في حمل الطاولة على الأقل.</div><div class=\"se\">At least let me help with the table.</div></div><div class=\"sent\" data-sent=\"1028\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\"><b>دعونا</b> فقط نتظاهر كأننا لا نعرف بعضنا البعض.</div><div class=\"se\">Let&#39;s just pretend like we don&#39;t know each other.</div></div></div>"
+    },
+    {
+     "key": "w:w0208",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0208\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">مجموعة</span><span class=\"rg\">group <span class=\"gx\">(collection)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1320\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">لقد نُشِرت للتو <b>مجموعة</b> من اشعارها .</div><div class=\"se\">A collection of her verses has just been published.</div></div><div class=\"sent\" data-sent=\"908\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">قسمتنا مدرستنا إلى <b>مجموعتين</b>.</div><div class=\"se\">Our teacher separated us into two groups.</div></div></div>"
+    },
+    {
+     "key": "w:w0118",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0118\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ar\" dir=\"rtl\">حصل</span><span class=\"rg\">to get, to acquire, to obtain <span class=\"dim\">(<bdi data-tl lang=\"ar\" dir=\"rtl\" class=\"tlf\">حصل على</bdi>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"216\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">و ماذا لو <b>حصل</b> ذلك؟</div><div class=\"se\">So what?</div></div><div class=\"sent\" data-sent=\"203\"><div class=\"st\" data-tl lang=\"ar\" dir=\"rtl\">آمل أن <b>أحصل</b> على نسختين من هذا الكتاب.</div><div class=\"se\">I am hoping to get two copies of this book.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "46eb57e9b8c8ca3c"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "2afbf40d53756f29"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "c04b5da449dbd608"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 23,
+     "sha": "c5d7640089bcd527"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "8ac89c9943a65acd"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.205333,
+     0.094769,
+     0.0616
+    ],
+    "toGo": [
+     115,
+     224,
+     282
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.205333,
+     "all": false
+    },
+    "eta": 115,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 31,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.05775
+   },
+   "items": {
+    "items": 160,
+    "right": 145
+   }
+  }
+ ]
+}

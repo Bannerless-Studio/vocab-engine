@@ -1,0 +1,2524 @@
+{
+ "lang": "russian",
+ "packKey": "ru",
+ "words": 2000,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "c19c74271403fc61"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     168,
+     274,
+     334
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": 168,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "Алфавит first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until a set is learned Learn Алфавит, sets 1–2 of 6 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 0 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 30 learned Still shaky и это он они Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 1 of 60 › Drill this set",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "в in, at (to, into)",
+        "я I",
+        "не not, -n&#39;t, no",
+        "и and",
+        "на on, at (to, onto)",
+        "что that",
+        "быть to be (impf.)",
+        "с with (from, off)",
+        "это this, it, that",
+        "он he, it"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "класс class (m)",
+        "великий great, outstanding",
+        "похожий similar, alike",
+        "военный military, war",
+        "состояние condition, state, status (n)",
+        "наверное probably, most likely",
+        "например for example, for instance, e.g",
+        "возможный possible, probable",
+        "чувство sense, feeling (n)",
+        "либо either that or, or"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "убить to kill (pf.)",
+        "убийство murder, homicide (n)",
+        "кровь blood (f)",
+        "оружие weapon, arm, weaponry (n)",
+        "погибнуть to die of unnatural causes, to be killed (pf.)",
+        "убивать to kill (impf.)",
+        "секс sex (m)",
+        "убийца murderer (m/f)",
+        "стрелять to shoot, to fire (impf.)",
+        "зрение vision, sight (n)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 4 of 60",
+       "rows": 10,
+       "first": [
+        "этот this",
+        "всё everything",
+        "который which, who, that",
+        "свой one&#39;s own (my, your, his...)",
+        "мой my, mine",
+        "же after all, really (emphasis)",
+        "знать to know (impf.)",
+        "если if, in case",
+        "бы would (conditional particle)",
+        "хотеть to want (impf.)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "класс class (m)",
+        "великий great, outstanding",
+        "похожий similar, alike",
+        "военный military, war",
+        "состояние condition, state, status (n)",
+        "наверное probably, most likely",
+        "например for example, for instance, e.g",
+        "возможный possible, probable",
+        "чувство sense, feeling (n)",
+        "либо either that or, or"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "убить to kill (pf.)",
+        "убийство murder, homicide (n)",
+        "кровь blood (f)",
+        "оружие weapon, arm, weaponry (n)",
+        "погибнуть to die of unnatural causes, to be killed (pf.)",
+        "убивать to kill (impf.)",
+        "секс sex (m)",
+        "убийца murderer (m/f)",
+        "стрелять to shoot, to fire (impf.)",
+        "зрение vision, sight (n)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0001",
+     "mc:w:w0007",
+     "mc:w:w0008",
+     "mc:w:w0008",
+     "mc:w:w0009",
+     "mc:w:w0003",
+     "mc:w:w0009",
+     "mc:w:w0004",
+     "mc:w:w0010",
+     "mc:w:w0005",
+     "mc:w:w0006",
+     "mc:w:w0006",
+     "mc:w:w0007",
+     "mc:w:w0002",
+     "mc:w:w0010",
+     "mc:w:w0001",
+     "mc:w:w0002",
+     "mc:w:w0004",
+     "mc:w:w0005",
+     "mc:w:w0003",
+     "mc:w:w0003",
+     "mc:w:w0004",
+     "mc:w:w0005"
+    ],
+    [
+     "type:w:w0002",
+     "mc:w:w0006",
+     "mc:w:w0009",
+     "mc:w:w0008",
+     "mc:w:w0007",
+     "mc:w:w0004",
+     "mc:w:w0001",
+     "mc:w:w0003",
+     "mc:w:w0005",
+     "mc:w:w0010",
+     "mc:w:w0017",
+     "mc:w:w0018",
+     "mc:w:w0013",
+     "mc:w:w0016",
+     "mc:w:w0020",
+     "mc:w:w0017",
+     "mc:w:w0016",
+     "mc:w:w0012",
+     "mc:w:w0014",
+     "mc:w:w0019",
+     "mc:w:w0011",
+     "mc:w:w0012",
+     "mc:w:w0013",
+     "mc:w:w0011",
+     "mc:w:w0015",
+     "mc:w:w0014",
+     "mc:w:w0018",
+     "mc:w:w0015",
+     "mc:w:w0019",
+     "mc:w:w0020",
+     "mc:w:w0018",
+     "mc:w:w0004",
+     "mc:w:w0003",
+     "mc:w:w0002",
+     "mc:w:w0005",
+     "type:w:w0010",
+     "type:w:w0009",
+     "type:w:w0006",
+     "type:w:w0007",
+     "type:w:w0001",
+     "type:w:w0008"
+    ],
+    [
+     "mc:w:w0011",
+     "type:w:w0017",
+     "type:w:w0004",
+     "type:w:w0019",
+     "type:w:w0003",
+     "type:w:w0002",
+     "mc:w:w0012",
+     "type:w:w0013",
+     "type:w:w0014",
+     "mc:w:w0018",
+     "mc:w:w0010",
+     "type:w:w0016",
+     "mc:w:w0020",
+     "type:w:w0005",
+     "type:w:w0015",
+     "mc:w:w0010",
+     "mc:w:w0025",
+     "mc:w:w0028",
+     "mc:w:w0022",
+     "mc:w:w0030",
+     "mc:w:w0025",
+     "mc:w:w0023",
+     "mc:w:w0030",
+     "mc:w:w0021",
+     "mc:w:w0024",
+     "mc:w:w0027",
+     "mc:w:w0029",
+     "mc:w:w0026",
+     "mc:w:w0026",
+     "mc:w:w0022",
+     "mc:w:w0021",
+     "mc:w:w0029",
+     "mc:w:w0027",
+     "mc:w:w0024",
+     "mc:w:w0023",
+     "mc:w:w0028",
+     "mc:w:w0024",
+     "mc:w:w0001",
+     "mc:w:w0019",
+     "mc:w:w0013",
+     "mc:w:w0017",
+     "mc:w:w0003",
+     "mc:w:w0009",
+     "mc:w:w0008",
+     "mc:w:w0006",
+     "mc:w:w0016",
+     "mc:w:w0007",
+     "mc:w:w0004",
+     "mc:w:w0018",
+     "mc:w:w0009",
+     "mc:w:w0004",
+     "type:w:w0020",
+     "type:w:w0012",
+     "type:w:w0011"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">в</span><span class=\"rg\">in, at <span class=\"gx\">(to, into)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"0\"><div class=\"st\" data-tl lang=\"ru\">Один раз <b>в</b> жизни я делаю хорошее дело... И оно бесполезно.</div><div class=\"se\">For once in my life I&#39;m doing a good deed... And it is useless.</div></div><div class=\"sent\" data-sent=\"3\"><div class=\"st\" data-tl lang=\"ru\">Каждый, <b>в</b> итоге, должен учиться сам.</div><div class=\"se\">Everyone must learn on their own in the end.</div></div></div>"
+    },
+    {
+     "key": "w:w0007",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0007\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">быть</span><span class=\"rg\">to be <span class=\"dim\">(impf.)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"54\"><div class=\"st\" data-tl lang=\"ru\">Как я могу <b>быть</b> роботом? Роботы не мечтают.</div><div class=\"se\">How could I be a robot? Robots don&#39;t dream.</div></div><div class=\"sent\" data-sent=\"126\"><div class=\"st\" data-tl lang=\"ru\">Должно <b>быть</b>, ему за 60.</div><div class=\"se\">He must be over sixty.</div></div></div>"
+    },
+    {
+     "key": "w:w0008",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0008\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">с</span><span class=\"rg\">with <span class=\"gx\">(from, off)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"15\"><div class=\"st\" data-tl lang=\"ru\">Америка - это очень милое место, если вы находитесь здесь <b>с</b> целью заработать деньги.</div><div class=\"se\">America is a lovely place to be, if you are here to earn money.</div></div><div class=\"sent\" data-sent=\"39\"><div class=\"st\" data-tl lang=\"ru\">Если вы не знали меня <b>с</b> этой стороны, то вы вообще меня не знали.</div><div class=\"se\">If you didn&#39;t know me that way then you simply didn&#39;t know me.</div></div></div>"
+    },
+    {
+     "key": "w:w0008",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0008\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">с</span><span class=\"rg\">with <span class=\"gx\">(from, off)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"15\"><div class=\"st\" data-tl lang=\"ru\">Америка - это очень милое место, если вы находитесь здесь <b>с</b> целью заработать деньги.</div><div class=\"se\">America is a lovely place to be, if you are here to earn money.</div></div><div class=\"sent\" data-sent=\"39\"><div class=\"st\" data-tl lang=\"ru\">Если вы не знали меня <b>с</b> этой стороны, то вы вообще меня не знали.</div><div class=\"se\">If you didn&#39;t know me that way then you simply didn&#39;t know me.</div></div></div>"
+    },
+    {
+     "key": "w:w0009",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0009\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">это</span><span class=\"rg\">this, it, that</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2\"><div class=\"st\" data-tl lang=\"ru\">Сегодня 18 июня, и <b>это</b> день рождения Мюриэл!</div><div class=\"se\">Today is June 18th and it is Muiriel&#39;s birthday!</div></div><div class=\"sent\" data-sent=\"4\"><div class=\"st\" data-tl lang=\"ru\"><b>Это</b> ничего не изменит.</div><div class=\"se\">That won&#39;t change anything.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "afe015333f246b51"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "ce254cc73e85073b"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "8d20d825ed4e9211"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "be34f914b5e7f215"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "87fc9bbc2e7e3a86"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.006667,
+     0.003077,
+     0.002
+    ],
+    "toGo": [
+     167,
+     273,
+     333
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.006667,
+     "all": false
+    },
+    "eta": 167,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.001875
+   },
+   "items": {
+    "items": 118,
+    "right": 110
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "day": {
+     "n": 3,
+     "sha": "b278ce8f51ca6cd8"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "cd027b2572ca8cdf"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "abd3df54f2d95a77"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 29,
+     "sha": "17b81c8a7d7175bc"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 3,
+     "sha": "e3f9f0c08da51372"
+    },
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 120,
+     "sha": "e36c4c81e67b831b"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.058,
+     0.027154,
+     0.017733
+    ],
+    "toGo": [
+     155,
+     260,
+     318
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.058,
+     "all": false
+    },
+    "eta": 155,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.017667
+   },
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "today": [
+    "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, A1 In 6 sessions since your last visit +16 mastered Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 120 learned Still shaky так нет один уже до должен думать после тоже большой сегодня Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 150 learned Still shaky нет сказать здесь почему место идти всегда через вопрос что-нибудь конечно понимать Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 13 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 13 of 60",
+       "rows": 10,
+       "first": [
+        "дом house, building (m)",
+        "спасибо thank you, thanks",
+        "работать to work (impf.)",
+        "дать to give (pf.)",
+        "какой-то some, a/an",
+        "любить to love, to like, to be fond of (impf.)",
+        "получить to get, to receive (pf.)",
+        "при at (with)",
+        "тут here",
+        "тогда then"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "класс class (m)",
+        "великий great, outstanding",
+        "похожий similar, alike",
+        "военный military, war",
+        "состояние condition, state, status (n)",
+        "наверное probably, most likely",
+        "например for example, for instance, e.g",
+        "возможный possible, probable",
+        "чувство sense, feeling (n)",
+        "либо either that or, or"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "убить to kill (pf.)",
+        "убийство murder, homicide (n)",
+        "кровь blood (f)",
+        "оружие weapon, arm, weaponry (n)",
+        "погибнуть to die of unnatural causes, to be killed (pf.)",
+        "убивать to kill (impf.)",
+        "секс sex (m)",
+        "убийца murderer (m/f)",
+        "стрелять to shoot, to fire (impf.)",
+        "зрение vision, sight (n)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 16 of 60",
+       "rows": 10,
+       "first": [
+        "город city, town (m)",
+        "женщина woman (f)",
+        "смотреть to watch, to see (to look, to gaze (impf.) )",
+        "взять to take (pf.)",
+        "проблема problem (f)",
+        "помочь to help (pf.)",
+        "потом later (then)",
+        "более more",
+        "начать to start, to begin, to commence (pf.)",
+        "понять to understand, to comprehend, to see (pf.)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "класс class (m)",
+        "великий great, outstanding",
+        "похожий similar, alike",
+        "военный military, war",
+        "состояние condition, state, status (n)",
+        "наверное probably, most likely",
+        "например for example, for instance, e.g",
+        "возможный possible, probable",
+        "чувство sense, feeling (n)",
+        "либо either that or, or"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "убить to kill (pf.)",
+        "убийство murder, homicide (n)",
+        "кровь blood (f)",
+        "оружие weapon, arm, weaponry (n)",
+        "погибнуть to die of unnatural causes, to be killed (pf.)",
+        "убивать to kill (impf.)",
+        "секс sex (m)",
+        "убийца murderer (m/f)",
+        "стрелять to shoot, to fire (impf.)",
+        "зрение vision, sight (n)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0060",
+     "type:w:w0108",
+     "mc:w:w0112",
+     "mc:w:w0063",
+     "type:w:w0056",
+     "mc:w:w0058",
+     "type:w:w0043",
+     "type:w:w0053",
+     "type:w:w0099",
+     "type:w:w0014",
+     "type:w:w0049",
+     "type:w:w0103",
+     "type:w:w0118",
+     "mc:w:w0114",
+     "type:w:w0102",
+     "type:w:w0099",
+     "type:w:w0049",
+     "type:w:w0118",
+     "mc:w:w0114",
+     "mc:w:w0099",
+     "mc:w:w0127",
+     "mc:w:w0121",
+     "mc:w:w0121",
+     "mc:w:w0130",
+     "mc:w:w0126",
+     "mc:w:w0125",
+     "mc:w:w0130",
+     "mc:w:w0122",
+     "mc:w:w0129",
+     "mc:w:w0126",
+     "mc:w:w0128",
+     "mc:w:w0124",
+     "mc:w:w0122",
+     "mc:w:w0125",
+     "mc:w:w0128",
+     "mc:w:w0127",
+     "mc:w:w0124",
+     "mc:w:w0123",
+     "mc:w:w0129",
+     "mc:w:w0123",
+     "mc:w:w0123",
+     "mc:w:w0123",
+     "mc:w:w0052",
+     "mc:w:w0101",
+     "mc:w:w0119",
+     "mc:w:w0091",
+     "mc:w:w0112",
+     "mc:w:w0118",
+     "mc:w:w0117",
+     "mc:w:w0103",
+     "mc:w:w0115",
+     "mc:w:w0096",
+     "mc:w:w0114",
+     "mc:w:w0113",
+     "mc:w:w0101",
+     "type:w:w0093",
+     "type:w:w0061",
+     "type:w:w0098",
+     "type:w:w0116",
+     "type:w:w0088",
+     "type:w:w0095",
+     "type:w:w0111",
+     "type:w:w0070",
+     "type:w:w0081",
+     "type:w:w0071",
+     "type:w:w0120",
+     "type:w:w0097",
+     "type:w:w0098",
+     "type:s:s2628",
+     "mc:s:s3094",
+     "type:s:s0209",
+     "mc:s:s2471",
+     "mc:s:s0876",
+     "type:s:s2762",
+     "type:s:s2722",
+     "type:s:s2097",
+     "type:s:s2628",
+     "type:s:s0209",
+     "type:s:s2762",
+     "type:s:s2722",
+     "type:s:s2097",
+     "mc:s:s2628",
+     "mc:s:s0209",
+     "mc:s:s2762",
+     "mc:s:s2722",
+     "mc:s:s2097",
+     "mc:s:s2097",
+     "mc:s:s2097",
+     "mc:s:s2097"
+    ],
+    [
+     "type:w:w0060",
+     "type:w:w0127",
+     "type:w:w0079",
+     "type:w:w0052",
+     "type:w:w0042",
+     "type:w:w0118",
+     "mc:w:w0123",
+     "type:w:w0099",
+     "mc:w:w0114",
+     "type:w:w0098",
+     "type:w:w0014",
+     "mc:w:w0101",
+     "type:w:w0049",
+     "type:w:w0056",
+     "type:w:w0067",
+     "type:w:w0052",
+     "type:w:w0118",
+     "type:w:w0099",
+     "mc:w:w0135",
+     "mc:w:w0139",
+     "mc:w:w0139",
+     "mc:w:w0138",
+     "mc:w:w0140",
+     "mc:w:w0140",
+     "mc:w:w0132",
+     "mc:w:w0137",
+     "mc:w:w0134",
+     "mc:w:w0131",
+     "mc:w:w0133",
+     "mc:w:w0136",
+     "mc:w:w0136",
+     "mc:w:w0135",
+     "mc:w:w0132",
+     "mc:w:w0131",
+     "mc:w:w0137",
+     "mc:w:w0138",
+     "mc:w:w0133",
+     "mc:w:w0134",
+     "mc:w:w0124",
+     "mc:w:w0070",
+     "mc:w:w0053",
+     "mc:w:w0039",
+     "mc:w:w0058",
+     "mc:w:w0129",
+     "mc:w:w0023",
+     "mc:w:w0056",
+     "mc:w:w0121",
+     "mc:w:w0118",
+     "mc:w:w0065",
+     "mc:w:w0063",
+     "mc:w:w0065",
+     "mc:w:w0063",
+     "type:w:w0078",
+     "type:w:w0063",
+     "type:w:w0126",
+     "type:w:w0053",
+     "type:w:w0084",
+     "type:w:w0125",
+     "type:w:w0043",
+     "type:w:w0112",
+     "type:w:w0122",
+     "type:w:w0130",
+     "type:w:w0123",
+     "type:w:w0128",
+     "type:w:w0084",
+     "type:w:w0125",
+     "type:w:w0128",
+     "type:s:s2422",
+     "type:s:s2628",
+     "mc:s:s3076",
+     "mc:s:s0501",
+     "type:s:s2722",
+     "mc:s:s0149",
+     "type:s:s2762",
+     "mc:s:s1216",
+     "type:s:s2422",
+     "type:s:s2628",
+     "mc:s:s3076",
+     "type:s:s2722",
+     "type:s:s2762",
+     "mc:s:s1216",
+     "mc:s:s2422",
+     "mc:s:s2628",
+     "mc:s:s2722",
+     "mc:s:s2762",
+     "mc:s:s2628"
+    ],
+    [
+     "type:w:w0052",
+     "type:w:w0102",
+     "type:w:w0118",
+     "type:w:w0084",
+     "type:w:w0056",
+     "type:w:w0079",
+     "type:w:w0125",
+     "type:w:w0099",
+     "type:w:w0042",
+     "type:w:w0067",
+     "type:w:w0132",
+     "type:w:w0128",
+     "mc:w:w0065",
+     "type:w:w0119",
+     "mc:w:w0063",
+     "type:w:w0132",
+     "mc:w:w0142",
+     "mc:w:w0148",
+     "mc:w:w0142",
+     "mc:w:w0146",
+     "mc:w:w0149",
+     "mc:w:w0149",
+     "mc:w:w0151",
+     "mc:w:w0141",
+     "mc:w:w0143",
+     "mc:w:w0147",
+     "mc:w:w0143",
+     "mc:w:w0141",
+     "mc:w:w0150",
+     "mc:w:w0151",
+     "mc:w:w0144",
+     "mc:w:w0148",
+     "mc:w:w0147",
+     "mc:w:w0146",
+     "mc:w:w0144",
+     "mc:w:w0150",
+     "mc:w:w0142",
+     "mc:w:w0141",
+     "mc:w:w0151",
+     "mc:w:w0051",
+     "mc:w:w0123",
+     "mc:w:w0055",
+     "mc:w:w0138",
+     "mc:w:w0101",
+     "mc:w:w0131",
+     "mc:w:w0057",
+     "mc:w:w0136",
+     "mc:w:w0140",
+     "mc:w:w0135",
+     "mc:w:w0133",
+     "mc:w:w0137",
+     "mc:w:w0136",
+     "type:w:w0114",
+     "type:w:w0076",
+     "type:w:w0134",
+     "type:w:w0091",
+     "type:w:w0077",
+     "type:w:w0090",
+     "type:w:w0092",
+     "type:w:w0049",
+     "type:w:w0089",
+     "type:w:w0098",
+     "type:w:w0086",
+     "type:w:w0139",
+     "type:w:w0089",
+     "type:w:w0098",
+     "type:w:w0139",
+     "mc:w:w0089",
+     "type:s:s2422",
+     "mc:s:s1660",
+     "mc:s:s1255",
+     "mc:s:s0059",
+     "type:s:s3135",
+     "type:s:s2722",
+     "type:s:s2934",
+     "mc:s:s0025",
+     "type:s:s2422",
+     "mc:s:s0059",
+     "type:s:s3135",
+     "type:s:s2722",
+     "type:s:s2934",
+     "mc:s:s2422",
+     "mc:s:s3135",
+     "mc:s:s2722",
+     "mc:s:s2934"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0060",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0060\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">должен</span><span class=\"rg\">must, have to, should</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"3\"><div class=\"st\" data-tl lang=\"ru\">Каждый, в итоге, <b>должен</b> учиться сам.</div><div class=\"se\">Everyone must learn on their own in the end.</div></div><div class=\"sent\" data-sent=\"348\"><div class=\"st\" data-tl lang=\"ru\">Ты <b>должен</b> показать хороший пример своим детям.</div><div class=\"se\">You should set a good example to your children.</div></div></div>"
+    },
+    {
+     "key": "w:w0108",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0108\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">можно</span><span class=\"rg\">one can, one may <span class=\"gx\">(it is allowed)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"24\"><div class=\"st\" data-tl lang=\"ru\">Время всегда <b>можно</b> найти.</div><div class=\"se\">One can always find time.</div></div><div class=\"sent\" data-sent=\"169\"><div class=\"st\" data-tl lang=\"ru\"><b>Можно</b> ли вам помочь?</div><div class=\"se\">Can I help you?</div></div></div>"
+    },
+    {
+     "key": "w:w0112",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0112\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">тоже</span><span class=\"rg\">too, also, as well</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"60\"><div class=\"st\" data-tl lang=\"ru\">«Я люблю играть в карты». — «Я <b>тоже</b>».</div><div class=\"se\">&quot;I like playing cards.&quot; &quot;Me too.&quot;</div></div><div class=\"sent\" data-sent=\"1910\"><div class=\"st\" data-tl lang=\"ru\">Если смогу, завтра <b>тоже</b> приду.</div><div class=\"se\">I&#39;ll come back tomorrow if I can.</div></div></div>"
+    },
+    {
+     "key": "w:w0063",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0063\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">думать</span><span class=\"rg\">to think <span class=\"dim\">(impf.)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1350\"><div class=\"st\" data-tl lang=\"ru\">У меня есть основание <b>думать</b>, что мы Тома никогда больше не увидим.</div><div class=\"se\">I have reason to think that we&#39;ll never see Tom again.</div></div><div class=\"sent\" data-sent=\"1414\"><div class=\"st\" data-tl lang=\"ru\">Вы не можете помешать мне <b>думать</b> об этом.</div><div class=\"se\">You can&#39;t stop me from thinking about it.</div></div></div>"
+    },
+    {
+     "key": "w:w0056",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0056\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">уже</span><span class=\"rg\">already</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"208\"><div class=\"st\" data-tl lang=\"ru\">Я <b>уже</b> был в Саппоро до этого.</div><div class=\"se\">I&#39;ve been in Sapporo before.</div></div><div class=\"sent\" data-sent=\"219\"><div class=\"st\" data-tl lang=\"ru\">Я помню, я <b>уже</b> читал этот роман.</div><div class=\"se\">I remember reading this novel before.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "6340e46686894303"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "f50945393d71cf94"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "0dca1bfca4c1ca43"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 41,
+     "sha": "f024ae4bcd0b7341"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 3,
+     "sha": "ee6cab66e6ea9238"
+    },
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "67b7c43afdde8c11"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.064667,
+     0.030231,
+     0.019733
+    ],
+    "toGo": [
+     153,
+     259,
+     316
+    ],
+    "toGoTotal": 187,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.064667,
+     "all": false
+    },
+    "eta": 153,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.019542
+   },
+   "items": {
+    "items": 260,
+    "right": 226
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "d59f90d693a5a386"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.730769,
+     0.38
+    ],
+    "toGo": [
+     0,
+     86,
+     169
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.730769,
+     "all": false
+    },
+    "eta": 86,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.35625
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 86 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Моя семья Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 86 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Моя семья Start",
+    "Session 2 Goal 2 of 3 ≈ 86 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Моя семья Start",
+    "Session 3 Goal 2 of 3 ≈ 87 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Моя семья Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 86 sessions daily life: directions, simple chat, short notices Алфавит 0 / 33 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices Алфавит 0 / 33 taught · 0 mastered A1 2 of 600 mastered reading 1 of 20 A2 380 learned Still shaky пойти машина рассказать ходить ужин сентябрь обед состояние существовать безопасность честь секунда Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "да yes",
+        "девятнадцать nineteen",
+        "до свидания goodbye",
+        "здравствуйте hello",
+        "извините excuse me, sorry",
+        "ноль zero",
+        "привет hello, hi",
+        "простите sorry, excuse me, forgive me",
+        "тысяча thousand",
+        "фиолетовый purple"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "хватать to be enough (to grab (impf.) )",
+        "офицер officer (m)",
+        "подходить to approach, to come up (to suit, to fit (impf.) )",
+        "модель model (f)",
+        "платить to pay (impf.)",
+        "зайти to come in, to go, to call (pf.)",
+        "упасть to fall, to drop (pf.)",
+        "называться to be called, to be named (impf.)",
+        "ожидать to expect, to anticipate (impf.)",
+        "святой holy, sacred"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "убить to kill (pf.)",
+        "убийство murder, homicide (n)",
+        "кровь blood (f)",
+        "оружие weapon, arm, weaponry (n)",
+        "погибнуть to die of unnatural causes, to be killed (pf.)",
+        "убивать to kill (impf.)",
+        "секс sex (m)",
+        "убийца murderer (m/f)",
+        "стрелять to shoot, to fire (impf.)",
+        "зрение vision, sight (n)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "да yes",
+        "девятнадцать nineteen",
+        "до свидания goodbye",
+        "здравствуйте hello",
+        "извините excuse me, sorry",
+        "ноль zero",
+        "привет hello, hi",
+        "простите sorry, excuse me, forgive me",
+        "тысяча thousand",
+        "фиолетовый purple"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 39 of 70",
+       "rows": 10,
+       "first": [
+        "здоровый healthy, sound",
+        "разговаривать to talk, to speak, to converse (impf.)",
+        "вокруг around, round, about",
+        "надежда hope, expectation, prospect (f)",
+        "низкий low",
+        "роман novel (m)",
+        "опыт experience (m)",
+        "лежать to lie (impf.)",
+        "образование education (n)",
+        "вот-вот just about to"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "убить to kill (pf.)",
+        "убийство murder, homicide (n)",
+        "кровь blood (f)",
+        "оружие weapon, arm, weaponry (n)",
+        "погибнуть to die of unnatural causes, to be killed (pf.)",
+        "убивать to kill (impf.)",
+        "секс sex (m)",
+        "убийца murderer (m/f)",
+        "стрелять to shoot, to fire (impf.)",
+        "зрение vision, sight (n)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0050",
+     "type:w:w0859",
+     "type:w:w0801",
+     "type:w:w0092",
+     "type:w:w0395",
+     "type:w:w0134",
+     "type:w:w0084",
+     "type:w:w0034",
+     "type:w:w0816",
+     "type:w:w0847",
+     "type:w:w0193",
+     "type:w:w0422",
+     "type:w:w0779",
+     "type:w:w0698",
+     "type:w:w0921",
+     "type:w:w0092",
+     "mc:w:w0965",
+     "mc:w:w0960",
+     "mc:w:w0967",
+     "mc:w:w0965",
+     "mc:w:w0962",
+     "mc:w:w0960",
+     "mc:w:w0966",
+     "mc:w:w0957",
+     "mc:w:w0973",
+     "mc:w:w0963",
+     "mc:w:w0957",
+     "mc:w:w0961",
+     "mc:w:w0966",
+     "mc:w:w0962",
+     "mc:w:w0961",
+     "mc:w:w0963",
+     "mc:w:w0964",
+     "mc:w:w0964",
+     "mc:w:w0973",
+     "mc:w:w0967",
+     "mc:w:w0965",
+     "mc:w:w0957",
+     "mc:w:w0966",
+     "mc:w:w0962",
+     "mc:w:w0961",
+     "mc:w:w0967",
+     "mc:w:w0962",
+     "mc:w:w0961",
+     "mc:w:w0920",
+     "mc:w:w0378",
+     "mc:w:w0839",
+     "mc:w:w0116",
+     "mc:w:w0898",
+     "mc:w:w0557",
+     "mc:w:w0683",
+     "mc:w:w0431",
+     "mc:w:w0680",
+     "mc:w:w0219",
+     "mc:w:w0297",
+     "mc:w:w0495",
+     "mc:w:w0297",
+     "type:w:w0460",
+     "type:w:w0155",
+     "type:w:w0751",
+     "type:w:w0609",
+     "type:w:w0688",
+     "type:w:w0175",
+     "type:w:w0858",
+     "type:w:w0353",
+     "type:w:w0157",
+     "type:w:w0855",
+     "type:w:w0869",
+     "type:w:w0354",
+     "type:w:w0855",
+     "mc:s:s0148",
+     "mc:s:s1184",
+     "mc:s:s2257",
+     "type:s:s2072",
+     "mc:s:s0102",
+     "type:s:s1686",
+     "mc:s:s2665",
+     "mc:s:s1963",
+     "mc:s:s0148",
+     "mc:s:s2257",
+     "type:s:s2072",
+     "type:s:s1686",
+     "mc:s:s2072",
+     "mc:s:s1686"
+    ],
+    [
+     "mc:w:w0961",
+     "type:w:w0092",
+     "mc:w:w0957",
+     "type:w:w0782",
+     "mc:w:w0297",
+     "type:w:w0878",
+     "mc:w:w0967",
+     "mc:w:w0966",
+     "mc:w:w0962",
+     "type:w:w0506",
+     "type:w:w0724",
+     "type:w:w0658",
+     "type:w:w0855",
+     "type:w:w0606",
+     "mc:w:w0965",
+     "mc:w:w0297",
+     "mc:w:w0966",
+     "type:w:w0658",
+     "mc:w:w0965",
+     "mc:w:w0297",
+     "mc:w:w0966",
+     "mc:w:w0972",
+     "mc:w:w0977",
+     "mc:w:w0970",
+     "mc:w:w0968",
+     "mc:w:w0969",
+     "mc:w:w0976",
+     "mc:w:w0968",
+     "mc:w:w0976",
+     "mc:w:w0971",
+     "mc:w:w0975",
+     "mc:w:w0969",
+     "mc:w:w0971",
+     "mc:w:w0970",
+     "mc:w:w0953",
+     "mc:w:w0977",
+     "mc:w:w0974",
+     "mc:w:w0974",
+     "mc:w:w0972",
+     "mc:w:w0975",
+     "mc:w:w0953",
+     "mc:w:w0699",
+     "mc:w:w0144",
+     "mc:w:w0162",
+     "mc:w:w0622",
+     "mc:w:w0199",
+     "mc:w:w0501",
+     "mc:w:w0825",
+     "mc:w:w0006",
+     "mc:w:w0261",
+     "mc:w:w0215",
+     "mc:w:w0633",
+     "mc:w:w0879",
+     "mc:w:w0162",
+     "mc:w:w0501",
+     "mc:w:w0261",
+     "type:w:w0476",
+     "type:w:w0411",
+     "type:w:w0286",
+     "type:w:w0205",
+     "type:w:w0189",
+     "type:w:w0107",
+     "type:w:w0015",
+     "type:w:w0810",
+     "type:w:w0786",
+     "type:w:w0900",
+     "type:w:w0624",
+     "type:w:w0231",
+     "type:w:w0411",
+     "type:w:w0810",
+     "mc:s:s0830",
+     "type:s:s2072",
+     "mc:s:s0559",
+     "type:s:s1686",
+     "type:s:s0148",
+     "type:s:s1544",
+     "mc:s:s2257",
+     "mc:s:s2830",
+     "type:s:s2072",
+     "mc:s:s0559",
+     "type:s:s1686",
+     "type:s:s0148",
+     "type:s:s1544",
+     "mc:s:s2257",
+     "mc:s:s2072",
+     "mc:s:s1686",
+     "mc:s:s0148",
+     "mc:s:s1544"
+    ],
+    [
+     "type:w:w0674",
+     "type:w:w0499",
+     "type:w:w0434",
+     "type:w:w0810",
+     "type:w:w0700",
+     "mc:w:w0261",
+     "type:w:w0411",
+     "mc:w:w0297",
+     "mc:w:w0966",
+     "mc:w:w0965",
+     "mc:w:w0501",
+     "mc:w:w0162",
+     "type:w:w0782",
+     "type:w:w0820",
+     "type:w:w0658",
+     "type:w:w0499",
+     "mc:w:w0501",
+     "mc:w:w0979",
+     "mc:w:w0985",
+     "mc:w:w0985",
+     "mc:w:w0982",
+     "mc:w:w0980",
+     "mc:w:w0986",
+     "mc:w:w0984",
+     "mc:w:w0981",
+     "mc:w:w0979",
+     "mc:w:w0986",
+     "mc:w:w0980",
+     "mc:w:w0983",
+     "mc:w:w0981",
+     "mc:w:w0987",
+     "mc:w:w0978",
+     "mc:w:w0987",
+     "mc:w:w0982",
+     "mc:w:w0983",
+     "mc:w:w0984",
+     "mc:w:w0978",
+     "mc:w:w0979",
+     "mc:w:w0980",
+     "mc:w:w0981",
+     "mc:w:w0978",
+     "mc:w:w0979",
+     "mc:w:w0612",
+     "mc:w:w0184",
+     "mc:w:w0488",
+     "mc:w:w0556",
+     "mc:w:w0503",
+     "mc:w:w0058",
+     "mc:w:w0511",
+     "mc:w:w0713",
+     "mc:w:w0603",
+     "mc:w:w0782",
+     "mc:w:w0384",
+     "mc:w:w0243",
+     "mc:w:w0612",
+     "mc:w:w0184",
+     "mc:w:w0511",
+     "mc:w:w0713",
+     "mc:w:w0243",
+     "type:w:w0666",
+     "type:w:w0402",
+     "type:w:w0222",
+     "type:w:w0415",
+     "type:w:w0430",
+     "type:w:w0267",
+     "type:w:w0682",
+     "type:w:w0601",
+     "type:w:w0403",
+     "type:w:w0943",
+     "type:w:w0062",
+     "type:w:w0404",
+     "type:w:w0430",
+     "type:w:w0682",
+     "type:w:w0943",
+     "type:s:s1686",
+     "mc:s:s0578",
+     "mc:s:s1634",
+     "type:s:s0148",
+     "type:s:s2072",
+     "mc:s:s1801",
+     "mc:s:s3078",
+     "type:s:s2257",
+     "type:s:s1686",
+     "type:s:s0148",
+     "type:s:s2072",
+     "type:s:s2257",
+     "mc:s:s1686",
+     "mc:s:s0148",
+     "mc:s:s2072",
+     "mc:s:s2257"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0050",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0050\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">тот</span><span class=\"rg\">that</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"83\"><div class=\"st\" data-tl lang=\"ru\">Посмотри на <b>тот</b> дым.</div><div class=\"se\">Look at that smoke.</div></div><div class=\"sent\" data-sent=\"143\"><div class=\"st\" data-tl lang=\"ru\"><b>Тот</b> новый магазин откроется на следующей неделе.</div><div class=\"se\">That new store is opening next week.</div></div></div>"
+    },
+    {
+     "key": "w:w0859",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0859\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">любимый</span><span class=\"rg\">favorite</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1035\"><div class=\"st\" data-tl lang=\"ru\">Кто твой <b>любимый</b> герой в этой книге?</div><div class=\"se\">Who&#39;s your favorite character in this book?</div></div><div class=\"sent\" data-sent=\"1880\"><div class=\"st\" data-tl lang=\"ru\">Какой твой <b>любимый</b> национальный парк?</div><div class=\"se\">What&#39;s your favorite national park?</div></div></div>"
+    },
+    {
+     "key": "w:w0801",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0801\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">перевод</span><span class=\"rg\">translation <span class=\"dim\">(m)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"670\"><div class=\"st\" data-tl lang=\"ru\"><b>Перевод</b> французского романа занял больше трёх месяцев.</div><div class=\"se\">The translation of the French novel took more than three months.</div></div><div class=\"sent\" data-sent=\"1293\"><div class=\"st\" data-tl lang=\"ru\">Сколько времени ей требуется на <b>перевод</b> этой книги?</div><div class=\"se\">How much time does she need to translate this book?</div></div></div>"
+    },
+    {
+     "key": "w:w0092",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0092\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">новый</span><span class=\"rg\">new</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"143\"><div class=\"st\" data-tl lang=\"ru\">Тот <b>новый</b> магазин откроется на следующей неделе.</div><div class=\"se\">That new store is opening next week.</div></div><div class=\"sent\" data-sent=\"266\"><div class=\"st\" data-tl lang=\"ru\">Я надеюсь построить <b>новый</b> дом в следующем году.</div><div class=\"se\">I hope to build a new house next year.</div></div></div>"
+    },
+    {
+     "key": "w:w0395",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0395\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">собственный</span><span class=\"rg\">own, one&#39;s own</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1851\"><div class=\"st\" data-tl lang=\"ru\">Россия подписала <b>собственный</b> мирный договор с Германией.</div><div class=\"se\">Russia signed its own peace treaty with Germany.</div></div><div class=\"sent\" data-sent=\"2019\"><div class=\"st\" data-tl lang=\"ru\">Хотел бы ты вести свой <b>собственный</b> бизнес?</div><div class=\"se\">Would you like to run your own business?</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "320988c5b2a63da8"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "13c17c1e5d4fa692"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d9b7082dcbad7ea0"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 16,
+     "sha": "1e77249b089b0f11"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "986c1e752ab32447"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 980,
+     "sha": "c15e239c229abdb2"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.981667,
+     0.716154,
+     0.3724
+    ],
+    "toGo": [
+     0,
+     88,
+     170
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.716154,
+     "all": false
+    },
+    "eta": 88,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.349125
+   },
+   "items": {
+    "items": 262,
+    "right": 219
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "2eb4f86d6e4db2a0"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     1,
+     1
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 1,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.75
+   },
+   "todayFirst": "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Работа из дома Start",
+   "today": [
+    "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Работа из дома Start",
+    "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Работа из дома Start",
+    "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Работа из дома Start"
+   ],
+   "progress": {
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles Алфавит 0 / 33 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles Алфавит 0 / 33 taught · 0 mastered A1 2 of 600 mastered A2 4 of 700 mastered reading 0 of 20 B1 5 of 700 mastered sentences 1 · reading 0 of 20 Still shaky жена равный старик замуж ближайший банка особо объяснять сведение Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "да yes",
+        "девятнадцать nineteen",
+        "до свидания goodbye",
+        "здравствуйте hello",
+        "извините excuse me, sorry",
+        "ноль zero",
+        "привет hello, hi",
+        "простите sorry, excuse me, forgive me",
+        "тысяча thousand",
+        "фиолетовый purple"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "замок castle (m)",
+        "появляться to appear, to show up, to emerge (impf.)",
+        "потеря loss (f)",
+        "единый single, one, sole",
+        "выпустить to release, to let out, to let go (pf.)",
+        "сад garden, orchard (m)",
+        "вера faith, belief (f)",
+        "использование use, usage (n)",
+        "ответственность responsibility (f)",
+        "техника technique (f)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "невероятный unbelievable",
+        "соответствовать to correspond, to conform, to be in line (impf.)",
+        "рассчитывать to count / reckon (impf.)",
+        "тайный secret",
+        "ошибаться to make a mistake, to err (impf.)",
+        "середина middle (f)",
+        "губа lip (f)",
+        "кадр scene, shot (frame, still, shot (m) )",
+        "копия copy, duplicate (f)",
+        "поверхность surface, face (f)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 70 of 70 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "да yes",
+        "девятнадцать nineteen",
+        "до свидания goodbye",
+        "здравствуйте hello",
+        "извините excuse me, sorry",
+        "ноль zero",
+        "привет hello, hi",
+        "простите sorry, excuse me, forgive me",
+        "тысяча thousand",
+        "фиолетовый purple"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "замок castle (m)",
+        "появляться to appear, to show up, to emerge (impf.)",
+        "потеря loss (f)",
+        "единый single, one, sole",
+        "выпустить to release, to let out, to let go (pf.)",
+        "сад garden, orchard (m)",
+        "вера faith, belief (f)",
+        "использование use, usage (n)",
+        "ответственность responsibility (f)",
+        "техника technique (f)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "невероятный unbelievable",
+        "соответствовать to correspond, to conform, to be in line (impf.)",
+        "рассчитывать to count / reckon (impf.)",
+        "тайный secret",
+        "ошибаться to make a mistake, to err (impf.)",
+        "середина middle (f)",
+        "губа lip (f)",
+        "кадр scene, shot (frame, still, shot (m) )",
+        "копия copy, duplicate (f)",
+        "поверхность surface, face (f)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0111",
+     "type:w:w1702",
+     "type:w:w1378",
+     "type:w:w0160",
+     "type:w:w0498",
+     "type:w:w1074",
+     "type:w:w1670",
+     "type:w:w1330",
+     "type:w:w1342",
+     "type:w:w1656",
+     "type:w:w0621",
+     "type:w:w0787",
+     "type:w:w0651",
+     "type:w:w1649",
+     "type:w:w0211",
+     "mc:w:w1595",
+     "mc:w:w0479",
+     "mc:w:w1069",
+     "mc:w:w0701",
+     "mc:w:w1175",
+     "mc:w:w1849",
+     "mc:w:w0816",
+     "mc:w:w1903",
+     "mc:w:w1062",
+     "mc:w:w1234",
+     "mc:w:w0534",
+     "mc:w:w0598",
+     "mc:w:w0479",
+     "type:w:w1616",
+     "type:w:w1077",
+     "type:w:w1411",
+     "type:w:w0744",
+     "type:w:w1472",
+     "type:w:w0148",
+     "type:w:w1068",
+     "type:w:w0212",
+     "type:w:w1055",
+     "type:w:w1415",
+     "type:w:w0949",
+     "type:w:w1387",
+     "type:w:w1616",
+     "type:w:w1077",
+     "type:w:w1068",
+     "mc:s:s2530",
+     "mc:s:s2597",
+     "mc:s:s2558",
+     "mc:s:s2508",
+     "type:s:s1207",
+     "mc:s:s2163",
+     "type:s:s1350",
+     "mc:s:s3193",
+     "type:s:s1207",
+     "type:s:s1350",
+     "mc:s:s3193",
+     "mc:s:s1207",
+     "mc:s:s1350"
+    ],
+    [
+     "type:w:w1077",
+     "type:w:w1110",
+     "type:w:w1571",
+     "type:w:w0266",
+     "type:w:w0147",
+     "mc:w:w0479",
+     "type:w:w0338",
+     "type:w:w1221",
+     "type:w:w0209",
+     "type:w:w1752",
+     "type:w:w0653",
+     "type:w:w1616",
+     "type:w:w1068",
+     "type:w:w1320",
+     "type:w:w0441",
+     "type:w:w1110",
+     "type:w:w0338",
+     "type:w:w1320",
+     "type:w:w0441",
+     "mc:w:w1110",
+     "mc:w:w1320",
+     "mc:w:w1294",
+     "mc:w:w0499",
+     "mc:w:w0514",
+     "mc:w:w1677",
+     "mc:w:w0096",
+     "mc:w:w0208",
+     "mc:w:w1237",
+     "mc:w:w2005",
+     "mc:w:w1524",
+     "mc:w:w0750",
+     "mc:w:w0563",
+     "mc:w:w1119",
+     "mc:w:w0096",
+     "mc:w:w1237",
+     "type:w:w1398",
+     "type:w:w0123",
+     "type:w:w1674",
+     "type:w:w0654",
+     "type:w:w1529",
+     "type:w:w0620",
+     "type:w:w0817",
+     "type:w:w0279",
+     "type:w:w0427",
+     "type:w:w0876",
+     "type:w:w0275",
+     "type:w:w0113",
+     "type:w:w0123",
+     "type:w:w0620",
+     "type:s:s1350",
+     "mc:s:s2324",
+     "mc:s:s2093",
+     "type:s:s0384",
+     "type:s:s1207",
+     "mc:s:s2969",
+     "mc:s:s3193",
+     "mc:s:s2938",
+     "type:s:s1350",
+     "type:s:s0384",
+     "type:s:s1207",
+     "mc:s:s1350",
+     "mc:s:s0384",
+     "mc:s:s1207",
+     "mc:s:s1207"
+    ],
+    [
+     "mc:w:w1237",
+     "type:w:w0043",
+     "type:w:w0718",
+     "type:w:w0235",
+     "type:w:w1436",
+     "type:w:w1221",
+     "type:w:w0441",
+     "type:w:w1568",
+     "type:w:w1110",
+     "type:w:w1320",
+     "mc:w:w0096",
+     "type:w:w0338",
+     "type:w:w1752",
+     "type:w:w0123",
+     "type:w:w0620",
+     "type:w:w1436",
+     "mc:w:w1221",
+     "mc:w:w1743",
+     "mc:w:w0255",
+     "mc:w:w1752",
+     "mc:w:w1212",
+     "mc:w:w0311",
+     "mc:w:w1838",
+     "mc:w:w1686",
+     "mc:w:w1895",
+     "mc:w:w1377",
+     "mc:w:w0284",
+     "mc:w:w1463",
+     "mc:w:w1743",
+     "mc:w:w0255",
+     "mc:w:w1463",
+     "mc:w:w0255",
+     "type:w:w0142",
+     "type:w:w0676",
+     "type:w:w0844",
+     "type:w:w1687",
+     "type:w:w0692",
+     "type:w:w0901",
+     "type:w:w0723",
+     "type:w:w0482",
+     "type:w:w0836",
+     "type:w:w0183",
+     "type:w:w1640",
+     "type:w:w0892",
+     "type:w:w1687",
+     "type:w:w1640",
+     "mc:w:w1640",
+     "type:s:s0384",
+     "mc:s:s1747",
+     "mc:s:s3161",
+     "mc:s:s1105",
+     "type:s:s1350",
+     "type:s:s1207",
+     "mc:s:s2081",
+     "mc:s:s0663",
+     "type:s:s0384",
+     "type:s:s1350",
+     "type:s:s1207",
+     "mc:s:s0384",
+     "mc:s:s1350",
+     "mc:s:s1207"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0111",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0111\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">иметь</span><span class=\"rg\">to have, to possess <span class=\"dim\">(impf.)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1071\"><div class=\"st\" data-tl lang=\"ru\">Я не хочу <b>иметь</b> необходимость предупреждать тебя снова.</div><div class=\"se\">I don&#39;t want to have to warn you again.</div></div><div class=\"sent\" data-sent=\"1488\"><div class=\"st\" data-tl lang=\"ru\">Должно быть, хорошо <b>иметь</b> друзей на высоких должностях.</div><div class=\"se\">It must be nice to have friends in high places.</div></div></div>"
+    },
+    {
+     "key": "w:w1702",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1702\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">постель</span><span class=\"rg\">bed <span class=\"dim\">(f)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1447\"><div class=\"st\" data-tl lang=\"ru\">Одиннадцать – обычное для меня время ложиться в <b>постель</b>.</div><div class=\"se\">Eleven o&#39;clock is my regular time for going to bed.</div></div><div class=\"sent\" data-sent=\"2654\"><div class=\"st\" data-tl lang=\"ru\">Я хотел провести весь день в <b>постели</b>.</div><div class=\"se\">I wanted to stay in bed all day.</div></div></div>"
+    },
+    {
+     "key": "w:w1378",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1378\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">фонд</span><span class=\"rg\">fund <span class=\"dim\">(m)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"408\"><div class=\"st\" data-tl lang=\"ru\">Это был дополнительный <b>фонд</b> для покупки книг.</div><div class=\"se\">This was an additional fund for buying books.</div></div><div class=\"sent\" data-sent=\"1754\"><div class=\"st\" data-tl lang=\"ru\">Они создали <b>фонд</b> для поддержки жертв.</div><div class=\"se\">They set up a fund to support the victims.</div></div></div>"
+    },
+    {
+     "key": "w:w0160",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0160\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">понять</span><span class=\"rg\">to understand, to comprehend, to see <span class=\"dim\">(pf.)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"232\"><div class=\"st\" data-tl lang=\"ru\">Невозможно заставить его <b>понять</b> новую теорию.</div><div class=\"se\">It is impossible to get him to understand the new theory.</div></div><div class=\"sent\" data-sent=\"2316\"><div class=\"st\" data-tl lang=\"ru\">Сложно <b>понять</b> то, что он говорит.</div><div class=\"se\">It&#39;s hard to understand what he&#39;s saying.</div></div></div>"
+    },
+    {
+     "key": "w:w0498",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0498\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">английский</span><span class=\"rg\">English</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"77\"><div class=\"st\" data-tl lang=\"ru\">Например, тебе нравится <b>английский</b>?</div><div class=\"se\">For example, do you like English?</div></div><div class=\"sent\" data-sent=\"104\"><div class=\"st\" data-tl lang=\"ru\">Мне нравятся музыка и <b>английский</b> язык.</div><div class=\"se\">I like English and music.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "6700ef8bf2ab1f5c"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "e382775611635602"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "53cb218d3d45b435"
+    },
+    "read": {
+     "n": 2,
+     "sha": "07e71869e4c43a0d"
+    },
+    "s": {
+     "n": 18,
+     "sha": "3817837ccbc41bae"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "5387dcdbc96bac4d"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.991667,
+     0.992308,
+     0.99
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 0.99,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.7425
+   },
+   "items": {
+    "items": 181,
+    "right": 155
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "1e82c7f589fd6908"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.2,
+     0.092308,
+     0.06
+    ],
+    "toGo": [
+     115,
+     224,
+     284
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.2,
+     "all": false
+    },
+    "eta": 115,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 31,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.05625
+   },
+   "todayFirst": "Алфавит first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn Алфавит, sets 1–2 of 6 A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья",
+   "today": [
+    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья Start",
+    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья Start",
+    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья Start"
+   ],
+   "progress": {
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 154 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Still shaky делать после любить кто-нибудь собираться нога ужин дедушка шестьдесят Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "да yes",
+        "девятнадцать nineteen",
+        "до свидания goodbye",
+        "здравствуйте hello",
+        "извините excuse me, sorry",
+        "ноль zero",
+        "привет hello, hi",
+        "простите sorry, excuse me, forgive me",
+        "тысяча thousand",
+        "фиолетовый purple"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "класс class (m)",
+        "великий great, outstanding",
+        "похожий similar, alike",
+        "военный military, war",
+        "состояние condition, state, status (n)",
+        "наверное probably, most likely",
+        "например for example, for instance, e.g",
+        "возможный possible, probable",
+        "чувство sense, feeling (n)",
+        "либо either that or, or"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "убить to kill (pf.)",
+        "убийство murder, homicide (n)",
+        "кровь blood (f)",
+        "оружие weapon, arm, weaponry (n)",
+        "погибнуть to die of unnatural causes, to be killed (pf.)",
+        "убивать to kill (impf.)",
+        "секс sex (m)",
+        "убийца murderer (m/f)",
+        "стрелять to shoot, to fire (impf.)",
+        "зрение vision, sight (n)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "да yes",
+        "девятнадцать nineteen",
+        "до свидания goodbye",
+        "здравствуйте hello",
+        "извините excuse me, sorry",
+        "ноль zero",
+        "привет hello, hi",
+        "простите sorry, excuse me, forgive me",
+        "тысяча thousand",
+        "фиолетовый purple"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "класс class (m)",
+        "великий great, outstanding",
+        "похожий similar, alike",
+        "военный military, war",
+        "состояние condition, state, status (n)",
+        "наверное probably, most likely",
+        "например for example, for instance, e.g",
+        "возможный possible, probable",
+        "чувство sense, feeling (n)",
+        "либо either that or, or"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "убить to kill (pf.)",
+        "убийство murder, homicide (n)",
+        "кровь blood (f)",
+        "оружие weapon, arm, weaponry (n)",
+        "погибнуть to die of unnatural causes, to be killed (pf.)",
+        "убивать to kill (impf.)",
+        "секс sex (m)",
+        "убийца murderer (m/f)",
+        "стрелять to shoot, to fire (impf.)",
+        "зрение vision, sight (n)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0344",
+     "type:w:w0144",
+     "type:w:w0326",
+     "type:w:w0210",
+     "type:w:w0118",
+     "mc:w:w0521",
+     "type:w:w0332",
+     "type:w:w0504",
+     "type:w:w0577",
+     "type:w:w0402",
+     "type:w:w0092",
+     "type:w:w0246",
+     "type:w:w0220",
+     "type:w:w0075",
+     "type:w:w0284",
+     "type:w:w0220",
+     "mc:w:w0141",
+     "mc:w:w0215",
+     "mc:w:w0178",
+     "mc:w:w0023",
+     "mc:w:w0519",
+     "mc:w:w0056",
+     "mc:w:w0020",
+     "mc:w:w0587",
+     "mc:w:w0387",
+     "mc:w:w0043",
+     "mc:w:w0549",
+     "mc:w:w0520",
+     "type:w:w0569",
+     "type:w:w0260",
+     "type:w:w0205",
+     "type:w:w0145",
+     "type:w:w0094",
+     "type:w:w0292",
+     "type:w:w0355",
+     "type:w:w0315",
+     "type:w:w0112",
+     "type:w:w0500",
+     "type:w:w0299",
+     "type:w:w0196",
+     "mc:s:s3069",
+     "mc:s:s1176",
+     "mc:s:s0734",
+     "mc:s:s2188",
+     "type:s:s3134",
+     "mc:s:s0173",
+     "mc:s:s2729",
+     "type:s:s1038",
+     "type:s:s3134",
+     "type:s:s1038",
+     "mc:s:s3134",
+     "mc:s:s1038"
+    ],
+    [
+     "type:w:w0310",
+     "type:w:w0220",
+     "type:w:w0235",
+     "type:w:w0361",
+     "type:w:w0269",
+     "type:w:w0479",
+     "type:w:w0240",
+     "type:w:w0022",
+     "mc:w:w0211",
+     "type:w:w0090",
+     "type:w:w0115",
+     "type:w:w0320",
+     "type:w:w0018",
+     "type:w:w0405",
+     "type:w:w0532",
+     "mc:w:w0119",
+     "mc:w:w0559",
+     "mc:w:w0287",
+     "mc:w:w0518",
+     "mc:w:w0107",
+     "mc:w:w0427",
+     "mc:w:w0594",
+     "mc:w:w0186",
+     "mc:w:w0014",
+     "mc:w:w0304",
+     "mc:w:w0257",
+     "mc:w:w0321",
+     "mc:w:w0287",
+     "mc:w:w0186",
+     "mc:w:w0257",
+     "type:w:w0401",
+     "type:w:w0109",
+     "type:w:w0015",
+     "type:w:w0227",
+     "type:w:w0274",
+     "type:w:w0068",
+     "type:w:w0372",
+     "type:w:w0453",
+     "type:w:w0233",
+     "type:w:w0295",
+     "type:w:w0509",
+     "type:w:w0370",
+     "type:w:w0233",
+     "mc:s:s1471",
+     "type:s:s3034",
+     "type:s:s3134",
+     "mc:s:s0551",
+     "mc:s:s2069",
+     "mc:s:s1536",
+     "type:s:s3195",
+     "type:s:s1038",
+     "type:s:s3034",
+     "type:s:s3134",
+     "type:s:s3195",
+     "type:s:s1038",
+     "mc:s:s3034",
+     "mc:s:s3134",
+     "mc:s:s3195",
+     "mc:s:s1038",
+     "mc:s:s3195"
+    ],
+    [
+     "mc:w:w0186",
+     "type:w:w0233",
+     "type:w:w0349",
+     "type:w:w0039",
+     "type:w:w0406",
+     "mc:w:w0257",
+     "type:w:w0537",
+     "type:w:w0099",
+     "type:w:w0557",
+     "type:w:w0327",
+     "type:w:w0064",
+     "type:w:w0582",
+     "type:w:w0075",
+     "type:w:w0320",
+     "mc:w:w0287",
+     "type:w:w0099",
+     "type:w:w0557",
+     "mc:w:w0558",
+     "mc:w:w0098",
+     "mc:w:w0491",
+     "mc:w:w0514",
+     "mc:w:w0462",
+     "mc:w:w0286",
+     "mc:w:w0485",
+     "mc:w:w0556",
+     "mc:w:w0510",
+     "mc:w:w0379",
+     "mc:w:w0313",
+     "mc:w:w0562",
+     "mc:w:w0379",
+     "mc:w:w0379",
+     "type:w:w0171",
+     "type:w:w0499",
+     "type:w:w0044",
+     "type:w:w0189",
+     "type:w:w0095",
+     "type:w:w0038",
+     "type:w:w0279",
+     "type:w:w0309",
+     "type:w:w0097",
+     "type:w:w0553",
+     "type:w:w0374",
+     "type:w:w0465",
+     "type:w:w0499",
+     "type:w:w0189",
+     "type:s:s1038",
+     "type:s:s3195",
+     "mc:s:s2749",
+     "mc:s:s1527",
+     "mc:s:s0863",
+     "mc:s:s2703",
+     "type:s:s3034",
+     "type:s:s3134",
+     "type:s:s1038",
+     "type:s:s3195",
+     "type:s:s3034",
+     "type:s:s3134",
+     "mc:s:s1038",
+     "mc:s:s3195",
+     "mc:s:s3034",
+     "mc:s:s3134"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0344",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0344\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">полиция</span><span class=\"rg\">police <span class=\"dim\">(f)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"37\"><div class=\"st\" data-tl lang=\"ru\"><b>Полиция</b> вас заставит найти пули.</div><div class=\"se\">The police will get you to find the bullets.</div></div><div class=\"sent\" data-sent=\"809\"><div class=\"st\" data-tl lang=\"ru\"><b>Полиция</b> не нашла в квартире следов преступления.</div><div class=\"se\">The police found no signs of foul play in the apartment.</div></div></div>"
+    },
+    {
+     "key": "w:w0144",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0144\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">понимать</span><span class=\"rg\">to understand, to see, to comprehend <span class=\"dim\">(impf.)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1167\"><div class=\"st\" data-tl lang=\"ru\">Я начинаю <b>понимать</b> эту идею.</div><div class=\"se\">I&#39;m beginning to get the idea.</div></div><div class=\"sent\" data-sent=\"33\"><div class=\"st\" data-tl lang=\"ru\">Есть проблема, которую ты не <b>понимаешь</b>.</div><div class=\"se\">There&#39;s a problem there that you don&#39;t see.</div></div></div>"
+    },
+    {
+     "key": "w:w0326",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0326\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">сюда</span><span class=\"rg\">here</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1231\"><div class=\"st\" data-tl lang=\"ru\">Я пришел <b>сюда</b> около пяти.</div><div class=\"se\">I arrived here about five o&#39;clock.</div></div><div class=\"sent\" data-sent=\"2056\"><div class=\"st\" data-tl lang=\"ru\">Том умер прежде, чем скорая смогла добраться <b>сюда</b>.</div><div class=\"se\">Tom died before the ambulance could get there.</div></div></div>"
+    },
+    {
+     "key": "w:w0210",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0210\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">перед</span><span class=\"rg\">before, in front of</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"26\"><div class=\"st\" data-tl lang=\"ru\">Каждый одинокий человек одинок из-за страха <b>перед</b> окружающими.</div><div class=\"se\">Every person who is alone is alone because they are afraid of others.</div></div><div class=\"sent\" data-sent=\"454\"><div class=\"st\" data-tl lang=\"ru\">Ты должен снять обувь <b>перед</b> входом в дом.</div><div class=\"se\">You must remove your shoes before entering a house.</div></div></div>"
+    },
+    {
+     "key": "w:w0118",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0118\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ru\">сегодня</span><span class=\"rg\">today</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2\"><div class=\"st\" data-tl lang=\"ru\"><b>Сегодня</b> 18 июня, и это день рождения Мюриэл!</div><div class=\"se\">Today is June 18th and it is Muiriel&#39;s birthday!</div></div><div class=\"sent\" data-sent=\"36\"><div class=\"st\" data-tl lang=\"ru\">Я не буду вас <b>сегодня</b> больше ни о чем спрашивать.</div><div class=\"se\">I won&#39;t ask you anything else today.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "9879f131d5f1100f"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "2087ee15d8213562"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "c04b5da449dbd608"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 18,
+     "sha": "d66690f0dcbfab43"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "6da8f66c9529106d"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.205333,
+     0.094769,
+     0.0616
+    ],
+    "toGo": [
+     115,
+     223,
+     284
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.205333,
+     "all": false
+    },
+    "eta": 115,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 31,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.05775
+   },
+   "items": {
+    "items": 173,
+    "right": 157
+   }
+  }
+ ]
+}

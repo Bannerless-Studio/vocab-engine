@@ -1,0 +1,2491 @@
+{
+ "lang": "persian",
+ "packKey": "fa",
+ "words": 2000,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "c19c74271403fc61"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     170,
+     285,
+     333
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": 170,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "الفبا first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until a set is learned Learn الفبا , sets 1–2 of 6 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy الفبا 0 / 33 taught · 0 mastered A1 0 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy الفبا 0 / 33 taught · 0 mastered A1 30 learned Still shaky و ما رفتن خود Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 1 of 60 › Drill this set",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "بودن to be ( است، هست : is) (OK ( باشد ) , all right)",
+        "و and",
+        "به to (at, in)",
+        "کردن to do, to make ( (light verb) )",
+        "که that (who, which; when)",
+        "از from, of (than)",
+        "را (direct-object marker)",
+        "در in, at",
+        "من I, me",
+        "شدن to become ( (passive auxiliary) )"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "یافتن to find",
+        "پرونده file (case)",
+        "معلوم clear, known, obvious",
+        "فرار کردن to run away, to escape",
+        "گذشتن to pass (to go by)",
+        "دنبال کردن to follow",
+        "نیاز need",
+        "منبع source, spring",
+        "امیدوار hopeful",
+        "لذت pleasure"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "کشتن to kill",
+        "خون blood",
+        "قتل murder",
+        "اسلحه gun, firearm",
+        "قاتل killer",
+        "سم poison",
+        "سلاح weapon",
+        "بمب bomb",
+        "یخ ice",
+        "سفارش order"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 4 of 60",
+       "rows": 10,
+       "first": [
+        "کار work, job (thing to do)",
+        "یا or",
+        "دیگر other, another (anymore)",
+        "دانستن to know",
+        "دادن to give (to water ( آب دادن ) )",
+        "فکر کردن to think",
+        "دیدن to see (to be damaged ( آسیب دیدن ) )",
+        "فقط only, just",
+        "خیلی very, a lot",
+        "اما but"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "یافتن to find",
+        "پرونده file (case)",
+        "معلوم clear, known, obvious",
+        "فرار کردن to run away, to escape",
+        "گذشتن to pass (to go by)",
+        "دنبال کردن to follow",
+        "نیاز need",
+        "منبع source, spring",
+        "امیدوار hopeful",
+        "لذت pleasure"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "کشتن to kill",
+        "خون blood",
+        "قتل murder",
+        "اسلحه gun, firearm",
+        "قاتل killer",
+        "سم poison",
+        "سلاح weapon",
+        "بمب bomb",
+        "یخ ice",
+        "سفارش order"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0001",
+     "mc:w:w0001",
+     "mc:w:w0010",
+     "mc:w:w0003",
+     "mc:w:w0002",
+     "mc:w:w0008",
+     "mc:w:w0002",
+     "mc:w:w0006",
+     "mc:w:w0010",
+     "mc:w:w0005",
+     "mc:w:w0005",
+     "mc:w:w0004",
+     "mc:w:w0003",
+     "mc:w:w0007",
+     "mc:w:w0007",
+     "mc:w:w0008",
+     "mc:w:w0009",
+     "mc:w:w0004",
+     "mc:w:w0006",
+     "mc:w:w0009",
+     "mc:w:w0008",
+     "mc:w:w0006",
+     "mc:w:w0006"
+    ],
+    [
+     "mc:w:w0009",
+     "type:w:w0003",
+     "mc:w:w0007",
+     "mc:w:w0005",
+     "mc:w:w0010",
+     "mc:w:w0002",
+     "mc:w:w0006",
+     "mc:w:w0008",
+     "mc:w:w0004",
+     "type:w:w0001",
+     "mc:w:w0013",
+     "mc:w:w0015",
+     "mc:w:w0020",
+     "mc:w:w0016",
+     "mc:w:w0012",
+     "mc:w:w0011",
+     "mc:w:w0015",
+     "mc:w:w0016",
+     "mc:w:w0014",
+     "mc:w:w0017",
+     "mc:w:w0017",
+     "mc:w:w0013",
+     "mc:w:w0019",
+     "mc:w:w0019",
+     "mc:w:w0012",
+     "mc:w:w0018",
+     "mc:w:w0011",
+     "mc:w:w0018",
+     "mc:w:w0020",
+     "mc:w:w0014",
+     "mc:w:w0011",
+     "mc:w:w0003",
+     "mc:w:w0008",
+     "mc:w:w0001",
+     "type:w:w0009",
+     "type:w:w0007",
+     "type:w:w0002",
+     "type:w:w0005",
+     "type:w:w0006",
+     "type:w:w0010",
+     "type:w:w0004"
+    ],
+    [
+     "mc:w:w0014",
+     "type:w:w0016",
+     "type:w:w0006",
+     "mc:w:w0011",
+     "type:w:w0001",
+     "mc:w:w0012",
+     "mc:w:w0004",
+     "type:w:w0015",
+     "type:w:w0003",
+     "mc:w:w0018",
+     "type:w:w0017",
+     "type:w:w0019",
+     "mc:w:w0013",
+     "type:w:w0008",
+     "type:w:w0020",
+     "type:w:w0017",
+     "mc:w:w0022",
+     "mc:w:w0027",
+     "mc:w:w0022",
+     "mc:w:w0029",
+     "mc:w:w0029",
+     "mc:w:w0024",
+     "mc:w:w0021",
+     "mc:w:w0023",
+     "mc:w:w0026",
+     "mc:w:w0028",
+     "mc:w:w0025",
+     "mc:w:w0028",
+     "mc:w:w0030",
+     "mc:w:w0026",
+     "mc:w:w0021",
+     "mc:w:w0030",
+     "mc:w:w0024",
+     "mc:w:w0023",
+     "mc:w:w0025",
+     "mc:w:w0027",
+     "mc:w:w0023",
+     "mc:w:w0010",
+     "mc:w:w0015",
+     "mc:w:w0009",
+     "mc:w:w0016",
+     "mc:w:w0020",
+     "mc:w:w0019",
+     "mc:w:w0007",
+     "mc:w:w0006",
+     "mc:w:w0005",
+     "mc:w:w0017",
+     "mc:w:w0002",
+     "mc:w:w0008",
+     "mc:w:w0019",
+     "mc:w:w0002",
+     "type:w:w0014",
+     "type:w:w0012",
+     "type:w:w0011",
+     "type:w:w0013",
+     "type:w:w0018"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">بودن</span><span class=\"rg\">to be <span class=\"dim\">(<bdi data-tl lang=\"fa\" dir=\"rtl\" class=\"tlf\">است، هست</bdi>: is)</span> <span class=\"gx\">(OK <span class=\"dim\">(<bdi data-tl lang=\"fa\" dir=\"rtl\" class=\"tlf\">باشد</bdi>)</span>, all right)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"640\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\"><b>بودن</b>، عمل کردن <b>است</b>.</div><div class=\"se\">To be is to do.</div></div><div class=\"sent\" data-sent=\"1\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">جان و بت هم سن <b>هستند</b>.</div><div class=\"se\">John and Beth are the same age.</div></div></div>"
+    },
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">بودن</span><span class=\"rg\">to be <span class=\"dim\">(<bdi data-tl lang=\"fa\" dir=\"rtl\" class=\"tlf\">است، هست</bdi>: is)</span> <span class=\"gx\">(OK <span class=\"dim\">(<bdi data-tl lang=\"fa\" dir=\"rtl\" class=\"tlf\">باشد</bdi>)</span>, all right)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"640\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\"><b>بودن</b>، عمل کردن <b>است</b>.</div><div class=\"se\">To be is to do.</div></div><div class=\"sent\" data-sent=\"1\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">جان و بت هم سن <b>هستند</b>.</div><div class=\"se\">John and Beth are the same age.</div></div></div>"
+    },
+    {
+     "key": "w:w0010",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0010\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">شدن</span><span class=\"rg\">to become <span class=\"gx\">(<span class=\"dim\">(passive auxiliary)</span>)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"101\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">عضو <b>شدن</b> در این کتابخانه بسیار آسان است.</div><div class=\"se\">It&#39;s very easy to become a member in this library.</div></div><div class=\"sent\" data-sent=\"4\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">کفش های مگ کوچک <b>شده اند</b>.</div><div class=\"se\">Meg&#39;s shoes are a little loose.</div></div></div>"
+    },
+    {
+     "key": "w:w0003",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0003\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">به</span><span class=\"rg\">to <span class=\"gx\">(at, in)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"5\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">دکتر خوبی کسی است که <b>به</b> راهنمایی های خودش عمل کند.</div><div class=\"se\">A good doctor follows his own directions.</div></div><div class=\"sent\" data-sent=\"15\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">این <b>به</b> من مربوط نیست.</div><div class=\"se\">It&#39;s not my business.</div></div></div>"
+    },
+    {
+     "key": "w:w0002",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0002\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">و</span><span class=\"rg\">and</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">جان <b>و</b> بت هم سن هستند.</div><div class=\"se\">John and Beth are the same age.</div></div><div class=\"sent\" data-sent=\"7\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">من <b>و</b> تونی دیروز با هم بازی کردیم.</div><div class=\"se\">Tony and I played together yesterday.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "c34f19763ee51fcd"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "60ce72f59b11d9bd"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "07a1357703a47aba"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "be34f914b5e7f215"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "3b245eafe1828ce8"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.009333,
+     0.004308,
+     0.0028
+    ],
+    "toGo": [
+     168,
+     283,
+     330
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.009333,
+     "all": false
+    },
+    "eta": 168,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.002625
+   },
+   "items": {
+    "items": 120,
+    "right": 112
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "day": {
+     "n": 3,
+     "sha": "9994fe5d7976c0b9"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "d748c39340e19bff"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "1aed3292ff8dfef6"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 32,
+     "sha": "c3dc6e29c34b3caf"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 3,
+     "sha": "e3f9f0c08da51372"
+    },
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 120,
+     "sha": "b514a0436e19bb61"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.055333,
+     0.025923,
+     0.016933
+    ],
+    "toGo": [
+     157,
+     272,
+     317
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.055333,
+     "all": false
+    },
+    "eta": 157,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.016917
+   },
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "today": [
+    "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, A1 In 6 sessions since your last visit +17 mastered Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy الفبا 0 / 33 taught · 0 mastered A1 120 learned Still shaky بودن خواستن باید گرفتن چرا مورد بالا پسر نفر تمام نیاز داشتن Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy الفبا 0 / 33 taught · 0 mastered A1 150 learned Still shaky دختر خوردن زیاد بدون قبل اسم زندگی Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 13 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 13 of 60",
+       "rows": 10,
+       "first": [
+        "کم little, few, low",
+        "کسی someone, anyone",
+        "مهم important",
+        "کی who (when)",
+        "آقا sir, Mr (gentleman)",
+        "بازی کردن to play",
+        "بد bad",
+        "بی without",
+        "سه three",
+        "شهر city, town"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "یافتن to find",
+        "پرونده file (case)",
+        "معلوم clear, known, obvious",
+        "فرار کردن to run away, to escape",
+        "گذشتن to pass (to go by)",
+        "دنبال کردن to follow",
+        "نیاز need",
+        "منبع source, spring",
+        "امیدوار hopeful",
+        "لذت pleasure"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "کشتن to kill",
+        "خون blood",
+        "قتل murder",
+        "اسلحه gun, firearm",
+        "قاتل killer",
+        "سم poison",
+        "سلاح weapon",
+        "بمب bomb",
+        "یخ ice",
+        "سفارش order"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 16 of 60",
+       "rows": 10,
+       "first": [
+        "همان that very, the same",
+        "شاید maybe, perhaps",
+        "فرد person, individual",
+        "طرف side (towards ( طرفِ ) )",
+        "خانم lady (Mrs, Ms; wife)",
+        "جدید new, recent",
+        "آنجا there",
+        "حتی even",
+        "البته of course",
+        "نام name"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "یافتن to find",
+        "پرونده file (case)",
+        "معلوم clear, known, obvious",
+        "فرار کردن to run away, to escape",
+        "گذشتن to pass (to go by)",
+        "دنبال کردن to follow",
+        "نیاز need",
+        "منبع source, spring",
+        "امیدوار hopeful",
+        "لذت pleasure"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "کشتن to kill",
+        "خون blood",
+        "قتل murder",
+        "اسلحه gun, firearm",
+        "قاتل killer",
+        "سم poison",
+        "سلاح weapon",
+        "بمب bomb",
+        "یخ ice",
+        "سفارش order"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0115",
+     "type:w:w0027",
+     "type:w:w0094",
+     "mc:w:w0116",
+     "type:w:w0034",
+     "mc:w:w0048",
+     "mc:w:w0051",
+     "type:w:w0021",
+     "mc:w:w0114",
+     "mc:w:w0101",
+     "mc:w:w0127",
+     "type:w:w0001",
+     "type:w:w0069",
+     "type:w:w0102",
+     "mc:w:w0108",
+     "mc:w:w0114",
+     "mc:w:w0127",
+     "type:w:w0069",
+     "type:w:w0102",
+     "mc:w:w0114",
+     "mc:w:w0128",
+     "mc:w:w0120",
+     "mc:w:w0124",
+     "mc:w:w0118",
+     "mc:w:w0124",
+     "mc:w:w0123",
+     "mc:w:w0129",
+     "mc:w:w0120",
+     "mc:w:w0121",
+     "mc:w:w0128",
+     "mc:w:w0129",
+     "mc:w:w0126",
+     "mc:w:w0119",
+     "mc:w:w0123",
+     "mc:w:w0125",
+     "mc:w:w0119",
+     "mc:w:w0118",
+     "mc:w:w0126",
+     "mc:w:w0125",
+     "mc:w:w0121",
+     "mc:w:w0126",
+     "mc:w:w0126",
+     "mc:w:w0045",
+     "mc:w:w0031",
+     "mc:w:w0114",
+     "mc:w:w0052",
+     "mc:w:w0113",
+     "mc:w:w0149",
+     "mc:w:w0028",
+     "mc:w:w0122",
+     "mc:w:w0105",
+     "mc:w:w0077",
+     "mc:w:w0110",
+     "mc:w:w0106",
+     "mc:w:w0031",
+     "type:w:w0112",
+     "type:w:w0030",
+     "type:w:w0127",
+     "type:w:w0109",
+     "type:w:w0064",
+     "type:w:w0117",
+     "type:w:w0076",
+     "type:w:w0065",
+     "type:w:w0116",
+     "type:w:w0052",
+     "type:w:w0061",
+     "type:w:w0108",
+     "type:w:w0127",
+     "type:s:s0917",
+     "mc:s:s0913",
+     "mc:s:s1210",
+     "type:s:s0451",
+     "mc:s:s1180",
+     "mc:s:s0127",
+     "type:s:s1425",
+     "mc:s:s1065",
+     "type:s:s0917",
+     "type:s:s0451",
+     "type:s:s1425",
+     "mc:s:s0917",
+     "mc:s:s0451",
+     "mc:s:s1425"
+    ],
+    [
+     "type:w:w0021",
+     "mc:w:w0126",
+     "type:w:w0102",
+     "type:w:w0125",
+     "type:w:w0120",
+     "type:w:w0034",
+     "type:w:w0119",
+     "type:w:w0124",
+     "mc:w:w0114",
+     "type:w:w0027",
+     "type:w:w0118",
+     "type:w:w0030",
+     "type:w:w0127",
+     "mc:w:w0031",
+     "type:w:w0069",
+     "type:w:w0125",
+     "type:w:w0120",
+     "type:w:w0034",
+     "type:w:w0118",
+     "type:w:w0127",
+     "type:w:w0069",
+     "mc:w:w0133",
+     "mc:w:w0135",
+     "mc:w:w0131",
+     "mc:w:w0132",
+     "mc:w:w0136",
+     "mc:w:w0134",
+     "mc:w:w0132",
+     "mc:w:w0148",
+     "mc:w:w0133",
+     "mc:w:w0135",
+     "mc:w:w0131",
+     "mc:w:w0134",
+     "mc:w:w0148",
+     "mc:w:w0136",
+     "mc:w:w0137",
+     "mc:w:w0130",
+     "mc:w:w0138",
+     "mc:w:w0137",
+     "mc:w:w0138",
+     "mc:w:w0130",
+     "mc:w:w0048",
+     "mc:w:w0127",
+     "mc:w:w0116",
+     "mc:w:w0128",
+     "mc:w:w0121",
+     "mc:w:w0123",
+     "mc:w:w0126",
+     "mc:w:w0051",
+     "mc:w:w0101",
+     "mc:w:w0022",
+     "mc:w:w0108",
+     "mc:w:w0129",
+     "type:w:w0092",
+     "type:w:w0001",
+     "type:w:w0098",
+     "type:w:w0077",
+     "type:w:w0082",
+     "type:w:w0083",
+     "type:w:w0075",
+     "type:w:w0089",
+     "type:w:w0087",
+     "type:w:w0079",
+     "type:w:w0080",
+     "type:w:w0073",
+     "type:w:w0098",
+     "type:w:w0077",
+     "type:w:w0080",
+     "type:w:w0073",
+     "mc:s:s0854",
+     "mc:s:s1384",
+     "mc:s:s1587",
+     "mc:s:s1003",
+     "mc:s:s1023",
+     "type:s:s1425",
+     "mc:s:s0912",
+     "mc:s:s1271",
+     "mc:s:s1384",
+     "type:s:s1425",
+     "mc:s:s1271",
+     "mc:s:s1425"
+    ],
+    [
+     "type:w:w0135",
+     "type:w:w0080",
+     "type:w:w0131",
+     "type:w:w0069",
+     "type:w:w0126",
+     "type:w:w0114",
+     "type:w:w0118",
+     "type:w:w0125",
+     "type:w:w0098",
+     "type:w:w0077",
+     "type:w:w0127",
+     "type:w:w0073",
+     "type:w:w0034",
+     "type:w:w0030",
+     "type:w:w0120",
+     "type:w:w0135",
+     "type:w:w0098",
+     "mc:w:w0143",
+     "mc:w:w0140",
+     "mc:w:w0142",
+     "mc:w:w0147",
+     "mc:w:w0147",
+     "mc:w:w0146",
+     "mc:w:w0145",
+     "mc:w:w0144",
+     "mc:w:w0141",
+     "mc:w:w0140",
+     "mc:w:w0139",
+     "mc:w:w0150",
+     "mc:w:w0145",
+     "mc:w:w0150",
+     "mc:w:w0144",
+     "mc:w:w0142",
+     "mc:w:w0141",
+     "mc:w:w0146",
+     "mc:w:w0139",
+     "mc:w:w0143",
+     "mc:w:w0146",
+     "mc:w:w0150",
+     "mc:w:w0139",
+     "mc:w:w0130",
+     "mc:w:w0134",
+     "mc:w:w0148",
+     "mc:w:w0060",
+     "mc:w:w0133",
+     "mc:w:w0031",
+     "mc:w:w0136",
+     "mc:w:w0063",
+     "mc:w:w0127",
+     "mc:w:w0033",
+     "mc:w:w0019",
+     "mc:w:w0138",
+     "mc:w:w0134",
+     "type:w:w0086",
+     "type:w:w0084",
+     "type:w:w0137",
+     "type:w:w0102",
+     "type:w:w0039",
+     "type:w:w0091",
+     "type:w:w0085",
+     "type:w:w0111",
+     "type:w:w0132",
+     "type:w:w0096",
+     "type:w:w0081",
+     "type:w:w0099",
+     "type:w:w0091",
+     "mc:s:s0208",
+     "mc:s:s1271",
+     "mc:s:s1384",
+     "mc:s:s0953",
+     "mc:s:s0439",
+     "mc:s:s0872",
+     "mc:s:s0545",
+     "mc:s:s0950",
+     "mc:s:s0545",
+     "mc:s:s0950",
+     "mc:s:s0950",
+     "mc:s:s0950"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0115",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0115\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">خاطر</span><span class=\"rg\">sake <span class=\"gx\">(because of <span class=\"dim\">(<bdi data-tl lang=\"fa\" dir=\"rtl\" class=\"tlf\">به خاطر</bdi>)</span>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"94\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">به <b>خاطر</b> می‌آورم که ملکه را ملاقات کردم.</div><div class=\"se\">I remember that I met the queen.</div></div><div class=\"sent\" data-sent=\"235\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">آنها به ما گفتند که به <b>خاطر</b> برف می‌توانیم به خانه هایمان برویم.</div><div class=\"se\">They told us we could go home because of the snow.</div></div></div>"
+    },
+    {
+     "key": "w:w0027",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0027\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">باید</span><span class=\"rg\">must, have to, should</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"20\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">من گیج شده ام.حالا چکار <b>باید</b> بکنم؟</div><div class=\"se\">I&#39;m confused. What do I do now?</div></div><div class=\"sent\" data-sent=\"34\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">ما <b>باید</b> کلاسمان را تمیز کنیم.</div><div class=\"se\">We must clean our class.</div></div></div>"
+    },
+    {
+     "key": "w:w0094",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0094\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">چند</span><span class=\"rg\">how many <span class=\"gx\">(a few, several)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"270\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">هیچکس دقیقاً نمی‌داند جمعیت ایالات متحده از <b>چند</b> نژاد تشکیل شده است.</div><div class=\"se\">Nobody knows exactly how many races make up the population of the United States.</div></div><div class=\"sent\" data-sent=\"557\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">پس او <b>چند</b> سال دارد؟</div><div class=\"se\">How old is he, then?</div></div></div>"
+    },
+    {
+     "key": "w:w0116",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0116\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">تمام</span><span class=\"rg\">all, whole <span class=\"gx\">(finished)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"61\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\"><b>تمام</b> راهها به رم ختم می‌شود.</div><div class=\"se\">All roads lead to Rome.</div></div><div class=\"sent\" data-sent=\"85\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">شما اینجا <b>تمام</b> مشخصه های جستجوی پیشرفته را فرا می‌گیرید.</div><div class=\"se\">You can learn about advanced search features here.</div></div></div>"
+    },
+    {
+     "key": "w:w0034",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0034\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">دانستن</span><span class=\"rg\">to know</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"783\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">زشت <b>دانستن</b> دیگران، تو را زیباتر نمی‌کند.</div><div class=\"se\">Saying someone is ugly doesn’t make you any prettier.</div></div><div class=\"sent\" data-sent=\"29\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">آیا <b>میدانی</b> که برج توکیو کجاست؟</div><div class=\"se\">Do you know where Tokyo Tower is?</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "de006e0f32eacf9f"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "d5e24baf6fad88cc"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "0dca1bfca4c1ca43"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 48,
+     "sha": "8e50e834e02c46fd"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 3,
+     "sha": "ee6cab66e6ea9238"
+    },
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "a2e15830861d41f1"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.064667,
+     0.030231,
+     0.019733
+    ],
+    "toGo": [
+     155,
+     270,
+     314
+    ],
+    "toGoTotal": 187,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.064667,
+     "all": false
+    },
+    "eta": 155,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.019542
+   },
+   "items": {
+    "items": 241,
+    "right": 209
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "e1fb9d18a419eddb"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.730769,
+     0.38
+    ],
+    "toGo": [
+     0,
+     97,
+     167
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.730769,
+     "all": false
+    },
+    "eta": 97,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.35625
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 97 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read روز علی Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 97 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read روز علی Start",
+    "Session 2 Goal 2 of 3 ≈ 97 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read روز علی Start",
+    "Session 3 Goal 2 of 3 ≈ 98 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read روز علی Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 97 sessions daily life: directions, simple chat, short notices الفبا 0 / 33 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 99 sessions daily life: directions, simple chat, short notices الفبا 0 / 33 taught · 0 mastered A1 2 of 600 mastered sentences 1 · reading 1 of 20 A2 380 learned Still shaky بودن سال خواهر احتمالاً بیست ناراحت اتوبوس آشپزخانه بو فوتبال موقعیت بحث Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "شهریور Shahrivar (6th month, Aug–Sep)",
+        "فروردین Farvardin (1st Iranian month, Mar–Apr)",
+        "آبان Aban (8th month, Oct–Nov)",
+        "خرداد Khordad (3rd month, May–Jun)",
+        "اردیبهشت Ordibehesht (2nd month, Apr–May)",
+        "آذر Azar (9th month, Nov–Dec)",
+        "مرداد Mordad (5th month, Jul–Aug)",
+        "قهوه‌ای brown",
+        "سه‌شنبه Tuesday",
+        "قرمز red"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "معامله transaction",
+        "جمع sum, total (gathering)",
+        "رهبر leader, conductor, guide",
+        "نزدیک شدن to approach",
+        "زنگ bell, ring (to ring ( زنگ زدن ) , to call)",
+        "صاحب owner",
+        "گم شدن to get lost",
+        "سیاست politics",
+        "انتقال transfer",
+        "جمع شدن to gather"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "کشتن to kill",
+        "خون blood",
+        "قتل murder",
+        "اسلحه gun, firearm",
+        "قاتل killer",
+        "سم poison",
+        "سلاح weapon",
+        "بمب bomb",
+        "یخ ice",
+        "سفارش order"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "شهریور Shahrivar (6th month, Aug–Sep)",
+        "فروردین Farvardin (1st Iranian month, Mar–Apr)",
+        "آبان Aban (8th month, Oct–Nov)",
+        "خرداد Khordad (3rd month, May–Jun)",
+        "اردیبهشت Ordibehesht (2nd month, Apr–May)",
+        "آذر Azar (9th month, Nov–Dec)",
+        "مرداد Mordad (5th month, Jul–Aug)",
+        "قهوه‌ای brown",
+        "سه‌شنبه Tuesday",
+        "قرمز red"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 39 of 70",
+       "rows": 10,
+       "first": [
+        "حساب کردن to count (to settle up)",
+        "اسب horse",
+        "پل bridge",
+        "فرهنگ culture",
+        "نسخه version",
+        "ترتیب order, regularity",
+        "عامل factor (agent)",
+        "واقعیت fact (reality, actuality)",
+        "تکان دادن to shake, to wave",
+        "اضافه کردن to add"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "کشتن to kill",
+        "خون blood",
+        "قتل murder",
+        "اسلحه gun, firearm",
+        "قاتل killer",
+        "سم poison",
+        "سلاح weapon",
+        "بمب bomb",
+        "یخ ice",
+        "سفارش order"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0051",
+     "type:w:w0851",
+     "type:w:w0800",
+     "type:w:w0091",
+     "type:w:w0448",
+     "type:w:w0135",
+     "type:w:w0088",
+     "type:w:w0034",
+     "type:w:w0812",
+     "type:w:w0840",
+     "type:w:w0192",
+     "type:w:w0421",
+     "type:w:w0791",
+     "type:w:w0729",
+     "type:w:w0918",
+     "type:w:w0091",
+     "mc:w:w0958",
+     "mc:w:w1152",
+     "mc:w:w0967",
+     "mc:w:w0807",
+     "mc:w:w0963",
+     "mc:w:w0807",
+     "mc:w:w0965",
+     "mc:w:w0962",
+     "mc:w:w0962",
+     "mc:w:w0966",
+     "mc:w:w0958",
+     "mc:w:w0967",
+     "mc:w:w0957",
+     "mc:w:w0966",
+     "mc:w:w0960",
+     "mc:w:w0963",
+     "mc:w:w0957",
+     "mc:w:w0960",
+     "mc:w:w1152",
+     "mc:w:w0965",
+     "mc:w:w0958",
+     "mc:w:w0958",
+     "mc:w:w0957",
+     "mc:w:w0966",
+     "mc:w:w0960",
+     "mc:w:w0965",
+     "mc:w:w0966",
+     "mc:w:w0960",
+     "mc:w:w0833",
+     "mc:w:w0288",
+     "mc:w:w0491",
+     "mc:w:w0109",
+     "mc:w:w0369",
+     "mc:w:w0674",
+     "mc:w:w0234",
+     "mc:w:w0445",
+     "mc:w:w0891",
+     "mc:w:w0673",
+     "mc:w:w0551",
+     "mc:w:w0943",
+     "mc:w:w0551",
+     "type:w:w0696",
+     "type:w:w0698",
+     "type:w:w0856",
+     "type:w:w0867",
+     "type:w:w0460",
+     "type:w:w0168",
+     "type:w:w0344",
+     "type:w:w0350",
+     "type:w:w0147",
+     "type:w:w0767",
+     "type:w:w0150",
+     "type:w:w0847",
+     "type:w:w0767",
+     "mc:s:s0142",
+     "mc:s:s0953",
+     "mc:s:s1486",
+     "mc:s:s2015",
+     "mc:s:s1374",
+     "type:s:s0090",
+     "mc:s:s1696",
+     "mc:s:s1222",
+     "mc:s:s0142",
+     "mc:s:s1486",
+     "mc:s:s2015",
+     "type:s:s0090",
+     "mc:s:s0090"
+    ],
+    [
+     "type:w:w0767",
+     "type:w:w0855",
+     "type:w:w0162",
+     "type:w:w0091",
+     "mc:w:w0958",
+     "mc:w:w0960",
+     "mc:w:w0551",
+     "mc:w:w0957",
+     "mc:w:w0966",
+     "type:w:w0430",
+     "type:w:w0090",
+     "type:w:w0065",
+     "type:w:w0284",
+     "mc:w:w0965",
+     "type:w:w0589",
+     "mc:w:w0960",
+     "mc:w:w0966",
+     "type:w:w0284",
+     "mc:w:w0960",
+     "mc:w:w0966",
+     "mc:w:w0284",
+     "mc:w:w0970",
+     "mc:w:w0974",
+     "mc:w:w0970",
+     "mc:w:w0969",
+     "mc:w:w0975",
+     "mc:w:w0969",
+     "mc:w:w0905",
+     "mc:w:w0905",
+     "mc:w:w0876",
+     "mc:w:w0974",
+     "mc:w:w0961",
+     "mc:w:w0961",
+     "mc:w:w0976",
+     "mc:w:w0978",
+     "mc:w:w0876",
+     "mc:w:w0971",
+     "mc:w:w0975",
+     "mc:w:w0976",
+     "mc:w:w0971",
+     "mc:w:w0978",
+     "mc:w:w0261",
+     "mc:w:w0521",
+     "mc:w:w0605",
+     "mc:w:w0783",
+     "mc:w:w0231",
+     "mc:w:w0778",
+     "mc:w:w0060",
+     "mc:w:w0702",
+     "mc:w:w0152",
+     "mc:w:w0958",
+     "mc:w:w0403",
+     "mc:w:w0102",
+     "mc:w:w0783",
+     "mc:w:w0060",
+     "mc:w:w0958",
+     "type:w:w0465",
+     "type:w:w0053",
+     "type:w:w0041",
+     "type:w:w0193",
+     "type:w:w0200",
+     "type:w:w0059",
+     "type:w:w0835",
+     "type:w:w0071",
+     "type:w:w0850",
+     "type:w:w0534",
+     "type:w:w0872",
+     "type:w:w0537",
+     "type:w:w0041",
+     "type:w:w0850",
+     "type:s:s0338",
+     "mc:s:s1486",
+     "mc:s:s1015",
+     "mc:s:s0120",
+     "type:s:s0090",
+     "type:s:s2015",
+     "mc:s:s1352",
+     "mc:s:s0142",
+     "type:s:s0338",
+     "mc:s:s0120",
+     "type:s:s0090",
+     "type:s:s2015",
+     "mc:s:s0142",
+     "mc:s:s0338",
+     "mc:s:s0090",
+     "mc:s:s2015"
+    ],
+    [
+     "type:w:w0284",
+     "mc:w:w0958",
+     "mc:w:w0966",
+     "type:w:w0041",
+     "type:w:w0850",
+     "mc:w:w0060",
+     "type:w:w0518",
+     "type:w:w0589",
+     "type:w:w0900",
+     "mc:w:w0960",
+     "type:w:w0392",
+     "type:w:w0057",
+     "type:w:w0293",
+     "mc:w:w0783",
+     "type:w:w0716",
+     "type:w:w0850",
+     "mc:w:w0783",
+     "mc:w:w0981",
+     "mc:w:w0949",
+     "mc:w:w0977",
+     "mc:w:w1026",
+     "mc:w:w1026",
+     "mc:w:w0982",
+     "mc:w:w0984",
+     "mc:w:w0964",
+     "mc:w:w0949",
+     "mc:w:w0983",
+     "mc:w:w0982",
+     "mc:w:w0964",
+     "mc:w:w0977",
+     "mc:w:w0981",
+     "mc:w:w0899",
+     "mc:w:w0936",
+     "mc:w:w0983",
+     "mc:w:w0936",
+     "mc:w:w0899",
+     "mc:w:w0984",
+     "mc:w:w1026",
+     "mc:w:w0964",
+     "mc:w:w0936",
+     "mc:w:w0936",
+     "mc:w:w0936",
+     "mc:w:w0591",
+     "mc:w:w0467",
+     "mc:w:w0160",
+     "mc:w:w0489",
+     "mc:w:w0806",
+     "mc:w:w0543",
+     "mc:w:w0589",
+     "mc:w:w0474",
+     "mc:w:w0227",
+     "mc:w:w0496",
+     "mc:w:w0047",
+     "mc:w:w0433",
+     "mc:w:w0489",
+     "mc:w:w0806",
+     "mc:w:w0496",
+     "mc:w:w0047",
+     "mc:w:w0496",
+     "type:w:w0405",
+     "type:w:w0044",
+     "type:w:w0211",
+     "type:w:w0944",
+     "type:w:w0393",
+     "type:w:w0531",
+     "type:w:w0660",
+     "type:w:w0530",
+     "type:w:w0431",
+     "type:w:w0416",
+     "type:w:w0924",
+     "type:w:w0245",
+     "type:w:w0530",
+     "type:w:w0416",
+     "mc:w:w0530",
+     "mc:s:s0142",
+     "mc:s:s0118",
+     "mc:s:s1243",
+     "type:s:s2015",
+     "type:s:s0090",
+     "type:s:s0338",
+     "type:s:s0895",
+     "mc:s:s1077",
+     "type:s:s2015",
+     "type:s:s0090",
+     "type:s:s0338",
+     "type:s:s0895",
+     "mc:s:s2015",
+     "mc:s:s0090",
+     "mc:s:s0338",
+     "mc:s:s0895"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0051",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0051\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">چرا</span><span class=\"rg\">why</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"14\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">ابتدا از او خوشم نمی‌آمد ولی حالا <b>چرا</b>.</div><div class=\"se\">At first I did not like him, but now I do.</div></div><div class=\"sent\" data-sent=\"308\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\"><b>چرا</b> به من مظنون هستید؟</div><div class=\"se\">Why do you suspect me?</div></div></div>"
+    },
+    {
+     "key": "w:w0851",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0851\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">اجازه</span><span class=\"rg\">permission</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1166\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">آدم <b>اجازه</b> ندارد قولش را بشکند.</div><div class=\"se\">One is not allowed to break his promise.</div></div><div class=\"sent\" data-sent=\"1439\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">من نمی‌توانم این <b>اجازه</b> را بدهم.</div><div class=\"se\">I can&#39;t possibly allow that.</div></div></div>"
+    },
+    {
+     "key": "w:w0800",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0800\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">نجات دادن</span><span class=\"rg\">to save, to rescue</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"518\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">او زندگی مرا <b>نجات</b> <b>داد</b>.</div><div class=\"se\">He saved my life.</div></div><div class=\"sent\" data-sent=\"1521\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">آنچه می‌توانی را <b>نجات</b> <b>بده</b>.</div><div class=\"se\">Salvage what you can.</div></div></div>"
+    },
+    {
+     "key": "w:w0091",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0091\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">دختر</span><span class=\"rg\">girl <span class=\"gx\">(daughter)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"377\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">آن <b>دختر</b> کوچولو قادر به سوار شدن به دوچرخه نیست.</div><div class=\"se\">The little girl is not capable of riding a bicycle.</div></div><div class=\"sent\" data-sent=\"663\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\"><b>دختر</b> او به زن زیبایی تبدیل شده است.</div><div class=\"se\">Her daughter has become a beautiful woman.</div></div></div>"
+    },
+    {
+     "key": "w:w0448",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0448\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">طول کشیدن</span><span class=\"rg\">to take <span class=\"dim\">(time)</span>, to last</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"224\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">زیاد <b>طول</b> <b>نمی‌کشد</b> که حال اسکات خوب می‌شود.</div><div class=\"se\">It will not be long before Scott gets well.</div></div><div class=\"sent\" data-sent=\"456\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">مدّت زیادی برای تام <b>طول</b> <b>کشید</b> تا تام با مرگ ماری کنار بیاید.</div><div class=\"se\">It took Tom a long time to get over Mary&#39;s death.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "90c3b4cbd28eaa47"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "a85ed0d1a99ae078"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d9b7082dcbad7ea0"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 16,
+     "sha": "a1f5bfe821dc644d"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "986c1e752ab32447"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 980,
+     "sha": "5e01e96d544dbd1f"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.981667,
+     0.719231,
+     0.374
+    ],
+    "toGo": [
+     0,
+     99,
+     168
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.719231,
+     "all": false
+    },
+    "eta": 99,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.350625
+   },
+   "items": {
+    "items": 259,
+    "right": 216
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "893006f2887625ee"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     1,
+     1
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 1,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.75
+   },
+   "todayFirst": "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read یک تصمیم سخت Start",
+   "today": [
+    "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read یک تصمیم سخت Start",
+    "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read یک تصمیم سخت Start",
+    "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read یک تصمیم سخت Start"
+   ],
+   "progress": {
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles الفبا 0 / 33 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles الفبا 0 / 33 taught · 0 mastered A1 3 of 600 mastered A2 4 of 700 mastered sentences 1 · reading 0 of 20 B1 3 of 700 mastered reading 0 of 20 Still shaky اتفاق افتادن تیم مال کوچک توجه کردن ایرانی منتشر شدن قادر Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "شهریور Shahrivar (6th month, Aug–Sep)",
+        "فروردین Farvardin (1st Iranian month, Mar–Apr)",
+        "آبان Aban (8th month, Oct–Nov)",
+        "خرداد Khordad (3rd month, May–Jun)",
+        "اردیبهشت Ordibehesht (2nd month, Apr–May)",
+        "آذر Azar (9th month, Nov–Dec)",
+        "مرداد Mordad (5th month, Jul–Aug)",
+        "قهوه‌ای brown",
+        "سه‌شنبه Tuesday",
+        "قرمز red"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "رأی vote",
+        "مست drunk, intoxicated, inebriated",
+        "امتیاز point, score (privilege)",
+        "باغ garden, orchard, bagh",
+        "مشتری customer",
+        "غربی western",
+        "برش cut, slice",
+        "عدم lack, absence",
+        "راحتی ease, comfort, comfortableness",
+        "تمرین exercise, practice"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "دایره circle",
+        "فوری urgent, immediate",
+        "یکدیگر each other, one another",
+        "بیمار شدن to fall ill",
+        "مستقل independent",
+        "عید holiday",
+        "ناراحتی sadness, upset",
+        "ساختار structure",
+        "گیج confused, distracted",
+        "پیرمرد old man"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 70 of 70 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "شهریور Shahrivar (6th month, Aug–Sep)",
+        "فروردین Farvardin (1st Iranian month, Mar–Apr)",
+        "آبان Aban (8th month, Oct–Nov)",
+        "خرداد Khordad (3rd month, May–Jun)",
+        "اردیبهشت Ordibehesht (2nd month, Apr–May)",
+        "آذر Azar (9th month, Nov–Dec)",
+        "مرداد Mordad (5th month, Jul–Aug)",
+        "قهوه‌ای brown",
+        "سه‌شنبه Tuesday",
+        "قرمز red"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "رأی vote",
+        "مست drunk, intoxicated, inebriated",
+        "امتیاز point, score (privilege)",
+        "باغ garden, orchard, bagh",
+        "مشتری customer",
+        "غربی western",
+        "برش cut, slice",
+        "عدم lack, absence",
+        "راحتی ease, comfort, comfortableness",
+        "تمرین exercise, practice"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "دایره circle",
+        "فوری urgent, immediate",
+        "یکدیگر each other, one another",
+        "بیمار شدن to fall ill",
+        "مستقل independent",
+        "عید holiday",
+        "ناراحتی sadness, upset",
+        "ساختار structure",
+        "گیج confused, distracted",
+        "پیرمرد old man"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0114",
+     "type:w:w1703",
+     "type:w:w1370",
+     "type:w:w0161",
+     "type:w:w0501",
+     "type:w:w1057",
+     "type:w:w1666",
+     "type:w:w1324",
+     "type:w:w1342",
+     "type:w:w1647",
+     "type:w:w0618",
+     "type:w:w0784",
+     "type:w:w0660",
+     "type:w:w1643",
+     "type:w:w0209",
+     "mc:w:w0598",
+     "mc:w:w1068",
+     "mc:w:w1907",
+     "mc:w:w0812",
+     "mc:w:w0478",
+     "mc:w:w1056",
+     "mc:w:w1847",
+     "mc:w:w0535",
+     "mc:w:w1667",
+     "mc:w:w0699",
+     "mc:w:w1220",
+     "mc:w:w1174",
+     "mc:w:w1068",
+     "type:w:w0749",
+     "type:w:w1063",
+     "type:w:w1381",
+     "type:w:w0954",
+     "type:w:w0155",
+     "type:w:w1062",
+     "type:w:w1419",
+     "type:w:w1058",
+     "type:w:w1469",
+     "type:w:w0220",
+     "type:w:w1613",
+     "type:w:w1410",
+     "type:w:w0749",
+     "type:w:w1063",
+     "type:w:w1419",
+     "mc:s:s2515",
+     "mc:s:s2565",
+     "mc:s:s2537",
+     "mc:s:s1214",
+     "mc:s:s1412",
+     "mc:s:s1357",
+     "mc:s:s2170",
+     "mc:s:s2604",
+     "mc:s:s2604"
+    ],
+    [
+     "type:w:w1535",
+     "type:w:w0749",
+     "type:w:w0016",
+     "type:w:w0896",
+     "type:w:w1014",
+     "type:w:w0372",
+     "mc:w:w1068",
+     "type:w:w0985",
+     "type:w:w1568",
+     "type:w:w1537",
+     "type:w:w1063",
+     "type:w:w0214",
+     "type:w:w0381",
+     "type:w:w0696",
+     "type:w:w1419",
+     "type:w:w0372",
+     "type:w:w1063",
+     "mc:w:w0320",
+     "mc:w:w0575",
+     "mc:w:w1764",
+     "mc:w:w0586",
+     "mc:w:w1815",
+     "mc:w:w1750",
+     "mc:w:w1134",
+     "mc:w:w0939",
+     "mc:w:w1025",
+     "mc:w:w0164",
+     "mc:w:w0580",
+     "mc:w:w0663",
+     "mc:w:w0320",
+     "mc:w:w0575",
+     "mc:w:w1764",
+     "mc:w:w1815",
+     "mc:w:w0320",
+     "mc:w:w1764",
+     "type:w:w0423",
+     "type:w:w1576",
+     "type:w:w0935",
+     "type:w:w1030",
+     "type:w:w1152",
+     "type:w:w1035",
+     "type:w:w0393",
+     "type:w:w0763",
+     "type:w:w1365",
+     "type:w:w0308",
+     "type:w:w0278",
+     "type:w:w1527",
+     "type:w:w1035",
+     "type:w:w0308",
+     "mc:s:s1137",
+     "mc:s:s0101",
+     "mc:s:s0044",
+     "mc:s:s1629",
+     "mc:s:s1741",
+     "mc:s:s1183",
+     "mc:s:s2106",
+     "mc:s:s2604",
+     "mc:s:s1741"
+    ],
+    [
+     "type:w:w0906",
+     "type:w:w0728",
+     "type:w:w0881",
+     "mc:w:w1764",
+     "type:w:w1063",
+     "type:w:w0690",
+     "type:w:w0372",
+     "type:w:w0140",
+     "type:w:w0308",
+     "mc:w:w1815",
+     "mc:w:w0575",
+     "type:w:w1035",
+     "mc:w:w0320",
+     "type:w:w0999",
+     "type:w:w0863",
+     "type:w:w0690",
+     "type:w:w0308",
+     "type:w:w0863",
+     "mc:w:w0099",
+     "mc:w:w1385",
+     "mc:w:w0530",
+     "mc:w:w0061",
+     "mc:w:w1183",
+     "mc:w:w1383",
+     "mc:w:w0657",
+     "mc:w:w0830",
+     "mc:w:w1433",
+     "mc:w:w1191",
+     "mc:w:w0292",
+     "mc:w:w0189",
+     "mc:w:w1191",
+     "mc:w:w0292",
+     "type:w:w1045",
+     "type:w:w1094",
+     "type:w:w0515",
+     "type:w:w1093",
+     "type:w:w0475",
+     "type:w:w0201",
+     "type:w:w0007",
+     "type:w:w0231",
+     "type:w:w0774",
+     "type:w:w0650",
+     "type:w:w0995",
+     "type:w:w1700",
+     "type:w:w0201",
+     "type:w:w0231",
+     "mc:w:w0231",
+     "mc:s:s1089",
+     "type:s:s0413",
+     "mc:s:s1729",
+     "mc:s:s1741",
+     "mc:s:s2650",
+     "mc:s:s1053",
+     "mc:s:s0229",
+     "mc:s:s1400",
+     "type:s:s0413",
+     "mc:s:s1053",
+     "mc:s:s0413"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0114",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0114\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">نفر</span><span class=\"rg\">person <span class=\"dim\">(counting word)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"384\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">این کار به ده <b>نفر</b> برای ده روز نیاز دارد.</div><div class=\"se\">The work requires ten men for ten days.</div></div><div class=\"sent\" data-sent=\"409\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">آیا میزی برای دو <b>نفر</b> در روز جمعه وجود دارد؟</div><div class=\"se\">Is there a table available for two on Friday?</div></div></div>"
+    },
+    {
+     "key": "w:w1703",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1703\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">کیلومتر</span><span class=\"rg\">kilometre, kilometer</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"127\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">مدرسه دو <b>کیلومتر</b> به سمت جلو است.</div><div class=\"se\">The school is two kilometers ahead.</div></div><div class=\"sent\" data-sent=\"2377\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">خانه‌ی ما ده <b>کیلومتر</b> از شهر دور است.</div><div class=\"se\">Our house is ten kilometres from the city.</div></div></div>"
+    },
+    {
+     "key": "w:w1370",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1370\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">صندوق</span><span class=\"rg\">box, chest, trunk</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2204\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">پول را در <b>صندوق</b> گذاشتم.</div><div class=\"se\">I put the money in the box.</div></div><div class=\"sent\" data-sent=\"3003\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">لباس‌هایش را در یک <b>صندوق</b> قدیمی گذاشت.</div><div class=\"se\">He put his clothes in an old chest.</div></div></div>"
+    },
+    {
+     "key": "w:w0161",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0161\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">نام</span><span class=\"rg\">name</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"259\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\"><b>نام</b> او را فراموش کردم.</div><div class=\"se\">I forgot his name.</div></div><div class=\"sent\" data-sent=\"902\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\"><b>نام</b> او را به یاد نمی‌آورم.</div><div class=\"se\">I can&#39;t remember her name.</div></div></div>"
+    },
+    {
+     "key": "w:w0501",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0501\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">ایستادن</span><span class=\"rg\">to stand up <span class=\"gx\">(to stop)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"289\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">او در برابر تمام خشونت محکم <b>ایستاد</b>.</div><div class=\"se\">He was strongly against all violence.</div></div><div class=\"sent\" data-sent=\"434\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">اگر کلید برده بودم، پشت در <b>نایستاده</b> بودم.</div><div class=\"se\">If I had taken the key, I wouldn&#39;t be standing behind the door.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "2fa3d17bc941f7fb"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "6743c9c5af37eacb"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "37211556792997ed"
+    },
+    "read": {
+     "n": 2,
+     "sha": "07e71869e4c43a0d"
+    },
+    "s": {
+     "n": 22,
+     "sha": "e1db4d1fa4287386"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "d340b2d9e8f7bc8a"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.988333,
+     0.989231,
+     0.9915
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 0.9915,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.743625
+   },
+   "items": {
+    "items": 168,
+    "right": 142
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "03c2271094a156b8"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.2,
+     0.092308,
+     0.06
+    ],
+    "toGo": [
+     117,
+     236,
+     283
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.2,
+     "all": false
+    },
+    "eta": 117,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 32,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.05625
+   },
+   "todayFirst": "الفبا first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn الفبا , sets 1–2 of 6 A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read روز علی",
+   "today": [
+    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read روز علی Start",
+    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read روز علی Start",
+    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 32 sessions. Listen Recall Sentences Read روز علی Start"
+   ],
+   "progress": {
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy الفبا 0 / 33 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy الفبا 0 / 33 taught · 0 mastered A1 149 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 32 sessions. Still shaky خیلی الآن پدر سمت گوش کردن فرستادن خریدن مطمئن دوازده Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "شهریور Shahrivar (6th month, Aug–Sep)",
+        "فروردین Farvardin (1st Iranian month, Mar–Apr)",
+        "آبان Aban (8th month, Oct–Nov)",
+        "خرداد Khordad (3rd month, May–Jun)",
+        "اردیبهشت Ordibehesht (2nd month, Apr–May)",
+        "آذر Azar (9th month, Nov–Dec)",
+        "مرداد Mordad (5th month, Jul–Aug)",
+        "قهوه‌ای brown",
+        "سه‌شنبه Tuesday",
+        "قرمز red"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "یافتن to find",
+        "پرونده file (case)",
+        "معلوم clear, known, obvious",
+        "فرار کردن to run away, to escape",
+        "گذشتن to pass (to go by)",
+        "دنبال کردن to follow",
+        "نیاز need",
+        "منبع source, spring",
+        "امیدوار hopeful",
+        "لذت pleasure"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "کشتن to kill",
+        "خون blood",
+        "قتل murder",
+        "اسلحه gun, firearm",
+        "قاتل killer",
+        "سم poison",
+        "سلاح weapon",
+        "بمب bomb",
+        "یخ ice",
+        "سفارش order"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "شهریور Shahrivar (6th month, Aug–Sep)",
+        "فروردین Farvardin (1st Iranian month, Mar–Apr)",
+        "آبان Aban (8th month, Oct–Nov)",
+        "خرداد Khordad (3rd month, May–Jun)",
+        "اردیبهشت Ordibehesht (2nd month, Apr–May)",
+        "آذر Azar (9th month, Nov–Dec)",
+        "مرداد Mordad (5th month, Jul–Aug)",
+        "قهوه‌ای brown",
+        "سه‌شنبه Tuesday",
+        "قرمز red"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "یافتن to find",
+        "پرونده file (case)",
+        "معلوم clear, known, obvious",
+        "فرار کردن to run away, to escape",
+        "گذشتن to pass (to go by)",
+        "دنبال کردن to follow",
+        "نیاز need",
+        "منبع source, spring",
+        "امیدوار hopeful",
+        "لذت pleasure"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "کشتن to kill",
+        "خون blood",
+        "قتل murder",
+        "اسلحه gun, firearm",
+        "قاتل killer",
+        "سم poison",
+        "سلاح weapon",
+        "بمب bomb",
+        "یخ ice",
+        "سفارش order"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0343",
+     "type:w:w0141",
+     "type:w:w0346",
+     "type:w:w0214",
+     "type:w:w0149",
+     "mc:w:w0520",
+     "type:w:w0330",
+     "type:w:w0504",
+     "type:w:w0577",
+     "type:w:w0405",
+     "type:w:w0091",
+     "type:w:w0242",
+     "type:w:w0221",
+     "type:w:w0075",
+     "type:w:w0295",
+     "type:w:w0221",
+     "mc:w:w0045",
+     "mc:w:w0521",
+     "mc:w:w0522",
+     "mc:w:w0212",
+     "mc:w:w0023",
+     "mc:w:w0182",
+     "mc:w:w0385",
+     "mc:w:w0020",
+     "mc:w:w0587",
+     "mc:w:w0549",
+     "mc:w:w0139",
+     "mc:w:w0055",
+     "type:w:w0322",
+     "type:w:w0434",
+     "type:w:w0292",
+     "type:w:w0307",
+     "type:w:w0546",
+     "type:w:w0356",
+     "type:w:w0207",
+     "type:w:w0152",
+     "type:w:w0261",
+     "type:w:w0263",
+     "type:w:w0509",
+     "type:w:w0122",
+     "mc:s:s1502",
+     "type:s:s0949",
+     "mc:s:s0670",
+     "mc:s:s0513",
+     "mc:s:s2641",
+     "type:s:s2541",
+     "mc:s:s0860",
+     "mc:s:s0220",
+     "type:s:s0949",
+     "type:s:s2541",
+     "mc:s:s0949",
+     "mc:s:s2541"
+    ],
+    [
+     "type:w:w0357",
+     "type:w:w0221",
+     "type:w:w0232",
+     "type:w:w0404",
+     "type:w:w0053",
+     "type:w:w0160",
+     "type:w:w0001",
+     "type:w:w0234",
+     "type:w:w0283",
+     "type:w:w0202",
+     "type:w:w0272",
+     "type:w:w0143",
+     "type:w:w0607",
+     "type:w:w0178",
+     "type:w:w0498",
+     "mc:w:w0146",
+     "mc:w:w0117",
+     "mc:w:w0538",
+     "mc:w:w0408",
+     "mc:w:w0344",
+     "mc:w:w0155",
+     "mc:w:w0457",
+     "mc:w:w0425",
+     "mc:w:w0341",
+     "mc:w:w0460",
+     "mc:w:w0335",
+     "mc:w:w0328",
+     "mc:w:w0538",
+     "mc:w:w0425",
+     "mc:w:w0335",
+     "type:w:w0201",
+     "type:w:w0150",
+     "type:w:w0339",
+     "type:w:w0239",
+     "type:w:w0475",
+     "type:w:w0480",
+     "type:w:w0223",
+     "type:w:w0315",
+     "type:w:w0015",
+     "type:w:w0278",
+     "type:w:w0251",
+     "type:w:w0411",
+     "type:w:w0015",
+     "type:s:s2541",
+     "mc:s:s1742",
+     "type:s:s0949",
+     "mc:s:s0528",
+     "mc:s:s1056",
+     "type:s:s1590",
+     "type:s:s0918",
+     "mc:s:s0694",
+     "type:s:s2541",
+     "type:s:s0949",
+     "type:s:s1590",
+     "type:s:s0918",
+     "mc:s:s2541",
+     "mc:s:s0949",
+     "mc:s:s1590",
+     "mc:s:s0918",
+     "mc:s:s1590"
+    ],
+    [
+     "type:w:w0373",
+     "type:w:w0047",
+     "mc:w:w0541",
+     "type:w:w0477",
+     "type:w:w0462",
+     "type:w:w0324",
+     "type:w:w0109",
+     "type:w:w0269",
+     "type:w:w0333",
+     "type:w:w0239",
+     "mc:w:w0538",
+     "mc:w:w0425",
+     "type:w:w0056",
+     "type:w:w0015",
+     "mc:w:w0335",
+     "type:w:w0269",
+     "type:w:w0333",
+     "mc:w:w0449",
+     "mc:w:w0345",
+     "mc:w:w0319",
+     "mc:w:w0431",
+     "mc:w:w0123",
+     "mc:w:w0556",
+     "mc:w:w0241",
+     "mc:w:w0298",
+     "mc:w:w0128",
+     "mc:w:w0362",
+     "mc:w:w0557",
+     "mc:w:w0407",
+     "mc:w:w0362",
+     "mc:w:w0362",
+     "type:w:w0593",
+     "type:w:w0077",
+     "type:w:w0512",
+     "type:w:w0289",
+     "type:w:w0237",
+     "type:w:w0244",
+     "type:w:w0463",
+     "type:w:w0294",
+     "type:w:w0176",
+     "type:w:w0473",
+     "type:w:w0259",
+     "type:w:w0421",
+     "type:w:w0077",
+     "type:w:w0289",
+     "type:s:s1590",
+     "mc:s:s2581",
+     "type:s:s0949",
+     "type:s:s0918",
+     "mc:s:s0619",
+     "mc:s:s0280",
+     "mc:s:s0751",
+     "type:s:s2541",
+     "type:s:s1590",
+     "type:s:s0949",
+     "type:s:s0918",
+     "type:s:s2541",
+     "mc:s:s1590",
+     "mc:s:s0949",
+     "mc:s:s0918",
+     "mc:s:s2541"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0343",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0343\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">اشتباه</span><span class=\"rg\">mistake, error, fault</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"349\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">به این توجه کن که نباید همان <b>اشتباه</b> قبلی را تکرار کنی.</div><div class=\"se\">See to it that you don&#39;t make the same mistake.</div></div><div class=\"sent\" data-sent=\"1053\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">درباره من <b>اشتباه</b> برداشت نکن.</div><div class=\"se\">Don&#39;t get me wrong.</div></div></div>"
+    },
+    {
+     "key": "w:w0141",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0141\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">خبر</span><span class=\"rg\">news</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"28\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">سلام خوبی؟ چه <b>خبر</b>؟</div><div class=\"se\">Hey, how are you? What&#39;s up?</div></div><div class=\"sent\" data-sent=\"225\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">واکنش او در مقابل این <b>خبر</b> چه بود؟</div><div class=\"se\">What was her reaction to the news?</div></div></div>"
+    },
+    {
+     "key": "w:w0346",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0346\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">متوجه شدن</span><span class=\"rg\">to notice, to realise</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"10\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">من <b>متوجه</b> <b>نشدم</b>.</div><div class=\"se\">I don&#39;t understand this.</div></div><div class=\"sent\" data-sent=\"2977\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">او <b>متوجه</b> اشتباه خود <b>نشد</b>.</div><div class=\"se\">He didn&#39;t notice his mistake.</div></div></div>"
+    },
+    {
+     "key": "w:w0214",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0214\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">کنار</span><span class=\"rg\">next to, beside</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"67\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">او به <b>کنار</b> رفت تا آن خانم رد شود.</div><div class=\"se\">He stepped aside for her to pass.</div></div><div class=\"sent\" data-sent=\"456\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">مدّت زیادی برای تام طول کشید تا تام با مرگ ماری <b>کنار</b> بیاید.</div><div class=\"se\">It took Tom a long time to get over Mary&#39;s death.</div></div></div>"
+    },
+    {
+     "key": "w:w0149",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0149\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"fa\" dir=\"rtl\">ساختن</span><span class=\"rg\">to build, to make</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"134\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">او رازش را آشکار <b>نساخت</b>.</div><div class=\"se\">He didn&#39;t reveal his secret.</div></div><div class=\"sent\" data-sent=\"175\"><div class=\"st\" data-tl lang=\"fa\" dir=\"rtl\">می‌توانی آن را به موقع <b>بسازی</b>؟</div><div class=\"se\">Can you make it on time?</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "93296a0c63502c28"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "9aef5df64f4ae545"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "0ab35ba6a2c0e17c"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 18,
+     "sha": "1d140d4c5e19b941"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "9df26b19edfeddb2"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.198667,
+     0.091692,
+     0.0596
+    ],
+    "toGo": [
+     117,
+     236,
+     283
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.198667,
+     "all": false
+    },
+    "eta": 117,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 24
+    },
+    "gateNote": "A2 waits · A1 at 24% known",
+    "gateOpensIn": 32,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.055875
+   },
+   "items": {
+    "items": 173,
+    "right": 157
+   }
+  }
+ ]
+}

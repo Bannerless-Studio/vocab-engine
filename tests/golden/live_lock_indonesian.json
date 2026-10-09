@@ -1,0 +1,2481 @@
+{
+ "lang": "indonesian",
+ "packKey": "id",
+ "words": 2000,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "c19c74271403fc61"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     178,
+     271,
+     334
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": 178,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy A1 0 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy A1 30 learned Still shaky di itu dengan ke Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 1 of 60 › Drill this set",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "aku I, me (informal)",
+        "yang which, who, that (relative)",
+        "tidak not, no",
+        "di in, at, on",
+        "ini this, these",
+        "itu that, those",
+        "dan and",
+        "dia he, she (him, her)",
+        "dengan with (by)",
+        "akan will, shall (future)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bilang to say, to tell (colloquial)",
+        "nggak not, no (colloquial tidak)",
+        "rahasia secret",
+        "berasal to come from, to be from, to originate from",
+        "video video",
+        "bintang star",
+        "menghentikan to stop (something)",
+        "keadaan condition, shape, state (situation)",
+        "jumlah total (sum)",
+        "agak rather, somewhat"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bunuh to kill",
+        "darah blood",
+        "menembak to shoot",
+        "senjata weapon",
+        "bom bomb",
+        "narkoba drugs (narcotics)",
+        "keju cheese",
+        "sudut corner (angle)",
+        "menjalani to live",
+        "sekadar just, only, simply"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 4 of 60",
+       "rows": 10,
+       "first": [
+        "lebih more (-er (comparative) )",
+        "harus must, have to",
+        "baik good (well; fine)",
+        "ingin to want, to wish",
+        "menjadi to become (to be; so, then)",
+        "bukan not (with nouns) (isn&#39;t it?)",
+        "tetapi but",
+        "melihat to see, to look",
+        "dapat can, be able to (to get)",
+        "ya yes (right? (tag question) )"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bilang to say, to tell (colloquial)",
+        "nggak not, no (colloquial tidak)",
+        "rahasia secret",
+        "berasal to come from, to be from, to originate from",
+        "video video",
+        "bintang star",
+        "menghentikan to stop (something)",
+        "keadaan condition, shape, state (situation)",
+        "jumlah total (sum)",
+        "agak rather, somewhat"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bunuh to kill",
+        "darah blood",
+        "menembak to shoot",
+        "senjata weapon",
+        "bom bomb",
+        "narkoba drugs (narcotics)",
+        "keju cheese",
+        "sudut corner (angle)",
+        "menjalani to live",
+        "sekadar just, only, simply"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0001",
+     "mc:w:w0007",
+     "mc:w:w0008",
+     "mc:w:w0008",
+     "mc:w:w0009",
+     "mc:w:w0003",
+     "mc:w:w0009",
+     "mc:w:w0004",
+     "mc:w:w0010",
+     "mc:w:w0005",
+     "mc:w:w0006",
+     "mc:w:w0006",
+     "mc:w:w0007",
+     "mc:w:w0002",
+     "mc:w:w0010",
+     "mc:w:w0001",
+     "mc:w:w0002",
+     "mc:w:w0004",
+     "mc:w:w0005",
+     "mc:w:w0003",
+     "mc:w:w0003",
+     "mc:w:w0004",
+     "mc:w:w0005"
+    ],
+    [
+     "type:w:w0002",
+     "mc:w:w0006",
+     "mc:w:w0009",
+     "mc:w:w0008",
+     "mc:w:w0007",
+     "mc:w:w0004",
+     "mc:w:w0001",
+     "mc:w:w0003",
+     "mc:w:w0005",
+     "mc:w:w0010",
+     "mc:w:w0013",
+     "mc:w:w0014",
+     "mc:w:w0021",
+     "mc:w:w0015",
+     "mc:w:w0022",
+     "mc:w:w0013",
+     "mc:w:w0017",
+     "mc:w:w0018",
+     "mc:w:w0012",
+     "mc:w:w0011",
+     "mc:w:w0011",
+     "mc:w:w0012",
+     "mc:w:w0015",
+     "mc:w:w0016",
+     "mc:w:w0022",
+     "mc:w:w0014",
+     "mc:w:w0021",
+     "mc:w:w0017",
+     "mc:w:w0018",
+     "mc:w:w0016",
+     "mc:w:w0021",
+     "mc:w:w0005",
+     "mc:w:w0004",
+     "mc:w:w0003",
+     "mc:w:w0002",
+     "type:w:w0009",
+     "type:w:w0010",
+     "type:w:w0006",
+     "type:w:w0001",
+     "type:w:w0008",
+     "type:w:w0007"
+    ],
+    [
+     "type:w:w0005",
+     "mc:w:w0021",
+     "mc:w:w0013",
+     "mc:w:w0012",
+     "type:w:w0003",
+     "mc:w:w0014",
+     "type:w:w0002",
+     "mc:w:w0011",
+     "type:w:w0018",
+     "type:w:w0016",
+     "mc:w:w0006",
+     "mc:w:w0022",
+     "type:w:w0004",
+     "type:w:w0015",
+     "mc:w:w0017",
+     "mc:w:w0006",
+     "mc:w:w0023",
+     "mc:w:w0026",
+     "mc:w:w0027",
+     "mc:w:w0019",
+     "mc:w:w0024",
+     "mc:w:w0028",
+     "mc:w:w0027",
+     "mc:w:w0029",
+     "mc:w:w0028",
+     "mc:w:w0030",
+     "mc:w:w0026",
+     "mc:w:w0025",
+     "mc:w:w0024",
+     "mc:w:w0030",
+     "mc:w:w0020",
+     "mc:w:w0019",
+     "mc:w:w0029",
+     "mc:w:w0020",
+     "mc:w:w0023",
+     "mc:w:w0025",
+     "mc:w:w0020",
+     "mc:w:w0008",
+     "mc:w:w0001",
+     "mc:w:w0015",
+     "mc:w:w0005",
+     "mc:w:w0010",
+     "mc:w:w0004",
+     "mc:w:w0007",
+     "mc:w:w0018",
+     "mc:w:w0016",
+     "mc:w:w0003",
+     "mc:w:w0009",
+     "mc:w:w0004",
+     "mc:w:w0009",
+     "type:w:w0021",
+     "type:w:w0014",
+     "type:w:w0012",
+     "type:w:w0022",
+     "type:w:w0017",
+     "type:w:w0011",
+     "type:w:w0013"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">aku</span><span class=\"rg\">I, me <span class=\"dim\">(informal)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"29\"><div class=\"st\" data-tl lang=\"id\"><b>Aku</b> tidak dapat membayangkan hidup tanpa kamu.</div><div class=\"se\">I can&#39;t imagine life without you.</div></div><div class=\"sent\" data-sent=\"1289\"><div class=\"st\" data-tl lang=\"id\">Jenis makanan apa yang harus <b>ku</b> bawa?</div><div class=\"se\">What kind of food do you want me to bring?</div></div></div>"
+    },
+    {
+     "key": "w:w0007",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0007\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">dan</span><span class=\"rg\">and</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"16\"><div class=\"st\" data-tl lang=\"id\">Perang datang <b>dan</b> pergi. Tapi prajuritku tetap abadi.</div><div class=\"se\">Wars come and go, but soldiers stay eternal.</div></div><div class=\"sent\" data-sent=\"30\"><div class=\"st\" data-tl lang=\"id\">Cinta adalah misteri <b>dan</b> penderitaan tanpa batas waktu.</div><div class=\"se\">Love is mystery and misery indefinitely.</div></div></div>"
+    },
+    {
+     "key": "w:w0008",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0008\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">dia</span><span class=\"rg\">he, she <span class=\"gx\">(him, her)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2\"><div class=\"st\" data-tl lang=\"id\">Mary gagal lagi. Meski begitu, <b>dia</b> masih muda.</div><div class=\"se\">Mary has failed again. After all she is still young.</div></div><div class=\"sent\" data-sent=\"13\"><div class=\"st\" data-tl lang=\"id\"><b>Dia</b> tidak dapat berjalan lagi.</div><div class=\"se\">He can&#39;t walk any more.</div></div></div>"
+    },
+    {
+     "key": "w:w0008",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0008\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">dia</span><span class=\"rg\">he, she <span class=\"gx\">(him, her)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2\"><div class=\"st\" data-tl lang=\"id\">Mary gagal lagi. Meski begitu, <b>dia</b> masih muda.</div><div class=\"se\">Mary has failed again. After all she is still young.</div></div><div class=\"sent\" data-sent=\"13\"><div class=\"st\" data-tl lang=\"id\"><b>Dia</b> tidak dapat berjalan lagi.</div><div class=\"se\">He can&#39;t walk any more.</div></div></div>"
+    },
+    {
+     "key": "w:w0009",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0009\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">dengan</span><span class=\"rg\">with <span class=\"gx\">(by)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"12\"><div class=\"st\" data-tl lang=\"id\">Rumahku dekat <b>dengan</b> Menara Tokyo.</div><div class=\"se\">My house is near Tokyo Tower.</div></div><div class=\"sent\" data-sent=\"45\"><div class=\"st\" data-tl lang=\"id\">Dia menghindar untuk bertemu dengannya dalam perjalanan.</div><div class=\"se\">He avoided meeting her on the way.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "a94f240595b63f46"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "ce254cc73e85073b"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "8d20d825ed4e9211"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "be34f914b5e7f215"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "6606bb4e0fd48f95"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.006667,
+     0.003077,
+     0.002
+    ],
+    "toGo": [
+     176,
+     270,
+     333
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.006667,
+     "all": false
+    },
+    "eta": 176,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.001875
+   },
+   "items": {
+    "items": 121,
+    "right": 113
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "day": {
+     "n": 3,
+     "sha": "354986b45f9a244f"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "0b3613a49fb70918"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "58fe33db552428f8"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 17,
+     "sha": "f9daeda1e9bcbfef"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 3,
+     "sha": "e3f9f0c08da51372"
+    },
+    "showPron": false,
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 120,
+     "sha": "5476d00064076610"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.064667,
+     0.030231,
+     0.019733
+    ],
+    "toGo": [
+     163,
+     255,
+     316
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.064667,
+     "all": false
+    },
+    "eta": 163,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.019542
+   },
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "today": [
+    "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, A1 In 6 sessions since your last visit +22 mastered Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy A1 120 learned Still shaky akan ada menjadi anak sini selalu mulai ketika cara masalah Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy A1 150 learned Still shaky akan ada apa menjadi sini menunggu kata hidup menemukan Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 13 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 13 of 60",
+       "rows": 10,
+       "first": [
+        "bermain to play",
+        "sesuatu something",
+        "menunggu to wait (for)",
+        "kota city, town",
+        "jam hour (clock; o&#39;clock)",
+        "sana there",
+        "mobil car",
+        "selama during, for (a period)",
+        "begitu so, like that",
+        "setiap every, each"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bilang to say, to tell (colloquial)",
+        "nggak not, no (colloquial tidak)",
+        "rahasia secret",
+        "berasal to come from, to be from, to originate from",
+        "video video",
+        "bintang star",
+        "menghentikan to stop (something)",
+        "keadaan condition, shape, state (situation)",
+        "jumlah total (sum)",
+        "agak rather, somewhat"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bunuh to kill",
+        "darah blood",
+        "menembak to shoot",
+        "senjata weapon",
+        "bom bomb",
+        "narkoba drugs (narcotics)",
+        "keju cheese",
+        "sudut corner (angle)",
+        "menjalani to live",
+        "sekadar just, only, simply"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 16 of 60",
+       "rows": 10,
+       "first": [
+        "air water (drinking water (air minum) )",
+        "mencari to look for, to search",
+        "tidur to sleep",
+        "bagus good, nice",
+        "tiga three",
+        "rasa taste (feeling)",
+        "sebagai as",
+        "pun also, even (-ever (apa pun = whatever) )",
+        "membeli to buy",
+        "saat when, while"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bilang to say, to tell (colloquial)",
+        "nggak not, no (colloquial tidak)",
+        "rahasia secret",
+        "berasal to come from, to be from, to originate from",
+        "video video",
+        "bintang star",
+        "menghentikan to stop (something)",
+        "keadaan condition, shape, state (situation)",
+        "jumlah total (sum)",
+        "agak rather, somewhat"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bunuh to kill",
+        "darah blood",
+        "menembak to shoot",
+        "senjata weapon",
+        "bom bomb",
+        "narkoba drugs (narcotics)",
+        "keju cheese",
+        "sudut corner (angle)",
+        "menjalani to live",
+        "sekadar just, only, simply"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0114",
+     "type:w:w0010",
+     "mc:w:w0113",
+     "type:w:w0121",
+     "mc:w:w0119",
+     "type:w:w0050",
+     "type:w:w0035",
+     "type:w:w0071",
+     "type:w:w0124",
+     "type:w:w0098",
+     "mc:w:w0115",
+     "type:w:w0014",
+     "type:w:w0116",
+     "mc:w:w0110",
+     "type:w:w0079",
+     "type:w:w0124",
+     "mc:w:w0115",
+     "type:w:w0116",
+     "mc:w:w0110",
+     "mc:w:w0124",
+     "mc:w:w0118",
+     "mc:w:w0133",
+     "mc:w:w0129",
+     "mc:w:w0127",
+     "mc:w:w0117",
+     "mc:w:w0129",
+     "mc:w:w0173",
+     "mc:w:w0122",
+     "mc:w:w0127",
+     "mc:w:w0118",
+     "mc:w:w0159",
+     "mc:w:w0126",
+     "mc:w:w0173",
+     "mc:w:w0122",
+     "mc:w:w0128",
+     "mc:w:w0117",
+     "mc:w:w0128",
+     "mc:w:w0133",
+     "mc:w:w0126",
+     "mc:w:w0159",
+     "mc:w:w0133",
+     "mc:w:w0133",
+     "mc:w:w0110",
+     "mc:w:w0046",
+     "mc:w:w0044",
+     "mc:w:w0103",
+     "mc:w:w0115",
+     "mc:w:w0099",
+     "mc:w:w0101",
+     "mc:w:w0067",
+     "mc:w:w0120",
+     "mc:w:w0107",
+     "mc:w:w0032",
+     "mc:w:w0089",
+     "mc:w:w0046",
+     "type:w:w0091",
+     "type:w:w0092",
+     "type:w:w0067",
+     "type:w:w0095",
+     "type:w:w0113",
+     "type:w:w0083",
+     "type:w:w0114",
+     "type:w:w0084",
+     "type:w:w0111",
+     "type:w:w0119",
+     "type:w:w0076",
+     "type:w:w0096",
+     "type:w:w0067",
+     "type:s:s1816",
+     "mc:s:s1476",
+     "mc:s:s0607",
+     "type:s:s1071",
+     "mc:s:s0711",
+     "mc:s:s1655",
+     "type:s:s0344",
+     "type:s:s0654",
+     "type:s:s1816",
+     "type:s:s1071",
+     "type:s:s0344",
+     "type:s:s0654",
+     "mc:s:s1816",
+     "mc:s:s1071",
+     "mc:s:s0344",
+     "mc:s:s0654"
+    ],
+    [
+     "type:w:w0173",
+     "type:w:w0067",
+     "type:w:w0014",
+     "type:w:w0124",
+     "type:w:w0111",
+     "type:w:w0159",
+     "mc:w:w0133",
+     "type:w:w0079",
+     "mc:w:w0046",
+     "mc:w:w0110",
+     "type:w:w0050",
+     "type:w:w0035",
+     "type:w:w0116",
+     "mc:w:w0115",
+     "type:w:w0054",
+     "type:w:w0067",
+     "type:w:w0014",
+     "type:w:w0124",
+     "mc:w:w0046",
+     "type:w:w0050",
+     "type:w:w0116",
+     "mc:w:w0137",
+     "mc:w:w0136",
+     "mc:w:w0125",
+     "mc:w:w0144",
+     "mc:w:w0136",
+     "mc:w:w0131",
+     "mc:w:w0123",
+     "mc:w:w0144",
+     "mc:w:w0131",
+     "mc:w:w0137",
+     "mc:w:w0138",
+     "mc:w:w0140",
+     "mc:w:w0140",
+     "mc:w:w0132",
+     "mc:w:w0125",
+     "mc:w:w0138",
+     "mc:w:w0132",
+     "mc:w:w0134",
+     "mc:w:w0123",
+     "mc:w:w0134",
+     "mc:w:w0113",
+     "mc:w:w0133",
+     "mc:w:w0127",
+     "mc:w:w0062",
+     "mc:w:w0027",
+     "mc:w:w0114",
+     "mc:w:w0119",
+     "mc:w:w0110",
+     "mc:w:w0033",
+     "mc:w:w0055",
+     "mc:w:w0129",
+     "mc:w:w0009",
+     "type:w:w0122",
+     "type:w:w0081",
+     "type:w:w0108",
+     "type:w:w0126",
+     "type:w:w0128",
+     "type:w:w0010",
+     "type:w:w0093",
+     "type:w:w0090",
+     "type:w:w0117",
+     "type:w:w0113",
+     "type:w:w0118",
+     "type:w:w0089",
+     "type:w:w0122",
+     "type:w:w0081",
+     "type:w:w0117",
+     "type:w:w0113",
+     "mc:w:w0113",
+     "mc:s:s0480",
+     "type:s:s1816",
+     "type:s:s0344",
+     "mc:s:s1126",
+     "type:s:s1071",
+     "type:s:s0654",
+     "mc:s:s2213",
+     "mc:s:s0954",
+     "type:s:s1816",
+     "type:s:s0344",
+     "type:s:s1071",
+     "type:s:s0654",
+     "mc:s:s1816",
+     "mc:s:s0344",
+     "mc:s:s1071",
+     "mc:s:s0654"
+    ],
+    [
+     "type:w:w0090",
+     "type:w:w0122",
+     "type:w:w0113",
+     "type:w:w0014",
+     "type:w:w0081",
+     "type:w:w0116",
+     "mc:w:w0046",
+     "type:w:w0124",
+     "type:w:w0035",
+     "type:w:w0067",
+     "type:w:w0117",
+     "type:w:w0050",
+     "type:w:w0010",
+     "type:w:w0111",
+     "type:w:w0079",
+     "type:w:w0122",
+     "mc:w:w0122",
+     "mc:w:w0153",
+     "mc:w:w0142",
+     "mc:w:w0143",
+     "mc:w:w0142",
+     "mc:w:w0139",
+     "mc:w:w0130",
+     "mc:w:w0141",
+     "mc:w:w0147",
+     "mc:w:w0148",
+     "mc:w:w0139",
+     "mc:w:w0143",
+     "mc:w:w0147",
+     "mc:w:w0146",
+     "mc:w:w0130",
+     "mc:w:w0141",
+     "mc:w:w0151",
+     "mc:w:w0146",
+     "mc:w:w0153",
+     "mc:w:w0148",
+     "mc:w:w0151",
+     "mc:w:w0141",
+     "mc:w:w0147",
+     "mc:w:w0153",
+     "mc:w:w0041",
+     "mc:w:w0023",
+     "mc:w:w0140",
+     "mc:w:w0132",
+     "mc:w:w0054",
+     "mc:w:w0134",
+     "mc:w:w0137",
+     "mc:w:w0049",
+     "mc:w:w0061",
+     "mc:w:w0075",
+     "mc:w:w0068",
+     "mc:w:w0015",
+     "mc:w:w0015",
+     "type:w:w0112",
+     "type:w:w0136",
+     "type:w:w0125",
+     "type:w:w0054",
+     "type:w:w0110",
+     "type:w:w0123",
+     "type:w:w0115",
+     "type:w:w0131",
+     "type:w:w0133",
+     "type:w:w0138",
+     "type:w:w0144",
+     "type:w:w0108",
+     "mc:s:s1303",
+     "mc:s:s0287",
+     "type:s:s0344",
+     "mc:s:s1219",
+     "type:s:s1071",
+     "type:s:s1816",
+     "type:s:s0654",
+     "mc:s:s1342",
+     "mc:s:s1303",
+     "mc:s:s0287",
+     "type:s:s0344",
+     "mc:s:s1219",
+     "type:s:s1071",
+     "type:s:s1816",
+     "type:s:s0654",
+     "mc:s:s1303",
+     "mc:s:s0344",
+     "mc:s:s1219",
+     "mc:s:s1071",
+     "mc:s:s1816",
+     "mc:s:s0654"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0114",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0114\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">ketika</span><span class=\"rg\">when <span class=\"dim\">(at the time)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"27\"><div class=\"st\" data-tl lang=\"id\">Saya senang <b>ketika</b> saya membaca.</div><div class=\"se\">I am happiest when I am reading.</div></div><div class=\"sent\" data-sent=\"153\"><div class=\"st\" data-tl lang=\"id\"><b>Ketika</b> dia sampai stasiun, keretanya telah berangkat.</div><div class=\"se\">When he got to the station, the train had already left.</div></div></div>"
+    },
+    {
+     "key": "w:w0010",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0010\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">akan</span><span class=\"rg\">will, shall <span class=\"dim\">(future)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"10\"><div class=\"st\" data-tl lang=\"id\">Pada tahun 2020, populasi kota ini <b>akan</b> dua kali lipat.</div><div class=\"se\">By the year 2020, the population of this city will have doubled.</div></div><div class=\"sent\" data-sent=\"28\"><div class=\"st\" data-tl lang=\"id\">Dunia <b>akan</b> tersenyum bahagia tanpa diriku.</div><div class=\"se\">The world will smile happily without me.</div></div></div>"
+    },
+    {
+     "key": "w:w0113",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0113\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">mulai</span><span class=\"rg\">to start, to begin</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"423\"><div class=\"st\" data-tl lang=\"id\">Dia <b>mulai</b> bekerja pada Pukul tujuh.</div><div class=\"se\">She starts her job at seven o&#39;clock.</div></div><div class=\"sent\" data-sent=\"1091\"><div class=\"st\" data-tl lang=\"id\">Kegiatan sekolah <b>dimulai</b> pada pukul 8:10 pagi.</div><div class=\"se\">School begins at 8:10 a.m.</div></div></div>"
+    },
+    {
+     "key": "w:w0121",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0121\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">berbicara</span><span class=\"rg\">to talk</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"129\"><div class=\"st\" data-tl lang=\"id\">Dia bisa <b>berbicara</b> empat bahasa.</div><div class=\"se\">Jorge is able to speak four languages.</div></div><div class=\"sent\" data-sent=\"249\"><div class=\"st\" data-tl lang=\"id\">Tom tidak suka <b>berbicara</b> di depan umum.</div><div class=\"se\">Tom doesn&#39;t like speaking in public.</div></div></div>"
+    },
+    {
+     "key": "w:w0119",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0119\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">masalah</span><span class=\"rg\">problem</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"186\"><div class=\"st\" data-tl lang=\"id\">Ini merupakan sebuah <b>masalah</b>, bagaimanapun kamu melihatnya.</div><div class=\"se\">It&#39;s a problem, however you look at it.</div></div><div class=\"sent\" data-sent=\"834\"><div class=\"st\" data-tl lang=\"id\">Kelompok tersebut berusaha untuk memecahkan <b>masalah-masalah</b> sosial.</div><div class=\"se\">The group tried to solve social problems.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "f4deba8bdbd52a74"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "b212947c727fcb08"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "c16393ebcff72965"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 29,
+     "sha": "5e870e8a08368703"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 3,
+     "sha": "ee6cab66e6ea9238"
+    },
+    "showPron": false,
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "b40defe51bbd3f71"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.080667,
+     0.037615,
+     0.024533
+    ],
+    "toGo": [
+     160,
+     251,
+     311
+    ],
+    "toGoTotal": 148,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.080667,
+     "all": false
+    },
+    "eta": 160,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.024042
+   },
+   "items": {
+    "items": 256,
+    "right": 222
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "c94b996944d510f0"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.730769,
+     0.38
+    ],
+    "toGo": [
+     0,
+     82,
+     167
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.730769,
+     "all": false
+    },
+    "eta": 82,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.35625
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 82 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Hari Budi Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 82 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Hari Budi Start",
+    "Session 2 Goal 2 of 3 ≈ 82 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Hari Budi Start",
+    "Session 3 Goal 2 of 3 ≈ 83 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Hari Budi Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 82 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 84 sessions daily life: directions, simple chat, short notices A1 2 of 600 mastered sentences 1 · reading 1 of 20 A2 380 learned Still shaky hanya biasa silakan pilihan pakaian penyakit tentara daya jembatan listrik mengejar Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "oranye orange",
+        "sama-sama you&#39;re welcome (same to you (the) )",
+        "sampai jumpa see you, goodbye",
+        "selamat malam good evening (good night)",
+        "selamat pagi good morning",
+        "selamat siang good day (around midday)",
+        "selamat sore good afternoon",
+        "selamat tinggal goodbye (to someone staying)",
+        "tanya to ask",
+        "terima kasih thank you"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "hangat warm",
+        "celana pants, trousers",
+        "mengenakan to wear, to be dressed in",
+        "rakyat people, populace",
+        "menikmati to enjoy",
+        "meletakkan to set",
+        "raya big",
+        "mengajak to invite",
+        "normal normal",
+        "nyata real (clear)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bunuh to kill",
+        "darah blood",
+        "menembak to shoot",
+        "senjata weapon",
+        "bom bomb",
+        "narkoba drugs (narcotics)",
+        "keju cheese",
+        "sudut corner (angle)",
+        "menjalani to live",
+        "sekadar just, only, simply"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "oranye orange",
+        "sama-sama you&#39;re welcome (same to you (the) )",
+        "sampai jumpa see you, goodbye",
+        "selamat malam good evening (good night)",
+        "selamat pagi good morning",
+        "selamat siang good day (around midday)",
+        "selamat sore good afternoon",
+        "selamat tinggal goodbye (to someone staying)",
+        "tanya to ask",
+        "terima kasih thank you"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 39 of 70",
+       "rows": 10,
+       "first": [
+        "kisah story, tale",
+        "pendidikan education",
+        "danau lake",
+        "terkejut surprised",
+        "kecewa disappointed",
+        "catatan note",
+        "membayangkan to imagine",
+        "memasang to put, to place, to insert",
+        "alamat address",
+        "aktif active"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bunuh to kill",
+        "darah blood",
+        "menembak to shoot",
+        "senjata weapon",
+        "bom bomb",
+        "narkoba drugs (narcotics)",
+        "keju cheese",
+        "sudut corner (angle)",
+        "menjalani to live",
+        "sekadar just, only, simply"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0766",
+     "type:w:w0646",
+     "type:w:w0617",
+     "type:w:w0088",
+     "type:w:w0070",
+     "type:w:w0229",
+     "type:w:w0845",
+     "type:w:w0294",
+     "type:w:w0175",
+     "type:w:w0493",
+     "type:w:w0763",
+     "type:w:w2053",
+     "type:w:w0018",
+     "type:w:w2014",
+     "type:w:w0657",
+     "type:w:w0088",
+     "mc:w:w0924",
+     "mc:w:w0922",
+     "mc:w:w0924",
+     "mc:w:w0925",
+     "mc:w:w0911",
+     "mc:w:w0951",
+     "mc:w:w0920",
+     "mc:w:w0911",
+     "mc:w:w0951",
+     "mc:w:w0927",
+     "mc:w:w0928",
+     "mc:w:w0919",
+     "mc:w:w0922",
+     "mc:w:w0926",
+     "mc:w:w0927",
+     "mc:w:w0926",
+     "mc:w:w0919",
+     "mc:w:w0920",
+     "mc:w:w0928",
+     "mc:w:w0925",
+     "mc:w:w0924",
+     "mc:w:w0928",
+     "mc:w:w0922",
+     "mc:w:w0926",
+     "mc:w:w0927",
+     "mc:w:w0925",
+     "mc:w:w0926",
+     "mc:w:w0927",
+     "mc:w:w0741",
+     "mc:w:w2011",
+     "mc:w:w0106",
+     "mc:w:w0471",
+     "mc:w:w0884",
+     "mc:w:w0955",
+     "mc:w:w0673",
+     "mc:w:w0541",
+     "mc:w:w0335",
+     "mc:w:w0387",
+     "mc:w:w0632",
+     "mc:w:w0293",
+     "mc:w:w0632",
+     "type:w:w0061",
+     "type:w:w0330",
+     "type:w:w0361",
+     "type:w:w0645",
+     "type:w:w0424",
+     "type:w:w0133",
+     "type:w:w0426",
+     "type:w:w0384",
+     "type:w:w0512",
+     "type:w:w0809",
+     "type:w:w0609",
+     "type:w:w0358",
+     "type:w:w0809",
+     "mc:s:s1669",
+     "type:s:s1674",
+     "mc:s:s2452",
+     "mc:s:s1570",
+     "mc:s:s0698",
+     "mc:s:s1038",
+     "mc:s:s1152",
+     "mc:s:s0388",
+     "mc:s:s1669",
+     "type:s:s1674",
+     "mc:s:s2452",
+     "mc:s:s1570",
+     "mc:s:s1038",
+     "mc:s:s1674"
+    ],
+    [
+     "mc:w:w0926",
+     "mc:w:w0632",
+     "mc:w:w0924",
+     "type:w:w0088",
+     "type:w:w0660",
+     "type:w:w0809",
+     "type:w:w0145",
+     "type:w:w0307",
+     "mc:w:w0927",
+     "type:w:w0290",
+     "type:w:w0626",
+     "mc:w:w0922",
+     "type:w:w0280",
+     "mc:w:w0928",
+     "mc:w:w0925",
+     "type:w:w0660",
+     "type:w:w0307",
+     "mc:w:w0922",
+     "mc:w:w0925",
+     "mc:w:w0660",
+     "mc:w:w0307",
+     "mc:w:w0935",
+     "mc:w:w0940",
+     "mc:w:w0938",
+     "mc:w:w0935",
+     "mc:w:w0936",
+     "mc:w:w0933",
+     "mc:w:w0934",
+     "mc:w:w0943",
+     "mc:w:w0931",
+     "mc:w:w0933",
+     "mc:w:w0938",
+     "mc:w:w0934",
+     "mc:w:w0932",
+     "mc:w:w0931",
+     "mc:w:w0930",
+     "mc:w:w0936",
+     "mc:w:w0930",
+     "mc:w:w0940",
+     "mc:w:w0943",
+     "mc:w:w0932",
+     "mc:w:w0776",
+     "mc:w:w0737",
+     "mc:w:w0351",
+     "mc:w:w0706",
+     "mc:w:w0605",
+     "mc:w:w0349",
+     "mc:w:w0635",
+     "mc:w:w0636",
+     "mc:w:w0603",
+     "mc:w:w0902",
+     "mc:w:w0480",
+     "mc:w:w0599",
+     "mc:w:w0351",
+     "mc:w:w0349",
+     "mc:w:w0603",
+     "type:w:w0668",
+     "type:w:w0388",
+     "type:w:w0075",
+     "type:w:w0760",
+     "type:w:w0877",
+     "type:w:w0757",
+     "type:w:w0785",
+     "type:w:w0370",
+     "type:w:w0108",
+     "type:w:w0786",
+     "type:w:w0109",
+     "type:w:w0138",
+     "type:w:w0388",
+     "type:w:w0370",
+     "mc:s:s2452",
+     "mc:s:s1729",
+     "mc:s:s1570",
+     "type:s:s1674",
+     "mc:s:s1692",
+     "mc:s:s1038",
+     "mc:s:s2401",
+     "mc:s:s0572",
+     "mc:s:s1570",
+     "type:s:s1674",
+     "mc:s:s2401",
+     "mc:s:s1674"
+    ],
+    [
+     "mc:w:w0925",
+     "mc:w:w0349",
+     "type:w:w0370",
+     "type:w:w0626",
+     "type:w:w0388",
+     "type:w:w0165",
+     "type:w:w0778",
+     "mc:w:w0603",
+     "type:w:w0611",
+     "mc:w:w0351",
+     "type:w:w0149",
+     "type:w:w0307",
+     "type:w:w0647",
+     "mc:w:w0922",
+     "type:w:w0660",
+     "mc:w:w0603",
+     "mc:w:w0946",
+     "mc:w:w0948",
+     "mc:w:w0945",
+     "mc:w:w0939",
+     "mc:w:w0948",
+     "mc:w:w0975",
+     "mc:w:w0950",
+     "mc:w:w0978",
+     "mc:w:w0939",
+     "mc:w:w0945",
+     "mc:w:w0975",
+     "mc:w:w0878",
+     "mc:w:w0878",
+     "mc:w:w0978",
+     "mc:w:w0944",
+     "mc:w:w0941",
+     "mc:w:w0941",
+     "mc:w:w0946",
+     "mc:w:w0950",
+     "mc:w:w0944",
+     "mc:w:w0946",
+     "mc:w:w0978",
+     "mc:w:w0878",
+     "mc:w:w0944",
+     "mc:w:w0978",
+     "mc:w:w0491",
+     "mc:w:w1043",
+     "mc:w:w0855",
+     "mc:w:w0806",
+     "mc:w:w0066",
+     "mc:w:w0607",
+     "mc:w:w0251",
+     "mc:w:w0305",
+     "mc:w:w0774",
+     "mc:w:w0218",
+     "mc:w:w0626",
+     "mc:w:w0111",
+     "mc:w:w0855",
+     "mc:w:w0305",
+     "mc:w:w0774",
+     "mc:w:w0305",
+     "mc:w:w0774",
+     "type:w:w0502",
+     "type:w:w0442",
+     "type:w:w0618",
+     "type:w:w0851",
+     "type:w:w0262",
+     "type:w:w0684",
+     "type:w:w0118",
+     "type:w:w0253",
+     "type:w:w0214",
+     "type:w:w0504",
+     "type:w:w0467",
+     "type:w:w0057",
+     "type:w:w0442",
+     "type:w:w0057",
+     "mc:w:w0057",
+     "mc:s:s2580",
+     "mc:s:s1570",
+     "mc:s:s1077",
+     "type:s:s1674",
+     "mc:s:s1262",
+     "mc:s:s2401",
+     "mc:s:s1669",
+     "mc:s:s0448",
+     "mc:s:s1570",
+     "type:s:s1674",
+     "mc:s:s1674"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0766",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0766\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">sadar</span><span class=\"rg\">aware</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"683\"><div class=\"st\" data-tl lang=\"id\">Aku <b>sadar</b> kalau apa yang telah aku pilih ternyata tidak membuatku tertarik.</div><div class=\"se\">I realized that what I had chosen didn&#39;t really interest me.</div></div><div class=\"sent\" data-sent=\"701\"><div class=\"st\" data-tl lang=\"id\">Apa kamu <b>sadar</b> akan apa yang kamu perbuat?</div><div class=\"se\">Do you realize what you&#39;re doing?</div></div></div>"
+    },
+    {
+     "key": "w:w0646",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0646\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">nyaman</span><span class=\"rg\">comfortable, pleasant</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1450\"><div class=\"st\" data-tl lang=\"id\">Dia merasa bingung dan tidak <b>nyaman</b>.</div><div class=\"se\">He felt lost and uncomfortable.</div></div><div class=\"sent\" data-sent=\"2137\"><div class=\"st\" data-tl lang=\"id\">Pastikan Anda berada dalam posisi yang <b>nyaman</b>.</div><div class=\"se\">Make sure that you are in a comfortable position.</div></div></div>"
+    },
+    {
+     "key": "w:w0617",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0617\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">mengalami</span><span class=\"rg\">to experience, to undergo</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"94\"><div class=\"st\" data-tl lang=\"id\">Dia <b>mengalami</b> sedikit kemajuan dalam Bahasa Inggris.</div><div class=\"se\">He has made little progress in his English.</div></div><div class=\"sent\" data-sent=\"1069\"><div class=\"st\" data-tl lang=\"id\">Bahasa Inggrismu <b>mengalami</b> banyak peningkatan.</div><div class=\"se\">Your English has improved a lot.</div></div></div>"
+    },
+    {
+     "key": "w:w0088",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0088\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">tentang</span><span class=\"rg\">about</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"14\"><div class=\"st\" data-tl lang=\"id\">Ibunya selalu mengeluh <b>tentang</b> hal itu.</div><div class=\"se\">His mother is constantly complaining about it.</div></div><div class=\"sent\" data-sent=\"270\"><div class=\"st\" data-tl lang=\"id\">Sebuah artikel <b>tentang</b> sekolah kita muncul di koran.</div><div class=\"se\">An article about our school appeared in the newspaper.</div></div></div>"
+    },
+    {
+     "key": "w:w0070",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0070\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">semua</span><span class=\"rg\">all, every</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"84\"><div class=\"st\" data-tl lang=\"id\"><b>Semua</b> sekolah tutup pada hari libur itu.</div><div class=\"se\">All the schools are closed on that holiday.</div></div><div class=\"sent\" data-sent=\"120\"><div class=\"st\" data-tl lang=\"id\">Tidak <b>semua</b> kertas kecil adalah cek.</div><div class=\"se\">All that glitters is not gold.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "7ef3550dda94bc5e"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "48936006a8cd778c"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d9b7082dcbad7ea0"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 16,
+     "sha": "155ba1115de4dd9a"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "986c1e752ab32447"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 980,
+     "sha": "5757500d01748d2f"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.985,
+     0.718462,
+     0.3736
+    ],
+    "toGo": [
+     0,
+     84,
+     169
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.718462,
+     "all": false
+    },
+    "eta": 84,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.35025
+   },
+   "items": {
+    "items": 250,
+    "right": 207
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "a51915672eb83b58"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     1,
+     1
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 1,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.75
+   },
+   "todayFirst": "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Keputusan yang sulit Start",
+   "today": [
+    "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Keputusan yang sulit Start",
+    "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Keputusan yang sulit Start",
+    "Session 3 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Keputusan yang sulit Start"
+   ],
+   "progress": {
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles A1 1 of 600 mastered A2 4 of 700 mastered reading 0 of 20 B1 6 of 700 mastered sentences 1 · reading 0 of 20 Still shaky segera terbuka mirip melawan agama sengaja kapten gaji ramai Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "oranye orange",
+        "sama-sama you&#39;re welcome (same to you (the) )",
+        "sampai jumpa see you, goodbye",
+        "selamat malam good evening (good night)",
+        "selamat pagi good morning",
+        "selamat siang good day (around midday)",
+        "selamat sore good afternoon",
+        "selamat tinggal goodbye (to someone staying)",
+        "tanya to ask",
+        "terima kasih thank you"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "kacamata glasses, spectacles",
+        "semesta entire (alam semesta = universe)",
+        "mainan toy",
+        "ringan light",
+        "apalagi let alone",
+        "uji to test, to examine",
+        "ratu queen",
+        "libur to be on holiday",
+        "cermin mirror",
+        "bendera flag"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "bising noisy",
+        "panen harvest",
+        "penghuni resident, occupant, inhabitant",
+        "lowongan vacancy",
+        "bambu bamboo",
+        "warung small shop, food stall",
+        "ulasan review",
+        "kerupuk crackers (krupuk)",
+        "sambal chilli sauce (sambal)",
+        "rupiah rupiah"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 70 of 70 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "oranye orange",
+        "sama-sama you&#39;re welcome (same to you (the) )",
+        "sampai jumpa see you, goodbye",
+        "selamat malam good evening (good night)",
+        "selamat pagi good morning",
+        "selamat siang good day (around midday)",
+        "selamat sore good afternoon",
+        "selamat tinggal goodbye (to someone staying)",
+        "tanya to ask",
+        "terima kasih thank you"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "kacamata glasses, spectacles",
+        "semesta entire (alam semesta = universe)",
+        "mainan toy",
+        "ringan light",
+        "apalagi let alone",
+        "uji to test, to examine",
+        "ratu queen",
+        "libur to be on holiday",
+        "cermin mirror",
+        "bendera flag"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "bising noisy",
+        "panen harvest",
+        "penghuni resident, occupant, inhabitant",
+        "lowongan vacancy",
+        "bambu bamboo",
+        "warung small shop, food stall",
+        "ulasan review",
+        "kerupuk crackers (krupuk)",
+        "sambal chilli sauce (sambal)",
+        "rupiah rupiah"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0364",
+     "type:w:w1573",
+     "type:w:w2117",
+     "type:w:w0033",
+     "type:w:w1553",
+     "type:w:w1050",
+     "type:w:w0484",
+     "type:w:w1272",
+     "type:w:w2065",
+     "type:w:w0732",
+     "type:w:w0492",
+     "type:w:w0870",
+     "type:w:w0527",
+     "type:w:w0626",
+     "type:w:w0791",
+     "mc:w:w1975",
+     "mc:w:w1331",
+     "mc:w:w1264",
+     "mc:w:w0339",
+     "mc:w:w0714",
+     "mc:w:w0816",
+     "mc:w:w1189",
+     "mc:w:w1734",
+     "mc:w:w1344",
+     "mc:w:w0159",
+     "mc:w:w0345",
+     "mc:w:w1937",
+     "mc:w:w1331",
+     "type:w:w1017",
+     "type:w:w0045",
+     "type:w:w0674",
+     "type:w:w0852",
+     "type:w:w1552",
+     "type:w:w1043",
+     "type:w:w0279",
+     "type:w:w2019",
+     "type:w:w0316",
+     "type:w:w1293",
+     "type:w:w1234",
+     "type:w:w0752",
+     "type:w:w1017",
+     "type:w:w0045",
+     "type:w:w0279",
+     "type:s:s1745",
+     "mc:s:s0234",
+     "mc:s:s0166",
+     "mc:s:s0786",
+     "mc:s:s0753",
+     "mc:s:s0382",
+     "mc:s:s1494",
+     "mc:s:s2919",
+     "type:s:s1745",
+     "mc:s:s2919",
+     "mc:s:s1745"
+    ],
+    [
+     "mc:w:w1331",
+     "type:w:w1401",
+     "type:w:w0869",
+     "type:w:w2022",
+     "type:w:w0471",
+     "type:w:w1442",
+     "type:w:w1017",
+     "type:w:w0279",
+     "type:w:w1475",
+     "type:w:w0672",
+     "type:w:w0754",
+     "type:w:w0763",
+     "type:w:w1685",
+     "type:w:w0243",
+     "type:w:w0045",
+     "type:w:w2022",
+     "type:w:w1475",
+     "mc:w:w2022",
+     "mc:w:w1475",
+     "mc:w:w2022",
+     "mc:w:w2022",
+     "mc:w:w0558",
+     "mc:w:w1798",
+     "mc:w:w0027",
+     "mc:w:w0873",
+     "mc:w:w1185",
+     "mc:w:w1256",
+     "mc:w:w1042",
+     "mc:w:w2093",
+     "mc:w:w0665",
+     "mc:w:w0646",
+     "mc:w:w0234",
+     "mc:w:w0709",
+     "mc:w:w1042",
+     "mc:w:w0665",
+     "type:w:w1037",
+     "type:w:w1691",
+     "type:w:w0878",
+     "type:w:w1542",
+     "type:w:w0385",
+     "type:w:w0227",
+     "type:w:w1323",
+     "type:w:w1550",
+     "type:w:w0802",
+     "type:w:w0538",
+     "type:w:w1447",
+     "type:w:w1390",
+     "type:w:w1542",
+     "type:w:w1550",
+     "type:s:s1745",
+     "type:s:s1610",
+     "mc:s:s1223",
+     "mc:s:s1918",
+     "mc:s:s0947",
+     "mc:s:s0341",
+     "mc:s:s1553",
+     "mc:s:s2919",
+     "type:s:s1745",
+     "type:s:s1610",
+     "mc:s:s1223",
+     "mc:s:s1745",
+     "mc:s:s1610",
+     "mc:s:s1610"
+    ],
+    [
+     "type:w:w1542",
+     "type:w:w0763",
+     "type:w:w1275",
+     "type:w:w1031",
+     "type:w:w2022",
+     "type:w:w1475",
+     "type:w:w1629",
+     "type:w:w0641",
+     "type:w:w1760",
+     "type:w:w1644",
+     "type:w:w1550",
+     "type:w:w1056",
+     "mc:w:w1042",
+     "type:w:w0772",
+     "mc:w:w0665",
+     "type:w:w0763",
+     "type:w:w0641",
+     "mc:w:w0036",
+     "mc:w:w1084",
+     "mc:w:w0539",
+     "mc:w:w1168",
+     "mc:w:w0704",
+     "mc:w:w2006",
+     "mc:w:w1690",
+     "mc:w:w2050",
+     "mc:w:w0767",
+     "mc:w:w0637",
+     "mc:w:w1369",
+     "mc:w:w0730",
+     "mc:w:w1168",
+     "mc:w:w0704",
+     "mc:w:w0704",
+     "type:w:w0931",
+     "type:w:w0486",
+     "type:w:w0224",
+     "type:w:w0757",
+     "type:w:w0368",
+     "type:w:w0057",
+     "type:w:w0903",
+     "type:w:w1545",
+     "type:w:w0629",
+     "type:w:w0902",
+     "type:w:w0797",
+     "type:w:w2002",
+     "type:w:w0931",
+     "type:w:w0903",
+     "mc:w:w0903",
+     "type:s:s1745",
+     "type:s:s0044",
+     "mc:s:s2757",
+     "type:s:s1223",
+     "mc:s:s0468",
+     "mc:s:s0649",
+     "type:s:s1610",
+     "mc:s:s0494",
+     "type:s:s1745",
+     "type:s:s0044",
+     "type:s:s1223",
+     "type:s:s1610",
+     "mc:s:s1745",
+     "mc:s:s0044",
+     "mc:s:s1223",
+     "mc:s:s1610"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0364",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0364\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">enak</span><span class=\"rg\">delicious</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1\"><div class=\"st\" data-tl lang=\"id\">Mary adalah gadis yang <b>enak</b> diajak bicara.</div><div class=\"se\">Mary is a girl who is pleasant to talk with.</div></div><div class=\"sent\" data-sent=\"85\"><div class=\"st\" data-tl lang=\"id\">Minuman ini sangat <b>enak</b>.</div><div class=\"se\">This drink is very delicious.</div></div></div>"
+    },
+    {
+     "key": "w:w1573",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1573\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">bantal</span><span class=\"rg\">pillow</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"182\"><div class=\"st\" data-tl lang=\"id\">Bisakah bawakan saya <b>bantal</b> dan selimut, tolong?</div><div class=\"se\">Could you bring me a pillow and blanket, please?</div></div><div class=\"sent\" data-sent=\"1663\"><div class=\"st\" data-tl lang=\"id\">Berapa <b>bantal</b> yang Anda gunakan saat tidur?</div><div class=\"se\">How many pillows do you use when sleeping?</div></div></div>"
+    },
+    {
+     "key": "w:w2117",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w2117\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">apa-apa</span><span class=\"rg\">anything</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"414\"><div class=\"st\" data-tl lang=\"id\">Anda tidak perlu mengatakan <b>apa-apa</b>.</div><div class=\"se\">You don&#39;t have to say anything.</div></div><div class=\"sent\" data-sent=\"650\"><div class=\"st\" data-tl lang=\"id\">Tom tidak ingin minum <b>apa-apa</b>.</div><div class=\"se\">Tom doesn&#39;t want anything to drink.</div></div></div>"
+    },
+    {
+     "key": "w:w0033",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0033\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">baik</span><span class=\"rg\">good <span class=\"gx\">(well; fine)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"56\"><div class=\"st\" data-tl lang=\"id\">Kurang tidur tidak <b>baik</b> bagi kesehatan anda.</div><div class=\"se\">Lack of sleep is bad for your health.</div></div><div class=\"sent\" data-sent=\"87\"><div class=\"st\" data-tl lang=\"id\">Kedua orang tuanya <b>baik-baik</b> saja.</div><div class=\"se\">Both of his parents are well.</div></div></div>"
+    },
+    {
+     "key": "w:w1553",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1553\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">perlahan</span><span class=\"rg\">slowly</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"522\"><div class=\"st\" data-tl lang=\"id\">Tom melihat sekitar ruangan secara <b>perlahan</b>.</div><div class=\"se\">Tom slowly looked around the room.</div></div><div class=\"sent\" data-sent=\"525\"><div class=\"st\" data-tl lang=\"id\">Tom menaiki tangga secara <b>perlahan</b>.</div><div class=\"se\">Tom slowly walked up the stairs.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "c1da2e71396f91d2"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "6743c9c5af37eacb"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "53cb218d3d45b435"
+    },
+    "read": {
+     "n": 2,
+     "sha": "07e71869e4c43a0d"
+    },
+    "s": {
+     "n": 19,
+     "sha": "9714e44eea832b1b"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "da384136879a8f39"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.996667,
+     0.990769,
+     0.992
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 0.992,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.744
+   },
+   "items": {
+    "items": 180,
+    "right": 154
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "35737d29b083b6f4"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.2,
+     0.092308,
+     0.06
+    ],
+    "toGo": [
+     125,
+     221,
+     284
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.2,
+     "all": false
+    },
+    "eta": 125,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 31,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.05625
+   },
+   "todayFirst": "Session 21 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Hari Budi Start",
+   "today": [
+    "Session 21 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Hari Budi Start",
+    "Session 22 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Hari Budi Start",
+    "Session 23 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Hari Budi Start"
+   ],
+   "progress": {
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy A1 150 of 600 mastered sentences 1 · reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Still shaky satu jika menggunakan penting manusia panas berbeda adik enam ayam Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "oranye orange",
+        "sama-sama you&#39;re welcome (same to you (the) )",
+        "sampai jumpa see you, goodbye",
+        "selamat malam good evening (good night)",
+        "selamat pagi good morning",
+        "selamat siang good day (around midday)",
+        "selamat sore good afternoon",
+        "selamat tinggal goodbye (to someone staying)",
+        "tanya to ask",
+        "terima kasih thank you"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bilang to say, to tell (colloquial)",
+        "nggak not, no (colloquial tidak)",
+        "rahasia secret",
+        "berasal to come from, to be from, to originate from",
+        "video video",
+        "bintang star",
+        "menghentikan to stop (something)",
+        "keadaan condition, shape, state (situation)",
+        "jumlah total (sum)",
+        "agak rather, somewhat"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bunuh to kill",
+        "darah blood",
+        "menembak to shoot",
+        "senjata weapon",
+        "bom bomb",
+        "narkoba drugs (narcotics)",
+        "keju cheese",
+        "sudut corner (angle)",
+        "menjalani to live",
+        "sekadar just, only, simply"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "oranye orange",
+        "sama-sama you&#39;re welcome (same to you (the) )",
+        "sampai jumpa see you, goodbye",
+        "selamat malam good evening (good night)",
+        "selamat pagi good morning",
+        "selamat siang good day (around midday)",
+        "selamat sore good afternoon",
+        "selamat tinggal goodbye (to someone staying)",
+        "tanya to ask",
+        "terima kasih thank you"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bilang to say, to tell (colloquial)",
+        "nggak not, no (colloquial tidak)",
+        "rahasia secret",
+        "berasal to come from, to be from, to originate from",
+        "video video",
+        "bintang star",
+        "menghentikan to stop (something)",
+        "keadaan condition, shape, state (situation)",
+        "jumlah total (sum)",
+        "agak rather, somewhat"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "bunuh to kill",
+        "darah blood",
+        "menembak to shoot",
+        "senjata weapon",
+        "bom bomb",
+        "narkoba drugs (narcotics)",
+        "keju cheese",
+        "sudut corner (angle)",
+        "menjalani to live",
+        "sekadar just, only, simply"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0099",
+     "type:w:w0249",
+     "type:w:w0421",
+     "type:w:w0363",
+     "type:w:w0538",
+     "type:w:w0010",
+     "type:w:w0381",
+     "type:w:w0184",
+     "type:w:w0532",
+     "type:w:w0238",
+     "mc:w:w0576",
+     "type:w:w0230",
+     "mc:w:w0223",
+     "type:w:w1275",
+     "type:w:w0006",
+     "mc:w:w0223",
+     "mc:w:w0559",
+     "mc:w:w0334",
+     "mc:w:w0333",
+     "mc:w:w0339",
+     "mc:w:w0003",
+     "mc:w:w0013",
+     "mc:w:w0558",
+     "mc:w:w0119",
+     "mc:w:w0452",
+     "mc:w:w0588",
+     "mc:w:w0162",
+     "mc:w:w0164",
+     "type:w:w0146",
+     "type:w:w0350",
+     "type:w:w0581",
+     "type:w:w0042",
+     "type:w:w0495",
+     "type:w:w0404",
+     "type:w:w0330",
+     "type:w:w0520",
+     "type:w:w0027",
+     "type:w:w0007",
+     "type:w:w0357",
+     "type:w:w0319",
+     "mc:s:s0487",
+     "mc:s:s0481",
+     "mc:s:s1164",
+     "mc:s:s1490",
+     "mc:s:s2243",
+     "type:s:s2612",
+     "type:s:s1529",
+     "type:s:s0067",
+     "type:s:s2612",
+     "type:s:s1529",
+     "type:s:s0067",
+     "mc:s:s2612",
+     "mc:s:s1529",
+     "mc:s:s0067"
+    ],
+    [
+     "type:w:w0364",
+     "type:w:w0337",
+     "type:w:w0039",
+     "type:w:w0176",
+     "type:w:w0526",
+     "type:w:w0172",
+     "type:w:w1212",
+     "mc:w:w0223",
+     "type:w:w0413",
+     "type:w:w0261",
+     "type:w:w2002",
+     "type:w:w0462",
+     "type:w:w0539",
+     "type:w:w0502",
+     "type:w:w0245",
+     "mc:w:w0158",
+     "mc:w:w0021",
+     "mc:w:w0192",
+     "mc:w:w0255",
+     "mc:w:w0567",
+     "mc:w:w0458",
+     "mc:w:w0177",
+     "mc:w:w0536",
+     "mc:w:w0120",
+     "mc:w:w0522",
+     "mc:w:w0276",
+     "mc:w:w0311",
+     "mc:w:w0158",
+     "mc:w:w0458",
+     "mc:w:w0120",
+     "type:w:w0450",
+     "type:w:w0332",
+     "type:w:w0268",
+     "type:w:w0229",
+     "type:w:w0369",
+     "type:w:w0445",
+     "type:w:w0038",
+     "type:w:w0159",
+     "type:w:w0351",
+     "type:w:w0200",
+     "type:w:w0269",
+     "type:w:w0346",
+     "type:w:w0038",
+     "mc:s:s1877",
+     "type:s:s1529",
+     "type:s:s0067",
+     "mc:s:s2357",
+     "mc:s:s0228",
+     "mc:s:s1394",
+     "mc:s:s1570",
+     "type:s:s2612",
+     "type:s:s1529",
+     "type:s:s0067",
+     "mc:s:s1570",
+     "type:s:s2612",
+     "mc:s:s1529",
+     "mc:s:s0067",
+     "mc:s:s2612",
+     "mc:s:s1529"
+    ],
+    [
+     "mc:w:w0120",
+     "type:w:w0337",
+     "mc:w:w0158",
+     "type:w:w0345",
+     "type:w:w0117",
+     "type:w:w0540",
+     "type:w:w0288",
+     "type:w:w0067",
+     "type:w:w0193",
+     "type:w:w0213",
+     "type:w:w0132",
+     "type:w:w0150",
+     "mc:w:w0458",
+     "type:w:w0231",
+     "type:w:w0038",
+     "type:w:w0288",
+     "type:w:w0067",
+     "mc:w:w0266",
+     "mc:w:w0408",
+     "mc:w:w0102",
+     "mc:w:w0059",
+     "mc:w:w0058",
+     "mc:w:w0432",
+     "mc:w:w0114",
+     "mc:w:w0537",
+     "mc:w:w0547",
+     "mc:w:w0256",
+     "mc:w:w0340",
+     "mc:w:w0232",
+     "mc:w:w0547",
+     "mc:w:w0232",
+     "type:w:w0414",
+     "type:w:w0111",
+     "type:w:w0046",
+     "type:w:w0385",
+     "type:w:w0278",
+     "type:w:w0071",
+     "type:w:w0598",
+     "type:w:w0476",
+     "type:w:w0165",
+     "type:w:w0143",
+     "type:w:w1026",
+     "type:w:w0056",
+     "type:w:w0414",
+     "type:w:w0046",
+     "mc:s:s1570",
+     "type:s:s1529",
+     "mc:s:s1652",
+     "type:s:s2612",
+     "type:s:s0775",
+     "mc:s:s1954",
+     "type:s:s0067",
+     "mc:s:s1596",
+     "type:s:s1529",
+     "type:s:s2612",
+     "type:s:s0775",
+     "type:s:s0067",
+     "mc:s:s1529",
+     "mc:s:s2612",
+     "mc:s:s0775",
+     "mc:s:s0067"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0099",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0099\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">sekali</span><span class=\"rg\">once <span class=\"gx\">(very)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"4\"><div class=\"st\" data-tl lang=\"id\">Pesawat ini mampu menampung 40 orang penumpang <b>sekali</b> terbang.</div><div class=\"se\">This airplane is capable of carrying 40 passengers at a time.</div></div><div class=\"sent\" data-sent=\"106\"><div class=\"st\" data-tl lang=\"id\">Dia mengambil pelajaran piano seminggu <b>sekali</b>.</div><div class=\"se\">She takes piano lessons once a week.</div></div></div>"
+    },
+    {
+     "key": "w:w0249",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0249\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">pilih</span><span class=\"rg\">to choose</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"316\"><div class=\"st\" data-tl lang=\"id\">Dulu, wanita Amerika tidak punya hak <b>pilih</b>.</div><div class=\"se\">In the past, American women did not have the right to vote.</div></div><div class=\"sent\" data-sent=\"131\"><div class=\"st\" data-tl lang=\"id\">Dia <b>terpilih</b> menjadi anggota tim.</div><div class=\"se\">He was chosen to be a member of the team.</div></div></div>"
+    },
+    {
+     "key": "w:w0421",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0421\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">setuju</span><span class=\"rg\">to agree</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"92\"><div class=\"st\" data-tl lang=\"id\">Saya menganggap diamnya mereka sebagai tanda <b>setuju</b>.</div><div class=\"se\">I interpreted their silence as consent.</div></div><div class=\"sent\" data-sent=\"348\"><div class=\"st\" data-tl lang=\"id\">Saya <b>setuju</b> pada rencana ini.</div><div class=\"se\">I agree to this plan.</div></div></div>"
+    },
+    {
+     "key": "w:w0363",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0363\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">lagu</span><span class=\"rg\">song</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"340\"><div class=\"st\" data-tl lang=\"id\">Aku sangat suka <b>lagu</b> ini.</div><div class=\"se\">I love this song.</div></div><div class=\"sent\" data-sent=\"1600\"><div class=\"st\" data-tl lang=\"id\">Tom menutup pidatonya dengan <b>lagu</b> yang indah.</div><div class=\"se\">Tom closed his speech with a beautiful song.</div></div></div>"
+    },
+    {
+     "key": "w:w0538",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0538\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"id\">susu</span><span class=\"rg\">milk</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1078\"><div class=\"st\" data-tl lang=\"id\">Saya membeli <b>susu</b> dua botol.</div><div class=\"se\">I bought two bottles of milk.</div></div><div class=\"sent\" data-sent=\"1674\"><div class=\"st\" data-tl lang=\"id\">Tom menambahkan <b>susu</b> ke dalam tehnya.</div><div class=\"se\">Tom put milk in his tea.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "71cbf43efe88d828"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "f2e6ae9ef46c838b"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "daa8405779d18315"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 17,
+     "sha": "fb3ceab7bb5e5b11"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "ef711eb0ec4ffb13"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.2,
+     0.092308,
+     0.06
+    ],
+    "toGo": [
+     125,
+     221,
+     284
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.2,
+     "all": false
+    },
+    "eta": 125,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 31,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.05625
+   },
+   "items": {
+    "items": 174,
+    "right": 158
+   }
+  }
+ ]
+}

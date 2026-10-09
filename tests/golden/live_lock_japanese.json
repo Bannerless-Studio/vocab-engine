@@ -1,0 +1,3181 @@
+{
+ "lang": "japanese",
+ "packKey": "ja",
+ "words": 2000,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "ea57c939d5a48951"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "c19c74271403fc61"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     null,
+     551,
+     568
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": null,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "ひらがな and カタカナ first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 0% survive a trip: greet, order, count, buy Review skipped until a set is learned Learn ひらがな, sets 1–2 of 12 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 0% survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 0% survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 0% survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A1 Goal 1 of 3 0% survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 0 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 0% survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 30 learned Still shaky は だ か いい その みる Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 1 of 60 › Drill this set",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "の &#39;s (particle) , of ( (nominaliser) )",
+        "は as for (topic marker)",
+        "に to (particle) , at, in ( (indirect object marker) )",
+        "た (past tense ending)",
+        "を (direct object marker)",
+        "が (subject marker) (but)",
+        "ない not (negative ending)",
+        "と and (particle) (with; (quotation marker) )",
+        "だ is (copula, plain) , am, are",
+        "する to do"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ござる to be",
+        "もの show written person",
+        "パーティー party",
+        "そんざい show written existence",
+        "まもる show written to protect, to defend",
+        "いぜん show written before, formerly, ago",
+        "べつ show written another, different, separate",
+        "しあわせ show written happy",
+        "かなり quite",
+        "つかれる show written to be tired"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ち show written blood",
+        "ころす show written to kill, to put to death",
+        "だます to deceive, to cheat",
+        "しかも and yet",
+        "かっこう show written shape, figure, appearance",
+        "じこ show written self",
+        "のべる show written to express or state something",
+        "まつり show written festival",
+        "わかもの show written youngster",
+        "つくす show written to do to exhaustion"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 4 of 60",
+       "rows": 10,
+       "first": [
+        "なに show written what",
+        "ば if (conditional)",
+        "たい want to (do)",
+        "くる show written to come",
+        "これ this (one)",
+        "それ that (one, near you)",
+        "もの thing, object",
+        "かれ show written he, him (boyfriend)",
+        "まで until (particle) , as far as",
+        "やる to do (to give)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ござる to be",
+        "もの show written person",
+        "パーティー party",
+        "そんざい show written existence",
+        "まもる show written to protect, to defend",
+        "いぜん show written before, formerly, ago",
+        "べつ show written another, different, separate",
+        "しあわせ show written happy",
+        "かなり quite",
+        "つかれる show written to be tired"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ち show written blood",
+        "ころす show written to kill, to put to death",
+        "だます to deceive, to cheat",
+        "しかも and yet",
+        "かっこう show written shape, figure, appearance",
+        "じこ show written self",
+        "のべる show written to express or state something",
+        "まつり show written festival",
+        "わかもの show written youngster",
+        "つくす show written to do to exhaustion"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0002",
+     "mc:w:w0002",
+     "mc:w:w0005",
+     "mc:w:w0004",
+     "mc:w:w0007",
+     "mc:w:w0003",
+     "mc:w:w0006",
+     "mc:w:w0001",
+     "mc:w:w0003",
+     "mc:w:w0010",
+     "mc:w:w0009",
+     "mc:w:w0010",
+     "mc:w:w0008",
+     "mc:w:w0005",
+     "mc:w:w0004",
+     "mc:w:w0008",
+     "mc:w:w0007",
+     "mc:w:w0009",
+     "mc:w:w0001",
+     "mc:w:w0006",
+     "mc:w:w0003",
+     "mc:w:w0001",
+     "mc:w:w0001",
+     "type:w:w0003",
+     "type:w:w0002",
+     "type:w:w0009",
+     "type:w:w0006",
+     "type:w:w0005",
+     "type:w:w0008",
+     "type:w:w0007",
+     "type:w:w0001",
+     "type:w:w0004",
+     "type:w:w0010"
+    ],
+    [
+     "type:w:w0004",
+     "type:w:w0009",
+     "type:w:w0003",
+     "type:w:w0010",
+     "type:w:w0002",
+     "type:w:w0007",
+     "type:w:w0008",
+     "type:w:w0005",
+     "type:w:w0001",
+     "type:w:w0006",
+     "mc:w:w0013",
+     "mc:w:w0020",
+     "mc:w:w0014",
+     "mc:w:w0013",
+     "mc:w:w0015",
+     "mc:w:w0020",
+     "mc:w:w0018",
+     "mc:w:w0019",
+     "mc:w:w0017",
+     "mc:w:w0012",
+     "mc:w:w0019",
+     "mc:w:w0017",
+     "mc:w:w0011",
+     "mc:w:w0016",
+     "mc:w:w0011",
+     "mc:w:w0012",
+     "mc:w:w0018",
+     "mc:w:w0015",
+     "mc:w:w0014",
+     "mc:w:w0016",
+     "mc:w:w0018",
+     "mc:w:w0004",
+     "mc:w:w0010",
+     "mc:w:w0008",
+     "mc:w:w0009",
+     "mc:w:w0006",
+     "mc:w:w0001",
+     "type:w:w0018",
+     "type:w:w0020",
+     "type:w:w0016",
+     "type:w:w0017",
+     "type:w:w0015",
+     "type:w:w0012",
+     "type:w:w0011",
+     "mc:w:w0003",
+     "type:w:w0013",
+     "type:w:w0014",
+     "type:w:w0019",
+     "type:w:w0015"
+    ],
+    [
+     "type:w:w0003",
+     "type:w:w0012",
+     "type:w:w0015",
+     "type:w:w0017",
+     "type:w:w0011",
+     "type:w:w0002",
+     "type:w:w0019",
+     "type:w:w0014",
+     "type:w:w0020",
+     "type:w:w0013",
+     "type:w:w0016",
+     "type:w:w0007",
+     "type:w:w0005",
+     "type:w:w0018",
+     "type:w:w0001",
+     "mc:w:w0025",
+     "mc:w:w0025",
+     "mc:w:w0022",
+     "mc:w:w0027",
+     "mc:w:w0024",
+     "mc:w:w0026",
+     "mc:w:w0026",
+     "mc:w:w0022",
+     "mc:w:w0023",
+     "mc:w:w0021",
+     "mc:w:w0027",
+     "mc:w:w0021",
+     "mc:w:w0028",
+     "mc:w:w0024",
+     "mc:w:w0029",
+     "mc:w:w0030",
+     "mc:w:w0028",
+     "mc:w:w0030",
+     "mc:w:w0023",
+     "mc:w:w0029",
+     "mc:w:w0025",
+     "mc:w:w0021",
+     "mc:w:w0029",
+     "mc:w:w0005",
+     "mc:w:w0011",
+     "mc:w:w0017",
+     "mc:w:w0009",
+     "mc:w:w0006",
+     "mc:w:w0015",
+     "mc:w:w0013",
+     "mc:w:w0008",
+     "mc:w:w0007",
+     "mc:w:w0010",
+     "mc:w:w0004",
+     "mc:w:w0002",
+     "mc:w:w0009",
+     "mc:w:w0013",
+     "mc:w:w0002",
+     "type:w:w0025",
+     "type:w:w0004",
+     "type:w:w0009",
+     "mc:w:w0015",
+     "type:w:w0021",
+     "type:w:w0008",
+     "mc:w:w0001",
+     "type:w:w0006",
+     "mc:w:w0018",
+     "type:w:w0024",
+     "type:w:w0028",
+     "type:w:w0010",
+     "type:w:w0025",
+     "mc:w:w0025"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0002",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0002\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">は</span><span class=\"rg\">as for <span class=\"dim\">(topic marker)</span></span></div></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0156\" role=\"button\" tabindex=\"0\">がっこう</span>にすべてを<span class=\"tk\" data-tok=\"w0379\" role=\"button\" tabindex=\"0\">もと</span><b>めることはできない。</b><button type=\"button\" class=\"replay ssay\" data-sent=\"1\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"学校に全てを求めることはできない。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">One can&#39;t expect everything from schools.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0022\" role=\"button\" tabindex=\"0\">わたし</span>の<span class=\"tk\" data-tok=\"w0182\" role=\"button\" tabindex=\"0\">なまえ</span><b>はジャックです。</b><button type=\"button\" class=\"replay ssay\" data-sent=\"5\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"私の名前はジャックです。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">My name is Jack.</div></div></div>"
+    },
+    {
+     "key": "w:w0002",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0002\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">は</span><span class=\"rg\">as for <span class=\"dim\">(topic marker)</span></span></div></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0156\" role=\"button\" tabindex=\"0\">がっこう</span>にすべてを<span class=\"tk\" data-tok=\"w0379\" role=\"button\" tabindex=\"0\">もと</span><b>めることはできない。</b><button type=\"button\" class=\"replay ssay\" data-sent=\"1\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"学校に全てを求めることはできない。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">One can&#39;t expect everything from schools.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0022\" role=\"button\" tabindex=\"0\">わたし</span>の<span class=\"tk\" data-tok=\"w0182\" role=\"button\" tabindex=\"0\">なまえ</span><b>はジャックです。</b><button type=\"button\" class=\"replay ssay\" data-sent=\"5\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"私の名前はジャックです。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">My name is Jack.</div></div></div>"
+    },
+    {
+     "key": "w:w0005",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0005\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">を</span><span class=\"rg\">(direct object marker)</span></div></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0156\" role=\"button\" tabindex=\"0\">がっこう</span>にすべ<b>てを</b><span class=\"tk\" data-tok=\"w0379\" role=\"button\" tabindex=\"0\">もと</span>めることはできない。<button type=\"button\" class=\"replay ssay\" data-sent=\"1\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"学校に全てを求めることはできない。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">One can&#39;t expect everything from schools.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0335\" role=\"button\" tabindex=\"0\">くち</span><b>を</b><span class=\"tk\" data-tok=\"w0440\" role=\"button\" tabindex=\"0\">あ</span>けてください！<button type=\"button\" class=\"replay ssay\" data-sent=\"7\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"口を開けてください！\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Open your mouth!</div></div></div>"
+    },
+    {
+     "key": "w:w0004",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0004\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">た</span><span class=\"rg\">(past tense ending)</span></div></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0494\" role=\"button\" tabindex=\"0\">あら</span>ったあとひっぱって<span class=\"tk\" data-tok=\"w1706\" role=\"button\" tabindex=\"0\">かたち</span>にして。<button type=\"button\" class=\"replay ssay\" data-sent=\"3\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"洗ったあと引っ張って形にして。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Pull into shape after washing.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0517\" role=\"button\" tabindex=\"0\">けさ</span>テレビを<span class=\"tk\" data-tok=\"w0029\" role=\"button\" tabindex=\"0\">み</span>ました。<button type=\"button\" class=\"replay ssay\" data-sent=\"8\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"今朝テレビを見ました。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I watched TV this morning.</div></div></div>"
+    },
+    {
+     "key": "w:w0007",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0007\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">ない</span><span class=\"rg\">not <span class=\"dim\">(negative ending)</span></span></div></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0156\" role=\"button\" tabindex=\"0\">がっこう</span>にすべてを<span class=\"tk\" data-tok=\"w0379\" role=\"button\" tabindex=\"0\">もと</span>めることはできない。<button type=\"button\" class=\"replay ssay\" data-sent=\"1\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"学校に全てを求めることはできない。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">One can&#39;t expect everything from schools.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">そういう<span class=\"tk\" data-tok=\"w1405\" role=\"button\" tabindex=\"0\">いんしょう</span>を<span class=\"tk\" data-tok=\"w0310\" role=\"button\" tabindex=\"0\">あた</span>えるつもりではなかったんです。<button type=\"button\" class=\"replay ssay\" data-sent=\"12\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"そういう印象を与えるつもりではなかったんです。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I didn&#39;t mean to give you that impression.</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "ea57c939d5a48951"
+    },
+    "day": {
+     "n": 3,
+     "sha": "bc82743afa773e94"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "9cbe86b41a7fe6fc"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "e9fd564a50a70819"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "be34f914b5e7f215"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "10fbcbbb73c4e3f2"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     null,
+     551,
+     568
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": null,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "items": {
+    "items": 149,
+    "right": 136
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "91947b95701fe154"
+    },
+    "day": {
+     "n": 3,
+     "sha": "5ad936a7e3d1927c"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "2151c1ee9e136076"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "3c315cdaebad0292"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 10,
+     "sha": "02be95348a4ba2ad"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 3,
+     "sha": "d169bdca9d259118"
+    },
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 80,
+     "sha": "a67012fb58dbba6e"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.039143,
+     0.018252,
+     0.011946
+    ],
+    "toGo": [
+     null,
+     529,
+     550
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.039143,
+     "all": false
+    },
+    "eta": null,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.009981
+   },
+   "todayFirst": "Session 13 Goal 1 of 3 4% survive a trip: greet, order, count, buy Review Learn A1, set 9 Listen Recall Sentences Start",
+   "today": [
+    "Session 13 Goal 1 of 3 4% survive a trip: greet, order, count, buy Review Learn A1, set 9 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 4% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 5 of 47 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 5% survive a trip: greet, order, count, buy Review Learn A1, set 10 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, A1 In 6 sessions since your last visit +18 mastered +2 characters only Goal 1 of 3 4% survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 80 learned Still shaky た いる もの ほう Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 5% survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 100 learned Still shaky だけ もつ 〜日 ひ まだ 〜つ Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 9 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 9 of 60",
+       "rows": 10,
+       "first": [
+        "まえ show written front (before, ago)",
+        "〜じ show written o&#39;clock",
+        "みんな show written everyone, all",
+        "め show written eye",
+        "じかん show written time",
+        "はいる show written to enter, to go into",
+        "える show written to get, to obtain",
+        "ひつよう show written necessary, needed",
+        "たべる show written to eat",
+        "きょう show written today"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ござる to be",
+        "もの show written person",
+        "パーティー party",
+        "そんざい show written existence",
+        "まもる show written to protect, to defend",
+        "いぜん show written before, formerly, ago",
+        "べつ show written another, different, separate",
+        "しあわせ show written happy",
+        "かなり quite",
+        "つかれる show written to be tired"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ち show written blood",
+        "ころす show written to kill, to put to death",
+        "だます to deceive, to cheat",
+        "しかも and yet",
+        "かっこう show written shape, figure, appearance",
+        "じこ show written self",
+        "のべる show written to express or state something",
+        "まつり show written festival",
+        "わかもの show written youngster",
+        "つくす show written to do to exhaustion"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 11 of 60",
+       "rows": 10,
+       "first": [
+        "つくる show written to make",
+        "くるま show written car, vehicle, carriage",
+        "とる to take",
+        "よむ show written to read",
+        "すぎる to pass (to be too (much) )",
+        "〜ちゅう show written during (throughout)",
+        "すぐ soon, immediately, right away",
+        "あう show written to meet with, to see",
+        "ほか show written other, some other, another",
+        "つく to be attached (to arrive; to be turned on)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ござる to be",
+        "もの show written person",
+        "パーティー party",
+        "そんざい show written existence",
+        "まもる show written to protect, to defend",
+        "いぜん show written before, formerly, ago",
+        "べつ show written another, different, separate",
+        "しあわせ show written happy",
+        "かなり quite",
+        "つかれる show written to be tired"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ち show written blood",
+        "ころす show written to kill, to put to death",
+        "だます to deceive, to cheat",
+        "しかも and yet",
+        "かっこう show written shape, figure, appearance",
+        "じこ show written self",
+        "のべる show written to express or state something",
+        "まつり show written festival",
+        "わかもの show written youngster",
+        "つくす show written to do to exhaustion"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0012",
+     "mc:c:c0062",
+     "mc:c:c0071",
+     "mc:c:c0073",
+     "type:w:w0026",
+     "type:w:w0061",
+     "type:w:w0076",
+     "mc:w:w0069",
+     "type:w:w0074",
+     "type:w:w0049",
+     "mc:c:c0067",
+     "type:w:w0066",
+     "mc:c:c0060",
+     "type:w:w0037",
+     "type:w:w0019",
+     "type:w:w0004",
+     "type:w:w0031",
+     "type:w:w0073",
+     "mc:c:c0057",
+     "mc:c:c0072",
+     "type:w:w0074",
+     "mc:c:c0067",
+     "mc:c:c0060",
+     "type:w:w0037",
+     "type:w:w0004",
+     "mc:w:w0086",
+     "mc:w:w0084",
+     "mc:w:w0083",
+     "mc:w:w0089",
+     "mc:w:w0081",
+     "mc:w:w0088",
+     "mc:w:w0082",
+     "mc:w:w0089",
+     "mc:w:w0084",
+     "mc:w:w0087",
+     "mc:w:w0090",
+     "mc:w:w0081",
+     "mc:w:w0086",
+     "mc:w:w0090",
+     "mc:w:w0085",
+     "mc:w:w0083",
+     "mc:w:w0088",
+     "mc:w:w0087",
+     "mc:w:w0085",
+     "mc:w:w0082",
+     "mc:w:w0086",
+     "mc:w:w0083",
+     "mc:w:w0085",
+     "mc:w:w0020",
+     "mc:w:w0025",
+     "mc:w:w0067",
+     "mc:w:w0013",
+     "mc:w:w0023",
+     "mc:w:w0039",
+     "mc:w:w0040",
+     "mc:w:w0042",
+     "mc:w:w0036",
+     "mc:w:w0037",
+     "mc:w:w0032",
+     "mc:w:w0022",
+     "mc:w:w0037",
+     "mc:c:c0073",
+     "type:w:w0058",
+     "mc:c:c0069",
+     "mc:c:c0070",
+     "mc:c:c0060",
+     "type:w:w0057",
+     "mc:c:c0064",
+     "type:w:w0052",
+     "mc:w:w0076",
+     "type:w:w0027",
+     "type:w:w0056",
+     "type:w:w0042",
+     "mc:s:s1809",
+     "mc:s:s2671",
+     "mc:s:s1532",
+     "mc:s:s2120",
+     "mc:s:s2631",
+     "mc:s:s2421",
+     "mc:s:s0948",
+     "mc:s:s3251"
+    ],
+    [
+     "type:w:w0073",
+     "type:w:w0070",
+     "type:w:w0004",
+     "type:w:w0082",
+     "mc:w:w0083",
+     "mc:c:c0067",
+     "type:w:w0037",
+     "type:w:w0019",
+     "type:w:w0074",
+     "type:w:w0090",
+     "type:w:w0069",
+     "mc:w:w0086",
+     "mc:w:w0089",
+     "mc:w:w0088",
+     "mc:w:w0084",
+     "mc:c:c0060",
+     "mc:w:w0081",
+     "mc:w:w0085",
+     "type:w:w0049",
+     "mc:w:w0087",
+     "mc:w:w0083",
+     "mc:c:c0067",
+     "type:w:w0037",
+     "mc:w:w0086",
+     "mc:w:w0088",
+     "mc:c:c0060",
+     "mc:c:c0075",
+     "mc:c:c0076",
+     "mc:c:c0076",
+     "mc:c:c0079",
+     "mc:c:c0075",
+     "mc:c:c0082",
+     "mc:c:c0083",
+     "mc:c:c0074",
+     "mc:c:c0078",
+     "mc:c:c0083",
+     "mc:c:c0080",
+     "mc:c:c0077",
+     "mc:c:c0080",
+     "mc:c:c0074",
+     "mc:c:c0077",
+     "mc:c:c0081",
+     "mc:c:c0081",
+     "mc:c:c0079",
+     "mc:c:c0082",
+     "mc:c:c0078",
+     "mc:w:w0078",
+     "mc:w:w0083",
+     "mc:w:w0085",
+     "mc:w:w0086",
+     "mc:w:w0057",
+     "mc:w:w0041",
+     "mc:w:w0005",
+     "mc:w:w0070",
+     "mc:w:w0075",
+     "mc:w:w0030",
+     "mc:w:w0069",
+     "mc:w:w0077",
+     "mc:w:w0069",
+     "mc:w:w0077",
+     "type:w:w0030",
+     "type:w:w0066",
+     "type:w:w0058",
+     "type:w:w0015",
+     "mc:w:w0037",
+     "type:w:w0072",
+     "type:w:w0068",
+     "type:w:w0063",
+     "type:w:w0062",
+     "type:w:w0059",
+     "type:w:w0064",
+     "type:w:w0080",
+     "mc:w:w0037",
+     "type:w:w0072",
+     "type:w:w0080",
+     "mc:s:s2421",
+     "mc:s:s3119",
+     "mc:s:s2671",
+     "mc:s:s1532",
+     "mc:s:s1592",
+     "mc:s:s2636",
+     "mc:s:s0948",
+     "mc:s:s2901",
+     "mc:s:s2671",
+     "mc:s:s2901"
+    ],
+    [
+     "mc:w:w0060",
+     "type:w:w0072",
+     "mc:c:c0083",
+     "mc:w:w0077",
+     "mc:w:w0086",
+     "type:w:w0074",
+     "mc:w:w0069",
+     "mc:c:c0080",
+     "mc:c:c0060",
+     "mc:c:c0082",
+     "mc:w:w0083",
+     "type:w:w0004",
+     "type:w:w0080",
+     "mc:c:c0081",
+     "mc:c:c0074",
+     "type:w:w0037",
+     "mc:w:w0088",
+     "mc:w:w0085",
+     "mc:c:c0076",
+     "mc:c:c0067",
+     "type:w:w0074",
+     "mc:c:c0067",
+     "mc:w:w0096",
+     "mc:w:w0095",
+     "mc:w:w0099",
+     "mc:w:w0092",
+     "mc:w:w0094",
+     "mc:w:w0095",
+     "mc:w:w0096",
+     "mc:w:w0100",
+     "mc:w:w0100",
+     "mc:w:w0099",
+     "mc:w:w0092",
+     "mc:w:w0091",
+     "mc:w:w0091",
+     "mc:w:w0093",
+     "mc:w:w0097",
+     "mc:w:w0098",
+     "mc:w:w0098",
+     "mc:w:w0097",
+     "mc:w:w0093",
+     "mc:w:w0094",
+     "mc:w:w0095",
+     "mc:w:w0092",
+     "mc:w:w0098",
+     "mc:w:w0024",
+     "mc:w:w0062",
+     "mc:w:w0079",
+     "mc:w:w0055",
+     "mc:w:w0014",
+     "mc:w:w0053",
+     "mc:w:w0063",
+     "mc:w:w0043",
+     "mc:w:w0060",
+     "mc:w:w0071",
+     "mc:w:w0050",
+     "mc:w:w0001",
+     "mc:w:w0050",
+     "type:w:w0098",
+     "type:w:w0026",
+     "mc:c:c0078",
+     "mc:c:c0075",
+     "type:w:w0049",
+     "mc:w:w0037",
+     "type:w:w0071",
+     "mc:c:c0077",
+     "type:w:w0065",
+     "type:w:w0095",
+     "type:w:w0044",
+     "mc:c:c0079",
+     "mc:c:c0079",
+     "mc:c:c0079",
+     "mc:s:s0014",
+     "mc:s:s2901",
+     "mc:s:s2352",
+     "mc:s:s1744",
+     "mc:s:s2671",
+     "mc:s:s1448",
+     "mc:s:s3251",
+     "mc:s:s1532",
+     "mc:s:s0014",
+     "mc:s:s2901",
+     "mc:s:s1448",
+     "mc:s:s0014"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0012",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0012\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">も</span><span class=\"rg\">also <span class=\"dim\">(particle)</span>, too <span class=\"gx\">(even)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">そんなに<span class=\"tk\" data-tok=\"w1726\" role=\"button\" tabindex=\"0\">きんちょう</span><b>しなくてもいいですよ。</b><button type=\"button\" class=\"replay ssay\" data-sent=\"20\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"そんなに緊張しなくてもいいですよ。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">There&#39;s no need to be that tense.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">いくら<span class=\"tk\" data-tok=\"w0190\" role=\"button\" tabindex=\"0\">でんわ</span><b>をかけても</b><span class=\"tk\" data-tok=\"w1820\" role=\"button\" tabindex=\"0\">つう</span>じません。<button type=\"button\" class=\"replay ssay\" data-sent=\"26\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"いくら電話をかけても通じません。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">However often I phone I can&#39;t get through.</div></div></div>"
+    },
+    {
+     "key": "c:c0062",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0062\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">誰</span><span class=\"rp\">だれ</span><span class=\"rg\">who</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"ucue\" aria-label=\"漢字 3/6\"><span data-tl lang=\"ja\">漢字</span> ●●●○○○</div>"
+    },
+    {
+     "key": "c:c0071",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0071\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">聞く</span><span class=\"rp\">きく</span><span class=\"rg\">to hear, to listen</span></div></div><div class=\"ucue\" aria-label=\"漢字 3/6\"><span data-tl lang=\"ja\">漢字</span> ●●●○○○</div>"
+    },
+    {
+     "key": "c:c0073",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0073\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">出る</span><span class=\"rp\">でる</span><span class=\"rg\">to go out, to leave <span class=\"gx\">(to appear)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"ucue\" aria-label=\"漢字 3/6\"><span data-tl lang=\"ja\">漢字</span> ●●●○○○</div>"
+    },
+    {
+     "key": "w:w0026",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0026\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">人</span><span class=\"rg\">person, people</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"ucue\" aria-label=\"漢字 6/6\"><span data-tl lang=\"ja\">漢字</span> ●●●●●●</div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st hasruby\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0038\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">彼<rt>かれ</rt></ruby></span>は<span class=\"tk\" data-tok=\"w1661\" role=\"button\" tabindex=\"0\">こうしょう</span>させるには<span class=\"tk\" data-tok=\"w0113\" role=\"button\" tabindex=\"0\">て</span>づよい<b><span class=\"tk\" data-tok=\"w0026\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">人<rt>ひと</rt></ruby></span></b>です。<button type=\"button\" class=\"replay ssay\" data-sent=\"28\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"彼は交渉させるには手づよい人です。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">He is a right person who can drive a hard bargain.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st hasruby\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0034\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">来<rt>く</rt></ruby></span>る<b><span class=\"tk\" data-tok=\"w0026\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">人<rt>ひと</rt></ruby></span></b>は<span class=\"tk\" data-tok=\"w0062\" role=\"button\" tabindex=\"0\">だれ</span>でも<span class=\"tk\" data-tok=\"w1504\" role=\"button\" tabindex=\"0\">かんげい</span>されます。<button type=\"button\" class=\"replay ssay\" data-sent=\"87\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"来る人は誰でも歓迎されます。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Whoever comes will be welcome.</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "bb5c79962357ba72"
+    },
+    "day": {
+     "n": 3,
+     "sha": "4c9bb23239869085"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "c4325a683223660a"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "a182b19b10d84662"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 18,
+     "sha": "5e479654423a680c"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 3,
+     "sha": "75b3e4f08756bdf9"
+    },
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 100,
+     "sha": "70a48569044f9f94"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.051732,
+     0.023851,
+     0.015584
+    ],
+    "toGo": [
+     null,
+     522,
+     544
+    ],
+    "toGoTotal": 237,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.051732,
+     "all": false
+    },
+    "eta": null,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.011546
+   },
+   "items": {
+    "items": 250,
+    "right": 216
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "ea57c939d5a48951"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "6d0dd7568302f2d6"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.8,
+     0.584615,
+     0.285
+    ],
+    "toGo": [
+     null,
+     251,
+     331
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.8,
+     "all": false
+    },
+    "eta": null,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.2375
+   },
+   "todayFirst": "Session 1 Goal 1 of 3 80% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 1 of 47 Listen Recall Sentences Read 田中さんの一日 Start",
+   "today": [
+    "Session 1 Goal 1 of 3 80% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 1 of 47 Listen Recall Sentences Read 田中さんの一日 Start",
+    "Session 2 Goal 1 of 3 79% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 2 of 47 Listen Recall Sentences Read 田中さんの一日 Start",
+    "Session 3 Goal 1 of 3 79% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 3 of 47 Listen Recall Sentences Read 田中さんの一日 Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 1 of 3 80% survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 0 of 600 mastered characters only 0 of 448 · reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 1 of 3 79% survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 1 of 600 mastered characters only 0 of 448 · sentences 1 · reading 1 of 20 A2 350 learned Still shaky だ ため つき すべて もの どようび れんらく こうどう ふゆ はっきり Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "いただきます thank you for the food (said before eating)",
+        "おねがいします show written please",
+        "よろしくおねがいします show written nice to meet you (please treat me well)",
+        "じゅういちがつ show written November",
+        "じゅうにがつ show written December",
+        "ひるごはん show written lunch",
+        "ばんごはん show written dinner, evening meal",
+        "あさごはん show written breakfast",
+        "わたしたち show written we, us",
+        "たんじょうび show written birthday"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "てつだう show written to help",
+        "はる show written to stretch, to put up (to stick (on) )",
+        "ねんれい show written someone&#39;s age",
+        "ねがう show written to hope, to wish, to desire",
+        "さくら show written cherry tree",
+        "きょうりょく show written cooperation",
+        "あまい show written sweet, sugary, mellow",
+        "システム system",
+        "かなしい show written sad, sorrowful",
+        "たいおう show written dealing"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ち show written blood",
+        "ころす show written to kill, to put to death",
+        "だます to deceive, to cheat",
+        "しかも and yet",
+        "かっこう show written shape, figure, appearance",
+        "じこ show written self",
+        "のべる show written to express or state something",
+        "まつり show written festival",
+        "わかもの show written youngster",
+        "つくす show written to do to exhaustion"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "いただきます thank you for the food (said before eating)",
+        "おねがいします show written please",
+        "よろしくおねがいします show written nice to meet you (please treat me well)",
+        "じゅういちがつ show written November",
+        "じゅうにがつ show written December",
+        "ひるごはん show written lunch",
+        "ばんごはん show written dinner, evening meal",
+        "あさごはん show written breakfast",
+        "わたしたち show written we, us",
+        "たんじょうび show written birthday"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "てつだう show written to help",
+        "はる show written to stretch, to put up (to stick (on) )",
+        "ねんれい show written someone&#39;s age",
+        "ねがう show written to hope, to wish, to desire",
+        "さくら show written cherry tree",
+        "きょうりょく show written cooperation",
+        "あまい show written sweet, sugary, mellow",
+        "システム system",
+        "かなしい show written sad, sorrowful",
+        "たいおう show written dealing"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ち show written blood",
+        "ころす show written to kill, to put to death",
+        "だます to deceive, to cheat",
+        "しかも and yet",
+        "かっこう show written shape, figure, appearance",
+        "じこ show written self",
+        "のべる show written to express or state something",
+        "まつり show written festival",
+        "わかもの show written youngster",
+        "つくす show written to do to exhaustion"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0429",
+     "type:w:w0800",
+     "type:w:w0639",
+     "type:w:w0328",
+     "type:w:w0326",
+     "type:w:w0380",
+     "type:w:w0098",
+     "type:w:w0629",
+     "type:w:w0258",
+     "type:w:w0537",
+     "type:w:w0878",
+     "type:w:w0058",
+     "type:w:w0765",
+     "type:w:w0171",
+     "type:w:w0929",
+     "type:w:w0262",
+     "type:w:w0747",
+     "type:w:w0361",
+     "type:w:w0156",
+     "type:w:w0104",
+     "type:w:w0328",
+     "type:w:w0747",
+     "mc:c:c0023",
+     "mc:c:c0026",
+     "mc:c:c0022",
+     "mc:c:c0026",
+     "mc:c:c0022",
+     "mc:c:c0023",
+     "mc:c:c0022",
+     "mc:c:c0022",
+     "mc:c:c0022",
+     "mc:c:c0022",
+     "mc:w:w0122",
+     "mc:w:w0381",
+     "mc:w:w0522",
+     "mc:w:w0462",
+     "mc:w:w0565",
+     "mc:w:w0876",
+     "mc:w:w0757",
+     "mc:w:w0271",
+     "mc:w:w0084",
+     "mc:w:w0730",
+     "mc:w:w0050",
+     "mc:w:w0324",
+     "mc:w:w0462",
+     "mc:w:w0271",
+     "mc:w:w0084",
+     "type:w:w0789",
+     "type:w:w0875",
+     "type:w:w0223",
+     "type:w:w0515",
+     "type:w:w0726",
+     "type:w:w0912",
+     "type:w:w0868",
+     "type:w:w0707",
+     "type:w:w0280",
+     "type:w:w0812",
+     "type:w:w0776",
+     "type:w:w0456",
+     "type:w:w0707",
+     "mc:s:s2471",
+     "mc:s:s2189",
+     "mc:s:s2145",
+     "mc:s:s1210",
+     "mc:s:s2593",
+     "mc:s:s1311",
+     "mc:s:s0394",
+     "mc:s:s0753",
+     "mc:s:s0394"
+    ],
+    [
+     "type:w:w0239",
+     "mc:w:w0462",
+     "mc:w:w0084",
+     "type:w:w0743",
+     "type:w:w0747",
+     "type:w:w0314",
+     "mc:c:c0022",
+     "type:w:w0427",
+     "type:w:w0707",
+     "type:w:w0328",
+     "type:w:w0425",
+     "mc:w:w0271",
+     "type:w:w0043",
+     "type:w:w0889",
+     "type:w:w0085",
+     "mc:w:w0164",
+     "type:w:w0205",
+     "type:w:w0033",
+     "type:w:w0379",
+     "type:w:w0009",
+     "mc:w:w0462",
+     "type:w:w0743",
+     "type:w:w0747",
+     "mc:c:c0022",
+     "type:w:w0009",
+     "mc:w:w0747",
+     "mc:c:c0034",
+     "mc:c:c0027",
+     "mc:c:c0030",
+     "mc:c:c0034",
+     "mc:c:c0031",
+     "mc:c:c0031",
+     "mc:c:c0029",
+     "mc:c:c0027",
+     "mc:c:c0029",
+     "mc:c:c0030",
+     "mc:c:c0034",
+     "mc:c:c0034",
+     "mc:c:c0031",
+     "mc:c:c0031",
+     "mc:w:w0003",
+     "mc:w:w0287",
+     "mc:w:w0323",
+     "mc:w:w0417",
+     "mc:w:w0813",
+     "mc:w:w0836",
+     "mc:w:w0742",
+     "mc:w:w0608",
+     "mc:w:w0119",
+     "mc:w:w0391",
+     "mc:w:w0056",
+     "mc:w:w0457",
+     "type:w:w0021",
+     "type:w:w0362",
+     "type:w:w0014",
+     "type:w:w0863",
+     "type:w:w0762",
+     "type:w:w0101",
+     "type:w:w0167",
+     "type:w:w0689",
+     "type:w:w0882",
+     "type:w:w0305",
+     "type:w:w0316",
+     "type:w:w0507",
+     "type:w:w0167",
+     "type:w:w0305",
+     "mc:w:w0167",
+     "mc:s:s2512",
+     "mc:s:s0549",
+     "mc:s:s0582",
+     "mc:s:s0625",
+     "mc:s:s3222",
+     "mc:s:s2631",
+     "mc:s:s0394",
+     "mc:s:s0168",
+     "mc:s:s2631"
+    ],
+    [
+     "mc:c:c0022",
+     "type:w:w0042",
+     "type:w:w0934",
+     "type:w:w0167",
+     "type:w:w0023",
+     "type:w:w0743",
+     "type:w:w0305",
+     "type:w:w0039",
+     "type:w:w0005",
+     "type:w:w0480",
+     "mc:c:c0034",
+     "type:w:w0009",
+     "type:w:w0511",
+     "mc:c:c0031",
+     "type:w:w0138",
+     "type:w:w0617",
+     "mc:w:w0462",
+     "type:w:w0747",
+     "type:w:w0891",
+     "type:w:w0492",
+     "type:w:w0934",
+     "type:w:w0009",
+     "type:w:w0617",
+     "mc:c:c0048",
+     "mc:c:c0044",
+     "mc:c:c0049",
+     "mc:c:c0051",
+     "mc:c:c0054",
+     "mc:c:c0048",
+     "mc:c:c0056",
+     "mc:c:c0044",
+     "mc:c:c0055",
+     "mc:c:c0038",
+     "mc:c:c0055",
+     "mc:c:c0054",
+     "mc:c:c0051",
+     "mc:c:c0038",
+     "mc:c:c0056",
+     "mc:c:c0049",
+     "mc:c:c0048",
+     "mc:c:c0056",
+     "mc:w:w0348",
+     "mc:w:w0046",
+     "mc:w:w0475",
+     "mc:w:w0416",
+     "mc:w:w0478",
+     "mc:w:w0195",
+     "mc:w:w0653",
+     "mc:w:w0136",
+     "mc:w:w0298",
+     "mc:w:w0197",
+     "mc:w:w0371",
+     "mc:w:w0251",
+     "mc:w:w0416",
+     "mc:w:w0136",
+     "type:w:w0264",
+     "type:w:w0811",
+     "type:w:w0358",
+     "type:w:w0130",
+     "type:w:w0606",
+     "type:w:w0188",
+     "type:w:w0944",
+     "type:w:w0031",
+     "type:w:w0254",
+     "type:w:w0624",
+     "type:w:w0739",
+     "type:w:w0034",
+     "type:w:w0811",
+     "type:w:w0130",
+     "type:w:w0624",
+     "mc:w:w0624",
+     "mc:w:w0624",
+     "mc:s:s2538",
+     "mc:s:s1273",
+     "mc:s:s2487",
+     "mc:s:s2631",
+     "mc:s:s2809",
+     "mc:s:s2299",
+     "mc:s:s0496",
+     "mc:s:s1975",
+     "mc:s:s2631",
+     "mc:s:s2809",
+     "mc:s:s2631"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0429",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0429\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">まん<button type=\"button\" class=\"showw\" data-showw=\"万\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">ten thousand, myriad</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0937\" role=\"button\" tabindex=\"0\">うちゅう</span>にはなんびゃく<b><span class=\"tk\" data-tok=\"w0429\" role=\"button\" tabindex=\"0\">まん</span></b>もの<span class=\"tk\" data-tok=\"w0814\" role=\"button\" tabindex=\"0\">ほし</span>がある。<button type=\"button\" class=\"replay ssay\" data-sent=\"1557\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"宇宙には何百万もの星がある。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">There are millions of stars in the universe.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">それはいち<span class=\"tk\" data-tok=\"w0429\" role=\"button\" tabindex=\"0\">まん</span><span class=\"tk\" data-tok=\"w0183\" role=\"button\" tabindex=\"0\">えん</span>と<span class=\"tk\" data-tok=\"w1621\" role=\"button\" tabindex=\"0\">けいさん</span>されている。<button type=\"button\" class=\"replay ssay\" data-sent=\"1812\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"それは壱万円と計算されている。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">It is computed at 10,000 yen.</div></div></div>"
+    },
+    {
+     "key": "w:w0800",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0800\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">〜ばん<button type=\"button\" class=\"showw\" data-showw=\"〜番\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">number <span class=\"dim\">(in order)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w1983\" role=\"button\" tabindex=\"0\">きんきゅう</span>の<span class=\"tk\" data-tok=\"w0271\" role=\"button\" tabindex=\"0\">ばあい</span>には１１０<span class=\"tk\" data-tok=\"w0800\" role=\"button\" tabindex=\"0\">ばん</span>にお<span class=\"tk\" data-tok=\"w0190\" role=\"button\" tabindex=\"0\">でんわ</span>ください。<button type=\"button\" class=\"replay ssay\" data-sent=\"1421\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"緊急の場合には１１０番にお電話ください。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">In case of an emergency, dial 110.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">ボストンいきは<span class=\"tk\" data-tok=\"w0031\" role=\"button\" tabindex=\"0\">なん</span><span class=\"tk\" data-tok=\"w0800\" role=\"button\" tabindex=\"0\">ばん</span>ホームですか。<button type=\"button\" class=\"replay ssay\" data-sent=\"1663\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"ボストン行きは何番ホームですか。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">What track for Boston?</div></div></div>"
+    },
+    {
+     "key": "w:w0639",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0639\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">きょく<button type=\"button\" class=\"showw\" data-showw=\"曲\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">piece of music</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">これはあなたのお<span class=\"tk\" data-tok=\"w1867\" role=\"button\" tabindex=\"0\">きにい</span>りの<b><span class=\"tk\" data-tok=\"w0639\" role=\"button\" tabindex=\"0\">きょく</span></b>ですか。<button type=\"button\" class=\"replay ssay\" data-sent=\"1989\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"これはあなたのお気に入りの曲ですか。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Is this your favorite song?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0173\" role=\"button\" tabindex=\"0\">いちばん</span><span class=\"tk\" data-tok=\"w0055\" role=\"button\" tabindex=\"0\">す</span>きな<b><span class=\"tk\" data-tok=\"w0639\" role=\"button\" tabindex=\"0\">きょく</span></b>は<span class=\"tk\" data-tok=\"w0031\" role=\"button\" tabindex=\"0\">なん</span>ですか。<button type=\"button\" class=\"replay ssay\" data-sent=\"2520\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"一番好きな曲は何ですか。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">What&#39;s your favorite song?</div></div></div>"
+    },
+    {
+     "key": "w:w0328",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0328\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">おと<button type=\"button\" class=\"showw\" data-showw=\"音\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">sound</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0599\" role=\"button\" tabindex=\"0\">わたしたち</span>は<span class=\"tk\" data-tok=\"w0794\" role=\"button\" tabindex=\"0\">みみ</span>で<b><span class=\"tk\" data-tok=\"w0328\" role=\"button\" tabindex=\"0\">おと</span></b>を<span class=\"tk\" data-tok=\"w0071\" role=\"button\" tabindex=\"0\">き</span>きます。<button type=\"button\" class=\"replay ssay\" data-sent=\"966\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"私達は耳で音を聞きます。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">We hear with our ears.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0478\" role=\"button\" tabindex=\"0\">さかな</span>は<b><span class=\"tk\" data-tok=\"w0328\" role=\"button\" tabindex=\"0\">おと</span></b>が<span class=\"tk\" data-tok=\"w0745\" role=\"button\" tabindex=\"0\">き</span>こえると<span class=\"tk\" data-tok=\"w0030\" role=\"button\" tabindex=\"0\">おも</span>いますか。<button type=\"button\" class=\"replay ssay\" data-sent=\"1433\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"魚は音が聞こえると思いますか。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Do you think fish can hear?</div></div></div>"
+    },
+    {
+     "key": "w:w0326",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0326\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">からだ<button type=\"button\" class=\"showw\" data-showw=\"体\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">body <span class=\"gx\">(health)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">お<b><span class=\"tk\" data-tok=\"w0326\" role=\"button\" tabindex=\"0\">からだ</span></b>を<span class=\"tk\" data-tok=\"w0697\" role=\"button\" tabindex=\"0\">たいせつ</span>にしてくださいね。<button type=\"button\" class=\"replay ssay\" data-sent=\"744\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"お体を大切にして下さいね。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Please take care of yourself.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">もうお<b><span class=\"tk\" data-tok=\"w0326\" role=\"button\" tabindex=\"0\">からだ</span></b>はいいんですか。<button type=\"button\" class=\"replay ssay\" data-sent=\"1634\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"もうお体はいいんですか。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Are you all right now?</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "a4cf5e1ab53e5f30"
+    },
+    "day": {
+     "n": 3,
+     "sha": "a848914bb05a8c89"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "5565ea9896904154"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "539ce46534b46326"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 22,
+     "sha": "60e14e82cd94bf58"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "33554887d86e6746"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.788893,
+     0.574541,
+     0.280152
+    ],
+    "toGo": [
+     null,
+     253,
+     341
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.788893,
+     "all": false
+    },
+    "eta": null,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.23325
+   },
+   "items": {
+    "items": 228,
+    "right": 188
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "ea57c939d5a48951"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "14d16d79782aa5b3"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "toGo": [
+     null,
+     193,
+     43
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.8,
+     "all": false
+    },
+    "eta": null,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.5
+   },
+   "todayFirst": "Session 1 Goal 1 of 3 80% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 1 of 47 Listen Recall Sentences Read 一人で暮らして Start",
+   "today": [
+    "Session 1 Goal 1 of 3 80% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 1 of 47 Listen Recall Sentences Read 一人で暮らして Start",
+    "Session 2 Goal 1 of 3 80% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 2 of 47 Listen Recall Sentences Read 一人で暮らして Start",
+    "Session 3 Goal 1 of 3 79% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 3 of 47 Listen Recall Sentences Read 一人で暮らして Start"
+   ],
+   "progress": {
+    "start": "0 sessions, B1 Goal 1 of 3 80% survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered characters only 0 of 585 · reading 0 of 20 B1 0 of 700 mastered characters only 0 of 557 · reading 0 of 20 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 Goal 1 of 3 79% survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 1 of 600 mastered A2 1 of 700 mastered characters only 0 of 585 · sentences 2 · reading 0 of 20 B1 0 of 700 mastered characters only 0 of 557 · sentences 1 · reading 0 of 20 Still shaky そして びょういん しゅくだい けん あん Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "いただきます thank you for the food (said before eating)",
+        "おねがいします show written please",
+        "よろしくおねがいします show written nice to meet you (please treat me well)",
+        "じゅういちがつ show written November",
+        "じゅうにがつ show written December",
+        "ひるごはん show written lunch",
+        "ばんごはん show written dinner, evening meal",
+        "あさごはん show written breakfast",
+        "わたしたち show written we, us",
+        "たんじょうび show written birthday"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "いどう show written movement, moving (to move)",
+        "ふう way, manner, style",
+        "まかせる show written to leave something up to someone",
+        "ボタン button",
+        "ほご show written protection",
+        "いっしょうけんめい show written for dear life",
+        "レストラン restaurant",
+        "しょうり show written victory",
+        "じょうだん show written joke",
+        "さいふ show written wallet, coin purse, pocketbook"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "きゅうけい show written rest",
+        "ビデオ video",
+        "ゆうがた show written early evening",
+        "さくせい show written production (to create, to draw up, to prepare)",
+        "きかん show written organization, authority, institute",
+        "にちよう show written Sunday",
+        "いらい show written request",
+        "つまらない boring",
+        "しゅうせい show written revision (to revise)",
+        "しばしば every so often, frequently, repeatedly"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 70 of 70 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "いただきます thank you for the food (said before eating)",
+        "おねがいします show written please",
+        "よろしくおねがいします show written nice to meet you (please treat me well)",
+        "じゅういちがつ show written November",
+        "じゅうにがつ show written December",
+        "ひるごはん show written lunch",
+        "ばんごはん show written dinner, evening meal",
+        "あさごはん show written breakfast",
+        "わたしたち show written we, us",
+        "たんじょうび show written birthday"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "いどう show written movement, moving (to move)",
+        "ふう way, manner, style",
+        "まかせる show written to leave something up to someone",
+        "ボタン button",
+        "ほご show written protection",
+        "いっしょうけんめい show written for dear life",
+        "レストラン restaurant",
+        "しょうり show written victory",
+        "じょうだん show written joke",
+        "さいふ show written wallet, coin purse, pocketbook"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "きゅうけい show written rest",
+        "ビデオ video",
+        "ゆうがた show written early evening",
+        "さくせい show written production (to create, to draw up, to prepare)",
+        "きかん show written organization, authority, institute",
+        "にちよう show written Sunday",
+        "いらい show written request",
+        "つまらない boring",
+        "しゅうせい show written revision (to revise)",
+        "しばしば every so often, frequently, repeatedly"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0066",
+     "type:w:w0450",
+     "type:w:w0712",
+     "type:w:w0018",
+     "type:w:w1430",
+     "type:w:w1684",
+     "type:w:w1706",
+     "type:w:w0852",
+     "type:w:w0315",
+     "type:w:w1590",
+     "type:w:w0190",
+     "type:w:w0166",
+     "type:w:w1121",
+     "type:w:w1321",
+     "type:w:w0836",
+     "type:w:w0065",
+     "type:w:w0526",
+     "type:w:w0129",
+     "type:w:w0880",
+     "type:w:w0135",
+     "type:w:w0526",
+     "mc:c:c0026",
+     "mc:c:c0022",
+     "mc:c:c0026",
+     "mc:c:c0023",
+     "mc:c:c0022",
+     "mc:c:c0023",
+     "mc:w:w1022",
+     "mc:w:w1593",
+     "mc:w:w0085",
+     "mc:w:w1064",
+     "mc:w:w0569",
+     "mc:w:w0317",
+     "mc:w:w0931",
+     "mc:w:w0205",
+     "mc:w:w0192",
+     "mc:w:w1347",
+     "mc:w:w0393",
+     "mc:w:w0038",
+     "mc:w:w1593",
+     "mc:w:w0085",
+     "mc:w:w0205",
+     "type:w:w1509",
+     "type:w:w1545",
+     "type:w:w0009",
+     "type:w:w1461",
+     "type:w:w1081",
+     "type:w:w0733",
+     "type:w:w1542",
+     "type:w:w1327",
+     "type:w:w0691",
+     "type:w:w0240",
+     "type:w:w0875",
+     "type:w:w1005",
+     "type:w:w0691",
+     "mc:s:s1087",
+     "mc:s:s0645",
+     "mc:s:s2751",
+     "mc:s:s1351",
+     "mc:s:s2086",
+     "mc:s:s3162",
+     "mc:s:s2493",
+     "mc:s:s2244",
+     "mc:s:s2751",
+     "mc:s:s2244"
+    ],
+    [
+     "type:w:w1376",
+     "type:w:w1325",
+     "type:w:w0691",
+     "type:w:w1383",
+     "mc:w:w0205",
+     "type:w:w1596",
+     "type:w:w0100",
+     "type:w:w0036",
+     "type:w:w0690",
+     "mc:w:w1593",
+     "mc:w:w0085",
+     "type:w:w0233",
+     "type:w:w1562",
+     "type:w:w1371",
+     "type:w:w0365",
+     "type:w:w1687",
+     "type:w:w0526",
+     "type:w:w0410",
+     "type:w:w0021",
+     "type:w:w0104",
+     "mc:w:w0205",
+     "type:w:w1596",
+     "type:w:w0100",
+     "type:w:w0690",
+     "type:w:w0526",
+     "type:w:w0021",
+     "mc:c:c0029",
+     "mc:c:c0034",
+     "mc:c:c0031",
+     "mc:c:c0029",
+     "mc:c:c0031",
+     "mc:c:c0030",
+     "mc:c:c0027",
+     "mc:c:c0027",
+     "mc:c:c0030",
+     "mc:c:c0034",
+     "mc:c:c0034",
+     "mc:c:c0030",
+     "mc:w:w0341",
+     "mc:w:w0112",
+     "mc:w:w1560",
+     "mc:w:w0706",
+     "mc:w:w0494",
+     "mc:w:w1862",
+     "mc:w:w0605",
+     "mc:w:w1843",
+     "mc:w:w1894",
+     "mc:w:w0461",
+     "mc:w:w1248",
+     "mc:w:w1605",
+     "mc:w:w1560",
+     "mc:w:w1560",
+     "type:w:w1641",
+     "type:w:w1001",
+     "type:w:w0097",
+     "type:w:w0326",
+     "type:w:w0521",
+     "type:w:w0083",
+     "type:w:w0889",
+     "type:w:w0675",
+     "type:w:w1390",
+     "type:w:w1664",
+     "type:w:w1573",
+     "type:w:w0114",
+     "type:w:w1001",
+     "type:w:w0675",
+     "mc:s:s1655",
+     "mc:s:s2244",
+     "mc:s:s2302",
+     "mc:s:s2813",
+     "mc:s:s1068",
+     "mc:s:s2399",
+     "mc:s:s1180",
+     "mc:s:s2751",
+     "mc:s:s1180",
+     "mc:s:s2751"
+    ],
+    [
+     "type:w:w1596",
+     "type:w:w1001",
+     "mc:w:w1560",
+     "type:w:w0021",
+     "type:w:w0100",
+     "mc:c:c0034",
+     "mc:c:c0030",
+     "type:w:w1655",
+     "type:w:w0675",
+     "type:w:w0690",
+     "mc:w:w0205",
+     "type:w:w1701",
+     "type:w:w0891",
+     "type:w:w1694",
+     "type:w:w0263",
+     "type:w:w0643",
+     "type:w:w0124",
+     "type:w:w1372",
+     "type:w:w0526",
+     "type:w:w1504",
+     "mc:c:c0030",
+     "type:w:w0675",
+     "type:w:w0263",
+     "mc:w:w0675",
+     "mc:c:c0054",
+     "mc:c:c0055",
+     "mc:c:c0048",
+     "mc:c:c0056",
+     "mc:c:c0038",
+     "mc:c:c0049",
+     "mc:c:c0051",
+     "mc:c:c0055",
+     "mc:c:c0038",
+     "mc:c:c0044",
+     "mc:c:c0051",
+     "mc:c:c0048",
+     "mc:c:c0044",
+     "mc:c:c0049",
+     "mc:c:c0054",
+     "mc:c:c0056",
+     "mc:c:c0054",
+     "mc:w:w0936",
+     "mc:w:w0522",
+     "mc:w:w1201",
+     "mc:w:w1986",
+     "mc:w:w1237",
+     "mc:w:w0404",
+     "mc:w:w0446",
+     "mc:w:w0436",
+     "mc:w:w1190",
+     "mc:w:w0417",
+     "mc:w:w1272",
+     "mc:w:w1828",
+     "mc:w:w0522",
+     "mc:w:w1201",
+     "mc:w:w0436",
+     "type:w:w0885",
+     "type:w:w0919",
+     "type:w:w0332",
+     "type:w:w0512",
+     "type:w:w0017",
+     "type:w:w0061",
+     "type:w:w0602",
+     "type:w:w0965",
+     "type:w:w1320",
+     "type:w:w0156",
+     "type:w:w0006",
+     "type:w:w1618",
+     "mc:s:s1461",
+     "mc:s:s2751",
+     "mc:s:s1180",
+     "mc:s:s0831",
+     "mc:s:s2204",
+     "mc:s:s3099",
+     "mc:s:s0286",
+     "mc:s:s0778",
+     "mc:s:s0778"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0066",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0066\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">ここ</span><span class=\"rg\">here</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><b>ここから</b><span class=\"tk\" data-tok=\"w1745\" role=\"button\" tabindex=\"0\">とお</span>くまで<span class=\"tk\" data-tok=\"w0027\" role=\"button\" tabindex=\"0\">い</span>けるボートが<span class=\"tk\" data-tok=\"w0097\" role=\"button\" tabindex=\"0\">ほ</span>しいです。<button type=\"button\" class=\"replay ssay\" data-sent=\"2\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"ここから遠くまで行けるボートが欲しいです。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I want a boat that will take me far away from here.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0038\" role=\"button\" tabindex=\"0\">かれ</span>は<span class=\"tk\" data-tok=\"w0227\" role=\"button\" tabindex=\"0\">きのう</span><span class=\"tk\" data-tok=\"w1330\" role=\"button\" tabindex=\"0\">ぶじ</span><b>にここに</b><span class=\"tk\" data-tok=\"w0399\" role=\"button\" tabindex=\"0\">つ</span>きました。<button type=\"button\" class=\"replay ssay\" data-sent=\"436\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"彼は昨日無事にここに着きました。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">He arrived here safely yesterday.</div></div></div>"
+    },
+    {
+     "key": "w:w0450",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0450\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">ゆき<button type=\"button\" class=\"showw\" data-showw=\"雪\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">snow</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">ふじさんは<span class=\"tk\" data-tok=\"w0811\" role=\"button\" tabindex=\"0\">ふゆ</span>には<b><span class=\"tk\" data-tok=\"w0450\" role=\"button\" tabindex=\"0\">ゆき</span></b>でおおわれます。<button type=\"button\" class=\"replay ssay\" data-sent=\"222\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"富士山は冬には雪でおおわれます。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Mt. Fuji is covered with snow in winter.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0070\" role=\"button\" tabindex=\"0\">かのじょ</span>の<span class=\"tk\" data-tok=\"w1787\" role=\"button\" tabindex=\"0\">はだ</span>は<b><span class=\"tk\" data-tok=\"w0450\" role=\"button\" tabindex=\"0\">ゆき</span></b>のように<span class=\"tk\" data-tok=\"w0507\" role=\"button\" tabindex=\"0\">しろ</span>い。<button type=\"button\" class=\"replay ssay\" data-sent=\"344\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"彼女の肌は雪のように白い。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Her skin is as white as snow.</div></div></div>"
+    },
+    {
+     "key": "w:w0712",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0712\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">がわ<button type=\"button\" class=\"showw\" data-showw=\"側\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">side</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0222\" role=\"button\" tabindex=\"0\">とお</span>りのどちら<b><span class=\"tk\" data-tok=\"w0712\" role=\"button\" tabindex=\"0\">がわ</span></b>にも<span class=\"tk\" data-tok=\"w1912\" role=\"button\" tabindex=\"0\">ちゅうしゃ</span>できます。<button type=\"button\" class=\"replay ssay\" data-sent=\"697\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"通りのどちら側にも駐車できます。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">You can park on either side of the street.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">ドアの<b><span class=\"tk\" data-tok=\"w0712\" role=\"button\" tabindex=\"0\">そば</span></b>に<span class=\"tk\" data-tok=\"w0232\" role=\"button\" tabindex=\"0\">いぬ</span>がいます。<button type=\"button\" class=\"replay ssay\" data-sent=\"1768\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"ドアの側に犬がいます。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">There&#39;s a dog by the door.</div></div></div>"
+    },
+    {
+     "key": "w:w0018",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0018\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">ある</span><span class=\"rg\">to be, to exist <span class=\"dim\">(things)</span> <span class=\"gx\">(to have)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">この<span class=\"tk\" data-tok=\"w0278\" role=\"button\" tabindex=\"0\">ばしょ</span>には<span class=\"tk\" data-tok=\"w1229\" role=\"button\" tabindex=\"0\">ふしぎ</span>な<span class=\"tk\" data-tok=\"w1804\" role=\"button\" tabindex=\"0\">ふんいき</span><b>がある。</b><button type=\"button\" class=\"replay ssay\" data-sent=\"11\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"この場所には不思議な雰囲気がある。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">This place has a mysterious atmosphere.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">インドは<span class=\"tk\" data-tok=\"w0767\" role=\"button\" tabindex=\"0\">ちいき</span><span class=\"tk\" data-tok=\"w0415\" role=\"button\" tabindex=\"0\">しょく</span>ゆたかなしょく<span class=\"tk\" data-tok=\"w0866\" role=\"button\" tabindex=\"0\">ぶんか</span>があります。<button type=\"button\" class=\"replay ssay\" data-sent=\"24\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"インドは地域色豊かな食文化があります。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">India has a cuisine rich in regional flavour.</div></div></div>"
+    },
+    {
+     "key": "w:w1430",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1430\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">たいてい</span><span class=\"rg\">for the most part, mostly, generally</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><b>ものにはたいてい</b><span class=\"tk\" data-tok=\"w1812\" role=\"button\" tabindex=\"0\">おもて</span>と<span class=\"tk\" data-tok=\"w1387\" role=\"button\" tabindex=\"0\">うら</span>がある。<button type=\"button\" class=\"replay ssay\" data-sent=\"33\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"ものにはたいてい表と裏がある。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">With most things there&#39;s both what you see and what&#39;s behind it.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0246\" role=\"button\" tabindex=\"0\">ちち</span>は、<span class=\"tk\" data-tok=\"w0510\" role=\"button\" tabindex=\"0\">にちようび</span><b>はたいてい</b><span class=\"tk\" data-tok=\"w0056\" role=\"button\" tabindex=\"0\">いえ</span>にいます。<button type=\"button\" class=\"replay ssay\" data-sent=\"219\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"父は、日曜日はたいてい家にいます。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">My father is usually at home on Sundays.</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "e6043167ff709ada"
+    },
+    "day": {
+     "n": 3,
+     "sha": "65a78250d099d90b"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "2b8e8bf0fa4cf6ac"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d9b7082dcbad7ea0"
+    },
+    "read": {
+     "n": 2,
+     "sha": "07e71869e4c43a0d"
+    },
+    "s": {
+     "n": 20,
+     "sha": "f78d0f58d8f5303e"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "3f726c3368436a38"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.78978,
+     0.790347,
+     0.790526
+    ],
+    "toGo": [
+     null,
+     195,
+     49
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.78978,
+     "all": false
+    },
+    "eta": null,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.494
+   },
+   "items": {
+    "items": 218,
+    "right": 188
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "ea57c939d5a48951"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "756c4293d0788fcd"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.15,
+     0.069231,
+     0.045
+    ],
+    "toGo": [
+     null,
+     481,
+     498
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.15,
+     "all": false
+    },
+    "eta": null,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 30,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.0375
+   },
+   "todayFirst": "ひらがな and カタカナ first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 15% survive a trip: greet, order, count, buy Review Learn ひらがな, sets 1–2 of 12 A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Listen Recall Sentences Read 田中さんの一日",
+   "today": [
+    "Session 21 Goal 1 of 3 15% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 1 of 47 A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Listen Recall Sentences Read 田中さんの一日 Start",
+    "Session 22 Goal 1 of 3 15% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 2 of 47 A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Listen Recall Sentences Read 田中さんの一日 Start",
+    "Session 23 Goal 1 of 3 15% survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 3 of 47 A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Listen Recall Sentences Read 田中さんの一日 Start"
+   ],
+   "progress": {
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 15% survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 150 of 600 mastered characters only 0 of 448 · reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 15% survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 151 of 600 mastered characters only 0 of 448 · reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Still shaky たかい まいにち かぞく コーヒー うる Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "いただきます thank you for the food (said before eating)",
+        "おねがいします show written please",
+        "よろしくおねがいします show written nice to meet you (please treat me well)",
+        "じゅういちがつ show written November",
+        "じゅうにがつ show written December",
+        "ひるごはん show written lunch",
+        "ばんごはん show written dinner, evening meal",
+        "あさごはん show written breakfast",
+        "わたしたち show written we, us",
+        "たんじょうび show written birthday"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ござる to be",
+        "もの show written person",
+        "パーティー party",
+        "そんざい show written existence",
+        "まもる show written to protect, to defend",
+        "いぜん show written before, formerly, ago",
+        "べつ show written another, different, separate",
+        "しあわせ show written happy",
+        "かなり quite",
+        "つかれる show written to be tired"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ち show written blood",
+        "ころす show written to kill, to put to death",
+        "だます to deceive, to cheat",
+        "しかも and yet",
+        "かっこう show written shape, figure, appearance",
+        "じこ show written self",
+        "のべる show written to express or state something",
+        "まつり show written festival",
+        "わかもの show written youngster",
+        "つくす show written to do to exhaustion"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "いただきます thank you for the food (said before eating)",
+        "おねがいします show written please",
+        "よろしくおねがいします show written nice to meet you (please treat me well)",
+        "じゅういちがつ show written November",
+        "じゅうにがつ show written December",
+        "ひるごはん show written lunch",
+        "ばんごはん show written dinner, evening meal",
+        "あさごはん show written breakfast",
+        "わたしたち show written we, us",
+        "たんじょうび show written birthday"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ござる to be",
+        "もの show written person",
+        "パーティー party",
+        "そんざい show written existence",
+        "まもる show written to protect, to defend",
+        "いぜん show written before, formerly, ago",
+        "べつ show written another, different, separate",
+        "しあわせ show written happy",
+        "かなり quite",
+        "つかれる show written to be tired"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ち show written blood",
+        "ころす show written to kill, to put to death",
+        "だます to deceive, to cheat",
+        "しかも and yet",
+        "かっこう show written shape, figure, appearance",
+        "じこ show written self",
+        "のべる show written to express or state something",
+        "まつり show written festival",
+        "わかもの show written youngster",
+        "つくす show written to do to exhaustion"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0354",
+     "type:w:w0059",
+     "type:w:w0296",
+     "type:w:w0135",
+     "mc:w:w0597",
+     "type:w:w0110",
+     "type:w:w0517",
+     "type:w:w0144",
+     "type:w:w0506",
+     "type:w:w0014",
+     "type:w:w0010",
+     "type:w:w0241",
+     "type:w:w0160",
+     "type:w:w0203",
+     "type:w:w0050",
+     "type:w:w0321",
+     "type:w:w0115",
+     "type:w:w0480",
+     "type:w:w0274",
+     "type:w:w0008",
+     "type:w:w0160",
+     "mc:c:c0026",
+     "mc:c:c0026",
+     "mc:c:c0022",
+     "mc:c:c0023",
+     "mc:c:c0023",
+     "mc:c:c0022",
+     "mc:w:w0467",
+     "mc:w:w0431",
+     "mc:w:w0227",
+     "mc:w:w0127",
+     "mc:w:w0323",
+     "mc:w:w0535",
+     "mc:w:w0553",
+     "mc:w:w0328",
+     "mc:w:w0219",
+     "mc:w:w0539",
+     "mc:w:w0108",
+     "mc:w:w0234",
+     "type:w:w0320",
+     "type:w:w0028",
+     "type:w:w0391",
+     "type:w:w0043",
+     "type:w:w0357",
+     "type:w:w0190",
+     "type:w:w0004",
+     "type:w:w0428",
+     "type:w:w0422",
+     "type:w:w0538",
+     "type:w:w0145",
+     "type:w:w0573",
+     "type:w:w0538",
+     "mc:s:s0145",
+     "mc:s:s1688",
+     "mc:s:s2684",
+     "mc:s:s0074",
+     "mc:s:s2462",
+     "mc:s:s1814",
+     "mc:s:s1352",
+     "mc:s:s2551"
+    ],
+    [
+     "type:w:w0166",
+     "type:w:w0031",
+     "type:w:w0432",
+     "type:w:w0129",
+     "type:w:w0372",
+     "type:w:w0036",
+     "type:w:w0255",
+     "type:w:w0035",
+     "type:w:w0305",
+     "type:w:w0207",
+     "type:w:w0155",
+     "type:w:w0160",
+     "type:w:w0362",
+     "type:w:w0022",
+     "type:w:w0538",
+     "type:w:w0455",
+     "type:w:w0349",
+     "type:w:w0146",
+     "type:w:w0100",
+     "type:w:w0236",
+     "type:w:w0207",
+     "type:w:w0538",
+     "type:w:w0146",
+     "mc:c:c0034",
+     "mc:c:c0034",
+     "mc:c:c0029",
+     "mc:c:c0027",
+     "mc:c:c0027",
+     "mc:c:c0031",
+     "mc:c:c0031",
+     "mc:c:c0030",
+     "mc:c:c0030",
+     "mc:c:c0029",
+     "mc:c:c0030",
+     "mc:w:w0384",
+     "mc:w:w0555",
+     "mc:w:w0252",
+     "mc:w:w0600",
+     "mc:w:w0181",
+     "mc:w:w0052",
+     "mc:w:w0295",
+     "mc:w:w0489",
+     "mc:w:w0458",
+     "mc:w:w0306",
+     "mc:w:w0046",
+     "mc:w:w0152",
+     "mc:w:w0306",
+     "mc:w:w0046",
+     "type:w:w0058",
+     "type:w:w0016",
+     "type:w:w0096",
+     "type:w:w0189",
+     "type:w:w0530",
+     "type:w:w0039",
+     "type:w:w0483",
+     "type:w:w0301",
+     "type:w:w0317",
+     "type:w:w0427",
+     "type:w:w0087",
+     "type:w:w0226",
+     "type:w:w0016",
+     "type:w:w0226",
+     "mc:w:w0016",
+     "mc:s:s1843",
+     "mc:s:s0008",
+     "mc:s:s0229",
+     "mc:s:s2195",
+     "mc:s:s1909",
+     "mc:s:s2346",
+     "mc:s:s0712",
+     "mc:s:s0915"
+    ],
+    [
+     "type:w:w0525",
+     "type:w:w0438",
+     "type:w:w0253",
+     "type:w:w0448",
+     "type:w:w0226",
+     "type:w:w0589",
+     "type:w:w0193",
+     "type:w:w0324",
+     "type:w:w0411",
+     "type:w:w0538",
+     "mc:w:w0306",
+     "type:w:w0016",
+     "type:w:w0207",
+     "mc:c:c0030",
+     "type:w:w0146",
+     "type:w:w0134",
+     "type:w:w0223",
+     "mc:w:w0046",
+     "type:w:w0162",
+     "type:w:w0464",
+     "type:w:w0324",
+     "mc:w:w0306",
+     "mc:c:c0030",
+     "type:w:w0134",
+     "mc:c:c0056",
+     "mc:c:c0044",
+     "mc:c:c0056",
+     "mc:c:c0055",
+     "mc:c:c0054",
+     "mc:c:c0049",
+     "mc:c:c0051",
+     "mc:c:c0038",
+     "mc:c:c0048",
+     "mc:c:c0044",
+     "mc:c:c0055",
+     "mc:c:c0049",
+     "mc:c:c0048",
+     "mc:c:c0054",
+     "mc:c:c0051",
+     "mc:c:c0038",
+     "mc:c:c0054",
+     "mc:w:w0291",
+     "mc:w:w0282",
+     "mc:w:w0591",
+     "mc:w:w0478",
+     "mc:w:w0552",
+     "mc:w:w0585",
+     "mc:w:w0370",
+     "mc:w:w0084",
+     "mc:w:w0061",
+     "mc:w:w0266",
+     "mc:w:w0271",
+     "mc:w:w0449",
+     "mc:w:w0449",
+     "type:w:w0280",
+     "type:w:w0534",
+     "type:w:w0424",
+     "type:w:w0216",
+     "type:w:w0561",
+     "type:w:w0426",
+     "type:w:w0077",
+     "type:w:w0178",
+     "type:w:w0332",
+     "type:w:w0279",
+     "type:w:w0117",
+     "type:w:w0239",
+     "type:w:w0424",
+     "mc:s:s0206",
+     "mc:s:s0235",
+     "mc:s:s3201",
+     "mc:s:s2310",
+     "mc:s:s1381",
+     "mc:s:s0701",
+     "mc:s:s2263",
+     "mc:s:s3052"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0354",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0354\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">ふつう<button type=\"button\" class=\"showw\" data-showw=\"普通\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">ordinary, common</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0038\" role=\"button\" tabindex=\"0\">かれ</span>は<b><span class=\"tk\" data-tok=\"w0354\" role=\"button\" tabindex=\"0\">ふつう</span></b>の<span class=\"tk\" data-tok=\"w0184\" role=\"button\" tabindex=\"0\">にんげん</span>です。<button type=\"button\" class=\"replay ssay\" data-sent=\"400\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"彼は普通の人間です。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">He&#39;s just an ordinary man.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0038\" role=\"button\" tabindex=\"0\">かれ</span>はごく<b><span class=\"tk\" data-tok=\"w0354\" role=\"button\" tabindex=\"0\">ふつう</span></b>の<span class=\"tk\" data-tok=\"w0363\" role=\"button\" tabindex=\"0\">がくせい</span>です。<button type=\"button\" class=\"replay ssay\" data-sent=\"516\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"彼はごく普通の学生です。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">He&#39;s just an ordinary student.</div></div></div>"
+    },
+    {
+     "key": "w:w0059",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0059\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">〜さん</span><span class=\"rg\">Mr., Ms. <span class=\"dim\">(after a name)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0164\" role=\"button\" tabindex=\"0\">あした</span><span class=\"tk\" data-tok=\"w0022\" role=\"button\" tabindex=\"0\">わたし</span><b>はブラウンさんを</b><span class=\"tk\" data-tok=\"w1540\" role=\"button\" tabindex=\"0\">ほうもん</span>します。<button type=\"button\" class=\"replay ssay\" data-sent=\"123\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"明日私はブラウンさんを訪問します。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I&#39;ll call on Mr Brown tomorrow.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0921\" role=\"button\" tabindex=\"0\">べんごし</span><b>さんに</b><span class=\"tk\" data-tok=\"w0560\" role=\"button\" tabindex=\"0\">きんようび</span>に<span class=\"tk\" data-tok=\"w0108\" role=\"button\" tabindex=\"0\">あ</span>えますか。<button type=\"button\" class=\"replay ssay\" data-sent=\"197\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"弁護士さんに金曜日に会えますか。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Can the lawyer see me on Friday?</div></div></div>"
+    },
+    {
+     "key": "w:w0296",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0296\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">なし</span><span class=\"rg\">without, none</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w1732\" role=\"button\" tabindex=\"0\">こおり</span>は<span class=\"tk\" data-tok=\"w0128\" role=\"button\" tabindex=\"0\">い</span><b>れますか、なしでいいですか。</b><button type=\"button\" class=\"replay ssay\" data-sent=\"226\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"氷は入れますか、なしでいいですか。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Would you like ice?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><b>なしを</b><span class=\"tk\" data-tok=\"w0089\" role=\"button\" tabindex=\"0\">た</span>べています。<button type=\"button\" class=\"replay ssay\" data-sent=\"2400\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"なしを食べています。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I&#39;m eating a Japanese pear.</div></div></div>"
+    },
+    {
+     "key": "w:w0135",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0135\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">そこ</span><span class=\"rg\">there <span class=\"dim\">(near you)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0532\" role=\"button\" tabindex=\"0\">しゅうまつ</span><b>はそこにご</b><span class=\"tk\" data-tok=\"w1392\" role=\"button\" tabindex=\"0\">たいざい</span>の<span class=\"tk\" data-tok=\"w0347\" role=\"button\" tabindex=\"0\">よてい</span>ですか。<button type=\"button\" class=\"replay ssay\" data-sent=\"904\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"週末はそこにご滞在の予定ですか。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Are you staying there for the weekend?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0022\" role=\"button\" tabindex=\"0\">わたし</span><b>もそこで</b><span class=\"tk\" data-tok=\"w0350\" role=\"button\" tabindex=\"0\">お</span>ります。<button type=\"button\" class=\"replay ssay\" data-sent=\"978\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"私もそこで降ります。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I get off there, too.</div></div></div>"
+    },
+    {
+     "key": "w:w0597",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0597\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">ばんごはん<button type=\"button\" class=\"showw\" data-showw=\"晩ご飯\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">dinner, evening meal</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><b><span class=\"tk\" data-tok=\"w0597\" role=\"button\" tabindex=\"0\">ばんごはん</span></b>は<span class=\"tk\" data-tok=\"w0089\" role=\"button\" tabindex=\"0\">た</span>べましたか。<button type=\"button\" class=\"replay ssay\" data-sent=\"2495\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"晩ご飯は食べましたか。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Have you eaten dinner?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><b><span class=\"tk\" data-tok=\"w0597\" role=\"button\" tabindex=\"0\">ばんごはん</span></b>をご<span class=\"tk\" data-tok=\"w0158\" role=\"button\" tabindex=\"0\">いっしょ</span>にどうですか？<button type=\"button\" class=\"replay ssay\" data-sent=\"2984\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"晩ご飯をご一緒にどうですか？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Would you like to have dinner with me?</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "8b70ba88846e988a"
+    },
+    "day": {
+     "n": 3,
+     "sha": "5c249c1e6dd406a4"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "98778ffbce603446"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "9f3d054bda846141"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 24,
+     "sha": "8617b9852baf65d9"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "9c64401987ea982f"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.151,
+     0.069692,
+     0.0453
+    ],
+    "toGo": [
+     null,
+     481,
+     498
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.151,
+     "all": false
+    },
+    "eta": null,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 30,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.03775
+   },
+   "items": {
+    "items": 206,
+    "right": 188
+   }
+  },
+  {
+   "record": "placedChars",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "3d3051b191a8692f"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "6d0dd7568302f2d6"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.729436,
+     0.379088
+    ],
+    "toGo": [
+     0,
+     211,
+     268
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.729436,
+     "all": false
+    },
+    "eta": 211,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.35511
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 210 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read 田中さんの一日 Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 210 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read 田中さんの一日 Start",
+    "Session 2 Goal 2 of 3 ≈ 210 sessions daily life: directions, simple chat, short notices Review Learn 漢字 A2, set 31 of 59 Listen Recall Sentences Read 田中さんの一日 Start",
+    "Session 3 Goal 2 of 3 ≈ 210 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read 田中さんの一日 Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 210 sessions daily life: directions, simple chat, short notices ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 0 of 600 mastered characters only 0 of 448 · reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 210 sessions daily life: directions, simple chat, short notices ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 1 of 600 mastered characters only 0 of 448 · reading 1 of 20 A2 370 learned Still shaky は これ もの 〜つ かんけい はず かん つまり Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "いただきます thank you for the food (said before eating)",
+        "おねがいします show written please",
+        "よろしくおねがいします show written nice to meet you (please treat me well)",
+        "じゅういちがつ show written November",
+        "じゅうにがつ show written December",
+        "ひるごはん show written lunch",
+        "ばんごはん show written dinner, evening meal",
+        "あさごはん show written breakfast",
+        "わたしたち show written we, us",
+        "たんじょうび show written birthday"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "てつだう show written to help",
+        "はる show written to stretch, to put up (to stick (on) )",
+        "ねんれい show written someone&#39;s age",
+        "ねがう show written to hope, to wish, to desire",
+        "さくら show written cherry tree",
+        "きょうりょく show written cooperation",
+        "あまい show written sweet, sugary, mellow",
+        "システム system",
+        "かなしい show written sad, sorrowful",
+        "たいおう show written dealing"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ち show written blood",
+        "ころす show written to kill, to put to death",
+        "だます to deceive, to cheat",
+        "しかも and yet",
+        "かっこう show written shape, figure, appearance",
+        "じこ show written self",
+        "のべる show written to express or state something",
+        "まつり show written festival",
+        "わかもの show written youngster",
+        "つくす show written to do to exhaustion"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "いただきます thank you for the food (said before eating)",
+        "おねがいします show written please",
+        "よろしくおねがいします show written nice to meet you (please treat me well)",
+        "じゅういちがつ show written November",
+        "じゅうにがつ show written December",
+        "ひるごはん show written lunch",
+        "ばんごはん show written dinner, evening meal",
+        "あさごはん show written breakfast",
+        "わたしたち show written we, us",
+        "たんじょうび show written birthday"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 38 of 70",
+       "rows": 10,
+       "first": [
+        "なおす show written to fix, to repair",
+        "みぎ show written right",
+        "いしき show written consciousness",
+        "おもい show written thought (feeling, emotion, sentiment)",
+        "かくす show written to hide, to conceal",
+        "たいよう show written sun",
+        "やっと finally, at last, at length",
+        "ふだん show written usual case, everyday, informal",
+        "テニス tennis",
+        "かわり show written substitute, substitution"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "ち show written blood",
+        "ころす show written to kill, to put to death",
+        "だます to deceive, to cheat",
+        "しかも and yet",
+        "かっこう show written shape, figure, appearance",
+        "じこ show written self",
+        "のべる show written to express or state something",
+        "まつり show written festival",
+        "わかもの show written youngster",
+        "つくす show written to do to exhaustion"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0193",
+     "type:w:w0283",
+     "type:w:w0130",
+     "type:w:w0603",
+     "type:w:w0047",
+     "type:w:w0635",
+     "type:w:w0922",
+     "type:w:w0923",
+     "type:w:w0917",
+     "type:w:w0008",
+     "type:w:w0468",
+     "type:w:w0240",
+     "type:w:w0939",
+     "type:w:w0244",
+     "type:w:w0169",
+     "type:w:w0224",
+     "type:w:w0041",
+     "type:w:w0234",
+     "type:w:w0122",
+     "type:w:w0519",
+     "mc:w:w0959",
+     "mc:w:w0954",
+     "mc:w:w0931",
+     "mc:w:w0959",
+     "mc:w:w0956",
+     "mc:w:w0954",
+     "mc:w:w0962",
+     "mc:w:w0957",
+     "mc:w:w0956",
+     "mc:w:w0960",
+     "mc:w:w0958",
+     "mc:w:w0953",
+     "mc:w:w0953",
+     "mc:w:w0958",
+     "mc:w:w0960",
+     "mc:w:w0962",
+     "mc:w:w0931",
+     "mc:w:w0955",
+     "mc:w:w0957",
+     "mc:w:w0955",
+     "mc:w:w0956",
+     "mc:w:w0953",
+     "mc:w:w0315",
+     "mc:w:w0012",
+     "mc:w:w0472",
+     "mc:w:w0829",
+     "mc:w:w0372",
+     "mc:w:w0207",
+     "mc:w:w0443",
+     "mc:w:w0776",
+     "mc:w:w0316",
+     "mc:w:w0462",
+     "mc:w:w0264",
+     "mc:w:w0750",
+     "mc:w:w0207",
+     "mc:w:w0316",
+     "type:w:w0627",
+     "type:w:w0100",
+     "type:w:w0275",
+     "type:w:w0760",
+     "type:w:w0085",
+     "type:w:w0747",
+     "type:w:w0858",
+     "type:w:w0442",
+     "type:w:w0037",
+     "type:w:w0040",
+     "type:w:w0889",
+     "type:w:w0010",
+     "type:w:w0275",
+     "type:w:w0747",
+     "type:w:w0037",
+     "mc:w:w0747",
+     "mc:w:w0037",
+     "mc:w:w0747",
+     "mc:s:s2459",
+     "mc:s:s0199",
+     "mc:s:s1511",
+     "mc:s:s1128",
+     "mc:s:s2338",
+     "mc:s:s2988",
+     "mc:s:s2931",
+     "mc:s:s3223",
+     "mc:s:s0199",
+     "mc:s:s2338"
+    ],
+    [
+     "type:w:w0851",
+     "type:w:w0854",
+     "mc:w:w0953",
+     "type:w:w0688",
+     "type:w:w0752",
+     "mc:w:w0316",
+     "type:w:w0353",
+     "type:w:w0033",
+     "type:w:w0139",
+     "type:w:w0630",
+     "type:w:w0421",
+     "type:w:w0093",
+     "type:w:w0747",
+     "type:w:w0275",
+     "type:w:w0138",
+     "type:w:w0674",
+     "mc:w:w0207",
+     "mc:w:w0956",
+     "type:w:w0037",
+     "type:w:w0246",
+     "type:w:w0688",
+     "type:w:w0747",
+     "type:w:w0037",
+     "mc:w:w0747",
+     "mc:c:c0953",
+     "mc:c:c0931",
+     "mc:c:c0958",
+     "mc:c:c0962",
+     "mc:c:c0962",
+     "mc:c:c0931",
+     "mc:c:c0952",
+     "mc:c:c0954",
+     "mc:c:c0954",
+     "mc:c:c0953",
+     "mc:c:c0960",
+     "mc:c:c0952",
+     "mc:c:c0956",
+     "mc:c:c0960",
+     "mc:c:c0955",
+     "mc:c:c0957",
+     "mc:c:c0958",
+     "mc:c:c0955",
+     "mc:c:c0956",
+     "mc:c:c0957",
+     "mc:c:c0953",
+     "mc:c:c0952",
+     "mc:w:w0127",
+     "mc:w:w0208",
+     "mc:w:w0578",
+     "mc:w:w0409",
+     "mc:w:w0596",
+     "mc:w:w0842",
+     "mc:w:w0678",
+     "mc:w:w0876",
+     "mc:w:w0507",
+     "mc:w:w0526",
+     "mc:w:w0720",
+     "mc:w:w0539",
+     "mc:w:w0578",
+     "mc:w:w0507",
+     "type:w:w0512",
+     "type:w:w0011",
+     "type:w:w0332",
+     "type:w:w0378",
+     "type:w:w0253",
+     "type:w:w0642",
+     "type:w:w0076",
+     "type:w:w0815",
+     "type:w:w0887",
+     "type:w:w0864",
+     "type:w:w0257",
+     "type:w:w0816",
+     "mc:s:s1621",
+     "mc:s:s2044",
+     "mc:s:s2027",
+     "mc:s:s1796",
+     "mc:s:s0627",
+     "mc:s:s0005",
+     "mc:s:s0199",
+     "mc:s:s2338"
+    ],
+    [
+     "type:w:w0925",
+     "type:w:w0608",
+     "type:w:w0098",
+     "type:w:w0336",
+     "mc:c:c0952",
+     "mc:w:w0507",
+     "type:w:w0843",
+     "type:w:w0136",
+     "mc:w:w0578",
+     "type:w:w0111",
+     "type:w:w0182",
+     "type:w:w0463",
+     "type:w:w0747",
+     "type:w:w0037",
+     "type:w:w0126",
+     "mc:c:c0953",
+     "type:w:w0148",
+     "type:w:w0697",
+     "type:w:w0688",
+     "type:w:w0199",
+     "type:w:w0098",
+     "type:w:w0037",
+     "mc:w:w0098",
+     "mc:w:w0965",
+     "mc:w:w0974",
+     "mc:w:w0970",
+     "mc:w:w0969",
+     "mc:w:w0967",
+     "mc:w:w0967",
+     "mc:w:w0963",
+     "mc:w:w0961",
+     "mc:w:w0970",
+     "mc:w:w0971",
+     "mc:w:w0969",
+     "mc:w:w0971",
+     "mc:w:w0965",
+     "mc:w:w0974",
+     "mc:w:w0968",
+     "mc:w:w0968",
+     "mc:w:w0963",
+     "mc:w:w0973",
+     "mc:w:w0973",
+     "mc:w:w0961",
+     "mc:w:w0973",
+     "mc:w:w0905",
+     "mc:w:w0439",
+     "mc:w:w0397",
+     "mc:w:w0502",
+     "mc:w:w0280",
+     "mc:w:w0062",
+     "mc:w:w0213",
+     "mc:w:w0356",
+     "mc:w:w0896",
+     "mc:w:w0859",
+     "mc:w:w0368",
+     "mc:w:w0030",
+     "mc:w:w0280",
+     "mc:w:w0213",
+     "mc:w:w0859",
+     "mc:w:w0280",
+     "type:w:w0743",
+     "type:w:w0895",
+     "type:w:w1375",
+     "type:w:w0670",
+     "type:w:w0835",
+     "type:w:w0036",
+     "type:w:w0002",
+     "type:w:w0464",
+     "type:w:w0780",
+     "type:w:w0115",
+     "type:w:w0101",
+     "type:w:w0035",
+     "type:w:w0002",
+     "type:w:w0035",
+     "mc:s:s3285",
+     "mc:s:s0504",
+     "mc:s:s0100",
+     "mc:s:s0520",
+     "mc:s:s2886",
+     "mc:s:s2881",
+     "mc:s:s2403",
+     "mc:s:s3066",
+     "mc:s:s3285",
+     "mc:s:s0520",
+     "mc:s:s3066"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0193",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0193\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">かかる</span><span class=\"rg\">to take time or money, to cost, to require</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0881\" role=\"button\" tabindex=\"0\">たび</span>はおよそ５<span class=\"tk\" data-tok=\"w0196\" role=\"button\" tabindex=\"0\">じかん</span><b>くらいかかるでしょう。</b><button type=\"button\" class=\"replay ssay\" data-sent=\"69\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"旅はおよそ５時間くらいかかるでしょう。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">The trip will take some five hours.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0528\" role=\"button\" tabindex=\"0\">らいねん</span>はお<span class=\"tk\" data-tok=\"w0084\" role=\"button\" tabindex=\"0\">め</span>にかかれるでしょう。<button type=\"button\" class=\"replay ssay\" data-sent=\"81\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"来年はお目にかかれるでしょう。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I&#39;ll be able to see you next year.</div></div></div>"
+    },
+    {
+     "key": "w:w0283",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0283\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">はは<button type=\"button\" class=\"showw\" data-showw=\"母\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">mother</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><b><span class=\"tk\" data-tok=\"w0283\" role=\"button\" tabindex=\"0\">はは</span></b>は<span class=\"tk\" data-tok=\"w0420\" role=\"button\" tabindex=\"0\">りょうり</span>が<span class=\"tk\" data-tok=\"w0475\" role=\"button\" tabindex=\"0\">じょうず</span>です。<button type=\"button\" class=\"replay ssay\" data-sent=\"183\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"母は料理が上手です。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">My mother cooks well.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><b><span class=\"tk\" data-tok=\"w0283\" role=\"button\" tabindex=\"0\">はは</span></b>は<span class=\"tk\" data-tok=\"w1174\" role=\"button\" tabindex=\"0\">かいもの</span>に<span class=\"tk\" data-tok=\"w0027\" role=\"button\" tabindex=\"0\">い</span>きましたね。<button type=\"button\" class=\"replay ssay\" data-sent=\"184\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"母は買い物に行きましたね。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">My mother went shopping, didn&#39;t she?</div></div></div>"
+    },
+    {
+     "key": "w:w0130",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0130\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">つき<button type=\"button\" class=\"showw\" data-showw=\"月\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">moon <span class=\"gx\">(month)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0980\" role=\"button\" tabindex=\"0\">たいよう</span>は<b><span class=\"tk\" data-tok=\"w0130\" role=\"button\" tabindex=\"0\">つき</span></b>より<span class=\"tk\" data-tok=\"w0264\" role=\"button\" tabindex=\"0\">おお</span>きいのです。<button type=\"button\" class=\"replay ssay\" data-sent=\"745\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"太陽は月より大きいのです。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">The sun is larger than the moon.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0595\" role=\"button\" tabindex=\"0\">じゅうにがつ</span>は<span class=\"tk\" data-tok=\"w0057\" role=\"button\" tabindex=\"0\">いち</span><span class=\"tk\" data-tok=\"w0054\" role=\"button\" tabindex=\"0\">ねん</span>の<span class=\"tk\" data-tok=\"w0309\" role=\"button\" tabindex=\"0\">さいご</span>の<b><span class=\"tk\" data-tok=\"w0130\" role=\"button\" tabindex=\"0\">つき</span></b>です。<button type=\"button\" class=\"replay ssay\" data-sent=\"901\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"十二月は一年の最後の月です。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">December is the last month of the year.</div></div></div>"
+    },
+    {
+     "key": "w:w0603",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0603\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">いぜん<button type=\"button\" class=\"showw\" data-showw=\"以前\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">before, formerly, ago</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0070\" role=\"button\" tabindex=\"0\">かのじょ</span>は<b><span class=\"tk\" data-tok=\"w0603\" role=\"button\" tabindex=\"0\">いぜん</span></b><span class=\"tk\" data-tok=\"w0218\" role=\"button\" tabindex=\"0\">えいが</span>スターだったと<span class=\"tk\" data-tok=\"w0030\" role=\"button\" tabindex=\"0\">おも</span>われていました。<button type=\"button\" class=\"replay ssay\" data-sent=\"304\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"彼女は以前映画スターだったと思われていました。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">She was believed to have been a film star before.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\">きょうとは<b><span class=\"tk\" data-tok=\"w0603\" role=\"button\" tabindex=\"0\">いぜん</span></b>にほんのしゅとでした。<button type=\"button\" class=\"replay ssay\" data-sent=\"1430\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"京都は以前日本の首都でした。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Kyoto was the former capital of Japan.</div></div></div>"
+    },
+    {
+     "key": "w:w0047",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0047\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ja\">あなた</span><span class=\"rg\">you</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><b>あなたからさまざまなことを</b><span class=\"tk\" data-tok=\"w0658\" role=\"button\" tabindex=\"0\">まな</span>びました。<button type=\"button\" class=\"replay ssay\" data-sent=\"10\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"あなたからさまざまなことを学びました。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I learned a lot from you.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"ja\"><span class=\"tk\" data-tok=\"w0186\" role=\"button\" tabindex=\"0\">ともだち</span><b>はあなたのことをなんて</b><span class=\"tk\" data-tok=\"w0220\" role=\"button\" tabindex=\"0\">よ</span>ぶのですか。<button type=\"button\" class=\"replay ssay\" data-sent=\"102\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"友達はあなたのことをなんて呼ぶのですか。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">What do your friends call you?</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "8d47b34bf2956b15"
+    },
+    "day": {
+     "n": 3,
+     "sha": "8958faf84057b598"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "8076c2402facdf1d"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "539ce46534b46326"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 22,
+     "sha": "299de80796357caf"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "7b38755a2d43c07d"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 970,
+     "sha": "e7b01314dab6e5ba"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.985333,
+     0.721208,
+     0.37514
+    ],
+    "toGo": [
+     0,
+     213,
+     270
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.721208,
+     "all": false
+    },
+    "eta": 213,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.35161
+   },
+   "items": {
+    "items": 249,
+    "right": 216
+   }
+  }
+ ]
+}

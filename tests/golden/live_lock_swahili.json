@@ -1,0 +1,2473 @@
+{
+ "lang": "swahili",
+ "packKey": "sw",
+ "words": 2000,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "c19c74271403fc61"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     167,
+     279,
+     334
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": 167,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy A1 0 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy A1 30 learned Still shaky katika amba- kuweza kutoka Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 1 of 60 › Drill this set",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "-a of (-a: wa, ya, cha, za...)",
+        "na and, with",
+        "kwa with, by, for, to",
+        "kuwa to be, to become",
+        "ni is, are, am (copula)",
+        "katika in, at, among",
+        "huyo that, those (just mentioned)",
+        "huyu this, these",
+        "kwenye at, in, on, to",
+        "-ake his, her, its"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "binafsi personal, self",
+        "kupanga to plan, to arrange, to set up",
+        "kuanzia to start at some place, to emanate",
+        "kesi case (n/n)",
+        "kufaa to be suitable or useful",
+        "bahati luck, fortune (n/n)",
+        "maalum special, distinguished",
+        "risasi bullet (n/n)",
+        "mgombea candidate (m/wa)",
+        "kuharibu to destroy, to ruin, to damage"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "kuua to kill",
+        "mauaji murder, killing, massacre (ji/ma)",
+        "bomu bomb (ji/ma)",
+        "damu blood (n/n)",
+        "mlipuko explosion, detonation (m/mi)",
+        "silaha weapon (n/n)",
+        "bunduki gun (n/n)",
+        "kijinsia gender-related, gender-based",
+        "kulipuka to explode, to burst",
+        "kimapenzi romantic"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 4 of 60",
+       "rows": 10,
+       "first": [
+        "-ote all, whole (-ote)",
+        "mtandao network (internet (m/mi) )",
+        "-kubwa big, large (great)",
+        "kusema to say, to speak",
+        "kutoa to give, to take out",
+        "sana very, a lot",
+        "au or",
+        "-enye having, with (-enye)",
+        "lakini but",
+        "kuna there is, there are"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "binafsi personal, self",
+        "kupanga to plan, to arrange, to set up",
+        "kuanzia to start at some place, to emanate",
+        "kesi case (n/n)",
+        "kufaa to be suitable or useful",
+        "bahati luck, fortune (n/n)",
+        "maalum special, distinguished",
+        "risasi bullet (n/n)",
+        "mgombea candidate (m/wa)",
+        "kuharibu to destroy, to ruin, to damage"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "kuua to kill",
+        "mauaji murder, killing, massacre (ji/ma)",
+        "bomu bomb (ji/ma)",
+        "damu blood (n/n)",
+        "mlipuko explosion, detonation (m/mi)",
+        "silaha weapon (n/n)",
+        "bunduki gun (n/n)",
+        "kijinsia gender-related, gender-based",
+        "kulipuka to explode, to burst",
+        "kimapenzi romantic"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0001",
+     "mc:w:w0003",
+     "mc:w:w0001",
+     "mc:w:w0006",
+     "mc:w:w0002",
+     "mc:w:w0009",
+     "mc:w:w0005",
+     "mc:w:w0004",
+     "mc:w:w0010",
+     "mc:w:w0003",
+     "mc:w:w0002",
+     "mc:w:w0007",
+     "mc:w:w0006",
+     "mc:w:w0007",
+     "mc:w:w0008",
+     "mc:w:w0004",
+     "mc:w:w0005",
+     "mc:w:w0008",
+     "mc:w:w0009",
+     "mc:w:w0010",
+     "mc:w:w0009",
+     "mc:w:w0004",
+     "mc:w:w0009"
+    ],
+    [
+     "type:w:w0010",
+     "mc:w:w0008",
+     "mc:w:w0002",
+     "mc:w:w0006",
+     "mc:w:w0001",
+     "mc:w:w0005",
+     "type:w:w0007",
+     "mc:w:w0004",
+     "mc:w:w0009",
+     "mc:w:w0003",
+     "mc:w:w0013",
+     "mc:w:w0012",
+     "mc:w:w0019",
+     "mc:w:w0013",
+     "mc:w:w0012",
+     "mc:w:w0020",
+     "mc:w:w0038",
+     "mc:w:w0014",
+     "mc:w:w0020",
+     "mc:w:w0015",
+     "mc:w:w0017",
+     "mc:w:w0017",
+     "mc:w:w0011",
+     "mc:w:w0014",
+     "mc:w:w0018",
+     "mc:w:w0011",
+     "mc:w:w0015",
+     "mc:w:w0018",
+     "mc:w:w0019",
+     "mc:w:w0038",
+     "mc:w:w0015",
+     "mc:w:w0007",
+     "mc:w:w0010",
+     "type:w:w0008",
+     "type:w:w0002",
+     "type:w:w0001",
+     "type:w:w0005",
+     "type:w:w0009",
+     "type:w:w0006",
+     "type:w:w0004",
+     "type:w:w0003"
+    ],
+    [
+     "mc:w:w0020",
+     "mc:w:w0012",
+     "mc:w:w0004",
+     "mc:w:w0013",
+     "type:w:w0017",
+     "mc:w:w0014",
+     "mc:w:w0015",
+     "type:w:w0009",
+     "mc:w:w0019",
+     "mc:w:w0018",
+     "type:w:w0011",
+     "type:w:w0007",
+     "type:w:w0038",
+     "type:w:w0010",
+     "mc:w:w0003",
+     "type:w:w0011",
+     "mc:w:w0029",
+     "mc:w:w0027",
+     "mc:w:w0022",
+     "mc:w:w0016",
+     "mc:w:w0030",
+     "mc:w:w0022",
+     "mc:w:w0024",
+     "mc:w:w0027",
+     "mc:w:w0024",
+     "mc:w:w0016",
+     "mc:w:w0021",
+     "mc:w:w0023",
+     "mc:w:w0025",
+     "mc:w:w0023",
+     "mc:w:w0030",
+     "mc:w:w0026",
+     "mc:w:w0026",
+     "mc:w:w0029",
+     "mc:w:w0025",
+     "mc:w:w0021",
+     "mc:w:w0029",
+     "mc:w:w0005",
+     "mc:w:w0038",
+     "mc:w:w0011",
+     "mc:w:w0008",
+     "mc:w:w0009",
+     "mc:w:w0006",
+     "mc:w:w0017",
+     "mc:w:w0001",
+     "mc:w:w0002",
+     "mc:w:w0006",
+     "type:w:w0015",
+     "type:w:w0019",
+     "type:w:w0014",
+     "type:w:w0013",
+     "type:w:w0004",
+     "type:w:w0018",
+     "type:w:w0020",
+     "type:w:w0012",
+     "type:w:w0015"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">-a</span><span class=\"rg\">of <span class=\"dim\">(-a: wa, ya, cha, za...)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"3\"><div class=\"st\" data-tl lang=\"sw\">Nimesikia kuwa hamli mboga <b>za</b> majani kwenu. Mnasema kuwa ni chakula <b>cha</b> wanyama.</div><div class=\"se\">I&#39;ve heard that you don&#39;t eat green leafy vegetables. You say that it is food for animals.</div></div><div class=\"sent\" data-sent=\"8\"><div class=\"st\" data-tl lang=\"sw\">Unieleze habari zote <b>za</b> safari uliyosafiri.</div><div class=\"se\">Tell me all about the trip you&#39;ve made.</div></div></div>"
+    },
+    {
+     "key": "w:w0003",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0003\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">kwa</span><span class=\"rg\">with, by, for, to</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"45\"><div class=\"st\" data-tl lang=\"sw\"><b>Kwa</b> sasa, Burj Khalifa ni jengo refu zaidi duniani.</div><div class=\"se\">Burj Khalifa is currently the tallest skyscraper in the world.</div></div><div class=\"sent\" data-sent=\"55\"><div class=\"st\" data-tl lang=\"sw\">Daraja liko wazi <b>kwa</b> trafiki.</div><div class=\"se\">The bridge is open to traffic.</div></div></div>"
+    },
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">-a</span><span class=\"rg\">of <span class=\"dim\">(-a: wa, ya, cha, za...)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"3\"><div class=\"st\" data-tl lang=\"sw\">Nimesikia kuwa hamli mboga <b>za</b> majani kwenu. Mnasema kuwa ni chakula <b>cha</b> wanyama.</div><div class=\"se\">I&#39;ve heard that you don&#39;t eat green leafy vegetables. You say that it is food for animals.</div></div><div class=\"sent\" data-sent=\"8\"><div class=\"st\" data-tl lang=\"sw\">Unieleze habari zote <b>za</b> safari uliyosafiri.</div><div class=\"se\">Tell me all about the trip you&#39;ve made.</div></div></div>"
+    },
+    {
+     "key": "w:w0006",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0006\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">katika</span><span class=\"rg\">in, at, among</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"32\"><div class=\"st\" data-tl lang=\"sw\">Nina simu <b>katika</b> chumba changu.</div><div class=\"se\">I have a telephone in my room.</div></div><div class=\"sent\" data-sent=\"43\"><div class=\"st\" data-tl lang=\"sw\">Kuna visiwa <b>katika</b> bahari.</div><div class=\"se\">There are islands in the sea.</div></div></div>"
+    },
+    {
+     "key": "w:w0002",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0002\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">na</span><span class=\"rg\">and, with</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"56\"><div class=\"st\" data-tl lang=\"sw\">Wakati wa mkutano <b>na</b> waandishi wa habari, Rais alizungumza kuhusu uhusiano wa nje.</div><div class=\"se\">During the press conference, the President touched on foreign relations.</div></div><div class=\"sent\" data-sent=\"57\"><div class=\"st\" data-tl lang=\"sw\">Nilikutana <b>na</b> Naomi nilipokuwa nikirudi nyumbani <b>na</b> tukawa na mazungumzo.</div><div class=\"se\">I met Naomi on my way home and we had a chat.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "225d43388b6edc6d"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "60ce72f59b11d9bd"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "07a1357703a47aba"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "be34f914b5e7f215"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "f1c4c078df48efdc"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.009333,
+     0.004308,
+     0.0028
+    ],
+    "toGo": [
+     165,
+     277,
+     331
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.009333,
+     "all": false
+    },
+    "eta": 165,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.002625
+   },
+   "items": {
+    "items": 120,
+    "right": 112
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "day": {
+     "n": 3,
+     "sha": "038f57cfb987d4d5"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "5f66f5d5d5763dc0"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "abd3df54f2d95a77"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 19,
+     "sha": "3a14e40dfdf8926f"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 3,
+     "sha": "e3f9f0c08da51372"
+    },
+    "showPron": false,
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 120,
+     "sha": "d5771c5c994c99d1"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.054,
+     0.025308,
+     0.016533
+    ],
+    "toGo": [
+     153,
+     264,
+     318
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.054,
+     "all": false
+    },
+    "eta": 153,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.016542
+   },
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "today": [
+    "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, A1 In 6 sessions since your last visit +13 mastered Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy A1 120 learned Still shaky kuweza kusema sehemu kuanza mji kuonekana taarifa nini mkono suala Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy A1 150 learned Still shaky kuandika mtoto kuonekana kupitia blogu kabisa maandamano kuja kupa polisi dunia chama Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 13 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 13 of 60",
+       "rows": 10,
+       "first": [
+        "ndani inside (ndani ya: in, inside)",
+        "bila without",
+        "maoni opinion, comment (ji/ma)",
+        "sheria law (n/n)",
+        "kura vote, ballot (n/n)",
+        "kabisa completely, entirely, absolutely",
+        "ajili sake (kwa ajili ya: for, because of) (n/n)",
+        "saa hour (clock, watch; o&#39;clock (n/n) )",
+        "siyo no, it is not",
+        "kuita to call"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "binafsi personal, self",
+        "kupanga to plan, to arrange, to set up",
+        "kuanzia to start at some place, to emanate",
+        "kesi case (n/n)",
+        "kufaa to be suitable or useful",
+        "bahati luck, fortune (n/n)",
+        "maalum special, distinguished",
+        "risasi bullet (n/n)",
+        "mgombea candidate (m/wa)",
+        "kuharibu to destroy, to ruin, to damage"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "kuua to kill",
+        "mauaji murder, killing, massacre (ji/ma)",
+        "bomu bomb (ji/ma)",
+        "damu blood (n/n)",
+        "mlipuko explosion, detonation (m/mi)",
+        "silaha weapon (n/n)",
+        "bunduki gun (n/n)",
+        "kijinsia gender-related, gender-based",
+        "kulipuka to explode, to burst",
+        "kimapenzi romantic"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 16 of 60",
+       "rows": 10,
+       "first": [
+        "leo today",
+        "kadhaa several",
+        "hatua step, stage (measure, action (n/n) )",
+        "kabla before (kabla ya)",
+        "mwanafunzi student, pupil (m/wa)",
+        "tatu three",
+        "mnamo in, on (a date) (around (a time) )",
+        "muhimu important",
+        "video video (n/n)",
+        "kweli truly, really (true)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "binafsi personal, self",
+        "kupanga to plan, to arrange, to set up",
+        "kuanzia to start at some place, to emanate",
+        "kesi case (n/n)",
+        "kufaa to be suitable or useful",
+        "bahati luck, fortune (n/n)",
+        "maalum special, distinguished",
+        "risasi bullet (n/n)",
+        "mgombea candidate (m/wa)",
+        "kuharibu to destroy, to ruin, to damage"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "kuua to kill",
+        "mauaji murder, killing, massacre (ji/ma)",
+        "bomu bomb (ji/ma)",
+        "damu blood (n/n)",
+        "mlipuko explosion, detonation (m/mi)",
+        "silaha weapon (n/n)",
+        "bunduki gun (n/n)",
+        "kijinsia gender-related, gender-based",
+        "kulipuka to explode, to burst",
+        "kimapenzi romantic"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0089",
+     "type:w:w0032",
+     "type:w:w0114",
+     "mc:w:w0105",
+     "type:w:w0079",
+     "mc:w:w0119",
+     "type:w:w0061",
+     "type:w:w0015",
+     "type:w:w0109",
+     "type:w:w0085",
+     "mc:w:w0076",
+     "type:w:w0129",
+     "type:w:w0075",
+     "type:w:w0102",
+     "type:w:w0112",
+     "type:w:w0109",
+     "mc:w:w0076",
+     "type:w:w0075",
+     "type:w:w0102",
+     "mc:w:w0109",
+     "mc:w:w0126",
+     "mc:w:w0128",
+     "mc:w:w0126",
+     "mc:w:w0086",
+     "mc:w:w0121",
+     "mc:w:w0127",
+     "mc:w:w0086",
+     "mc:w:w0128",
+     "mc:w:w0122",
+     "mc:w:w0127",
+     "mc:w:w0123",
+     "mc:w:w0124",
+     "mc:w:w0125",
+     "mc:w:w0120",
+     "mc:w:w0120",
+     "mc:w:w0122",
+     "mc:w:w0125",
+     "mc:w:w0123",
+     "mc:w:w0124",
+     "mc:w:w0121",
+     "mc:w:w0123",
+     "mc:w:w0123",
+     "mc:w:w0118",
+     "mc:w:w0117",
+     "mc:w:w0089",
+     "mc:w:w0100",
+     "mc:w:w0116",
+     "mc:w:w0077",
+     "mc:w:w0051",
+     "mc:w:w0053",
+     "mc:w:w0113",
+     "mc:w:w0081",
+     "mc:w:w0044",
+     "mc:w:w0115",
+     "mc:w:w0117",
+     "type:w:w0111",
+     "type:w:w0119",
+     "type:w:w0072",
+     "type:w:w0017",
+     "type:w:w0101",
+     "type:w:w0064",
+     "type:w:w0070",
+     "type:w:w0069",
+     "type:w:w0090",
+     "type:w:w0058",
+     "type:w:w0082",
+     "type:w:w0040",
+     "type:w:w0072",
+     "type:s:s0172",
+     "type:s:s0763",
+     "type:s:s0508",
+     "type:s:s1139",
+     "mc:s:s0987",
+     "type:s:s0713",
+     "mc:s:s1399",
+     "mc:s:s2035",
+     "type:s:s0172",
+     "type:s:s0763",
+     "type:s:s0508",
+     "type:s:s1139",
+     "type:s:s0713",
+     "mc:s:s0172",
+     "mc:s:s0763",
+     "mc:s:s0508",
+     "mc:s:s1139",
+     "mc:s:s0713",
+     "mc:s:s0713",
+     "mc:s:s0713",
+     "mc:s:s0713"
+    ],
+    [
+     "type:w:w0109",
+     "type:w:w0075",
+     "type:w:w0072",
+     "type:w:w0128",
+     "type:w:w0040",
+     "mc:w:w0123",
+     "mc:w:w0076",
+     "type:w:w0017",
+     "type:w:w0015",
+     "type:w:w0102",
+     "mc:w:w0117",
+     "type:w:w0085",
+     "type:w:w0004",
+     "type:w:w0018",
+     "type:w:w0089",
+     "type:w:w0128",
+     "mc:w:w0123",
+     "type:w:w0017",
+     "mc:w:w0135",
+     "mc:w:w0134",
+     "mc:w:w0135",
+     "mc:w:w0132",
+     "mc:w:w0130",
+     "mc:w:w0137",
+     "mc:w:w0144",
+     "mc:w:w0144",
+     "mc:w:w0132",
+     "mc:w:w0134",
+     "mc:w:w0133",
+     "mc:w:w0133",
+     "mc:w:w0138",
+     "mc:w:w0138",
+     "mc:w:w0130",
+     "mc:w:w0131",
+     "mc:w:w0137",
+     "mc:w:w0131",
+     "mc:w:w0136",
+     "mc:w:w0136",
+     "mc:w:w0124",
+     "mc:w:w0089",
+     "mc:w:w0060",
+     "mc:w:w0015",
+     "mc:w:w0105",
+     "mc:w:w0126",
+     "mc:w:w0120",
+     "mc:w:w0119",
+     "mc:w:w0123",
+     "mc:w:w0125",
+     "mc:w:w0056",
+     "mc:w:w0055",
+     "mc:w:w0056",
+     "mc:w:w0055",
+     "type:w:w0078",
+     "type:w:w0079",
+     "type:w:w0088",
+     "type:w:w0121",
+     "type:w:w0071",
+     "type:w:w0035",
+     "type:w:w0032",
+     "type:w:w0127",
+     "type:w:w0086",
+     "type:w:w0081",
+     "type:w:w0122",
+     "type:w:w0093",
+     "type:w:w0071",
+     "type:w:w0035",
+     "type:w:w0093",
+     "type:s:s0713",
+     "type:s:s0172",
+     "mc:s:s2000",
+     "type:s:s0045",
+     "mc:s:s1122",
+     "mc:s:s0822",
+     "type:s:s0601",
+     "mc:s:s1123",
+     "type:s:s0713",
+     "type:s:s0172",
+     "mc:s:s2000",
+     "type:s:s0045",
+     "type:s:s0601",
+     "mc:s:s1123",
+     "mc:s:s0713",
+     "mc:s:s0172",
+     "mc:s:s0045",
+     "mc:s:s0601",
+     "mc:s:s0172"
+    ],
+    [
+     "type:w:w0102",
+     "type:w:w0093",
+     "type:w:w0049",
+     "type:w:w0133",
+     "mc:w:w0056",
+     "type:w:w0134",
+     "type:w:w0128",
+     "mc:w:w0055",
+     "type:w:w0035",
+     "type:w:w0079",
+     "mc:w:w0123",
+     "type:w:w0039",
+     "type:w:w0040",
+     "type:w:w0017",
+     "type:w:w0071",
+     "mc:w:w0123",
+     "mc:w:w0139",
+     "mc:w:w0148",
+     "mc:w:w0146",
+     "mc:w:w0149",
+     "mc:w:w0141",
+     "mc:w:w0139",
+     "mc:w:w0143",
+     "mc:w:w0142",
+     "mc:w:w0143",
+     "mc:w:w0142",
+     "mc:w:w0141",
+     "mc:w:w0150",
+     "mc:w:w0146",
+     "mc:w:w0140",
+     "mc:w:w0148",
+     "mc:w:w0140",
+     "mc:w:w0147",
+     "mc:w:w0150",
+     "mc:w:w0147",
+     "mc:w:w0149",
+     "mc:w:w0146",
+     "mc:w:w0142",
+     "mc:w:w0140",
+     "mc:w:w0069",
+     "mc:w:w0066",
+     "mc:w:w0054",
+     "mc:w:w0135",
+     "mc:w:w0046",
+     "mc:w:w0131",
+     "mc:w:w0138",
+     "mc:w:w0130",
+     "mc:w:w0137",
+     "mc:w:w0076",
+     "mc:w:w0117",
+     "mc:w:w0022",
+     "mc:w:w0130",
+     "type:w:w0018",
+     "type:w:w0087",
+     "type:w:w0072",
+     "type:w:w0109",
+     "type:w:w0075",
+     "type:w:w0144",
+     "type:w:w0004",
+     "type:w:w0104",
+     "type:w:w0132",
+     "type:w:w0136",
+     "type:w:w0094",
+     "type:w:w0066",
+     "type:w:w0132",
+     "type:w:w0136",
+     "type:w:w0066",
+     "mc:w:w0132",
+     "mc:s:s1913",
+     "type:s:s0740",
+     "type:s:s0372",
+     "mc:s:s0872",
+     "mc:s:s1869",
+     "type:s:s0185",
+     "mc:s:s0022",
+     "mc:s:s1280",
+     "mc:s:s1913",
+     "type:s:s0740",
+     "type:s:s0372",
+     "mc:s:s0872",
+     "type:s:s0185",
+     "mc:s:s0740",
+     "mc:s:s0372",
+     "mc:s:s0185"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0089",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0089\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">taarifa</span><span class=\"rg\">report, information, notice <span class=\"dim\">(n/n)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"110\"><div class=\"st\" data-tl lang=\"sw\">Perry aliamua kupata <b>taarifa</b> kwa Drake.</div><div class=\"se\">Perry decided to gain information from Drake.</div></div><div class=\"sent\" data-sent=\"361\"><div class=\"st\" data-tl lang=\"sw\">Alitoa <b>taarifa</b> ya jinsi alivyonusurika.</div><div class=\"se\">He gave an account of how he had escaped.</div></div></div>"
+    },
+    {
+     "key": "w:w0032",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0032\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">kusema</span><span class=\"rg\">to say, to speak</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"196\"><div class=\"st\" data-tl lang=\"sw\">Jumapili moja asubuhi George aliingia sebuleni na <b>kusema</b> yafuatayo.</div><div class=\"se\">One Sunday morning George burst into the living room and said the following.</div></div><div class=\"sent\" data-sent=\"403\"><div class=\"st\" data-tl lang=\"sw\">Baba anapenda <b>kusema</b> vitu vya kuchekesha.</div><div class=\"se\">Daddy loves to say funny things.</div></div></div>"
+    },
+    {
+     "key": "w:w0114",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0114\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">blogu</span><span class=\"rg\">blog <span class=\"dim\">(n/n)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1146\"><div class=\"st\" data-tl lang=\"sw\">Tunaongea ndani ya <b>blogu</b> na kunukuu kutoka kwenye <b>blogu</b>.</div><div class=\"se\">We are talking on blogs and quoting blogs.</div></div><div class=\"sent\" data-sent=\"1263\"><div class=\"st\" data-tl lang=\"sw\">Kituo hicho huchapisha <b>blogu</b> za waandishi hawa.</div><div class=\"se\">The Centre publishes running blogs by these journalists.</div></div></div>"
+    },
+    {
+     "key": "w:w0105",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0105\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">mkono</span><span class=\"rg\">hand <span class=\"dim\">(m/mi)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"428\"><div class=\"st\" data-tl lang=\"sw\">Kwa wale wanaotafuta amani na usalama: Tunawaunga <b>mkono</b>.</div><div class=\"se\">To those who seek peace and security: We support you.</div></div><div class=\"sent\" data-sent=\"542\"><div class=\"st\" data-tl lang=\"sw\">Usijaribu kufunika anga lote kwa kiganja cha <b>mkono</b> wako.</div><div class=\"se\">Don&#39;t try to cover the whole sky with the palm of your hand.</div></div></div>"
+    },
+    {
+     "key": "w:w0079",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0079\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">mji</span><span class=\"rg\">town, city <span class=\"dim\">(m/mi)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"171\"><div class=\"st\" data-tl lang=\"sw\">Je, kuna makumbusho katika <b>mji</b> huu?</div><div class=\"se\">Is there a museum in this town?</div></div><div class=\"sent\" data-sent=\"256\"><div class=\"st\" data-tl lang=\"sw\"><b>Mji</b> wetu bado hauna huduma ya maji.</div><div class=\"se\">Our city has no water service yet.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "447d5078e6b56fa2"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "47a1993e8c023706"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "cdf6700f306e0b5a"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 30,
+     "sha": "89515117c5a705da"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 3,
+     "sha": "ee6cab66e6ea9238"
+    },
+    "showPron": false,
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "bc21c0459460b26d"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.055333,
+     0.025923,
+     0.016933
+    ],
+    "toGo": [
+     153,
+     264,
+     318
+    ],
+    "toGoTotal": 224,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.055333,
+     "all": false
+    },
+    "eta": 153,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.016917
+   },
+   "items": {
+    "items": 259,
+    "right": 225
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "2d2750d72817f03c"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.730769,
+     0.38
+    ],
+    "toGo": [
+     0,
+     93,
+     169
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.730769,
+     "all": false
+    },
+    "eta": 93,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.35625
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 93 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Familia ya Juma Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 93 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Familia ya Juma Start",
+    "Session 2 Goal 2 of 3 ≈ 93 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Familia ya Juma Start",
+    "Session 3 Goal 2 of 3 ≈ 94 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Familia ya Juma Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 93 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 95 sessions daily life: directions, simple chat, short notices A1 2 of 600 mastered sentences 1 · reading 1 of 20 A2 380 learned Still shaky nchi -ao kuna jamii -refu pole bidhaa uchunguzi kulenga kigeni upigaji kadi Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "hivi karibuni recently (soon)",
+        "karibu welcome (come in)",
+        "keshokutwa the day after tomorrow",
+        "kwa hiyo so, therefore",
+        "kwa nini why",
+        "kwa sababu because",
+        "marahaba reply to shikamoo",
+        "sasa hivi right now, just now",
+        "shikamoo respectful greeting to an elder",
+        "sijambo I am fine (reply to hujambo)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "kuenea to spread",
+        "upatikanaji availability (u)",
+        "kambi camp (n/n)",
+        "ghafla suddenly",
+        "kuendeleza to develop, to continue, to promote",
+        "mgonjwa patient (m/wa)",
+        "ujasiri courage, bravery (u)",
+        "kutuhumu to suspect, to allege",
+        "hai alive",
+        "dhara harm, damage, loss (ji/ma)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "kuua to kill",
+        "mauaji murder, killing, massacre (ji/ma)",
+        "bomu bomb (ji/ma)",
+        "damu blood (n/n)",
+        "mlipuko explosion, detonation (m/mi)",
+        "silaha weapon (n/n)",
+        "bunduki gun (n/n)",
+        "kijinsia gender-related, gender-based",
+        "kulipuka to explode, to burst",
+        "kimapenzi romantic"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "hivi karibuni recently (soon)",
+        "karibu welcome (come in)",
+        "keshokutwa the day after tomorrow",
+        "kwa hiyo so, therefore",
+        "kwa nini why",
+        "kwa sababu because",
+        "marahaba reply to shikamoo",
+        "sasa hivi right now, just now",
+        "shikamoo respectful greeting to an elder",
+        "sijambo I am fine (reply to hujambo)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 39 of 70",
+       "rows": 10,
+       "first": [
+        "barafu ice (n/n)",
+        "kufuta to wipe clean",
+        "-katili brutal, cruel",
+        "mkakati strategy (m/mi)",
+        "dhana concept, belief, thought (n/n)",
+        "jiwe stone (ji/ma)",
+        "kuhudhuria to attend",
+        "ujumla totality (kwa ujumla: in general) (u)",
+        "umaskini poverty (u)",
+        "kutenda to act, to carry out"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "kuua to kill",
+        "mauaji murder, killing, massacre (ji/ma)",
+        "bomu bomb (ji/ma)",
+        "damu blood (n/n)",
+        "mlipuko explosion, detonation (m/mi)",
+        "silaha weapon (n/n)",
+        "bunduki gun (n/n)",
+        "kijinsia gender-related, gender-based",
+        "kulipuka to explode, to burst",
+        "kimapenzi romantic"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0786",
+     "type:w:w0661",
+     "type:w:w0516",
+     "type:w:w0101",
+     "type:w:w0071",
+     "type:w:w2017",
+     "type:w:w0863",
+     "type:w:w0295",
+     "type:w:w0186",
+     "type:w:w0960",
+     "type:w:w0783",
+     "type:w:w0184",
+     "type:w:w0018",
+     "type:w:w0856",
+     "type:w:w0670",
+     "type:w:w0101",
+     "mc:w:w0946",
+     "mc:w:w0949",
+     "mc:w:w0948",
+     "mc:w:w0948",
+     "mc:w:w0942",
+     "mc:w:w0943",
+     "mc:w:w0913",
+     "mc:w:w0946",
+     "mc:w:w0943",
+     "mc:w:w0950",
+     "mc:w:w0952",
+     "mc:w:w0922",
+     "mc:w:w0950",
+     "mc:w:w0922",
+     "mc:w:w0947",
+     "mc:w:w0952",
+     "mc:w:w0942",
+     "mc:w:w0949",
+     "mc:w:w0947",
+     "mc:w:w0913",
+     "mc:w:w0946",
+     "mc:w:w0952",
+     "mc:w:w0950",
+     "mc:w:w0922",
+     "mc:w:w0947",
+     "mc:w:w0913",
+     "mc:w:w0922",
+     "mc:w:w0947",
+     "mc:w:w1115",
+     "mc:w:w0453",
+     "mc:w:w0788",
+     "mc:w:w0821",
+     "mc:w:w0662",
+     "mc:w:w0508",
+     "mc:w:w0381",
+     "mc:w:w0752",
+     "mc:w:w0432",
+     "mc:w:w0136",
+     "mc:w:w0634",
+     "mc:w:w2021",
+     "mc:w:w0634",
+     "type:w:w0872",
+     "type:w:w0106",
+     "type:w:w0692",
+     "type:w:w0417",
+     "type:w:w0428",
+     "type:w:w0172",
+     "type:w:w0493",
+     "type:w:w0631",
+     "type:w:w0375",
+     "type:w:w0659",
+     "type:w:w2018",
+     "type:w:w0443",
+     "type:w:w0659",
+     "mc:s:s1332",
+     "mc:s:s1823",
+     "mc:s:s1929",
+     "mc:s:s0578",
+     "mc:s:s0949",
+     "mc:s:s1946",
+     "mc:s:s0585",
+     "type:s:s1206",
+     "mc:s:s1332",
+     "mc:s:s1929",
+     "mc:s:s0578",
+     "mc:s:s1946",
+     "type:s:s1206",
+     "mc:s:s1206"
+    ],
+    [
+     "type:w:w0322",
+     "type:w:w0444",
+     "mc:w:w0947",
+     "mc:w:w0952",
+     "mc:w:w0913",
+     "type:w:w0441",
+     "type:w:w0659",
+     "mc:w:w0950",
+     "mc:w:w0634",
+     "type:w:w0003",
+     "type:w:w0101",
+     "mc:w:w0922",
+     "mc:w:w0946",
+     "type:w:w0717",
+     "type:w:w0117",
+     "mc:w:w0913",
+     "mc:w:w0950",
+     "mc:w:w0922",
+     "type:w:w0117",
+     "mc:w:w0913",
+     "mc:w:w0950",
+     "mc:w:w0953",
+     "mc:w:w0959",
+     "mc:w:w0953",
+     "mc:w:w0957",
+     "mc:w:w0956",
+     "mc:w:w0962",
+     "mc:w:w0957",
+     "mc:w:w0958",
+     "mc:w:w0955",
+     "mc:w:w0959",
+     "mc:w:w0962",
+     "mc:w:w0951",
+     "mc:w:w0954",
+     "mc:w:w0965",
+     "mc:w:w0958",
+     "mc:w:w0956",
+     "mc:w:w0954",
+     "mc:w:w0965",
+     "mc:w:w0955",
+     "mc:w:w0951",
+     "mc:w:w0276",
+     "mc:w:w0533",
+     "mc:w:w0401",
+     "mc:w:w0440",
+     "mc:w:w0024",
+     "mc:w:w0019",
+     "mc:w:w0241",
+     "mc:w:w0207",
+     "mc:w:w0364",
+     "mc:w:w0907",
+     "mc:w:w0518",
+     "mc:w:w0040",
+     "mc:w:w0401",
+     "mc:w:w0019",
+     "mc:w:w0364",
+     "type:w:w0362",
+     "type:w:w0849",
+     "type:w:w0200",
+     "type:w:w0681",
+     "type:w:w0514",
+     "type:w:w0660",
+     "type:w:w0664",
+     "type:w:w0128",
+     "type:w:w0311",
+     "type:w:w0475",
+     "type:w:w0062",
+     "type:w:w0698",
+     "type:w:w0849",
+     "type:w:w0128",
+     "type:s:s0593",
+     "mc:s:s0578",
+     "mc:s:s2123",
+     "mc:s:s1946",
+     "type:s:s1206",
+     "mc:s:s0023",
+     "mc:s:s1929",
+     "mc:s:s1874",
+     "type:s:s0593",
+     "mc:s:s2123",
+     "type:s:s1206",
+     "mc:s:s1929",
+     "mc:s:s0593",
+     "mc:s:s1206"
+    ],
+    [
+     "type:w:w0128",
+     "mc:w:w0364",
+     "type:w:w0004",
+     "type:w:w0402",
+     "type:w:w0071",
+     "mc:w:w0019",
+     "type:w:w0117",
+     "mc:w:w0950",
+     "type:w:w0318",
+     "mc:w:w0401",
+     "type:w:w0849",
+     "type:w:w0026",
+     "mc:w:w0913",
+     "mc:w:w0922",
+     "type:w:w0809",
+     "mc:w:w0019",
+     "type:w:w0809",
+     "mc:w:w0971",
+     "mc:w:w0972",
+     "mc:w:w0971",
+     "mc:w:w0963",
+     "mc:w:w0969",
+     "mc:w:w0969",
+     "mc:w:w0975",
+     "mc:w:w0964",
+     "mc:w:w0974",
+     "mc:w:w0968",
+     "mc:w:w0970",
+     "mc:w:w0966",
+     "mc:w:w0970",
+     "mc:w:w0972",
+     "mc:w:w0963",
+     "mc:w:w0974",
+     "mc:w:w0975",
+     "mc:w:w0966",
+     "mc:w:w0964",
+     "mc:w:w0968",
+     "mc:w:w0969",
+     "mc:w:w0974",
+     "mc:w:w0975",
+     "mc:w:w0964",
+     "mc:w:w0747",
+     "mc:w:w0598",
+     "mc:w:w0542",
+     "mc:w:w0113",
+     "mc:w:w0448",
+     "mc:w:w0232",
+     "mc:w:w0575",
+     "mc:w:w0941",
+     "mc:w:w0331",
+     "mc:w:w0884",
+     "mc:w:w0064",
+     "mc:w:w0625",
+     "mc:w:w0747",
+     "mc:w:w0232",
+     "mc:w:w0575",
+     "mc:w:w0625",
+     "mc:w:w0747",
+     "mc:w:w0747",
+     "type:w:w0618",
+     "type:w:w0700",
+     "type:w:w0195",
+     "type:w:w0188",
+     "type:w:w0227",
+     "type:w:w0185",
+     "type:w:w0249",
+     "type:w:w0152",
+     "type:w:w0138",
+     "type:w:w0205",
+     "type:w:w0746",
+     "type:w:w0547",
+     "type:w:w0138",
+     "type:w:w0746",
+     "mc:w:w0746",
+     "type:s:s0593",
+     "type:s:s1206",
+     "mc:s:s0619",
+     "mc:s:s1679",
+     "mc:s:s1929",
+     "mc:s:s2528",
+     "mc:s:s0144",
+     "mc:s:s1332",
+     "type:s:s0593",
+     "type:s:s1206",
+     "mc:s:s0593",
+     "mc:s:s1206"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0786",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0786\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">kusikiliza</span><span class=\"rg\">to listen</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"529\"><div class=\"st\" data-tl lang=\"sw\">Acha ujumbe wako baada ya <b>kusikiliza</b> mlio.</div><div class=\"se\">Leave your message after hearing the beep.</div></div><div class=\"sent\" data-sent=\"913\"><div class=\"st\" data-tl lang=\"sw\">Yeyote anayesikia sauti yake iliyorekodiwa ana hisia za <b>kumsikiliza</b> mgeni.</div><div class=\"se\">Whoever hears his recorded voice has the feeling of having heard a stranger.</div></div></div>"
+    },
+    {
+     "key": "w:w0661",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0661\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">mnyama</span><span class=\"rg\">animal <span class=\"dim\">(m/wa)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"169\"><div class=\"st\" data-tl lang=\"sw\">Inaonekana kuna shida ya kimaumbile kwa <b>mnyama</b> huyu.</div><div class=\"se\">There seems to be some genetic problem with this animal.</div></div><div class=\"sent\" data-sent=\"2466\"><div class=\"st\" data-tl lang=\"sw\">Dubu ni <b>mnyama</b> mkubwa mwenye nguvu.</div><div class=\"se\">A bear is a big, strong animal.</div></div></div>"
+    },
+    {
+     "key": "w:w0516",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0516\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">dada</span><span class=\"rg\">sister <span class=\"dim\">(n/n)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"247\"><div class=\"st\" data-tl lang=\"sw\"><b>Dada</b> yangu anafanya kazi katika Ubalozi wa Amerika huko London.</div><div class=\"se\">My sister works at the United States Embassy in London.</div></div><div class=\"sent\" data-sent=\"535\"><div class=\"st\" data-tl lang=\"sw\">Susan, <b>dada</b> ya Juan, ana akili sana.</div><div class=\"se\">Susan, Juan&#39;s sister, is very intelligent.</div></div></div>"
+    },
+    {
+     "key": "w:w0101",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0101\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">-zuri</span><span class=\"rg\">good, nice, beautiful</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"27\"><div class=\"st\" data-tl lang=\"sw\">Yeye ni mwanafunzi <b>mzuri</b>.</div><div class=\"se\">He is a good student.</div></div><div class=\"sent\" data-sent=\"28\"><div class=\"st\" data-tl lang=\"sw\">Yeye ni mwanamke <b>mzuri</b>.</div><div class=\"se\">She&#39;s a good woman.</div></div></div>"
+    },
+    {
+     "key": "w:w0071",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0071\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">hivi</span><span class=\"rg\">like this, thus</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"231\"><div class=\"st\" data-tl lang=\"sw\"><b>Hivi</b> sasa tuna ofisi 200 za mauzo zenye utaratibu mzuri kote nchini Japan.</div><div class=\"se\">We currently have 200 well organized sales offices all over Japan.</div></div><div class=\"sent\" data-sent=\"293\"><div class=\"st\" data-tl lang=\"sw\"><b>Hivi</b> majuzi nimekuwa nikifurahia kwa kimya maajabu ya mazingira.</div><div class=\"se\">Lately I&#39;ve had the time to quietly enjoy the wonders of nature.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "dd714377d505dca8"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "a5ca60422ce2983c"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d9b7082dcbad7ea0"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 16,
+     "sha": "f86b07c05436c36c"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "986c1e752ab32447"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 980,
+     "sha": "2dbb68490cf7d19e"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.983333,
+     0.717692,
+     0.3732
+    ],
+    "toGo": [
+     0,
+     95,
+     171
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.717692,
+     "all": false
+    },
+    "eta": 95,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.349875
+   },
+   "items": {
+    "items": 254,
+    "right": 211
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "2062ac623ffebd88"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     1,
+     1
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 1,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.75
+   },
+   "todayFirst": "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Uamuzi mgumu Start",
+   "today": [
+    "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Uamuzi mgumu Start",
+    "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Uamuzi mgumu Start",
+    "Session 3 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Uamuzi mgumu Start"
+   ],
+   "progress": {
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles A1 0 of 600 mastered A2 3 of 700 mastered reading 0 of 20 B1 5 of 700 mastered sentences 1 · reading 0 of 20 Still shaky kutaka namna kufuata kiraia zana jiwe mtalii haja kioo Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "hivi karibuni recently (soon)",
+        "karibu welcome (come in)",
+        "keshokutwa the day after tomorrow",
+        "kwa hiyo so, therefore",
+        "kwa nini why",
+        "kwa sababu because",
+        "marahaba reply to shikamoo",
+        "sasa hivi right now, just now",
+        "shikamoo respectful greeting to an elder",
+        "sijambo I am fine (reply to hujambo)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "matakwa wish, want (ji/ma)",
+        "kidemokrasia democratic",
+        "kushawishi to persuade, to coax, to tempt",
+        "faini fine (n/n)",
+        "mwanga light (m/mi)",
+        "mwigizaji actor or actress (m/wa)",
+        "ufanisi efficiency (u)",
+        "bluu blue",
+        "manjano yellow (colour) (ji/ma)",
+        "shangazi paternal aunt (n/n)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "uwiano equality (u)",
+        "kuzoa to gather up, to sweep up, to pick up",
+        "mteule chosen one, appointee, elect (m/wa)",
+        "kuvunjika to be broken",
+        "mbunifu designer (m/wa)",
+        "sadaka religious offering or sacrifice (n/n)",
+        "kilio cry or shout (ki/vi)",
+        "kununulia to buy for",
+        "uthibitisho confirmation, verification (u)",
+        "malaika angel (n/n)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 70 of 70 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "hivi karibuni recently (soon)",
+        "karibu welcome (come in)",
+        "keshokutwa the day after tomorrow",
+        "kwa hiyo so, therefore",
+        "kwa nini why",
+        "kwa sababu because",
+        "marahaba reply to shikamoo",
+        "sasa hivi right now, just now",
+        "shikamoo respectful greeting to an elder",
+        "sijambo I am fine (reply to hujambo)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "matakwa wish, want (ji/ma)",
+        "kidemokrasia democratic",
+        "kushawishi to persuade, to coax, to tempt",
+        "faini fine (n/n)",
+        "mwanga light (m/mi)",
+        "mwigizaji actor or actress (m/wa)",
+        "ufanisi efficiency (u)",
+        "bluu blue",
+        "manjano yellow (colour) (ji/ma)",
+        "shangazi paternal aunt (n/n)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "uwiano equality (u)",
+        "kuzoa to gather up, to sweep up, to pick up",
+        "mteule chosen one, appointee, elect (m/wa)",
+        "kuvunjika to be broken",
+        "mbunifu designer (m/wa)",
+        "sadaka religious offering or sacrifice (n/n)",
+        "kilio cry or shout (ki/vi)",
+        "kununulia to buy for",
+        "uthibitisho confirmation, verification (u)",
+        "malaika angel (n/n)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0381",
+     "type:w:w1608",
+     "type:w:w0171",
+     "type:w:w0039",
+     "type:w:w1591",
+     "type:w:w1073",
+     "type:w:w0510",
+     "type:w:w1243",
+     "type:w:w1518",
+     "type:w:w0731",
+     "type:w:w0515",
+     "type:w:w0892",
+     "type:w:w0539",
+     "type:w:w0632",
+     "type:w:w0807",
+     "mc:w:w0120",
+     "mc:w:w1789",
+     "mc:w:w0355",
+     "mc:w:w1223",
+     "mc:w:w0350",
+     "mc:w:w1370",
+     "mc:w:w1969",
+     "mc:w:w1422",
+     "mc:w:w1312",
+     "mc:w:w0727",
+     "mc:w:w1999",
+     "mc:w:w0843",
+     "mc:w:w1789",
+     "type:w:w0699",
+     "type:w:w1030",
+     "type:w:w0887",
+     "type:w:w0297",
+     "type:w:w0680",
+     "type:w:w0320",
+     "type:w:w1319",
+     "type:w:w1585",
+     "type:w:w0870",
+     "type:w:w0042",
+     "type:w:w0764",
+     "type:w:w1302",
+     "type:w:w0699",
+     "type:w:w1030",
+     "type:w:w1319",
+     "mc:s:s1741",
+     "mc:s:s0230",
+     "type:s:s0749",
+     "type:s:s1490",
+     "mc:s:s0162",
+     "mc:s:s0782",
+     "mc:s:s0378",
+     "mc:s:s0596",
+     "type:s:s0749",
+     "type:s:s1490",
+     "mc:s:s0596",
+     "mc:s:s0749",
+     "mc:s:s1490"
+    ],
+    [
+     "type:w:w1168",
+     "type:w:w1715",
+     "type:w:w0537",
+     "type:w:w1030",
+     "type:w:w0781",
+     "type:w:w0699",
+     "mc:w:w1789",
+     "type:w:w0298",
+     "type:w:w1354",
+     "type:w:w0044",
+     "type:w:w0544",
+     "type:w:w0264",
+     "type:w:w0885",
+     "type:w:w1360",
+     "type:w:w1319",
+     "type:w:w1715",
+     "mc:w:w1789",
+     "type:w:w1360",
+     "type:w:w1319",
+     "mc:w:w1715",
+     "mc:w:w1360",
+     "mc:w:w1450",
+     "mc:w:w1774",
+     "mc:w:w1331",
+     "mc:w:w1437",
+     "mc:w:w0112",
+     "mc:w:w0712",
+     "mc:w:w0367",
+     "mc:w:w1283",
+     "mc:w:w1484",
+     "mc:w:w0419",
+     "mc:w:w1582",
+     "mc:w:w1756",
+     "mc:w:w0112",
+     "mc:w:w0367",
+     "type:w:w1436",
+     "type:w:w0800",
+     "type:w:w0502",
+     "type:w:w1567",
+     "type:w:w1547",
+     "type:w:w1693",
+     "type:w:w1689",
+     "type:w:w0761",
+     "type:w:w1600",
+     "type:w:w1091",
+     "type:w:w0374",
+     "type:w:w1406",
+     "type:w:w0800",
+     "type:w:w1693",
+     "mc:s:s0596",
+     "mc:s:s0070",
+     "type:s:s0749",
+     "mc:s:s2533",
+     "mc:s:s0371",
+     "mc:s:s2264",
+     "type:s:s1490",
+     "mc:s:s0281",
+     "mc:s:s0596",
+     "type:s:s0749",
+     "type:s:s1490",
+     "mc:s:s0749",
+     "mc:s:s1490"
+    ],
+    [
+     "type:w:w1706",
+     "type:w:w0613",
+     "mc:w:w0367",
+     "type:w:w0781",
+     "mc:w:w1789",
+     "type:w:w0371",
+     "mc:w:w0112",
+     "type:w:w1715",
+     "type:w:w0327",
+     "type:w:w1360",
+     "type:w:w0501",
+     "type:w:w1693",
+     "type:w:w1319",
+     "type:w:w0800",
+     "type:w:w1168",
+     "type:w:w1706",
+     "mc:w:w0112",
+     "mc:w:w0642",
+     "mc:w:w1967",
+     "mc:w:w0980",
+     "mc:w:w0781",
+     "mc:w:w1544",
+     "mc:w:w0137",
+     "mc:w:w1082",
+     "mc:w:w1168",
+     "mc:w:w1744",
+     "mc:w:w0063",
+     "mc:w:w0486",
+     "mc:w:w1641",
+     "mc:w:w0980",
+     "mc:w:w0781",
+     "mc:w:w0980",
+     "mc:w:w0980",
+     "type:w:w0656",
+     "type:w:w0828",
+     "type:w:w1673",
+     "type:w:w1712",
+     "type:w:w0208",
+     "type:w:w1310",
+     "type:w:w0012",
+     "type:w:w0186",
+     "type:w:w0240",
+     "type:w:w0494",
+     "type:w:w0145",
+     "type:w:w0055",
+     "type:w:w0208",
+     "type:w:w0055",
+     "mc:s:s0792",
+     "mc:s:s1762",
+     "mc:s:s1917",
+     "mc:s:s0129",
+     "type:s:s1490",
+     "mc:s:s0596",
+     "mc:s:s1736",
+     "type:s:s0749",
+     "mc:s:s0792",
+     "type:s:s1490",
+     "type:s:s0749",
+     "mc:s:s1490",
+     "mc:s:s0749"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0381",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0381\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">kampuni</span><span class=\"rg\">company <span class=\"dim\">(n/n)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"65\"><div class=\"st\" data-tl lang=\"sw\">Jina lake rasmi katika <b>kampuni</b> hiyo ni Msaidizi wa Rais.</div><div class=\"se\">His official title at the company is Assistant to the President.</div></div><div class=\"sent\" data-sent=\"146\"><div class=\"st\" data-tl lang=\"sw\">Mwaka wa kifedha wa <b>kampuni</b> hiyo unaanzia Aprili hadi Machi ya mwaka uliofuata.</div><div class=\"se\">The company&#39;s financial year runs from April until March of the following year.</div></div></div>"
+    },
+    {
+     "key": "w:w1608",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1608\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">kuridhika</span><span class=\"rg\">to be satisfied, to contented</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2605\"><div class=\"st\" data-tl lang=\"sw\">Mama <b>aliridhika</b> na matokeo ya mtihani.</div><div class=\"se\">Mother was satisfied with the exam results.</div></div><div class=\"sent\" data-sent=\"2723\"><div class=\"st\" data-tl lang=\"sw\">Mteja <b>ameridhika</b> na huduma yetu nzuri.</div><div class=\"se\">The customer is satisfied with our good service.</div></div></div>"
+    },
+    {
+     "key": "w:w0171",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0171\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">kawaida</span><span class=\"rg\">custom, habit <span class=\"gx\">(normal <span class=\"dim\">(kawaida)</span> <span class=\"dim\">(n/n)</span>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"165\"><div class=\"st\" data-tl lang=\"sw\">Mashine tena ilifanya kelele ya <b>kawaida</b> na kuchapisha uchambuzi ufuatao.</div><div class=\"se\">The machine again made the usual noise and printed out the following analysis.</div></div><div class=\"sent\" data-sent=\"297\"><div class=\"st\" data-tl lang=\"sw\">Kazi ya waandishi wa habari ni kuwapa watu wa <b>kawaida</b> ukweli.</div><div class=\"se\">The function of the press is to provide the common people with facts.</div></div></div>"
+    },
+    {
+     "key": "w:w0039",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0039\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">-kubwa</span><span class=\"rg\">big, large <span class=\"gx\">(great)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"44\"><div class=\"st\" data-tl lang=\"sw\">Kuna miji mingi <b>mikubwa</b> katika Brazil.</div><div class=\"se\">There are a lot of big cities in Brazil.</div></div><div class=\"sent\" data-sent=\"320\"><div class=\"st\" data-tl lang=\"sw\">Jua hutoa kiasi <b>kikubwa</b> cha joto na mwangaza.</div><div class=\"se\">The sun sends out an incredible amount of heat and light.</div></div></div>"
+    },
+    {
+     "key": "w:w1591",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1591\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">mshangao</span><span class=\"rg\">surprise, astonishment, wonder <span class=\"dim\">(m/mi)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1565\"><div class=\"st\" data-tl lang=\"sw\">Mtandaoni, watumiaji wa mtandao walionyesha <b>mshangao</b> wao kwa habari hizo.</div><div class=\"se\">Online, netizens expressed dismay at the news.</div></div><div class=\"sent\" data-sent=\"1623\"><div class=\"st\" data-tl lang=\"sw\">Mara nyingi nilikabiliana na <b>mshangao</b> kuhusu asili yangu.</div><div class=\"se\">I was often faced with disbelief when it came to my origins.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "bf042216a86608f6"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "6743c9c5af37eacb"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "3d2c15200d7aa718"
+    },
+    "read": {
+     "n": 2,
+     "sha": "07e71869e4c43a0d"
+    },
+    "s": {
+     "n": 18,
+     "sha": "0946e7733d7bfeef"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "9c3d9a2ba070a31f"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.993333,
+     0.992308,
+     0.992
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 0.992,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.744
+   },
+   "items": {
+    "items": 178,
+    "right": 152
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "showPron": false,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "4b0fd38a13f507b8"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.2,
+     0.092308,
+     0.06
+    ],
+    "toGo": [
+     115,
+     229,
+     284
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.2,
+     "all": false
+    },
+    "eta": 115,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 31,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.05625
+   },
+   "todayFirst": "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Familia ya Juma Start",
+   "today": [
+    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Familia ya Juma Start",
+    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Familia ya Juma Start",
+    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Familia ya Juma Start"
+   ],
+   "progress": {
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy A1 155 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Still shaky na kufanya eneo blogu leo vita kulala mia Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "hivi karibuni recently (soon)",
+        "karibu welcome (come in)",
+        "keshokutwa the day after tomorrow",
+        "kwa hiyo so, therefore",
+        "kwa nini why",
+        "kwa sababu because",
+        "marahaba reply to shikamoo",
+        "sasa hivi right now, just now",
+        "shikamoo respectful greeting to an elder",
+        "sijambo I am fine (reply to hujambo)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "binafsi personal, self",
+        "kupanga to plan, to arrange, to set up",
+        "kuanzia to start at some place, to emanate",
+        "kesi case (n/n)",
+        "kufaa to be suitable or useful",
+        "bahati luck, fortune (n/n)",
+        "maalum special, distinguished",
+        "risasi bullet (n/n)",
+        "mgombea candidate (m/wa)",
+        "kuharibu to destroy, to ruin, to damage"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "kuua to kill",
+        "mauaji murder, killing, massacre (ji/ma)",
+        "bomu bomb (ji/ma)",
+        "damu blood (n/n)",
+        "mlipuko explosion, detonation (m/mi)",
+        "silaha weapon (n/n)",
+        "bunduki gun (n/n)",
+        "kijinsia gender-related, gender-based",
+        "kulipuka to explode, to burst",
+        "kimapenzi romantic"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "hivi karibuni recently (soon)",
+        "karibu welcome (come in)",
+        "keshokutwa the day after tomorrow",
+        "kwa hiyo so, therefore",
+        "kwa nini why",
+        "kwa sababu because",
+        "marahaba reply to shikamoo",
+        "sasa hivi right now, just now",
+        "shikamoo respectful greeting to an elder",
+        "sijambo I am fine (reply to hujambo)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "binafsi personal, self",
+        "kupanga to plan, to arrange, to set up",
+        "kuanzia to start at some place, to emanate",
+        "kesi case (n/n)",
+        "kufaa to be suitable or useful",
+        "bahati luck, fortune (n/n)",
+        "maalum special, distinguished",
+        "risasi bullet (n/n)",
+        "mgombea candidate (m/wa)",
+        "kuharibu to destroy, to ruin, to damage"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "kuua to kill",
+        "mauaji murder, killing, massacre (ji/ma)",
+        "bomu bomb (ji/ma)",
+        "damu blood (n/n)",
+        "mlipuko explosion, detonation (m/mi)",
+        "silaha weapon (n/n)",
+        "bunduki gun (n/n)",
+        "kijinsia gender-related, gender-based",
+        "kulipuka to explode, to burst",
+        "kimapenzi romantic"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0254",
+     "type:w:w0238",
+     "mc:w:w0220",
+     "type:w:w0173",
+     "type:w:w0489",
+     "type:w:w0396",
+     "type:w:w0112",
+     "type:w:w0549",
+     "type:w:w1210",
+     "mc:w:w0581",
+     "type:w:w0227",
+     "type:w:w0432",
+     "type:w:w0006",
+     "type:w:w0370",
+     "type:w:w0010",
+     "type:w:w0006",
+     "mc:w:w0482",
+     "mc:w:w0008",
+     "mc:w:w2023",
+     "mc:w:w0021",
+     "mc:w:w0344",
+     "mc:w:w0124",
+     "mc:w:w0340",
+     "mc:w:w0373",
+     "mc:w:w0569",
+     "mc:w:w0570",
+     "mc:w:w0169",
+     "mc:w:w0159",
+     "type:w:w2017",
+     "type:w:w1408",
+     "type:w:w0142",
+     "type:w:w0126",
+     "type:w:w0318",
+     "type:w:w0364",
+     "type:w:w0521",
+     "type:w:w0386",
+     "type:w:w0045",
+     "type:w:w0029",
+     "type:w:w0011",
+     "type:w:w0533",
+     "mc:s:s0646",
+     "mc:s:s1689",
+     "mc:s:s1960",
+     "mc:s:s0127",
+     "mc:s:s0667",
+     "mc:s:s1281",
+     "mc:s:s0034",
+     "mc:s:s1640"
+    ],
+    [
+     "type:w:w0072",
+     "type:w:w0471",
+     "type:w:w0274",
+     "type:w:w0006",
+     "type:w:w0050",
+     "type:w:w0086",
+     "type:w:w0076",
+     "type:w:w0066",
+     "type:w:w0540",
+     "type:w:w0192",
+     "type:w:w0354",
+     "type:w:w0360",
+     "type:w:w0361",
+     "type:w:w0228",
+     "mc:w:w0510",
+     "type:w:w0072",
+     "mc:w:w0538",
+     "mc:w:w0297",
+     "mc:w:w0583",
+     "mc:w:w0427",
+     "mc:w:w2019",
+     "mc:w:w1471",
+     "mc:w:w0545",
+     "mc:w:w0278",
+     "mc:w:w0553",
+     "mc:w:w0339",
+     "mc:w:w0547",
+     "mc:w:w0237",
+     "mc:w:w1471",
+     "mc:w:w0547",
+     "mc:w:w0547",
+     "type:w:w0327",
+     "type:w:w0528",
+     "type:w:w0258",
+     "type:w:w0501",
+     "type:w:w0469",
+     "type:w:w0182",
+     "type:w:w0256",
+     "type:w:w0495",
+     "type:w:w0128",
+     "type:w:w0537",
+     "type:w:w0137",
+     "type:w:w0114",
+     "type:w:w0114",
+     "type:s:s2345",
+     "mc:s:s0978",
+     "mc:s:s0298",
+     "mc:s:s0633",
+     "mc:s:s0028",
+     "mc:s:s1071",
+     "mc:s:s2509",
+     "mc:s:s0105",
+     "type:s:s2345",
+     "mc:s:s2345"
+    ],
+    [
+     "type:w:w0231",
+     "type:w:w0114",
+     "mc:w:w0547",
+     "type:w:w0563",
+     "type:w:w0127",
+     "type:w:w0180",
+     "type:w:w0113",
+     "type:w:w0072",
+     "type:w:w0138",
+     "type:w:w0417",
+     "type:w:w0575",
+     "type:w:w0023",
+     "mc:w:w1471",
+     "type:w:w0509",
+     "mc:w:w0329",
+     "type:w:w0114",
+     "mc:w:w0547",
+     "type:w:w0072",
+     "mc:w:w0072",
+     "mc:w:w0072",
+     "mc:w:w0487",
+     "mc:w:w0594",
+     "mc:w:w0550",
+     "mc:w:w0436",
+     "mc:w:w0098",
+     "mc:w:w0164",
+     "mc:w:w0446",
+     "mc:w:w0097",
+     "mc:w:w0199",
+     "mc:w:w0176",
+     "mc:w:w0183",
+     "mc:w:w0565",
+     "type:w:w0591",
+     "type:w:w0059",
+     "type:w:w0185",
+     "type:w:w0206",
+     "type:w:w0404",
+     "type:w:w0419",
+     "type:w:w0037",
+     "type:w:w0267",
+     "type:w:w0107",
+     "type:w:w0423",
+     "type:w:w0002",
+     "type:w:w0068",
+     "type:w:w0404",
+     "type:w:w0267",
+     "type:w:w0002",
+     "mc:w:w0404",
+     "mc:s:s0890",
+     "type:s:s0684",
+     "mc:s:s1520",
+     "type:s:s2345",
+     "mc:s:s0051",
+     "mc:s:s0001",
+     "mc:s:s1361",
+     "mc:s:s0324",
+     "type:s:s0684",
+     "type:s:s2345",
+     "mc:s:s0684",
+     "mc:s:s2345"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0254",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0254\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">ulimwengu</span><span class=\"rg\">world <span class=\"dim\">(u/ma)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"103\"><div class=\"st\" data-tl lang=\"sw\">Katika sehemu nyingi za <b>ulimwengu</b>, hakuna chakula cha kutosha kukidhi mahitaji ya kila mtu.</div><div class=\"se\">In many parts of the world, there is not enough food to meet everyone&#39;s needs.</div></div><div class=\"sent\" data-sent=\"302\"><div class=\"st\" data-tl lang=\"sw\"><b>Ulimwengu</b> unahitaji kukuza vyanzo vipya vya nishati badala ya mafuta.</div><div class=\"se\">The world needs to develop new energy sources in place of oil.</div></div></div>"
+    },
+    {
+     "key": "w:w0238",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0238\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">kuongeza</span><span class=\"rg\">to add, to increase</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2016\"><div class=\"st\" data-tl lang=\"sw\">Katika baadhi ya nchi hatua hizi zimekuwa zikitangulia katika harakati za <b>kuongeza</b> udhibiti mtandaoni.</div><div class=\"se\">In some countries, these types of measures have been a precursor to efforts to increase online censorship.</div></div><div class=\"sent\" data-sent=\"304\"><div class=\"st\" data-tl lang=\"sw\">Serikali ilitangaza kwamba kodi <b>zitaongezwa</b>.</div><div class=\"se\">The government made an announcement to the effect that taxes would be raised.</div></div></div>"
+    },
+    {
+     "key": "w:w0220",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0220\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">kampeni</span><span class=\"rg\">campaign <span class=\"dim\">(n/n)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"138\"><div class=\"st\" data-tl lang=\"sw\"><b>Kampeni</b> zilifaulu na akashinda uchaguzi.</div><div class=\"se\">The campaign succeeded and he won the election.</div></div><div class=\"sent\" data-sent=\"1203\"><div class=\"st\" data-tl lang=\"sw\">Kila mtu anafanya kazi bila malipo kwa ajili ya <b>kampeni</b>.</div><div class=\"se\">Everybody is working for the campaign gratis.</div></div></div>"
+    },
+    {
+     "key": "w:w0173",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0173\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">nje</span><span class=\"rg\">outside</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"56\"><div class=\"st\" data-tl lang=\"sw\">Wakati wa mkutano na waandishi wa habari, Rais alizungumza kuhusu uhusiano wa <b>nje</b>.</div><div class=\"se\">During the press conference, the President touched on foreign relations.</div></div><div class=\"sent\" data-sent=\"137\"><div class=\"st\" data-tl lang=\"sw\">Biashara ya <b>nje</b> ya nchi inategemea kabisa bandari hii.</div><div class=\"se\">The country&#39;s foreign trade depends entirely on this port.</div></div></div>"
+    },
+    {
+     "key": "w:w0489",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0489\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"sw\">Juni</span><span class=\"rg\">June</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"780\"><div class=\"st\" data-tl lang=\"sw\">Pande hizo mbili lazima zifikie makubaliano mwishoni mwa <b>Juni</b>.</div><div class=\"se\">The two sides must reach an agreement in principle by the end of June.</div></div><div class=\"sent\" data-sent=\"2506\"><div class=\"st\" data-tl lang=\"sw\">Shule hufungwa mwezi <b>Juni</b> kila mwaka.</div><div class=\"se\">Schools close in June every year.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "fd9606fdbdf0f8ed"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "206179c1c85d616d"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "17b1fe54b1bed27f"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 23,
+     "sha": "e5d8f98be7d4f49e"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "showPron": false,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "5ce7d98f5f5353b0"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.206667,
+     0.095385,
+     0.062
+    ],
+    "toGo": [
+     115,
+     228,
+     284
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.206667,
+     "all": false
+    },
+    "eta": 115,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 30,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.058125
+   },
+   "items": {
+    "items": 162,
+    "right": 147
+   }
+  }
+ ]
+}

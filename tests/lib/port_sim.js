@@ -226,13 +226,16 @@ return {
     const ans = mulberry32(o.seed * 7919 + 1), stat = { items: 0, right: 0 };
     for(let sn = 0; sn < o.sessions; sn++){
       NOW += 60 * 60 * 1000;
+      if(o.hook) o.hook("pre", api, { sn });
       // the script primer's one-time choice: skipped by default (a learner who reads the script), learned with opts.script "learn"
       if(/id="scriptSkip"/.test(api.panel())) api.el(o.script === "learn" ? "scriptLearn" : "scriptSkip").click();
       if(!/id="go"/.test(api.panel())) throw new Error(site.lang + " session " + (sn + 1) + ": no Start button: " + api.panel().replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 500));
+      if(o.hook) o.hook("today", api, { sn });
       api.el("go").click();
+      if(o.hook) o.hook("started", api, { sn });
       for(let guard = 0; guard < 3000; guard++){
         const html = api.panel(), D = api.getD();
-        if(D && api.getCur() && D.cur){ const ok = ans() < o.acc; stat.items++; if(ok) stat.right++; answer(api, ok, byId); api.el("nx").click(); continue; }
+        if(D && api.getCur() && D.cur){ const ok = ans() < o.acc; stat.items++; if(ok) stat.right++; answer(api, ok, byId); if(o.hook) o.hook("answered", api, { sn, item: stat.items }); api.el("nx").click(); continue; }
         if(/id="again"/.test(html)){ api.el("again").click(); break; }
         if(/id="ok"/.test(html) && !D){ api.el("ok").click(); continue; }
         if(/id="dr"/.test(html)){ api.el("dr").click(); continue; }
@@ -244,9 +247,10 @@ return {
       if(sn === 3 && ps[0] && ps[1]){ VC.markPassageDone(prog, ps[0].id, 3, 3, "2026-10-02", true, pack); VC.markPassageDone(prog, ps[1].id, 2, 3, "2026-10-02", false, pack); }
       if(sn === 2 || sn === 5){ api.clickTab("progress"); api.clickTab("today"); }
       await api.save();
+      if(o.hook) o.hook("end", api, { sn });
     }
     return { raw: st.ls.getItem(key), stat, keys: st.ls.keys() };
   } finally { Math.random = real; }
 }
 
-module.exports = { SIBLINGS, loadSibling, genericFlags, withTiers, withG, legacySeed, playSessions, mulberry32, clone };
+module.exports = { SIBLINGS, makeFakeDom, memStore, loadSibling, genericFlags, withTiers, withG, legacySeed, playSessions, mulberry32, clone };
