@@ -48,7 +48,8 @@ const OLD = mainCoreSrc ? (() => { const f = path.join(fs.mkdtempSync(path.join(
 const appHtml = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
 const scriptOf = html => { const b = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]; return b[b.length - 1][1]; };
 function extractAttrs(tag){ const attrs = {}; const re = /([a-zA-Z_:][-a-zA-Z0-9_:.]*)(?:\s*=\s*"([^"]*)")?/g; let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; } return attrs; }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){ this.tagName = (tag||"div").toUpperCase(); this._attrs = Object.assign({}, attrs); this._classes = new Set((this._attrs.class||"").split(/\s+/).filter(Boolean));
@@ -65,9 +66,9 @@ function makeFakeDom(){
     remove(){} focus(){} click(){ if(this.onclick) this.onclick({}); (this._listeners.click||[]).forEach(f=>f({})); } closest(){ return null; } querySelector(){ return null; } querySelectorAll(){ return []; }
   }
   function registerIdsFromHtml(html){ const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g; let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); } }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/); const btnRe = /<button([^>]*)>/g;
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/); const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return { title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); }, getElementById(id){ return registry.get(id) || null; },
     querySelector(sel){ return this.querySelectorAll(sel)[0] || null; },
@@ -85,7 +86,7 @@ async function boot(pack, prog, seed, opts){
   if(o.core && o.core !== VC) pack = withCollapsed(pack);
   Math.random = mulberry32(seed);
   const st = o.st || { ls: memStore(), ss: memStore() }; if(prog) st.ls.setItem(VC.storageKey(pack), JSON.stringify(prog));
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const ss = { getVoices: () => [{ lang:"zh-CN", name:"x" }], onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
   const fnBody = scriptOf(o.html || appHtml) + `
@@ -295,7 +296,7 @@ const ptKey = it => String(it.key).startsWith("p:");
     const base = synth(["1", "2"], 2, 4, 5);
     const open = VC.openPatterns(base, PACK, PATTERNS, WORDS);
     let api = await boot(PACK, clone(base), 11, { patterns: PATTERNS });
-    check("Today plan line: Sentences 8 items · 3 patterns", /5\. Sentences<\/td><td>8 items · 3 patterns</.test(api.panel()), (api.panel().match(/Sentences<\/td><td>[^<]*/) || [""])[0]);
+    check("Today plan row: Sentences · 3 patterns (app v2: no item count)", /<div class="tst"><span>Sentences<\/span><div class="tsd">3 patterns<\/div>/.test(api.panel()), (api.panel().match(/<span>Sentences<\/span><div class="tsd">[^<]*/) || [""])[0]);
     const notes = []; let firstMiss = 0;
     const rows = await session(api, (it, rec, rows, step) => {
       if(ptKey(it)) notes.push({ key: it.key, note: /class="pnote"/.test(api.panel()), step });
@@ -333,7 +334,9 @@ const ptKey = it => String(it.key).startsWith("p:");
     check("misses set s 0", uniq2.every(k => pr2.pt[k.slice(2)].s === 0));
     api.tab("progress"); await tick();
     const st = VC.patternStats(pr2, PACK, PATTERNS, WORDS);
-    check(`Progress row: Patterns ${st.done} done / ${st.open} open (of 27)`, api.panel().includes(`<tr><td>Patterns</td><td>${st.done} done / ${st.open} open (of 27)</td></tr>`));
+    api.el("pvAll").click(); // app v2: each level row carries "patterns done of open" under Show all
+    const pparts = [...api.panel().matchAll(/patterns (\d+) of (\d+)/g)], psum = pparts.reduce((a, m) => [a[0] + +m[1], a[1] + +m[2]], [0, 0]);
+    check(`Progress level rows: patterns ${psum[0]} done of ${psum[1]} open over ${pparts.length} levels = patternStats ${st.done} / ${st.open}`, pparts.length > 0 && psum[0] === st.done && psum[1] === st.open);
     // Sentences test: 8 of 20 pattern items.
     api.tab("test"); await tick();
     const tb = api.el("tSentences");
@@ -432,10 +435,12 @@ const ptKey = it => String(it.key).startsWith("p:");
     const api = await boot(PACK, synth(["1", "2"], 2, 4, 5), 41, { patterns: PATTERNS });
     const seen = [];
     await session(api, (it, rec, rows) => {
-      if(ptKey(it)){ const h = api.panel(), m = h.match(/data-pcue="([^"]*)"/), en = m ? m[1] : null;
-        seen.push({ it, en, note: /class="pnote"/.test(h), cueBefore: !!en && h.includes(`>${en}<`), hasBtn: /<button type="button" class="showw"[^>]*data-pcue="[^"]*"[^>]*>meaning<\/button>/.test(h) }); }
+      // App v2 (engine default since the flag collapse): a later meeting hides the English behind "Show meaning" (data-pcue);
+      // a first meeting shows it open in the cue block (fb51).
+      if(ptKey(it)){ const h = api.panel(), m = h.match(/data-pcue="([^"]*)"/), o = h.match(/<div class="q cue">([^<]+)<\/div>/), en = m ? m[1] : o ? o[1] : null;
+        seen.push({ it, en, open: !!o, note: /class="pnote"/.test(h), cueBefore: !!m && h.includes(`>${m[1]}<`), hasBtn: /<button type="button" class="showw"[^>]*data-pcue="[^"]*"[^>]*>Show meaning<\/button>/.test(h) }); }
       return rows.length % 4 !== 2; });
-    check(`pattern items (${seen.length}) carry a "meaning" tap and no English before the answer`, seen.length >= 3 && seen.every(x => x.hasBtn && x.en && !x.cueBefore));
+    check(`pattern items (${seen.length}, ${seen.filter(x => x.open).length} first meetings): a later meeting carries a "Show meaning" tap and no English before the answer; a first meeting shows the English open, no tap`, seen.length >= 3 && seen.every(x => x.en && (x.open ? !x.hasBtn : x.hasBtn && !x.cueBefore))); // a first session meets every pattern for the first time; the Sentences test below covers met ones
     check("the tap's English is the item's own sentence", seen.every(x => [...ENS].some(e => esc(e) === x.en)));
     check("the English is in the reveal after the answer (right and wrong)", seen.every(x => String(x.it.reveal).includes(x.en)));
     check("the two-line note is not on the question at first meeting (it rides with the verdict, [12])", seen.length >= 3 && seen.every(x => !x.note));
@@ -452,14 +457,16 @@ const ptKey = it => String(it.key).startsWith("p:");
     api.tab("test"); await tick();
     const tb = api.el("tSentences");
     if(tb){ tb.click(); const D = api.getD(); const pts = [D.cur, ...D.q].filter(Boolean).filter(ptKey);
-      check(`Sentences test: pattern items (${pts.length}) hide the English the same way`, pts.length >= 3 && pts.every(it => /data-pcue=/.test(it.html) && !/<div class="q cue">[^<]/.test(it.html))); }
+      const ptRec = api.getProg().pt || {}, hid = it => /data-pcue=/.test(it.html), opn = it => /<div class="q cue">[^<]/.test(it.html);
+      check(`Sentences test: pattern items (${pts.length}): met ones hide the English behind the tap (${pts.filter(hid).length}), first meetings show it open`, pts.length >= 3 && pts.some(hid) && pts.every(it => ptRec[it.key.slice(2)] ? hid(it) && !opn(it) : opn(it) && !hid(it))); }
     else skip("Sentences test button absent");
     // Reload mid-cloze: the item comes back with the English hidden again (the tap is not kept).
     const st = { ls: memStore(), ss: memStore() };
     const a1 = await boot(PACK, synth(["1", "2"], 2, 4, 5), 42, { patterns: PATTERNS, st });
     await session(a1, () => true, { stop: (rows, it) => ptKey(it) });
     const a2 = await boot(PACK, null, 43, { patterns: PATTERNS, st }), c2 = a2.getCur();
-    check("reload mid-cloze: the pattern item resumes with the English hidden (re-hidden, not kept)", !!c2 && ptKey(c2) && /data-pcue=/.test(a2.panel()));
+    { const met = !!((a2.getProg().pt || {})[c2 && c2.key.slice(2)]), h2 = a2.panel();
+      check(`reload mid-cloze: the pattern item resumes as it was (${met ? "met: English hidden behind the tap" : "first meeting: English open"})`, !!c2 && ptKey(c2) && (met ? /data-pcue=/.test(h2) && !/<div class="q cue">[^<]/.test(h2) : /<div class="q cue">[^<]/.test(h2) && !/data-pcue=/.test(h2))); }
     // Without the field: the English shows above the options, as before.
     const P0 = Object.assign({}, PACK); delete P0.patternCue;
     const b = await boot(P0, synth(["1", "2"], 2, 4, 5), 41, { patterns: PATTERNS }); const off = [];
@@ -517,24 +524,8 @@ const ptKey = it => String(it.key).startsWith("p:");
       PATTERNS.forEach(pp => pp.sentences.forEach(sn => sn.marks.forEach((m, mi) => { for(let k = 0; k < 6; k++){
         const a = JSON.stringify(C47.patternOpts(pp, sn, mi, PATTERNS, mulberry32(k))), b = JSON.stringify(VC.patternOpts(pp, sn, mi, PATTERNS, mulberry32(k))); if(a === b) same++; else bad.push(sn.id); } })));
       check(`zh patternOpts identical to ${B47} for every mark of every sentence (${same} draws, same seeds)`, bad.length === 0 && same > 1000, bad.slice(0, 5).join(" "));
-      const walk = async (html, core, prog, seed) => {
-        const api = await boot(PACK, clone(prog), seed, { html, core, patterns: PATTERNS });
-        const out = [api.panel()];
-        for(let k = 0; k < 2; k++){ out.push(JSON.stringify(await session(api, (it, rec, rows) => rows.length % 3 !== 1))); out.push(api.panel()); api.tab("today"); await tick(); out.push(api.panel()); }
-        api.tab("test"); await tick(); const tb = api.el("tSentences"); if(tb){ tb.click(); const D = api.getD(); out.push([D.cur, ...D.q].filter(Boolean).map(x => x.html).join("\n")); }
-        return out;
-      };
-      const rec = [["a learned record", synth(["1", "2"], 2, 4, 5)]];
-      const of = [process.env.PAIRS_OWNER, "/Users/ishmum/.claude/uploads/9e41e879-e4d7-4530-b040-c9be1286edd7/a48ee4d3-vocab_zh_progress_8.json"].find(x => x && fs.existsSync(x));
-      if(of) rec.push(["the owner export", VC.bootProg(fs.readFileSync(of, "utf8"), PACK).prog]);
-      const fresh = VC.bootProg(null, PACK).prog; rec.push(["a fresh record", fresh]);
-      for(const [name, prog] of rec){
-        const ref = await walk(b47html(), C47, prog, 31), cur = await walk(appHtml, VC, prog, 31);
-        const ptItems = cur.filter(x => /What's the missing word|Type the missing word/.test(x)).length;
-        check(`${name}: two-session patterns walk (plans, items, options, Sentences test) byte-identical to ${B47}`, JSON.stringify(ref) === JSON.stringify(cur) && ref.length >= 7, cur.findIndex((x, i) => x !== ref[i]));
-        if(name !== "a fresh record") check(`${name}: the walk reached pattern items`, ptItems > 0, ptItems);
-      }
-      function b47html(){ return git(B47, "engine/app.html"); }
+      // The two-session walk byte-identical to d1601cd compared the appView-off render (the suite pack predates appView);
+      // deleted with the flag collapse (stage 2): appView v2 changed after d1601cd, so the walk has no v2 control.
     }
     // validator
     const val = (patterns, pk) => JSON.parse(cp.execFileSync(PY, ["-I", "-c", `import sys, json

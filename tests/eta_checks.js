@@ -17,7 +17,7 @@
 const fs = require("fs");
 const path = require("path");
 const cp = require("child_process"), os = require("os");
-const { packAsOf, stripFlags, withCollapsed } = require("./lib/pack_flags.js");
+const { stripFlags } = require("./lib/pack_flags.js");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
@@ -50,7 +50,8 @@ function extractAttrs(tag){
   let m; while((m = re.exec(tag))){ if(m[1]) attrs[m[1]] = m[2] !== undefined ? m[2] : ""; }
   return attrs;
 }
-function makeFakeDom(){
+function makeFakeDom(srcHtml){
+  const H = srcHtml || appHtml; // an older sha's app.html registers its own ids
   const registry = new Map(); const tabButtons = [];
   class El {
     constructor(tag, attrs){
@@ -99,10 +100,10 @@ function makeFakeDom(){
     const re = /<([a-zA-Z0-9]+)((?:\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*(?:\s*=\s*"[^"]*")?)*)\s*\/?>/g;
     let m; while((m = re.exec(html))){ const attrs = extractAttrs(m[2]); if(attrs.id) new El(m[1], attrs); }
   }
-  const tabsMatch = appHtml.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
+  const tabsMatch = H.match(/<nav[^>]*id="tabs"[^>]*>([\s\S]*?)<\/nav>/);
   const btnRe = /<button([^>]*)>/g;
   let bm; while((bm = btnRe.exec(tabsMatch[1]))){ tabButtons.push(new El("button", extractAttrs(bm[1]))); }
-  registerIdsFromHtml(appHtml.slice(appHtml.indexOf("<body>"), appHtml.indexOf("<nav")));
+  registerIdsFromHtml(H.slice(H.indexOf("<body>"), H.indexOf("<nav")));
   return {
     title: "", head: { appended: [], appendChild(c){ this.appended.push(c); return c; } }, body: new El("body", {}), documentElement: new El("html", {}),
     write(){}, createElement(tag){ return new El(tag, {}); },
@@ -136,7 +137,7 @@ class FakeDate extends Date {
 async function boot(pack, st, seed, opts){
   const o = opts || {};
   Math.random = mulberry32(seed);
-  const document = makeFakeDom();
+  const document = makeFakeDom(o.html);
   const voices = [{ lang:"zh-CN", name:"x" }];
   const ss = { getVoices: () => voices, onvoiceschanged: null, cancel(){}, speak(){} };
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(){} };
@@ -202,7 +203,7 @@ async function playSessions(pack, seedP, sessions, seed, acc, onSession, opts){
   }
   return api;
 }
-const SIM = stripFlags(PACK, []); // appView is UI only: the planner is the same
+const SIM = clone(PACK); // the planner sims run on a copy of the pack
 const LV = VC.levelIds(PACK), BYLV = VC.wordsByLevel(WORDS, PACK), GOALS = VC.progressMapGoals(PACK);
 // Per session: every goal's position and every level's known share (passages counted as in the app; the sim skips reading).
 async function trace(start, n, seed, acc, opts){
@@ -533,20 +534,8 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
     check("whole-pack bar under appView: no pm -> no second line, no placeholder; 14 entries -> sessionsToGo", /<div class="pmap" id="pmap"/.test(fh) && !/class="pm2"/.test(fh) && !/pace: —/.test(fh) && f3.includes(`<div class="pm2">≈\u00a0${VC.sessionsToGoX(wp)} sessions</div>`));
   }
 
-  console.log(`\n[4] flag-off: Today and Progress byte-identical to ${BASE} on 3 records (appView off; appView + progressView off)`);
-  if(!BASE_CORE) console.log("SKIP  base unavailable");
-  else {
-    const recs = [["fresh", freshStart()], ["owner", OWNER ? ownerStart() : seedKnown(2)], ["mid + 5 pm", (() => { const p = seedLevel(2, 30); p.pm = pmLine(5, 0, 0.3, 0.01); return p; })()]];
-    for(const [pk, pack] of [["appView off", stripFlags(PACK, [])], ["appView + progressView off", stripFlags(PACK, [])]]){
-      for(const [name, rec] of recs){
-        // one app at a time: boot reseeds the shared Math.random
-        const run = async (env, pk) => { const x = await bootWith(pk, clone(rec), 3, Object.assign({}, env, VIEW)); const t = x.panel(); x.clickTab("progress"); return [t, x.panel()]; };
-        // the base engine reads the stage-1 keys this engine has as default (withCollapsed)
-        const [t1, p1] = await run({}, pack), [t2, p2] = await run({ core: BASE_CORE, html: BASE_APP }, withCollapsed(pack));
-        check(`${pk}, ${name}: Today + Progress equal base`, t1 === t2 && p1 === p2);
-      }
-    }
-  }
+  // [4] (flag-off: Today and Progress byte-identical to the base with appView / progressView off) deleted: both are
+  // engine default since the flag collapse (stage 2).
 
   // [5] (placed starts with placedKnown off: a gate hold from the placed level's first session) deleted: placedKnown is the
   // engine default since the flag collapse, so a placed start has no gate hold ([6] covers placed starts).
