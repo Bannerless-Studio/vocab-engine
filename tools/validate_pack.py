@@ -172,10 +172,8 @@ def check_pack(pack, rep):
                         rep.err(f"pack.progressMap.goals[{i}].label must be a non-empty string")
         elif pm is True:
             rep.warn("pack.progressMap: true is ignored since the flag collapse (no goals, no progress map); give {goals: [...]}")
-        else:
-            rep.err("pack.progressMap must be {goals: [...]}")
-    if pack.get("typing") in (None, False):
-        rep.warn("pack.typing is off: a held word (streak 2) moves up only by typed answers (docs/PACK_SCHEMA.md \"wordsBy\"), so it stays held")
+        elif pm is not False:
+            rep.err("pack.progressMap must be false or {goals: [...]}")
     # levelExam (docs/PACK_SCHEMA.md "levelExam"): level id -> "pinyin" | "characters".
     if "levelExam" in pack:
         le = pack["levelExam"]; ids = {str(l.get("id")) for l in pack.get("levels", []) if isinstance(l, dict)}
