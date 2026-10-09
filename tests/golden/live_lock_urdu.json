@@ -1,0 +1,2504 @@
+{
+ "lang": "urdu",
+ "packKey": "ur",
+ "words": 2000,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "c19c74271403fc61"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     167,
+     265,
+     332
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": 167,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "حروفِ تہجی first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until a set is learned Learn حروفِ تہجی , sets 1–2 of 8 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 30 learned Still shaky میں ایک ہو جانا دینا Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 1 of 60 › Drill this set",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "کا of, &#39;s (possessive: کا/کی/کے )",
+        "ہونا to be (to become; to happen)",
+        "وہ that (he, she, it, they (far) )",
+        "میں in, into",
+        "میں I",
+        "سے from (with, by; than; since)",
+        "اور and",
+        "کے لیے for",
+        "کو to ( (object marker) )",
+        "کرنا to do, to make"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "سیاست politics (f)",
+        "اعلیٰ high, superior (top)",
+        "قبول acceptance, assent (m)",
+        "شامل کرنا to include, to add",
+        "ظاہر clear, apparent, obviously",
+        "رونا to cry, to weep",
+        "قومی national",
+        "کے قریب near, close to",
+        "قبل ago, before, previous",
+        "رابطہ contact, in touch (m)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "خون blood (m)",
+        "اسلحہ weapons, ammunitions (m)",
+        "شراب alcohol (f)",
+        "زہر poison (m)",
+        "شمال north (m)",
+        "نظریہ theory (m)",
+        "وزن weight, weighing, measure (m)",
+        "مناسب appropriate, fitting",
+        "سیدھا straight",
+        "احتیاط prudence (f)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 4 of 60",
+       "rows": 10,
+       "first": [
+        "کے بارے میں about, concerning",
+        "کے پاس near (has ( میرے پاس : I have) (someone) )",
+        "کے بعد after",
+        "میرا my, mine",
+        "کچھ some, something (a little)",
+        "کہنا to say, to tell",
+        "ہی only, just, the very (emphatic)",
+        "سب all, everyone, everything",
+        "والا the one (who/that) (-er, -man ( دودھ والا : milkman) )",
+        "لینا to take, to get"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "سیاست politics (f)",
+        "اعلیٰ high, superior (top)",
+        "قبول acceptance, assent (m)",
+        "شامل کرنا to include, to add",
+        "ظاہر clear, apparent, obviously",
+        "رونا to cry, to weep",
+        "قومی national",
+        "کے قریب near, close to",
+        "قبل ago, before, previous",
+        "رابطہ contact, in touch (m)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "خون blood (m)",
+        "اسلحہ weapons, ammunitions (m)",
+        "شراب alcohol (f)",
+        "زہر poison (m)",
+        "شمال north (m)",
+        "نظریہ theory (m)",
+        "وزن weight, weighing, measure (m)",
+        "مناسب appropriate, fitting",
+        "سیدھا straight",
+        "احتیاط prudence (f)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0002",
+     "mc:w:w0002",
+     "mc:w:w0005",
+     "mc:w:w0004",
+     "mc:w:w0007",
+     "mc:w:w0003",
+     "mc:w:w0006",
+     "mc:w:w0001",
+     "mc:w:w0003",
+     "mc:w:w0008",
+     "mc:w:w0010",
+     "mc:w:w0008",
+     "mc:w:w0009",
+     "mc:w:w0005",
+     "mc:w:w0004",
+     "mc:w:w0009",
+     "mc:w:w0007",
+     "mc:w:w0010",
+     "mc:w:w0001",
+     "mc:w:w0006",
+     "mc:w:w0003",
+     "mc:w:w0001",
+     "mc:w:w0001"
+    ],
+    [
+     "mc:w:w0002",
+     "type:w:w0010",
+     "mc:w:w0003",
+     "type:w:w0006",
+     "type:w:w0008",
+     "mc:w:w0007",
+     "type:w:w0009",
+     "mc:w:w0005",
+     "mc:w:w0001",
+     "type:w:w0004",
+     "mc:w:w0014",
+     "mc:w:w0015",
+     "mc:w:w0013",
+     "mc:w:w0015",
+     "mc:w:w0018",
+     "mc:w:w0020",
+     "mc:w:w0016",
+     "mc:w:w0019",
+     "mc:w:w0020",
+     "mc:w:w0018",
+     "mc:w:w0011",
+     "mc:w:w0016",
+     "mc:w:w0019",
+     "mc:w:w0017",
+     "mc:w:w0011",
+     "mc:w:w0013",
+     "mc:w:w0012",
+     "mc:w:w0017",
+     "mc:w:w0012",
+     "mc:w:w0014",
+     "mc:w:w0012",
+     "mc:w:w0010",
+     "mc:w:w0006",
+     "mc:w:w0004",
+     "mc:w:w0009",
+     "mc:w:w0008",
+     "type:w:w0005",
+     "type:w:w0003",
+     "type:w:w0007",
+     "type:w:w0002",
+     "type:w:w0001"
+    ],
+    [
+     "type:w:w0020",
+     "type:w:w0017",
+     "type:w:w0018",
+     "type:w:w0001",
+     "type:w:w0011",
+     "type:w:w0008",
+     "mc:w:w0014",
+     "mc:w:w0013",
+     "type:w:w0015",
+     "mc:w:w0012",
+     "type:w:w0004",
+     "type:w:w0009",
+     "type:w:w0019",
+     "mc:w:w0016",
+     "mc:w:w0003",
+     "type:w:w0004",
+     "mc:w:w0023",
+     "mc:w:w0021",
+     "mc:w:w0029",
+     "mc:w:w0024",
+     "mc:w:w0030",
+     "mc:w:w0021",
+     "mc:w:w0030",
+     "mc:w:w0022",
+     "mc:w:w0025",
+     "mc:w:w0027",
+     "mc:w:w0027",
+     "mc:w:w0026",
+     "mc:w:w0023",
+     "mc:w:w0025",
+     "mc:w:w0026",
+     "mc:w:w0022",
+     "mc:w:w0028",
+     "mc:w:w0028",
+     "mc:w:w0029",
+     "mc:w:w0024",
+     "mc:w:w0028",
+     "mc:w:w0015",
+     "mc:w:w0005",
+     "mc:w:w0019",
+     "mc:w:w0011",
+     "mc:w:w0007",
+     "mc:w:w0020",
+     "mc:w:w0001",
+     "mc:w:w0017",
+     "mc:w:w0002",
+     "mc:w:w0018",
+     "mc:w:w0012",
+     "mc:w:w0020",
+     "mc:w:w0012",
+     "type:w:w0010",
+     "type:w:w0006",
+     "type:w:w0016",
+     "type:w:w0013",
+     "type:w:w0014",
+     "type:w:w0003"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0002",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0002\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">ہونا</span><span class=\"rg\">to be <span class=\"gx\">(to become; to happen)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"204\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">اسے وکیل <b>ہونا</b> چاہیے <b>تھا</b>۔</div><div class=\"se\">He should have been a lawyer.</div></div><div class=\"sent\" data-sent=\"263\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">ہر وقت ایماندار <b>ہونا</b> آسان نہیں <b>ہے</b>۔</div><div class=\"se\">It&#39;s not easy to be honest all the time.</div></div></div>"
+    },
+    {
+     "key": "w:w0002",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0002\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">ہونا</span><span class=\"rg\">to be <span class=\"gx\">(to become; to happen)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"204\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">اسے وکیل <b>ہونا</b> چاہیے <b>تھا</b>۔</div><div class=\"se\">He should have been a lawyer.</div></div><div class=\"sent\" data-sent=\"263\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">ہر وقت ایماندار <b>ہونا</b> آسان نہیں <b>ہے</b>۔</div><div class=\"se\">It&#39;s not easy to be honest all the time.</div></div></div>"
+    },
+    {
+     "key": "w:w0005",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0005\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">میں</span><span class=\"rg\">I</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"15\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">تمہیں جتنے پیسے چاہیے، <b>میں</b> اتنے تمہیں دے دوں گا۔</div><div class=\"se\">I will lend you as much money as you want.</div></div><div class=\"sent\" data-sent=\"16\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>میں</b> تمہیں سچ بتا رہا ہوں۔</div><div class=\"se\">I tell you the truth.</div></div></div>"
+    },
+    {
+     "key": "w:w0004",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0004\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">میں</span><span class=\"rg\">in, into</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"7\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">تمہیں دکان سڑک کے کونے <b>میں</b> ملے گی۔</div><div class=\"se\">You&#39;ll find the shop around the corner.</div></div><div class=\"sent\" data-sent=\"12\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">اس نے اپنا ہوم ورک ایک گھنٹے <b>میں</b> ختم کر لیا۔</div><div class=\"se\">She finished her homework in an hour.</div></div></div>"
+    },
+    {
+     "key": "w:w0007",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0007\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">اور</span><span class=\"rg\">and</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"4\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">بس تھوڑا سا صبر <b>اور</b>۔</div><div class=\"se\">Just a little more patience.</div></div><div class=\"sent\" data-sent=\"45\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">محنت <b>اور</b> صبر سے ہر مشکل آسان ہو جاتی ہے۔</div><div class=\"se\">Patience and hard work will conquer all.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "b3819970351ab88e"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "60ce72f59b11d9bd"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "07a1357703a47aba"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "be34f914b5e7f215"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "bb0935b2fa8aa692"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.009333,
+     0.004308,
+     0.0028
+    ],
+    "toGo": [
+     165,
+     262,
+     330
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.009333,
+     "all": false
+    },
+    "eta": 165,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.002625
+   },
+   "items": {
+    "items": 120,
+    "right": 112
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "day": {
+     "n": 3,
+     "sha": "e218845fbfcc678f"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "46191faf3181e268"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "1aed3292ff8dfef6"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 27,
+     "sha": "bab2d6638b4f825e"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 3,
+     "sha": "e3f9f0c08da51372"
+    },
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 120,
+     "sha": "5e0bc359bcb55939"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.063333,
+     0.029615,
+     0.019333
+    ],
+    "toGo": [
+     151,
+     248,
+     314
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.063333,
+     "all": false
+    },
+    "eta": 151,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.019167
+   },
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "today": [
+    "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, A1 In 6 sessions since your last visit +23 mastered Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 120 learned Still shaky کرنا کہنا سکنا سے پہلے دور تمہارا کم کبھی چکنا Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 150 learned Still shaky کرنا سمجھنا کبھی سننا جی مگر پولیس نظر آنا Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 13 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 13 of 60",
+       "rows": 10,
+       "first": [
+        "حکومت government (f)",
+        "نیا new",
+        "کیونکہ because",
+        "کی طرح like, in the manner of",
+        "واپس back",
+        "چلا جانا to go away, to leave",
+        "موجود present, available",
+        "بعد later, afterwards",
+        "پہلے first (before, earlier)",
+        "جی yes (polite) (sir, madam (after a name) )"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "سیاست politics (f)",
+        "اعلیٰ high, superior (top)",
+        "قبول acceptance, assent (m)",
+        "شامل کرنا to include, to add",
+        "ظاہر clear, apparent, obviously",
+        "رونا to cry, to weep",
+        "قومی national",
+        "کے قریب near, close to",
+        "قبل ago, before, previous",
+        "رابطہ contact, in touch (m)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "خون blood (m)",
+        "اسلحہ weapons, ammunitions (m)",
+        "شراب alcohol (f)",
+        "زہر poison (m)",
+        "شمال north (m)",
+        "نظریہ theory (m)",
+        "وزن weight, weighing, measure (m)",
+        "مناسب appropriate, fitting",
+        "سیدھا straight",
+        "احتیاط prudence (f)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 16 of 60",
+       "rows": 10,
+       "first": [
+        "ڈالنا to put, to pour",
+        "جنگ war (f)",
+        "رات night (f)",
+        "بن جانا to become",
+        "پہنچ جانا to arrive, to reach",
+        "جیسا like, as",
+        "لانا to bring",
+        "مدد کرنا to help",
+        "اس لیے so, therefore",
+        "پتہ ہونا to know ( مجھے پتہ ہے : I know)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "سیاست politics (f)",
+        "اعلیٰ high, superior (top)",
+        "قبول acceptance, assent (m)",
+        "شامل کرنا to include, to add",
+        "ظاہر clear, apparent, obviously",
+        "رونا to cry, to weep",
+        "قومی national",
+        "کے قریب near, close to",
+        "قبل ago, before, previous",
+        "رابطہ contact, in touch (m)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "خون blood (m)",
+        "اسلحہ weapons, ammunitions (m)",
+        "شراب alcohol (f)",
+        "زہر poison (m)",
+        "شمال north (m)",
+        "نظریہ theory (m)",
+        "وزن weight, weighing, measure (m)",
+        "مناسب appropriate, fitting",
+        "سیدھا straight",
+        "احتیاط prudence (f)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0095",
+     "type:w:w0120",
+     "mc:w:w0119",
+     "mc:w:w0104",
+     "type:w:w0115",
+     "mc:w:w0107",
+     "mc:w:w0111",
+     "type:w:w0110",
+     "type:w:w0096",
+     "type:w:w0041",
+     "type:w:w0071",
+     "type:w:w0049",
+     "mc:w:w0114",
+     "type:w:w0112",
+     "type:w:w0008",
+     "type:w:w0096",
+     "type:w:w0071",
+     "mc:w:w0114",
+     "type:w:w0112",
+     "mc:w:w0096",
+     "mc:w:w0126",
+     "mc:w:w0117",
+     "mc:w:w0130",
+     "mc:w:w0121",
+     "mc:w:w0125",
+     "mc:w:w0122",
+     "mc:w:w0128",
+     "mc:w:w0123",
+     "mc:w:w0124",
+     "mc:w:w0126",
+     "mc:w:w0125",
+     "mc:w:w0130",
+     "mc:w:w0123",
+     "mc:w:w0117",
+     "mc:w:w0127",
+     "mc:w:w0128",
+     "mc:w:w0122",
+     "mc:w:w0127",
+     "mc:w:w0124",
+     "mc:w:w0121",
+     "mc:w:w0127",
+     "mc:w:w0127",
+     "mc:w:w0035",
+     "mc:w:w0023",
+     "mc:w:w0063",
+     "mc:w:w0054",
+     "mc:w:w0102",
+     "mc:w:w0116",
+     "mc:w:w0098",
+     "mc:w:w0113",
+     "mc:w:w0103",
+     "mc:w:w0118",
+     "mc:w:w0051",
+     "mc:w:w0056",
+     "mc:w:w0023",
+     "type:w:w0070",
+     "type:w:w0074",
+     "type:w:w0119",
+     "type:w:w0068",
+     "type:w:w0085",
+     "type:w:w0067",
+     "type:w:w0073",
+     "type:w:w0111",
+     "type:w:w0012",
+     "type:w:w0091",
+     "type:w:w0083",
+     "type:w:w0077",
+     "type:w:w0119",
+     "type:s:s0551",
+     "mc:s:s0222",
+     "mc:s:s0287",
+     "mc:s:s0221",
+     "type:s:s0594",
+     "mc:s:s0521",
+     "type:s:s0590",
+     "type:s:s0593",
+     "type:s:s0551",
+     "type:s:s0594",
+     "type:s:s0590",
+     "type:s:s0593",
+     "mc:s:s0551",
+     "mc:s:s0594",
+     "mc:s:s0590",
+     "mc:s:s0593"
+    ],
+    [
+     "type:w:w0126",
+     "type:w:w0119",
+     "type:w:w0107",
+     "type:w:w0130",
+     "mc:w:w0114",
+     "mc:w:w0023",
+     "type:w:w0041",
+     "type:w:w0112",
+     "type:w:w0038",
+     "type:w:w0096",
+     "type:w:w0121",
+     "type:w:w0008",
+     "type:w:w0071",
+     "type:w:w0049",
+     "mc:w:w0127",
+     "type:w:w0119",
+     "type:w:w0107",
+     "type:w:w0130",
+     "type:w:w0038",
+     "type:w:w0121",
+     "type:w:w0071",
+     "mc:w:w0134",
+     "mc:w:w0134",
+     "mc:w:w0129",
+     "mc:w:w0132",
+     "mc:w:w0133",
+     "mc:w:w0129",
+     "mc:w:w0133",
+     "mc:w:w0132",
+     "mc:w:w0135",
+     "mc:w:w0136",
+     "mc:w:w0137",
+     "mc:w:w0131",
+     "mc:w:w0138",
+     "mc:w:w0131",
+     "mc:w:w0135",
+     "mc:w:w0136",
+     "mc:w:w0140",
+     "mc:w:w0137",
+     "mc:w:w0138",
+     "mc:w:w0140",
+     "mc:w:w0059",
+     "mc:w:w0117",
+     "mc:w:w0062",
+     "mc:w:w0057",
+     "mc:w:w0119",
+     "mc:w:w0125",
+     "mc:w:w0049",
+     "mc:w:w0068",
+     "mc:w:w0123",
+     "mc:w:w0104",
+     "mc:w:w0128",
+     "mc:w:w0111",
+     "type:w:w0122",
+     "type:w:w0082",
+     "type:w:w0090",
+     "type:w:w0043",
+     "type:w:w0124",
+     "type:w:w0089",
+     "type:w:w0147",
+     "type:w:w0084",
+     "type:w:w0099",
+     "type:w:w0105",
+     "type:w:w0047",
+     "type:w:w0127",
+     "type:w:w0122",
+     "type:w:w0082",
+     "type:w:w0099",
+     "type:w:w0105",
+     "mc:w:w0105",
+     "mc:s:s0231",
+     "mc:s:s1154",
+     "mc:s:s0423",
+     "mc:s:s1446",
+     "type:s:s0594",
+     "mc:s:s0366",
+     "type:s:s0590",
+     "type:s:s0149",
+     "type:s:s0594",
+     "type:s:s0590",
+     "type:s:s0149",
+     "mc:s:s0594",
+     "mc:s:s0590",
+     "mc:s:s0149"
+    ],
+    [
+     "type:w:w0105",
+     "type:w:w0099",
+     "type:w:w0008",
+     "type:w:w0130",
+     "type:w:w0082",
+     "type:w:w0129",
+     "type:w:w0107",
+     "type:w:w0121",
+     "type:w:w0119",
+     "type:w:w0071",
+     "type:w:w0122",
+     "type:w:w0120",
+     "type:w:w0147",
+     "type:w:w0038",
+     "type:w:w0112",
+     "type:w:w0130",
+     "mc:w:w0143",
+     "mc:w:w0150",
+     "mc:w:w0141",
+     "mc:w:w0150",
+     "mc:w:w0145",
+     "mc:w:w0142",
+     "mc:w:w1301",
+     "mc:w:w0142",
+     "mc:w:w0141",
+     "mc:w:w0143",
+     "mc:w:w0145",
+     "mc:w:w0159",
+     "mc:w:w0139",
+     "mc:w:w1301",
+     "mc:w:w0139",
+     "mc:w:w0146",
+     "mc:w:w0159",
+     "mc:w:w0146",
+     "mc:w:w0379",
+     "mc:w:w0379",
+     "mc:w:w0150",
+     "mc:w:w0143",
+     "mc:w:w0139",
+     "mc:w:w0150",
+     "mc:w:w0133",
+     "mc:w:w0127",
+     "mc:w:w0138",
+     "mc:w:w0132",
+     "mc:w:w0137",
+     "mc:w:w0114",
+     "mc:w:w0134",
+     "mc:w:w0131",
+     "mc:w:w0136",
+     "mc:w:w0069",
+     "mc:w:w0023",
+     "mc:w:w0135",
+     "type:w:w0097",
+     "type:w:w0094",
+     "type:w:w0088",
+     "type:w:w0037",
+     "type:w:w0140",
+     "type:w:w0080",
+     "type:w:w0092",
+     "type:w:w0087",
+     "type:w:w0098",
+     "type:w:w0093",
+     "type:w:w0096",
+     "type:w:w0076",
+     "type:w:w0094",
+     "mc:s:s0358",
+     "mc:s:s0370",
+     "mc:s:s0440",
+     "mc:s:s0359",
+     "mc:s:s0459",
+     "type:s:s0149",
+     "type:s:s0594",
+     "type:s:s0590",
+     "mc:s:s0440",
+     "mc:s:s0359",
+     "type:s:s0149",
+     "type:s:s0594",
+     "type:s:s0590",
+     "mc:s:s0149",
+     "mc:s:s0594",
+     "mc:s:s0590",
+     "mc:s:s0149"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0095",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0095\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">صاحب</span><span class=\"rg\">sir, Mr. <span class=\"gx\">(gentleman <span class=\"dim\">(m)</span>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"149\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">کیا تم بینگلی <b>صاحب</b> کو جانتے ہو؟</div><div class=\"se\">Do you know Mr. Bingley?</div></div><div class=\"sent\" data-sent=\"1648\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">میرے استاد ماسٹر <b>صاحب</b> ہیں۔</div><div class=\"se\">My teacher is Master sahib.</div></div></div>"
+    },
+    {
+     "key": "w:w0120",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0120\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">سننا</span><span class=\"rg\">to hear, to listen</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1313\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">مجھے موسیقی <b>سننا</b> پسند ہے۔</div><div class=\"se\">I like listening to music.</div></div><div class=\"sent\" data-sent=\"78\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">میں نے اس گیت کو فرانسیسی زبان میں گایا ہوا <b>سنا</b> ہے۔</div><div class=\"se\">I have heard that song sung in French.</div></div></div>"
+    },
+    {
+     "key": "w:w0119",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0119\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">چکنا</span><span class=\"rg\">to have already <span class=\"dim\">(done)</span> <span class=\"dim\">(after a verb stem: <bdi data-tl lang=\"ur\" dir=\"rtl\" class=\"tlf\">کر چکا</bdi>)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"47\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">کیونکہ اب تم ٹھیک ہو <b>چکے</b> ہو، تم سفر کر سکتے ہو۔</div><div class=\"se\">Now that you are well again, you can travel.</div></div><div class=\"sent\" data-sent=\"106\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">آخری ٹرین جا <b>چکی</b> ہے۔</div><div class=\"se\">The last train has already gone.</div></div></div>"
+    },
+    {
+     "key": "w:w0104",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0104\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">دور</span><span class=\"rg\">far, far away</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"59\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">مجھے ایک کشتی چاہیے جو مجھے یہاں سے <b>دور</b> لے جائے۔</div><div class=\"se\">I want a boat that&#39;ll take me far away from here.</div></div><div class=\"sent\" data-sent=\"89\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">وہ زیادہ <b>دور</b> نہیں رہتا۔</div><div class=\"se\">He doesn&#39;t live far away.</div></div></div>"
+    },
+    {
+     "key": "w:w0115",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0115\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">باہر</span><span class=\"rg\">outside</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"713\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">آپ صرف <b>باہر</b> والوں کو کیوں روکتے ہیں؟</div><div class=\"se\">Why did you stop only the foreigners?</div></div><div class=\"sent\" data-sent=\"779\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>باہر</b> درجہ حرارت صفر ہے۔</div><div class=\"se\">The temperature outside is zero.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "b9b805ef0e5090e4"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "1ef1b9b10ed177e9"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "4f5c045a9d37720c"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 40,
+     "sha": "3d75caafa39e1677"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 3,
+     "sha": "ee6cab66e6ea9238"
+    },
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "a1c686463aaf508f"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.079333,
+     0.037,
+     0.024133
+    ],
+    "toGo": [
+     148,
+     244,
+     310
+    ],
+    "toGoTotal": 152,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.079333,
+     "all": false
+    },
+    "eta": 148,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.023667
+   },
+   "items": {
+    "items": 250,
+    "right": 216
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "8f6901edb88b91d2"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.730769,
+     0.38
+    ],
+    "toGo": [
+     0,
+     79,
+     169
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.730769,
+     "all": false
+    },
+    "eta": 79,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.35625
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 79 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read احمد کا دن Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 79 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read احمد کا دن Start",
+    "Session 2 Goal 2 of 3 ≈ 80 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read احمد کا دن Start",
+    "Session 3 Goal 2 of 3 ≈ 81 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read احمد کا دن Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 79 sessions daily life: directions, simple chat, short notices حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 82 sessions daily life: directions, simple chat, short notices حروفِ تہجی 0 / 40 taught · 0 mastered A1 1 of 600 mastered sentences 1 · reading 1 of 20 A2 380 learned Still shaky گھر پیدا ہونا جولائی پھل خوشی چین ضرورت چہرہ بجے گواہ کاروبار درج Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "ریل train, railway (f)",
+        "سالن curry (m)",
+        "نارنجی orange (colour)",
+        "ناشتہ breakfast (m)",
+        "نانا maternal grandfather (m)",
+        "پیلا yellow",
+        "چاول rice (m)",
+        "چچی aunt (f)",
+        "کالا black",
+        "گانا to sing"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "علاج medical treatment (cure (m) )",
+        "ڈرامہ drama (m)",
+        "خاموش silent (quiet)",
+        "مجرم criminal, offender (m/f)",
+        "خالی empty, vacant",
+        "سیٹ seat (f)",
+        "ورنہ otherwise",
+        "ٹکڑا piece, fragment, section (m)",
+        "مزہ fun, pleasure, enjoyment (m)",
+        "معاشرہ society (m)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "خون blood (m)",
+        "اسلحہ weapons, ammunitions (m)",
+        "شراب alcohol (f)",
+        "زہر poison (m)",
+        "شمال north (m)",
+        "نظریہ theory (m)",
+        "وزن weight, weighing, measure (m)",
+        "مناسب appropriate, fitting",
+        "سیدھا straight",
+        "احتیاط prudence (f)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "ریل train, railway (f)",
+        "سالن curry (m)",
+        "نارنجی orange (colour)",
+        "ناشتہ breakfast (m)",
+        "نانا maternal grandfather (m)",
+        "پیلا yellow",
+        "چاول rice (m)",
+        "چچی aunt (f)",
+        "کالا black",
+        "گانا to sing"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 39 of 70",
+       "rows": 10,
+       "first": [
+        "ہوائی air ( ہوائی جہاز : aeroplane)",
+        "بتا دینا to tell",
+        "دھیان دینا to pay attention",
+        "ہدایت guidance (f)",
+        "غلطی کرنا to make a mistake",
+        "چڑھنا to climb",
+        "شرط condition, term (f)",
+        "سمندر sea, ocean (m)",
+        "سمیت including, along with",
+        "واقع situated, located"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "خون blood (m)",
+        "اسلحہ weapons, ammunitions (m)",
+        "شراب alcohol (f)",
+        "زہر poison (m)",
+        "شمال north (m)",
+        "نظریہ theory (m)",
+        "وزن weight, weighing, measure (m)",
+        "مناسب appropriate, fitting",
+        "سیدھا straight",
+        "احتیاط prudence (f)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0051",
+     "type:w:w0837",
+     "type:w:w0775",
+     "type:w:w0093",
+     "type:w:w0386",
+     "type:w:w0133",
+     "type:w:w0086",
+     "type:w:w0035",
+     "type:w:w0789",
+     "type:w:w0827",
+     "type:w:w0188",
+     "type:w:w0395",
+     "type:w:w0753",
+     "type:w:w0669",
+     "type:w:w0897",
+     "type:w:w0093",
+     "mc:w:w0935",
+     "mc:w:w0931",
+     "mc:w:w0938",
+     "mc:w:w0933",
+     "mc:w:w0940",
+     "mc:w:w0939",
+     "mc:w:w0939",
+     "mc:w:w0935",
+     "mc:w:w0931",
+     "mc:w:w0942",
+     "mc:w:w0944",
+     "mc:w:w0940",
+     "mc:w:w0933",
+     "mc:w:w0942",
+     "mc:w:w0936",
+     "mc:w:w0937",
+     "mc:w:w0944",
+     "mc:w:w0938",
+     "mc:w:w0937",
+     "mc:w:w0936",
+     "mc:w:w0935",
+     "mc:w:w0944",
+     "mc:w:w0933",
+     "mc:w:w0942",
+     "mc:w:w0936",
+     "mc:w:w0936",
+     "mc:w:w0942",
+     "mc:w:w0936",
+     "mc:w:w0812",
+     "mc:w:w0687",
+     "mc:w:w0899",
+     "mc:w:w0116",
+     "mc:w:w0874",
+     "mc:w:w0373",
+     "mc:w:w0572",
+     "mc:w:w0515",
+     "mc:w:w0655",
+     "mc:w:w0455",
+     "mc:w:w0220",
+     "mc:w:w0310",
+     "mc:w:w0220",
+     "type:w:w0674",
+     "type:w:w0341",
+     "type:w:w0657",
+     "type:w:w0168",
+     "type:w:w0725",
+     "type:w:w0200",
+     "type:w:w0479",
+     "type:w:w0836",
+     "type:w:w0831",
+     "type:w:w0875",
+     "type:w:w0152",
+     "type:w:w0349",
+     "type:w:w0875",
+     "mc:s:s2556",
+     "mc:s:s1085",
+     "mc:s:s1040",
+     "mc:s:s0116",
+     "type:s:s0783",
+     "mc:s:s1184",
+     "mc:s:s0160",
+     "mc:s:s0940",
+     "mc:s:s2556",
+     "mc:s:s1040",
+     "mc:s:s0116",
+     "type:s:s0783",
+     "mc:s:s1184",
+     "mc:s:s0783"
+    ],
+    [
+     "mc:w:w0220",
+     "mc:w:w0933",
+     "type:w:w0122",
+     "type:w:w0093",
+     "type:w:w0506",
+     "mc:w:w0944",
+     "type:w:w0905",
+     "type:w:w0282",
+     "mc:w:w0936",
+     "type:w:w0873",
+     "type:w:w0858",
+     "type:w:w0150",
+     "mc:w:w0942",
+     "type:w:w0875",
+     "mc:w:w0935",
+     "type:w:w0506",
+     "type:w:w0282",
+     "type:w:w0150",
+     "mc:w:w0935",
+     "mc:w:w0506",
+     "mc:w:w0282",
+     "mc:w:w0951",
+     "mc:w:w0953",
+     "mc:w:w0943",
+     "mc:w:w0947",
+     "mc:w:w0945",
+     "mc:w:w0950",
+     "mc:w:w0796",
+     "mc:w:w0946",
+     "mc:w:w0953",
+     "mc:w:w0948",
+     "mc:w:w0948",
+     "mc:w:w0951",
+     "mc:w:w0947",
+     "mc:w:w1012",
+     "mc:w:w0796",
+     "mc:w:w0950",
+     "mc:w:w1012",
+     "mc:w:w0945",
+     "mc:w:w0946",
+     "mc:w:w0943",
+     "mc:w:w0236",
+     "mc:w:w0427",
+     "mc:w:w0384",
+     "mc:w:w0456",
+     "mc:w:w0936",
+     "mc:w:w0513",
+     "mc:w:w0125",
+     "mc:w:w0767",
+     "mc:w:w0580",
+     "mc:w:w0656",
+     "mc:w:w0389",
+     "mc:w:w0364",
+     "mc:w:w0384",
+     "mc:w:w0513",
+     "mc:w:w0580",
+     "type:w:w0142",
+     "type:w:w0855",
+     "type:w:w0630",
+     "type:w:w0927",
+     "type:w:w0821",
+     "type:w:w0469",
+     "type:w:w0473",
+     "type:w:w0912",
+     "type:w:w0563",
+     "type:w:w0171",
+     "type:w:w1051",
+     "type:w:w0915",
+     "type:w:w0855",
+     "type:w:w0912",
+     "mc:s:s0138",
+     "type:s:s1184",
+     "mc:s:s1040",
+     "type:s:s0891",
+     "type:s:s0783",
+     "mc:s:s0911",
+     "mc:s:s2556",
+     "mc:s:s1305",
+     "type:s:s1184",
+     "mc:s:s1040",
+     "type:s:s0891",
+     "type:s:s0783",
+     "mc:s:s2556",
+     "mc:s:s1184",
+     "mc:s:s0891",
+     "mc:s:s0783"
+    ],
+    [
+     "type:w:w0150",
+     "type:w:w0614",
+     "type:w:w0282",
+     "mc:w:w0513",
+     "type:w:w0309",
+     "type:w:w0855",
+     "type:w:w0506",
+     "type:w:w0268",
+     "type:w:w0912",
+     "mc:w:w0935",
+     "type:w:w0037",
+     "mc:w:w0384",
+     "mc:w:w0580",
+     "type:w:w0858",
+     "type:w:w0873",
+     "mc:w:w0513",
+     "mc:w:w0580",
+     "mc:w:w0959",
+     "mc:w:w0959",
+     "mc:w:w0956",
+     "mc:w:w0954",
+     "mc:w:w0876",
+     "mc:w:w0958",
+     "mc:w:w0639",
+     "mc:w:w0955",
+     "mc:w:w0662",
+     "mc:w:w0876",
+     "mc:w:w0952",
+     "mc:w:w0662",
+     "mc:w:w0954",
+     "mc:w:w0957",
+     "mc:w:w0955",
+     "mc:w:w0958",
+     "mc:w:w0956",
+     "mc:w:w0952",
+     "mc:w:w0957",
+     "mc:w:w0639",
+     "mc:w:w0956",
+     "mc:w:w0639",
+     "mc:w:w0955",
+     "mc:w:w0956",
+     "mc:w:w0955",
+     "mc:w:w0226",
+     "mc:w:w0879",
+     "mc:w:w0756",
+     "mc:w:w0873",
+     "mc:w:w0617",
+     "mc:w:w0818",
+     "mc:w:w0930",
+     "mc:w:w0858",
+     "mc:w:w0173",
+     "mc:w:w0887",
+     "mc:w:w0089",
+     "mc:w:w0475",
+     "mc:w:w0756",
+     "mc:w:w0873",
+     "mc:w:w0173",
+     "mc:w:w0887",
+     "mc:w:w0873",
+     "type:w:w0792",
+     "type:w:w0366",
+     "type:w:w0480",
+     "type:w:w0066",
+     "type:w:w0928",
+     "type:w:w0157",
+     "type:w:w0602",
+     "type:w:w0814",
+     "type:w:w0648",
+     "type:w:w0829",
+     "type:w:w0001",
+     "type:w:w0087",
+     "type:w:w0602",
+     "type:w:w0648",
+     "type:w:w0087",
+     "mc:s:s2833",
+     "mc:s:s2530",
+     "mc:s:s0994",
+     "mc:s:s1040",
+     "mc:s:s1096",
+     "type:s:s1184",
+     "mc:s:s2556",
+     "type:s:s0783",
+     "type:s:s1184",
+     "type:s:s0783",
+     "mc:s:s1184",
+     "mc:s:s0783"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0051",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0051\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">نہ</span><span class=\"rg\">not <span class=\"gx\">(don&#39;t; nor)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"60\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">اگر وہ گیٹار اتنا مہنگا <b>نہ</b> ہوتا، میں اسے خرید لیتا۔</div><div class=\"se\">If that guitar weren&#39;t so expensive, I could buy it.</div></div><div class=\"sent\" data-sent=\"117\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">تم اس کی کسی بات پہ اعتبار <b>نہ</b> کرنا۔</div><div class=\"se\">You can&#39;t believe a word he says.</div></div></div>"
+    },
+    {
+     "key": "w:w0837",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0837\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">روڈ</span><span class=\"rg\">road <span class=\"dim\">(m)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1469\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">یہ <b>روڈ</b> شہر تک جاتی ہے۔</div><div class=\"se\">This road goes to the city.</div></div><div class=\"sent\" data-sent=\"2551\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">یہ <b>روڈ</b> سیدھا بازار جاتا ہے۔</div><div class=\"se\">This road goes straight to the market.</div></div></div>"
+    },
+    {
+     "key": "w:w0775",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0775\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">قانونی</span><span class=\"rg\">legal</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1125\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">عدالت نے فیصلہ کیا کہ یہ <b>قانونی</b> ہے۔</div><div class=\"se\">The court decided that this is legal.</div></div><div class=\"sent\" data-sent=\"1126\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">یہ کام <b>قانونی</b> طور پر ٹھیک ہے۔</div><div class=\"se\">This work is legally fine.</div></div></div>"
+    },
+    {
+     "key": "w:w0093",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0093\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">بچہ</span><span class=\"rg\">child <span class=\"dim\">(m)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"272\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">عمر جو مرضی ہو، <b>بچہ</b> <b>بچہ</b> ہوتا ہے۔</div><div class=\"se\">No matter the age, a child is a child.</div></div><div class=\"sent\" data-sent=\"1010\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>بچہ</b> دروازے کے پیچھے چھپ گیا۔</div><div class=\"se\">The child hid behind the door.</div></div></div>"
+    },
+    {
+     "key": "w:w0386",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0386\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">یعنی</span><span class=\"rg\">that is, i.e., meaning</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"942\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>یعنی</b> آپ کل نہیں آئیں گے؟</div><div class=\"se\">That means you won&#39;t come tomorrow?</div></div><div class=\"sent\" data-sent=\"1444\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>یعنی</b> کام ختم ہو گیا۔</div><div class=\"se\">That means the work is finished.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "24c49890ca759ea2"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "19684fcd6beb6a2f"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "539ce46534b46326"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 16,
+     "sha": "adfac2c6e38d34a0"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "986c1e752ab32447"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 980,
+     "sha": "b9e2b1037adea172"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.983333,
+     0.716154,
+     0.3724
+    ],
+    "toGo": [
+     0,
+     82,
+     170
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.716154,
+     "all": false
+    },
+    "eta": 82,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.349125
+   },
+   "items": {
+    "items": 256,
+    "right": 213
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "9a56fedca9958bf9"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     1,
+     1
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 1,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.75
+   },
+   "todayFirst": "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read ایک مشکل فیصلہ Start",
+   "today": [
+    "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read ایک مشکل فیصلہ Start",
+    "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read ایک مشکل فیصلہ Start",
+    "Session 3 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read ایک مشکل فیصلہ Start"
+   ],
+   "progress": {
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles حروفِ تہجی 0 / 40 taught · 0 mastered A1 4 of 600 mastered A2 3 of 700 mastered sentences 1 · reading 0 of 20 B1 4 of 700 mastered reading 0 of 20 Still shaky ابھی آدھا کپتان معنی سکون دوستی اندھیرا بیج مقبول Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "ریل train, railway (f)",
+        "سالن curry (m)",
+        "نارنجی orange (colour)",
+        "ناشتہ breakfast (m)",
+        "نانا maternal grandfather (m)",
+        "پیلا yellow",
+        "چاول rice (m)",
+        "چچی aunt (f)",
+        "کالا black",
+        "گانا to sing"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "سبق lesson (m)",
+        "برباد ruined",
+        "احاطہ enclosure, compound (m)",
+        "ڈبہ box, container (m)",
+        "نرم soft",
+        "خالو maternal aunt&#39;s husband (m)",
+        "خالہ maternal aunt (f)",
+        "ماموں maternal uncle (m)",
+        "ممانی maternal uncle&#39;s wife (f)",
+        "پھوپھی paternal aunt (f)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "بندھن bond (m)",
+        "اطالوی Italian",
+        "غروب dusk, sunset (m)",
+        "غرور pride, vanity, haughtiness (m)",
+        "خیریت health, well-being, welfare (f)",
+        "میوہ fruit (dried fruit and nuts (m) )",
+        "بھاپ steam, water vapour (m)",
+        "پیاسا thirsty",
+        "تھیلا bag, sack (m)",
+        "یادداشت memory (f)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 70 of 70 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "ریل train, railway (f)",
+        "سالن curry (m)",
+        "نارنجی orange (colour)",
+        "ناشتہ breakfast (m)",
+        "نانا maternal grandfather (m)",
+        "پیلا yellow",
+        "چاول rice (m)",
+        "چچی aunt (f)",
+        "کالا black",
+        "گانا to sing"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "سبق lesson (m)",
+        "برباد ruined",
+        "احاطہ enclosure, compound (m)",
+        "ڈبہ box, container (m)",
+        "نرم soft",
+        "خالو maternal aunt&#39;s husband (m)",
+        "خالہ maternal aunt (f)",
+        "ماموں maternal uncle (m)",
+        "ممانی maternal uncle&#39;s wife (f)",
+        "پھوپھی paternal aunt (f)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "بندھن bond (m)",
+        "اطالوی Italian",
+        "غروب dusk, sunset (m)",
+        "غرور pride, vanity, haughtiness (m)",
+        "خیریت health, well-being, welfare (f)",
+        "میوہ fruit (dried fruit and nuts (m) )",
+        "بھاپ steam, water vapour (m)",
+        "پیاسا thirsty",
+        "تھیلا bag, sack (m)",
+        "یادداشت memory (f)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0110",
+     "type:w:w1680",
+     "type:w:w1344",
+     "type:w:w0154",
+     "type:w:w0517",
+     "type:w:w1036",
+     "type:w:w1648",
+     "type:w:w1298",
+     "type:w:w1313",
+     "type:w:w1635",
+     "type:w:w0443",
+     "type:w:w0759",
+     "type:w:w0621",
+     "type:w:w1621",
+     "type:w:w0204",
+     "mc:w:w1145",
+     "mc:w:w1567",
+     "mc:w:w1153",
+     "mc:w:w1035",
+     "mc:w:w1888",
+     "mc:w:w0789",
+     "mc:w:w0673",
+     "mc:w:w1876",
+     "mc:w:w0498",
+     "mc:w:w1025",
+     "mc:w:w1195",
+     "mc:w:w1402",
+     "mc:w:w1567",
+     "type:w:w1586",
+     "type:w:w0923",
+     "type:w:w1019",
+     "type:w:w1039",
+     "type:w:w0159",
+     "type:w:w1439",
+     "type:w:w1350",
+     "type:w:w1380",
+     "type:w:w0206",
+     "type:w:w0715",
+     "type:w:w1029",
+     "type:w:w1377",
+     "type:w:w1586",
+     "type:w:w0923",
+     "type:w:w1350",
+     "mc:s:s2507",
+     "mc:s:s2162",
+     "mc:s:s1404",
+     "mc:s:s2529",
+     "mc:s:s2596",
+     "mc:s:s2557",
+     "type:s:s1349",
+     "type:s:s1206",
+     "type:s:s1349",
+     "type:s:s1206",
+     "mc:s:s1349",
+     "mc:s:s1206"
+    ],
+    [
+     "type:w:w0428",
+     "type:w:w0118",
+     "type:w:w0848",
+     "type:w:w1481",
+     "type:w:w1059",
+     "type:w:w0914",
+     "type:w:w1675",
+     "type:w:w1586",
+     "type:w:w0923",
+     "mc:w:w1567",
+     "type:w:w0898",
+     "type:w:w1104",
+     "type:w:w0664",
+     "type:w:w1350",
+     "type:w:w1417",
+     "type:w:w0848",
+     "type:w:w1586",
+     "type:w:w1417",
+     "mc:w:w0848",
+     "mc:w:w1586",
+     "mc:w:w0848",
+     "mc:w:w1086",
+     "mc:w:w0600",
+     "mc:w:w0097",
+     "mc:w:w0254",
+     "mc:w:w1206",
+     "mc:w:w1023",
+     "mc:w:w0780",
+     "mc:w:w0660",
+     "mc:w:w1416",
+     "mc:w:w1956",
+     "mc:w:w0584",
+     "mc:w:w0590",
+     "mc:w:w1023",
+     "mc:w:w0660",
+     "type:w:w0468",
+     "type:w:w0959",
+     "type:w:w1069",
+     "type:w:w1427",
+     "type:w:w0546",
+     "type:w:w0960",
+     "type:w:w1437",
+     "type:w:w1373",
+     "type:w:w0093",
+     "type:w:w0924",
+     "type:w:w0258",
+     "type:w:w0606",
+     "type:w:w1069",
+     "type:w:w1437",
+     "mc:s:s0905",
+     "mc:s:s1072",
+     "mc:s:s1550",
+     "type:s:s1519",
+     "type:s:s1349",
+     "type:s:s1206",
+     "mc:s:s0627",
+     "mc:s:s0674",
+     "mc:s:s1072",
+     "type:s:s1519",
+     "type:s:s1349",
+     "type:s:s1206",
+     "mc:s:s1519",
+     "mc:s:s1349",
+     "mc:s:s1206",
+     "mc:s:s1206"
+    ],
+    [
+     "mc:w:w0660",
+     "type:w:w1370",
+     "type:w:w0058",
+     "type:w:w0551",
+     "type:w:w0848",
+     "type:w:w1069",
+     "type:w:w1437",
+     "type:w:w1104",
+     "type:w:w1586",
+     "type:w:w0914",
+     "type:w:w1417",
+     "type:w:w0321",
+     "type:w:w1096",
+     "mc:w:w1023",
+     "type:w:w1357",
+     "type:w:w0848",
+     "mc:w:w1018",
+     "mc:w:w1364",
+     "mc:w:w1431",
+     "mc:w:w1082",
+     "mc:w:w1459",
+     "mc:w:w1524",
+     "mc:w:w1988",
+     "mc:w:w0914",
+     "mc:w:w1529",
+     "mc:w:w0831",
+     "mc:w:w0840",
+     "mc:w:w1104",
+     "mc:w:w1364",
+     "mc:w:w1431",
+     "mc:w:w1104",
+     "mc:w:w1431",
+     "type:w:w1325",
+     "type:w:w1367",
+     "type:w:w0900",
+     "type:w:w1391",
+     "type:w:w0215",
+     "type:w:w0512",
+     "type:w:w0899",
+     "type:w:w0518",
+     "type:w:w0354",
+     "type:w:w0378",
+     "type:w:w1618",
+     "type:w:w1282",
+     "type:w:w1391",
+     "type:w:w1618",
+     "mc:w:w1618",
+     "type:s:s1349",
+     "mc:s:s0442",
+     "mc:s:s1072",
+     "mc:s:s2940",
+     "type:s:s1519",
+     "type:s:s1206",
+     "mc:s:s1860",
+     "type:s:s0884",
+     "type:s:s1349",
+     "type:s:s1519",
+     "type:s:s1206",
+     "type:s:s0884",
+     "mc:s:s1349",
+     "mc:s:s1519",
+     "mc:s:s1206",
+     "mc:s:s0884"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0110",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0110\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">بار</span><span class=\"rg\">time, occasion <span class=\"dim\">(<bdi data-tl lang=\"ur\" dir=\"rtl\" class=\"tlf\">ایک بار</bdi>: once)</span> <span class=\"dim\">(f)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"131\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">اسے <b>بار</b> <b>بار</b> پڑھو۔</div><div class=\"se\">Read it again and again.</div></div><div class=\"sent\" data-sent=\"1039\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">وہ دوسری <b>بار</b> بھی ناکام ہو گیا۔</div><div class=\"se\">He failed the second time too.</div></div></div>"
+    },
+    {
+     "key": "w:w1680",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1680\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">آلو</span><span class=\"rg\">potato <span class=\"dim\">(m)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2376\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">بازار سے ایک کلو <b>آلو</b> لے آؤ۔</div><div class=\"se\">Bring a kilo of potatoes from the market.</div></div><div class=\"sent\" data-sent=\"2670\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>آلو</b> کی سبزی بہت مزیدار ہے۔</div><div class=\"se\">The potato dish is very tasty.</div></div></div>"
+    },
+    {
+     "key": "w:w1344",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1344\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">فیکٹری</span><span class=\"rg\">factory <span class=\"dim\">(f)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1628\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">وہ ایک <b>فیکٹری</b> میں کام کرتا ہے۔</div><div class=\"se\">He works in a factory.</div></div><div class=\"sent\" data-sent=\"1763\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>فیکٹری</b> میں سو لوگ کام کرتے ہیں۔</div><div class=\"se\">A hundred people work in the factory.</div></div></div>"
+    },
+    {
+     "key": "w:w0154",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0154\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">پتہ ہونا</span><span class=\"rg\">to know <span class=\"dim\">(<bdi data-tl lang=\"ur\" dir=\"rtl\" class=\"tlf\">مجھے پتہ ہے</bdi>: I know)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"256\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>پتہ</b> نہیں وہ کیوں اتنی پریشان ہے۔</div><div class=\"se\">I wonder why she is so worried.</div></div><div class=\"sent\" data-sent=\"265\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>پتہ</b> نہیں وہ آئے گا کہ نہیں۔</div><div class=\"se\">I wonder if he will come.</div></div></div>"
+    },
+    {
+     "key": "w:w0517",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0517\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">بارش</span><span class=\"rg\">rain <span class=\"dim\">(f)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"83\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>بارش</b> کے بعد پتے بہت تازہ ہو گئے ہیں۔</div><div class=\"se\">The leaves are fresh after a rainfall.</div></div><div class=\"sent\" data-sent=\"121\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">اجلاس کے دوران <b>بارش</b> ہوتی رہی۔</div><div class=\"se\">It rained during the whole meeting.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "309109e163cc3be3"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "6743c9c5af37eacb"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "53cb218d3d45b435"
+    },
+    "read": {
+     "n": 2,
+     "sha": "07e71869e4c43a0d"
+    },
+    "s": {
+     "n": 18,
+     "sha": "45e1e9c309c439c7"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "1f2b525eaf4ded23"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.994615,
+     0.992
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 0.992,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.744
+   },
+   "items": {
+    "items": 183,
+    "right": 157
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "b427bc4023020dd8"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.2,
+     0.092308,
+     0.06
+    ],
+    "toGo": [
+     115,
+     215,
+     283
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.2,
+     "all": false
+    },
+    "eta": 115,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 30,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.05625
+   },
+   "todayFirst": "حروفِ تہجی first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn حروفِ تہجی , sets 1–2 of 8 A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Listen Recall Sentences Read احمد کا دن",
+   "today": [
+    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Listen Recall Sentences Read احمد کا دن Start",
+    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Listen Recall Sentences Read احمد کا دن Start",
+    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Listen Recall Sentences Read احمد کا دن Start"
+   ],
+   "progress": {
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 151 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Still shaky بتانا بڑھنا اتنا اٹھنا مشورہ دینا تعمیر کھانا سفید پیچھے Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "ریل train, railway (f)",
+        "سالن curry (m)",
+        "نارنجی orange (colour)",
+        "ناشتہ breakfast (m)",
+        "نانا maternal grandfather (m)",
+        "پیلا yellow",
+        "چاول rice (m)",
+        "چچی aunt (f)",
+        "کالا black",
+        "گانا to sing"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "سیاست politics (f)",
+        "اعلیٰ high, superior (top)",
+        "قبول acceptance, assent (m)",
+        "شامل کرنا to include, to add",
+        "ظاہر clear, apparent, obviously",
+        "رونا to cry, to weep",
+        "قومی national",
+        "کے قریب near, close to",
+        "قبل ago, before, previous",
+        "رابطہ contact, in touch (m)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "خون blood (m)",
+        "اسلحہ weapons, ammunitions (m)",
+        "شراب alcohol (f)",
+        "زہر poison (m)",
+        "شمال north (m)",
+        "نظریہ theory (m)",
+        "وزن weight, weighing, measure (m)",
+        "مناسب appropriate, fitting",
+        "سیدھا straight",
+        "احتیاط prudence (f)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "ریل train, railway (f)",
+        "سالن curry (m)",
+        "نارنجی orange (colour)",
+        "ناشتہ breakfast (m)",
+        "نانا maternal grandfather (m)",
+        "پیلا yellow",
+        "چاول rice (m)",
+        "چچی aunt (f)",
+        "کالا black",
+        "گانا to sing"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "سیاست politics (f)",
+        "اعلیٰ high, superior (top)",
+        "قبول acceptance, assent (m)",
+        "شامل کرنا to include, to add",
+        "ظاہر clear, apparent, obviously",
+        "رونا to cry, to weep",
+        "قومی national",
+        "کے قریب near, close to",
+        "قبل ago, before, previous",
+        "رابطہ contact, in touch (m)"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "خون blood (m)",
+        "اسلحہ weapons, ammunitions (m)",
+        "شراب alcohol (f)",
+        "زہر poison (m)",
+        "شمال north (m)",
+        "نظریہ theory (m)",
+        "وزن weight, weighing, measure (m)",
+        "مناسب appropriate, fitting",
+        "سیدھا straight",
+        "احتیاط prudence (f)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0336",
+     "type:w:w0142",
+     "type:w:w0317",
+     "type:w:w0206",
+     "type:w:w0116",
+     "mc:w:w0539",
+     "type:w:w0324",
+     "type:w:w0520",
+     "type:w:w0587",
+     "type:w:w0396",
+     "type:w:w0093",
+     "type:w:w0242",
+     "type:w:w0216",
+     "type:w:w0075",
+     "type:w:w0279",
+     "type:w:w0216",
+     "mc:w:w0170",
+     "mc:w:w0564",
+     "mc:w:w0208",
+     "mc:w:w0538",
+     "mc:w:w0139",
+     "mc:w:w0411",
+     "mc:w:w0019",
+     "mc:w:w0537",
+     "mc:w:w0024",
+     "mc:w:w0042",
+     "mc:w:w2015",
+     "mc:w:w0054",
+     "type:w:w0271",
+     "type:w:w0462",
+     "type:w:w0314",
+     "type:w:w0251",
+     "type:w:w0217",
+     "type:w:w0202",
+     "type:w:w0524",
+     "type:w:w0151",
+     "type:w:w0297",
+     "type:w:w0351",
+     "type:w:w0583",
+     "type:w:w0118",
+     "mc:s:s0494",
+     "type:s:s0207",
+     "mc:s:s2888",
+     "mc:s:s0727",
+     "mc:s:s1077",
+     "mc:s:s0645",
+     "mc:s:s0377",
+     "type:s:s0394",
+     "type:s:s0207",
+     "type:s:s0394",
+     "mc:s:s0207",
+     "mc:s:s0394"
+    ],
+    [
+     "type:w:w0388",
+     "type:w:w0110",
+     "type:w:w0277",
+     "type:w:w0062",
+     "type:w:w0313",
+     "type:w:w0356",
+     "type:w:w0458",
+     "type:w:w0216",
+     "type:w:w0246",
+     "type:w:w0485",
+     "type:w:w0542",
+     "mc:w:w0504",
+     "type:w:w0318",
+     "type:w:w0209",
+     "type:w:w0127",
+     "mc:w:w0082",
+     "mc:w:w0031",
+     "mc:w:w0469",
+     "mc:w:w0222",
+     "mc:w:w0577",
+     "mc:w:w0461",
+     "mc:w:w0498",
+     "mc:w:w0376",
+     "mc:w:w0162",
+     "mc:w:w0561",
+     "mc:w:w0101",
+     "mc:w:w0112",
+     "mc:w:w0469",
+     "mc:w:w0376",
+     "mc:w:w0101",
+     "type:w:w0244",
+     "type:w:w0131",
+     "type:w:w0367",
+     "type:w:w0543",
+     "type:w:w0136",
+     "type:w:w0552",
+     "type:w:w0007",
+     "type:w:w0178",
+     "type:w:w0289",
+     "type:w:w0292",
+     "type:w:w0529",
+     "type:w:w0506",
+     "type:w:w0289",
+     "mc:s:s0827",
+     "mc:s:s1934",
+     "type:s:s0207",
+     "type:s:s0394",
+     "mc:s:s0913",
+     "mc:s:s0030",
+     "mc:s:s2878",
+     "mc:s:s0756",
+     "type:s:s0207",
+     "type:s:s0394",
+     "mc:s:s0207",
+     "mc:s:s0394"
+    ],
+    [
+     "type:w:w0574",
+     "type:w:w0113",
+     "type:w:w0289",
+     "type:w:w0274",
+     "type:w:w0533",
+     "type:w:w0281",
+     "type:w:w0026",
+     "type:w:w0485",
+     "type:w:w0491",
+     "type:w:w0253",
+     "type:w:w2011",
+     "mc:w:w0376",
+     "mc:w:w0469",
+     "type:w:w0609",
+     "mc:w:w0101",
+     "type:w:w0289",
+     "mc:w:w0469",
+     "type:w:w0609",
+     "mc:w:w0294",
+     "mc:w:w0273",
+     "mc:w:w0299",
+     "mc:w:w0193",
+     "mc:w:w0350",
+     "mc:w:w0053",
+     "mc:w:w0585",
+     "mc:w:w0327",
+     "mc:w:w0560",
+     "mc:w:w0470",
+     "mc:w:w0348",
+     "mc:w:w0011",
+     "type:w:w0390",
+     "type:w:w0393",
+     "type:w:w0020",
+     "type:w:w0532",
+     "type:w:w0236",
+     "type:w:w0223",
+     "type:w:w0566",
+     "type:w:w0408",
+     "type:w:w0528",
+     "type:w:w0392",
+     "type:w:w0547",
+     "type:w:w0553",
+     "type:w:w0393",
+     "type:w:w0236",
+     "type:w:w0408",
+     "type:w:w0392",
+     "type:s:s0394",
+     "mc:s:s0574",
+     "mc:s:s0003",
+     "mc:s:s1417",
+     "type:s:s0207",
+     "mc:s:s0561",
+     "mc:s:s0466",
+     "mc:s:s2731",
+     "type:s:s0394",
+     "type:s:s0207",
+     "mc:s:s0394",
+     "mc:s:s0207"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0336",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0336\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">عدالت</span><span class=\"rg\">court <span class=\"dim\">(f)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"922\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">وہ کل <b>عدالت</b> جائیں گے۔</div><div class=\"se\">They will go to court tomorrow.</div></div><div class=\"sent\" data-sent=\"923\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\"><b>عدالت</b> نے فیصلہ سنا دیا۔</div><div class=\"se\">The court announced its decision.</div></div></div>"
+    },
+    {
+     "key": "w:w0142",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0142\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">پورا</span><span class=\"rg\">whole, entire, complete</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"339\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">وہ <b>پورا</b> دن مصروف رہا ہے۔</div><div class=\"se\">He has been working all day long.</div></div><div class=\"sent\" data-sent=\"551\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">کیا تمہیں <b>پورا</b> یقین ہے کہ ٹام یہ کر لے گا؟</div><div class=\"se\">Are you absolutely sure that Tom will do that?</div></div></div>"
+    },
+    {
+     "key": "w:w0317",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0317\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">مرنا</span><span class=\"rg\">to die, to be dead</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"717\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">ہار ماننے سے بہتر <b>مرنا</b> پسند کروں گی۔</div><div class=\"se\">I&#39;d rather die than give up.</div></div><div class=\"sent\" data-sent=\"338\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">ٹام کو امید ہے کہ مریم نہیں <b>مرے</b> گی۔</div><div class=\"se\">Tom hopes Mary won&#39;t die.</div></div></div>"
+    },
+    {
+     "key": "w:w0206",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0206\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">کے درمیان</span><span class=\"rg\">between, among</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"543\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">دو ممالک کے درمیان کوئی رابطہ نہیں ہے۔</div><div class=\"se\">There&#39;s no communication between the two countries.</div></div><div class=\"sent\" data-sent=\"2852\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">دونوں شہروں کے درمیان فاصلہ زیادہ نہیں ہے۔</div><div class=\"se\">The distance between the two cities is not great.</div></div></div>"
+    },
+    {
+     "key": "w:w0116",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0116\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ur\" dir=\"rtl\">ضرورت ہونا</span><span class=\"rg\">to need <span class=\"dim\">(<bdi data-tl lang=\"ur\" dir=\"rtl\" class=\"tlf\">مجھے ضرورت ہے</bdi>: I need)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"36\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">مجھے قرض کی اب <b>ضرورت</b> نہیں <b>ہے</b>۔</div><div class=\"se\">I don&#39;t need a loan anymore.</div></div><div class=\"sent\" data-sent=\"200\"><div class=\"st\" data-tl lang=\"ur\" dir=\"rtl\">اس سائیکل کو مرمت کی <b>ضرورت</b> <b>ہے</b>۔</div><div class=\"se\">This bicycle needs repairing.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "688320ce36d3f912"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "92103db5aa5e73c0"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "9f3d054bda846141"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 20,
+     "sha": "150d4dbe89817195"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "014baec9a5379794"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.201333,
+     0.092923,
+     0.0604
+    ],
+    "toGo": [
+     115,
+     215,
+     283
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.201333,
+     "all": false
+    },
+    "eta": 115,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 30,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.056625
+   },
+   "items": {
+    "items": 165,
+    "right": 150
+   }
+  }
+ ]
+}

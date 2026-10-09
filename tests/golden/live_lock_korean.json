@@ -1,0 +1,2504 @@
+{
+ "lang": "korean",
+ "packKey": "ko",
+ "words": 2000,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "c19c74271403fc61"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     168,
+     266,
+     331
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": 168,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "한글 first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until a set is learned Learn 한글, sets 1–2 of 7 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 0 learned Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 30 learned Still shaky 하다 있다 없다 주다 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 1 of 60 › Drill this set",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "하다 to do (to make)",
+        "것 thing (one (-는 것: the act of) )",
+        "나 I, me (informal)",
+        "있다 there is (to be (somewhere) ; to have)",
+        "-이다 to be (copula: N-이다 = is N)",
+        "너 you (informal)",
+        "가다 to go",
+        "저 I, me (humble)",
+        "되다 to become (to be done; to be okay)",
+        "그 he (that)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "대하다 to treat, to face (-에 대해: about)",
+        "적 time, experience (-ㄴ 적이 있다: have done) (enemy)",
+        "보이다 to be seen (to look, to seem; to show)",
+        "중 during, in the middle of (among)",
+        "위하다 to be for (-을 위해: for the sake of)",
+        "원하다 to want, to hope",
+        "맞다 to be right, to be correct (to fit; to be hit by (비를 맞다: to be caught in the rain) )",
+        "줄 how to (-ㄹ 줄 알다) (line, rope)",
+        "자기 oneself (honey (to a partner) )",
+        "자신 oneself"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "그러다 to do so",
+        "당하다 to suffer, to undergo",
+        "상황 situation, conditions",
+        "죽이다 to kill, to cause to die",
+        "수도 capital (city) (water supply)",
+        "상태 condition, status",
+        "총 gun",
+        "삶 life",
+        "놈 guy, fellow (rude)",
+        "피 blood"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 4 of 60",
+       "rows": 10,
+       "first": [
+        "그것 that (thing) , it",
+        "이것 this (thing)",
+        "싶다 to want to (-고 싶다)",
+        "말 words, speech (language)",
+        "뭐 what (spoken)",
+        "다 all, everything",
+        "하나 one (native Korean)",
+        "보다 to see, to look at, to watch (to try (-아 보다) )",
+        "말하다 to speak, to talk",
+        "말다 to stop, to not do (-지 마세요: don&#39;t)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "대하다 to treat, to face (-에 대해: about)",
+        "적 time, experience (-ㄴ 적이 있다: have done) (enemy)",
+        "보이다 to be seen (to look, to seem; to show)",
+        "중 during, in the middle of (among)",
+        "위하다 to be for (-을 위해: for the sake of)",
+        "원하다 to want, to hope",
+        "맞다 to be right, to be correct (to fit; to be hit by (비를 맞다: to be caught in the rain) )",
+        "줄 how to (-ㄹ 줄 알다) (line, rope)",
+        "자기 oneself (honey (to a partner) )",
+        "자신 oneself"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "그러다 to do so",
+        "당하다 to suffer, to undergo",
+        "상황 situation, conditions",
+        "죽이다 to kill, to cause to die",
+        "수도 capital (city) (water supply)",
+        "상태 condition, status",
+        "총 gun",
+        "삶 life",
+        "놈 guy, fellow (rude)",
+        "피 blood"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0001",
+     "mc:w:w0009",
+     "mc:w:w0003",
+     "mc:w:w0006",
+     "mc:w:w0003",
+     "mc:w:w0004",
+     "mc:w:w0006",
+     "mc:w:w0001",
+     "mc:w:w0002",
+     "mc:w:w0002",
+     "mc:w:w0007",
+     "mc:w:w0007",
+     "mc:w:w0009",
+     "mc:w:w0005",
+     "mc:w:w0004",
+     "mc:w:w0010",
+     "mc:w:w0008",
+     "mc:w:w0010",
+     "mc:w:w0008",
+     "mc:w:w0005",
+     "mc:w:w0004",
+     "mc:w:w0001",
+     "mc:w:w0008"
+    ],
+    [
+     "type:w:w0003",
+     "type:w:w0010",
+     "type:w:w0009",
+     "mc:w:w0001",
+     "mc:w:w0004",
+     "type:w:w0002",
+     "type:w:w0007",
+     "mc:w:w0008",
+     "type:w:w0005",
+     "type:w:w0006",
+     "mc:w:w0021",
+     "mc:w:w0019",
+     "mc:w:w0016",
+     "mc:w:w0013",
+     "mc:w:w0018",
+     "mc:w:w0015",
+     "mc:w:w0017",
+     "mc:w:w0019",
+     "mc:w:w0021",
+     "mc:w:w0012",
+     "mc:w:w0017",
+     "mc:w:w0011",
+     "mc:w:w0014",
+     "mc:w:w0013",
+     "mc:w:w0011",
+     "mc:w:w0014",
+     "mc:w:w0018",
+     "mc:w:w0016",
+     "mc:w:w0015",
+     "mc:w:w0012",
+     "mc:w:w0018",
+     "mc:w:w0002",
+     "mc:w:w0010",
+     "mc:w:w0009",
+     "mc:w:w0003",
+     "mc:w:w0005",
+     "mc:w:w0006",
+     "mc:w:w0007",
+     "type:w:w0001",
+     "type:w:w0008",
+     "type:w:w0004"
+    ],
+    [
+     "mc:w:w0016",
+     "mc:w:w0008",
+     "type:w:w0002",
+     "mc:w:w0019",
+     "mc:w:w0021",
+     "mc:w:w0001",
+     "type:w:w0014",
+     "type:w:w0010",
+     "type:w:w0017",
+     "mc:w:w0012",
+     "type:w:w0013",
+     "mc:w:w0011",
+     "type:w:w0015",
+     "mc:w:w0004",
+     "mc:w:w0018",
+     "type:w:w0013",
+     "mc:w:w0025",
+     "mc:w:w0024",
+     "mc:w:w0030",
+     "mc:w:w0029",
+     "mc:w:w0025",
+     "mc:w:w0024",
+     "mc:w:w0023",
+     "mc:w:w0022",
+     "mc:w:w0030",
+     "mc:w:w0020",
+     "mc:w:w0029",
+     "mc:w:w0028",
+     "mc:w:w0028",
+     "mc:w:w0022",
+     "mc:w:w0023",
+     "mc:w:w0027",
+     "mc:w:w0026",
+     "mc:w:w0027",
+     "mc:w:w0020",
+     "mc:w:w0026",
+     "mc:w:w0027",
+     "mc:w:w0015",
+     "mc:w:w0017",
+     "mc:w:w0013",
+     "mc:w:w0014",
+     "type:w:w0018",
+     "type:w:w0004",
+     "type:w:w0016",
+     "type:w:w0019",
+     "type:w:w0007",
+     "type:w:w0011",
+     "type:w:w0001",
+     "type:w:w0005",
+     "type:w:w0003",
+     "type:w:w0008",
+     "type:w:w0006",
+     "type:w:w0012",
+     "type:w:w0004",
+     "type:w:w0001"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">하다</span><span class=\"rg\">to do <span class=\"gx\">(to make)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"436\"><div class=\"st\" data-tl lang=\"ko\">톰은 운전면허 시험에 떨어질 듯 <b>하다</b>.</div><div class=\"se\">Tom isn&#39;t likely to pass the driving test.</div></div><div class=\"sent\" data-sent=\"6\"><div class=\"st\" data-tl lang=\"ko\">아무나 <b>할</b> 수 있는 것이 아닙니다.</div><div class=\"se\">It&#39;s not something anyone can do.</div></div></div>"
+    },
+    {
+     "key": "w:w0009",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0009\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">그</span><span class=\"rg\">he <span class=\"gx\">(that)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"29\"><div class=\"st\" data-tl lang=\"ko\">내 생각엔 그의 제안을 고려해 볼 만하다.</div><div class=\"se\">I think his suggestion is worth considering.</div></div><div class=\"sent\" data-sent=\"41\"><div class=\"st\" data-tl lang=\"ko\">그는 1분 차이로 기차를 놓쳤다.</div><div class=\"se\">He missed the train by a minute.</div></div></div>"
+    },
+    {
+     "key": "w:w0003",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0003\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">나</span><span class=\"rg\">I, me <span class=\"dim\">(informal)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1\"><div class=\"st\" data-tl lang=\"ko\">이 세상의 교육이 나를 실망시켜요.</div><div class=\"se\">Education in this world disappoints me.</div></div><div class=\"sent\" data-sent=\"12\"><div class=\"st\" data-tl lang=\"ko\"><b>난</b> 쇼핑 가야되요, 한 시간 안에 돌아올게요.</div><div class=\"se\">I have to go shopping. I&#39;ll be back in an hour.</div></div></div>"
+    },
+    {
+     "key": "w:w0006",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0006\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">-이다</span><span class=\"rg\">to be <span class=\"dim\">(copula: N-이다 = is N)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"0\"><div class=\"st\" data-tl lang=\"ko\">이 사진 최근 거<b>에요</b>?</div><div class=\"se\">Is it a recent picture?</div></div><div class=\"sent\" data-sent=\"2\"><div class=\"st\" data-tl lang=\"ko\">왜냐하면 당신은 혼자가 되고 싶지 않기 때문이에요.</div><div class=\"se\">It&#39;s because you don&#39;t want to be alone.</div></div></div>"
+    },
+    {
+     "key": "w:w0003",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0003\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">나</span><span class=\"rg\">I, me <span class=\"dim\">(informal)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1\"><div class=\"st\" data-tl lang=\"ko\">이 세상의 교육이 나를 실망시켜요.</div><div class=\"se\">Education in this world disappoints me.</div></div><div class=\"sent\" data-sent=\"12\"><div class=\"st\" data-tl lang=\"ko\"><b>난</b> 쇼핑 가야되요, 한 시간 안에 돌아올게요.</div><div class=\"se\">I have to go shopping. I&#39;ll be back in an hour.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "de22189e2d56aed1"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "0694f2cf1ee32b8e"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "789087bbfa227938"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "be34f914b5e7f215"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "aa4e860d3fa55db1"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.008,
+     0.003692,
+     0.0024
+    ],
+    "toGo": [
+     167,
+     263,
+     329
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.008,
+     "all": false
+    },
+    "eta": 167,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.00225
+   },
+   "items": {
+    "items": 119,
+    "right": 111
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "day": {
+     "n": 3,
+     "sha": "a0736fc57f007cbf"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "a86ba5c70b448883"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "58fe33db552428f8"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 30,
+     "sha": "c8ef8269d87c514a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 3,
+     "sha": "e3f9f0c08da51372"
+    },
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 120,
+     "sha": "12849395e9f66be6"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.064667,
+     0.030231,
+     0.019733
+    ],
+    "toGo": [
+     151,
+     245,
+     312
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.064667,
+     "all": false
+    },
+    "eta": 151,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.019542
+   },
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "today": [
+    "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, A1 In 6 sessions since your last visit +22 mastered Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 120 learned Still shaky 주다 더 잘 모르다 크다 모든 아주 이야기 입다 -와/과 -도 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 150 learned Still shaky 주다 더 모르다 크다 아주 함께 차 바로 방 부르다 기다리다 손 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 13 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 13 of 60",
+       "rows": 10,
+       "first": [
+        "보내다 to send, to dispatch",
+        "명 person (counter)",
+        "또 again",
+        "나오다 to come out",
+        "어떤 what kind of (some)",
+        "아무 anyone",
+        "밤 night",
+        "도와주다 to help, to assist, to aid",
+        "마음 heart, mind",
+        "차 car (tea)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "대하다 to treat, to face (-에 대해: about)",
+        "적 time, experience (-ㄴ 적이 있다: have done) (enemy)",
+        "보이다 to be seen (to look, to seem; to show)",
+        "중 during, in the middle of (among)",
+        "위하다 to be for (-을 위해: for the sake of)",
+        "원하다 to want, to hope",
+        "맞다 to be right, to be correct (to fit; to be hit by (비를 맞다: to be caught in the rain) )",
+        "줄 how to (-ㄹ 줄 알다) (line, rope)",
+        "자기 oneself (honey (to a partner) )",
+        "자신 oneself"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "그러다 to do so",
+        "당하다 to suffer, to undergo",
+        "상황 situation, conditions",
+        "죽이다 to kill, to cause to die",
+        "수도 capital (city) (water supply)",
+        "상태 condition, status",
+        "총 gun",
+        "삶 life",
+        "놈 guy, fellow (rude)",
+        "피 blood"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 16 of 60",
+       "rows": 10,
+       "first": [
+        "어떻다 to be how, to be what like",
+        "물 water",
+        "치다 to hit (to play (an instrument, a sport) )",
+        "사다 to buy, to purchase",
+        "영화 movie, film",
+        "배우다 to learn",
+        "일어나다 to get up, to arise",
+        "얼마나 how long, how much, how many",
+        "항상 always",
+        "빨리 quickly, without delay"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "대하다 to treat, to face (-에 대해: about)",
+        "적 time, experience (-ㄴ 적이 있다: have done) (enemy)",
+        "보이다 to be seen (to look, to seem; to show)",
+        "중 during, in the middle of (among)",
+        "위하다 to be for (-을 위해: for the sake of)",
+        "원하다 to want, to hope",
+        "맞다 to be right, to be correct (to fit; to be hit by (비를 맞다: to be caught in the rain) )",
+        "줄 how to (-ㄹ 줄 알다) (line, rope)",
+        "자기 oneself (honey (to a partner) )",
+        "자신 oneself"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "그러다 to do so",
+        "당하다 to suffer, to undergo",
+        "상황 situation, conditions",
+        "죽이다 to kill, to cause to die",
+        "수도 capital (city) (water supply)",
+        "상태 condition, status",
+        "총 gun",
+        "삶 life",
+        "놈 guy, fellow (rude)",
+        "피 blood"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0142",
+     "type:w:w0079",
+     "type:w:w0067",
+     "mc:w:w0111",
+     "type:w:w0095",
+     "mc:w:w0118",
+     "mc:w:w0119",
+     "mc:w:w0107",
+     "mc:w:w0104",
+     "type:w:w0046",
+     "type:w:w0117",
+     "type:w:w0027",
+     "type:w:w0043",
+     "type:w:w0030",
+     "type:w:w0106",
+     "mc:w:w0104",
+     "type:w:w0117",
+     "type:w:w0043",
+     "type:w:w0030",
+     "mc:w:w0104",
+     "mc:w:w0127",
+     "mc:w:w0122",
+     "mc:w:w0131",
+     "mc:w:w0127",
+     "mc:w:w0131",
+     "mc:w:w0197",
+     "mc:w:w0121",
+     "mc:w:w0123",
+     "mc:w:w0124",
+     "mc:w:w0197",
+     "mc:w:w0123",
+     "mc:w:w0122",
+     "mc:w:w0120",
+     "mc:w:w0121",
+     "mc:w:w0120",
+     "mc:w:w0128",
+     "mc:w:w0124",
+     "mc:w:w0135",
+     "mc:w:w0135",
+     "mc:w:w0128",
+     "mc:w:w0135",
+     "mc:w:w0135",
+     "mc:w:w0054",
+     "mc:w:w0113",
+     "mc:w:w0042",
+     "mc:w:w0110",
+     "mc:w:w0118",
+     "mc:w:w0095",
+     "mc:w:w0125",
+     "mc:w:w0112",
+     "mc:w:w0102",
+     "mc:w:w0115",
+     "mc:w:w0063",
+     "mc:w:w0114",
+     "mc:w:w0113",
+     "type:w:w0091",
+     "type:w:w0096",
+     "type:w:w0080",
+     "type:w:w0081",
+     "type:w:w0072",
+     "type:w:w0119",
+     "type:w:w0074",
+     "type:w:w0057",
+     "type:w:w0097",
+     "type:w:w0083",
+     "type:w:w0109",
+     "type:w:w0084",
+     "type:w:w0080",
+     "mc:s:s1219",
+     "type:s:s0199",
+     "type:s:s1169",
+     "type:s:s0084",
+     "type:s:s1021",
+     "mc:s:s0460",
+     "type:s:s0188",
+     "type:s:s1029",
+     "type:s:s0199",
+     "type:s:s1169",
+     "type:s:s0084",
+     "type:s:s1021",
+     "type:s:s0188",
+     "type:s:s1029",
+     "mc:s:s0199",
+     "mc:s:s1169",
+     "mc:s:s0084",
+     "mc:s:s1021",
+     "mc:s:s0188",
+     "mc:s:s1029",
+     "mc:s:s1021",
+     "mc:s:s0188",
+     "mc:s:s1029"
+    ],
+    [
+     "type:w:w0097",
+     "type:w:w0080",
+     "type:w:w0121",
+     "mc:w:w0113",
+     "type:w:w0026",
+     "type:w:w0046",
+     "mc:w:w0135",
+     "type:w:w0027",
+     "type:w:w0067",
+     "type:w:w0117",
+     "type:w:w0043",
+     "type:w:w0095",
+     "type:w:w0111",
+     "type:w:w0030",
+     "mc:w:w0104",
+     "type:w:w0080",
+     "mc:w:w0113",
+     "type:w:w0046",
+     "mc:w:w0133",
+     "mc:w:w0126",
+     "mc:w:w0126",
+     "mc:w:w0136",
+     "mc:w:w0132",
+     "mc:w:w0129",
+     "mc:w:w0132",
+     "mc:w:w0133",
+     "mc:w:w0130",
+     "mc:w:w0138",
+     "mc:w:w0078",
+     "mc:w:w0130",
+     "mc:w:w0134",
+     "mc:w:w0139",
+     "mc:w:w0136",
+     "mc:w:w0078",
+     "mc:w:w0129",
+     "mc:w:w0138",
+     "mc:w:w0134",
+     "mc:w:w0139",
+     "mc:w:w0005",
+     "mc:w:w0107",
+     "mc:w:w0056",
+     "mc:w:w0124",
+     "mc:w:w0121",
+     "mc:w:w0131",
+     "mc:w:w0120",
+     "mc:w:w0067",
+     "mc:w:w0062",
+     "mc:w:w0128",
+     "mc:w:w0051",
+     "mc:w:w0119",
+     "mc:w:w0062",
+     "mc:w:w0128",
+     "type:w:w0197",
+     "type:w:w0079",
+     "type:w:w0135",
+     "type:w:w0100",
+     "type:w:w0122",
+     "type:w:w0118",
+     "type:w:w0107",
+     "type:w:w0071",
+     "type:w:w0127",
+     "type:w:w0089",
+     "type:w:w0103",
+     "type:w:w0123",
+     "type:w:w0135",
+     "type:w:w0100",
+     "type:w:w0089",
+     "mc:s:s1014",
+     "mc:s:s0147",
+     "type:s:s0801",
+     "type:s:s0084",
+     "type:s:s1169",
+     "type:s:s0199",
+     "type:s:s0188",
+     "mc:s:s0471",
+     "mc:s:s1014",
+     "type:s:s0801",
+     "type:s:s0084",
+     "type:s:s1169",
+     "type:s:s0199",
+     "type:s:s0188",
+     "mc:s:s0801",
+     "mc:s:s0084",
+     "mc:s:s1169",
+     "mc:s:s0199",
+     "mc:s:s0188"
+    ],
+    [
+     "type:w:w0080",
+     "type:w:w0107",
+     "type:w:w0018",
+     "type:w:w0097",
+     "type:w:w0067",
+     "type:w:w0027",
+     "mc:w:w0062",
+     "type:w:w0100",
+     "mc:w:w0128",
+     "type:w:w0139",
+     "type:w:w0135",
+     "type:w:w0089",
+     "type:w:w0046",
+     "mc:w:w0113",
+     "type:w:w0095",
+     "mc:w:w0128",
+     "mc:w:w0146",
+     "mc:w:w0150",
+     "mc:w:w0140",
+     "mc:w:w0145",
+     "mc:w:w0144",
+     "mc:w:w0144",
+     "mc:w:w0147",
+     "mc:w:w0141",
+     "mc:w:w0146",
+     "mc:w:w0137",
+     "mc:w:w0143",
+     "mc:w:w0147",
+     "mc:w:w0137",
+     "mc:w:w0143",
+     "mc:w:w0154",
+     "mc:w:w0140",
+     "mc:w:w0145",
+     "mc:w:w0141",
+     "mc:w:w0154",
+     "mc:w:w0150",
+     "mc:w:w0146",
+     "mc:w:w0144",
+     "mc:w:w0147",
+     "mc:w:w0135",
+     "mc:w:w0073",
+     "mc:w:w0132",
+     "mc:w:w0060",
+     "mc:w:w0053",
+     "mc:w:w0138",
+     "mc:w:w0058",
+     "mc:w:w0133",
+     "mc:w:w0055",
+     "mc:w:w0030",
+     "mc:w:w0026",
+     "mc:w:w0061",
+     "mc:w:w0138",
+     "type:w:w0130",
+     "type:w:w0030",
+     "type:w:w0117",
+     "type:w:w0103",
+     "type:w:w0136",
+     "type:w:w0121",
+     "type:w:w0104",
+     "type:w:w0129",
+     "type:w:w0026",
+     "type:w:w0126",
+     "type:w:w0134",
+     "type:w:w0043",
+     "type:w:w0104",
+     "type:w:w0129",
+     "type:w:w0126",
+     "type:w:w0134",
+     "mc:w:w0126",
+     "mc:s:s0106",
+     "type:s:s1169",
+     "type:s:s0084",
+     "type:s:s0199",
+     "mc:s:s2812",
+     "type:s:s0188",
+     "mc:s:s0818",
+     "mc:s:s0612",
+     "mc:s:s0106",
+     "type:s:s1169",
+     "type:s:s0084",
+     "type:s:s0199",
+     "type:s:s0188",
+     "mc:s:s1169",
+     "mc:s:s0084",
+     "mc:s:s0199",
+     "mc:s:s0188",
+     "mc:s:s0084",
+     "mc:s:s0084"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0142",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0142\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">이런</span><span class=\"rg\">like this, such <span class=\"dim\">(+ noun)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"595\"><div class=\"st\" data-tl lang=\"ko\">내 시각으로 <b>이런</b> 식의 대처는 현명하지 않을 수도 있다.</div><div class=\"se\">From my perspective, this sort of approach may not be wise.</div></div><div class=\"sent\" data-sent=\"911\"><div class=\"st\" data-tl lang=\"ko\">어떻게 <b>이런</b> 결론에 도달하셨나요?</div><div class=\"se\">How did you arrive at this conclusion?</div></div></div>"
+    },
+    {
+     "key": "w:w0079",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0079\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">모든</span><span class=\"rg\">all, every, each</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"95\"><div class=\"st\" data-tl lang=\"ko\">결과가 좋으면 <b>모든</b> 것이 좋다.</div><div class=\"se\">All&#39;s well that ends well.</div></div><div class=\"sent\" data-sent=\"159\"><div class=\"st\" data-tl lang=\"ko\">그는 <b>모든</b> 실패를 극복했다고 주장한다.</div><div class=\"se\">He claims that he&#39;s gotten over all his failures.</div></div></div>"
+    },
+    {
+     "key": "w:w0067",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0067\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">크다</span><span class=\"rg\">to be big</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"755\"><div class=\"st\" data-tl lang=\"ko\">나는 너보다 <b>크다</b>.</div><div class=\"se\">I&#39;m bigger than you.</div></div><div class=\"sent\" data-sent=\"146\"><div class=\"st\" data-tl lang=\"ko\">이 방은 너무 <b>커요</b>.</div><div class=\"se\">This room is too big.</div></div></div>"
+    },
+    {
+     "key": "w:w0111",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0111\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">입다</span><span class=\"rg\">to wear, to put on</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"100\"><div class=\"st\" data-tl lang=\"ko\">마지막으로 그를 봤을때 그는 파란 셔츠에 흰색 바지를 <b>입고</b> 있었다.</div><div class=\"se\">When I last saw him, he was wearing a blue shirt and white slacks.</div></div><div class=\"sent\" data-sent=\"593\"><div class=\"st\" data-tl lang=\"ko\">몇몇 다른 사람들이 부상을 <b>입었다</b>.</div><div class=\"se\">Several other people were wounded.</div></div></div>"
+    },
+    {
+     "key": "w:w0095",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0095\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">필요하다</span><span class=\"rg\">to need, to be necessary</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"158\"><div class=\"st\" data-tl lang=\"ko\">그 일은 많은 힘이 <b>필요하다</b>.</div><div class=\"se\">That job takes a lot of strength.</div></div><div class=\"sent\" data-sent=\"83\"><div class=\"st\" data-tl lang=\"ko\">더 시간이 <b>필요해요</b>.</div><div class=\"se\">I need more time.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "298d9ccd85e2fa92"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "a675f2ebda8ac066"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "a4c5ba1c36033b8b"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 41,
+     "sha": "7e4a91d67620d9a2"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 3,
+     "sha": "ee6cab66e6ea9238"
+    },
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "a88d9b09fd9c1481"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.078,
+     0.036385,
+     0.023733
+    ],
+    "toGo": [
+     146,
+     241,
+     308
+    ],
+    "toGoTotal": 154,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.078,
+     "all": false
+    },
+    "eta": 146,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.023292
+   },
+   "items": {
+    "items": 265,
+    "right": 229
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "63df37b4bec0e01b"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.730769,
+     0.38
+    ],
+    "toGo": [
+     0,
+     78,
+     165
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.730769,
+     "all": false
+    },
+    "eta": 78,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.35625
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 78 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read 민수의 하루 Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 78 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read 민수의 하루 Start",
+    "Session 2 Goal 2 of 3 ≈ 78 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read 민수의 하루 Start",
+    "Session 3 Goal 2 of 3 ≈ 79 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read 민수의 하루 Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 78 sessions daily life: directions, simple chat, short notices 한글 0 / 47 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 80 sessions daily life: directions, simple chat, short notices 한글 0 / 47 taught · 0 mastered A1 1 of 600 mastered sentences 3 · reading 1 of 20 A2 380 learned Still shaky 작다 마지막 보통 작년 사월 발견하다 과학 고객 사과하다 대답 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "이 two (Sino-Korean)",
+        "이월 February",
+        "일월 January",
+        "일흔 seventy (native Korean)",
+        "잘 먹겠습니다 thank you for the meal (before eating)",
+        "잘 먹었습니다 thank you for the meal (after eating)",
+        "죄송합니다 I&#39;m sorry (formal apology)",
+        "처음 뵙겠습니다 how do you do (first meeting)",
+        "칠월 July",
+        "팔월 August"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "조각 piece, slice, scrap",
+        "계속하다 to continue",
+        "건강하다 to be healthy",
+        "당연하다 to be natural, to be obvious",
+        "신다 to wear on one&#39;s feet",
+        "배고프다 to be hungry",
+        "눕다 to lie down",
+        "끊다 to cut (to hang up; to quit)",
+        "손님 customer, client",
+        "어젯밤 last night"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "그러다 to do so",
+        "당하다 to suffer, to undergo",
+        "상황 situation, conditions",
+        "죽이다 to kill, to cause to die",
+        "수도 capital (city) (water supply)",
+        "상태 condition, status",
+        "총 gun",
+        "삶 life",
+        "놈 guy, fellow (rude)",
+        "피 blood"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "이 two (Sino-Korean)",
+        "이월 February",
+        "일월 January",
+        "일흔 seventy (native Korean)",
+        "잘 먹겠습니다 thank you for the meal (before eating)",
+        "잘 먹었습니다 thank you for the meal (after eating)",
+        "죄송합니다 I&#39;m sorry (formal apology)",
+        "처음 뵙겠습니다 how do you do (first meeting)",
+        "칠월 July",
+        "팔월 August"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 39 of 70",
+       "rows": 10,
+       "first": [
+        "살리다 to save (a life) , to rescue",
+        "깨끗하다 to be clean",
+        "주인 master or owner",
+        "출발하다 to depart",
+        "눈물 tears",
+        "개인 individual, personal",
+        "평생 one&#39;s entire life, lifetime",
+        "사무실 office",
+        "영상 video, picture, image",
+        "포함하다 to include"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "그러다 to do so",
+        "당하다 to suffer, to undergo",
+        "상황 situation, conditions",
+        "죽이다 to kill, to cause to die",
+        "수도 capital (city) (water supply)",
+        "상태 condition, status",
+        "총 gun",
+        "삶 life",
+        "놈 guy, fellow (rude)",
+        "피 blood"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0052",
+     "type:w:w0846",
+     "type:w:w0792",
+     "type:w:w0071",
+     "type:w:w0408",
+     "type:w:w0132",
+     "type:w:w0088",
+     "type:w:w0034",
+     "type:w:w0801",
+     "type:w:w0836",
+     "type:w:w0191",
+     "type:w:w0424",
+     "type:w:w0776",
+     "type:w:w0689",
+     "type:w:w0891",
+     "type:w:w0071",
+     "mc:w:w0935",
+     "mc:w:w0929",
+     "mc:w:w0935",
+     "mc:w:w0925",
+     "mc:w:w0922",
+     "mc:w:w0960",
+     "mc:w:w0941",
+     "mc:w:w0931",
+     "mc:w:w0960",
+     "mc:w:w0925",
+     "mc:w:w0931",
+     "mc:w:w0919",
+     "mc:w:w0927",
+     "mc:w:w0932",
+     "mc:w:w0919",
+     "mc:w:w0922",
+     "mc:w:w0941",
+     "mc:w:w0932",
+     "mc:w:w0929",
+     "mc:w:w0927",
+     "mc:w:w0935",
+     "mc:w:w0931",
+     "mc:w:w0927",
+     "mc:w:w0932",
+     "mc:w:w0919",
+     "mc:w:w0927",
+     "mc:w:w0932",
+     "mc:w:w0919",
+     "mc:w:w0171",
+     "mc:w:w0410",
+     "mc:w:w0070",
+     "mc:w:w0525",
+     "mc:w:w0635",
+     "mc:w:w0444",
+     "mc:w:w0786",
+     "mc:w:w0339",
+     "mc:w:w0878",
+     "mc:w:w0489",
+     "mc:w:w0255",
+     "mc:w:w0633",
+     "mc:w:w0255",
+     "type:w:w0310",
+     "type:w:w0313",
+     "type:w:w0710",
+     "type:w:w0131",
+     "type:w:w0172",
+     "type:w:w0108",
+     "type:w:w0797",
+     "type:w:w0826",
+     "type:w:w0653",
+     "type:w:w0813",
+     "type:w:w0111",
+     "type:w:w0401",
+     "type:w:w0813",
+     "mc:s:s1360",
+     "mc:s:s1450",
+     "mc:s:s2671",
+     "mc:s:s0053",
+     "mc:s:s0872",
+     "mc:s:s0019",
+     "mc:s:s1271",
+     "mc:s:s1134",
+     "mc:s:s1360",
+     "mc:s:s2671",
+     "mc:s:s0053",
+     "mc:s:s0019"
+    ],
+    [
+     "mc:w:w0935",
+     "type:w:w0379",
+     "mc:w:w0927",
+     "type:w:w0389",
+     "type:w:w0813",
+     "type:w:w0055",
+     "mc:w:w0932",
+     "mc:w:w0931",
+     "type:w:w0688",
+     "type:w:w0747",
+     "mc:w:w0255",
+     "type:w:w0269",
+     "type:w:w0071",
+     "mc:w:w0919",
+     "type:w:w0164",
+     "mc:w:w0932",
+     "type:w:w0747",
+     "mc:w:w0919",
+     "mc:w:w0747",
+     "mc:w:w0919",
+     "mc:w:w0747",
+     "mc:w:w0934",
+     "mc:w:w0950",
+     "mc:w:w0970",
+     "mc:w:w0966",
+     "mc:w:w0985",
+     "mc:w:w0985",
+     "mc:w:w0939",
+     "mc:w:w0934",
+     "mc:w:w0936",
+     "mc:w:w0950",
+     "mc:w:w0972",
+     "mc:w:w0939",
+     "mc:w:w0937",
+     "mc:w:w0972",
+     "mc:w:w0970",
+     "mc:w:w0936",
+     "mc:w:w0938",
+     "mc:w:w0937",
+     "mc:w:w0966",
+     "mc:w:w0938",
+     "mc:w:w0721",
+     "mc:w:w0252",
+     "mc:w:w0118",
+     "mc:w:w0079",
+     "mc:w:w0927",
+     "mc:w:w0245",
+     "mc:w:w0167",
+     "mc:w:w0419",
+     "mc:w:w0553",
+     "mc:w:w0791",
+     "mc:w:w0619",
+     "mc:w:w0805",
+     "mc:w:w0927",
+     "mc:w:w0419",
+     "mc:w:w0619",
+     "type:w:w0887",
+     "type:w:w0853",
+     "type:w:w0066",
+     "type:w:w0863",
+     "type:w:w0015",
+     "type:w:w0098",
+     "type:w:w0804",
+     "type:w:w0082",
+     "type:w:w0087",
+     "type:w:w0512",
+     "type:w:w0233",
+     "type:w:w0215",
+     "type:w:w0863",
+     "type:w:w0512",
+     "mc:s:s0143",
+     "mc:s:s0316",
+     "type:s:s2671",
+     "mc:s:s1055",
+     "mc:s:s1370",
+     "mc:s:s0019",
+     "type:s:s0053",
+     "mc:s:s1360",
+     "type:s:s2671",
+     "mc:s:s1370",
+     "type:s:s0053",
+     "mc:s:s2671",
+     "mc:s:s0053"
+    ],
+    [
+     "type:w:w0747",
+     "type:w:w0388",
+     "type:w:w0301",
+     "mc:w:w0932",
+     "mc:w:w0419",
+     "mc:w:w0619",
+     "type:w:w0723",
+     "mc:w:w0919",
+     "type:w:w0512",
+     "type:w:w0863",
+     "type:w:w0387",
+     "type:w:w0164",
+     "type:w:w0536",
+     "type:w:w0604",
+     "mc:w:w0927",
+     "type:w:w0512",
+     "mc:w:w0946",
+     "mc:w:w0961",
+     "mc:w:w0948",
+     "mc:w:w0943",
+     "mc:w:w0947",
+     "mc:w:w1025",
+     "mc:w:w0944",
+     "mc:w:w1025",
+     "mc:w:w0944",
+     "mc:w:w0948",
+     "mc:w:w1032",
+     "mc:w:w0926",
+     "mc:w:w0949",
+     "mc:w:w0926",
+     "mc:w:w0947",
+     "mc:w:w0943",
+     "mc:w:w0946",
+     "mc:w:w0961",
+     "mc:w:w0949",
+     "mc:w:w1032",
+     "mc:w:w0961",
+     "mc:w:w0944",
+     "mc:w:w0949",
+     "mc:w:w0961",
+     "mc:w:w0949",
+     "mc:w:w0541",
+     "mc:w:w0105",
+     "mc:w:w0557",
+     "mc:w:w0562",
+     "mc:w:w0856",
+     "mc:w:w0602",
+     "mc:w:w0477",
+     "mc:w:w0288",
+     "mc:w:w0750",
+     "mc:w:w0232",
+     "mc:w:w0164",
+     "mc:w:w0425",
+     "mc:w:w0562",
+     "mc:w:w0750",
+     "mc:w:w0232",
+     "mc:w:w0232",
+     "mc:w:w0232",
+     "type:w:w0009",
+     "type:w:w0491",
+     "type:w:w0716",
+     "type:w:w0440",
+     "type:w:w0305",
+     "type:w:w0426",
+     "type:w:w0462",
+     "type:w:w0624",
+     "type:w:w0458",
+     "type:w:w0264",
+     "type:w:w0711",
+     "type:w:w0481",
+     "type:w:w0716",
+     "mc:w:w0716",
+     "mc:s:s0963",
+     "mc:s:s1370",
+     "mc:s:s0198",
+     "mc:s:s3014",
+     "type:s:s0053",
+     "type:s:s2671",
+     "mc:s:s1305",
+     "mc:s:s1193",
+     "mc:s:s0963",
+     "mc:s:s3014",
+     "type:s:s0053",
+     "type:s:s2671",
+     "mc:s:s0053",
+     "mc:s:s2671"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0052",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0052\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">지금</span><span class=\"rg\">now</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"203\"><div class=\"st\" data-tl lang=\"ko\">에이미는 <b>지금</b> 음악을 듣고 있어요.</div><div class=\"se\">Aimee is listening to music now.</div></div><div class=\"sent\" data-sent=\"347\"><div class=\"st\" data-tl lang=\"ko\"><b>지금</b> 어디 가는 길이세요?</div><div class=\"se\">Are we going somewhere now?</div></div></div>"
+    },
+    {
+     "key": "w:w0846",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0846\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">나타나다</span><span class=\"rg\">to appear, to become manifest</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1088\"><div class=\"st\" data-tl lang=\"ko\">톰은 <b>나타나지</b> 않았다.</div><div class=\"se\">Tom failed to appear.</div></div><div class=\"sent\" data-sent=\"1485\"><div class=\"st\" data-tl lang=\"ko\">갑자기 고양이 한 마리가 <b>나타났어요</b>.</div><div class=\"se\">Suddenly a cat appeared.</div></div></div>"
+    },
+    {
+     "key": "w:w0792",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0792\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">소년</span><span class=\"rg\">boy</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"386\"><div class=\"st\" data-tl lang=\"ko\">그 소년들은 북쪽으로 갔다.</div><div class=\"se\">The boys have gone north.</div></div><div class=\"sent\" data-sent=\"406\"><div class=\"st\" data-tl lang=\"ko\">톰은 이제는 게으른 소년이 아니다.</div><div class=\"se\">Tom is not an idle boy any longer.</div></div></div>"
+    },
+    {
+     "key": "w:w0071",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0071\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">듣다</span><span class=\"rg\">to hear, to listen</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"88\"><div class=\"st\" data-tl lang=\"ko\">너를 <b>들을</b> 수 있지만, 볼 수 없어요.</div><div class=\"se\">I can hear you, but I can&#39;t see you.</div></div><div class=\"sent\" data-sent=\"203\"><div class=\"st\" data-tl lang=\"ko\">에이미는 지금 음악을 <b>듣고</b> 있어요.</div><div class=\"se\">Aimee is listening to music now.</div></div></div>"
+    },
+    {
+     "key": "w:w0408",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0408\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">가방</span><span class=\"rg\">bag</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"217\"><div class=\"st\" data-tl lang=\"ko\">톰은 가방에 손을 넣어 책을 꺼냈다.</div><div class=\"se\">Tom reached into his bag and pulled out a book.</div></div><div class=\"sent\" data-sent=\"693\"><div class=\"st\" data-tl lang=\"ko\">저 남자가 내 가방을 훔쳤다.</div><div class=\"se\">That man stole my bag.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "ea11c0a682f49df1"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "3722fd153a4226b5"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "539ce46534b46326"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 17,
+     "sha": "0f80520fe0c4475a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "986c1e752ab32447"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 980,
+     "sha": "0c049c099279bdd4"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.99,
+     0.720769,
+     0.3748
+    ],
+    "toGo": [
+     0,
+     80,
+     166
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.720769,
+     "all": false
+    },
+    "eta": 80,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.351375
+   },
+   "items": {
+    "items": 251,
+    "right": 208
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "5c2c3275edd61f52"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     1,
+     1
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 1,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.75
+   },
+   "todayFirst": "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read 어려운 결정 Start",
+   "today": [
+    "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read 어려운 결정 Start",
+    "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read 어려운 결정 Start",
+    "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read 어려운 결정 Start"
+   ],
+   "progress": {
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles 한글 0 / 47 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles 한글 0 / 47 taught · 0 mastered A1 1 of 600 mastered A2 4 of 700 mastered reading 0 of 20 B1 4 of 700 mastered reading 0 of 20 Still shaky 때문 만나다 걸다 확인하다 차이 그날 미국인 버튼 세금 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "이 two (Sino-Korean)",
+        "이월 February",
+        "일월 January",
+        "일흔 seventy (native Korean)",
+        "잘 먹겠습니다 thank you for the meal (before eating)",
+        "잘 먹었습니다 thank you for the meal (after eating)",
+        "죄송합니다 I&#39;m sorry (formal apology)",
+        "처음 뵙겠습니다 how do you do (first meeting)",
+        "칠월 July",
+        "팔월 August"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "우산 umbrella",
+        "걸어가다 to walk (there) , to go on foot",
+        "생선 fish",
+        "샤워 shower",
+        "넥타이 necktie",
+        "재미없다 to be boring",
+        "계절 season",
+        "한글 hangul",
+        "깎다 to cut, to trim (to give a discount)",
+        "쇼핑 shopping"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "타워 tower",
+        "매니저 manager",
+        "틀림없다 to be certain, must be",
+        "그나저나 by the way",
+        "수상 award (prime minister)",
+        "애쓰다 to try hard, to strive",
+        "베개 pillow",
+        "이빨 tooth",
+        "습관 habit",
+        "졸리다 to feel/get sleepy/drowsy"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 70 of 70 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "이 two (Sino-Korean)",
+        "이월 February",
+        "일월 January",
+        "일흔 seventy (native Korean)",
+        "잘 먹겠습니다 thank you for the meal (before eating)",
+        "잘 먹었습니다 thank you for the meal (after eating)",
+        "죄송합니다 I&#39;m sorry (formal apology)",
+        "처음 뵙겠습니다 how do you do (first meeting)",
+        "칠월 July",
+        "팔월 August"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "우산 umbrella",
+        "걸어가다 to walk (there) , to go on foot",
+        "생선 fish",
+        "샤워 shower",
+        "넥타이 necktie",
+        "재미없다 to be boring",
+        "계절 season",
+        "한글 hangul",
+        "깎다 to cut, to trim (to give a discount)",
+        "쇼핑 shopping"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "타워 tower",
+        "매니저 manager",
+        "틀림없다 to be certain, must be",
+        "그나저나 by the way",
+        "수상 award (prime minister)",
+        "애쓰다 to try hard, to strive",
+        "베개 pillow",
+        "이빨 tooth",
+        "습관 habit",
+        "졸리다 to feel/get sleepy/drowsy"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0114",
+     "type:w:w1667",
+     "type:w:w1370",
+     "type:w:w0157",
+     "type:w:w0503",
+     "type:w:w1037",
+     "type:w:w1634",
+     "type:w:w1327",
+     "type:w:w1339",
+     "type:w:w1621",
+     "type:w:w0614",
+     "type:w:w0785",
+     "type:w:w0643",
+     "type:w:w1607",
+     "type:w:w0202",
+     "mc:w:w0695",
+     "mc:w:w0801",
+     "mc:w:w1031",
+     "mc:w:w0480",
+     "mc:w:w0544",
+     "mc:w:w2014",
+     "mc:w:w1023",
+     "mc:w:w1801",
+     "mc:w:w1870",
+     "mc:w:w1181",
+     "mc:w:w1222",
+     "mc:w:w1556",
+     "mc:w:w0801",
+     "type:w:w0971",
+     "type:w:w1385",
+     "type:w:w0212",
+     "type:w:w1026",
+     "type:w:w0749",
+     "type:w:w1163",
+     "type:w:w1579",
+     "type:w:w1416",
+     "type:w:w0149",
+     "type:w:w1413",
+     "type:w:w1448",
+     "type:w:w0918",
+     "type:w:w0971",
+     "type:w:w1385",
+     "type:w:w1579",
+     "mc:s:s2514",
+     "mc:s:s1213",
+     "mc:s:s2603",
+     "mc:s:s2169",
+     "mc:s:s2564",
+     "mc:s:s2536",
+     "mc:s:s1411",
+     "mc:s:s1356",
+     "mc:s:s1356"
+    ],
+    [
+     "type:w:w1074",
+     "mc:w:w0801",
+     "type:w:w0971",
+     "type:w:w0486",
+     "type:w:w1146",
+     "type:w:w0121",
+     "type:w:w1385",
+     "type:w:w0288",
+     "type:w:w1445",
+     "type:w:w1156",
+     "type:w:w1093",
+     "type:w:w1579",
+     "type:w:w0896",
+     "type:w:w0300",
+     "type:w:w0798",
+     "type:w:w0121",
+     "type:w:w1093",
+     "mc:w:w1617",
+     "mc:w:w0414",
+     "mc:w:w0996",
+     "mc:w:w0863",
+     "mc:w:w0934",
+     "mc:w:w1216",
+     "mc:w:w1548",
+     "mc:w:w0394",
+     "mc:w:w0483",
+     "mc:w:w1571",
+     "mc:w:w0780",
+     "mc:w:w0401",
+     "mc:w:w1617",
+     "mc:w:w0414",
+     "mc:w:w0996",
+     "mc:w:w0934",
+     "mc:w:w1617",
+     "mc:w:w0996",
+     "type:w:w0800",
+     "type:w:w1666",
+     "type:w:w0878",
+     "type:w:w1034",
+     "type:w:w0116",
+     "type:w:w1357",
+     "type:w:w0841",
+     "type:w:w1361",
+     "type:w:w0237",
+     "type:w:w0259",
+     "type:w:w0753",
+     "type:w:w0139",
+     "type:w:w1357",
+     "type:w:w0259",
+     "mc:s:s1461",
+     "mc:s:s1938",
+     "mc:s:s0969",
+     "mc:s:s1573",
+     "type:s:s0451",
+     "mc:s:s1777",
+     "type:s:s1015",
+     "mc:s:s1356",
+     "type:s:s0451",
+     "type:s:s1015",
+     "mc:s:s0451",
+     "mc:s:s1015"
+    ],
+    [
+     "type:w:w0909",
+     "type:w:w1357",
+     "mc:w:w0934",
+     "type:w:w0246",
+     "type:w:w0028",
+     "type:w:w0676",
+     "mc:w:w1617",
+     "type:w:w0259",
+     "type:w:w0121",
+     "type:w:w1396",
+     "type:w:w1028",
+     "type:w:w1134",
+     "type:w:w1093",
+     "mc:w:w0996",
+     "mc:w:w0414",
+     "mc:w:w0934",
+     "type:w:w0676",
+     "type:w:w1134",
+     "mc:w:w1444",
+     "mc:w:w0495",
+     "mc:w:w0317",
+     "mc:w:w0476",
+     "mc:w:w1704",
+     "mc:w:w1871",
+     "mc:w:w1948",
+     "mc:w:w0284",
+     "mc:w:w0611",
+     "mc:w:w1230",
+     "mc:w:w1631",
+     "mc:w:w0181",
+     "mc:w:w1948",
+     "mc:w:w0284",
+     "type:w:w1344",
+     "type:w:w1741",
+     "type:w:w0087",
+     "type:w:w0538",
+     "type:w:w0089",
+     "type:w:w0512",
+     "type:w:w1622",
+     "type:w:w0239",
+     "type:w:w1166",
+     "type:w:w0071",
+     "type:w:w1559",
+     "type:w:w0335",
+     "type:w:w0087",
+     "type:w:w0089",
+     "type:w:w1559",
+     "mc:s:s2473",
+     "type:s:s1015",
+     "type:s:s0451",
+     "mc:s:s0529",
+     "mc:s:s1943",
+     "mc:s:s2647",
+     "mc:s:s3015",
+     "mc:s:s0863",
+     "type:s:s1015",
+     "type:s:s0451",
+     "mc:s:s2647",
+     "mc:s:s1015",
+     "mc:s:s0451"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0114",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0114\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">학교</span><span class=\"rg\">school</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"142\"><div class=\"st\" data-tl lang=\"ko\">우리 애들은 학교에 있어요.</div><div class=\"se\">My children are in school.</div></div><div class=\"sent\" data-sent=\"170\"><div class=\"st\" data-tl lang=\"ko\">그분은 학교에 버스로 갑니다.</div><div class=\"se\">He goes to school by bus.</div></div></div>"
+    },
+    {
+     "key": "w:w1667",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1667\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">모임</span><span class=\"rg\">gathering or meeting</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2116\"><div class=\"st\" data-tl lang=\"ko\">오늘 저녁에 친구들 모임이 있어요.</div><div class=\"se\">I have a get-together with friends this evening.</div></div><div class=\"sent\" data-sent=\"2117\"><div class=\"st\" data-tl lang=\"ko\">저는 매주 한국어 공부 모임에 가요.</div><div class=\"se\">I go to a Korean study group every week.</div></div></div>"
+    },
+    {
+     "key": "w:w1370",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1370\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">알아보다</span><span class=\"rg\">to find out <span class=\"gx\">(to recognise)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"621\"><div class=\"st\" data-tl lang=\"ko\">아무도 날 <b>알아보지</b> 못 했어.</div><div class=\"se\">No one recognized me.</div></div><div class=\"sent\" data-sent=\"1751\"><div class=\"st\" data-tl lang=\"ko\">오랜만에 만났는데 친구가 저를 바로 <b>알아봤어요</b>.</div><div class=\"se\">We met after a long time, but my friend recognised me straight away.</div></div></div>"
+    },
+    {
+     "key": "w:w0157",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0157\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">빨리</span><span class=\"rg\">quickly, without delay</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"5\"><div class=\"st\" data-tl lang=\"ko\">해결책을 찾았지만 너무 <b>빨리</b> 찾아서 맞는 답이 아닌거 같습니다.</div><div class=\"se\">I found a solution, but I found it so fast that it can&#39;t be the right solution.</div></div><div class=\"sent\" data-sent=\"38\"><div class=\"st\" data-tl lang=\"ko\">뛰어라, 네가 할 수 있는 만큼 <b>빨리</b>.</div><div class=\"se\">Run as fast as you can.</div></div></div>"
+    },
+    {
+     "key": "w:w0503",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0503\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">가수</span><span class=\"rg\">singer</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"303\"><div class=\"st\" data-tl lang=\"ko\">내가 좋아하는 가수는 탈리아입니다.</div><div class=\"se\">Thalia&#39;s my favorite singer.</div></div><div class=\"sent\" data-sent=\"1472\"><div class=\"st\" data-tl lang=\"ko\">그 가수의 노래 실력은 대단해요.</div><div class=\"se\">That singer&#39;s singing ability is amazing.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "d17ccb5c056baa13"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "fc86f5acc6fbba32"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d69e2203ef7362ed"
+    },
+    "read": {
+     "n": 2,
+     "sha": "07e71869e4c43a0d"
+    },
+    "s": {
+     "n": 21,
+     "sha": "a4a090cd92f4a095"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "c31e1b568edc07a8"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.99,
+     0.99,
+     0.9905
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 0.9905,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.742875
+   },
+   "items": {
+    "items": 173,
+    "right": 147
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "script": {
+     "n": 6,
+     "sha": "f67c993adc3862c6"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "8409ffda82ceb3b7"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.2,
+     0.092308,
+     0.06
+    ],
+    "toGo": [
+     114,
+     213,
+     280
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.2,
+     "all": false
+    },
+    "eta": 114,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 32,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.05625
+   },
+   "todayFirst": "한글 first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 110 sessions survive a trip: greet, order, count, buy Review Learn 한글, sets 1–2 of 7 A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read 민수의 하루",
+   "today": [
+    "Session 21 Goal 1 of 3 ≈ 110 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read 민수의 하루 Start",
+    "Session 22 Goal 1 of 3 ≈ 110 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read 민수의 하루 Start",
+    "Session 23 Goal 1 of 3 ≈ 110 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read 민수의 하루 Start"
+   ],
+   "progress": {
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 110 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 110 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 155 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Still shaky 것 오다 차 사다 아마 다니다 나무 신문 우유 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "이 two (Sino-Korean)",
+        "이월 February",
+        "일월 January",
+        "일흔 seventy (native Korean)",
+        "잘 먹겠습니다 thank you for the meal (before eating)",
+        "잘 먹었습니다 thank you for the meal (after eating)",
+        "죄송합니다 I&#39;m sorry (formal apology)",
+        "처음 뵙겠습니다 how do you do (first meeting)",
+        "칠월 July",
+        "팔월 August"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "대하다 to treat, to face (-에 대해: about)",
+        "적 time, experience (-ㄴ 적이 있다: have done) (enemy)",
+        "보이다 to be seen (to look, to seem; to show)",
+        "중 during, in the middle of (among)",
+        "위하다 to be for (-을 위해: for the sake of)",
+        "원하다 to want, to hope",
+        "맞다 to be right, to be correct (to fit; to be hit by (비를 맞다: to be caught in the rain) )",
+        "줄 how to (-ㄹ 줄 알다) (line, rope)",
+        "자기 oneself (honey (to a partner) )",
+        "자신 oneself"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "그러다 to do so",
+        "당하다 to suffer, to undergo",
+        "상황 situation, conditions",
+        "죽이다 to kill, to cause to die",
+        "수도 capital (city) (water supply)",
+        "상태 condition, status",
+        "총 gun",
+        "삶 life",
+        "놈 guy, fellow (rude)",
+        "피 blood"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "이 two (Sino-Korean)",
+        "이월 February",
+        "일월 January",
+        "일흔 seventy (native Korean)",
+        "잘 먹겠습니다 thank you for the meal (before eating)",
+        "잘 먹었습니다 thank you for the meal (after eating)",
+        "죄송합니다 I&#39;m sorry (formal apology)",
+        "처음 뵙겠습니다 how do you do (first meeting)",
+        "칠월 July",
+        "팔월 August"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "대하다 to treat, to face (-에 대해: about)",
+        "적 time, experience (-ㄴ 적이 있다: have done) (enemy)",
+        "보이다 to be seen (to look, to seem; to show)",
+        "중 during, in the middle of (among)",
+        "위하다 to be for (-을 위해: for the sake of)",
+        "원하다 to want, to hope",
+        "맞다 to be right, to be correct (to fit; to be hit by (비를 맞다: to be caught in the rain) )",
+        "줄 how to (-ㄹ 줄 알다) (line, rope)",
+        "자기 oneself (honey (to a partner) )",
+        "자신 oneself"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "그러다 to do so",
+        "당하다 to suffer, to undergo",
+        "상황 situation, conditions",
+        "죽이다 to kill, to cause to die",
+        "수도 capital (city) (water supply)",
+        "상태 condition, status",
+        "총 gun",
+        "삶 life",
+        "놈 guy, fellow (rude)",
+        "피 blood"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0210",
+     "type:w:w0341",
+     "type:w:w0072",
+     "type:w:w0324",
+     "mc:w:w0530",
+     "type:w:w0090",
+     "type:w:w2006",
+     "type:w:w0212",
+     "type:w:w0503",
+     "type:w:w0330",
+     "type:w:w0274",
+     "type:w:w0138",
+     "type:w:w0113",
+     "type:w:w0386",
+     "type:w:w0234",
+     "type:w:w0113",
+     "mc:w:w0199",
+     "mc:w:w2012",
+     "mc:w:w0130",
+     "mc:w:w0555",
+     "mc:w:w0012",
+     "mc:w:w0170",
+     "mc:w:w0526",
+     "mc:w:w0034",
+     "mc:w:w0366",
+     "mc:w:w0048",
+     "mc:w:w0586",
+     "mc:w:w0014",
+     "type:w:w0184",
+     "type:w:w0207",
+     "type:w:w0222",
+     "type:w:w0129",
+     "type:w:w0106",
+     "type:w:w0575",
+     "type:w:w0269",
+     "type:w:w0482",
+     "type:w:w0336",
+     "type:w:w0419",
+     "type:w:w0301",
+     "type:w:w0240",
+     "mc:s:s0124",
+     "mc:s:s0609",
+     "mc:s:s2642",
+     "mc:s:s0917",
+     "mc:s:s2702",
+     "mc:s:s0344",
+     "mc:s:s1425",
+     "mc:s:s0824"
+    ],
+    [
+     "type:w:w0035",
+     "type:w:w0316",
+     "type:w:w0144",
+     "type:w:w0114",
+     "mc:w:w0251",
+     "type:w:w0142",
+     "type:w:w0113",
+     "type:w:w0063",
+     "type:w:w0369",
+     "mc:w:w0167",
+     "type:w:w0105",
+     "type:w:w0002",
+     "type:w:w0017",
+     "type:w:w0078",
+     "type:w:w0400",
+     "type:w:w0035",
+     "mc:w:w0407",
+     "mc:w:w0474",
+     "mc:w:w0148",
+     "mc:w:w0328",
+     "mc:w:w0178",
+     "mc:w:w0390",
+     "mc:w:w0353",
+     "mc:w:w0270",
+     "mc:w:w0561",
+     "mc:w:w2001",
+     "mc:w:w0262",
+     "mc:w:w0329",
+     "mc:w:w0390",
+     "mc:w:w0262",
+     "mc:w:w0262",
+     "type:w:w0553",
+     "type:w:w0414",
+     "type:w:w0501",
+     "type:w:w0053",
+     "type:w:w0272",
+     "type:w:w0046",
+     "type:w:w0203",
+     "type:w:w0291",
+     "type:w:w0163",
+     "type:w:w0454",
+     "type:w:w0164",
+     "type:w:w0500",
+     "type:w:w0500",
+     "type:s:s0915",
+     "mc:s:s1167",
+     "type:s:s0404",
+     "mc:s:s1696",
+     "mc:s:s0496",
+     "mc:s:s2585",
+     "mc:s:s2703",
+     "mc:s:s1368",
+     "type:s:s0915",
+     "type:s:s0404",
+     "mc:s:s0915",
+     "mc:s:s0404",
+     "mc:s:s0404",
+     "mc:s:s0404"
+    ],
+    [
+     "type:w:w0103",
+     "type:w:w0498",
+     "type:w:w0177",
+     "type:w:w0166",
+     "type:w:w0426",
+     "type:w:w0331",
+     "mc:w:w0262",
+     "type:w:w0500",
+     "mc:w:w0390",
+     "type:w:w0323",
+     "type:w:w0551",
+     "type:w:w0261",
+     "type:w:w0035",
+     "type:w:w0019",
+     "type:w:w0521",
+     "type:w:w0166",
+     "type:w:w0019",
+     "type:w:w0521",
+     "mc:w:w0488",
+     "mc:w:w0593",
+     "mc:w:w0151",
+     "mc:w:w0191",
+     "mc:w:w2009",
+     "mc:w:w0169",
+     "mc:w:w0424",
+     "mc:w:w0224",
+     "mc:w:w0136",
+     "mc:w:w0292",
+     "mc:w:w0576",
+     "mc:w:w0280",
+     "type:w:w0263",
+     "type:w:w0399",
+     "type:w:w0485",
+     "type:w:w2004",
+     "type:w:w0010",
+     "type:w:w0216",
+     "type:w:w0084",
+     "type:w:w0476",
+     "type:w:w0342",
+     "type:w:w0029",
+     "type:w:w0128",
+     "type:w:w0367",
+     "type:w:w0485",
+     "type:w:w0216",
+     "type:w:w0342",
+     "type:w:w0128",
+     "mc:s:s2564",
+     "mc:s:s0601",
+     "mc:s:s0792",
+     "type:s:s0404",
+     "mc:s:s0064",
+     "mc:s:s2821",
+     "type:s:s2693",
+     "type:s:s0915",
+     "type:s:s0404",
+     "type:s:s2693",
+     "type:s:s0915",
+     "mc:s:s0404",
+     "mc:s:s2693",
+     "mc:s:s0915"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0210",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0210\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">어제</span><span class=\"rg\">yesterday</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"33\"><div class=\"st\" data-tl lang=\"ko\"><b>어제</b> 저는 책을 샀어요.</div><div class=\"se\">Yesterday, I bought a book.</div></div><div class=\"sent\" data-sent=\"89\"><div class=\"st\" data-tl lang=\"ko\"><b>어제</b> 너무 많이 먹어서 이제 난 병이 나요.</div><div class=\"se\">Yesterday I ate too much and now I feel sick.</div></div></div>"
+    },
+    {
+     "key": "w:w0341",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0341\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">침대</span><span class=\"rg\">bed</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"545\"><div class=\"st\" data-tl lang=\"ko\">커다란 거미를 침대에서 발견하면 어떻게 해야해?</div><div class=\"se\">What should you do if you find a big spider on your bed?</div></div><div class=\"sent\" data-sent=\"827\"><div class=\"st\" data-tl lang=\"ko\">톰은 침대에 누웠다.</div><div class=\"se\">Tom went to bed.</div></div></div>"
+    },
+    {
+     "key": "w:w0072",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0072\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">어디</span><span class=\"rg\">where</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"14\"><div class=\"st\" data-tl lang=\"ko\">내 안경은 <b>어디</b> 있어요?</div><div class=\"se\">Where are my glasses?</div></div><div class=\"sent\" data-sent=\"253\"><div class=\"st\" data-tl lang=\"ko\">여름방학을 어디서 보내셨어요?</div><div class=\"se\">Where did you spend your summer vacation?</div></div></div>"
+    },
+    {
+     "key": "w:w0324",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0324\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">맛있다</span><span class=\"rg\">to be delicious</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"321\"><div class=\"st\" data-tl lang=\"ko\">프랑스 빵은 <b>맛있습니다</b>.</div><div class=\"se\">French bread is delicious.</div></div><div class=\"sent\" data-sent=\"703\"><div class=\"st\" data-tl lang=\"ko\"><b>맛있는</b> 저녁 식사에 감사드립니다.</div><div class=\"se\">Thank you for the delicious dinner.</div></div></div>"
+    },
+    {
+     "key": "w:w0530",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0530\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"ko\">덥다</span><span class=\"rg\">to be hot</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"44\"><div class=\"st\" data-tl lang=\"ko\">오늘은 날씨가 매우 <b>덥다</b>.</div><div class=\"se\">It is very hot today.</div></div><div class=\"sent\" data-sent=\"495\"><div class=\"st\" data-tl lang=\"ko\">오늘은 어제처럼 그렇게 <b>덥지는</b> 않네.</div><div class=\"se\">It&#39;s not as hot today as it was yesterday.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "90ff6a0f3908fb46"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "206179c1c85d616d"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "17b1fe54b1bed27f"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 22,
+     "sha": "b780f580a02a1e9f"
+    },
+    "script": {
+     "n": 6,
+     "sha": "9751383f81b9065d"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "5b3d279ac74052ec"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.206667,
+     0.095385,
+     0.062
+    ],
+    "toGo": [
+     113,
+     212,
+     280
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.206667,
+     "all": false
+    },
+    "eta": 113,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 32,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.058125
+   },
+   "items": {
+    "items": 166,
+    "right": 151
+   }
+  }
+ ]
+}

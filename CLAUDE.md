@@ -88,6 +88,7 @@ $NODE tests/sentence_spans_checks.js             # 15 (sentence spans flag-off c
 $NODE tests/port_sites_checks.js                # 359: all 13 sibling packs (../<lang>/pack, read only) through `packbuilder enrich --emit`: ft tiers, generic flag set (ja also the characters lag set + levelExam: lag sets 60 then 3/5/8, unit pair records, levelExam known rule on levels 2-3, gate sentence on a characters level), validator 0 errors (script sites too, since E3), 8 Today sessions at 85% each (script sites also with the primer learned), pair streaks written, ft-based known, Today / Progress / Read render, gate sentence, ETA branching per site on tools/eta.json (shipped: pack eta = file, finite estimates, "≈ N sessions"; absent: all null, no "≈"), measured and null values, a curve-shaped eta (fb42) read off its curves; ~7 min
 $NODE tests/flagoff_snapshot.js --check          # 46 (ar hi sw ur added; reads ../<lang>/pack; drift in a sibling checkout fails it)
 $NODE tests/flagoff_snapshot.js --capture        # regenerate tests/golden/ (explained commit only)
+$NODE tests/live_lock.js --check                 # 14 packs equal (flag collapse lock: the 14 live sibling packs as shipped, 5 records each, 6 with a characters layer, tests/golden/live_lock_<lang>.json; ~95 s; --capture in an explained commit only; --check --strip boots without the COLLAPSED keys, differs until the collapse is done, exit 0)
 
 ./build.sh packs/zh dist/zh.html                 # also writes dist/sw.js
 python3 tools/jsonify_pack.py packs/zh           # after editing any packs/zh/*.json
@@ -106,7 +107,7 @@ Republish rounds (bump, enrich, build, check, guard, controls, commit per site; 
 
 `tests/run_tier.sh fast|full [--area a,b]` runs a tier with the pinned Node (sets HSK_DIR when `../chinese` is absent), prints one line per suite (pass/fail counts, seconds) and exits 0 only when all pass. Run from a sibling checkout (`../vocab-engine-<branch>`) or any worktree.
 
-- **FAST** (per-feature worker, every commit): pack_flags_checks, engine_checks, migration_checks, export_checks, `flagoff_snapshot.js --check`, plus the suites of every area the diff touches (`--area`).
+- **FAST** (per-feature worker, every commit): pack_flags_checks, engine_checks, migration_checks, export_checks, `flagoff_snapshot.js --check`, `live_lock.js --check`, plus the suites of every area the diff touches (`--area`).
 - **FULL** (integration / republish only): every suite, including opts_mix (~8 to 14 min) and gloss_overlap (~6 to 16 min). About 20 min idle.
 
 | area | suites |

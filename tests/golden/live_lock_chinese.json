@@ -1,0 +1,3296 @@
+{
+ "lang": "chinese",
+ "packKey": "zh",
+ "words": 1193,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "ea57c939d5a48951"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 4,
+     "sha": "8e8a3b0eca9a0e47"
+    },
+    "showPron": true,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     97,
+     180,
+     335
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": 97,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "New here? Placement finds where to start. Take the placement test A few short lessons explain how Mandarin (HSK 1–4) sounds and is written. Start the first lesson Session 1 Goal 1 of 3 ≈ 97 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn HSK 1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test A few short lessons explain how Mandarin (HSK 1–4) sounds and is written. Start the first lesson Session 1 Goal 1 of 3 ≈ 97 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn HSK 1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test A few short lessons explain how Mandarin (HSK 1–4) sounds and is written. Start the first lesson Session 2 Goal 1 of 3 ≈ 97 sessions survive a trip: greet, order, count, buy Review Learn HSK 1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test A few short lessons explain how Mandarin (HSK 1–4) sounds and is written. Start the first lesson Session 3 Goal 1 of 3 ≈ 97 sessions survive a trip: greet, order, count, buy Review Learn HSK 1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, HSK 1 Goal 1 of 3 ≈ 97 sessions survive a trip: greet, order, count, buy HSK 1 0 learned Show all Settings Show pinyin New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, HSK 1 Goal 1 of 3 ≈ 96 sessions survive a trip: greet, order, count, buy HSK 1 30 learned Still shaky shàng tā lái néng Show all Settings Show pinyin New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 1 of 15 › Drill this set",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 1 of 15",
+       "rows": 10,
+       "first": [
+        "de show written of (~&#39;s (possessive particle) ; (used after an attribute) )",
+        "shì show written to be (is; are; am; yes)",
+        "zài show written at (in; located at; to exist; (in progress: -ing) )",
+        "le show written (completed action marker)",
+        "wǒ show written I (me; my)",
+        "hé show written and (joining two nouns) (together with; with) also: gēn , yǔ",
+        "yǒu show written to have (there is)",
+        "bù show written no (not)",
+        "rén show written person (people)",
+        "nǐ show written you (informal)"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 1 of 15",
+       "rows": 10,
+       "first": [
+        "yě show written also (too; as well; both ... and ...)",
+        "wèi show written because of (for)",
+        "jiù show written then (at once; right away; just; only)",
+        "dào show written to reach (to arrive; to leave for; to go to)",
+        "yào show written to want (to need; to ask for; will; shall; about to) also: xiǎng",
+        "hái show written still (also; in addition; yet; fairly) also: hái shi , réng rán",
+        "kě yǐ show written can (may) also: huì , néng",
+        "ràng show written to let (to allow; to make (sb do sth) ; to yield)",
+        "cóng show written from (through) also: yóu",
+        "zhe show written (aspect particle: action in progress, ongoing state)"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 1 of 30",
+       "rows": 10,
+       "first": [
+        "bèi show written (passive marker: by) (quilt)",
+        "guó jiā show written country (nation; state)",
+        "zì jǐ show written oneself (self; one&#39;s own)",
+        "bǎ show written (object marker, before the verb) (to hold; (classifier: handles) )",
+        "yòu show written again (already happened) (also)",
+        "de show written -ly",
+        "yòng show written to use (to employ) also: shǐ yòng",
+        "gèng show written more (even more)",
+        "rú guǒ show written if (in case)",
+        "shì jiè show written world"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "yǔ show written and (with; to give) also: hé , gēn",
+        "duì show written right (correct; towards; at; for) also: zhèng què",
+        "ér show written and (as well as)",
+        "děng show written to wait (for) (class; rank; etc.)",
+        "yǐ show written to use (by means of)",
+        "zhī show written (possessive particle) (him)",
+        "guò show written to cross (to pass (time) ; to spend (a holiday) ; (experienced action marker) )",
+        "yóu show written by (from; to follow)",
+        "fā zhǎn show written to develop (development; growth)",
+        "shè huì show written society"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 1 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 4 of 15",
+       "rows": 10,
+       "first": [
+        "duō show written many (much; too many; in excess) also: xǔ duō",
+        "qù show written to go (to go to (a place) )",
+        "kàn show written to look (at) (to see; to watch; to read; to visit)",
+        "xià show written down (below; under; to go down; next (week etc) )",
+        "xiàn zài show written now (at present)",
+        "lǐ show written inside (in; interior; lining) also: nèi",
+        "zuò show written to do (to make; to produce; to cook) also: gàn , nòng",
+        "zěn me show written how? (what?; why?)",
+        "méi show written have not (negative prefix for verbs) (not)",
+        "xiǎng show written to think (to want (to) ; to miss (sb) ; to think of)"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 1 of 15",
+       "rows": 10,
+       "first": [
+        "yě show written also (too; as well; both ... and ...)",
+        "wèi show written because of (for)",
+        "jiù show written then (at once; right away; just; only)",
+        "dào show written to reach (to arrive; to leave for; to go to)",
+        "yào show written to want (to need; to ask for; will; shall; about to) also: xiǎng",
+        "hái show written still (also; in addition; yet; fairly) also: hái shi , réng rán",
+        "kě yǐ show written can (may) also: huì , néng",
+        "ràng show written to let (to allow; to make (sb do sth) ; to yield)",
+        "cóng show written from (through) also: yóu",
+        "zhe show written (aspect particle: action in progress, ongoing state)"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 1 of 30",
+       "rows": 10,
+       "first": [
+        "bèi show written (passive marker: by) (quilt)",
+        "guó jiā show written country (nation; state)",
+        "zì jǐ show written oneself (self; one&#39;s own)",
+        "bǎ show written (object marker, before the verb) (to hold; (classifier: handles) )",
+        "yòu show written again (already happened) (also)",
+        "de show written -ly",
+        "yòng show written to use (to employ) also: shǐ yòng",
+        "gèng show written more (even more)",
+        "rú guǒ show written if (in case)",
+        "shì jiè show written world"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "yǔ show written and (with; to give) also: hé , gēn",
+        "duì show written right (correct; towards; at; for) also: zhèng què",
+        "ér show written and (as well as)",
+        "děng show written to wait (for) (class; rank; etc.)",
+        "yǐ show written to use (by means of)",
+        "zhī show written (possessive particle) (him)",
+        "guò show written to cross (to pass (time) ; to spend (a holiday) ; (experienced action marker) )",
+        "yóu show written by (from; to follow)",
+        "fā zhǎn show written to develop (development; growth)",
+        "shè huì show written society"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0018",
+     "mc:w:w0022",
+     "mc:w:w0101",
+     "mc:w:w0009",
+     "mc:w:w0054",
+     "mc:w:w0022",
+     "mc:w:w0125",
+     "mc:w:w0091",
+     "mc:w:w0091",
+     "mc:w:w0028",
+     "mc:w:w0009",
+     "mc:w:w0028",
+     "mc:w:w0099",
+     "mc:w:w0018",
+     "mc:w:w0125",
+     "mc:w:w0101",
+     "mc:w:w0062",
+     "mc:w:w0099",
+     "mc:w:w0062",
+     "mc:w:w0054",
+     "mc:w:w0022",
+     "mc:w:w0091",
+     "mc:w:w0062"
+    ],
+    [
+     "mc:w:w0091",
+     "type:w:w0101",
+     "type:w:w0009",
+     "type:w:w0028",
+     "mc:w:w0062",
+     "type:w:w0054",
+     "mc:w:w0022",
+     "type:w:w0125",
+     "mc:w:w0018",
+     "type:w:w0099",
+     "mc:w:w0092",
+     "mc:w:w0026",
+     "mc:w:w0004",
+     "mc:w:w0085",
+     "mc:w:w0014",
+     "mc:w:w0104",
+     "mc:w:w0092",
+     "mc:w:w0025",
+     "mc:w:w0025",
+     "mc:w:w0014",
+     "mc:w:w0142",
+     "mc:w:w0142",
+     "mc:w:w0144",
+     "mc:w:w0144",
+     "mc:w:w0051",
+     "mc:w:w0004",
+     "mc:w:w0085",
+     "mc:w:w0104",
+     "mc:w:w0026",
+     "mc:w:w0051",
+     "mc:w:w0085",
+     "mc:w:w0018",
+     "mc:w:w0101",
+     "mc:w:w0009",
+     "mc:w:w0054",
+     "mc:w:w0062",
+     "mc:w:w0091",
+     "mc:w:w0028",
+     "mc:w:w0099",
+     "mc:w:w0022",
+     "mc:w:w0125"
+    ],
+    [
+     "type:w:w0014",
+     "type:w:w0022",
+     "mc:w:w0004",
+     "type:w:w0144",
+     "type:w:w0051",
+     "mc:w:w0104",
+     "mc:w:w0026",
+     "mc:w:w0142",
+     "type:w:w0091",
+     "type:w:w0101",
+     "mc:w:w0025",
+     "mc:w:w0085",
+     "type:w:w0062",
+     "type:w:w0092",
+     "type:w:w0099",
+     "mc:w:w0025",
+     "mc:w:w0001",
+     "mc:w:w0001",
+     "mc:w:w0012",
+     "mc:w:w0023",
+     "mc:w:w0071",
+     "mc:w:w0087",
+     "mc:w:w0067",
+     "mc:w:w0094",
+     "mc:w:w0072",
+     "mc:w:w0087",
+     "mc:w:w0100",
+     "mc:w:w0071",
+     "mc:w:w0023",
+     "mc:w:w0012",
+     "mc:w:w0131",
+     "mc:w:w0094",
+     "mc:w:w0100",
+     "mc:w:w0131",
+     "mc:w:w0072",
+     "mc:w:w0067",
+     "mc:w:w0131",
+     "mc:w:w0018",
+     "mc:w:w0125",
+     "mc:w:w0026",
+     "mc:w:w0142",
+     "mc:w:w0009",
+     "mc:w:w0104",
+     "mc:w:w0025",
+     "mc:w:w0085",
+     "mc:w:w0028",
+     "mc:w:w0054",
+     "mc:w:w0004",
+     "mc:w:w0104",
+     "mc:w:w0004",
+     "mc:w:w0091",
+     "mc:w:w0092",
+     "mc:w:w0018",
+     "mc:w:w0144",
+     "mc:w:w0062",
+     "mc:w:w0051",
+     "mc:w:w0022",
+     "mc:w:w0014"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0018",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0018\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t5\">le</span><button type=\"button\" class=\"showw\" data-showw=\"了\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">(completed action marker)</span></div></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Nǐ</span></span> <span class=\"tk\" data-tok=\"w0024\" role=\"button\" tabindex=\"0\"><span class=\"t1\">jīn</span><span class=\"t1\">tiān</span></span> <span class=\"tk\" data-tok=\"w0037\" role=\"button\" tabindex=\"0\"><span class=\"t3\">jǐ</span></span> <span class=\"tk\" data-tok=\"w0083\" role=\"button\" tabindex=\"0\"><span class=\"t4\">suì</span></span> <b><span class=\"tk\" data-tok=\"w0018\" role=\"button\" tabindex=\"0\"><span class=\"t5\">le</span></span></b>?<button type=\"button\" class=\"replay ssay\" data-sent=\"43\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"你今天几岁了？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">How old are you now?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Nǐ</span></span> <span class=\"tk\" data-tok=\"w0127\" role=\"button\" tabindex=\"0\"><span class=\"t4\">kàn</span><span class=\"t4\">jiàn</span></span> <span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">wǒ</span></span> <span class=\"tk\" data-tok=\"w0125\" role=\"button\" tabindex=\"0\"><span class=\"t5\">de</span></span> <span class=\"tk\" data-tok=\"w0016\" role=\"button\" tabindex=\"0\"><span class=\"t1\">shū</span></span> <b><span class=\"tk\" data-tok=\"w0018\" role=\"button\" tabindex=\"0\"><span class=\"t5\">le</span></span></b> <span class=\"tk\" data-tok=\"w0051\" role=\"button\" tabindex=\"0\"><span class=\"t5\">ma</span></span>?<button type=\"button\" class=\"replay ssay\" data-sent=\"92\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"你看见我的书了吗？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Have you seen my book?</div></div></div>"
+    },
+    {
+     "key": "w:w0022",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0022\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t2\">rén</span><button type=\"button\" class=\"showw\" data-showw=\"人\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">person <span class=\"gx\">(people)</span></span></div></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Nǐ</span></span> <span class=\"tk\" data-tok=\"w0078\" role=\"button\" tabindex=\"0\"><span class=\"t1\">jiā</span></span> <span class=\"tk\" data-tok=\"w0101\" role=\"button\" tabindex=\"0\"><span class=\"t3\">yǒu</span></span> <span class=\"tk\" data-tok=\"w0037\" role=\"button\" tabindex=\"0\"><span class=\"t3\">jǐ</span></span> <span class=\"tk\" data-tok=\"w0012\" role=\"button\" tabindex=\"0\"><span class=\"t4\">gè</span></span> <b><span class=\"tk\" data-tok=\"w0022\" role=\"button\" tabindex=\"0\"><span class=\"t2\">rén</span></span></b>?<button type=\"button\" class=\"replay ssay\" data-sent=\"46\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"你家有几个人？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">How many people are in your family?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0078\" role=\"button\" tabindex=\"0\"><span class=\"t1\">jiā</span></span> <span class=\"tk\" data-tok=\"w0101\" role=\"button\" tabindex=\"0\"><span class=\"t3\">yǒu</span></span> <span class=\"tk\" data-tok=\"w0060\" role=\"button\" tabindex=\"0\"><span class=\"t4\">sì</span></span> <span class=\"tk\" data-tok=\"w0012\" role=\"button\" tabindex=\"0\"><span class=\"t4\">gè</span></span> <b><span class=\"tk\" data-tok=\"w0022\" role=\"button\" tabindex=\"0\"><span class=\"t2\">rén</span></span></b>.<button type=\"button\" class=\"replay ssay\" data-sent=\"47\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我家有四个人。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">There are four people in my family.</div></div></div>"
+    },
+    {
+     "key": "w:w0101",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0101\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t3\">yǒu</span><button type=\"button\" class=\"showw\" data-showw=\"有\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">to have <span class=\"gx\">(there is)</span></span></div></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <b><span class=\"tk\" data-tok=\"w0101\" role=\"button\" tabindex=\"0\"><span class=\"t3\">yǒu</span></span></b> <span class=\"tk\" data-tok=\"w0001\" role=\"button\" tabindex=\"0\"><span class=\"t1\">yī</span></span> <span class=\"tk\" data-tok=\"w0012\" role=\"button\" tabindex=\"0\"><span class=\"t4\">gè</span></span> <span class=\"tk\" data-tok=\"w0070\" role=\"button\" tabindex=\"0\"><span class=\"t3\">nǚ</span>&#39;<span class=\"t2\">ér</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"16\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我有一个女儿。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I have a daughter.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Nǐ</span></span> <b><span class=\"tk\" data-tok=\"w0101\" role=\"button\" tabindex=\"0\"><span class=\"t3\">yǒu</span></span></b> <span class=\"tk\" data-tok=\"w0119\" role=\"button\" tabindex=\"0\"><span class=\"t3\">gǒu</span></span> <span class=\"tk\" data-tok=\"w0051\" role=\"button\" tabindex=\"0\"><span class=\"t5\">ma</span></span>?<button type=\"button\" class=\"replay ssay\" data-sent=\"17\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"你有狗吗？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Do you have a dog?</div></div></div>"
+    },
+    {
+     "key": "w:w0009",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0009\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t4\">bù</span><button type=\"button\" class=\"showw\" data-showw=\"不\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">no <span class=\"gx\">(not)</span></span></div></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0058\" role=\"button\" tabindex=\"0\"><span class=\"t3\">xǐ</span><span class=\"t5\">huan</span></span> <span class=\"tk\" data-tok=\"w0120\" role=\"button\" tabindex=\"0\"><span class=\"t1\">māo</span></span>, <b><span class=\"tk\" data-tok=\"w0009\" role=\"button\" tabindex=\"0\"><span class=\"t4\">bù</span></span></b> <span class=\"tk\" data-tok=\"w0058\" role=\"button\" tabindex=\"0\"><span class=\"t3\">xǐ</span><span class=\"t5\">huan</span></span> <span class=\"tk\" data-tok=\"w0119\" role=\"button\" tabindex=\"0\"><span class=\"t3\">gǒu</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"19\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我喜欢猫，不喜欢狗。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I like cats, not dogs.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0059\" role=\"button\" tabindex=\"0\"><span class=\"t1\">hē</span></span> <span class=\"tk\" data-tok=\"w0108\" role=\"button\" tabindex=\"0\"><span class=\"t3\">shuǐ</span></span>, <b><span class=\"tk\" data-tok=\"w0009\" role=\"button\" tabindex=\"0\"><span class=\"t4\">bù</span></span></b> <span class=\"tk\" data-tok=\"w0059\" role=\"button\" tabindex=\"0\"><span class=\"t1\">hē</span></span> <span class=\"tk\" data-tok=\"w0133\" role=\"button\" tabindex=\"0\"><span class=\"t2\">chá</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"23\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我喝水，不喝茶。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I drink water, not tea.</div></div></div>"
+    },
+    {
+     "key": "w:w0054",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0054\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t2\">hé</span><button type=\"button\" class=\"showw\" data-showw=\"和\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">and <span class=\"dim\">(joining two nouns)</span> <span class=\"gx\">(together with; with)</span></span></div></div><div class=\"syn\" style=\"color:var(--mute);font-size:15px\">also: <bdi data-tl lang=\"zh\"><span class=\"t1\">gēn</span></bdi>, <bdi data-tl lang=\"zh\"><span class=\"t3\">yǔ</span></bdi></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Nǐ</span></span> <b><span class=\"tk\" data-tok=\"w0054\" role=\"button\" tabindex=\"0\"><span class=\"t2\">hé</span></span></b> <span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">nǐ</span></span> <span class=\"tk\" data-tok=\"w0102\" role=\"button\" tabindex=\"0\"><span class=\"t2\">péng</span><span class=\"t5\">you</span></span> <span class=\"tk\" data-tok=\"w0045\" role=\"button\" tabindex=\"0\"><span class=\"t4\">qù</span></span> <span class=\"tk\" data-tok=\"w0055\" role=\"button\" tabindex=\"0\"><span class=\"t3\">nǎ</span></span>?<button type=\"button\" class=\"replay ssay\" data-sent=\"103\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"你和你朋友去哪？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Where are you and your friend going?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0073\" role=\"button\" tabindex=\"0\"><span class=\"t1\">Mā</span><span class=\"t5\">ma</span></span> <span class=\"tk\" data-tok=\"w0117\" role=\"button\" tabindex=\"0\"><span class=\"t4\">ài</span></span> <span class=\"tk\" data-tok=\"w0030\" role=\"button\" tabindex=\"0\"><span class=\"t2\">ér</span><span class=\"t5\">zi</span></span> <b><span class=\"tk\" data-tok=\"w0054\" role=\"button\" tabindex=\"0\"><span class=\"t2\">hé</span></span></b> <span class=\"tk\" data-tok=\"w0070\" role=\"button\" tabindex=\"0\"><span class=\"t3\">nǚ</span>&#39;<span class=\"t2\">ér</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"123\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"妈妈爱儿子和女儿。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Mom loves her son and daughter.</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "ea57c939d5a48951"
+    },
+    "day": {
+     "n": 3,
+     "sha": "90bc8d101920af27"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "776fb70298b72ecd"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d9b7082dcbad7ea0"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 4,
+     "sha": "a392a80f28fc9876"
+    },
+    "showPron": true,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "54b210d5d36397d6"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0.00404,
+     0.002017,
+     0.001006
+    ],
+    "toGo": [
+     96,
+     179,
+     334
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.00404,
+     "all": false
+    },
+    "eta": 96,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.000838
+   },
+   "items": {
+    "items": 122,
+    "right": 114
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "cebb3fe33aefbcf8"
+    },
+    "day": {
+     "n": 3,
+     "sha": "28a378c7246289bc"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "1a543233fdb3a778"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "ef3285797869127b"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 14,
+     "sha": "c7643579fd381258"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 4,
+     "sha": "29c02d6f22cda6e3"
+    },
+    "showPron": true,
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 60,
+     "sha": "3cb23a6e47a83175"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0.045724,
+     0.023496,
+     0.01239
+    ],
+    "toGo": [
+     86,
+     170,
+     327
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.045724,
+     "all": false
+    },
+    "eta": 86,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.008153
+   },
+   "todayFirst": "A few short lessons explain how Mandarin (HSK 1–4) sounds and is written. Start the first lesson Session 13 Goal 1 of 3 ≈ 86 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 7 of 17 Listen Recall Sentences Start",
+   "today": [
+    "A few short lessons explain how Mandarin (HSK 1–4) sounds and is written. Start the first lesson Session 13 Goal 1 of 3 ≈ 86 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 7 of 17 Listen Recall Sentences Start",
+    "A few short lessons explain how Mandarin (HSK 1–4) sounds and is written. Start the first lesson Session 14 Goal 1 of 3 ≈ 84 sessions survive a trip: greet, order, count, buy Review Learn HSK 1, set 7 Listen Recall Sentences Start",
+    "A few short lessons explain how Mandarin (HSK 1–4) sounds and is written. Start the first lesson Session 15 Goal 1 of 3 ≈ 83 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 8 of 17 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, HSK 1 In 6 sessions since your last visit +5 mastered +1 characters only Goal 1 of 3 ≈ 86 sessions survive a trip: greet, order, count, buy HSK 1 60 learned Still shaky xǐ huan Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, HSK 1 Goal 1 of 3 ≈ 83 sessions survive a trip: greet, order, count, buy HSK 1 70 learned Still shaky 听 péng you 爱 钱 Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 7 of 15 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 7 of 15",
+       "rows": 10,
+       "first": [
+        "jiā show written home (family; (classifier for shops, companies) )",
+        "dōng xi show written thing (stuff)",
+        "kāi show written to open (transitive or intransitive)",
+        "xué xiào show written school",
+        "péng you show written friend",
+        "xiě show written to write",
+        "mǎi show written to buy (to purchase)",
+        "jiào show written to be called (to call; to shout; to ask (sb to do sth) )",
+        "běn show written (classifier for books) (this; root; origin)",
+        "xué xí show written to learn (to study)"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 1 of 15",
+       "rows": 10,
+       "first": [
+        "yě show written also (too; as well; both ... and ...)",
+        "wèi show written because of (for)",
+        "jiù show written then (at once; right away; just; only)",
+        "dào show written to reach (to arrive; to leave for; to go to)",
+        "yào show written to want (to need; to ask for; will; shall; about to) also: xiǎng",
+        "hái show written still (also; in addition; yet; fairly) also: hái shi , réng rán",
+        "kě yǐ show written can (may) also: 会 , 能",
+        "ràng show written to let (to allow; to make (sb do sth) ; to yield)",
+        "cóng show written from (through) also: yóu",
+        "zhe show written (aspect particle: action in progress, ongoing state)"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 1 of 30",
+       "rows": 10,
+       "first": [
+        "bèi show written (passive marker: by) (quilt)",
+        "guó jiā show written country (nation; state)",
+        "zì jǐ show written oneself (self; one&#39;s own)",
+        "bǎ show written (object marker, before the verb) (to hold; (classifier: handles) )",
+        "yòu show written again (already happened) (also)",
+        "de show written -ly",
+        "yòng show written to use (to employ) also: shǐ yòng",
+        "gèng show written more (even more)",
+        "rú guǒ show written if (in case)",
+        "shì jiè show written world"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "yǔ show written and (with; to give) also: 和 , gēn",
+        "duì show written right (correct; towards; at; for) also: zhèng què",
+        "ér show written and (as well as)",
+        "děng show written to wait (for) (class; rank; etc.)",
+        "yǐ show written to use (by means of)",
+        "zhī show written (possessive particle) (him)",
+        "guò show written to cross (to pass (time) ; to spend (a holiday) ; (experienced action marker) )",
+        "yóu show written by (from; to follow)",
+        "fā zhǎn show written to develop (development; growth)",
+        "shè huì show written society"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 1 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 8 of 15",
+       "rows": 10,
+       "first": [
+        "rèn shi show written to know (to recognize)",
+        "duō shao show written how much? (how many?)",
+        "nǎ show written which (how)",
+        "èr show written two (2) also: liǎng",
+        "zhù show written to live (to dwell)",
+        "shū show written book (letter)",
+        "huí show written to go back (to return; to reply; time (s) (occurrences) )",
+        "yī yuàn show written hospital",
+        "zěn me yàng show written how? (how about?)",
+        "shuǐ show written water (liquid)"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 1 of 15",
+       "rows": 10,
+       "first": [
+        "yě show written also (too; as well; both ... and ...)",
+        "wèi show written because of (for)",
+        "jiù show written then (at once; right away; just; only)",
+        "dào show written to reach (to arrive; to leave for; to go to)",
+        "yào show written to want (to need; to ask for; will; shall; about to) also: 想",
+        "hái show written still (also; in addition; yet; fairly) also: hái shi , réng rán",
+        "kě yǐ show written can (may) also: 会 , 能",
+        "ràng show written to let (to allow; to make (sb do sth) ; to yield)",
+        "cóng show written from (through) also: yóu",
+        "zhe show written (aspect particle: action in progress, ongoing state)"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 1 of 30",
+       "rows": 10,
+       "first": [
+        "bèi show written (passive marker: by) (quilt)",
+        "guó jiā show written country (nation; state)",
+        "zì jǐ show written oneself (self; one&#39;s own)",
+        "bǎ show written (object marker, before the verb) (to hold; (classifier: handles) )",
+        "yòu show written again (already happened) (also)",
+        "de show written -ly",
+        "yòng show written to use (to employ) also: shǐ yòng",
+        "gèng show written more (even more)",
+        "rú guǒ show written if (in case)",
+        "shì jiè show written world"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "yǔ show written and (with; to give) also: 和 , gēn",
+        "duì show written right (correct; towards; at; for) also: zhèng què",
+        "ér show written and (as well as)",
+        "děng show written to wait (for) (class; rank; etc.)",
+        "yǐ show written to use (by means of)",
+        "zhī show written (possessive particle) (him)",
+        "guò show written to cross (to pass (time) ; to spend (a holiday) ; (experienced action marker) )",
+        "yóu show written by (from; to follow)",
+        "fā zhǎn show written to develop (development; growth)",
+        "shè huì show written society"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0094",
+     "type:w:w0145",
+     "type:w:w0117",
+     "mc:c:c0121",
+     "mc:c:c0072",
+     "mc:c:c0045",
+     "mc:w:w0041",
+     "type:w:w0009",
+     "type:w:w0052",
+     "type:w:w0071",
+     "type:w:w0111",
+     "mc:c:c0080",
+     "type:w:w0026",
+     "mc:c:c0001",
+     "type:w:w0058",
+     "type:w:w0053",
+     "type:w:w0085",
+     "type:w:w0022",
+     "type:w:w0069",
+     "mc:c:c0028",
+     "type:w:w0052",
+     "type:w:w0111",
+     "type:w:w0026",
+     "mc:c:c0001",
+     "type:w:w0053",
+     "mc:c:c0146",
+     "mc:c:c0138",
+     "mc:c:c0052",
+     "mc:c:c0115",
+     "mc:c:c0077",
+     "mc:c:c0140",
+     "mc:c:c0041",
+     "mc:c:c0058",
+     "mc:c:c0138",
+     "mc:c:c0041",
+     "mc:c:c0115",
+     "mc:c:c0077",
+     "mc:c:c0053",
+     "mc:c:c0122",
+     "mc:c:c0140",
+     "mc:c:c0146",
+     "mc:c:c0053",
+     "mc:c:c0052",
+     "mc:c:c0058",
+     "mc:c:c0122",
+     "mc:c:c0053",
+     "mc:c:c0146",
+     "mc:c:c0058",
+     "mc:w:w0018",
+     "mc:w:w0083",
+     "mc:w:w0115",
+     "mc:w:w0080",
+     "mc:w:w0047",
+     "mc:w:w0004",
+     "mc:w:w0140",
+     "mc:w:w0009",
+     "mc:w:w0088",
+     "mc:w:w0138",
+     "mc:w:w0146",
+     "mc:w:w0024",
+     "mc:w:w0138",
+     "mc:c:c0065",
+     "mc:c:c0072",
+     "mc:c:c0090",
+     "mc:c:c0117",
+     "mc:c:c0087",
+     "mc:c:c0111",
+     "mc:c:c0012",
+     "mc:c:c0006",
+     "mc:c:c0145",
+     "mc:w:w0041",
+     "mc:c:c0100",
+     "mc:c:c0029",
+     "mc:s:s0016",
+     "mc:s:s0001",
+     "mc:s:s0050",
+     "mc:s:s0101",
+     "mc:s:s0123",
+     "mc:s:s0028",
+     "mc:s:s0116",
+     "mc:s:s0068"
+    ],
+    [
+     "type:w:w0058",
+     "type:w:w0052",
+     "mc:c:c0001",
+     "mc:c:c0146",
+     "mc:c:c0084",
+     "mc:c:c0003",
+     "mc:c:c0053",
+     "type:w:w0026",
+     "mc:c:c0080",
+     "mc:c:c0095",
+     "type:w:w0072",
+     "mc:c:c0058",
+     "type:w:w0146",
+     "type:w:w0012",
+     "mc:c:c0088",
+     "mc:w:w0138",
+     "mc:w:w0041",
+     "type:w:w0111",
+     "mc:c:c0143",
+     "type:w:w0053",
+     "mc:c:c0084",
+     "mc:c:c0003",
+     "mc:c:c0053",
+     "mc:c:c0058",
+     "type:w:w0012",
+     "mc:w:w0138",
+     "mc:w:w0011",
+     "mc:w:w0017",
+     "mc:w:w0011",
+     "mc:w:w0102",
+     "mc:w:w0086",
+     "mc:w:w0103",
+     "mc:w:w0102",
+     "mc:w:w0076",
+     "mc:w:w0046",
+     "mc:w:w0086",
+     "mc:w:w0078",
+     "mc:w:w0075",
+     "mc:w:w0035",
+     "mc:w:w0103",
+     "mc:w:w0017",
+     "mc:w:w0035",
+     "mc:w:w0078",
+     "mc:w:w0076",
+     "mc:w:w0046",
+     "mc:w:w0075",
+     "mc:w:w0080",
+     "mc:w:w0003",
+     "mc:w:w0047",
+     "mc:w:w0145",
+     "mc:w:w0069",
+     "mc:w:w0077",
+     "mc:w:w0090",
+     "mc:w:w0024",
+     "mc:w:w0084",
+     "mc:w:w0121",
+     "mc:w:w0122",
+     "mc:w:w0088",
+     "mc:w:w0122",
+     "mc:w:w0088",
+     "mc:w:w0041",
+     "mc:c:c0122",
+     "mc:c:c0028",
+     "mc:c:c0077",
+     "type:w:w0080",
+     "mc:c:c0045",
+     "mc:c:c0053",
+     "mc:c:c0140",
+     "type:w:w0117",
+     "mc:c:c0146",
+     "mc:c:c0052",
+     "mc:c:c0121",
+     "type:w:w0080",
+     "mc:c:c0045",
+     "mc:c:c0121",
+     "mc:s:s0873",
+     "mc:s:s0119",
+     "mc:s:s0069",
+     "mc:s:s0113",
+     "mc:s:s0882",
+     "mc:s:s0128",
+     "mc:s:s0127",
+     "mc:s:s0122",
+     "mc:s:s0069",
+     "mc:s:s0122"
+    ],
+    [
+     "type:w:w0140",
+     "type:w:w0111",
+     "mc:c:c0003",
+     "mc:w:w0122",
+     "type:w:w0053",
+     "mc:c:c0084",
+     "mc:c:c0045",
+     "type:w:w0146",
+     "type:w:w0012",
+     "mc:w:w0088",
+     "mc:c:c0053",
+     "mc:c:c0121",
+     "mc:c:c0058",
+     "mc:w:w0041",
+     "type:w:w0103",
+     "type:w:w0026",
+     "type:w:w0080",
+     "mc:w:w0138",
+     "mc:w:w0011",
+     "type:w:w0052",
+     "mc:c:c0084",
+     "type:w:w0052",
+     "mc:c:c0102",
+     "mc:c:c0011",
+     "mc:c:c0078",
+     "mc:c:c0086",
+     "mc:c:c0086",
+     "mc:c:c0011",
+     "mc:c:c0069",
+     "mc:c:c0035",
+     "mc:c:c0102",
+     "mc:c:c0076",
+     "mc:c:c0078",
+     "mc:c:c0047",
+     "mc:c:c0035",
+     "mc:c:c0083",
+     "mc:c:c0083",
+     "mc:c:c0024",
+     "mc:c:c0069",
+     "mc:c:c0024",
+     "mc:c:c0076",
+     "mc:c:c0047",
+     "mc:c:c0011",
+     "mc:c:c0078",
+     "mc:c:c0069",
+     "mc:w:w0047",
+     "mc:w:w0071",
+     "mc:w:w0086",
+     "mc:w:w0094",
+     "mc:w:w0009",
+     "mc:w:w0004",
+     "mc:w:w0018",
+     "mc:w:w0117",
+     "mc:w:w0083",
+     "mc:w:w0115",
+     "mc:w:w0146",
+     "mc:w:w0102",
+     "mc:w:w0146",
+     "type:w:w0117",
+     "mc:w:w0076",
+     "mc:c:c0058",
+     "type:w:w0077",
+     "mc:c:c0115",
+     "mc:w:w0078",
+     "mc:c:c0138",
+     "mc:w:w0046",
+     "mc:w:w0017",
+     "mc:w:w0035",
+     "mc:w:w0075",
+     "mc:c:c0041",
+     "mc:c:c0041",
+     "mc:c:c0041",
+     "mc:s:s0122",
+     "mc:s:s0012",
+     "mc:s:s0113",
+     "mc:s:s0119",
+     "mc:s:s0127",
+     "mc:s:s0882",
+     "mc:s:s0128",
+     "mc:s:s0069",
+     "mc:s:s0122",
+     "mc:s:s0012",
+     "mc:s:s0882",
+     "mc:s:s0122"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0094",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0094\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\">日</span><span class=\"rp\"><span class=\"t4\">rì</span></span><span class=\"rg\">day <span class=\"gx\">(date)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st hasruby\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0024\" role=\"button\" tabindex=\"0\"><span class=\"t1\">Jīn</span><span class=\"t1\">tiān</span></span> <span class=\"tk\" data-tok=\"w0099\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">是<rt><span class=\"t4\">shì</span></rt></ruby></span> <span class=\"tk\" data-tok=\"w0037\" role=\"button\" tabindex=\"0\"><span class=\"t3\">jǐ</span></span> <span class=\"tk\" data-tok=\"w0100\" role=\"button\" tabindex=\"0\"><span class=\"t4\">yuè</span></span> <span class=\"tk\" data-tok=\"w0037\" role=\"button\" tabindex=\"0\"><span class=\"t3\">jǐ</span></span> <b><span class=\"tk\" data-tok=\"w0094\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">日<rt><span class=\"t4\">rì</span></rt></ruby></span></b>?<button type=\"button\" class=\"replay ssay\" data-sent=\"41\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"今天是几月几日？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">What&#39;s the date today?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st hasruby\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0024\" role=\"button\" tabindex=\"0\"><span class=\"t1\">Jīn</span><span class=\"t1\">tiān</span></span> <span class=\"tk\" data-tok=\"w0099\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">是<rt><span class=\"t4\">shì</span></rt></ruby></span> <span class=\"tk\" data-tok=\"w0015\" role=\"button\" tabindex=\"0\"><span class=\"t3\">jiǔ</span></span> <span class=\"tk\" data-tok=\"w0100\" role=\"button\" tabindex=\"0\"><span class=\"t4\">yuè</span></span> <span class=\"tk\" data-tok=\"w0060\" role=\"button\" tabindex=\"0\"><span class=\"t4\">sì</span></span> <b><span class=\"tk\" data-tok=\"w0094\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">日<rt><span class=\"t4\">rì</span></rt></ruby></span></b>.<button type=\"button\" class=\"replay ssay\" data-sent=\"42\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"今天是九月四日。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Today is September 4th.</div></div></div>"
+    },
+    {
+     "key": "w:w0145",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0145\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t3\">lǐ</span><button type=\"button\" class=\"showw\" data-showw=\"里\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">inside <span class=\"gx\">(in; interior; lining)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"syn\" style=\"color:var(--mute);font-size:15px\">also: <bdi data-tl lang=\"zh\"><span class=\"t4\">nèi</span></bdi></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st hasruby\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0043\" role=\"button\" tabindex=\"0\"><span class=\"t1\">Yī</span><span class=\"t4\">yuàn</span></span> <b><span class=\"tk\" data-tok=\"w0145\" role=\"button\" tabindex=\"0\"><span class=\"t3\">lǐ</span></span></b> <span class=\"tk\" data-tok=\"w0101\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">有<rt><span class=\"t3\">yǒu</span></rt></ruby></span> <span class=\"tk\" data-tok=\"w0087\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hěn</span></span> <span class=\"tk\" data-tok=\"w0065\" role=\"button\" tabindex=\"0\"><span class=\"t1\">duō</span></span> <span class=\"tk\" data-tok=\"w0042\" role=\"button\" tabindex=\"0\"><span class=\"t1\">yī</span><span class=\"t1\">shēng</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"111\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"医院里有很多医生。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">There are many doctors in the hospital.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st hasruby\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0076\" role=\"button\" tabindex=\"0\"><span class=\"t2\">Xué</span><span class=\"t4\">xiào</span></span> <b><span class=\"tk\" data-tok=\"w0145\" role=\"button\" tabindex=\"0\"><span class=\"t3\">lǐ</span></span></b> <span class=\"tk\" data-tok=\"w0101\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">有<rt><span class=\"t3\">yǒu</span></rt></ruby></span> <span class=\"tk\" data-tok=\"w0087\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hěn</span></span> <span class=\"tk\" data-tok=\"w0065\" role=\"button\" tabindex=\"0\"><span class=\"t1\">duō</span></span> <span class=\"tk\" data-tok=\"w0077\" role=\"button\" tabindex=\"0\"><span class=\"t2\">xué</span><span class=\"t5\">sheng</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"112\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"学校里有很多学生。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">There are many students in the school.</div></div></div>"
+    },
+    {
+     "key": "w:w0117",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0117\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t4\">ài</span><button type=\"button\" class=\"showw\" data-showw=\"爱\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">to love <span class=\"gx\">(affection; to be fond of)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st hasruby\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">我<rt><span class=\"t3\">wǒ</span></rt></ruby></span> <b><span class=\"tk\" data-tok=\"w0117\" role=\"button\" tabindex=\"0\"><span class=\"t4\">ài</span></span></b> <span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">我<rt><span class=\"t3\">wǒ</span></rt></ruby></span><span class=\"tk\" data-tok=\"w0125\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">的<rt><span class=\"t5\">de</span></rt></ruby></span> <span class=\"tk\" data-tok=\"w0078\" role=\"button\" tabindex=\"0\"><span class=\"t1\">jiā</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"121\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我爱我的家。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I love my family.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st hasruby\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><ruby class=\"bare\">我<rt><span class=\"t3\">wǒ</span></rt></ruby></span> <b><span class=\"tk\" data-tok=\"w0117\" role=\"button\" tabindex=\"0\"><span class=\"t4\">ài</span></span></b> <span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">nǐ</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"122\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我爱你。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I love you.</div></div></div>"
+    },
+    {
+     "key": "c:c0121",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0121\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\">现在</span><span class=\"rp\"><span class=\"t4\">xiàn</span><span class=\"t4\">zài</span></span><span class=\"rg\">now <span class=\"gx\">(at present)</span></span></div></div><div class=\"ucue\" aria-label=\"字 2/5\"><span data-tl lang=\"zh\">字</span> ●●○○○</div><div><span class=\"chint\"><span><span class=\"hc\" data-tl lang=\"zh\">现</span> now: to see <span data-tl lang=\"zh\">见</span> jade <span data-tl lang=\"zh\">王</span></span><span><span class=\"hc\" data-tl lang=\"zh\">在</span> at</span></span></div>"
+    },
+    {
+     "key": "c:c0072",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0072\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\">好</span><span class=\"rp\"><span class=\"t3\">hǎo</span></span><span class=\"rg\">good <span class=\"gx\">(well; OK; fine; appropriate)</span></span></div></div><div class=\"ucue\" aria-label=\"字 2/5\"><span data-tl lang=\"zh\">字</span> ●●○○○</div><div><span class=\"chint\"><span>a woman <span data-tl lang=\"zh\">女</span> with a son <span data-tl lang=\"zh\">子</span>: good</span></span></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "99e7daf71e1812f2"
+    },
+    "day": {
+     "n": 3,
+     "sha": "7f2cb5619f64eb59"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "cf0476cfcd8aea1e"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "4f05198544670579"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 23,
+     "sha": "f3955d8b8c4964dc"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 4,
+     "sha": "960780a640cc1bcf"
+    },
+    "showPron": true,
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 70,
+     "sha": "9adc41e794f6f3fd"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0.062559,
+     0.031899,
+     0.016581
+    ],
+    "toGo": [
+     83,
+     167,
+     324
+    ],
+    "toGoTotal": 194,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.062559,
+     "all": false
+    },
+    "eta": 83,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.009201
+   },
+   "items": {
+    "items": 250,
+    "right": 216
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "ea57c939d5a48951"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "3",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 4,
+     "sha": "bf0a3de69a1f23fd"
+    },
+    "showPron": true,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 447,
+     "sha": "f082324fb75380d0"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0.8,
+     0.601008,
+     0.224811
+    ],
+    "toGo": [
+     5,
+     36,
+     244
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.8,
+     "all": false
+    },
+    "eta": 5,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0016",
+     "lv": "2"
+    },
+    "position": 0.187343
+   },
+   "todayFirst": "Session 1 Goal 1 of 3 ≈ 5 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 1 of 17 Listen Recall Sentences Read 妹妹的生日 Start",
+   "today": [
+    "Session 1 Goal 1 of 3 ≈ 5 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 1 of 17 Listen Recall Sentences Read 妹妹的生日 Start",
+    "Session 2 Goal 1 of 3 ≈ 6 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 2 of 17 Listen Recall Sentences Read 妹妹的生日 Start",
+    "Session 3 Goal 1 of 3 ≈ 6 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 3 of 17 Listen Recall Sentences Read 妹妹的生日 Start"
+   ],
+   "progress": {
+    "start": "0 sessions, HSK 3 Goal 1 of 3 ≈ 5 sessions survive a trip: greet, order, count, buy HSK 1 0 of 150 mastered HSK 2 0 of 147 mastered characters only 0 of 147 · reading 0 of 15 HSK 3 150 learned Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, HSK 3 Goal 1 of 3 ≈ 7 sessions survive a trip: greet, order, count, buy HSK 1 2 of 150 mastered HSK 2 0 of 147 mastered characters only 0 of 147 · reading 0 of 15 HSK 3 150 learned Still shaky chī kāi yì si zhī dào gěi yīng gāi cái liǎn Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 15 of 15 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 15 of 15 ✓",
+       "rows": 10,
+       "first": [
+        "méi guān xi show written it doesn&#39;t matter (never mind)",
+        "huǒ chē zhàn show written train station (railway station)",
+        "chū zū chē show written taxi",
+        "xià yǔ show written to rain",
+        "zhuō zi show written table (desk)",
+        "yǐ zi show written chair",
+        "bēi zi show written cup (glass)",
+        "mǐ fàn show written rice (cooked)",
+        "bù kè qi show written you&#39;re welcome (don&#39;t mention it)",
+        "fàn guǎn show written restaurant"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 15 of 15 ✓",
+       "rows": 7,
+       "first": [
+        "fú wù yuán show written waiter (waitress)",
+        "xī guā show written watermelon",
+        "qíng show written sunny (clear; fine (weather) )",
+        "pǎo bù show written to run (to jog)",
+        "yáng ròu show written mutton (lamb; goat meat)",
+        "gōng gòng qì chē show written bus",
+        "dǎ lán qiú show written to play basketball"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 16 of 30",
+       "rows": 10,
+       "first": [
+        "hài pà show written to be afraid (to be scared)",
+        "bāo show written bag (package; to wrap; to cover; to include)",
+        "yù dào show written to meet (to run into; to come across)",
+        "chà show written poor (not up to standard; to lack; short of; different)",
+        "huài show written bad (broken; spoiled; to go bad)",
+        "dǎ suàn show written to plan (to intend) also: jì huà",
+        "jiē show written to pick up (sb) (to meet (sb) ; to receive; to answer (the phone) )",
+        "jí show written extremely (pole (geography, physics) ) also: jí qí",
+        "huà show written to draw (to paint; picture; painting)",
+        "kǒu show written mouth also: zuǐ"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "yǔ show written and (with; to give) also: hé , gēn",
+        "duì show written right (correct; towards; at; for) also: zhèng què",
+        "ér show written and (as well as)",
+        "děng show written to wait (for) (class; rank; etc.)",
+        "yǐ show written to use (by means of)",
+        "zhī show written (possessive particle) (him)",
+        "guò show written to cross (to pass (time) ; to spend (a holiday) ; (experienced action marker) )",
+        "yóu show written by (from; to follow)",
+        "fā zhǎn show written to develop (development; growth)",
+        "shè huì show written society"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 1 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 15 of 15 ✓",
+       "rows": 10,
+       "first": [
+        "méi guān xi show written it doesn&#39;t matter (never mind)",
+        "huǒ chē zhàn show written train station (railway station)",
+        "chū zū chē show written taxi",
+        "xià yǔ show written to rain",
+        "zhuō zi show written table (desk)",
+        "yǐ zi show written chair",
+        "bēi zi show written cup (glass)",
+        "mǐ fàn show written rice (cooked)",
+        "bù kè qi show written you&#39;re welcome (don&#39;t mention it)",
+        "fàn guǎn show written restaurant"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 15 of 15 ✓",
+       "rows": 7,
+       "first": [
+        "fú wù yuán show written waiter (waitress)",
+        "xī guā show written watermelon",
+        "qíng show written sunny (clear; fine (weather) )",
+        "pǎo bù show written to run (to jog)",
+        "yáng ròu show written mutton (lamb; goat meat)",
+        "gōng gòng qì chē show written bus",
+        "dǎ lán qiú show written to play basketball"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 16 of 30",
+       "rows": 10,
+       "first": [
+        "hài pà show written to be afraid (to be scared)",
+        "bāo show written bag (package; to wrap; to cover; to include)",
+        "yù dào show written to meet (to run into; to come across)",
+        "chà show written poor (not up to standard; to lack; short of; different)",
+        "huài show written bad (broken; spoiled; to go bad)",
+        "dǎ suàn show written to plan (to intend) also: jì huà",
+        "jiē show written to pick up (sb) (to meet (sb) ; to receive; to answer (the phone) )",
+        "jí show written extremely (pole (geography, physics) ) also: jí qí",
+        "huà show written to draw (to paint; picture; painting)",
+        "kǒu show written mouth also: zuǐ"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "yǔ show written and (with; to give) also: hé , gēn",
+        "duì show written right (correct; towards; at; for) also: zhèng què",
+        "ér show written and (as well as)",
+        "děng show written to wait (for) (class; rank; etc.)",
+        "yǐ show written to use (by means of)",
+        "zhī show written (possessive particle) (him)",
+        "guò show written to cross (to pass (time) ; to spend (a holiday) ; (experienced action marker) )",
+        "yóu show written by (from; to follow)",
+        "fā zhǎn show written to develop (development; growth)",
+        "shè huì show written society"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0234",
+     "type:w:w0060",
+     "type:w:w0338",
+     "type:w:w0160",
+     "type:w:w0085",
+     "type:w:w0126",
+     "type:w:w0361",
+     "type:w:w0432",
+     "type:w:w0147",
+     "type:w:w0248",
+     "type:w:w0218",
+     "type:w:w0295",
+     "type:w:w0532",
+     "type:w:w0116",
+     "type:w:w0186",
+     "type:w:w0365",
+     "type:w:w0268",
+     "type:w:w0155",
+     "type:w:w0051",
+     "type:w:w0204",
+     "type:w:w0160",
+     "type:w:w0268",
+     "mc:c:c0062",
+     "mc:c:c0099",
+     "mc:c:c0125",
+     "mc:c:c0099",
+     "mc:c:c0125",
+     "mc:c:c0062",
+     "mc:c:c0125",
+     "mc:c:c0125",
+     "mc:c:c0125",
+     "mc:c:c0125",
+     "mc:w:w0347",
+     "mc:w:w0093",
+     "mc:w:w0199",
+     "mc:w:w0079",
+     "mc:w:w0028",
+     "mc:w:w0389",
+     "mc:w:w0252",
+     "mc:w:w0547",
+     "mc:w:w0005",
+     "mc:w:w0344",
+     "mc:w:w0325",
+     "mc:w:w0217",
+     "mc:w:w0079",
+     "mc:w:w0547",
+     "mc:w:w0005",
+     "type:w:w0438",
+     "type:w:w0203",
+     "type:w:w0162",
+     "type:w:w0103",
+     "type:w:w0194",
+     "type:w:w0210",
+     "type:w:w0277",
+     "type:w:w0052",
+     "type:w:w0069",
+     "type:w:w0082",
+     "type:w:w0514",
+     "type:w:w0293",
+     "type:w:w0052",
+     "mc:s:s0349",
+     "mc:s:s0635",
+     "mc:s:s0875",
+     "mc:s:s0135",
+     "mc:s:s0438",
+     "mc:s:s0023",
+     "mc:s:s0287",
+     "mc:s:s0327",
+     "mc:s:s0287"
+    ],
+    [
+     "type:w:w0335",
+     "type:w:w0423",
+     "type:w:w0160",
+     "type:w:w0216",
+     "type:w:w0268",
+     "type:w:w0052",
+     "mc:w:w0005",
+     "mc:w:w0079",
+     "type:w:w0141",
+     "type:w:w0460",
+     "type:w:w0136",
+     "mc:w:w0547",
+     "type:w:w0014",
+     "type:w:w0033",
+     "type:w:w0006",
+     "mc:c:c0125",
+     "type:w:w0443",
+     "type:w:w0042",
+     "type:w:w0137",
+     "type:w:w0243",
+     "type:w:w0423",
+     "type:w:w0216",
+     "type:w:w0268",
+     "mc:w:w0005",
+     "type:w:w0243",
+     "mc:w:w0268",
+     "mc:c:c0009",
+     "mc:c:c0091",
+     "mc:c:c0009",
+     "mc:c:c0101",
+     "mc:c:c0018",
+     "mc:c:c0091",
+     "mc:c:c0054",
+     "mc:c:c0054",
+     "mc:c:c0018",
+     "mc:c:c0101",
+     "mc:c:c0009",
+     "mc:c:c0101",
+     "mc:c:c0018",
+     "mc:c:c0091",
+     "mc:w:w0145",
+     "mc:w:w0132",
+     "mc:w:w0207",
+     "mc:w:w0450",
+     "mc:w:w0510",
+     "mc:w:w0037",
+     "mc:w:w0235",
+     "mc:w:w0112",
+     "mc:w:w0087",
+     "mc:w:w0107",
+     "mc:w:w0083",
+     "mc:w:w0430",
+     "type:w:w0026",
+     "type:w:w0558",
+     "type:w:w0131",
+     "type:w:w0227",
+     "type:w:w0064",
+     "type:w:w0222",
+     "type:w:w0213",
+     "type:w:w0564",
+     "type:w:w0345",
+     "type:w:w0209",
+     "type:w:w0097",
+     "type:w:w0092",
+     "type:w:w0213",
+     "type:w:w0209",
+     "mc:w:w0213",
+     "mc:s:s0287",
+     "mc:s:s0268",
+     "mc:s:s0217",
+     "mc:s:s0882",
+     "mc:s:s0178",
+     "mc:s:s0085",
+     "mc:s:s0639",
+     "mc:s:s0227",
+     "mc:s:s0085"
+    ],
+    [
+     "mc:c:c0101",
+     "type:w:w0216",
+     "type:w:w0530",
+     "type:w:w0209",
+     "type:w:w0253",
+     "mc:w:w0023",
+     "mc:c:c0018",
+     "type:w:w0331",
+     "type:w:w0268",
+     "mc:c:c0091",
+     "type:w:w0001",
+     "type:w:w0213",
+     "type:w:w0094",
+     "type:w:w0243",
+     "type:w:w0017",
+     "type:w:w0425",
+     "type:w:w0423",
+     "type:w:w0397",
+     "mc:c:c0009",
+     "mc:w:w0005",
+     "type:w:w0530",
+     "type:w:w0213",
+     "type:w:w0425",
+     "mc:c:c0025",
+     "mc:c:c0085",
+     "mc:c:c0051",
+     "mc:c:c0142",
+     "mc:c:c0028",
+     "mc:c:c0144",
+     "mc:c:c0085",
+     "mc:c:c0051",
+     "mc:c:c0004",
+     "mc:c:c0022",
+     "mc:c:c0004",
+     "mc:c:c0142",
+     "mc:c:c0025",
+     "mc:c:c0144",
+     "mc:c:c0022",
+     "mc:c:c0028",
+     "mc:c:c0144",
+     "mc:c:c0022",
+     "mc:w:w0119",
+     "mc:w:w0135",
+     "mc:w:w0553",
+     "mc:w:w0086",
+     "mc:w:w0513",
+     "mc:w:w0038",
+     "mc:w:w0447",
+     "mc:w:w0415",
+     "mc:w:w0046",
+     "mc:w:w0133",
+     "mc:w:w0029",
+     "mc:w:w0059",
+     "mc:w:w0086",
+     "mc:w:w0415",
+     "type:w:w0175",
+     "type:w:w0251",
+     "type:w:w0303",
+     "type:w:w0259",
+     "type:w:w0428",
+     "type:w:w0193",
+     "type:w:w0221",
+     "type:w:w0089",
+     "type:w:w0091",
+     "type:w:w0047",
+     "type:w:w0281",
+     "type:w:w0282",
+     "type:w:w0251",
+     "type:w:w0259",
+     "type:w:w0047",
+     "mc:w:w0047",
+     "mc:w:w0047",
+     "mc:s:s0206",
+     "mc:s:s0038",
+     "mc:s:s0014",
+     "mc:s:s0147",
+     "mc:s:s0198",
+     "mc:s:s0085",
+     "mc:s:s0188",
+     "mc:s:s0337",
+     "mc:s:s0147",
+     "mc:s:s0198",
+     "mc:s:s0147"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0234",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0234\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t4\">cì</span><button type=\"button\" class=\"showw\" data-showw=\"次\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">time<span class=\"dim\">(s)</span> <span class=\"dim\">(occurrences)</span> <span class=\"gx\">(next; second)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"syn\" style=\"color:var(--mute);font-size:15px\">also: <bdi data-tl lang=\"zh\"><span class=\"t2\">huí</span></bdi>, <bdi data-tl lang=\"zh\"><span class=\"t4\">biàn</span></bdi></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0142\" role=\"button\" tabindex=\"0\"><span class=\"t4\">Zhè</span></span> <b><span class=\"tk\" data-tok=\"w0234\" role=\"button\" tabindex=\"0\"><span class=\"t4\">cì</span></span></b> <span class=\"tk\" data-tok=\"w0464\" role=\"button\" tabindex=\"0\"><span class=\"t3\">bǐ</span><span class=\"t4\">sài</span></span> <span class=\"tk\" data-tok=\"w0087\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hěn</span></span> <span class=\"tk\" data-tok=\"w0572\" role=\"button\" tabindex=\"0\"><span class=\"t4\">zhòng</span><span class=\"t4\">yào</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"304\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"这次比赛很重要。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">This competition is very important.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0142\" role=\"button\" tabindex=\"0\"><span class=\"t4\">Zhè</span></span> <b><span class=\"tk\" data-tok=\"w0234\" role=\"button\" tabindex=\"0\"><span class=\"t4\">cì</span></span></b> <span class=\"tk\" data-tok=\"w0261\" role=\"button\" tabindex=\"0\"><span class=\"t3\">kǎo</span><span class=\"t4\">shì</span></span> <span class=\"tk\" data-tok=\"w0125\" role=\"button\" tabindex=\"0\"><span class=\"t5\">de</span></span> <span class=\"tk\" data-tok=\"w0423\" role=\"button\" tabindex=\"0\"><span class=\"t2\">chéng</span><span class=\"t4\">jì</span></span> <span class=\"tk\" data-tok=\"w0170\" role=\"button\" tabindex=\"0\"><span class=\"t1\">chū</span></span> <span class=\"tk\" data-tok=\"w0104\" role=\"button\" tabindex=\"0\"><span class=\"t2\">lái</span></span> <span class=\"tk\" data-tok=\"w0018\" role=\"button\" tabindex=\"0\"><span class=\"t5\">le</span></span> <span class=\"tk\" data-tok=\"w0051\" role=\"button\" tabindex=\"0\"><span class=\"t5\">ma</span></span>?<button type=\"button\" class=\"replay ssay\" data-sent=\"327\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"这次考试的成绩出来了吗？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Are the exam results out yet?</div></div></div>"
+    },
+    {
+     "key": "w:w0060",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0060\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t4\">sì</span><button type=\"button\" class=\"showw\" data-showw=\"四\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">four <span class=\"gx\">(4)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0024\" role=\"button\" tabindex=\"0\"><span class=\"t1\">Jīn</span><span class=\"t1\">tiān</span></span> <span class=\"tk\" data-tok=\"w0099\" role=\"button\" tabindex=\"0\"><span class=\"t4\">shì</span></span> <span class=\"tk\" data-tok=\"w0015\" role=\"button\" tabindex=\"0\"><span class=\"t3\">jiǔ</span></span> <span class=\"tk\" data-tok=\"w0100\" role=\"button\" tabindex=\"0\"><span class=\"t4\">yuè</span></span> <b><span class=\"tk\" data-tok=\"w0060\" role=\"button\" tabindex=\"0\"><span class=\"t4\">sì</span></span></b> <span class=\"tk\" data-tok=\"w0094\" role=\"button\" tabindex=\"0\"><span class=\"t4\">rì</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"42\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"今天是九月四日。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Today is September 4th.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0078\" role=\"button\" tabindex=\"0\"><span class=\"t1\">jiā</span></span> <span class=\"tk\" data-tok=\"w0101\" role=\"button\" tabindex=\"0\"><span class=\"t3\">yǒu</span></span> <b><span class=\"tk\" data-tok=\"w0060\" role=\"button\" tabindex=\"0\"><span class=\"t4\">sì</span></span></b> <span class=\"tk\" data-tok=\"w0012\" role=\"button\" tabindex=\"0\"><span class=\"t4\">gè</span></span> <span class=\"tk\" data-tok=\"w0022\" role=\"button\" tabindex=\"0\"><span class=\"t2\">rén</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"47\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我家有四个人。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">There are four people in my family.</div></div></div>"
+    },
+    {
+     "key": "w:w0338",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0338\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t1\">guān</span><span class=\"t5\">xi</span><button type=\"button\" class=\"showw\" data-showw=\"关系\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">relation <span class=\"gx\">(relationship)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0092\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span><span class=\"t5\">men</span></span> <span class=\"tk\" data-tok=\"w0125\" role=\"button\" tabindex=\"0\"><span class=\"t5\">de</span></span> <b><span class=\"tk\" data-tok=\"w0338\" role=\"button\" tabindex=\"0\"><span class=\"t1\">guān</span><span class=\"t5\">xi</span></span></b> <span class=\"tk\" data-tok=\"w0087\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hěn</span></span> <span class=\"tk\" data-tok=\"w0072\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hǎo</span></span>, <span class=\"tk\" data-tok=\"w0200\" role=\"button\" tabindex=\"0\"><span class=\"t4\">jiù</span></span> <span class=\"tk\" data-tok=\"w0332\" role=\"button\" tabindex=\"0\"><span class=\"t4\">xiàng</span></span> <span class=\"tk\" data-tok=\"w0001\" role=\"button\" tabindex=\"0\"><span class=\"t1\">yī</span></span> <span class=\"tk\" data-tok=\"w0078\" role=\"button\" tabindex=\"0\"><span class=\"t1\">jiā</span></span> <span class=\"tk\" data-tok=\"w0022\" role=\"button\" tabindex=\"0\"><span class=\"t2\">rén</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"347\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我们的关系很好，就像一家人。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Our relationship is good, just like family.</div></div></div>"
+    },
+    {
+     "key": "w:w0160",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0160\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t4\">jiàn</span><button type=\"button\" class=\"showw\" data-showw=\"件\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\"><span class=\"dim\">(classifier for clothes, events, things)</span> <span class=\"gx\">(item)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0142\" role=\"button\" tabindex=\"0\"><span class=\"t4\">Zhè</span></span> <b><span class=\"tk\" data-tok=\"w0160\" role=\"button\" tabindex=\"0\"><span class=\"t4\">jiàn</span></span></b> <span class=\"tk\" data-tok=\"w0135\" role=\"button\" tabindex=\"0\"><span class=\"t1\">yī</span><span class=\"t5\">fu</span></span> <span class=\"tk\" data-tok=\"w0087\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hěn</span></span> <span class=\"tk\" data-tok=\"w0270\" role=\"button\" tabindex=\"0\"><span class=\"t4\">guì</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"138\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"这件衣服很贵。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">This piece of clothing is expensive.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0143\" role=\"button\" tabindex=\"0\"><span class=\"t4\">Nà</span></span> <b><span class=\"tk\" data-tok=\"w0160\" role=\"button\" tabindex=\"0\"><span class=\"t4\">jiàn</span></span></b> <span class=\"tk\" data-tok=\"w0135\" role=\"button\" tabindex=\"0\"><span class=\"t1\">yī</span><span class=\"t5\">fu</span></span> <span class=\"tk\" data-tok=\"w0087\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hěn</span></span> <span class=\"tk\" data-tok=\"w0163\" role=\"button\" tabindex=\"0\"><span class=\"t2\">pián</span><span class=\"t5\">yi</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"139\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"那件衣服很便宜。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">That piece of clothing is cheap.</div></div></div>"
+    },
+    {
+     "key": "w:w0085",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0085\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t2\">nián</span><button type=\"button\" class=\"showw\" data-showw=\"年\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">year <span class=\"gx\">(New Year)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w1138\" role=\"button\" tabindex=\"0\"><span class=\"t4\">Guò</span></span> <span class=\"tk\" data-tok=\"w0018\" role=\"button\" tabindex=\"0\"><span class=\"t5\">le</span></span> <span class=\"tk\" data-tok=\"w0087\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hěn</span></span> <span class=\"tk\" data-tok=\"w0065\" role=\"button\" tabindex=\"0\"><span class=\"t1\">duō</span></span> <b><span class=\"tk\" data-tok=\"w0085\" role=\"button\" tabindex=\"0\"><span class=\"t2\">nián</span></span></b>, <span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">nǐ</span></span> <span class=\"tk\" data-tok=\"w0280\" role=\"button\" tabindex=\"0\"><span class=\"t2\">hái</span></span> <span class=\"tk\" data-tok=\"w0559\" role=\"button\" tabindex=\"0\"><span class=\"t4\">jì</span><span class=\"t5\">de</span></span> <span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">wǒ</span></span> <span class=\"tk\" data-tok=\"w0051\" role=\"button\" tabindex=\"0\"><span class=\"t5\">ma</span></span>?<button type=\"button\" class=\"replay ssay\" data-sent=\"577\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"过了很多年，你还记得我吗？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">After so many years, do you still remember me?</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "c9d20a417d693dae"
+    },
+    "day": {
+     "n": 3,
+     "sha": "14ef35fc46dcdff0"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "3",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "35952f6e5cd77f3a"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d9b7082dcbad7ea0"
+    },
+    "read": {
+     "n": 2,
+     "sha": "cd77fb572bbd5321"
+    },
+    "s": {
+     "n": 22,
+     "sha": "b744c201cc20ef9b"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 4,
+     "sha": "bf0a3de69a1f23fd"
+    },
+    "showPron": true,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 447,
+     "sha": "8af8183f6d4758ea"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0.767003,
+     0.577815,
+     0.216262
+    ],
+    "toGo": [
+     7,
+     39,
+     245
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.767003,
+     "all": false
+    },
+    "eta": 7,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0016",
+     "lv": "2"
+    },
+    "position": 0.179799
+   },
+   "items": {
+    "items": 228,
+    "right": 188
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "ea57c939d5a48951"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "4",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 4,
+     "sha": "a95d2c7248101b86"
+    },
+    "showPron": true,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 1193,
+     "sha": "396b7fdafb07d205"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0.8,
+     0.8,
+     0.8
+    ],
+    "toGo": [
+     5,
+     10,
+     19
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.8,
+     "all": false
+    },
+    "eta": 5,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0046",
+     "lv": "4"
+    },
+    "position": 0.5
+   },
+   "todayFirst": "Session 1 Goal 1 of 3 ≈ 5 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 1 of 17 Listen Recall Sentences Read 招聘广告 Start",
+   "today": [
+    "Session 1 Goal 1 of 3 ≈ 5 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 1 of 17 Listen Recall Sentences Read 招聘广告 Start",
+    "Session 2 Goal 1 of 3 ≈ 6 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 2 of 17 Listen Recall Sentences Read 招聘广告 Start",
+    "Session 3 Goal 1 of 3 ≈ 6 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 3 of 17 Listen Recall Sentences Read 招聘广告 Start"
+   ],
+   "progress": {
+    "start": "0 sessions, HSK 4 Goal 1 of 3 ≈ 5 sessions survive a trip: greet, order, count, buy HSK 1–2 0 of 297 mastered HSK 3 0 of 298 mastered characters only 0 of 298 · reading 0 of 20 HSK 4 0 of 598 mastered characters only 0 of 598 · reading 0 of 25 Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, HSK 4 Goal 1 of 3 ≈ 6 sessions survive a trip: greet, order, count, buy HSK 1–2 0 of 297 mastered HSK 3 0 of 298 mastered characters only 0 of 298 · sentences 1 · reading 0 of 20 HSK 4 0 of 598 mastered characters only 0 of 598 · reading 0 of 25 Still shaky zěn me cài jī chǎng yǐ qián zuò jù lí Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 15 of 15 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 15 of 15 ✓",
+       "rows": 10,
+       "first": [
+        "méi guān xi show written it doesn&#39;t matter (never mind)",
+        "huǒ chē zhàn show written train station (railway station)",
+        "chū zū chē show written taxi",
+        "xià yǔ show written to rain",
+        "zhuō zi show written table (desk)",
+        "yǐ zi show written chair",
+        "bēi zi show written cup (glass)",
+        "mǐ fàn show written rice (cooked)",
+        "bù kè qi show written you&#39;re welcome (don&#39;t mention it)",
+        "fàn guǎn show written restaurant"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 15 of 15 ✓",
+       "rows": 7,
+       "first": [
+        "fú wù yuán show written waiter (waitress)",
+        "xī guā show written watermelon",
+        "qíng show written sunny (clear; fine (weather) )",
+        "pǎo bù show written to run (to jog)",
+        "yáng ròu show written mutton (lamb; goat meat)",
+        "gōng gòng qì chē show written bus",
+        "dǎ lán qiú show written to play basketball"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 30 of 30 ✓",
+       "rows": 8,
+       "first": [
+        "zhào xiàng jī show written camera",
+        "xǐ shǒu jiān show written toilet (bathroom; restroom; lavatory)",
+        "qiān bǐ show written pencil (lead)",
+        "kuài zi show written chopsticks",
+        "xíng li xiāng show written suitcase (baggage compartment)",
+        "kě show written thirsty",
+        "hēi bǎn show written blackboard",
+        "pá shān show written to climb a mountain (to climb mountains; to mountaineer)"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 60 of 60 ✓",
+       "rows": 8,
+       "first": [
+        "hán jià show written winter vacation (winter holiday)",
+        "dǔ chē show written traffic jam (to get congested (of traffic) )",
+        "cū xīn show written careless (thoughtless) also: mǎ hu",
+        "mǎ hu show written careless (sloppy) also: cū xīn",
+        "gān bēi show written to drink a toast (Cheers! (proposing a toast) )",
+        "tián kòng show written to fill in a blank (to fill a vacancy)",
+        "fàng shǔ jià show written summer vacation (to be on) (summer holiday)",
+        "yù xí show written to preview (a lesson) (to prepare a lesson)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 15 of 15 ✓",
+       "rows": 10,
+       "first": [
+        "méi guān xi show written it doesn&#39;t matter (never mind)",
+        "huǒ chē zhàn show written train station (railway station)",
+        "chū zū chē show written taxi",
+        "xià yǔ show written to rain",
+        "zhuō zi show written table (desk)",
+        "yǐ zi show written chair",
+        "bēi zi show written cup (glass)",
+        "mǐ fàn show written rice (cooked)",
+        "bù kè qi show written you&#39;re welcome (don&#39;t mention it)",
+        "fàn guǎn show written restaurant"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 15 of 15 ✓",
+       "rows": 7,
+       "first": [
+        "fú wù yuán show written waiter (waitress)",
+        "xī guā show written watermelon",
+        "qíng show written sunny (clear; fine (weather) )",
+        "pǎo bù show written to run (to jog)",
+        "yáng ròu show written mutton (lamb; goat meat)",
+        "gōng gòng qì chē show written bus",
+        "dǎ lán qiú show written to play basketball"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 30 of 30 ✓",
+       "rows": 8,
+       "first": [
+        "zhào xiàng jī show written camera",
+        "xǐ shǒu jiān show written toilet (bathroom; restroom; lavatory)",
+        "qiān bǐ show written pencil (lead)",
+        "kuài zi show written chopsticks",
+        "xíng li xiāng show written suitcase (baggage compartment)",
+        "kě show written thirsty",
+        "hēi bǎn show written blackboard",
+        "pá shān show written to climb a mountain (to climb mountains; to mountaineer)"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 60 of 60 ✓",
+       "rows": 8,
+       "first": [
+        "hán jià show written winter vacation (winter holiday)",
+        "dǔ chē show written traffic jam (to get congested (of traffic) )",
+        "cū xīn show written careless (thoughtless) also: mǎ hu",
+        "mǎ hu show written careless (sloppy) also: cū xīn",
+        "gān bēi show written to drink a toast (Cheers! (proposing a toast) )",
+        "tián kòng show written to fill in a blank (to fill a vacancy)",
+        "fàng shǔ jià show written summer vacation (to be on) (summer holiday)",
+        "yù xí show written to preview (a lesson) (to prepare a lesson)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0486",
+     "type:w:w0847",
+     "type:w:w0237",
+     "type:w:w0929",
+     "type:w:w0198",
+     "type:w:w0607",
+     "type:w:w0043",
+     "type:w:w0519",
+     "type:w:w0149",
+     "type:w:w0619",
+     "type:w:w0763",
+     "type:w:w0090",
+     "type:w:w1106",
+     "type:w:w0108",
+     "type:w:w1013",
+     "type:w:w0175",
+     "type:w:w0145",
+     "type:w:w0517",
+     "type:w:w0345",
+     "type:w:w0760",
+     "type:w:w0145",
+     "mc:c:c0125",
+     "mc:c:c0062",
+     "mc:c:c0125",
+     "mc:c:c0099",
+     "mc:c:c0062",
+     "mc:c:c0099",
+     "mc:w:w0375",
+     "mc:w:w1009",
+     "mc:w:w0631",
+     "mc:w:w0211",
+     "mc:w:w0511",
+     "mc:w:w0932",
+     "mc:w:w0668",
+     "mc:w:w0141",
+     "mc:w:w0278",
+     "mc:w:w0750",
+     "mc:w:w0495",
+     "mc:w:w0207",
+     "mc:w:w1009",
+     "mc:w:w0631",
+     "mc:w:w0141",
+     "type:w:w0315",
+     "type:w:w0439",
+     "type:w:w0636",
+     "type:w:w0878",
+     "type:w:w0546",
+     "type:w:w0125",
+     "type:w:w0983",
+     "type:w:w1162",
+     "type:w:w0258",
+     "type:w:w0924",
+     "type:w:w0055",
+     "type:w:w0100",
+     "type:w:w0258",
+     "mc:s:s0019",
+     "mc:s:s0639",
+     "mc:s:s0167",
+     "mc:s:s0259",
+     "mc:s:s0538",
+     "mc:s:s0459",
+     "mc:s:s0571",
+     "mc:s:s0385",
+     "mc:s:s0167",
+     "mc:s:s0385"
+    ],
+    [
+     "type:w:w1138",
+     "type:w:w0906",
+     "type:w:w0716",
+     "type:w:w0206",
+     "type:w:w0425",
+     "type:w:w0440",
+     "type:w:w0828",
+     "mc:w:w0141",
+     "type:w:w0722",
+     "type:w:w0764",
+     "type:w:w0283",
+     "mc:w:w1009",
+     "type:w:w0300",
+     "type:w:w0258",
+     "type:w:w1063",
+     "type:w:w0498",
+     "mc:w:w0631",
+     "type:w:w0145",
+     "type:w:w1191",
+     "type:w:w0914",
+     "type:w:w0425",
+     "type:w:w0440",
+     "type:w:w0828",
+     "type:w:w0722",
+     "mc:w:w0631",
+     "type:w:w1191",
+     "mc:c:c0018",
+     "mc:c:c0018",
+     "mc:c:c0091",
+     "mc:c:c0091",
+     "mc:c:c0101",
+     "mc:c:c0009",
+     "mc:c:c0009",
+     "mc:c:c0101",
+     "mc:c:c0054",
+     "mc:c:c0054",
+     "mc:c:c0018",
+     "mc:c:c0009",
+     "mc:w:w0563",
+     "mc:w:w0405",
+     "mc:w:w0210",
+     "mc:w:w1079",
+     "mc:w:w0461",
+     "mc:w:w0588",
+     "mc:w:w1122",
+     "mc:w:w0605",
+     "mc:w:w0390",
+     "mc:w:w1011",
+     "mc:w:w0496",
+     "mc:w:w0802",
+     "mc:w:w0210",
+     "mc:w:w0210",
+     "type:w:w0933",
+     "type:w:w0113",
+     "type:w:w0556",
+     "type:w:w0775",
+     "type:w:w0462",
+     "type:w:w0433",
+     "type:w:w0367",
+     "type:w:w0319",
+     "type:w:w0232",
+     "type:w:w0329",
+     "type:w:w0868",
+     "type:w:w0073",
+     "type:w:w0113",
+     "type:w:w0319",
+     "mc:s:s0617",
+     "mc:s:s0518",
+     "mc:s:s0167",
+     "mc:s:s0090",
+     "mc:s:s0168",
+     "mc:s:s0665",
+     "mc:s:s0385",
+     "mc:s:s0882",
+     "mc:s:s0385",
+     "mc:s:s0882"
+    ],
+    [
+     "mc:w:w0210",
+     "mc:w:w0078",
+     "type:w:w1090",
+     "type:w:w0425",
+     "type:w:w1065",
+     "type:w:w0722",
+     "type:w:w0088",
+     "type:w:w0113",
+     "type:w:w0828",
+     "type:w:w0311",
+     "type:w:w1191",
+     "type:w:w0440",
+     "mc:c:c0009",
+     "type:w:w0672",
+     "type:w:w0319",
+     "type:w:w0282",
+     "type:w:w0438",
+     "mc:w:w0631",
+     "type:w:w0600",
+     "mc:c:c0018",
+     "type:w:w0088",
+     "type:w:w0828",
+     "type:w:w0319",
+     "mc:w:w0828",
+     "mc:c:c0028",
+     "mc:c:c0051",
+     "mc:c:c0144",
+     "mc:c:c0004",
+     "mc:c:c0144",
+     "mc:c:c0004",
+     "mc:c:c0025",
+     "mc:c:c0142",
+     "mc:c:c0051",
+     "mc:c:c0085",
+     "mc:c:c0085",
+     "mc:c:c0022",
+     "mc:c:c0025",
+     "mc:c:c0142",
+     "mc:c:c0028",
+     "mc:c:c0022",
+     "mc:c:c0028",
+     "mc:w:w1015",
+     "mc:w:w1130",
+     "mc:w:w0134",
+     "mc:w:w0606",
+     "mc:w:w0712",
+     "mc:w:w0050",
+     "mc:w:w0958",
+     "mc:w:w0233",
+     "mc:w:w1104",
+     "mc:w:w1167",
+     "mc:w:w0829",
+     "mc:w:w1173",
+     "mc:w:w1130",
+     "mc:w:w0134",
+     "mc:w:w0233",
+     "type:w:w0182",
+     "type:w:w0364",
+     "type:w:w0117",
+     "type:w:w0086",
+     "type:w:w0111",
+     "type:w:w0957",
+     "type:w:w0941",
+     "type:w:w1069",
+     "type:w:w0993",
+     "type:w:w0317",
+     "type:w:w0126",
+     "type:w:w0181",
+     "mc:s:s0703",
+     "mc:s:s0385",
+     "mc:s:s0273",
+     "mc:s:s0366",
+     "mc:s:s0361",
+     "mc:s:s0252",
+     "mc:s:s0882",
+     "mc:s:s0740",
+     "mc:s:s0740"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0486",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0486\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t2\">huán</span><span class=\"t4\">jìng</span><button type=\"button\" class=\"showw\" data-showw=\"环境\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">environment <span class=\"gx\">(circumstances)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0142\" data-ts=\"这个\" data-tr=\"zhège\" role=\"button\" tabindex=\"0\"><span class=\"t4\">Zhè</span><span class=\"t5\">ge</span></span> <span class=\"tk\" data-tok=\"w0388\" role=\"button\" tabindex=\"0\"><span class=\"t2\">chéng</span><span class=\"t4\">shì</span></span> <span class=\"tk\" data-tok=\"w0087\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hěn</span></span> <span class=\"tk\" data-tok=\"w0412\" role=\"button\" tabindex=\"0\"><span class=\"t1\">gān</span><span class=\"t4\">jìng</span></span>, <b><span class=\"tk\" data-tok=\"w0486\" role=\"button\" tabindex=\"0\"><span class=\"t2\">huán</span><span class=\"t4\">jìng</span></span></b> <span class=\"tk\" data-tok=\"w0156\" role=\"button\" tabindex=\"0\"><span class=\"t3\">yě</span></span> <span class=\"tk\" data-tok=\"w0087\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hěn</span></span> <span class=\"tk\" data-tok=\"w0072\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hǎo</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"276\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"这个城市很干净，环境也很好。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">This city is very clean, the environment is also good.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0267\" role=\"button\" tabindex=\"0\"><span class=\"t2\">jué</span><span class=\"t5\">de</span></span> <span class=\"tk\" data-tok=\"w0142\" data-ts=\"这里\" data-tr=\"zhèlǐ\" role=\"button\" tabindex=\"0\"><span class=\"t4\">zhè</span><span class=\"t3\">lǐ</span></span> <span class=\"tk\" data-tok=\"w0125\" role=\"button\" tabindex=\"0\"><span class=\"t5\">de</span></span> <b><span class=\"tk\" data-tok=\"w0486\" role=\"button\" tabindex=\"0\"><span class=\"t2\">huán</span><span class=\"t4\">jìng</span></span></b> <span class=\"tk\" data-tok=\"w0087\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hěn</span></span> <span class=\"tk\" data-tok=\"w0072\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hǎo</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"377\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我觉得这里的环境很好。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I think the environment here is very good.</div></div></div>"
+    },
+    {
+     "key": "w:w0847",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0847\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t3\">zǒng</span><span class=\"t2\">jié</span><button type=\"button\" class=\"showw\" data-showw=\"总结\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">to sum up <span class=\"gx\">(summary; to conclude)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div>"
+    },
+    {
+     "key": "w:w0237",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0237\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t3\">měi</span><button type=\"button\" class=\"showw\" data-showw=\"每\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">each <span class=\"gx\">(every)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"syn\" style=\"color:var(--mute);font-size:15px\">also: <bdi data-tl lang=\"zh\"><span class=\"t4\">gè</span></bdi></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Nǐ</span></span> <b><span class=\"tk\" data-tok=\"w0237\" role=\"button\" tabindex=\"0\"><span class=\"t3\">měi</span></span></b> <span class=\"tk\" data-tok=\"w0012\" role=\"button\" tabindex=\"0\"><span class=\"t4\">gè</span></span> <span class=\"tk\" data-tok=\"w0097\" role=\"button\" tabindex=\"0\"><span class=\"t1\">xīng</span><span class=\"t1\">qī</span></span> <span class=\"tk\" data-tok=\"w0144\" role=\"button\" tabindex=\"0\"><span class=\"t1\">dōu</span></span> <span class=\"tk\" data-tok=\"w0153\" role=\"button\" tabindex=\"0\"><span class=\"t4\">shàng</span><span class=\"t1\">bān</span></span> <span class=\"tk\" data-tok=\"w0051\" role=\"button\" tabindex=\"0\"><span class=\"t5\">ma</span></span>?<button type=\"button\" class=\"replay ssay\" data-sent=\"159\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"你每个星期都上班吗？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Do you work every week?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <b><span class=\"tk\" data-tok=\"w0237\" role=\"button\" tabindex=\"0\"><span class=\"t3\">měi</span></span></b> <span class=\"tk\" data-tok=\"w0012\" role=\"button\" tabindex=\"0\"><span class=\"t4\">gè</span></span> <span class=\"tk\" data-tok=\"w0097\" role=\"button\" tabindex=\"0\"><span class=\"t1\">xīng</span><span class=\"t1\">qī</span></span> <span class=\"tk\" data-tok=\"w0144\" role=\"button\" tabindex=\"0\"><span class=\"t1\">dōu</span></span> <span class=\"tk\" data-tok=\"w0153\" role=\"button\" tabindex=\"0\"><span class=\"t4\">shàng</span><span class=\"t1\">bān</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"160\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我每个星期都上班。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I work every week.</div></div></div>"
+    },
+    {
+     "key": "w:w0929",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0929\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t4\">zuì</span><span class=\"t3\">hǎo</span><button type=\"button\" class=\"showw\" data-showw=\"最好\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">best <span class=\"gx\">(had better <span class=\"dim\">(do what we suggest)</span> <span class=\"dim\">(you)</span>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div>"
+    },
+    {
+     "key": "w:w0198",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0198\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t2\">wán</span><button type=\"button\" class=\"showw\" data-showw=\"完\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">to finish <span class=\"gx\">(to be over)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"syn\" style=\"color:var(--mute);font-size:15px\">also: <bdi data-tl lang=\"zh\"><span class=\"t2\">jié</span><span class=\"t4\">shù</span></bdi></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0125\" role=\"button\" tabindex=\"0\"><span class=\"t5\">de</span></span> <span class=\"tk\" data-tok=\"w0326\" role=\"button\" tabindex=\"0\"><span class=\"t4\">zuò</span><span class=\"t4\">yè</span></span> <span class=\"tk\" data-tok=\"w0280\" role=\"button\" tabindex=\"0\"><span class=\"t2\">hái</span></span> <span class=\"tk\" data-tok=\"w0111\" role=\"button\" tabindex=\"0\"><span class=\"t2\">méi</span></span> <b><span class=\"tk\" data-tok=\"w0198\" role=\"button\" tabindex=\"0\"><span class=\"t2\">wán</span></span></b>.<button type=\"button\" class=\"replay ssay\" data-sent=\"646\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我的作业还没完。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">My homework isn&#39;t finished yet.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0142\" data-ts=\"这个\" data-tr=\"zhège\" role=\"button\" tabindex=\"0\"><span class=\"t4\">Zhè</span><span class=\"t5\">ge</span></span> <span class=\"tk\" data-tok=\"w0132\" role=\"button\" tabindex=\"0\"><span class=\"t2\">píng</span><span class=\"t3\">guǒ</span></span> <span class=\"tk\" data-tok=\"w0729\" role=\"button\" tabindex=\"0\"><span class=\"t3\">zhǐ</span><span class=\"t4\">yào</span></span> <span class=\"tk\" data-tok=\"w0359\" role=\"button\" tabindex=\"0\"><span class=\"t4\">bàn</span></span> <span class=\"tk\" data-tok=\"w0012\" role=\"button\" tabindex=\"0\"><span class=\"t4\">gè</span></span> <span class=\"tk\" data-tok=\"w0199\" role=\"button\" tabindex=\"0\"><span class=\"t3\">xiǎo</span><span class=\"t2\">shí</span></span> <span class=\"tk\" data-tok=\"w0200\" role=\"button\" tabindex=\"0\"><span class=\"t4\">jiù</span></span> <span class=\"tk\" data-tok=\"w0131\" role=\"button\" tabindex=\"0\"><span class=\"t2\">néng</span></span> <span class=\"tk\" data-tok=\"w0047\" role=\"button\" tabindex=\"0\"><span class=\"t1\">chī</span></span> <b><span class=\"tk\" data-tok=\"w0198\" role=\"button\" tabindex=\"0\"><span class=\"t2\">wán</span></span></b>.<button type=\"button\" class=\"replay ssay\" data-sent=\"681\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"这个苹果只要半个小时就能吃完。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">This apple only takes half an hour to eat.</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "265d1a5b78c84c07"
+    },
+    "day": {
+     "n": 3,
+     "sha": "74d51bcabb2545c9"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "4",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "76a9dc818b9222db"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "e9fd564a50a70819"
+    },
+    "read": {
+     "n": 2,
+     "sha": "679e2fcdfb5c1b01"
+    },
+    "s": {
+     "n": 20,
+     "sha": "b590353152179c56"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 4,
+     "sha": "a95d2c7248101b86"
+    },
+    "showPron": true,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 1193,
+     "sha": "acea2f07b2429ca3"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0.779125,
+     0.778824,
+     0.77938
+    ],
+    "toGo": [
+     6,
+     12,
+     27
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.779125,
+     "all": false
+    },
+    "eta": 6,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0046",
+     "lv": "4"
+    },
+    "position": 0.487008
+   },
+   "items": {
+    "items": 218,
+    "right": 188
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "ea57c939d5a48951"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 4,
+     "sha": "5ab721469314294a"
+    },
+    "showPron": true,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "042dee1835695a5e"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0.076768,
+     0.038319,
+     0.019111
+    ],
+    "toGo": [
+     80,
+     164,
+     323
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.076768,
+     "all": false
+    },
+    "eta": 80,
+    "gateHold": {
+     "lv": "2",
+     "prev": "1",
+     "pct": 25
+    },
+    "gateNote": "HSK 2 waits · HSK 1 at 25% known",
+    "gateOpensIn": 12,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "1"
+    },
+    "position": 0.015926
+   },
+   "todayFirst": "Session 21 Goal 1 of 3 ≈ 80 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 1 of 17 HSK 2 opens at 70% of HSK 1 known. Now 25%, ≈ 12 sessions. Listen Recall Sentences Read 我的家 Start",
+   "today": [
+    "Session 21 Goal 1 of 3 ≈ 80 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 1 of 17 HSK 2 opens at 70% of HSK 1 known. Now 25%, ≈ 12 sessions. Listen Recall Sentences Read 我的家 Start",
+    "Session 22 Goal 1 of 3 ≈ 80 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 2 of 17 HSK 2 opens at 70% of HSK 1 known. Now 25%, ≈ 12 sessions. Listen Recall Sentences Read 我的家 Start",
+    "Session 23 Goal 1 of 3 ≈ 79 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 3 of 17 HSK 2 opens at 70% of HSK 1 known. Now 27%, ≈ 10 sessions. Listen Recall Sentences Read 我的家 Start"
+   ],
+   "progress": {
+    "start": "20 sessions, HSK 1 So far 38 mastered Goal 1 of 3 ≈ 80 sessions survive a trip: greet, order, count, buy HSK 1 38 of 150 mastered characters only 0 of 150 · reading 0 of 15 HSK 2 0 learned HSK 2 opens at 70% of HSK 1 known. Now 25%, ≈ 12 sessions. Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, HSK 1 Goal 1 of 3 ≈ 78 sessions survive a trip: greet, order, count, buy HSK 1 44 of 150 mastered characters only 0 of 150 · reading 1 of 15 HSK 2 0 learned HSK 2 opens at 70% of HSK 1 known. Now 29%, ≈ 9 sessions. Still shaky qī shàng tā tā xiǎng fàn guǎn Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 15 of 15 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 15 of 15 ✓",
+       "rows": 10,
+       "first": [
+        "méi guān xi show written it doesn&#39;t matter (never mind)",
+        "huǒ chē zhàn show written train station (railway station)",
+        "chū zū chē show written taxi",
+        "xià yǔ show written to rain",
+        "zhuō zi show written table (desk)",
+        "yǐ zi show written chair",
+        "bēi zi show written cup (glass)",
+        "mǐ fàn show written rice (cooked)",
+        "bù kè qi show written you&#39;re welcome (don&#39;t mention it)",
+        "fàn guǎn show written restaurant"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 1 of 15",
+       "rows": 10,
+       "first": [
+        "yě show written also (too; as well; both ... and ...)",
+        "wèi show written because of (for)",
+        "jiù show written then (at once; right away; just; only)",
+        "dào show written to reach (to arrive; to leave for; to go to)",
+        "yào show written to want (to need; to ask for; will; shall; about to) also: xiǎng",
+        "hái show written still (also; in addition; yet; fairly) also: hái shi , réng rán",
+        "kě yǐ show written can (may) also: huì , néng",
+        "ràng show written to let (to allow; to make (sb do sth) ; to yield)",
+        "cóng show written from (through) also: yóu",
+        "zhe show written (aspect particle: action in progress, ongoing state)"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 1 of 30",
+       "rows": 10,
+       "first": [
+        "bèi show written (passive marker: by) (quilt)",
+        "guó jiā show written country (nation; state)",
+        "zì jǐ show written oneself (self; one&#39;s own)",
+        "bǎ show written (object marker, before the verb) (to hold; (classifier: handles) )",
+        "yòu show written again (already happened) (also)",
+        "de show written -ly",
+        "yòng show written to use (to employ) also: shǐ yòng",
+        "gèng show written more (even more)",
+        "rú guǒ show written if (in case)",
+        "shì jiè show written world"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "yǔ show written and (with; to give) also: hé , gēn",
+        "duì show written right (correct; towards; at; for) also: zhèng què",
+        "ér show written and (as well as)",
+        "děng show written to wait (for) (class; rank; etc.)",
+        "yǐ show written to use (by means of)",
+        "zhī show written (possessive particle) (him)",
+        "guò show written to cross (to pass (time) ; to spend (a holiday) ; (experienced action marker) )",
+        "yóu show written by (from; to follow)",
+        "fā zhǎn show written to develop (development; growth)",
+        "shè huì show written society"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 1 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 15 of 15 ✓",
+       "rows": 10,
+       "first": [
+        "méi guān xi show written it doesn&#39;t matter (never mind)",
+        "huǒ chē zhàn show written train station (railway station)",
+        "chū zū chē show written taxi",
+        "xià yǔ show written to rain",
+        "zhuō zi show written table (desk)",
+        "yǐ zi show written chair",
+        "bēi zi show written cup (glass)",
+        "mǐ fàn show written rice (cooked)",
+        "bù kè qi show written you&#39;re welcome (don&#39;t mention it)",
+        "fàn guǎn show written restaurant"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 1 of 15",
+       "rows": 10,
+       "first": [
+        "yě show written also (too; as well; both ... and ...)",
+        "wèi show written because of (for)",
+        "jiù show written then (at once; right away; just; only)",
+        "dào show written to reach (to arrive; to leave for; to go to)",
+        "yào show written to want (to need; to ask for; will; shall; about to) also: xiǎng",
+        "hái show written still (also; in addition; yet; fairly) also: hái shi , réng rán",
+        "kě yǐ show written can (may) also: huì , néng",
+        "ràng show written to let (to allow; to make (sb do sth) ; to yield)",
+        "cóng show written from (through) also: yóu",
+        "zhe show written (aspect particle: action in progress, ongoing state)"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 1 of 30",
+       "rows": 10,
+       "first": [
+        "bèi show written (passive marker: by) (quilt)",
+        "guó jiā show written country (nation; state)",
+        "zì jǐ show written oneself (self; one&#39;s own)",
+        "bǎ show written (object marker, before the verb) (to hold; (classifier: handles) )",
+        "yòu show written again (already happened) (also)",
+        "de show written -ly",
+        "yòng show written to use (to employ) also: shǐ yòng",
+        "gèng show written more (even more)",
+        "rú guǒ show written if (in case)",
+        "shì jiè show written world"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "yǔ show written and (with; to give) also: hé , gēn",
+        "duì show written right (correct; towards; at; for) also: zhèng què",
+        "ér show written and (as well as)",
+        "děng show written to wait (for) (class; rank; etc.)",
+        "yǐ show written to use (by means of)",
+        "zhī show written (possessive particle) (him)",
+        "guò show written to cross (to pass (time) ; to spend (a holiday) ; (experienced action marker) )",
+        "yóu show written by (from; to follow)",
+        "fā zhǎn show written to develop (development; growth)",
+        "shè huì show written society"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0104",
+     "type:w:w0120",
+     "type:w:w0130",
+     "type:w:w0119",
+     "type:w:w0044",
+     "type:w:w0042",
+     "type:w:w0051",
+     "type:w:w0045",
+     "type:w:w0089",
+     "type:w:w0080",
+     "type:w:w0121",
+     "mc:w:w0096",
+     "type:w:w0054",
+     "type:w:w0070",
+     "type:w:w0127",
+     "type:w:w0048",
+     "type:w:w0136",
+     "mc:w:w0106",
+     "type:w:w0021",
+     "type:w:w0017",
+     "type:w:w0054",
+     "mc:c:c0062",
+     "mc:c:c0125",
+     "mc:c:c0062",
+     "mc:c:c0125",
+     "mc:c:c0099",
+     "mc:c:c0099",
+     "mc:w:w0135",
+     "mc:w:w0106",
+     "mc:w:w0082",
+     "mc:w:w0124",
+     "mc:w:w0141",
+     "mc:w:w0110",
+     "mc:w:w0142",
+     "mc:w:w0052",
+     "mc:w:w0062",
+     "mc:w:w0079",
+     "mc:w:w0137",
+     "mc:w:w0144",
+     "type:w:w0145",
+     "type:w:w0068",
+     "type:w:w0088",
+     "type:w:w0061",
+     "type:w:w0058",
+     "type:w:w0006",
+     "type:w:w0019",
+     "mc:w:w0150",
+     "type:w:w0036",
+     "type:w:w0139",
+     "type:w:w0075",
+     "type:w:w0117",
+     "type:w:w0139",
+     "mc:s:s0130",
+     "mc:s:s0030",
+     "mc:s:s0055",
+     "mc:s:s0101",
+     "mc:s:s0047",
+     "mc:s:s0019",
+     "mc:s:s0082",
+     "mc:s:s0018"
+    ],
+    [
+     "type:w:w0069",
+     "type:w:w0065",
+     "type:w:w0047",
+     "type:w:w0115",
+     "type:w:w0123",
+     "type:w:w0010",
+     "type:w:w0005",
+     "type:w:w0015",
+     "type:w:w0140",
+     "type:w:w0066",
+     "type:w:w0072",
+     "type:w:w0084",
+     "type:w:w0054",
+     "type:w:w0094",
+     "type:w:w0039",
+     "type:w:w0035",
+     "type:w:w0076",
+     "type:w:w0090",
+     "type:w:w0139",
+     "type:w:w0059",
+     "type:w:w0066",
+     "type:w:w0039",
+     "type:w:w0090",
+     "mc:c:c0091",
+     "mc:c:c0018",
+     "mc:c:c0091",
+     "mc:c:c0101",
+     "mc:c:c0054",
+     "mc:c:c0009",
+     "mc:c:c0018",
+     "mc:c:c0054",
+     "mc:c:c0101",
+     "mc:c:c0009",
+     "mc:c:c0054",
+     "mc:w:w0037",
+     "mc:w:w0114",
+     "mc:w:w0032",
+     "mc:w:w0012",
+     "mc:w:w0111",
+     "mc:w:w0093",
+     "mc:w:w0148",
+     "mc:w:w0046",
+     "mc:w:w0013",
+     "mc:w:w0122",
+     "mc:w:w0025",
+     "mc:w:w0109",
+     "mc:w:w0122",
+     "mc:w:w0025",
+     "type:w:w0001",
+     "type:w:w0018",
+     "type:w:w0053",
+     "type:w:w0133",
+     "type:w:w0128",
+     "type:w:w0086",
+     "type:w:w0016",
+     "type:w:w0026",
+     "type:w:w0023",
+     "type:w:w0101",
+     "type:w:w0064",
+     "type:w:w0073",
+     "type:w:w0018",
+     "type:w:w0073",
+     "mc:w:w0018",
+     "mc:s:s0060",
+     "mc:s:s0015",
+     "mc:s:s0078",
+     "mc:s:s0083",
+     "mc:s:s0009",
+     "mc:s:s0129",
+     "mc:s:s0041",
+     "mc:s:s0074"
+    ],
+    [
+     "type:w:w0049",
+     "type:w:w0066",
+     "mc:c:c0054",
+     "type:w:w0009",
+     "type:w:w0050",
+     "type:w:w0030",
+     "type:w:w0039",
+     "type:w:w0149",
+     "type:w:w0106",
+     "type:w:w0018",
+     "mc:w:w0025",
+     "type:w:w0132",
+     "type:w:w0073",
+     "type:w:w0090",
+     "mc:w:w0122",
+     "type:w:w0004",
+     "type:w:w0077",
+     "type:w:w0033",
+     "type:w:w0063",
+     "type:w:w0003",
+     "type:w:w0149",
+     "mc:w:w0025",
+     "type:w:w0090",
+     "type:w:w0004",
+     "mc:c:c0144",
+     "mc:c:c0028",
+     "mc:c:c0025",
+     "mc:c:c0085",
+     "mc:c:c0004",
+     "mc:c:c0022",
+     "mc:c:c0051",
+     "mc:c:c0022",
+     "mc:c:c0028",
+     "mc:c:c0051",
+     "mc:c:c0144",
+     "mc:c:c0004",
+     "mc:c:c0025",
+     "mc:c:c0142",
+     "mc:c:c0085",
+     "mc:c:c0142",
+     "mc:c:c0142",
+     "mc:w:w0087",
+     "mc:w:w0116",
+     "mc:w:w0105",
+     "mc:w:w0112",
+     "mc:w:w0107",
+     "mc:w:w0097",
+     "mc:w:w0056",
+     "mc:w:w0057",
+     "mc:w:w0081",
+     "mc:w:w0146",
+     "mc:w:w0060",
+     "mc:w:w0071",
+     "mc:w:w0071",
+     "type:w:w0083",
+     "type:w:w0027",
+     "type:w:w0002",
+     "type:w:w0011",
+     "type:w:w0113",
+     "type:w:w0014",
+     "type:w:w0147",
+     "type:w:w0099",
+     "type:w:w0031",
+     "type:w:w0043",
+     "type:w:w0040",
+     "mc:w:w0106",
+     "type:w:w0002",
+     "mc:s:s0023",
+     "mc:s:s0872",
+     "mc:s:s0013",
+     "mc:s:s0045",
+     "mc:s:s0021",
+     "mc:s:s0048",
+     "mc:s:s0132",
+     "mc:s:s0057"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0104",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0104\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t2\">lái</span><button type=\"button\" class=\"showw\" data-showw=\"来\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">to come <span class=\"gx\">(<span class=\"dim\">(used as a substitute for a more specific verb)</span>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0165\" role=\"button\" tabindex=\"0\"><span class=\"t1\">Gōng</span><span class=\"t4\">gòng</span><span class=\"t4\">qì</span><span class=\"t1\">chē</span></span> <b><span class=\"tk\" data-tok=\"w0104\" role=\"button\" tabindex=\"0\"><span class=\"t2\">lái</span></span></b> <span class=\"tk\" data-tok=\"w0018\" role=\"button\" tabindex=\"0\"><span class=\"t5\">le</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"203\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"公共汽车来了。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">The bus is here.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0176\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Kě</span><span class=\"t3\">yǐ</span></span>, <span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">wǒ</span></span> <b><span class=\"tk\" data-tok=\"w0104\" role=\"button\" tabindex=\"0\"><span class=\"t2\">lái</span></span></b> <span class=\"tk\" data-tok=\"w0204\" role=\"button\" tabindex=\"0\"><span class=\"t1\">bāng</span><span class=\"t4\">zhù</span></span> <span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">nǐ</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"220\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"可以，我来帮助你。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Sure, I&#39;ll help you.</div></div></div>"
+    },
+    {
+     "key": "w:w0120",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0120\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t1\">māo</span><button type=\"button\" class=\"showw\" data-showw=\"猫\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">cat</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0111\" role=\"button\" tabindex=\"0\"><span class=\"t2\">méi</span></span> <span class=\"tk\" data-tok=\"w0101\" role=\"button\" tabindex=\"0\"><span class=\"t3\">yǒu</span></span> <b><span class=\"tk\" data-tok=\"w0120\" role=\"button\" tabindex=\"0\"><span class=\"t1\">māo</span></span></b>.<button type=\"button\" class=\"replay ssay\" data-sent=\"18\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我没有猫。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I don&#39;t have a cat.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0058\" role=\"button\" tabindex=\"0\"><span class=\"t3\">xǐ</span><span class=\"t5\">huan</span></span> <b><span class=\"tk\" data-tok=\"w0120\" role=\"button\" tabindex=\"0\"><span class=\"t1\">māo</span></span></b>, <span class=\"tk\" data-tok=\"w0009\" role=\"button\" tabindex=\"0\"><span class=\"t4\">bù</span></span> <span class=\"tk\" data-tok=\"w0058\" role=\"button\" tabindex=\"0\"><span class=\"t3\">xǐ</span><span class=\"t5\">huan</span></span> <span class=\"tk\" data-tok=\"w0119\" role=\"button\" tabindex=\"0\"><span class=\"t3\">gǒu</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"19\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我喜欢猫，不喜欢狗。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I like cats, not dogs.</div></div></div>"
+    },
+    {
+     "key": "w:w0130",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0130\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t3\">lǎo</span><span class=\"t1\">shī</span><button type=\"button\" class=\"showw\" data-showw=\"老师\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">teacher</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0071\" role=\"button\" tabindex=\"0\"><span class=\"t1\">Tā</span></span> <span class=\"tk\" data-tok=\"w0099\" role=\"button\" tabindex=\"0\"><span class=\"t4\">shì</span></span> <b><span class=\"tk\" data-tok=\"w0130\" role=\"button\" tabindex=\"0\"><span class=\"t3\">lǎo</span><span class=\"t1\">shī</span></span></b>.<button type=\"button\" class=\"replay ssay\" data-sent=\"51\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"她是老师。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">She&#39;s a teacher.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0099\" role=\"button\" tabindex=\"0\"><span class=\"t4\">shì</span></span> <b><span class=\"tk\" data-tok=\"w0130\" role=\"button\" tabindex=\"0\"><span class=\"t3\">lǎo</span><span class=\"t1\">shī</span></span></b>, <span class=\"tk\" data-tok=\"w0062\" role=\"button\" tabindex=\"0\"><span class=\"t4\">zài</span></span> <span class=\"tk\" data-tok=\"w0076\" role=\"button\" tabindex=\"0\"><span class=\"t2\">xué</span><span class=\"t4\">xiào</span></span> <span class=\"tk\" data-tok=\"w0084\" role=\"button\" tabindex=\"0\"><span class=\"t1\">gōng</span><span class=\"t4\">zuò</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"56\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我是老师，在学校工作。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I&#39;m a teacher, I work at a school.</div></div></div>"
+    },
+    {
+     "key": "w:w0119",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0119\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t3\">gǒu</span><button type=\"button\" class=\"showw\" data-showw=\"狗\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">dog</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Nǐ</span></span> <span class=\"tk\" data-tok=\"w0101\" role=\"button\" tabindex=\"0\"><span class=\"t3\">yǒu</span></span> <b><span class=\"tk\" data-tok=\"w0119\" role=\"button\" tabindex=\"0\"><span class=\"t3\">gǒu</span></span></b> <span class=\"tk\" data-tok=\"w0051\" role=\"button\" tabindex=\"0\"><span class=\"t5\">ma</span></span>?<button type=\"button\" class=\"replay ssay\" data-sent=\"17\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"你有狗吗？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Do you have a dog?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0058\" role=\"button\" tabindex=\"0\"><span class=\"t3\">xǐ</span><span class=\"t5\">huan</span></span> <span class=\"tk\" data-tok=\"w0120\" role=\"button\" tabindex=\"0\"><span class=\"t1\">māo</span></span>, <span class=\"tk\" data-tok=\"w0009\" role=\"button\" tabindex=\"0\"><span class=\"t4\">bù</span></span> <span class=\"tk\" data-tok=\"w0058\" role=\"button\" tabindex=\"0\"><span class=\"t3\">xǐ</span><span class=\"t5\">huan</span></span> <b><span class=\"tk\" data-tok=\"w0119\" role=\"button\" tabindex=\"0\"><span class=\"t3\">gǒu</span></span></b>.<button type=\"button\" class=\"replay ssay\" data-sent=\"19\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我喜欢猫，不喜欢狗。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I like cats, not dogs.</div></div></div>"
+    },
+    {
+     "key": "w:w0044",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0044\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t2\">shí</span><button type=\"button\" class=\"showw\" data-showw=\"十\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">ten <span class=\"gx\">(10)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <b><span class=\"tk\" data-tok=\"w0044\" role=\"button\" tabindex=\"0\"><span class=\"t2\">shí</span></span></b> <span class=\"tk\" data-tok=\"w0115\" role=\"button\" tabindex=\"0\"><span class=\"t3\">diǎn</span></span> <span class=\"tk\" data-tok=\"w0128\" role=\"button\" tabindex=\"0\"><span class=\"t4\">shuì</span><span class=\"t4\">jiào</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"95\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我十点睡觉。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I sleep at ten.</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0148\" role=\"button\" tabindex=\"0\"><span class=\"t1\">Fēi</span><span class=\"t1\">jī</span></span> <b><span class=\"tk\" data-tok=\"w0044\" role=\"button\" tabindex=\"0\"><span class=\"t2\">shí</span></span></b> <span class=\"tk\" data-tok=\"w0019\" role=\"button\" tabindex=\"0\"><span class=\"t4\">èr</span></span> <span class=\"tk\" data-tok=\"w0115\" role=\"button\" tabindex=\"0\"><span class=\"t3\">diǎn</span></span> <span class=\"tk\" data-tok=\"w0086\" role=\"button\" tabindex=\"0\"><span class=\"t1\">kāi</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"110\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"飞机十二点开。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">The plane leaves at twelve.</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "eafcf0d73b48e6b8"
+    },
+    "day": {
+     "n": 3,
+     "sha": "74a507e2a110ffcc"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "8f2dc2c5e5ab84b6"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "c614309cbb44e7e7"
+    },
+    "read": {
+     "n": 2,
+     "sha": "66aa27279dd3ca56"
+    },
+    "s": {
+     "n": 24,
+     "sha": "ab632ba6b1ca5d14"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 4,
+     "sha": "5ab721469314294a"
+    },
+    "showPron": true,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "723e489dc3793fb5"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0.088889,
+     0.04437,
+     0.022129
+    ],
+    "toGo": [
+     78,
+     162,
+     321
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.088889,
+     "all": false
+    },
+    "eta": 78,
+    "gateHold": {
+     "lv": "2",
+     "prev": "1",
+     "pct": 29
+    },
+    "gateNote": "HSK 2 waits · HSK 1 at 29% known",
+    "gateOpensIn": 9,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "1"
+    },
+    "position": 0.018441
+   },
+   "items": {
+    "items": 206,
+    "right": 188
+   }
+  },
+  {
+   "record": "placedChars",
+   "seed": {
+    "chars": {
+     "n": 5,
+     "sha": "b7fb34c11053eeaa"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "3",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 4,
+     "sha": "bf0a3de69a1f23fd"
+    },
+    "showPron": true,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 447,
+     "sha": "f082324fb75380d0"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     1,
+     0.751261,
+     0.299749
+    ],
+    "toGo": [
+     0,
+     14,
+     196
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.751261,
+     "all": false
+    },
+    "eta": 14,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0016",
+     "lv": "2"
+    },
+    "position": 0.281014
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 14 sessions daily life: directions, simple chat, short notices Review Learn HSK 3, set 16 Listen Recall Sentences Read 妹妹的生日 Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 14 sessions daily life: directions, simple chat, short notices Review Learn HSK 3, set 16 Listen Recall Sentences Read 妹妹的生日 Start",
+    "Session 2 Goal 2 of 3 ≈ 15 sessions daily life: directions, simple chat, short notices Review Learn 字 HSK 3, set 16 of 30 Listen Recall Sentences Read 妹妹的生日 Start",
+    "Session 3 Goal 2 of 3 ≈ 16 sessions daily life: directions, simple chat, short notices Review Learn HSK 3, set 17 Listen Recall Sentences Read 妹妹的生日 Start"
+   ],
+   "progress": {
+    "start": "0 sessions, HSK 3 Goal 2 of 3 ≈ 14 sessions daily life: directions, simple chat, short notices HSK 1 0 of 150 mastered HSK 2 0 of 147 mastered characters only 0 of 147 · reading 0 of 15 HSK 3 150 learned Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, HSK 3 Goal 2 of 3 ≈ 18 sessions daily life: directions, simple chat, short notices HSK 1 0 of 150 mastered HSK 2 2 of 147 mastered characters only 0 of 147 · sentences 1 · reading 0 of 15 HSK 3 170 learned Still shaky wǔ hé wèi xìng tī dōng huò zhě wén huà duǎn Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 15 of 15 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 15 of 15 ✓",
+       "rows": 10,
+       "first": [
+        "méi guān xi show written it doesn&#39;t matter (never mind)",
+        "huǒ chē zhàn show written train station (railway station)",
+        "chū zū chē show written taxi",
+        "xià yǔ show written to rain",
+        "zhuō zi show written table (desk)",
+        "yǐ zi show written chair",
+        "bēi zi show written cup (glass)",
+        "mǐ fàn show written rice (cooked)",
+        "bù kè qi show written you&#39;re welcome (don&#39;t mention it)",
+        "fàn guǎn show written restaurant"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 15 of 15 ✓",
+       "rows": 7,
+       "first": [
+        "fú wù yuán show written waiter (waitress)",
+        "xī guā show written watermelon",
+        "qíng show written sunny (clear; fine (weather) )",
+        "pǎo bù show written to run (to jog)",
+        "yáng ròu show written mutton (lamb; goat meat)",
+        "gōng gòng qì chē show written bus",
+        "dǎ lán qiú show written to play basketball"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 16 of 30",
+       "rows": 10,
+       "first": [
+        "hài pà show written to be afraid (to be scared)",
+        "bāo show written bag (package; to wrap; to cover; to include)",
+        "yù dào show written to meet (to run into; to come across)",
+        "chà show written poor (not up to standard; to lack; short of; different)",
+        "huài show written bad (broken; spoiled; to go bad)",
+        "dǎ suàn show written to plan (to intend) also: jì huà",
+        "jiē show written to pick up (sb) (to meet (sb) ; to receive; to answer (the phone) )",
+        "jí show written extremely (pole (geography, physics) ) also: jí qí",
+        "huà show written to draw (to paint; picture; painting)",
+        "kǒu show written mouth also: zuǐ"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "yǔ show written and (with; to give) also: hé , gēn",
+        "duì show written right (correct; towards; at; for) also: zhèng què",
+        "ér show written and (as well as)",
+        "děng show written to wait (for) (class; rank; etc.)",
+        "yǐ show written to use (by means of)",
+        "zhī show written (possessive particle) (him)",
+        "guò show written to cross (to pass (time) ; to spend (a holiday) ; (experienced action marker) )",
+        "yóu show written by (from; to follow)",
+        "fā zhǎn show written to develop (development; growth)",
+        "shè huì show written society"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "HSK 1 HSK 2 HSK 3 HSK 4 ‹ Set 1 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "1",
+       "set": "Set 15 of 15 ✓",
+       "rows": 10,
+       "first": [
+        "méi guān xi show written it doesn&#39;t matter (never mind)",
+        "huǒ chē zhàn show written train station (railway station)",
+        "chū zū chē show written taxi",
+        "xià yǔ show written to rain",
+        "zhuō zi show written table (desk)",
+        "yǐ zi show written chair",
+        "bēi zi show written cup (glass)",
+        "mǐ fàn show written rice (cooked)",
+        "bù kè qi show written you&#39;re welcome (don&#39;t mention it)",
+        "fàn guǎn show written restaurant"
+       ]
+      },
+      {
+       "lv": "2",
+       "set": "Set 15 of 15 ✓",
+       "rows": 7,
+       "first": [
+        "fú wù yuán show written waiter (waitress)",
+        "xī guā show written watermelon",
+        "qíng show written sunny (clear; fine (weather) )",
+        "pǎo bù show written to run (to jog)",
+        "yáng ròu show written mutton (lamb; goat meat)",
+        "gōng gòng qì chē show written bus",
+        "dǎ lán qiú show written to play basketball"
+       ]
+      },
+      {
+       "lv": "3",
+       "set": "Set 18 of 30",
+       "rows": 10,
+       "first": [
+        "dì tú show written map",
+        "gǎn show written to dare (daring)",
+        "zhào gu show written to take care of (to look after; to show consideration)",
+        "zhōng jiān show written the middle (the inside)",
+        "fāng biàn show written convenient (suitable)",
+        "lóu show written building (with more than one storey) (floor)",
+        "mǎ shàng show written immediately (at once; right away)",
+        "kě &#39; ài show written cute (lovely; adorable)",
+        "shù xué show written math (maths; mathematics)",
+        "sī jī show written driver"
+       ]
+      },
+      {
+       "lv": "4",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "yǔ show written and (with; to give) also: hé , gēn",
+        "duì show written right (correct; towards; at; for) also: zhèng què",
+        "ér show written and (as well as)",
+        "děng show written to wait (for) (class; rank; etc.)",
+        "yǐ show written to use (by means of)",
+        "zhī show written (possessive particle) (him)",
+        "guò show written to cross (to pass (time) ; to spend (a holiday) ; (experienced action marker) )",
+        "yóu show written by (from; to follow)",
+        "fā zhǎn show written to develop (development; growth)",
+        "shè huì show written society"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0524",
+     "type:w:w0031",
+     "type:w:w0137",
+     "type:w:w0010",
+     "type:w:w0287",
+     "type:w:w0446",
+     "type:w:w0549",
+     "type:w:w0491",
+     "type:w:w0257",
+     "type:w:w0511",
+     "type:w:w0239",
+     "type:w:w0231",
+     "type:w:w0088",
+     "type:w:w0256",
+     "type:w:w0232",
+     "type:w:w0217",
+     "type:w:w0259",
+     "type:w:w0490",
+     "type:w:w0581",
+     "type:w:w0203",
+     "mc:w:w0427",
+     "mc:w:w0456",
+     "mc:w:w0370",
+     "mc:w:w0427",
+     "mc:w:w0387",
+     "mc:w:w0570",
+     "mc:w:w0493",
+     "mc:w:w0408",
+     "mc:w:w0403",
+     "mc:w:w0433",
+     "mc:w:w0493",
+     "mc:w:w0456",
+     "mc:w:w0408",
+     "mc:w:w0370",
+     "mc:w:w0403",
+     "mc:w:w0387",
+     "mc:w:w0357",
+     "mc:w:w0357",
+     "mc:w:w0570",
+     "mc:w:w0433",
+     "mc:w:w0403",
+     "mc:w:w0456",
+     "mc:w:w0247",
+     "mc:w:w0125",
+     "mc:w:w0189",
+     "mc:w:w0213",
+     "mc:w:w0303",
+     "mc:w:w0308",
+     "mc:w:w0157",
+     "mc:w:w0418",
+     "mc:w:w0318",
+     "mc:w:w0552",
+     "mc:w:w0134",
+     "mc:w:w0089",
+     "mc:w:w0308",
+     "mc:w:w0318",
+     "type:w:w0438",
+     "type:w:w0175",
+     "type:w:w0514",
+     "type:w:w0434",
+     "type:w:w0222",
+     "type:w:w0292",
+     "type:w:w0466",
+     "type:w:w0086",
+     "type:w:w0147",
+     "type:w:w0305",
+     "type:w:w0311",
+     "type:w:w0023",
+     "type:w:w0514",
+     "type:w:w0292",
+     "type:w:w0147",
+     "mc:w:w0292",
+     "mc:w:w0147",
+     "mc:w:w0292",
+     "mc:s:s0734",
+     "mc:s:s0077",
+     "mc:s:s0020",
+     "mc:s:s0151",
+     "mc:s:s0145",
+     "mc:s:s0178",
+     "mc:s:s0079",
+     "mc:s:s0233",
+     "mc:s:s0077",
+     "mc:s:s0145"
+    ],
+    [
+     "mc:w:w0456",
+     "type:w:w0269",
+     "type:w:w0028",
+     "mc:w:w0308",
+     "mc:w:w0403",
+     "mc:w:w0110",
+     "type:w:w0335",
+     "type:w:w0292",
+     "type:w:w0514",
+     "type:w:w0443",
+     "type:w:w0332",
+     "type:w:w0464",
+     "type:w:w0563",
+     "type:w:w0293",
+     "type:w:w0193",
+     "type:w:w0147",
+     "mc:w:w0318",
+     "type:w:w0112",
+     "type:w:w0233",
+     "type:w:w0369",
+     "mc:w:w0308",
+     "type:w:w0563",
+     "type:w:w0233",
+     "mc:w:w0563",
+     "mc:c:c0570",
+     "mc:c:c0357",
+     "mc:c:c0493",
+     "mc:c:c0433",
+     "mc:c:c0493",
+     "mc:c:c0408",
+     "mc:c:c0403",
+     "mc:c:c0408",
+     "mc:c:c0433",
+     "mc:c:c0403",
+     "mc:c:c0370",
+     "mc:c:c0387",
+     "mc:c:c0456",
+     "mc:c:c0456",
+     "mc:c:c0427",
+     "mc:c:c0387",
+     "mc:c:c0370",
+     "mc:c:c0427",
+     "mc:c:c0570",
+     "mc:c:c0357",
+     "mc:c:c0570",
+     "mc:c:c0403",
+     "mc:w:w0180",
+     "mc:w:w0300",
+     "mc:w:w0215",
+     "mc:w:w0275",
+     "mc:w:w0176",
+     "mc:w:w0122",
+     "mc:w:w0277",
+     "mc:w:w0160",
+     "mc:w:w0083",
+     "mc:w:w0291",
+     "mc:w:w0279",
+     "mc:w:w0046",
+     "mc:w:w0215",
+     "mc:w:w0083",
+     "type:w:w0401",
+     "type:w:w0363",
+     "type:w:w0430",
+     "type:w:w0177",
+     "type:w:w0148",
+     "type:w:w0224",
+     "type:w:w0557",
+     "type:w:w0281",
+     "type:w:w0388",
+     "type:w:w0385",
+     "type:w:w0043",
+     "type:w:w0034",
+     "mc:s:s0340",
+     "mc:s:s0170",
+     "mc:s:s0145",
+     "mc:s:s0077",
+     "mc:s:s0052",
+     "mc:s:s0426",
+     "mc:s:s0268",
+     "mc:s:s0090"
+    ],
+    [
+     "type:w:w0236",
+     "type:w:w0563",
+     "mc:w:w0308",
+     "mc:c:c0403",
+     "type:w:w0243",
+     "type:w:w0556",
+     "type:w:w0093",
+     "mc:c:c0570",
+     "type:w:w0061",
+     "mc:w:w0083",
+     "type:w:w0233",
+     "mc:w:w0215",
+     "type:w:w0272",
+     "type:w:w0155",
+     "type:w:w0422",
+     "type:w:w0154",
+     "type:w:w0237",
+     "type:w:w0431",
+     "type:w:w0124",
+     "type:w:w0073",
+     "mc:w:w0308",
+     "type:w:w0155",
+     "mc:w:w0308",
+     "mc:w:w0407",
+     "mc:w:w0407",
+     "mc:w:w0501",
+     "mc:w:w0393",
+     "mc:w:w0419",
+     "mc:w:w0392",
+     "mc:w:w0304",
+     "mc:w:w0529",
+     "mc:w:w0393",
+     "mc:w:w0487",
+     "mc:w:w0487",
+     "mc:w:w0304",
+     "mc:w:w0348",
+     "mc:w:w0419",
+     "mc:w:w0378",
+     "mc:w:w0392",
+     "mc:w:w0348",
+     "mc:w:w0529",
+     "mc:w:w0501",
+     "mc:w:w0378",
+     "mc:w:w0501",
+     "mc:w:w0009",
+     "mc:w:w0566",
+     "mc:w:w0261",
+     "mc:w:w0016",
+     "mc:w:w0442",
+     "mc:w:w0005",
+     "mc:w:w0020",
+     "mc:w:w0389",
+     "mc:w:w0152",
+     "mc:w:w0276",
+     "mc:w:w0450",
+     "mc:w:w0376",
+     "mc:w:w0442",
+     "mc:w:w0020",
+     "mc:w:w0276",
+     "mc:w:w0442",
+     "type:w:w0242",
+     "type:w:w0278",
+     "type:w:w0294",
+     "type:w:w0045",
+     "type:w:w0131",
+     "type:w:w0141",
+     "type:w:w0054",
+     "type:w:w0432",
+     "type:w:w0092",
+     "type:w:w0087",
+     "type:w:w0025",
+     "type:w:w0424",
+     "type:w:w0054",
+     "type:w:w0424",
+     "mc:s:s0156",
+     "mc:s:s0139",
+     "mc:s:s0881",
+     "mc:s:s0174",
+     "mc:s:s0666",
+     "mc:s:s0078",
+     "mc:s:s0223",
+     "mc:s:s0159",
+     "mc:s:s0156",
+     "mc:s:s0174",
+     "mc:s:s0159"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0524",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0524\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t3\">lǎo</span><button type=\"button\" class=\"showw\" data-showw=\"老\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">old <span class=\"dim\">(of people)</span> <span class=\"gx\">(always; <span class=\"dim\">(prefix before a surname or a birth-order number)</span>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0142\" data-ts=\"这个\" data-tr=\"zhège\" role=\"button\" tabindex=\"0\"><span class=\"t4\">Zhè</span><span class=\"t5\">ge</span></span> <b><span class=\"tk\" data-tok=\"w0524\" role=\"button\" tabindex=\"0\"><span class=\"t3\">lǎo</span></span></b> <span class=\"tk\" data-tok=\"w0288\" role=\"button\" tabindex=\"0\"><span class=\"t4\">wèn</span><span class=\"t2\">tí</span></span> <span class=\"tk\" data-tok=\"w0280\" role=\"button\" tabindex=\"0\"><span class=\"t2\">hái</span></span> <span class=\"tk\" data-tok=\"w0111\" role=\"button\" tabindex=\"0\"><span class=\"t2\">méi</span></span> <span class=\"tk\" data-tok=\"w0556\" role=\"button\" tabindex=\"0\"><span class=\"t3\">jiě</span><span class=\"t2\">jué</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"737\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"这个老问题还没解决。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">This old problem still isn&#39;t solved.</div></div></div>"
+    },
+    {
+     "key": "w:w0031",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0031\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t1\">xiān</span><span class=\"t5\">sheng</span><button type=\"button\" class=\"showw\" data-showw=\"先生\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">Mr. <span class=\"gx\">(sir; mister; gentleman; husband)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><b><span class=\"tk\" data-tok=\"w0031\" role=\"button\" tabindex=\"0\"><span class=\"t1\">Xiān</span><span class=\"t5\">sheng</span></span></b>, <span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">nǐ</span></span> <span class=\"tk\" data-tok=\"w0072\" role=\"button\" tabindex=\"0\"><span class=\"t3\">hǎo</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"82\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"先生，你好。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Hello, sir.</div></div></div>"
+    },
+    {
+     "key": "w:w0137",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0137\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t1\">shuō</span><span class=\"t4\">huà</span><button type=\"button\" class=\"showw\" data-showw=\"说话\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">to speak <span class=\"gx\">(to talk; to say)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"syn\" style=\"color:var(--mute);font-size:15px\">also: <bdi data-tl lang=\"zh\"><span class=\"t3\">jiǎng</span></bdi>, <bdi data-tl lang=\"zh\"><span class=\"t2\">tán</span></bdi></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0028\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Nǐ</span></span> <span class=\"tk\" data-tok=\"w0026\" role=\"button\" tabindex=\"0\"><span class=\"t4\">huì</span></span> <b><span class=\"tk\" data-tok=\"w0137\" role=\"button\" tabindex=\"0\"><span class=\"t1\">shuō</span><span class=\"t4\">huà</span></span></b> <span class=\"tk\" data-tok=\"w0051\" role=\"button\" tabindex=\"0\"><span class=\"t5\">ma</span></span>?<button type=\"button\" class=\"replay ssay\" data-sent=\"74\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"你会说话吗？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Can you talk?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0091\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span></span> <span class=\"tk\" data-tok=\"w0052\" role=\"button\" tabindex=\"0\"><span class=\"t1\">tīng</span></span> <span class=\"tk\" data-tok=\"w0102\" role=\"button\" tabindex=\"0\"><span class=\"t2\">péng</span><span class=\"t5\">you</span></span> <b><span class=\"tk\" data-tok=\"w0137\" role=\"button\" tabindex=\"0\"><span class=\"t1\">shuō</span><span class=\"t4\">huà</span></span></b>.<button type=\"button\" class=\"replay ssay\" data-sent=\"116\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我听朋友说话。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">I&#39;m listening to my friend talk.</div></div></div>"
+    },
+    {
+     "key": "w:w0010",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0010\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t4\">bù</span><span class=\"t4\">kè</span><span class=\"t5\">qi</span><button type=\"button\" class=\"showw\" data-showw=\"不客气\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">you&#39;re welcome <span class=\"gx\">(don&#39;t mention it)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><b><span class=\"tk\" data-tok=\"w0010\" role=\"button\" tabindex=\"0\"><span class=\"t4\">Bù</span><span class=\"t4\">kè</span><span class=\"t5\">qi</span></span></b>.<button type=\"button\" class=\"replay ssay\" data-sent=\"4\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"不客气。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">You&#39;re welcome.</div></div></div>"
+    },
+    {
+     "key": "w:w0287",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0287\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\"><span class=\"t4\">wèn</span><button type=\"button\" class=\"showw\" data-showw=\"问\" aria-label=\"Show written form\">show written</button></span><span class=\"rg\">to ask <span class=\"gx\">(to inquire)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0138\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Qǐng</span></span> <b><span class=\"tk\" data-tok=\"w0287\" role=\"button\" tabindex=\"0\"><span class=\"t4\">wèn</span></span></b>, <span class=\"tk\" data-tok=\"w0142\" data-ts=\"这个\" data-tr=\"zhège\" role=\"button\" tabindex=\"0\"><span class=\"t4\">zhè</span><span class=\"t5\">ge</span></span> <span class=\"tk\" data-tok=\"w0274\" role=\"button\" tabindex=\"0\"><span class=\"t4\">lù</span></span> <span class=\"tk\" data-tok=\"w0088\" role=\"button\" tabindex=\"0\"><span class=\"t3\">zěn</span><span class=\"t5\">me</span></span> <span class=\"tk\" data-tok=\"w0271\" role=\"button\" tabindex=\"0\"><span class=\"t3\">zǒu</span></span>?<button type=\"button\" class=\"replay ssay\" data-sent=\"212\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"请问，这个路怎么走？\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Excuse me, how do I get to this road?</div></div><div class=\"sent tks\" data-tokbox><div class=\"st\" data-tl lang=\"zh\"><span class=\"tk\" data-tok=\"w0092\" role=\"button\" tabindex=\"0\"><span class=\"t3\">Wǒ</span><span class=\"t5\">men</span></span> <span class=\"tk\" data-tok=\"w0045\" role=\"button\" tabindex=\"0\"><span class=\"t4\">qù</span></span> <span class=\"tk\" data-tok=\"w0221\" role=\"button\" tabindex=\"0\"><span class=\"t3\">zhǎo</span></span> <span class=\"tk\" data-tok=\"w0232\" role=\"button\" tabindex=\"0\"><span class=\"t2\">fú</span><span class=\"t4\">wù</span><span class=\"t2\">yuán</span></span> <b><span class=\"tk\" data-tok=\"w0287\" role=\"button\" tabindex=\"0\"><span class=\"t4\">wèn</span></span></b> <span class=\"tk\" data-tok=\"w0288\" role=\"button\" tabindex=\"0\"><span class=\"t4\">wèn</span><span class=\"t2\">tí</span></span> <span class=\"tk\" data-tok=\"w0181\" role=\"button\" tabindex=\"0\"><span class=\"t5\">ba</span></span>.<button type=\"button\" class=\"replay ssay\" data-sent=\"257\" aria-label=\"Hear the sentence\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button><button type=\"button\" class=\"showw\" data-showw=\"我们去找服务员问问题吧。\" aria-label=\"Show written form\">show written</button></div><div class=\"se\">Let&#39;s go find the waiter to ask.</div></div></div>"
+    }
+   ],
+   "final": {
+    "chars": {
+     "n": 5,
+     "sha": "e7d26085bedf2aaa"
+    },
+    "day": {
+     "n": 3,
+     "sha": "0253557e96e881ac"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "3",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "161817888dbd2410"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d9b7082dcbad7ea0"
+    },
+    "read": {
+     "n": 2,
+     "sha": "cd77fb572bbd5321"
+    },
+    "s": {
+     "n": 22,
+     "sha": "3c0189dbb557b4b5"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 4,
+     "sha": "e89965252050619b"
+    },
+    "showPron": true,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 467,
+     "sha": "470ec780cc9571d0"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "2",
+     "3",
+     "4"
+    ],
+    "positions": [
+     0.975758,
+     0.731765,
+     0.29254
+    ],
+    "toGo": [
+     0,
+     18,
+     203
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.731765,
+     "all": false
+    },
+    "eta": 18,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0016",
+     "lv": "2"
+    },
+    "position": 0.274728
+   },
+   "items": {
+    "items": 249,
+    "right": 216
+   }
+  }
+ ]
+}

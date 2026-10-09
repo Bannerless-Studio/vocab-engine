@@ -1,0 +1,2463 @@
+{
+ "lang": "german",
+ "packKey": "de",
+ "words": 2000,
+ "midError": null,
+ "records": [
+  {
+   "record": "fresh",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "c19c74271403fc61"
+    },
+    "showPron": true,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0,
+     0,
+     0
+    ],
+    "toGo": [
+     170,
+     267,
+     333
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0,
+     "all": false
+    },
+    "eta": 170,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0
+   },
+   "todayFirst": "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+   "today": [
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy A1 0 learned Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy A1 30 learned Still shaky ich du an Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 1 of 60 › Drill this set",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 1 of 60",
+       "rows": 10,
+       "first": [
+        "der the (der, die, das)",
+        "ich I (me)",
+        "sein to be",
+        "und and",
+        "ein a, an (ein, eine)",
+        "haben to have",
+        "in in, at, within",
+        "nicht not",
+        "es it",
+        "du you (informal)"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "völlig complete, total, utter",
+        "allerdings however, but",
+        "verschwinden to disappear, to move out of view, to vanish",
+        "schlagen to beat",
+        "persönlich personal",
+        "der Plan pl. Pläne plan",
+        "gemeinsam common, mutual, shared",
+        "die Stelle pl. Stellen place, spot (job)",
+        "selber myself, yourself, etc. (emphatic)",
+        "gelten to be valid"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "töten to kill",
+        "die Waffe pl. Waffen weapon, arm",
+        "der Sex no pl. sex",
+        "das Blut rarely pl. blood",
+        "umbringen to kill, to do away with, to murder",
+        "der Mord pl. Morde murder",
+        "die Droge pl. Drogen drug",
+        "die Leiche pl. Leichen dead body, corpse, cadaver",
+        "darunter including, among these",
+        "der Kilometer pl. Kilometer kilometer"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 4 of 60",
+       "rows": 10,
+       "first": [
+        "auch also, too",
+        "dieser this, this one",
+        "wenn if (when (ever) )",
+        "wollen to want (to)",
+        "noch still (yet; more)",
+        "aber but",
+        "bei in, at, for (with, on)",
+        "müssen must, to have to",
+        "nur only, just",
+        "aus from"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "völlig complete, total, utter",
+        "allerdings however, but",
+        "verschwinden to disappear, to move out of view, to vanish",
+        "schlagen to beat",
+        "persönlich personal",
+        "der Plan pl. Pläne plan",
+        "gemeinsam common, mutual, shared",
+        "die Stelle pl. Stellen place, spot (job)",
+        "selber myself, yourself, etc. (emphatic)",
+        "gelten to be valid"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "töten to kill",
+        "die Waffe pl. Waffen weapon, arm",
+        "der Sex no pl. sex",
+        "das Blut rarely pl. blood",
+        "umbringen to kill, to do away with, to murder",
+        "der Mord pl. Morde murder",
+        "die Droge pl. Drogen drug",
+        "die Leiche pl. Leichen dead body, corpse, cadaver",
+        "darunter including, among these",
+        "der Kilometer pl. Kilometer kilometer"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "mc:w:w0001",
+     "mc:w:w0009",
+     "mc:w:w0009",
+     "mc:w:w0008",
+     "mc:w:w0004",
+     "mc:w:w0002",
+     "mc:w:w0008",
+     "mc:w:w0010",
+     "mc:w:w0005",
+     "mc:w:w0006",
+     "mc:w:w0005",
+     "mc:w:w0006",
+     "mc:w:w0007",
+     "mc:w:w0007",
+     "mc:w:w0003",
+     "mc:w:w0010",
+     "mc:w:w0003",
+     "mc:w:w0001",
+     "mc:w:w0002",
+     "mc:w:w0004",
+     "mc:w:w0002",
+     "mc:w:w0010",
+     "mc:w:w0002"
+    ],
+    [
+     "mc:w:w0001",
+     "mc:w:w0010",
+     "mc:w:w0004",
+     "type:w:w0008",
+     "mc:w:w0002",
+     "mc:w:w0005",
+     "type:w:w0009",
+     "mc:w:w0007",
+     "mc:w:w0003",
+     "type:w:w0006",
+     "mc:w:w0013",
+     "mc:w:w0015",
+     "mc:w:w0013",
+     "mc:w:w0011",
+     "mc:w:w0017",
+     "mc:w:w0018",
+     "mc:w:w0014",
+     "mc:w:w0020",
+     "mc:w:w0018",
+     "mc:w:w0012",
+     "mc:w:w0012",
+     "mc:w:w0016",
+     "mc:w:w0014",
+     "mc:w:w0016",
+     "mc:w:w0019",
+     "mc:w:w0011",
+     "mc:w:w0015",
+     "mc:w:w0017",
+     "mc:w:w0019",
+     "mc:w:w0020",
+     "mc:w:w0015",
+     "mc:w:w0008",
+     "mc:w:w0009",
+     "mc:w:w0010",
+     "mc:w:w0006",
+     "type:w:w0002",
+     "type:w:w0005",
+     "type:w:w0007",
+     "type:w:w0003",
+     "type:w:w0004",
+     "type:w:w0001"
+    ],
+    [
+     "type:w:w0002",
+     "type:w:w0017",
+     "type:w:w0019",
+     "mc:w:w0015",
+     "type:w:w0020",
+     "type:w:w0009",
+     "type:w:w0006",
+     "mc:w:w0013",
+     "type:w:w0012",
+     "mc:w:w0016",
+     "type:w:w0010",
+     "type:w:w0011",
+     "type:w:w0008",
+     "type:w:w0018",
+     "type:w:w0014",
+     "type:w:w0010",
+     "mc:w:w0025",
+     "mc:w:w0022",
+     "mc:w:w0028",
+     "mc:w:w0029",
+     "mc:w:w0023",
+     "mc:w:w0027",
+     "mc:w:w0024",
+     "mc:w:w0021",
+     "mc:w:w0026",
+     "mc:w:w0025",
+     "mc:w:w0027",
+     "mc:w:w0026",
+     "mc:w:w0028",
+     "mc:w:w0023",
+     "mc:w:w0030",
+     "mc:w:w0024",
+     "mc:w:w0022",
+     "mc:w:w0021",
+     "mc:w:w0029",
+     "mc:w:w0030",
+     "mc:w:w0021",
+     "mc:w:w0001",
+     "mc:w:w0003",
+     "mc:w:w0004",
+     "mc:w:w0007",
+     "mc:w:w0011",
+     "mc:w:w0002",
+     "mc:w:w0005",
+     "mc:w:w0019",
+     "mc:w:w0020",
+     "mc:w:w0017",
+     "mc:w:w0010",
+     "mc:w:w0014",
+     "mc:w:w0002",
+     "mc:w:w0010",
+     "type:w:w0013",
+     "type:w:w0016",
+     "type:w:w0015"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0001",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0001\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">der</span><span class=\"rg\">the <span class=\"dim\">(der, die, das)</span></span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"10\"><div class=\"st\" data-tl lang=\"de\">Irgendwann werde ich wie der Wind rennen.</div><div class=\"se\">Someday I&#39;ll run like the wind.</div></div><div class=\"sent\" data-sent=\"16\"><div class=\"st\" data-tl lang=\"de\">Und doch, auch das Gegenteil ist immer wahr.</div><div class=\"se\">And yet, the contrary is always true as well.</div></div></div>"
+    },
+    {
+     "key": "w:w0009",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0009\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">es</span><span class=\"rg\">it</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"5\"><div class=\"st\" data-tl lang=\"de\"><b>Es</b> würde ewig dauern, alles zu erklären.</div><div class=\"se\">It would take forever for me to explain everything.</div></div><div class=\"sent\" data-sent=\"7\"><div class=\"st\" data-tl lang=\"de\">Vielleicht wird <b>es</b> für ihn genauso sein.</div><div class=\"se\">Maybe it will be exactly the same for him.</div></div></div>"
+    },
+    {
+     "key": "w:w0009",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0009\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">es</span><span class=\"rg\">it</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"5\"><div class=\"st\" data-tl lang=\"de\"><b>Es</b> würde ewig dauern, alles zu erklären.</div><div class=\"se\">It would take forever for me to explain everything.</div></div><div class=\"sent\" data-sent=\"7\"><div class=\"st\" data-tl lang=\"de\">Vielleicht wird <b>es</b> für ihn genauso sein.</div><div class=\"se\">Maybe it will be exactly the same for him.</div></div></div>"
+    },
+    {
+     "key": "w:w0008",
+     "kind": "mc",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0008\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">nicht</span><span class=\"rg\">not</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"12\"><div class=\"st\" data-tl lang=\"de\"><b>Nicht</b> öffnen, bevor der Zug hält.</div><div class=\"se\">Don&#39;t open before the train stops.</div></div><div class=\"sent\" data-sent=\"20\"><div class=\"st\" data-tl lang=\"de\">Ich will <b>nicht</b> um deine Hand anhalten!</div><div class=\"se\">I don&#39;t want to propose to you!</div></div></div>"
+    },
+    {
+     "key": "w:w0004",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0004\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">und</span><span class=\"rg\">and</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"16\"><div class=\"st\" data-tl lang=\"de\"><b>Und</b> doch, auch das Gegenteil ist immer wahr.</div><div class=\"se\">And yet, the contrary is always true as well.</div></div><div class=\"sent\" data-sent=\"61\"><div class=\"st\" data-tl lang=\"de\">Wissenschaft beginnt, wenn man warum <b>und</b> wie fragt.</div><div class=\"se\">Science begins when you ask why and how.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "cb9bca474ef91d13"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": false,
+    "pm": {
+     "n": 3,
+     "sha": "f107366016e18375"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "3d2c15200d7aa718"
+    },
+    "read": {
+     "n": 2,
+     "sha": "227ab13286be6fd1"
+    },
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "be34f914b5e7f215"
+    },
+    "showPron": true,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 30,
+     "sha": "9340c2146c0a6cfa"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.010667,
+     0.004923,
+     0.0032
+    ],
+    "toGo": [
+     168,
+     264,
+     330
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.010667,
+     "all": false
+    },
+    "eta": 168,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.003
+   },
+   "items": {
+    "items": 118,
+    "right": 110
+   }
+  },
+  {
+   "record": "mid12",
+   "seed": {
+    "day": {
+     "n": 3,
+     "sha": "933889fcbe303982"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 12,
+     "sha": "4e5e58f65025c948"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "4ace01c020729007"
+    },
+    "read": {
+     "n": 2,
+     "sha": "59c9de2877a66223"
+    },
+    "s": {
+     "n": 47,
+     "sha": "dbc745e032756f25"
+    },
+    "sessions": 12,
+    "sets": {
+     "n": 3,
+     "sha": "e3f9f0c08da51372"
+    },
+    "showPron": true,
+    "sn": 12,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 120,
+     "sha": "2b586ae0f41d51bf"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.059333,
+     0.027769,
+     0.018133
+    ],
+    "toGo": [
+     156,
+     251,
+     316
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.059333,
+     "all": false
+    },
+    "eta": 156,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.018042
+   },
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "today": [
+    "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+   ],
+   "progress": {
+    "start": "12 sessions, A1 In 6 sessions since your last visit +19 mastered Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy A1 120 learned Still shaky können so kein wie finden die Zeit weil damit Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy A1 150 learned Still shaky denken glauben bleiben gern gegen weit aussehen Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 13 of 60 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 13 of 60",
+       "rows": 10,
+       "first": [
+        "unter under",
+        "nie never, never at all",
+        "ab from (a time, a place) (off)",
+        "erste first",
+        "hören to hear",
+        "bringen to bring, to take, to bear",
+        "dürfen may, to be allowed to",
+        "warum why",
+        "das Leben pl. Leben life",
+        "alt old"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "völlig complete, total, utter",
+        "allerdings however, but",
+        "verschwinden to disappear, to move out of view, to vanish",
+        "schlagen to beat",
+        "persönlich personal",
+        "der Plan pl. Pläne plan",
+        "gemeinsam common, mutual, shared",
+        "die Stelle pl. Stellen place, spot (job)",
+        "selber myself, yourself, etc. (emphatic)",
+        "gelten to be valid"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "töten to kill",
+        "die Waffe pl. Waffen weapon, arm",
+        "der Sex no pl. sex",
+        "das Blut rarely pl. blood",
+        "umbringen to kill, to do away with, to murder",
+        "der Mord pl. Morde murder",
+        "die Droge pl. Drogen drug",
+        "die Leiche pl. Leichen dead body, corpse, cadaver",
+        "darunter including, among these",
+        "der Kilometer pl. Kilometer kilometer"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 16 of 60",
+       "rows": 10,
+       "first": [
+        "sicher sure, certain (safe)",
+        "jemand someone, somebody",
+        "ohne without",
+        "dort there",
+        "sprechen to speak",
+        "seit since",
+        "klar clear",
+        "möchten would like (to)",
+        "bekommen to get, to receive",
+        "weiter further, farther, more"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "völlig complete, total, utter",
+        "allerdings however, but",
+        "verschwinden to disappear, to move out of view, to vanish",
+        "schlagen to beat",
+        "persönlich personal",
+        "der Plan pl. Pläne plan",
+        "gemeinsam common, mutual, shared",
+        "die Stelle pl. Stellen place, spot (job)",
+        "selber myself, yourself, etc. (emphatic)",
+        "gelten to be valid"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "töten to kill",
+        "die Waffe pl. Waffen weapon, arm",
+        "der Sex no pl. sex",
+        "das Blut rarely pl. blood",
+        "umbringen to kill, to do away with, to murder",
+        "der Mord pl. Morde murder",
+        "die Droge pl. Drogen drug",
+        "die Leiche pl. Leichen dead body, corpse, cadaver",
+        "darunter including, among these",
+        "der Kilometer pl. Kilometer kilometer"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0117",
+     "type:w:w0074",
+     "type:w:w0066",
+     "type:w:w0118",
+     "type:w:w0090",
+     "type:w:w0096",
+     "mc:w:w0041",
+     "type:w:w0057",
+     "type:w:w0075",
+     "type:w:w0026",
+     "type:w:w0020",
+     "mc:w:w0116",
+     "type:w:w0119",
+     "type:w:w0120",
+     "type:w:w0082",
+     "type:w:w0075",
+     "type:w:w0020",
+     "type:w:w0119",
+     "type:w:w0120",
+     "mc:w:w0075",
+     "mc:w:w0130",
+     "mc:w:w0123",
+     "mc:w:w0130",
+     "mc:w:w0125",
+     "mc:w:w0128",
+     "mc:w:w0124",
+     "mc:w:w0121",
+     "mc:w:w0128",
+     "mc:w:w0126",
+     "mc:w:w0121",
+     "mc:w:w0129",
+     "mc:w:w0127",
+     "mc:w:w0125",
+     "mc:w:w0127",
+     "mc:w:w0124",
+     "mc:w:w0122",
+     "mc:w:w0129",
+     "mc:w:w0122",
+     "mc:w:w0123",
+     "mc:w:w0126",
+     "mc:w:w0122",
+     "mc:w:w0122",
+     "mc:w:w0104",
+     "mc:w:w0089",
+     "mc:w:w0094",
+     "mc:w:w0114",
+     "mc:w:w0004",
+     "mc:w:w0102",
+     "mc:w:w0113",
+     "mc:w:w0098",
+     "mc:w:w0055",
+     "mc:w:w0112",
+     "mc:w:w0115",
+     "mc:w:w0053",
+     "mc:w:w0089",
+     "type:w:w0087",
+     "type:w:w0051",
+     "type:w:w0104",
+     "type:w:w0097",
+     "type:w:w0083",
+     "type:w:w0111",
+     "type:w:w0116",
+     "type:w:w0093",
+     "type:w:w0100",
+     "type:w:w0080",
+     "type:w:w0061",
+     "type:w:w0092",
+     "type:w:w0104",
+     "mc:s:s0094",
+     "type:s:s0029",
+     "mc:s:s3120",
+     "type:s:s2304",
+     "mc:s:s1752",
+     "mc:s:s3119",
+     "type:s:s2279",
+     "mc:s:s2962",
+     "type:s:s0029",
+     "type:s:s2304",
+     "type:s:s2279",
+     "mc:s:s0029",
+     "mc:s:s2304",
+     "mc:s:s2279"
+    ],
+    [
+     "type:w:w0119",
+     "type:w:w0124",
+     "mc:w:w0041",
+     "mc:w:w0089",
+     "type:w:w0075",
+     "type:w:w0082",
+     "type:w:w0026",
+     "type:w:w0120",
+     "type:w:w0090",
+     "type:w:w0104",
+     "type:w:w0130",
+     "type:w:w0096",
+     "mc:w:w0122",
+     "type:w:w0110",
+     "type:w:w0020",
+     "mc:w:w0089",
+     "type:w:w0075",
+     "type:w:w0082",
+     "type:w:w0130",
+     "mc:w:w0122",
+     "type:w:w0020",
+     "mc:w:w0139",
+     "mc:w:w0136",
+     "mc:w:w0140",
+     "mc:w:w0133",
+     "mc:w:w0135",
+     "mc:w:w0131",
+     "mc:w:w0134",
+     "mc:w:w0138",
+     "mc:w:w0133",
+     "mc:w:w0138",
+     "mc:w:w0131",
+     "mc:w:w0136",
+     "mc:w:w0135",
+     "mc:w:w0137",
+     "mc:w:w0132",
+     "mc:w:w0132",
+     "mc:w:w0134",
+     "mc:w:w0139",
+     "mc:w:w0140",
+     "mc:w:w0137",
+     "mc:w:w0121",
+     "mc:w:w0126",
+     "mc:w:w0129",
+     "mc:w:w0125",
+     "mc:w:w0127",
+     "mc:w:w0044",
+     "mc:w:w0122",
+     "mc:w:w0128",
+     "mc:w:w0123",
+     "mc:w:w0065",
+     "mc:w:w0116",
+     "mc:w:w0068",
+     "type:w:w0089",
+     "type:w:w0085",
+     "type:w:w0095",
+     "type:w:w0094",
+     "type:w:w0006",
+     "type:w:w0109",
+     "type:w:w0101",
+     "type:w:w0091",
+     "type:w:w0115",
+     "type:w:w0084",
+     "type:w:w0105",
+     "type:w:w0106",
+     "type:w:w0095",
+     "type:w:w0094",
+     "type:w:w0105",
+     "type:w:w0106",
+     "type:s:s2304",
+     "mc:s:s2395",
+     "mc:s:s2694",
+     "type:s:s0029",
+     "type:s:s2279",
+     "mc:s:s0119",
+     "mc:s:s3079",
+     "mc:s:s0045",
+     "type:s:s2304",
+     "mc:s:s2395",
+     "type:s:s0029",
+     "type:s:s2279",
+     "mc:s:s0045",
+     "mc:s:s2304",
+     "mc:s:s0029",
+     "mc:s:s2279",
+     "mc:s:s0045"
+    ],
+    [
+     "type:w:w0105",
+     "type:w:w0095",
+     "type:w:w0115",
+     "mc:w:w0089",
+     "type:w:w0110",
+     "type:w:w0100",
+     "mc:w:w0122",
+     "type:w:w0106",
+     "type:w:w0020",
+     "type:w:w0109",
+     "type:w:w0137",
+     "type:w:w0082",
+     "type:w:w0075",
+     "type:w:w0130",
+     "type:w:w0094",
+     "mc:w:w0089",
+     "mc:w:w0149",
+     "mc:w:w0147",
+     "mc:w:w0142",
+     "mc:w:w0143",
+     "mc:w:w0148",
+     "mc:w:w0141",
+     "mc:w:w0146",
+     "mc:w:w0144",
+     "mc:w:w0150",
+     "mc:w:w0145",
+     "mc:w:w0142",
+     "mc:w:w0147",
+     "mc:w:w0149",
+     "mc:w:w0145",
+     "mc:w:w0141",
+     "mc:w:w0148",
+     "mc:w:w0143",
+     "mc:w:w0146",
+     "mc:w:w0150",
+     "mc:w:w0144",
+     "mc:w:w0147",
+     "mc:w:w0145",
+     "mc:w:w0141",
+     "mc:w:w0147",
+     "mc:w:w0134",
+     "mc:w:w0136",
+     "mc:w:w0050",
+     "mc:w:w0132",
+     "mc:w:w0037",
+     "mc:w:w0059",
+     "mc:w:w0133",
+     "mc:w:w0064",
+     "mc:w:w0003",
+     "mc:w:w0131",
+     "mc:w:w0051",
+     "mc:w:w0139",
+     "type:w:w0112",
+     "type:w:w0120",
+     "type:w:w0104",
+     "type:w:w0098",
+     "type:w:w0119",
+     "type:w:w0099",
+     "type:w:w0140",
+     "type:w:w0135",
+     "type:w:w0114",
+     "type:w:w0101",
+     "type:w:w0138",
+     "type:w:w0108",
+     "type:w:w0120",
+     "mc:s:s2774",
+     "mc:s:s1628",
+     "type:s:s0029",
+     "type:s:s2304",
+     "mc:s:s2743",
+     "mc:s:s2763",
+     "mc:s:s0045",
+     "mc:s:s2395",
+     "type:s:s0029",
+     "type:s:s2304",
+     "mc:s:s2763",
+     "mc:s:s0045",
+     "mc:s:s0029",
+     "mc:s:s2304",
+     "mc:s:s2763",
+     "mc:s:s2304"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0117",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0117\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">danke</span><span class=\"rg\">thanks, thank you</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"93\"><div class=\"st\" data-tl lang=\"de\">Es geht mir gut, <b>danke</b>.</div><div class=\"se\">I&#39;m fine, thank you.</div></div><div class=\"sent\" data-sent=\"999\"><div class=\"st\" data-tl lang=\"de\">Auf Wiedersehen und <b>danke</b> für den ganzen Fisch!</div><div class=\"se\">So long, and thanks for all the fish!</div></div></div>"
+    },
+    {
+     "key": "w:w0074",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0074\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">wieder</span><span class=\"rg\">again</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"739\"><div class=\"st\" data-tl lang=\"de\">Ich habe seitdem nie <b>wieder</b> von ihm gehört.</div><div class=\"se\">I have never heard of him since.</div></div><div class=\"sent\" data-sent=\"823\"><div class=\"st\" data-tl lang=\"de\">Jeder hat zu Hause hin und <b>wieder</b> Ärger.</div><div class=\"se\">Everyone has domestic troubles from time to time.</div></div></div>"
+    },
+    {
+     "key": "w:w0066",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0066\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">ja</span><span class=\"rg\">yes</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"412\"><div class=\"st\" data-tl lang=\"de\"><b>Ja</b>, sie ist hier rechts.</div><div class=\"se\">Yes, it&#39;s here to the right.</div></div><div class=\"sent\" data-sent=\"897\"><div class=\"st\" data-tl lang=\"de\">Er hat bereits <b>ja</b> gesagt.</div><div class=\"se\">He has already said yes.</div></div></div>"
+    },
+    {
+     "key": "w:w0118",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0118\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">der Mensch</span><span class=\"rp\">pl. Menschen</span><span class=\"rg\">person, man, human being</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"31\"><div class=\"st\" data-tl lang=\"de\">Jeder <b>Mensch</b> ist eine Welt.</div><div class=\"se\">Each person is a world.</div></div><div class=\"sent\" data-sent=\"44\"><div class=\"st\" data-tl lang=\"de\">Er ist ein guter <b>Mensch</b>.</div><div class=\"se\">He&#39;s a good person.</div></div></div>"
+    },
+    {
+     "key": "w:w0090",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0090\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">die Zeit</span><span class=\"rp\">pl. Zeiten</span><span class=\"rg\">time</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"219\"><div class=\"st\" data-tl lang=\"de\">Es ist <b>Zeit</b> das Tor zu schließen.</div><div class=\"se\">It is time to shut the gate.</div></div><div class=\"sent\" data-sent=\"369\"><div class=\"st\" data-tl lang=\"de\">Möglicherweise wird er längere <b>Zeit</b> auf Hainan verbringen.</div><div class=\"se\">It&#39;s possible he will spend more time in Hainan.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "112d482a14f13187"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 14,
+     "sha": "2cfbd21d25b18bcd"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "b117947a42ef069c"
+    },
+    "read": {
+     "n": 2,
+     "sha": "0ea2474efd48d00b"
+    },
+    "s": {
+     "n": 59,
+     "sha": "5069e276b4811e17"
+    },
+    "sessions": 15,
+    "sets": {
+     "n": 3,
+     "sha": "ee6cab66e6ea9238"
+    },
+    "showPron": true,
+    "sn": 15,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 150,
+     "sha": "3972b754614cff13"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.075333,
+     0.035154,
+     0.022933
+    ],
+    "toGo": [
+     152,
+     247,
+     311
+    ],
+    "toGoTotal": 161,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.075333,
+     "all": false
+    },
+    "eta": 152,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": null,
+    "position": 0.022542
+   },
+   "items": {
+    "items": 249,
+    "right": 215
+   }
+  },
+  {
+   "record": "placedMid",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "f72982c85f788863"
+    },
+    "showPron": true,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 950,
+     "sha": "f20ad1dc3a949a1b"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     0.730769,
+     0.38
+    ],
+    "toGo": [
+     0,
+     81,
+     168
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.730769,
+     "all": false
+    },
+    "eta": 81,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.35625
+   },
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 81 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Mein Tag Start",
+   "today": [
+    "Session 1 Goal 2 of 3 ≈ 81 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Mein Tag Start",
+    "Session 2 Goal 2 of 3 ≈ 81 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Mein Tag Start",
+    "Session 3 Goal 2 of 3 ≈ 82 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Mein Tag Start"
+   ],
+   "progress": {
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 81 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 83 sessions daily life: directions, simple chat, short notices A1 2 of 600 mastered sentences 2 · reading 1 of 20 A2 380 learned Still shaky darüber verlieren fühlen oft halt vorstellen bereit leer der Mittwoch erfahren die Politik vorbereiten Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "dreißig thirty",
+        "Entschuldigung excuse me, sorry",
+        "gute Nacht good night",
+        "guten Abend good evening",
+        "guten Morgen good morning",
+        "guten Tag hello, good day",
+        "heiß hot",
+        "neunzehn nineteen",
+        "neunzig ninety",
+        "siebzig seventy"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 36 of 70",
+       "rows": 10,
+       "first": [
+        "die Hoffnung pl. Hoffnungen hope",
+        "treiben to drift (to drive)",
+        "das Programm pl. Programme program",
+        "zwingen to force",
+        "die Seele pl. Seelen soul",
+        "dick fat, thick (swollen)",
+        "weinen to cry, to weep",
+        "entweder either",
+        "die Ehre pl. Ehren honour",
+        "der Anwalt pl. Anwälte lawyer, attorney"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "töten to kill",
+        "die Waffe pl. Waffen weapon, arm",
+        "der Sex no pl. sex",
+        "das Blut rarely pl. blood",
+        "umbringen to kill, to do away with, to murder",
+        "der Mord pl. Morde murder",
+        "die Droge pl. Drogen drug",
+        "die Leiche pl. Leichen dead body, corpse, cadaver",
+        "darunter including, among these",
+        "der Kilometer pl. Kilometer kilometer"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "dreißig thirty",
+        "Entschuldigung excuse me, sorry",
+        "gute Nacht good night",
+        "guten Abend good evening",
+        "guten Morgen good morning",
+        "guten Tag hello, good day",
+        "heiß hot",
+        "neunzehn nineteen",
+        "neunzig ninety",
+        "siebzig seventy"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 39 of 70",
+       "rows": 10,
+       "first": [
+        "der Besuch pl. Besuche visit, call",
+        "die Freude pl. Freuden joy, delight, glee",
+        "der Versuch pl. Versuche try (attempt)",
+        "der Berg pl. Berge mountain, hill",
+        "der Stein pl. Steine stone, rock",
+        "lügen to tell a lie",
+        "zustimmen to agree",
+        "die Show pl. Shows show, spectacle",
+        "mindestens at least",
+        "trotz in spite of, despite"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "töten to kill",
+        "die Waffe pl. Waffen weapon, arm",
+        "der Sex no pl. sex",
+        "das Blut rarely pl. blood",
+        "umbringen to kill, to do away with, to murder",
+        "der Mord pl. Morde murder",
+        "die Droge pl. Drogen drug",
+        "die Leiche pl. Leichen dead body, corpse, cadaver",
+        "darunter including, among these",
+        "der Kilometer pl. Kilometer kilometer"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0799",
+     "type:w:w0672",
+     "type:w:w0502",
+     "type:w:w0088",
+     "type:w:w0071",
+     "type:w:w0330",
+     "type:w:w0878",
+     "type:w:w0293",
+     "type:w:w0188",
+     "type:w:w0504",
+     "type:w:w0796",
+     "type:w:w0181",
+     "type:w:w0018",
+     "type:w:w0744",
+     "type:w:w0681",
+     "type:w:w0088",
+     "mc:w:w0958",
+     "mc:w:w0960",
+     "mc:w:w0967",
+     "mc:w:w0961",
+     "mc:w:w0958",
+     "mc:w:w0963",
+     "mc:w:w0964",
+     "mc:w:w0957",
+     "mc:w:w0964",
+     "mc:w:w0959",
+     "mc:w:w0957",
+     "mc:w:w0962",
+     "mc:w:w0965",
+     "mc:w:w0961",
+     "mc:w:w0960",
+     "mc:w:w0962",
+     "mc:w:w0963",
+     "mc:w:w0965",
+     "mc:w:w0959",
+     "mc:w:w0967",
+     "mc:w:w0958",
+     "mc:w:w0957",
+     "mc:w:w0965",
+     "mc:w:w0961",
+     "mc:w:w0960",
+     "mc:w:w0967",
+     "mc:w:w0961",
+     "mc:w:w0960",
+     "mc:w:w0429",
+     "mc:w:w0493",
+     "mc:w:w0800",
+     "mc:w:w0445",
+     "mc:w:w0576",
+     "mc:w:w0135",
+     "mc:w:w0833",
+     "mc:w:w0764",
+     "mc:w:w0650",
+     "mc:w:w0515",
+     "mc:w:w0674",
+     "mc:w:w0373",
+     "mc:w:w0674",
+     "type:w:w0467",
+     "type:w:w0456",
+     "type:w:w0736",
+     "type:w:w0441",
+     "type:w:w0204",
+     "type:w:w0509",
+     "type:w:w0634",
+     "type:w:w0918",
+     "type:w:w0004",
+     "type:w:w0402",
+     "type:w:w0505",
+     "type:w:w0705",
+     "type:w:w0402",
+     "mc:s:s0557",
+     "mc:s:s3034",
+     "mc:s:s1540",
+     "type:s:s1050",
+     "mc:s:s3104",
+     "mc:s:s2079",
+     "type:s:s1402",
+     "mc:s:s2806",
+     "mc:s:s0557",
+     "mc:s:s1540",
+     "type:s:s1050",
+     "mc:s:s2079",
+     "type:s:s1402",
+     "mc:s:s1050",
+     "mc:s:s1402"
+    ],
+    [
+     "mc:w:w0965",
+     "type:w:w0402",
+     "type:w:w0371",
+     "mc:w:w0958",
+     "type:w:w0629",
+     "type:w:w0647",
+     "mc:w:w0674",
+     "mc:w:w0961",
+     "type:w:w0088",
+     "mc:w:w0967",
+     "type:w:w0620",
+     "type:w:w0847",
+     "mc:w:w0960",
+     "type:w:w0035",
+     "mc:w:w0957",
+     "mc:w:w0958",
+     "mc:w:w0674",
+     "type:w:w0620",
+     "type:w:w0035",
+     "mc:w:w0957",
+     "mc:w:w0958",
+     "mc:w:w0969",
+     "mc:w:w0976",
+     "mc:w:w0969",
+     "mc:w:w0974",
+     "mc:w:w0966",
+     "mc:w:w0977",
+     "mc:w:w0970",
+     "mc:w:w0966",
+     "mc:w:w0973",
+     "mc:w:w0968",
+     "mc:w:w0971",
+     "mc:w:w0972",
+     "mc:w:w0973",
+     "mc:w:w0971",
+     "mc:w:w0974",
+     "mc:w:w0977",
+     "mc:w:w0968",
+     "mc:w:w0970",
+     "mc:w:w0972",
+     "mc:w:w0976",
+     "mc:w:w0362",
+     "mc:w:w0497",
+     "mc:w:w0297",
+     "mc:w:w0401",
+     "mc:w:w0424",
+     "mc:w:w0543",
+     "mc:w:w0517",
+     "mc:w:w0472",
+     "mc:w:w0058",
+     "mc:w:w0710",
+     "mc:w:w0488",
+     "mc:w:w0326",
+     "mc:w:w0497",
+     "mc:w:w0424",
+     "mc:w:w0472",
+     "type:w:w0320",
+     "type:w:w0775",
+     "type:w:w0317",
+     "type:w:w0734",
+     "type:w:w0431",
+     "type:w:w0164",
+     "type:w:w0321",
+     "type:w:w0883",
+     "type:w:w0479",
+     "type:w:w0896",
+     "type:w:w0415",
+     "type:w:w0085",
+     "type:w:w0320",
+     "type:w:w0321",
+     "type:s:s1050",
+     "mc:s:s1419",
+     "type:s:s1402",
+     "mc:s:s1890",
+     "mc:s:s2912",
+     "mc:s:s2079",
+     "mc:s:s0557",
+     "mc:s:s0868",
+     "type:s:s1050",
+     "mc:s:s1419",
+     "type:s:s1402",
+     "mc:s:s2079",
+     "mc:s:s1050",
+     "mc:s:s1402"
+    ],
+    [
+     "type:w:w0371",
+     "type:w:w0620",
+     "mc:w:w0958",
+     "type:w:w0231",
+     "type:w:w0321",
+     "mc:w:w0957",
+     "type:w:w0035",
+     "type:w:w0432",
+     "type:w:w0206",
+     "mc:w:w0674",
+     "type:w:w0152",
+     "mc:w:w0424",
+     "type:w:w0320",
+     "mc:w:w0497",
+     "mc:w:w0472",
+     "type:w:w0321",
+     "mc:w:w0497",
+     "mc:w:w0979",
+     "mc:w:w0980",
+     "mc:w:w0978",
+     "mc:w:w0985",
+     "mc:w:w0975",
+     "mc:w:w0984",
+     "mc:w:w0981",
+     "mc:w:w0983",
+     "mc:w:w0980",
+     "mc:w:w0982",
+     "mc:w:w0985",
+     "mc:w:w0984",
+     "mc:w:w0975",
+     "mc:w:w0986",
+     "mc:w:w0979",
+     "mc:w:w0978",
+     "mc:w:w0983",
+     "mc:w:w0982",
+     "mc:w:w0986",
+     "mc:w:w0981",
+     "mc:w:w0985",
+     "mc:w:w0983",
+     "mc:w:w0978",
+     "mc:w:w0982",
+     "mc:w:w0982",
+     "mc:w:w0369",
+     "mc:w:w0729",
+     "mc:w:w0500",
+     "mc:w:w0272",
+     "mc:w:w0564",
+     "mc:w:w0616",
+     "mc:w:w0668",
+     "mc:w:w0371",
+     "mc:w:w0434",
+     "mc:w:w0249",
+     "mc:w:w0636",
+     "mc:w:w0420",
+     "mc:w:w0272",
+     "mc:w:w0564",
+     "mc:w:w0249",
+     "mc:w:w0636",
+     "mc:w:w0249",
+     "type:w:w0926",
+     "type:w:w0337",
+     "type:w:w0765",
+     "type:w:w0391",
+     "type:w:w0602",
+     "type:w:w0941",
+     "type:w:w0311",
+     "type:w:w0252",
+     "type:w:w0795",
+     "type:w:w0414",
+     "type:w:w0919",
+     "type:w:w0143",
+     "type:w:w0252",
+     "type:w:w0414",
+     "mc:w:w0252",
+     "type:s:s1050",
+     "mc:s:s2221",
+     "mc:s:s1094",
+     "mc:s:s1540",
+     "mc:s:s2258",
+     "mc:s:s2079",
+     "mc:s:s1396",
+     "type:s:s1402",
+     "type:s:s1050",
+     "type:s:s1402",
+     "mc:s:s1050",
+     "mc:s:s1402"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0799",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0799\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">die Situation</span><span class=\"rp\">pl. Situationen</span><span class=\"rg\">situation, circumstances</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1944\"><div class=\"st\" data-tl lang=\"de\">Es ist wesentlich, dass du die Situation verstehst.</div><div class=\"se\">It&#39;s essential that you understand the situation.</div></div><div class=\"sent\" data-sent=\"378\"><div class=\"st\" data-tl lang=\"de\">Was sollten sie in dieser <b>Situation</b> tun?</div><div class=\"se\">What should they do in this situation?</div></div></div>"
+    },
+    {
+     "key": "w:w0672",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0672\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">die Kraft</span><span class=\"rp\">pl. Kräfte</span><span class=\"rg\">strength, force, power</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2046\"><div class=\"st\" data-tl lang=\"de\">Das Gesetz ist nicht länger in <b>Kraft</b>.</div><div class=\"se\">The law is not in effect any longer.</div></div><div class=\"sent\" data-sent=\"318\"><div class=\"st\" data-tl lang=\"de\">Du musst ordentlich essen, um bei <b>Kräften</b> zu bleiben.</div><div class=\"se\">You must eat properly to keep up your strength.</div></div></div>"
+    },
+    {
+     "key": "w:w0502",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0502\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">eins</span><span class=\"rg\">one</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1253\"><div class=\"st\" data-tl lang=\"de\">Treffen wir uns um <b>eins</b>.</div><div class=\"se\">Let&#39;s meet at one o&#39;clock.</div></div><div class=\"sent\" data-sent=\"1484\"><div class=\"st\" data-tl lang=\"de\"><b>Eins</b> plus <b>eins</b> ist zwei. Stimmt das?</div><div class=\"se\">One plus one is two. Is that right?</div></div></div>"
+    },
+    {
+     "key": "w:w0088",
+     "kind": "type",
+     "html": "<div class=\"diff\">You typed zzz not it</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0088\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">wer</span><span class=\"rg\">who</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"79\"><div class=\"st\" data-tl lang=\"de\">Ich frage mich, <b>wer</b> es entdeckt hat.</div><div class=\"se\">I wonder who discovered it.</div></div><div class=\"sent\" data-sent=\"381\"><div class=\"st\" data-tl lang=\"de\"><b>Wer</b> ist euer Lehrer?</div><div class=\"se\">Who is your teacher?</div></div></div>"
+    },
+    {
+     "key": "w:w0071",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0071\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">doch</span><span class=\"rg\">after all, yet <span class=\"gx\">(yes <span class=\"dim\">(answer)</span>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"16\"><div class=\"st\" data-tl lang=\"de\">Und <b>doch</b>, auch das Gegenteil ist immer wahr.</div><div class=\"se\">And yet, the contrary is always true as well.</div></div><div class=\"sent\" data-sent=\"258\"><div class=\"st\" data-tl lang=\"de\">Diese Kuchen sind lecker. Bitte probiere <b>doch</b> einen.</div><div class=\"se\">These cakes are good. Please try one.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "9a5d2047eae52fdf"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "A2",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "48936006a8cd778c"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "d9b7082dcbad7ea0"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 16,
+     "sha": "6f0e9f2b9307b2f1"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "986c1e752ab32447"
+    },
+    "showPron": true,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 980,
+     "sha": "a61f7ccb55036fed"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.976667,
+     0.717692,
+     0.3732
+    ],
+    "toGo": [
+     0,
+     83,
+     169
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 1,
+     "n": 3,
+     "p": 0.717692,
+     "all": false
+    },
+    "eta": 83,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.349875
+   },
+   "items": {
+    "items": 255,
+    "right": 212
+   }
+  },
+  {
+   "record": "placedFull",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 0,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "showPron": true,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "688b2ef84e90804f"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     1,
+     1,
+     1
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 1,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.75
+   },
+   "todayFirst": "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Eine schwierige Entscheidung Start",
+   "today": [
+    "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Eine schwierige Entscheidung Start",
+    "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Eine schwierige Entscheidung Start",
+    "Session 3 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Eine schwierige Entscheidung Start"
+   ],
+   "progress": {
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles A1 0 of 600 mastered A2 4 of 700 mastered reading 0 of 20 B1 6 of 700 mastered reading 0 of 20 Still shaky sieben die Zeitung sechzig niemals das Fest aktuell der Bau trainieren lächeln Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "dreißig thirty",
+        "Entschuldigung excuse me, sorry",
+        "gute Nacht good night",
+        "guten Abend good evening",
+        "guten Morgen good morning",
+        "guten Tag hello, good day",
+        "heiß hot",
+        "neunzehn nineteen",
+        "neunzig ninety",
+        "siebzig seventy"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "mitten in the middle",
+        "wetten to bet",
+        "studieren to study (at university)",
+        "das Loch pl. Löcher hole",
+        "präsentieren to present, to showcase",
+        "teilnehmen to participate",
+        "der Doktor pl. Doktoren doctor",
+        "die Pause pl. Pausen break",
+        "der Vorschlag pl. Vorschläge proposal, suggestion",
+        "das Schicksal pl. Schicksale fate, destiny"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "die Hausaufgabe pl. Hausaufgaben homework",
+        "der Reis rarely pl. rice",
+        "die Bewerbung pl. Bewerbungen application (job)",
+        "der Pullover pl. Pullover sweater",
+        "das Formular pl. Formulare form",
+        "der Vermieter pl. Vermieter landlord",
+        "die Heizung pl. Heizungen heating",
+        "die Haltestelle pl. Haltestellen stop (bus, tram)",
+        "die Fahrkarte pl. Fahrkarten ticket (bus, train)",
+        "umsteigen to change (trains, buses)"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 70 of 70 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "dreißig thirty",
+        "Entschuldigung excuse me, sorry",
+        "gute Nacht good night",
+        "guten Abend good evening",
+        "guten Morgen good morning",
+        "guten Tag hello, good day",
+        "heiß hot",
+        "neunzehn nineteen",
+        "neunzig ninety",
+        "siebzig seventy"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "mitten in the middle",
+        "wetten to bet",
+        "studieren to study (at university)",
+        "das Loch pl. Löcher hole",
+        "präsentieren to present, to showcase",
+        "teilnehmen to participate",
+        "der Doktor pl. Doktoren doctor",
+        "die Pause pl. Pausen break",
+        "der Vorschlag pl. Vorschläge proposal, suggestion",
+        "das Schicksal pl. Schicksale fate, destiny"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 70 of 70 ✓",
+       "rows": 10,
+       "first": [
+        "die Hausaufgabe pl. Hausaufgaben homework",
+        "der Reis rarely pl. rice",
+        "die Bewerbung pl. Bewerbungen application (job)",
+        "der Pullover pl. Pullover sweater",
+        "das Formular pl. Formulare form",
+        "der Vermieter pl. Vermieter landlord",
+        "die Heizung pl. Heizungen heating",
+        "die Haltestelle pl. Haltestellen stop (bus, tram)",
+        "die Fahrkarte pl. Fahrkarten ticket (bus, train)",
+        "umsteigen to change (trains, buses)"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0375",
+     "type:w:w1605",
+     "type:w:w0171",
+     "type:w:w0033",
+     "type:w:w1587",
+     "type:w:w1084",
+     "type:w:w0497",
+     "type:w:w1309",
+     "type:w:w1506",
+     "type:w:w0746",
+     "type:w:w0503",
+     "type:w:w0907",
+     "type:w:w0529",
+     "type:w:w0650",
+     "type:w:w0821",
+     "mc:w:w1368",
+     "mc:w:w0741",
+     "mc:w:w0859",
+     "mc:w:w1785",
+     "mc:w:w2005",
+     "mc:w:w0121",
+     "mc:w:w0354",
+     "mc:w:w1416",
+     "mc:w:w0349",
+     "mc:w:w1980",
+     "mc:w:w1303",
+     "mc:w:w1231",
+     "mc:w:w0741",
+     "type:w:w0700",
+     "type:w:w1384",
+     "type:w:w0889",
+     "type:w:w0030",
+     "type:w:w0684",
+     "type:w:w0769",
+     "type:w:w0307",
+     "type:w:w1571",
+     "type:w:w1209",
+     "type:w:w0257",
+     "type:w:w1030",
+     "type:w:w0874",
+     "type:w:w0700",
+     "type:w:w1384",
+     "type:w:w0307",
+     "mc:s:s0220",
+     "mc:s:s0739",
+     "mc:s:s0152",
+     "type:s:s1480",
+     "mc:s:s1731",
+     "mc:s:s0368",
+     "mc:s:s0772",
+     "mc:s:s2905",
+     "type:s:s1480",
+     "mc:s:s2905",
+     "mc:s:s1480"
+    ],
+    [
+     "type:w:w1096",
+     "type:w:w0307",
+     "type:w:w1384",
+     "type:w:w1702",
+     "mc:w:w0741",
+     "type:w:w0758",
+     "type:w:w1374",
+     "type:w:w1695",
+     "type:w:w1867",
+     "type:w:w0296",
+     "type:w:w1437",
+     "type:w:w1574",
+     "type:w:w0700",
+     "type:w:w1974",
+     "type:w:w0521",
+     "type:w:w1702",
+     "type:w:w1867",
+     "mc:w:w1702",
+     "mc:w:w1867",
+     "mc:w:w1702",
+     "mc:w:w1702",
+     "mc:w:w1524",
+     "mc:w:w1885",
+     "mc:w:w0490",
+     "mc:w:w0138",
+     "mc:w:w1803",
+     "mc:w:w0323",
+     "mc:w:w1799",
+     "mc:w:w0904",
+     "mc:w:w1359",
+     "mc:w:w0124",
+     "mc:w:w1793",
+     "mc:w:w0424",
+     "mc:w:w1799",
+     "mc:w:w1359",
+     "type:w:w0246",
+     "type:w:w0943",
+     "type:w:w1677",
+     "type:w:w0621",
+     "type:w:w1526",
+     "type:w:w1315",
+     "type:w:w1558",
+     "type:w:w0908",
+     "type:w:w1667",
+     "type:w:w1352",
+     "type:w:w1632",
+     "type:w:w1641",
+     "type:w:w0621",
+     "type:w:w0908",
+     "type:s:s2905",
+     "mc:s:s0239",
+     "mc:s:s1080",
+     "mc:s:s2861",
+     "mc:s:s0743",
+     "type:s:s1480",
+     "mc:s:s2973",
+     "mc:s:s0146",
+     "type:s:s2905",
+     "mc:s:s1080",
+     "type:s:s1480",
+     "mc:s:s2905",
+     "mc:s:s1480",
+     "mc:s:s1480"
+    ],
+    [
+     "mc:w:w1359",
+     "type:w:w0483",
+     "type:w:w0437",
+     "type:w:w0712",
+     "type:w:w0806",
+     "type:w:w1085",
+     "mc:w:w1799",
+     "type:w:w1702",
+     "type:w:w0908",
+     "type:w:w1867",
+     "type:w:w0900",
+     "type:w:w0654",
+     "type:w:w0621",
+     "type:w:w1974",
+     "type:w:w0168",
+     "type:w:w0483",
+     "type:w:w1702",
+     "mc:w:w0082",
+     "mc:w:w0008",
+     "mc:w:w1202",
+     "mc:w:w1974",
+     "mc:w:w1648",
+     "mc:w:w1555",
+     "mc:w:w0051",
+     "mc:w:w1004",
+     "mc:w:w1263",
+     "mc:w:w0107",
+     "mc:w:w1487",
+     "mc:w:w1714",
+     "mc:w:w1974",
+     "mc:w:w1648",
+     "mc:w:w1648",
+     "type:w:w1070",
+     "type:w:w1547",
+     "type:w:w0382",
+     "type:w:w1069",
+     "type:w:w0645",
+     "type:w:w0522",
+     "type:w:w0475",
+     "type:w:w0639",
+     "type:w:w0704",
+     "type:w:w1497",
+     "type:w:w1572",
+     "type:w:w0696",
+     "type:w:w1070",
+     "type:w:w0475",
+     "mc:w:w0475",
+     "type:s:s1480",
+     "mc:s:s1890",
+     "mc:s:s0472",
+     "type:s:s2905",
+     "mc:s:s1556",
+     "type:s:s1080",
+     "type:s:s0914",
+     "mc:s:s2970",
+     "type:s:s1480",
+     "mc:s:s1890",
+     "type:s:s2905",
+     "type:s:s1080",
+     "type:s:s0914",
+     "mc:s:s1480",
+     "mc:s:s2905",
+     "mc:s:s1080",
+     "mc:s:s0914"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0375",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0375\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">aufstehen</span><span class=\"rg\">to get up</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"129\"><div class=\"st\" data-tl lang=\"de\">Ich wollte nicht früh <b>aufstehen</b>.</div><div class=\"se\">I didn&#39;t want to get up early.</div></div><div class=\"sent\" data-sent=\"1362\"><div class=\"st\" data-tl lang=\"de\">Nach dem <b>Aufstehen</b> bin ich schwimmen gegangen.</div><div class=\"se\">I went swimming after I woke up.</div></div></div>"
+    },
+    {
+     "key": "w:w1605",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1605\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">fantastisch</span><span class=\"rg\">fantastic</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1488\"><div class=\"st\" data-tl lang=\"de\">Es war <b>fantastisch</b>, dir im wirklichen Leben zu begegnen.</div><div class=\"se\">It was awesome to meet you in real life!</div></div><div class=\"sent\" data-sent=\"1485\"><div class=\"st\" data-tl lang=\"de\">Wir hatten einen <b>fantastischen</b> Urlaub in Schweden.</div><div class=\"se\">We had a fantastic holiday in Sweden.</div></div></div>"
+    },
+    {
+     "key": "w:w0171",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0171\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">versuchen</span><span class=\"rg\">to try, to attempt</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"81\"><div class=\"st\" data-tl lang=\"de\">Wir müssen <b>versuchen</b>, unsere Umwelt zu schützen.</div><div class=\"se\">We must try to protect the environment.</div></div><div class=\"sent\" data-sent=\"822\"><div class=\"st\" data-tl lang=\"de\">Ich werde <b>versuchen</b>, deine Wünsche zu erfüllen.</div><div class=\"se\">I&#39;ll try to meet your wishes.</div></div></div>"
+    },
+    {
+     "key": "w:w0033",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0033\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">wenn</span><span class=\"rg\">if <span class=\"gx\">(when<span class=\"dim\">(ever)</span>)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"60\"><div class=\"st\" data-tl lang=\"de\">Bitte benutzen Sie diesen Ausgang, <b>wenn</b> es brennt.</div><div class=\"se\">Please use this exit when there is a fire.</div></div><div class=\"sent\" data-sent=\"61\"><div class=\"st\" data-tl lang=\"de\">Wissenschaft beginnt, <b>wenn</b> man warum und wie fragt.</div><div class=\"se\">Science begins when you ask why and how.</div></div></div>"
+    },
+    {
+     "key": "w:w1587",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w1587\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">das Netz</span><span class=\"rp\">pl. Netze</span><span class=\"rg\">net</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"2991\"><div class=\"st\" data-tl lang=\"de\">Ich habe über das Netz zwei Pizzen bestellt.</div><div class=\"se\">I ordered two pizzas on-line.</div></div><div class=\"sent\" data-sent=\"2427\"><div class=\"st\" data-tl lang=\"de\">Ich halte Kennenlernbörsen im <b>Netz</b> nicht für sicher.</div><div class=\"se\">I think online dating isn&#39;t safe.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "5275203a901c614d"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "pl": "B1",
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "23afd846934351b6"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "37211556792997ed"
+    },
+    "read": {
+     "n": 2,
+     "sha": "07e71869e4c43a0d"
+    },
+    "s": {
+     "n": 19,
+     "sha": "769d19a9e46b548f"
+    },
+    "sessions": 3,
+    "sets": {
+     "n": 3,
+     "sha": "e25e5a0e62169a72"
+    },
+    "showPron": true,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 2000,
+     "sha": "4b1e76125dfd4859"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.995,
+     0.993846,
+     0.9925
+    ],
+    "toGo": [
+     0,
+     0,
+     0
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 2,
+     "n": 3,
+     "p": 0.9925,
+     "all": true
+    },
+    "eta": 0,
+    "gateHold": null,
+    "gateNote": null,
+    "gateOpensIn": null,
+    "suggestPassage": {
+     "id": "p0041",
+     "lv": "B1"
+    },
+    "position": 0.744375
+   },
+   "items": {
+    "items": 181,
+    "right": 155
+   }
+  },
+  {
+   "record": "gated",
+   "seed": {
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "s": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "sessions": 20,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "showPron": true,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "b4fbfd5a206f175e"
+    }
+   },
+   "derivedBefore": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.2,
+     0.092308,
+     0.06
+    ],
+    "toGo": [
+     117,
+     217,
+     282
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.2,
+     "all": false
+    },
+    "eta": 117,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 25
+    },
+    "gateNote": "A2 waits · A1 at 25% known",
+    "gateOpensIn": 31,
+    "suggestPassage": {
+     "id": "p0001",
+     "lv": "A1"
+    },
+    "position": 0.05625
+   },
+   "todayFirst": "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Mein Tag Start",
+   "today": [
+    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Mein Tag Start",
+    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Mein Tag Start",
+    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Mein Tag Start"
+   ],
+   "progress": {
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy A1 156 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 26%, ≈ 31 sessions. Still shaky vielleicht deutsch die Minute die Art vier vorbei das Gefühl Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+   },
+   "words": {
+    "start": {
+     "text": "A1 A2 B1 ‹ Set 60 of 60 ✓ › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "dreißig thirty",
+        "Entschuldigung excuse me, sorry",
+        "gute Nacht good night",
+        "guten Abend good evening",
+        "guten Morgen good morning",
+        "guten Tag hello, good day",
+        "heiß hot",
+        "neunzehn nineteen",
+        "neunzig ninety",
+        "siebzig seventy"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "völlig complete, total, utter",
+        "allerdings however, but",
+        "verschwinden to disappear, to move out of view, to vanish",
+        "schlagen to beat",
+        "persönlich personal",
+        "der Plan pl. Pläne plan",
+        "gemeinsam common, mutual, shared",
+        "die Stelle pl. Stellen place, spot (job)",
+        "selber myself, yourself, etc. (emphatic)",
+        "gelten to be valid"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "töten to kill",
+        "die Waffe pl. Waffen weapon, arm",
+        "der Sex no pl. sex",
+        "das Blut rarely pl. blood",
+        "umbringen to kill, to do away with, to murder",
+        "der Mord pl. Morde murder",
+        "die Droge pl. Drogen drug",
+        "die Leiche pl. Leichen dead body, corpse, cadaver",
+        "darunter including, among these",
+        "der Kilometer pl. Kilometer kilometer"
+       ]
+      }
+     ]
+    },
+    "end": {
+     "text": "A1 A2 B1 ‹ Set 1 of 70 › Drill this set Review",
+     "levels": [
+      {
+       "lv": "A1",
+       "set": "Set 60 of 60 ✓",
+       "rows": 10,
+       "first": [
+        "dreißig thirty",
+        "Entschuldigung excuse me, sorry",
+        "gute Nacht good night",
+        "guten Abend good evening",
+        "guten Morgen good morning",
+        "guten Tag hello, good day",
+        "heiß hot",
+        "neunzehn nineteen",
+        "neunzig ninety",
+        "siebzig seventy"
+       ]
+      },
+      {
+       "lv": "A2",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "völlig complete, total, utter",
+        "allerdings however, but",
+        "verschwinden to disappear, to move out of view, to vanish",
+        "schlagen to beat",
+        "persönlich personal",
+        "der Plan pl. Pläne plan",
+        "gemeinsam common, mutual, shared",
+        "die Stelle pl. Stellen place, spot (job)",
+        "selber myself, yourself, etc. (emphatic)",
+        "gelten to be valid"
+       ]
+      },
+      {
+       "lv": "B1",
+       "set": "Set 1 of 70",
+       "rows": 10,
+       "first": [
+        "töten to kill",
+        "die Waffe pl. Waffen weapon, arm",
+        "der Sex no pl. sex",
+        "das Blut rarely pl. blood",
+        "umbringen to kill, to do away with, to murder",
+        "der Mord pl. Morde murder",
+        "die Droge pl. Drogen drug",
+        "die Leiche pl. Leichen dead body, corpse, cadaver",
+        "darunter including, among these",
+        "der Kilometer pl. Kilometer kilometer"
+       ]
+      }
+     ]
+    }
+   },
+   "trace": [
+    [
+     "type:w:w0252",
+     "type:w:w0236",
+     "mc:w:w0221",
+     "type:w:w0172",
+     "type:w:w0472",
+     "type:w:w0392",
+     "type:w:w0112",
+     "type:w:w0539",
+     "type:w:w0532",
+     "mc:w:w0577",
+     "type:w:w0228",
+     "type:w:w0431",
+     "type:w:w0006",
+     "type:w:w0369",
+     "type:w:w0010",
+     "type:w:w0006",
+     "mc:w:w0355",
+     "mc:w:w0562",
+     "mc:w:w0593",
+     "mc:w:w0163",
+     "mc:w:w0022",
+     "mc:w:w0464",
+     "mc:w:w0124",
+     "mc:w:w0338",
+     "mc:w:w0008",
+     "mc:w:w0340",
+     "mc:w:w0563",
+     "mc:w:w0168",
+     "type:w:w0126",
+     "type:w:w0379",
+     "type:w:w0041",
+     "type:w:w0143",
+     "type:w:w0220",
+     "type:w:w0561",
+     "type:w:w0321",
+     "type:w:w0494",
+     "type:w:w0312",
+     "type:w:w0508",
+     "type:w:w0522",
+     "type:w:w0028",
+     "mc:s:s2674",
+     "mc:s:s0045",
+     "mc:s:s2883",
+     "mc:s:s0464",
+     "mc:s:s1793",
+     "mc:s:s2848",
+     "mc:s:s1693",
+     "mc:s:s0461"
+    ],
+    [
+     "type:w:w0326",
+     "type:w:w0006",
+     "type:w:w0239",
+     "type:w:w0024",
+     "type:w:w0428",
+     "type:w:w0445",
+     "type:w:w0246",
+     "type:w:w0438",
+     "type:w:w0366",
+     "type:w:w0187",
+     "type:w:w0304",
+     "type:w:w0287",
+     "type:w:w0346",
+     "type:w:w0320",
+     "type:w:w0387",
+     "type:w:w0326",
+     "mc:w:w0586",
+     "mc:w:w0233",
+     "mc:w:w0057",
+     "mc:w:w0195",
+     "mc:w:w0451",
+     "mc:w:w0235",
+     "mc:w:w0579",
+     "mc:w:w0595",
+     "mc:w:w0521",
+     "mc:w:w0430",
+     "mc:w:w0070",
+     "mc:w:w0244",
+     "mc:w:w0235",
+     "mc:w:w0070",
+     "mc:w:w0070",
+     "type:w:w0280",
+     "type:w:w0096",
+     "type:w:w0281",
+     "type:w:w0194",
+     "type:w:w0418",
+     "type:w:w0227",
+     "type:w:w0212",
+     "type:w:w0260",
+     "type:w:w0297",
+     "type:w:w0234",
+     "type:w:w0206",
+     "type:w:w0268",
+     "type:w:w0268",
+     "mc:s:s2176",
+     "mc:s:s1786",
+     "mc:s:s0391",
+     "mc:s:s1894",
+     "type:s:s0200",
+     "mc:s:s2292",
+     "mc:s:s3164",
+     "mc:s:s0648",
+     "type:s:s0200",
+     "mc:s:s0200"
+    ],
+    [
+     "type:w:w0053",
+     "type:w:w0394",
+     "type:w:w0268",
+     "type:w:w0223",
+     "mc:w:w0070",
+     "type:w:w0452",
+     "type:w:w0149",
+     "type:w:w0316",
+     "type:w:w0329",
+     "type:w:w0412",
+     "type:w:w0170",
+     "type:w:w0311",
+     "mc:w:w0235",
+     "type:w:w0326",
+     "mc:w:w0553",
+     "type:w:w0394",
+     "type:w:w0268",
+     "type:w:w0316",
+     "mc:w:w0316",
+     "mc:w:w0316",
+     "mc:w:w0531",
+     "mc:w:w0498",
+     "mc:w:w0298",
+     "mc:w:w0267",
+     "mc:w:w0524",
+     "mc:w:w0547",
+     "mc:w:w0349",
+     "mc:w:w0486",
+     "mc:w:w0557",
+     "mc:w:w0552",
+     "mc:w:w0082",
+     "mc:w:w0439",
+     "type:w:w0084",
+     "type:w:w0345",
+     "type:w:w0545",
+     "type:w:w0232",
+     "type:w:w0108",
+     "type:w:w0257",
+     "type:w:w0465",
+     "type:w:w0254",
+     "type:w:w0038",
+     "type:w:w0190",
+     "type:w:w0230",
+     "type:w:w0442",
+     "type:w:w0108",
+     "type:w:w0254",
+     "type:w:w0230",
+     "mc:w:w0108",
+     "mc:s:s0942",
+     "mc:s:s2735",
+     "mc:s:s2715",
+     "mc:s:s2356",
+     "mc:s:s0040",
+     "mc:s:s0603",
+     "mc:s:s1160",
+     "type:s:s0200",
+     "type:s:s0200",
+     "mc:s:s0200"
+    ]
+   ],
+   "reveals": [
+    {
+     "key": "w:w0252",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0252\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">verlieren</span><span class=\"rg\">to lose</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"955\"><div class=\"st\" data-tl lang=\"de\">Ohne ihn wird unsere Firma ihre Funktion <b>verlieren</b>.</div><div class=\"se\">Without him our company would cease to function.</div></div><div class=\"sent\" data-sent=\"2645\"><div class=\"st\" data-tl lang=\"de\">Tom wird nicht <b>verlieren</b>.</div><div class=\"se\">Tom isn&#39;t going to lose.</div></div></div>"
+    },
+    {
+     "key": "w:w0236",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0236\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">das Ding</span><span class=\"rp\">pl. Dinge</span><span class=\"rg\">thing</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1810\"><div class=\"st\" data-tl lang=\"de\">Jedes <b>Ding</b> hat seine Zeit.</div><div class=\"se\">Everything has got its time.</div></div><div class=\"sent\" data-sent=\"597\"><div class=\"st\" data-tl lang=\"de\">Nimm die <b>Dinge</b> etwas ernster.</div><div class=\"se\">Take things a little more seriously.</div></div></div>"
+    },
+    {
+     "key": "w:w0221",
+     "kind": "mc",
+     "html": "<div class=\"q\">You heard</div><div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0221\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">die Sache</span><span class=\"rp\">pl. Sachen</span><span class=\"rg\">matter, affair, case</span></div></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"682\"><div class=\"st\" data-tl lang=\"de\">Niemand weiß, wie die Sache ausgehen wird.</div><div class=\"se\">No one knows how things will end.</div></div><div class=\"sent\" data-sent=\"795\"><div class=\"st\" data-tl lang=\"de\">Ich werde die Sache mit meinem Vater besprechen.</div><div class=\"se\">I&#39;ll talk the matter over with my father.</div></div></div>"
+    },
+    {
+     "key": "w:w0172",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0172\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">erst</span><span class=\"rg\">not until, not for, not before <span class=\"gx\">(only)</span></span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"1219\"><div class=\"st\" data-tl lang=\"de\"><b>Erst</b> einmal sollte ich beide Seiten anhören.</div><div class=\"se\">First, I should hear both sides.</div></div><div class=\"sent\" data-sent=\"1508\"><div class=\"st\" data-tl lang=\"de\">Er hat <b>erst</b> mit dreißig angefangen zu malen.</div><div class=\"se\">He didn&#39;t start to paint until he was thirty.</div></div></div>"
+    },
+    {
+     "key": "w:w0472",
+     "kind": "type",
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0472\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"de\">krank</span><span class=\"rg\">sick, ill</span></div><button type=\"button\" class=\"replay\" id=\"rvp\" aria-label=\"Replay\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">\n    <path d=\"M4 9v6h3.5l4.9 4V5l-4.9 4H4z\" fill=\"currentColor\"/>\n    <path d=\"M16.2 8.8a5 5 0 0 1 0 6.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n    <path d=\"M18.6 6.3a8.5 8.5 0 0 1 0 11.4\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" fill=\"none\"/>\n  </svg></button></div><div class=\"rvx\"><div class=\"sent\" data-sent=\"29\"><div class=\"st\" data-tl lang=\"de\">Sie ist an diesem Wochenende <b>krank</b> geworden.</div><div class=\"se\">She got sick this weekend.</div></div><div class=\"sent\" data-sent=\"350\"><div class=\"st\" data-tl lang=\"de\">Sie ist seit letztem Mittwoch <b>krank</b>.</div><div class=\"se\">She has been sick since last Wednesday.</div></div></div>"
+    }
+   ],
+   "final": {
+    "day": {
+     "n": 3,
+     "sha": "325019a357bf69b6"
+    },
+    "lessons": {
+     "n": 0,
+     "sha": "44136fa355b3678a"
+    },
+    "placedOnce": true,
+    "pm": {
+     "n": 3,
+     "sha": "9cc3b0d8bdfc2c79"
+    },
+    "pv": {
+     "n": 4,
+     "sha": "c372a7f7c9ca6c31"
+    },
+    "read": {
+     "n": 2,
+     "sha": "6eb83ec9cb2912fd"
+    },
+    "s": {
+     "n": 23,
+     "sha": "cb8170b1942b0330"
+    },
+    "sessions": 23,
+    "sets": {
+     "n": 3,
+     "sha": "70404ee4577cfa6d"
+    },
+    "showPron": true,
+    "sn": 3,
+    "theme": null,
+    "v": 1,
+    "w": {
+     "n": 600,
+     "sha": "d809cc5f6d1828ad"
+    }
+   },
+   "derivedAfter": {
+    "goals": [
+     "A1",
+     "A2",
+     "B1"
+    ],
+    "positions": [
+     0.208,
+     0.096,
+     0.0624
+    ],
+    "toGo": [
+     117,
+     215,
+     282
+    ],
+    "toGoTotal": null,
+    "currentGoal": {
+     "i": 0,
+     "n": 3,
+     "p": 0.208,
+     "all": false
+    },
+    "eta": 117,
+    "gateHold": {
+     "lv": "A2",
+     "prev": "A1",
+     "pct": 26
+    },
+    "gateNote": "A2 waits · A1 at 26% known",
+    "gateOpensIn": 31,
+    "suggestPassage": {
+     "id": "p0002",
+     "lv": "A1"
+    },
+    "position": 0.0585
+   },
+   "items": {
+    "items": 160,
+    "right": 145
+   }
+  }
+ ]
+}

@@ -54,6 +54,17 @@ const FLAG_SINCE = [
   { key: "placedKnown", sha: "a18d6e2", path: ["placedKnown"] },
 ];
 
+// Flag collapse (TODO.md "Flag collapse"): the pack keys that read the same in all 14 live packs (scout: .cache/briefs/flag-collapse-scout.md),
+// so they become default engine behaviour. pronUntilPrimer and placementChars are derived from script / characters, progressMap by presence,
+// rereadPerfectDays is absent everywhere. tests/live_lock.js --check --strip boots every live pack without them and must equal the goldens once
+// the collapse is done. progressMap carries the goals data the engine still reads, so a strip keeps it (COLLAPSED_DATA).
+const COLLAPSED = [
+  "glossFocus", "dayAware", "pauseNew", "helpClose", "readAnswerBlock", "optsMix", "listenQuestions", "readRotation", "wordsBy",
+  "glossStyle", "pairs", "freqTiers", "progressView", "appView", "levelGate", "placementWhole", "placementEarlyStop", "placedRead",
+  "placedKnown", "pronUntilPrimer", "placementChars", "progressMap", "rereadPerfectDays",
+];
+const COLLAPSED_DATA = ["progressMap"];
+
 const byKey = new Map(FLAG_SINCE.map(f => [f.key, f]));
 const ancestorCache = new Map();
 
@@ -94,6 +105,9 @@ function stripFlags(pack, keys) {
   return out;
 }
 
+// deep copy of `pack` without the collapsed flags, keeping the data they carry
+function stripCollapsed(pack) { return stripFlags(pack, COLLAPSED.filter(k => !COLLAPSED_DATA.includes(k))); }
+
 // deep copy of `pack` as it shipped at `sha`: every flag introduced after `sha` removed.
 // opts.keep: newer flags to leave on; opts.strip: extra keys to drop (isolation, not age).
 function packAsOf(pack, sha, opts) {
@@ -110,4 +124,4 @@ function packBefore(pack, key, opts) {
   return packAsOf(pack, f.sha + "~1", opts);
 }
 
-module.exports = { FLAG_SINCE, packAsOf, packBefore, stripFlags, isAncestor };
+module.exports = { FLAG_SINCE, COLLAPSED, COLLAPSED_DATA, stripCollapsed, packAsOf, packBefore, stripFlags, isAncestor };
