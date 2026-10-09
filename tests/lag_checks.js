@@ -8,7 +8,9 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf, packBefore } = require("./lib/pack_flags.js");
+const { packAsOf } = require("./lib/pack_flags.js");
+// the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
+const PAIRS_ERA = "9eb6ecb~1";
 const cp = require("child_process");
 const util = require("util");
 
@@ -23,7 +25,7 @@ function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8"
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // fb27: PACK is zh without characters.start / ramp (the rule of sections 1-4 and the control); PACKR is zh as shipped.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACKR = packBefore(loadConst(path.join(ZH, "pack.js"), "PACK"), "pairs", { keep: ["characters.start", "characters.ramp"] });
+const PACKR = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), PAIRS_ERA, { keep: ["characters.start", "characters.ramp"] });
 const PACK = (p => { delete p.characters.start; delete p.characters.ramp; return p; })(clone0(PACKR));
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");

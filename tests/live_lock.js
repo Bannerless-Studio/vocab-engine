@@ -11,7 +11,7 @@ const fs = require("fs");
 const crypto = require("crypto");
 const path = require("path");
 const S = require("./lib/port_sim.js");
-const { COLLAPSED, COLLAPSED_DATA, FLAG_SINCE, stripCollapsed, stripFlags } = require("./lib/pack_flags.js");
+const { COLLAPSED, COLLAPSED_DATA, stripCollapsed, stripFlags } = require("./lib/pack_flags.js");
 
 const ROOT = path.join(__dirname, "..");
 const GOLDEN_DIR = path.join(__dirname, "golden");
@@ -146,8 +146,9 @@ function firstDiff(a, b, p) {
 const short = v => { const s = typeof v === "string" ? v : JSON.stringify(v); return s === undefined ? "undefined" : s.length > 160 ? s.slice(0, 160) + "..." : s; };
 
 (async () => {
-  const bad = COLLAPSED.filter(k => !FLAG_SINCE.some(f => f.key === k));
-  if (bad.length) { console.log("FAIL  COLLAPSED keys missing from FLAG_SINCE: " + bad.join(", ")); process.exit(1); }
+  // collapsed keys are top-level pack keys (stripFlags drops an unlisted top-level key by name)
+  const bad = COLLAPSED.filter(k => k.includes("."));
+  if (bad.length) { console.log("FAIL  COLLAPSED keys must be top-level: " + bad.join(", ")); process.exit(1); }
   const t0 = Date.now(), langs = LANGS.filter(l => !only || only.split(",").includes(l));
   let equal = 0, differ = 0, missing = 0, total = 0;
   for (const lang of langs) {

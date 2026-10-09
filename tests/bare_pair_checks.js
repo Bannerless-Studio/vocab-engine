@@ -22,7 +22,7 @@ const PY = process.env.PYTHON3 || "python3";
 function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn typeof ${name} !== "undefined" ? ${name} : undefined;`)(); }
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
 // levelGate and levelExam (fb38) came after 3044601; tests/level_gate_checks.js covers them.
-const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["progressView", "levelGate", "levelExam"] });
+const PACK = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), "34c5df3", { strip: ["progressView", "levelExam"] });
 const noBBP = p => Object.assign({}, p, { characters: (c => { const q = Object.assign({}, c); delete q.bareByPair; return q; })(p.characters) });
 const PACK_OFF = noBBP(PACK);
 // The 3044601 control strips every field that postdates it (fb31 patternCue, fb32 glossStyle); each has its own control.

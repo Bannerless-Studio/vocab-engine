@@ -5,7 +5,9 @@
 const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
-const { packBefore } = require("./lib/pack_flags.js");
+const { packAsOf } = require("./lib/pack_flags.js");
+// the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
+const PAIRS_ERA = "9eb6ecb~1";
 const os = require("os");
 const cp = require("child_process");
 const util = require("util");
@@ -22,7 +24,7 @@ function loadConst(file, name){
 // readRotation (fb16) shuffles questions and picks by session; its checks are listen_mode_checks [14].
 // pack.pairs (fb23) has its own suite (tests/pairs_checks.js); the app checks here run the day planner.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK = Object.assign(packBefore(loadConst(path.join(ZH, "pack.js"), "PACK"), "pairs", { strip: ["readRotation"] }), { typing: null });
+const PACK = Object.assign(packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), PAIRS_ERA, { strip: [] }), { typing: null });
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");

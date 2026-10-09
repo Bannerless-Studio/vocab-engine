@@ -997,7 +997,7 @@ console.log("\n[D2] fb48: placement reads the whole result (pack.placementWhole)
     fs.writeFileSync(f, oldOf("engine/core.js")); oldCore = require(f); oldHtml = oldOf("engine/app.html");
     fs.rmSync(dir, { recursive: true, force: true });
   } catch(e){ oldCore = null; }
-  const OFFW = packAsOf(PACK, BASE_E, { strip: ["placementWhole"] });
+  const OFFW = packAsOf(PACK, BASE_E, { strip: [] });
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
   // right answers per bucket (zh asks 2,3,2,3,...); the first 12 are the owner-reported record
   const RECS = {
@@ -1091,7 +1091,7 @@ try {
 } catch(e){ G_CORE = null; }
 console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack.placementEarlyStop)");
 {
-  const OFFE = packAsOf(PACK, BASE_G, { strip: ["placementEarlyStop"] });
+  const OFFE = packAsOf(PACK, BASE_G, { strip: [] });
   check("pack.placementEarlyStop: on in the shipped pack, off in the control", PACK.placementEarlyStop === true && VC.placementEarlyStopOn(PACK) && OFFE.placementEarlyStop === undefined && !VC.placementEarlyStopOn(OFFE));
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
   const TOT = N.reduce((a, b) => a + b, 0);
@@ -1194,7 +1194,7 @@ console.log("\n[D5] fb51: the reveal drops the stimulus hint links it makes redu
 
 console.log("\n[D6] fb51: a pattern below the placed level is not a first meeting (pack.placedRead)");
 {
-  const OFFP = packAsOf(PACK, BASE_G, { strip: ["placedRead"] });
+  const OFFP = packAsOf(PACK, BASE_G, { strip: [] });
   const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
   const placedRec = () => VC.applyPlacement(VC.normalizeProg({}, PACK), st0, st0.length, WORDS, PACK, CHARACTERS);
   const lvOf = lv => PATTERNS.find(p => String(p.lv) === lv).id;

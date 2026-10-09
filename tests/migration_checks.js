@@ -24,7 +24,7 @@ const readJSON = f => JSON.parse(fs.readFileSync(path.join(ZH, f), "utf8"));
 // The sections before [lag] check the stage model (withWords, as on main 590af86); zh ships
 // characters.learn "lag" since fb3-lag, checked against the same records in [lag].
 // levelGate / levelExam (fb38) hold the next level back; these sections walk the Learn order of a record, so they run without them (level_gate_checks covers both).
-const LAG_PACK = packAsOf(readJSON("pack.json"), "34c5df3", { strip: ["levelGate", "levelExam"] }), WORDS = readJSON("words.json"), LEGACY = readJSON("legacy.json");
+const LAG_PACK = packAsOf(readJSON("pack.json"), "34c5df3", { strip: ["levelExam"] }), WORDS = readJSON("words.json"), LEGACY = readJSON("legacy.json");
 const PACK = (p => { const c = Object.assign({}, p.characters, { withWords: true }); delete c.learn; return Object.assign({}, p, { characters: c }); })(LAG_PACK);
 const HSK_CORE = path.join(HSK, "src", "pinyin_core.js");
 const PC = fs.existsSync(HSK_CORE) ? require(HSK_CORE) : null;

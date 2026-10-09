@@ -91,8 +91,8 @@ check("packBefore(first flag): no flag key left", FLAG_SINCE.every(f => !flagPre
 check("packAsOf(pack, HEAD) is the pack unchanged", JSON.stringify(packAsOf(PACK, "HEAD")) === JSON.stringify(PACK));
 check("packAsOf never mutates its input", (() => { const c = JSON.stringify(PACK); packAsOf(PACK, "3044601"); stripFlags(PACK, ["pairs"]); return JSON.stringify(PACK) === c; })());
 check("keep leaves a newer flag on; strip drops an older one", (() => {
-  const p = packAsOf(PACK, "3044601", { keep: ["levelGate"], strip: ["pairs"] });
-  return "levelGate" in p && !("pairs" in p) && !("progressView" in p);
+  const p = packAsOf(PACK, "3044601", { keep: ["appView"], strip: ["glossFocus"] });
+  return "appView" in p && !("glossFocus" in p) && !("progressView" in p);
 })());
 check("stripFlags removes a nested flag and keeps its siblings", (() => {
   const p = stripFlags(PACK, ["characters.start"]);

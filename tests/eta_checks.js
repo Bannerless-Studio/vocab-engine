@@ -479,7 +479,7 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
     const leg = Object.assign(clone(PACK), { eta: { gain: [0.01, 0.01, 0.01], known: 5.2 } }), noE = stripFlags(PACK, ["eta"]), nullK = Object.assign(clone(PACK), { eta: { curve: PACK.eta.curve, knownCurve: null } });
     const lin = Math.ceil((PACK.levelGate - VC.levelKnownPct(WORDS, PACK, far, LV[1], CHARACTERS)) * lv2 / 5.2 - 1e-9);
     check(`levelOpensIn: legacy known 5.2 and no pack.eta -> words / 5.2 = ${lin}; knownCurve null -> null`, VC.levelOpensIn(WORDS, leg, far, CHARACTERS) === lin && VC.levelOpensIn(WORDS, noE, far, CHARACTERS) === lin && VC.levelOpensIn(WORDS, nullK, far, CHARACTERS) === null);
-    check("levelOpensIn: open gate -> null; pack without levelGate -> null", VC.levelOpensIn(WORDS, PACK, open, CHARACTERS) === null && VC.levelOpensIn(WORDS, stripFlags(PACK, ["levelGate"]), far, CHARACTERS) === null);
+    check("levelOpensIn: open gate -> null; pack without levelGate -> null", VC.levelOpensIn(WORDS, PACK, open, CHARACTERS) === null && VC.levelOpensIn(WORDS, stripFlags(PACK, []), far, CHARACTERS) === null);
   }
 
   console.log(`\n[2] owner export: the numbers shown, and the sims they come from`);
@@ -552,7 +552,7 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
   }
 
   console.log(`\n[5] placed starts (Test tab placement at HSK 2 / HSK 3): prog.pl selects pack.eta.placed for the whole record (pack.placedKnown off: [6] has it on)`);
-  const PK0 = stripFlags(PACK, ["placedKnown"]), ctx0 = Object.assign({}, ctx, { pack: PK0 });
+  const PK0 = stripFlags(PACK, []), ctx0 = Object.assign({}, ctx, { pack: PK0 });
   {
     const PACK = PK0, ctx = ctx0;
     // Replaces fb41's seeded-record gate check (owner 2026-10-08: new learners, with or without the placement test).
@@ -598,7 +598,7 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
 
   console.log(`\n[6] pack.placedKnown (fb52): placed provisional records count as known for the gate, goals, map and ETA position; flag off byte-identical to ${PK_BASE}`);
   {
-    const PK0 = stripFlags(PACK, ["placedKnown"]), c0 = Object.assign({}, ctx, { pack: PK0 });
+    const PK0 = stripFlags(PACK, []), c0 = Object.assign({}, ctx, { pack: PK0 });
     const st = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
     // The owner's placement (docs/PACK_SCHEMA.md "placementWhole"): every bucket answered, one isolated zero, k = 10 -> lands in HSK 4.
     const k = VC.placementStopIndex(st.map((_, i) => i < 10 ? { r: i === 3 ? 0 : 3, n: 3 } : { r: 0, n: 3 }), { whole: true });
@@ -669,7 +669,7 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
       const gp = { w: owner.w, sessions: 1 };
       const noPl = clone(owner); delete noPl.pl;
       check("H1 without prog.pl (no placement on record) the normal formula applies", VC.goalPosition(noPl, PACK, PACK.progressMap.goals[0], WORDS, CHARACTERS, PASSAGES) < a.gps[0]);
-      const off = clone(owner), PKo = stripFlags(PACK, ["placedKnown"]);
+      const off = clone(owner), PKo = stripFlags(PACK, []);
       check("H1 flag off ignores prog.pl (positions equal the same record read without pl)", JSON.stringify(VC.goalPositions(off, PKo, WORDS, CHARACTERS, PASSAGES)) === JSON.stringify(VC.goalPositions(Object.assign(clone(off), { pl: undefined }), PKo, WORDS, CHARACTERS, PASSAGES)));
     }
     // A fresh record and the owner export (no provisional records) are unchanged by the flag.
