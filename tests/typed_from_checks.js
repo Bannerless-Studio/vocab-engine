@@ -221,7 +221,7 @@ function walk(api, stopAt){
   // ---------------------------------------------------------------- [1] config + rotation
   console.log("\n[1] config and kind rotation");
   {
-    check("zh ships typedFrom [written, pron] + glossFocus on top of typing pron", JSON.stringify(PACK.typedFrom) === '["written","pron"]' && PACK.glossFocus === true && PACK.typing === "pron");
+    check("zh ships typedFrom [written, pron] on top of typing pron (glossFocus: engine default, no pack key)", JSON.stringify(PACK.typedFrom) === '["written","pron"]' && !("glossFocus" in PACK) && PACK.typing === "pron");
     check("typedFromOn: off without the field, off without typing, invalid sides ignored",
       !VC.typedFromOn(PACK_BASE) && !VC.typedFromOn(Object.assign({}, PACK, { typing: null })) && !VC.typedFromOn({ typing: "pron", typedFrom: "written" })
       && JSON.stringify(VC.typedFromSides({ typing: "pron", typedFrom: ["pron", "x", "written"] })) === '["written","pron"]' && VC.typedFromOn(PACK));
@@ -373,7 +373,6 @@ function walk(api, stopAt){
       && bItems.filter(x => x.label === "Type the meaning").every(x => !HAN.test(stripTags(x.html)) && x.html.includes(VC.toneHTML(w.pron))));
     const at = atTierProg([w]); api.setProg(at);
     const items = typePlan(w, 9).map(api.itemFromPlan);
-    const tagOf = x => (x.html.match(/class="ktag"[^>]*><b>([^<]*)<\/b>/) || [])[1];
     const byStim = x => HAN.test(stripTags(x.html)) ? "chars" : x.html.includes(VC.toneHTML(w.pron)) ? "pinyin" : "gloss";
     const sig = items.map(x => `${x.label}/${byStim(x)}`);
     check(`at tier: the nine slots in rotation order (${sig.join(", ")})`,
@@ -390,14 +389,15 @@ function walk(api, stopAt){
       if(byStim(it) === "chars" && (MARKED.test(stripTags(h)) || /class="t[1-5]"/.test(h) || /class="pron"/.test(h))) leaks.push("reading on characters");
       if(byStim(it) === "pinyin" && HAN.test(stripTags(h))) leaks.push("characters under pinyin");
       const answerBits = it === wChars ? [w.w, VC.stripMarks(w.pron)] : it.label === "Type the meaning" ? VC.glossParts(w.en).primary.split(/[;,]/).map(s => s.trim().replace(/^to /, "")).filter(s => s.length > 2) : [VC.stripMarks(w.pron)];
-      const meta = [it.label, it.placeholder || "", tagOf(it) || "", stripTags(h.replace(/<div class="big wd"[\s\S]*$/, ""))].join(" ").toLowerCase();
+      const meta = [it.label, it.placeholder || "", stripTags(h.replace(/<div class="big wd"[\s\S]*$/, ""))].join(" ").toLowerCase();
       answerBits.forEach(b => { if(meta.includes(b.toLowerCase())) leaks.push("answer in label/tag/placeholder: " + b); });
       if(it.label === "Type the meaning" && stripTags(h).includes(VC.glossParts(w.en).primary)) leaks.push("gloss on card");
       check(`${name}: no audio, no taps, no ruby, no reading/characters leak, answer not in label/tag/placeholder (${leaks.join("; ") || "clean"})`, leaks.length === 0);
     }
-    check("tags and placeholders: meaning items 'meaning · any one' + 'meaning…' + Latin input; characters->pinyin 'pinyin · tones optional'",
-      [wMean, pMean].every(x => /class="ktag"[^>]*><b>meaning<\/b> · any one</.test(x.html) && x.placeholder === "meaning…" && x.inputTA === ' lang="en"')
-      && /class="ktag"[^>]*><b>pinyin<\/b> · tones optional</.test(wPron.html) && wPron.placeholder === "pinyin, tones optional…" && wPron.inputTA === ' lang="en"');
+    // App v2 (engine default since the flag collapse): no kind tag; the placeholder names what to type.
+    check("placeholders: meaning items 'any one meaning' + Latin input; characters->pinyin 'tones optional'; no kind tag",
+      [wMean, pMean].every(x => !/class="ktag"/.test(x.html) && x.placeholder === "any one meaning" && x.inputTA === ' lang="en"')
+      && !/class="ktag"/.test(wPron.html) && wPron.placeholder === "tones optional" && wPron.inputTA === ' lang="en"');
     // Renderer: nothing spoken before the answer; reveal plays the word and has Replay.
     const primary1 = VC.glossParts(w.en).primary.split(";")[0].trim();
     const run = (slot, value, prog) => {
@@ -409,23 +409,23 @@ function walk(api, stopAt){
       return { html, before, after: spoken.length - k0 - before, rv: api.html("rv"), wrong: api.getD().miss.length > 0, prog: api.getProg() };
     };
     const r1 = run(0, primary1);
-    check(`renderer, characters -> meaning: silent before the answer, "${primary1}" right, reveal speaks + Replay`, r1.before === 0 && !r1.wrong && r1.after > 0 && /id="rvp"/.test(r1.rv) && /id="tin"[^>]*lang="en"/.test(r1.html) && /placeholder="meaning…"/.test(r1.html));
+    check(`renderer, characters -> meaning: silent before the answer, "${primary1}" right, reveal speaks + Replay`, r1.before === 0 && !r1.wrong && r1.after > 0 && /id="rvp"/.test(r1.rv) && /id="tin"[^>]*lang="en"/.test(r1.html) && /placeholder="any one meaning"/.test(r1.html));
     const r2 = run(5, primary1.toUpperCase() + "!");
     check("renderer, pinyin -> meaning: silent before the answer, case/punctuation-insensitive right", r2.before === 0 && !r2.wrong && r2.after > 0);
     const r3 = run(8, VC.stripMarks(w.pron));
     check("renderer, characters -> pinyin: silent before the answer, toneless right with the tones note", r3.before === 0 && !r3.wrong && /tones: /.test(r3.rv));
     const r5 = run(1, w.w);
-    check(`meaning -> characters (typedFrom): kind tag "characters" without "listen", no Replay before the answer, nothing spoken on mount; right; the reveal speaks + Replay (tag ${JSON.stringify(stripTags((wChars.html.match(/<div class="ktag"[\s\S]*?<\/div>/) || [""])[0]))})`,
-      tagOf(wChars) === "characters" && !/listen/.test(wChars.html) && !/id="rp2"/.test(r5.html) && !wChars.mount && r5.before === 0 && !r5.wrong && r5.after > 0 && /id="rvp"/.test(r5.rv));
+    check(`meaning -> characters (typedFrom): placeholder "characters", no Replay before the answer, nothing spoken on mount; right; the reveal speaks + Replay (placeholder ${JSON.stringify(wChars.placeholder)})`,
+      wChars.placeholder === "characters" && !/class="ktag"/.test(wChars.html) && !/id="rp2"/.test(r5.html) && !wChars.mount && r5.before === 0 && !r5.wrong && r5.after > 0 && /id="rvp"/.test(r5.rv));
     {
       const pr = atTierProg([w]); api.setProg(pr);
       const ctl = api.writtenTypeItem(w);
-      check("control: without typedFrom the characters item (writtenTypeItem) keeps its listen tag, Replay and mount", /<b>characters<\/b> · listen/.test(ctl.html) && /id="rp2"/.test(ctl.html) && typeof ctl.mount === "function");
+      check("control: without typedFrom the characters item (writtenTypeItem) keeps its Replay and mount", ctl.placeholder === "characters" && /id="rp2"/.test(ctl.html) && typeof ctl.mount === "function");
     }
     const r4 = run(0, "zzz not it");
     const rec = r4.prog.w[w.id];
-    check(`renderer, a wrong meaning: 'you typed' shown, the miss is k="type" and the record keeps its shape (${JSON.stringify(rec)})`,
-      r4.wrong && /you typed: zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov", "t", "u", "f", "p"].includes(k))); // p: pair streaks (pairs, engine default since the flag collapse)
+    check(`renderer, a wrong meaning: 'You typed' shown, the miss is k="type" and the record keeps its shape (${JSON.stringify(rec)})`,
+      r4.wrong && /You typed zzz not it/.test(r4.rv) && rec.k === "type" && Object.keys(rec).every(k => ["r", "w", "s", "k", "prov", "t", "u", "f", "p"].includes(k))); // p: pair streaks (pairs, engine default since the flag collapse)
     // Second miss: the silent choice counterpart with the same stimulus.
     api.setProg(atTierProg([w]));
     const plan = typePlan(w, 7); const mi = api.itemFromPlan(plan[0], 0, plan);
@@ -487,8 +487,11 @@ function walk(api, stopAt){
     const { api } = await boot({ seed: 9 });
     const w = WORDS.find(x => x.lv === "1" && /^\(/.test(x.en) && VC.glossParts(x.en).qualifiers.length && unitOf(x));
     const g = VC.gloss(w), gp = VC.glossParts(g);
-    const want = gp.pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join("");
-    check(`glossOut("${g}") -> the leading qualifier dimmed at the end of its alternative (${want})`, api.glossOut(g) === want && (g !== "(joining two nouns) and; together with; with…" || want === 'and <span class="dim">(joining two nouns)</span>; together with; with…'));
+    // glossStyle (engine default since the flag collapse): the first sense focused, the rest in a gx span (app.html glossOut).
+    const focus = t => VC.glossParts(t).pieces.map(x => x.dim ? `<span class="dim">${VC.escapeHtml(x.t)}</span>` : VC.escapeHtml(x.t)).join("");
+    const sense = t => VC.parenPieces(t).every(x => x.g || !x.t.trim()) && VC.parenPieces(t).some(x => x.g) ? `<span class="dim">${VC.escapeHtml(t)}</span>` : focus(t);
+    const sn = VC.glossSenses(g), want = sn.rest.length ? `${sense(sn.first)} <span class="gx">(${sn.rest.map(sense).join("; ")})</span>` : focus(g);
+    check(`glossOut("${g}") -> the leading qualifier dimmed at the end of its alternative, the other senses in gx (${want})`, api.glossOut(g) === want && (g !== "(joining two nouns) and; together with; with" || want === 'and <span class="dim">(joining two nouns)</span> <span class="gx">(together with; with)</span>'));
     check("glossOut with notes (reveal, popover) appends the reading note dimmed; without, it is gone",
       api.glossOut("who; also pr. [shuí]") === "who" && api.glossOut("who; also pr. [shuí]", true) === 'who <span class="dim">also pr. [shuí]</span>');
     check("glossOut: a gloss with no qualifier is plain escaped text", api.glossOut("to study") === "to study" && api.glossOut("(completed action marker)") === "(completed action marker)");
@@ -521,9 +524,7 @@ function walk(api, stopAt){
     const hits = sweep.filter(([, h]) => moved.some(m => h.includes(m)));
     check(`sweep of ${sweep.length} screens (tabs, Test recall, Today): no raw gloss with qualifiers left${hits.length ? ` (${hits.slice(0, 3).map(x => x[0]).join(", ")})` : ""}; dim spans seen`,
       sweep.length > 20 && hits.length === 0 && sweep.some(([, h]) => /class="dim"/.test(h)) && !sweep.some(([k]) => /ERR/.test(k)));
-    const { api: off } = await boot({ seed: 9, pack: PACK_BASE });
-    off.setProg(atTierProg([w]));
-    check("glossFocus off: raw gloss everywhere, no dim span", off.glossOut(g) === raw && off.revealBlock(w).includes(raw) && !/class="dim"/.test(off.revealBlock(w) + off.wordRowHTML(w, "wl")) && off.readItem(w).optHtml === undefined);
+    // glossFocus-off control deleted: glossFocus is engine default since the flag collapse (stage 2).
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // [5] control vs main ef44c6e deleted: it predates pairs and dayAware, engine default since the flag collapse.
