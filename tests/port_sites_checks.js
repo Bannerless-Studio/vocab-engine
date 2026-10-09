@@ -65,11 +65,10 @@ async function site(dirName, code){
   const periph = LV.map(lv => cnt(lv)[2]), want = LV.map(lv => Math.floor((SHARE[lv] || 0) * BY[lv].length + 0.5));
   check(`${code}: tiers per level [ambient core peripheral] ${LV.map(lv => `${lv} ${cnt(lv)}`).join("  ")}; peripheral = ${want.join("/")}`, JSON.stringify(periph) === JSON.stringify(want) && D.WORDS.filter(w => w.ft === 0).every(w => w.rank <= 100));
   if(units.length) check(`${code}: unit ft = lowest ft of its words (${units.length} units)`, units.every(u => u.ft === Math.min(...u.words.map(i => S.BY_ID[i].ft))));
-  const flags = ["glossFocus", "helpClose", "readAnswerBlock", "optsMix"];
-  // the stage-1 collapsed keys (engine default since the flag collapse) are no longer emitted
+  // the collapsed keys (stage 1 and 2: engine default since the flag collapse) are no longer emitted
   const gone = Object.keys(COLLAPSED_LIVE).concat("rereadPerfectDays").filter(k => k in P);
   check(`${code}: generic flag set (typedFrom ${JSON.stringify(P.typedFrom)}, goals ${P.progressMap && P.progressMap.goals.map(g => g.upTo)}; collapsed keys emitted: ${gone.join(",") || "none"})`,
-    flags.every(k => P[k] === true) && P.glossStyle === "primary" && P.progressView === "v2" && P.appView === "v2" && gone.length === 0
+    gone.length === 0
     && JSON.stringify(P.typedFrom) === JSON.stringify(code === "ja" ? ["written", "pron"] : ["written"]) && P.progressMap.goals.length === 3
     && (code === "ja" ? JSON.stringify(P.levelExam) === JSON.stringify({ [LV[0]]: "pinyin", [LV[1]]: "characters", [LV[2]]: "characters" })
       && P.characters.learn === "lag" && P.characters.start === 60 && JSON.stringify(P.characters.ramp) === "[3,5,8]" && P.characters.bareBy === "typed" && P.characters.bareWords === true && P.characters.bareByPair === true && P.placementChars === true
