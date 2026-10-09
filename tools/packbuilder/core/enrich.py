@@ -21,6 +21,7 @@ from .util import Env, write_json
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from jsonify_pack import render  # noqa: E402
+from pack_collapsed import drop_collapsed, stale_collapsed  # noqa: E402
 
 TIER_NAMES = {"ambient": 0, "core": 1, "peripheral": 2}
 AMBIENT_RANK = 100
@@ -63,10 +64,11 @@ def assign_tiers(words, overrides=None, shares=None, ambient_rank=AMBIENT_RANK):
 
 
 # Every top-level key LanguageSpec.port_flags() has ever been able to emit, and the `characters` sub-keys it merges.
-# --check reads them as port-era: one the spec no longer emits must not linger in a shipped pack.json.
-PORT_KEYS = ("dayAware", "typedFrom", "glossFocus", "glossStyle", "helpClose", "readAnswerBlock", "optsMix", "pauseNew",
-             "listenQuestions", "readRotation", "wordsBy", "progressMap", "pairs", "freqTiers", "progressView", "appView",
-             "levelGate", "levelExam", "pronUntilPrimer", "placementWhole", "placementChars", "placementEarlyStop", "placedRead", "placedKnown")
+# --check reads them as port-era: one the spec no longer emits must not linger in a shipped pack.json. The collapsed
+# flags (tools/pack_collapsed.py) are not here: enrich drops them, and --check notes a shipped one without failing.
+PORT_KEYS = ("typedFrom", "glossFocus", "glossStyle", "helpClose", "readAnswerBlock", "optsMix",
+             "progressMap", "progressView", "appView",
+             "levelExam", "pronUntilPrimer", "placementChars")
 PORT_CHARACTERS_KEYS = ("learn", "start", "ramp", "bareBy", "bareWords", "bareByPair")
 
 
@@ -103,6 +105,7 @@ def enrich_data(spec, pack, words, units=None, overrides=None, eta=None):
     pack, words = json.loads(json.dumps(pack)), json.loads(json.dumps(words))
     units = json.loads(json.dumps(units)) if units is not None else None
     assign_tiers(words, overrides)
+    pack = drop_collapsed(pack)
     for k, v in spec.port_flags().items():
         if isinstance(v, dict) and isinstance(pack.get(k), dict):
             pack[k].update(v)
@@ -150,8 +153,11 @@ def main(lang, repo, check=False, emit=None):
     parts = [("pack", "PACK", pack, new_pack), ("words", "WORDS", words, new_words)]
     if units is not None:
         parts.append(("characters", "CHARACTERS", units, new_units))
-    stale = [stem for stem, _, old, new in parts if old != new]
+    # a shipped pack still carrying collapsed flags is current: the engine ignores them and the next enrich drops them
+    stale = [stem for stem, _, old, new in parts if (drop_collapsed(old) if stem == "pack" else old) != new]
     if check:
+        if stale_collapsed(pack):
+            print("enrich --check: note: pack.json carries collapsed flags the engine ignores (the next enrich drops them): " + ", ".join(stale_collapsed(pack)))
         drift = flag_drift(spec, pack)
         if drift:
             print("enrich --check: the shipped pack.json flag block differs from the spec's port_flags():")

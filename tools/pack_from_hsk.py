@@ -587,18 +587,7 @@ def main(argv):
         # by tone as hsk did, and a Reference card of every lesson sound in the Sounds tab.
         "tones": "pinyin",
         "soundsReference": True,
-        # Plans know what was drilled today (docs/PACK_SCHEMA.md "dayAware"; owner feedback 2026-10-02).
-        "dayAware": True,
-        # New material can be paused from Progress (docs/PACK_SCHEMA.md "pauseNew").
-        "pauseNew": True,
-        # Every question of a listening pass is audio-only (docs/PACK_SCHEMA.md "Listening pass"; owner 2026-10-03).
-        "listenQuestions": "all",
-        # Read stage alternates reading and listening passes by session, no day gates; questions
-        # shuffled per pass (docs/PACK_SCHEMA.md "readRotation"; owner 2026-10-03). Replaces rereadPerfectDays.
-        "readRotation": True,
-        # A word past streak 2 moves up only by typed answers; choice answers hold it
-        # (docs/PACK_SCHEMA.md "wordsBy"; owner 2026-10-03).
-        "wordsBy": "typed",
+        # The collapsed flags (tools/pack_collapsed.py: dayAware, pairs, freqTiers, ...) are engine defaults, never emitted.
         # Today row: position toward the goal + measured sessions to go (docs/PACK_SCHEMA.md "progressMap"; owner 2026-10-04).
         # Ladder of goals, one shown at a time, each scoped to levels <= upTo (a level id); switches at 90%.
         "progressMap": {"goals": [
@@ -606,29 +595,13 @@ def main(argv):
             {"upTo": "3", "label": "daily life: directions, simple chat, short notices"},
             {"upTo": "4", "label": "follow a slow drama with subtitles"},
         ]},
-        # Review, Recall, Listen and the characters Test ask each item's weakest pair first (written,
-        # sound, meaning; docs/PACK_SCHEMA.md "pairs"; owner 2026-10-05).
-        "pairs": True,
-        # Frequency tiers (docs/PACK_SCHEMA.md "freqTiers"; owner 2026-10-06): words.json `ft` sets per word
-        # how much practice it needs (ambient / core / peripheral); levels are in zipf order.
-        "freqTiers": True,
         # Progress tab: since-last-visit deltas, one bar per level, rows at their expected state behind
         # Show all (docs/PACK_SCHEMA.md "progressView"; owner 2026-10-07).
         "progressView": "v2",
         # Today, header, drill end and session done in the Progress v2 direction (docs/PACK_SCHEMA.md "appView"; owner 2026-10-07).
         "appView": "v2",
-        # Placement reads the whole result (docs/PACK_SCHEMA.md "placementWhole"; owner 2026-10-08).
-        "placementWhole": True,
         # Placement also places the characters layer (docs/PACK_SCHEMA.md "placementChars"; owner 2026-10-08).
         "placementChars": True,
-        # Placement stops asking after three empty buckets (docs/PACK_SCHEMA.md "placementEarlyStop"; owner 2026-10-08).
-        "placementEarlyStop": True,
-        # A placed learner reads from the placed level (docs/PACK_SCHEMA.md "placedRead"; owner 2026-10-08).
-        "placedRead": True,
-        # Placed provisional words count as known for the gate, goals, map and ETA position (docs/PACK_SCHEMA.md "placedKnown"; owner 2026-10-08).
-        "placedKnown": True,
-        # The next HSK level opens when this share of the previous one is known (docs/PACK_SCHEMA.md "levelGate"; owner 2026-10-07).
-        "levelGate": 0.7,
         # What each level's exam asks (docs/PACK_SCHEMA.md "levelExam"; owner 2026-10-07): HSK 1-2 are pinyin papers, HSK 3-4 read hanzi.
         "levelExam": {"1": "pinyin", "2": "pinyin", "3": "characters", "4": "characters"},
         # ETA curves (docs/PACK_SCHEMA.md "eta"): tools/zh_eta.json, written by tests/eta_checks.js --calibrate --write

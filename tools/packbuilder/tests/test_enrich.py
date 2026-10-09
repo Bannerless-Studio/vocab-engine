@@ -85,12 +85,22 @@ class Flags(unittest.TestCase):
         f = get_spec("it").port_flags()
         self.assertEqual(f["typedFrom"], ["written"])
         self.assertEqual([g["upTo"] for g in f["progressMap"]["goals"]], ["A1", "A2", "B1"])
-        for k in ("dayAware", "pairs", "freqTiers", "glossFocus", "readRotation", "optsMix", "pauseNew", "placementWhole", "placedKnown"):
+        for k in ("glossFocus", "optsMix"):
             self.assertIs(f[k], True)
-        self.assertEqual((f["glossStyle"], f["progressView"], f["appView"], f["levelGate"], f["wordsBy"], f["listenQuestions"]),
-                         ("primary", "v2", "v2", 0.7, "typed", "all"))
+        self.assertEqual((f["glossStyle"], f["progressView"], f["appView"]), ("primary", "v2", "v2"))
         self.assertNotIn("characters", f)
         self.assertNotIn("levelExam", f)
+
+    def test_collapsed_flags_never_emitted_and_dropped_by_enrich(self):
+        from pack_collapsed import COLLAPSED
+        for code in ("it", "ja", "ar"):
+            f = get_spec(code).port_flags()
+            self.assertEqual([k for k in COLLAPSED if k in f], [], code)
+        self.assertEqual([k for k in COLLAPSED if k in enrich.PORT_KEYS], [])
+        stale = {k: True for k in COLLAPSED}
+        p, _, _ = enrich.enrich_data(get_spec("it"), dict(stale, key="it"), words(), None)
+        self.assertEqual([k for k in COLLAPSED if k in p], [])
+        self.assertEqual(enrich.flag_drift(get_spec("it"), dict(p, **stale)), [])
 
     def test_ja_typed_from_and_characters_set(self):
         ja = get_spec("ja")
@@ -245,12 +255,23 @@ class CheckDetectsFlagDrift(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t:
             r = self.enriched_repo(t)
             pack = json.loads((r / "pack" / "pack.json").read_text())
-            pack["levelGate"] = 0.5
-            del pack["pairs"]
+            pack["glossStyle"] = "all"
+            del pack["optsMix"]
             pack["progressMap"]["goals"][0]["label"] = "other"
             lines = enrich.flag_drift(get_spec("it"), pack)
-            self.assertEqual(sorted(l.split(":")[0] for l in lines), ["levelGate", "pairs", "progressMap"])
+            self.assertEqual(sorted(l.split(":")[0] for l in lines), ["glossStyle", "optsMix", "progressMap"])
             self.assertTrue(all("shipped" in l and "spec" in l for l in lines))
+
+    def test_check_passes_a_shipped_pack_with_collapsed_flags(self):
+        # the live packs carry the collapsed flags until the next republish round's enrich drops them
+        from pack_collapsed import COLLAPSED
+        with tempfile.TemporaryDirectory() as t:
+            r = self.enriched_repo(t)
+            pj = r / "pack" / "pack.json"
+            pack = json.loads(pj.read_text())
+            pack.update({k: True for k in COLLAPSED})
+            pj.write_text(json.dumps(pack))
+            self.assertEqual(enrich.main("it", r, check=True), 0)
 
     def test_eta_and_non_port_keys_are_ignored(self):
         with tempfile.TemporaryDirectory() as t:

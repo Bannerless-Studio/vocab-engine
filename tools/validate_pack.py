@@ -19,6 +19,8 @@ import re
 import subprocess
 import sys
 
+from pack_collapsed import stale_collapsed  # noqa: E402  (tools/, beside this file)
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -57,6 +59,18 @@ def load(packdir, stem, rep, required=True):
     except ValueError as e:
         rep.err(f"{stem}.json is not valid JSON: {e}")
         return None
+
+
+# engine/core.js LEVEL_GATE: the share of a level that must be known before the next one opens (pack.levelGate until the flag collapse)
+LEVEL_GATE = 0.7
+
+
+def check_collapsed(pack, rep):
+    """A collapsed flag (tools/pack_collapsed.py) left in a pack: the engine ignores it. A warning until the next republish
+    round's enrich drops the keys from every live pack (TODO.md), then an error."""
+    stale = stale_collapsed(pack)
+    if stale:
+        rep.warn("pack.json keys the engine no longer reads (default behaviour since the flag collapse; enrich drops them): " + ", ".join(stale))
 
 
 def check_pack(pack, rep):
@@ -138,18 +152,7 @@ def check_pack(pack, rep):
     char_levels = check_characters_pack(pack, ids, rep)
     check_pron_aids_pack(pack, rep)
     check_audio_pack(pack, rep)
-    if "dayAware" in pack and not is_bool(pack["dayAware"]):
-        rep.err("pack.dayAware must be a boolean")
-    if "pauseNew" in pack and not is_bool(pack["pauseNew"]):
-        rep.err("pack.pauseNew must be a boolean")
-    if "listenQuestions" in pack and pack["listenQuestions"] != "all":
-        rep.err('pack.listenQuestions must be "all" when present')
-    if "rereadPerfectDays" in pack and not (isinstance(pack["rereadPerfectDays"], int) and not is_bool(pack["rereadPerfectDays"]) and pack["rereadPerfectDays"] > 0):
-        rep.err("pack.rereadPerfectDays must be a positive integer when present")
-    if "readRotation" in pack and not is_bool(pack["readRotation"]):
-        rep.err("pack.readRotation must be a boolean")
-    if pack.get("readRotation") is True and not pack.get("dayAware"):
-        rep.err("pack.readRotation needs pack.dayAware (passes are counted by session)")
+    check_collapsed(pack, rep)
     pm = pack.get("progressMap")
     if "progressMap" in pack:
         if isinstance(pm, dict):
@@ -169,57 +172,27 @@ def check_pack(pack, rep):
                         rep.err(f"pack.progressMap.goals[{i}].label must be a non-empty string")
         elif not is_bool(pm):
             rep.err("pack.progressMap must be a boolean or {goals: [...]}")
-    if pm not in (None, False) and not pack.get("dayAware"):
-        rep.err("pack.progressMap needs pack.dayAware (the pace is counted in sessions)")
     if "progressView" in pack and pack["progressView"] != "v2":
         rep.err('pack.progressView must be "v2" when present')
     if "appView" in pack and pack["appView"] != "v2":
         rep.err('pack.appView must be "v2" when present')
-    if "wordsBy" in pack and pack["wordsBy"] != "typed":
-        rep.err('pack.wordsBy must be "typed" when present')
-    elif pack.get("wordsBy") == "typed" and pack.get("typing") in (None, False):
-        rep.err("pack.wordsBy needs pack.typing (a held word moves up only by typed answers)")
-    elif pack.get("wordsBy") == "typed" and not pack.get("dayAware"):
-        rep.warn("pack.wordsBy without pack.dayAware: held words are not planned typed")
+    if pack.get("typing") in (None, False):
+        rep.warn("pack.typing is off: a held word (streak 2) moves up only by typed answers (docs/PACK_SCHEMA.md \"wordsBy\"), so it stays held")
     if "pronUntilPrimer" in pack and not is_bool(pack["pronUntilPrimer"]):
         rep.err("pack.pronUntilPrimer must be a boolean")
     elif pack.get("pronUntilPrimer") is True and "script" not in pack:
         rep.err("pack.pronUntilPrimer needs pack.script (the default turns off when the primer is done)")
-    if "placementWhole" in pack and not is_bool(pack["placementWhole"]):
-        rep.err("pack.placementWhole must be a boolean")
-    if "placedRead" in pack and not is_bool(pack["placedRead"]):
-        rep.err("pack.placedRead must be a boolean")
-    if "placementEarlyStop" in pack and not is_bool(pack["placementEarlyStop"]):
-        rep.err("pack.placementEarlyStop must be a boolean")
-    if "placedKnown" in pack and not is_bool(pack["placedKnown"]):
-        rep.err("pack.placedKnown must be a boolean")
     if "placementChars" in pack and not is_bool(pack["placementChars"]):
         rep.err("pack.placementChars must be a boolean")
     elif pack.get("placementChars") is True and not (isinstance(pack.get("characters"), dict) and pack["characters"].get("learn") == "lag"):
         rep.err('pack.placementChars needs pack.characters with learn "lag"')
-    if "pairs" in pack and not is_bool(pack["pairs"]):
-        rep.err("pack.pairs must be a boolean")
-    elif pack.get("pairs") is True and not pack.get("dayAware"):
-        rep.err("pack.pairs needs pack.dayAware (pairs are scheduled by session)")
-    # freqTiers (docs/PACK_SCHEMA.md "freqTiers"): per-word practice tiers act on pair streaks.
-    if "freqTiers" in pack and not is_bool(pack["freqTiers"]):
-        rep.err("pack.freqTiers must be a boolean")
-    elif pack.get("freqTiers") is True and not (pack.get("pairs") is True and pack.get("dayAware")):
-        rep.err("pack.freqTiers needs pack.pairs (tiers set each pair's mastery)")
-    # levelGate (docs/PACK_SCHEMA.md "levelGate"): a fraction of the previous level that must be known.
-    if "levelGate" in pack:
-        lg = pack["levelGate"]
-        if isinstance(lg, bool) or not isinstance(lg, (int, float)) or not 0 < lg <= 1:
-            rep.err("pack.levelGate must be a number in (0, 1]")
-        elif not (pack.get("pairs") is True and pack.get("dayAware")):
-            rep.err("pack.levelGate needs pack.pairs (known is the pair definition)")
     # levelExam (docs/PACK_SCHEMA.md "levelExam"): level id -> "pinyin" | "characters".
     if "levelExam" in pack:
         le = pack["levelExam"]; ids = {str(l.get("id")) for l in pack.get("levels", []) if isinstance(l, dict)}
         if not isinstance(le, dict) or not all(isinstance(k, str) and k in ids and v in ("pinyin", "characters") for k, v in le.items()):
             rep.err("pack.levelExam must map level ids to \"pinyin\" or \"characters\"")
-        elif not (pack.get("pairs") is True and pack.get("dayAware") and "characters" in pack):
-            rep.err("pack.levelExam needs pack.pairs and pack.characters (the unit's meaning pair)")
+        elif "characters" not in pack:
+            rep.err("pack.levelExam needs pack.characters (the unit's meaning pair)")
     # eta (docs/PACK_SCHEMA.md "eta"): calibrated ETA curves (legacy: constant slopes); null = no estimate for that goal / the gate.
     if "eta" in pack:
         et = pack["eta"]
@@ -227,7 +200,7 @@ def check_pack(pack, rep):
         nonneg = lambda v: is_num(v) and not isinstance(v, bool) and v >= 0
         goals_n = len(pm["goals"]) if isinstance(pm, dict) and isinstance(pm.get("goals"), list) else None
 
-        gate = pack.get("levelGate") if is_num(pack.get("levelGate")) else None
+        gate = LEVEL_GATE
 
         def curve_err(c, last_min=None, last_max=None):
             if not (isinstance(c, list) and len(c) >= 2 and all(isinstance(p, list) and len(p) == 2 and nonneg(p[0]) and nonneg(p[1]) for p in c)):
@@ -314,8 +287,6 @@ def check_pack(pack, rep):
         rep.err("pack.glossStyle needs pack.glossFocus")
     if "patterns" in pack and not is_bool(pack["patterns"]):
         rep.err("pack.patterns must be a boolean")
-    elif pack.get("patterns") is True and pack.get("pairs") is not True:
-        rep.err("pack.patterns needs pack.pairs (and so pack.dayAware): pattern asks are counted by session")
     if "patternCue" in pack and pack["patternCue"] != "after":
         rep.err('pack.patternCue must be "after" when present')
     elif pack.get("patternCue") == "after" and pack.get("patterns") is not True:
@@ -480,14 +451,10 @@ def check_characters_pack(pack, level_ids, rep):
         rep.err("pack.characters.compose must be a boolean")
     if "bareBy" in ch and ch["bareBy"] != "typed":
         rep.err('pack.characters.bareBy must be "typed"')
-    elif "bareBy" in ch and not pack.get("dayAware"):
-        rep.warn("pack.characters.bareBy without pack.dayAware: units between mastered and bare get no guaranteed typed share")
     if "bareWords" in ch and not is_bool(ch["bareWords"]):
         rep.err("pack.characters.bareWords must be a boolean")
     if "bareByPair" in ch and not is_bool(ch["bareByPair"]):
         rep.err("pack.characters.bareByPair must be a boolean")
-    elif ch.get("bareByPair") is True and not (pack.get("pairs") is True and pack.get("dayAware")):
-        rep.err("pack.characters.bareByPair needs pack.pairs (it reads the written <-> meaning pair streak)")
     if "withWords" in ch and not is_bool(ch["withWords"]):
         rep.err("pack.characters.withWords must be a boolean")
     if "learn" in ch and ch["learn"] != "lag":
