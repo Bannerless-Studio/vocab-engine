@@ -164,6 +164,7 @@ return {
   onShowWritten, gapSentence, recallItem, readItem, hearItem, revealBlock, wordRowHTML, glossHTML, passagePlainHTML, charTeach, revealWritten, pronFirst: () => PRON_FIRST, tokTap,
   panelListeners: () => document.getElementById("panel")._listeners.click || [],
   wordsSearch: q => { tab = "words"; wordsQuery = q; render(); }, startPassage: p => { tab = "read"; startPassage(p); },
+  readQ: i => { RD.qi = i; RD.shown = false; readQuestionScreen(); }, getRD: () => RD,
 };`;
   const names = ["document","window","navigator","location","localStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","PACK","WORDS","SENTENCES","LESSONS","PASSAGES"];
   const args = [document, window, { userAgent:"CharsAppChecks/1.0" }, undefined, localStorage, () => ({ matches:false }), fn => setTimeout(fn, 0),
@@ -1270,6 +1271,70 @@ Math.random = mulberry32(20261004);
     const body = z.api.passageSentenceHTML(P0.sentences[0], 0, false);
     check("passage body renders the same bare markup for the same unit", /<ruby class="bare">/.test(body) || !(P0.sentences[0].ruby || []).some(r => r[3] && ubz.get(r[3])));
   } catch(e){ check(`fb24 section threw: ${e.message}`, false); }
+
+  // ---------------------------------------------------------------- mixed known / unknown sentence order (zh-read-order)
+  // Owner 2026-10-09 (Read statement 我从自行车上掉下来以后，腿很疼。 with 掉 腿 疼 unlearned): pinyin words between
+  // ruby words. Every pron-first renderer emits the tokens in sentence order (a reading for a pron token, the base for a
+  // ruby one), and every box holding that ruby carries .hasruby, so a wrapped line's annotations and an inline
+  // show-written tap get the tall ruby line box.
+  console.log("\n[zh-read-order] mixed pinyin / ruby sentences render in sentence order, in a .hasruby box");
+  check("CSS: .hasruby sets the tall ruby line box", /(^|\n)\s*\.hasruby\{line-height:2\.3\}/.test(appHtml));
+  for(const [name, dir] of [["zh", ZH], ["ja", process.env.JA_PACK || path.join(ROOT, "..", "japanese", "pack")]]){
+    if(!fs.existsSync(path.join(dir, "characters.js"))){ console.log(`NOTE  ${name}: no pack at ${dir}, skipped`); continue; }
+    try {
+      const L = (f, v) => loadConst(path.join(dir, f), v), LO = (f, v) => tryLoadConst(path.join(dir, f), v);
+      const pk = L("pack.js", "PACK"), ws = L("words.js", "WORDS"), ss = L("sentences.js", "SENTENCES"), us = L("characters.js", "CHARACTERS"), ps = LO("sentences.js", "PASSAGES") || [];
+      const ub = VC.unitByWord(us), cfg = pk.characters;
+      // Known = mastered (ruby); unknown = no unit record (its reading). Unknown: two non-adjacent tokens with a
+      // known token after each, so a reading always sits between ruby tokens.
+      const pick = s => { const r = (s.ruby || []).filter(k => ub.get(k[3])); if(r.length < 6) return null;
+        const t = String(s.t || ""); const han = k => /\p{Script=Han}/u.test(t.slice(k[0], k[1]));
+        const idx = []; for(let i = 1; i < r.length - 1 && idx.length < 2; i++) if(han(r[i]) && han(r[i + 1]) && !idx.includes(i - 1)) idx.push(i);
+        return idx.length === 2 ? new Set(idx.map(i => r[i][3])) : null; };
+      const seed = (rubies, unk) => { const prog = VC.normalizeProg({ placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true, mix: true } }, pk);
+        rubies.forEach(rs => (rs || []).forEach(k => { const u = ub.get(k[3]); if(u && !unk.has(k[3])) prog.chars.c[u.id] = { r: cfg.mastered, w: 0, s: cfg.mastered }; }));
+        unk.forEach(id => { const u = ub.get(id); if(u) delete prog.chars.c[u.id]; });
+        return prog; };
+      // DOM text order: drop <rt> and the show-written tap, strip tags; each token's display must follow the previous one.
+      const order = (html, t, ruby, prog) => {
+        const txt = VC.unescapeHtml ? VC.unescapeHtml(html) : html;
+        const flat = txt.replace(/<button[^>]*class="showw"[\s\S]*?<\/button>/g, "").replace(/<rt>[\s\S]*?<\/rt>/g, "").replace(/<[^>]+>/g, "").replace(/&amp;/g, "&");
+        const tiers = VC.rubyTiers({ t, ruby }, us, prog, pk, true) || [];
+        let pos = 0, pron = 0, rb = 0; const miss = [];
+        tiers.forEach(k => { const d = k.tier === "pron" ? String(k.reading) : t.slice(k.start, k.end); if(k.tier === "pron") pron++; else rb++;
+          const at = flat.toLowerCase().indexOf(d.toLowerCase(), pos); if(at < 0) miss.push(d); else pos = at + d.length; });
+        return { ok: miss.length === 0 && pron >= 2 && rb >= 2, miss, pron, rb };
+      };
+      const boxCls = (html, before) => { const i = html.indexOf(before); if(i < 0) return null; const open = html.lastIndexOf("<", i); const tag = html.slice(open, html.indexOf(">", open) + 1); return /class="[^"]*\bhasruby\b/.test(tag); };
+      // 1. Read question stem + verdict list statement (rubyTextOr) on a passage question.
+      let P = null, qi = -1, unkQ = null;
+      for(const p of ps){ const i = p.questions.findIndex(q => Array.isArray(q.ruby) && pick({ t: q.q, ruby: q.ruby })); if(i >= 0){ P = p; qi = i; unkQ = pick({ t: p.questions[i].q, ruby: p.questions[i].ruby }); break; } }
+      if(name === "zh"){ const want = "我从自行车上掉下来以后，腿很疼。"; const p = ps.find(p => p.questions.some(q => q.q === want));
+        if(p){ P = p; qi = p.questions.findIndex(q => q.q === want); const by = Object.fromEntries(p.questions[qi].ruby.map(k => [p.questions[qi].q.slice(k[0], k[1]), k[3]])); unkQ = new Set(["掉", "腿", "疼"].map(c => by[c])); } }
+      if(P){
+        const q = P.questions[qi];
+        const prog = seed([q.ruby, P.titleRuby].concat((P.sentences || []).map(x => x.ruby)), unkQ);
+        const { api } = await boot({ pack: pk, words: ws, sentences: ss, units: us, lessons: [], passages: ps }); api.setProg(prog);
+        api.startPassage(P); const at = api.getRD().p.questions.findIndex(x => x.q === q.q); api.readQ(at);
+        const panel = api.html("panel"), stem = (panel.match(/<div class="med wd[^"]*"[^>]*>[\s\S]*?<\/div>/) || [""])[0];
+        const o = order(stem, q.q, q.ruby, prog);
+        check(`${name}: Read question "${q.q}" in sentence order (${o.pron} pinyin, ${o.rb} ruby${o.miss.length ? "; out of order: " + o.miss.join(" ") : ""})`, o.ok);
+        check(`${name}: Read question stem box carries .hasruby, show-written tap inside it`, /^<div class="med wd hasruby"/.test(stem) && /class="showw"/.test(stem));
+        const t2 = api.rubyTextOr(q.q, q.ruby); const o2 = order(t2, q.q, q.ruby, prog);
+        check(`${name}: rubyTextOr (verdict list, titles) in sentence order`, o2.ok);
+      } else console.log(`NOTE  ${name}: no passage question with two pinyin words between ruby words`);
+      // 2. Passage view, Words example rows (pfSentence: sentence reveal, examples, sentence items share it).
+      const S = ss.find(s => pick(s));
+      if(S){
+        const unk = pick(S), prog = seed([S.ruby], unk);
+        const { api } = await boot({ pack: pk, words: ws, sentences: ss, units: us, lessons: [], passages: ps }); api.setProg(prog);
+        const row = api.sentenceRowHTML(S); const o = order(row, S.t, S.ruby, prog);
+        check(`${name}: sentence row (Words examples, reveals) "${S.t}" in sentence order (${o.pron} pinyin, ${o.rb} ruby${o.miss.length ? "; out of order: " + o.miss.join(" ") : ""})`, o.ok && /<div class="st hasruby"/.test(row));
+        const ph = api.passageSentenceHTML(S, 0, false); const op = order(ph, S.t, S.ruby, prog);
+        check(`${name}: passage sentence in sentence order, .hasruby box`, op.ok && /class="ptxt hasruby"/.test(ph));
+      } else console.log(`NOTE  ${name}: no sentence with two pinyin words between ruby words`);
+    } catch(e){ check(`${name}: section threw: ${e.stack}`, false); }
+  }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);
