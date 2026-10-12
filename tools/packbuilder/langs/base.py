@@ -368,7 +368,7 @@ class LanguageSpec:
     form_colon_translation = False   # lex: "X of Y: translation" form-of lines also give a sense
     strict_selection = False    # drop dictionary-only POS keys, single letters, rare English homographs
     phrase_bound_share = None   # drop a word when this share of its tokens sits inside a multiword phrase
-    phrase_absorbs_parts = False   # links: a content word inside a matched phrase links only the phrase
+    phrase_absorbs_parts = False   # links: a part (any POS) inside a matched phrase links only the phrase, unless it also occurs outside it
     object_clitics = set()      # PRON surfaces after which a NOUN-tagged token is read as a verb
     # token-level phrase matching: every token inside a matched phrase links only
     # the phrase, and art_prep contractions are split first (es: "a pesar del" = a pesar de + el)

@@ -174,6 +174,7 @@ class Italian(LanguageSpec):
     fixed_word = {("il", "DET"): ("il", ["lo", "la", "l'", "i", "gli", "le"]),
                   ("uno", "DET"): ("un", ["uno", "una", "un'"])}
     multiword = {"per favore": ("per", "favore")}
+    phrase_absorbs_parts = True    # "Per favore": the phrase is the link, not per + il favore
     # apocopated forms link to their lemma (link forms, not typing alts)
     apocope = {"nessun": "nessuno", "quel": "quello", "bel": "bello", "buon": "buono", "gran": "grande",
                "san": "santo", "ciascun": "ciascuno", "alcun": "alcuno"}
