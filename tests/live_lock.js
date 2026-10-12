@@ -67,10 +67,10 @@ function derived(site, pack, prog) {
 }
 
 function placed(site, pack, mode, withUnits) {
-  const st = VC.strata(site.words, pack.placement, VC.setSizeOf(pack)), half = Math.ceil(st.length / 2);
-  const res = st.map((b, i) => { const n = VC.placementItemCount(i, pack); return { r: mode === "full" || i < half ? n : 0, n }; });
-  const stop = VC.placementStopIndex(res, pack.placementWhole === true ? { whole: true } : undefined);
-  return VC.applyPlacement(VC.defaultProg(pack), st, stop == null ? st.length : stop, site.words, pack, withUnits ? (site.characters || []) : []);
+  const st = VC.strata(site.words, pack.placement, VC.setSizeOf(pack)), half = Math.ceil(st.length / 2), n = VC.placementProbeItems(pack);
+  const right = b => mode === "full" || b < half;
+  const w = VC.placementWalk(st.length, b => ({ r: right(b) ? n : 0, n }), b => right(b));
+  return VC.applyPlacement(VC.defaultProg(pack), st, w.passed, site.words, pack, withUnits ? (site.characters || []) : [], { missed: w.missed });
 }
 
 // first level fully taught but 25% known: the level gate holds the next level

@@ -868,96 +868,104 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
   }
 }
 
-console.log("\n[D2] fb48: placement reads the whole result (pack.placementWhole)");
+// Adaptive placement (owner 2026-10-12): the result screen reads the probes the walk asked, and the sweep misses; the walk itself is in
+// tests/engine_checks.js [4]. Here the page takes the same walk from a per-bucket outcome (core placementWalk) and the UI shows it.
+const adaptiveInject = (api, B, st0, outcome, n) => {
+  const w = VC.placementWalk(B, b => ({ r: outcome(b), n }), b => outcome(b) > 0);
+  const answers = w.probes.flatMap(p => st0[p.b].words.slice(0, n).map((x, j) => ({ id: x.id, ok: j < p.r })));
+  VC.placementSweepBuckets(B, w.probes).forEach(b => answers.push({ id: st0[b].words[0].id, ok: outcome(b) > 0 }));
+  api.ev(`PL = { st: VC.strata(WORDS, PACK.placement, SIZE), probes: ${JSON.stringify(w.probes)}, answers: ${JSON.stringify(answers)}, missed: ${JSON.stringify(w.missed)}, vocab: null, plan: [], cur: null }; placeResult();`);
+  return w;
+};
+
+console.log("\n[D2] fb48: the result screen lists the probed buckets; a missed sweep item takes its bucket out, the landing stays");
 {
-  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
-  // right answers per bucket (zh asks 3,4,3,4,... since placement-mix); the first 12 are the owner-reported record
-  const RECS = {
-    "reported record": [1, 3, 2, 0, 2, 2, 2, 2, 2, 3, 1, 2, 0, 0, 0, 0].map((r, i) => ({ r, n: i % 2 ? 3 : 2 })), // asked under the 2,3 counts of the time
-    "all right": N.slice(),
-    "first bucket 0": N.map((n, i) => i === 0 ? 0 : n),
-    "poor": N.map((n, i) => i < 2 ? n : 0),
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), n = VC.placementProbeItems(PACK), B = st0.length;
+  const OUT = {
+    "all right": () => n,
+    "bucket 0 wrong, rest right": b => b === 0 ? 0 : n,
+    "poor": b => b < 2 ? n : 0,
+    "beginner": () => 0,
   };
-  const place = async (pack, rec, r, o) => { const { api, st } = await bootWith(pack, rec, 13, o);
-    api.ev(`PL = { vocab:{items:[], i:0}, st: VC.strata(WORDS, PACK.placement, SIZE), res: ${JSON.stringify(r.map((x, i) => typeof x === "object" ? x : { r: x, n: N[i] }))} }; placeResult();`);
-    return { html: api.panel(), rec: st.ls.getItem(VC.storageKey(pack)), prog: api.getProg() }; };
+  const place = async (pack, rec, outcome) => { const { api, st } = await bootWith(pack, rec, 13);
+    const w = adaptiveInject(api, B, st0, outcome, n);
+    return { w, html: api.panel(), prog: api.getProg(), rec: st.ls.getItem(VC.storageKey(pack)) }; };
   const owner2 = owner ? () => clone(owner) : null;
   const sources = [["fresh record", () => null]].concat(owner2 ? [["owner export", owner2]] : []);
   for(const [sn, mk] of sources){
-    // flag on
-    const rep = await place(PACK, mk(), RECS["reported record"]);
-    check(`${sn}, flag on, reported record: placement lands past the skipped bucket (${rep.html.match(/Start at ([^<]*)/)[1]})`, rep.prog.placedOnce === true && /<h2>Start at HSK 4, set 1\b/.test(rep.html));
-    check(`${sn}, flag on, reported record: 9 ok cells, the zero bucket muted, 6 bad cells`, (rep.html.match(/color:var\(--ok\)/g) || []).length === 9 && (rep.html.match(/color:var\(--mute\)/g) || []).length === 1 && (rep.html.match(/color:var\(--bad\)/g) || []).length === 6);
-    const poor = await place(PACK, mk(), RECS["poor"]);
-    check(`${sn}, flag on, poor record: no muted cell`, !/var\(--mute\)/.test(poor.html));
-    const first0 = await place(PACK, mk(), RECS["first bucket 0"]);
-    check(`${sn}, flag on, first bucket 0: every cell bad (stop 0, nothing skipped)`, (first0.html.match(/color:var\(--bad\)/g) || []).length === 16 && !/var\(--mute\)/.test(first0.html));
-    // flag-off control vs f6481b8 deleted: placementWhole is engine default since the flag collapse (the window rule is gone).
+    const poor = await place(PACK, mk(), OUT["poor"]);
+    const ids = VC.levelIds(PACK), ownPl = (mk() || {}).pl;
+    check(`${sn}, poor: probes ${poor.w.probes.map(p => p.b)} land on bucket ${poor.w.passed}; pl is the landing level (a retake never lowers an earlier pl: ${ownPl || "none"} -> ${poor.prog.pl})`,
+      poor.prog.placedOnce === true && poor.w.passed === 2 && ((mk() || {}).sessions > 0 ? poor.prog.pl === ownPl : ids.indexOf(poor.prog.pl) === Math.max(ids.indexOf(ownPl), ids.indexOf(String(st0[2].lv)))));
+    check(`${sn}, poor: Start at is the landing (bucket 2: level ${st0[2].lv}, set ${st0[2].s0 + 1})${sn === "fresh record" ? "" : " or further on for an owner's retake"}`,
+      sn !== "fresh record" ? true : /<h2>Start at HSK 1, set 11<\/h2>/.test(poor.html));
+    check(`${sn}, poor: one table row per probe (${poor.w.probes.length}), passed probes green, failed red`, (poor.html.match(/<tr><td>/g) || []).length === poor.w.probes.length && (poor.html.match(/color:var\(--ok\)/g) || []).length === poor.w.probes.filter(p => p.b < poor.w.passed).length && (poor.html.match(/color:var\(--bad\)/g) || []).length === poor.w.probes.filter(p => p.b >= poor.w.passed).length);
+    check(`${sn}, poor: no "Not asked" line, no flat line`, !/plNotAsked/.test(poor.html) && !/plFlat/.test(poor.html));
+    const miss = await place(PACK, mk(), OUT["bucket 0 wrong, rest right"]);
+    check(`${sn}, bucket 0 wrong on the sweep: missed [${miss.w.missed}], top still passed (${miss.w.passed}/${B}), no word of bucket 0 seeded, Start at the missed set${sn === "fresh record" ? " (HSK 1, set 1)" : ""}`,
+      JSON.stringify(miss.w.missed) === "[0]" && miss.w.passed === B && st0[0].words.every(x => !miss.prog.w[x.id] || !miss.prog.w[x.id].prov) && (sn !== "fresh record" || /<h2>Start at HSK 1, set 1<\/h2>/.test(miss.html)));
+    const beg = await place(PACK, mk(), OUT["beginner"]);
+    check(`${sn}, beginner: probes ${beg.w.probes.map(p => p.b).join(",")} land on the first set; flat line "You knew 0%"${owner2 && sn !== "fresh record" ? "" : "; Start at HSK 1, set 1"}`, beg.w.passed === 0 && /You knew 0% at every level; starting from the first set and keeping what you got right\./.test(beg.html) && (sn !== "fresh record" || /<h2>Start at HSK 1, set 1<\/h2>/.test(beg.html)));
+    const all = await place(PACK, mk(), OUT["all right"]);
+    check(`${sn}, all right: probes ${all.w.probes.map(p => p.b).join(",")}, no flat line (passed the top), the top passed`, all.w.passed === B && !/plFlat/.test(all.html) && all.prog.placedOnce === true);
   }
 }
 
-// The flag-off control vs 143a674 is deleted: placementChars is engine default for a characters.learn "lag" pack since the flag
-// collapse (stage 3), so no lag pack runs the old placement any more.
 console.log("\n[D3] fb50: placement places the characters layer (characters.learn \"lag\") + Today's Sounds hint");
 {
   check("placementCharsOn: on for the shipped lag pack without a pack key (flag collapse), off without learn lag", !("placementChars" in PACK) && VC.placementCharsOn(PACK) && !VC.placementCharsOn(Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { learn: undefined }) })));
-  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
-  const RECS = {
-    "reported record": [1, 3, 2, 0, 2, 2, 2, 2, 2, 3, 1, 2, 0, 0, 0, 0].map((r, i) => ({ r, n: i % 2 ? 3 : 2 })), // asked under the 2,3 counts of the time
-    "all right": N.slice(),
-    "first bucket 0": N.map((n, i) => i === 0 ? 0 : n),
-    "first bucket only": N.map((n, i) => i === 0 ? n : 0),
-    "poor": N.map((n, i) => i < 2 ? n : 0),
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), n = VC.placementProbeItems(PACK), B = st0.length;
+  const OUT = {
+    "poor": b => b < 2 ? n : 0,
+    "all right": () => n,
+    "first bucket only": b => b === 0 ? n : 0,
+    "beginner": () => 0,
   };
-  const place = async (pack, rec, r, o) => { const { api, st } = await bootWith(pack, rec, 13, o);
-    api.ev(`PL = { vocab:{items:[], i:0}, st: VC.strata(WORDS, PACK.placement, SIZE), res: ${JSON.stringify(r.map((x, i) => typeof x === "object" ? x : { r: x, n: N[i] }))} }; placeResult();`);
-    const html = api.panel(), prog = api.getProg(), rec2 = st.ls.getItem(VC.storageKey(pack));
+  const place = async (pack, rec, outcome) => { const { api, st } = await bootWith(pack, rec, 13);
+    adaptiveInject(api, B, st0, outcome, n);
+    const html = api.panel(), prog = api.getProg();
     api.clickTab("today");
-    return { html, rec: rec2, prog, today: api.panel() }; };
+    return { html, prog, today: api.panel() }; };
   const owner2 = owner ? () => clone(owner) : null;
   const sources = [["fresh record", () => null]].concat(owner2 ? [["owner export", owner2]] : []);
   for(const [sn, mk] of sources){
-    const rep = await place(PACK, mk(), RECS["reported record"]);
+    const rep = await place(PACK, mk(), OUT["poor"]);
     const line = (rep.html.match(/<p class="q" id="plChars">([^<]*)<\/p>/) || [])[1];
-    const n = VC.placedCharsThrough(PACK, CHARACTERS, rep.prog);
-    check(`${sn}, flag on, reported record: one line under the table "${line}"`, /^Characters: placed through HSK \d, set \d+$/.test(line || "") && n && line === `Characters: placed through HSK ${n.lv}, set ${n.set}` && rep.html.indexOf("</table>") < rep.html.indexOf('id="plChars"') && (rep.html.match(/id="plChars"/g) || []).length === 1);
-    check(`${sn}, flag on, reported record: unit records written provisional (${Object.keys(VC.charRecs(rep.prog)).length}), Learn teaches no placed unit`, Object.keys(VC.charRecs(rep.prog)).length > 0 && Object.values(VC.charRecs(rep.prog)).some(r => r.prov === 1));
-    const none = await place(PACK, mk(), RECS["first bucket 0"]);
-    check(`${sn}, flag on, first bucket 0: no line (nothing placed)`, !/plChars/.test(none.html));
-    const one = await place(PACK, mk(), RECS["first bucket only"]);
-    check(`${sn}, flag on, first bucket only: ${/plChars/.test(one.html) ? "line present: " + one.html.match(/id="plChars">([^<]*)/)[1] : "no line (first set not whole)"}`, true);
-    // Today's Sounds hint
-    check(`${sn}, flag on, reported record: Today has no "Start the first lesson" hint`, !/id="hintSounds"/.test(rep.today) && /id="go"/.test(rep.today));
-    check(`${sn}, flag on, reported record: Sounds stays unmarked (prog.soundsOpened ${rep.prog.soundsOpened}, lessons done ${Object.keys(rep.prog.lessons || {}).length}) and its tab is reachable`, rep.prog.soundsOpened === (mk() || {}).soundsOpened && Object.keys(rep.prog.lessons || {}).length === Object.keys((mk() || { lessons: {} }).lessons || {}).length);
+    const cn = VC.placedCharsThrough(PACK, CHARACTERS, rep.prog);
+    if(sn === "fresh record") check(`${sn}, poor (passed 2 buckets): one line under the table "${line}"`, /^Characters: placed through HSK \d, set \d+$/.test(line || "") && cn && line === `Characters: placed through HSK ${cn.lv}, set ${cn.set}` && rep.html.indexOf("</table>") < rep.html.indexOf('id="plChars"') && (rep.html.match(/id="plChars"/g) || []).length === 1);
+    else check(`${sn}, poor: no characters line (the owner's characters were placed before, nothing new is placed)`, !/plChars/.test(rep.html));
+    check(`${sn}, poor: unit records present (${Object.keys(VC.charRecs(rep.prog)).length})${sn === "fresh record" ? ", written provisional" : ""}`, Object.keys(VC.charRecs(rep.prog)).length > 0 && (sn !== "fresh record" || Object.values(VC.charRecs(rep.prog)).some(r => r.prov === 1)));
+    const none = await place(PACK, mk(), OUT["beginner"]);
+    check(`${sn}, beginner: no line (nothing placed)`, !/plChars/.test(none.html));
+    const one = await place(PACK, mk(), OUT["first bucket only"]);
+    check(`${sn}, first bucket only: ${/plChars/.test(one.html) ? "line present: " + one.html.match(/id="plChars">([^<]*)/)[1] : "no line (first set not whole)"}`, true);
+    check(`${sn}, poor: Today has no "Start the first lesson" hint`, !/id="hintSounds"/.test(rep.today) && /id="go"/.test(rep.today));
+    check(`${sn}, poor: Sounds stays unmarked (prog.soundsOpened ${rep.prog.soundsOpened}, lessons done ${Object.keys(rep.prog.lessons || {}).length}) and its tab is reachable`, rep.prog.soundsOpened === (mk() || {}).soundsOpened && Object.keys(rep.prog.lessons || {}).length === Object.keys((mk() || { lessons: {} }).lessons || {}).length);
     if(!owner2 || sn !== "owner export") {
       const f = await bootWith(PACK, null, 3); check("flag on, fresh record, no placement: the hint is shown", /id="hintSounds"/.test(f.api.panel()));
-      const o1 = await place(PACK, null, RECS["first bucket only"]);
+      const o1 = await place(PACK, null, OUT["first bucket only"]);
       check("flag on, placement passing only the first bucket: the hint is still shown", /id="hintSounds"/.test(o1.today));
     }
   }
 }
 
-console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack.placementEarlyStop)");
+console.log("\n[D4] fb51 -> adaptive: the walk asks probes then the sweep, drives the real screens (pack.placementItems)");
 {
-  check("placementEarlyStop is engine default (flag collapse): zh carries no key", !("placementEarlyStop" in PACK));
-  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), N = st0.map((_, i) => VC.placementItemCount(i, PACK));
-  const TOT = N.reduce((a, b) => a + b, 0);
-  // right = how many items of bucket b to get right
-  const walk = async (pack, rec, rightOf, o) => {
-    const { api, st } = await bootWith(pack, rec, 13, o);
+  const st0 = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), n = VC.placementProbeItems(PACK), B = st0.length;
+  // okOf(it): whether the learner answers this item right. The walk is the real screen flow (choices and typed items).
+  const walk = async (pack, rec, okOf) => {
+    const { api, st } = await bootWith(pack, rec, 13);
     api.ev("placeFrom = null; placeRender()"); const screens = [api.panel()];
     api.el("go").click();
-    const seen = {}, kinds = {}, typed = []; let asked = 0;
+    const seen = [], typed = []; let asked = 0, kinds = {};
     for(let g = 0; g < 200; g++){
       if(!/Words \d+ \/ \d+/.test(api.panel())) break;
-      const b = api.ev("PL.vocab.items[PL.vocab.i - 1].b"), kind = api.ev("PL.vocab.items[PL.vocab.i - 1].kind"), q = api.ev("PL.cur");
-      seen[b] = (seen[b] || 0) + 1; asked++;
-      const ok = seen[b] <= rightOf(b), h = api.panel();
-      kinds[kind] = (kinds[kind] || 0) + 1;
-      screens.push(h);
+      const it = api.ev("PL.vocab.items[PL.vocab.i - 1]"), q = api.ev("PL.cur");
+      const ok = okOf(it); asked++; kinds[it.kind] = (kinds[it.kind] || 0) + 1; seen.push(it.b);
+      const h = api.panel(); screens.push(h);
       if(/id="tin"/.test(h)){
         api.el("tin").value = ok ? typedAnswer(q) : "zzz not it"; api.el("submit").click();
-        typed.push({ ok, label: q.label, han: /\p{Script=Han}/u.test(h.replace(/<[^>]+>/g, "")), rv: api.el("rv").innerHTML, r: api.ev(`PL.res[${b}].r`), n: api.ev(`PL.res[${b}].n`), recs: Object.keys(api.getProg().w || {}).length });
+        typed.push({ ok, label: q.label, han: /\p{Script=Han}/u.test(h.replace(/<[^>]+>/g, "")), rv: api.el("rv").innerHTML, recs: Object.keys(api.getProg().w || {}).length });
         api.el("nx").click();
       } else {
         const btns = api.el("o").children;
@@ -965,59 +973,34 @@ console.log("\n[D4] fb51: placement stops asking after three empty buckets (pack
       }
     }
     screens.push(api.panel());
-    return { asked, kinds, typed, html: api.panel(), screens, rec: st.ls.getItem(VC.storageKey(pack)), prog: api.getProg() };
+    return { asked, kinds, typed, seen, html: api.panel(), screens, prog: api.getProg(), probes: api.ev("PL.probes.map(p => p.b)") };
   };
-  const RECS = {
-    "beginner (all wrong)": () => 0,
-    "advanced (all right)": b => N[b],
-    "two empty buckets then right": b => (b === 1 || b === 2) ? 0 : N[b],
-    "right to bucket 5, then empty": b => b < 6 ? N[b] : 0,
-  };
-  const lvLabel = lv => api0.ev(`levelLabel(${JSON.stringify(lv)})`);
-  var api0 = (await bootWith(PACK, null, 13)).api;
   const owner2 = owner ? () => clone(owner) : null;
   const sources = [["fresh record", () => null]].concat(owner2 ? [["owner export", owner2]] : []);
   for(const [sn, mk] of sources){
-    const beg = await walk(PACK, mk(), RECS["beginner (all wrong)"]);
-    check(`${sn}, flag on, beginner: stops after bucket 3 with ${N[0] + N[1] + N[2]} items asked (asked ${beg.asked})`, beg.asked === N[0] + N[1] + N[2] && N[0] + N[1] + N[2] === 10);
-    const lineOf = (html, nAsked) => { const na = VC.placementNotAsked(st0, st0.map((_, i) => i < nAsked ? { r:0, n:N[i] } : { r:0, n:0, skipped:true }));
-      return { na, line: (html.match(/<tr id="plNotAsked"><td colspan="2" style="color:var\(--mute\)">([^<]*)<\/td><\/tr>/) || [])[1],
-        want: "Not asked: " + na.map(e => e.whole ? lvLabel(e.lv) : `${lvLabel(e.lv)} ${e.s1 - e.s0 > 1 ? `sets ${e.s0 + 1}–${e.s1}` : `set ${e.s1}`}`).join(", ") }; };
-    const lb = lineOf(beg.html, 3);
-    check(`${sn}, flag on, beginner: one muted line "${lb.line}" (whole levels by label)`, lb.line === lb.want && /^Not asked: HSK 2, HSK 3, HSK 4$/.test(lb.line || "") && lb.na.every(e => e.whole));
-    check(`${sn}, flag on, beginner: 3 table rows for asked buckets (bad), the unasked buckets not listed`, (beg.html.match(/<tr><td>HSK/g) || []).length === 3 && (beg.html.match(/color:var\(--bad\)/g) || []).length === 3);
-    check(`${sn}, flag on, beginner: nothing stored for the unasked buckets (placed once, no word beyond the first level placed)`, beg.prog.placedOnce === true && !/skipped/.test(beg.rec || ""));
-    const adv = await walk(PACK, mk(), RECS["advanced (all right)"]);
-    check(`${sn}, flag on, advanced: all ${TOT} items asked, no "Not asked" line (asked ${adv.asked})`, adv.asked === TOT && !/plNotAsked/.test(adv.html));
-    // placement-mix: Review's kinds end to end (zh: typing "pron" + typedFrom, so the typed slot rotates pinyin / characters / meaning)
-    const wantK = st0.flatMap((_, i) => VC.placementKinds(i, N[i], PACK)).reduce((a, k) => (a[k] = (a[k] || 0) + 1, a), {});
-    check(`${sn}, advanced: kinds asked ${JSON.stringify(adv.kinds)} = placementKinds ${JSON.stringify(wantK)}; recall and typed cards shown`,
-      JSON.stringify(adv.kinds) === JSON.stringify(Object.fromEntries(Object.keys(adv.kinds).map(k => [k, wantK[k]]))) && adv.kinds.recall > 0 && adv.typed.length > 0 && adv.screens.some(h => /Which word is this\?/.test(h)));
+    const beg = await walk(PACK, mk(), () => false);
+    check(`${sn}, beginner: probes ${beg.probes} (7,3,1,0), ${beg.asked} items asked, flat line, table lists the ${beg.probes.length} probed buckets`,
+      beg.probes.join(",") === "7,3,1,0" && beg.asked === 4 * n && /You knew 0%/.test(beg.html) && (beg.html.match(/<tr><td>/g) || []).length === 4 && (sn !== "fresh record" || /Start at HSK 1, set 1/.test(beg.html)));
+    const adv = await walk(PACK, mk(), () => true);
+    const sweepN = VC.placementSweepBuckets(B, adv.probes.map(b => ({ b, r: n, n }))).length;
+    check(`${sn}, advanced: probes ${adv.probes} then ${sweepN} sweep items; ${adv.asked} items asked; kinds ${JSON.stringify(adv.kinds)}; no "Not asked" line`,
+      adv.probes.join(",") === "7,11,13,14,15" && adv.asked === 5 * n + sweepN && adv.kinds.read === 5 + sweepN && adv.kinds.recall === 10 && !/plNotAsked/.test(adv.html));
     check(`${sn}, advanced: every typed card right and revealed (${adv.typed.length} typed: ${[...new Set(adv.typed.map(t => t.label))].join(", ")}), no word record before the result`,
-      adv.typed.every(t => t.ok && /class="rw/.test(t.rv) && !/You typed/.test(t.rv) && t.r === t.n) && adv.typed.every(t => t.recs === Object.keys((mk() || { w: {} }).w || {}).length));
-    // zh typed kinds follow what the learner is shown (typedKindOk shownWritten): before any characters only pinyin or meaning
-    // from the reading, no hanzi on the card; with characters learned (owner export) a written kind appears.
+      adv.typed.every(t => t.ok && /class="rw/.test(t.rv) && !/You typed/.test(t.rv)) && adv.typed.every(t => t.recs === Object.keys((mk() || { w: {} }).w || {}).length));
     const tlabels = [...new Set(adv.typed.map(t => t.label))];
     if(sn === "fresh record") check(`fresh record: typed placement cards are pinyin/meaning only (${tlabels.join(", ")}), no hanzi on any typed card`,
       tlabels.includes("Type the pinyin") && tlabels.every(l => l === "Type the pinyin" || l === "Type the meaning") && adv.typed.every(t => !t.han));
-    else check(`owner export (characters learned): a written typed kind appears (${tlabels.join(", ")})`, tlabels.includes("Type the characters"));
-    const tmiss = await walk(PACK, mk(), b => b === 0 ? 0 : N[b]);
-    const t0 = tmiss.typed.filter((_, i) => i === 0);
-    check(`${sn}, bucket 0 all wrong: its typed miss shows "You typed", counts once (${t0.length && t0[0].r}/${t0.length && t0[0].n} at that point), nothing re-asked (asked ${tmiss.asked} of ${TOT})`,
-      t0.length === 1 && !t0[0].ok && /You typed zzz not it/.test(t0[0].rv) && t0[0].r === 0 && tmiss.asked === TOT);
-    const two = await walk(PACK, mk(), RECS["two empty buckets then right"]);
-    check(`${sn}, flag on, two empty buckets then right: all asked (asked ${two.asked})`, two.asked === TOT && !/plNotAsked/.test(two.html));
-    const mid = await walk(PACK, mk(), RECS["right to bucket 5, then empty"]);
-    const lm = lineOf(mid.html, 9);
-    check(`${sn}, flag on, right to bucket 5 then empty: stops after bucket 9 (asked ${mid.asked} of ${TOT}); partial level by set range: "${lm.line}"`, mid.asked === N.slice(0, 9).reduce((a, b) => a + b, 0) && lm.line === lm.want && lm.na.some(e => !e.whole) && /^Not asked: HSK 3 sets? \d+(–\d+)?, HSK 4$/.test(lm.line || ""));
-    // flag-off controls vs 8564258 deleted: placementEarlyStop is engine default since the flag collapse.
+    else check(`owner export: typed cards are pinyin, meaning or characters (${tlabels.join(", ")})`, tlabels.length > 0 && tlabels.every(l => ["Type the pinyin", "Type the meaning", "Type the characters"].includes(l)));
+    // one typed miss in the first probe (bucket 7): one miss, shown "You typed", not re-asked; the probe stays 3/4 and passes
+    const tmiss = await walk(PACK, mk(), it => !(it.kind === "type" && it.b === 7));
+    check(`${sn}, typed miss in probe bucket 7: shows "You typed", counts once, nothing re-asked (asked ${tmiss.asked})`,
+      tmiss.typed.filter(t => !t.ok).length === 1 && /You typed zzz not it/.test(tmiss.typed.find(t => !t.ok).rv) && tmiss.asked === adv.asked);
+    const mid = await walk(PACK, mk(), it => it.b < 6);
+    check(`${sn}, right below bucket 6 then empty: probes ${mid.probes} land on bucket 6; a probe-only walk plus the sweep (asked ${mid.asked})`,
+      mid.probes.join(",") === "7,3,5,6" && /Start at/.test(mid.html) && !/plFlat/.test(mid.html));
+    const two = await walk(PACK, mk(), it => !(it.b === 1 || it.b === 2));
+    check(`${sn}, buckets 1 and 2 wrong: the probes pass the top, the sweep misses both (asked ${two.asked}), no line for them`, two.probes.join(",") === "7,11,13,14,15" && two.asked === adv.asked && !/plNotAsked/.test(two.html));
   }
-  // the stop rules treat the unasked buckets as failed: whole and window
-  const res = N.map((n, i) => i < 3 ? { r:0, n } : { r:0, n:0, skipped:true });
-  check("placementStopIndex reads unasked buckets as failed (window rule 0, whole rule 0)", VC.placementStopIndex(res) === 0 && VC.placementStopIndex(res, { whole: true }) === 0);
-  const res2 = N.map((n, i) => i < 5 ? { r:n, n } : i < 8 ? { r:0, n } : { r:0, n:0, skipped:true });
-  check("right to bucket 4, three empty, rest unasked: both rules stop at 5", VC.placementStopIndex(res2) === 5 && VC.placementStopIndex(res2, { whole: true }) === 5);
-  check("placementEarlyStopAfter: needs three asked buckets, all zero", !VC.placementEarlyStopAfter([{r:0},{r:0}], 1) && VC.placementEarlyStopAfter([{r:0},{r:0},{r:0}], 2) && !VC.placementEarlyStopAfter([{r:0},{r:1},{r:0},{r:0}], 3) && VC.placementEarlyStopAfter([{r:2},{r:0},{r:0},{r:0}], 3));
 }
 
 console.log("\n[D5] fb51: the reveal drops the stimulus hint links it makes redundant (appView v2)");

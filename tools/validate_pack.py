@@ -138,8 +138,8 @@ def check_pack(pack, rep):
         rep.err("pack.soundsHint must be a non-empty string")
     if "placementItems" in pack:
         pi = pack["placementItems"]
-        if not (isinstance(pi, list) and pi and all(isinstance(x, int) and not is_bool(x) and x > 0 for x in pi)):
-            rep.err("pack.placementItems must be a list of positive integers (default [3, 4])")
+        if not (isinstance(pi, int) and not is_bool(pi) and pi > 0):
+            rep.err("pack.placementItems must be a positive integer, the items per placement probe (default 4)")
     if "spaced" in pack and not is_bool(pack["spaced"]):
         rep.err("pack.spaced must be a boolean")
     if "compounds" in pack and not (isinstance(pack["compounds"], list) and all(is_str(c) for c in pack["compounds"])):
@@ -596,15 +596,15 @@ def check_synonyms(words, by_id, rep):
                 rep.err(f"{where}.{f} must be true when present")
 
 
-DEFAULT_PLACEMENT_ITEMS = [3, 4]  # core.js DEFAULT_PLACEMENT_ITEMS
+DEFAULT_PLACEMENT_ITEMS = 4  # core.js PLACEMENT_PROBE_ITEMS
 
 
 def min_bucket_words(pack):
-    """A bucket must hold the most items placement draws from it (core.js placementItemCount)."""
+    """A bucket must hold one probe's items (core.js placementProbeItems); a sweep item needs one word."""
     pi = pack.get("placementItems")
-    if isinstance(pi, list) and pi and all(isinstance(x, int) and not is_bool(x) and x > 0 for x in pi):
-        return max(pi)
-    return max(DEFAULT_PLACEMENT_ITEMS)
+    if isinstance(pi, int) and not is_bool(pi) and pi > 0:
+        return pi
+    return DEFAULT_PLACEMENT_ITEMS
 
 
 def strata(words, spec, set_size):

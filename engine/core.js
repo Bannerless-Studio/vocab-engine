@@ -921,85 +921,86 @@ function strata(pool, bucketSpec, setSize){
   });
   return out;
 }
-// 3 then 4 (was 2 then 3): every bucket asks each placement kind at least once (owner 2026-10-09: placed at the top of Italian,
-// then 4/15 in Review on typed basics, because placement asked recognition only).
-const DEFAULT_PLACEMENT_ITEMS = [3, 4];
-function placementItemCount(bucketIndex, pack){
-  const items = (pack && Array.isArray(pack.placementItems) && pack.placementItems.length) ? pack.placementItems : DEFAULT_PLACEMENT_ITEMS;
-  return items[bucketIndex % items.length];
+// Adaptive placement (owner 2026-10-12: a 42-item sweep gave a flat 27/42 profile A1 set 1). The walk probes one bucket at a time.
+// A probe is PLACEMENT_PROBE_ITEMS words from the bucket in PLACEMENT_PROBE_ORDER (read-or-hear, recall, typed-or-recall, recall), and
+// passes at 3/4 (integers: r*4 >= n*3). The first probe is the middle bucket. A pass raises the lower bound to it, a fail lowers the
+// upper bound, and the next probe is the midpoint of the open bracket. The bracket closes when its ends are adjacent: passed and failed
+// buckets next to each other, the top passed, or the bottom failed. Buckets 0..passed-1 are passed; the landing is bucket `passed`.
+// Then a confirmation sweep asks one read-or-hear item in each passed bucket no probe asked.
+const PLACEMENT_PROBE_ITEMS = 4;
+const PLACEMENT_PROBE_ORDER = ["read", "recall", "type", "recall"];
+// pack.placementItems: items per probe (a positive integer); default 4.
+function placementProbeItems(pack){
+  const n = pack && pack.placementItems;
+  return Number.isInteger(n) && n > 0 ? n : PLACEMENT_PROBE_ITEMS;
 }
-// Placement measures what Review measures (TODO.md "placement leniency"): each bucket rotates read-or-hear, recall (meaning ->
-// word choice) and type (meaning -> typed word), starting one kind later per bucket; a pack without typing asks recall instead,
-// as Review does. No rng, so a seeded walk stays reproducible.
-const PLACEMENT_KINDS = ["read", "recall", "type"];
-function placementKinds(bucketIndex, n, pack){
+// Kinds of one probe's n items, in order. A pack without typing asks recall in the type slot (Review's substitute), never type.
+function placementKinds(n, pack){
   const typing = typingEnabled(pack), out = [];
-  for(let j = 0; j < n; j++){ const k = PLACEMENT_KINDS[(bucketIndex + j) % PLACEMENT_KINDS.length]; out.push(k === "type" && !typing ? "recall" : k); }
+  for(let j = 0; j < n; j++){ const k = PLACEMENT_PROBE_ORDER[j % PLACEMENT_PROBE_ORDER.length]; out.push(k === "type" && !typing ? "recall" : k); }
   return out;
 }
-
-// The placement stop (owner 2026-10-08: a 1/2 opening bucket zeroed a 22/30 test; the earlier 3-bucket window rule judged the
-// first buckets on 2-5 items, so one early miss stopped placement at 0 while the later buckets were asked and discarded; pack
-// key placementWhole, default since the flag collapse). The largest passed prefix k wins: accuracy over buckets 0..k-1 >= 0.75 (integers, so exactly 0.75 passes) and
-// every bucket in it has a right answer, except an isolated zero (right answers on both sides, the bucket k itself for
-// the last one) which is skipped: counted in the accuracy, its words provisional like the rest.
-function placementSkipped(res, k){
-  const out = [];
-  for(let j=0;j<k;j++){
-    if(res[j].r >= 1) continue;
-    if(j > 0 && res[j-1].r >= 1 && j+1 < res.length && res[j+1].r >= 1) out.push(j);
-    else return null;
-  }
+const placementPassed = (r, n) => r * 4 >= n * 3;
+// probes: [{ b, r, n }] in asked order. lo = highest passed probe bucket (-1 none), hi = lowest failed probe bucket (B none).
+function placementBracket(B, probes){
+  let lo = -1, hi = B;
+  (probes || []).forEach(p => { if(placementPassed(p.r, p.n)) lo = Math.max(lo, p.b); else hi = Math.min(hi, p.b); });
+  return { lo, hi, closed: hi - lo <= 1 };
+}
+// The bucket the walk probes next, or null once the bracket is closed.
+function placementNextProbe(B, probes){
+  const { lo, hi, closed } = placementBracket(B, probes);
+  return closed ? null : Math.floor((lo + hi) / 2);
+}
+// Buckets no probe asked inside the passed range: one read-or-hear sweep item each.
+function placementSweepBuckets(B, probes){
+  const passed = placementBracket(B, probes).hi, asked = new Set((probes || []).map(p => p.b)), out = [];
+  for(let b = 0; b < passed; b++) if(!asked.has(b)) out.push(b);
   return out;
 }
-function placementStopIndex(res){
-  for(let k=res.length;k>=0;k--){
-    let r = 0, n = 0;
-    for(let j=0;j<k;j++){ r += res[j].r; n += res[j].n; }
-    if(r*4 < n*3 || placementSkipped(res, k) == null) continue;
-    return k === res.length ? null : k;
-  }
-  return 0;
+// Flat profile: the walk closed at the bottom and every probed bucket's right share is within 15 points. Returns the overall right
+// percentage for "You knew N% at every level", else null.
+function placementFlat(B, probes){
+  const P = probes || [];
+  if(!P.length || placementBracket(B, P).hi !== 0) return null;
+  const shares = P.map(p => 100 * p.r / p.n);
+  if(Math.max(...shares) - Math.min(...shares) > 15) return null;
+  const r = P.reduce((a, p) => a + p.r, 0), n = P.reduce((a, p) => a + p.n, 0);
+  return Math.round(100 * r / n);
+}
+// The whole walk against answers: probeFn(b) -> {r, n}; sweepFn(b) -> true when the sweep item is right (default right).
+// Returns { probes, passed, missed }. Tests and the live simulation use it; the app takes the same steps one answer at a time.
+function placementWalk(B, probeFn, sweepFn){
+  const probes = [];
+  for(let b = placementNextProbe(B, probes); b != null; b = placementNextProbe(B, probes)){ const a = probeFn(b); probes.push({ b, r: a.r, n: a.n }); }
+  const passed = placementBracket(B, probes).hi, missed = [];
+  placementSweepBuckets(B, probes).forEach(b => { if(sweepFn && !sweepFn(b)) missed.push(b); });
+  return { probes, passed, missed };
 }
 
-// Early stop (fb51; owner 2026-10-08: a beginner answered 35 words to learn they know none; pack key placementEarlyStop, default
-// since the flag collapse): the items are asked bucket by bucket, and the asking stops once three consecutive asked buckets have
-// no right answer. The buckets not asked are in-memory entries {r:0, n:0, skipped:true} (never stored) that the stop rule reads as failed.
-// res[0..k] are all asked; true when the last three of them are all zero (so at least three buckets were asked).
-function placementEarlyStopAfter(res, k){
-  return k >= 2 && res[k].r === 0 && res[k - 1].r === 0 && res[k - 2].r === 0;
-}
-// The unasked buckets of a result as one entry per level: whole when every bucket of that level was skipped, else the set range.
-function placementNotAsked(st, res){
-  const out = [];
-  st.forEach((b, i) => {
-    if(!res[i] || !res[i].skipped) return;
-    const last = out[out.length - 1];
-    if(last && last.lv === b.lv){ last.s1 = b.s1; last.n++; }
-    else out.push({ lv: b.lv, s0: b.s0, s1: b.s1, n: 1 });
-  });
-  out.forEach(e => { e.whole = e.n === st.filter(b => b.lv === e.lv).length; delete e.n; });
-  return out;
-}
-
-// Placement only ever moves a learner forward: no word record is removed or downgraded, so
-// learned and drilled-ahead state survive a poor retake.
-function applyPlacement(prog, st, passed, words, pack, units){
+// applyPlacement(prog, st, passed, words, pack, units, opts). Seeds the passed prefix: every word of buckets 0..passed-1 except the
+// buckets in opts.missed (a missed sweep item takes its bucket out, the landing stays). opts.right: ids answered right anywhere,
+// probes and sweep, seeded provisional even above the landing. A word answered wrong is never seeded above the landing, and inside a
+// passed bucket it stays with its bucket (the bucket passed on 3/4 or the sweep).
+function applyPlacement(prog, st, passed, words, pack, units, opts){
+  const o = opts || {}, missed = new Set(o.missed || []);
   const out = Object.assign({}, prog, { w: {} });
   Object.keys(prog.w||{}).forEach(k => { out.w[k] = Object.assign({}, prog.w[k]); });
   out.sets = Object.assign({}, defaultProg(pack).sets, prog.sets||{});
-  for(let i=0;i<passed;i++){ const b = st[i]; out.sets[b.lv] = Math.max(out.sets[b.lv]||0, b.s1); }
+  for(let i=0;i<passed;i++){ if(missed.has(i)) continue; const b = st[i]; out.sets[b.lv] = Math.max(out.sets[b.lv]||0, b.s1); }
   const ids = levelIds(pack), byLv = wordsByLevel(words, pack), size = setSizeOf(pack);
   const firstIdx = ids.indexOf(String(((pack.placement||[])[0]||[])[0]));
   if(passed > 0 && firstIdx > 0) ids.slice(0, firstIdx).forEach(lv => { out.sets[lv] = Math.max(out.sets[lv]||0, nSets(byLv[lv], size)); });
-  // Legacy levels are pinned at their old counters first; then only the prefix this attempt
-  // asserted is seeded, never a counter prefix a republish may have shifted.
+  // Legacy levels are pinned at their old counters first; then only the words this attempt asserted are seeded,
+  // never a counter prefix a republish may have shifted.
   pinPrefixRecords(out, words, pack, undefined, prog.sets);
-  const seed = {};
-  for(let i=0;i<passed;i++){ const b = st[i]; seed[b.lv] = Math.max(seed[b.lv]||0, b.s1); }
-  if(passed > 0 && firstIdx > 0) ids.slice(0, firstIdx).forEach(lv => { seed[lv] = nSets(byLv[lv], size); });
   const covered = new Set();
-  Object.keys(seed).forEach(lv => (byLv[lv]||[]).slice(0, seed[lv]*size).forEach(w => { covered.add(w.id); if(!out.w[w.id]) out.w[w.id] = {r:1,w:0,s:1,prov:1}; }));
+  const seed = id => { covered.add(id); if(!out.w[id]) out.w[id] = {r:1,w:0,s:1,prov:1}; };
+  if(passed > 0 && firstIdx > 0) ids.slice(0, firstIdx).forEach(lv => (byLv[lv]||[]).forEach(w => seed(w.id)));
+  // The bucket's words come from `words` (the pool this attempt writes records for), in the same strata cut as st.
+  const bk = strata(words, pack.placement, size);
+  for(let i=0;i<passed;i++){ if(!missed.has(i)) (bk[i] || st[i]).words.forEach(w => seed(w.id)); }
+  (o.right || []).forEach(seed);
   ids.forEach(lv => settleSetCounter(out, words, pack, lv));
   placeCharUnits(out, pack, units, covered);
   // A placement past the first bucket reads the script (fb52, pack key placedKnown), so the primer is skipped exactly as the learner's
@@ -4593,7 +4594,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   foldAccents, foldLenientLetters, LENIENT_LETTERS, foldGermanAscii, pointingKey, normalizeTyped, typingEnabled, typingLenientFor, acceptTyped,
   surfaces, sharesSurface, samePron,
   findSurface, textForms, locateWord, packSurfaces, spannedByLonger, gapMatch, gapCandidateIndices, blankSentence,
-  strata, placementItemCount, placementKinds, PLACEMENT_KINDS, placementEarlyStopAfter, placementNotAsked, placementStopIndex, placementSkipped, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
+  strata, placementProbeItems, placementKinds, PLACEMENT_PROBE_ITEMS, PLACEMENT_PROBE_ORDER, placementPassed, placementBracket, placementNextProbe, placementSweepBuckets, placementFlat, placementWalk, applyPlacement, placementCharsOn, charPlanSets, placedCharSets, placedCharsThrough, placedPastFirstBucket, dedupeMisses,
   parseStored, dropUnknownSets, bootProg, lessonItemKey, lessonSayMode, applyImport, todayGates, testGates, listenPlanCount, pickVoice, liveVoice, TTS_TIMING, ttsDriver, CLIP_START_MS, clipStartWatch, speechUsable, isSamsungBrowser, wordAudio, wordSay, packAudio,
   PROG_VERSION, WORD_MASTERED, SENTENCE_MASTERED, storageKey, defaultProg, validateProgShape, normalizeProg,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,

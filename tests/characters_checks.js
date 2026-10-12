@@ -745,11 +745,10 @@ function placeCharsChecks(){
   }catch(e){ console.log(`    cannot load ${PREV}:engine/core.js: ${e.message}`); }
   check(`[placeChars] pre-fb50 engine ${PREV} loads from git`, !!OLD);
   const st = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
-  const W = { whole: true };
-  // The owner's record shape (docs/PACK_SCHEMA.md "placementWhole"): every bucket answered, one isolated zero, k = 10 of 16.
-  const ownerRes = st.map((_, i) => i < 10 ? { r: i === 3 ? 0 : 3, n: 3 } : { r: 0, n: 3 });
-  const k = VC.placementStopIndex(ownerRes, W);
-  check(`[placeChars] zh fixture: whole rule gives k = 10 (got ${k}), on for the shipped pack without a key`, k === 10 && !("placementChars" in PACK) && VC.placementCharsOn(PACK));
+  // The owner's placement shape (k = 10 of 16 passed, right up to bucket 9): the adaptive walk gives the passed count.
+  const walkK = VC.placementWalk(st.length, b => ({ r: b < 10 ? 4 : 0, n: 4 }), () => true);
+  const k = walkK.passed;
+  check(`[placeChars] zh fixture: the adaptive walk passes 10 of 16 buckets (got ${k}, probes ${walkK.probes.map(p => p.b).join(",")}), on for the shipped pack without a key`, k === 10 && walkK.missed.length === 0 && !("placementChars" in PACK) && VC.placementCharsOn(PACK));
   const fresh = () => VC.defaultProg(PACK);
   const snap = JSON.stringify(fresh());
   const out = VC.applyPlacement(fresh(), st, k, WORDS, PACK, UNITS);

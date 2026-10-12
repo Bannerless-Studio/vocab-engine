@@ -196,84 +196,87 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
 })();
 
 (function(){
-  console.log("\n[4] strata / placementStopIndex");
-  const st = VC.strata(WORDS, PACK.placement, PACK.setSize);
-  const counts = st.map((b,i)=>VC.placementItemCount(i));
-  const total = counts.reduce((a,b)=>a+b, 0);
-  console.log(`    ${st.length} buckets, ${total} items; words per bucket: ${st.map(b=>b.words.length).join(",")}`);
-  check("zh placement: 16 buckets totalling 56 items", st.length === 16 && total === 56);
-  check("every bucket has enough words for its item count", st.every((b,i)=>b.words.length >= counts[i]));
+  console.log("\n[4] strata / adaptive placement walk");
+  const st = VC.strata(WORDS, PACK.placement, PACK.setSize), n = VC.placementProbeItems(PACK);
+  console.log(`    ${st.length} buckets; words per bucket: ${st.map(b=>b.words.length).join(",")}`);
+  check("zh placement: 16 buckets", st.length === 16);
+  check("every bucket holds one probe's items", st.every(b => b.words.length >= n));
   const byLv = VC.wordsByLevel(WORDS, PACK);
   const lastEnds = PACK.placement.every(([lv])=>{ const bs = st.filter(b=>b.lv===lv); return bs[bs.length-1].s1 === VC.nSets(byLv[lv], PACK.setSize); });
   check("each level's last bucket ends exactly at its set count", lastEnds);
   check("strata honours a non-10 setSize", (()=>{ const s = VC.strata(WORDS, [["1",2]], 5); return s.length===2 && s[1].s1 === Math.ceil(byLv["1"].length/5); })());
-  // pack.placementItems: cycled per bucket; the default is 3 then 4 since placement-mix (was 2 then 3), so every bucket asks each kind.
-  check("placementItemCount default (no pack arg): 3,4,3,4,...",
-    [0,1,2,3,4].every(i => VC.placementItemCount(i) === (i%2===0?3:4)));
-  check("placementItemCount with pack.placementItems unset: same as default", [0,1,2,3].every(i => VC.placementItemCount(i, PACK) === (i%2===0?3:4)));
-  check("placementItemCount cycles a custom pack.placementItems", [0,1,2,3,4,5].every(i => VC.placementItemCount(i, {placementItems:[4,1,2]}) === [4,1,2][i%3]));
-  // placement-mix (TODO.md "placement leniency"): placement asks what Review asks, read-or-hear, recall and typed.
+  // Items per probe: pack.placementItems, default 4.
+  check("placementProbeItems: default 4, pack.placementItems a positive integer, anything else falls back", VC.placementProbeItems(PACK) === 4 && VC.placementProbeItems({ placementItems: 3 }) === 3 && VC.placementProbeItems({ placementItems: [3, 4] }) === 4 && VC.placementProbeItems({ placementItems: 0 }) === 4);
+  // Probe kinds: read-or-hear, recall, typed-or-recall, recall; no rng.
   const TYP = { typing: { accents: "lenient", strictFromLevel: "B1" } }, NOTYP = { typing: null };
-  check("placementKinds: bucket b starts at kind b mod 3 and rotates read, recall, type",
-    JSON.stringify([0,1,2,3].map(b => VC.placementKinds(b, 4, TYP))) === JSON.stringify([["read","recall","type","read"],["recall","type","read","recall"],["type","read","recall","type"],["read","recall","type","read"]]));
-  check("placementKinds: every 3- and 4-item bucket of a typing pack asks each kind at least once",
-    [0,1,2,3,4,5].every(b => [3,4].every(n => VC.PLACEMENT_KINDS.every(k => VC.placementKinds(b, n, TYP).includes(k)))));
-  check("placementKinds: a pack without typing asks recall in the type slot (Review's substitute), never type",
-    [0,1,2].every(b => { const k = VC.placementKinds(b, 4, NOTYP), t = VC.placementKinds(b, 4, TYP); return !k.includes("type") && k.every((x, j) => x === (t[j] === "type" ? "recall" : t[j])); }));
-  check("placementKinds: typing \"pron\" counts as typing; no rng (same output twice)", VC.placementKinds(2, 3, { typing: "pron" })[0] === "type" && JSON.stringify(VC.placementKinds(5, 4, TYP)) === JSON.stringify(VC.placementKinds(5, 4, TYP)));
-  check("zh placement (this suite's typing:null copy): 56 items, no type, a third or more recall",
-    (() => { const ks = st.flatMap((_, i) => VC.placementKinds(i, counts[i], PACK)); return ks.length === 56 && !ks.includes("type") && ks.filter(k => k === "recall").length >= 56 / 3; })());
+  check("placementKinds(4): read, recall, type, recall (a typing pack)", JSON.stringify(VC.placementKinds(4, TYP)) === JSON.stringify(["read","recall","type","recall"]));
+  check("placementKinds(4) without typing: type slot asks recall, never type", JSON.stringify(VC.placementKinds(4, NOTYP)) === JSON.stringify(["read","recall","recall","recall"]));
+  check("placementKinds(3): the first three kinds; typing \"pron\" counts as typing; same output twice", JSON.stringify(VC.placementKinds(3, TYP)) === JSON.stringify(["read","recall","type"]) && VC.placementKinds(3, { typing: "pron" })[2] === "type" && JSON.stringify(VC.placementKinds(4, TYP)) === JSON.stringify(VC.placementKinds(4, TYP)));
+  check("placementPassed: 3/4 passes, 2/4 fails, integers only (3/3 passes, 2/3 fails)", VC.placementPassed(3, 4) && !VC.placementPassed(2, 4) && VC.placementPassed(3, 3) && !VC.placementPassed(2, 3));
+  // Binary-search paths on 12 buckets (italian shape). probeR(b) gives the probe's right count, sweepOk the sweep answer.
+  const walk = (B, probeR, sweepOk) => VC.placementWalk(B, b => ({ r: probeR(b), n: 4 }), sweepOk);
+  const items = (B, w) => 4 * w.probes.length + VC.placementSweepBuckets(B, w.probes).length;
+  const ps = w => w.probes.map(p => p.b).join(",");
+  const allWrong = walk(12, () => 0), allRight = walk(12, () => 4);
+  check(`12 buckets, all wrong: probes ${ps(allWrong)} (5,2,0), landing bucket 0, no sweep, 12 items`, ps(allWrong) === "5,2,0" && allWrong.passed === 0 && items(12, allWrong) === 12);
+  check(`12 buckets, all right: probes ${ps(allRight)} (5,8,10,11), top passed, sweep of the 8 unasked buckets, 24 items`, ps(allRight) === "5,8,10,11" && allRight.passed === 12 && VC.placementSweepBuckets(12, allRight.probes).join(",") === "0,1,2,3,4,6,7,9" && items(12, allRight) === 24);
+  const mixed = walk(12, b => (b === 5 || b === 6) ? 4 : (b === 8 || b === 7) ? 0 : 0);
+  check(`mixed: pass 5, fail 8, pass 6, fail 7 -> probes ${ps(mixed)}, adjacent bracket 6|7, landing 7, sweep 0-4`, ps(mixed) === "5,8,6,7" && mixed.passed === 7 && VC.placementSweepBuckets(12, mixed.probes).join(",") === "0,1,2,3,4");
+  check("a closed bracket asks nothing more; an open one asks the midpoint", VC.placementNextProbe(12, mixed.probes) === null && VC.placementNextProbe(12, [{b:5,r:4,n:4}]) === 8 && VC.placementNextProbe(12, [{b:5,r:0,n:4}]) === 2);
+  check("16 buckets (chinese shape): all right -> 5 probes, sweep of 11, 31 items; all wrong -> 4 probes, 16 items", (() => {
+    const a = walk(16, () => 4), w = walk(16, () => 0);
+    return ps(a) === "7,11,13,14,15" && a.passed === 16 && items(16, a) === 31 && w.probes.length === 4 && w.passed === 0 && items(16, w) === 16; })());
+  // Sweep misses: the walk reports them, the bracket is unchanged.
+  const miss = walk(12, () => 4, b => b !== 3);
+  check("sweep miss on bucket 3 is reported; the top still passed", JSON.stringify(miss.missed) === "[3]" && miss.passed === 12);
+  // Flat profile line: closed at the bottom and every probe's share within 15 points.
+  check("flat line: all-wrong at 1/4 on every probe -> 25% (bottom bracket, spread 0)", VC.placementFlat(12, walk(12, () => 1).probes) === 25);
+  check("flat line: 2/4 everywhere -> 50%; a bottom bracket with a spread above 15 points -> no line", VC.placementFlat(12, walk(12, () => 2).probes) === 50 && VC.placementFlat(12, [{b:5,r:0,n:4},{b:2,r:0,n:4},{b:0,r:1,n:4}]) === null);
+  check("flat line: a walk that passed at the top, or a placement above the bottom, gets no line", VC.placementFlat(12, allRight.probes) === null && VC.placementFlat(12, mixed.probes) === null && VC.placementFlat(12, []) === null);
+  // Random outcomes: probes never repeat, stay in range, and always close within 5 probes for 16 buckets.
+  const lcg = seed => () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  let okRandom = true;
+  for(const B of [12, 16]){ const rnd = lcg(B * 7919);
+    for(let t = 0; t < 300; t++){ const pat = Array.from({length: B}, () => rnd() < 0.5 ? 4 : 0); const w = walk(B, b => pat[b]);
+      const bs = w.probes.map(p => p.b);
+      if(new Set(bs).size !== bs.length || bs.some(b => b < 0 || b >= B) || bs.length > 5 || w.passed < 0 || w.passed > B || VC.placementNextProbe(B, w.probes) !== null) okRandom = false; } }
+  check("random outcomes on 12 and 16 buckets: no repeated probe, in range, closed within 5 probes", okRandom);
+  // applyPlacement seeds the passed prefix (minus missed buckets), right answers anywhere, never a wrong word above the landing.
+  check("applyPlacement: passed buckets seeded provisional, a missed bucket's words not, pl is the landing level", (() => {
+    const out = VC.applyPlacement(VC.defaultProg(PACK), st, 3, WORDS, PACK, undefined, { missed: [1] });
+    const seeded = id => out.w[id] && out.w[id].prov === 1;
+    return st[0].words.every(w => seeded(w.id)) && st[1].words.every(w => !seeded(w.id)) && st[2].words.every(w => seeded(w.id)) && st[3].words.every(w => !seeded(w.id))
+      && out.pl === String(st[3].lv) && out.placedOnce === true; })());
+  check("applyPlacement: a word answered right above the landing is seeded {r:1,w:0,s:1,prov:1}; a wrong one above it is not", (() => {
+    const right = st[5].words[0].id, out = VC.applyPlacement(VC.defaultProg(PACK), st, 3, WORDS, PACK, undefined, { right: [right] });
+    return util.isDeepStrictEqual(out.w[right], { r:1, w:0, s:1, prov:1 }) && st[5].words.slice(1).every(w => !out.w[w.id]); })());
+  // Lengths on the sibling packs (the owner's italian 12-bucket and chinese 16-bucket shapes, and a non-typing copy).
   {
     let dir = process.env.LANG_REPOS_DIR || null;
     if(!dir) for(let d = path.join(ROOT, ".."); ; d = path.dirname(d)){ if(fs.existsSync(path.join(d, "italian", "pack", "pack.js"))){ dir = d; break; } if(path.dirname(d) === d) break; }
     const sib = lang => { const f = dir && path.join(dir, lang, "pack"); return f && fs.existsSync(path.join(f, "pack.js")) ? { pack: loadConst(path.join(f, "pack.js"), "PACK"), words: loadConst(path.join(f, "words.js"), "WORDS") } : null; };
-    const total = (pack, words) => { const s = VC.strata(words, pack.placement, VC.setSizeOf(pack)); const ks = s.flatMap((_, i) => VC.placementKinds(i, VC.placementItemCount(i, pack), pack));
-      return { buckets: s.length, n: ks.length, type: ks.filter(k => k === "type").length, recall: ks.filter(k => k === "recall").length, read: ks.filter(k => k === "read").length }; };
-    const it = sib("italian"), zh = sib("chinese");
-    if(!it || !zh) console.log("    skip: sibling italian/chinese packs not found (LANG_REPOS_DIR)");
-    else {
-      const ti = total(it.pack, it.words), tz = total(zh.pack, zh.words);
-      console.log(`    italian ${JSON.stringify(ti)}; chinese ${JSON.stringify(tz)}`);
-      check("italian (typing, strict from B1): 12 buckets, 42 items, 14 of each kind", ti.buckets === 12 && ti.n === 42 && ti.type === 14 && ti.recall === 14 && ti.read === 14);
-      check("chinese (typing \"pron\"): 16 buckets, 56 items, typed items asked", tz.buckets === 16 && tz.n === 56 && tz.type >= 18);
-      const nt = total(Object.assign({}, it.pack, { typing: null }), it.words);
-      check("italian copy without typing: 42 items, none typed, 28 recall", nt.n === 42 && nt.type === 0 && nt.recall === 28);
+    const it = sib("italian");
+    if(!it) console.log("    skip: sibling italian pack not found (LANG_REPOS_DIR)");
+    const itSt = it ? VC.strata(it.words, it.pack.placement, VC.setSizeOf(it.pack)) : [];
+    const zhSt = st;
+    const lenOf = (pack, B, probeR, sweepOk) => { const w = VC.placementWalk(B, b => ({ r: probeR(b), n: VC.placementProbeItems(pack) }), sweepOk); return { w, items: VC.placementProbeItems(pack) * w.probes.length + VC.placementSweepBuckets(B, w.probes).length }; };
+    const lcgRun = seed => () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+    if(it){
+      const iw = lenOf(it.pack, itSt.length, () => 0), ir = lenOf(it.pack, itSt.length, () => 4);
+      console.log(`    italian ${itSt.length} buckets: all wrong ${iw.items} items (${iw.w.probes.length} probes), all right ${ir.items} (${ir.w.probes.length} probes + sweep)`);
+      check("italian (12 buckets): all wrong = 12 items; all right = 24 items; both within the owner's caps (<=40)", itSt.length === 12 && iw.items === 12 && ir.items === 24 && ir.items <= 40);
+      const rnd = lcgRun(12345); const counts = new Set();
+      for(let t = 0; t < 200; t++){ const r = walkP(rnd, it.pack, itSt.length); counts.add(r); }
+      console.log(`    italian flat 64%: probe counts over 200 seeded walks ${JSON.stringify([...counts].sort())}`);
+      check("italian flat 64% profile (each item right at p=0.64): 3-4 probes", [...counts].every(c => c >= 3 && c <= 4) && counts.size > 0);
+      const noType = lenOf(Object.assign({}, it.pack, { typing: null }), itSt.length, () => 4);
+      check("italian copy without typing: same 24 items, no type kind asked", noType.items === 24 && !VC.placementKinds(4, Object.assign({}, it.pack, { typing: null })).includes("type"));
     }
+    const zw = lenOf(PACK, zhSt.length, () => 0), zr = lenOf(PACK, zhSt.length, () => 4);
+    console.log(`    chinese ${zhSt.length} buckets: all wrong ${zw.items} items, all right ${zr.items} items`);
+    check("chinese (16 buckets): all wrong = 16 items; all right = 31 items (<=48)", zhSt.length === 16 && zw.items === 16 && zr.items === 31 && zr.items <= 48);
   }
-  const allRight = Array.from({length:6}, ()=>({r:3,n:3}));
-  check("all buckets correct -> null", VC.placementStopIndex(allRight) === null);
-  check("bucket 3 entirely wrong, right on both sides -> skipped (isolated zero), placement runs to the end", VC.placementStopIndex([{r:3,n:3},{r:3,n:3},{r:3,n:3},{r:0,n:3},{r:3,n:3},{r:3,n:3}]) === null);
-  check("a single miss in a big-enough bucket 0 still passes", VC.placementStopIndex([{r:3,n:4},{r:3,n:3},{r:3,n:3},{r:3,n:3}]) === null);
-  // pack.placementWhole (fb48, docs/PACK_SCHEMA.md "placementWhole"): the largest passed prefix of the whole result.
-  const W = { whole: true }, rn = (r, n) => r.map((x, i) => ({ r: x, n: n[i] }));
-  const REPORTED = rn([1,3,2,0,2,2,2,2,2,3,1,2], [2,3,2,3,2,3,2,3,2,3,2,3]);
-  check("whole: the reported record (19/25 over buckets 0-9, bucket 3 isolated) -> 10 (the old 3-bucket window rule gave 0)", VC.placementStopIndex(REPORTED, W) === 10 && VC.placementStopIndex(REPORTED) === 10);
-  check("whole: the skipped bucket of the reported record is [3]", JSON.stringify(VC.placementSkipped(REPORTED, 10)) === "[3]");
-  check("whole: all buckets right -> null", VC.placementStopIndex(allRight, W) === null);
-  check("whole: a 0/n first bucket -> 0 (no left neighbour, never skipped)", VC.placementStopIndex(rn([0,3,3,3,3,3], [3,3,3,3,3,3]), W) === 0);
-  check("whole: two adjacent zero buckets stop at the first of them", VC.placementStopIndex(rn([3,3,3,0,0,3,3,3], [3,3,3,3,3,3,3,3]), W) === 3);
-  check("whole: an isolated zero in the middle is skipped, the run goes on to the end (null)", VC.placementStopIndex(rn([3,3,0,3,3,3], [3,3,3,3,3,3]), W) === null);
-  check("whole: a zero last bucket is not isolated (no bucket after it) -> stops there", VC.placementStopIndex(rn([3,3,3,3,0], [3,3,3,3,3]), W) === 4);
-  check("whole: a zero bucket followed by a zero is not isolated even when accuracy holds", VC.placementStopIndex(rn([6,6,6,6,0,0], [6,6,6,6,3,3]), W) === 4);
-  check("whole: accuracy exactly 0.75 passes (3/4 over one bucket)", VC.placementStopIndex(rn([3], [4]), W) === null);
-  check("whole: 0.75 exactly passes, just under stops (3/4+3/4 = 6/8 passes; 3/4+2/4 = 5/8 stops at 1)", VC.placementStopIndex(rn([3,3], [4,4]), W) === null && VC.placementStopIndex(rn([3,2], [4,4]), W) === 1);
-  check("whole: the largest k wins over a smaller passing prefix (a later recovery)", VC.placementStopIndex(rn([3,1,1,3,3,3], [3,3,3,3,3,3]), W) === null);
-  check("whole: empty result -> null", VC.placementStopIndex([], W) === null);
-  check("opts are ignored since the flag collapse (the whole-result rule is the only one)", VC.placementStopIndex(REPORTED, { whole: false }) === 10 && VC.placementStopIndex(rn([3,3,3,0,3,3], [3,3,3,3,3,3])) === null);
-  check("whole: applyPlacement at the stop seeds provisional, prog.pl is the landing bucket's level", (() => {
-    const st = VC.strata(WORDS, PACK.placement, PACK.setSize), n = st.length;
-    const res = st.map((_, i) => ({ r: i === 3 ? 0 : 3, n: 3 })); res[n-1] = { r: 0, n: 3 }; res[n-2] = { r: 0, n: 3 };
-    const k = VC.placementStopIndex(res, W), out = VC.applyPlacement(VC.defaultProg(PACK), st, k, WORDS, PACK);
-    return k === n - 2 && out.placedOnce === true && out.pl === String(st[k].lv) && Object.values(out.w).every(r => r.prov === 1);
-  })());
-  check("fb53: a retake landing lower keeps prog.pl and the placed records; a higher one raises pl", (() => {
-    const st = VC.strata(WORDS, PACK.placement, PACK.setSize);
-    const hi = VC.applyPlacement(VC.defaultProg(PACK), st, 10, WORDS, PACK);
-    const lo = VC.applyPlacement(hi, st, 0, WORDS, PACK);
-    const up = VC.applyPlacement(VC.applyPlacement(VC.defaultProg(PACK), st, 3, WORDS, PACK), st, 10, WORDS, PACK);
-    return hi.pl === String(st[10].lv) && lo.pl === hi.pl && util.isDeepStrictEqual(lo.w, hi.w) && up.pl === hi.pl
-      && util.isDeepStrictEqual(lo.sets, hi.sets);
-  })());
+  function walkP(rnd, pack, B){ const n = VC.placementProbeItems(pack); return VC.placementWalk(B, () => { let r = 0; for(let j = 0; j < n; j++) if(rnd() < 0.64) r++; return { r, n }; }).probes.length; }
 })();
 
 (function(){
@@ -774,8 +777,8 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("level with fewer words than one set is a warning, not an error", thin.status === 0 && /fewer than one set/.test(thin.stdout));
   const small = run(Object.assign({}, base, { setSize:2, placement:[["A1",3]] }), [...mkw(5,"A1"), ...mkw(12,"A2")]);
   check("placement bucket with < 4 words (set-boundary math; default items 3,4) is an error", small.status === 1 && /needs >= 4/.test(small.stdout));
-  const small3 = run(Object.assign({}, base, { setSize:3, placement:[["A1",3]], placementItems:[2,3] }), [...mkw(9,"A1"), ...mkw(12,"A2")]);
-  check("placementItems [2,3]: 3-word buckets validate (the need follows the pack's largest count)", small3.status === 0);
+  const small3 = run(Object.assign({}, base, { setSize:3, placement:[["A1",3]], placementItems:3 }), [...mkw(9,"A1"), ...mkw(12,"A2")]);
+  check("placementItems 3: 3-word buckets validate (the need follows the items per probe)", small3.status === 0);
   const small4 = run(Object.assign({}, base, { setSize:3, placement:[["A1",3]] }), [...mkw(9,"A1"), ...mkw(12,"A2")]);
   check("default items: the same 3-word buckets are an error (needs >= 4)", small4.status === 1 && /needs >= 4/.test(small4.stdout));
   const wordsAB = [...mkw(20,"A1"), ...mkw(12,"A2")];
@@ -785,12 +788,12 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   check("pack.soundsHint: empty string is an error", shBad.status === 1 && /soundsHint must be a non-empty string/.test(shBad.stdout));
   const shType = run(Object.assign({}, base, { soundsHint: 3 }), wordsAB);
   check("pack.soundsHint: non-string is an error", shType.status === 1 && /soundsHint must be a non-empty string/.test(shType.stdout));
-  const piOk = run(Object.assign({}, base, { placementItems: [3,2] }), wordsAB);
-  check("pack.placementItems: list of positive ints validates", piOk.status === 0);
-  const piBad = run(Object.assign({}, base, { placementItems: [2, 0] }), wordsAB);
-  check("pack.placementItems: a non-positive entry is an error", piBad.status === 1 && /placementItems must be a list of positive integers/.test(piBad.stdout));
-  const piType = run(Object.assign({}, base, { placementItems: "23" }), wordsAB);
-  check("pack.placementItems: non-list is an error", piType.status === 1 && /placementItems must be a list of positive integers/.test(piType.stdout));
+  const piOk = run(Object.assign({}, base, { placementItems: 3 }), wordsAB);
+  check("pack.placementItems: a positive integer validates", piOk.status === 0);
+  const piBad = run(Object.assign({}, base, { placementItems: 0 }), wordsAB);
+  check("pack.placementItems: zero is an error", piBad.status === 1 && /placementItems must be a positive integer/.test(piBad.stdout));
+  const piList = run(Object.assign({}, base, { placementItems: [3, 4] }), wordsAB);
+  check("pack.placementItems: a list is an error (it is items per probe now)", piList.status === 1 && /placementItems must be a positive integer/.test(piList.stdout));
   fs.rmSync(tmp, { recursive:true, force:true });
 })();
 
@@ -1911,48 +1914,53 @@ return {
         const orig = Math.random; Math.random = require("./lib/port_sim.js").mulberry32(11);
         try {
           b.api.enterPlacement();
-          const pl = b.api.getPL(), seen = []; let recBefore = -1;
+          const pl = b.api.getPL(), seen = []; let maxRec = 0;
           for(let g = 0; g < 200 && pl.cur; g++){
-            const q = pl.cur, it = pl.vocab.items[pl.vocab.i - 1], h = panel(b), last = pl.vocab.i === pl.vocab.items.length;
-            if(last) recBefore = Object.keys(b.api.getProg().w || {}).length;
+            const q = pl.cur, it = pl.vocab.items[pl.vocab.i - 1], h = panel(b);
+            maxRec = Math.max(maxRec, Object.keys(b.api.getProg().w || {}).length);
             const typed = !!el(b, "tin") && /id="tin"/.test(h);
             seen.push({ kind: it.kind, typed, label: q.label || "", lv: it.w.lv, b: it.b });
             if(typed){ el(b, "tin").value = answer(it, q) ? (q.label === "Type the meaning" ? VC.gloss(it.w) : it.w.w) : "zzz"; el(b, "submit").click(); seen[seen.length - 1].reveal = panel(b) + (el(b, "rv") ? el(b, "rv").innerHTML : ""); if(!el(b, "nx")) break; el(b, "nx").click(); }
             else { const btns = el(b, "o").children; (answer(it, q) ? btns.find(x => x.dataset.v === String(q.a)) : btns.find(x => x.dataset.v !== String(q.a))).click(); }
             if(/Start at/.test(panel(b))) break;
           }
-          return { b, pl, seen, recBefore, html: panel(b) };
+          return { b, pl, seen, maxRec, html: panel(b) };
         } finally { Math.random = orig; }
       };
+      const probes = pl => pl.probes.map(p => p.b).join(",");
       const all = await walk(IT.pack, () => true);
       const n = all.seen.length, kinds = k => all.seen.filter(x => x.kind === k).length;
-      check(`italian placement walk, all right: ${n} items (read ${kinds("read")}, recall ${kinds("recall")}, type ${kinds("type")}), every bucket full marks`,
-        n === 42 && kinds("read") === 14 && kinds("recall") === 14 && kinds("type") === 14 && all.pl.res.every((r, i) => r.n === VC.placementItemCount(i, IT.pack) && r.r === r.n));
+      check(`italian adaptive walk, all right: probes ${probes(all.pl)} (5,8,10,11), ${n} items (read ${kinds("read")}, recall ${kinds("recall")}, type ${kinds("type")}), every probe full marks`,
+        probes(all.pl) === "5,8,10,11" && n === 24 && kinds("read") === 12 && kinds("recall") === 8 && kinds("type") === 4 && all.pl.probes.every(p => p.r === p.n));
       const tl = all.seen.filter(x => x.kind === "type").map(x => x.label);
       check(`italian placement: recall is Review's card (Which word is this?), type is Review's typed card with its typedFrom rotation (${tl.filter(l => l === "Type the word").length} word, ${tl.filter(l => l === "Type the meaning").length} meaning)`,
         all.seen.filter(x => x.kind === "recall").every(x => x.label === "Which word is this?" && !x.typed) && all.seen.filter(x => x.kind === "type").every(x => x.typed) && tl.every((l, i) => l === (i % 2 ? "Type the meaning" : "Type the word")));
       check("italian placement: a typed answer shows the word (Review's reveal), no word record written before the result screen",
-        all.seen.filter(x => x.typed).every(x => /class="rw/.test(x.reveal)) && all.recBefore === 0 && /Start at/.test(all.html));
-      // a typed miss counts once: same item count, the bucket's n up and r not, no re-ask
-      const miss = await walk(IT.pack, it => it.kind !== "type" || it.b !== 0);
-      const t0 = miss.seen.filter(x => x.b === 0 && x.typed);
-      check(`italian placement: a typed miss in bucket 0 is one miss (${miss.pl.res[0].r}/${miss.pl.res[0].n}), shows "You typed", is not re-asked (${miss.seen.length} items)`,
-        t0.length === 1 && miss.pl.res[0].n === 3 && miss.pl.res[0].r === 2 && /You typed zzz/.test(t0[0].reveal) && miss.seen.length === 42);
+        all.seen.filter(x => x.typed).every(x => /class="rw/.test(x.reveal)) && all.maxRec === 0 && /Start at/.test(all.html));
+      const dead = await walk(IT.pack, () => false);
+      check(`italian adaptive walk, all wrong: probes ${probes(dead.pl)} (5,2,0), ${dead.seen.length} items, flat line "You knew 0%", table lists the 3 probed buckets`,
+        probes(dead.pl) === "5,2,0" && dead.seen.length === 12 && /You knew 0% at every level/.test(dead.html) && (dead.html.match(/<tr>/g) || []).length === 3);
+      // a typed miss counts once: probe 5 goes 3/4 and still passes, the item is not re-asked
+      const miss = await walk(IT.pack, (it, q) => it.kind !== "type" || it.b !== 5);
+      const t5 = miss.seen.filter(x => x.b === 5 && x.typed);
+      check(`italian adaptive walk: a typed miss in probe bucket 5 is one miss (${miss.pl.probes[0].r}/${miss.pl.probes[0].n}), shows "You typed", not re-asked (${miss.seen.length} items)`,
+        t5.length === 1 && miss.pl.probes[0].b === 5 && miss.pl.probes[0].r === 3 && miss.seen.length === 24 && /You typed zzz/.test(t5[0].reveal));
       // Review's checker per level: B1 strict, A1 lenient (typing.strictFromLevel "B1")
       const acc = lv => IT.words.find(w => w.lv === lv && fold(w.w) !== w.w && !IT.words.some(v => v !== w && fold(v.w) === fold(w.w)));
       const a1 = acc("A1"), b1 = acc("B1");
       const st = await bootApp([{ lang: "it-IT", name: "x" }], IT);
       st.api.enterPlacement(); const pl = st.api.getPL();
-      // one typed item per run, each the first type slot (typed the word, as the rotation starts)
-      pl.vocab.items = [{ b: 0, w: a1, kind: "type" }, { b: 11, w: b1, kind: "type" }]; pl.vocab.i = 0; pl.plan = []; pl.res.forEach(r => { r.r = 0; r.n = 0; }); // the item already on screen may have joined the plan
+      // two typed items on screen: the first right (lenient A1), the second a miss (strict B1)
+      pl.vocab = { kind: "probe", b: 0, r: 0, i: 0, items: [{ b: 0, w: a1, kind: "type" }, { b: 11, w: b1, kind: "type" }] }; pl.plan = [];
       st.api.placeNext(); el(st, "tin").value = fold(a1.w); el(st, "submit").click(); pl.plan = []; el(st, "nx").click();
       el(st, "tin").value = fold(b1.w); el(st, "submit").click();
-      check(`italian placement typed: "${fold(a1.w)}" for A1 ${a1.w} right (lenient), "${fold(b1.w)}" for B1 ${b1.w} a miss (strict)`, pl.cur.label === "Type the word" && pl.res[0].r === 1 && pl.res[0].n === 1 && pl.res[11].r === 0 && pl.res[11].n === 1);
+      const ansA = pl.answers.find(a => a.id === a1.id), ansB = pl.answers.find(a => a.id === b1.id);
+      check(`italian placement typed: "${fold(a1.w)}" for A1 ${a1.w} right (lenient), "${fold(b1.w)}" for B1 ${b1.w} a miss (strict)`, !!ansA && ansA.ok === true && !!ansB && ansB.ok === false);
       const off = await walk(Object.assign({}, IT.pack, { typing: null }), () => true);
       check(`italian copy without typing: ${off.seen.length} items, none typed, type slots asked as recall (${off.seen.filter(x => x.label === "Which word is this?").length} recall cards)`,
-        off.seen.length === 42 && off.seen.every(x => !x.typed && x.kind !== "type") && off.seen.filter(x => x.kind === "recall").length === 28);
+        off.seen.length === 24 && off.seen.every(x => !x.typed && x.kind !== "type") && off.seen.filter(x => x.kind === "recall").length === 12);
     }
-  }catch(e){ check(`italian placement walk does not throw (got: ${e.stack})`, false); }
+  }catch(e){ check(`italian adaptive walk does not throw (got: ${e.stack})`, false); }
 
   // Test tab: a free test held back by a threshold shows an unlock note in its place.
   try{

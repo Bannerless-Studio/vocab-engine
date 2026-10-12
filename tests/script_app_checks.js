@@ -780,9 +780,9 @@ function playDrillFrom(api, btnId){ api.el(btnId).click(); return playDrill(api)
         const PLx = a.getPL(), it = PLx.vocab.items[PLx.vocab.i - 1], q = PLx.cur;
         if(!out[it.kind]) out[it.kind] = { h: a.html("panel"), o: optsMarkup(a), label: q.label };
         if(/id="tin"/.test(a.html("panel"))){
-          const r0 = PLx.res[it.b].r, ok = typedRight && !out.typeRv;
+          const right = () => PLx.answers.filter(x => x.ok).length, r0 = right(), ok = typedRight && !out.typeRv;
           a.el("tin").value = ok ? it.w.w : "zzz"; a.el("submit").click();
-          if(!out.typeRv) out.typeRv = { rv: a.html("rv"), ok, counted: PLx.res[it.b].r - r0 };
+          if(!out.typeRv) out.typeRv = { rv: a.html("rv"), ok, counted: right() - r0 };
           a.el("nx").click();
         } else a.el("o").children[0].click();
       }

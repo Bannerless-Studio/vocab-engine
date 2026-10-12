@@ -3349,47 +3349,66 @@ function testRender(){
   setTitle("Test"); testName = null;
   [["tListen", "Listen"], ["tRecall", "Recall"], ["tSentences", "Sentences"], ["tChars", "Characters"]].forEach(([id, t]) => { const b = $(id); const f = b && b.onclick; if(f) b.onclick = () => { testName = t; setTitle(t); f(); }; });
 }
-function placementItemTotal(){ return VC.strata(WORDS, PACK.placement, SIZE).reduce((n,_,i)=>n+VC.placementItemCount(i, PACK), 0); }
 function placeRender(){
   stopSpeaking();
   D = null; drillKeyHandler = null; PL = null; setScore(0,0);
   const P = $("panel"); const lw = learnedWords();
   const first = levelLabel(PACK.placement[0][0]), last = levelLabel(PACK.placement[PACK.placement.length-1][0]);
   P.innerHTML = `<button class="ghost rback" id="back">${placeFrom === "progress" ? "Progress" : "Test"}</button>
-    <p class="q">${placementItemTotal()} words across ${escapeHtml(first)}–${escapeHtml(last)}: Pick the meaning, pick the word, or type it. Typed answers are shown at once; the rest at the end. Places you inside a level; skipped words stay in review as provisional.</p>
+    <p class="q">${escapeHtml(first)}–${escapeHtml(last)}: Pick the meaning, pick the word, or type it. Typed answers are shown at once; the rest at the end. A few words at a time narrow down your level.</p>
     ${lw.length ? `<p class="q">Current: ${lw.length} words learned. Retaking can only move you forward: nothing already learned is lost.</p>` : ""}
     <div class="actions"><button class="next" id="go">Start</button></div>`;
   $("back").onclick = leavePlacement;
   $("go").onclick = startPlacement;
 }
+// Adaptive walk state: PL.probes (results in asked order), PL.answers (every item: id, right), PL.missed (sweep buckets missed),
+// PL.vocab (the batch on screen: a probe or the sweep). Core decides the next probe and the sweep (placementNextProbe, placementSweepBuckets).
 function startPlacement(){
   D = null; drillKeyHandler = null; setScore(0,0);
   const st = VC.strata(WORDS, PACK.placement, SIZE);
-  const bucketItems = [];
-  st.forEach((b,bi) => { const ws = pick(b.words, VC.placementItemCount(bi, PACK)), ks = VC.placementKinds(bi, ws.length, PACK); ws.forEach((w, j) => bucketItems.push({b:bi, w, kind: ks[j]})); });
-  // Early stop: asked bucket by bucket (shuffled inside a bucket) so the loop can stop after three empty buckets.
-  const items = st.reduce((acc, _, bi) => acc.concat(shuffle(bucketItems.filter(x => x.b === bi))), []);
-  PL = { vocab:{items, i:0}, st, res: st.map(()=>({r:0,n:0})), plan: [], cur: null };
+  PL = { st, probes: [], answers: [], missed: [], vocab: null, plan: [], cur: null };
+  PL.vocab = placeProbeBatch(VC.placementNextProbe(st.length, PL.probes));
   placeVocabNext();
 }
-function placeMark(it, ok){ PL.res[it.b].n++; if(ok) PL.res[it.b].r++; }
+// One probe: PLACEMENT_PROBE_ITEMS words of bucket b, asked in kind order (placeProdItem builds recall and typed items).
+function placeProbeBatch(b){
+  if(b == null) return null;
+  const ws = pick(PL.st[b].words, VC.placementProbeItems(PACK)), ks = VC.placementKinds(ws.length, PACK);
+  return { kind: "probe", b, r: 0, items: ws.map((w, j) => ({ b, w, kind: ks[j] })), i: 0 };
+}
+// The confirmation sweep: one read-or-hear item in each passed bucket that no probe asked.
+function placeSweepBatch(buckets){
+  if(!buckets.length) return null;
+  return { kind: "sweep", b: null, r: 0, items: buckets.map(b => ({ b, w: pick(PL.st[b].words, 1)[0], kind: "read", sweep: true })), i: 0 };
+}
+// A finished batch: a probe is recorded and the next one chosen; after the last probe the sweep runs; the sweep ends the walk.
+function placeAdvance(){
+  const V = PL.vocab;
+  if(V.kind === "probe"){
+    PL.probes.push({ b: V.b, r: V.r, n: V.items.length });
+    const next = VC.placementNextProbe(PL.st.length, PL.probes);
+    PL.vocab = next != null ? placeProbeBatch(next) : placeSweepBatch(VC.placementSweepBuckets(PL.st.length, PL.probes));
+    return;
+  }
+  PL.vocab = null;
+}
+function placeMark(it, ok){
+  PL.answers.push({ id: it.w.id, ok: !!ok });
+  if(it.sweep){ if(!ok) PL.missed.push(it.b); }
+  else if(PL.vocab) PL.vocab.r += ok ? 1 : 0;
+}
 function placeVocabNext(){
   stopSpeaking();
   drillKeyHandler = null;
-  const P = $("panel"); const V = PL.vocab;
-  if(V.i > 0){
-    const k = V.items[V.i - 1].b, nxt = V.items[V.i];
-    if((!nxt || nxt.b !== k) && VC.placementEarlyStopAfter(PL.res, k)){
-      for(let j = k + 1; j < PL.res.length; j++) PL.res[j] = { r:0, n:0, skipped:true };
-      V.i = V.items.length;
-    }
-  }
-  if(V.i >= V.items.length){ placeResult(); return; }
+  if(PL.vocab && PL.vocab.i >= PL.vocab.items.length) placeAdvance();
+  if(!PL.vocab){ placeResult(); return; }
+  const V = PL.vocab;
   const it = V.items[V.i++]; const w = it.w; setScore(V.i - 1, V.items.length);
   if(it.kind && it.kind !== "read"){ placeProdItem(it); return; }
   PL.cur = { kind: "read", key: "w:" + w.id, a: VC.gloss(w) };
   const opts = shuffle([VC.gloss(w), ...VC.meaningOpts(w, WORDS).map(d => VC.gloss(d))]); // a measurement: level tiers, never optsMix (review M1)
   const asHear = canHearWord(w) && Math.random() < 0.5;
+  const P = $("panel");
   P.innerHTML = `<p class="q">Words ${V.i} / ${V.items.length}</p>
     ${asHear ? `<div class="hear-stage"><button class="speaker" id="rp" aria-label="Replay">${SPEAKER_SVG}</button></div>` : readStimHTML(w)}
     <div class="opts" id="o"></div>`;
@@ -3442,23 +3461,30 @@ function placeResult(){
   stopSpeaking();
   drillKeyHandler = null;
   setScore(0,0);
-  const st = PL.st;
-  const stop = VC.placementStopIndex(PL.res);
-  const passed = stop==null ? st.length : stop;
-  const skipped = VC.placementSkipped(PL.res, passed) || [];
+  const st = PL.st, B = st.length;
+  // The landing is the first failed bucket: passed buckets are 0..passed-1 (passed = B when the top bucket passed).
+  const passed = VC.placementBracket(B, PL.probes).hi;
+  const right = PL.answers.filter(a => a.ok).map(a => a.id);
   const charsBefore = Object.keys(VC.charRecs(prog)).length;
-  prog = VC.applyPlacement(prog, st, passed, WORDS, PACK, CHAR_LIST);
-  const na = VC.placementNotAsked(st, PL.res);
-  const notAskedRow = na.length ? `<tr id="plNotAsked"><td colspan="2" style="color:var(--mute)">Not asked: ${na.map(e => e.whole ? escapeHtml(levelLabel(e.lv)) : `${escapeHtml(levelLabel(e.lv))} ${e.s1 - e.s0 > 1 ? `sets ${e.s0 + 1}–${e.s1}` : `set ${e.s1}`}`).join(", ")}</td></tr>` : "";
+  prog = VC.applyPlacement(prog, st, passed, WORDS, PACK, CHAR_LIST, { right, missed: PL.missed });
   const charsLine = Object.keys(VC.charRecs(prog)).length > charsBefore ? VC.placedCharsThrough(PACK, CHAR_LIST, prog) : null;
   store.save();
   // Where the learner actually is now (a poor retake never moves them back), not where
   // this attempt stopped.
-  const nn = nextNewSetRaw();
-  const pos = nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered";
+  // Start at: the landing (first failed bucket's first set). With no failed bucket, the earliest sweep-missed bucket, since its
+  // words are the first untaught ones. A retake whose untaught words lie further on keeps that position (never moves back).
+  const nn = nextNewSetRaw(), startIdx = passed < B ? passed : (PL.missed.length ? Math.min(...PL.missed) : -1);
+  const nnIdx = nn ? st.findIndex(b => b.words.some(w => w.id === nn.words[0].id)) : -1;
+  const nnAhead = !!nn && (nnIdx < 0 || nnIdx > startIdx);
+  const at = startIdx < 0 || nnAhead ? nn : { lv: st[startIdx].lv, set: st[startIdx].s0 };
+  const pos = at ? `${levelLabel(at.lv)}, set ${at.set+1}` : "everything covered";
+  const flat = VC.placementFlat(B, PL.probes);
+  const rows = PL.probes.slice().sort((x, y) => x.b - y.b).map(p => { const b = st[p.b];
+    return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${p.b < passed ? 'var(--ok)' : 'var(--bad)'}">${p.r}/${p.n}</td></tr>`; }).join("");
   const P = $("panel");
   P.innerHTML = `<div class="done"><h2>Start at ${escapeHtml(pos)}</h2>
-    <table class="stats">${st.map((b,i)=>{ const r = PL.res[i]; if(r.skipped) return ""; return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${skipped.includes(i)?'var(--mute)':i<passed?'var(--ok)':'var(--bad)'}">${r.r}/${r.n}</td></tr>`; }).join("")}${notAskedRow}</table>
+    <table class="stats">${rows}</table>
+    ${flat != null ? `<p class="q" id="plFlat">You knew ${flat}% at every level; starting from the first set and keeping what you got right.</p>` : ""}
     ${charsLine ? `<p class="q" id="plChars">Characters: placed through ${escapeHtml(levelLabel(charsLine.lv))}, set ${charsLine.set}</p>` : ""}<p class="q">${learnedWords().length} words learned; newly placed ones are provisional and kept in review.</p>
     <button class="next" id="ok">${placeFrom === "progress" ? "Back to Progress" : "Go to Today"}</button></div>`;
   $("ok").onclick = () => { if(placeFrom === "progress"){ leavePlacement(); return; } placeFrom = null; switchToTab("today", "Today"); testSel = null; render(); };

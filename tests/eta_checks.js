@@ -554,8 +554,8 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
   console.log(`\n[6] placedKnown (fb52; engine default since the flag collapse): placed provisional records count as known for the gate, goals, map and ETA position`);
   {
     const st = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK));
-    // The owner's placement (docs/PACK_SCHEMA.md "placementWhole"): every bucket answered, one isolated zero, k = 10 -> lands in HSK 4.
-    const k = VC.placementStopIndex(st.map((_, i) => i < 10 ? { r: i === 3 ? 0 : 3, n: 3 } : { r: 0, n: 3 }), { whole: true });
+    // The owner's placement shape (right up to bucket 9, wrong from 10): the adaptive walk passes 10 buckets -> lands in HSK 4.
+    const k = VC.placementWalk(st.length, b => ({ r: b < 10 ? 4 : 0, n: 4 }), () => true).passed;
     const placedOwner = () => VC.applyPlacement(freshStart(), st, k, WORDS, PACK, CHARACTERS);
     const placedA2 = () => VC.applyPlacement(freshStart(), st, st.findIndex(b => String(b.lv) === "3"), WORDS, PACK, CHARACTERS);
     check(`the owner fixture gives k = ${k} (lands ${st[k] && st[k].lv})`, k === 10 && String(st[k].lv) === "4");
