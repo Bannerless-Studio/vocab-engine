@@ -2443,9 +2443,10 @@ return {
       taught.includes(R.inserted) && taught.includes(R.swappedIn) && taught.every(id => !R.learnedIds.has(id)) && taught.length === R.size);
     api.wordsTab();
     const wb = api.getHtml("wbody");
-    // frequency tiers: the learned sets come first (3 here), then the unlearned words in rank order
-    check("app, reordered level: Words tab opens the slice holding the first unlearned word (after the 3 learned sets), not marked done",
-      /Set 4 of \d+/.test(wb));
+    // Sets are cut by list position (as Today numbers them): the inserted unlearned word sits at rank 2, so the next set is the one holding it
+    const rnn = VC.levelNewSet(R.words, PACK, R.prog, "1");
+    check("app, reordered level: Words tab opens the set holding the first unlearned word (Today's numbering), not marked done",
+      new RegExp(`Set ${rnn.set + 1} of \\d+`).test(wb));
   }catch(e){ check(`app reordered-level scenario does not throw (got: ${e.message})`, false); }
 
   // A leftover teach can be the level's last unlearned set (nothing fresh remains after it)
