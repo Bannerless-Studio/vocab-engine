@@ -962,6 +962,9 @@ function walk(api, stopAt){
         const b = await screens(CUR_HTML, VC, pk, ss, ps, 11);
         // 0ad8a97: hear-sentence items are centred (no "sent" class); the base still marks them
         a.walk = a.walk.replace(/<div class="drill-body sent">(?=<p class="q">What did they say\?)/g, '<div class="drill-body">');
+        // placement-adaptive set label: seedPF counts HSK 2 set 3 with no records for sets 1-2; Learn teaches the first set with an
+        // unrecorded word, so the label names set 1 (d3632b8 named the counter)
+        a.today = a.today.replace("HSK 2, set 3", "HSK 2, set 1"); a.walk = a.walk.replace(/HSK 2, set 3(?=<)/g, "HSK 2, set 1");
         for(const k of Object.keys(b)) b[k] = stripExam(b[k]);
         for(const k of Object.keys(a)){
           const same = a[k] === b[k];
