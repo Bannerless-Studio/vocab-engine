@@ -686,7 +686,7 @@ Out of sample (seeds 8/9/10; probes at goal positions 0 / .25 / .5 / .75, the es
 - **Hard preferences rank ahead of the stage**: `optsOneScript`'s "shown like the answer" (recall, cloze) and cloze article agreement (`prefer`).
 - **Soft preference inside a stage, per builder**:
   - `meaningOpts` (read, hear, typed meaning's choice fallback; `charRead` through `charReadOpts`): same part of speech.
-  - `wordOpts` (recall, typed word's choice fallback) and `gapChoices` (cloze): function words first for a function-word answer, then same part of speech.
+  - `wordOpts` (recall, typed word's choice fallback) and `gapChoices` (cloze): function words first for a function-word answer, then same part of speech. A distractor whose label or any `w`/`alt`/`forms` surface is written in the cloze sentence (outside the blank) is skipped and refilled from the same pool, and kept only when the pool cannot refill three; `patternOpts` applies the same rule to a pattern's other marks.
   - `sentenceOpts` (sentence read / hear): translation length within 0.67–1.5× of the answer's, then sharing a word with it. Its same-level restriction is gone under the flag.
   - `charOpts` (`charPick`, `charRecall`): same character count.
   - `charSoundOpts` (`charSound`): same syllable count of the shown reading (fb21: 一会儿 yīhuìr is two syllables, not three characters).

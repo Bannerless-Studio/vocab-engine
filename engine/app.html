@@ -2035,7 +2035,7 @@ function gapSentence(s, typed){
   const gapKind = typed && TYPING ? "type" : "recall";
   const base = { key:"s:"+s.id, reveal: sentenceRevealBlock(s), onAnswer: ok=>{ markSentence(s.id, ok, gapKind === "type" ? "gapType" : "gap"); markGapWord(entry.id, ok, gapKind); },
     onReveal: b => saySentence(s, b), revealHear: canHearSentence(s) };
-  const choice = () => { const gc = VC.gapChoices(entry, match, WORDS, PACK, optLike(entry), wordMix()); const m = optScript(entry, Object.values(gc.byLabel));
+  const choice = () => { const gc = VC.gapChoices(entry, match, WORDS, PACK, optLike(entry), wordMix(), s); const m = optScript(entry, Object.values(gc.byLabel));
     return { kind:"mc", label:"What's the missing word?", optsClass:"opts-hero opts-w", html, opts: gc.opts, a: gc.a, optHtml: wordOptHtml(gc.byLabel, null, !!entry.pronInGloss, m), optsT: true }; };
   if(typed && TYPING){
     return Object.assign(base, { kind:"type", label:"Type the missing word", html,
@@ -2092,7 +2092,7 @@ function patternItem(pid, si, mi){
   // wrong, and on a miss any time. Read before notePattern writes the record.
   base.onAnswer = function(ok){ const first = VC.patternFirstMeeting(prog, p, PACK); VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); if(first) this.html = bodyFor(false); // a re-queued miss is not a first meeting (fb53)
     this.reveal = ok && !first ? rv : note + rv; };
-  const choice = () => ({ kind: "mc", label: "What's the missing word?", optsClass: "opts-hero opts-w", opts: [ans, ...VC.patternOpts(p, s, mi, PATTERN_LIST)], a: ans, optHtml: patternOptHTML, optsT: true });
+  const choice = () => ({ kind: "mc", label: "What's the missing word?", optsClass: "opts-hero opts-w", opts: [ans, ...VC.patternOpts(p, s, mi, PATTERN_LIST, undefined, PACK)], a: ans, optHtml: patternOptHTML, optsT: true });
   if(TYPING) return Object.assign(base, { kind: "type", label: "Type the missing word", check: v => VC.normKey(String(v).normalize("NFC")) === VC.normKey(ans.normalize("NFC")),
     choiceFallback(){ const c = Object.assign({}, this, choice()); c.onAnswer = base.onAnswer; return c; } });
   return Object.assign(base, choice());

@@ -1095,6 +1095,36 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
 })();
 
 (function(){
+  console.log("\n[34] gap and pattern options: no distractor written in its own sentence");
+  const { mulberry32 } = require("./lib/port_sim.js");
+  const seeded = (k, fn) => { const orig = Math.random; Math.random = mulberry32(k); try { return fn(); } finally { Math.random = orig; } };
+  const offered = (n, fn, word) => { let c = 0; for(let k = 1; k <= n; k++) if(seeded(k, fn).includes(word)) c++; return c; };
+  // 虽然下雨了，____他还是来了。 with 但是 as the answer: 虽然 is written in the sentence.
+  const gx = { id: "gx1", t: "虽然下雨了，但是他还是来了。", en: "Although it rained, he still came.", lv: "2", words: ["w0542", "w0162", "w0025", "w0104"] };
+  const bu = BY_ID.w0162, gm = VC.gapMatch(gx, bu, BY_ID, PACK);
+  const small = [BY_ID.w0542, BY_ID.w0101, BY_ID.w0022, BY_ID.w0142, BY_ID.w0085];
+  check("gap zh: the 但是 cloze of 虽然下雨了，____他还是来了。 never offers 虽然 (full pool, 300 seeds)", offered(300, () => VC.gapChoices(bu, gm, WORDS, PACK, null, null, gx).opts, "虽然") === 0);
+  check("gap zh: control, the same pool without the sentence offers 虽然 (the check can fail)", offered(300, () => VC.gapChoices(bu, gm, small, PACK).opts, "虽然") > 0);
+  check("gap zh: small pool with 虽然 refills from content words, 4 options, 虽然 never (300 seeds)", (() => { for(let k = 1; k <= 300; k++){ const o = seeded(k, () => VC.gapChoices(bu, gm, small, PACK, null, null, gx).opts); if(o.length !== 4 || o.includes("虽然")) return false; } return true; })());
+  check("gap zh, optsMix path: the screenshot cloze never offers 虽然 and keeps 4 options (200 seeds)", (() => { for(let k = 1; k <= 200; k++){ const o = VC.gapChoices(bu, gm, WORDS, PACK, null, { rng: mulberry32(k), stage: () => 2, rot: 0 }, gx).opts; if(o.length !== 4 || o.includes("虽然")) return false; } return true; })());
+  // Synthetic English: the same-POS distractors dog and bird both occur in the sentence.
+  const cat = { id: "c", w: "cat", en: "cat", lv: "A1", pos: "noun" }, sy = { id: "sy", t: "The dog and the bird see the cat.", en: "x", lv: "A1", words: ["d", "b", "c"] }, ym = { start: 29, end: 32, text: "cat" };
+  const dog = { id: "d", w: "dog", en: "dog", lv: "A1", pos: "noun" }, bird = { id: "b", w: "bird", en: "bird", lv: "A1", pos: "noun" };
+  const others = [{ id: "r", w: "run", en: "to run", lv: "A1", pos: "verb" }, { id: "bl", w: "blue", en: "blue", lv: "A1", pos: "adj" }, { id: "q", w: "quickly", en: "quickly", lv: "A1", pos: "adv" }];
+  check("gap synthetic: same-POS distractors written in the sentence are refilled from other POS: 4 options, dog and bird never offered", (() => { for(let k = 1; k <= 200; k++){ const o = seeded(k, () => VC.gapChoices(cat, ym, [dog, bird, ...others], {}, null, null, sy).opts); if(o.length !== 4 || o.includes("dog") || o.includes("bird")) return false; } return true; })());
+  check("gap synthetic: a pool that cannot refill falls back to the unfiltered pick, seed for seed (3 options, dog offered)", (() => { for(let k = 1; k <= 50; k++){ const a = seeded(k, () => VC.gapChoices(cat, ym, [dog, bird], {}, null, null, sy).opts), b = seeded(k, () => VC.gapChoices(cat, ym, [dog, bird], {}).opts); if(JSON.stringify(a) !== JSON.stringify(b) || a.length !== 3 || !a.includes("dog")) return false; } return true; })());
+  // Pattern cues: the own mark 虽然 is written in 虽然下雨了，____他还是来了。 and must not be offered for 但是.
+  const PA = { id: "pA", lv: "2", sentences: [{ id: "pA.1", t: "虽然下雨了，但是他还是来了。", marks: [[6, 8]] }, { id: "pA.2", t: "虽然很累，但是我很高兴。", marks: [[0, 2], [5, 7]] }] };
+  const PB = { id: "pB", lv: "2", sentences: [{ id: "pB.1", t: "我们然后回家。", marks: [[2, 4]] }] };
+  const PC = { id: "pC", lv: "2", sentences: [{ id: "pC.1", t: "我已经来了。", marks: [[1, 3]] }] };
+  const PD = { id: "pD", lv: "2", sentences: [{ id: "pD.1", t: "其实我不知道。", marks: [[0, 2]] }] };
+  const ALLP = [PA, PB, PC, PD];
+  check("pattern zh: the 但是 blank of 虽然下雨了，____他还是来了。 never offers 虽然, 3 other marks (200 seeds)", offered(200, () => VC.patternOpts(PA, PA.sentences[0], 0, ALLP, Math.random, PACK), "虽然") === 0 && Array.from({ length: 200 }, (_, k) => seeded(k + 1, () => VC.patternOpts(PA, PA.sentences[0], 0, ALLP, Math.random, PACK)).length).every(n => n === 3));
+  check("pattern zh: control, 但是 in a sentence without 虽然 still offers the own mark 虽然 (the check can fail)", offered(200, () => VC.patternOpts(PA, { id: "x", t: "他很累，但是我很高兴。", marks: [[4, 6]] }, 0, ALLP, Math.random, PACK), "虽然") > 0);
+  check("pattern zh: a pattern whose only other mark is 虽然 falls back to the unfiltered pick, seed for seed", (() => { for(let k = 1; k <= 50; k++){ const a = seeded(k, () => VC.patternOpts(PA, PA.sentences[0], 0, [PA], Math.random, PACK)), b = seeded(k, () => VC.patternOpts(PA, PA.sentences[0], 0, [PA], Math.random)); if(JSON.stringify(a) !== JSON.stringify(b) || a.length !== 1) return false; } return true; })());
+})();
+
+(function(){
   console.log("\n[19] gap article rule (fr/es browser-verify)");
   const F = { levels:[{id:"A1",label:"A1"}], functionWords:["le","un"], spaced:true, typing:{ enabled:true, accents:"lenient" } };
   const W = [

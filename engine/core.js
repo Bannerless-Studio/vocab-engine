@@ -80,7 +80,7 @@ function comboStep(t, m, k){
   const n = comboCount(m, k), gcd = (a, b) => b ? gcd(b, a % b) : a, st = [7, 11, 13, 17, 5, 3, 1].find(p => gcd(p, n) === 1) || 1;
   return (t * st) % n;
 }
-function mixPick(ans, cands, mix, rank, near, accept, n, nearFirst){
+function mixPick(ans, cands, mix, rank, near, accept, n, nearFirst, avoid){
   const r = mix.rng || Math.random, want = n || 3, as = mix.stage(ans) === 1 ? 1 : 0;
   const bucket = as === 0 && mix.bucket ? v => mix.bucket(ans, v) : () => 0;
   // nearFirst: near is a length the learner can see (charPick/charRecall/charSound/pronChoice), so it outranks the learn-order bucket.
@@ -98,13 +98,21 @@ function mixPick(ans, cands, mix, rank, near, accept, n, nearFirst){
     const q = g.slice().sort((x, y) => (String(x.id) < String(y.id) ? -1 : 1)), pick = nthCombination(q.length, need, comboStep(rot + [...String(ans.id)].reduce((h, c) => h + c.charCodeAt(0), 0), q.length, need));
     return [...pick.map(i => q[i]), ...shuffle(q.filter((x, i) => !pick.includes(i)), r)];
   });
-  function run(strict){
+  function run(strict, skip){
     const ok = accept(strict), chosen = [];
-    for(const v of ordered){ if(chosen.length >= want) break; if(ok(v)) chosen.push(v); }
+    for(const v of ordered){ if(chosen.length >= want) break; if(skip && skip(v)) continue; if(ok(v)) chosen.push(v); }
     return chosen;
   }
+  // avoid: candidates that may not be chosen while the rest can still fill want. Same draws either way; a short result falls back to the unavoided pick.
+  if(avoid){ const soft = run(true, avoid), got = soft.length < want ? run(false, avoid) : soft; if(got.length >= want) return got; }
   const chosen = run(true);
   return chosen.length < want ? run(false) : chosen;
+}
+// A distractor must not show anywhere in the sentence it is offered beside: a cue word visible
+// next to the blank (虽然 in 虽然…，____) gives the answer away.
+function stimHits(text, forms, pack){
+  const spaced = !pack || pack.spaced !== false, t = normKey(text);
+  return forms.some(f => { const s = normKey(f); return !!s && findSurface(t, s, spaced).length > 0; });
 }
 // Never a homograph of the answer (the read stimulus would fit both), a homophone (the hear
 // stimulus would fit both) or a gloss sharing its first two words (a near-synonym). Prefers
@@ -148,7 +156,8 @@ function meaningOpts(entry, pool, mix){
 // or first-two-gloss-words match. A content-word answer never gets a pack.functionWords
 // distractor: a learner rules those out on sight, and in a cloze one may even fit the blank.
 // prefer ranks matching candidates first (gapChoices article agreement).
-function wordOpts(entry, pool, showOf, pack, prefer, mix){
+// stim (optional): the sentence the item shows without its blank; see stimHits.
+function wordOpts(entry, pool, showOf, pack, prefer, mix, stim){
   const show = showOf || (e => e.w);
   const ansGloss = normKey(entry.en), ansF2 = firstTwoWords(entry.en);
   const hasPos = !!entry.pos;
@@ -159,12 +168,13 @@ function wordOpts(entry, pool, showOf, pack, prefer, mix){
     v.id!==entry.id && !sharesSurface(v, entry) && normKey(v.en)!==ansGloss && !(ansF2 && firstTwoWords(v.en)===ansF2) &&
     (ansFw || !fw.has(v.id)) && !(pf && pronClash(v, entry)) && !isSyn(v, entry));
   const samePos = v => hasPos && v.pos===entry.pos;
+  const inStim = stim ? (v => stimHits(stim, [show(v), ...textForms(v)], pack)) : null;
   if(mix) return mixPick(entry, cands, mix, v => prefer && !prefer(v) ? 1 : 0, v => (ansFw && !fw.has(v.id) ? 2 : 0) + (samePos(v) ? 0 : 1), strict => {
     const usedW = new Set([...surfaces(entry), normKey(show(entry))]), usedF2 = new Set(), chosen = [];
     return v => { const k = normKey(show(v)), f2 = firstTwoWords(v.en);
       if(usedW.has(k) || (showOf && surfaces(v).some(x => usedW.has(x))) || (pf && chosen.some(c => pronClash(c, v))) || (strict && f2 && usedF2.has(f2))) return false;
       chosen.push(v); usedW.add(k); if(showOf) surfaces(v).forEach(x => usedW.add(x)); if(f2) usedF2.add(f2); return true; };
-  });
+  }, 3, false, inStim);
   const t1 = cands.filter(v=>v.lv===entry.lv && samePos(v));
   const t2 = cands.filter(v=>v.lv===entry.lv && !samePos(v));
   const t3 = cands.filter(v=>v.lv!==entry.lv && samePos(v));
@@ -172,12 +182,13 @@ function wordOpts(entry, pool, showOf, pack, prefer, mix){
   const tiered = [...shuffle(t1), ...shuffle(t2), ...shuffle(t3), ...shuffle(t4)];
   const byClass = ansFw ? [...tiered.filter(v=>fw.has(v.id)), ...tiered.filter(v=>!fw.has(v.id))] : tiered;
   const ordered = prefer ? [...byClass.filter(v => prefer(v)), ...byClass.filter(v => !prefer(v))] : byClass;
-  function pass(strict){
+  function pass(strict, skip){
     // Only the displayed w must differ (alts are never shown). With a label fn, written forms
     // must differ too: same-w homographs with different labels would read as one written word.
     const chosen = []; const usedW = new Set([...surfaces(entry), normKey(show(entry))]); const usedF2 = new Set();
     for(const v of ordered){
       if(chosen.length>=3) break;
+      if(skip && skip(v)) continue;
       const k = normKey(show(v)), f2 = firstTwoWords(v.en);
       if(usedW.has(k)) continue;
       if(showOf && surfaces(v).some(x => usedW.has(x))) continue;
@@ -187,8 +198,9 @@ function wordOpts(entry, pool, showOf, pack, prefer, mix){
     }
     return chosen;
   }
-  let chosen = pass(true);
-  if(chosen.length<3) chosen = pass(false);
+  let chosen = pass(true, inStim);
+  if(chosen.length<3) chosen = pass(false, inStim);
+  if(inStim && chosen.length<3){ chosen = pass(true); if(chosen.length<3) chosen = pass(false); }
   return chosen;
 }
 // Cloze distractors use the same rules as recall: plausible words, never a second right answer.
@@ -665,7 +677,8 @@ function articleAgreement(pack){
 // with fewer than GAP_GENDER_MIN same-gender candidates, behave as without the flag.
 const GAP_GENDER_MIN = 3;
 function gapGenderOn(pack){ return !!(pack && pack.gapGender === true); }
-function gapChoices(entry, match, pool, pack, like, mix){
+// sentence: the item's sentence; its text without the blank is the stimulus no distractor may appear in.
+function gapChoices(entry, match, pool, pack, like, mix, sentence){
   const arts = packArticles(pool);
   const show = e => bareForm(e, arts);
   const vis = match && match.article;
@@ -681,7 +694,8 @@ function gapChoices(entry, match, pool, pack, like, mix){
     if((pool || []).filter(v => v.id !== entry.id && !fits(v) && same(v) && (!like || like(v))).length >= GAP_GENDER_MIN) prefer = same;
   }
   if(like) prefer = prefer ? (p => v => p(v) && like(v))(prefer) : like;
-  const ds = wordOpts(entry, blank ? (pool || []).filter(v => !fits(v)) : pool, show, pack, prefer, mix);
+  const stim = sentence && match ? String(sentence.t).slice(0, match.start) + " " + String(sentence.t).slice(match.end) : null;
+  const ds = wordOpts(entry, blank ? (pool || []).filter(v => !fits(v)) : pool, show, pack, prefer, mix, stim);
   const byLabel = {}; [entry, ...ds].forEach(e => { byLabel[show(e)] = e; });
   return { opts: [show(entry), ...ds.map(show)], a: show(entry), byLabel };
 }
@@ -2137,16 +2151,22 @@ function patternCased(form, ans, ansStart){
 // Wrong choices: the pattern's own other mark texts first (了 vs 过, 才 vs 就), then other patterns'
 // marks of the answer's length, then any. Never the answer, never a mark of a pattern in p.near or in the
 // sentence's own near (an author-listed pattern whose word could also fit the blank, 如果 for 即使).
-function patternOpts(p, s, mi, patterns, rng){
+function patternOpts(p, s, mi, patterns, rng, pack){
   const r = rng || Math.random, ans = patternMarkText(s, s.marks[mi]), af = patternFold(ans), near = new Set([...(p.near || []), ...(s.near || [])]);
   const uniq = ts => { const seen = new Set(); return ts.filter(t => { const f = patternFold(t); if(seen.has(f)) return false; seen.add(f); return true; }); };
   const own = uniq(patternMarkTexts(p)).filter(t => patternFold(t) !== af);
   const ownF = new Set(own.map(patternFold));
   const others = uniq((patterns || []).filter(q => q.id !== p.id && !near.has(q.id)).flatMap(patternMarkTexts)).filter(t => patternFold(t) !== af && !ownF.has(patternFold(t)));
-  const len = cpLen(ans), out = [], outF = new Set(), forms = patternForms([p, ...(patterns || [])]);
+  const len = cpLen(ans), forms = patternForms([p, ...(patterns || [])]);
   const ansStart = patternSentenceStart(s.t, s.marks[mi][0]);
-  [own, others.filter(t => cpLen(t) === len), others.filter(t => cpLen(t) !== len)].forEach(t => shuffle(t.slice(), r).forEach(x => { if(out.length < 3 && !outF.has(patternFold(x))){ outF.add(patternFold(x)); out.push(patternCased(forms.get(patternFold(x)) || { text: x, mid: false }, ans, ansStart)); } }));
-  return out;
+  const lists = [own, others.filter(t => cpLen(t) === len), others.filter(t => cpLen(t) !== len)].map(t => shuffle(t.slice(), r));
+  // A mark written elsewhere in the sentence (虽然 in 虽然…，但是) gives the blank away: skipped while three others remain.
+  const mk = s.marks[mi], spaced = !pack || pack.spaced !== false, stim = patternFold(String(s.t).slice(0, mk[0]) + " " + String(s.t).slice(mk[1]));
+  const pick = inStim => { const out = [], outF = new Set();
+    lists.forEach(t => t.forEach(x => { if(out.length < 3 && !outF.has(patternFold(x)) && !(inStim && findSurface(stim, patternFold(x), spaced).length)){ outF.add(patternFold(x)); out.push(patternCased(forms.get(patternFold(x)) || { text: x, mid: false }, ans, ansStart)); } }));
+    return out; };
+  const out = pick(true);
+  return out.length < 3 ? pick(false) : out;
 }
 // The sentence to ask: one whose words are all learned when there is one, else any.
 function patternSentenceIndex(p, prog, rng){
