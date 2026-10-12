@@ -413,6 +413,9 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
   // 3: one miss on a placed word lowers the position (the marker is not a free pass)
   const q3 = clone(q2), k0 = Object.keys(q3.w)[0]; VC.markRec(q3.w, k0, false, true); VC.notePair(q3.w[k0], "wm", false, false, 1);
   check("a miss on a placed word (markRec + its pair, as markWord does) lowers the whole-pack position", pos(q3)[0] < pos(q2)[0]);
+  // 3b: a cloze miss (markMissKind drops prov, no w++ of its own) also lowers every position read and ends placedProv
+  const q3b = clone(base), k1 = Object.keys(q3b.w)[0]; VC.markMissKind(q3b.w, k1, false, "gap");
+  check("a cloze miss on a placed word ends placedProv and lowers whole-pack position and the level bar", !VC.placedProv(q3b.w[k1]) && q3b.w[k1].pl === 1 && pos(q3b)[0] < p0[0]);
   // control: a record without pl (a build before this one) steps back when prov lifts
   const old = clone(base); Object.values(old.w).forEach(r => { delete r.pl; }); uid.forEach(i => { delete VC.charRecs(old)[i].pl; });
   const o1 = clone(old); Object.keys(o1.w).forEach(k => { delete o1.w[k].prov; });
