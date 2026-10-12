@@ -10,7 +10,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed, stripExam } = require("./lib/pack_flags.js");
 const os = require("os");
 const cp = require("child_process");
 
@@ -300,7 +300,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
         return out;
       };
       const ref = await walk(baseHtml, BASE), cur = await walk(appHtml, VC);
-      check(`flag off (bareByPair stripped): Today, two sessions, three Read passages, Progress and records byte-identical to ${BASE_SHA} (${ref.join("").length} chars)`, JSON.stringify(ref) === JSON.stringify(cur), cur.findIndex((x, i) => x !== ref[i]));
+      check(`flag off (bareByPair stripped): Today, two sessions, three Read passages, Progress and records byte-identical to ${BASE_SHA} (${ref.join("").length} chars)`, JSON.stringify(ref) === JSON.stringify(cur.map(stripExam)), cur.findIndex((x, i) => stripExam(x) !== ref[i]));
     }
     const p = OWNER ? clone(OWNER) : synth();
     const ctl = core => JSON.stringify(passageSents().map(s => core.rubyTiers(s, CHARACTERS, p, PACK_OFF, true)).concat(WORDS.slice(0, 400).map(w => core.bareWord(w, CHARACTERS, p, PACK_OFF))));

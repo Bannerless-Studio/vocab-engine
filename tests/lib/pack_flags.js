@@ -123,4 +123,7 @@ function packBefore(pack, key, opts) {
   return packAsOf(pack, f.sha + "~1", opts);
 }
 
-module.exports = { FLAG_SINCE, COLLAPSED, COLLAPSED_DATA, COLLAPSED_LIVE, COLLAPSED_DERIVED, withCollapsed, stripCollapsed, packAsOf, packBefore, stripFlags, isAncestor };
+// Level exam + critical set (engine default, 2026-10-12): a pinned-sha control compares the current screens without the
+// chrome the base never had: Today's "Level exam ready" line and the Words-tab flag button (tests/exam_checks.js covers both).
+const stripExam = h => typeof h === "string" ? h.replace(/<p class="pvs"><button type="button" class="showw" id="examReady"[^>]*>[^<]*<\/button><\/p>/g, "").replace(/<button type="button" class="cflag[^"]*" id="cf_[^"]*"[^>]*>[\s\S]*?<\/svg><\/button>/g, "") : h;
+module.exports = { stripExam, FLAG_SINCE, COLLAPSED, COLLAPSED_DATA, COLLAPSED_LIVE, COLLAPSED_DERIVED, withCollapsed, stripCollapsed, packAsOf, packBefore, stripFlags, isAncestor };

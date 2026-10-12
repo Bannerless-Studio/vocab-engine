@@ -739,7 +739,8 @@ if(owner){
   const h = (tr.find(x => x[0] === "test home") || [])[1] || "";
   const ids = [...h.matchAll(/<button class="(ghost|next)" id="([^"]+)">([^<]*)<\/button>/g)].map(m => [m[1], m[2], m[3]]);
   console.log("INFO  placed: " + ids.map(x => x.join(":")).join(" | "));
-  check("placed learner: full-width ghost rows Listen, Recall, Sentences, Characters, nothing else", JSON.stringify(ids.map(x => x[2])) === JSON.stringify(["Listen", "Recall", "Sentences", "Characters"]) && ids.every(x => x[0] === "ghost"));
+  // Level exam rows (tests/exam_checks.js) follow the four tests, one per level offered (the owner export: HSK 1 and HSK 2).
+  check("placed learner: full-width ghost rows Listen, Recall, Sentences, Characters, then the Level exam rows, nothing else", JSON.stringify(ids.map(x => x[2]).filter(t => !/^Level exam: /.test(t))) === JSON.stringify(["Listen", "Recall", "Sentences", "Characters"]) && ids.every(x => x[0] === "ghost") && ids.slice(4).every(x => /^Level exam: /.test(x[2])));
   check('placed learner (owner 2026-10-08): no placement at all on the Test tab (no "lacement" text)', !/lacement/.test(h));
   check('placed learner: no intro, no "20", no "Take Placement"', !/Placement finds where to start/.test(h) && !/ 20</.test(h) && !/Take Placement/.test(h) && !/style="flex:1"/.test(h));
   const pl = (tr.find(x => x[0] === "placement screen") || [])[1] || "";
@@ -748,7 +749,7 @@ if(owner){
   const u = await walkTabs(PACK, un, 56);
   const uh = (u.tr.find(x => x[0] === "test home") || [])[1] || "";
   const uids = [...uh.matchAll(/<button class="(ghost|next)" id="([^"]+)">([^<]*)<\/button>/g)].map(m => m[3]);
-  check("unplaced learner: the intro, then the primary \"Take the placement test\" first, the four tests after", /^<p class="q">Placement finds where to start\./.test(uh) && /<button class="next" id="pl">Take the placement test<\/button>/.test(uh) && JSON.stringify(uids) === JSON.stringify(["Take the placement test", "Listen", "Recall", "Sentences", "Characters"]));
+  check("unplaced learner: the intro, then the primary \"Take the placement test\" first, the four tests after", /^<p class="q">Placement finds where to start\./.test(uh) && /<button class="next" id="pl">Take the placement test<\/button>/.test(uh) && JSON.stringify(uids.filter(t => !/^Level exam: /.test(t))) === JSON.stringify(["Take the placement test", "Listen", "Recall", "Sentences", "Characters"]));
   const small = clone(owner); // a characters plan under 20 shows its count
   const { api } = await bootWith(PACK, small, 57);
   api.ev(`VC.__charTestPlan = VC.charTestPlan; VC.charTestPlan = (...a) => VC.__charTestPlan(...a).slice(0, 12)`);

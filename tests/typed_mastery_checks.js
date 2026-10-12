@@ -15,7 +15,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed, stripExam } = require("./lib/pack_flags.js");
 // the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
 const PAIRS_ERA = "9eb6ecb~1";
 const cp = require("child_process");
@@ -729,6 +729,7 @@ const qsig = api => { const D = api.getD(); return D ? [D.cur, ...D.q].filter(Bo
       const a = await run(baseHtml, baseCore), b = await run(undefined, undefined);
       // 0ad8a97: hear-sentence items are centred (no "sent" class); the base still marks them
       a.walk = a.walk.replace(/<div class="drill-body sent">(?=<p class="q">What did they say\?)/g, '<div class="drill-body">');
+      for(const k of Object.keys(b)) b[k] = stripExam(b[k]);
       for(const k of Object.keys(a)){
         let d = 0; while(d < a[k].length && a[k][d] === b[k][d]) d++;
         check(`${k} byte-identical to ${BASE_SHA} (${a[k].length} chars)${a[k] === b[k] ? "" : ` first diff at ${d}: base ${JSON.stringify(a[k].slice(d, d + 80))} vs ${JSON.stringify(b[k].slice(d, d + 80))}`}`, a[k] === b[k] && a[k].length > 100);

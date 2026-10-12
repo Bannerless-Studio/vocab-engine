@@ -12,7 +12,7 @@
 const HELPX = /<button type="button" class="helpx"[^>]*>×<\/button>$/;
 const fs = require("fs");
 const path = require("path");
-const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed, stripExam } = require("./lib/pack_flags.js");
 // the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
 const PAIRS_ERA = "9eb6ecb~1";
 const cp = require("child_process");
@@ -962,6 +962,7 @@ function walk(api, stopAt){
         const b = await screens(CUR_HTML, VC, pk, ss, ps, 11);
         // 0ad8a97: hear-sentence items are centred (no "sent" class); the base still marks them
         a.walk = a.walk.replace(/<div class="drill-body sent">(?=<p class="q">What did they say\?)/g, '<div class="drill-body">');
+        for(const k of Object.keys(b)) b[k] = stripExam(b[k]);
         for(const k of Object.keys(a)){
           const same = a[k] === b[k];
           let at = -1; if(!same){ for(let i = 0; i < Math.max(a[k].length, b[k].length); i++) if(a[k][i] !== b[k][i]){ at = i; break; } }

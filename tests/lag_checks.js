@@ -8,7 +8,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { packAsOf, withCollapsed } = require("./lib/pack_flags.js");
+const { packAsOf, withCollapsed, stripExam } = require("./lib/pack_flags.js");
 // the pack this suite was written against: as shipped just before pairs (9eb6ecb), the collapsed flags now engine default
 const PAIRS_ERA = "9eb6ecb~1";
 const cp = require("child_process");
@@ -392,7 +392,7 @@ try {
           api.today(); play(api);
           out.push({ t, g: gp, prog: st.ls.getItem(VC.storageKey(pk)) });
         }
-        check(`withWords pack (no learn), ${name}: Today, Progress and a whole session's progress byte-identical to ${BASE_SHA} (${out[0].t.length} + ${out[0].g.length} chars)`, out[0].t === out[1].t && noBars(out[0].g) === noBars(out[1].g) && out[0].prog === out[1].prog);
+        check(`withWords pack (no learn), ${name}: Today, Progress and a whole session's progress byte-identical to ${BASE_SHA} (${out[0].t.length} + ${out[0].g.length} chars)`, stripExam(out[0].t) === out[1].t && noBars(out[0].g) === noBars(out[1].g) && out[0].prog === out[1].prog);
       }
     }
   }

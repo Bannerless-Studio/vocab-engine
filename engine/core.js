@@ -1371,6 +1371,64 @@ function levelGateHold(words, pack, prog, units){
 const levelGateNote = (words, pack, prog, units) => { const h = levelGateHold(words, pack, prog, units); return h ? `${levelLabel(pack, h.lv)} waits · ${levelLabel(pack, h.prev)} at ${h.pct}% known` : null; };
 // What Today teaches: nextNewSet unless the gate holds.
 const nextNewSetOpen = (words, pack, prog, units) => levelGateHold(words, pack, prog, units) ? null : nextNewSet(words, pack, prog);
+// Level exam and critical set (docs/PACK_SCHEMA.md "Level exam and critical set"; owner 2026-10-12: words known
+// in-app were missed on external level mocks, where nothing shows the reading and sentences are heard). The
+// exam is a Test-tab drill of EXAM_SIZE items drawn from one level, bare (no reading before the verdict), one
+// attempt each. prog.crit = { wordId: session added }: an exam miss or the Words-tab flag adds a word; a
+// right answer that leaves it known (wordKnown), or un-flagging, removes it; the key goes with its last word,
+// so a record that never held one is unchanged. prog.exam = { level: { r, n, d } }: the last exam's score
+// and ISO day, read by the Test row and Today's "Level exam ready" line.
+const EXAM_SIZE = 20, CRIT_SLOTS = 3;
+const EXAM_MIX = [["hearS", 6], ["gap", 5], ["readS", 4], ["typeM", 3], ["recall", 2]];
+const EXAM_SENT_KINDS = ["hearS", "gap", "readS"];
+// A level without sentences keeps the proportions in word kinds.
+const EXAM_WORD_KIND = { hearS: "hear", gap: "read", readS: "read" };
+const critMap = prog => prog && isObj(prog.crit) ? prog.crit : {};
+const critHas = (prog, id) => critMap(prog)[id] !== undefined;
+function critAdd(prog, id, sn){ if(!prog || typeof id !== "string") return false; if(!isObj(prog.crit)) prog.crit = {}; if(prog.crit[id] !== undefined) return false; prog.crit[id] = Number.isFinite(sn) ? sn : 0; return true; }
+function critRemove(prog, id){ if(!prog || !isObj(prog.crit) || prog.crit[id] === undefined) return false; delete prog.crit[id]; if(!Object.keys(prog.crit).length) delete prog.crit; return true; }
+// Oldest-added first (session, then id): a word keeps its turn instead of jittering between plans.
+function critWords(prog, words){ const m = critMap(prog); return (words || []).filter(w => w && m[w.id] !== undefined).sort((a, b) => (m[a.id] - m[b.id]) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)); }
+// The mark path: a right answer that leaves the word known (every askable pair at its bar) retires it.
+function critSettle(prog, id, word, pack, ok){ return !!ok && critHas(prog, id) && wordKnown(((prog && prog.w) || {})[id], word, pack) && critRemove(prog, id); }
+// Review's reserve: up to n critical words, typed when a typed kind fits (o.typedOk), else recall. No rng.
+function critPick(learned, prog, n, typedOk){ return n > 0 ? critWords(prog, learned).slice(0, n).map(w => ({ kind: typeof typedOk === "function" && typedOk(w) ? "type" : "recall", word: w, crit: true })) : []; }
+// The levels an exam is offered for: known to LEVEL_GATE, or settled (SETTLED of its learned words known) below
+// the level Learn teaches. A level with no words has no exam.
+function examLevels(words, pack, prog, units){
+  const byLv = wordsByLevel(words, pack), r = (prog && prog.w) || {}, bw = knownCtx(pack, units), ids = levelIds(pack);
+  const nn = nextNewSet(words, pack, prog), ci = nn ? ids.indexOf(String(nn.lv)) : ids.length;
+  return ids.filter((lv, i) => { const list = byLv[lv] || []; if(!list.length) return false;
+    if(levelKnownPct(words, pack, prog, lv, units) + 1e-9 >= LEVEL_GATE) return true;
+    if(i >= ci) return false;
+    const learned = list.filter(w => isObj(r[w.id]));
+    return levelSettled(learned.length, learned.filter(w => wordKnownX(r[w.id], w, pack, prog, bw)).length); });
+}
+const examResult = (prog, lv) => { const e = prog && isObj(prog.exam) ? prog.exam[String(lv)] : null; return isObj(e) && Number.isInteger(e.r) && Number.isInteger(e.n) ? e : null; };
+function examRecord(prog, lv, r, n, day){ if(!isObj(prog.exam)) prog.exam = {}; prog.exam[String(lv)] = { r, n, d: String(day) }; return prog.exam[String(lv)]; }
+// The highest level offered that has no exam yet: Today's one line.
+function examReady(words, pack, prog, units){ const ls = examLevels(words, pack, prog, units).filter(lv => !examResult(prog, lv)); return ls.length ? ls[ls.length - 1] : null; }
+function examAgo(e, today){
+  const d = isoDayNumber(today) - isoDayNumber(e && e.d);
+  return !isFinite(d) ? "" : d <= 0 ? "today" : d === 1 ? "yesterday" : `${d} days ago`;
+}
+// o.typedOk(word): a typed meaning item fits; o.gapOk(sentence): a blank can be placed; o.canHear(word).
+// Returns [{ kind, word }] / [{ kind, s }], shuffled; kinds hearS / gap / readS / typeM / recall / hear / read.
+function examPlan(words, sentences, pack, prog, lv, rng, o){
+  const r = rng || Math.random, opt = o || {};
+  const ws = shuffle((wordsByLevel(words, pack)[String(lv)] || []).slice(), r), ss = shuffle((sentences || []).filter(s => s && String(s.lv) === String(lv)), r);
+  const used = new Set(); let wi = 0;
+  const takeS = fit => { const s = ss.find(x => !used.has(x) && (!fit || fit(x))); if(s) used.add(s); return s || null; };
+  const wordItem = kind => { const w = ws[wi++]; if(!w) return null;
+    const k = kind === "typeM" ? (typeof opt.typedOk === "function" && opt.typedOk(w) ? "typeM" : "recall") : kind === "hear" && typeof opt.canHear === "function" && !opt.canHear(w) ? "read" : kind;
+    return { kind: k, word: w }; };
+  const out = [];
+  EXAM_MIX.forEach(([kind, n]) => { for(let i = 0; i < n; i++){
+    const s = EXAM_SENT_KINDS.includes(kind) ? takeS(kind === "gap" && typeof opt.gapOk === "function" ? opt.gapOk : null) : null;
+    const it = s ? { kind, s } : wordItem(EXAM_WORD_KIND[kind] || kind);
+    if(it) out.push(it); } });
+  return shuffle(out, r);
+}
 // Before the first record lands in a records-less level, its counter prefix gets placement's
 // provisional records, so switching the level to the records rule loses nothing.
 function pinPrefixRecords(prog, words, pack, lv, counters){
@@ -1426,12 +1484,15 @@ function buildReviewPlan(learned, prog, pack, opts){
   const ru = recordedUnits(o.units, prog, pack);
   const rs = recordedScriptUnits(o.script, prog, pack);
   if(ru.length || rs.length) return hearableKinds(unifiedReviewPlan(learned, ru, prog, pack, n, o.rng, rs, Object.assign({ units: o.script }, o.scriptCtx || {}), o), o.canHear);
-  const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
+  const cr = critPick(learned, prog, Math.min(CRIT_SLOTS, n), o.typedOk), crSet = new Set(cr.map(x => x.word.id));
+  if(crSet.size) learned = learned.filter(x => !crSet.has(x.id));
+  const pv = provPick(learned, Math.min(REVIEW_PROV, n - cr.length), prog.w);
   const pvSet = new Set(pv.map(w=>w.id));
-  const rest = weakFirst(learned.filter(x=>!pvSet.has(x.id)), n - pv.length, prog.w, null, o.rng);
+  const rest = weakFirst(learned.filter(x=>!pvSet.has(x.id)), n - cr.length - pv.length, prog.w, null, o.rng);
   const pool = shuffle([...rest, ...pv], o.rng);
   const kinds = kindMix(pool.length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
-  return hearableKinds(applyMissedKinds(pool.map((word,i)=>({ kind: kinds[i], word })), prog, pack, false, o), o.canHear);
+  const items = pool.map((word,i)=>({ kind: kinds[i], word }));
+  return hearableKinds(applyMissedKinds(cr.length ? shuffle([...items, ...cr], o.rng) : items, prog, pack, false, o), o.canHear);
 }
 function buildRecallPlan(learned, prog, pack, n, opts){
   const o = opts || {};
@@ -2030,6 +2091,23 @@ function pairScriptPre(learned, prog, pack, n, o){
   const pool = dayPick(cands, n, dayLog(prog, o.today), o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined, undefined, DAY_HELD_SHARE_REVIEW);
   return dayScriptItems(pool, pack, o, o.rng || Math.random, prog).filter(e => e.kind);
 }
+// Critical words (prog.crit) under pairs: up to CRIT_SLOTS word candidates, oldest-added first, each asked typed
+// when a typed kind fits one of its pairs (pairOpts: the device, typedSeen and this session's answers apply), else
+// in the wm pair's hard direction (recall). Taken before the bare boost and the ranked pick; no rng.
+function critPre(cands, prog, pack, n, o, sn){
+  const m = critMap(prog); if(!Object.keys(m).length) return [];
+  const psn = Number.isInteger(o.sn) ? o.sn : sn, out = [];
+  const list = cands.filter(c => c.t === "w" && m[c.x.id] !== undefined).sort((a, b) => (m[a.x.id] - m[b.x.id]) || (a.x.id < b.x.id ? -1 : a.x.id > b.x.id ? 1 : 0));
+  for(const c of list){
+    if(out.length >= Math.min(CRIT_SLOTS, n)) break;
+    const po = pairOpts(c, pack, o, psn);
+    const tp = PAIRS.find(p => po[p] && po[p].typed.length);
+    if(tp) out.push({ c, pair: tp, kind: "type" });
+    else if(po.wm && po.wm.choice.includes("recall")) out.push({ c, pair: "wm", kind: "recall" });
+    else { const p = PAIRS.find(x => po[x] && po[x].choice.length); if(p) out.push({ c, pair: p, kind: pairKind(po[p], 1, []) }); }
+  }
+  return out;
+}
 // Review and Recall by pairs. o.extra (paused) is ignored: a paused Review stays at n items.
 // sx: pairScriptPre's script items, taken first.
 function pairPlan(learned, prog, pack, n, o, wk, ck, boost, sx){
@@ -2038,7 +2116,9 @@ function pairPlan(learned, prog, pack, n, o, wk, ck, boost, sx){
   // Owner 2026-10-06: a paused session's 40-item Review is too long to keep focus and remember mistakes,
   // so the paused growth (o.extra) is ignored and Review keeps its normal size.
   const bb = boost ? bareBoost(cands, prog, pack, sn, d, o) : undefined;
+  const cr = boost ? critPre(cands, prog, pack, n, o, sn) : [];
   const pre = sx && sx.length ? [...sx, ...(bb || []).slice(0, Math.max(0, n - sx.length))] : bb;
+  if(cr.length){ const got = new Set((pre || []).map(e => e.c.key)); const add = cr.filter(e => !got.has(e.c.key)); if(add.length) return hearableKinds(shuffle(pairPick(cands, n, d, o.rng, sn, pack, o, [...add, ...(pre || [])]), o.rng).map(pairPlanItem), o.canHear); }
   const pool = shuffle(pairPick(cands, n, d, o.rng, sn, pack, o, pre), o.rng);
   return hearableKinds(pool.map(pairPlanItem), o.canHear);
 }
@@ -3494,16 +3574,19 @@ function rankUnified(words, wrecs, units, crecs, n, pack, rng, sunits, srecs){
 }
 function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx, opts){
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = rng || Math.random;
-  const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
+  // Critical words (prog.crit) take their slots before the provisional reserve; with none, nothing differs.
+  const cr = critPick(learned, prog, Math.min(CRIT_SLOTS, n), opts && opts.typedOk), crSet = new Set(cr.map(x => x.word.id));
+  if(crSet.size) learned = learned.filter(x => !crSet.has(x.id));
+  const pv = provPick(learned, Math.min(REVIEW_PROV, n - cr.length), prog.w);
   const pvSet = new Set(pv.map(w => w.id));
   // Placed units (placementCharsOn) are kept in review like placed words; with none, no slot is taken and no rng drawn.
-  const pu = ru.some(u => (charRecs(prog)[u.id] || {}).prov) ? provPick(ru, Math.min(REVIEW_PROV, n - pv.length), charRecs(prog)) : [];
+  const pu = ru.some(u => (charRecs(prog)[u.id] || {}).prov) ? provPick(ru, Math.min(REVIEW_PROV, n - cr.length - pv.length), charRecs(prog)) : [];
   const puSet = new Set(pu.map(u => u.id));
-  const ranked = rankUnified(learned.filter(x => !pvSet.has(x.id)), prog.w, pu.length ? ru.filter(u => !puSet.has(u.id)) : ru, charRecs(prog), n - pv.length - pu.length, pack, rng, rs, scriptRecs(prog));
-  const pool = shuffle([...ranked, ...pv.map(w => ({ kind:"w", entry:w })), ...pu.map(u => ({ kind:"c", entry:u }))], rng);
+  const ranked = rankUnified(learned.filter(x => !pvSet.has(x.id)), prog.w, pu.length ? ru.filter(u => !puSet.has(u.id)) : ru, charRecs(prog), n - cr.length - pv.length - pu.length, pack, rng, rs, scriptRecs(prog));
+  const pool = shuffle([...ranked, ...pv.map(w => ({ kind:"w", entry:w })), ...pu.map(u => ({ kind:"c", entry:u })), ...cr.map(x => ({ kind:"k", entry:x }))], rng);
   const kinds = kindMix(pool.filter(x => x.kind === "w").length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), rng);
   let wi = 0;
-  const out = pool.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry }
+  const out = pool.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry } : x.kind === "k" ? x.entry
     : x.kind === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: x.entry }
     : { kind: pickScriptKind(scfg.reviewKinds, x.entry, scfg, r, sctx), unit: x.entry });
   return applyMissedKinds(out.filter(it => it.kind), prog, pack, false, opts);
@@ -4602,7 +4685,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, patternFirstMeeting, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
-  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, EXAM_SIZE, EXAM_MIX, CRIT_SLOTS, critMap, critHas, critAdd, critRemove, critWords, critSettle, critPick, critPre, examLevels, examResult, examRecord, examReady, examAgo, examPlan, seededRng, hashSeed, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, levelPosition, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,

@@ -23,6 +23,7 @@ pack_flags_checks||base
 engine_checks||base
 migration_checks||base
 export_checks||base
+exam_checks||base
 flagoff_snapshot|--check|base
 live_lock|--check|base
 live_lock|--check --strip|-

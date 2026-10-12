@@ -142,6 +142,9 @@
   .wl .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
   .wl .pr{font-size:15px;display:block}
   .wl .en{color:var(--mute);font-size:14px;text-align:left;display:block;margin:0}
+  .cflag{flex:0 0 auto;min-height:0;width:auto;padding:6px;border:0;background:none;color:var(--mute);cursor:pointer;line-height:0}
+  .cflag.on{color:var(--ink)}
+  .pvcl{margin-top:4px}
   table.stats{width:100%;border-collapse:collapse;font-size:15px}
   table.stats td{padding:8px 0;border-bottom:1px solid var(--line)}
   table.stats td:last-child{text-align:right;font-variant-numeric:tabular-nums}
@@ -190,7 +193,7 @@
   /* Words list: one word column for every row (the widest headword up to half the width), so the reading and
      gloss column starts at the same x on each row; a longer headword wraps inside it. Rows keep 44px. */
   @supports (grid-template-columns: subgrid){
-    :root[data-appview="v2"] #wl{display:grid;grid-template-columns:fit-content(50%) minmax(0,1fr);column-gap:12px}
+    :root[data-appview="v2"] #wl{display:grid;grid-template-columns:fit-content(50%) minmax(0,1fr) auto;column-gap:12px}
     :root[data-appview="v2"] #wl .wl{display:grid;grid-column:1/-1;grid-template-columns:subgrid;column-gap:12px;min-height:44px;box-sizing:border-box}
     :root[data-appview="v2"] #wl .wl .wd{max-width:none;min-width:0;white-space:normal;overflow-wrap:anywhere}
   }
@@ -1823,6 +1826,64 @@ function levelGateHold(words, pack, prog, units){
 const levelGateNote = (words, pack, prog, units) => { const h = levelGateHold(words, pack, prog, units); return h ? `${levelLabel(pack, h.lv)} waits · ${levelLabel(pack, h.prev)} at ${h.pct}% known` : null; };
 // What Today teaches: nextNewSet unless the gate holds.
 const nextNewSetOpen = (words, pack, prog, units) => levelGateHold(words, pack, prog, units) ? null : nextNewSet(words, pack, prog);
+// Level exam and critical set (docs/PACK_SCHEMA.md "Level exam and critical set"; owner 2026-10-12: words known
+// in-app were missed on external level mocks, where nothing shows the reading and sentences are heard). The
+// exam is a Test-tab drill of EXAM_SIZE items drawn from one level, bare (no reading before the verdict), one
+// attempt each. prog.crit = { wordId: session added }: an exam miss or the Words-tab flag adds a word; a
+// right answer that leaves it known (wordKnown), or un-flagging, removes it; the key goes with its last word,
+// so a record that never held one is unchanged. prog.exam = { level: { r, n, d } }: the last exam's score
+// and ISO day, read by the Test row and Today's "Level exam ready" line.
+const EXAM_SIZE = 20, CRIT_SLOTS = 3;
+const EXAM_MIX = [["hearS", 6], ["gap", 5], ["readS", 4], ["typeM", 3], ["recall", 2]];
+const EXAM_SENT_KINDS = ["hearS", "gap", "readS"];
+// A level without sentences keeps the proportions in word kinds.
+const EXAM_WORD_KIND = { hearS: "hear", gap: "read", readS: "read" };
+const critMap = prog => prog && isObj(prog.crit) ? prog.crit : {};
+const critHas = (prog, id) => critMap(prog)[id] !== undefined;
+function critAdd(prog, id, sn){ if(!prog || typeof id !== "string") return false; if(!isObj(prog.crit)) prog.crit = {}; if(prog.crit[id] !== undefined) return false; prog.crit[id] = Number.isFinite(sn) ? sn : 0; return true; }
+function critRemove(prog, id){ if(!prog || !isObj(prog.crit) || prog.crit[id] === undefined) return false; delete prog.crit[id]; if(!Object.keys(prog.crit).length) delete prog.crit; return true; }
+// Oldest-added first (session, then id): a word keeps its turn instead of jittering between plans.
+function critWords(prog, words){ const m = critMap(prog); return (words || []).filter(w => w && m[w.id] !== undefined).sort((a, b) => (m[a.id] - m[b.id]) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)); }
+// The mark path: a right answer that leaves the word known (every askable pair at its bar) retires it.
+function critSettle(prog, id, word, pack, ok){ return !!ok && critHas(prog, id) && wordKnown(((prog && prog.w) || {})[id], word, pack) && critRemove(prog, id); }
+// Review's reserve: up to n critical words, typed when a typed kind fits (o.typedOk), else recall. No rng.
+function critPick(learned, prog, n, typedOk){ return n > 0 ? critWords(prog, learned).slice(0, n).map(w => ({ kind: typeof typedOk === "function" && typedOk(w) ? "type" : "recall", word: w, crit: true })) : []; }
+// The levels an exam is offered for: known to LEVEL_GATE, or settled (SETTLED of its learned words known) below
+// the level Learn teaches. A level with no words has no exam.
+function examLevels(words, pack, prog, units){
+  const byLv = wordsByLevel(words, pack), r = (prog && prog.w) || {}, bw = knownCtx(pack, units), ids = levelIds(pack);
+  const nn = nextNewSet(words, pack, prog), ci = nn ? ids.indexOf(String(nn.lv)) : ids.length;
+  return ids.filter((lv, i) => { const list = byLv[lv] || []; if(!list.length) return false;
+    if(levelKnownPct(words, pack, prog, lv, units) + 1e-9 >= LEVEL_GATE) return true;
+    if(i >= ci) return false;
+    const learned = list.filter(w => isObj(r[w.id]));
+    return levelSettled(learned.length, learned.filter(w => wordKnownX(r[w.id], w, pack, prog, bw)).length); });
+}
+const examResult = (prog, lv) => { const e = prog && isObj(prog.exam) ? prog.exam[String(lv)] : null; return isObj(e) && Number.isInteger(e.r) && Number.isInteger(e.n) ? e : null; };
+function examRecord(prog, lv, r, n, day){ if(!isObj(prog.exam)) prog.exam = {}; prog.exam[String(lv)] = { r, n, d: String(day) }; return prog.exam[String(lv)]; }
+// The highest level offered that has no exam yet: Today's one line.
+function examReady(words, pack, prog, units){ const ls = examLevels(words, pack, prog, units).filter(lv => !examResult(prog, lv)); return ls.length ? ls[ls.length - 1] : null; }
+function examAgo(e, today){
+  const d = isoDayNumber(today) - isoDayNumber(e && e.d);
+  return !isFinite(d) ? "" : d <= 0 ? "today" : d === 1 ? "yesterday" : `${d} days ago`;
+}
+// o.typedOk(word): a typed meaning item fits; o.gapOk(sentence): a blank can be placed; o.canHear(word).
+// Returns [{ kind, word }] / [{ kind, s }], shuffled; kinds hearS / gap / readS / typeM / recall / hear / read.
+function examPlan(words, sentences, pack, prog, lv, rng, o){
+  const r = rng || Math.random, opt = o || {};
+  const ws = shuffle((wordsByLevel(words, pack)[String(lv)] || []).slice(), r), ss = shuffle((sentences || []).filter(s => s && String(s.lv) === String(lv)), r);
+  const used = new Set(); let wi = 0;
+  const takeS = fit => { const s = ss.find(x => !used.has(x) && (!fit || fit(x))); if(s) used.add(s); return s || null; };
+  const wordItem = kind => { const w = ws[wi++]; if(!w) return null;
+    const k = kind === "typeM" ? (typeof opt.typedOk === "function" && opt.typedOk(w) ? "typeM" : "recall") : kind === "hear" && typeof opt.canHear === "function" && !opt.canHear(w) ? "read" : kind;
+    return { kind: k, word: w }; };
+  const out = [];
+  EXAM_MIX.forEach(([kind, n]) => { for(let i = 0; i < n; i++){
+    const s = EXAM_SENT_KINDS.includes(kind) ? takeS(kind === "gap" && typeof opt.gapOk === "function" ? opt.gapOk : null) : null;
+    const it = s ? { kind, s } : wordItem(EXAM_WORD_KIND[kind] || kind);
+    if(it) out.push(it); } });
+  return shuffle(out, r);
+}
 // Before the first record lands in a records-less level, its counter prefix gets placement's
 // provisional records, so switching the level to the records rule loses nothing.
 function pinPrefixRecords(prog, words, pack, lv, counters){
@@ -1878,12 +1939,15 @@ function buildReviewPlan(learned, prog, pack, opts){
   const ru = recordedUnits(o.units, prog, pack);
   const rs = recordedScriptUnits(o.script, prog, pack);
   if(ru.length || rs.length) return hearableKinds(unifiedReviewPlan(learned, ru, prog, pack, n, o.rng, rs, Object.assign({ units: o.script }, o.scriptCtx || {}), o), o.canHear);
-  const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
+  const cr = critPick(learned, prog, Math.min(CRIT_SLOTS, n), o.typedOk), crSet = new Set(cr.map(x => x.word.id));
+  if(crSet.size) learned = learned.filter(x => !crSet.has(x.id));
+  const pv = provPick(learned, Math.min(REVIEW_PROV, n - cr.length), prog.w);
   const pvSet = new Set(pv.map(w=>w.id));
-  const rest = weakFirst(learned.filter(x=>!pvSet.has(x.id)), n - pv.length, prog.w, null, o.rng);
+  const rest = weakFirst(learned.filter(x=>!pvSet.has(x.id)), n - cr.length - pv.length, prog.w, null, o.rng);
   const pool = shuffle([...rest, ...pv], o.rng);
   const kinds = kindMix(pool.length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), o.rng);
-  return hearableKinds(applyMissedKinds(pool.map((word,i)=>({ kind: kinds[i], word })), prog, pack, false, o), o.canHear);
+  const items = pool.map((word,i)=>({ kind: kinds[i], word }));
+  return hearableKinds(applyMissedKinds(cr.length ? shuffle([...items, ...cr], o.rng) : items, prog, pack, false, o), o.canHear);
 }
 function buildRecallPlan(learned, prog, pack, n, opts){
   const o = opts || {};
@@ -2482,6 +2546,23 @@ function pairScriptPre(learned, prog, pack, n, o){
   const pool = dayPick(cands, n, dayLog(prog, o.today), o.rng, daySn(prog), typedBareOn(pack) ? DAY_TYPED_CONSOLIDATE_SHARE : undefined, undefined, DAY_HELD_SHARE_REVIEW);
   return dayScriptItems(pool, pack, o, o.rng || Math.random, prog).filter(e => e.kind);
 }
+// Critical words (prog.crit) under pairs: up to CRIT_SLOTS word candidates, oldest-added first, each asked typed
+// when a typed kind fits one of its pairs (pairOpts: the device, typedSeen and this session's answers apply), else
+// in the wm pair's hard direction (recall). Taken before the bare boost and the ranked pick; no rng.
+function critPre(cands, prog, pack, n, o, sn){
+  const m = critMap(prog); if(!Object.keys(m).length) return [];
+  const psn = Number.isInteger(o.sn) ? o.sn : sn, out = [];
+  const list = cands.filter(c => c.t === "w" && m[c.x.id] !== undefined).sort((a, b) => (m[a.x.id] - m[b.x.id]) || (a.x.id < b.x.id ? -1 : a.x.id > b.x.id ? 1 : 0));
+  for(const c of list){
+    if(out.length >= Math.min(CRIT_SLOTS, n)) break;
+    const po = pairOpts(c, pack, o, psn);
+    const tp = PAIRS.find(p => po[p] && po[p].typed.length);
+    if(tp) out.push({ c, pair: tp, kind: "type" });
+    else if(po.wm && po.wm.choice.includes("recall")) out.push({ c, pair: "wm", kind: "recall" });
+    else { const p = PAIRS.find(x => po[x] && po[x].choice.length); if(p) out.push({ c, pair: p, kind: pairKind(po[p], 1, []) }); }
+  }
+  return out;
+}
 // Review and Recall by pairs. o.extra (paused) is ignored: a paused Review stays at n items.
 // sx: pairScriptPre's script items, taken first.
 function pairPlan(learned, prog, pack, n, o, wk, ck, boost, sx){
@@ -2490,7 +2571,9 @@ function pairPlan(learned, prog, pack, n, o, wk, ck, boost, sx){
   // Owner 2026-10-06: a paused session's 40-item Review is too long to keep focus and remember mistakes,
   // so the paused growth (o.extra) is ignored and Review keeps its normal size.
   const bb = boost ? bareBoost(cands, prog, pack, sn, d, o) : undefined;
+  const cr = boost ? critPre(cands, prog, pack, n, o, sn) : [];
   const pre = sx && sx.length ? [...sx, ...(bb || []).slice(0, Math.max(0, n - sx.length))] : bb;
+  if(cr.length){ const got = new Set((pre || []).map(e => e.c.key)); const add = cr.filter(e => !got.has(e.c.key)); if(add.length) return hearableKinds(shuffle(pairPick(cands, n, d, o.rng, sn, pack, o, [...add, ...(pre || [])]), o.rng).map(pairPlanItem), o.canHear); }
   const pool = shuffle(pairPick(cands, n, d, o.rng, sn, pack, o, pre), o.rng);
   return hearableKinds(pool.map(pairPlanItem), o.canHear);
 }
@@ -3946,16 +4029,19 @@ function rankUnified(words, wrecs, units, crecs, n, pack, rng, sunits, srecs){
 }
 function unifiedReviewPlan(learned, ru, prog, pack, n, rng, rs, sctx, opts){
   const cfg = charsConfig(pack), scfg = scriptConfig(pack); const r = rng || Math.random;
-  const pv = provPick(learned, Math.min(REVIEW_PROV, n), prog.w);
+  // Critical words (prog.crit) take their slots before the provisional reserve; with none, nothing differs.
+  const cr = critPick(learned, prog, Math.min(CRIT_SLOTS, n), opts && opts.typedOk), crSet = new Set(cr.map(x => x.word.id));
+  if(crSet.size) learned = learned.filter(x => !crSet.has(x.id));
+  const pv = provPick(learned, Math.min(REVIEW_PROV, n - cr.length), prog.w);
   const pvSet = new Set(pv.map(w => w.id));
   // Placed units (placementCharsOn) are kept in review like placed words; with none, no slot is taken and no rng drawn.
-  const pu = ru.some(u => (charRecs(prog)[u.id] || {}).prov) ? provPick(ru, Math.min(REVIEW_PROV, n - pv.length), charRecs(prog)) : [];
+  const pu = ru.some(u => (charRecs(prog)[u.id] || {}).prov) ? provPick(ru, Math.min(REVIEW_PROV, n - cr.length - pv.length), charRecs(prog)) : [];
   const puSet = new Set(pu.map(u => u.id));
-  const ranked = rankUnified(learned.filter(x => !pvSet.has(x.id)), prog.w, pu.length ? ru.filter(u => !puSet.has(u.id)) : ru, charRecs(prog), n - pv.length - pu.length, pack, rng, rs, scriptRecs(prog));
-  const pool = shuffle([...ranked, ...pv.map(w => ({ kind:"w", entry:w })), ...pu.map(u => ({ kind:"c", entry:u }))], rng);
+  const ranked = rankUnified(learned.filter(x => !pvSet.has(x.id)), prog.w, pu.length ? ru.filter(u => !puSet.has(u.id)) : ru, charRecs(prog), n - cr.length - pv.length - pu.length, pack, rng, rs, scriptRecs(prog));
+  const pool = shuffle([...ranked, ...pv.map(w => ({ kind:"w", entry:w })), ...pu.map(u => ({ kind:"c", entry:u })), ...cr.map(x => ({ kind:"k", entry:x }))], rng);
   const kinds = kindMix(pool.filter(x => x.kind === "w").length, REVIEW_PRODUCTION_SHARE, typingEnabled(pack), rng);
   let wi = 0;
-  const out = pool.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry }
+  const out = pool.map(x => x.kind === "w" ? { kind: kinds[wi++], word: x.entry } : x.kind === "k" ? x.entry
     : x.kind === "c" ? { kind: cfg.reviewKinds[Math.floor(r() * cfg.reviewKinds.length)], unit: x.entry }
     : { kind: pickScriptKind(scfg.reviewKinds, x.entry, scfg, r, sctx), unit: x.entry });
   return applyMissedKinds(out.filter(it => it.kind), prog, pack, false, opts);
@@ -5054,7 +5140,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, patternFirstMeeting, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
-  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, EXAM_SIZE, EXAM_MIX, CRIT_SLOTS, critMap, critHas, critAdd, critRemove, critWords, critSettle, critPick, critPre, examLevels, examResult, examRecord, examReady, examAgo, examPlan, seededRng, hashSeed, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, levelPosition, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
@@ -5212,7 +5298,7 @@ function wordRetry(id, ok){
   if(!D) return false; const dn = D.down || (D.down = []); if(dn.includes(id)) return true;
   if(!ok && ((prog.w[id] || {}).s || 0) >= VC.WORD_HOLD) dn.push(id); return false;
 }
-function markWord(id, ok, kind, reqKind){ const fresh = !prog.w[id]; VC.ensureWordRec(prog, WORDS, PACK, id); if(fresh && VC.daySn(prog)) prog.w[id].f = VC.daySn(prog); const s0 = prog.w[id].s; VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) }); if(kind === "type" && todayStepState) typedSession.add(id); pairNoteWord(id, ok, kind, s0); VC.settleProv(prog.w[id], WORDS_BY_ID[id], PACK); dayNote("w:" + id, kind, ok); store.save(); }
+function markWord(id, ok, kind, reqKind){ const fresh = !prog.w[id]; VC.ensureWordRec(prog, WORDS, PACK, id); if(fresh && VC.daySn(prog)) prog.w[id].f = VC.daySn(prog); const s0 = prog.w[id].s; VC.markWordRec(prog.w, id, ok, kind, reqKind, PACK, { retry: wordRetry(id, ok), typable: typedWordFits(WORDS_BY_ID[id]) }); if(kind === "type" && todayStepState) typedSession.add(id); pairNoteWord(id, ok, kind, s0); VC.settleProv(prog.w[id], WORDS_BY_ID[id], PACK); VC.critSettle(prog, id, WORDS_BY_ID[id], PACK, ok); dayNote("w:" + id, kind, ok); store.save(); }
 // Cloze: the sentence item keeps r/w/s; only the blanked word's missed kind changes.
 // Pairs: a cloze miss is a miss of the word's meaning -> written pair; a right cloze moves no pair.
 function markGapWord(id, ok, kind){ const k = VC.markMissKind(prog.w, id, ok, kind); if(!ok && prog.w[id]) VC.notePair(prog.w[id], "wm", false, false, VC.daySn(prog)); if(dayNote("w:" + id, "gap", ok) || k) store.save(); }
@@ -5489,11 +5575,19 @@ const REPLAY_STAGE = `<div class="listen-stage"><button class="replay" id="rpa" 
 
 // A script pack turns pronunciation off once the primer is done (VC.pronUntilPrimerOn); a stored choice always wins.
 const showPron = () => VC.showPronOn(PACK, SUNITS, prog);
-const pronOf = x => showPron() ? VC.pronShown(x) : "";
+// Level exam (docs/PACK_SCHEMA.md "Level exam and critical set"): an exam item is bare, no reading anywhere before
+// the verdict. One flag, raised while examItem builds (the item carries bare: true), read by every reading site
+// (pronOf, dispWord, sentenceRuby, pfSentence); the reveal builders lower it, as Review's reveal shows the reading.
+let BARE_ITEM = false;
+const bareBuild = f => { const was = BARE_ITEM; BARE_ITEM = true; try { const it = f(); if(it && typeof it === "object") it.bare = true; return it; } finally { BARE_ITEM = was; } };
+const unbare = f => { const was = BARE_ITEM; BARE_ITEM = false; try { return f(); } finally { BARE_ITEM = was; } };
+// Option labels render when the card shows, so a bare item's option builder runs under the flag too.
+const asItem = (it, f) => { if(!(it && it.bare)) return f(); const was = BARE_ITEM; BARE_ITEM = true; try { return f(); } finally { BARE_ITEM = was; } };
+const pronOf = x => showPron() && !BARE_ITEM ? VC.pronShown(x) : "";
 // pronFirst (core.js displayForm). Off, dispWord returns the written form and every helper
 // below renders exactly the pre-pronFirst markup.
 const PRON_FIRST = HAS_CHARACTERS && VC.pronFirstOn(PACK);
-const dispWord = e => VC.displayForm(e, CHAR_LIST, prog, PACK);
+const dispWord = e => BARE_ITEM && e && e.w ? { text: String(e.w), isPron: false, written: String(e.w) } : VC.displayForm(e, CHAR_LIST, prog, PACK);
 // No progress effect, so a learner who wants the characters is never blocked.
 const showWrittenBtn = written => `<button type="button" class="showw" data-showw="${escapeHtml(written)}" aria-label="Show written form">show written</button>`;
 // tap false: no tap, for places that are themselves tap targets.
@@ -5686,7 +5780,7 @@ function optScript(entry, others){
 }
 
 // A drill that touches no unit (Sounds lessons) is no session for the planner's clock.
-function drill(items, onDone, summary, onShown){ if(VC.dayStart(prog, PACK, todayISO(), !todayStepState && items.some(it => /^[wscx]:/.test(String(it && it.key))))) store.save(); D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown, rzo: rzOriginOf(onDone), rzs: summary && summary.rzs }; rzFin = null; dnext(); }
+function drill(items, onDone, summary, onShown){ if(VC.dayStart(prog, PACK, todayISO(), !todayStepState && items.some(it => /^[wscx]:/.test(String(it && it.key))))) store.save(); D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown, rzo: rzOriginOf(onDone), rzs: summary && summary.rzs, once: !!(summary && summary.once) }; rzFin = null; dnext(); }
 function setScore(answered, total){
   const left = total ? Math.max(0, total - answered) : 0;
   $("score").textContent = (total && left > 0) ? `${left} left` : "";
@@ -5787,7 +5881,7 @@ function dnext(){
     const { right, seen, miss, onDone, summary, onShown } = D;
     setScore(0, 0);
     screenTop();
-    P.innerHTML = `<div class="done"><h2>${firstTimeScore(seen, miss)}</h2>${summary ? summary(miss) : ""}<button class="next" id="ok">Continue</button></div>`;
+    P.innerHTML = `<div class="done"><h2>${firstTimeScore(seen, miss, D.once)}</h2>${summary ? summary(miss) : ""}<button class="next" id="ok">Continue</button></div>`;
     rzFin = D; D = null; drillKeyHandler = null;
     $("ok").onclick = () => { rzFin = null; sessionClear(); onDone(); };
     if(onShown) onShown();
@@ -5802,8 +5896,9 @@ function dnext(){
   sessionSave(true);
 }
 // v2 score: right first time over distinct items. Every miss requeued one re-ask, so asks = items + misses.
-function firstTimeScore(seen, miss){
-  const n = seen - miss.length;
+// once (the level exam): no miss was requeued, so asks = items.
+function firstTimeScore(seen, miss, once){
+  const n = once ? seen : seen - miss.length;
   return `${n - VC.dedupeMisses(miss).length} of ${n}`;
 }
 // v2: sentence and pattern items (cloze, hear-sentence, pattern) left-align label and stimulus together.
@@ -5817,17 +5912,18 @@ function renderMcItem(it){
   it.rzShown = opts;
   const container = $("o");
   let answered = false;
-  const optH = optsPrimary(opts, o => it.optHtml ? it.optHtml(o) : ui(o));
+  const optH = asItem(it, () => optsPrimary(opts, o => it.optHtml ? it.optHtml(o) : ui(o)));
+  const labels = asItem(it, () => opts.map(o => optH ? optH(o) : it.optHtml ? it.optHtml(o) : ui(o)));
   opts.forEach((o,i)=>{
     const b = document.createElement("button");
-    b.innerHTML = `<b class="num"${UIA}>${i+1}</b>${optH ? optH(o) : it.optHtml ? it.optHtml(o) : ui(o)}`;
+    b.innerHTML = `<b class="num"${UIA}>${i+1}</b>${labels[i]}`;
     if(it.optsT && DISP.rtl) b.dir = "rtl"; // options are target-language words
     b.onclick = () => {
       if(answered) return; answered = true;
       [...container.children].forEach(x=>{ x.disabled = true; if(x.dataset.v === it.a) x.classList.add("ok"); });
       const ok = o === it.a;
       if(!ok) b.classList.add("bad");
-      D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(it); }
+      D.seen++; if(ok) D.right++; else { D.miss.push(it); if(!D.once) D.q.push(it); }
       ANS_IT = it; try { if(it.onAnswer) it.onAnswer(ok); } finally { ANS_IT = null; }
       const rh = revealHTML(it, it.reveal || "", ok); dropStimLinks(rh); showReveal(rh);
       playReveal(it);
@@ -5884,7 +5980,7 @@ function renderTypeItem(it){
     if(answered) return; if(!input.value.trim()) return;
     answered = true; input.disabled = true; $("submit").style.display = "none";
     const ok = it.check(input.value);
-    D.seen++; if(ok) D.right++; else { D.miss.push(it); D.q.push(typedRequeue(it)); }
+    D.seen++; if(ok) D.right++; else { D.miss.push(it); if(!D.once) D.q.push(typedRequeue(it)); }
     ANS_IT = it; try { if(it.onAnswer) it.onAnswer(ok); } finally { ANS_IT = null; }
     const rh = typedRevealHTML(it, input.value, ok);
     dropStimLinks(rh); showReveal(rh);
@@ -6014,7 +6110,7 @@ function highlightHTML(s, entry){
 }
 // null when the sentence renders exactly as without characters (showPron off hides all ruby).
 function sentenceRuby(s){
-  if(!HAS_CHARACTERS || !s || !Array.isArray(s.ruby) || (!showPron() && !PRON_FIRST)) return null;
+  if(BARE_ITEM || !HAS_CHARACTERS || !s || !Array.isArray(s.ruby) || (!showPron() && !PRON_FIRST)) return null;
   return VC.rubyTiers(s, CHAR_LIST, prog, PACK, VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU));
 }
 // The bare tier keeps its <rt> with visibility:hidden, so a token's width never changes
@@ -6048,7 +6144,7 @@ function rubyTextHTML(s, toks, entry, taps){
 }
 // false: the sentence could only show its reading line, where no blank can be placed.
 function pfSentence(s, entry, blank, written, taps){
-  if(!PRON_FIRST) return null;
+  if(!PRON_FIRST || BARE_ITEM) return null;
   const d = VC.sentenceDisplay(s, CHAR_LIST, prog, PACK, VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU), blank, written);
   if(d === null) return blank ? false : null;
   if(d.mode === "text") return null;
@@ -6088,7 +6184,8 @@ function exampleSentencesHTML(entry){
   if(!ex.length) return "";
   return `<p class="q" style="margin-top:12px">Example${ex.length>1?"s":""}:</p>${ex.map(s => sentenceRowHTML(s, entry)).join("")}`;
 }
-function revealBlock(entry){
+function revealBlock(entry){ return unbare(() => revealBlockHTML(entry)); }
+function revealBlockHTML(entry){
   const p = pronBeside(entry), hear = canHearWord(entry);
   // The examples carry no "Examples:" heading in a reveal.
   const ex = exampleSentencesHTML(entry).replace(/^<p class="q" style="margin-top:12px">Examples?:<\/p>/, "");
@@ -6278,7 +6375,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "3290375004-2364851";
+const VE_BUILD = "2527597940-2379142";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6339,6 +6436,34 @@ pronTypeItem = rzWrap("typePron", pronTypeItem); writtenTypeItem = rzWrap("typeW
 writtenPronTypeItem = rzWrap("typeWrittenPron", writtenPronTypeItem); meaningTypeItem = rzWrap("typeMeaning", meaningTypeItem);
 readSentence = rzWrap("sRead", readSentence); hearSentence = rzWrap("sHear", hearSentence); gapSentence = rzWrap("sGap", gapSentence); patternItem = rzWrap("pattern", patternItem);
 charDrillItem = rzWrap("char", charDrillItem); scriptDrillItem = rzWrap("script", scriptDrillItem); lessonItem = rzWrap("lesson", lessonItem);
+// Level exam items (core.js examPlan kinds), built bare; a miss puts the word on the critical set (a sentence
+// miss: the blanked word, else the sentence's words of the exam level). Registered so a parked exam resumes bare.
+function examItem(kind, x){
+  const it = bareBuild(() => kind === "hearS" ? sentenceByEar(x) : kind === "readS" ? readSentence(x) : kind === "gap" ? (gapSentence(x, false) || readSentence(x))
+    : kind === "typeM" ? (typedKindFits(x, "writtenMeaning") ? meaningTypeItem(x, false) : recallItem(x)) : kind === "hear" ? hearItem(x) : kind === "read" ? readItem(x) : recallItem(x));
+  const inner = it.onAnswer;
+  it.onAnswer = function(ok){ if(inner) inner.call(this, ok); if(!ok) examMiss(this, x); };
+  return it;
+}
+examItem = rzWrap("exam", examItem);
+function examMiss(it, x){
+  const ids = String(it.key || "").startsWith("w:") ? [x.id] : it.gapWord ? [it.gapWord] : (x.words || []).filter(id => WORDS_BY_ID[id] && String(WORDS_BY_ID[id].lv) === String(x.lv));
+  const sn = VC.daySn(prog); let n = 0;
+  ids.forEach(id => { if(VC.critAdd(prog, id, sn)){ n++; if(D) (D.ca || (D.ca = [])).push(id); } });
+  if(n) store.save();
+}
+function examResults(lv){
+  const summary = miss => `${missSummary(miss)}<p class="pvs" id="examCrit">Added to critical: ${(D && D.ca ? D.ca.length : 0)} word${D && D.ca && D.ca.length === 1 ? "" : "s"}</p>`;
+  summary.rzs = { s: "exam", lv }; summary.once = true;
+  return { summary, onShown: () => { const d = rzFin; if(!d) return; VC.examRecord(prog, lv, d.seen - VC.dedupeMisses(d.miss).length, d.seen, todayISO()); store.save(); } };
+}
+const examOpts = () => ({ typedOk: w => typedKindFits(w, "writtenMeaning"), gapOk: s => gapIdxs(s).length > 0, canHear: canHearWord });
+function startExam(lv){
+  const rng = VC.seededRng(VC.hashSeed(`exam:${lv}:${prog.sessions || 0}:${VC.daySn(prog)}:${Object.keys(prog.exam || {}).length}`));
+  const plan = VC.examPlan(WORDS, SENTENCES, PACK, prog, lv, rng, examOpts());
+  const r = examResults(lv);
+  drill(plan.map(p => examItem(p.kind, p.s || p.word)), testRender, r.summary, r.onShown);
+}
 // A choice counterpart (typedRequeue) is rebuilt from its typed parent.
 function rzFallback(it){
   const r = rzRun(it.choiceFallback, it, []);
@@ -6457,7 +6582,7 @@ function drillRec(d){
   const items = (d.cur ? [d.cur] : []).concat(d.q);
   return { o: d.rzo, cur: !!d.cur, ord: d.cur && d.cur.rzShown ? d.cur.rzShown : null,
     q: items.map(it => rzEncItem(it, it === d.cur || !!it.rzSeen)), right: d.right, seen: d.seen,
-    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined, dn: d.down && d.down.length ? d.down.slice() : undefined };
+    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined, dn: d.down && d.down.length ? d.down.slice() : undefined, ca: d.ca && d.ca.length ? d.ca.slice() : undefined };
 }
 // A miss is kept as its item's recipe, once per key (missSummary shows the first one): the
 // reveal markup with its example sentences is ~3 KB a miss.
@@ -6561,8 +6686,9 @@ function sessionResume(forTab){
     const o = rec.drill.o;
     if(o.o === "wordsSet"){ wordsQuery = ""; wordsLv = o.lv; wordsTapped = true; wordsSet = o.set; }
     if(o.o === "lesson") soundsSel = o.i;
-    D = { q: items, right: rec.drill.right, seen: rec.drill.seen, miss: misses, onDone, summary: results.summary, onShown: results.onShown, rzo: o, rzs: results.summary.rzs };
+    D = { q: items, right: rec.drill.right, seen: rec.drill.seen, miss: misses, onDone, summary: results.summary, onShown: results.onShown, rzo: o, rzs: results.summary.rzs, once: !!results.summary.once };
     if(Array.isArray(rec.drill.dn)) D.down = rec.drill.dn.filter(id => typeof id === "string");
+    if(Array.isArray(rec.drill.ca)) D.ca = rec.drill.ca.filter(id => typeof id === "string");
     dnext();
   } else if(rd){
     // fb46: the time between the record and now was not spent reading.
@@ -6632,7 +6758,8 @@ $("panel").addEventListener("click", e => {
   if(!box.hidden) bringIntoView(box);
 });
 
-function sentenceRevealBlock(s){
+function sentenceRevealBlock(s){ return unbare(() => sentenceRevealHTML(s)); }
+function sentenceRevealHTML(s){
   const pf = pfSentence(s, null, null, null, true);
   if(pf && pf.taps) return `<div data-tokbox><div class="rw${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${sentSayHTML(s)}${pfWrittenTap(pf)}</div><div style="color:var(--mute)">${ui(s.en)}</div></div>`;
   if(pf){
@@ -6683,7 +6810,7 @@ function gapSentence(s, typed){
   const html = pf ? `<div class="med wd${pf.ruby ? " hasruby" : ""}"${TA}>${pf.html}${pfWrittenTap(pf)}</div><div class="q cue">${ui(s.en)}</div>`
     : `<div class="med wd"${TA}>${escapeHtml(b.before)}<span class="blank">____</span>${escapeHtml(b.after)}</div><div class="q cue">${ui(s.en)}</div>`;
   const gapKind = typed && TYPING ? "type" : "recall";
-  const base = { key:"s:"+s.id, reveal: sentenceRevealBlock(s), onAnswer: ok=>{ markSentence(s.id, ok, gapKind === "type" ? "gapType" : "gap"); markGapWord(entry.id, ok, gapKind); },
+  const base = { key:"s:"+s.id, gapWord: entry.id, reveal: sentenceRevealBlock(s), onAnswer: ok=>{ markSentence(s.id, ok, gapKind === "type" ? "gapType" : "gap"); markGapWord(entry.id, ok, gapKind); },
     onReveal: b => saySentence(s, b), revealHear: canHearSentence(s) };
   const choice = () => { const gc = VC.gapChoices(entry, match, WORDS, PACK, optLike(entry), wordMix(), s); const m = optScript(entry, Object.values(gc.byLabel));
     return { kind:"mc", label:"What's the missing word?", optsClass:"opts-hero opts-w", html, opts: gc.opts, a: gc.a, optHtml: gapOptsHtml(entry, gc, m), optsT: true }; };
@@ -7102,6 +7229,7 @@ function todayRender(){
   if(legacyNotice) $("legacyOk").onclick = () => { legacyNotice = null; todayRender(); };
   if(legacyFail) $("legacySkip").onclick = () => { legacyFail = null; storeReadOnly = false; store.save(); todayRender(); };
   if($("pmap")){ const go = () => document.querySelector('#tabs button[data-t="progress"]').click(); $("pmap").onclick = go; $("pmap").onkeydown = e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } }; }
+  if($("examReady")) $("examReady").onclick = () => document.querySelector('#tabs button[data-t="test"]').click();
   if(showPlaceHint) $("hintPlace").onclick = enterPlacementFromToday;
   if(showSoundsHint) $("hintSounds").onclick = enterFirstSoundsLessonFromToday;
   if(xNotice) $("scriptNoticeOk").onclick = () => { VC.dismissScriptNotice(prog); store.save(); todayRender(); };
@@ -7138,7 +7266,8 @@ function todayPlanV2(o){
   if(pz) steps.splice(1, 1);
   if(readNext){ const p = readNext.p; steps.push([readNext.mode === "listen" ? "Listen" : "Read", tf(p.title)]); }
   const goal = pvGoalHTML();
-  return `<div class="pv tdv"><p class="pva">Session ${n}${pz ? ", review only" : ""}</p>${goal ? `<div class="pmv" id="pmap" role="button" tabindex="0" aria-label="Open Progress">${goal}</div>` : ""}<section class="tsts">${steps.map(s => `<div class="tst"><span>${s[0]}</span><div class="tsd">${s[1]}</div></div>`).join("")}</section></div>`;
+  const ex = VC.examReady(WORDS, PACK, prog, CHAR_LIST);
+  return `<div class="pv tdv"><p class="pva">Session ${n}${pz ? ", review only" : ""}</p>${goal ? `<div class="pmv" id="pmap" role="button" tabindex="0" aria-label="Open Progress">${goal}</div>` : ""}<section class="tsts">${steps.map(s => `<div class="tst"><span>${s[0]}</span><div class="tsd">${s[1]}</div></div>`).join("")}</section>${ex != null ? `<p class="pvs"><button type="button" class="showw" id="examReady" style="margin:0">Level exam ready: ${escapeHtml(levelLabel(ex))}</button></p>` : ""}</div>`;
 }
 // inSession: Go has started the session (prog.sn is its number); the home plan is for the next one.
 function todayReadItem(inSession){
@@ -7314,6 +7443,7 @@ function rzResultsOf(e){
   if(!e) return { summary: missSummary };
   const s = rzDec(e);
   if(s.s === "scriptMore" && s.snap && Array.isArray(s.snap.ssets) && s.snap.ssets[s.i + 1]) return scriptMoreResults(s.snap, s.i);
+  if(s.s === "exam" && LEVELS.includes(String(s.lv))) return examResults(String(s.lv));
   return rzFail();
 }
 // Lesson card `body` is trusted pack HTML (pack authors write it); everything else is escaped.
@@ -7435,11 +7565,17 @@ function wordsRender(){
   search.oninput = () => { wordsQuery = search.value; clearTimeout(searchTimer); searchTimer = setTimeout(renderWordBody, 120); };
   renderWordBody();
 }
+// Critical flag (docs/PACK_SCHEMA.md "Level exam and critical set"): icon only, its label in aria.
+const FLAG_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3v18M5 4h11l-2 4 2 4H5" fill="FILL" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
+const critFlagHTML = w => { const on = VC.critHas(prog, w.id); return `<button type="button" class="cflag${on ? " on" : ""}" id="cf_${escapeHtml(w.id)}" aria-pressed="${on}" aria-label="${on ? "Unmark" : "Mark critical"}">${FLAG_SVG.replace("FILL", on ? "currentColor" : "none")}</button>`; };
+function critToggle(id){ if(VC.critHas(prog, id)) VC.critRemove(prog, id); else VC.critAdd(prog, id, VC.daySn(prog)); store.save(); }
 function wordListInto(wl, list){
   list.forEach(w => {
     const row = document.createElement("div"); row.className = "wl";
-    row.innerHTML = wordRowHTML(w, "wl");
+    row.innerHTML = wordRowHTML(w, "wl") + critFlagHTML(w);
     if(canHearWord(w)){ row.style.cursor = "pointer"; row.onclick = () => sayWord(w); }
+    const b = $("cf_" + w.id);
+    if(b) b.onclick = e => { if(e && e.stopPropagation) e.stopPropagation(); critToggle(w.id); renderWordBody(); };
     wl.appendChild(row);
   });
 }
@@ -7965,13 +8101,15 @@ function testRender(){
   // appView: placement leads before the first placement and is gone after it (owner 2026-10-08; Reset all progress
   // brings it back); a test of 20 drops its count.
   const placed = !!prog.placedOnce, cnt = n => n === 20 ? "" : ` ${n}`;
+  const examLvs = needMore ? [] : VC.examLevels(WORDS, PACK, prog, CHAR_LIST);
   P.innerHTML = `${placed ? "" : `<p class="q">Placement finds where to start. Free tests draw from what's already learned.</p>`}
     <div class="actions tacts">
       ${needMore ? (placed ? `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far).</div>` : `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far). Learn ${VC.TEST_MIN_WORDS} words first, or let placement find where to start.<button class="next" id="needPlace" style="margin-top:8px">Take the placement test</button></div>`) : placed ? "" : `<button class="next" id="pl">Take the placement test</button>`}
       ${tg.words ? `${hearN ? `<button class="ghost" id="tListen">Listen${cnt(hearN)}</button>` : lockNote("tListenLock", "Listen test: no items until a voice or recording is available.")}
       <button class="ghost" id="tRecall">Recall${cnt(n20)}</button>` : ""}
       ${tg.sentences ? `<button class="ghost" id="tSentences">Sentences${cnt(sentN)}</button>` : sentNote}${charN ? `
-      <button class="ghost" id="tChars">Characters${cnt(charN)}</button>` : charNote}
+      <button class="ghost" id="tChars">Characters${cnt(charN)}</button>` : charNote}${examLvs.map(lv => { const e = VC.examResult(prog, lv); return `
+      <button class="ghost" id="tExam_${escapeHtml(lv)}">Level exam: ${escapeHtml(levelLabel(lv))}</button>${e ? `<p class="q" id="tExamLast_${escapeHtml(lv)}" style="margin:0">${e.r} of ${e.n}, ${VC.examAgo(e, todayISO())}</p>` : ""}`; }).join("")}
     </div>`;
   if(!placed){
     if(needMore) $("needPlace").onclick = enterPlacementFromToday;
@@ -7985,8 +8123,9 @@ function testRender(){
     $("tSentences").onclick = () => { const pi = PATTERNS_ON ? patternItems(VC.patternCount(20), planSn()) : []; drill(pickSentences(availSent, 20 - pi.length, s => [canHearSentence(s) ? "hear" : "read"]).map(sentenceByEar).concat(pi), testRender, missSummary); };
   }
   if(charN) $("tChars").onclick = () => drill(charPlan().map(planItem), testRender, missSummary);
+  examLvs.forEach(lv => { $("tExam_" + lv).onclick = () => startExam(lv); });
   setTitle("Test"); testName = null;
-  [["tListen", "Listen"], ["tRecall", "Recall"], ["tSentences", "Sentences"], ["tChars", "Characters"]].forEach(([id, t]) => { const b = $(id); const f = b && b.onclick; if(f) b.onclick = () => { testName = t; setTitle(t); f(); }; });
+  [["tListen", "Listen"], ["tRecall", "Recall"], ["tSentences", "Sentences"], ["tChars", "Characters"], ...examLvs.map(lv => ["tExam_" + lv, "Level exam: " + levelLabel(lv)])].forEach(([id, t]) => { const b = $(id); const f = b && b.onclick; if(f) b.onclick = () => { testName = t; setTitle(t); f(); }; });
 }
 function placeRender(){
   stopSpeaking();
@@ -8236,6 +8375,13 @@ function pvGoalsHTML(){
 }
 // "Level 1" + "Level 2" -> "Level 1–2": a shared leading word is written once.
 const pvRange = (a, b) => { const i = a.lastIndexOf(" ") + 1; return i > 0 && b.slice(0, i) === a.slice(0, i) ? `${a}–${b.slice(i)}` : `${a}–${b}`; };
+// Progress: the critical set as one row, its words (Missed-row markup) behind a tap; hidden when empty.
+let pvCritOpen = false;
+function critRowHTML(){
+  const list = VC.critWords(prog, WORDS); if(!list.length) return "";
+  const rows = pvCritOpen ? `<div class="pvcl" id="pvCritList">${list.map((w, i) => missRowHTML({ key: "w:" + w.id, reveal: revealBlock(w) }, 1, i)).join("")}</div>` : "";
+  return `<div class="pvl"><button class="pvc" id="pvCrit" aria-expanded="${pvCritOpen}" aria-controls="pvCritList"><span>Exam misses</span><span class="pvn">${list.length} left</span></button>${rows}</div>`;
+}
 function progressRender(){
   stopSpeaking();
   setScore(0,0);
@@ -8300,7 +8446,7 @@ function progressRender(){
   P.innerHTML = `${hasSpeech || PACK_AUDIO ? "" : `<div class="warn">${VOICE_NOTICE_V2}</div>`}<div class="pv">
     <p class="pva">${prog.sessions || 0} session${prog.sessions === 1 ? "" : "s"}, ${escapeHtml(levelLabel(LEVELS[at]))}</p>
     ${pvHeroHTML(cur, anim)}${pvGoalHTML()}${all ? pvGoalsHTML() : ""}
-    <section class="pvls">${all ? `<div class="pvl" id="pvLearned"><div class="pvt"><span>Learned</span><span class="pvn">${lwAll.length} of ${WORDS.length}</span></div></div>` : ""}${xp ? `<table class="stats">${xp.rows}</table>` : ""}${lvData.map(levelRow).join("")}${cp && !lag && cp.rows ? `<table class="stats">${cp.rows}</table>` : ""}${sounds}${rspd}</section>
+    <section class="pvls">${all ? `<div class="pvl" id="pvLearned"><div class="pvt"><span>Learned</span><span class="pvn">${lwAll.length} of ${WORDS.length}</span></div></div>` : ""}${critRowHTML()}${xp ? `<table class="stats">${xp.rows}</table>` : ""}${lvData.map(levelRow).join("")}${cp && !lag && cp.rows ? `<table class="stats">${cp.rows}</table>` : ""}${sounds}${rspd}</section>
     ${missed.length ? `<section class="pvx"><p class="pvk">Still shaky</p><p class="pvw">${missed.map(w => `<span${TA}>${wordFormHTML(w, false)}</span>`).join(" ")}</p></section>` : ""}
     ${all && weak.length ? `<section><p class="pvk">Weakest words</p>${weak.map(w => `<div class="rowset">${wordRowHTML(w, "rowset")}</div>`).join("")}</section>` : ""}
     <button class="ghost pvall" id="pvAll" aria-expanded="${all}">${all ? "Show less" : "Show all"}</button>
@@ -8308,6 +8454,7 @@ function progressRender(){
     <div class="row">${PACK.showPron !== false ? `<button class="chip ${showPron()?'on':''}" id="togglePron" aria-pressed="${showPron()}">Show ${escapeHtml(PRON_NOUN)}</button>` : ""}<button class="chip ${paused() ? "" : "on"}" id="togglePause" aria-pressed="${!paused()}">New material: ${paused() ? "paused" : "on"}</button>${themeChipHTML()}</div>${xp ? xp.controls : ""}${cp ? cp.controls : ""}${progressToolsHTML()}</section></div>`;
   $("pvAll").onclick = () => { pvAll = !pvAll; progressRender(); };
   if(folded) $("pvLow").onclick = () => { pvLow = true; progressRender(); };
+  if($("pvCrit")) $("pvCrit").onclick = () => { pvCritOpen = !pvCritOpen; progressRender(); };
   progressWire(xp, cp);
 }
 function charProgress(o){
@@ -8459,4 +8606,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:985711598-2364175-->
+<!--ve-build:1722844656-2378466-->
