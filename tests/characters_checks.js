@@ -757,7 +757,7 @@ function placeCharsChecks(){
   const run = VC.placedCharSets(PACK, UNITS, placedW, {});
   const seeded = UNITS.filter(u => recs[u.id]);
   console.log(`    zh k=10: ${placedW.size} placed words, ${seeded.length} units seeded in ${run.length} of ${sets.length} sets`);
-  check(`[placeChars] zh: ${seeded.length} units seeded provisional {r:1,w:0,s:1,prov:1}, every one with all its words placed`, seeded.length > 0 && seeded.every(u => JSON.stringify(recs[u.id]) === '{"r":1,"w":0,"s":1,"prov":1}' && u.words.every(i => placedW.has(i))));
+  check(`[placeChars] zh: ${seeded.length} units seeded provisional {r:1,w:0,s:0,prov:1,pl:1}, every one with all its words placed`, seeded.length > 0 && seeded.every(u => JSON.stringify(recs[u.id]) === '{"r":1,"w":0,"s":0,"prov":1,"pl":1}' && u.words.every(i => placedW.has(i))));
   check("[placeChars] zh: the seeded units are exactly the whole sets of the leading run (no partial set)", run.length > 0 && run.length < sets.length && run.every(x => x.units.every(u => recs[u.id])) && sets.slice(run.length).every(x => !x.units.every(u => recs[u.id])) && seeded.length === run.reduce((n, x) => n + x.units.length, 0));
   const nextSet = sets[run.length];
   check("[placeChars] zh: the first unseeded set has a unit whose word is unplaced", nextSet.units.some(u => !u.words.every(i => placedW.has(i))));
@@ -821,12 +821,14 @@ function placeCharsChecks(){
   const off = Object.assign({}, PACK, { characters: Object.assign({}, PACK.characters, { learn: undefined }) });
   check("[placeChars] without learn lag: no hint hiding, placementCharsOn false", !VC.placedPastFirstBucket(out, WORDS, off) && !VC.placementCharsOn(off));
   if(OLD){
+    // placed-fixes: a placed record is now {s:0,prov:1,pl:1} (probation + marker); the pre-fb50 engine seeded {s:1,prov:1}.
+    const oldShape = q => { const c = JSON.parse(JSON.stringify(q)); Object.values(c.w || {}).forEach(r => { if(r.pl === 1 && r.s === 0){ delete r.pl; r.s = 1; } }); return c; };
     const n1 = OLD.applyPlacement(OLD.defaultProg(off), st, 8, WORDS, off), n2 = VC.applyPlacement(VC.defaultProg(off), st, 8, WORDS, off, UNITS);
-    check("[placeChars] without characters.learn lag: identical to the pre-fb50 engine", JSON.stringify(n1) === JSON.stringify(n2));
+    check("[placeChars] without characters.learn lag: identical to the pre-fb50 engine", JSON.stringify(n1) === JSON.stringify(oldShape(n2)));
     const lw = zhLike();
     const stz = VC.strata(lw.words, lw.pack.placement, VC.setSizeOf(lw.pack));
     const z1 = OLD.applyPlacement(OLD.defaultProg(lw.pack), stz, 2, lw.words, lw.pack), z2 = VC.applyPlacement(VC.defaultProg(lw.pack), stz, 2, lw.words, lw.pack, lw.units);
-    check("[placeChars] zh-like fixture (no learn lag): byte-identical to the pre-fb50 engine, no unit seeded", JSON.stringify(z1) === JSON.stringify(z2) && Object.keys(VC.charRecs(z2)).length === 0);
+    check("[placeChars] zh-like fixture (no learn lag): byte-identical to the pre-fb50 engine, no unit seeded", JSON.stringify(z1) === JSON.stringify(oldShape(z2)) && Object.keys(VC.charRecs(z2)).length === 0);
   }
   // ja: the shipped pack (learn lag).
   const JA = path.join(ROOT, "..", "japanese", "pack");
