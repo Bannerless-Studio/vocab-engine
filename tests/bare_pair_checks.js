@@ -299,7 +299,8 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
         api.tab("progress"); await tick(); out.push(noBars(api.panel())); out.push(JSON.stringify(api.getProg()));
         return out;
       };
-      const ref = await walk(baseHtml, BASE), cur = await walk(appHtml, VC);
+      // zh-read-order: the passage title now carries hasruby (line-height for its ruby); d3632b8 marks none
+      const ref = await walk(baseHtml, BASE), cur = (await walk(appHtml, VC)).map(x => x.replace(/<h2 class="ptitle hasruby"/g, '<h2 class="ptitle"'));
       check(`flag off (bareByPair stripped): Today, two sessions, three Read passages, Progress and records byte-identical to ${BASE_SHA} (${ref.join("").length} chars)`, JSON.stringify(ref) === JSON.stringify(cur.map(stripExam)), cur.findIndex((x, i) => stripExam(x) !== ref[i]));
     }
     const p = OWNER ? clone(OWNER) : synth();
