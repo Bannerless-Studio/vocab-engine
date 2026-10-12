@@ -1725,11 +1725,16 @@ function examItem(kind, x){
 }
 examItem = rzWrap("exam", examItem);
 function examMiss(it, x){
-  const ids = String(it.key || "").startsWith("w:") ? [x.id] : it.gapWord ? [it.gapWord] : (x.words || []).filter(id => WORDS_BY_ID[id] && String(WORDS_BY_ID[id].lv) === String(x.lv));
+  const word = String(it.key || "").startsWith("w:"), sent = !word && !it.gapWord;
+  const ids = word ? [x.id] : it.gapWord ? [it.gapWord] : VC.examMissWords(prog, x, x.lv, WORDS_BY_ID_MAP, PACK, VC.EXAM_CRIT_MAX - ((D && D.cs) || 0));
   const sn = VC.daySn(prog); let n = 0;
-  ids.forEach(id => { if(VC.critAdd(prog, id, sn)){ n++; if(D) (D.ca || (D.ca = [])).push(id); } });
+  ids.forEach(id => { if(VC.critAdd(prog, id, sn)){ n++; if(D) (D.ca || (D.ca = [])).push(id);
+    // A flagged word without a record gets one (as a passage weak word does, d), so Review can draw it.
+    if(!prog.w[id]) VC.ensureWordRec(prog, WORDS, PACK, id).d = 1; } });
+  if(sent && D) D.cs = ((D.cs) || 0) + n;
   if(n) store.save();
 }
+const WORDS_BY_ID_MAP = new Map(WORDS.map(w => [w.id, w]));
 function examResults(lv){
   const summary = miss => `${missSummary(miss)}<p class="pvs" id="examCrit">Added to critical: ${(D && D.ca ? D.ca.length : 0)} word${D && D.ca && D.ca.length === 1 ? "" : "s"}</p>`;
   summary.rzs = { s: "exam", lv }; summary.once = true;
@@ -1860,7 +1865,7 @@ function drillRec(d){
   const items = (d.cur ? [d.cur] : []).concat(d.q);
   return { o: d.rzo, cur: !!d.cur, ord: d.cur && d.cur.rzShown ? d.cur.rzShown : null,
     q: items.map(it => rzEncItem(it, it === d.cur || !!it.rzSeen)), right: d.right, seen: d.seen,
-    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined, dn: d.down && d.down.length ? d.down.slice() : undefined, ca: d.ca && d.ca.length ? d.ca.slice() : undefined };
+    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined, dn: d.down && d.down.length ? d.down.slice() : undefined, ca: d.ca && d.ca.length ? d.ca.slice() : undefined, cs: d.cs || undefined };
 }
 // A miss is kept as its item's recipe, once per key (missSummary shows the first one): the
 // reveal markup with its example sentences is ~3 KB a miss.
@@ -1967,6 +1972,7 @@ function sessionResume(forTab){
     D = { q: items, right: rec.drill.right, seen: rec.drill.seen, miss: misses, onDone, summary: results.summary, onShown: results.onShown, rzo: o, rzs: results.summary.rzs, once: !!results.summary.once };
     if(Array.isArray(rec.drill.dn)) D.down = rec.drill.dn.filter(id => typeof id === "string");
     if(Array.isArray(rec.drill.ca)) D.ca = rec.drill.ca.filter(id => typeof id === "string");
+    if(Number.isInteger(rec.drill.cs)) D.cs = rec.drill.cs;
     dnext();
   } else if(rd){
     // fb46: the time between the record and now was not spent reading.
@@ -2544,7 +2550,7 @@ function todayPlanV2(o){
   if(pz) steps.splice(1, 1);
   if(readNext){ const p = readNext.p; steps.push([readNext.mode === "listen" ? "Listen" : "Read", tf(p.title)]); }
   const goal = pvGoalHTML();
-  const ex = VC.examReady(WORDS, PACK, prog, CHAR_LIST);
+  const ex0 = VC.examReady(WORDS, PACK, prog, CHAR_LIST), ex = ex0 != null && !VC.examSeen(prog, ex0) ? ex0 : null;
   return `<div class="pv tdv"><p class="pva">Session ${n}${pz ? ", review only" : ""}</p>${goal ? `<div class="pmv" id="pmap" role="button" tabindex="0" aria-label="Open Progress">${goal}</div>` : ""}<section class="tsts">${steps.map(s => `<div class="tst"><span>${s[0]}</span><div class="tsd">${s[1]}</div></div>`).join("")}</section>${ex != null ? `<p class="pvs"><button type="button" class="showw" id="examReady" style="margin:0">Level exam ready: ${escapeHtml(levelLabel(ex))}</button></p>` : ""}</div>`;
 }
 // inSession: Go has started the session (prog.sn is its number); the home plan is for the next one.
@@ -3380,6 +3386,8 @@ function testRender(){
   // brings it back); a test of 20 drops its count.
   const placed = !!prog.placedOnce, cnt = n => n === 20 ? "" : ` ${n}`;
   const examLvs = needMore ? [] : VC.examLevels(WORDS, PACK, prog, CHAR_LIST);
+  // Today's "Level exam ready" line stops once the Test tab has been opened for that level.
+  if(examLvs.length && VC.noteExamSeen(prog, VC.examReady(WORDS, PACK, prog, CHAR_LIST))) store.save();
   P.innerHTML = `${placed ? "" : `<p class="q">Placement finds where to start. Free tests draw from what's already learned.</p>`}
     <div class="actions tacts">
       ${needMore ? (placed ? `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far).</div>` : `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far). Learn ${VC.TEST_MIN_WORDS} words first, or let placement find where to start.<button class="next" id="needPlace" style="margin-top:8px">Take the placement test</button></div>`) : placed ? "" : `<button class="next" id="pl">Take the placement test</button>`}
@@ -3656,7 +3664,7 @@ const pvRange = (a, b) => { const i = a.lastIndexOf(" ") + 1; return i > 0 && b.
 // Progress: the critical set as one row, its words (Missed-row markup) behind a tap; hidden when empty.
 let pvCritOpen = false;
 function critRowHTML(){
-  const list = VC.critWords(prog, WORDS); if(!list.length) return "";
+  const list = VC.critWords(prog, learnedWords()); if(!list.length) return ""; // the words Review can draw (any record, provisional included)
   const rows = pvCritOpen ? `<div class="pvcl" id="pvCritList">${list.map((w, i) => missRowHTML({ key: "w:" + w.id, reveal: revealBlock(w) }, 1, i)).join("")}</div>` : "";
   return `<div class="pvl"><button class="pvc" id="pvCrit" aria-expanded="${pvCritOpen}" aria-controls="pvCritList"><span>Exam misses</span><span class="pvn">${list.length} left</span></button>${rows}</div>`;
 }

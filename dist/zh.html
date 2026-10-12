@@ -1861,8 +1861,21 @@ function examLevels(words, pack, prog, units){
 }
 const examResult = (prog, lv) => { const e = prog && isObj(prog.exam) ? prog.exam[String(lv)] : null; return isObj(e) && Number.isInteger(e.r) && Number.isInteger(e.n) ? e : null; };
 function examRecord(prog, lv, r, n, day){ if(!isObj(prog.exam)) prog.exam = {}; prog.exam[String(lv)] = { r, n, d: String(day) }; return prog.exam[String(lv)]; }
-// The highest level offered that has no exam yet: Today's one line.
-function examReady(words, pack, prog, units){ const ls = examLevels(words, pack, prog, units).filter(lv => !examResult(prog, lv)); return ls.length ? ls[ls.length - 1] : null; }
+// The lowest level offered that has no exam yet: Today's one line, until the learner has opened the Test tab since it
+// appeared (prog.exam.seen = that level, noted when Test renders; a new level offered later shows again).
+function examReady(words, pack, prog, units){ const ls = examLevels(words, pack, prog, units).filter(lv => !examResult(prog, lv)); return ls.length ? ls[0] : null; }
+const examSeen = (prog, lv) => !!(prog && isObj(prog.exam) && lv != null && prog.exam.seen === String(lv));
+function noteExamSeen(prog, lv){ if(lv == null || examSeen(prog, lv)) return false; if(!isObj(prog.exam)) prog.exam = {}; prog.exam.seen = String(lv); return true; }
+// A hear- or read-sentence miss flags only the sentence's exam-level words the learner does not know yet, lowest streak
+// first (no record counts as 0), at most two per sentence and capLeft left of the exam's six (review 2026-10-12: a
+// sentence carries 6-12 words; flagging them all would flood the reserve). A cloze miss flags its blanked word alone.
+const EXAM_SENT_CRIT = 2, EXAM_CRIT_MAX = 6;
+function examMissWords(prog, s, lv, words, pack, capLeft){
+  const r = (prog && prog.w) || {}, by = words instanceof Map ? words : new Map((words || []).map(w => [w.id, w]));
+  const n = Math.min(EXAM_SENT_CRIT, capLeft == null ? EXAM_SENT_CRIT : capLeft); if(n <= 0) return [];
+  const cands = [...new Set((s && s.words) || [])].map(id => by.get(id)).filter(w => w && String(w.lv) === String(lv) && !critHas(prog, w.id) && !wordKnown(r[w.id], w, pack));
+  return cands.map(w => ({ w, s: isObj(r[w.id]) ? r[w.id].s || 0 : 0 })).sort((a, b) => a.s - b.s || (a.w.id < b.w.id ? -1 : a.w.id > b.w.id ? 1 : 0)).slice(0, n).map(x => x.w.id);
+}
 function examAgo(e, today){
   const d = isoDayNumber(today) - isoDayNumber(e && e.d);
   return !isFinite(d) ? "" : d <= 0 ? "today" : d === 1 ? "yesterday" : `${d} days ago`;
@@ -5140,7 +5153,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, patternFirstMeeting, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
-  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, EXAM_SIZE, EXAM_MIX, CRIT_SLOTS, critMap, critHas, critAdd, critRemove, critWords, critSettle, critPick, critPre, examLevels, examResult, examRecord, examReady, examAgo, examPlan, seededRng, hashSeed, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, EXAM_SIZE, EXAM_MIX, CRIT_SLOTS, critMap, critHas, critAdd, critRemove, critWords, critSettle, critPick, critPre, examLevels, examResult, examRecord, examReady, examSeen, noteExamSeen, EXAM_SENT_CRIT, EXAM_CRIT_MAX, examMissWords, examAgo, examPlan, seededRng, hashSeed, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, levelPosition, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
@@ -6375,7 +6388,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2527597940-2379142";
+const VE_BUILD = "2533064663-2381407";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6447,11 +6460,16 @@ function examItem(kind, x){
 }
 examItem = rzWrap("exam", examItem);
 function examMiss(it, x){
-  const ids = String(it.key || "").startsWith("w:") ? [x.id] : it.gapWord ? [it.gapWord] : (x.words || []).filter(id => WORDS_BY_ID[id] && String(WORDS_BY_ID[id].lv) === String(x.lv));
+  const word = String(it.key || "").startsWith("w:"), sent = !word && !it.gapWord;
+  const ids = word ? [x.id] : it.gapWord ? [it.gapWord] : VC.examMissWords(prog, x, x.lv, WORDS_BY_ID_MAP, PACK, VC.EXAM_CRIT_MAX - ((D && D.cs) || 0));
   const sn = VC.daySn(prog); let n = 0;
-  ids.forEach(id => { if(VC.critAdd(prog, id, sn)){ n++; if(D) (D.ca || (D.ca = [])).push(id); } });
+  ids.forEach(id => { if(VC.critAdd(prog, id, sn)){ n++; if(D) (D.ca || (D.ca = [])).push(id);
+    // A flagged word without a record gets one (as a passage weak word does, d), so Review can draw it.
+    if(!prog.w[id]) VC.ensureWordRec(prog, WORDS, PACK, id).d = 1; } });
+  if(sent && D) D.cs = ((D.cs) || 0) + n;
   if(n) store.save();
 }
+const WORDS_BY_ID_MAP = new Map(WORDS.map(w => [w.id, w]));
 function examResults(lv){
   const summary = miss => `${missSummary(miss)}<p class="pvs" id="examCrit">Added to critical: ${(D && D.ca ? D.ca.length : 0)} word${D && D.ca && D.ca.length === 1 ? "" : "s"}</p>`;
   summary.rzs = { s: "exam", lv }; summary.once = true;
@@ -6582,7 +6600,7 @@ function drillRec(d){
   const items = (d.cur ? [d.cur] : []).concat(d.q);
   return { o: d.rzo, cur: !!d.cur, ord: d.cur && d.cur.rzShown ? d.cur.rzShown : null,
     q: items.map(it => rzEncItem(it, it === d.cur || !!it.rzSeen)), right: d.right, seen: d.seen,
-    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined, dn: d.down && d.down.length ? d.down.slice() : undefined, ca: d.ca && d.ca.length ? d.ca.slice() : undefined };
+    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined, dn: d.down && d.down.length ? d.down.slice() : undefined, ca: d.ca && d.ca.length ? d.ca.slice() : undefined, cs: d.cs || undefined };
 }
 // A miss is kept as its item's recipe, once per key (missSummary shows the first one): the
 // reveal markup with its example sentences is ~3 KB a miss.
@@ -6689,6 +6707,7 @@ function sessionResume(forTab){
     D = { q: items, right: rec.drill.right, seen: rec.drill.seen, miss: misses, onDone, summary: results.summary, onShown: results.onShown, rzo: o, rzs: results.summary.rzs, once: !!results.summary.once };
     if(Array.isArray(rec.drill.dn)) D.down = rec.drill.dn.filter(id => typeof id === "string");
     if(Array.isArray(rec.drill.ca)) D.ca = rec.drill.ca.filter(id => typeof id === "string");
+    if(Number.isInteger(rec.drill.cs)) D.cs = rec.drill.cs;
     dnext();
   } else if(rd){
     // fb46: the time between the record and now was not spent reading.
@@ -7266,7 +7285,7 @@ function todayPlanV2(o){
   if(pz) steps.splice(1, 1);
   if(readNext){ const p = readNext.p; steps.push([readNext.mode === "listen" ? "Listen" : "Read", tf(p.title)]); }
   const goal = pvGoalHTML();
-  const ex = VC.examReady(WORDS, PACK, prog, CHAR_LIST);
+  const ex0 = VC.examReady(WORDS, PACK, prog, CHAR_LIST), ex = ex0 != null && !VC.examSeen(prog, ex0) ? ex0 : null;
   return `<div class="pv tdv"><p class="pva">Session ${n}${pz ? ", review only" : ""}</p>${goal ? `<div class="pmv" id="pmap" role="button" tabindex="0" aria-label="Open Progress">${goal}</div>` : ""}<section class="tsts">${steps.map(s => `<div class="tst"><span>${s[0]}</span><div class="tsd">${s[1]}</div></div>`).join("")}</section>${ex != null ? `<p class="pvs"><button type="button" class="showw" id="examReady" style="margin:0">Level exam ready: ${escapeHtml(levelLabel(ex))}</button></p>` : ""}</div>`;
 }
 // inSession: Go has started the session (prog.sn is its number); the home plan is for the next one.
@@ -8102,6 +8121,8 @@ function testRender(){
   // brings it back); a test of 20 drops its count.
   const placed = !!prog.placedOnce, cnt = n => n === 20 ? "" : ` ${n}`;
   const examLvs = needMore ? [] : VC.examLevels(WORDS, PACK, prog, CHAR_LIST);
+  // Today's "Level exam ready" line stops once the Test tab has been opened for that level.
+  if(examLvs.length && VC.noteExamSeen(prog, VC.examReady(WORDS, PACK, prog, CHAR_LIST))) store.save();
   P.innerHTML = `${placed ? "" : `<p class="q">Placement finds where to start. Free tests draw from what's already learned.</p>`}
     <div class="actions tacts">
       ${needMore ? (placed ? `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far).</div>` : `<div class="stmt">Free tests unlock at ${VC.TEST_MIN_WORDS} learned words (${lw.length} so far). Learn ${VC.TEST_MIN_WORDS} words first, or let placement find where to start.<button class="next" id="needPlace" style="margin-top:8px">Take the placement test</button></div>`) : placed ? "" : `<button class="next" id="pl">Take the placement test</button>`}
@@ -8378,7 +8399,7 @@ const pvRange = (a, b) => { const i = a.lastIndexOf(" ") + 1; return i > 0 && b.
 // Progress: the critical set as one row, its words (Missed-row markup) behind a tap; hidden when empty.
 let pvCritOpen = false;
 function critRowHTML(){
-  const list = VC.critWords(prog, WORDS); if(!list.length) return "";
+  const list = VC.critWords(prog, learnedWords()); if(!list.length) return ""; // the words Review can draw (any record, provisional included)
   const rows = pvCritOpen ? `<div class="pvcl" id="pvCritList">${list.map((w, i) => missRowHTML({ key: "w:" + w.id, reveal: revealBlock(w) }, 1, i)).join("")}</div>` : "";
   return `<div class="pvl"><button class="pvc" id="pvCrit" aria-expanded="${pvCritOpen}" aria-controls="pvCritList"><span>Exam misses</span><span class="pvn">${list.length} left</span></button>${rows}</div>`;
 }
@@ -8606,4 +8627,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1722844656-2378466-->
+<!--ve-build:2574834388-2380731-->

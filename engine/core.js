@@ -1406,8 +1406,21 @@ function examLevels(words, pack, prog, units){
 }
 const examResult = (prog, lv) => { const e = prog && isObj(prog.exam) ? prog.exam[String(lv)] : null; return isObj(e) && Number.isInteger(e.r) && Number.isInteger(e.n) ? e : null; };
 function examRecord(prog, lv, r, n, day){ if(!isObj(prog.exam)) prog.exam = {}; prog.exam[String(lv)] = { r, n, d: String(day) }; return prog.exam[String(lv)]; }
-// The highest level offered that has no exam yet: Today's one line.
-function examReady(words, pack, prog, units){ const ls = examLevels(words, pack, prog, units).filter(lv => !examResult(prog, lv)); return ls.length ? ls[ls.length - 1] : null; }
+// The lowest level offered that has no exam yet: Today's one line, until the learner has opened the Test tab since it
+// appeared (prog.exam.seen = that level, noted when Test renders; a new level offered later shows again).
+function examReady(words, pack, prog, units){ const ls = examLevels(words, pack, prog, units).filter(lv => !examResult(prog, lv)); return ls.length ? ls[0] : null; }
+const examSeen = (prog, lv) => !!(prog && isObj(prog.exam) && lv != null && prog.exam.seen === String(lv));
+function noteExamSeen(prog, lv){ if(lv == null || examSeen(prog, lv)) return false; if(!isObj(prog.exam)) prog.exam = {}; prog.exam.seen = String(lv); return true; }
+// A hear- or read-sentence miss flags only the sentence's exam-level words the learner does not know yet, lowest streak
+// first (no record counts as 0), at most two per sentence and capLeft left of the exam's six (review 2026-10-12: a
+// sentence carries 6-12 words; flagging them all would flood the reserve). A cloze miss flags its blanked word alone.
+const EXAM_SENT_CRIT = 2, EXAM_CRIT_MAX = 6;
+function examMissWords(prog, s, lv, words, pack, capLeft){
+  const r = (prog && prog.w) || {}, by = words instanceof Map ? words : new Map((words || []).map(w => [w.id, w]));
+  const n = Math.min(EXAM_SENT_CRIT, capLeft == null ? EXAM_SENT_CRIT : capLeft); if(n <= 0) return [];
+  const cands = [...new Set((s && s.words) || [])].map(id => by.get(id)).filter(w => w && String(w.lv) === String(lv) && !critHas(prog, w.id) && !wordKnown(r[w.id], w, pack));
+  return cands.map(w => ({ w, s: isObj(r[w.id]) ? r[w.id].s || 0 : 0 })).sort((a, b) => a.s - b.s || (a.w.id < b.w.id ? -1 : a.w.id > b.w.id ? 1 : 0)).slice(0, n).map(x => x.w.id);
+}
 function examAgo(e, today){
   const d = isoDayNumber(today) - isoDayNumber(e && e.d);
   return !isFinite(d) ? "" : d <= 0 ? "today" : d === 1 ? "yesterday" : `${d} days ago`;
@@ -4685,7 +4698,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, patternFirstMeeting, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
-  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, EXAM_SIZE, EXAM_MIX, CRIT_SLOTS, critMap, critHas, critAdd, critRemove, critWords, critSettle, critPick, critPre, examLevels, examResult, examRecord, examReady, examAgo, examPlan, seededRng, hashSeed, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, EXAM_SIZE, EXAM_MIX, CRIT_SLOTS, critMap, critHas, critAdd, critRemove, critWords, critSettle, critPick, critPre, examLevels, examResult, examRecord, examReady, examSeen, noteExamSeen, EXAM_SENT_CRIT, EXAM_CRIT_MAX, examMissWords, examAgo, examPlan, seededRng, hashSeed, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, levelPosition, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,

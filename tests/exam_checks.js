@@ -150,7 +150,7 @@ async function boot(pack, st, seed, opts){
   if(o.core && o.core !== VC) pack = withCollapsed(pack); // an older engine: the collapsed keys at their live values
   Math.random = mulberry32(seed);
   const document = makeFakeDom(o.html);
-  const voices = o.voices || [{ lang:"zh-CN", name:"x" }];
+  const voices = o.voices || [{ lang: (pack && pack.tts) || "zh-CN", name:"x" }];
   const ss = { getVoices: () => voices, onvoiceschanged: null, cancel(){}, speak(){} };
   const wl = {};
   const window = { VocabCore: o.core || VC, speechSynthesis: ss, SpeechSynthesisUtterance: function(t){ this.text = t; }, addEventListener(t, f){ (wl[t] = wl[t] || []).push(f); } };
@@ -168,9 +168,9 @@ return {
   mopen: i => { const b = { dataset: { mopen: String(i) }, attrs: {}, setAttribute(k, v){ this.attrs[k] = v; } }; const e = { target: { closest: sel => sel === "[data-mopen]" ? b : null } }; (document.getElementById("panel")._listeners.click || []).forEach(f => f(e)); return b; },
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(),
 };`;
-  const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS","PATTERNS"];
+  const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS","PATTERNS","SCRIPT"];
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent: o.ua || "AppViewChecks/1.0" }, undefined, st.ls, st.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
-    function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, WORDS, SENTENCES, LESSONS, PASSAGES, CHARACTERS, o.patterns ? PATTERNS : undefined];
+    function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, o.words || WORDS, o.sentences || SENTENCES, o.lessons || LESSONS, o.passages || PASSAGES, "characters" in o ? o.characters : CHARACTERS, o.patterns ? PATTERNS : undefined, o.script];
   const api = new Function(...names, fnBody)(...args);
   await tick(); await tick();
   return api;
@@ -223,6 +223,16 @@ console.log("\n[1] core: gate availability and the exam plan");
   // whole level is learned, so the share is 100% too; the clause matters only for a level Learn skipped.
   const st = clone(k); BYLV[LV[0]].forEach((w, i) => { if(i % 10 === 0) st.w[w.id] = { r: 1, w: 1, s: 0 }; });
   check("HSK 1 at 90% known, Learn at HSK 2 (settled): offered", JSON.stringify(VC.examLevels(WORDS, PACK, st, CHARACTERS)) === JSON.stringify([LV[0]]));
+  { const two = clone(k); BYLV[LV[1]].forEach(w => { two.w[w.id] = KNOWN_REC(); }); BYLV[LV[2]].slice(0, 10).forEach(w => { two.w[w.id] = { r: 1, w: 0, s: 1 }; });
+    check("HSK 1 and 2 known: both offered; examReady is the LOWEST without an exam (HSK 1), then HSK 2 once HSK 1 is taken", JSON.stringify(VC.examLevels(WORDS, PACK, two, CHARACTERS)) === JSON.stringify([LV[0], LV[1]]) && VC.examReady(WORDS, PACK, two, CHARACTERS) === LV[0] && (VC.examRecord(two, LV[0], 10, 20, "2026-10-12"), VC.examReady(WORDS, PACK, two, CHARACTERS) === LV[1]));
+    check("noteExamSeen writes prog.exam.seen = level once; examSeen reads it; examResult ignores the key; a later level is not seen", !VC.examSeen(two, LV[1]) && VC.noteExamSeen(two, LV[1]) && !VC.noteExamSeen(two, LV[1]) && two.exam.seen === LV[1] && VC.examSeen(two, LV[1]) && VC.examResult(two, "seen") === null && !VC.examSeen(two, LV[2]));
+    // Sentence-miss flags: exam-level words not known, lowest streak first, two per sentence, the exam's cap.
+    const s3 = SENTENCES.find(s => String(s.lv) === LV[0] && new Set(s.words).size >= 4), ids = [...new Set(s3.words)].filter(id => String(BY_ID[id].lv) === LV[0]);
+    const m = clone(two); ids.forEach((id, i) => { m.w[id] = { r: 1, w: 0, s: 3 - (i % 3), p: { wm: [0, 1] } }; }); // every one unknown (wm 0), streaks 3,2,1,...
+    const got = VC.examMissWords(m, s3, LV[0], WORDS, PACK, 6);
+    check("examMissWords: two words, the lowest streaks first, none known, none already critical", got.length === 2 && got.every(id => ids.includes(id)) && Math.max(...got.map(id => m.w[id].s)) <= Math.min(...ids.filter(id => !got.includes(id)).map(id => m.w[id].s)) && VC.examMissWords(m, s3, LV[0], WORDS, PACK, 1).length === 1 && VC.examMissWords(m, s3, LV[0], WORDS, PACK, 0).length === 0 && (got.forEach(id => VC.critAdd(m, id, 1)), !VC.examMissWords(m, s3, LV[0], WORDS, PACK, 6).some(id => got.includes(id))));
+    ids.forEach(id => { m.w[id] = KNOWN_REC(); });
+    check("examMissWords: every word known -> none flagged", VC.examMissWords(m, s3, LV[0], WORDS, PACK, 6).length === 0 && VC.EXAM_SENT_CRIT === 2 && VC.EXAM_CRIT_MAX === 6); }
   VC.examRecord(k, LV[0], 12, 20, "2026-10-09");
   check("an exam taken: examResult { r, n, d }, examReady null, examAgo 3 days ago / yesterday / today", JSON.stringify(VC.examResult(k, LV[0])) === JSON.stringify({ r: 12, n: 20, d: "2026-10-09" }) && VC.examReady(WORDS, PACK, k, CHARACTERS) === null && VC.examAgo(VC.examResult(k, LV[0]), "2026-10-12") === "3 days ago" && VC.examAgo({ d: "2026-10-11" }, "2026-10-12") === "yesterday" && VC.examAgo({ d: "2026-10-12" }, "2026-10-12") === "today");
   check("EXAM_SIZE 20 = the mix 6 hear-sentence + 5 gap + 4 read-sentence + 3 written->meaning + 2 recall; CRIT_SLOTS 3", VC.EXAM_SIZE === 20 && VC.EXAM_MIX.reduce((n, [, c]) => n + c, 0) === 20 && JSON.stringify(VC.EXAM_MIX) === JSON.stringify([["hearS", 6], ["gap", 5], ["readS", 4], ["typeM", 3], ["recall", 2]]) && VC.CRIT_SLOTS === 3);
@@ -310,6 +320,8 @@ console.log("\n[4] app: Test row, Today line, the exam drill");
   check("Today: one line \"Level exam ready: HSK 1\" linking to Test", /id="examReady"[^>]*>Level exam ready: HSK 1<\/button>/.test(api.panel()) && !/Level exam ready: HSK 2/.test(api.panel()));
   api.el("examReady").click();
   check("the line opens the Test tab; the row \"Level exam: HSK 1\" is there, HSK 2-4 are not, no last score", api.title() === "Test" && examRow(api, LV[0]) && /Level exam: HSK 1<\/button>/.test(api.panel()) && !/Level exam: HSK 2/.test(api.panel()) && !api.el("tExamLast_" + LV[0]));
+  check("opening Test notes prog.exam.seen = \"1\" (stored); Today's line is gone before any exam; a reboot keeps it gone", api.getProg().exam.seen === LV[0] && stored(st, PACK).exam.seen === LV[0] && (api.clickTab("today"), !/examReady/.test(api.panel())) && !/examReady/.test((await bootWith(PACK, api.getProg(), 9)).api.panel()));
+  api.clickTab("test");
   examRow(api, LV[0]).click();
   const D0 = api.getD();
   check("the exam starts: 20 items, header names it, D.once set", D0 && D0.q.length + 1 === 20 && api.title() === "Level exam: HSK 1" && D0.once === true);
@@ -335,8 +347,8 @@ console.log("\n[4] app: Test row, Today line, the exam drill");
   check("one attempt each: no miss requeued; result \"14 of 20\"; Missed rows; \"Added to critical: k words\"", !api.getD() && fin && fin.seen === 20 && fin.miss.length === 6 && /<h2>14 of 20<\/h2>/.test(api.panel()) && /class="pvk">Missed</.test(api.panel()) && /id="examCrit">Added to critical: \d+ words?<\/p>/.test(api.panel()));
   const prog = api.getProg();
   const critN = Object.keys(prog.crit || {}).length, said = +(/Added to critical: (\d+)/.exec(api.panel()) || [])[1];
-  check("every missed word (gap: the blanked word; sentence: its HSK 1 words) is in prog.crit with the session number; the line counts them", critN > 0 && critN === said && Object.values(prog.crit).every(v => v === VC.daySn(prog)) && Object.keys(prog.crit).every(id => lvIds.has(id)));
-  check("prog.exam[\"1\"] = { r: 14, n: 20, d: today }; the record is stored", JSON.stringify(prog.exam) === JSON.stringify({ "1": { r: 14, n: 20, d: DAY } }) && JSON.stringify(stored(st, PACK).exam) === JSON.stringify(prog.exam));
+  check("every missed word (gap: the blanked word; sentence: up to 2 unknown HSK 1 words, 6 per exam) is in prog.crit with the session number; the line counts them", critN > 0 && critN === said && Object.values(prog.crit).every(v => v === VC.daySn(prog)) && Object.keys(prog.crit).every(id => lvIds.has(id)) && fin.cs <= 6 && critN <= wrong.filter(k => k.startsWith("w:")).length + wrong.filter(k => k.startsWith("s:")).length * 2 && Object.keys(prog.crit).every(id => prog.w[id]));
+  check("prog.exam[\"1\"] = { r: 14, n: 20, d: today }; the record is stored", JSON.stringify(prog.exam["1"]) === JSON.stringify({ r: 14, n: 20, d: DAY }) && prog.exam.seen === LV[0] && JSON.stringify(stored(st, PACK).exam) === JSON.stringify(prog.exam));
   check("exam answers mark the records: a missed word's pair streak reset to 0 (wm or sm)", wrong.filter(k => k.startsWith("w:")).every(k => { const r = prog.w[k.slice(2)]; return r.w >= 1 && (r.p.wm[0] === 0 || r.p.sm[0] === 0); }));
   api.el("ok").click();
   check("Continue returns to Test; the row shows the last score \"14 of 20, today\"; Today's line is gone", api.title() === "Test" && /id="tExamLast_1"[^>]*>14 of 20, today<\/p>/.test(api.panel()) && (api.clickTab("today"), !/examReady/.test(api.panel())));
@@ -356,7 +368,7 @@ console.log("\n[4] app: Test row, Today line, the exam drill");
   rv.clickTab("words"); rv.el("rev").click();
   const items = [rv.getCur(), ...rv.getD().q], crit = items.filter(it => String(it.key).startsWith("w:") && VC.critHas(rv.getProg(), it.key.slice(2)));
   const oldest3 = VC.critWords(rv.getProg(), WORDS).slice(0, 3).map(w => w.id);
-  check("Words-tab Review: the 3 oldest-added critical words are in the plan (more may come by rank: exam misses are weak)", crit.length >= 3 && oldest3.every(id => crit.some(it => it.key === "w:" + id)));
+  check(`Words-tab Review: the ${oldest3.length} oldest-added critical words are in the plan (more may come by rank: exam misses are weak)`, oldest3.length >= 1 && crit.length >= oldest3.length && oldest3.every(id => crit.some(it => it.key === "w:" + id)));
 }
 
 console.log("\n[5] Words flag toggle");
@@ -381,6 +393,7 @@ console.log("\n[6] Progress row");
   none.clickTab("progress");
   check("no crit words: no row", !/Exam misses/.test(none.panel()));
   const ids = BYLV[LV[0]].slice(0, 4).map(w => w.id); ids.forEach((id, i) => VC.critAdd(rec, id, 3 + i));
+  VC.critAdd(rec, BYLV[LV[3]][0].id, 2); // flagged without a record: Review cannot draw it, the row does not count it
   const { api } = await bootWith(PACK, rec, 6);
   api.clickTab("progress");
   check("row \"Exam misses\" / \"4 left\" among the level rows, folded", /id="pvCrit"[^>]*aria-expanded="false"[^>]*><span>Exam misses<\/span><span class="pvn">4 left<\/span>/.test(api.panel()) && !/id="pvCritList"/.test(api.panel()));
@@ -392,6 +405,34 @@ console.log("\n[6] Progress row");
   // Mastery on the mark path removes a crit word; the row count follows.
   const w = BY_ID[ids[0]]; api.ev(`markWord(${JSON.stringify(w.id)}, true, "type")`);
   check("a right typed answer on a known word retires it from the set: 3 left", !VC.critHas(api.getProg(), w.id) && (api.clickTab("progress"), /<span class="pvn">3 left<\/span>/.test(api.panel())));
+}
+
+console.log("\n[8] bare items on the ja pack (ruby, pronFirst, kana typing) and a Latin pack (italian)");
+for(const [name, dir] of [["ja", process.env.JA_PACK || path.join(ROOT, "..", "japanese", "pack")], ["it", process.env.IT_PACK || path.join(ROOT, "..", "italian", "pack")]]){
+  if(!fs.existsSync(path.join(dir, "pack.js"))){ console.log(`NOTE  ${name}: no pack at ${dir}, skipped`); continue; }
+  const L = (f, v) => fs.existsSync(path.join(dir, f)) ? loadConst(path.join(dir, f), v) : undefined;
+  const pk = L("pack.js", "PACK"), ws = L("words.js", "WORDS"), ss = L("sentences.js", "SENTENCES"), us = L("characters.js", "CHARACTERS"), sc = L("script.js", "SCRIPT");
+  const lv = VC.levelIds(pk), by = VC.wordsByLevel(ws, pk), byId = Object.fromEntries(ws.map(w => [w.id, w]));
+  const p = VC.normalizeProg({}, pk); p.sessions = 12; p.placedOnce = true;
+  by[lv[0]].forEach(w => { p.w[w.id] = KNOWN_REC(); }); by[lv[1]].slice(0, 30).forEach(w => { p.w[w.id] = { r: 1, w: 0, s: 1 }; });
+  if(sc) VC.answerScriptChoice(p, false);
+  const { api } = await bootWith(pk, p, 21, { words: ws, sentences: ss, lessons: [], passages: [], characters: us, script: sc });
+  api.clickTab("test");
+  if(!examRow(api, lv[0])){ check(`${name}: exam row for ${lv[0]} on Test`, false); continue; }
+  examRow(api, lv[0]).click();
+  let n = 0, aids = 0, bad = [], wShown = 0, wTotal = 0;
+  for(let guard = 0; guard < 40 && api.getD() && api.getCur(); guard++){
+    const it = api.getCur(); n++;
+    const s = stem(api), o = optsHtml(api), h = s + o;
+    if(/<ruby|<rt|class="pron"|class="op"|class="rp"|class="sp"|class="tpron"|class="showw"/.test(h)){ aids++; bad.push(it.rz && it.rz.a[0]); }
+    if(String(it.key).startsWith("w:") && it.label === "What does it mean?" && !/hear-stage/.test(s)){ const w = byId[it.key.slice(2)]; wTotal++; if(s.includes(escapeHtml(w.w)) && (!w.pron || !s.includes(escapeHtml(w.pron)))) wShown++; }
+    if(!it.bare) bad.push("not bare");
+    const w = byId[String(it.key).slice(2)];
+    if(it.kind === "type"){ api.el("tin").value = it.label === "Type the meaning" && w ? VC.gloss(w) : "zzz"; api.el("submit").click(); } else answer(api, n % 2 === 0);
+    api.el("nx").click();
+  }
+  check(`${name}: 20 bare asks, no ruby / reading / show-written markup in any stem or option set; read items show the written form without its reading (${wShown} of ${wTotal})${bad.length ? ` [${bad.join(", ")}]` : ""}`, n === 20 && aids === 0 && !bad.length && wShown === wTotal);
+  check(`${name}: result screen, crit written, prog.exam.${lv[0]} stored`, !api.getD() && api.fin() && api.fin().seen === 20 && Object.keys(api.getProg().crit || {}).length > 0 && VC.examResult(api.getProg(), lv[0]) !== null);
 }
 
 if(OWNER){
