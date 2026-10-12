@@ -36,6 +36,7 @@ const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const PASSAGES = loadConst(path.join(ZH, "sentences.js"), "PASSAGES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
 const CHARACTERS = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
+const PATTERNS = loadConst(path.join(ZH, "sentences.js"), "PATTERNS");
 const BY_ID = Object.fromEntries(WORDS.map(w => [w.id, w]));
 // The zh pack without typedFrom/glossFocus: the typed-slot rules and controls below predate them
 // (tests/typed_from_checks.js covers them).
@@ -163,7 +164,7 @@ return {
   today: () => { tab = "today"; render(); }, goto: t => { tab = t; testSel = null; RD = null; soundsSel = null; render(); },
   getD: () => D, getCur: () => __cur, panelListeners: t => document.getElementById("panel")._listeners[t || "click"] || [],
   startPassage: p => { tab = "read"; startPassage(p); }, rd: () => RD,
-  sentenceRowHTML, sentenceRevealBlock, readSentence, gapSentence, passageSentenceHTML, passagePlainHTML, glossHTML, revealBlock, recallItem, readItem, wordRowHTML, charTeach, charDrillItem,
+  sentenceRowHTML, sentenceRevealBlock, readSentence, gapSentence, patternItem, passageSentenceHTML, passagePlainHTML, glossHTML, revealBlock, recallItem, readItem, wordRowHTML, charTeach, charDrillItem,
   pronTypeItem: ${hook("pronTypeItem")},
   itemFromPlan: ${hook("itemFromPlan")}, tokTap: ${hook("tokTap")}, onTok: ${hook("onTok")}, tokOwns: ${hook("tokOwns")}, docListeners: t => document._listeners[t] || [], soundsRefGroups: ${hook("soundsRefGroups")},
   drill1: it => drill([it], () => {}, null),
@@ -173,6 +174,7 @@ return {
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"PronAidsChecks/1.0" }, undefined, localStorage, () => ({ matches:false }), fn => setTimeout(fn, 0),
     function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, o.pack || PACK, o.words || WORDS, o.sentences || SENTENCES, LESSONS, o.passages || PASSAGES];
   if(o.units !== false){ names.push("CHARACTERS"); args.push(o.units || CHARACTERS); }
+  names.push("PATTERNS"); args.push(o.patterns || []); // [] unless a section asks for pattern items (PATTERN_LIST)
   const api = new Function(...names, fnBody)(...args);
   await tick(); await tick();
   return { api, document, spoken };
@@ -1072,6 +1074,32 @@ function walk(api, stopAt){
     const typed = seen.filter(x => x.kind === "type");
     check(`session 2: every reading coloured (${seen.length} screens, ${unc.length} uncoloured), typed reading items present (${typed.length})${err ? " ERROR " + err.message : ""}`,
       !err && unc.length === 0 && typed.length > 0 && !!api.getProg().day);
+  } catch(e){ check(`section threw: ${e.stack}`, false); }
+
+  console.log("\n[15] pattern options (owner 2026-10-12): a mark whose words are bare shows no reading in its option, a non-bare mark keeps it; the reading follows the sentence's per-word tier");
+  try {
+    // the current pack: PACK is pinned to PAIRS_ERA, which predates bareByPair (the bare rule this section checks)
+    const PACK_NOW = loadConst(path.join(ZH, "pack.js"), "PACK");
+    const U1 = CHARACTERS.find(u => u.words && u.words[0] === "w0542"), U2 = CHARACTERS.find(u => u.words && u.words[0] === "w0162");
+    const visible = html => !/class="bare"/.test(html) && /<rt>/.test(html);
+    // characters started (level-1 words and units recorded), as the bare check needs: sentenceRuby gates on charsStarted
+    const progFor = bare => { const p = VC.normalizeProg({ placedOnce: true, soundsOpened: true, sessions: 12 }, PACK_NOW);
+      p.sets = { "1": NS("1"), "2": 0, "3": 0, "4": 0 }; p.sn = 12;
+      byLv["1"].forEach(w => { p.w[w.id] = { r: 5, w: 0, s: 4, u: 10 }; });
+      p.chars = Object.assign(p.chars || {}, { choiceSeen: true, c: {} });
+      CHARACTERS.filter(u => u.lv === "1").slice(0, 40).forEach((u, i) => { p.chars.c[u.id] = { r: 4, w: 0, s: i < 20 ? 3 + (i % 2) : 2, u: 10 }; });
+      p.chars.c[U1.id] = bare ? { r: 5, w: 0, s: 3, u: 10, p: { wm: [2, 9], ws: [2, 9] } } : { r: 4, w: 0, s: 3, u: 10 };
+      p.chars.c[U2.id] = { r: 4, w: 0, s: 3, u: 10 }; return p; };
+    const bareRun = await boot({ seed: 9, pack: PACK_NOW, patterns: PATTERNS }); bareRun.api.setProg(progFor(true));
+    const bIt = bareRun.api.patternItem("p07", 1, 0);
+    const bSu = bIt.optHtml("虽然"), bDan = bIt.optHtml("但是");
+    const plainRun = await boot({ seed: 9, pack: PACK_NOW, patterns: PATTERNS }); plainRun.api.setProg(progFor(false));
+    const pIt = plainRun.api.patternItem("p07", 1, 0);
+    const pSu = pIt.optHtml("虽然"), pDan = pIt.optHtml("但是");
+    check(`bare 虽然 (ruby (3), wm and ws at 2): its option shows no reading (${bSu})`, !visible(bSu) && bSu.includes("虽然"));
+    check(`bare 虽然: the non-bare 但是 option keeps its reading (${bDan})`, visible(bDan) && bDan.includes("但是"));
+    check(`no bare pair: 虽然 option keeps its reading (${pSu})`, visible(pSu) && pSu.includes("虽然"));
+    check(`no bare pair: 但是 option keeps its reading`, visible(pDan));
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);

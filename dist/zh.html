@@ -5670,7 +5670,9 @@ function charCtx(){
 function optScript(entry, others){
   const mixed = () => others.some(v => dispWord(v).isPron !== dispWord(entry).isPron);
   if(pronLeakShown(entry) || OPTS_ONE_SCRIPT && entry.pronInGloss && mixed()) return "written";
-  return OPTS_ONE_SCRIPT && mixed() ? "pron" : null;
+  if(!OPTS_ONE_SCRIPT || !mixed()) return null;
+  // A pron-labelled set would show the reading of a bare word (wordOptHtml), so a set holding one is written.
+  return [entry, ...others].some(e => VC.bareWord(e, CHAR_LIST, prog, PACK)) ? "written" : "pron";
 }
 
 // A drill that touches no unit (Sounds lessons) is no session for the planner's clock.
@@ -6266,7 +6268,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "3410521293-2361002";
+const VE_BUILD = "1447843241-2361674";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6695,11 +6697,16 @@ function sentenceItemFor(s){
 // in the reveal when the stem already shows it). patternSession: the
 // patterns planned in the running Today session, kept in its session record (today.pt).
 const PATTERN_BY_ID = new Map(PATTERN_LIST.map(p => [p.id, p])), patternSession = new Set();
-// The reading of each mark text, for the options: its sentence's ruby tokens inside the mark.
+// The reading of each mark text, for the options: its sentence's ruby tokens inside the mark (x, mk: the tiers come from the sentence).
 const PATTERN_READING = (() => { const m = new Map(); PATTERN_LIST.forEach(p => (p.sentences || []).forEach(x => (x.marks || []).forEach(mk => {
-  const t = VC.patternMarkText(x, mk), r = Array.isArray(x.ruby) ? x.ruby.filter(k => k[0] >= mk[0] && k[1] <= mk[1]).map(k => k[2]).join("") : "";
-  if(r && !m.has(t)) m.set(t, r); }))); return m; })();
-const patternOptHTML = o => { const r = HAS_CHARACTERS && PATTERN_READING.get(o); return r ? rubyTokHTML(escapeHtml(o), { tier: showPron() ? "ruby" : "bare", reading: r }) : escapeHtml(o); };
+  const t = VC.patternMarkText(x, mk), toks = Array.isArray(x.ruby) ? x.ruby.filter(k => k[0] >= mk[0] && k[1] <= mk[1]) : [], r = toks.map(k => k[2]).join("");
+  if(r && !m.has(t)) m.set(t, { r, x, mk }); }))); return m; })();
+// Option readings take the stimulus's per-token tiers (sentenceRuby, as passage options do through pfRubyText):
+// a mark whose words are all bare shows no reading, like the same words in the sentence.
+const patternOptHTML = o => { const hit = HAS_CHARACTERS && PATTERN_READING.get(o); if(!hit) return escapeHtml(o);
+  const toks = (sentenceRuby(hit.x) || []).filter(k => k.start >= hit.mk[0] && k.end <= hit.mk[1]);
+  const bare = toks.length > 0 && toks.every(k => k.tier === "bare");
+  return rubyTokHTML(escapeHtml(o), { tier: showPron() && !bare ? "ruby" : "bare", reading: hit.r }); };
 const patternNoteHTML = p => `<div class="pnote">${p.note.map(ui).join("<br>")}</div>`;
 // pack.patternCue "after" (docs/PACK_SCHEMA.md "patternCue"; owner 2026-10-07: the English names the
 // blank): hidden until answered behind a "meaning" tap (no penalty, nothing
@@ -8415,4 +8422,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:3572575605-2360326-->
+<!--ve-build:4038994837-2360998-->
