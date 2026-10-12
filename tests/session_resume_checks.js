@@ -369,8 +369,10 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
       ({ api } = await boot(Object.assign({ seed: 14 }, st)));
       check(`Words set drill (level 1, set 2): reload resumes on the Words tab at the same item (${same(a, snapOf(api)).join(", ") || "all equal"})`, same(a, snapOf(api)).length === 0 && api.tab() === "words");
       finishDrill(api); api.el("ok").click(); finishDrill(ctl.api); ctl.api.el("ok").click();
+      // the resumed run answered one item, so its records were created in a different order; the marks are compared as a set
+      const dMarks = x => JSON.stringify(Object.keys(x.getProg().w).filter(k => x.getProg().w[k].d).sort());
       check("Words set drill: Continue after the reload settles the set as without one (same sets, same d marks) and shows the Words page",
-        JSON.stringify(api.getProg().sets) === JSON.stringify(ctl.api.getProg().sets) && JSON.stringify(Object.keys(api.getProg().w).filter(k => api.getProg().w[k].d)) === JSON.stringify(Object.keys(ctl.api.getProg().w).filter(k => ctl.api.getProg().w[k].d)) && /Drill this set/.test(api.html("wbody")));
+        JSON.stringify(api.getProg().sets) === JSON.stringify(ctl.api.getProg().sets) && dMarks(api) === dMarks(ctl.api) && /Drill this set/.test(api.html("wbody")));
     }
     {
       const st = fresh();

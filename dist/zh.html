@@ -6388,7 +6388,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2533064663-2381407";
+const VE_BUILD = "3943762022-2381179";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -7619,19 +7619,16 @@ function renderWordBody(){
     wordListInto($("wl"), matches.slice(0,150));
     return;
   }
-  // Browsing slices stay fixed rank order (but see below) so a set's words don't move as the learner progresses;
+  // Browsing slices stay fixed rank order so a set's words don't move as the learner progresses;
   // done-ness comes from records because a republish can shift the counter prefix.
-  let list = levelList(wordsLv); const total = nSets(wordsLv);
+  const list = levelList(wordsLv), total = nSets(wordsLv);
   const lwAll = learnedWords(); const got = new Set(lwAll.map(w => w.id));
-  // Learned words sit anywhere in the frequency order (taught under the earlier one), so
-  // sets are numbered by count as on Today (VC.levelNewSet): the learned sets first, then the unlearned
-  // words in rank order (the next set = what Learn teaches), the leftover learned words last.
-  { const lrn = list.filter(w => got.has(w.id)), cut = Math.floor(lrn.length / SIZE) * SIZE;
-    list = lrn.slice(0, cut).concat(list.filter(w => !got.has(w.id)), lrn.slice(cut)); }
-  const firstNew = list.findIndex(w => !got.has(w.id));
-  const next = Math.max(0, Math.min(firstNew < 0 ? total : Math.floor(firstNew/SIZE), total-1));
+  // Sets are the rank-order list cut by position, numbered as on Today (VC.levelNewSet): the next set is the one holding the
+  // first unrecorded word, and it shows exactly the words Learn teaches (a gapped level leaves learned words in its slice).
+  const nn = VC.levelNewSet(WORDS, PACK, prog, wordsLv);
+  const next = nn ? Math.min(nn.set, total-1) : Math.max(0, total-1);
   if(wordsSet == null) wordsSet = next;
-  const set = list.slice(wordsSet*SIZE, wordsSet*SIZE+SIZE);
+  const set = nn && wordsSet === nn.set ? nn.words : list.slice(wordsSet*SIZE, wordsSet*SIZE+SIZE);
   const setDone = set.length > 0 && set.every(w => got.has(w.id));
   const canReview = lwAll.length >= 5;
   // appView: "Next new" only away from the next set; Review sits under Drill.
@@ -8627,4 +8624,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2574834388-2380731-->
+<!--ve-build:3399859058-2380503-->

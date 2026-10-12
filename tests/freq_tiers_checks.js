@@ -369,8 +369,8 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check("pinPrefixRecords pins the same 30 (id order)", Object.keys(pin.w).sort().join() === want.slice().sort().join());
     const nn = VC.levelNewSet(WORDS, PACK, VC.pinPrefixRecords(clone(oldP), WORDS, PACK), "2"), settled = VC.pinPrefixRecords(clone(oldP), WORDS, PACK);
     VC.settleSetCounter(settled, WORDS, PACK, "2");
-    check(`set label and counter count learned words: next HSK 2 set ${nn && nn.set + 1} (4), counter ${settled.sets["2"]} (3); its words are the first 10 unrecorded by frequency`,
-      nn && nn.lv === "2" && nn.set === 3 && settled.sets["2"] === 3 && nn.words.map(w => w.id).join() === L2.filter(w => !want.includes(w.id)).slice(0, 10).map(w => w.id).join());
+    check(`set label names the set holding the first unrecorded word, the counter counts learned sets: next HSK 2 set ${nn && nn.set + 1} (1), counter ${settled.sets["2"]} (3); its words are the first 10 unrecorded by frequency`,
+      nn && nn.lv === "2" && nn.set === 0 && settled.sets["2"] === 3 && nn.words.map(w => w.id).join() === L2.filter(w => !want.includes(w.id)).slice(0, 10).map(w => w.id).join());
   }
 
   // [9] (flag-off control vs ff760d8) deleted: freqTiers is engine default since the flag collapse.
@@ -410,7 +410,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     check(`Progress level rows count known by the tier rule (${lvRows.join(" / ")})`, VC.levelIds(PACK).every((lv, i) => +lvRows[i] === VC.learnedWords(WORDS, PACK, prog).filter(w => w.lv === lv && VC.wordKnownX(prog.w[w.id], w, PACK, prog, VC.knownCtx(PACK, CHARACTERS))).length)); check("nothing new stored: records carry only fields older engines know (r w s k t u f d prov p)", Object.values(prog.w).every(r => Object.keys(r).every(k => ["r", "w", "s", "k", "t", "u", "f", "d", "prov", "p"].includes(k))));
   }
 
-  console.log("\n[11] Words tab numbers sets by count (as Today) for a learner taught in the earlier order");
+  console.log("\n[11] Words tab numbers sets by position (as Today) for a learner taught in the earlier order");
   {
     NOW = new Date(2026, 9, 6, 8, 0, 0).getTime();
     const idOrd = byLv["1"].slice().sort((a, b) => a.id < b.id ? -1 : 1).slice(0, 35);
@@ -421,7 +421,7 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
       const nn = VC.nextNewSet(WORDS, pk, p0), btn = (api.el("wbody").innerHTML.match(/<span class="pvn">Set (\d+) of (\d+)/) || []); // app v2 Words nav
       const rows = (api.el("wl") ? api.el("wl").children : []).map(c => c.innerHTML), learned = new Set(idOrd.map(w => w.id));
       if(pk === PACK){
-        check(`${label}: Words tab opens on Today's set number (${btn[1]} vs ${nn.set + 1})`, +btn[1] === nn.set + 1 && nn.set === 3);
+        check(`${label}: Words tab opens on Today's set number (${btn[1]} vs ${nn.set + 1})`, +btn[1] === nn.set + 1 && nn.set === 0);
         check(`${label}: the shown set is the next Learn set, so Drill this set marks no learned word`, rows.length === nn.words.length && nn.words.every((w, i) => rows[i].includes(w.w)) && nn.words.every(w => !learned.has(w.id)));
         api.el("nx").click(); api.el("jump").click();
         check(`${label}: "next new" returns to the same set`, +(api.el("wbody").innerHTML.match(/<span class="pvn">Set (\d+)/) || [])[1] === nn.set + 1);
