@@ -1300,9 +1300,9 @@ function levelNewSet(words, pack, prog, lv){
   const got = new Set(levelLearned(list, done, size, prog.w, pack).map(w => w.id));
   const fresh = list.filter(w => !got.has(w.id)).slice(0, size);
   if(!fresh.length) return null;
-  // Learned words sit anywhere in the frequency order (taught under the earlier order), so the
-  // set is the count of sets already learned.
-  return { lv, set: Math.min(Math.floor(got.size / size), nSets(list, size) - 1), words: fresh };
+  // The set holds fresh[0] by its place in the list: the label names the words Learn teaches, gaps included (a placement
+  // that misses a bucket leaves an untaught gap below the learned words; the count of learned sets named the wrong set).
+  return { lv, set: Math.floor(list.indexOf(fresh[0]) / size), words: fresh };
 }
 // The counter only feeds bars and labels, so it follows the records: a teach that finishes one
 // set's leftovers and then most of the next must move it past both (TODO.md, set counter lag).

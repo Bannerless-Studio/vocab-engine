@@ -870,6 +870,7 @@ console.log("\n[D1] fb45: Still shaky, right-first-time score, sentence alignmen
 
 // Adaptive placement (owner 2026-10-12): the result screen reads the probes the walk asked, and the sweep misses; the walk itself is in
 // tests/engine_checks.js [4]. Here the page takes the same walk from a per-bucket outcome (core placementWalk) and the UI shows it.
+const levelLabel_ = lv => "HSK " + String(lv);
 const adaptiveInject = (api, B, st0, outcome, n) => {
   const w = VC.placementWalk(B, b => ({ r: outcome(b), n }), b => outcome(b) > 0);
   const answers = w.probes.flatMap(p => st0[p.b].words.slice(0, n).map((x, j) => ({ id: x.id, ok: j < p.r })));
@@ -906,6 +907,13 @@ console.log("\n[D2] fb48: the result screen lists the probed buckets; a missed s
       JSON.stringify(miss.w.missed) === "[0]" && miss.w.passed === B && st0[0].words.every(x => !miss.prog.w[x.id] || !miss.prog.w[x.id].prov) && (sn !== "fresh record" || /<h2>Start at HSK 1, set 1<\/h2>/.test(miss.html)));
     const beg = await place(PACK, mk(), OUT["beginner"]);
     check(`${sn}, beginner: probes ${beg.w.probes.map(p => p.b).join(",")} land on the first set; flat line "You knew 0%"${owner2 && sn !== "fresh record" ? "" : "; Start at HSK 1, set 1"}`, beg.w.passed === 0 && /You knew 0% at every level; starting from the first set and keeping what you got right\./.test(beg.html) && (sn !== "fresh record" || /<h2>Start at HSK 1, set 1<\/h2>/.test(beg.html)));
+    if(sn === "fresh record"){
+      // sweep miss at bucket 3 under a landing at 10: the Start line names bucket 3's first set, the set Learn teaches next
+      const gap = await place(PACK, mk(), b => (b < 10 && b !== 3) ? n : 0);
+      const lab = levelLabel_(st0[3].lv), prog = gap.prog, nno = VC.nextNewSetOpen(WORDS, PACK, prog, CHARACTERS);
+      check(`${sn}, sweep miss at bucket 3 (landing ${gap.w.passed}): Start line "${(gap.html.match(/<h2>Start at ([^<]*)<\/h2>/) || [])[1]}" = Learn's first new set (${nno && nno.lv} set ${nno && nno.set + 1}) = bucket 3's first set`,
+        gap.w.missed.join() === "3" && gap.w.passed === 10 && !!nno && nno.lv === String(st0[3].lv) && nno.set === st0[3].s0 && new RegExp(`<h2>Start at ${lab}, set ${st0[3].s0 + 1}</h2>`).test(gap.html));
+    }
     const all = await place(PACK, mk(), OUT["all right"]);
     check(`${sn}, all right: probes ${all.w.probes.map(p => p.b).join(",")}, no flat line (passed the top), the top passed`, all.w.passed === B && !/plFlat/.test(all.html) && all.prog.placedOnce === true);
   }

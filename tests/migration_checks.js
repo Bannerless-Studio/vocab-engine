@@ -142,17 +142,18 @@ const mig = n => VC.migrateLegacy(PACK, LEGACY, clone(SEEDS[n])).prog;
 check("A empty: equals defaultProg plus the marker", eq(mig("A empty"), Object.assign(VC.defaultProg(PACK), { legacy: { key:"hsk_pinyin", format:"hsk-v2" } })));
 // One character stage per level with characters.withWords (fb2-write): no choice card; an
 // unlocked 字 stage and the next word level take turns by prog.sessions parity; a stored
-// "after" (chars.defer) is "later": HSK 2 set 3, the stage before the split.
+// "after" (chars.defer) is "later": the HSK 2 words stage, the stage before the split. Its set is the first set that holds an
+// unrecorded word (position in the level list), so a gapped C mid-HSK2 (records in id order, list in frequency order) is set 0.
 const par = (p, n) => Object.assign(p, { sessions: n });
 // The level gate (LEVEL_GATE, engine default since the flag collapse) holds HSK 2 until HSK 1 is known; these checks walk the
 // stage model, so HSK 1's counter prefix is pinned as records (as the first teach would) and made placed-provisional (counted
 // known for position) to open it.
 const gateOpen = p => { VC.pinPrefixRecords(p, W, PACK, "1"); (VC.wordsByLevel(W, PACK)["1"] || []).forEach(w => { if(p.w[w.id]) p.w[w.id].prov = 1; }); return p; };
 const isChars1 = s => s && s.kind === "chars" && eq(s.levels, ["1"]);
-check("C mid-HSK2: no card; even sessions HSK 2 set 3, odd 字1; skipped (later), HSK 2 set 3 both",
+check("C mid-HSK2: no card; even sessions HSK 2 set 0, odd 字1; skipped (later), HSK 2 set 0 both",
   !VC.showCharChoice(PACK, W, U, mig("C mid-HSK2"))
-  && (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(gateOpen(mig("C mid-HSK2")), 2))) && isChars1(VC.nextStage(PACK, W, U, par(gateOpen(mig("C mid-HSK2")), 3)))
-  && [2, 3].every(n => (s => s && s.kind === "words" && s.lv === "2" && s.set === 3)(VC.nextStage(PACK, W, U, par(VC.answerCharChoice(gateOpen(mig("C mid-HSK2")), false), n)))));
+  && (s => s && s.kind === "words" && s.lv === "2" && s.set === 0)(VC.nextStage(PACK, W, U, par(gateOpen(mig("C mid-HSK2")), 2))) && isChars1(VC.nextStage(PACK, W, U, par(gateOpen(mig("C mid-HSK2")), 3)))
+  && [2, 3].every(n => (s => s && s.kind === "words" && s.lv === "2" && s.set === 0)(VC.nextStage(PACK, W, U, par(VC.answerCharChoice(gateOpen(mig("C mid-HSK2")), false), n)))));
 // R5 (owner 2026-10-02): a learner with character records (the old single stage, taught every
 // session) loads as chars.order "first": 字1 every session until done; "with" restores the turns.
 const withO = p => VC.setCharMode(p, "with");
@@ -399,11 +400,11 @@ console.log("\n[write] characters per level, bareBy typed, bareWords (fb2-write)
   // The first HSK 1 unit in pack order (c0001 before fb26 put each level in frequency order).
   const C1 = "chars:1 " + VC.charStageUnits(["1"], U, PACK)[0].id;
   const bg = gateOpen(clone(b)), bs = n => Object.assign(clone(bg), { sessions: n });
-  check(`(b) mid HSK 2: old pack ${nextOf(OLD, bg)}; now no card, sessions alternate ${nextOf(PACK, bs(4))} / ${nextOf(PACK, bs(5))}`, nextOf(OLD, bg) === "words:2/3" && nextOf(PACK, bs(4)) === "words:2/3" && nextOf(PACK, bs(5)) === C1 && !VC.showCharChoice(PACK, W, U, b));
+  check(`(b) mid HSK 2: old pack ${nextOf(OLD, bg)}; now no card, sessions alternate ${nextOf(PACK, bs(4))} / ${nextOf(PACK, bs(5))}`, nextOf(OLD, bg) === "words:2/0" && nextOf(PACK, bs(4)) === "words:2/0" && nextOf(PACK, bs(5)) === C1 && !VC.showCharChoice(PACK, W, U, b));
   // Stored choice mapping: chars.defer true ("after") is "later"; anything else is "with words".
   // The alternation reads prog.sessions only: no new field.
-  check("(b) stored choice: defer true -> later (HSK 2 set 3 every session, one 字 stage last); seen + defer false or unseen -> with words",
-    [4, 5].every(n => (p => nextOf(PACK, p) === "words:2/3" && VC.stagePath(PACK, W, U, p).filter(s => s.kind === "chars").length === 1)(VC.setCharOrder(bs(n), true)))
+  check("(b) stored choice: defer true -> later (HSK 2 set 0 every session, one 字 stage last); seen + defer false or unseen -> with words",
+    [4, 5].every(n => (p => nextOf(PACK, p) === "words:2/0" && VC.stagePath(PACK, W, U, p).filter(s => s.kind === "chars").length === 1)(VC.setCharOrder(bs(n), true)))
     && nextOf(PACK, VC.answerCharChoice(bs(5), true)) === C1 && nextOf(PACK, bs(5)) === C1
     && !VC.charsWithWords(PACK, VC.setCharOrder(bs(5), true)) && VC.charsWithWords(PACK, bs(5)) && !VC.charsWithWords(OLD, bs(5)));
   // (c) in the characters stage

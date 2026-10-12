@@ -3471,13 +3471,9 @@ function placeResult(){
   store.save();
   // Where the learner actually is now (a poor retake never moves them back), not where
   // this attempt stopped.
-  // Start at: the landing (first failed bucket's first set). With no failed bucket, the earliest sweep-missed bucket, since its
-  // words are the first untaught ones. A retake whose untaught words lie further on keeps that position (never moves back).
-  const nn = nextNewSetRaw(), startIdx = passed < B ? passed : (PL.missed.length ? Math.min(...PL.missed) : -1);
-  const nnIdx = nn ? st.findIndex(b => b.words.some(w => w.id === nn.words[0].id)) : -1;
-  const nnAhead = !!nn && (nnIdx < 0 || nnIdx > startIdx);
-  const at = startIdx < 0 || nnAhead ? nn : { lv: st[startIdx].lv, set: st[startIdx].s0 };
-  const pos = at ? `${levelLabel(at.lv)}, set ${at.set+1}` : "everything covered";
+  // Where the learner actually is now (a poor retake never moves them back): the first set with untaught words, the one Learn teaches.
+  const nn = nextNewSetRaw();
+  const pos = nn ? `${levelLabel(nn.lv)}, set ${nn.set+1}` : "everything covered";
   const flat = VC.placementFlat(B, PL.probes);
   const rows = PL.probes.slice().sort((x, y) => x.b - y.b).map(p => { const b = st[p.b];
     return `<tr><td>${escapeHtml(levelLabel(b.lv))} sets ${b.s0+1}–${b.s1}</td><td style="color:${p.b < passed ? 'var(--ok)' : 'var(--bad)'}">${p.r}/${p.n}</td></tr>`; }).join("");
