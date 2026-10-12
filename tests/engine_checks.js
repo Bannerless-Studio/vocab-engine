@@ -1027,7 +1027,7 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   // --- app.html render-site guard: every target-text element carries ${TA} (lang/dir/font)
   const app = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
   const bare = [...app.matchAll(/class="(big wd|med wd|wd|st|rw)"(?!\$\{TA\})/g)].map(m=>m[0]);
-  const optsW = [...app.matchAll(/optHtml: wordOptHtml\([^)]*\)(, optsT: true)?/g)];
+  const optsW = [...app.matchAll(/optHtml: (?:wordOptHtml|gapOptsHtml|patternOptsHtml)\([^)]*\)(, optsT: true)?/g)];
   check("app.html: every target-text element (big/med/wd/st/rw) carries ${TA}; every word-option item sets optsT",
     bare.length === 0 && optsW.length >= 2 && optsW.every(m=>!!m[1]) && /id="tin"[^>]*\$\{it\.inputTA !== undefined \? it\.inputTA : TA\}/.test(app)
     // the only overrides are the typed-reading item, the typed-meaning item (English) and the

@@ -5600,11 +5600,20 @@ function bigWordHTML(entry){
   const p = pronAsked(entry);
   return `<div class="big wd"${TA}>${wordFormHTML(entry)}</div>${p ? `<div class="pron">${readingHTML(p)}</div>` : ""}`;
 }
+// Answer-leak guard (owner 2026-10-12): when the answer is the only option with its bare state (the only bare one,
+// or the only one showing its reading), every option shows its reading, so the answer does not stand out.
+// states: one per option, null for an option with no reading to show.
+function leaksBare(ans, states){ const s = states.filter(x => x !== null); return ans !== null && s.length >= 2 && s.filter(x => x === ans).length === 1; }
+// A gap option shows its reading unless bareWord hides it (pronAsked); null when it has no reading.
+function gapOptBare(e, noPron){ return !e || noPron || !pronBeside(e) ? null : !!(BARE_WORDS && VC.bareWord(e, CHAR_LIST, prog, PACK)); }
+function gapOptsHtml(entry, gc, mode){ const noPron = !!entry.pronInGloss;
+  const plain = leaksBare(gapOptBare(entry, noPron), gc.opts.map(o => gapOptBare(gc.byLabel[o], noPron)));
+  return wordOptHtml(gc.byLabel, null, noPron, mode, plain); }
 // Recall keys options by word id, so `written` gives the label for a value that is not one.
 // mode (optScript): one label mode for the whole set, "pron" or "written"; null: each its own.
-function wordOptHtml(byKey, written, noPron, mode){
-  if(mode) return o => { const e = byKey[o]; const asPron = mode === "pron" && !!(e && e.pron); const p = e && !noPron && !asPron ? pronAsked(e) : ""; return `${asPron ? twReading(e.pron) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
-  return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const p = e && !noPron ? pronAsked(e) : ""; return `${d && d.isPron ? twReading(d.text) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
+function wordOptHtml(byKey, written, noPron, mode, plain){
+  if(mode) return o => { const e = byKey[o]; const asPron = mode === "pron" && !!(e && e.pron); const p = e && !noPron && !asPron ? (plain ? pronBeside(e) : pronAsked(e)) : ""; return `${asPron ? twReading(e.pron) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
+  return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const p = e && !noPron ? (plain ? pronBeside(e) : pronAsked(e)) : ""; return `${d && d.isPron ? twReading(d.text) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
 }
 // pack.optsOneScript (docs/PACK_SCHEMA.md "optsOneScript"): one option in characters among
 // readings (or the reverse) is the answer, so a set is labelled in one mode. Distractors shown
@@ -6268,7 +6277,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1447843241-2361674";
+const VE_BUILD = "2620049485-2363111";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -6676,7 +6685,7 @@ function gapSentence(s, typed){
   const base = { key:"s:"+s.id, reveal: sentenceRevealBlock(s), onAnswer: ok=>{ markSentence(s.id, ok, gapKind === "type" ? "gapType" : "gap"); markGapWord(entry.id, ok, gapKind); },
     onReveal: b => saySentence(s, b), revealHear: canHearSentence(s) };
   const choice = () => { const gc = VC.gapChoices(entry, match, WORDS, PACK, optLike(entry), wordMix(), s); const m = optScript(entry, Object.values(gc.byLabel));
-    return { kind:"mc", label:"What's the missing word?", optsClass:"opts-hero opts-w", html, opts: gc.opts, a: gc.a, optHtml: wordOptHtml(gc.byLabel, null, !!entry.pronInGloss, m), optsT: true }; };
+    return { kind:"mc", label:"What's the missing word?", optsClass:"opts-hero opts-w", html, opts: gc.opts, a: gc.a, optHtml: gapOptsHtml(entry, gc, m), optsT: true }; };
   if(typed && TYPING){
     return Object.assign(base, { kind:"type", label:"Type the missing word", html,
       check: val => VC.acceptTyped(val, entry, PACK, [match.text], WORDS),
@@ -6703,10 +6712,14 @@ const PATTERN_READING = (() => { const m = new Map(); PATTERN_LIST.forEach(p => 
   if(r && !m.has(t)) m.set(t, { r, x, mk }); }))); return m; })();
 // Option readings take the stimulus's per-token tiers (sentenceRuby, as passage options do through pfRubyText):
 // a mark whose words are all bare shows no reading, like the same words in the sentence.
-const patternOptHTML = o => { const hit = HAS_CHARACTERS && PATTERN_READING.get(o); if(!hit) return escapeHtml(o);
+const patternOptBare = o => { const hit = HAS_CHARACTERS && PATTERN_READING.get(o); if(!hit) return null;
   const toks = (sentenceRuby(hit.x) || []).filter(k => k.start >= hit.mk[0] && k.end <= hit.mk[1]);
-  const bare = toks.length > 0 && toks.every(k => k.tier === "bare");
+  return toks.length > 0 && toks.every(k => k.tier === "bare"); };
+const patternOptHTML = (o, plain) => { const hit = HAS_CHARACTERS && PATTERN_READING.get(o); if(!hit) return escapeHtml(o);
+  const bare = !plain && patternOptBare(o) === true;
   return rubyTokHTML(escapeHtml(o), { tier: showPron() && !bare ? "ruby" : "bare", reading: hit.r }); };
+// One item's option builder: plain (every reading shown) when the answer is the only option with its bare state.
+const patternOptsHtml = (ans, opts) => { const plain = leaksBare(patternOptBare(ans), opts.map(patternOptBare)); return o => patternOptHTML(o, plain); };
 const patternNoteHTML = p => `<div class="pnote">${p.note.map(ui).join("<br>")}</div>`;
 // pack.patternCue "after" (docs/PACK_SCHEMA.md "patternCue"; owner 2026-10-07: the English names the
 // blank): hidden until answered behind a "meaning" tap (no penalty, nothing
@@ -6737,7 +6750,8 @@ function patternItem(pid, si, mi){
   // wrong, and on a miss any time. Read before notePattern writes the record.
   base.onAnswer = function(ok){ const first = VC.patternFirstMeeting(prog, p, PACK); VC.notePattern(prog, pid, ok, VC.daySn(prog)); store.save(); if(first) this.html = bodyFor(false); // a re-queued miss is not a first meeting (fb53)
     this.reveal = ok && !first ? rv : note + rv; };
-  const choice = () => ({ kind: "mc", label: "What's the missing word?", optsClass: "opts-hero opts-w", opts: [ans, ...VC.patternOpts(p, s, mi, PATTERN_LIST, undefined, PACK)], a: ans, optHtml: patternOptHTML, optsT: true });
+  const choice = () => { const opts = [ans, ...VC.patternOpts(p, s, mi, PATTERN_LIST, undefined, PACK)];
+    return { kind: "mc", label: "What's the missing word?", optsClass: "opts-hero opts-w", opts, a: ans, optHtml: patternOptsHtml(ans, opts), optsT: true }; };
   if(TYPING) return Object.assign(base, { kind: "type", label: "Type the missing word", check: v => VC.normKey(String(v).normalize("NFC")) === VC.normKey(ans.normalize("NFC")),
     choiceFallback(){ const c = Object.assign({}, this, choice()); c.onAnswer = base.onAnswer; return c; } });
   return Object.assign(base, choice());
@@ -8422,4 +8436,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:4038994837-2360998-->
+<!--ve-build:2725236931-2362435-->

@@ -166,6 +166,7 @@ return {
   startPassage: p => { tab = "read"; startPassage(p); }, rd: () => RD,
   sentenceRowHTML, sentenceRevealBlock, readSentence, gapSentence, patternItem, passageSentenceHTML, passagePlainHTML, glossHTML, revealBlock, recallItem, readItem, wordRowHTML, charTeach, charDrillItem,
   pronTypeItem: ${hook("pronTypeItem")},
+  patternOptsHtml: ${hook("patternOptsHtml")}, gapOptsHtml: ${hook("gapOptsHtml")},
   itemFromPlan: ${hook("itemFromPlan")}, tokTap: ${hook("tokTap")}, onTok: ${hook("onTok")}, tokOwns: ${hook("tokOwns")}, docListeners: t => document._listeners[t] || [], soundsRefGroups: ${hook("soundsRefGroups")},
   drill1: it => drill([it], () => {}, null),
   wordsPage: (lv, set) => { tab = "words"; wordsQuery = ""; wordsLv = lv; wordsSet = set; render(); },
@@ -1076,30 +1077,56 @@ function walk(api, stopAt){
       !err && unc.length === 0 && typed.length > 0 && !!api.getProg().day);
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
-  console.log("\n[15] pattern options (owner 2026-10-12): a mark whose words are bare shows no reading in its option, a non-bare mark keeps it; the reading follows the sentence's per-word tier");
+  console.log("\n[15] answer leak on option readings (owner 2026-10-12): an answer that is the only bare option, or the only non-bare one, shows every reading; a mixed set keeps per-word bare");
   try {
-    // the current pack: PACK is pinned to PAIRS_ERA, which predates bareByPair (the bare rule this section checks)
-    const PACK_NOW = loadConst(path.join(ZH, "pack.js"), "PACK");
-    const U1 = CHARACTERS.find(u => u.words && u.words[0] === "w0542"), U2 = CHARACTERS.find(u => u.words && u.words[0] === "w0162");
+    const PACK_NOW = loadConst(path.join(ZH, "pack.js"), "PACK"); // PACK is pinned to PAIRS_ERA, which predates bareByPair
+    const unitOf = wid => CHARACTERS.find(u => u.words && u.words[0] === wid) || null;
     const visible = html => !/class="bare"/.test(html) && /<rt>/.test(html);
-    // characters started (level-1 words and units recorded), as the bare check needs: sentenceRuby gates on charsStarted
-    const progFor = bare => { const p = VC.normalizeProg({ placedOnce: true, soundsOpened: true, sessions: 12 }, PACK_NOW);
+    const gapVisible = html => /class="op"/.test(html);
+    // pattern marks with a reading and a unit for every token: the mark text and its word ids
+    const cands = [];
+    PATTERNS.forEach(p => p.sentences.forEach(s => (s.marks || []).forEach(mk => {
+      const toks = (s.ruby || []).filter(k => k[0] >= mk[0] && k[1] <= mk[1]), t = VC.patternMarkText(s, mk);
+      if(toks.length && toks.every(k => unitOf(k[3])) && !cands.some(c => c.t === t)) cands.push({ t, wids: toks.map(k => k[3]) });
+    })));
+    const SU = cands.find(c => c.t === "虽然"), BUT = cands.find(c => c.t === "但是");
+    const disjoint = (a, b) => !a.wids.some(w => b.wids.includes(w));
+    const free = cands.filter(c => c !== SU && c !== BUT && disjoint(c, SU) && disjoint(c, BUT));
+    const Y = free[0], Z = free.find(c => c !== Y && disjoint(c, Y));
+    const SUw = WORDS.find(w => w.id === "w0542"), BUTw = WORDS.find(w => w.id === "w0162");
+    const GW = WORDS.filter(w => w.pron && w.w && unitOf(w.id) && ![SUw, BUTw].includes(w) && ![SU, BUT, Y, Z].some(c => c && c.wids.includes(w.id))).slice(0, 2);
+    if(!SU || !BUT || !Y || !Z || !SUw || !BUTw || GW.length < 2) throw new Error("need 4 disjoint pattern marks and 4 pron words");
+    const ALLW = [...new Set([...[SU, BUT, Y, Z].flatMap(c => c.wids), ...[SUw, BUTw, ...GW].map(w => w.id)])];
+    // characters started (as section [14] does); the listed word ids get bare records, the rest non-bare
+    const progFor = bareIds => { const p = VC.normalizeProg({ placedOnce: true, soundsOpened: true, sessions: 12 }, PACK_NOW);
       p.sets = { "1": NS("1"), "2": 0, "3": 0, "4": 0 }; p.sn = 12;
       byLv["1"].forEach(w => { p.w[w.id] = { r: 5, w: 0, s: 4, u: 10 }; });
       p.chars = Object.assign(p.chars || {}, { choiceSeen: true, c: {} });
       CHARACTERS.filter(u => u.lv === "1").slice(0, 40).forEach((u, i) => { p.chars.c[u.id] = { r: 4, w: 0, s: i < 20 ? 3 + (i % 2) : 2, u: 10 }; });
-      p.chars.c[U1.id] = bare ? { r: 5, w: 0, s: 3, u: 10, p: { wm: [2, 9], ws: [2, 9] } } : { r: 4, w: 0, s: 3, u: 10 };
-      p.chars.c[U2.id] = { r: 4, w: 0, s: 3, u: 10 }; return p; };
-    const bareRun = await boot({ seed: 9, pack: PACK_NOW, patterns: PATTERNS }); bareRun.api.setProg(progFor(true));
-    const bIt = bareRun.api.patternItem("p07", 1, 0);
-    const bSu = bIt.optHtml("虽然"), bDan = bIt.optHtml("但是");
-    const plainRun = await boot({ seed: 9, pack: PACK_NOW, patterns: PATTERNS }); plainRun.api.setProg(progFor(false));
-    const pIt = plainRun.api.patternItem("p07", 1, 0);
-    const pSu = pIt.optHtml("虽然"), pDan = pIt.optHtml("但是");
-    check(`bare 虽然 (ruby (3), wm and ws at 2): its option shows no reading (${bSu})`, !visible(bSu) && bSu.includes("虽然"));
-    check(`bare 虽然: the non-bare 但是 option keeps its reading (${bDan})`, visible(bDan) && bDan.includes("但是"));
-    check(`no bare pair: 虽然 option keeps its reading (${pSu})`, visible(pSu) && pSu.includes("虽然"));
-    check(`no bare pair: 但是 option keeps its reading`, visible(pDan));
+      ALLW.forEach(wid => { p.chars.c[unitOf(wid).id] = bareIds.includes(wid) ? { r: 5, w: 0, s: 3, u: 10, p: { wm: [2, 9], ws: [2, 9] } } : { r: 4, w: 0, s: 3, u: 10 }; });
+      return p; };
+    const { api } = await boot({ seed: 9, pack: PACK_NOW, patterns: PATTERNS });
+    const shown = r => r.map(x => `${x.o}:${x.vis ? "on" : "off"}`).join(" ");
+    // pattern: answer c, options [c, ...rest], bare marks bareC
+    const pat = (bareC, c, rest) => { api.setProg(progFor(bareC.flatMap(x => x.wids))); const opts = [c.t, ...rest.map(x => x.t)], f = api.patternOptsHtml(c.t, opts);
+      return opts.map(o => ({ o, vis: visible(f(o)) })); };
+    // gap: answer word c, options [c, ...rest], bare words bareW
+    const gap = (bareW, c, rest) => { api.setProg(progFor(bareW.map(w => w.id))); const all = [c, ...rest], gc = { opts: all.map(w => w.w), byLabel: Object.fromEntries(all.map(w => [w.w, w])) }, f = api.gapOptsHtml(c, gc, null);
+      return gc.opts.map(o => ({ o, vis: gapVisible(f(o)) })); };
+    const rA = pat([SU], SU, [BUT, Y, Z]);
+    check(`pattern: answer 虽然 is the only bare option, every reading shown (${shown(rA)})`, rA.every(x => x.vis));
+    const rB = pat([SU, Y, Z], BUT, [SU, Y, Z]);
+    check(`pattern: answer 但是 is the only non-bare option, every reading shown (${shown(rB)})`, rB.every(x => x.vis));
+    const rC = pat([SU, Y], SU, [Y, BUT, Z]);
+    check(`pattern: 2 bare, 2 not, no leak: bare 虽然 and Y hidden, 但是 and Z kept (${shown(rC)})`, rC.every(x => x.vis === ![SU.t, Y.t].includes(x.o)));
+    const rD = pat([], SU, [BUT, Y, Z]);
+    check(`pattern control: no bare option, every reading shown (${shown(rD)})`, rD.every(x => x.vis));
+    const gA = gap([SUw], SUw, [BUTw, ...GW]);
+    check(`gap: answer 虽然 is the only bare word, every reading shown (${shown(gA)})`, gA.every(x => x.vis));
+    const gB = gap([SUw, ...GW], BUTw, [SUw, ...GW]);
+    check(`gap: answer 但是 is the only non-bare word, every reading shown (${shown(gB)})`, gB.every(x => x.vis));
+    const gC = gap([SUw, GW[0]], SUw, [GW[0], BUTw, GW[1]]);
+    check(`gap: 2 bare, 2 not, no leak: bare 虽然 and GW[0] hidden, 但是 and GW[1] kept (${shown(gC)})`, gC.every(x => x.vis === ![SUw.w, GW[0].w].includes(x.o)));
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);
