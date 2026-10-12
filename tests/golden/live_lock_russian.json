@@ -1054,7 +1054,7 @@
    "todayFirst": "Session 1 Goal 2 of 3 ≈ 86 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Моя семья Level exam ready: A1 Start",
    "today": [
     "Session 1 Goal 2 of 3 ≈ 86 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Моя семья Level exam ready: A1 Start",
-    "Session 2 Goal 2 of 3 ≈ 86 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Моя семья Level exam ready: A1 Start",
+    "Session 2 Goal 2 of 3 ≈ 87 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Моя семья Level exam ready: A1 Start",
     "Session 3 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Моя семья Level exam ready: A1 Start"
    ],
    "progress": {
@@ -1483,7 +1483,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "c8f824c8140f01be"
+     "sha": "f99c1e93d0680970"
     },
     "pv": {
      "n": 4,
@@ -1511,7 +1511,7 @@
     "v": 1,
     "w": {
      "n": 980,
-     "sha": "f7e2dbbab2a3e7d4"
+     "sha": "c0ae51b41f246350"
     }
    },
    "derivedAfter": {
@@ -1521,20 +1521,20 @@
      "B1"
     ],
     "positions": [
-     0.975,
-     0.714615,
-     0.3716
+     0.973333,
+     0.712308,
+     0.3704
     ],
     "toGo": [
      0,
      89,
-     170
+     171
     ],
     "toGoTotal": null,
     "currentGoal": {
      "i": 1,
      "n": 3,
-     "p": 0.714615,
+     "p": 0.712308,
      "all": false
     },
     "eta": 89,
@@ -1545,7 +1545,7 @@
      "id": "p0002",
      "lv": "A1"
     },
-    "position": 0.348375
+    "position": 0.34725
    },
    "items": {
     "items": 260,
@@ -1967,7 +1967,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "fc86f5acc6fbba32"
+     "sha": "ff36f3e62e5cad88"
     },
     "pv": {
      "n": 4,
@@ -1995,7 +1995,7 @@
     "v": 1,
     "w": {
      "n": 2000,
-     "sha": "be50524239795a75"
+     "sha": "363c8f6379ba9d64"
     }
    },
    "derivedAfter": {
@@ -2007,7 +2007,7 @@
     "positions": [
      0.99,
      0.991538,
-     0.991
+     0.9895
     ],
     "toGo": [
      0,
@@ -2018,7 +2018,7 @@
     "currentGoal": {
      "i": 2,
      "n": 3,
-     "p": 0.991,
+     "p": 0.9895,
      "all": true
     },
     "eta": 0,
@@ -2029,7 +2029,7 @@
      "id": "p0041",
      "lv": "B1"
     },
-    "position": 0.74325
+    "position": 0.742125
    },
    "items": {
     "items": 181,

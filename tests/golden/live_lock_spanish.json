@@ -1483,7 +1483,7 @@
     "v": 1,
     "w": {
      "n": 980,
-     "sha": "b6074e92a70f7c05"
+     "sha": "3fad17df0970d1cd"
     }
    },
    "derivedAfter": {
@@ -1493,9 +1493,9 @@
      "B1"
     ],
     "positions": [
-     0.981667,
-     0.718462,
-     0.3736
+     0.98,
+     0.717692,
+     0.3732
     ],
     "toGo": [
      0,
@@ -1506,7 +1506,7 @@
     "currentGoal": {
      "i": 1,
      "n": 3,
-     "p": 0.718462,
+     "p": 0.717692,
      "all": false
     },
     "eta": 90,
@@ -1517,7 +1517,7 @@
      "id": "p0002",
      "lv": "A1"
     },
-    "position": 0.35025
+    "position": 0.349875
    },
    "items": {
     "items": 251,
@@ -1587,7 +1587,7 @@
    "today": [
     "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Una decisión difícil Level exam ready: A1 Start",
     "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Una decisión difícil Level exam ready: A1 Start",
-    "Session 3 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Una decisión difícil Level exam ready: A1 Start"
+    "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Una decisión difícil Level exam ready: A1 Start"
    ],
    "progress": {
     "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
@@ -1936,7 +1936,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "6743c9c5af37eacb"
+     "sha": "e382775611635602"
     },
     "pv": {
      "n": 4,
@@ -1961,7 +1961,7 @@
     "v": 1,
     "w": {
      "n": 2000,
-     "sha": "5d30a0188cb8a27d"
+     "sha": "fd3711f38316996f"
     }
    },
    "derivedAfter": {
@@ -1971,9 +1971,9 @@
      "B1"
     ],
     "positions": [
-     0.996667,
-     0.993077,
-     0.992
+     0.993333,
+     0.99,
+     0.9895
     ],
     "toGo": [
      0,
@@ -1984,7 +1984,7 @@
     "currentGoal": {
      "i": 2,
      "n": 3,
-     "p": 0.992,
+     "p": 0.9895,
      "all": true
     },
     "eta": 0,
@@ -1995,7 +1995,7 @@
      "id": "p0041",
      "lv": "B1"
     },
-    "position": 0.744
+    "position": 0.742125
    },
    "items": {
     "items": 181,

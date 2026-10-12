@@ -1028,7 +1028,7 @@
    "todayFirst": "Session 1 Goal 2 of 3 ≈ 81 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Mein Tag Level exam ready: A1 Start",
    "today": [
     "Session 1 Goal 2 of 3 ≈ 81 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Mein Tag Level exam ready: A1 Start",
-    "Session 2 Goal 2 of 3 ≈ 81 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Mein Tag Level exam ready: A1 Start",
+    "Session 2 Goal 2 of 3 ≈ 82 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Mein Tag Level exam ready: A1 Start",
     "Session 3 Goal 2 of 3 ≈ 83 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Mein Tag Level exam ready: A1 Start"
    ],
    "progress": {
@@ -1454,7 +1454,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "7816666a390bbadb"
+     "sha": "a847142eb21ecb2b"
     },
     "pv": {
      "n": 4,
@@ -1479,7 +1479,7 @@
     "v": 1,
     "w": {
      "n": 980,
-     "sha": "7eba2eb406e58c31"
+     "sha": "814f0f138e079983"
     }
    },
    "derivedAfter": {
@@ -1489,20 +1489,20 @@
      "B1"
     ],
     "positions": [
-     0.98,
-     0.714615,
-     0.3716
+     0.973333,
+     0.711538,
+     0.37
     ],
     "toGo": [
      0,
      84,
-     169
+     170
     ],
     "toGoTotal": null,
     "currentGoal": {
      "i": 1,
      "n": 3,
-     "p": 0.714615,
+     "p": 0.711538,
      "all": false
     },
     "eta": 84,
@@ -1513,7 +1513,7 @@
      "id": "p0002",
      "lv": "A1"
     },
-    "position": 0.348375
+    "position": 0.346875
    },
    "items": {
     "items": 257,
@@ -1583,7 +1583,7 @@
    "today": [
     "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Eine schwierige Entscheidung Level exam ready: A1 Start",
     "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Eine schwierige Entscheidung Level exam ready: A1 Start",
-    "Session 3 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Eine schwierige Entscheidung Level exam ready: A1 Start"
+    "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Eine schwierige Entscheidung Level exam ready: A1 Start"
    ],
    "progress": {
     "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings Show reading New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
@@ -1925,7 +1925,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "a97e1cfe4b1b6c98"
+     "sha": "e382775611635602"
     },
     "pv": {
      "n": 4,
@@ -1950,7 +1950,7 @@
     "v": 1,
     "w": {
      "n": 2000,
-     "sha": "1e0b51a64c0b71c9"
+     "sha": "a8ab8def5e5ca753"
     }
    },
    "derivedAfter": {
@@ -1960,9 +1960,9 @@
      "B1"
     ],
     "positions": [
-     0.991667,
-     0.990769,
-     0.991
+     0.99,
+     0.99,
+     0.99
     ],
     "toGo": [
      0,
@@ -1973,7 +1973,7 @@
     "currentGoal": {
      "i": 2,
      "n": 3,
-     "p": 0.991,
+     "p": 0.99,
      "all": true
     },
     "eta": 0,
@@ -1984,7 +1984,7 @@
      "id": "p0041",
      "lv": "B1"
     },
-    "position": 0.74325
+    "position": 0.7425
    },
    "items": {
     "items": 174,

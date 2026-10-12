@@ -1039,7 +1039,7 @@
    ],
    "progress": {
     "start": "0 sessions, A2 Goal 2 of 3 ≈ 83 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A2 Goal 2 of 3 ≈ 86 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered sentences 2 · reading 1 of 20 A2 380 learned Still shaky il nome il bambino il controllo la base salvare l&#39;immagine il mercato insomma ringraziare l&#39;offerta il biglietto la conoscenza Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 87 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered sentences 2 · reading 1 of 20 A2 380 learned Still shaky il nome il bambino il controllo la base salvare l&#39;immagine il mercato insomma ringraziare l&#39;offerta il biglietto la conoscenza Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -1461,7 +1461,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "c8f824c8140f01be"
+     "sha": "e9fc129010550d1f"
     },
     "pv": {
      "n": 4,
@@ -1486,7 +1486,7 @@
     "v": 1,
     "w": {
      "n": 980,
-     "sha": "4d030bc058df9cea"
+     "sha": "3b368580830c4176"
     }
    },
    "derivedAfter": {
@@ -1496,23 +1496,23 @@
      "B1"
     ],
     "positions": [
-     0.98,
-     0.715385,
-     0.372
+     0.976667,
+     0.712308,
+     0.3704
     ],
     "toGo": [
      0,
-     86,
-     167
+     87,
+     168
     ],
     "toGoTotal": null,
     "currentGoal": {
      "i": 1,
      "n": 3,
-     "p": 0.715385,
+     "p": 0.712308,
      "all": false
     },
-    "eta": 86,
+    "eta": 87,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1520,7 +1520,7 @@
      "id": "p0002",
      "lv": "A1"
     },
-    "position": 0.34875
+    "position": 0.34725
    },
    "items": {
     "items": 258,
@@ -1930,7 +1930,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "fc86f5acc6fbba32"
+     "sha": "20409a40313deb2a"
     },
     "pv": {
      "n": 4,
@@ -1955,7 +1955,7 @@
     "v": 1,
     "w": {
      "n": 2000,
-     "sha": "62304708629e896e"
+     "sha": "d883e8544758c432"
     }
    },
    "derivedAfter": {
@@ -1965,9 +1965,9 @@
      "B1"
     ],
     "positions": [
-     0.993333,
-     0.993846,
-     0.9905
+     0.991667,
+     0.993077,
+     0.989
     ],
     "toGo": [
      0,
@@ -1978,7 +1978,7 @@
     "currentGoal": {
      "i": 2,
      "n": 3,
-     "p": 0.9905,
+     "p": 0.989,
      "all": true
     },
     "eta": 0,
@@ -1989,7 +1989,7 @@
      "id": "p0041",
      "lv": "B1"
     },
-    "position": 0.742875
+    "position": 0.74175
    },
    "items": {
     "items": 172,

@@ -1470,7 +1470,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "07e61d6c1b9a27dd"
+     "sha": "7816666a390bbadb"
     },
     "pv": {
      "n": 4,
@@ -1498,7 +1498,7 @@
     "v": 1,
     "w": {
      "n": 980,
-     "sha": "01aba8985a3a5f4c"
+     "sha": "1735dd91d019e688"
     }
    },
    "derivedAfter": {
@@ -1508,9 +1508,9 @@
      "B1"
     ],
     "positions": [
-     0.983333,
-     0.716923,
-     0.3728
+     0.981667,
+     0.715385,
+     0.372
     ],
     "toGo": [
      0,
@@ -1521,7 +1521,7 @@
     "currentGoal": {
      "i": 1,
      "n": 3,
-     "p": 0.716923,
+     "p": 0.715385,
      "all": false
     },
     "eta": 91,
@@ -1532,7 +1532,7 @@
      "id": "p0002",
      "lv": "A1"
     },
-    "position": 0.3495
+    "position": 0.34875
    },
    "items": {
     "items": 252,
@@ -1605,7 +1605,7 @@
    "today": [
     "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read عطلة على الشاطئ Level exam ready: A1 Start",
     "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read عطلة على الشاطئ Level exam ready: A1 Start",
-    "Session 3 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read عطلة على الشاطئ Level exam ready: A1 Start"
+    "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read عطلة على الشاطئ Level exam ready: A1 Start"
    ],
    "progress": {
     "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
@@ -1950,7 +1950,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "6743c9c5af37eacb"
+     "sha": "fc86f5acc6fbba32"
     },
     "pv": {
      "n": 4,
@@ -1978,7 +1978,7 @@
     "v": 1,
     "w": {
      "n": 2000,
-     "sha": "36a5d74cf7228af3"
+     "sha": "891d881f2bb44fc2"
     }
    },
    "derivedAfter": {
@@ -1989,8 +1989,8 @@
     ],
     "positions": [
      0.991667,
-     0.990769,
-     0.992
+     0.989231,
+     0.991
     ],
     "toGo": [
      0,
@@ -2001,7 +2001,7 @@
     "currentGoal": {
      "i": 2,
      "n": 3,
-     "p": 0.992,
+     "p": 0.991,
      "all": true
     },
     "eta": 0,
@@ -2012,7 +2012,7 @@
      "id": "p0041",
      "lv": "B1"
     },
-    "position": 0.744
+    "position": 0.74325
    },
    "items": {
     "items": 177,

@@ -1042,7 +1042,7 @@
    ],
    "progress": {
     "start": "0 sessions, A2 Goal 2 of 3 ≈ 97 sessions daily life: directions, simple chat, short notices الفبا 0 / 33 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A2 Goal 2 of 3 ≈ 99 sessions daily life: directions, simple chat, short notices الفبا 0 / 33 taught · 0 mastered A1 0 of 600 mastered sentences 2 · reading 1 of 20 A2 380 learned Still shaky درد خواهر صبر جمعه چای کفش آشپزخانه ساده محصول دیوانه اقدام پریدن Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 100 sessions daily life: directions, simple chat, short notices الفبا 0 / 33 taught · 0 mastered A1 0 of 600 mastered sentences 2 · reading 1 of 20 A2 380 learned Still shaky درد خواهر صبر جمعه چای کفش آشپزخانه ساده محصول دیوانه اقدام پریدن Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -1460,7 +1460,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "85d3f0321413270f"
+     "sha": "fc856ff11289b4d9"
     },
     "pv": {
      "n": 4,
@@ -1488,7 +1488,7 @@
     "v": 1,
     "w": {
      "n": 980,
-     "sha": "4f59ee78122a5697"
+     "sha": "80ef03b6e2ec2981"
     }
    },
    "derivedAfter": {
@@ -1498,23 +1498,23 @@
      "B1"
     ],
     "positions": [
-     0.981667,
-     0.717692,
-     0.3732
+     0.975,
+     0.714615,
+     0.3716
     ],
     "toGo": [
      0,
-     99,
+     100,
      168
     ],
     "toGoTotal": null,
     "currentGoal": {
      "i": 1,
      "n": 3,
-     "p": 0.717692,
+     "p": 0.714615,
      "all": false
     },
-    "eta": 99,
+    "eta": 100,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1522,7 +1522,7 @@
      "id": "p0002",
      "lv": "A1"
     },
-    "position": 0.349875
+    "position": 0.348375
    },
    "items": {
     "items": 254,
@@ -1938,7 +1938,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "e382775611635602"
+     "sha": "20409a40313deb2a"
     },
     "pv": {
      "n": 4,
@@ -1966,7 +1966,7 @@
     "v": 1,
     "w": {
      "n": 2000,
-     "sha": "9ce97610c5b81ff1"
+     "sha": "d83d00b8fb4cd580"
     }
    },
    "derivedAfter": {
@@ -1976,9 +1976,9 @@
      "B1"
     ],
     "positions": [
-     0.99,
-     0.989231,
-     0.99
+     0.986667,
+     0.986923,
+     0.9885
     ],
     "toGo": [
      0,
@@ -1989,7 +1989,7 @@
     "currentGoal": {
      "i": 2,
      "n": 3,
-     "p": 0.99,
+     "p": 0.9885,
      "all": true
     },
     "eta": 0,
@@ -2000,7 +2000,7 @@
      "id": "p0041",
      "lv": "B1"
     },
-    "position": 0.7425
+    "position": 0.741375
    },
    "items": {
     "items": 175,

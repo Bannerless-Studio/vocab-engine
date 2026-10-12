@@ -1039,11 +1039,11 @@
    "today": [
     "Session 1 Goal 2 of 3 ≈ 82 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Hari Budi Level exam ready: A1 Start",
     "Session 2 Goal 2 of 3 ≈ 82 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Hari Budi Level exam ready: A1 Start",
-    "Session 3 Goal 2 of 3 ≈ 83 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Hari Budi Level exam ready: A1 Start"
+    "Session 3 Goal 2 of 3 ≈ 84 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Hari Budi Level exam ready: A1 Start"
    ],
    "progress": {
     "start": "0 sessions, A2 Goal 2 of 3 ≈ 82 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A2 Goal 2 of 3 ≈ 84 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered sentences 2 · reading 1 of 20 A2 380 learned Still shaky ini pergi sedang kurang pakaian penjara operasi betapa mempelajari daya jembatan listrik Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 85 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered sentences 2 · reading 1 of 20 A2 380 learned Still shaky ini pergi sedang kurang pakaian penjara operasi betapa mempelajari daya jembatan listrik Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -1461,7 +1461,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "07e61d6c1b9a27dd"
+     "sha": "384c692b5a366fdf"
     },
     "pv": {
      "n": 4,
@@ -1486,7 +1486,7 @@
     "v": 1,
     "w": {
      "n": 980,
-     "sha": "3b7f079e2c434bc4"
+     "sha": "9248596c6309c46d"
     }
    },
    "derivedAfter": {
@@ -1497,22 +1497,22 @@
     ],
     "positions": [
      0.98,
-     0.716923,
-     0.3728
+     0.714615,
+     0.3716
     ],
     "toGo": [
      0,
-     84,
+     85,
      169
     ],
     "toGoTotal": null,
     "currentGoal": {
      "i": 1,
      "n": 3,
-     "p": 0.716923,
+     "p": 0.714615,
      "all": false
     },
-    "eta": 84,
+    "eta": 85,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1520,7 +1520,7 @@
      "id": "p0002",
      "lv": "A1"
     },
-    "position": 0.3495
+    "position": 0.348375
    },
    "items": {
     "items": 254,
@@ -1590,7 +1590,7 @@
    "today": [
     "Session 1 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Keputusan yang sulit Level exam ready: A1 Start",
     "Session 2 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Keputusan yang sulit Level exam ready: A1 Start",
-    "Session 3 All goals 100% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Keputusan yang sulit Level exam ready: A1 Start"
+    "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Keputusan yang sulit Level exam ready: A1 Start"
    ],
    "progress": {
     "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
@@ -1938,7 +1938,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "6743c9c5af37eacb"
+     "sha": "e382775611635602"
     },
     "pv": {
      "n": 4,
@@ -1963,7 +1963,7 @@
     "v": 1,
     "w": {
      "n": 2000,
-     "sha": "c4fd6ea57e964833"
+     "sha": "aea860f636c6042d"
     }
    },
    "derivedAfter": {
@@ -1974,8 +1974,8 @@
     ],
     "positions": [
      0.983333,
-     0.99,
-     0.992
+     0.988462,
+     0.99
     ],
     "toGo": [
      0,
@@ -1986,7 +1986,7 @@
     "currentGoal": {
      "i": 2,
      "n": 3,
-     "p": 0.992,
+     "p": 0.99,
      "all": true
     },
     "eta": 0,
@@ -1997,7 +1997,7 @@
      "id": "p0041",
      "lv": "B1"
     },
-    "position": 0.744
+    "position": 0.7425
    },
    "items": {
     "items": 180,

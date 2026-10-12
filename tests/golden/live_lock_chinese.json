@@ -1122,7 +1122,7 @@
    "today": [
     "Session 1 Goal 1 of 3 ≈ 5 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 1 of 17 Listen Recall Sentences Read 妹妹的生日 Level exam ready: HSK 1 Start",
     "Session 2 Goal 1 of 3 ≈ 6 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 2 of 17 Listen Recall Sentences Read 妹妹的生日 Level exam ready: HSK 1 Start",
-    "Session 3 Goal 1 of 3 ≈ 6 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 3 of 17 Listen Recall Sentences Read 妹妹的生日 Level exam ready: HSK 1 Start"
+    "Session 3 Goal 1 of 3 ≈ 7 sessions survive a trip: greet, order, count, buy Review Learn 字 HSK 1, set 3 of 17 Listen Recall Sentences Read 妹妹的生日 Level exam ready: HSK 1 Start"
    ],
    "progress": {
     "start": "0 sessions, HSK 3 Goal 1 of 3 ≈ 5 sessions survive a trip: greet, order, count, buy HSK 1 0 of 150 mastered HSK 2 0 of 147 mastered characters only 0 of 147 · reading 0 of 15 HSK 3 150 learned Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
@@ -1550,7 +1550,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "68b87b3602e56b7a"
+     "sha": "2651b9262de03e38"
     },
     "pv": {
      "n": 4,
@@ -1575,7 +1575,7 @@
     "v": 1,
     "w": {
      "n": 447,
-     "sha": "20fdab7bda96daea"
+     "sha": "44646c4cf93a3dea"
     }
    },
    "derivedAfter": {
@@ -2776,12 +2776,12 @@
    "todayFirst": "Session 1 Goal 2 of 3 ≈ 14 sessions daily life: directions, simple chat, short notices Review Learn HSK 3, set 16 Listen Recall Sentences Read 妹妹的生日 Level exam ready: HSK 1 Start",
    "today": [
     "Session 1 Goal 2 of 3 ≈ 14 sessions daily life: directions, simple chat, short notices Review Learn HSK 3, set 16 Listen Recall Sentences Read 妹妹的生日 Level exam ready: HSK 1 Start",
-    "Session 2 Goal 2 of 3 ≈ 15 sessions daily life: directions, simple chat, short notices Review Learn 字 HSK 3, set 16 of 30 Listen Recall Sentences Read 妹妹的生日 Level exam ready: HSK 1 Start",
+    "Session 2 Goal 2 of 3 ≈ 16 sessions daily life: directions, simple chat, short notices Review Learn 字 HSK 3, set 16 of 30 Listen Recall Sentences Read 妹妹的生日 Level exam ready: HSK 1 Start",
     "Session 3 Goal 2 of 3 ≈ 17 sessions daily life: directions, simple chat, short notices Review Learn HSK 3, set 17 Listen Recall Sentences Read 妹妹的生日 Level exam ready: HSK 1 Start"
    ],
    "progress": {
     "start": "0 sessions, HSK 3 Goal 2 of 3 ≈ 14 sessions daily life: directions, simple chat, short notices HSK 1 0 of 150 mastered HSK 2 0 of 147 mastered characters only 0 of 147 · reading 0 of 15 HSK 3 150 learned Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, HSK 3 Goal 2 of 3 ≈ 18 sessions daily life: directions, simple chat, short notices HSK 1 0 of 150 mastered HSK 2 0 of 147 mastered characters only 0 of 147 · sentences 1 · reading 0 of 15 HSK 3 170 learned Still shaky shū yī shēng qián chuán xuě zǒng shì jiāo bān liǎn méi guān xi kàn qī zi Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+    "end": "3 sessions, HSK 3 Goal 2 of 3 ≈ 19 sessions daily life: directions, simple chat, short notices HSK 1 0 of 150 mastered HSK 2 0 of 147 mastered characters only 0 of 147 · sentences 1 · reading 0 of 15 HSK 3 170 learned Still shaky shū yī shēng qián chuán xuě zǒng shì jiāo bān liǎn méi guān xi kàn qī zi Show all Settings Show pinyin New material: on Dark theme Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -3226,7 +3226,7 @@
     "placedOnce": true,
     "pm": {
      "n": 3,
-     "sha": "1959d2ce000c4385"
+     "sha": "63e251bcef005025"
     },
     "pv": {
      "n": 4,
@@ -3251,7 +3251,7 @@
     "v": 1,
     "w": {
      "n": 467,
-     "sha": "035e0d0219efd1f3"
+     "sha": "aa73a4ec03e341e2"
     }
    },
    "derivedAfter": {
@@ -3261,23 +3261,23 @@
      "4"
     ],
     "positions": [
-     0.973064,
-     0.728403,
-     0.291199
+     0.967677,
+     0.725714,
+     0.290193
     ],
     "toGo": [
      0,
-     18,
-     204
+     19,
+     205
     ],
     "toGoTotal": null,
     "currentGoal": {
      "i": 1,
      "n": 3,
-     "p": 0.728403,
+     "p": 0.725714,
      "all": false
     },
-    "eta": 18,
+    "eta": 19,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -3285,7 +3285,7 @@
      "id": "p0016",
      "lv": "2"
     },
-    "position": 0.273889
+    "position": 0.273051
    },
    "items": {
     "items": 249,
