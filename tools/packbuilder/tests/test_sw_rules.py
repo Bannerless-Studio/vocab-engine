@@ -395,6 +395,11 @@ class HomographContextRules(unittest.TestCase):
         self.assertEqual(self.reading("Tufuate taratibu hizi.", "taratibu")[1], "NOUN")
         self.assertEqual(self.reading("Tufuate taratibu.", "taratibu")[1], "NOUN")
 
+    def test_taratibu_clause_final_after_a_verbs_object_is_slowly(self):
+        self.assertEqual(self.reading("Alisoma kitabu taratibu.", "taratibu"), ("taratibu", "ADV"))
+        self.assertEqual(self.reading("Tulifuata sheria taratibu.", "taratibu")[1], "NOUN")
+        self.assertEqual(self.reading("Walifanya mpango wa taratibu.", "taratibu")[1], "NOUN")
+
     def test_hazina_treasure_after_a_verb_or_associative(self):
         self.assertEqual(self.reading("Walizika hazina yao.", "hazina"), ("hazina", "NOUN"))
 
@@ -867,7 +872,8 @@ def kuwa_spec():
                     "amua": "amua", "kana": "kana", "jua": "jua", "choka": "choka", "julikana": "julikana",
                     "chukulia": "chukulia", "maliza": "maliza", "saidia": "saidia", "omba": "omba", "jibu": "jibu",
                     "taka": "taka", "anza": "anza", "toka": "toka", "tuma": "tuma", "pata": "pata",
-                    "ripoti": "ripoti", "ambia": "ambia", "hofia": "hofu", "semekana": "semeka"})
+                    "ripoti": "ripoti", "ambia": "ambia", "hofia": "hofu", "semekana": "semeka",
+                    "elezwa": "elezwa", "ambiwa": "ambiwa"})
     an.adj_stem |= {"huru", "tulivu", "pya"}
     an.adj_form.update({"huru": "huru", "utulivu": "tulivu", "mtulivu": "tulivu", "mpya": "pya"})
     return sp
@@ -954,6 +960,11 @@ class KuwaVerbVersusConjunction(unittest.TestCase):
         self.verb("Aliripotiwa kuwa katika miaka yake ya 20.")
         self.conj("Inaonekana kuwa katika mji huo rais ametimiza ahadi.")
         self.conj("Aliambiwa kuwa kwa sababu hiyo adui anasubiri.")
+
+    def test_passive_lemmas_elezwa_and_ambiwa_raise_like_ripotiwa(self):
+        self.verb("Alielezwa kuwa katika miaka yake ya 20.")
+        self.verb("Aliambiwa kuwa katika miaka yake ya 20.")
+        self.conj("Alielezwa kuwa anasoma.")
 
     def test_quote_after_kuwa_is_read_inside(self):
         self.conj('Alisema kuwa "anasoma".')

@@ -969,6 +969,29 @@ console.log("\n[rs] read.done[pid].t (fb46): whole seconds of the latest complet
 }
 
 
+// Boot drops a rollback's showPron: true while a script pack's primer is unfinished (dropRollbackShowPron); a stored
+// false, a finished primer and a non-script pack keep it; without the script units nothing is dropped.
+{
+  const PS = require("./lib/port_sim.js");
+  const withShow = (pack, v, extra) => { const p = clone(VC.defaultProg(pack)); p.showPron = v; return Object.assign(p, extra || {}); };
+  const boot = (p, pack, units) => VC.bootProg(JSON.stringify(p), pack, false, units);
+  const scripts = PS.SIBLINGS.map(l => PS.loadSibling(l)).filter(s => s && s.script && Array.isArray(s.script.units) && s.script.units.length);
+  if(!scripts.length) skip("[showPron] no sibling script pack in this checkout (../<lang>/pack/script.js)");
+  for(const site of scripts){
+    const u = site.script.units, L = `[showPron] ${site.lang}`;
+    const unfinished = withShow(site.pack, true), without = clone(unfinished); delete without.showPron;
+    const ub = boot(unfinished, site.pack, u);
+    check(`${L}: rollback showPron:true on an unfinished primer is gone after boot, everything else byte-equal`, ub.backupRaw === null && !("showPron" in ub.prog) && eq(ub.prog, boot(without, site.pack, u).prog));
+    check(`${L}: no units given -> nothing dropped (showPron:true kept)`, boot(unfinished, site.pack).prog.showPron === true);
+    const imp = VC.applyImport(null, JSON.stringify(unfinished), site.pack, u);
+    check(`${L}: a file carrying showPron:true (a pre-fb45 export) imports without it while the primer is unfinished`, imp.ok && !("showPron" in imp.prog) && eq(imp.prog, VC.applyImport(null, JSON.stringify(without), site.pack, u).prog));
+    check(`${L}: stored false on an unfinished primer is an explicit choice and stays`, boot(withShow(site.pack, false), site.pack, u).prog.showPron === false);
+    const done = withShow(site.pack, true, { script: Object.assign(clone(unfinished.script), { skipped: true }) });
+    check(`${L}: showPron:true with the primer skipped (done) stays`, boot(done, site.pack, u).prog.showPron === true);
+  }
+  const plain = PS.loadSibling("italian");
+  if(plain) check("[showPron] a non-script pack keeps showPron:true (nothing to roll back)", boot(withShow(plain.pack, true), plain.pack, undefined).prog.showPron === true);
+}
 (async () => {
 console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/briefs/port-plan.md sections 1 and 3): no field is new beyond the pairs / dayAware / progress-map family; sibling engines ef44c6e and aa00571 boot it unchanged");
 {
@@ -990,6 +1013,8 @@ console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/bri
     // pre-fb45 engines write showPron on boot; a record written for a script pack (pronUntilPrimerOn) carries none, main keeps it when it comes back (TODO "Open defects")
     const tolFor = raw => VC.pronUntilPrimerOn(site.pack) && !("showPron" in JSON.parse(raw)) ? (p => { const c = clone(p); delete c.showPron; return c; }) : (p => p);
     const seed = PS.legacySeed(VC, site, 150, 7);
+    const units = site.script && site.script.units;
+    const expectBack = q => { const d = clone(q); if(d.showPron === true && units && units.length && !VC.scriptPrimerDone(G.pack, units, d)) delete d.showPron; return d; };
     // old engines boot a record written under G byte-equal, a mark keeps every new field, and back on main
     const boots = (raw, prog, L) => {
         for(const { sha, eng } of OLD){
@@ -1002,8 +1027,8 @@ console.log("\n[port] the generic flag set G on the 13 sibling packs (.cache/bri
           eng.markRec(q.w, id, true, true);
           const others = Object.keys(tol(q)).filter(k => k !== "w").every(k => eq(q[k], prog[k])) && Object.keys(q.w).filter(k => k !== id).every(k => eq(q.w[k], prog.w[k]));
           check(`${L}: a mark on ${sha} keeps every new field (p, f, day, pm, pv, read.done s / ls) and every other record`, others && eq(sans(q.w[id]), sans(prog.w[id])) && eq(q.w[id].p, prog.w[id].p));
-          const back = VC.bootProg(JSON.stringify(q), G.pack);
-          check(`${L}: and back on main from ${sha}: no backup, progress byte-equal (showPron tolerated: the old build appends it, main keeps it)`, back.backupRaw === null && JSON.stringify(tol(back.prog)) === JSON.stringify(tol(q)));
+          const back = VC.bootProg(JSON.stringify(q), G.pack, false, units);
+          check(`${L}: and back on main from ${sha}: no backup, progress byte-equal (showPron tolerated: the old build appends it; main drops a true one while the primer is unfinished, keeps it once done)`, back.backupRaw === null && JSON.stringify(tol(back.prog)) === JSON.stringify(tol(expectBack(q))));
         }
     };
     let sim = null, err = null;

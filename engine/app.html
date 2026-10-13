@@ -469,6 +469,7 @@ const LEVELS = VC.levelIds(PACK);
 const SIZE = VC.setSizeOf(PACK);
 const BY_LV = VC.wordsByLevel(WORDS, PACK);
 const WORDS_BY_ID = {}; WORDS.forEach(w=>{ WORDS_BY_ID[w.id] = w; });
+VC.setGlossIndex(PACK, WORDS);
 const CHAR_CTX = { units: CHAR_LIST, words: WORDS, byId: WORDS_BY_ID };
 // Every primer surface is gated on HAS_SCRIPT (docs/SCRIPT_PRIMER.md); without it each code
 // path is the pre-primer one and SU stays undefined.
@@ -3601,7 +3602,7 @@ function progressWire(xp, cp){
         $("impCancel").onclick = () => { box.style.display = "none"; box.innerHTML = ""; };
         return;
       }
-      const r = VC.applyImport(prog, text, PACK);
+      const r = VC.applyImport(prog, text, PACK, SUNITS);
       if(!r.ok){ showImportError(r.newer ? r.reason : "That doesn't look like valid exported progress for this pack: " + r.reason); return; }
       await applyImported(r.prog);
     }catch(e){
@@ -3853,7 +3854,7 @@ function legacyFailHTML(why){
     storeReadOnly = true;
     legacyFail = lm.fail;
   }
-  const b = VC.bootProg(got.value, PACK, !got.ok);
+  const b = VC.bootProg(got.value, PACK, !got.ok, SUNITS);
   if(b.readOnly){
     storeReadOnly = true;
     storageWarn("Saved progress could not be read (storage error), so this session is read-only: nothing you do now will be saved, and your stored progress is left untouched. Reload to try again.");
