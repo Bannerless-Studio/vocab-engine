@@ -47,6 +47,9 @@ Wave 0 review follow-ups (w35-review 2026-10-08, LOW, not blocking wave 1): pack
 | noun gender field `g` for article agreement in cloze gaps | it es fr de builders (cd94707, on main); core.js gap distractors | not shipped: the four live words.json carry no `g` (last republish predates cd94707), so gapGender is inert on live sites; republish it es fr de on a main sha at or after cd94707 and check `g` counts first; fb46 |
 | Nastaliq line height on Urdu | urdu site | unverified in a real browser; being checked by the urdu port 2026-10-08 |
 | Indonesian passages PROPN rescue | `id.tag_texts` (`lowc`/`capc`, `lowpos`) | `packbuilder passages` tags only passage texts, less evidence than the corpus build; when id passages are authored, compare their PROPN tags with corpus tagging (passage texts appended to a corpus sample), seed the rescue counts from the tagged corpus if they differ |
+| Sentence ids are positional | packbuilder sentences stage, each language's sentences.json | a full rebuild moves them (it 2973 of 3139, es 1791 of 3282, de 3203 of 3388, fr 0) and breaks prog.s and the day log; any sentence re-link (it-phrase, the 110 better it links, a fr rebuild) waits on text-stable sentence ids carried forward like tools/id_map_v1.json (source: .cache/briefs/rebuild-drift-report.md) |
+| es rebuild regresses | es builder / port_flags | a rebuilt es pack drops `patterns` and `patternCue` (port_flags does not emit them) and regresses two translations ("Tom se sentó solo en el bar" now "felt alone") |
+| noun gender `g` not shipped | enrich | `g` reaches the live packs only through enrich (branch enrich-gender, separate); 929 it words, 957 es, 939 fr, 800 de differ from live |
 
 ## Parked features (owner decisions)
 
