@@ -394,6 +394,34 @@ console.log("\n[4] reading speed row (fb46): t stored at completion, guards, med
   }
 }
 
+// ------------------------------------------------------------------ [6] placed marker: position never steps back (placed-fixes)
+{
+  console.log("\n[6] placed marker pl: zh placed through HSK 3, position monotone across prov lift and unit mastery");
+  const st = VC.strata(WORDS, PACK.placement, VC.setSizeOf(PACK)), passed = st.findIndex(b => String(b.lv) === "3");
+  const base = VC.applyPlacement(VC.normalizeProg({ placedOnce: true, soundsOpened: true }, PACK), st, passed, WORDS, PACK, CHARACTERS);
+  const crs = VC.charRecs(base), uid = CHARACTERS.filter(u => crs[u.id]).map(u => u.id);
+  const goals = VC.progressMapGoals(PACK), pos = q => [VC.progressPosition(q, PACK, WORDS, CHARACTERS, PASSAGES), ...VC.goalPositions(q, PACK, WORDS, CHARACTERS, PASSAGES), VC.levelPosition(q, PACK, "2", WORDS, CHARACTERS)];
+  const p0 = pos(base), mono = (a, b) => a.every((x, i) => b[i] >= x - 1e-12);
+  check(`units placed carry pl (${uid.length}) and every placed word carries pl`, uid.length > 0 && uid.every(i => crs[i].pl === 1) && Object.values(base.w).every(r => r.pl === 1 && r.s === 0));
+  // 1: every word's prov settles at known (production answers on every pair), no miss
+  const q1 = clone(base); Object.keys(q1.w).forEach(k => { const w = WORDS.find(x => x.id === k); q1.w[k].p = { wm: [3, 1], sm: [3, 1], ws: [3, 1] }; q1.w[k].r = 9; q1.w[k].s = 5; VC.settleProv(q1.w[k], w, PACK); });
+  check("settled words: no prov left, position monotone (map, goals, level bar)", Object.values(q1.w).every(r => !r.prov) && mono(p0, pos(q1)));
+  // 2: units reach mastered through real answers (markChar drops prov at mastered), still no miss
+  const q2 = clone(q1), cfg = PACK.characters;
+  uid.forEach(i => { for(let n = 0; n < cfg.mastered + 1; n++) VC.markChar(q2, i, true, PACK, false); });
+  check(`unit mastery: prov gone on every placed unit, position monotone (${p0[0].toFixed(4)} -> ${pos(q2)[0].toFixed(4)})`, uid.every(i => !VC.charRecs(q2)[i].prov) && mono(p0, pos(q2)));
+  // 3: one miss on a placed word lowers the position (the marker is not a free pass)
+  const q3 = clone(q2), k0 = Object.keys(q3.w)[0]; VC.markRec(q3.w, k0, false, true); VC.notePair(q3.w[k0], "wm", false, false, 1);
+  check("a miss on a placed word (markRec + its pair, as markWord does) lowers the whole-pack position", pos(q3)[0] < pos(q2)[0]);
+  // 3b: a cloze miss (markMissKind drops prov, no w++ of its own) also lowers every position read and ends placedProv
+  const q3b = clone(base), k1 = Object.keys(q3b.w)[0]; VC.markMissKind(q3b.w, k1, false, "gap");
+  check("a cloze miss on a placed word ends placedProv and lowers whole-pack position and the level bar", !VC.placedProv(q3b.w[k1]) && q3b.w[k1].pl === 1 && pos(q3b)[0] < p0[0]);
+  // control: a record without pl (a build before this one) steps back when prov lifts
+  const old = clone(base); Object.values(old.w).forEach(r => { delete r.pl; }); uid.forEach(i => { delete VC.charRecs(old)[i].pl; });
+  const o1 = clone(old); Object.keys(o1.w).forEach(k => { delete o1.w[k].prov; });
+  check("control: an old record (no pl) loses its placed share when prov lifts without the pairs rule", pos(o1)[0] < pos(old)[0]);
+}
+
 console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
 process.exit(fails ? 1 : 0);
 })();

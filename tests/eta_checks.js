@@ -581,7 +581,10 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
       const r = p.w[w.id]; delete r.prov; r.p = { wm: [3, 1], sm: [3, 1], ws: [3, 1] };
       const known = VC.wordKnown(r, w, PACK), exam = VC.wordKnownX(r, w, PACK, p, bw), pct1 = VC.levelKnownPct(WORDS, PACK, p, "3", CHARACTERS);
       const u = VC.charRecs(p)[bw.get(w.id).id]; delete u.prov; const pct2 = VC.levelKnownPct(WORDS, PACK, p, "3", CHARACTERS);
-      check(`levelExam characters: ${w.w} known by the word rule, not by the exam (unit at streak 1): counts while its unit is placed (${pct0} -> ${pct1}), not once the unit's prov is gone (${pct2})`, known && !exam && pct1 === pct0 && Math.abs(pct2 - (pct0 - 1 / n)) < 1e-9);
+      check(`levelExam characters: ${w.w} known by the word rule, not by the exam (unit at streak 1): counts while its unit is placed (${pct0} -> ${pct1}), and after both provs lift without a miss, the placed marker (pl) keeps it (${pct2})`, known && !exam && pct1 === pct0 && pct2 === pct0);
+      r.w = 1; const pct3 = VC.levelKnownPct(WORDS, PACK, p, "3", CHARACTERS);
+      u.w = 1; const pct4 = VC.levelKnownPct(WORDS, PACK, p, "3", CHARACTERS);
+      check(`levelExam characters: a miss on the word alone still counts while its unit stays placed (${pct3}); a miss on the unit too ends it and the word waits on the exam (${pct4})`, pct3 === pct0 && Math.abs(pct4 - (pct0 - 1 / n)) < 1e-9);
     }
     // Fully placed (every bucket passed, k = null; owner 2026-10-09 es screenshot "everything covered", "Goal 1 of 3 ≈ 180 sessions"):
     // every goal full, the finished learner's "All goals" line without an estimate, mastered rows stay literal (0).

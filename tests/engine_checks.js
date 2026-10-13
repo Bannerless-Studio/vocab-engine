@@ -255,9 +255,9 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
     const out = VC.applyPlacement(VC.defaultProg(PACK), st, 10, WORDS, PACK);
     const nn = VC.nextNewSet(WORDS, PACK, out);
     return !!nn && nn.lv === String(st[10].lv) && nn.set === st[10].s0; })());
-  check("applyPlacement: a word answered right above the landing is seeded {r:1,w:0,s:1,prov:1}; a wrong one above it is not", (() => {
+  check("applyPlacement: a word answered right above the landing is seeded {r:1,w:0,s:0,prov:1,pl:1}; a wrong one above it is not", (() => {
     const right = st[5].words[0].id, out = VC.applyPlacement(VC.defaultProg(PACK), st, 3, WORDS, PACK, undefined, { right: [right] });
-    return util.isDeepStrictEqual(out.w[right], { r:1, w:0, s:1, prov:1 }) && st[5].words.slice(1).every(w => !out.w[w.id]); })());
+    return util.isDeepStrictEqual(out.w[right], { r:1, w:0, s:0, prov:1, pl:1 }) && st[5].words.slice(1).every(w => !out.w[w.id]); })());
   // Lengths on the sibling packs (the owner's italian 12-bucket and chinese 16-bucket shapes, and a non-typing copy).
   {
     let dir = process.env.LANG_REPOS_DIR || null;
@@ -3298,6 +3298,52 @@ async function swChecks(){
   const rotOn = Object.assign({}, ON, { dayAware: true, readRotation: true });
   const nr = VC.nextReadItem(PASSAGES, WORDS, rotOn, placedTop, "2026-10-08", false, 5, seededOnce());
   check("readRotation on a placed record: the new pick is the top-level passage", nr && nr.reason === "new" && nr.p.lv === top);
+})();
+
+// Placed-word probation and the placed marker (placed-fixes; TODO "placed-word probation", "placedKnown position can step back").
+(() => {
+  console.log("\n[placed] probation (s 0, first miss in any kind drops prov) and the pl marker (position never steps back)");
+  const L = VC.levelIds(PACK), size = VC.setSizeOf(PACK), st = VC.strata(WORDS, PACK.placement, size);
+  const out = VC.applyPlacement(VC.defaultProg(PACK), st, 3, WORDS, PACK);
+  const ids = Object.keys(out.w), id0 = ids[0], w0 = BY_ID[id0];
+  check("[placed] every seeded record is {r:1,w:0,s:0,prov:1,pl:1}", ids.length > 0 && ids.every(k => util.isDeepStrictEqual(out.w[k], { r:1, w:0, s:0, prov:1, pl:1 })));
+  check("[placed] probation: every pair of a placed word boots at streak 0 and it is not known by the pairs rule", VC.wordPairs(w0, PACK).every(p => VC.pairState(out.w[id0], p).s === 0) && !VC.wordKnown(out.w[id0], w0, PACK));
+  check("[placed] a legacy-counter record (pinPrefixRecords) is not marked placed", (() => { const q = VC.defaultProg(PACK); q.sets = Object.assign({}, q.sets, { [L[0]]: 1 }); VC.pinPrefixRecords(q, WORDS, PACK, L[0], q.sets); const k = Object.keys(q.w); return k.length > 0 && k.every(i => q.w[i].prov === 1 && q.w[i].pl === undefined); })());
+  // a miss in any kind drops prov: the cloze path (markMissKind) as well as markRec
+  const gap = { [id0]: Object.assign({}, out.w[id0]) };
+  VC.markMissKind(gap, id0, true, "gap");
+  check("[placed] a right cloze keeps prov", gap[id0].prov === 1);
+  VC.markMissKind(gap, id0, false, "gap");
+  check("[placed] a missed cloze word drops prov and keeps pl", gap[id0].prov === undefined && gap[id0].pl === 1);
+  check("[placed] a missed cloze word ends the placed position (w >= 1, placedProv false)", gap[id0].w >= 1 && !VC.placedProv(gap[id0]));
+  const posOf = q => VC.progressPosition(q, PACK, WORDS, [], []);
+  const clozeMiss = JSON.parse(JSON.stringify(out)); const pBefore = posOf(clozeMiss);
+  VC.markMissKind(clozeMiss.w, id0, false, "gap");
+  check(`[placed] a cloze miss leaves progressPosition unchanged or lower (${pBefore.toFixed(4)} -> ${posOf(clozeMiss).toFixed(4)})`, posOf(clozeMiss) < pBefore);
+  const rt = { [id0]: Object.assign({}, out.w[id0], { s: 2 }) }; VC.markWordRec(rt, id0, false, "read", undefined, PACK, { retry: true });
+  check("[placed] markWordRec retry miss ends the position", rt[id0].prov === undefined && !VC.placedProv(rt[id0]));
+  const un = { prov:1, pl:1, r:1, w:0, s:0 }; VC.settleUnitProv(un, false, PACK);
+  check("[placed] settleUnitProv miss ends the position", un.prov === undefined && !VC.placedProv(un));
+  const aw = VC.defaultProg(PACK); aw.w = JSON.parse(JSON.stringify(out.w)); VC.applyWeakWords(aw, [{ id: id0, weight: 1 }], WORDS, PACK);
+  check("[placed] applyWeakWords ends the position", !VC.placedProv(aw.w[id0]));
+  const gmark = { prov:1, pl:1, r:1, w:0, s:0 }; VC.markRec({ k: gmark }, "k", false, true);
+  check("[placed] markRec miss ends the position", !VC.placedProv(gmark));
+  const mw = { [id0]: Object.assign({}, out.w[id0]) }; VC.markWordRec(mw, id0, false, "read", undefined, PACK);
+  check("[placed] markWordRec miss drops prov (s below the hold)", mw[id0].prov === undefined && mw[id0].pl === 1 && mw[id0].w === 1);
+  const mh = { [id0]: Object.assign({}, out.w[id0], { s: 2 }) }; VC.markWordRec(mh, id0, false, "read", undefined, PACK);
+  check("[placed] markWordRec miss drops prov (held word)", mh[id0].prov === undefined);
+  // position: prov lifting without a miss never lowers it; a miss lowers it by that word
+  const pos = q => VC.progressPosition(q, PACK, WORDS, [], []);
+  const p0 = pos(out), lift = JSON.parse(JSON.stringify(out));
+  ids.slice(0, 40).forEach(k => { delete lift.w[k].prov; lift.w[k].s = 5; lift.w[k].r = 9; });
+  check(`[placed] position is unchanged when prov lifts without a miss (${p0.toFixed(4)} -> ${pos(lift).toFixed(4)})`, pos(lift) === p0);
+  const settled = JSON.parse(JSON.stringify(out)); const rr = settled.w[id0]; rr.p = { wm: [3, 1], sm: [3, 1], ws: [3, 1] };
+  check("[placed] settleProv at known drops prov, position stays", VC.settleProv(rr, w0, PACK) && rr.prov === undefined && pos(settled) === p0);
+  const missed = JSON.parse(JSON.stringify(out)); VC.markRec(missed.w, id0, false, true);
+  check(`[placed] a miss lowers position by that one word (${p0.toFixed(4)} -> ${pos(missed).toFixed(4)})`, pos(missed) < p0);
+  check("[placed] a placed record round-trips normalizeProg / validateProgShape with pl", (() => { const n = VC.normalizeProg(JSON.parse(JSON.stringify(out)), PACK); return n.w[id0].pl === 1 && VC.validateProgShape(JSON.parse(JSON.stringify(out)), L).ok === true; })());
+  const bad = JSON.parse(JSON.stringify(out)); bad.w[id0].pl = "x";
+  check("[placed] a non-number pl is rejected by validateProgShape", VC.validateProgShape(bad, L).ok === false);
 })();
 
 appBootChecks.catch(e => { console.error("app boot checks crashed:", e); fails++; })

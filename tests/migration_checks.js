@@ -916,6 +916,33 @@ console.log("\n[pl] prog.pl (fb42): the level a pre-session placement landed in 
 }
 
 
+console.log("\n[plr] pl on prog.w and prog.chars.c records (placed-fixes): written only by a placement on this build, never cleared; 232dbc5 and ef44c6e boot them unchanged, no backup, a mark there keeps pl, and back");
+{
+  const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog;
+  const wids = Object.keys(p.w).slice(0, 3), cids = ["c0001", "c0002"];
+  wids.forEach(id => { p.w[id] = { r: 1, w: 0, s: 0, prov: 1, pl: 1 }; }); p.w[wids[2]] = { r: 4, w: 0, s: 3, pl: 1 };
+  cids.forEach(id => { p.chars.c[id] = { r: 1, w: 0, s: 0, prov: 1, pl: 1 }; });
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK), im = VC.applyImport(null, raw, LAG_PACK);
+  check("[plr] boot here keeps pl byte-equal, no backup; export/import keeps it; validateProgShape accepts it", here.backupRaw === null && JSON.stringify(here.prog) === raw && im.ok && im.prog.w[wids[0]].pl === 1 && im.prog.chars.c[cids[0]].pl === 1 && VC.validateProgShape(p, Object.keys(p.sets)).ok);
+  for(const sha of ["232dbc5", "ef44c6e"]){
+    let eng = null, op = null;
+    try {
+      const cp = require("child_process");
+      const f = path.join(migTmp(), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
+      op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`[plr] engine ${sha} not in this checkout's history`); continue; }
+    const o = eng.bootProg(raw, op), o2 = eng.bootProg(raw, LAG_PACK);
+    check(`[plr] engine ${sha} boots a record carrying pl (its zh pack, and this pack): no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw && o2.backupRaw === null && JSON.stringify(o2.prog) === raw);
+    const q = clone(o.prog); eng.markRec(q.w, wids[0], true, true); eng.markChar ? eng.markChar(q, cids[0], true, op, false) : eng.markRec(q.chars.c, cids[0], true, false);
+    check(`[plr] a mark on ${sha} keeps pl on the word and the unit`, q.w[wids[0]].pl === 1 && q.chars.c[cids[0]].pl === 1);
+    const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
+    check(`[plr] and back here from ${sha}: no backup, pl byte-equal`, back.backupRaw === null && back.prog.w[wids[0]].pl === 1 && back.prog.w[wids[2]].pl === 1 && back.prog.chars.c[cids[1]].pl === 1);
+  }
+}
+
+
 console.log("\n[rs] read.done[pid].t (fb46): whole seconds of the latest completed reading pass (progressView v2); boot writes nothing; ef44c6e and aa00571 carry it through, no backup, and back");
 {
   const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog; p.read = { done: { p0001: { sc: 3, n: 4, d: "2026-10-04", x: 2, t: 95 }, p0002: { sc: 4, n: 4, d: "2026-10-04", x: 1 } } };

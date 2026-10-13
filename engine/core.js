@@ -978,6 +978,14 @@ function placementWalk(B, probeFn, sweepFn){
   return { probes, passed, missed };
 }
 
+// A record a placement asserts (word or unit). Probation: s 0, so every pair boots at streak 0 (pairBoot) and one lucky
+// placement guess cannot hold the word at a known bar it never earned; the first miss in any kind drops prov (dropProv).
+// pl: 1 marks it placed for good: unlike prov it is never cleared, so position (posKnown) keeps counting the record when
+// prov lifts without a miss (docs/PACK_SCHEMA.md "placedKnown"). Not written by pinPrefixRecords: those are legacy counters, not assertions.
+const placedRec = () => ({ r:1, w:0, s:0, prov:1, pl:1 });
+// A miss ends provisional status in every kind and on every record map (word, gap-blank word, unit).
+// A miss of any kind also ends the placed-known position (placedProv reads pl with w 0 only): w rises to at least 1, pl stays.
+function dropProv(p, ok){ if(!ok && isObj(p) && p.prov){ delete p.prov; if(p.pl && !(p.w > 0)) p.w = 1; } return p; }
 // applyPlacement(prog, st, passed, words, pack, units, opts). Seeds the passed prefix: every word of buckets 0..passed-1 except the
 // buckets in opts.missed (a missed sweep item takes its bucket out, the landing stays). opts.right: ids answered right anywhere,
 // probes and sweep, seeded provisional even above the landing. A word answered wrong is never seeded above the landing, and inside a
@@ -995,7 +1003,7 @@ function applyPlacement(prog, st, passed, words, pack, units, opts){
   // never a counter prefix a republish may have shifted.
   pinPrefixRecords(out, words, pack, undefined, prog.sets);
   const covered = new Set();
-  const seed = id => { covered.add(id); if(!out.w[id]) out.w[id] = {r:1,w:0,s:1,prov:1}; };
+  const seed = id => { covered.add(id); if(!out.w[id]) out.w[id] = placedRec(); };
   if(passed > 0 && firstIdx > 0) ids.slice(0, firstIdx).forEach(lv => (byLv[lv]||[]).forEach(w => seed(w.id)));
   // The bucket's words come from `words` (the pool this attempt writes records for), in the same strata cut as st.
   const bk = strata(words, pack.placement, size);
@@ -1063,7 +1071,7 @@ function placeCharUnits(out, pack, units, covered){
   if(!add.length) return 0;
   // out.chars is the input's object until cloned (applyPlacement is pure).
   out.chars = Object.assign({}, ensureChars(Object.assign({}, out)), { c: Object.assign({}, recs) });
-  add.forEach(id => { out.chars.c[id] = { r:1, w:0, s:1, prov:1 }; });
+  add.forEach(id => { out.chars.c[id] = placedRec(); });
   return add.length;
 }
 // "Characters: placed through <level>, set N" on the result screen: the last set of the recorded run, level-local number.
@@ -1114,7 +1122,7 @@ function validateRecMap(m, name, allowWordFlags){
     if(!isObj(p)) return `${name}.${k} must be an object`;
     for(const f of ["r","w","s","f"]) if(p[f] !== undefined && typeof p[f] !== "number") return `${name}.${k}.${f} must be a number`;
     if(allowWordFlags){
-      for(const f of ["prov","d"]) if(p[f] !== undefined && typeof p[f] !== "number" && typeof p[f] !== "boolean") return `${name}.${k}.${f} must be a number or boolean`;
+      for(const f of ["prov","d","pl"]) if(p[f] !== undefined && typeof p[f] !== "number" && typeof p[f] !== "boolean") return `${name}.${k}.${f} must be a number or boolean`;
     }
   }
   return null;
@@ -1221,7 +1229,8 @@ function applyImport(prev, text, pack){
 function markRec(map, key, ok, isWord, kind, reqKind){
   const p = map[key] || {r:0,w:0,s:0};
   if(ok){ p.r++; p.s++; } else { p.w++; p.s=0; }
-  if(isWord && p.prov && (p.s>=WORD_MASTERED || !ok)) delete p.prov;
+  if(isWord && p.prov && p.s>=WORD_MASTERED) delete p.prov;
+  if(isWord) dropProv(p, ok);
   if(isWord) setMissKind(p, ok, kind, reqKind);
   map[key] = p; return p;
 }
@@ -1237,10 +1246,11 @@ const WORD_HOLD = 2;
 function markWordRec(map, key, ok, kind, reqKind, pack, o){
   const p = map[key], x = o || {};
   if(!isObj(p) || x.typable === false) return markRec(map, key, ok, true, kind, reqKind);
-  if(x.retry){ if(ok) p.r++; else p.w++; setMissKind(p, ok, kind, reqKind); return p; }
+  if(x.retry){ if(ok) p.r++; else p.w++; dropProv(p, ok); setMissKind(p, ok, kind, reqKind); return p; }
   if((p.s || 0) < WORD_HOLD) return markRec(map, key, ok, true, kind, reqKind);
   if(ok){ p.r++; if(kind === "type") p.s++; } else { p.w++; p.s--; }
-  if(p.prov && (p.s>=WORD_MASTERED || !ok)) delete p.prov;
+  if(p.prov && p.s>=WORD_MASTERED) delete p.prov;
+  dropProv(p, ok);
   setMissKind(p, ok, kind, reqKind);
   return p;
 }
@@ -1253,7 +1263,9 @@ function setMissKind(p, ok, kind, reqKind){
 // Only the blanked word's k changes: the sentence record carries the answer.
 function markMissKind(map, key, ok, kind){
   const p = map[key];
-  return isObj(p) ? setMissKind(p, ok, kind) : false;
+  const had = isObj(p) && !!p.prov;
+  dropProv(p, ok);
+  return isObj(p) ? setMissKind(p, ok, kind) || (had && !p.prov) : false;
 }
 const weakScore = rec => { const p = rec || {r:0,w:0,s:0}; return (p.w||0)*3 - (p.s||0); };
 // Weakest first with jitter (ties and near-ties shuffle so reviews don't repeat).
@@ -1351,7 +1363,8 @@ function wordKnownX(rec, word, pack, prog, byWord){
 // applyPlacement / pinPrefixRecords / placeCharUnits; dropped by the first miss and at mastered / known) counts as known for
 // position only: the level gate and its sentence, the goal bars, the progress map and the ETA position. Review picks,
 // mastered counts (Progress rows, totals), typed tiers, Still shaky, Test pools and wordKnownX (levelExam) keep it provisional.
-const placedProv = rec => isObj(rec) && !!rec.prov;
+// pl (placedRec) keeps counting while the record was never missed (w 0) after prov lifts at known / mastered; a miss ends both.
+const placedProv = rec => isObj(rec) && (!!rec.prov || (!!rec.pl && !(rec.w > 0)));
 const posKnown = (pack, rec) => placedProv(rec);
 // On a levelExam "characters" level a word whose prov settled at known (settleProv) still waits on its unit's exam; while that
 // unit is itself placed-provisional the word keeps counting, so the gate does not close again between the two.
@@ -1450,7 +1463,7 @@ function pinPrefixRecords(prog, words, pack, lv, counters){
   (lv === undefined ? levelIds(pack) : [String(lv)]).forEach(id => {
     const list = byLv[id] || [];
     if(list.some(w => taughtRec(prog.w, w))) return;
-    counterOrder(list, pack).slice(0, (sets[id]||0)*size).forEach(w => { if(!prog.w[w.id]) prog.w[w.id] = {r:1,w:0,s:1,prov:1}; });
+    counterOrder(list, pack).slice(0, (sets[id]||0)*size).forEach(w => { if(!prog.w[w.id]) prog.w[w.id] = {r:1,w:0,s:1,prov:1}; /* legacy counter, no pl: pinned prefix records are not placement assertions (placed-fixes) */ });
   });
   return prog;
 }
@@ -2651,7 +2664,7 @@ function applyWeakWords(prog, entries, words, pack){
     if(!e || !(e.weight > 0)) return;
     const p = ensureWordRec(prog, words, pack, e.id);
     p.w = (p.w || 0) + e.weight; p.s = 0;
-    if(p.prov) delete p.prov;
+    dropProv(p, false);
     if(!learned.has(e.id)) p.d = 1;
   });
   return prog;
@@ -3068,8 +3081,8 @@ function markChar(prog, unitId, ok, pack, held){
 }
 // A placed unit (placeCharUnits) stays provisional until mastered or missed, as markRec does for a word.
 function settleUnitProv(p, ok, pack){
-  if(p.prov && (p.s >= (charsConfig(pack) || {}).mastered || !ok)) delete p.prov;
-  return p;
+  if(p.prov && p.s >= (charsConfig(pack) || {}).mastered) delete p.prov;
+  return dropProv(p, ok);
 }
 function typedBareOn(pack){ const c = charsConfig(pack); return !!(c && c.bareBy === "typed"); }
 const TYPED_WRITTEN_KINDS = ["written", "writtenMeaning", "writtenPron"];
