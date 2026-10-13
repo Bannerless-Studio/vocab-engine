@@ -195,10 +195,9 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
     const ruPack = path.join(ROOT, "..", "russian", "pack");
     if(fs.existsSync(path.join(ruPack, "script.json"))){
       const d = path.join(tmp, "ru"); fs.mkdirSync(d); for(const f of fs.readdirSync(ruPack)) if(f.endsWith(".json")) fs.copyFileSync(path.join(ruPack, f), path.join(d, f));
-      const pj = JSON.parse(fs.readFileSync(path.join(d, "pack.json"), "utf8")); Object.assign(pj, { dayAware: true, pairs: true }); fs.writeFileSync(path.join(d, "pack.json"), JSON.stringify(pj));
       cp.execSync(`${PY} "${path.join(ROOT, "tools", "jsonify_pack.py")}" "${d}"`, { stdio: "ignore" });
       let out = "", code = 0; try { out = cp.execSync(`${PY} "${path.join(ROOT, "tools", "validate_pack.py")}" "${d}"`, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }); } catch(e){ code = e.status; out = String(e.stdout || "") + String(e.stderr || ""); }
-      check(`validate_pack: pairs with script is valid (../russian/pack + dayAware + pairs: exit ${code}, ${(out.match(/(\d+) errors/) || [])[1]} errors)`, code === 0 && !/pack\.pairs/.test(out) && / 0 errors/.test(out));
+      check(`validate_pack: pairs with script is valid (../russian/pack as shipped, pairs is engine default: exit ${code}, ${(out.match(/(\d+) errors/) || [])[1]} errors)`, code === 0 && !/pack\.pairs/.test(out) && / 0 errors/.test(out));
     } else skip("validate_pack pairs + script: ../russian/pack absent");
   }
 
