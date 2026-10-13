@@ -506,7 +506,7 @@ function finishDrill(api){ for(let i = 0; i < 200 && api.getD(); i++){ answer(ap
     const base = Object.keys(VC.normalizeProg(seedPF(), PACK));
     check(`progress keeps its top-level shape, no session fields (${Object.keys(p).sort().join(", ")}; read comes from the Read unlocks as before, day and sn from dayAware)`, Object.keys(p).every(k => base.includes(k) || k === "read" || k === "day" || k === "sn"));
     const r = sess(st.ls);
-    check("record shape: v, build, t, fp, tab, today, drill (o, cur, ord, q, right, seen, miss), plus the stored value's view { tab, live }", JSON.stringify(Object.keys(r).sort()) === JSON.stringify(["build", "drill", "fp", "t", "tab", "today", "v", "view"]) && JSON.stringify(r.view) === '{"tab":"today","live":true}' && JSON.stringify(Object.keys(r.drill).sort()) === JSON.stringify(["cur", "miss", "o", "ord", "q", "right", "seen"]));
+    check("record shape: v, build, t, fp, tab, today, drill (o, cur, cw, ord, q, right, seen, miss), plus the stored value's view { tab, live }", JSON.stringify(Object.keys(r).sort()) === JSON.stringify(["build", "drill", "fp", "t", "tab", "today", "v", "view"]) && JSON.stringify(r.view) === '{"tab":"today","live":true}' && JSON.stringify(Object.keys(r.drill).sort()) === JSON.stringify(["cur", "cw", "miss", "o", "ord", "q", "right", "seen"]));
   } catch(e){ check(`section threw: ${e.stack}`, false); }
 
   // ---------------------------------------------------------------- [8] build id

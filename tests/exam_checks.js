@@ -352,6 +352,14 @@ console.log("\n[4] app: Test row, Today line, the exam drill");
   check("exam answers mark the records: a missed word's pair streak reset to 0 (wm or sm)", wrong.filter(k => k.startsWith("w:")).every(k => { const r = prog.w[k.slice(2)]; return r.w >= 1 && (r.p.wm[0] === 0 || r.p.sm[0] === 0); }));
   api.el("ok").click();
   check("Continue returns to Test; the row shows the last score \"14 of 20, today\"; Today's line is gone", api.title() === "Test" && /id="tExamLast_1"[^>]*>14 of 20, today<\/p>/.test(api.panel()) && (api.clickTab("today"), !/examReady/.test(api.panel())));
+  // Same tab, no reload: the Review plan reads the exam's prog.crit writes.
+  {
+    const cm = Object.keys(api.getProg().crit || {});
+    const oldest = VC.critWords(api.getProg(), WORDS).slice(0, 3).map(w => w.id);
+    api.clickTab("words"); api.el("rev").click();
+    const wi = [api.getCur(), ...api.getD().q].map(it => String(it.key));
+    check(`same tab after the exam (${cm.length} flagged): Words-tab Review holds the ${oldest.length} oldest critical words`, oldest.length >= 1 && oldest.every(id => wi.includes("w:" + id)));
+  }
   // Retake any time.
   api.clickTab("test"); examRow(api, LV[0]).click();
   check("retake: a new exam starts", api.getD() && api.getD().q.length === 19);
@@ -408,7 +416,7 @@ console.log("\n[6] Progress row");
 }
 
 console.log("\n[8] bare items on the ja pack (ruby, pronFirst, kana typing) and a Latin pack (italian)");
-for(const [name, dir] of [["ja", process.env.JA_PACK || path.join(ROOT, "..", "japanese", "pack")], ["it", process.env.IT_PACK || path.join(ROOT, "..", "italian", "pack")]]){
+for(const [name, dir] of [["ja", process.env.JA_PACK || path.join(ROOT, "..", "japanese", "pack")], ["it", process.env.IT_PACK || path.join(ROOT, "..", "italian", "pack")], ["fr", path.join(ROOT, "..", "french", "pack")], ["de", path.join(ROOT, "..", "german", "pack")], ["ru", path.join(ROOT, "..", "russian", "pack")]]){
   if(!fs.existsSync(path.join(dir, "pack.js"))){ console.log(`NOTE  ${name}: no pack at ${dir}, skipped`); continue; }
   const L = (f, v) => fs.existsSync(path.join(dir, f)) ? loadConst(path.join(dir, f), v) : undefined;
   const pk = L("pack.js", "PACK"), ws = L("words.js", "WORDS"), ss = L("sentences.js", "SENTENCES"), us = L("characters.js", "CHARACTERS"), sc = L("script.js", "SCRIPT");
@@ -433,6 +441,44 @@ for(const [name, dir] of [["ja", process.env.JA_PACK || path.join(ROOT, "..", "j
   }
   check(`${name}: 20 bare asks, no ruby / reading / show-written markup in any stem or option set; read items show the written form without its reading (${wShown} of ${wTotal})${bad.length ? ` [${bad.join(", ")}]` : ""}`, n === 20 && aids === 0 && !bad.length && wShown === wTotal);
   check(`${name}: result screen, crit written, prog.exam.${lv[0]} stored`, !api.getD() && api.fin() && api.fin().seen === 20 && Object.keys(api.getProg().crit || {}).length > 0 && VC.examResult(api.getProg(), lv[0]) !== null);
+  {
+    const pr = api.getProg(), oldest = VC.critWords(pr, ws).filter(w => pr.w[w.id]).slice(0, 3).map(w => w.id);
+    api.clickTab("words"); const rv = api.el("rev");
+    if(!rv) check(`${name}: same-tab Review button after the exam`, false);
+    else {
+      rv.click();
+      const keys = [api.getCur(), ...api.getD().q].map(it => String(it.key));
+      api.clickTab("today"); api.el("go").click();
+      const dd = api.getD(), ti = dd ? [api.getCur(), ...dd.q].map(it => String(it && it.key)) : [];
+      check(`${name}: same tab after the exam, Today's Review stage holds the oldest critical words`, oldest.length >= 1 && oldest.every(id => ti.includes("w:" + id)));
+      check(`${name}: same tab after the exam, Words-tab Review holds the ${oldest.length} oldest critical words with a record`, oldest.length >= 1 && oldest.every(id => keys.includes("w:" + id)));
+    }
+  }
+  // A Review parked mid-way before the exam: coming back to it after the verdict, same tab, no reload.
+  for(const where of ["today", "words"]){
+    const { api: a2 } = await bootWith(pk, p, 22, { words: ws, sentences: ss, lessons: [], passages: [], characters: us, script: sc });
+    a2.clickTab(where);
+    if(where === "today") a2.el("go").click(); else a2.el("rev").click();
+    for(let i = 0; i < 2 && a2.getD() && a2.getCur(); i++){ answer(a2, true); a2.el("nx").click(); }
+    a2.clickTab("test"); examRow(a2, lv[0]).click();
+    for(let g = 0, n2 = 0; g < 40 && a2.getD() && a2.getCur(); g++){ n2++; const it = a2.getCur(), w = byId[String(it.key).slice(2)]; if(it.kind === "type"){ a2.el("tin").value = "zzz"; a2.el("submit").click(); } else answer(a2, n2 % 2 === 0); a2.el("nx").click(); }
+    const pr2 = a2.getProg(), old2 = VC.critWords(pr2, ws).filter(w => pr2.w[w.id]).slice(0, 3).map(w => w.id);
+    a2.clickTab(where);
+    if(where === "today" && a2.el("go")) a2.el("go").click(); else if(where === "words" && !a2.getD() && a2.el("rev")) a2.el("rev").click();
+    const d2 = a2.getD(), k2 = d2 ? [a2.getCur(), ...d2.q].map(it => String(it && it.key)) : [];
+    check(`${name}: Review parked before the exam, back in ${where} after it: the ${old2.length} oldest critical words are in the plan`, old2.length >= 1 && old2.every(id => k2.includes("w:" + id)));
+  }
+  // A word flagged on the Words tab while a Review is parked: the reserve reaches the resumed plan, the size stays.
+  {
+    const { api: a3 } = await bootWith(pk, p, 23, { words: ws, sentences: ss, lessons: [], passages: [], characters: us, script: sc });
+    a3.clickTab("words"); a3.el("rev").click();
+    for(let i = 0; i < 2 && a3.getD() && a3.getCur(); i++){ answer(a3, true); a3.el("nx").click(); }
+    const n0 = a3.getD().q.length + 1, inPlan = new Set([a3.getCur(), ...a3.getD().q].map(it => String(it.key)));
+    const pr3 = a3.getProg(), pick = VC.learnedWords(ws, pk, pr3).filter(w => !inPlan.has("w:" + w.id))[0];
+    a3.clickTab("test"); a3.ev(`critToggle(${JSON.stringify(pick.id)})`); a3.clickTab("words");
+    const k3 = [a3.getCur(), ...a3.getD().q].map(it => String(it.key));
+    check(`${name}: word flagged while a Review is parked: it is in the resumed plan, queue length ${n0} kept, no key twice`, k3.includes("w:" + pick.id) && k3.length === n0 && new Set(k3).size === k3.length);
+  }
 }
 
 if(OWNER){
