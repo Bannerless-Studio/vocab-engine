@@ -5,9 +5,13 @@
 // unit was already answered right earlier that day (same kind / any kind), units touched vs
 // available, units missed that day that never came back, "due" units (weakest-oldest and
 // mastered-longest-unseen at the day's start) never drilled, new material per session.
-// dayAware is engine default since the flag collapse (its off control went with the flag); thresholds the pre-pairs
-// day planner met are reported as INFO (see info()). Passages are left out: the Read stage drills no units.
-// Run: node tests/day_sim_checks.js [--sessions N] [--quiet]
+// dayAware is engine default since the flag collapse (its off control went with the flag). The thresholds the pre-pairs
+// day planner met were decided one by one (TODO.md DONE 2026-10-13 "day_sim INFO thresholds"): each one the pairs planner
+// guarantees is a check below, with its derivation; the rest were deleted with a one-line reason at their old site.
+// Passages are left out: the Read stage drills no units.
+// Run: node tests/day_sim_checks.js [--sessions N] [--quiet] [--pack <dir>]
+// --pack <dir> (probe, not a gate): runs the scenario sections (A, B, pause, rollover, voiceless, backlog, rotation) on another
+// pack checkout's pack/ (../italian/pack ...); the zh-only sections are skipped and a failed check does not set the exit code.
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -17,11 +21,13 @@ const PAIRS_ERA = "9eb6ecb~1";
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
-const ZH = path.join(ROOT, "packs", "zh");
-function loadConst(file, name){ return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
+const PROBE_ARG = process.argv.indexOf("--pack") > 0 ? process.argv[process.argv.indexOf("--pack") + 1] : null, PROBE = !!PROBE_ARG;
+const ZH = PROBE ? path.resolve(PROBE_ARG) : path.join(ROOT, "packs", "zh");
+function loadConst(file, name){ if(PROBE && !fs.existsSync(file)) return []; return new Function(fs.readFileSync(file, "utf8") + `\nreturn ${name};`)(); }
 // pack.pairs (fb23) replaces the day planner this suite checks; tests/pairs_checks.js covers it.
 // fb37: these checks pin the Progress tab before progressView (tests/progress_view_checks.js covers v2).
-const PACK_ON = packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), PAIRS_ERA);
+const PACK_ON = PROBE ? loadConst(path.join(ZH, "pack.js"), "PACK") : packAsOf(loadConst(path.join(ZH, "pack.js"), "PACK"), PAIRS_ERA);
+const SCRIPT_D = PROBE && fs.existsSync(path.join(ZH, "script.js")) ? loadConst(path.join(ZH, "script.js"), "SCRIPT") : undefined;
 const WORDS = loadConst(path.join(ZH, "words.js"), "WORDS");
 const SENTENCES = loadConst(path.join(ZH, "sentences.js"), "SENTENCES");
 const LESSONS = loadConst(path.join(ZH, "lessons.js"), "LESSONS");
@@ -44,9 +50,6 @@ function check(name, cond){
   if(cond){ passes++; console.log(`PASS  ${name}`); }
   else { fails++; console.log(`FAIL  ${name}`); }
 }
-// pairs (fb23; engine default since the flag collapse) schedules Review/Recall by pair streak and replaced the day planner
-// these thresholds were set for; the pre-collapse engine with every live flag on misses them the same way. Reported, not checked.
-function info(name, cond){ console.log(`INFO  ${name}: ${cond ? "met" : "not met"} under pairs (pre-pairs planner threshold)`); }
 
 // ------------------------------------------------------------------ fake DOM (copied from session_resume_checks.js)
 const appHtml = fs.readFileSync(path.join(ROOT, "engine", "app.html"), "utf8");
@@ -142,7 +145,8 @@ class FakeDate extends Date {
   static now(){ return NOW; }
 }
 
-let VOICES = [{ lang:"zh-CN", name:"x" }], ACC = 0.85, NO_EXTRA = false; // NO_EXTRA: paused Review at base size (control)
+const TTS = PROBE ? PACK_ON.tts : "zh-CN";
+let VOICES = [{ lang:TTS, name:"x" }], ACC = 0.85, NO_EXTRA = false; // NO_EXTRA: paused Review at base size (control)
 async function boot(pack, st, seed){
   Math.random = mulberry32(seed);
   const document = makeFakeDom();
@@ -161,9 +165,9 @@ return {
   lesson: i => { switchToTab("sounds", "Sounds"); soundsSel = i; soundsRender(); },
   clickTab: t => document.querySelectorAll('#tabs button[data-t="' + t + '"]')[0].click(), quit: () => quitDrill(),
 };`;
-  const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS"];
+  const names = ["SpeechSynthesisUtterance","document","window","navigator","location","localStorage","sessionStorage","matchMedia","requestAnimationFrame","Audio","confirm","alert","Date","PACK","WORDS","SENTENCES","LESSONS","PASSAGES","CHARACTERS","SCRIPT"];
   const args = [window.SpeechSynthesisUtterance, document, window, { userAgent:"DaySimChecks/1.0" }, undefined, st.ls, st.ss, () => ({ matches:false }), fn => setTimeout(fn, 0),
-    function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, WORDS, SENTENCES, LESSONS, [], CHARACTERS];
+    function(){ return { play(){ return Promise.resolve(); }, pause(){} }; }, () => true, () => {}, FakeDate, pack, WORDS, SENTENCES, LESSONS, [], CHARACTERS, SCRIPT_D];
   const api = new Function(...names, fnBody)(...args);
   await tick(); await tick();
   return api;
@@ -228,7 +232,8 @@ function seedProg(pack, nWords, nUnits, seed){
     });
     left -= take; if(!left) break;
   }
-  p.chars.choiceSeen = true;
+  if(SCRIPT_D && p.script){ p.script.skipped = false; p.script.choiceSeen = true; SCRIPT_D.units.forEach(u => { const s = Math.floor(r() * 5); p.script.u[u.id] = { r: s + 1, w: 0, s, u: 1 + Math.floor(r() * 9), t: DAY_N - 1 - Math.floor(r() * 20) }; }); }
+  p.chars = p.chars || { c: {} }; p.chars.c = p.chars.c || {}; p.chars.choiceSeen = true;
   const learned = new Set(Object.keys(p.w));
   const units = CHARACTERS.filter(u => learned.has(u.words[0])).slice(0, nUnits);
   units.forEach(u => { const s = Math.floor(r() * 7); p.chars.c[u.id] = { r: s + 1, w: r() < 0.6 ? 0 : 1 + Math.floor(r() * 2), s, t: DAY_N - 1 - Math.floor(r() * 20) }; });
@@ -327,7 +332,7 @@ function report(label, m, learnNew){
 }
 const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
 // Consolidating: from mastered (3) up to the pack's bare (zh 5 since fb10-weak-floor; 6 before).
-const BARE = VC.charsConfig(PACK_ON).bare;
+const BARE = (VC.charsConfig(PACK_ON) || { bare: 6 }).bare;
 // Session clock (core.js DAY_RECENT_SESSIONS): a drilled item repeats a kind already answered
 // right (not the in-drill retry) earlier the same day, or in one of the previous
 // DAY_RECENT_SESSIONS sessions, in another drill. dayOf: session index -> day index.
@@ -397,14 +402,11 @@ function missesCarried(drilled0){
     const a = VC.buildReviewPlan(lw, P, PACK_ON, Object.assign({ rng: mulberry32(3) }, o)), b = VC.buildReviewPlan(lw, P, PACK_ON, Object.assign({ rng: mulberry32(3) }, o));
     const sig = pl => pl.map(x => x.kind + ":" + (x.word ? x.word.id : x.unit.id)).join();
     check(`deterministic given (progress, date, rng seed): Review plan rebuilt identically (${a.length} items)`, a.length === 20 && sig(a) === sig(b));
-    // Small pool: everything already right today in every kind still fills the plan.
-    const S = seedProg(PACK_ON, 20, 0, 4); const slw = VC.learnedWords(WORDS, PACK_ON, S);
-    VC.dayStart(S, PACK_ON, DAY);
-    slw.forEach(w => ["recall", "type", "hear", "read"].forEach(k => VC.noteDay(S, PACK_ON, DAY, "w:" + w.id, k, true)));
-    VC.dayStart(S, PACK_ON, DAY);
-    info("nothing else eligible: a 20-word pool all right today still fills Review (15) and Recall (8)",
-      VC.buildReviewPlan(slw, S, PACK_ON, { today: DAY, rng: mulberry32(1) }).length === 15 && VC.buildRecallPlan(slw, S, PACK_ON, 8, { today: DAY, rng: mulberry32(1) }).length === 8);
+    // Deleted threshold "a 20-word pool all right today still fills Review (15) and Recall (8)": under pairs a known pair of an
+    // ambient word (the pack's ~100 commonest) gets no ask (every sentence rehearses it, core.js pairPick), so the 20 commonest words
+    // all known leave Review 8 and Recall 8 on zh it ja es; the day log is not an input of the pairs scheduler.
   }
+  if(!PROBE){
   // Owner 2026-10-03 ("am I practising weak/faltered words enough?", fb8-weak-analysis): a word
   // missed by ear never reached production, and weak words lost Review/Recall slots to unit
   // misses, consolidation and refresh. (A) a production answer settles any miss; (B) a weak-word
@@ -532,6 +534,7 @@ function missesCarried(drilled0){
     api = await boot(PACK_ON, st, 77);
     check("reload after those writes: the session resumes (fingerprint followed them)", !!api.getD() && qsig(api) === parked && api.getProg().sn === 2);
   }
+  }
   const scenarios = [
     { name: "A: 150 words (HSK 1) + 60 character units, learning HSK 2 words", words: 150, units: 60 },
     { name: "B: HSK 1-3 learned (595 words) + 60 character units, learning characters", words: 595, units: 60 },
@@ -549,17 +552,27 @@ function missesCarried(drilled0){
       res[tag] = { m, day, seed: seedP };
     }
     const on = res.on.m, onDay = res.on.day;
-    info(`dayAware: same-kind repeats of items answered right earlier today <= 2% of sessions 2..${N_SESSIONS} (${on.sameKindAll}/${on.itemsAfter1})`, on.sameKindAll <= 0.02 * on.itemsAfter1);
+    // Deleted: same-kind repeats of items right earlier today <= 2%. Under pairs a pair below 3 is asked again in its production direction
+    // (core.js pairKind) until a production answer takes it to 3, so the same kind repeats by design (zh 95/600 and 46/600 here;
+    // it, ja, es 14% to 30%). What pairs promises is no (item, pair) twice in one session, in-drill retries aside: tests/pairs_checks.js [7].
     check(`dayAware: every unit missed in sessions 1..${N_SESSIONS - 1} comes back the same day (${on.missKeys.length - on.lostMiss.length}/${on.missKeys.length})`, on.lostMiss.length === 0);
-    info(`dayAware: every production miss of sessions 1..${N_SESSIONS - 1} comes back in a production kind the same day (${on.prodKeys.length - on.prodLost.length}/${on.prodKeys.length})`, on.prodKeys.length > 0 && on.prodLost.length === 0);
+    // Deleted: every production miss comes back in a production kind the same day. A missed pair is at 0 and comes back next session in the
+    // kind it was missed in when that kind belongs to the pair, else the production direction (pairKind), but the Listen plan only offers
+    // the choice kind (hear), which answers a typed sm miss as a recognition ask (zh B 41/42, ja B 34/42, it 25/26 and 30/31); the pair
+    // then climbs 0 -> 1 -> 2 by choice and takes its production ask from 1. "Every miss comes back the same day" stays a check below.
     check(`dayAware: the ${K_DUE} weakest-oldest due units are all drilled (${K_DUE - on.weakStarved.length}/${K_DUE})`, on.weakStarved.length === 0);
-    info(`dayAware: the ${K_DUE} mastered longest-unseen units are all drilled (${K_DUE - on.staleStarved.length}/${K_DUE})`, on.staleStarved.length === 0);
-    // The other planners after the day: Test (Listen, Recall, Sentences, Characters), Words-tab Review.
+    // Deleted: the 30 mastered longest-unseen units are all drilled (zh 14/30 and 11/30, it 11/30 and 4/30, ja 8/30 and 5/30, es 11/30
+    // and 6/30). Known pairs share a PAIR_REFRESH (10%) slot per plan, oldest first, behind every pair below 3; tests/pairs_checks.js [5]
+    // checks that share and its order.
+    // The Test Sentences pool after the day. Deleted: the same row for Test Listen, Recall and Characters and the Words-tab Review (zh A 13, 15,
+    // 14 and 10 of 20 in a kind already right today; the other packs 0 to 14 of 20): those pools are pair pickers, which read pair streaks
+    // and not the day log. Sentences keep dayPick (core.js dayPickList), whose tier 4 (right recently in every kind) is last: met 0/20 on
+    // zh it ja es in both scenarios, so it is a check.
     const api = onDay.api, dl = VC.dayLog(api.getProg(), DAY);
     // A pending miss whose settling kinds this drill can ask are all right today is asked in one of
     // them (core.js dayItemKind: misses first), which is no repeat.
     const rightToday = it => { const e = dl.a[it.key]; const mk = VC.dayPending(e); return !!(e && Array.isArray(e.r) && e.r.includes(kindOf(it))) && !(mk && VC.daySettlesAt(it.key, mk, kindOf(it))); };
-    for(const [tab, id] of [["test", "tListen"], ["test", "tRecall"], ["test", "tSentences"], ["test", "tChars"], ["words", "rev"]]){
+    for(const [tab, id] of [["test", "tSentences"]]){
       api.clickTab(tab);
       const shown = api.panel() + ((api.el("wbody") || {}).innerHTML || "");
       if(!shown.includes(`id="${id}"`)){ check(`${tab} ${id} offered`, false); continue; }
@@ -567,7 +580,7 @@ function missesCarried(drilled0){
       const D = api.getD(); const items = D ? [D.cur, ...D.q].filter(Boolean) : [];
       const rep = items.filter(rightToday);
       if(WHY && rep.length) console.log("   ", id, rep.map(it => `${it.key} ${kindOf(it)} ${JSON.stringify(dl.a[it.key])}`).join("; "), "pool tiers:", JSON.stringify(VC.learnedWords(WORDS, PACK_ON, api.getProg()).reduce((m, w) => { const t = VC.dayTier({ key: "w:" + w.id, rec: api.getProg().w[w.id], mastered: 3, kinds: VC.dayWordKinds(PACK_ON) }, dl); m[t] = (m[t] || 0) + 1; return m; }, {})));
-      info(`after the day, ${tab} ${id}: no item in a kind already right today (${rep.length}/${items.length})`, items.length > 0 && rep.length === 0);
+      check(`after the day, ${tab} ${id}: no item in a kind already right today (${rep.length}/${items.length})`, items.length > 0 && rep.length === 0);
       api.quit();
     }
     // Lead finding 2026-10-02: weakScore ranking gave character units at streak 3-6 (pinyin
@@ -587,8 +600,9 @@ function missesCarried(drilled0){
     const rv = [...new Set(day.drilled.map(d => d.sess))].map(sn => day.drilled.filter(d => d.sess === sn && d.step === 0).length);
     report(`${sc.name.slice(0, 1)} paused`, m, day.learnNew);
     check(`pause ${sc.name.slice(0, 1)}: no new material in ${N_SESSIONS} sessions (${day.learnNew.join(",")})`, day.learnNew.every(n => n === 0));
-    info(`pause ${sc.name.slice(0, 1)}: Review items per session ${rv.join(",")} (with retries; the extra shrinks as A's 210-item pool is used, M2)`, rv.every(n => n >= (sc.words > 200 ? 36 : 20)));
-    info(`pause ${sc.name.slice(0, 1)}: same-kind repeats of items right earlier today <= 2% of sessions 2..${N_SESSIONS} (${m.sameKindAll}/${m.itemsAfter1}); in the repeat window ${rep.length}/${day.drilled.length}`, m.sameKindAll <= 0.02 * m.itemsAfter1);
+    // Deleted: paused Review >= 20 (A) / 36 (B) items per session. Under pairs a paused Review keeps its normal size (owner 2026-10-06, PACK_SCHEMA
+    // pauseNew "Review size"; pairPlan ignores o.extra), so the 36 floor of the growth the pairs planner removed cannot be met; the size is
+    // checked below on the large pool. Also deleted: same-kind repeats <= 2% (zh A 118/442, B 57/442; it, ja, es 23% to 39%), as for dayAware above.
     check(`pause ${sc.name.slice(0, 1)}: every miss of sessions 1..${N_SESSIONS - 1} comes back the same day (${m.missKeys.length - m.lostMiss.length}/${m.missKeys.length}), production misses in production (${m.prodKeys.length - m.prodLost.length}/${m.prodKeys.length}), in a settling kind (${mc.n - mc.lost.length}/${mc.n})`, m.lostMiss.length === 0 && m.prodLost.length === 0 && mc.lost.length === 0 && mc.n > 0);
   }
   // Review M2 (fb4-pause review): a small pool must not pad the paused Review with same-day
@@ -614,7 +628,10 @@ function missesCarried(drilled0){
       res.paused.every((x, i) => x[0] <= res.control[i][0] && x[1] >= res.control[i][1]));
     NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
     const own = await playDay(PACK_ON, Object.assign(seedProg(PACK_ON, 595, 250, 11), { pause: 1 }), 5, 5), ro = reviewRepeats(own.drilled);
-    info(`pause large pool (595 words, 250 units): Review keeps the Learn step's items, 5 sessions (${ro.map(x => x.join("/")).join(", ")} repeats/items)`, ro.every(x => x[1] === 40 && x[0] <= 1));
+    // Derivation: pairPlan ignores o.extra and a paused Review keeps its normal size (PACK_SCHEMA pauseNew "Review size", owner 2026-10-06), so
+    // with 595 words and 250 units every session's Review is the characters Review size (REVIEW_SIZE_CHARS 20), never the 40 the growth made.
+    // The old "<= 1 repeat" half is not promised across sessions (ja 10 to 38 of 30 to 42) and is only printed.
+    check(`pause large pool (595 words, 250 units): Review stays at its normal size ${PROBE ? ro[0][1] : 20}, 5 sessions (${ro.map(x => x.join("/")).join(", ")} repeats/items)`, ro.every(x => x[1] === (PROBE ? ro[0][1] : 20)));
   }
   console.log(`\n[rollover] scenario A, sessions 1-4 on one evening, 5-8 the next morning`);
   {
@@ -632,7 +649,8 @@ function missesCarried(drilled0){
       if(tag === "on"){
         check(`rollover: prog.sn counts one per Today session (${run.prog.sn})`, run.prog.sn === N_SESSIONS);
         check(`rollover: every miss of sessions 1-${N_SESSIONS - 1} comes back in a settling kind across midnight (${mc.n - mc.lost.length}/${mc.n}, sentences ${mc.sentN}; production misses back in production ${mc.prodN - mc.prodLost}/${mc.prodN})`, mc.n > 0 && mc.prodN > 0 && mc.sentN > 0 && mc.lost.length === 0);
-        info(`rollover: no same-kind repeat of an item right earlier that day or in the previous ${VC.DAY_RECENT_SESSIONS} sessions (${rep.length}/${run.drilled.length}; session 5 ${cross}/${s5})`, rep.length === 0);
+        // Deleted: no same-kind repeat of an item right earlier that day or in the previous 2 sessions (zh 64/684, it 136/691, ja 193/852,
+        // es 135/683). The window rule is the pre-pairs planner's tier 4; pairs repeats a pair's production direction until it is known (see above).
       }
     }
   }
@@ -648,15 +666,19 @@ function missesCarried(drilled0){
     const ss = VC.availableSentences(SENTENCES, WORDS, PACK_ON, seedP).slice(0, 4).map(x => "s:" + x.id);
     const keys = [...ws, ...ss];
     seedCarried(seedP, Object.fromEntries(keys.map(k => [k, "hear"])));
-    const pend = [];
-    const run = await playDay(PACK_ON, seedP, 10, 5, 24 * 60 * 60 * 1000, (sn, api) => { const p = pendingOf(api, keys); pend.push(p.length); if(WHY) p.forEach(k => console.log("    s" + (sn + 1), k, JSON.stringify(api.getProg().day.a[k]))); });
-    VOICES = [{ lang:"zh-CN", name:"x" }]; ACC = 0.85;
+    const pend = [], pendS = [];
+    const run = await playDay(PACK_ON, seedP, 10, 5, 24 * 60 * 60 * 1000, (sn, api) => { const p = pendingOf(api, keys); pend.push(p.length); pendS.push(pendingOf(api, ss).length); if(WHY) p.forEach(k => console.log("    s" + (sn + 1), k, JSON.stringify(api.getProg().day.a[k]))); });
+    VOICES = [{ lang:TTS, name:"x" }]; ACC = 0.85;
     // A unit's typed item (also) is planned for the unit, not for its word's carried miss (as in
     // [backlog]); with the typed share at 0.35 (fb10) one can follow the word's own item.
     const perSess = keys.map(k => Math.max(...[...Array(10).keys()].map(sn => new Set(run.drilled.filter(d => d.sess === sn && d.key === k && !d.also).map(d => d.step)).size)));
     const heard = run.drilled.filter(d => d.kind === "hear").length;
     console.log(`  pending carried misses after each session: ${pend.join(",")}; most stages one carried item appears in within a session: ${Math.max(...perSess)}; hear items shown: ${heard}`);
-    info(`voiceless: carried hear misses (words and sentences) settle within 2 sessions (${pend.slice(0, 2).join(",")})`, pend[1] === 0 && pend.every((n, i) => i < 2 || n === 0));
+    // Derivation: sentences keep dayPick, whose tier 0 is a pending miss with a kind this planner can settle; with no voice a cloze or a read
+    // settles a hear miss (daySettles), so the 4 sentences are settled by session 2. Deleted for the 6 words: the pairs scheduler orders by
+    // pair streak, not by the day log, and a real miss writes its pair to 0 (notePair); this seed writes only the day log, so a word with a
+    // carried "hear" miss stayed pending in all 10 sessions on zh it ja es (pending 6 of 6). Carried word misses are checked in [backlog] with the pair at 0.
+    check(`voiceless: carried hear misses of the sentences settle within 2 sessions (pending ${pendS.slice(0, 3).join(",")})`, pendS[1] === 0 && pendS.every((n, i) => i < 2 || n === 0));
     check(`voiceless: no carried item is asked in more than one stage of a session (max ${Math.max(...perSess)}) and no hear item is shown (${heard})`, Math.max(...perSess) <= 1 && heard === 0);
   }
   console.log(`\n[backlog] scenario A with 60 carried misses (40 word, 12 character, 8 sentence)`);
@@ -670,6 +692,7 @@ function missesCarried(drilled0){
     VC.availableSentences(SENTENCES, WORDS, PACK_ON, seedP).slice(0, 8).forEach((x, i) => { misses["s:" + x.id] = i % 2 ? "read" : "hear"; });
     seedCarried(seedP, misses);
     const keys = Object.keys(misses);
+    const seedPair0 = JSON.parse(JSON.stringify(seedP));
     const run = await playDay(PACK_ON, seedP, 4, 5, 24 * 60 * 60 * 1000);
     const s1 = run.drilled.filter(d => d.sess === 0);
     const steps = [...new Set(s1.map(d => d.step))];
@@ -677,10 +700,20 @@ function missesCarried(drilled0){
     // carried miss when the unit's miss is carried, whatever its word's.
     const isMiss = (k, ds) => { const u = ds.find(d => d.key === k && d.also); return u ? u.also in misses : k in misses; };
     const share = steps.map(st => { const ds = s1.filter(d => d.step === st), ks = [...new Set(ds.map(d => d.key))]; return { st, n: ks.length, miss: ks.filter(k => isMiss(k, ds)).length }; }).filter(x => x.n >= 5);
-    const back = keys.filter(k => withAlso(run.drilled).some(d => d.key === k && VC.daySettlesAt(k, [misses[k]], d.kind)));
-    console.log(`  session 1 per stage (carried misses / items): ${share.map(x => `step ${x.st} ${x.miss}/${x.n}`).join(", ")}; carried misses asked in a settling kind within 4 sessions: ${back.length}/${keys.length}`);
+    // The seed above is the day log only (the pre-pairs shape): the stage-share check below is dayPick's miss cap (DAY_MISS_SHARE), which
+    // the pair pickers do not have (their Listen takes every sm pair at 0 first).
+    console.log(`  session 1 per stage (carried misses / items), day log only: ${share.map(x => `step ${x.st} ${x.miss}/${x.n}`).join(", ")}`);
     check(`backlog: every session-1 stage has >= 40% items that are not carried misses (${share.map(x => `${x.n - x.miss}/${x.n}`).join(", ")})`, share.length > 0 && share.every(x => x.n - x.miss >= 0.4 * x.n));
-    info(`backlog: every carried miss is asked in a settling kind within 4 sessions (${back.length}/${keys.length})`, back.length === keys.length);
+    // A real miss also sets its pair to 0 (core.js notePair), which is what the pairs scheduler reads: the same misses, pair at 0 in the pair of the missed kind.
+    const PAIR_SEED = { recall: "wm", type: "wm", read: "wm", hear: "sm", charRecall: "wm", charRead: "wm" };
+    Object.entries(misses).forEach(([k, kind]) => { const rec = k[0] === "w" ? seedPair0.w[k.slice(2)] : k[0] === "c" ? seedPair0.chars.c[k.slice(2)] : null; if(rec) rec.p = { [PAIR_SEED[kind]]: [0, seedPair0.sn] }; });
+    NOW = new Date(2026, 9, 2, 7, 0, 0).getTime();
+    const run0 = await playDay(PACK_ON, seedPair0, 4, 5, 24 * 60 * 60 * 1000);
+    const back = keys.filter(k => withAlso(run0.drilled).some(d => d.key === k && VC.daySettlesAt(k, [misses[k]], d.kind)));
+    console.log(`  with the pair at 0 too: carried misses asked in a settling kind within 4 sessions: ${back.length}/${keys.length}`);
+    // Derivation: a pair at 0 is the lowest streak, so pairPick takes it in the next session in the kind it was missed in (pairKind), and the 4 sessions
+    // hold 4 x (Review 20 + Recall 8 + Listen 10) pair slots for the 52 word and unit misses; the 8 sentence misses are dayPick tier 0.
+    check(`backlog: every carried miss is asked in a settling kind within 4 sessions (${back.length}/${keys.length})`, back.length === keys.length);
   }
   console.log(`\n[rotation] scenario B, one Today session a day for ${ROT_DAYS} days: nothing eligible stays unseen without bound`);
   for(const [tag, pack] of [["on", PACK_ON]]){ // the dayAware-off control went with the flag
@@ -700,11 +733,15 @@ function missesCarried(drilled0){
     if(WHY) console.log("    rotation repeats:", rrep.join("; "));
     console.log(`    same-kind repeats of an item right in the previous ${VC.DAY_RECENT_SESSIONS} sessions: ${rrep.length}/${run.drilled.length}`);
     if(tag === "on"){
-      info(`rotation: no same-kind repeat of an item right in the previous ${VC.DAY_RECENT_SESSIONS} sessions (${rrep.length}/${run.drilled.length})`, rrep.length === 0);
-      info(`rotation: the ${ROT_K} mastered units unseen longest at the start are all drilled within ${ROT_DAYS} days`, oldest === 0);
-      info(`rotation: every character unit at streak 3-${BARE - 1} is drilled within ${ROT_DAYS} days (${midSeen}/${mid.length})`, mid.length > 0 && midSeen === mid.length);
+      // Deleted: no same-kind repeat in the previous 2 sessions (zh 43/1195, it 116/869, ja 305/1678, es 112/886, as for rollover); the 60 mastered
+      // units unseen longest are all drilled in 14 days (zh 22 of 60, it 15, ja 17, es 15: known pairs get a 10% oldest-first refresh slot behind every
+      // pair below 3, PAIR_REFRESH, tests/pairs_checks.js [5]); every unit at streak 3 to bare-1 is drilled in 14 days (zh 3/13, ja 3/30): a
+      // unit one answer short of bare boots at pair 2 and waits behind the words at 0 and 1 (lowest streak first, pairPick), and one at 3 is a
+      // known pair on the refresh share. The suite's 595 random-streak words keep that queue full, unlike the owner export (PACK_SCHEMA pairs "Measured":
+      // units reaching bare 274.7 -> 307.0 a week).
     }
   }
+  if(!PROBE){
   // characters.bareBy "typed" (owner feedback 2026-10-02: "it takes more than 3/6 attempts for
   // mastery"): from mastered only typed written-side answers move a unit, so they must come often
   // enough. Scenario B, a week of Today sessions; control: bareBy removed (choice answers credit).
@@ -751,6 +788,7 @@ function missesCarried(drilled0){
     }
     // the dayAware-off control (Review plans equal main before fb46) went with the flag
   }
+  }
   console.log(`\n${passes} passed, ${fails} failed`);
-  process.exit(fails ? 1 : 0);
+  process.exit(fails && !PROBE ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
