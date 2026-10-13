@@ -252,6 +252,7 @@ class LanguageSpec:
     forced_a1_file = "tools/forced_a1.txt"
     bad_sentences_file = "tools/bad_sentences.txt"   # optional hand-reviewed drop list, one sentence per line
     id_map_file = "tools/id_map_v1.json"
+    sentence_id_map_file = "tools/sentence_ids_v1.json"   # {"issued": {id: text}}, core/sentence_ids.py
     report_file = "tools/REPORT.md"
 
     report_title = None

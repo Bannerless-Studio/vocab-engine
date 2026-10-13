@@ -8,7 +8,8 @@ allowed places. Exit 1 and print every offending key otherwise.
 Allowed: pack.json top-level keys = spec.port_flags() keys (needs --lang/--engine-tools) + eta + --pack-keys, and the removal
 of a collapsed flag (tools/pack_collapsed.py: the engine ignores it, enrich drops it);
 words.json per-word fields = --word-fields; characters.json per-unit fields = --unit-fields; any other *.json
-byte-equal after parsing, unless listed in --free-files. Same ids, same order, same length everywhere else."""
+byte-equal after parsing, unless listed in --free-files; sentences.json is held to the sentence id rule
+(sentence_ids_rule: every live id keeps its text and stays, new texts take new ids, other fields free) unless listed in --free-files. Same ids, same order, same length everywhere else."""
 import argparse
 import json
 import subprocess
@@ -46,6 +47,21 @@ def rows(name, old, new, fields, bad, stats):
                     bad.append(f"{name}[{i}] ({a.get('id', a.get('w', i))}): field {k!r} changed")
         elif a != b:
             bad.append(f"{name}[{i}]: changed")
+
+
+def sentence_ids_rule(old, new, bad, notes):
+    """Learner records key on sentence ids (opaque to the engine): a live id never changes text and never disappears."""
+    new_ids = [r["id"] for r in new]
+    dup = sorted({i for i in new_ids if new_ids.count(i) > 1})
+    bad += [f"sentences.json: duplicate id {i}" for i in dup[:40]]
+    now = {r["id"]: r["t"] for r in new}
+    for r in old:
+        if r["id"] not in now:
+            bad.append(f"sentences.json: live id {r['id']} disappeared ({r['t'][:40]!r})")
+        elif now[r["id"]] != r["t"]:
+            bad.append(f"sentences.json: live id {r['id']} text changed {r['t'][:40]!r} -> {now[r['id']][:40]!r}")
+    fresh = len(set(now) - {r["id"] for r in old})
+    notes.append(f"sentences.json: {len(old)} live ids kept, {fresh} new ids")
 
 
 def main():
@@ -86,6 +102,8 @@ def main():
             off = [k for k in keys if k not in allow_keys and not (k in COLLAPSED and k not in new)]
             bad += [f"pack.json: key {k!r} changed and is not an allowed key" for k in off]
             notes.append("pack.json keys changed: " + ", ".join(keys))
+        elif n == "sentences.json":
+            sentence_ids_rule(old, new, bad, notes)
         elif n == "words.json":
             rows(n, old, new, wf, bad, stats)
         elif n == "characters.json":

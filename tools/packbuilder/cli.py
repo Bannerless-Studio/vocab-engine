@@ -13,6 +13,7 @@
             --check verifies the shipped pack, --emit DIR writes an enriched copy elsewhere
     gender  <repo>: tools/word_gender.json, the noun `g` by word id from a build (--check, --out FILE); enrich applies it
             (core/gender.py)
+    sentence-ids  <repo>: tools/sentence_ids_v1.json (--bootstrap: from the committed pack/sentences.json; core/sentence_ids.py)
     audio   recorded audio (docs/AUDIO.md): <repo>/audio/{w,s,p,x}/*.opus + manifest.json,
             item `audio` URLs and pack.json audio; --check/--prune/--only/--limit
 """
@@ -56,6 +57,8 @@ def main(argv=None):
     en = common(sub.add_parser("enrich", help="frequency tiers + port flag block + eta into the built pack"))
     en.add_argument("--check", action="store_true", help="write nothing; exit 1 when the shipped pack differs from the enrich output")
     en.add_argument("--emit", help="write the enriched pack (json + js) to this directory instead of the repo")
+    si = common(sub.add_parser("sentence-ids", help="tools/sentence_ids_v1.json: text-stable sentence ids (core/sentence_ids.py)"))
+    si.add_argument("--bootstrap", action="store_true", help="write the map from the committed pack/sentences.json (ids as live)")
     au = common(sub.add_parser("audio", help="recorded audio: <repo>/audio/*.opus + pack audio URLs (docs/AUDIO.md)"))
     au.add_argument("--check", action="store_true", help="report missing/stale/orphan clips and stale overrides; write nothing")
     au.add_argument("--prune", action="store_true", help="delete clips no pack item wants")
@@ -74,6 +77,10 @@ def main(argv=None):
     if args.cmd == "enrich":
         from .core.enrich import main as enrich_main
         return enrich_main(args.lang, args.repo, args.check, args.emit)
+
+    if args.cmd == "sentence-ids":
+        from .core.sentence_ids import main as sid_main
+        return sid_main(args.lang, args.repo, args.bootstrap)
 
     if args.cmd == "gender":
         from .core.gender import main as gender_main

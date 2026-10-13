@@ -109,6 +109,10 @@ def write_report(env, ctx):
     a("## Sentences\n")
     a(f"- Final sentences: **{st['final_sentences']:,}**, {st['with_audio']:,} with audio "
       "(`https://tatoeba.org/audio/download/<audio_id>`).")
+    si = S.get("sentence_ids")
+    if si:
+        a(f"- Sentence ids (`tools/sentence_ids_v1.json`): {si['kept']:,} kept, {len(si['new'])} new"
+          + (f" ({', '.join(si['new'][:20])})" if si["new"] else "") + f", {len(si['retired'])} retired.")
     a(f"- Word coverage: 0 = {st['coverage_0']}, 1 = {st['coverage_1']}, 2 = {st['coverage_2']}.")
     if st["zero_sentence_words"]:
         a(f"- Words with no sentence: {', '.join(st['zero_sentence_words'])}.")
