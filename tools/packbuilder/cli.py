@@ -11,6 +11,8 @@
             touches no other file
     enrich  <repo>: pack/words.json `ft`, the pack.json port flag block and `eta` (core/enrich.py);
             --check verifies the shipped pack, --emit DIR writes an enriched copy elsewhere
+    gender  <repo>: tools/word_gender.json, the noun `g` by word id from a build (--check, --out FILE); enrich applies it
+            (core/gender.py)
     audio   recorded audio (docs/AUDIO.md): <repo>/audio/{w,s,p,x}/*.opus + manifest.json,
             item `audio` URLs and pack.json audio; --check/--prune/--only/--limit
 """
@@ -48,6 +50,9 @@ def main(argv=None):
     sc = sub.add_parser("script", help="script primer: pack/script.json + pack.json script key")
     sc.add_argument("repo", help="language repo root (holds pack/)")
     sc.add_argument("--lang", required=True, help="language code (packbuilder/langs/<code>.py)")
+    gd = common(sub.add_parser("gender", help="tools/word_gender.json: noun g by word id, from a build (nothing under pack/ is written)"))
+    gd.add_argument("--check", action="store_true", help="write nothing; exit 1 when the file differs from the build")
+    gd.add_argument("--out", help="write the file here instead of <repo>/tools/word_gender.json")
     en = common(sub.add_parser("enrich", help="frequency tiers + port flag block + eta into the built pack"))
     en.add_argument("--check", action="store_true", help="write nothing; exit 1 when the shipped pack differs from the enrich output")
     en.add_argument("--emit", help="write the enriched pack (json + js) to this directory instead of the repo")
@@ -69,6 +74,10 @@ def main(argv=None):
     if args.cmd == "enrich":
         from .core.enrich import main as enrich_main
         return enrich_main(args.lang, args.repo, args.check, args.emit)
+
+    if args.cmd == "gender":
+        from .core.gender import main as gender_main
+        return gender_main(args.lang, args.repo, args.check, args.out)
 
     if args.cmd == "script":
         from .core.script_cli import main as script_main

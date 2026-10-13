@@ -4,6 +4,7 @@ port (vocab-engine .cache/briefs/port-plan.md §1, §2, §4): a pure function of
   * `ft` on every word of pack/words.json (0 ambient, 1 core, 2 peripheral; docs/PACK_SCHEMA.md "freqTiers")
     from its `rank` and the optional <repo>/tools/tiers_overrides.json, and on every unit of
     pack/characters.json (the lowest `ft` of its words);
+  * `g` (noun gender) by word id from <repo>/tools/word_gender.json when the pack declares gapGender (core/gender.py);
   * the pack.json flag block `LanguageSpec.port_flags()`;
   * pack.json `eta` copied from the optional <repo>/tools/eta.json (tests/eta_checks.js --pack ... --calibrate --write):
     {curve, knownCurve}, or the legacy {gain, known} of sites calibrated before fb42.
@@ -18,6 +19,7 @@ from pathlib import Path
 
 from ..langs import get_spec
 from .util import Env, write_json
+from .gender import apply_gender, load_map
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from jsonify_pack import render  # noqa: E402
@@ -98,10 +100,15 @@ def tier_counts(words):
     return {lv: [sum(1 for w in words if w["lv"] == lv and w["ft"] == t) for t in (0, 1, 2)] for lv in levels}
 
 
-def enrich_data(spec, pack, words, units=None, overrides=None, eta=None):
-    """The pure function: copies of (pack, words, units) with ft, the flag block and eta. Inputs untouched."""
+def enrich_data(spec, pack, words, units=None, overrides=None, eta=None, gender=None):
+    """The pure function: copies of (pack, words, units) with ft, g, the flag block and eta. Inputs untouched.
+    gender is {word id: g} (tools/word_gender.json); it applies only when the spec emits g (pack.gapGender)."""
     pack, words = json.loads(json.dumps(pack)), json.loads(json.dumps(words))
     units = json.loads(json.dumps(units)) if units is not None else None
+    if gender and spec.port_flags().get("gapGender"):
+        words, info = apply_gender(words, gender)
+        if info["conflicts"]:
+            raise SystemExit("enrich: tools/word_gender.json disagrees with the pack (id, lemma, pack, file): " + repr(info["conflicts"][:10]))
     assign_tiers(words, overrides)
     pack = drop_collapsed(pack)
     for k, v in spec.port_flags().items():
@@ -145,7 +152,11 @@ def main(lang, repo, check=False, emit=None):
     eta = _read(tools / "eta.json")
     if eta is not None:
         eta = {k: eta[k] for k in ("curve", "knownCurve", "placed", "gain", "known") if k in eta}
-    new_pack, new_words, new_units = enrich_data(spec, pack, words, units, load_overrides(tools / "tiers_overrides.json", words), eta)
+    gender = load_map(tools)
+    new_pack, new_words, new_units = enrich_data(spec, pack, words, units, load_overrides(tools / "tiers_overrides.json", words), eta, gender)
+    if spec.port_flags().get("gapGender"):
+        n_g = sum(1 for w in new_words if "g" in w)
+        print(f"{lang} gender: {n_g} nouns with g" + ("" if gender is not None else " (no tools/word_gender.json)"))
     counts = tier_counts(new_words)
     print(f"{lang} tiers [ambient core peripheral]: " + "  ".join(f"{lv} {c}" for lv, c in counts.items()))
     parts = [("pack", "PACK", pack, new_pack), ("words", "WORDS", words, new_words)]

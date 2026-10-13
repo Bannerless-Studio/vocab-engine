@@ -83,6 +83,7 @@ python3 -m packbuilder sample --lang it --repo . --seed 303
 python3 -m packbuilder passages . [--lang it] [--check]    # reading passages, see below
 python3 -m packbuilder passages ../packs/zh [--check]      # a flat pack dir (zh, from vocab-engine/tools), see docs/PACKBUILDER_HOOKS.md "Chinese (zh) passages"
 python3 -m packbuilder script --lang ko .                  # script primer only, see below
+python3 -m packbuilder gender --lang it --repo . [--check|--out FILE]   # tools/word_gender.json: noun g by word id, from a build (nothing under pack/ is written)
 python3 -m packbuilder enrich --lang it --repo . [--check|--emit DIR]   # ft tiers + port flag block + eta, see "Port enrich"
 python3 -m packbuilder audio  --lang fa --repo .            # recorded audio, see docs/AUDIO.md; run LAST
 python3 -m unittest discover -s engine/tools/packbuilder/tests -t engine/tools
@@ -109,7 +110,7 @@ span, and the engine locates it by surface. Rules and hooks: docs/PACKBUILDER_HO
 
 ### Port enrich
 
-`enrich` (core/enrich.py) is a pure post-stage over a built pack: it adds `ft` to every word (rank <= 100 ambient; per level the least frequent 10% / 25% / 40% of A1 / A2 / B1 peripheral; overrides in `tools/tiers_overrides.json`), the unit `ft` (lowest of its words), the pack.json flag block from `LanguageSpec.port_flags()` and `eta` from `tools/eta.json`. It needs the standard library only. Run it after `build` / `passages` / `script` / `audio` and before `tools/jsonify_pack.py` is trusted (it rewrites pack.js, words.js and characters.js itself). `--check` writes nothing and exits 1 when the shipped pack differs (a site's check.sh runs it); `--emit DIR` writes an enriched copy and leaves the repo alone. Rules: docs/PACK_SCHEMA.md "freqTiers" > "Other languages"; ETA constants: `node tests/eta_checks.js --pack <packdir> --calibrate --write <repo>/tools/eta.json`, then enrich again.
+`enrich` (core/enrich.py) is a pure post-stage over a built pack: it adds `ft` to every word (rank <= 100 ambient; per level the least frequent 10% / 25% / 40% of A1 / A2 / B1 peripheral; overrides in `tools/tiers_overrides.json`), the unit `ft` (lowest of its words), the pack.json flag block from `LanguageSpec.port_flags()` and `eta` from `tools/eta.json`. It needs the standard library only. Run it after `build` / `passages` / `script` / `audio` and before `tools/jsonify_pack.py` is trusted (it rewrites pack.js, words.js and characters.js itself). `--check` writes nothing and exits 1 when the shipped pack differs (a site's check.sh runs it); `--emit DIR` writes an enriched copy and leaves the repo alone. For it es fr de (`gapGender`) it also copies the noun `g` by word id from `tools/word_gender.json` when that file exists (`python3 -m packbuilder gender` writes it from a full build run that touches nothing under pack/ and needs the language venv: spaCy; a pack built after the builders emitted `g` already has it, and a disagreeing `g` stops enrich). The file is by id because the lexicon entry behind `g` is chosen with the corpus; ids are append-only, so it stays valid. Rules: docs/PACK_SCHEMA.md "freqTiers" > "Other languages"; ETA constants: `node tests/eta_checks.js --pack <packdir> --calibrate --write <repo>/tools/eta.json`, then enrich again.
 
 ### Reading passages
 
