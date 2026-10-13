@@ -1401,7 +1401,15 @@ const EXAM_WORD_KIND = { hearS: "hear", gap: "read", readS: "read" };
 const critMap = prog => prog && isObj(prog.crit) ? prog.crit : {};
 const critHas = (prog, id) => critMap(prog)[id] !== undefined;
 function critAdd(prog, id, sn){ if(!prog || typeof id !== "string") return false; if(!isObj(prog.crit)) prog.crit = {}; if(prog.crit[id] !== undefined) return false; prog.crit[id] = Number.isFinite(sn) ? sn : 0; return true; }
-function critRemove(prog, id){ if(!prog || !isObj(prog.crit) || prog.crit[id] === undefined) return false; delete prog.crit[id]; if(!Object.keys(prog.crit).length) delete prog.crit; return true; }
+// A word that leaves prog.crit is noted as cleared (c) on the last history entry of the exam that added it (a), so the
+// unlock latches: a later re-add of that word does not lock the next exam again (owner review 2026-10-13, F1).
+function examNoteCleared(prog, id){
+  if(!isObj(prog.exam)) return;
+  Object.keys(prog.exam).forEach(k => { const e = prog.exam[k]; if(!isObj(e) || !Array.isArray(e.h) || !e.h.length) return;
+    const last = e.h[e.h.length - 1];
+    if(isObj(last) && Array.isArray(last.a) && last.a.includes(id) && !(Array.isArray(last.c) && last.c.includes(id))) last.c = (Array.isArray(last.c) ? last.c : []).concat([id]); });
+}
+function critRemove(prog, id){ if(!prog || !isObj(prog.crit) || prog.crit[id] === undefined) return false; delete prog.crit[id]; if(!Object.keys(prog.crit).length) delete prog.crit; examNoteCleared(prog, id); return true; }
 // Oldest-added first (session, then id): a word keeps its turn instead of jittering between plans.
 function critWords(prog, words){ const m = critMap(prog); return (words || []).filter(w => w && m[w.id] !== undefined).sort((a, b) => (m[a.id] - m[b.id]) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)); }
 // The mark path: a right answer that leaves the word known (every askable pair at its bar) retires it.
@@ -1428,13 +1436,14 @@ const examNumbered = (pack, lv) => levelIds(pack).indexOf(String(lv)) + 1 >= EXA
 const examHist = e => !isObj(e) ? [] : Array.isArray(e.h) ? e.h.filter(isObj) : Number.isInteger(e.r) && Number.isInteger(e.n) ? [{ r: e.r, n: e.n, d: e.d }] : [];
 const examCount = (prog, lv) => { const e = examResult(prog, lv); return e ? (Number.isInteger(e.k) ? e.k : 1) : 0; };
 // The critical words the last exam added that are still critical: the next exam waits while any is (0: open).
-function examLock(prog, lv){ const h = examHist(examResult(prog, lv)), last = h[h.length - 1]; return last && Array.isArray(last.a) ? last.a.filter(id => critHas(prog, id)).length : 0; }
+function examLock(prog, lv){ const h = examHist(examResult(prog, lv)), last = h[h.length - 1]; return last && Array.isArray(last.a) ? last.a.filter(id => !(Array.isArray(last.c) && last.c.includes(id))).length : 0; }
 // o: { numbered, added, pass } for a numbered level; without it the record is the single exam as before.
 function examRecord(prog, lv, r, n, day, o){
   if(!isObj(prog.exam)) prog.exam = {};
   const key = String(lv), d = String(day), old = prog.exam[key];
   if(!o || !o.numbered){ prog.exam[key] = { r, n, d }; return prog.exam[key]; }
-  const it = Object.assign({ r, n, d }, o.pass ? { ok: 1 } : {}, Array.isArray(o.added) && o.added.length ? { a: o.added.slice() } : {});
+  const a = (Array.isArray(o.added) ? o.added : []).filter(id => critHas(prog, id));
+  const it = Object.assign({ r, n, d }, o.pass ? { ok: 1 } : {}, a.length ? { a: a.slice() } : {});
   const h = examHist(examResult(prog, lv)).concat([it]), e = { r, n, d, h, k: h.length };
   const p = (isObj(old) && old.p) || (o.pass ? d : null);
   if(p) e.p = p;
@@ -1509,9 +1518,9 @@ function examPlan(words, sentences, pack, prog, lv, rng, o){
   if(cum){
     const ids = levelIds(pack), early = new Set(ids.slice(0, Math.max(0, ids.indexOf(String(lv)))));
     const rec = (prog && prog.w) || {}, streak = id => pairState(rec[id], "wm").s;
-    const ew = shuffle((words || []).filter(w => w && early.has(String(w.lv)) && !critHas(prog, w.id)), r).sort((a, b) => streak(a.id) - streak(b.id));
+    const ew = shuffle((words || []).filter(w => w && early.has(String(w.lv)) && isObj(rec[w.id]) && !critHas(prog, w.id)), r).sort((a, b) => streak(a.id) - streak(b.id));
     const sStreak = s => (s.words || []).reduce((m, id, i) => { const v = streak(id); return i ? Math.min(m, v) : v; }, 0);
-    const es = shuffle((sentences || []).filter(s => s && early.has(String(s.lv)) && !(s.words || []).some(id => critHas(prog, id))), r).sort((a, b) => sStreak(a) - sStreak(b));
+    const es = shuffle((sentences || []).filter(s => s && early.has(String(s.lv)) && (s.words || []).length && (s.words || []).every(id => isObj(rec[id])) && !(s.words || []).some(id => critHas(prog, id))), r).sort((a, b) => sStreak(a) - sStreak(b));
     const earlyPick = picker(ew, es);
     EXAM_MIX_EARLIER.forEach(([kind, n]) => { for(let i = 0; i < n; i++){ const it = earlyPick(kind) || lvPick(kind); if(it) out.push(it); } });
   }

@@ -195,6 +195,7 @@ const escapeHtml = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").r
 const OWNER = (() => { for(const f of [process.env.PAIRS_OWNER, path.join(ROOT, "..", "chinese", ".cache", "owner-progress.json")]) if(f && fs.existsSync(f)) return JSON.parse(fs.readFileSync(f, "utf8")); return null; })();
 const LV = VC.levelIds(PACK), BYLV = VC.wordsByLevel(WORDS, PACK);
 const freshRec = () => VC.normalizeProg({}, PACK);
+const isObj0 = x => !!x && typeof x === "object" && !Array.isArray(x);
 const KNOWN_REC = () => ({ r: 6, w: 0, s: 6, p: { wm: [3, 1], sm: [3, 1], ws: [3, 1] } });
 // HSK 1 fully known, the first 30 HSK 2 words learned (streak 1), so Learn is at HSK 2 and HSK 1 is offered.
 function hsk1Known(){
@@ -465,6 +466,20 @@ console.log("\n[9] repeat exams: numbering, history, unlock rule, pass rule (cor
   check("pass rule: an outstanding critical word of the level blocks the pass", !VC.examPasses(pr, WORDS, LV[2], 20, 20, 2));
   const pr2 = freshRec(); VC.critAdd(pr2, BYLV[LV[0]][0].id, 1);
   check("pass rule: a critical word of an earlier level does not block the pass", VC.examPasses(pr2, WORDS, LV[2], 20, 20, 2));
+  const lt = freshRec(), LA = BYLV[LV[2]].slice(0, 2).map(w => w.id);
+  LA.forEach(id => VC.critAdd(lt, id, 2));
+  VC.examRecord(lt, LV[2], 14, 20, "2026-10-05", { numbered: true, added: LA });
+  VC.critRemove(lt, LA[0]); VC.critRemove(lt, LA[1]);
+  check("latch: both words cleared, the lock is open", VC.examLock(lt, LV[2]) === 0);
+  VC.critAdd(lt, LA[0], 9);
+  check("latch: a Review miss re-adds a cleared word; the lock stays open (no re-lock)", VC.examLock(lt, LV[2]) === 0 && VC.critHas(lt, LA[0]));
+  const lu = freshRec(), LB = BYLV[LV[2]].slice(0, 2).map(w => w.id);
+  LB.forEach(id => VC.critAdd(lu, id, 2));
+  VC.examRecord(lu, LV[2], 14, 20, "2026-10-05", { numbered: true, added: LB });
+  VC.critRemove(lu, LB[0]); VC.critAdd(lu, LB[0], 9);
+  check("latch: one word cleared then re-added, the other still outstanding: the lock reads 1, not 2", VC.examLock(lu, LV[2]) === 1);
+  VC.critRemove(lu, LB[1]); VC.critAdd(lu, LB[0], 10);
+  check("latch: the last outstanding word clears; a later re-add of the first word keeps the lock open", VC.examLock(lu, LV[2]) === 0);
 }
 
 console.log("\n[10] cumulative draw from exam 2 (core)");
@@ -517,6 +532,15 @@ console.log("\n[10] cumulative draw from exam 2 (core)");
   check("HSK 2 (position 2) retake: level-only, unchanged", l2.length === 20 && l2.every(it => String((it.s || it.word).lv) === LV[1]));
   const d1 = VC.examPlan(WORDS, SENTENCES, PACK, base, LV[2], VC.seededRng(11), cum), d2 = VC.examPlan(WORDS, SENTENCES, PACK, base, LV[2], VC.seededRng(11), cum);
   check("determinism: the same seed draws the same exam 2 plan", key(d1) === key(d2));
+  const partial = freshRec(); BYLV[LV[1]].forEach(w => { partial.w[w.id] = KNOWN_REC(); });
+  let recOk = true, lenOk = true, lvOk = true;
+  for(let seed = 1; seed <= 10; seed++){
+    const pl = VC.examPlan(WORDS, SENTENCES, PACK, partial, LV[2], VC.seededRng(seed), cum);
+    lenOk = lenOk && pl.length === 20;
+    recOk = recOk && pl.every(it => { const ids = it.s ? it.s.words : [it.word.id]; return String((it.s || it.word).lv) === LV[2] || ids.every(id => isObj0(partial.w[id])); });
+    lvOk = lvOk && pl.filter(it => String((it.s || it.word).lv) !== LV[2]).every(it => String((it.s || it.word).lv) === LV[1]);
+  }
+  check("F3: earlier candidates need a record: with only HSK 2 recorded, the earlier items are HSK 2 and recorded, and every exam stays 20 items", recOk && lenOk && lvOk);
 }
 
 console.log("\n[11] pass effect on pairs (core): zh, italian, ja units");
@@ -563,13 +587,23 @@ console.log("\n[11] pass effect on pairs (core): zh, italian, ja units");
   }
 }
 
+{
+  const cu = freshRec(), unit = CHARACTERS.find(u => u.id === "c0549");
+  check("F2 fixture: unit c0549 is a HSK 3 unit with word w0549", unit && unit.words[0] === "w0549" && String(BY_ID.w0549.lv) === LV[2]);
+  cu.chars.c.c0549 = { r: 3, w: 0, s: 3, p: { wm: [1, 1], ws: [3, 1] } };
+  const bareBefore = VC.pairBare(cu.chars.c.c0549, unit, cu, PACK);
+  const plan = VC.examPassPlan(cu, WORDS, LV[2], CHARACTERS, 7);
+  VC.examPassApply(cu, plan, 7);
+  const bareAfter = VC.pairBare(cu.chars.c.c0549, unit, cu, PACK);
+  check("F2: the zh pass hides c0549's reading through pairBare (ruby unit, wm 1 -> 2 with ws 3): false before, true after", bareBefore === false && bareAfter === true && JSON.stringify(cu.chars.c.c0549.p.wm) === "[2,7]" && JSON.stringify(cu.chars.c.c0549.p.ws) === "[3,1]");
+}
 console.log("\n[12] app: Test row history and lock, a retake passes");
 {
   const p2 = freshRec(); p2.sessions = 12; p2.sn = 12; p2.placedOnce = true;
   [0, 1, 2].forEach(i => { BYLV[LV[i]].forEach((w, j) => { p2.w[w.id] = i === 2 && j % 5 === 0 ? { r: 1, w: 0, s: 1 } : KNOWN_REC(); }); p2.sets[LV[i]] = Math.ceil(BYLV[LV[i]].length / VC.setSizeOf(PACK)); });
   CHARACTERS.filter(u => u.words && BYLV[LV[2]].some(w => w.id === u.words[0])).forEach(u => { p2.chars.c[u.id] = { r: 6, w: 0, s: 6, p: { wm: [3, 1], ws: [3, 1] } }; });
   const crit = BYLV[LV[2]][10].id;
-  VC.examRecord(p2, LV[2], 14, 20, DAY, { numbered: true, added: [crit] }); VC.critAdd(p2, crit, 2);
+  VC.critAdd(p2, crit, 2); VC.examRecord(p2, LV[2], 14, 20, DAY, { numbered: true, added: [crit] });
   const { api: a1, st: st1 } = await bootWith(PACK, p2, 31);
   a1.clickTab("test");
   check("Test row, numbered level with exam 1 taken and a critical word outstanding: \"Exam 1: 14 of 20, today\", the button disabled, \"Exam 2 opens when 1 critical word clears\"", /Exam 1: 14 of 20, today<\/p>/.test(a1.panel()) && /id="tExam_3"[^>]*disabled/.test(a1.panel()) && /id="tExamLock_3"[^>]*>Exam 2 opens when 1 critical word clears<\/p>/.test(a1.panel()));
@@ -578,6 +612,7 @@ console.log("\n[12] app: Test row history and lock, a retake passes");
   api.clickTab("test");
   check("the word cleared: exam 2 is open, no lock line, the button enabled", !/id="tExam_3"[^>]*disabled/.test(api.panel()) && !/tExamLock_3/.test(api.panel()));
   examRow(api, LV[2]).click();
+  const k2 = [api.getCur(), ...api.getD().q].map(it => it.key).join("|");
   check("exam 2 starts: 20 items, header \"Level exam: HSK 3\"", api.getD() && api.getD().q.length + 1 === 20 && api.title() === "Level exam: HSK 3");
   let guard = 0; while(api.getD() && api.getCur() && guard++ < 40){ answer(api, true); api.el("nx").click(); }
   const fin = api.fin(), pr = api.getProg();
@@ -588,6 +623,9 @@ console.log("\n[12] app: Test row history and lock, a retake passes");
   check("the low words of HSK 3 carry wm [2, session] now; the words already at 3 keep 3", hid > 0 && BYLV[LV[2]].filter(w => pr.w[w.id] && pr.w[w.id].s === 1 && !pr.w[w.id].p).length === 0);
   api.el("ok").click(); api.clickTab("today"); api.clickTab("test");
   check("the Test row reads \"Exam 2: 20 of 20, today · passed\" under the exam 1 line", /Exam 2: 20 of 20, today · passed/.test(api.panel()) && /Exam 1: 14 of 20, today/.test(api.panel()));
+  api.clickTab("test"); examRow(api, LV[2]).click();
+  const k3 = [api.getCur(), ...api.getD().q].map(it => it.key).join("|");
+  check("F4: a retake after exam 2 in the same session draws a different plan (k in the seed from exam 2)", api.getD() && k3 !== k2);
 }
 
 if(OWNER){

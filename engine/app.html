@@ -1760,8 +1760,9 @@ function examResults(lv){
 }
 const examOpts = () => ({ typedOk: w => typedKindFits(w, "writtenMeaning"), gapOk: s => gapIdxs(s).length > 0, canHear: canHearWord });
 function startExam(lv){
-  const rng = VC.seededRng(VC.hashSeed(`exam:${lv}:${prog.sessions || 0}:${VC.daySn(prog)}:${Object.keys(prog.exam || {}).length}`));
-  const plan = VC.examPlan(WORDS, SENTENCES, PACK, prog, lv, rng, Object.assign(examOpts(), { k: VC.examCount(prog, lv) + 1 }));
+  const k = VC.examCount(prog, lv) + 1;
+  const rng = VC.seededRng(VC.hashSeed(`exam:${lv}:${prog.sessions || 0}:${VC.daySn(prog)}:${Object.keys(prog.exam || {}).length}${k >= VC.EXAM_REPEAT_FROM ? `:k${k}` : ""}`));
+  const plan = VC.examPlan(WORDS, SENTENCES, PACK, prog, lv, rng, Object.assign(examOpts(), { k }));
   const r = examResults(lv);
   drill(plan.map(p => examItem(p.kind, p.s || p.word)), testRender, r.summary, r.onShown);
 }
