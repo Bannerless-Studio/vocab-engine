@@ -246,6 +246,8 @@ class Russian(LanguageSpec):
                    ("простите", "INTJ"): "sorry, excuse me, forgive me", ("ничего", "PRON"): "nothing; never mind",
                    ("кофе", "NOUN"): "coffee"}
     multiword = {"до свидания": ("до", "свидания")}
+    phrase_absorbs_parts = True    # "До свидания": the phrase is the link, not до + свидание
+
     # ничего links as its own word ("nothing"; "never mind"), not the rare nominative ничто
     # emphatic -то on a demonstrative is the demonstrative (Wiktionary lists так-то separately)
     closed_surfaces = {"ничего": ("ничего", "PRON"), "так-то": ("так", "ADV"), "вот-то": ("вот", "PART"),

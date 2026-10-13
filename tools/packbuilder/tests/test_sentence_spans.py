@@ -22,12 +22,13 @@ from packbuilder.langs import get_spec  # noqa: E402
 # (surface, lemma, group) -> word id; lemma/group double as the tagger reading
 WORDS = [("comprare", "VERB", "w_comprare"), ("mela", "NOUN", "w_mela"), ("per favore", "PHRASE", "w_perfav"),
          ("mangiare", "VERB", "w_mangiare"), ("pane", "NOUN", "w_pane"), ("grande", "ADJ", "w_grande"),
-         ("favore", "NOUN", "w_favore"), ("il", "DET", "w_il"), ("e", "CCONJ", "w_e")]
+         ("favore", "NOUN", "w_favore"), ("il", "DET", "w_il"), ("e", "CCONJ", "w_e"),
+         ("per", "ADP", "w_per")]
 READ = {"compra": ("comprare", "VERB"), "compro": ("comprare", "VERB"), "mele": ("mela", "NOUN"),
         "mela": ("mela", "NOUN"), "mangio": ("mangiare", "VERB"), "mangia": ("mangiare", "VERB"),
         "pane": ("pane", "NOUN"), "grande": ("grande", "ADJ"), "favore": ("favore", "NOUN"),
         "il": ("il", "DET"), "la": ("il", "DET"), "le": ("il", "DET"), "e": ("e", "CCONJ"),
-        "grandi": ("grande", "ADJ"), "pomi": ("mela", "NOUN")}
+        "grandi": ("grande", "ADJ"), "pomi": ("mela", "NOUN"), "per": ("per", "ADP")}
 
 
 class Lexicon:
@@ -104,6 +105,20 @@ class BuildSentencesSpans(unittest.TestCase):
         self.assertEqual([(u16(t, a, b), w) for a, b, w in s["spans"]],
                          [("Compra", "w_comprare"), ("le", "w_il"), ("mele", "w_mela"), ("per favore", "w_perfav")])
         self.assertNotIn("w_favore", {x[2] for x in s["spans"]})
+
+    def test_multiword_parts_of_every_group_leave_the_words_list(self):
+        # per (ADP) and favore (NOUN) are held by the phrase: neither is a link of the sentence
+        w = self.out["Compra le mele, per favore."]["words"]
+        self.assertIn("w_perfav", w)
+        self.assertNotIn("w_favore", w)
+        self.assertNotIn("w_per", w)
+
+    def test_part_outside_the_phrase_keeps_its_link(self):
+        out = build([("Compro il pane per la mela, per favore.",
+                      tokens(["Compro", "il", "pane", "per", "la", "mela", ",", "per", "favore", "."]))])
+        w = out["Compro il pane per la mela, per favore."]["words"]
+        self.assertIn("w_per", w)          # the first per is not part of the phrase
+        self.assertNotIn("w_favore", w)
 
     def test_repeated_word_two_spans(self):
         t = "Mangio il pane e mangia la mela."

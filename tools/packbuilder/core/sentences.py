@@ -4,7 +4,7 @@ import re
 from collections import Counter, defaultdict
 from itertools import chain
 
-from .lexicon import CONTENT_GROUPS, SKIP_UPOS
+from .lexicon import CONTENT_GROUPS, GROUP_LABEL, SKIP_UPOS
 from .spans import sentence_spans
 from .tag import iter_tagged
 from .util import log, stat
@@ -30,6 +30,11 @@ def det_gender(toks, i):
 HOMOGRAPH_STOP = {"to", "a", "an", "the", "of", "be", "do", "for", "in", "on", "at", "with", "by", "as", "or",
                   "and", "it", "one", "not", "so", "up", "out", "off", "get", "make", "have"}
 EN_WORD_RE = re.compile(r"[a-z]+")
+
+
+# Every group a multiword part can be held under: the parts of "per favore" are an
+# ADP and a NOUN, those of "kwa sababu" an ADP and a NOUN, those of "il y a" PRONs and a VERB.
+PHRASE_PART_GROUPS = tuple(GROUP_LABEL) + ("FORM",)
 
 
 def phrase_spans(toks, sp, key_to_id, en=None, ranges=None):
@@ -285,7 +290,7 @@ def sentence_links(toks, lexicon, key_to_id, allowed, text, groups=None, gender_
                 for part in sp.multiword[phrase]:
                     if len(re.findall(r"\b" + re.escape(part) + r"\b", low)) > n_phrase:
                         continue
-                    for g in CONTENT_GROUPS:
+                    for g in PHRASE_PART_GROUPS:        # a function-word part too (per, kwa)
                         pid = key_to_id.get((part, g))
                         if pid in links:
                             links.remove(pid)

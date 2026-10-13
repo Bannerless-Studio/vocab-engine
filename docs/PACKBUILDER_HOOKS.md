@@ -52,7 +52,7 @@ Added for Spanish; each defaults to off or a no-op, so Italian stays byte-identi
 - `copula_inflected`, `numeral_may_be_verb`, `after_article_is_noun`, `object_clitics`, `post_resolve`: in-context POS fixes (es: "son animales" is a noun, "un poco" not a noun, "la amo" a verb, fue a -> ir).
 - `form_colon_translation`: form-of glosses "X of Y: translation" also yield the translation (es: tía).
 - `strict_selection`: drops "?" POS keys, single letters, English homographs rare in the corpus, and noun keys whose entry is not a noun.
-- `phrase_bound_share` / `phrase_absorbs_parts`: words mostly bound in a taught phrase are dropped, and a phrase match removes its literal part links (embargo in sin embargo).
+- `phrase_bound_share` / `phrase_absorbs_parts`: words mostly bound in a taught phrase are dropped, and a phrase match removes its literal part links of any POS (embargo in sin embargo, per and favore in per favore, kwa in kwa sababu), except a part that also occurs outside the phrase in the sentence. A spec with `phrase_token_spans` consumes every phrase token instead and needs neither the flag nor this text rule.
 - `imperative_homograph(lexicon, lemma)`: noun homographs of an imperative+clitic.
 - `revert_dedupe_gloss`: a reverted -se verb whose base and reflexive glosses lead the same shows one gloss (on for es; would change 4 Italian glosses).
 - `marks_sentence(toks)`: extra top-level marker (es: voseo and regional slang kept out of A1/A2).

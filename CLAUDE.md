@@ -95,7 +95,7 @@ $NODE tests/live_lock.js --check                 # 14 packs equal (flag collapse
 ./build.sh packs/zh dist/zh.html                 # also writes dist/sw.js
 python3 tools/jsonify_pack.py packs/zh           # after editing any packs/zh/*.json
 python3 tools/validate_pack.py packs/zh          # schema + referential integrity; fails on stale .js
-.venv/bin/python -m pytest tools/packbuilder/tests   # 745 passed, 2 skipped (fb46 Gender class)
+.venv/bin/python -m pytest tools/packbuilder/tests   # 747 passed, 2 skipped (fb46 Gender class; it-phrase: multiword parts of any POS)
 python3 -m unittest discover -s tools/packbuilder/tests -t tools   # same suite, stdlib runner
 (cd tools && python3 -m packbuilder audio --lang fa --repo ../../persian --check)   # recorded-audio status of a repo
 python3 tools/pack_from_hsk.py [../chinese]      # regenerate packs/zh from the hsk data (idempotent; reads tools/zh_freq.json)
