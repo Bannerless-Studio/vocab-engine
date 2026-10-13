@@ -3,7 +3,7 @@ Ids are opaque keys to the engine (learner records key on them), so a rebuild mu
 a sentence claims the first unclaimed issued id with the same text, new text gets an id above
 the highest ever issued, and issued ids are never removed (a retired id is never reissued)."""
 import json
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 
@@ -25,20 +25,42 @@ def next_number(issued):
     return max([int(k[1:]) for k in issued] + [0]) + 1
 
 
-def assign(texts, issued):
-    """Ids for texts (in output order). Returns (ids, new_issued, stats). issued is not mutated."""
+def assign(texts, issued, legacy=None):
+    """Ids for texts (in output order). Returns (ids, new_issued, stats). issued is not mutated.
+    texts are the exact shipped texts. legacy (optional, same length) are the earlier-stage texts a map
+    written before ids moved after the finishing passes may hold: a sentence whose legacy text differs claims
+    the id issued for that text, and the id is rewritten to the shipped text (stats "rekeyed"), so the map
+    converges on shipped texts and the next build matches directly."""
     by_text = defaultdict(list)
     for sid in sorted(issued):
         by_text[issued[sid]].append(sid)
     ids = [None] * len(texts)
     claimed = set()
-    for i, t in enumerate(texts):
+
+    def claim(i, t):
         for sid in by_text.get(t, ()):
             if sid not in claimed:
                 ids[i] = sid
                 claimed.add(sid)
-                break
+                return True
+        return False
+
     out = dict(issued)
+    rekeyed = 0
+    shipped = Counter(texts)
+    # a map written before ids moved after the finishing passes holds the earlier text, and two sentences
+    # can finish to one text (fa: Arabic and Persian yeh): the earlier text is the exact one, so it goes first.
+    # Finishing passes are idempotent, so a map of shipped texts never holds a different sentence's earlier text.
+    if legacy:
+        for i, t in enumerate(texts):
+            if legacy[i] != t and claim(i, legacy[i]):
+                # a text two sentences ship keeps the earlier text as the key, which tells the two apart
+                if shipped[t] == 1:
+                    out[ids[i]] = t
+                    rekeyed += 1
+    for i, t in enumerate(texts):
+        if ids[i] is None:
+            claim(i, t)
     nxt = next_number(issued)
     fresh = []
     for i, t in enumerate(texts):
@@ -49,7 +71,15 @@ def assign(texts, issued):
             nxt += 1
     assert len(set(ids)) == len(ids), "sentence id claimed twice"
     retired = sorted(set(issued) - claimed)
-    return ids, out, {"kept": len(claimed), "new": fresh, "retired": retired}
+    return ids, out, {"kept": len(claimed), "new": fresh, "retired": retired, "rekeyed": rekeyed}
+
+
+def verify(texts, ids, issued, legacy=None):
+    """Round trip: replay assign over the map about to be saved. Returns the ids that a rebuild with the
+    same texts would not give back (a text changed after assign, a key that does not claim its own id);
+    empty when sound."""
+    again, _, _ = assign(texts, issued, legacy)
+    return [a for a, b in zip(ids, again) if a != b]
 
 
 def bootstrap(pack_sentences, issued=None):

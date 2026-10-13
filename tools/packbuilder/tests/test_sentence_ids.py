@@ -136,12 +136,23 @@ class WordIdMap(unittest.TestCase):
         from packbuilder.core.words import persist_ids
         with tempfile.TemporaryDirectory() as d:
             p = Path(d) / "id_map_v1.json"
+            p.write_text(json.dumps({"a|noun": "w0001", "gone|noun": "w0005"}))
+            words = [{"lemma": "a", "pos": "noun", "id": "w0001"}, {"lemma": "b", "pos": "noun", "id": "w0006"},
+                     {"lemma": "c", "pos": "verb", "id": "w0007"}]
+            self.assertEqual(persist_ids(p, words), (2, []))
+            self.assertEqual(json.loads(p.read_text()),
+                             {"a|noun": "w0001", "gone|noun": "w0005", "b|noun": "w0006", "c|verb": "w0007"})
+            self.assertEqual(persist_ids(p, words), (0, []))
+
+    def test_persist_refuses_a_key_that_would_hand_out_another_id(self):
+        from packbuilder.core.words import persist_ids
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "id_map_v1.json"
             p.write_text(json.dumps({"a|noun": "w0001"}))
-            words = [{"lemma": "a", "pos": "noun", "id": "w0009"}, {"lemma": "b", "pos": "noun", "id": "w0002"},
-                     {"lemma": "c", "pos": "verb", "id": "w0001"}]
-            self.assertEqual(persist_ids(p, words), 1)
-            self.assertEqual(json.loads(p.read_text()), {"a|noun": "w0001", "b|noun": "w0002"})
-            self.assertEqual(persist_ids(p, words), 0)
+            words = [{"lemma": "a", "pos": "noun", "id": "w0009"}]
+            with self.assertRaises(ValueError):
+                persist_ids(p, words)
+            self.assertEqual(json.loads(p.read_text()), {"a|noun": "w0001"})
 
 
 class PatternsFlags(unittest.TestCase):

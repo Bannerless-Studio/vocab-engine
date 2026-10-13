@@ -59,12 +59,19 @@ tools/gloss_overrides.json hand gloss fixes, "lemma|pos": "gloss" (keys starting
 tools/gloss_display.json   optional display-only glosses, same key format (see below)
 tools/forced_a1.txt        A1 core list: [NOUN] / [VERB] / [ADJ] / [ADV] headers, then lemmas
 tools/bad_sentences.txt    optional: hand-reviewed sentences to drop verbatim, one per line, "#..." comments
-tools/sentence_ids_v1.json {"issued": {sentence id: exact text}}: written by every build, carries ids forward by text (core/sentence_ids.py; `packbuilder sentence-ids --bootstrap` writes it from the committed pack)
-tools/id_map_v1.json       frozen "lemma|pos" -> word id (keeps learner progress across rebuilds)
+tools/sentence_ids_v1.json {"issued": {sentence id: exact shipped text}}: written by every build, carries ids forward by text (core/sentence_ids.py, see "Id maps"; `packbuilder sentence-ids --bootstrap` writes it from the committed pack)
+tools/id_map_v1.json       frozen "lemma|pos" -> word id (keeps learner progress across rebuilds; see "Id maps")
 tools/REPORT.md            generated; text between <!-- manual:begin/end --> is kept
 build.sh check.sh README.md TODO.md
 .cache/                    gitignored: downloads + derived/ (corpus, tagged corpus, lexicon)
 ```
+
+### Id maps
+
+Learner progress keys on word and sentence ids, so a rebuild from the committed site data must give every unchanged word and sentence its own id back. Both maps are written and read through one function each, and a build that would break the round trip stops before it writes anything.
+
+- **Words** (`core/words.py`): `id_key(lemma, pos)` is the only spelling of a key. `assign_ids` looks a word up by the lemma and pos it has when ids are assigned, which is before the finishing passes (`finalize_words`, `split_alt_forms`, gloss display) change them: hi folds the nukta, fa drops or restores ZWNJ, es shows a reflexive `-se`, de restores case, id and ja change the pos. It records that key as `word["_idkey"]`. `persist_ids` saves each shipped word under its shipped `lemma|pos` (the text the pack carries) and under the key the build looked it up with, never rewriting an entry and never reusing an id. It then replays the lookup (`ids_for_keys`, the same function `assign_ids` uses) over the map it is about to save and raises when any shipped word would not get its own id back, so a lookup key two words share fails the build and no file is touched. A shipped key that another id already holds is not overwritten; the build stats list it as `word_id_shipped_keys_held_by_other_ids` (it: 8) and the ids still round-trip through the lookup key. Old maps keyed by the build's lemma (de `jahr|noun`, hi folded) keep working and gain the shipped key on the next build.
+- **Sentences** (`core/sentence_ids.py`): ids are assigned after `sentence_fields` (fa `display_sentence`: yeh/kaf, ZWNJ), so the map holds the exact shipped text, the same text `sentence-ids --bootstrap` reads from `pack/sentences.json`. A map written by an older build holds the earlier `clean_sentence_text` text: a sentence whose two texts differ claims the id issued for the earlier one first, and the id is rewritten to the shipped text (stats `rekeyed`) unless two sentences ship one text, where the earlier text stays as the key because it is the only thing telling the pair apart. Before anything is written, `verify` replays `assign` over the new map and fails the build when any shipped sentence would get another id (a text changed after its id was assigned). Two sentences with identical shipped text claim ids in list order, so a map bootstrapped from a live pack can swap such a pair (persian has two); a map the builder wrote cannot.
 
 Word order: words.json is written level by level, each level sorted by `rank` ascending (`core/words.sort_by_rank`, run in `build_words` and again at the end of `finish_words` so no spec hook can reorder it). The engine cuts Learn sets in file order, so sets follow frequency. Every pack shipped as of 2026-09-28 was already in this order, so no pack reorders at its next rebuild.
 

@@ -690,17 +690,41 @@ def assign_levels(forced_ok, chosen, bands, forced_level=None):
     return level_of
 
 
+def id_key(lemma, pos):
+    """The one spelling of an id-map key. assign_ids reads it from the build's lemma and pos, persist_ids
+    writes it for the shipped lemma and pos (and for the build's, when a finishing pass changed them)."""
+    return f"{lemma}|{pos}"
+
+
+def ids_for_keys(keys, idmap):
+    """Per key (in list order): the id the frozen map gives it, None when the map has none or an earlier
+    key already claimed that id (first claimant wins). The only lookup: assign_ids builds on it and
+    persist_ids replays it to prove the saved map returns every shipped word its own id."""
+    used = set()
+    out = []
+    for key in keys:
+        old = idmap.get(key)
+        if old and old not in used:
+            used.add(old)
+            out.append(old)
+        else:
+            out.append(None)
+    return out
+
+
 def assign_ids(words, idmap):
     """Stable ids: a word whose "lemma|pos" is in the frozen id map keeps its
     id (first claimant wins); the rest get fresh ids above the map's maximum,
-    in list order. Returns the number of reused ids."""
-    used = set()
+    in list order. Records the key it looked up as word["_idkey"] (persist_ids
+    saves it, because a finishing pass may change lemma or pos afterwards).
+    Returns the number of reused ids."""
+    keys = [id_key(wd["lemma"], wd["pos"]) for wd in words]
+    found = ids_for_keys(keys, idmap)
     reused = 0
-    for wd in words:
-        old = idmap.get(f"{wd['lemma']}|{wd['pos']}")
-        if old and old not in used:
+    for wd, key, old in zip(words, keys, found):
+        wd["_idkey"] = key
+        if old:
             wd["id"] = old
-            used.add(old)
             reused += 1
     nxt = max([int(v[1:]) for v in idmap.values()] + [0]) + 1
     for wd in words:
@@ -710,21 +734,36 @@ def assign_ids(words, idmap):
     return reused
 
 
-def persist_ids(path, out_words):
-    """Add every shipped "lemma|pos" -> id the frozen map lacks (never rewrite an entry, never reuse an
-    id), so a word that took a fresh id keeps it on the next rebuild. Returns the number added."""
+def persist_ids(path, out_words, lookup_keys=None, write=True):
+    """Save the id map for the shipped words. A word's id is saved under its shipped "lemma|pos" and under
+    the key assign_ids looked it up with (lookup_keys, parallel to out_words; they differ when a finishing
+    pass changed the lemma or pos: hi nukta folding, fa ZWNJ, es -se, ja aux). Never rewrites an entry,
+    never reuses an id. Then replays the lookup over the saved map and raises ValueError when any shipped
+    word would not get its own id back (a fresh id on the next rebuild).
+    Returns (added keys, shipped keys another word already holds in the map)."""
     idmap = json.loads(path.read_text()) if path.exists() else {}
-    taken = set(idmap.values())
+    lookup_keys = lookup_keys or [id_key(wd["lemma"], wd["pos"]) for wd in out_words]
     added = 0
-    for wd in out_words:
-        key = f"{wd['lemma']}|{wd['pos']}"
-        if key not in idmap and wd["id"] not in taken:
+    held = []
+    # lookup keys first: a shipped key that equals another word's lookup key must not claim it
+    for key, wd in zip(lookup_keys, out_words):
+        if key not in idmap:
             idmap[key] = wd["id"]
-            taken.add(wd["id"])
             added += 1
-    if added:
+    for wd in out_words:
+        key = id_key(wd["lemma"], wd["pos"])
+        if key not in idmap:
+            idmap[key] = wd["id"]
+            added += 1
+        elif idmap[key] != wd["id"]:
+            held.append(key)
+    got = ids_for_keys(lookup_keys, idmap)
+    bad = [(k, w["id"], g) for k, w, g in zip(lookup_keys, out_words, got) if g != w["id"]]
+    if bad:
+        raise ValueError(f"{len(bad)} id map keys would not round-trip (key, shipped id, id the map gives): {bad[:5]}")
+    if added and write:
         path.write_text(json.dumps(idmap, ensure_ascii=False, indent=0, sort_keys=True) + "\n")
-    return added
+    return added, held
 
 
 def load_gloss_display(repo, path="tools/gloss_display.json"):

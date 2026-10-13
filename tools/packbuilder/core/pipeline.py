@@ -17,7 +17,7 @@ from .sentences import build_sentences
 from .sources import ensure_downloaded, stage_corpus, audio_recorders
 from .tag import stage_tag, truecase_stats, iter_tagged, tag_rows
 from .util import STATS, log, stat, dump_json, write_json
-from .words import persist_ids, build_words, apply_gloss_display, split_alt_forms, sort_by_rank, check_gloss_overrides
+from .words import id_key, persist_ids, build_words, apply_gloss_display, split_alt_forms, sort_by_rank, check_gloss_overrides
 
 STAGES = ["all", "corpus", "tag", "lex", "freq", "words", "sentences", "final"]
 WORD_FIELDS = ("id", "w", "lemma", "pos", "en", "lv", "rank", "pron", "alt", "forms", "bare", "g")
@@ -248,13 +248,28 @@ def run(env, stage="all", check_remote=False):
     words, records, top3000, sentences, users, primary = finish_words(env, ctx, words, records, top3000)
     out_words = [{k: w[k] for k in WORD_FIELDS if k in w} for w in words]
     apply_gloss_display(sp.repo, out_words, sp.gloss_display_file)    # display-only senses, after everything else
+    # both id maps are proven before anything is written: a key that would not give the shipped id back on
+    # the next rebuild stops the build here, not at a learner's lost progress
+    lookup_keys = [w.get("_idkey") or id_key(w["lemma"], w["pos"]) for w in words]
+    if "sentence_issued" in ctx:
+        bad = sentence_ids.verify([r["t"] for r in sentences], [r["id"] for r in sentences],
+                                  ctx["sentence_issued"], ctx["sentence_legacy"])
+        if bad:
+            raise SystemExit(f"ERROR sentence ids: {len(bad)} sentences changed text after their id was assigned "
+                             f"(the map would give them fresh ids on the next build): {bad[:5]}")
+    try:
+        persist_ids(Path(sp.repo) / sp.id_map_file, out_words, lookup_keys, write=False)
+    except ValueError as e:
+        raise SystemExit(f"ERROR word ids: {e}")
     write_json(env.pack / "words.json", out_words)     # -rsi gate may revert entries
     units = write_characters(env, out_words, sentences)
     write_json(env.pack / "sentences.json", sentences)
     repo = Path(sp.repo)
     if "sentence_issued" in ctx:
         sentence_ids.save(repo / sp.sentence_id_map_file, ctx["sentence_issued"])
-    stat("word_ids_added_to_map", persist_ids(repo / sp.id_map_file, out_words))
+    added, held = persist_ids(repo / sp.id_map_file, out_words, lookup_keys)
+    stat("word_ids_added_to_map", added)
+    stat("word_id_shipped_keys_held_by_other_ids", held)
     pack_json = build_pack_json(env, words, ctx["raw_upos"])
     pack_json.update(characters_pack_fields(sp, units))
     pack_json.update(script_pack_fields(sp, write_script(env, out_words)))

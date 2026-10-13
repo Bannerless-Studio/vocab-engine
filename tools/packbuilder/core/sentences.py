@@ -530,15 +530,11 @@ def build_sentences(env, ctx, words, top3000):
     n_examples = 0
     users = set()
     texts = [sp.clean_sentence_text(rows[sid][1]) for sid in sel]
-    issued = sentence_ids.load(Path(sp.repo) / sp.sentence_id_map_file if sp.repo else None)
-    out_ids, new_issued, id_stats = sentence_ids.assign(texts, issued)
-    ctx["sentence_issued"] = new_issued    # written by pipeline.run with sentences.json
-    stat("sentence_ids", {"kept": id_stats["kept"], "new": id_stats["new"], "retired": id_stats["retired"]})
     for i, sid in enumerate(sel):
         n, remoto, aud, maxlv, links = info[sid]
         lv = top_lv if remoto else maxlv
         row = rows[sid]
-        rec = {"id": out_ids[i], "t": texts[i], "en": row[3], "lv": lv,
+        rec = {"id": None, "t": texts[i], "en": row[3], "lv": lv,
                "words": links}
         if row[4] is not None:
             rec["audio"] = f"https://tatoeba.org/audio/download/{row[4]}"
@@ -553,6 +549,15 @@ def build_sentences(env, ctx, words, top3000):
         sentences.append(rec)
         if row[2]:
             users.add(row[2])
+    # ids last among the text-changing steps: sentence_fields (fa display_sentence) rewrites rec["t"], and
+    # the map keys on the text the pack ships. The cleaned text is the key earlier maps were written with.
+    issued = sentence_ids.load(Path(sp.repo) / sp.sentence_id_map_file if sp.repo else None)
+    out_ids, new_issued, id_stats = sentence_ids.assign([r["t"] for r in sentences], issued, legacy=texts)
+    for rec, sid_ in zip(sentences, out_ids):
+        rec["id"] = sid_
+    ctx["sentence_issued"], ctx["sentence_legacy"] = new_issued, texts    # written by pipeline.run with sentences.json
+    stat("sentence_ids", {"kept": id_stats["kept"], "new": id_stats["new"], "retired": id_stats["retired"],
+                          "rekeyed": id_stats["rekeyed"]})
     # -rsi label only when the pack's own sentences show it: >=60% of the
     # sentences linking the word carry a reflexive clitic on it; otherwise the
     # base infinitive with a combined gloss
