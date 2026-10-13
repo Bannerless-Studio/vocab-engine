@@ -1401,7 +1401,15 @@ const EXAM_WORD_KIND = { hearS: "hear", gap: "read", readS: "read" };
 const critMap = prog => prog && isObj(prog.crit) ? prog.crit : {};
 const critHas = (prog, id) => critMap(prog)[id] !== undefined;
 function critAdd(prog, id, sn){ if(!prog || typeof id !== "string") return false; if(!isObj(prog.crit)) prog.crit = {}; if(prog.crit[id] !== undefined) return false; prog.crit[id] = Number.isFinite(sn) ? sn : 0; return true; }
-function critRemove(prog, id){ if(!prog || !isObj(prog.crit) || prog.crit[id] === undefined) return false; delete prog.crit[id]; if(!Object.keys(prog.crit).length) delete prog.crit; return true; }
+// A word that leaves prog.crit is noted as cleared (c) on the last history entry of the exam that added it (a), so the
+// unlock latches: a later re-add of that word does not lock the next exam again (owner review 2026-10-13, F1).
+function examNoteCleared(prog, id){
+  if(!isObj(prog.exam)) return;
+  Object.keys(prog.exam).forEach(k => { const e = prog.exam[k]; if(!isObj(e) || !Array.isArray(e.h) || !e.h.length) return;
+    const last = e.h[e.h.length - 1];
+    if(isObj(last) && Array.isArray(last.a) && last.a.includes(id) && !(Array.isArray(last.c) && last.c.includes(id))) last.c = (Array.isArray(last.c) ? last.c : []).concat([id]); });
+}
+function critRemove(prog, id){ if(!prog || !isObj(prog.crit) || prog.crit[id] === undefined) return false; delete prog.crit[id]; if(!Object.keys(prog.crit).length) delete prog.crit; examNoteCleared(prog, id); return true; }
 // Oldest-added first (session, then id): a word keeps its turn instead of jittering between plans.
 function critWords(prog, words){ const m = critMap(prog); return (words || []).filter(w => w && m[w.id] !== undefined).sort((a, b) => (m[a.id] - m[b.id]) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)); }
 // The mark path: a right answer that leaves the word known (every askable pair at its bar) retires it.
@@ -1420,7 +1428,27 @@ function examLevels(words, pack, prog, units){
     return levelSettled(learned.length, learned.filter(w => wordKnownX(r[w.id], w, pack, prog, bw)).length); });
 }
 const examResult = (prog, lv) => { const e = prog && isObj(prog.exam) ? prog.exam[String(lv)] : null; return isObj(e) && Number.isInteger(e.r) && Number.isInteger(e.n) ? e : null; };
-function examRecord(prog, lv, r, n, day){ if(!isObj(prog.exam)) prog.exam = {}; prog.exam[String(lv)] = { r, n, d: String(day) }; return prog.exam[String(lv)]; }
+// Repeat exams (docs/PACK_SCHEMA.md "Level exam and critical set", repeat exams; owner 2026-10-12): a level at position
+// EXAM_NUMBERED or later keeps its whole history, h = [{ r, n, d, a?, ok? }] oldest first (a: the critical words that exam
+// added, ok: a pass), k = exams taken, p = ISO day of the first pass. Earlier levels keep the single exam { r, n, d }.
+const EXAM_NUMBERED = 3, EXAM_REPEAT_FROM = 2, EXAM_PASS = 0.85;
+const examNumbered = (pack, lv) => levelIds(pack).indexOf(String(lv)) + 1 >= EXAM_NUMBERED;
+const examHist = e => !isObj(e) ? [] : Array.isArray(e.h) ? e.h.filter(isObj) : Number.isInteger(e.r) && Number.isInteger(e.n) ? [{ r: e.r, n: e.n, d: e.d }] : [];
+const examCount = (prog, lv) => { const e = examResult(prog, lv); return e ? (Number.isInteger(e.k) ? e.k : 1) : 0; };
+// The critical words the last exam added that are still critical: the next exam waits while any is (0: open).
+function examLock(prog, lv){ const h = examHist(examResult(prog, lv)), last = h[h.length - 1]; return last && Array.isArray(last.a) ? last.a.filter(id => !(Array.isArray(last.c) && last.c.includes(id))).length : 0; }
+// o: { numbered, added, pass } for a numbered level; without it the record is the single exam as before.
+function examRecord(prog, lv, r, n, day, o){
+  if(!isObj(prog.exam)) prog.exam = {};
+  const key = String(lv), d = String(day), old = prog.exam[key];
+  if(!o || !o.numbered){ prog.exam[key] = { r, n, d }; return prog.exam[key]; }
+  const a = (Array.isArray(o.added) ? o.added : []).filter(id => critHas(prog, id));
+  const it = Object.assign({ r, n, d }, o.pass ? { ok: 1 } : {}, a.length ? { a: a.slice() } : {});
+  const h = examHist(examResult(prog, lv)).concat([it]), e = { r, n, d, h, k: h.length };
+  const p = (isObj(old) && old.p) || (o.pass ? d : null);
+  if(p) e.p = p;
+  prog.exam[key] = e; return e;
+}
 // The lowest level offered that has no exam yet: Today's one line, until the learner has opened the Test tab since it
 // appeared (prog.exam.seen = that level, noted when Test renders; a new level offered later shows again).
 function examReady(words, pack, prog, units){ const ls = examLevels(words, pack, prog, units).filter(lv => !examResult(prog, lv)); return ls.length ? ls[0] : null; }
@@ -1436,25 +1464,66 @@ function examMissWords(prog, s, lv, words, pack, capLeft){
   const cands = [...new Set((s && s.words) || [])].map(id => by.get(id)).filter(w => w && String(w.lv) === String(lv) && !critHas(prog, w.id) && !wordKnown(r[w.id], w, pack));
   return cands.map(w => ({ w, s: isObj(r[w.id]) ? r[w.id].s || 0 : 0 })).sort((a, b) => a.s - b.s || (a.w.id < b.w.id ? -1 : a.w.id > b.w.id ? 1 : 0)).slice(0, n).map(x => x.w.id);
 }
+// Pass (owner 2026-10-12): a numbered level's retake (exam 2 or later) at EXAM_PASS or more, with no critical word of that
+// level outstanding. Pass effect: every word of the level with a record and no critical flag whose wm or ws streak is below
+// PAIR_HOLD gets that pair set to PAIR_HOLD, answered this session (pairEntry shape), so bareByPair hides its reading. Pairs
+// at PAIR_HOLD or above stay as they are; sm and production pairs are never touched; words without a record are not
+// created. A character unit whose first word is in the level gets the same for its own wm stream.
+const examCritLeft = (prog, words, lv) => (words || []).filter(w => w && String(w.lv) === String(lv) && critHas(prog, w.id)).map(w => w.id);
+const examPasses = (prog, words, lv, r, n, k) => n > 0 && k >= EXAM_REPEAT_FROM && r / n + 1e-9 >= EXAM_PASS && !examCritLeft(prog, words, lv).length;
+function examPassPlan(prog, words, lv, units, sn){
+  const rec = (prog && prog.w) || {}, cr = charRecs(prog), out = [], inLv = new Set();
+  (words || []).forEach(w => { if(!w || String(w.lv) !== String(lv)) return; inLv.add(w.id);
+    if(critHas(prog, w.id) || !isObj(rec[w.id])) return;
+    const pairs = ["wm", "ws"].filter(p => pairState(rec[w.id], p).s < PAIR_HOLD);
+    if(pairs.length) out.push({ w: w.id, c: null, pairs }); });
+  (units || []).forEach(u => { const wid = u && (u.words || [])[0];
+    if(wid == null || !inLv.has(wid) || critHas(prog, wid) || !isObj(cr[u.id])) return;
+    if(pairState(cr[u.id], "wm").s < PAIR_HOLD) out.push({ w: wid, c: u.id, pairs: ["wm"] }); });
+  return out;
+}
+function examPassApply(prog, plan, sn){
+  plan.forEach(x => { const t = x.c != null ? charRecs(prog)[x.c] : prog.w[x.w]; if(!isObj(t.p)) t.p = {};
+    x.pairs.forEach(p => { t.p[p] = [PAIR_HOLD, sn > 0 ? sn : 0]; }); });
+  return new Set(plan.map(x => x.w)).size;
+}
 function examAgo(e, today){
   const d = isoDayNumber(today) - isoDayNumber(e && e.d);
   return !isFinite(d) ? "" : d <= 0 ? "today" : d === 1 ? "yesterday" : `${d} days ago`;
 }
 // o.typedOk(word): a typed meaning item fits; o.gapOk(sentence): a blank can be placed; o.canHear(word).
 // Returns [{ kind, word }] / [{ kind, s }], shuffled; kinds hearS / gap / readS / typeM / recall / hear / read.
+// Cumulative draw (owner 2026-10-12): exam 2 and later on a numbered level draw 14 of 20 items from the level (EXAM_MIX_LEVEL,
+// the mix scaled to 70%) and 6 from the earlier levels (EXAM_MIX_EARLIER). Earlier items take the lowest pair streak
+// first (wm; ties by the seeded shuffle) and never a critical word; a sentence with a critical word is not drawn. Earlier
+// slots the earlier levels cannot fill come from the level, so the exam stays 20 items. Exam 1 and every other level: EXAM_MIX.
+const EXAM_MIX_LEVEL = [["hearS", 4], ["gap", 4], ["readS", 3], ["typeM", 2], ["recall", 1]];
+const EXAM_MIX_EARLIER = [["hearS", 2], ["gap", 1], ["readS", 1], ["typeM", 1], ["recall", 1]];
 function examPlan(words, sentences, pack, prog, lv, rng, o){
   const r = rng || Math.random, opt = o || {};
+  const cum = opt.k >= EXAM_REPEAT_FROM && examNumbered(pack, lv);
+  const used = new Set();
+  const picker = (wordList, sentList) => {
+    let wi = 0;
+    const takeS = fit => { const s = sentList.find(x => !used.has(x) && (!fit || fit(x))); if(s) used.add(s); return s || null; };
+    const wordItem = kind => { const w = wordList[wi++]; if(!w) return null;
+      const k = kind === "typeM" ? (typeof opt.typedOk === "function" && opt.typedOk(w) ? "typeM" : "recall") : kind === "hear" && typeof opt.canHear === "function" && !opt.canHear(w) ? "read" : kind;
+      return { kind: k, word: w }; };
+    return kind => { const s = EXAM_SENT_KINDS.includes(kind) ? takeS(kind === "gap" && typeof opt.gapOk === "function" ? opt.gapOk : null) : null;
+      return s ? { kind, s } : wordItem(EXAM_WORD_KIND[kind] || kind); };
+  };
   const ws = shuffle((wordsByLevel(words, pack)[String(lv)] || []).slice(), r), ss = shuffle((sentences || []).filter(s => s && String(s.lv) === String(lv)), r);
-  const used = new Set(); let wi = 0;
-  const takeS = fit => { const s = ss.find(x => !used.has(x) && (!fit || fit(x))); if(s) used.add(s); return s || null; };
-  const wordItem = kind => { const w = ws[wi++]; if(!w) return null;
-    const k = kind === "typeM" ? (typeof opt.typedOk === "function" && opt.typedOk(w) ? "typeM" : "recall") : kind === "hear" && typeof opt.canHear === "function" && !opt.canHear(w) ? "read" : kind;
-    return { kind: k, word: w }; };
-  const out = [];
-  EXAM_MIX.forEach(([kind, n]) => { for(let i = 0; i < n; i++){
-    const s = EXAM_SENT_KINDS.includes(kind) ? takeS(kind === "gap" && typeof opt.gapOk === "function" ? opt.gapOk : null) : null;
-    const it = s ? { kind, s } : wordItem(EXAM_WORD_KIND[kind] || kind);
-    if(it) out.push(it); } });
+  const lvPick = picker(ws, ss), out = [];
+  (cum ? EXAM_MIX_LEVEL : EXAM_MIX).forEach(([kind, n]) => { for(let i = 0; i < n; i++){ const it = lvPick(kind); if(it) out.push(it); } });
+  if(cum){
+    const ids = levelIds(pack), early = new Set(ids.slice(0, Math.max(0, ids.indexOf(String(lv)))));
+    const rec = (prog && prog.w) || {}, streak = id => pairState(rec[id], "wm").s;
+    const ew = shuffle((words || []).filter(w => w && early.has(String(w.lv)) && isObj(rec[w.id]) && !critHas(prog, w.id)), r).sort((a, b) => streak(a.id) - streak(b.id));
+    const sStreak = s => (s.words || []).reduce((m, id, i) => { const v = streak(id); return i ? Math.min(m, v) : v; }, 0);
+    const es = shuffle((sentences || []).filter(s => s && early.has(String(s.lv)) && (s.words || []).length && (s.words || []).every(id => isObj(rec[id])) && !(s.words || []).some(id => critHas(prog, id))), r).sort((a, b) => sStreak(a) - sStreak(b));
+    const earlyPick = picker(ew, es);
+    EXAM_MIX_EARLIER.forEach(([kind, n]) => { for(let i = 0; i < n; i++){ const it = earlyPick(kind) || lvPick(kind); if(it) out.push(it); } });
+  }
   return shuffle(out, r);
 }
 // Before the first record lands in a records-less level, its counter prefix gets placement's
@@ -4751,7 +4820,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, patternFirstMeeting, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
   PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
-  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, EXAM_SIZE, EXAM_MIX, CRIT_SLOTS, critMap, critHas, critAdd, critRemove, critWords, critSettle, critPick, critPre, examLevels, examResult, examRecord, examReady, examSeen, noteExamSeen, EXAM_SENT_CRIT, EXAM_CRIT_MAX, examMissWords, examAgo, examPlan, seededRng, hashSeed, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
+  markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, EXAM_SIZE, EXAM_MIX, CRIT_SLOTS, critMap, critHas, critAdd, critRemove, critWords, critSettle, critPick, critPre, examLevels, examResult, examRecord, examReady, examSeen, noteExamSeen, EXAM_SENT_CRIT, EXAM_CRIT_MAX, examMissWords, examAgo, examPlan, EXAM_MIX_LEVEL, EXAM_MIX_EARLIER, EXAM_NUMBERED, EXAM_REPEAT_FROM, EXAM_PASS, examNumbered, examHist, examCount, examLock, examCritLeft, examPasses, examPassPlan, examPassApply, seededRng, hashSeed, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, levelPosition, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
