@@ -46,7 +46,16 @@ function genericFlags(pack, lang){
 // ft from the word's frequency rank, the rule of core/enrich.py assign_tiers: ambient rank <= 100; per level the
 // highest-rank share of the non-ambient words are peripheral (ties by id), the rest core; a word with no rank is core.
 // port_sites_checks asserts it equals the enrich output on all 13 sites (w35-review L2).
-function withTiers(pack, words){
+// tools/tiers_overrides.json ({word or id: "ambient"|"core"|"peripheral"}) wins over the rule without backfill.
+const TIER_NAMES = { ambient: 0, core: 1, peripheral: 2 };
+function tierOverrides(repo, words){
+  const f = path.join(repo, "tools", "tiers_overrides.json");
+  if(!fs.existsSync(f)) return {};
+  const raw = JSON.parse(fs.readFileSync(f, "utf8")), out = {};
+  words.forEach(w => { for(const k of [w.id, w.w]) if(k in raw) out[w.id] = TIER_NAMES[raw[k]]; });
+  return out;
+}
+function withTiers(pack, words, overrides){
   const ids = pack.levels.map(l => String(l.id)), out = clone(words);
   const ranked = w => Number.isInteger(w.rank);
   out.forEach(w => { w.ft = ranked(w) && w.rank <= AMBIENT_RANK ? 0 : 1; });
@@ -55,6 +64,7 @@ function withTiers(pack, words){
     const k = Math.floor((PERIPHERAL_SHARE[i] !== undefined ? PERIPHERAL_SHARE[i] : 0.4) * lw.length + 0.5);
     lw.filter(w => w.ft === 1 && ranked(w)).sort((a, b) => b.rank - a.rank || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)).slice(0, k).forEach(w => { w.ft = 2; });
   });
+  if(overrides) out.forEach(w => { if(w.id in overrides) w.ft = overrides[w.id]; });
   return out;
 }
 // a unit's ft is the lowest of its words (core/enrich.py)
@@ -63,7 +73,7 @@ function withUnitTiers(units, words){
   return units && clone(units).map(u => { const t = u.words.filter(i => i in ft).map(i => ft[i]); return Object.assign(u, { ft: t.length ? Math.min(...t) : 1 }); });
 }
 function withG(site){
-  const words = withTiers(site.pack, site.words);
+  const words = withTiers(site.pack, site.words, tierOverrides(path.dirname(site.dir), site.words));
   return { pack: Object.assign(clone(site.pack), genericFlags(site.pack, site.lang)), words, characters: withUnitTiers(site.characters, words) };
 }
 
@@ -253,4 +263,4 @@ return {
   } finally { Math.random = real; }
 }
 
-module.exports = { SIBLINGS, makeFakeDom, memStore, loadSibling, genericFlags, withTiers, withG, legacySeed, playSessions, mulberry32, clone };
+module.exports = { SIBLINGS, makeFakeDom, memStore, loadSibling, genericFlags, withTiers, tierOverrides, withG, legacySeed, playSessions, mulberry32, clone };

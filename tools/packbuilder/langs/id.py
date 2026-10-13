@@ -208,7 +208,7 @@ FORCED_IDIOMS = {tuple(p.split()) for p in (
     "salah paham", "tanah air", "negara bagian", "sumber daya", "latar belakang", "kata ganti", "bulan madu")}
 # reduplications that are words of their own, not a plural/intensive of the
 # root (satu-satunya "the only one" is not satu "one"); kaikki entries add more
-LEXICAL_REDUP = {"satu-satu"}
+LEXICAL_REDUP = {"satu-satu", "sampai-sampai"}
 REDUP_KPOS_GROUP = {"noun": "NOUN", "verb": "VERB", "adj": "ADJ", "adv": "ADV"}
 # subject pronouns before an object-voice verb ("yang pernah kamu alami")
 AGENT_PRONOUNS = {"aku", "saya", "kamu", "kau", "engkau", "dia", "ia", "mereka", "kami", "kita", "anda", "beliau"}
