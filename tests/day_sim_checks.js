@@ -9,9 +9,9 @@
 // day planner met were decided one by one (TODO.md DONE 2026-10-13 "day_sim INFO thresholds"): each one the pairs planner
 // guarantees is a check below, with its derivation; the rest were deleted with a one-line reason at their old site.
 // Passages are left out: the Read stage drills no units.
-// Run: node tests/day_sim_checks.js [--sessions N] [--quiet] [--pack <dir>]
+// Run: node tests/day_sim_checks.js [--sessions N] [--quiet] [--pack <dir>]  (SIM_TYPED_WRONG=1: the pre-sent-miss answer model, typed sentence blanks always missed, for before/after tables)
 // --pack <dir> (probe, not a gate): runs the scenario sections (A, B, pause, rollover, voiceless, backlog, rotation) on another
-// pack checkout's pack/ (../italian/pack ...); the zh-only sections are skipped and a failed check does not set the exit code.
+// pack checkout's pack/ (../italian/pack ...); the zh-only sections are skipped and a failed check does not set the exit code, except the gate checks (every miss comes back, sentences included, and the answer model).
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -45,10 +45,12 @@ try {
   const src = cp.execSync(`git -C "${ROOT}" show ${MAIN_PIN}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] });
   const f = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "daysim-")), `core_${MAIN_PIN}.js`); fs.writeFileSync(f, src); OLD = require(f);
 } catch(e){ OLD = null; }
-let fails = 0, passes = 0;
-function check(name, cond){
+let fails = 0, passes = 0, gateFails = 0;
+// gate (sent-miss): in --pack probe mode a failed check does not set the exit code, except a gate check: "every miss comes back" (the
+// sentence misses of it/es stayed pending while the probe exited 0, because the sim could not type a sentence blank).
+function check(name, cond, gate){
   if(cond){ passes++; console.log(`PASS  ${name}`); }
-  else { fails++; console.log(`FAIL  ${name}`); }
+  else { fails++; if(gate) gateFails++; console.log(`FAIL  ${name}`); }
 }
 
 // ------------------------------------------------------------------ fake DOM (copied from session_resume_checks.js)
@@ -200,14 +202,20 @@ function unitAlso(it, prog, pack){
 const withAlso = drilled => drilled.flatMap(d => d.also ? [d, Object.assign({}, d, { key: d.also, kind: "type" })] : [d]);
 // Harder kinds after easier ones: an item is "harder" than what was done when its rank is higher.
 const typedAnswer = it => {
+  // A typed sentence blank (gapType) is answered by typing the blanked word; before sent-miss this returned null, so every typed blank was a
+  // first-try miss on it/es/... and the sim's 85% model never applied to them.
+  if(!process.env.SIM_TYPED_WRONG && String(it.key).startsWith("s:") && it.gapWord && BY_ID[it.gapWord]) return BY_ID[it.gapWord].w;
   const w = BY_ID[String(it.key).slice(2)];
   if(!w || !String(it.key).startsWith("w:")) return null;
   return it.label === "Type the pinyin" ? w.pron : it.label === "Type the meaning" ? VC.gloss(w) : w.w;
 };
+// Typed items the model meant to answer right but has no answer for (a miss it did not intend): checked at the end, must stay 0.
+const UNANSWERABLE = {};
 function answer(api, right){
   const it = api.getCur();
   if(it.kind === "type"){
     const v = right ? typedAnswer(it) : null;
+    if(right && !v){ const k = String(it.key)[0] + ":" + (it.label || "?"); UNANSWERABLE[k] = (UNANSWERABLE[k] || 0) + 1; }
     api.el("tin").value = v || "zzz not it"; api.el("submit").click(); return;
   }
   const btns = api.el("o").children;
@@ -318,7 +326,8 @@ function metrics(seedP, pack, day, K){
   const prodKeys = [...new Set(prodMiss.map(d => d.key))];
   const prodLost = prodKeys.filter(k => { const last = Math.max(...prodMiss.filter(d => d.key === k).map(pos)); return !X.some(d => d.key === k && pos(d) > last && VC.DAY_PRODUCTION.includes(d.kind)); });
   const lostDetail = lostMiss.map(k => X.filter(d => d.key === k).map(d => `${k} s${d.sess + 1}/${d.step} ${d.kind} ${d.ok ? "ok" : "MISS"}`).join(", "));
-  return { prodKeys, prodLost, lostDetail, why, per, overlap, missKeys, lostMiss, weakStarved: weak.filter(k => !touched.has(k)), staleStarved: stale.filter(k => !touched.has(k)),
+  const sentKeys = missKeys.filter(k => k[0] === "s"), sentLost = lostMiss.filter(k => k[0] === "s"), sentProdKeys = prodKeys.filter(k => k[0] === "s"), sentProdLost = prodLost.filter(k => k[0] === "s");
+  return { sentKeys, sentLost, sentProdKeys, sentProdLost, prodKeys, prodLost, lostDetail, why, per, overlap, missKeys, lostMiss, weakStarved: weak.filter(k => !touched.has(k)), staleStarved: stale.filter(k => !touched.has(k)),
     touched: touched.size, avail, total: drilled.length,
     sameKindAll: per.slice(1).reduce((a, p) => a + p.sameKind, 0), itemsAfter1: per.slice(1).reduce((a, p) => a + p.n, 0) };
 }
@@ -328,6 +337,7 @@ function report(label, m, learnNew){
   if(!QUIET) m.per.forEach((p, i) => console.log(`    s${i + 1}: ${p.n} items, already right today: same kind ${pct(p.sameKind, p.n)}, any kind ${pct(p.anyKind, p.n)}; units ${p.units.size}, shared with s1 ${pct(m.overlap[i] * p.units.size, p.units.size)}; new ${learnNew[i]}`));
   if(WHY) console.log("    same-kind repeats by stage:", JSON.stringify(m.why), "misses never back:", JSON.stringify(m.lostDetail));
   console.log(`    production misses (s1..s${N_SESSIONS - 1}): ${m.prodKeys.length} units, not back in production: ${m.prodLost.length}${WHY && m.prodLost.length ? " " + m.prodLost.join(",") : ""}`);
+  console.log(`    sentence misses (s1..s${N_SESSIONS - 1}): ${m.sentKeys.length} units, never back: ${m.sentLost.length}`);
   console.log(`    missed today (s1..s${N_SESSIONS - 1}): ${m.missKeys.length} units, never back: ${m.lostMiss.length}; due weak never drilled: ${m.weakStarved.length}/${K_DUE}; mastered-stale never drilled: ${m.staleStarved.length}/${K_DUE}`);
 }
 const K_DUE = 30, ROT_DAYS = 14, ROT_K = 60;
@@ -547,7 +557,7 @@ function missesCarried(drilled0){
       const seedP = seedProg(pack, sc.words, sc.units, 11);
       const day = await playDay(pack, seedP, N_SESSIONS, 5);
       const m = metrics(seedP, pack, day, K_DUE);
-      if(WHY && tag === "on") m.lostMiss.forEach(k => console.log("    lost", k, JSON.stringify(VC.dayLog(day.prog, DAY).a[k]), JSON.stringify(day.prog.w[k.slice(2)] || day.prog.s[k.slice(2)] || day.prog.chars.c[k.slice(2)]), "n", VC.dayLog(day.prog, DAY).n));
+      if(WHY && tag === "on") m.lostMiss.forEach(k => console.log("    lost", k, "ageout-next-session:", (() => { const e = VC.dayLog(day.prog, DAY).a[k]; return !!(e && Array.isArray(e.mk) && e.mk.length && !VC.dayPending(e, VC.daySn(day.prog) + 1)); })(), JSON.stringify(VC.dayLog(day.prog, DAY).a[k]), JSON.stringify(day.prog.w[k.slice(2)] || day.prog.s[k.slice(2)] || day.prog.chars.c[k.slice(2)]), "n", VC.dayLog(day.prog, DAY).n));
       report("dayAware", m, day.learnNew);
       res[tag] = { m, day, seed: seedP };
     }
@@ -555,7 +565,7 @@ function missesCarried(drilled0){
     // Deleted: same-kind repeats of items right earlier today <= 2%. Under pairs a pair below 3 is asked again in its production direction
     // (core.js pairKind) until a production answer takes it to 3, so the same kind repeats by design (zh 95/600 and 46/600 here;
     // it, ja, es 14% to 30%). What pairs promises is no (item, pair) twice in one session, in-drill retries aside: tests/pairs_checks.js [7].
-    check(`dayAware: every unit missed in sessions 1..${N_SESSIONS - 1} comes back the same day (${on.missKeys.length - on.lostMiss.length}/${on.missKeys.length})`, on.lostMiss.length === 0);
+    check(`dayAware: every unit missed in sessions 1..${N_SESSIONS - 1} comes back the same day (${on.missKeys.length - on.lostMiss.length}/${on.missKeys.length}; sentences ${on.sentKeys.length - on.sentLost.length}/${on.sentKeys.length})`, on.lostMiss.length === 0 && on.sentKeys.length > 0, true);
     // Deleted: every production miss comes back in a production kind the same day. A missed pair is at 0 and comes back next session in the
     // kind it was missed in when that kind belongs to the pair, else the production direction (pairKind), but the Listen plan only offers
     // the choice kind (hear), which answers a typed sm miss as a recognition ask (zh B 41/42, ja B 34/42, it 25/26 and 30/31); the pair
@@ -603,7 +613,7 @@ function missesCarried(drilled0){
     // Deleted: paused Review >= 20 (A) / 36 (B) items per session. Under pairs a paused Review keeps its normal size (owner 2026-10-06, PACK_SCHEMA
     // pauseNew "Review size"; pairPlan ignores o.extra), so the 36 floor of the growth the pairs planner removed cannot be met; the size is
     // checked below on the large pool. Also deleted: same-kind repeats <= 2% (zh A 118/442, B 57/442; it, ja, es 23% to 39%), as for dayAware above.
-    check(`pause ${sc.name.slice(0, 1)}: every miss of sessions 1..${N_SESSIONS - 1} comes back the same day (${m.missKeys.length - m.lostMiss.length}/${m.missKeys.length}), production misses in production (${m.prodKeys.length - m.prodLost.length}/${m.prodKeys.length}), in a settling kind (${mc.n - mc.lost.length}/${mc.n})`, m.lostMiss.length === 0 && m.prodLost.length === 0 && mc.lost.length === 0 && mc.n > 0);
+    check(`pause ${sc.name.slice(0, 1)}: every miss of sessions 1..${N_SESSIONS - 1} comes back the same day (${m.missKeys.length - m.lostMiss.length}/${m.missKeys.length}; sentences ${m.sentKeys.length - m.sentLost.length}/${m.sentKeys.length}), sentence production misses in production (${m.sentProdKeys.length - m.sentProdLost.length}/${m.sentProdKeys.length}), in a settling kind (${mc.n - mc.lost.length}/${mc.n})`, m.lostMiss.length === 0 && m.sentKeys.length > 0 && m.sentProdLost.length === 0 && mc.lost.length === 0 && mc.n > 0, true);
   }
   // Review M2 (fb4-pause review): a small pool must not pad the paused Review with same-day
   // repeats. Review-step items whose key and kind were answered right earlier that day, per session.
@@ -648,7 +658,7 @@ function missesCarried(drilled0){
       if(WHY && tag === "on") console.log("    repeats:", rep.slice(0, 10).join("; "), "lost:", mc.lost.join("; "));
       if(tag === "on"){
         check(`rollover: prog.sn counts one per Today session (${run.prog.sn})`, run.prog.sn === N_SESSIONS);
-        check(`rollover: every miss of sessions 1-${N_SESSIONS - 1} comes back in a settling kind across midnight (${mc.n - mc.lost.length}/${mc.n}, sentences ${mc.sentN}; production misses back in production ${mc.prodN - mc.prodLost}/${mc.prodN})`, mc.n > 0 && mc.prodN > 0 && mc.sentN > 0 && mc.lost.length === 0);
+        check(`rollover: every miss of sessions 1-${N_SESSIONS - 1} comes back in a settling kind across midnight (${mc.n - mc.lost.length}/${mc.n}, sentences ${mc.sentN}; production misses back in production ${mc.prodN - mc.prodLost}/${mc.prodN})`, mc.n > 0 && mc.prodN > 0 && mc.sentN > 0 && mc.lost.length === 0, true);
         // Deleted: no same-kind repeat of an item right earlier that day or in the previous 2 sessions (zh 64/684, it 136/691, ja 193/852,
         // es 135/683). The window rule is the pre-pairs planner's tier 4; pairs repeats a pair's production direction until it is known (see above).
       }
@@ -672,13 +682,15 @@ function missesCarried(drilled0){
     // A unit's typed item (also) is planned for the unit, not for its word's carried miss (as in
     // [backlog]); with the typed share at 0.35 (fb10) one can follow the word's own item.
     const perSess = keys.map(k => Math.max(...[...Array(10).keys()].map(sn => new Set(run.drilled.filter(d => d.sess === sn && d.key === k && !d.also).map(d => d.step)).size)));
-    const heard = run.drilled.filter(d => d.kind === "hear").length;
-    console.log(`  pending carried misses after each session: ${pend.join(",")}; most stages one carried item appears in within a session: ${Math.max(...perSess)}; hear items shown: ${heard}`);
+    // A sentence with a recorded clip (s.audio) is playable with no voice (app.html canHearSentence): its hear item is legitimate (fr de fa ru).
+    const clip = new Set(SENTENCES.filter(x => x.audio).map(x => "s:" + x.id));
+    const heard = run.drilled.filter(d => d.kind === "hear" && !clip.has(d.key)).length;
+    console.log(`  pending carried misses after each session: ${pend.join(",")}; most stages one carried item appears in within a session: ${Math.max(...perSess)}; hear items shown with no clip: ${heard} (words ${run.drilled.filter(d => d.kind === "hear" && d.key[0] === "w").length}, sentences ${run.drilled.filter(d => d.kind === "hear" && d.key[0] === "s").length}${WHY ? " " + JSON.stringify(run.drilled.filter(d => d.kind === "hear" && d.key[0] === "s").slice(0, 6)) : ""})`);
     // Derivation: sentences keep dayPick, whose tier 0 is a pending miss with a kind this planner can settle; with no voice a cloze or a read
     // settles a hear miss (daySettles), so the 4 sentences are settled by session 2. Deleted for the 6 words: the pairs scheduler orders by
     // pair streak, not by the day log, and a real miss writes its pair to 0 (notePair); this seed writes only the day log, so a word with a
     // carried "hear" miss stayed pending in all 10 sessions on zh it ja es (pending 6 of 6). Carried word misses are checked in [backlog] with the pair at 0.
-    check(`voiceless: carried hear misses of the sentences settle within 2 sessions (pending ${pendS.slice(0, 3).join(",")})`, pendS[1] === 0 && pendS.every((n, i) => i < 2 || n === 0));
+    check(`voiceless: carried hear misses of the sentences settle within 2 sessions (pending ${pendS.slice(0, 3).join(",")})`, pendS[1] === 0 && pendS.every((n, i) => i < 2 || n === 0), true);
     check(`voiceless: no carried item is asked in more than one stage of a session (max ${Math.max(...perSess)}) and no hear item is shown (${heard})`, Math.max(...perSess) <= 1 && heard === 0);
   }
   console.log(`\n[backlog] scenario A with 60 carried misses (40 word, 12 character, 8 sentence)`);
@@ -713,7 +725,7 @@ function missesCarried(drilled0){
     console.log(`  with the pair at 0 too: carried misses asked in a settling kind within 4 sessions: ${back.length}/${keys.length}`);
     // Derivation: a pair at 0 is the lowest streak, so pairPick takes it in the next session in the kind it was missed in (pairKind), and the 4 sessions
     // hold 4 x (Review 20 + Recall 8 + Listen 10) pair slots for the 52 word and unit misses; the 8 sentence misses are dayPick tier 0.
-    check(`backlog: every carried miss is asked in a settling kind within 4 sessions (${back.length}/${keys.length})`, back.length === keys.length);
+    check(`backlog: every carried miss is asked in a settling kind within 4 sessions (${back.length}/${keys.length})`, back.length === keys.length, true);
   }
   console.log(`\n[rotation] scenario B, one Today session a day for ${ROT_DAYS} days: nothing eligible stays unseen without bound`);
   for(const [tag, pack] of [["on", PACK_ON]]){ // the dayAware-off control went with the flag
@@ -789,6 +801,10 @@ function missesCarried(drilled0){
     // the dayAware-off control (Review plans equal main before fb46) went with the flag
   }
   }
+  // The answer model must be able to answer what it means to answer right: a typed item with no answer was a miss nobody intended (before
+  // sent-miss every typed sentence blank on it/es/... was one, and looked like a planner defect: misses that never came back).
+  console.log(`\n[answer model] typed items the 85% model meant to answer right but could not: ${JSON.stringify(UNANSWERABLE)}`);
+  check(`answer model: every typed item it means to answer right has a typed answer (${Object.values(UNANSWERABLE).reduce((a, b) => a + b, 0)} without)`, Object.keys(UNANSWERABLE).length === 0, true);
   console.log(`\n${passes} passed, ${fails} failed`);
-  process.exit(fails && !PROBE ? 1 : 0);
+  process.exit((fails && !PROBE) || gateFails ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
