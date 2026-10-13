@@ -911,6 +911,13 @@ const sample = (arr, n) => Array.from({length:n}, ()=>arr[Math.floor(Math.random
   const join = parts => parts.map(x=>x.text).join("");
   const hitsOf = parts => parts.filter(x=>x.hit).map(x=>x.text);
 
+  // --- glossKey: a multi-word gloss keys with a separator, so no two distinct glosses key alike
+  {
+    const GP = { key:"t", name:"T", tts:"en-GB", levels:[{id:"A1",label:"A1"}], placement:[["A1",2]], typing:null, showPron:false, hasLessons:false, eta:{} };
+    check("glossKey: \"to be at\" and \"beat\" key apart (\"to be at\" keys as \"be at\")", VC.glossKey("to be at") !== VC.glossKey("beat") && VC.glossKey("to be at") === VC.glossKey("be at"));
+    check("checkGlossTyped: \"beat\" is no meaning of \"to be at\", and is the meaning of a word glossed \"beat\"; \"be at\" and the whole gloss are right", !VC.checkGlossTyped("beat", "to be at", GP) && VC.checkGlossTyped("beat", "beat", GP) && VC.checkGlossTyped("be at", "to be at", GP) && VC.checkGlossTyped("to be at", "to be at", GP));
+    check("checkGlossTyped: \"time(s)\" accepts \"time\" and \"times\" (a group written against its word is glued, not spaced)", VC.checkGlossTyped("time", "time(s)", GP) && VC.checkGlossTyped("times", "time(s)", GP));
+  }
   // --- script display props
   const zd = VC.scriptDisplay(PACK);
   check("zh script display: lang from tts ('zh'), LTR, no font/lineHeight overrides, no font link",

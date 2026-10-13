@@ -510,7 +510,7 @@ const tierProg = ws => { const pm = allProg(); ws.forEach(w => { VC.ensureChars(
     // pronInGloss: the gloss spells the toneless reading.
     const pig = WORDS.filter(w => w.pronInGloss).map(w => w.w).join(" ");
     const pigRule = WORDS.filter(w => ZG.pronInGloss(w.en, w.pron)).map(w => w.w).join(" ");
-    const toneless = w => VC.glossKey(w.pron.normalize("NFKD").replace(/\p{M}/gu, ""));
+    const toneless = w => VC.glossKey(w.pron.normalize("NFKD").replace(/\p{M}/gu, "")).replace(/\u0001/g, "");
     const indep = WORDS.filter(w => VC.glossParts(w.en).pieces.map(p => p.t).join(" ").normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/[^a-z0-9]+/g, "").includes(toneless(w)) && toneless(w).length >= 4).map(w => w.w).join(" ");
     check(`pronInGloss on exactly the words whose gloss spells the reading: ${pig} (rule: ${pigRule}; substring scan, readings of 4+ letters (蓝 "lan" sits in "plant"): ${indep}); 角 "${BY_W["角"].en}" and 长江 "${BY_W["长江"].en}" no longer do`,
       pig === pigRule && pig === "北京 元 人民币" && indep === pig && !BY_W["角"].pronInGloss && !BY_W["长江"].pronInGloss);

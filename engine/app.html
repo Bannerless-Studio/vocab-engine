@@ -3601,7 +3601,7 @@ function progressWire(xp, cp){
         $("impCancel").onclick = () => { box.style.display = "none"; box.innerHTML = ""; };
         return;
       }
-      const r = VC.applyImport(prog, text, PACK);
+      const r = VC.applyImport(prog, text, PACK, SUNITS);
       if(!r.ok){ showImportError(r.newer ? r.reason : "That doesn't look like valid exported progress for this pack: " + r.reason); return; }
       await applyImported(r.prog);
     }catch(e){
@@ -3853,7 +3853,7 @@ function legacyFailHTML(why){
     storeReadOnly = true;
     legacyFail = lm.fail;
   }
-  const b = VC.bootProg(got.value, PACK, !got.ok);
+  const b = VC.bootProg(got.value, PACK, !got.ok, SUNITS);
   if(b.readOnly){
     storeReadOnly = true;
     storageWarn("Saved progress could not be read (storage error), so this session is read-only: nothing you do now will be saved, and your stored progress is left untouched. Reload to try again.");

@@ -1187,7 +1187,7 @@ function dropUnknownSets(data, levelIdList){
 // An unusable stored value is returned as backupRaw so it is preserved before the defaults
 // replace it. readError: nothing is known about what is stored, so the session runs
 // read-only rather than risk a save clobbering real progress that merely failed to load.
-function bootProg(raw, pack, readError){
+function bootProg(raw, pack, readError, units){
   const out = { prog: defaultProg(pack), backupRaw: null, dropped: [], reason: null, readOnly: false };
   if(readError){ out.readOnly = true; out.reason = "storage read failed"; return out; }
   if(raw == null || raw === "") return out;
@@ -1198,10 +1198,11 @@ function bootProg(raw, pack, readError){
   if(!v.ok){ out.backupRaw = String(raw); out.reason = v.reason; return out; }
   out.dropped = d.dropped;
   out.prog = normalizeProg(d.data, pack);
+  dropRollbackShowPron(out.prog, pack, units);
   return out;
 }
 // theme and showPron survive an import that doesn't carry them.
-function applyImport(prev, text, pack){
+function applyImport(prev, text, pack, units){
   const p = parseStored(text);
   if(!p.ok) return p;
   // The file's v is its format version (PROG_VERSION); a newer file is refused whole, before any read.
@@ -1211,6 +1212,7 @@ function applyImport(prev, text, pack){
   const prog = normalizeProg(v.data, pack);
   if(v.data.theme === undefined) prog.theme = prev ? prev.theme : null;
   if(v.data.showPron === undefined && prev && prev.showPron !== undefined) prog.showPron = prev.showPron;
+  if(v.data.showPron === true) dropRollbackShowPron(prog, pack, units);
   // The characters mix preference survives an import that doesn't carry it, like theme.
   if(prog.chars && !(isObj(v.data.chars) && v.data.chars.mix !== undefined) && prev && isObj(prev.chars) && typeof prev.chars.mix === "boolean") prog.chars.mix = prev.chars.mix;
   return {ok:true, prog};
@@ -3757,6 +3759,15 @@ function showPronOn(pack, units, prog){
   if(prog && prog.showPron !== undefined) return prog.showPron !== false;
   return !(pronUntilPrimerOn(pack) && scriptPrimerDone(pack, units, prog));
 }
+// A pre-fb45 build appends showPron: true on every save; on a script pack with the primer still
+// unfinished that value is the default (on), so dropping it changes nothing on screen until the primer
+// is done, when it stops keeping pronunciation on for a learner who never chose. A stored false is
+// always a choice (the old build never writes it), so it stays. Needs the script units to know the
+// primer state: without them nothing is dropped.
+function dropRollbackShowPron(prog, pack, units){
+  if(prog.showPron !== true || !scriptActive(pack, units) || scriptPrimerDone(pack, units, prog)) return;
+  delete prog.showPron;
+}
 function scriptStages(pack, units, prog){
   const cfg = scriptConfig(pack); if(!cfg || !scriptActive(pack, units) || scriptSkipped(prog)) return [];
   const recs = scriptRecs(prog);
@@ -4441,7 +4452,8 @@ function glossKey(s){
   let t = toks.filter(x => !GLOSS_DROP.has(x));
   if(!t.length) t = toks;
   if(t.length > 1 && t[0] === "to") t = t.slice(1);
-  return t.join("");
+  // Not "": "to be at" would key as "beat", another word's meaning.
+  return t.join("\u0001");
 }
 const glossHasContent = s => glossWords(s).some(x => !GLOSS_FUNC.has(x));
 const GLOSS_GROUPS_MAX = 4;
@@ -4451,7 +4463,14 @@ function glossAltVariants(alt){
   const ps = parenPieces(alt), n = Math.min(ps.filter(p => p.g).length, GLOSS_GROUPS_MAX), out = [];
   for(let mask = 0; mask < (1 << n); mask++){
     let gi = 0;
-    out.push(ps.map(p => { if(!p.g) return p.t; const keep = gi >= n || (mask >> gi) & 1; gi++; return keep ? " " + p.t.slice(1, -1) + " " : " "; }).join(""));
+    out.push(ps.map((p, i) => {
+      if(!p.g) return p.t;
+      const keep = gi >= n || (mask >> gi) & 1; gi++;
+      if(!keep) return " ";
+      // time(s) keeps as "times": a group written against its word is part of that word
+      const glued = i > 0 && !/\s$/.test(ps[i - 1].t);
+      return (glued ? "" : " ") + p.t.slice(1, -1) + " ";
+    }).join(""));
   }
   return out;
 }

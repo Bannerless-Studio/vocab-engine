@@ -332,7 +332,7 @@ SAY_VERBS = {"sema", "eleza", "ambia", "jua", "fikiri", "dhani", "amini", "ona",
 # "seems/felt/decided/was reported to be in"; "that" only when a finite clause
 # follows the phrase (ilisemekana kuwa kwenye jiji la Tacna hapakuwa)
 RAISING_VERBS = {"onekana", "sikia", "hisi", "amua", "ahidi", "kataa", "kubali", "tarajia", "tumaini",
-                 "ogopa", "hofu", "kana"}
+                 "ogopa", "hofu", "kana", "elezwa", "ambiwa"}
 # ni wazi kuwa "it is clear that"
 THAT_AFTER = {"wazi", "kweli", "dhahiri", "hakika", "bayana", "ukweli", "uhakika"}
 # kuwa after a modal is the verb even before a finite verb, a compound tense
@@ -1159,10 +1159,13 @@ class Analyser:
         if low == "taratibu" and not (nxt is not None and (nxt[:1] == "z" or nxt[:3] == "haz" or
                                                            nxt in N_PLURAL_AGREE)) and \
                 (prev is None or prev[0] == "kwa" or prev[1] == "VERB" and prev[0] not in RULE_OBJ_VERBS or
-                 self._finite(nxt)):
+                 self._finite(nxt) or prev_noun and nxt is None and prev2 is not None and
+                 prev2[1] == "VERB" and prev2[0] not in RULE_OBJ_VERBS):
             # alitembea taratibu "slowly"; jiji hili taratibu litafutika: before a
             # verb whose subject is not the n-class plural; not taratibu za,
-            # taratibu zinafuatwa "procedures"
+            # taratibu zinafuatwa "procedures"; a verb's object then a clause end
+            # (alifanya kazi taratibu "did the work slowly"); fuata sheria taratibu
+            # keeps the noun, the verb takes procedures as its object
             return "taratibu", "ADV", {}
         if low in HAVE_FORMS and low in self.noun_form or low in HAVE_FORMS and low in self.noun:
             # a kuwa na form that spells a noun (hazina "treasure", kina "depth",
