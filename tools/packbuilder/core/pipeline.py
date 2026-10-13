@@ -252,11 +252,16 @@ def run(env, stage="all", check_remote=False):
     # the next rebuild stops the build here, not at a learner's lost progress
     lookup_keys = [w.get("_idkey") or id_key(w["lemma"], w["pos"]) for w in words]
     if "sentence_issued" in ctx:
-        bad = sentence_ids.verify([r["t"] for r in sentences], [r["id"] for r in sentences],
-                                  ctx["sentence_issued"], ctx["sentence_legacy"])
+        s_texts = [r["t"] for r in sentences]
+        s_ids = [r["id"] for r in sentences]
+        bad = sentence_ids.verify(s_texts, s_ids, ctx["sentence_issued"], ctx["sentence_legacy"])
         if bad:
-            raise SystemExit(f"ERROR sentence ids: {len(bad)} sentences changed text after their id was assigned "
-                             f"(the map would give them fresh ids on the next build): {bad[:5]}")
+            held = {}
+            for sid, t in ctx["sentence_issued"].items():
+                held.setdefault(t, []).append(sid)
+            shared = [f"{'/'.join(sorted(held[t]))}" for t in dict.fromkeys(s_texts) if len(held.get(t, ())) > 1]
+            raise SystemExit(f"ERROR sentence ids: {len(bad)} sentences would not get their id back on the next build "
+                             f"(text changed after assign, or one text held by two ids: {shared[:5]}): {bad[:5]}")
     try:
         persist_ids(Path(sp.repo) / sp.id_map_file, out_words, lookup_keys, write=False)
     except ValueError as e:

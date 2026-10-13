@@ -99,6 +99,21 @@ class SentenceFixtures(unittest.TestCase):
         ids2, _, st2 = si.assign(final, issued, legacy=built)
         self.assertEqual((ids2, st2["rekeyed"]), (ids, 0))
 
+    def test_rekey_skipped_when_shipped_text_already_held(self):
+        final, built = ["a\u200c."], ["a."]
+        stale = {"s0001": "a.", "s0002": "a\u200c."}
+        ids, issued, st = si.assign(final, stale, legacy=built)
+        self.assertEqual((ids, st["rekeyed"]), (["s0001"], 0))
+        self.assertEqual(issued, stale)
+        self.assertEqual(si.verify(final, ids, issued, built), [])
+
+    def test_ids_order_numerically_past_four_digits(self):
+        ids, issued, _ = si.assign(["x"], {"s9999": "y", "s10000": "x"})
+        self.assertEqual(ids, ["s10000"])
+        with tempfile.TemporaryDirectory() as d:
+            si.save(Path(d) / "m.json", {"s10000": "x", "s9999": "y"})
+            self.assertEqual(list(si.load(Path(d) / "m.json")), ["s9999", "s10000"])
+
     def test_map_of_shipped_texts_needs_no_legacy(self):
         # the bootstrap from a live pack: shipped texts only
         ids, issued, st = si.assign(["a\u200c.", "b."], {"s0001": "a\u200c.", "s0002": "b."}, legacy=["a.", "b."])

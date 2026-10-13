@@ -16,7 +16,7 @@ def load(path):
 
 
 def save(path, issued):
-    ordered = {k: issued[k] for k in sorted(issued)}
+    ordered = {k: issued[k] for k in sorted(issued, key=lambda k: int(k[1:]))}
     Path(path).write_text(json.dumps({"issued": ordered}, ensure_ascii=False, indent=0, separators=(",", ":")) + "\n",
                           encoding="utf-8")
 
@@ -32,7 +32,7 @@ def assign(texts, issued, legacy=None):
     the id issued for that text, and the id is rewritten to the shipped text (stats "rekeyed"), so the map
     converges on shipped texts and the next build matches directly."""
     by_text = defaultdict(list)
-    for sid in sorted(issued):
+    for sid in sorted(issued, key=lambda k: int(k[1:])):
         by_text[issued[sid]].append(sid)
     ids = [None] * len(texts)
     claimed = set()
@@ -55,7 +55,9 @@ def assign(texts, issued, legacy=None):
         for i, t in enumerate(texts):
             if legacy[i] != t and claim(i, legacy[i]):
                 # a text two sentences ship keeps the earlier text as the key, which tells the two apart
-                if shipped[t] == 1:
+                # a map that already holds the shipped text under another id keeps the earlier key: rekeying
+                # would put one text under two ids and the next build would claim the lower one
+                if shipped[t] == 1 and not by_text.get(t):
                     out[ids[i]] = t
                     rekeyed += 1
     for i, t in enumerate(texts):
@@ -101,6 +103,11 @@ def main(lang, repo, do_bootstrap):
         return 0
     live = json.loads((Path(repo) / "pack" / "sentences.json").read_text(encoding="utf-8"))
     issued = bootstrap(live, load(path))
+    import sys
+    dup = sorted(t for t, n in Counter(r["t"] for r in live).items() if n > 1)
+    if dup:
+        print(f"WARNING {len(dup)} repeated sentence texts: bootstrap pairs their ids in id order, a builder "
+              f"run pairs them in corpus order, so check the pairs once: {dup[:5]}", file=sys.stderr)
     save(path, issued)
     print(f"{path}: {len(issued)} issued ids ({len(live)} live)")
     return 0
