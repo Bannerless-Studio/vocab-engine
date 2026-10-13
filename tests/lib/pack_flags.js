@@ -32,6 +32,7 @@ const FLAG_SINCE = [
   { key: "characters.bareByPair", sha: "34c5df3", path: ["characters", "bareByPair"] },
   { key: "eta", sha: "77e046a", path: ["eta"] },
   { key: "gapGender", sha: "cd94707", path: ["gapGender"] },
+  { key: "credits", sha: "2fdf29d", path: ["credits"] },
 ];
 
 // Flag collapse (TODO.md "Flag collapse"): the pack keys that read the same in all 14 live packs (scout: .cache/briefs/flag-collapse-scout.md),
