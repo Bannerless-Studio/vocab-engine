@@ -1059,7 +1059,7 @@ function optScript(entry, others){
 }
 
 // A drill that touches no unit (Sounds lessons) is no session for the planner's clock.
-function drill(items, onDone, summary, onShown){ if(VC.dayStart(prog, PACK, todayISO(), !todayStepState && items.some(it => /^[wscx]:/.test(String(it && it.key))))) store.save(); D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown, rzo: rzOriginOf(onDone), rzs: summary && summary.rzs, once: !!(summary && summary.once) }; rzFin = null; dnext(); }
+function drill(items, onDone, summary, onShown){ if(VC.dayStart(prog, PACK, todayISO(), !todayStepState && items.some(it => /^[wscx]:/.test(String(it && it.key))))) store.save(); D = { q: shuffle(items.slice()), right:0, seen:0, miss:[], onDone, summary, onShown, rzo: rzOriginOf(onDone), rzs: summary && summary.rzs, once: !!(summary && summary.once), cw: critIds() }; rzFin = null; dnext(); }
 function setScore(answered, total){
   const left = total ? Math.max(0, total - answered) : 0;
   $("score").textContent = (total && left > 0) ? `${left} left` : "";
@@ -1862,11 +1862,32 @@ function rzDoneOf(o){
   if(o.o === "lesson" && LESSON_LIST[o.i]) return lessonDone(o.i);
   return rzFail();
 }
+const critIds = () => Object.keys(VC.critMap(prog));
+// A parked Review was planned before words joined prog.crit (exam verdict, Words-tab flag): the reserve
+// reaches it on resume, next in the queue, replacing unasked non-critical tail items. Records without cw
+// (an older build) resume as they were.
+function critTopUp(items, dr, today){
+  const o = dr.o, rev = o.o === "words" || (o.o === "today" && today && today.at === 0);
+  if(!rev || !Array.isArray(dr.cw)) return items;
+  const had = new Set(dr.cw), want = new Set(critIds().filter(id => !had.has(id)).map(id => "w:" + id));
+  if(!want.size) return items;
+  let plan;
+  try {
+    const lw = learnedWords(), snap = o.o === "today" && HAS_STAGES ? takeSnapshot() : null;
+    plan = snap ? VC.buildReviewPlan(lw, prog, PACK, todayReviewOpts(snap)).map(planItem) : VC.buildReviewPlan(lw, prog, PACK, plainReviewOpts()).map(itemFromPlan);
+  } catch(e){ return items; }
+  const queued = new Set(items.map(it => String(it.key))), add = plan.filter(it => want.has(String(it.key)) && !queued.has(String(it.key)));
+  if(!add.length) return items;
+  const keep = dr.cur ? 1 : 0, out = items.slice();
+  for(let n = 0, i = out.length - 1; n < add.length && i >= keep; i--) if(!VC.critHas(prog, String(out[i].key).slice(2))){ out.splice(i, 1); n++; }
+  out.splice(keep, 0, ...add);
+  return out;
+}
 function drillRec(d){
   const items = (d.cur ? [d.cur] : []).concat(d.q);
   return { o: d.rzo, cur: !!d.cur, ord: d.cur && d.cur.rzShown ? d.cur.rzShown : null,
     q: items.map(it => rzEncItem(it, it === d.cur || !!it.rzSeen)), right: d.right, seen: d.seen,
-    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined, dn: d.down && d.down.length ? d.down.slice() : undefined, ca: d.ca && d.ca.length ? d.ca.slice() : undefined, cs: d.cs || undefined };
+    miss: rzEncMisses(d.miss), sm: d.rzs ? rzEnc(d.rzs) : undefined, dn: d.down && d.down.length ? d.down.slice() : undefined, ca: d.ca && d.ca.length ? d.ca.slice() : undefined, cs: d.cs || undefined, cw: Array.isArray(d.cw) ? d.cw : undefined };
 }
 // A miss is kept as its item's recipe, once per key (missSummary shows the first one): the
 // reveal markup with its example sentences is ~3 KB a miss.
@@ -1964,6 +1985,7 @@ function sessionResume(forTab){
   switchToTab(rec.tab, tabTitle(rec.tab));
   stopSpeaking(); drillKeyHandler = null; rzFin = null;
   todayStepState = today;
+  if(rec.drill) items = critTopUp(items, rec.drill, today);
   if(today && (rec.drill || rd)) setTitle(todayStepTitle(today.at, !!(rd && rd.mode === "listen")));
   if(rec.tab === "test" && testName && (rec.drill || rd)) setTitle(testName);
   if(rec.drill){
@@ -1974,6 +1996,7 @@ function sessionResume(forTab){
     if(Array.isArray(rec.drill.dn)) D.down = rec.drill.dn.filter(id => typeof id === "string");
     if(Array.isArray(rec.drill.ca)) D.ca = rec.drill.ca.filter(id => typeof id === "string");
     if(Number.isInteger(rec.drill.cs)) D.cs = rec.drill.cs;
+    D.cw = critIds();
     dnext();
   } else if(rd){
     // fb46: the time between the record and now was not spent reading.
@@ -2480,6 +2503,8 @@ function charChoiceHTML(){
   const top = deferred.length && next && deferred[0].after !== next.lv ? levelLabel(deferred[0].after) : "";
   return `<div class="stmt" id="charChoice">${L} next: learn to recognise the written form of the words you already know. Or go on to ${N} first and do ${L} after ${top ? ui(top) : "it"}. You can change this later in Progress.<button class="next" id="choiceStart" style="margin-top:8px">Start ${L}</button><button class="ghost" id="choiceSkip" style="margin-top:8px">Skip to ${N}</button></div>`;
 }
+const todayReviewOpts = snap => ({ size: snap.reviewSize, extra: snap.reviewExtra, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), typedUnits: TYPED_UNITS });
+const plainReviewOpts = extra => ({ extra, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn() });
 function todayRender(){
   stopSpeaking();
   todayStepState = null;
@@ -2493,7 +2518,7 @@ function todayRender(){
   const g = VC.todayGates(lw.length, !pz && (snap ? snapLearns(snap) : !!nn), availSent.length, scriptCount());
   // Start today runs exactly this plan, so the line names units only when the plan holds
   // some (a first character day has no unit records yet).
-  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units: snap.charsStarted ? CHAR_LIST : undefined, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), typedUnits: TYPED_UNITS }) : null } : null;
+  todayPrep = snap ? { snap, review: g.review ? VC.buildReviewPlan(lw, prog, PACK, todayReviewOpts(snap)) : null } : null;
   const pk = PATTERNS_ON && g.sentences ? patternPlanCount() : 0;
   const showPlaceHint = !prog.placedOnce;
   const showSoundsHint = HAS_LESSONS && !prog.soundsOpened && !VC.placedPastFirstBucket(prog, WORDS, PACK);
@@ -2590,11 +2615,11 @@ function todayStep(){
   setTitle(todayStepTitle(s));
   if(s === 0){
     if(g.review && snap){
-      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, { size: snap.reviewSize, extra: snap.reviewExtra, units, script: SU, scriptCtx: scriptKindCtx(), canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn(), typedUnits: TYPED_UNITS });
+      const plan = todayStepState.review || VC.buildReviewPlan(lw, prog, PACK, todayReviewOpts(snap));
       todayStepState.review = null;
       drill(plan.map(planItem), todayStep, missSummary); return;
     }
-    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, { extra: paused() ? learnDrillCount(null) : undefined, canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn() }).map(itemFromPlan), todayStep, missSummary); return; }
+    if(g.review){ drill(VC.buildReviewPlan(lw, prog, PACK, plainReviewOpts(paused() ? learnDrillCount(null) : undefined)).map(itemFromPlan), todayStep, missSummary); return; }
     return todayStep();
   }
   if(s === 1){
@@ -2910,7 +2935,7 @@ function renderWordBody(){
     const items = []; withLearn(set.map(w => w.id), () => set.forEach(w => items.push(...learnPair(w))));
     drill(items, wordsSetDone(wordsLv, wordsSet, set.filter(w => !got.has(w.id)).map(w => w.id)), missSummary);
   };
-  if(canReview) $("rev").onclick = () => drill(VC.buildReviewPlan(learnedWords(), prog, PACK, { canHear: canHearWord, today: dayToday(), typedOk: typedWordFits, typedSeen: typedWordSeen, typedKindFits, sn: planSn() }).map(itemFromPlan), wordsRender, missSummary);
+  if(canReview) $("rev").onclick = () => drill(VC.buildReviewPlan(learnedWords(), prog, PACK, plainReviewOpts()).map(itemFromPlan), wordsRender, missSummary);
 }
 
 // RD holds everything a passage screen shows, so re-entering it (tab return, voiceschanged)
