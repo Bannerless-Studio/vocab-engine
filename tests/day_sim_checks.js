@@ -483,8 +483,8 @@ function missesCarried(drilled0){
     fs.writeFileSync(path.join(dir, "pack.json"), JSON.stringify(pj));
     cp.execSync(`python3 tools/jsonify_pack.py "${dir}"`, { cwd: ROOT, stdio: "ignore" });
     const bad = run();
-    // dayAware is engine default since the flag collapse: a pack still carrying the key passes with a stale-key warning.
-    check(`validate_pack: zh passes; a stale dayAware key passes with the stale-key warning (exit ${ok.code} / ${bad.code})`, ok.code === 0 && bad.code === 0 && /keys the engine no longer reads[^\n]*dayAware/.test(bad.out));
+    // dayAware is engine default since the flag collapse: a pack still carrying the key is a stale-key error.
+    check(`validate_pack: zh passes; a stale dayAware key is a stale-key error (exit ${ok.code} / ${bad.code})`, ok.code === 0 && bad.code === 1 && /ERROR pack\.json keys the engine no longer reads[^\n]*dayAware/.test(bad.out));
     fs.rmSync(tmp, { recursive: true, force: true });
   }
   console.log("\n[resume] a reload mid-drill on a day-aware session");

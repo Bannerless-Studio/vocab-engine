@@ -49,10 +49,11 @@ for(const k of ["ko", "fa", "ja"]){
   check(`${k}-like: OK line counts script units`, /\d+ script units;/.test(r.out), r.out);
   check(`${k}-like: script.js generated as const SCRIPT`, fs.existsSync(path.join(dir, "script.js")) && /^const SCRIPT=\{/m.test(fs.readFileSync(path.join(dir, "script.js"), "utf8")));
 }
-// Port E3: pack.pairs with pack.script is valid (script units keep their non-pairs Review slots).
+// Port E3: pack.pairs with pack.script is valid (script units keep their non-pairs Review slots). The two collapsed keys
+// are a stale-key error only (validate_pack errors on them), never a pairs error.
 for(const k of ["ko", "fa", "ja"]){
   const fx = FX[k](); Object.assign(fx.pack, { dayAware: true, pairs: true }); const r = runValidate(mkPack(fx));
-  check(`${k}-like + dayAware + pairs validates clean (no pairs error)`, r.status === 0 && / 0 errors/.test(r.out) && !/pack\.pairs/.test(r.out), r.out);
+  check(`${k}-like + dayAware + pairs: the stale-key error only (no pairs error)`, r.status === 1 && / 1 errors/.test(r.out) && /ERROR pack\.json keys the engine no longer reads[^\n]*dayAware, pairs/.test(r.out) && !/pack\.pairs/.test(r.out), r.out);
 }
 {
   const r = runValidate(path.join(ROOT, "packs", "zh"));

@@ -1,5 +1,5 @@
 // Checks for the help overlays (docs/PACK_SCHEMA.md "helpClose", engine default since the flag collapse) and the Read verdict scroll:
-// [1] no helpCloseOn / readAnswerBlockOn left, [2] validate_pack.py warns on the stale keys, [3] zh: the
+// [1] no helpCloseOn / readAnswerBlockOn left, [2] validate_pack.py errors on the stale keys, [3] zh: the
 // passage word popover, the sentence word popover and the audio toast each get a close
 // button, close on a tap outside, on Escape and after the timer (held while a pointer or
 // finger is on it), one at a time, [5] a Read question answered with the passage open brings the
@@ -200,10 +200,10 @@ async function onPassage(pack){
       return { status: r.status, out: (r.stdout || "") + (r.stderr || "") };
     };
     const a = run({}), b = run({ helpClose: true, readAnswerBlock: true }), c = run({ helpClose: false }), d = run({ readAnswerBlock: "yes" });
-    // Collapsed keys (flag collapse stage 2): any value is a stale-key warning, never an error.
-    const stale = (r, k) => r.status === 0 && new RegExp(`no longer reads[^\\n]*${k}`).test(r.out);
+    // Collapsed keys (flag collapse stage 2): any value is a stale-key error (validate_pack exit 1).
+    const stale = (r, k) => r.status === 1 && new RegExp(`ERROR pack\\.json keys the engine no longer reads[^\\n]*${k}`).test(r.out);
     check("absent: no helpClose / readAnswerBlock mention", a.status === 0 && !/helpClose|readAnswerBlock/.test(a.out), a.out);
-    check("present (true, false or not a boolean): no error, a stale-key warning naming the key", stale(b, "helpClose") && stale(b, "readAnswerBlock") && stale(c, "helpClose") && stale(d, "readAnswerBlock"), b.out + c.out + d.out);
+    check("present (true, false or not a boolean): a stale-key error naming the key", stale(b, "helpClose") && stale(b, "readAnswerBlock") && stale(c, "helpClose") && stale(d, "readAnswerBlock"), b.out + c.out + d.out);
   }
 
   console.log("\n[3] zh, flag on");

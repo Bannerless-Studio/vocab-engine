@@ -160,12 +160,12 @@ function seedW(){
       fs.writeFileSync(path.join(dir, "pack.json"), JSON.stringify(pack)); fs.writeFileSync(path.join(dir, "words.json"), JSON.stringify(words)); fs.writeFileSync(path.join(dir, "sentences.json"), "[]");
       cp.spawnSync(PY, [path.join(ROOT, "tools", "jsonify_pack.py"), dir], { cwd: ROOT });
       const r = cp.spawnSync(PY, [path.join(ROOT, "tools", "validate_pack.py"), dir], { cwd: ROOT, encoding: "utf8" }); return { status: r.status, out: (r.stdout || "") + (r.stderr || "") }; };
-    // flag collapse: wordsBy "typed" is engine default; a pack still carrying the key (or dayAware) validates with a stale-key warning
+    // flag collapse: wordsBy "typed" is engine default; a pack still carrying the key (or dayAware) is a stale-key error
     const plain = Object.assign({}, base); delete plain.dayAware;
     const ok = run(plain);
     check("validator: a pack without wordsBy / dayAware passes, no wordsBy message", ok.status === 0 && !/wordsBy/.test(ok.out), ok.out);
     const stale = run(Object.assign({}, base, { wordsBy: "typed" }));
-    check("validator: a pack still carrying wordsBy and dayAware passes with the stale-key warning", stale.status === 0 && /WARN  pack\.json keys the engine no longer reads[^\n]*dayAware, wordsBy/.test(stale.out), stale.out);
+    check("validator: a pack still carrying wordsBy and dayAware fails with the stale-key error", stale.status === 1 && /ERROR pack\.json keys the engine no longer reads[^\n]*dayAware, wordsBy/.test(stale.out), stale.out);
   }
 
   console.log("\n[2] streak table with the flag (kind x streak -> new streak; r/w counts; prov)");
