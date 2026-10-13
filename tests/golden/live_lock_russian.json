@@ -44,7 +44,7 @@
      0
     ],
     "toGo": [
-     168,
+     null,
      274,
      334
     ],
@@ -55,22 +55,22 @@
      "p": 0,
      "all": false
     },
-    "eta": 168,
+    "eta": null,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
     "position": 0
    },
-   "todayFirst": "Алфавит first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until a set is learned Learn Алфавит, sets 1–2 of 6 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
+   "todayFirst": "Алфавит first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 0% survive a trip: greet, order, count, buy Review skipped until a set is learned Learn Алфавит, sets 1–2 of 6 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
    "today": [
-    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
-    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
-    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 0% survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 0% survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 0% survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
    ],
    "progress": {
-    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 0 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 30 learned Still shaky и это он они Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, A1 Goal 1 of 3 0% survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 0 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 1% survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 30 learned Still shaky и это он они Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -394,7 +394,7 @@
      0.002
     ],
     "toGo": [
-     167,
+     null,
      273,
      333
     ],
@@ -405,7 +405,7 @@
      "p": 0.006667,
      "all": false
     },
-    "eta": 167,
+    "eta": null,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -474,7 +474,7 @@
      0.017733
     ],
     "toGo": [
-     155,
+     null,
      260,
      318
     ],
@@ -485,22 +485,22 @@
      "p": 0.058,
      "all": false
     },
-    "eta": 155,
+    "eta": null,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
     "position": 0.017667
    },
-   "todayFirst": "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "todayFirst": "Session 13 Goal 1 of 3 6% survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
    "today": [
-    "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
-    "Session 14 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
-    "Session 15 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+    "Session 13 Goal 1 of 3 6% survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 6% survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 6% survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
    ],
    "progress": {
-    "start": "12 sessions, A1 In 6 sessions since your last visit +16 mastered Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 120 learned Still shaky так нет один уже до должен думать после тоже большой сегодня Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 150 learned Still shaky нет сказать здесь почему место идти всегда через вопрос что-нибудь конечно понимать Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "12 sessions, A1 In 6 sessions since your last visit +16 mastered Goal 1 of 3 6% survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 120 learned Still shaky так нет один уже до должен думать после тоже большой сегодня Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 6% survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 150 learned Still shaky нет сказать здесь почему место идти всегда через вопрос что-нибудь конечно понимать Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -966,7 +966,7 @@
      0.019733
     ],
     "toGo": [
-     153,
+     null,
      259,
      316
     ],
@@ -977,7 +977,7 @@
      "p": 0.064667,
      "all": false
     },
-    "eta": 153,
+    "eta": null,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -2076,7 +2076,7 @@
      0.06
     ],
     "toGo": [
-     115,
+     null,
      224,
      284
     ],
@@ -2087,7 +2087,7 @@
      "p": 0.2,
      "all": false
     },
-    "eta": 115,
+    "eta": null,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
@@ -2101,15 +2101,15 @@
     },
     "position": 0.05625
    },
-   "todayFirst": "Алфавит first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn Алфавит, sets 1–2 of 6 A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья",
+   "todayFirst": "Алфавит first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 20% survive a trip: greet, order, count, buy Review Learn Алфавит, sets 1–2 of 6 A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья",
    "today": [
-    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья Start",
-    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья Start",
-    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья Start"
+    "Session 21 Goal 1 of 3 20% survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья Start",
+    "Session 22 Goal 1 of 3 20% survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья Start",
+    "Session 23 Goal 1 of 3 20% survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Моя семья Start"
    ],
    "progress": {
-    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 154 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Still shaky делать после любить кто-нибудь собираться нога ужин дедушка шестьдесят Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 20% survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 21% survive a trip: greet, order, count, buy Алфавит 0 / 33 taught · 0 mastered A1 154 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Still shaky делать после любить кто-нибудь собираться нога ужин дедушка шестьдесят Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2488,7 +2488,7 @@
      0.0616
     ],
     "toGo": [
-     115,
+     null,
      223,
      284
     ],
@@ -2499,7 +2499,7 @@
      "p": 0.205333,
      "all": false
     },
-    "eta": 115,
+    "eta": null,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
