@@ -5003,13 +5003,34 @@ function pronChoiceOpts(entry, pool, all, mix){
 }
 // One meaning is enough: the whole typed text, or every part of it split like the gloss, must
 // be one of the gloss's alternatives. Rules: docs/PACK_SCHEMA.md "Typed meaning".
+// Spacing-insensitive fallback (docs/PACK_SCHEMA.md "Typed meaning" rule 7): per pack, stripped form -> the
+// distinct separator keys in the pack's glosses that strip to it. Set by setGlossIndex; no index, no fallback.
+const GLOSS_INDEX = new WeakMap();
+const strippedKey = k => k.split("\u0001").join("");
+function setGlossIndex(pack, words){
+  const m = new Map();
+  (words || []).forEach(w => glossAltKeys(w.en || "", pack).forEach(k => {
+    const s = strippedKey(k);
+    if(!m.has(s)) m.set(s, new Set());
+    m.get(s).add(k);
+  }));
+  GLOSS_INDEX.set(pack, m);
+}
+// "hometown" for "home town": accepted when the stripped form names one gloss key in the pack and that
+// key is this entry's; two glosses with the same stripped form ("beat", "to be at") never match.
+function strippedMatch(k, keys, pack){
+  const idx = GLOSS_INDEX.get(pack);
+  const seen = idx && idx.get(strippedKey(k));
+  if(!seen || seen.size !== 1) return false;
+  return [...keys].some(a => strippedKey(a) === strippedKey(k));
+}
 function checkGlossTyped(val, en, pack){
   const keys = glossAltKeys(en, pack), v = String(val == null ? "" : val);
   if(keys.has(glossKey(v))) return true;
   // The whole gloss typed as written is right, reading notes and fragments included.
   if(glossKey(v) && glossKey(v) === glossKey(en)) return true;
   const parts = splitTopLevel(v, [";", ","]).map(glossKey).filter(Boolean);
-  return parts.length > 0 && parts.every(k => keys.has(k));
+  return parts.length > 0 && parts.every(k => keys.has(k) || strippedMatch(k, keys, pack));
 }
 // Gloss style (docs/PACK_SCHEMA.md "glossStyle", engine default since the flag collapse; owner 2026-10-07: 别 shows its most
 // used sense, the others in brackets). Display only; matching keeps the raw gloss.
@@ -5188,7 +5209,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
   scriptOpts, scriptRomanOpts, scriptExamples, scriptWordOpts, scriptJoinedForms, scriptItem, learnScriptPlan, scriptReviewScore, scriptTestPlan,
   tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings,
-  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, glossSenses, typedSynWords, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, optsOneScriptOn, composeSpanReading, spanReadingText,
+  setGlossIndex, TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, glossSenses, typedSynWords, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, optsOneScriptOn, composeSpanReading, spanReadingText,
   LEGACY_DROPPED, legacyBackupKey, isLegacyRecord, migrateLegacy };
 if(typeof module!=="undefined" && module.exports) module.exports = API;
 if(root) root.VocabCore = API;
@@ -5223,6 +5244,7 @@ const LEVELS = VC.levelIds(PACK);
 const SIZE = VC.setSizeOf(PACK);
 const BY_LV = VC.wordsByLevel(WORDS, PACK);
 const WORDS_BY_ID = {}; WORDS.forEach(w=>{ WORDS_BY_ID[w.id] = w; });
+VC.setGlossIndex(PACK, WORDS);
 const CHAR_CTX = { units: CHAR_LIST, words: WORDS, byId: WORDS_BY_ID };
 // Every primer surface is gated on HAS_SCRIPT (docs/SCRIPT_PRIMER.md); without it each code
 // path is the pre-primer one and SU stays undefined.
@@ -6407,7 +6429,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "3582202945-2382237";
+const VE_BUILD = "362583091-2383323";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -8643,4 +8665,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:1556663259-2381561-->
+<!--ve-build:3073503533-2382646-->

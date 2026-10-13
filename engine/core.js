@@ -4548,13 +4548,34 @@ function pronChoiceOpts(entry, pool, all, mix){
 }
 // One meaning is enough: the whole typed text, or every part of it split like the gloss, must
 // be one of the gloss's alternatives. Rules: docs/PACK_SCHEMA.md "Typed meaning".
+// Spacing-insensitive fallback (docs/PACK_SCHEMA.md "Typed meaning" rule 7): per pack, stripped form -> the
+// distinct separator keys in the pack's glosses that strip to it. Set by setGlossIndex; no index, no fallback.
+const GLOSS_INDEX = new WeakMap();
+const strippedKey = k => k.split("\u0001").join("");
+function setGlossIndex(pack, words){
+  const m = new Map();
+  (words || []).forEach(w => glossAltKeys(w.en || "", pack).forEach(k => {
+    const s = strippedKey(k);
+    if(!m.has(s)) m.set(s, new Set());
+    m.get(s).add(k);
+  }));
+  GLOSS_INDEX.set(pack, m);
+}
+// "hometown" for "home town": accepted when the stripped form names one gloss key in the pack and that
+// key is this entry's; two glosses with the same stripped form ("beat", "to be at") never match.
+function strippedMatch(k, keys, pack){
+  const idx = GLOSS_INDEX.get(pack);
+  const seen = idx && idx.get(strippedKey(k));
+  if(!seen || seen.size !== 1) return false;
+  return [...keys].some(a => strippedKey(a) === strippedKey(k));
+}
 function checkGlossTyped(val, en, pack){
   const keys = glossAltKeys(en, pack), v = String(val == null ? "" : val);
   if(keys.has(glossKey(v))) return true;
   // The whole gloss typed as written is right, reading notes and fragments included.
   if(glossKey(v) && glossKey(v) === glossKey(en)) return true;
   const parts = splitTopLevel(v, [";", ","]).map(glossKey).filter(Boolean);
-  return parts.length > 0 && parts.every(k => keys.has(k));
+  return parts.length > 0 && parts.every(k => keys.has(k) || strippedMatch(k, keys, pack));
 }
 // Gloss style (docs/PACK_SCHEMA.md "glossStyle", engine default since the flag collapse; owner 2026-10-07: 别 shows its most
 // used sense, the others in brackets). Display only; matching keeps the raw gloss.
@@ -4733,7 +4754,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   recordedScriptUnits, scriptActive, scriptPool, showScriptChoice, scriptKindShape, scriptKindFits, scriptKindFor, pickScriptKind, scriptFamily, SCRIPT_MIN_OPTIONS, scriptGlyph, scriptGlyphKeys, scriptGlyphIn, scriptWordHas, graphemes, shapingClusters, scriptUnitNote, scriptUnitHeadName, searchFold, scriptSecondRight,
   scriptOpts, scriptRomanOpts, scriptExamples, scriptWordOpts, scriptJoinedForms, scriptItem, learnScriptPlan, scriptReviewScore, scriptTestPlan,
   tonesOn, stripMarks, syllableTone, markSyllable, splitSyllable, splitReading, toneHTML, pronTypingOn, pronKey, numberedForms, checkPronTyped, kanaFold, plainPronKey, affixBare, affixAlts, writtenTypedFold, typeSlotKind, joinReadings,
-  TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, glossSenses, typedSynWords, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, optsOneScriptOn, composeSpanReading, spanReadingText,
+  setGlossIndex, TYPED_FROM_SIDES, typedFromSides, typedFromOn, typedKinds, typedAmbiguity, typedKindOk, typedSlotKind, splitTopLevel, glossSenses, typedSynWords, parenGroups, parenPieces, isPronNote, glossParts, glossKey, glossAltKeys, checkGlossTyped, pronChoiceOpts, optsOneScriptOn, composeSpanReading, spanReadingText,
   LEGACY_DROPPED, legacyBackupKey, isLegacyRecord, migrateLegacy };
 if(typeof module!=="undefined" && module.exports) module.exports = API;
 if(root) root.VocabCore = API;

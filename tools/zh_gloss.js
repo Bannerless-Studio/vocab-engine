@@ -150,6 +150,7 @@ function build(words, ov){
   }));
   const pig = words.filter(w => pronInGloss(gl(w), w.pron)).map(w => w.id);
   // Regression gate: tools/zh_gloss_expect.json lists the answers a B1 learner types for a word.
+  VC.setGlossIndex(PACK, words.map(w => ({ en: gl(w) })));
   const expect = ov.expect || {};
   Object.entries(expect).forEach(([w, as]) => {
     const e = byW.get(w);

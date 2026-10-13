@@ -322,6 +322,7 @@ Two pack fields, both off unless the pack sets them, so every other pack plans a
 4. The words `a`, `an`, `the`, `sb`, `sth`, `someone`, `somebody`, `something`, `etc` and `eg` are dropped, unless that would leave nothing.
 5. A leading `to` is dropped when more words follow (`kick` = `to kick`).
 6. The words are joined with U+0001, never with nothing: `to be at` keys as `be at`, which is not `beat`. Spacing inside a typed answer therefore matters (`icecream` does not match `ice cream`).
+7. Spacing fallback (core.js `setGlossIndex`, `strippedMatch`): a typed part that misses by spacing alone (`hometown` for `home town`) is accepted when its stripped form names exactly one gloss key in the pack's glosses and that key is this entry's. Two glosses with the same stripped form (`beat`, `to be at`) never match each other. The app sets the index at boot from the pack's words; without an index only rule 6 applies. Known cost: a closed spelling that is another gloss in the pack (`hometown` as its own gloss, `everyday` in Japanese) is rejected for the other entry; 16 of 13,672 multi-word alternatives across the 15 live packs.
 
 Each `(...)` group in an alternative is optional: the alternative is keyed with every combination of its groups kept (brackets removed) or left out, up to four groups (later groups always kept). So for "to kick; to play (e.g. soccer)", `kick`, `to play`, `play soccer` and `to play (e.g. soccer)` are right and `soccer` is wrong.
 
