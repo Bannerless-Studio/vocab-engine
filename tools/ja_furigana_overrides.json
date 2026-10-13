@@ -1,0 +1,4 @@
+{
+  "_about": "Words JmdictFurigana cannot align (no line, or more than one). Keys are word ids; w must match the headword.",
+  "w0211": {"w": "前に", "ruby": [[0, 1, "まえ"]], "reason": "JMdict has no 前に entry; the kanji 前 reads まえ and に is kana (scout 2026-10-08 miss)"}
+}
