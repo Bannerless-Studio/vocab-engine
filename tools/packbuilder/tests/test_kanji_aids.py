@@ -45,7 +45,10 @@ class Hints(unittest.TestCase):
         self.assertEqual(t["一"]["meaning"], "one", "a radical note is never a meaning")
         self.assertEqual(t["一"]["parts"], [], "a primitive lists only itself and has no parts")
         self.assertEqual(t["見"]["parts"], [["目", "eye"], ["儿", "legs"]])
-        self.assertEqual(t["々"], {"meaning": "repeats the kanji before it", "on": [], "kun": [], "parts": []})
+        self.assertEqual(t["々"], {"meaning": "repeats the kanji before it", "glosses": [], "on": [], "kun": [], "parts": [],
+                                   "fixed": True})
+        self.assertEqual(t["見"]["glosses"], ["see", "look", "hopes"])
+        self.assertNotIn("fixed", t["見"])
 
     def test_load_kanjidic_reads_gloss_readings_and_drops_okurigana_dots(self):
         import gzip
@@ -123,7 +126,7 @@ class Aids(unittest.TestCase):
         units = [{"id": "c1", "t": "好子", "words": ["w1"], "lv": "A1", "reading": "こうし"},
                  {"id": "c2", "t": "子", "words": ["w2"], "lv": "A1", "reading": "こ"}]
         kanji_aids.attach_hints(units, table(), {}, {})
-        self.assertEqual(units[0]["hint"], ["good, fine: 女 woman + 子 child", "child"])
+        self.assertEqual(units[0]["hint"], ["good: 女 woman + 子 child", "child"])
 
     def test_kana_positions_are_null_and_all_null_drops_the_field(self):
         units = [{"id": "c1", "t": "学ぶ", "words": ["w1"], "lv": "A1", "reading": "まなぶ", "hint": ["stale"]},
@@ -150,6 +153,122 @@ class Aids(unittest.TestCase):
             kanji_aids.attach_ruby([{"id": "w1", "w": "私", "pron": "わたし"}], {})
         with self.assertRaises(SystemExit):
             kanji_aids.attach_ruby([{"id": "w1", "w": "私", "pron": "わたし"}], {"w1": {"w": "子", "ruby": []}})
+
+
+def unit(t, w="w1", lv="A1"):
+    return {"id": "c" + w, "t": t, "words": [w], "lv": lv, "reading": "x"}
+
+
+def words(**en):
+    return [{"id": k, "w": "x", "en": v} for k, v in en.items()]
+
+
+def table2():
+    t = table()
+    t["経"] = {"meaning": "sutra, longitude", "glosses": ["sutra", "longitude", "pass through", "manage"], "on": [], "kun": [],
+               "parts": []}
+    t["験"] = {"meaning": "verification, effect", "glosses": ["verification", "effect", "testing"], "on": [], "kun": [], "parts": []}
+    t["新"] = {"meaning": "new", "glosses": ["new"], "on": [], "kun": [], "parts": [["立", "stand"], ["木", "tree"], ["斤", "axe"]]}
+    t["行"] = {"meaning": "going, journey", "glosses": ["going", "journey"], "on": [], "kun": [], "parts": []}
+    t["年"] = {"meaning": "year, counter for years", "glosses": ["year", "counter for years"], "on": [], "kun": [], "parts": []}
+    t["何"] = {"meaning": "what", "glosses": ["what"], "on": [], "kun": [],
+               "parts": [["化", "change"], ["口", "mouth"], ["亅", None], ["一", "one"]]}
+    t["時"] = {"meaning": "time, hour", "glosses": ["time", "hour"], "on": [], "kun": [], "parts": [["寸", "measurement"], ["日", "day"]]}
+    t["花"] = {"meaning": "flower", "glosses": ["flower"], "on": [], "kun": [], "parts": [["艹", "plants"], ["化", "change"]]}
+    t["学"] = dict(t["学"], glosses=["study"])
+    t["子"] = dict(t["子"], glosses=["child", "offspring"])
+    return t
+
+
+class Rules(unittest.TestCase):
+    def test_compound_prefers_the_gloss_found_in_the_unit_english(self):
+        t = table2()
+        t["意"] = {"meaning": "idea, mind", "glosses": ["idea", "mind", "heart"], "on": [], "kun": [], "parts": []}
+        t["見"] = {"meaning": "see, look", "glosses": ["see", "look", "hopes"], "on": [], "kun": [], "parts": []}
+        u = [unit("意見", "w1"), unit("経験", "w2"), unit("見学", "w3")]
+        kanji_aids.attach_hints(u, t, {}, {}, words(w1="opinion; the view of what one hears", w2="experience", w3="a Look around"))
+        self.assertEqual(u[0]["hint"], ["idea", "see"], "the first gloss found as whole words in the English, so no two-gloss join")
+        self.assertEqual(u[1]["hint"], ["sutra", "verification"], "no gloss in the English: the first gloss alone, never two")
+        self.assertEqual(u[2]["hint"], ["look", "study: 子 child"])
+
+    def test_override_beats_the_gloss_rule_and_a_bare_beats_it_too(self):
+        t = table2()
+        t["経"]["meaning"], t["経"]["fixed"] = "to pass through", True
+        u = [unit("経験", "w2")]
+        kanji_aids.attach_hints(u, t, {"経験:験": "test"}, {}, words(w2="experience, effect"))
+        self.assertEqual(u[0]["hint"], ["to pass through", "test"])
+
+    def test_okurigana_unit_reads_as_its_english_and_a_hook_gives_the_story(self):
+        t = table2()
+        u = [unit("行く", "w1"), unit("新しい", "w2"), unit("新しい", "w3")]
+        w = words(w1="to go", w2="new, novel", w3="new, novel")
+        kanji_aids.attach_hints(u[:1], t, {}, {}, w)
+        kanji_aids.attach_hints(u[1:2], t, {}, {"新": "立 stand + 木 tree + 斤 axe: new"}, w)
+        kanji_aids.attach_hints(u[2:], t, {"新しい:新": "fresh"}, {"新": "立 stand + 木 tree + 斤 axe: new"}, w)
+        self.assertEqual(u[0]["hint"], ["to go", None], "not the KANJIDIC noun gloss going")
+        self.assertEqual(u[1]["hint"], ["立 stand + 木 tree + 斤 axe: new, novel", None, None])
+        self.assertEqual(u[2]["hint"][0], "立 stand + 木 tree + 斤 axe: fresh", "a per-word meaning wins over the English")
+
+    def test_okurigana_english_is_clipped_at_a_separator(self):
+        t = table2()
+        u = [unit("行く", "w1")]
+        kanji_aids.attach_hints(u, t, {}, {}, words(w1="to carry out, to put into effect, to conduct"))
+        self.assertEqual(u[0]["hint"][0], "to carry out, to put into effect")
+
+    def test_leading_tilde_unit_is_labelled_suffix_unless_overridden(self):
+        t = table2()
+        u = [unit("〜年", "w1"), unit("〜年", "w2")]
+        kanji_aids.attach_hints(u[:1], t, {}, {}, words(w1="year(s)"))
+        kanji_aids.attach_hints(u[1:], t, {"〜年:年": "year (counter)"}, {}, words(w2="year(s)"))
+        self.assertEqual(u[0]["hint"], [None, "year (suffix)"])
+        self.assertEqual(u[1]["hint"], [None, "year (counter)"])
+
+    def test_parts_line_only_for_semantic_radicals(self):
+        t = table2()
+        u = [unit("新", "w1"), unit("何", "w2"), unit("時", "w3"), unit("花", "w4"), unit("好", "w5")]
+        kanji_aids.attach_hints(u, t, {}, {}, words(w1="new", w2="what", w3="time", w4="flower", w5="good"))
+        self.assertEqual(u[0]["hint"], ["立 stand + 木 tree + 斤 axe: new"])
+        self.assertEqual(u[1]["hint"], ["what"], "a part without a KANJIDIC gloss or a known search piece (化) drops the whole line")
+        self.assertEqual(u[2]["hint"], ["寸 measurement + 日 day: time, hour"], "every part has a one-word gloss")
+        self.assertEqual(u[3]["hint"], ["flower"], "化 is a known search piece")
+
+    def test_compound_breakdown_follows_the_same_filter_and_a_hook_story_replaces_it(self):
+        t = table2()
+        u = [unit("何時", "w1"), unit("花束", "w2")]
+        t["束"] = {"meaning": "bundle", "glosses": ["bundle"], "on": [], "kun": [], "parts": []}
+        kanji_aids.attach_hints(u, t, {}, {"花": "艹 grass over 化 change: flower"}, words(w1="what time", w2="bouquet"))
+        self.assertEqual(u[0]["hint"], ["what", "time: 寸 measurement + 日 day"])
+        self.assertEqual(u[1]["hint"], ["flower: 艹 grass over 化 change", "bundle"])
+
+    def test_one_character_unit_meaning_override_and_hook_collisions(self):
+        t = table2()
+        u = [unit("子", "w1"), unit("学", "w2")]
+        kanji_aids.attach_hints(u, t, {"子:子": "child (suffix)", "学:学": "school"}, {"学": "子 child under a roof: study"}, words(w1="x", w2="x"))
+        self.assertEqual(u[0]["hint"], ["child (suffix)"])
+        self.assertEqual(u[1]["hint"], ["子 child under a roof: school"], "the story of the hook, the meaning of the unit override")
+
+    def test_unused_hook_fails(self):
+        with self.assertRaises(SystemExit):
+            kanji_aids.attach_hints([unit("子")], table2(), {}, {"学": "a: b"}, words(w1="child"))
+
+
+class CommittedTables(unittest.TestCase):
+    def test_overrides_shape(self):
+        import json
+        data = json.loads((ROOT / "tools" / "ja_hints_overrides.json").read_text(encoding="utf-8"))
+        for k, v in data.items():
+            if k != "_meanings":
+                self.assertEqual(v.count(": "), 1, f"hook {k}: exactly one ': ' (story: meaning)")
+                self.assertLessEqual(len(v), 60, f"hook {k}")
+        for k, v in data["_meanings"].items():
+            self.assertLessEqual(len(v), 60, f"meaning {k}")
+            self.assertTrue(len(k) == 1 or (len(k.partition(":")[2]) == 1 and k.partition(":")[0] != ""), k)
+
+    def test_table_has_glosses_for_every_kanji_with_a_meaning(self):
+        import json
+        t = json.loads((ROOT / "tools" / "ja_hints.json").read_text(encoding="utf-8"))
+        for c, e in t.items():
+            self.assertTrue(e["glosses"] or e.get("fixed"), c)
 
 
 if __name__ == "__main__":

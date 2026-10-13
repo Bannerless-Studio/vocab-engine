@@ -1,12 +1,17 @@
 {
  "々": {
   "meaning": "repeats the kanji before it",
+  "glosses": [],
   "on": [],
   "kun": [],
-  "parts": []
+  "parts": [],
+  "fixed": true
  },
  "一": {
   "meaning": "one",
+  "glosses": [
+   "one"
+  ],
   "on": [
    "イチ",
    "イツ"
@@ -19,6 +24,9 @@
  },
  "七": {
   "meaning": "seven",
+  "glosses": [
+   "seven"
+  ],
   "on": [
    "シチ"
   ],
@@ -44,6 +52,10 @@
  },
  "万": {
   "meaning": "ten thousand, 10,000",
+  "glosses": [
+   "ten thousand",
+   "10,000"
+  ],
   "on": [
    "マン",
    "バン"
@@ -64,6 +76,19 @@
  },
  "丈": {
   "meaning": "length, ten shaku",
+  "glosses": [
+   "length",
+   "ten shaku",
+   "measure",
+   "Mr.",
+   "Ms.",
+   "height",
+   "stature",
+   "all (one has)",
+   "only",
+   "that's all",
+   "merely"
+  ],
   "on": [
    "ジョウ"
   ],
@@ -88,6 +113,9 @@
  },
  "三": {
   "meaning": "three",
+  "glosses": [
+   "three"
+  ],
   "on": [
    "サン",
    "ゾウ"
@@ -110,6 +138,10 @@
  },
  "上": {
   "meaning": "above, up",
+  "glosses": [
+   "above",
+   "up"
+  ],
   "on": [
    "ジョウ",
    "ショウ",
@@ -145,6 +177,14 @@
  },
  "下": {
   "meaning": "below, down",
+  "glosses": [
+   "below",
+   "down",
+   "descend",
+   "give",
+   "low",
+   "inferior"
+  ],
   "on": [
    "カ",
    "ゲ"
@@ -175,7 +215,14 @@
   ]
  },
  "不": {
-  "meaning": "negative, non-",
+  "meaning": "(prefix) not",
+  "glosses": [
+   "negative",
+   "non-",
+   "bad",
+   "ugly",
+   "clumsy"
+  ],
   "on": [
    "フ",
    "ブ"
@@ -194,10 +241,22 @@
     "丶",
     "dot"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "与": {
   "meaning": "bestow, participate in",
+  "glosses": [
+   "bestow",
+   "participate in",
+   "give",
+   "award",
+   "impart",
+   "provide",
+   "cause",
+   "gift",
+   "godsend"
+  ],
   "on": [
    "ヨ"
   ],
@@ -224,6 +283,12 @@
  },
  "世": {
   "meaning": "generation, world",
+  "glosses": [
+   "generation",
+   "world",
+   "society",
+   "public"
+  ],
   "on": [
    "セイ",
    "セ",
@@ -241,6 +306,10 @@
  },
  "丘": {
   "meaning": "hill, knoll",
+  "glosses": [
+   "hill",
+   "knoll"
+  ],
   "on": [
    "キュウ"
   ],
@@ -260,6 +329,12 @@
  },
  "両": {
   "meaning": "both, old Japanese coin",
+  "glosses": [
+   "both",
+   "old Japanese coin",
+   "counter for carriages (e.g., in a train)",
+   "two"
+  ],
   "on": [
    "リョウ"
   ],
@@ -284,6 +359,16 @@
  },
  "並": {
   "meaning": "row, and",
+  "glosses": [
+   "row",
+   "and",
+   "besides",
+   "as well as",
+   "line up",
+   "rank with",
+   "rival",
+   "equal"
+  ],
   "on": [
    "ヘイ",
    "ホウ"
@@ -312,6 +397,13 @@
  },
  "中": {
   "meaning": "in, inside",
+  "glosses": [
+   "in",
+   "inside",
+   "middle",
+   "mean",
+   "center"
+  ],
   "on": [
    "チュウ"
   ],
@@ -329,6 +421,13 @@
  },
  "主": {
   "meaning": "lord, chief",
+  "glosses": [
+   "lord",
+   "chief",
+   "master",
+   "main thing",
+   "principal"
+  ],
   "on": [
    "シュ",
    "ス",
@@ -352,6 +451,10 @@
  },
  "久": {
   "meaning": "long time, old story",
+  "glosses": [
+   "long time",
+   "old story"
+  ],
   "on": [
    "キュウ",
    "ク"
@@ -372,6 +475,16 @@
  },
  "乗": {
   "meaning": "ride, power",
+  "glosses": [
+   "ride",
+   "power",
+   "multiplication",
+   "record",
+   "counter for vehicles",
+   "board",
+   "mount",
+   "join"
+  ],
   "on": [
    "ジョウ",
    "ショウ"
@@ -402,6 +515,9 @@
  },
  "九": {
   "meaning": "nine",
+  "glosses": [
+   "nine"
+  ],
   "on": [
    "キュウ",
    "ク"
@@ -414,6 +530,10 @@
  },
  "乳": {
   "meaning": "milk, breasts",
+  "glosses": [
+   "milk",
+   "breasts"
+  ],
   "on": [
    "ニュウ"
   ],
@@ -438,6 +558,10 @@
  },
  "了": {
   "meaning": "complete, finish",
+  "glosses": [
+   "complete",
+   "finish"
+  ],
   "on": [
    "リョウ"
   ],
@@ -455,6 +579,12 @@
  },
  "予": {
   "meaning": "beforehand, previous",
+  "glosses": [
+   "beforehand",
+   "previous",
+   "myself",
+   "I"
+  ],
   "on": [
    "ヨ",
    "シャ"
@@ -479,6 +609,11 @@
  },
  "争": {
   "meaning": "contend, dispute",
+  "glosses": [
+   "contend",
+   "dispute",
+   "argue"
+  ],
   "on": [
    "ソウ"
   ],
@@ -507,6 +642,14 @@
  },
  "事": {
   "meaning": "matter, thing",
+  "glosses": [
+   "matter",
+   "thing",
+   "fact",
+   "business",
+   "reason",
+   "possibly"
+  ],
   "on": [
    "ジ",
    "ズ"
@@ -537,6 +680,9 @@
  },
  "二": {
   "meaning": "two",
+  "glosses": [
+   "two"
+  ],
   "on": [
    "ニ",
    "ジ"
@@ -550,6 +696,11 @@
  },
  "互": {
   "meaning": "mutually, reciprocally",
+  "glosses": [
+   "mutually",
+   "reciprocally",
+   "together"
+  ],
   "on": [
    "ゴ"
   ],
@@ -574,6 +725,9 @@
  },
  "五": {
   "meaning": "five",
+  "glosses": [
+   "five"
+  ],
   "on": [
    "ゴ"
   ],
@@ -585,6 +739,12 @@
  },
  "亡": {
   "meaning": "deceased, the late",
+  "glosses": [
+   "deceased",
+   "the late",
+   "dying",
+   "perish"
+  ],
   "on": [
    "ボウ",
    "モウ"
@@ -605,6 +765,12 @@
  },
  "交": {
   "meaning": "mingle, mixing",
+  "glosses": [
+   "mingle",
+   "mixing",
+   "association",
+   "coming & going"
+  ],
   "on": [
    "コウ"
   ],
@@ -633,6 +799,9 @@
  },
  "人": {
   "meaning": "person",
+  "glosses": [
+   "person"
+  ],
   "on": [
    "ジン",
    "ニン"
@@ -646,6 +815,9 @@
  },
  "今": {
   "meaning": "now",
+  "glosses": [
+   "now"
+  ],
   "on": [
    "コン",
    "キン"
@@ -666,6 +838,12 @@
  },
  "介": {
   "meaning": "jammed in, shellfish",
+  "glosses": [
+   "jammed in",
+   "shellfish",
+   "mediate",
+   "concern oneself with"
+  ],
   "on": [
    "カイ"
   ],
@@ -683,6 +861,12 @@
  },
  "仕": {
   "meaning": "attend, doing",
+  "glosses": [
+   "attend",
+   "doing",
+   "official",
+   "serve"
+  ],
   "on": [
    "シ",
    "ジ"
@@ -703,6 +887,11 @@
  },
  "他": {
   "meaning": "other, another",
+  "glosses": [
+   "other",
+   "another",
+   "the others"
+  ],
   "on": [
    "タ"
   ],
@@ -722,6 +911,12 @@
  },
  "付": {
   "meaning": "adhere, attach",
+  "glosses": [
+   "adhere",
+   "attach",
+   "refer to",
+   "append"
+  ],
   "on": [
    "フ"
   ],
@@ -755,6 +950,19 @@
  },
  "代": {
   "meaning": "substitute, change",
+  "glosses": [
+   "substitute",
+   "change",
+   "convert",
+   "replace",
+   "period",
+   "age",
+   "counter for decades of ages, eras, etc.",
+   "generation",
+   "charge",
+   "rate",
+   "fee"
+  ],
   "on": [
    "ダイ",
    "タイ"
@@ -783,6 +991,13 @@
  },
  "令": {
   "meaning": "orders, laws",
+  "glosses": [
+   "orders",
+   "laws",
+   "command",
+   "decree",
+   "good"
+  ],
   "on": [
    "レイ"
   ],
@@ -803,7 +1018,13 @@
   ]
  },
  "以": {
-  "meaning": "by means of, because",
+  "meaning": "from (a point on)",
+  "glosses": [
+   "by means of",
+   "because",
+   "in view of",
+   "compared with"
+  ],
   "on": [
    "イ"
   ],
@@ -819,10 +1040,15 @@
     "丶",
     "dot"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "仲": {
   "meaning": "go-between, relationship",
+  "glosses": [
+   "go-between",
+   "relationship"
+  ],
   "on": [
    "チュウ"
   ],
@@ -842,6 +1068,12 @@
  },
  "件": {
   "meaning": "affair, case",
+  "glosses": [
+   "affair",
+   "case",
+   "matter",
+   "item"
+  ],
   "on": [
    "ケン"
   ],
@@ -861,6 +1093,13 @@
  },
  "任": {
   "meaning": "responsibility, duty",
+  "glosses": [
+   "responsibility",
+   "duty",
+   "term",
+   "entrust to",
+   "appoint"
+  ],
   "on": [
    "ニン"
   ],
@@ -889,6 +1128,13 @@
  },
  "企": {
   "meaning": "undertake, scheme",
+  "glosses": [
+   "undertake",
+   "scheme",
+   "design",
+   "attempt",
+   "plan"
+  ],
   "on": [
    "キ"
   ],
@@ -909,6 +1155,12 @@
  },
  "休": {
   "meaning": "rest, day off",
+  "glosses": [
+   "rest",
+   "day off",
+   "retire",
+   "sleep"
+  ],
   "on": [
    "キュウ"
   ],
@@ -930,6 +1182,14 @@
  },
  "会": {
   "meaning": "meeting, meet",
+  "glosses": [
+   "meeting",
+   "meet",
+   "party",
+   "association",
+   "interview",
+   "join"
+  ],
   "on": [
    "カイ",
    "エ"
@@ -956,6 +1216,16 @@
  },
  "伝": {
   "meaning": "transmit, go along",
+  "glosses": [
+   "transmit",
+   "go along",
+   "walk along",
+   "follow",
+   "report",
+   "communicate",
+   "legend",
+   "tradition"
+  ],
   "on": [
    "デン",
    "テン"
@@ -985,6 +1255,13 @@
  },
  "伸": {
   "meaning": "expand, stretch",
+  "glosses": [
+   "expand",
+   "stretch",
+   "extend",
+   "lengthen",
+   "increase"
+  ],
   "on": [
    "シン"
   ],
@@ -1011,6 +1288,13 @@
  },
  "似": {
   "meaning": "becoming, resemble",
+  "glosses": [
+   "becoming",
+   "resemble",
+   "counterfeit",
+   "imitate",
+   "suitable"
+  ],
   "on": [
    "ジ"
   ],
@@ -1035,6 +1319,14 @@
  },
  "位": {
   "meaning": "rank, grade",
+  "glosses": [
+   "rank",
+   "grade",
+   "throne",
+   "crown",
+   "about",
+   "some"
+  ],
   "on": [
    "イ"
   ],
@@ -1055,6 +1347,11 @@
  },
  "低": {
   "meaning": "lower, short",
+  "glosses": [
+   "lower",
+   "short",
+   "humble"
+  ],
   "on": [
    "テイ"
   ],
@@ -1080,6 +1377,12 @@
  },
  "住": {
   "meaning": "dwell, reside",
+  "glosses": [
+   "dwell",
+   "reside",
+   "live",
+   "inhabit"
+  ],
   "on": [
    "ジュウ",
    "ヂュウ",
@@ -1107,6 +1410,13 @@
  },
  "体": {
   "meaning": "body, substance",
+  "glosses": [
+   "body",
+   "substance",
+   "object",
+   "reality",
+   "counter for images"
+  ],
   "on": [
    "タイ",
    "テイ"
@@ -1132,6 +1442,9 @@
  },
  "何": {
   "meaning": "what",
+  "glosses": [
+   "what"
+  ],
   "on": [
    "カ"
   ],
@@ -1162,6 +1475,13 @@
  },
  "余": {
   "meaning": "too much, myself",
+  "glosses": [
+   "too much",
+   "myself",
+   "surplus",
+   "other",
+   "remainder"
+  ],
   "on": [
    "ヨ"
   ],
@@ -1204,6 +1524,12 @@
  },
  "作": {
   "meaning": "make, production",
+  "glosses": [
+   "make",
+   "production",
+   "prepare",
+   "build"
+  ],
   "on": [
    "サク",
    "サ"
@@ -1234,6 +1560,15 @@
  },
  "使": {
   "meaning": "use, send on a mission",
+  "glosses": [
+   "use",
+   "send on a mission",
+   "order",
+   "messenger",
+   "envoy",
+   "ambassador",
+   "cause"
+  ],
   "on": [
    "シ"
   ],
@@ -1264,6 +1599,12 @@
  },
  "例": {
   "meaning": "example, custom",
+  "glosses": [
+   "example",
+   "custom",
+   "usage",
+   "precedent"
+  ],
   "on": [
    "レイ"
   ],
@@ -1287,6 +1628,13 @@
  },
  "供": {
   "meaning": "submit, offer",
+  "glosses": [
+   "submit",
+   "offer",
+   "present",
+   "serve (meal)",
+   "accompany"
+  ],
   "on": [
    "キョウ",
    "ク",
@@ -1319,6 +1667,13 @@
  },
  "依": {
   "meaning": "reliant, depend on",
+  "glosses": [
+   "reliant",
+   "depend on",
+   "consequently",
+   "therefore",
+   "due to"
+  ],
   "on": [
    "イ",
    "エ"
@@ -1343,6 +1698,10 @@
  },
  "価": {
   "meaning": "value, price",
+  "glosses": [
+   "value",
+   "price"
+  ],
   "on": [
    "カ",
    "ケ"
@@ -1363,6 +1722,14 @@
  },
  "便": {
   "meaning": "convenience, facility",
+  "glosses": [
+   "convenience",
+   "facility",
+   "excrement",
+   "feces",
+   "letter",
+   "chance"
+  ],
   "on": [
    "ベン",
    "ビン"
@@ -1395,6 +1762,12 @@
  },
  "係": {
   "meaning": "person in charge, connection",
+  "glosses": [
+   "person in charge",
+   "connection",
+   "duty",
+   "concern oneself"
+  ],
   "on": [
    "ケイ"
   ],
@@ -1429,6 +1802,14 @@
  },
  "保": {
   "meaning": "protect, guarantee",
+  "glosses": [
+   "protect",
+   "guarantee",
+   "keep",
+   "preserve",
+   "sustain",
+   "support"
+  ],
   "on": [
    "ホ",
    "ホウ"
@@ -1453,6 +1834,12 @@
  },
  "信": {
   "meaning": "faith, truth",
+  "glosses": [
+   "faith",
+   "truth",
+   "fidelity",
+   "trust"
+  ],
   "on": [
    "シン"
   ],
@@ -1470,6 +1857,12 @@
  },
  "修": {
   "meaning": "discipline, conduct oneself well",
+  "glosses": [
+   "discipline",
+   "conduct oneself well",
+   "study",
+   "master"
+  ],
   "on": [
    "シュウ",
    "シュ"
@@ -1499,6 +1892,10 @@
  },
  "俺": {
   "meaning": "I, myself",
+  "glosses": [
+   "I",
+   "myself"
+  ],
   "on": [
    "エン"
   ],
@@ -1527,6 +1924,10 @@
  },
  "個": {
   "meaning": "individual, counter for articles",
+  "glosses": [
+   "individual",
+   "counter for articles"
+  ],
   "on": [
    "コ",
    "カ"
@@ -1553,6 +1954,12 @@
  },
  "倍": {
   "meaning": "double, twice",
+  "glosses": [
+   "double",
+   "twice",
+   "times",
+   "fold"
+  ],
   "on": [
    "バイ"
   ],
@@ -1574,6 +1981,13 @@
  },
  "倒": {
   "meaning": "overthrow, fall",
+  "glosses": [
+   "overthrow",
+   "fall",
+   "collapse",
+   "drop",
+   "break down"
+  ],
   "on": [
    "トウ"
   ],
@@ -1610,6 +2024,10 @@
  },
  "借": {
   "meaning": "borrow, rent",
+  "glosses": [
+   "borrow",
+   "rent"
+  ],
   "on": [
    "シャク"
   ],
@@ -1637,6 +2055,11 @@
  },
  "値": {
   "meaning": "price, cost",
+  "glosses": [
+   "price",
+   "cost",
+   "value"
+  ],
   "on": [
    "チ"
   ],
@@ -1665,6 +2088,14 @@
  },
  "偉": {
   "meaning": "admirable, greatness",
+  "glosses": [
+   "admirable",
+   "greatness",
+   "remarkable",
+   "conceited",
+   "famous",
+   "excellent"
+  ],
   "on": [
    "イ"
   ],
@@ -1688,6 +2119,12 @@
  },
  "健": {
   "meaning": "healthy, health",
+  "glosses": [
+   "healthy",
+   "health",
+   "strength",
+   "persistence"
+  ],
   "on": [
    "ケン"
   ],
@@ -1711,6 +2148,12 @@
  },
  "側": {
   "meaning": "side, lean",
+  "glosses": [
+   "side",
+   "lean",
+   "oppose",
+   "regret"
+  ],
   "on": [
    "ソク"
   ],
@@ -1744,6 +2187,13 @@
  },
  "偶": {
   "meaning": "accidentally, even number",
+  "glosses": [
+   "accidentally",
+   "even number",
+   "couple",
+   "man & wife",
+   "same kind"
+  ],
   "on": [
    "グウ"
   ],
@@ -1775,6 +2225,9 @@
  },
  "傘": {
   "meaning": "umbrella",
+  "glosses": [
+   "umbrella"
+  ],
   "on": [
    "サン"
   ],
@@ -1798,6 +2251,11 @@
  },
  "備": {
   "meaning": "equip, provision",
+  "glosses": [
+   "equip",
+   "provision",
+   "preparation"
+  ],
   "on": [
    "ビ"
   ],
@@ -1827,6 +2285,11 @@
  },
  "催": {
   "meaning": "sponsor, hold (a meeting)",
+  "glosses": [
+   "sponsor",
+   "hold (a meeting)",
+   "give (a dinner)"
+  ],
   "on": [
    "サイ"
   ],
@@ -1851,6 +2314,18 @@
  },
  "傷": {
   "meaning": "wound, hurt",
+  "glosses": [
+   "wound",
+   "hurt",
+   "injure",
+   "impair",
+   "pain",
+   "injury",
+   "cut",
+   "gash",
+   "scar",
+   "weak point"
+  ],
   "on": [
    "ショウ"
   ],
@@ -1896,6 +2371,16 @@
  },
  "傾": {
   "meaning": "lean, incline",
+  "glosses": [
+   "lean",
+   "incline",
+   "tilt",
+   "trend",
+   "wane",
+   "sink",
+   "ruin",
+   "bias"
+  ],
   "on": [
    "ケイ"
   ],
@@ -1935,6 +2420,10 @@
  },
  "働": {
   "meaning": "work, (kokuji)",
+  "glosses": [
+   "work",
+   "(kokuji)"
+  ],
   "on": [
    "ドウ"
   ],
@@ -1965,7 +2454,14 @@
   ]
  },
  "像": {
-  "meaning": "statue, picture",
+  "meaning": "image, figure",
+  "glosses": [
+   "statue",
+   "picture",
+   "image",
+   "figure",
+   "portrait"
+  ],
   "on": [
    "ゾウ"
   ],
@@ -1991,10 +2487,17 @@
     "一",
     "one"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "僕": {
   "meaning": "me, I (male)",
+  "glosses": [
+   "me",
+   "I (male)",
+   "servant",
+   "manservant"
+  ],
   "on": [
    "ボク"
   ],
@@ -2030,6 +2533,14 @@
  },
  "優": {
   "meaning": "tenderness, excel",
+  "glosses": [
+   "tenderness",
+   "excel",
+   "surpass",
+   "actor",
+   "superiority",
+   "gentleness"
+  ],
   "on": [
    "ユウ",
    "ウ"
@@ -2072,6 +2583,11 @@
  },
  "元": {
   "meaning": "beginning, former time",
+  "glosses": [
+   "beginning",
+   "former time",
+   "origin"
+  ],
   "on": [
    "ゲン",
    "ガン"
@@ -2092,6 +2608,10 @@
  },
  "兄": {
   "meaning": "elder brother, big brother",
+  "glosses": [
+   "elder brother",
+   "big brother"
+  ],
   "on": [
    "ケイ",
    "キョウ"
@@ -2112,6 +2632,13 @@
  },
  "先": {
   "meaning": "before, ahead",
+  "glosses": [
+   "before",
+   "ahead",
+   "previous",
+   "future",
+   "precedence"
+  ],
   "on": [
    "セン"
   ],
@@ -2136,6 +2663,10 @@
  },
  "光": {
   "meaning": "ray, light",
+  "glosses": [
+   "ray",
+   "light"
+  ],
   "on": [
    "コウ"
   ],
@@ -2160,6 +2691,11 @@
  },
  "党": {
   "meaning": "party, faction",
+  "glosses": [
+   "party",
+   "faction",
+   "clique"
+  ],
   "on": [
    "トウ"
   ],
@@ -2188,6 +2724,10 @@
  },
  "入": {
   "meaning": "enter, insert",
+  "glosses": [
+   "enter",
+   "insert"
+  ],
   "on": [
    "ニュウ",
    "ジュ"
@@ -2204,6 +2744,13 @@
  },
  "全": {
   "meaning": "whole, entire",
+  "glosses": [
+   "whole",
+   "entire",
+   "all",
+   "complete",
+   "fulfill"
+  ],
   "on": [
    "ゼン"
   ],
@@ -2228,6 +2775,9 @@
  },
  "八": {
   "meaning": "eight",
+  "glosses": [
+   "eight"
+  ],
   "on": [
    "ハチ",
    "ハツ"
@@ -2246,7 +2796,13 @@
   ]
  },
  "公": {
-  "meaning": "public, prince",
+  "meaning": "public",
+  "glosses": [
+   "public",
+   "prince",
+   "official",
+   "governmental"
+  ],
   "on": [
    "コウ",
    "ク"
@@ -2263,10 +2819,14 @@
     "厶",
     "I"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "六": {
   "meaning": "six",
+  "glosses": [
+   "six"
+  ],
   "on": [
    "ロク",
    "リク"
@@ -2290,6 +2850,15 @@
  },
  "共": {
   "meaning": "together, both",
+  "glosses": [
+   "together",
+   "both",
+   "neither",
+   "all",
+   "and",
+   "alike",
+   "with"
+  ],
   "on": [
    "キョウ"
   ],
@@ -2315,6 +2884,15 @@
  },
  "兵": {
   "meaning": "soldier, private",
+  "glosses": [
+   "soldier",
+   "private",
+   "troops",
+   "army",
+   "warfare",
+   "strategy",
+   "tactics"
+  ],
   "on": [
    "ヘイ",
    "ヒョウ"
@@ -2339,6 +2917,14 @@
  },
  "具": {
   "meaning": "tool, utensil",
+  "glosses": [
+   "tool",
+   "utensil",
+   "means",
+   "possess",
+   "ingredients",
+   "counter for armor, suits, sets of furniture"
+  ],
   "on": [
    "グ"
   ],
@@ -2363,6 +2949,14 @@
  },
  "内": {
   "meaning": "inside, within",
+  "glosses": [
+   "inside",
+   "within",
+   "between",
+   "among",
+   "house",
+   "home"
+  ],
   "on": [
    "ナイ",
    "ダイ"
@@ -2383,6 +2977,11 @@
  },
  "円": {
   "meaning": "circle, yen",
+  "glosses": [
+   "circle",
+   "yen",
+   "round"
+  ],
   "on": [
    "エン"
   ],
@@ -2410,6 +3009,11 @@
  },
  "冊": {
   "meaning": "tome, counter for books",
+  "glosses": [
+   "tome",
+   "counter for books",
+   "volume"
+  ],
   "on": [
    "サツ",
    "サク"
@@ -2438,6 +3042,11 @@
  },
  "再": {
   "meaning": "again, twice",
+  "glosses": [
+   "again",
+   "twice",
+   "second time"
+  ],
   "on": [
    "サイ",
    "サ"
@@ -2462,6 +3071,10 @@
  },
  "冗": {
   "meaning": "superfluous, uselessness",
+  "glosses": [
+   "superfluous",
+   "uselessness"
+  ],
   "on": [
    "ジョウ"
   ],
@@ -2479,6 +3092,11 @@
  },
  "写": {
   "meaning": "copy, be photographed",
+  "glosses": [
+   "copy",
+   "be photographed",
+   "describe"
+  ],
   "on": [
    "シャ",
    "ジャ"
@@ -2506,6 +3124,9 @@
  },
  "冬": {
   "meaning": "winter",
+  "glosses": [
+   "winter"
+  ],
   "on": [
    "トウ"
   ],
@@ -2529,6 +3150,11 @@
  },
  "冷": {
   "meaning": "cool, cold (beer, person)",
+  "glosses": [
+   "cool",
+   "cold (beer, person)",
+   "chill"
+  ],
   "on": [
    "レイ"
   ],
@@ -2563,6 +3189,16 @@
  },
  "処": {
   "meaning": "dispose, manage",
+  "glosses": [
+   "dispose",
+   "manage",
+   "deal with",
+   "sentence",
+   "condemn",
+   "act",
+   "behave",
+   "place"
+  ],
   "on": [
    "ショ"
   ],
@@ -2588,6 +3224,14 @@
  },
  "出": {
   "meaning": "exit, leave",
+  "glosses": [
+   "exit",
+   "leave",
+   "go out",
+   "come out",
+   "put out",
+   "protrude"
+  ],
   "on": [
    "シュツ",
    "スイ"
@@ -2613,6 +3257,21 @@
  },
  "分": {
   "meaning": "part, minute of time",
+  "glosses": [
+   "part",
+   "minute of time",
+   "segment",
+   "share",
+   "degree",
+   "one's lot",
+   "duty",
+   "understand",
+   "know",
+   "rate",
+   "1%",
+   "chances",
+   "shaku/100"
+  ],
   "on": [
    "ブン",
    "フン",
@@ -2638,6 +3297,11 @@
  },
  "切": {
   "meaning": "cut, cutoff",
+  "glosses": [
+   "cut",
+   "cutoff",
+   "be sharp"
+  ],
   "on": [
    "セツ",
    "サイ"
@@ -2667,6 +3331,13 @@
  },
  "列": {
   "meaning": "file, row",
+  "glosses": [
+   "file",
+   "row",
+   "rank",
+   "tier",
+   "column"
+  ],
   "on": [
    "レツ",
    "レ"
@@ -2685,6 +3356,10 @@
  },
  "初": {
   "meaning": "first time, beginning",
+  "glosses": [
+   "first time",
+   "beginning"
+  ],
   "on": [
    "ショ"
   ],
@@ -2706,6 +3381,13 @@
  },
  "判": {
   "meaning": "judgement, judgment",
+  "glosses": [
+   "judgement",
+   "judgment",
+   "signature",
+   "stamp",
+   "seal"
+  ],
   "on": [
    "ハン",
    "バン"
@@ -2734,6 +3416,15 @@
  },
  "別": {
   "meaning": "separate, branch off",
+  "glosses": [
+   "separate",
+   "branch off",
+   "diverge",
+   "fork",
+   "another",
+   "extra",
+   "specially"
+  ],
   "on": [
    "ベツ"
   ],
@@ -2762,6 +3453,11 @@
  },
  "利": {
   "meaning": "profit, advantage",
+  "glosses": [
+   "profit",
+   "advantage",
+   "benefit"
+  ],
   "on": [
    "リ"
   ],
@@ -2781,6 +3477,13 @@
  },
  "到": {
   "meaning": "arrival, proceed",
+  "glosses": [
+   "arrival",
+   "proceed",
+   "reach",
+   "attain",
+   "result in"
+  ],
   "on": [
    "トウ"
   ],
@@ -2808,6 +3511,11 @@
  },
  "制": {
   "meaning": "system, law",
+  "glosses": [
+   "system",
+   "law",
+   "rule"
+  ],
   "on": [
    "セイ"
   ],
@@ -2837,6 +3545,15 @@
  },
  "刻": {
   "meaning": "engrave, cut fine",
+  "glosses": [
+   "engrave",
+   "cut fine",
+   "chop",
+   "hash",
+   "mince",
+   "time",
+   "carving"
+  ],
   "on": [
    "コク"
   ],
@@ -2869,6 +3586,13 @@
  },
  "則": {
   "meaning": "rule, law",
+  "glosses": [
+   "rule",
+   "law",
+   "follow",
+   "based on",
+   "model after"
+  ],
   "on": [
    "ソク"
   ],
@@ -2898,6 +3622,10 @@
  },
  "前": {
   "meaning": "in front, before",
+  "glosses": [
+   "in front",
+   "before"
+  ],
   "on": [
    "ゼン"
   ],
@@ -2926,6 +3654,14 @@
  },
  "割": {
   "meaning": "proportion, comparatively",
+  "glosses": [
+   "proportion",
+   "comparatively",
+   "divide",
+   "cut",
+   "separate",
+   "split"
+  ],
   "on": [
    "カツ"
   ],
@@ -2965,6 +3701,10 @@
  },
  "劇": {
   "meaning": "drama, play",
+  "glosses": [
+   "drama",
+   "play"
+  ],
   "on": [
    "ゲキ"
   ],
@@ -2998,6 +3738,14 @@
  },
  "力": {
   "meaning": "power, strength",
+  "glosses": [
+   "power",
+   "strength",
+   "strong",
+   "strain",
+   "bear up",
+   "exert"
+  ],
   "on": [
    "リョク",
    "リキ",
@@ -3010,6 +3758,13 @@
  },
  "功": {
   "meaning": "achievement, merits",
+  "glosses": [
+   "achievement",
+   "merits",
+   "success",
+   "honor",
+   "credit"
+  ],
   "on": [
    "コウ",
    "ク"
@@ -3030,6 +3785,14 @@
  },
  "加": {
   "meaning": "add, addition",
+  "glosses": [
+   "add",
+   "addition",
+   "increase",
+   "join",
+   "include",
+   "Canada"
+  ],
   "on": [
    "カ"
   ],
@@ -3050,6 +3813,11 @@
  },
  "助": {
   "meaning": "help, rescue",
+  "glosses": [
+   "help",
+   "rescue",
+   "assist"
+  ],
   "on": [
    "ジョ"
   ],
@@ -3072,6 +3840,11 @@
  },
  "努": {
   "meaning": "toil, diligent",
+  "glosses": [
+   "toil",
+   "diligent",
+   "as much as possible"
+  ],
   "on": [
    "ド"
   ],
@@ -3095,6 +3868,13 @@
  },
  "労": {
   "meaning": "labor, thank for",
+  "glosses": [
+   "labor",
+   "thank for",
+   "reward for",
+   "toil",
+   "trouble"
+  ],
   "on": [
    "ロウ"
   ],
@@ -3123,6 +3903,12 @@
  },
  "効": {
   "meaning": "merit, efficacy",
+  "glosses": [
+   "merit",
+   "efficacy",
+   "efficiency",
+   "benefit"
+  ],
   "on": [
    "コウ"
   ],
@@ -3148,6 +3934,13 @@
  },
  "勇": {
   "meaning": "courage, cheer up",
+  "glosses": [
+   "courage",
+   "cheer up",
+   "be in high spirits",
+   "bravery",
+   "heroism"
+  ],
   "on": [
    "ユウ"
   ],
@@ -3171,6 +3964,14 @@
  },
  "勉": {
   "meaning": "exertion, endeavour",
+  "glosses": [
+   "exertion",
+   "endeavour",
+   "encourage",
+   "strive",
+   "make effort",
+   "diligent"
+  ],
   "on": [
    "ベン"
   ],
@@ -3198,6 +3999,14 @@
  },
  "動": {
   "meaning": "move, motion",
+  "glosses": [
+   "move",
+   "motion",
+   "change",
+   "confusion",
+   "shift",
+   "shake"
+  ],
   "on": [
    "ドウ"
   ],
@@ -3230,6 +4039,10 @@
  },
  "務": {
   "meaning": "task, duties",
+  "glosses": [
+   "task",
+   "duties"
+  ],
   "on": [
    "ム"
   ],
@@ -3253,6 +4066,12 @@
  },
  "勝": {
   "meaning": "victory, win",
+  "glosses": [
+   "victory",
+   "win",
+   "prevail",
+   "excel"
+  ],
   "on": [
    "ショウ"
   ],
@@ -3292,6 +4111,13 @@
  },
  "勧": {
   "meaning": "persuade, recommend",
+  "glosses": [
+   "persuade",
+   "recommend",
+   "advise",
+   "encourage",
+   "offer"
+  ],
   "on": [
    "カン",
    "ケン"
@@ -3324,6 +4150,13 @@
  },
  "匂": {
   "meaning": "fragrant, stink",
+  "glosses": [
+   "fragrant",
+   "stink",
+   "glow",
+   "insinuate",
+   "(kokuji)"
+  ],
   "on": [],
   "kun": [
    "におう",
@@ -3343,6 +4176,14 @@
  },
  "化": {
   "meaning": "change, take the form of",
+  "glosses": [
+   "change",
+   "take the form of",
+   "influence",
+   "enchant",
+   "delude",
+   "-ization"
+  ],
   "on": [
    "カ",
    "ケ"
@@ -3362,6 +4203,9 @@
  },
  "北": {
   "meaning": "north",
+  "glosses": [
+   "north"
+  ],
   "on": [
    "ホク"
   ],
@@ -3381,6 +4225,12 @@
  },
  "匹": {
   "meaning": "equal, head",
+  "glosses": [
+   "equal",
+   "head",
+   "counter for small animals",
+   "roll of cloth"
+  ],
   "on": [
    "ヒツ"
   ],
@@ -3400,6 +4250,10 @@
  },
  "医": {
   "meaning": "doctor, medicine",
+  "glosses": [
+   "doctor",
+   "medicine"
+  ],
   "on": [
    "イ"
   ],
@@ -3425,6 +4279,9 @@
  },
  "十": {
   "meaning": "ten",
+  "glosses": [
+   "ten"
+  ],
   "on": [
    "ジュウ",
    "ジッ",
@@ -3439,6 +4296,9 @@
  },
  "千": {
   "meaning": "thousand",
+  "glosses": [
+   "thousand"
+  ],
   "on": [
    "セン"
   ],
@@ -3458,6 +4318,12 @@
  },
  "午": {
   "meaning": "noon, sign of the horse",
+  "glosses": [
+   "noon",
+   "sign of the horse",
+   "11AM-1PM",
+   "seventh sign of Chinese zodiac"
+  ],
   "on": [
    "ゴ"
   ],
@@ -3485,6 +4351,13 @@
  },
  "半": {
   "meaning": "half, middle",
+  "glosses": [
+   "half",
+   "middle",
+   "odd number",
+   "semi-",
+   "part-"
+  ],
   "on": [
    "ハン"
   ],
@@ -3508,6 +4381,12 @@
  },
  "卒": {
   "meaning": "graduate, soldier",
+  "glosses": [
+   "graduate",
+   "soldier",
+   "private",
+   "die"
+  ],
   "on": [
    "ソツ",
    "シュツ"
@@ -3536,6 +4415,10 @@
  },
  "協": {
   "meaning": "co-, cooperation",
+  "glosses": [
+   "co-",
+   "cooperation"
+  ],
   "on": [
    "キョウ"
   ],
@@ -3553,6 +4436,9 @@
  },
  "南": {
   "meaning": "south",
+  "glosses": [
+   "south"
+  ],
   "on": [
    "ナン",
    "ナ"
@@ -3581,6 +4467,12 @@
  },
  "単": {
   "meaning": "simple, one",
+  "glosses": [
+   "simple",
+   "one",
+   "single",
+   "merely"
+  ],
   "on": [
    "タン"
   ],
@@ -3604,6 +4496,15 @@
  },
  "博": {
   "meaning": "Dr., command",
+  "glosses": [
+   "Dr.",
+   "command",
+   "esteem",
+   "win acclaim",
+   "Ph.D.",
+   "exposition",
+   "fair"
+  ],
   "on": [
    "ハク",
    "バク"
@@ -3630,6 +4531,18 @@
  },
  "印": {
   "meaning": "stamp, seal",
+  "glosses": [
+   "stamp",
+   "seal",
+   "mark",
+   "imprint",
+   "symbol",
+   "emblem",
+   "trademark",
+   "evidence",
+   "souvenir",
+   "India"
+  ],
   "on": [
    "イン"
   ],
@@ -3647,6 +4560,11 @@
  },
  "危": {
   "meaning": "dangerous, fear",
+  "glosses": [
+   "dangerous",
+   "fear",
+   "uneasy"
+  ],
   "on": [
    "キ"
   ],
@@ -3672,6 +4590,12 @@
  },
  "卵": {
   "meaning": "egg, ovum",
+  "glosses": [
+   "egg",
+   "ovum",
+   "spawn",
+   "roe"
+  ],
   "on": [
    "ラン"
   ],
@@ -3699,6 +4623,16 @@
  },
  "原": {
   "meaning": "meadow, original",
+  "glosses": [
+   "meadow",
+   "original",
+   "primitive",
+   "field",
+   "plain",
+   "prairie",
+   "tundra",
+   "wilderness"
+  ],
   "on": [
    "ゲン"
   ],
@@ -3722,6 +4656,12 @@
  },
  "厳": {
   "meaning": "stern, strictness",
+  "glosses": [
+   "stern",
+   "strictness",
+   "severity",
+   "rigidity"
+  ],
   "on": [
    "ゲン",
    "ゴン"
@@ -3757,6 +4697,15 @@
  },
  "去": {
   "meaning": "gone, past",
+  "glosses": [
+   "gone",
+   "past",
+   "quit",
+   "leave",
+   "elapse",
+   "eliminate",
+   "divorce"
+  ],
   "on": [
    "キョ",
    "コ"
@@ -3778,6 +4727,19 @@
  },
  "参": {
   "meaning": "nonplussed, three (in documents)",
+  "glosses": [
+   "nonplussed",
+   "three (in documents)",
+   "going",
+   "coming",
+   "visiting",
+   "visit",
+   "be defeated",
+   "die",
+   "be madly in love",
+   "participate",
+   "take part in"
+  ],
   "on": [
    "サン",
    "シン"
@@ -3805,6 +4767,12 @@
  },
  "及": {
   "meaning": "reach out, exert",
+  "glosses": [
+   "reach out",
+   "exert",
+   "exercise",
+   "cause"
+  ],
   "on": [
    "キュウ"
   ],
@@ -3831,6 +4799,9 @@
  },
  "友": {
   "meaning": "friend",
+  "glosses": [
+   "friend"
+  ],
   "on": [
    "ユウ"
   ],
@@ -3853,7 +4824,10 @@
   ]
  },
  "反": {
-  "meaning": "anti-",
+  "meaning": "against, opposite",
+  "glosses": [
+   "anti-"
+  ],
   "on": [
    "ハン",
    "ホン",
@@ -3876,10 +4850,19 @@
     "厂",
     "wild goose"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "収": {
   "meaning": "income, obtain",
+  "glosses": [
+   "income",
+   "obtain",
+   "reap",
+   "pay",
+   "supply",
+   "store"
+  ],
   "on": [
    "シュウ"
   ],
@@ -3896,6 +4879,11 @@
  },
  "取": {
   "meaning": "take, fetch",
+  "glosses": [
+   "take",
+   "fetch",
+   "take up"
+  ],
   "on": [
    "シュ"
   ],
@@ -3918,7 +4906,16 @@
   ]
  },
  "受": {
-  "meaning": "accept, undergo",
+  "meaning": "to receive",
+  "glosses": [
+   "accept",
+   "undergo",
+   "answer (phone)",
+   "take",
+   "get",
+   "catch",
+   "receive"
+  ],
   "on": [
    "ジュ"
   ],
@@ -3940,10 +4937,14 @@
     "冖",
     "wa-shaped crown"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "口": {
   "meaning": "mouth",
+  "glosses": [
+   "mouth"
+  ],
   "on": [
    "コウ",
    "ク"
@@ -3960,6 +4961,9 @@
  },
  "古": {
   "meaning": "old",
+  "glosses": [
+   "old"
+  ],
   "on": [
    "コ"
   ],
@@ -3981,6 +4985,14 @@
  },
  "句": {
   "meaning": "phrase, clause",
+  "glosses": [
+   "phrase",
+   "clause",
+   "sentence",
+   "passage",
+   "paragraph",
+   "counter for haiku"
+  ],
   "on": [
    "ク"
   ],
@@ -3998,6 +5010,11 @@
  },
  "叫": {
   "meaning": "shout, exclaim",
+  "glosses": [
+   "shout",
+   "exclaim",
+   "yell"
+  ],
   "on": [
    "キョウ"
   ],
@@ -4017,6 +5034,11 @@
  },
  "可": {
   "meaning": "can, passable",
+  "glosses": [
+   "can",
+   "passable",
+   "approval"
+  ],
   "on": [
    "カ",
    "コク"
@@ -4042,6 +5064,11 @@
  },
  "台": {
   "meaning": "pedestal, a stand",
+  "glosses": [
+   "pedestal",
+   "a stand",
+   "counter for machines and vehicles"
+  ],
   "on": [
    "ダイ",
    "タイ"
@@ -4064,6 +5091,10 @@
  },
  "史": {
   "meaning": "history, chronicle",
+  "glosses": [
+   "history",
+   "chronicle"
+  ],
   "on": [
    "シ"
   ],
@@ -4081,6 +5112,9 @@
  },
  "右": {
   "meaning": "right",
+  "glosses": [
+   "right"
+  ],
   "on": [
    "ウ",
    "ユウ"
@@ -4105,6 +5139,15 @@
  },
  "号": {
   "meaning": "nickname, number",
+  "glosses": [
+   "nickname",
+   "number",
+   "item",
+   "title",
+   "pseudonym",
+   "name",
+   "call"
+  ],
   "on": [
    "ゴウ"
   ],
@@ -4129,6 +5172,13 @@
  },
  "司": {
   "meaning": "director, official",
+  "glosses": [
+   "director",
+   "official",
+   "govt office",
+   "rule",
+   "administer"
+  ],
   "on": [
    "シ"
   ],
@@ -4152,6 +5202,12 @@
  },
  "合": {
   "meaning": "fit, suit",
+  "glosses": [
+   "fit",
+   "suit",
+   "join",
+   "0.1"
+  ],
   "on": [
    "ゴウ",
    "ガッ",
@@ -4185,6 +5241,11 @@
  },
  "同": {
   "meaning": "same, agree",
+  "glosses": [
+   "same",
+   "agree",
+   "equal"
+  ],
   "on": [
    "ドウ"
   ],
@@ -4208,6 +5269,12 @@
  },
  "名": {
   "meaning": "name, noted",
+  "glosses": [
+   "name",
+   "noted",
+   "distinguished",
+   "reputation"
+  ],
   "on": [
    "メイ",
    "ミョウ"
@@ -4229,6 +5296,15 @@
  },
  "向": {
   "meaning": "yonder, facing",
+  "glosses": [
+   "yonder",
+   "facing",
+   "beyond",
+   "confront",
+   "defy",
+   "tend toward",
+   "approach"
+  ],
   "on": [
    "コウ"
   ],
@@ -4258,6 +5334,12 @@
  },
  "君": {
   "meaning": "mister, you",
+  "glosses": [
+   "mister",
+   "you",
+   "ruler",
+   "male name suffix"
+  ],
   "on": [
    "クン"
   ],
@@ -4286,6 +5368,14 @@
  },
  "否": {
   "meaning": "negate, no",
+  "glosses": [
+   "negate",
+   "no",
+   "noes",
+   "refuse",
+   "decline",
+   "deny"
+  ],
   "on": [
    "ヒ"
   ],
@@ -4314,6 +5404,14 @@
  },
  "含": {
   "meaning": "contain, include",
+  "glosses": [
+   "contain",
+   "include",
+   "hold in the mouth",
+   "bear in mind",
+   "understand",
+   "cherish"
+  ],
   "on": [
    "ガン"
   ],
@@ -4338,6 +5436,12 @@
  },
  "吸": {
   "meaning": "suck, imbibe",
+  "glosses": [
+   "suck",
+   "imbibe",
+   "inhale",
+   "sip"
+  ],
   "on": [
    "キュウ"
   ],
@@ -4361,6 +5465,13 @@
  },
  "吹": {
   "meaning": "blow, breathe",
+  "glosses": [
+   "blow",
+   "breathe",
+   "puff",
+   "emit",
+   "smoke"
+  ],
   "on": [
    "スイ"
   ],
@@ -4380,6 +5491,10 @@
  },
  "呂": {
   "meaning": "spine, backbone",
+  "glosses": [
+   "spine",
+   "backbone"
+  ],
   "on": [
    "ロ",
    "リョ"
@@ -4400,6 +5515,12 @@
  },
  "告": {
   "meaning": "revelation, tell",
+  "glosses": [
+   "revelation",
+   "tell",
+   "inform",
+   "announce"
+  ],
   "on": [
    "コク"
   ],
@@ -4423,6 +5544,11 @@
  },
  "周": {
   "meaning": "circumference, circuit",
+  "glosses": [
+   "circumference",
+   "circuit",
+   "lap"
+  ],
   "on": [
    "シュウ"
   ],
@@ -4446,6 +5572,10 @@
  },
  "味": {
   "meaning": "flavor, taste",
+  "glosses": [
+   "flavor",
+   "taste"
+  ],
   "on": [
    "ミ"
   ],
@@ -4478,6 +5608,11 @@
  },
  "呼": {
   "meaning": "call, call out to",
+  "glosses": [
+   "call",
+   "call out to",
+   "invite"
+  ],
   "on": [
    "コ"
   ],
@@ -4505,6 +5640,14 @@
  },
  "命": {
   "meaning": "fate, command",
+  "glosses": [
+   "fate",
+   "command",
+   "decree",
+   "destiny",
+   "life",
+   "appoint"
+  ],
   "on": [
    "メイ",
    "ミョウ"
@@ -4533,6 +5676,13 @@
  },
  "和": {
   "meaning": "harmony, Japanese style",
+  "glosses": [
+   "harmony",
+   "Japanese style",
+   "peace",
+   "soften",
+   "Japan"
+  ],
   "on": [
    "ワ",
    "オ",
@@ -4558,6 +5708,10 @@
  },
  "咲": {
   "meaning": "blossom, bloom",
+  "glosses": [
+   "blossom",
+   "bloom"
+  ],
   "on": [
    "ショウ"
   ],
@@ -4594,6 +5748,13 @@
  },
  "品": {
   "meaning": "goods, refinement",
+  "glosses": [
+   "goods",
+   "refinement",
+   "dignity",
+   "article",
+   "counter for meal courses"
+  ],
   "on": [
    "ヒン",
    "ホン"
@@ -4610,6 +5771,12 @@
  },
  "員": {
   "meaning": "employee, member",
+  "glosses": [
+   "employee",
+   "member",
+   "number",
+   "the one in charge"
+  ],
   "on": [
    "イン"
   ],
@@ -4635,6 +5802,12 @@
  },
  "唯": {
   "meaning": "solely, only",
+  "glosses": [
+   "solely",
+   "only",
+   "merely",
+   "simply"
+  ],
   "on": [
    "ユイ",
    "イ"
@@ -4655,6 +5828,12 @@
  },
  "商": {
   "meaning": "make a deal, selling",
+  "glosses": [
+   "make a deal",
+   "selling",
+   "dealing in",
+   "merchant"
+  ],
   "on": [
    "ショウ"
   ],
@@ -4690,6 +5869,11 @@
  },
  "問": {
   "meaning": "question, ask",
+  "glosses": [
+   "question",
+   "ask",
+   "problem"
+  ],
   "on": [
    "モン"
   ],
@@ -4711,6 +5895,11 @@
  },
  "善": {
   "meaning": "virtuous, good",
+  "glosses": [
+   "virtuous",
+   "good",
+   "goodness"
+  ],
   "on": [
    "ゼン"
   ],
@@ -4741,6 +5930,10 @@
  },
  "喉": {
   "meaning": "throat, voice",
+  "glosses": [
+   "throat",
+   "voice"
+  ],
   "on": [
    "コウ"
   ],
@@ -4768,6 +5961,10 @@
  },
  "喜": {
   "meaning": "rejoice, take pleasure in",
+  "glosses": [
+   "rejoice",
+   "take pleasure in"
+  ],
   "on": [
    "キ"
   ],
@@ -4796,6 +5993,10 @@
  },
  "喧": {
   "meaning": "noisy, boisterous",
+  "glosses": [
+   "noisy",
+   "boisterous"
+  ],
   "on": [
    "ケン"
   ],
@@ -4824,6 +6025,12 @@
  },
  "営": {
   "meaning": "camp, perform",
+  "glosses": [
+   "camp",
+   "perform",
+   "build",
+   "conduct (business)"
+  ],
   "on": [
    "エイ"
   ],
@@ -4852,6 +6059,10 @@
  },
  "嘘": {
   "meaning": "lie, falsehood",
+  "glosses": [
+   "lie",
+   "falsehood"
+  ],
   "on": [
    "キョ",
    "コ"
@@ -4885,6 +6096,9 @@
  },
  "嘩": {
   "meaning": "noisy",
+  "glosses": [
+   "noisy"
+  ],
   "on": [
    "カ",
    "ケ"
@@ -4909,6 +6123,11 @@
  },
  "噂": {
   "meaning": "rumor, gossip",
+  "glosses": [
+   "rumor",
+   "gossip",
+   "hearsay"
+  ],
   "on": [
    "ソン"
   ],
@@ -4936,6 +6155,11 @@
  },
  "噛": {
   "meaning": "chew, bite",
+  "glosses": [
+   "chew",
+   "bite",
+   "gnaw"
+  ],
   "on": [
    "コウ",
    "ゴウ"
@@ -4965,6 +6189,17 @@
  },
  "器": {
   "meaning": "utensil, vessel",
+  "glosses": [
+   "utensil",
+   "vessel",
+   "receptacle",
+   "implement",
+   "instrument",
+   "ability",
+   "container",
+   "tool",
+   "set"
+  ],
   "on": [
    "キ"
   ],
@@ -4984,6 +6219,9 @@
  },
  "四": {
   "meaning": "four",
+  "glosses": [
+   "four"
+  ],
   "on": [
    "シ"
   ],
@@ -5006,6 +6244,13 @@
  },
  "回": {
   "meaning": "-times, round",
+  "glosses": [
+   "-times",
+   "round",
+   "game",
+   "revolve",
+   "counter for occurrences"
+  ],
   "on": [
    "カイ",
    "エ"
@@ -5034,6 +6279,13 @@
  },
  "因": {
   "meaning": "cause, factor",
+  "glosses": [
+   "cause",
+   "factor",
+   "be associated with",
+   "depend on",
+   "be limited to"
+  ],
   "on": [
    "イン"
   ],
@@ -5054,6 +6306,10 @@
  },
  "団": {
   "meaning": "group, association",
+  "glosses": [
+   "group",
+   "association"
+  ],
   "on": [
    "ダン",
    "トン"
@@ -5075,6 +6331,11 @@
  },
  "困": {
   "meaning": "quandary, become distressed",
+  "glosses": [
+   "quandary",
+   "become distressed",
+   "annoyed"
+  ],
   "on": [
    "コン"
   ],
@@ -5094,6 +6355,16 @@
  },
  "囲": {
   "meaning": "surround, besiege",
+  "glosses": [
+   "surround",
+   "besiege",
+   "store",
+   "paling",
+   "enclosure",
+   "encircle",
+   "preserve",
+   "keep"
+  ],
   "on": [
    "イ"
   ],
@@ -5115,6 +6386,13 @@
  },
  "図": {
   "meaning": "map, drawing",
+  "glosses": [
+   "map",
+   "drawing",
+   "plan",
+   "extraordinary",
+   "audacious"
+  ],
   "on": [
    "ズ",
    "ト"
@@ -5136,6 +6414,12 @@
  },
  "固": {
   "meaning": "harden, set",
+  "glosses": [
+   "harden",
+   "set",
+   "clot",
+   "curdle"
+  ],
   "on": [
    "コ"
   ],
@@ -5162,6 +6446,9 @@
  },
  "国": {
   "meaning": "country",
+  "glosses": [
+   "country"
+  ],
   "on": [
    "コク"
   ],
@@ -5185,6 +6472,12 @@
  },
  "園": {
   "meaning": "park, garden",
+  "glosses": [
+   "park",
+   "garden",
+   "yard",
+   "farm"
+  ],
   "on": [
    "エン"
   ],
@@ -5212,6 +6505,12 @@
  },
  "土": {
   "meaning": "soil, earth",
+  "glosses": [
+   "soil",
+   "earth",
+   "ground",
+   "Turkey"
+  ],
   "on": [
    "ド",
    "ト"
@@ -5223,6 +6522,12 @@
  },
  "在": {
   "meaning": "exist, outskirts",
+  "glosses": [
+   "exist",
+   "outskirts",
+   "suburbs",
+   "located in"
+  ],
   "on": [
    "ザイ"
   ],
@@ -5246,6 +6551,10 @@
  },
  "地": {
   "meaning": "ground, earth",
+  "glosses": [
+   "ground",
+   "earth"
+  ],
   "on": [
    "チ",
    "ジ"
@@ -5264,6 +6573,10 @@
  },
  "均": {
   "meaning": "level, average",
+  "glosses": [
+   "level",
+   "average"
+  ],
   "on": [
    "キン"
   ],
@@ -5291,6 +6604,9 @@
  },
  "城": {
   "meaning": "castle",
+  "glosses": [
+   "castle"
+  ],
   "on": [
    "ジョウ",
    "セイ"
@@ -5315,6 +6631,13 @@
  },
  "域": {
   "meaning": "range, region",
+  "glosses": [
+   "range",
+   "region",
+   "limits",
+   "stage",
+   "level"
+  ],
   "on": [
    "イキ"
   ],
@@ -5336,6 +6659,12 @@
  },
  "基": {
   "meaning": "fundamentals, radical (chem)",
+  "glosses": [
+   "fundamentals",
+   "radical (chem)",
+   "counter for machines",
+   "foundation"
+  ],
   "on": [
    "キ"
   ],
@@ -5364,6 +6693,12 @@
  },
  "報": {
   "meaning": "report, news",
+  "glosses": [
+   "report",
+   "news",
+   "reward",
+   "retribution"
+  ],
   "on": [
    "ホウ"
   ],
@@ -5403,6 +6738,10 @@
  },
  "場": {
   "meaning": "location, place",
+  "glosses": [
+   "location",
+   "place"
+  ],
   "on": [
    "ジョウ",
    "チョウ"
@@ -5431,6 +6770,13 @@
  },
  "塗": {
   "meaning": "paint, plaster",
+  "glosses": [
+   "paint",
+   "plaster",
+   "daub",
+   "smear",
+   "coating"
+  ],
   "on": [
    "ト"
   ],
@@ -5472,6 +6818,9 @@
  },
  "塩": {
   "meaning": "salt",
+  "glosses": [
+   "salt"
+  ],
   "on": [
    "エン"
   ],
@@ -5511,6 +6860,11 @@
  },
  "境": {
   "meaning": "boundary, border",
+  "glosses": [
+   "boundary",
+   "border",
+   "region"
+  ],
   "on": [
    "キョウ",
    "ケイ"
@@ -5543,6 +6897,13 @@
  },
  "増": {
   "meaning": "increase, add",
+  "glosses": [
+   "increase",
+   "add",
+   "augment",
+   "gain",
+   "promote"
+  ],
   "on": [
    "ゾウ"
   ],
@@ -5573,6 +6934,11 @@
  },
  "壁": {
   "meaning": "wall, lining (stomach)",
+  "glosses": [
+   "wall",
+   "lining (stomach)",
+   "fence"
+  ],
   "on": [
    "ヘキ"
   ],
@@ -5608,6 +6974,11 @@
  },
  "壊": {
   "meaning": "demolition, break",
+  "glosses": [
+   "demolition",
+   "break",
+   "destroy"
+  ],
   "on": [
    "カイ",
    "エ"
@@ -5642,6 +7013,11 @@
  },
  "士": {
   "meaning": "gentleman, scholar",
+  "glosses": [
+   "gentleman",
+   "scholar",
+   "samurai"
+  ],
   "on": [
    "シ"
   ],
@@ -5652,6 +7028,9 @@
  },
  "声": {
   "meaning": "voice",
+  "glosses": [
+   "voice"
+  ],
   "on": [
    "セイ",
    "ショウ"
@@ -5673,6 +7052,9 @@
  },
  "売": {
   "meaning": "sell",
+  "glosses": [
+   "sell"
+  ],
   "on": [
    "バイ"
   ],
@@ -5697,6 +7079,11 @@
  },
  "変": {
   "meaning": "unusual, change",
+  "glosses": [
+   "unusual",
+   "change",
+   "strange"
+  ],
   "on": [
    "ヘン"
   ],
@@ -5718,6 +7105,9 @@
  },
  "夏": {
   "meaning": "summer",
+  "glosses": [
+   "summer"
+  ],
   "on": [
    "カ",
    "ガ",
@@ -5747,6 +7137,9 @@
  },
  "夕": {
   "meaning": "evening",
+  "glosses": [
+   "evening"
+  ],
   "on": [
    "セキ"
   ],
@@ -5757,6 +7150,9 @@
  },
  "外": {
   "meaning": "outside",
+  "glosses": [
+   "outside"
+  ],
   "on": [
    "ガイ",
    "ゲ"
@@ -5781,6 +7177,11 @@
  },
  "多": {
   "meaning": "many, frequent",
+  "glosses": [
+   "many",
+   "frequent",
+   "much"
+  ],
   "on": [
    "タ"
   ],
@@ -5798,6 +7199,10 @@
  },
  "夜": {
   "meaning": "night, evening",
+  "glosses": [
+   "night",
+   "evening"
+  ],
   "on": [
    "ヤ"
   ],
@@ -5822,6 +7227,11 @@
  },
  "夢": {
   "meaning": "dream, vision",
+  "glosses": [
+   "dream",
+   "vision",
+   "illusion"
+  ],
   "on": [
    "ム",
    "ボウ"
@@ -5852,6 +7262,10 @@
  },
  "大": {
   "meaning": "large, big",
+  "glosses": [
+   "large",
+   "big"
+  ],
   "on": [
    "ダイ",
    "タイ"
@@ -5865,6 +7279,11 @@
  },
  "天": {
   "meaning": "heavens, sky",
+  "glosses": [
+   "heavens",
+   "sky",
+   "imperial"
+  ],
   "on": [
    "テン"
   ],
@@ -5890,6 +7309,11 @@
  },
  "太": {
   "meaning": "plump, thick",
+  "glosses": [
+   "plump",
+   "thick",
+   "big around"
+  ],
   "on": [
    "タイ",
    "タ"
@@ -5911,6 +7335,10 @@
  },
  "夫": {
   "meaning": "husband, man",
+  "glosses": [
+   "husband",
+   "man"
+  ],
   "on": [
    "フ",
    "フウ",
@@ -5941,6 +7369,10 @@
  },
  "央": {
   "meaning": "center, middle",
+  "glosses": [
+   "center",
+   "middle"
+  ],
   "on": [
    "オウ"
   ],
@@ -5966,6 +7398,13 @@
  },
  "失": {
   "meaning": "lose, error",
+  "glosses": [
+   "lose",
+   "error",
+   "fault",
+   "disadvantage",
+   "loss"
+  ],
   "on": [
    "シツ"
   ],
@@ -5994,6 +7433,11 @@
  },
  "奏": {
   "meaning": "play music, speak to a ruler",
+  "glosses": [
+   "play music",
+   "speak to a ruler",
+   "complete"
+  ],
   "on": [
    "ソウ"
   ],
@@ -6025,6 +7469,11 @@
  },
  "契": {
   "meaning": "pledge, promise",
+  "glosses": [
+   "pledge",
+   "promise",
+   "vow"
+  ],
   "on": [
    "ケイ"
   ],
@@ -6056,6 +7505,10 @@
  },
  "奥": {
   "meaning": "heart, interior",
+  "glosses": [
+   "heart",
+   "interior"
+  ],
   "on": [
    "オウ"
   ],
@@ -6081,6 +7534,14 @@
  },
  "奪": {
   "meaning": "rob, take by force",
+  "glosses": [
+   "rob",
+   "take by force",
+   "snatch away",
+   "dispossess",
+   "plunder",
+   "usurp"
+  ],
   "on": [
    "ダツ"
   ],
@@ -6104,6 +7565,11 @@
  },
  "奮": {
   "meaning": "stirred up, be invigorated",
+  "glosses": [
+   "stirred up",
+   "be invigorated",
+   "flourish"
+  ],
   "on": [
    "フン"
   ],
@@ -6127,6 +7593,10 @@
  },
  "女": {
   "meaning": "woman, female",
+  "glosses": [
+   "woman",
+   "female"
+  ],
   "on": [
    "ジョ",
    "ニョ",
@@ -6140,6 +7610,12 @@
  },
  "奴": {
   "meaning": "guy, slave",
+  "glosses": [
+   "guy",
+   "slave",
+   "manservant",
+   "fellow"
+  ],
   "on": [
    "ド"
   ],
@@ -6160,6 +7636,11 @@
  },
  "好": {
   "meaning": "fond, pleasing",
+  "glosses": [
+   "fond",
+   "pleasing",
+   "like something"
+  ],
   "on": [
    "コウ"
   ],
@@ -6182,6 +7663,9 @@
  },
  "妹": {
   "meaning": "younger sister",
+  "glosses": [
+   "younger sister"
+  ],
   "on": [
    "マイ"
   ],
@@ -6213,6 +7697,10 @@
  },
  "妻": {
   "meaning": "wife, spouse",
+  "glosses": [
+   "wife",
+   "spouse"
+  ],
   "on": [
    "サイ"
   ],
@@ -6236,6 +7724,9 @@
  },
  "姉": {
   "meaning": "elder sister",
+  "glosses": [
+   "elder sister"
+  ],
   "on": [
    "シ"
   ],
@@ -6260,6 +7751,10 @@
  },
  "始": {
   "meaning": "commence, begin",
+  "glosses": [
+   "commence",
+   "begin"
+  ],
   "on": [
    "シ"
   ],
@@ -6285,6 +7780,13 @@
  },
  "委": {
   "meaning": "committee, entrust to",
+  "glosses": [
+   "committee",
+   "entrust to",
+   "leave to",
+   "devote",
+   "discard"
+  ],
   "on": [
    "イ"
   ],
@@ -6304,6 +7806,11 @@
  },
  "姿": {
   "meaning": "figure, form",
+  "glosses": [
+   "figure",
+   "form",
+   "shape"
+  ],
   "on": [
    "シ"
   ],
@@ -6327,6 +7834,10 @@
  },
  "娘": {
   "meaning": "daughter, girl",
+  "glosses": [
+   "daughter",
+   "girl"
+  ],
   "on": [
    "ジョウ"
   ],
@@ -6347,6 +7858,9 @@
  },
  "婚": {
   "meaning": "marriage",
+  "glosses": [
+   "marriage"
+  ],
   "on": [
    "コン"
   ],
@@ -6368,6 +7882,12 @@
  },
  "婦": {
   "meaning": "lady, woman",
+  "glosses": [
+   "lady",
+   "woman",
+   "wife",
+   "bride"
+  ],
   "on": [
    "フ"
   ],
@@ -6395,6 +7915,11 @@
  },
  "嫌": {
   "meaning": "dislike, detest",
+  "glosses": [
+   "dislike",
+   "detest",
+   "hate"
+  ],
   "on": [
    "ケン",
    "ゲン"
@@ -6425,6 +7950,12 @@
  },
  "子": {
   "meaning": "child, sign of the rat",
+  "glosses": [
+   "child",
+   "sign of the rat",
+   "11PM-1AM",
+   "first sign of Chinese zodiac"
+  ],
   "on": [
    "シ",
    "ス",
@@ -6439,6 +7970,12 @@
  },
  "字": {
   "meaning": "character, letter",
+  "glosses": [
+   "character",
+   "letter",
+   "word",
+   "section of village"
+  ],
   "on": [
    "ジ"
   ],
@@ -6460,6 +7997,13 @@
  },
  "存": {
   "meaning": "exist, suppose",
+  "glosses": [
+   "exist",
+   "suppose",
+   "be aware of",
+   "believe",
+   "feel"
+  ],
   "on": [
    "ソン",
    "ゾン"
@@ -6487,6 +8031,9 @@
  },
  "季": {
   "meaning": "seasons",
+  "glosses": [
+   "seasons"
+  ],
   "on": [
    "キ"
   ],
@@ -6504,6 +8051,11 @@
  },
  "学": {
   "meaning": "study, learning",
+  "glosses": [
+   "study",
+   "learning",
+   "science"
+  ],
   "on": [
    "ガク"
   ],
@@ -6527,6 +8079,13 @@
  },
  "宅": {
   "meaning": "home, house",
+  "glosses": [
+   "home",
+   "house",
+   "residence",
+   "our house",
+   "my husband"
+  ],
   "on": [
    "タク"
   ],
@@ -6552,6 +8111,12 @@
  },
  "宇": {
   "meaning": "eaves, roof",
+  "glosses": [
+   "eaves",
+   "roof",
+   "house",
+   "heaven"
+  ],
   "on": [
    "ウ"
   ],
@@ -6573,6 +8138,12 @@
  },
  "守": {
   "meaning": "guard, protect",
+  "glosses": [
+   "guard",
+   "protect",
+   "defend",
+   "obey"
+  ],
   "on": [
    "シュ",
    "ス"
@@ -6597,6 +8168,15 @@
  },
  "安": {
   "meaning": "relax, cheap",
+  "glosses": [
+   "relax",
+   "cheap",
+   "low",
+   "quiet",
+   "rested",
+   "contented",
+   "peaceful"
+  ],
   "on": [
    "アン"
   ],
@@ -6619,6 +8199,11 @@
  },
  "完": {
   "meaning": "perfect, completion",
+  "glosses": [
+   "perfect",
+   "completion",
+   "end"
+  ],
   "on": [
    "カン"
   ],
@@ -6644,6 +8229,14 @@
  },
  "宗": {
   "meaning": "religion, sect",
+  "glosses": [
+   "religion",
+   "sect",
+   "denomination",
+   "main point",
+   "origin",
+   "essence"
+  ],
   "on": [
    "シュウ",
    "ソウ"
@@ -6672,6 +8265,11 @@
  },
  "官": {
   "meaning": "bureaucrat, the government",
+  "glosses": [
+   "bureaucrat",
+   "the government",
+   "organ"
+  ],
   "on": [
    "カン"
   ],
@@ -6689,6 +8287,14 @@
  },
  "宙": {
   "meaning": "mid-air, air",
+  "glosses": [
+   "mid-air",
+   "air",
+   "space",
+   "sky",
+   "memorization",
+   "interval of time"
+  ],
   "on": [
    "チュウ"
   ],
@@ -6710,6 +8316,12 @@
  },
  "定": {
   "meaning": "determine, fix",
+  "glosses": [
+   "determine",
+   "fix",
+   "establish",
+   "decide"
+  ],
   "on": [
    "テイ",
    "ジョウ"
@@ -6732,6 +8344,13 @@
  },
  "実": {
   "meaning": "reality, truth",
+  "glosses": [
+   "reality",
+   "truth",
+   "seed",
+   "fruit",
+   "nut"
+  ],
   "on": [
    "ジツ",
    "シツ"
@@ -6760,6 +8379,12 @@
  },
  "客": {
   "meaning": "guest, visitor",
+  "glosses": [
+   "guest",
+   "visitor",
+   "customer",
+   "client"
+  ],
   "on": [
    "キャク",
    "カク"
@@ -6782,6 +8407,13 @@
  },
  "室": {
   "meaning": "room, apartment",
+  "glosses": [
+   "room",
+   "apartment",
+   "chamber",
+   "greenhouse",
+   "cellar"
+  ],
   "on": [
    "シツ"
   ],
@@ -6809,6 +8441,10 @@
  },
  "害": {
   "meaning": "harm, injury",
+  "glosses": [
+   "harm",
+   "injury"
+  ],
   "on": [
    "ガイ"
   ],
@@ -6838,6 +8474,14 @@
  },
  "家": {
   "meaning": "house, home",
+  "glosses": [
+   "house",
+   "home",
+   "family",
+   "professional",
+   "expert",
+   "performer"
+  ],
   "on": [
    "カ",
    "ケ"
@@ -6860,6 +8504,11 @@
  },
  "容": {
   "meaning": "contain, form",
+  "glosses": [
+   "contain",
+   "form",
+   "looks"
+  ],
   "on": [
    "ヨウ"
   ],
@@ -6895,6 +8544,16 @@
  },
  "宿": {
   "meaning": "inn, lodging",
+  "glosses": [
+   "inn",
+   "lodging",
+   "relay station",
+   "dwell",
+   "lodge",
+   "be pregnant",
+   "home",
+   "dwelling"
+  ],
   "on": [
    "シュク"
   ],
@@ -6920,6 +8579,13 @@
  },
  "寂": {
   "meaning": "loneliness, quietly",
+  "glosses": [
+   "loneliness",
+   "quietly",
+   "mellow",
+   "mature",
+   "death of a priest"
+  ],
   "on": [
    "ジャク",
    "セキ"
@@ -6951,6 +8617,12 @@
  },
  "密": {
   "meaning": "secrecy, density (pop)",
+  "glosses": [
+   "secrecy",
+   "density (pop)",
+   "minuteness",
+   "carefulness"
+  ],
   "on": [
    "ミツ"
   ],
@@ -6982,6 +8654,9 @@
  },
  "寒": {
   "meaning": "cold",
+  "glosses": [
+   "cold"
+  ],
   "on": [
    "カン"
   ],
@@ -7013,6 +8688,13 @@
  },
  "寝": {
   "meaning": "lie down, sleep",
+  "glosses": [
+   "lie down",
+   "sleep",
+   "rest",
+   "bed",
+   "remain unsold"
+  ],
   "on": [
    "シン"
   ],
@@ -7048,6 +8730,13 @@
  },
  "察": {
   "meaning": "guess, presume",
+  "glosses": [
+   "guess",
+   "presume",
+   "surmise",
+   "judge",
+   "understand"
+  ],
   "on": [
    "サツ"
   ],
@@ -7081,6 +8770,15 @@
  },
  "対": {
   "meaning": "vis-a-vis, opposite",
+  "glosses": [
+   "vis-a-vis",
+   "opposite",
+   "even",
+   "equal",
+   "versus",
+   "anti-",
+   "compare"
+  ],
   "on": [
    "タイ",
    "ツイ"
@@ -7106,6 +8804,12 @@
  },
  "専": {
   "meaning": "specialty, exclusive",
+  "glosses": [
+   "specialty",
+   "exclusive",
+   "mainly",
+   "solely"
+  ],
   "on": [
    "セン"
   ],
@@ -7129,6 +8833,17 @@
  },
  "将": {
   "meaning": "leader, commander",
+  "glosses": [
+   "leader",
+   "commander",
+   "general",
+   "admiral",
+   "or",
+   "and again",
+   "soon",
+   "from now on",
+   "just about"
+  ],
   "on": [
    "ショウ",
    "ソウ"
@@ -7157,6 +8872,13 @@
  },
  "尊": {
   "meaning": "revered, valuable",
+  "glosses": [
+   "revered",
+   "valuable",
+   "precious",
+   "noble",
+   "exalted"
+  ],
   "on": [
    "ソン"
   ],
@@ -7183,6 +8905,11 @@
  },
  "尋": {
   "meaning": "inquire, fathom",
+  "glosses": [
+   "inquire",
+   "fathom",
+   "look for"
+  ],
   "on": [
    "ジン"
   ],
@@ -7211,6 +8938,12 @@
  },
  "導": {
   "meaning": "guidance, leading",
+  "glosses": [
+   "guidance",
+   "leading",
+   "conduct",
+   "usher"
+  ],
   "on": [
    "ドウ"
   ],
@@ -7242,6 +8975,10 @@
  },
  "小": {
   "meaning": "little, small",
+  "glosses": [
+   "little",
+   "small"
+  ],
   "on": [
    "ショウ"
   ],
@@ -7255,6 +8992,10 @@
  },
  "少": {
   "meaning": "few, little",
+  "glosses": [
+   "few",
+   "little"
+  ],
   "on": [
    "ショウ"
   ],
@@ -7275,6 +9016,14 @@
  },
  "尽": {
   "meaning": "exhaust, use up",
+  "glosses": [
+   "exhaust",
+   "use up",
+   "run out of",
+   "deplete",
+   "befriend",
+   "serve"
+  ],
   "on": [
    "ジン",
    "サン"
@@ -7300,6 +9049,16 @@
  },
  "局": {
   "meaning": "bureau, board",
+  "glosses": [
+   "bureau",
+   "board",
+   "office",
+   "affair",
+   "conclusion",
+   "court lady",
+   "lady-in-waiting",
+   "her apartment"
+  ],
   "on": [
    "キョク"
   ],
@@ -7319,6 +9078,14 @@
  },
  "届": {
   "meaning": "deliver, reach",
+  "glosses": [
+   "deliver",
+   "reach",
+   "arrive",
+   "report",
+   "notify",
+   "forward"
+  ],
   "on": [
    "カイ"
   ],
@@ -7344,6 +9111,13 @@
  },
  "屋": {
   "meaning": "roof, house",
+  "glosses": [
+   "roof",
+   "house",
+   "shop",
+   "dealer",
+   "seller"
+  ],
   "on": [
    "オク"
   ],
@@ -7371,6 +9145,10 @@
  },
  "展": {
   "meaning": "unfold, expand",
+  "glosses": [
+   "unfold",
+   "expand"
+  ],
   "on": [
    "テン"
   ],
@@ -7396,6 +9174,14 @@
  },
  "履": {
   "meaning": "perform, complete",
+  "glosses": [
+   "perform",
+   "complete",
+   "footgear",
+   "shoes",
+   "boots",
+   "put on (the feet)"
+  ],
   "on": [
    "リ"
   ],
@@ -7427,6 +9213,9 @@
  },
  "山": {
   "meaning": "mountain",
+  "glosses": [
+   "mountain"
+  ],
   "on": [
    "サン",
    "セン"
@@ -7438,6 +9227,9 @@
  },
  "島": {
   "meaning": "island",
+  "glosses": [
+   "island"
+  ],
   "on": [
    "トウ"
   ],
@@ -7461,6 +9253,10 @@
  },
  "嵐": {
   "meaning": "storm, tempest",
+  "glosses": [
+   "storm",
+   "tempest"
+  ],
   "on": [
    "ラン"
   ],
@@ -7480,6 +9276,10 @@
  },
  "川": {
   "meaning": "stream, river",
+  "glosses": [
+   "stream",
+   "river"
+  ],
   "on": [
    "セン"
   ],
@@ -7490,6 +9290,10 @@
  },
  "州": {
   "meaning": "state, province",
+  "glosses": [
+   "state",
+   "province"
+  ],
   "on": [
    "シュウ",
    "ス"
@@ -7510,6 +9314,10 @@
  },
  "工": {
   "meaning": "craft, construction",
+  "glosses": [
+   "craft",
+   "construction"
+  ],
   "on": [
    "コウ",
    "ク",
@@ -7520,6 +9328,9 @@
  },
  "左": {
   "meaning": "left",
+  "glosses": [
+   "left"
+  ],
   "on": [
    "サ",
    "シャ"
@@ -7544,6 +9355,12 @@
  },
  "巨": {
   "meaning": "gigantic, big",
+  "glosses": [
+   "gigantic",
+   "big",
+   "large",
+   "great"
+  ],
   "on": [
    "キョ"
   ],
@@ -7557,6 +9374,14 @@
  },
  "差": {
   "meaning": "distinction, difference",
+  "glosses": [
+   "distinction",
+   "difference",
+   "variation",
+   "discrepancy",
+   "margin",
+   "balance"
+  ],
   "on": [
    "サ"
   ],
@@ -7589,6 +9414,9 @@
  },
  "己": {
   "meaning": "self",
+  "glosses": [
+   "self"
+  ],
   "on": [
    "コ",
    "キ"
@@ -7607,6 +9435,11 @@
  },
  "市": {
   "meaning": "market, city",
+  "glosses": [
+   "market",
+   "city",
+   "town"
+  ],
   "on": [
    "シ"
   ],
@@ -7626,6 +9459,12 @@
  },
  "布": {
   "meaning": "linen, cloth",
+  "glosses": [
+   "linen",
+   "cloth",
+   "spread",
+   "distribute"
+  ],
   "on": [
    "フ",
    "ホ"
@@ -7652,6 +9491,18 @@
  },
  "希": {
   "meaning": "hope, beg",
+  "glosses": [
+   "hope",
+   "beg",
+   "request",
+   "pray",
+   "beseech",
+   "Greece",
+   "dilute (acid)",
+   "rare",
+   "few",
+   "phenomenal"
+  ],
   "on": [
    "キ",
    "ケ"
@@ -7677,6 +9528,15 @@
  },
  "師": {
   "meaning": "expert, teacher",
+  "glosses": [
+   "expert",
+   "teacher",
+   "master",
+   "model",
+   "exemplar",
+   "army (incl. counter)",
+   "war"
+  ],
   "on": [
    "シ"
   ],
@@ -7700,6 +9560,12 @@
  },
  "席": {
   "meaning": "seat, mat",
+  "glosses": [
+   "seat",
+   "mat",
+   "occasion",
+   "place"
+  ],
   "on": [
    "セキ"
   ],
@@ -7727,6 +9593,13 @@
  },
  "帯": {
   "meaning": "sash, belt",
+  "glosses": [
+   "sash",
+   "belt",
+   "obi",
+   "zone",
+   "region"
+  ],
   "on": [
    "タイ"
   ],
@@ -7751,6 +9624,12 @@
  },
  "帰": {
   "meaning": "homecoming, arrive at",
+  "glosses": [
+   "homecoming",
+   "arrive at",
+   "lead to",
+   "result in"
+  ],
   "on": [
    "キ"
   ],
@@ -7781,6 +9660,16 @@
  },
  "常": {
   "meaning": "usual, ordinary",
+  "glosses": [
+   "usual",
+   "ordinary",
+   "normal",
+   "common",
+   "regular",
+   "continually",
+   "always",
+   "long-lasting"
+  ],
   "on": [
    "ジョウ"
   ],
@@ -7809,6 +9698,10 @@
  },
  "帽": {
   "meaning": "cap, headgear",
+  "glosses": [
+   "cap",
+   "headgear"
+  ],
   "on": [
    "ボウ",
    "モウ"
@@ -7834,6 +9727,11 @@
  },
  "平": {
   "meaning": "even, flat",
+  "glosses": [
+   "even",
+   "flat",
+   "peace"
+  ],
   "on": [
    "ヘイ",
    "ビョウ",
@@ -7857,6 +9755,10 @@
  },
  "年": {
   "meaning": "year, counter for years",
+  "glosses": [
+   "year",
+   "counter for years"
+  ],
   "on": [
    "ネン"
   ],
@@ -7884,6 +9786,11 @@
  },
  "幸": {
   "meaning": "happiness, blessing",
+  "glosses": [
+   "happiness",
+   "blessing",
+   "fortune"
+  ],
   "on": [
    "コウ"
   ],
@@ -7913,6 +9820,11 @@
  },
  "広": {
   "meaning": "wide, broad",
+  "glosses": [
+   "wide",
+   "broad",
+   "spacious"
+  ],
   "on": [
    "コウ"
   ],
@@ -7936,6 +9848,13 @@
  },
  "床": {
   "meaning": "bed, counter for beds",
+  "glosses": [
+   "bed",
+   "counter for beds",
+   "floor",
+   "padding",
+   "tatami"
+  ],
   "on": [
    "ショウ"
   ],
@@ -7956,6 +9875,10 @@
  },
  "店": {
   "meaning": "store, shop",
+  "glosses": [
+   "store",
+   "shop"
+  ],
   "on": [
    "テン"
   ],
@@ -7980,6 +9903,13 @@
  },
  "府": {
   "meaning": "borough, urban prefecture",
+  "glosses": [
+   "borough",
+   "urban prefecture",
+   "govt office",
+   "representative body",
+   "storehouse"
+  ],
   "on": [
    "フ"
   ],
@@ -8001,6 +9931,14 @@
  },
  "度": {
   "meaning": "degrees, occurrence",
+  "glosses": [
+   "degrees",
+   "occurrence",
+   "time",
+   "counter for occurrences",
+   "consider",
+   "attitude"
+  ],
   "on": [
    "ド",
    "ト",
@@ -8031,6 +9969,13 @@
  },
  "座": {
   "meaning": "squat, seat",
+  "glosses": [
+   "squat",
+   "seat",
+   "cushion",
+   "gathering",
+   "sit"
+  ],
   "on": [
    "ザ"
   ],
@@ -8054,6 +9999,10 @@
  },
  "庫": {
   "meaning": "warehouse, storehouse",
+  "glosses": [
+   "warehouse",
+   "storehouse"
+  ],
   "on": [
    "コ",
    "ク"
@@ -8074,6 +10023,11 @@
  },
  "庭": {
   "meaning": "courtyard, garden",
+  "glosses": [
+   "courtyard",
+   "garden",
+   "yard"
+  ],
   "on": [
    "テイ"
   ],
@@ -8097,6 +10051,10 @@
  },
  "康": {
   "meaning": "ease, peace",
+  "glosses": [
+   "ease",
+   "peace"
+  ],
   "on": [
    "コウ"
   ],
@@ -8122,6 +10080,9 @@
  },
  "建": {
   "meaning": "build",
+  "glosses": [
+   "build"
+  ],
   "on": [
    "ケン",
    "コン"
@@ -8145,6 +10106,17 @@
  },
  "弁": {
   "meaning": "valve, petal",
+  "glosses": [
+   "valve",
+   "petal",
+   "braid",
+   "speech",
+   "dialect",
+   "discrimination",
+   "dispose of",
+   "distinguish",
+   "conical cap"
+  ],
   "on": [
    "ベン",
    "ヘン"
@@ -8169,6 +10141,16 @@
  },
  "式": {
   "meaning": "style, ceremony",
+  "glosses": [
+   "style",
+   "ceremony",
+   "rite",
+   "function",
+   "method",
+   "system",
+   "form",
+   "expression"
+  ],
   "on": [
    "シキ"
   ],
@@ -8186,6 +10168,15 @@
  },
  "引": {
   "meaning": "pull, tug",
+  "glosses": [
+   "pull",
+   "tug",
+   "jerk",
+   "admit",
+   "install",
+   "quote",
+   "refer to"
+  ],
   "on": [
    "イン"
   ],
@@ -8202,6 +10193,10 @@
  },
  "弟": {
   "meaning": "younger brother, faithful service to elders",
+  "glosses": [
+   "younger brother",
+   "faithful service to elders"
+  ],
   "on": [
    "テイ",
    "ダイ",
@@ -8227,6 +10222,10 @@
  },
  "弱": {
   "meaning": "weak, frail",
+  "glosses": [
+   "weak",
+   "frail"
+  ],
   "on": [
    "ジャク"
   ],
@@ -8249,6 +10248,12 @@
  },
  "張": {
   "meaning": "counter for bows & stringed instruments, stretch",
+  "glosses": [
+   "counter for bows & stringed instruments",
+   "stretch",
+   "spread",
+   "put up (tent)"
+  ],
   "on": [
    "チョウ"
   ],
@@ -8270,6 +10275,9 @@
  },
  "強": {
   "meaning": "strong",
+  "glosses": [
+   "strong"
+  ],
   "on": [
    "キョウ",
    "ゴウ"
@@ -8298,6 +10306,12 @@
  },
  "弾": {
   "meaning": "bullet, twang",
+  "glosses": [
+   "bullet",
+   "twang",
+   "flip",
+   "snap"
+  ],
   "on": [
    "ダン",
    "タン"
@@ -8333,6 +10347,12 @@
  },
  "当": {
   "meaning": "hit, right",
+  "glosses": [
+   "hit",
+   "right",
+   "appropriate",
+   "himself"
+  ],
   "on": [
    "トウ"
   ],
@@ -8357,6 +10377,11 @@
  },
  "形": {
   "meaning": "shape, form",
+  "glosses": [
+   "shape",
+   "form",
+   "style"
+  ],
   "on": [
    "ケイ",
    "ギョウ"
@@ -8392,6 +10417,11 @@
  },
  "影": {
   "meaning": "shadow, silhouette",
+  "glosses": [
+   "shadow",
+   "silhouette",
+   "phantom"
+  ],
   "on": [
    "エイ"
   ],
@@ -8423,6 +10453,15 @@
  },
  "役": {
   "meaning": "duty, war",
+  "glosses": [
+   "duty",
+   "war",
+   "campaign",
+   "drafted labor",
+   "office",
+   "service",
+   "role"
+  ],
   "on": [
    "ヤク",
    "エキ"
@@ -8449,6 +10488,11 @@
  },
  "彼": {
   "meaning": "he, that",
+  "glosses": [
+   "he",
+   "that",
+   "the"
+  ],
   "on": [
    "ヒ"
   ],
@@ -8474,6 +10518,10 @@
  },
  "待": {
   "meaning": "wait, depend on",
+  "glosses": [
+   "wait",
+   "depend on"
+  ],
   "on": [
    "タイ"
   ],
@@ -8498,6 +10546,13 @@
  },
  "律": {
   "meaning": "rhythm, law",
+  "glosses": [
+   "rhythm",
+   "law",
+   "regulation",
+   "gauge",
+   "control"
+  ],
   "on": [
    "リツ",
    "リチ",
@@ -8517,6 +10572,11 @@
  },
  "後": {
   "meaning": "behind, back",
+  "glosses": [
+   "behind",
+   "back",
+   "later"
+  ],
   "on": [
    "ゴ",
    "コウ"
@@ -8545,6 +10605,19 @@
  },
  "徒": {
   "meaning": "on foot, junior",
+  "glosses": [
+   "on foot",
+   "junior",
+   "emptiness",
+   "vanity",
+   "futility",
+   "uselessness",
+   "ephemeral thing",
+   "gang",
+   "set",
+   "party",
+   "people"
+  ],
   "on": [
    "ト"
   ],
@@ -8569,6 +10642,16 @@
  },
  "従": {
   "meaning": "accompany, obey",
+  "glosses": [
+   "accompany",
+   "obey",
+   "submit to",
+   "comply",
+   "follow",
+   "secondary",
+   "incidental",
+   "subordinate"
+  ],
   "on": [
    "ジュウ",
    "ショウ",
@@ -8596,6 +10679,19 @@
  },
  "得": {
   "meaning": "gain, get",
+  "glosses": [
+   "gain",
+   "get",
+   "find",
+   "earn",
+   "acquire",
+   "can",
+   "may",
+   "able to",
+   "profit",
+   "advantage",
+   "benefit"
+  ],
   "on": [
    "トク"
   ],
@@ -8624,6 +10720,12 @@
  },
  "復": {
   "meaning": "restore, return to",
+  "glosses": [
+   "restore",
+   "return to",
+   "revert",
+   "resume"
+  ],
   "on": [
    "フク"
   ],
@@ -8663,6 +10765,16 @@
  },
  "徴": {
   "meaning": "indications, sign",
+  "glosses": [
+   "indications",
+   "sign",
+   "omen",
+   "symptom",
+   "collect",
+   "seek",
+   "refer to",
+   "question"
+  ],
   "on": [
    "チョウ",
    "チ"
@@ -8695,6 +10807,11 @@
  },
  "心": {
   "meaning": "heart, mind",
+  "glosses": [
+   "heart",
+   "mind",
+   "spirit"
+  ],
   "on": [
    "シン"
   ],
@@ -8706,6 +10823,11 @@
  },
  "必": {
   "meaning": "invariably, certain",
+  "glosses": [
+   "invariably",
+   "certain",
+   "inevitable"
+  ],
   "on": [
    "ヒツ"
   ],
@@ -8725,6 +10847,9 @@
  },
  "忘": {
   "meaning": "forget",
+  "glosses": [
+   "forget"
+  ],
   "on": [
    "ボウ"
   ],
@@ -8748,6 +10873,11 @@
  },
  "忙": {
   "meaning": "busy, occupied",
+  "glosses": [
+   "busy",
+   "occupied",
+   "restless"
+  ],
   "on": [
    "ボウ",
    "モウ"
@@ -8771,6 +10901,14 @@
  },
  "応": {
   "meaning": "apply, answer",
+  "glosses": [
+   "apply",
+   "answer",
+   "yes",
+   "OK",
+   "reply",
+   "accept"
+  ],
   "on": [
    "オウ",
    "ヨウ",
@@ -8794,6 +10932,15 @@
  },
  "念": {
   "meaning": "wish, sense",
+  "glosses": [
+   "wish",
+   "sense",
+   "idea",
+   "thought",
+   "feeling",
+   "desire",
+   "attention"
+  ],
   "on": [
    "ネン"
   ],
@@ -8815,6 +10962,10 @@
  },
  "怒": {
   "meaning": "angry, be offended",
+  "glosses": [
+   "angry",
+   "be offended"
+  ],
   "on": [
    "ド",
    "ヌ"
@@ -8840,6 +10991,11 @@
  },
  "怖": {
   "meaning": "dreadful, be frightened",
+  "glosses": [
+   "dreadful",
+   "be frightened",
+   "fearful"
+  ],
   "on": [
    "フ",
    "ホ"
@@ -8871,6 +11027,9 @@
  },
  "思": {
   "meaning": "think",
+  "glosses": [
+   "think"
+  ],
   "on": [
    "シ"
   ],
@@ -8892,6 +11051,12 @@
  },
  "急": {
   "meaning": "hurry, emergency",
+  "glosses": [
+   "hurry",
+   "emergency",
+   "sudden",
+   "steep"
+  ],
   "on": [
    "キュウ"
   ],
@@ -8917,6 +11082,11 @@
  },
  "性": {
   "meaning": "sex, gender",
+  "glosses": [
+   "sex",
+   "gender",
+   "nature"
+  ],
   "on": [
    "セイ",
    "ショウ"
@@ -8937,6 +11107,11 @@
  },
  "怪": {
   "meaning": "suspicious, mystery",
+  "glosses": [
+   "suspicious",
+   "mystery",
+   "apparition"
+  ],
   "on": [
    "カイ",
    "ケ"
@@ -8962,6 +11137,13 @@
  },
  "恋": {
   "meaning": "romance, in love",
+  "glosses": [
+   "romance",
+   "in love",
+   "yearn for",
+   "miss",
+   "darling"
+  ],
   "on": [
    "レン"
   ],
@@ -8987,6 +11169,11 @@
  },
  "恐": {
   "meaning": "fear, dread",
+  "glosses": [
+   "fear",
+   "dread",
+   "awe"
+  ],
   "on": [
    "キョウ"
   ],
@@ -9018,6 +11205,10 @@
  },
  "恥": {
   "meaning": "shame, dishonor",
+  "glosses": [
+   "shame",
+   "dishonor"
+  ],
   "on": [
    "チ"
   ],
@@ -9040,6 +11231,14 @@
  },
  "息": {
   "meaning": "breath, respiration",
+  "glosses": [
+   "breath",
+   "respiration",
+   "son",
+   "interest (on money)",
+   "rest",
+   "coming to an end"
+  ],
   "on": [
    "ソク"
   ],
@@ -9063,6 +11262,10 @@
  },
  "悔": {
   "meaning": "repent, regret",
+  "glosses": [
+   "repent",
+   "regret"
+  ],
   "on": [
    "カイ"
   ],
@@ -9104,6 +11307,12 @@
  },
  "患": {
   "meaning": "afflicted, disease",
+  "glosses": [
+   "afflicted",
+   "disease",
+   "suffer from",
+   "be ill"
+  ],
   "on": [
    "カン"
   ],
@@ -9123,6 +11332,13 @@
  },
  "悩": {
   "meaning": "trouble, worry",
+  "glosses": [
+   "trouble",
+   "worry",
+   "in pain",
+   "distress",
+   "illness"
+  ],
   "on": [
    "ノウ"
   ],
@@ -9149,6 +11365,14 @@
  },
  "悪": {
   "meaning": "bad, vice",
+  "glosses": [
+   "bad",
+   "vice",
+   "rascal",
+   "false",
+   "evil",
+   "wrong"
+  ],
   "on": [
    "アク",
    "オ"
@@ -9181,6 +11405,12 @@
  },
  "悲": {
   "meaning": "grieve, sad",
+  "glosses": [
+   "grieve",
+   "sad",
+   "deplore",
+   "regret"
+  ],
   "on": [
    "ヒ"
   ],
@@ -9201,6 +11431,14 @@
  },
  "情": {
   "meaning": "feelings, emotion",
+  "glosses": [
+   "feelings",
+   "emotion",
+   "passion",
+   "sympathy",
+   "circumstances",
+   "facts"
+  ],
   "on": [
    "ジョウ",
    "セイ"
@@ -9237,6 +11475,11 @@
  },
  "惑": {
   "meaning": "beguile, delusion",
+  "glosses": [
+   "beguile",
+   "delusion",
+   "perplexity"
+  ],
   "on": [
    "ワク"
   ],
@@ -9259,7 +11502,13 @@
   ]
  },
  "想": {
-  "meaning": "idea, thought",
+  "meaning": "to imagine, think",
+  "glosses": [
+   "idea",
+   "thought",
+   "conception",
+   "think"
+  ],
   "on": [
    "ソウ",
    "ソ"
@@ -9280,10 +11529,21 @@
     "目",
     "eye"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "意": {
   "meaning": "idea, mind",
+  "glosses": [
+   "idea",
+   "mind",
+   "heart",
+   "taste",
+   "thought",
+   "desire",
+   "care",
+   "liking"
+  ],
   "on": [
    "イ"
   ],
@@ -9309,6 +11569,11 @@
  },
  "愛": {
   "meaning": "love, affection",
+  "glosses": [
+   "love",
+   "affection",
+   "favourite"
+  ],
   "on": [
    "アイ"
   ],
@@ -9340,6 +11605,11 @@
  },
  "感": {
   "meaning": "emotion, feeling",
+  "glosses": [
+   "emotion",
+   "feeling",
+   "sensation"
+  ],
   "on": [
    "カン"
   ],
@@ -9365,6 +11635,13 @@
  },
  "態": {
   "meaning": "attitude, condition",
+  "glosses": [
+   "attitude",
+   "condition",
+   "figure",
+   "appearance",
+   "voice (of verbs)"
+  ],
   "on": [
    "タイ"
   ],
@@ -9392,6 +11669,10 @@
  },
  "慢": {
   "meaning": "ridicule, laziness",
+  "glosses": [
+   "ridicule",
+   "laziness"
+  ],
   "on": [
    "マン"
   ],
@@ -9417,6 +11698,11 @@
  },
  "慣": {
   "meaning": "accustomed, get used to",
+  "glosses": [
+   "accustomed",
+   "get used to",
+   "become experienced"
+  ],
   "on": [
    "カン"
   ],
@@ -9453,6 +11739,14 @@
  },
  "慮": {
   "meaning": "prudence, thought",
+  "glosses": [
+   "prudence",
+   "thought",
+   "concern",
+   "consider",
+   "deliberate",
+   "fear"
+  ],
   "on": [
    "リョ"
   ],
@@ -9489,6 +11783,12 @@
  },
  "憩": {
   "meaning": "recess, rest",
+  "glosses": [
+   "recess",
+   "rest",
+   "relax",
+   "repose"
+  ],
   "on": [
    "ケイ"
   ],
@@ -9521,6 +11821,11 @@
  },
  "憶": {
   "meaning": "recollection, think",
+  "glosses": [
+   "recollection",
+   "think",
+   "remember"
+  ],
   "on": [
    "オク"
   ],
@@ -9550,6 +11855,14 @@
  },
  "懸": {
   "meaning": "state of suspension, hang",
+  "glosses": [
+   "state of suspension",
+   "hang",
+   "depend",
+   "consult",
+   "distant",
+   "far apart"
+  ],
   "on": [
    "ケン",
    "ケ"
@@ -9587,6 +11900,14 @@
  },
  "成": {
   "meaning": "turn into, become",
+  "glosses": [
+   "turn into",
+   "become",
+   "get",
+   "grow",
+   "elapse",
+   "reach"
+  ],
   "on": [
    "セイ",
    "ジョウ"
@@ -9609,6 +11930,13 @@
  },
  "我": {
   "meaning": "ego, I",
+  "glosses": [
+   "ego",
+   "I",
+   "selfish",
+   "our",
+   "oneself"
+  ],
   "on": [
    "ガ"
   ],
@@ -9635,6 +11963,11 @@
  },
  "戦": {
   "meaning": "war, battle",
+  "glosses": [
+   "war",
+   "battle",
+   "match"
+  ],
   "on": [
    "セン"
   ],
@@ -9666,6 +11999,14 @@
  },
  "戻": {
   "meaning": "re-, return",
+  "glosses": [
+   "re-",
+   "return",
+   "revert",
+   "resume",
+   "restore",
+   "go backwards"
+  ],
   "on": [
    "レイ"
   ],
@@ -9694,6 +12035,10 @@
  },
  "所": {
   "meaning": "place, extent",
+  "glosses": [
+   "place",
+   "extent"
+  ],
   "on": [
    "ショ"
   ],
@@ -9724,6 +12069,9 @@
  },
  "手": {
   "meaning": "hand",
+  "glosses": [
+   "hand"
+  ],
   "on": [
    "シュ",
    "ズ"
@@ -9738,6 +12086,11 @@
  },
  "才": {
   "meaning": "genius, years old",
+  "glosses": [
+   "genius",
+   "years old",
+   "cubic shaku"
+  ],
   "on": [
    "サイ"
   ],
@@ -9759,6 +12112,13 @@
  },
  "打": {
   "meaning": "strike, hit",
+  "glosses": [
+   "strike",
+   "hit",
+   "knock",
+   "pound",
+   "dozen"
+  ],
   "on": [
    "ダ",
    "ダース"
@@ -9781,6 +12141,13 @@
  },
  "払": {
   "meaning": "pay, clear out",
+  "glosses": [
+   "pay",
+   "clear out",
+   "prune",
+   "banish",
+   "dispose of"
+  ],
   "on": [
    "フツ",
    "ヒツ",
@@ -9804,6 +12171,12 @@
  },
  "扱": {
   "meaning": "handle, entertain",
+  "glosses": [
+   "handle",
+   "entertain",
+   "thresh",
+   "strip"
+  ],
   "on": [
    "ソウ",
    "キュウ"
@@ -9827,6 +12200,10 @@
  },
  "批": {
   "meaning": "criticism, strike",
+  "glosses": [
+   "criticism",
+   "strike"
+  ],
   "on": [
    "ヒ"
   ],
@@ -9844,6 +12221,16 @@
  },
  "技": {
   "meaning": "skill, art",
+  "glosses": [
+   "skill",
+   "art",
+   "craft",
+   "ability",
+   "feat",
+   "performance",
+   "vocation",
+   "arts"
+  ],
   "on": [
    "ギ"
   ],
@@ -9871,6 +12258,17 @@
  },
  "抑": {
   "meaning": "repress, well",
+  "glosses": [
+   "repress",
+   "well",
+   "now",
+   "in the first place",
+   "push",
+   "shove",
+   "press",
+   "seal",
+   "do in spite of"
+  ],
   "on": [
    "ヨク"
   ],
@@ -9890,6 +12288,17 @@
  },
  "投": {
   "meaning": "throw, discard",
+  "glosses": [
+   "throw",
+   "discard",
+   "abandon",
+   "launch into",
+   "join",
+   "invest in",
+   "hurl",
+   "give up",
+   "sell at a loss"
+  ],
   "on": [
    "トウ"
   ],
@@ -9918,6 +12327,15 @@
  },
  "抜": {
   "meaning": "slip out, extract",
+  "glosses": [
+   "slip out",
+   "extract",
+   "pull out",
+   "pilfer",
+   "quote",
+   "remove",
+   "omit"
+  ],
   "on": [
    "バツ",
    "ハツ",
@@ -9952,6 +12370,12 @@
  },
  "択": {
   "meaning": "choose, select",
+  "glosses": [
+   "choose",
+   "select",
+   "elect",
+   "prefer"
+  ],
   "on": [
    "タク"
   ],
@@ -9975,6 +12399,11 @@
  },
  "抱": {
   "meaning": "embrace, hug",
+  "glosses": [
+   "embrace",
+   "hug",
+   "hold in arms"
+  ],
   "on": [
    "ホウ"
   ],
@@ -10000,6 +12429,19 @@
  },
  "押": {
   "meaning": "push, stop",
+  "glosses": [
+   "push",
+   "stop",
+   "check",
+   "subdue",
+   "attach",
+   "seize",
+   "weight",
+   "shove",
+   "press",
+   "seal",
+   "do in spite of"
+  ],
   "on": [
    "オウ"
   ],
@@ -10027,6 +12469,12 @@
  },
  "担": {
   "meaning": "shouldering, carry",
+  "glosses": [
+   "shouldering",
+   "carry",
+   "raise",
+   "bear"
+  ],
   "on": [
    "タン"
   ],
@@ -10051,6 +12499,12 @@
  },
  "拒": {
   "meaning": "repel, refuse",
+  "glosses": [
+   "repel",
+   "refuse",
+   "reject",
+   "decline"
+  ],
   "on": [
    "キョ",
    "ゴ"
@@ -10075,6 +12529,12 @@
  },
  "招": {
   "meaning": "beckon, invite",
+  "glosses": [
+   "beckon",
+   "invite",
+   "summon",
+   "engage"
+  ],
   "on": [
    "ショウ"
   ],
@@ -10098,6 +12558,12 @@
  },
  "拠": {
   "meaning": "foothold, based on",
+  "glosses": [
+   "foothold",
+   "based on",
+   "follow",
+   "therefore"
+  ],
   "on": [
    "キョ",
    "コ"
@@ -10122,6 +12588,10 @@
  },
  "拶": {
   "meaning": "be imminent, draw close",
+  "glosses": [
+   "be imminent",
+   "draw close"
+  ],
   "on": [
    "サツ"
   ],
@@ -10145,6 +12615,13 @@
  },
  "拾": {
   "meaning": "pick up, gather",
+  "glosses": [
+   "pick up",
+   "gather",
+   "find",
+   "go on foot",
+   "ten"
+  ],
   "on": [
    "シュウ",
    "ジュウ"
@@ -10173,6 +12650,10 @@
  },
  "持": {
   "meaning": "hold, have",
+  "glosses": [
+   "hold",
+   "have"
+  ],
   "on": [
    "ジ"
   ],
@@ -10198,6 +12679,14 @@
  },
  "指": {
   "meaning": "finger, point to",
+  "glosses": [
+   "finger",
+   "point to",
+   "indicate",
+   "put into",
+   "play (chess)",
+   "measure (ruler)"
+  ],
   "on": [
    "シ"
   ],
@@ -10223,6 +12712,11 @@
  },
  "挑": {
   "meaning": "challenge, contend for",
+  "glosses": [
+   "challenge",
+   "contend for",
+   "make love to"
+  ],
   "on": [
    "チョウ"
   ],
@@ -10246,6 +12740,13 @@
  },
  "挙": {
   "meaning": "raise, plan",
+  "glosses": [
+   "raise",
+   "plan",
+   "project",
+   "behavior",
+   "actions"
+  ],
   "on": [
    "キョ"
   ],
@@ -10271,6 +12772,11 @@
  },
  "挨": {
   "meaning": "approach, draw near",
+  "glosses": [
+   "approach",
+   "draw near",
+   "push open"
+  ],
   "on": [
    "アイ"
   ],
@@ -10298,6 +12804,12 @@
  },
  "振": {
   "meaning": "shake, wave",
+  "glosses": [
+   "shake",
+   "wave",
+   "wag",
+   "swing"
+  ],
   "on": [
    "シン"
   ],
@@ -10327,6 +12839,10 @@
  },
  "捕": {
   "meaning": "catch, capture",
+  "glosses": [
+   "catch",
+   "capture"
+  ],
   "on": [
    "ホ"
   ],
@@ -10360,6 +12876,14 @@
  },
  "捨": {
   "meaning": "discard, throw away",
+  "glosses": [
+   "discard",
+   "throw away",
+   "abandon",
+   "resign",
+   "reject",
+   "sacrifice"
+  ],
   "on": [
    "シャ"
   ],
@@ -10387,6 +12911,10 @@
  },
  "掃": {
   "meaning": "sweep, brush",
+  "glosses": [
+   "sweep",
+   "brush"
+  ],
   "on": [
    "ソウ",
    "シュ"
@@ -10414,7 +12942,13 @@
   ]
  },
  "授": {
-  "meaning": "impart, instruct",
+  "meaning": "to give, impart",
+  "glosses": [
+   "impart",
+   "instruct",
+   "grant",
+   "confer"
+  ],
   "on": [
    "ジュ"
   ],
@@ -10439,10 +12973,17 @@
     "扎",
     "pull"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "採": {
   "meaning": "pick, take",
+  "glosses": [
+   "pick",
+   "take",
+   "fetch",
+   "take up"
+  ],
   "on": [
    "サイ"
   ],
@@ -10466,6 +13007,11 @@
  },
  "探": {
   "meaning": "grope, search",
+  "glosses": [
+   "grope",
+   "search",
+   "look for"
+  ],
   "on": [
    "タン"
   ],
@@ -10494,6 +13040,12 @@
  },
  "接": {
   "meaning": "touch, contact",
+  "glosses": [
+   "touch",
+   "contact",
+   "adjoin",
+   "piece together"
+  ],
   "on": [
    "セツ",
    "ショウ"
@@ -10518,6 +13070,13 @@
  },
  "描": {
   "meaning": "sketch, compose",
+  "glosses": [
+   "sketch",
+   "compose",
+   "write",
+   "draw",
+   "paint"
+  ],
   "on": [
    "ビョウ"
   ],
@@ -10541,7 +13100,12 @@
   ]
  },
  "提": {
-  "meaning": "propose, take along",
+  "meaning": "to put forward",
+  "glosses": [
+   "propose",
+   "take along",
+   "carry in hand"
+  ],
   "on": [
    "テイ",
    "チョウ",
@@ -10563,10 +13127,19 @@
     "扎",
     "pull"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "換": {
   "meaning": "interchange, period",
+  "glosses": [
+   "interchange",
+   "period",
+   "change",
+   "convert",
+   "replace",
+   "renew"
+  ],
   "on": [
    "カン"
   ],
@@ -10600,6 +13173,11 @@
  },
  "援": {
   "meaning": "abet, help",
+  "glosses": [
+   "abet",
+   "help",
+   "save"
+  ],
   "on": [
    "エン"
   ],
@@ -10629,6 +13207,12 @@
  },
  "携": {
   "meaning": "portable, carry (in hand)",
+  "glosses": [
+   "portable",
+   "carry (in hand)",
+   "armed with",
+   "bring along"
+  ],
   "on": [
    "ケイ"
   ],
@@ -10657,6 +13241,14 @@
  },
  "摘": {
   "meaning": "pinch, pick",
+  "glosses": [
+   "pinch",
+   "pick",
+   "pluck",
+   "trim",
+   "clip",
+   "summarize"
+  ],
   "on": [
    "テキ"
   ],
@@ -10700,6 +13292,12 @@
  },
  "撃": {
   "meaning": "beat, attack",
+  "glosses": [
+   "beat",
+   "attack",
+   "defeat",
+   "conquer"
+  ],
   "on": [
    "ゲキ"
   ],
@@ -10731,6 +13329,10 @@
  },
  "撮": {
   "meaning": "snapshot, take pictures",
+  "glosses": [
+   "snapshot",
+   "take pictures"
+  ],
   "on": [
    "サツ"
   ],
@@ -10760,6 +13362,15 @@
  },
  "操": {
   "meaning": "maneuver, manipulate",
+  "glosses": [
+   "maneuver",
+   "manipulate",
+   "operate",
+   "steer",
+   "chastity",
+   "virginity",
+   "fidelity"
+  ],
   "on": [
    "ソウ",
    "サン"
@@ -10789,6 +13400,11 @@
  },
  "支": {
   "meaning": "branch, support",
+  "glosses": [
+   "branch",
+   "support",
+   "sustain"
+  ],
   "on": [
    "シ"
   ],
@@ -10810,6 +13426,16 @@
  },
  "改": {
   "meaning": "reformation, change",
+  "glosses": [
+   "reformation",
+   "change",
+   "modify",
+   "mend",
+   "renew",
+   "examine",
+   "inspect",
+   "search"
+  ],
   "on": [
    "カイ"
   ],
@@ -10834,6 +13460,12 @@
  },
  "攻": {
   "meaning": "aggression, attack",
+  "glosses": [
+   "aggression",
+   "attack",
+   "criticize",
+   "polish"
+  ],
   "on": [
    "コウ"
   ],
@@ -10857,6 +13489,15 @@
  },
  "放": {
   "meaning": "set free, release",
+  "glosses": [
+   "set free",
+   "release",
+   "fire",
+   "shoot",
+   "emit",
+   "banish",
+   "liberate"
+  ],
   "on": [
    "ホウ"
   ],
@@ -10885,6 +13526,10 @@
  },
  "政": {
   "meaning": "politics, government",
+  "glosses": [
+   "politics",
+   "government"
+  ],
   "on": [
    "セイ",
    "ショウ"
@@ -10914,6 +13559,17 @@
  },
  "故": {
   "meaning": "happenstance, especially",
+  "glosses": [
+   "happenstance",
+   "especially",
+   "intentionally",
+   "reason",
+   "cause",
+   "circumstances",
+   "the late",
+   "therefore",
+   "consequently"
+  ],
   "on": [
    "コ"
   ],
@@ -10943,6 +13599,13 @@
  },
  "救": {
   "meaning": "salvation, save",
+  "glosses": [
+   "salvation",
+   "save",
+   "help",
+   "rescue",
+   "reclaim"
+  ],
   "on": [
    "キュウ"
   ],
@@ -10970,6 +13633,11 @@
  },
  "敗": {
   "meaning": "failure, defeat",
+  "glosses": [
+   "failure",
+   "defeat",
+   "reversal"
+  ],
   "on": [
    "ハイ"
   ],
@@ -11000,7 +13668,12 @@
   ]
  },
  "教": {
-  "meaning": "teach, faith",
+  "meaning": "to teach",
+  "glosses": [
+   "teach",
+   "faith",
+   "doctrine"
+  ],
   "on": [
    "キョウ"
   ],
@@ -11025,10 +13698,17 @@
     "乞",
     "beg"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "散": {
   "meaning": "scatter, disperse",
+  "glosses": [
+   "scatter",
+   "disperse",
+   "spend",
+   "squander"
+  ],
   "on": [
    "サン"
   ],
@@ -11067,6 +13747,12 @@
  },
  "敬": {
   "meaning": "awe, respect",
+  "glosses": [
+   "awe",
+   "respect",
+   "honor",
+   "revere"
+  ],
   "on": [
    "ケイ",
    "キョウ"
@@ -11099,6 +13785,13 @@
  },
  "数": {
   "meaning": "number, strength",
+  "glosses": [
+   "number",
+   "strength",
+   "fate",
+   "law",
+   "figures"
+  ],
   "on": [
    "スウ",
    "ス",
@@ -11138,6 +13831,11 @@
  },
  "敵": {
   "meaning": "enemy, foe",
+  "glosses": [
+   "enemy",
+   "foe",
+   "opponent"
+  ],
   "on": [
    "テキ"
   ],
@@ -11187,6 +13885,15 @@
  },
  "文": {
   "meaning": "sentence, literature",
+  "glosses": [
+   "sentence",
+   "literature",
+   "style",
+   "art",
+   "decoration",
+   "figures",
+   "plan"
+  ],
   "on": [
    "ブン",
    "モン"
@@ -11199,6 +13906,10 @@
  },
  "料": {
   "meaning": "fee, materials",
+  "glosses": [
+   "fee",
+   "materials"
+  ],
   "on": [
    "リョウ"
   ],
@@ -11216,6 +13927,18 @@
  },
  "断": {
   "meaning": "severance, decline",
+  "glosses": [
+   "severance",
+   "decline",
+   "refuse",
+   "apologize",
+   "warn",
+   "dismiss",
+   "prohibit",
+   "decision",
+   "judgement",
+   "cutting"
+  ],
   "on": [
    "ダン"
   ],
@@ -11241,6 +13964,9 @@
  },
  "新": {
   "meaning": "new",
+  "glosses": [
+   "new"
+  ],
   "on": [
    "シン"
   ],
@@ -11279,6 +14005,11 @@
  },
  "方": {
   "meaning": "direction, person",
+  "glosses": [
+   "direction",
+   "person",
+   "alternative"
+  ],
   "on": [
    "ホウ"
   ],
@@ -11291,6 +14022,12 @@
  },
  "施": {
   "meaning": "give, bestow",
+  "glosses": [
+   "give",
+   "bestow",
+   "perform",
+   "alms"
+  ],
   "on": [
    "シ",
    "セ"
@@ -11323,6 +14060,10 @@
  },
  "旅": {
   "meaning": "trip, travel",
+  "glosses": [
+   "trip",
+   "travel"
+  ],
   "on": [
    "リョ"
   ],
@@ -11346,6 +14087,10 @@
  },
  "族": {
   "meaning": "tribe, family",
+  "glosses": [
+   "tribe",
+   "family"
+  ],
   "on": [
    "ゾク"
   ],
@@ -11367,6 +14112,12 @@
  },
  "日": {
   "meaning": "day, sun",
+  "glosses": [
+   "day",
+   "sun",
+   "Japan",
+   "counter for days"
+  ],
   "on": [
    "ニチ",
    "ジツ"
@@ -11380,6 +14131,10 @@
  },
  "早": {
   "meaning": "early, fast",
+  "glosses": [
+   "early",
+   "fast"
+  ],
   "on": [
    "ソウ",
    "サッ"
@@ -11405,6 +14160,9 @@
  },
  "昇": {
   "meaning": "rise up",
+  "glosses": [
+   "rise up"
+  ],
   "on": [
    "ショウ"
   ],
@@ -11432,6 +14190,10 @@
  },
  "明": {
   "meaning": "bright, light",
+  "glosses": [
+   "bright",
+   "light"
+  ],
   "on": [
    "メイ",
    "ミョウ",
@@ -11462,6 +14224,13 @@
  },
  "易": {
   "meaning": "easy, ready to",
+  "glosses": [
+   "easy",
+   "ready to",
+   "simple",
+   "fortune-telling",
+   "divination"
+  ],
   "on": [
    "エキ",
    "イ"
@@ -11491,6 +14260,11 @@
  },
  "昔": {
   "meaning": "once upon a time, antiquity",
+  "glosses": [
+   "once upon a time",
+   "antiquity",
+   "old times"
+  ],
   "on": [
    "セキ",
    "シャク"
@@ -11515,6 +14289,12 @@
  },
  "星": {
   "meaning": "star, spot",
+  "glosses": [
+   "star",
+   "spot",
+   "dot",
+   "mark"
+  ],
   "on": [
    "セイ",
    "ショウ"
@@ -11536,6 +14316,11 @@
  },
  "映": {
   "meaning": "reflect, reflection",
+  "glosses": [
+   "reflect",
+   "reflection",
+   "projection"
+  ],
   "on": [
    "エイ"
   ],
@@ -11566,6 +14351,10 @@
  },
  "春": {
   "meaning": "springtime, spring (season)",
+  "glosses": [
+   "springtime",
+   "spring (season)"
+  ],
   "on": [
    "シュン"
   ],
@@ -11597,6 +14386,10 @@
  },
  "昨": {
   "meaning": "yesterday, previous",
+  "glosses": [
+   "yesterday",
+   "previous"
+  ],
   "on": [
    "サク"
   ],
@@ -11614,6 +14407,10 @@
  },
  "昼": {
   "meaning": "daytime, noon",
+  "glosses": [
+   "daytime",
+   "noon"
+  ],
   "on": [
    "チュウ"
   ],
@@ -11641,6 +14438,10 @@
  },
  "時": {
   "meaning": "time, hour",
+  "glosses": [
+   "time",
+   "hour"
+  ],
   "on": [
    "ジ"
   ],
@@ -11665,6 +14466,10 @@
  },
  "晩": {
   "meaning": "nightfall, night",
+  "glosses": [
+   "nightfall",
+   "night"
+  ],
   "on": [
    "バン"
   ],
@@ -11690,6 +14495,12 @@
  },
  "普": {
   "meaning": "universal, wide(ly)",
+  "glosses": [
+   "universal",
+   "wide(ly)",
+   "generally",
+   "Prussia"
+  ],
   "on": [
    "フ"
   ],
@@ -11718,6 +14529,9 @@
  },
  "晴": {
   "meaning": "clear up",
+  "glosses": [
+   "clear up"
+  ],
   "on": [
    "セイ"
   ],
@@ -11757,6 +14571,13 @@
  },
  "暇": {
   "meaning": "spare time, rest",
+  "glosses": [
+   "spare time",
+   "rest",
+   "leisure",
+   "time",
+   "leave of absence"
+  ],
   "on": [
    "カ"
   ],
@@ -11777,6 +14598,11 @@
  },
  "暑": {
   "meaning": "sultry, hot",
+  "glosses": [
+   "sultry",
+   "hot",
+   "summer heat"
+  ],
   "on": [
    "ショ"
   ],
@@ -11796,6 +14622,9 @@
  },
  "暖": {
   "meaning": "warmth",
+  "glosses": [
+   "warmth"
+  ],
   "on": [
    "ダン",
    "ノン"
@@ -11831,6 +14660,14 @@
  },
  "暗": {
   "meaning": "darkness, disappear",
+  "glosses": [
+   "darkness",
+   "disappear",
+   "shade",
+   "informal",
+   "grow dark",
+   "be blinded"
+  ],
   "on": [
    "アン"
   ],
@@ -11856,6 +14693,14 @@
  },
  "暮": {
   "meaning": "evening, twilight",
+  "glosses": [
+   "evening",
+   "twilight",
+   "season's end",
+   "livelihood",
+   "make a living",
+   "spend time"
+  ],
   "on": [
    "ボ"
   ],
@@ -11880,6 +14725,9 @@
  },
  "曜": {
   "meaning": "weekday",
+  "glosses": [
+   "weekday"
+  ],
   "on": [
    "ヨウ"
   ],
@@ -11901,6 +14749,19 @@
  },
  "曲": {
   "meaning": "bend, music",
+  "glosses": [
+   "bend",
+   "music",
+   "melody",
+   "composition",
+   "pleasure",
+   "injustice",
+   "fault",
+   "curve",
+   "crooked",
+   "perverse",
+   "lean"
+  ],
   "on": [
    "キョク"
   ],
@@ -11918,6 +14779,17 @@
  },
  "更": {
   "meaning": "grow late, night watch",
+  "glosses": [
+   "grow late",
+   "night watch",
+   "sit up late",
+   "of course",
+   "renew",
+   "renovate",
+   "again",
+   "more and more",
+   "further"
+  ],
   "on": [
    "コウ"
   ],
@@ -11948,6 +14820,9 @@
  },
  "書": {
   "meaning": "write",
+  "glosses": [
+   "write"
+  ],
   "on": [
    "ショ"
   ],
@@ -11969,6 +14844,11 @@
  },
  "最": {
   "meaning": "utmost, most",
+  "glosses": [
+   "utmost",
+   "most",
+   "extreme"
+  ],
   "on": [
    "サイ",
    "シュ"
@@ -11998,6 +14878,10 @@
  },
  "月": {
   "meaning": "month, moon",
+  "glosses": [
+   "month",
+   "moon"
+  ],
   "on": [
    "ゲツ",
    "ガツ"
@@ -12009,6 +14893,14 @@
  },
  "有": {
   "meaning": "possess, have",
+  "glosses": [
+   "possess",
+   "have",
+   "exist",
+   "happen",
+   "occur",
+   "approx"
+  ],
   "on": [
    "ユウ",
    "ウ"
@@ -12033,6 +14925,12 @@
  },
  "服": {
   "meaning": "clothing, admit",
+  "glosses": [
+   "clothing",
+   "admit",
+   "obey",
+   "discharge"
+  ],
   "on": [
    "フク"
   ],
@@ -12054,6 +14952,14 @@
  },
  "望": {
   "meaning": "ambition, full moon",
+  "glosses": [
+   "ambition",
+   "full moon",
+   "hope",
+   "desire",
+   "aspire to",
+   "expect"
+  ],
   "on": [
    "ボウ",
    "モウ"
@@ -12079,6 +14985,14 @@
  },
  "朝": {
   "meaning": "morning, dynasty",
+  "glosses": [
+   "morning",
+   "dynasty",
+   "regime",
+   "epoch",
+   "period",
+   "(North) Korea"
+  ],
   "on": [
    "チョウ"
   ],
@@ -12102,6 +15016,12 @@
  },
  "期": {
   "meaning": "period, time",
+  "glosses": [
+   "period",
+   "time",
+   "date",
+   "term"
+  ],
   "on": [
    "キ",
    "ゴ"
@@ -12124,6 +15044,10 @@
  },
  "木": {
   "meaning": "tree, wood",
+  "glosses": [
+   "tree",
+   "wood"
+  ],
   "on": [
    "ボク",
    "モク"
@@ -12136,6 +15060,16 @@
  },
  "未": {
   "meaning": "un-, not yet",
+  "glosses": [
+   "un-",
+   "not yet",
+   "hitherto",
+   "still",
+   "even now",
+   "sign of the ram",
+   "1-3PM",
+   "eighth sign of Chinese zodiac"
+  ],
   "on": [
    "ミ",
    "ビ"
@@ -12166,6 +15100,13 @@
  },
  "末": {
   "meaning": "end, close",
+  "glosses": [
+   "end",
+   "close",
+   "tip",
+   "powder",
+   "posterity"
+  ],
   "on": [
    "マツ",
    "バツ"
@@ -12196,6 +15137,15 @@
  },
  "本": {
   "meaning": "book, present",
+  "glosses": [
+   "book",
+   "present",
+   "main",
+   "origin",
+   "true",
+   "real",
+   "counter for long cylindrical things"
+  ],
   "on": [
    "ホン"
   ],
@@ -12215,6 +15165,10 @@
  },
  "机": {
   "meaning": "desk, table",
+  "glosses": [
+   "desk",
+   "table"
+  ],
   "on": [
    "キ"
   ],
@@ -12234,6 +15188,10 @@
  },
  "村": {
   "meaning": "village, town",
+  "glosses": [
+   "village",
+   "town"
+  ],
   "on": [
    "ソン"
   ],
@@ -12253,6 +15211,15 @@
  },
  "束": {
   "meaning": "bundle, sheaf",
+  "glosses": [
+   "bundle",
+   "sheaf",
+   "ream",
+   "tie in bundles",
+   "govern",
+   "manage",
+   "control"
+  ],
   "on": [
    "ソク"
   ],
@@ -12283,6 +15250,15 @@
  },
  "条": {
   "meaning": "article, clause",
+  "glosses": [
+   "article",
+   "clause",
+   "counter for articles, clauses, paragraphs, etc.",
+   "twig",
+   "item",
+   "stripe",
+   "streak"
+  ],
   "on": [
    "ジョウ",
    "チョウ",
@@ -12309,6 +15285,13 @@
  },
  "来": {
   "meaning": "come, due",
+  "glosses": [
+   "come",
+   "due",
+   "next",
+   "cause",
+   "become"
+  ],
   "on": [
    "ライ",
    "タイ"
@@ -12343,6 +15326,12 @@
  },
  "杯": {
   "meaning": "counter for cupfuls, wine glass",
+  "glosses": [
+   "counter for cupfuls",
+   "wine glass",
+   "glass",
+   "toast"
+  ],
   "on": [
    "ハイ"
   ],
@@ -12370,6 +15359,9 @@
  },
  "東": {
   "meaning": "east",
+  "glosses": [
+   "east"
+  ],
   "on": [
    "トウ"
   ],
@@ -12397,6 +15389,12 @@
  },
  "板": {
   "meaning": "plank, board",
+  "glosses": [
+   "plank",
+   "board",
+   "plate",
+   "stage"
+  ],
   "on": [
    "ハン",
    "バン"
@@ -12421,6 +15419,12 @@
  },
  "析": {
   "meaning": "chop, divide",
+  "glosses": [
+   "chop",
+   "divide",
+   "tear",
+   "analyze"
+  ],
   "on": [
    "セキ"
   ],
@@ -12438,6 +15442,10 @@
  },
  "枚": {
   "meaning": "sheet of..., counter for flat thin objects or sheets",
+  "glosses": [
+   "sheet of...",
+   "counter for flat thin objects or sheets"
+  ],
   "on": [
    "マイ",
    "バイ"
@@ -12460,6 +15468,16 @@
  },
  "果": {
   "meaning": "fruit, reward",
+  "glosses": [
+   "fruit",
+   "reward",
+   "carry out",
+   "achieve",
+   "complete",
+   "end",
+   "finish",
+   "succeed"
+  ],
   "on": [
    "カ"
   ],
@@ -12484,6 +15502,9 @@
  },
  "査": {
   "meaning": "investigate",
+  "glosses": [
+   "investigate"
+  ],
   "on": [
    "サ"
   ],
@@ -12505,6 +15526,13 @@
  },
  "校": {
   "meaning": "exam, school",
+  "glosses": [
+   "exam",
+   "school",
+   "printing",
+   "proof",
+   "correction"
+  ],
   "on": [
    "コウ",
    "キョウ"
@@ -12527,6 +15555,11 @@
  },
  "根": {
   "meaning": "root, radical",
+  "glosses": [
+   "root",
+   "radical",
+   "head (pimple)"
+  ],
   "on": [
    "コン"
   ],
@@ -12547,6 +15580,13 @@
  },
  "格": {
   "meaning": "status, rank",
+  "glosses": [
+   "status",
+   "rank",
+   "capacity",
+   "character",
+   "case (law, grammar)"
+  ],
   "on": [
    "カク",
    "コウ",
@@ -12571,6 +15611,19 @@
  },
  "案": {
   "meaning": "plan, suggestion",
+  "glosses": [
+   "plan",
+   "suggestion",
+   "draft",
+   "ponder",
+   "fear",
+   "proposition",
+   "idea",
+   "expectation",
+   "worry",
+   "table",
+   "bench"
+  ],
   "on": [
    "アン"
   ],
@@ -12594,6 +15647,9 @@
  },
  "桜": {
   "meaning": "cherry",
+  "glosses": [
+   "cherry"
+  ],
   "on": [
    "オウ",
    "ヨウ"
@@ -12618,6 +15674,12 @@
  },
  "械": {
   "meaning": "contraption, fetter",
+  "glosses": [
+   "contraption",
+   "fetter",
+   "machine",
+   "instrument"
+  ],
   "on": [
    "カイ"
   ],
@@ -12641,6 +15703,14 @@
  },
  "棒": {
   "meaning": "rod, stick",
+  "glosses": [
+   "rod",
+   "stick",
+   "cane",
+   "pole",
+   "club",
+   "line"
+  ],
   "on": [
    "ボウ"
   ],
@@ -12670,6 +15740,10 @@
  },
  "森": {
   "meaning": "forest, woods",
+  "glosses": [
+   "forest",
+   "woods"
+  ],
   "on": [
    "シン"
   ],
@@ -12685,6 +15759,9 @@
  },
  "椅": {
   "meaning": "chair",
+  "glosses": [
+   "chair"
+  ],
   "on": [
    "イ"
   ],
@@ -12714,6 +15791,9 @@
  },
  "植": {
   "meaning": "plant",
+  "glosses": [
+   "plant"
+  ],
   "on": [
    "ショク"
   ],
@@ -12738,6 +15818,10 @@
  },
  "検": {
   "meaning": "examination, investigate",
+  "glosses": [
+   "examination",
+   "investigate"
+  ],
   "on": [
    "ケン"
   ],
@@ -12765,6 +15849,12 @@
  },
  "業": {
   "meaning": "business, vocation",
+  "glosses": [
+   "business",
+   "vocation",
+   "arts",
+   "performance"
+  ],
   "on": [
    "ギョウ",
    "ゴウ"
@@ -12801,6 +15891,11 @@
  },
  "楽": {
   "meaning": "music, comfort",
+  "glosses": [
+   "music",
+   "comfort",
+   "ease"
+  ],
   "on": [
    "ガク",
    "ラク",
@@ -12828,6 +15923,13 @@
  },
  "構": {
   "meaning": "posture, stance",
+  "glosses": [
+   "posture",
+   "stance",
+   "appearance",
+   "build",
+   "set up"
+  ],
   "on": [
    "コウ"
   ],
@@ -12856,6 +15958,13 @@
  },
  "様": {
   "meaning": "Esq., way",
+  "glosses": [
+   "Esq.",
+   "way",
+   "manner",
+   "situation",
+   "polite suffix"
+  ],
   "on": [
    "ヨウ",
    "ショウ"
@@ -12889,6 +15998,19 @@
  },
  "標": {
   "meaning": "signpost, seal",
+  "glosses": [
+   "signpost",
+   "seal",
+   "mark",
+   "stamp",
+   "imprint",
+   "symbol",
+   "emblem",
+   "trademark",
+   "evidence",
+   "souvenir",
+   "target"
+  ],
   "on": [
    "ヒョウ"
   ],
@@ -12921,6 +16043,11 @@
  },
  "権": {
   "meaning": "authority, power",
+  "glosses": [
+   "authority",
+   "power",
+   "rights"
+  ],
   "on": [
    "ケン",
    "ゴン"
@@ -12951,6 +16078,15 @@
  },
  "横": {
   "meaning": "sideways, side",
+  "glosses": [
+   "sideways",
+   "side",
+   "horizontal",
+   "width",
+   "woof",
+   "unreasonable",
+   "perverse"
+  ],
   "on": [
    "オウ"
   ],
@@ -12990,6 +16126,9 @@
  },
  "橋": {
   "meaning": "bridge",
+  "glosses": [
+   "bridge"
+  ],
   "on": [
    "キョウ"
   ],
@@ -13016,7 +16155,17 @@
   ]
  },
  "機": {
-  "meaning": "loom, mechanism",
+  "meaning": "machine, mechanism",
+  "glosses": [
+   "loom",
+   "mechanism",
+   "machine",
+   "airplane",
+   "opportunity",
+   "potency",
+   "efficacy",
+   "occasion"
+  ],
   "on": [
    "キ"
   ],
@@ -13044,10 +16193,16 @@
     "戈",
     "halberd"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "次": {
   "meaning": "next, order",
+  "glosses": [
+   "next",
+   "order",
+   "sequence"
+  ],
   "on": [
    "ジ",
    "シ"
@@ -13069,6 +16224,14 @@
  },
  "欲": {
   "meaning": "longing, covetousness",
+  "glosses": [
+   "longing",
+   "covetousness",
+   "greed",
+   "passion",
+   "desire",
+   "craving"
+  ],
   "on": [
    "ヨク"
   ],
@@ -13101,6 +16264,10 @@
  },
  "歌": {
   "meaning": "song, sing",
+  "glosses": [
+   "song",
+   "sing"
+  ],
   "on": [
    "カ"
   ],
@@ -13129,6 +16296,10 @@
  },
  "歓": {
   "meaning": "delight, joy",
+  "glosses": [
+   "delight",
+   "joy"
+  ],
   "on": [
    "カン"
   ],
@@ -13156,6 +16327,10 @@
  },
  "止": {
   "meaning": "stop, halt",
+  "glosses": [
+   "stop",
+   "halt"
+  ],
   "on": [
    "シ"
   ],
@@ -13179,6 +16354,12 @@
  },
  "正": {
   "meaning": "correct, justice",
+  "glosses": [
+   "correct",
+   "justice",
+   "righteous",
+   "10**40"
+  ],
   "on": [
    "セイ",
    "ショウ"
@@ -13202,6 +16383,12 @@
  },
  "武": {
   "meaning": "warrior, military",
+  "glosses": [
+   "warrior",
+   "military",
+   "chivalry",
+   "arms"
+  ],
   "on": [
    "ブ",
    "ム"
@@ -13223,6 +16410,10 @@
  },
  "歩": {
   "meaning": "walk, counter for steps",
+  "glosses": [
+   "walk",
+   "counter for steps"
+  ],
   "on": [
    "ホ",
    "ブ",
@@ -13249,6 +16440,10 @@
  },
  "歯": {
   "meaning": "tooth, cog",
+  "glosses": [
+   "tooth",
+   "cog"
+  ],
   "on": [
    "シ"
   ],
@@ -13275,6 +16470,12 @@
  },
  "歳": {
   "meaning": "year-end, age",
+  "glosses": [
+   "year-end",
+   "age",
+   "occasion",
+   "opportunity"
+  ],
   "on": [
    "サイ",
    "セイ"
@@ -13305,6 +16506,11 @@
  },
  "歴": {
   "meaning": "curriculum, continuation",
+  "glosses": [
+   "curriculum",
+   "continuation",
+   "passage of time"
+  ],
   "on": [
    "レキ",
    "レッキ"
@@ -13335,6 +16541,10 @@
  },
  "死": {
   "meaning": "death, die",
+  "glosses": [
+   "death",
+   "die"
+  ],
   "on": [
    "シ"
   ],
@@ -13363,6 +16573,11 @@
  },
  "残": {
   "meaning": "remainder, leftover",
+  "glosses": [
+   "remainder",
+   "leftover",
+   "balance"
+  ],
   "on": [
    "ザン",
    "サン"
@@ -13390,6 +16605,12 @@
  },
  "殴": {
   "meaning": "assault, hit",
+  "glosses": [
+   "assault",
+   "hit",
+   "beat",
+   "thrash"
+  ],
   "on": [
    "オウ"
   ],
@@ -13425,6 +16646,11 @@
  },
  "段": {
   "meaning": "grade, steps",
+  "glosses": [
+   "grade",
+   "steps",
+   "stairs"
+  ],
   "on": [
    "ダン",
    "タン"
@@ -13455,6 +16681,16 @@
  },
  "殺": {
   "meaning": "kill, murder",
+  "glosses": [
+   "kill",
+   "murder",
+   "butcher",
+   "slice off",
+   "split",
+   "diminish",
+   "reduce",
+   "spoil"
+  ],
   "on": [
    "サツ",
    "サイ",
@@ -13495,6 +16731,9 @@
  },
  "母": {
   "meaning": "mother",
+  "glosses": [
+   "mother"
+  ],
   "on": [
    "ボ"
   ],
@@ -13511,6 +16750,9 @@
  },
  "毎": {
   "meaning": "every",
+  "glosses": [
+   "every"
+  ],
   "on": [
    "マイ"
   ],
@@ -13535,6 +16777,12 @@
  },
  "比": {
   "meaning": "compare, race",
+  "glosses": [
+   "compare",
+   "race",
+   "ratio",
+   "Philippines"
+  ],
   "on": [
    "ヒ"
   ],
@@ -13545,6 +16793,11 @@
  },
  "氏": {
   "meaning": "family name, surname",
+  "glosses": [
+   "family name",
+   "surname",
+   "clan"
+  ],
   "on": [
    "シ"
   ],
@@ -13556,6 +16809,11 @@
  },
  "民": {
   "meaning": "people, nation",
+  "glosses": [
+   "people",
+   "nation",
+   "subjects"
+  ],
   "on": [
    "ミン"
   ],
@@ -13579,6 +16837,13 @@
  },
  "気": {
   "meaning": "spirit, mind",
+  "glosses": [
+   "spirit",
+   "mind",
+   "air",
+   "atmosphere",
+   "mood"
+  ],
   "on": [
    "キ",
    "ケ"
@@ -13608,6 +16873,9 @@
  },
  "水": {
   "meaning": "water",
+  "glosses": [
+   "water"
+  ],
   "on": [
    "スイ"
   ],
@@ -13619,6 +16887,13 @@
  },
  "氷": {
   "meaning": "icicle, ice",
+  "glosses": [
+   "icicle",
+   "ice",
+   "hail",
+   "freeze",
+   "congeal"
+  ],
   "on": [
    "ヒョウ"
   ],
@@ -13640,6 +16915,13 @@
  },
  "求": {
   "meaning": "request, want",
+  "glosses": [
+   "request",
+   "want",
+   "wish for",
+   "require",
+   "demand"
+  ],
   "on": [
    "キュウ",
    "グ"
@@ -13664,6 +16946,10 @@
  },
  "汗": {
   "meaning": "sweat, perspire",
+  "glosses": [
+   "sweat",
+   "perspire"
+  ],
   "on": [
    "カン"
   ],
@@ -13683,6 +16969,12 @@
  },
  "池": {
   "meaning": "pond, cistern",
+  "glosses": [
+   "pond",
+   "cistern",
+   "pool",
+   "reservoir"
+  ],
   "on": [
    "チ"
   ],
@@ -13702,6 +16994,12 @@
  },
  "決": {
   "meaning": "decide, fix",
+  "glosses": [
+   "decide",
+   "fix",
+   "agree upon",
+   "appoint"
+  ],
   "on": [
    "ケツ"
   ],
@@ -13736,6 +17034,18 @@
  },
  "治": {
   "meaning": "reign, be at peace",
+  "glosses": [
+   "reign",
+   "be at peace",
+   "calm down",
+   "subdue",
+   "quell",
+   "govt",
+   "cure",
+   "heal",
+   "rule",
+   "conserve"
+  ],
   "on": [
    "ジ",
    "チ"
@@ -13763,6 +17073,10 @@
  },
  "況": {
   "meaning": "condition, situation",
+  "glosses": [
+   "condition",
+   "situation"
+  ],
   "on": [
    "キョウ"
   ],
@@ -13788,6 +17102,11 @@
  },
  "泊": {
   "meaning": "overnight stay, put up at",
+  "glosses": [
+   "overnight stay",
+   "put up at",
+   "ride at anchor"
+  ],
   "on": [
    "ハク"
   ],
@@ -13808,6 +17127,14 @@
  },
  "法": {
   "meaning": "method, law",
+  "glosses": [
+   "method",
+   "law",
+   "rule",
+   "principle",
+   "model",
+   "system"
+  ],
   "on": [
    "ホウ",
    "ハッ",
@@ -13834,6 +17161,11 @@
  },
  "泣": {
   "meaning": "cry, weep",
+  "glosses": [
+   "cry",
+   "weep",
+   "moan"
+  ],
   "on": [
    "キュウ"
   ],
@@ -13853,6 +17185,12 @@
  },
  "泥": {
   "meaning": "mud, mire",
+  "glosses": [
+   "mud",
+   "mire",
+   "adhere to",
+   "be attached to"
+  ],
   "on": [
    "デイ",
    "ナイ",
@@ -13880,6 +17218,16 @@
  },
  "注": {
   "meaning": "pour, irrigate",
+  "glosses": [
+   "pour",
+   "irrigate",
+   "shed (tears)",
+   "flow into",
+   "concentrate on",
+   "notes",
+   "comment",
+   "annotate"
+  ],
   "on": [
    "チュウ"
   ],
@@ -13905,6 +17253,9 @@
  },
  "泳": {
   "meaning": "swim",
+  "glosses": [
+   "swim"
+  ],
   "on": [
    "エイ"
   ],
@@ -13928,6 +17279,11 @@
  },
  "洗": {
   "meaning": "wash, inquire into",
+  "glosses": [
+   "wash",
+   "inquire into",
+   "probe"
+  ],
   "on": [
    "セン"
   ],
@@ -13955,6 +17311,12 @@
  },
  "活": {
   "meaning": "lively, resuscitation",
+  "glosses": [
+   "lively",
+   "resuscitation",
+   "being helped",
+   "living"
+  ],
   "on": [
    "カツ"
   ],
@@ -13988,6 +17350,14 @@
  },
  "派": {
   "meaning": "faction, group",
+  "glosses": [
+   "faction",
+   "group",
+   "party",
+   "clique",
+   "sect",
+   "school"
+  ],
   "on": [
    "ハ"
   ],
@@ -14009,6 +17379,12 @@
  },
  "流": {
   "meaning": "current, a sink",
+  "glosses": [
+   "current",
+   "a sink",
+   "flow",
+   "forfeit"
+  ],
   "on": [
    "リュウ",
    "ル"
@@ -14040,6 +17416,11 @@
  },
  "浮": {
   "meaning": "floating, float",
+  "glosses": [
+   "floating",
+   "float",
+   "rise to surface"
+  ],
   "on": [
    "フ"
   ],
@@ -14066,6 +17447,10 @@
  },
  "海": {
   "meaning": "sea, ocean",
+  "glosses": [
+   "sea",
+   "ocean"
+  ],
   "on": [
    "カイ"
   ],
@@ -14093,6 +17478,13 @@
  },
  "消": {
   "meaning": "extinguish, blow out",
+  "glosses": [
+   "extinguish",
+   "blow out",
+   "turn off",
+   "neutralize",
+   "cancel"
+  ],
   "on": [
    "ショウ"
   ],
@@ -14117,6 +17509,10 @@
  },
  "涙": {
   "meaning": "tears, sympathy",
+  "glosses": [
+   "tears",
+   "sympathy"
+  ],
   "on": [
    "ルイ",
    "レイ"
@@ -14149,6 +17545,12 @@
  },
  "深": {
   "meaning": "deep, heighten",
+  "glosses": [
+   "deep",
+   "heighten",
+   "intensify",
+   "strengthen"
+  ],
   "on": [
    "シン"
   ],
@@ -14180,6 +17582,14 @@
  },
  "済": {
   "meaning": "settle (debt, etc.), relieve (burden)",
+  "glosses": [
+   "settle (debt, etc.)",
+   "relieve (burden)",
+   "finish",
+   "come to an end",
+   "excusable",
+   "need not"
+  ],
   "on": [
    "サイ",
    "セイ"
@@ -14221,6 +17631,14 @@
  },
  "渉": {
   "meaning": "ford, go cross",
+  "glosses": [
+   "ford",
+   "go cross",
+   "transit",
+   "ferry",
+   "import",
+   "involve"
+  ],
   "on": [
    "ショウ"
   ],
@@ -14248,6 +17666,14 @@
  },
  "減": {
   "meaning": "dwindle, decrease",
+  "glosses": [
+   "dwindle",
+   "decrease",
+   "reduce",
+   "decline",
+   "curtail",
+   "get hungry"
+  ],
   "on": [
    "ゲン"
   ],
@@ -14276,6 +17702,16 @@
  },
  "渡": {
   "meaning": "transit, ford",
+  "glosses": [
+   "transit",
+   "ford",
+   "ferry",
+   "cross",
+   "import",
+   "deliver",
+   "diameter",
+   "migrate"
+  ],
   "on": [
    "ト"
   ],
@@ -14301,6 +17737,9 @@
  },
  "港": {
   "meaning": "harbor",
+  "glosses": [
+   "harbor"
+  ],
   "on": [
    "コウ"
   ],
@@ -14328,6 +17767,9 @@
  },
  "湖": {
   "meaning": "lake",
+  "glosses": [
+   "lake"
+  ],
   "on": [
    "コ"
   ],
@@ -14355,6 +17797,12 @@
  },
  "満": {
   "meaning": "full, fullness",
+  "glosses": [
+   "full",
+   "fullness",
+   "enough",
+   "satisfy"
+  ],
   "on": [
    "マン",
    "バン"
@@ -14393,6 +17841,13 @@
  },
  "準": {
   "meaning": "semi-, correspond to",
+  "glosses": [
+   "semi-",
+   "correspond to",
+   "proportionate to",
+   "conform",
+   "imitate"
+  ],
   "on": [
    "ジュン"
   ],
@@ -14421,6 +17876,12 @@
  },
  "滞": {
   "meaning": "stagnate, be delayed",
+  "glosses": [
+   "stagnate",
+   "be delayed",
+   "overdue",
+   "arrears"
+  ],
   "on": [
    "タイ",
    "テイ"
@@ -14445,6 +17906,13 @@
  },
  "演": {
   "meaning": "performance, act",
+  "glosses": [
+   "performance",
+   "act",
+   "play",
+   "render",
+   "stage"
+  ],
   "on": [
    "エン"
   ],
@@ -14474,6 +17942,13 @@
  },
  "漫": {
   "meaning": "cartoon, involuntarily",
+  "glosses": [
+   "cartoon",
+   "involuntarily",
+   "unrestrained",
+   "in spite of oneself",
+   "corrupt"
+  ],
   "on": [
    "マン"
   ],
@@ -14502,6 +17977,13 @@
  },
  "激": {
   "meaning": "violent, get excited",
+  "glosses": [
+   "violent",
+   "get excited",
+   "enraged",
+   "chafe",
+   "incite"
+  ],
   "on": [
    "ゲキ"
   ],
@@ -14533,6 +18015,9 @@
  },
  "火": {
   "meaning": "fire",
+  "glosses": [
+   "fire"
+  ],
   "on": [
    "カ"
   ],
@@ -14545,6 +18030,13 @@
  },
  "点": {
   "meaning": "spot, point",
+  "glosses": [
+   "spot",
+   "point",
+   "mark",
+   "speck",
+   "decimal point"
+  ],
   "on": [
    "テン"
   ],
@@ -14574,6 +18066,22 @@
  },
  "為": {
   "meaning": "do, change",
+  "glosses": [
+   "do",
+   "change",
+   "make",
+   "benefit",
+   "welfare",
+   "be of use",
+   "reach to",
+   "try",
+   "practice",
+   "cost",
+   "serve as",
+   "good",
+   "advantage",
+   "as a result of"
+  ],
   "on": [
    "イ"
   ],
@@ -14615,6 +18123,14 @@
  },
  "無": {
   "meaning": "nothingness, none",
+  "glosses": [
+   "nothingness",
+   "none",
+   "ain't",
+   "nothing",
+   "nil",
+   "not"
+  ],
   "on": [
    "ム",
    "ブ"
@@ -14642,7 +18158,14 @@
   ]
  },
  "然": {
-  "meaning": "sort of thing, so",
+  "meaning": "(suffix) -ly, state",
+  "glosses": [
+   "sort of thing",
+   "so",
+   "if so",
+   "in that case",
+   "well"
+  ],
   "on": [
    "ゼン",
    "ネン"
@@ -14666,10 +18189,15 @@
     "杰",
     "hero"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "焼": {
   "meaning": "bake, burning",
+  "glosses": [
+   "bake",
+   "burning"
+  ],
   "on": [
    "ショウ"
   ],
@@ -14697,6 +18225,13 @@
  },
  "熱": {
   "meaning": "heat, temperature",
+  "glosses": [
+   "heat",
+   "temperature",
+   "fever",
+   "mania",
+   "passion"
+  ],
   "on": [
    "ネツ"
   ],
@@ -14728,6 +18263,11 @@
  },
  "燃": {
   "meaning": "burn, blaze",
+  "glosses": [
+   "burn",
+   "blaze",
+   "glow"
+  ],
   "on": [
    "ネン"
   ],
@@ -14757,6 +18297,12 @@
  },
  "爆": {
   "meaning": "bomb, burst open",
+  "glosses": [
+   "bomb",
+   "burst open",
+   "pop",
+   "split"
+  ],
   "on": [
    "バク"
   ],
@@ -14792,6 +18338,9 @@
  },
  "父": {
   "meaning": "father",
+  "glosses": [
+   "father"
+  ],
   "on": [
    "フ"
   ],
@@ -14802,6 +18351,11 @@
  },
  "片": {
   "meaning": "one-sided, leaf",
+  "glosses": [
+   "one-sided",
+   "leaf",
+   "sheet"
+  ],
   "on": [
    "ヘン"
   ],
@@ -14813,6 +18367,13 @@
  },
  "版": {
   "meaning": "printing block, printing plate",
+  "glosses": [
+   "printing block",
+   "printing plate",
+   "edition",
+   "impression",
+   "label"
+  ],
   "on": [
    "ハン"
   ],
@@ -14834,6 +18395,9 @@
  },
  "牛": {
   "meaning": "cow",
+  "glosses": [
+   "cow"
+  ],
   "on": [
    "ギュウ"
   ],
@@ -14844,6 +18408,11 @@
  },
  "物": {
   "meaning": "thing, object",
+  "glosses": [
+   "thing",
+   "object",
+   "matter"
+  ],
   "on": [
    "ブツ",
    "モツ"
@@ -14873,6 +18442,10 @@
  },
  "牲": {
   "meaning": "animal sacrifice, offering",
+  "glosses": [
+   "animal sacrifice",
+   "offering"
+  ],
   "on": [
    "セイ"
   ],
@@ -14890,6 +18463,9 @@
  },
  "特": {
   "meaning": "special",
+  "glosses": [
+   "special"
+  ],
   "on": [
    "トク"
   ],
@@ -14911,6 +18487,9 @@
  },
  "犠": {
   "meaning": "sacrifice",
+  "glosses": [
+   "sacrifice"
+  ],
   "on": [
    "ギ",
    "キ"
@@ -14955,6 +18534,9 @@
  },
  "犬": {
   "meaning": "dog",
+  "glosses": [
+   "dog"
+  ],
   "on": [
    "ケン"
   ],
@@ -14975,6 +18557,11 @@
  },
  "犯": {
   "meaning": "crime, sin",
+  "glosses": [
+   "crime",
+   "sin",
+   "offense"
+  ],
   "on": [
    "ハン",
    "ボン"
@@ -14995,6 +18582,13 @@
  },
  "状": {
   "meaning": "status quo, conditions",
+  "glosses": [
+   "status quo",
+   "conditions",
+   "circumstances",
+   "form",
+   "appearance"
+  ],
   "on": [
    "ジョウ"
   ],
@@ -15012,6 +18606,12 @@
  },
  "狂": {
   "meaning": "lunatic, insane",
+  "glosses": [
+   "lunatic",
+   "insane",
+   "crazy",
+   "confuse"
+  ],
   "on": [
    "キョウ"
   ],
@@ -15033,6 +18633,12 @@
  },
  "狙": {
   "meaning": "aim at, sight",
+  "glosses": [
+   "aim at",
+   "sight",
+   "shadow",
+   "stalk"
+  ],
   "on": [
    "ソ",
    "ショ"
@@ -15058,6 +18664,12 @@
  },
  "独": {
   "meaning": "single, alone",
+  "glosses": [
+   "single",
+   "alone",
+   "spontaneously",
+   "Germany"
+  ],
   "on": [
    "ドク",
    "トク"
@@ -15078,6 +18690,12 @@
  },
  "狭": {
   "meaning": "cramped, narrow",
+  "glosses": [
+   "cramped",
+   "narrow",
+   "contract",
+   "tight"
+  ],
   "on": [
    "キョウ",
    "コウ"
@@ -15121,6 +18739,9 @@
  },
  "猫": {
   "meaning": "cat",
+  "glosses": [
+   "cat"
+  ],
   "on": [
    "ビョウ"
   ],
@@ -15144,6 +18765,9 @@
  },
  "猿": {
   "meaning": "monkey",
+  "glosses": [
+   "monkey"
+  ],
   "on": [
    "エン"
   ],
@@ -15171,6 +18795,10 @@
  },
  "獄": {
   "meaning": "prison, jail",
+  "glosses": [
+   "prison",
+   "jail"
+  ],
   "on": [
    "ゴク"
   ],
@@ -15192,6 +18820,16 @@
  },
  "率": {
   "meaning": "ratio, rate",
+  "glosses": [
+   "ratio",
+   "rate",
+   "proportion",
+   "%",
+   "factor",
+   "lead",
+   "spearhead",
+   "command"
+  ],
   "on": [
    "ソツ",
    "リツ",
@@ -15225,6 +18863,10 @@
  },
  "玉": {
   "meaning": "jewel, ball",
+  "glosses": [
+   "jewel",
+   "ball"
+  ],
   "on": [
    "ギョク"
   ],
@@ -15246,6 +18888,11 @@
  },
  "王": {
   "meaning": "king, rule",
+  "glosses": [
+   "king",
+   "rule",
+   "magnate"
+  ],
   "on": [
    "オウ",
    "-ノウ"
@@ -15255,6 +18902,11 @@
  },
  "珍": {
   "meaning": "rare, curious",
+  "glosses": [
+   "rare",
+   "curious",
+   "strange"
+  ],
   "on": [
    "チン"
   ],
@@ -15279,6 +18931,11 @@
  },
  "現": {
   "meaning": "present, existing",
+  "glosses": [
+   "present",
+   "existing",
+   "actual"
+  ],
   "on": [
    "ゲン"
   ],
@@ -15301,6 +18958,10 @@
  },
  "球": {
   "meaning": "ball, sphere",
+  "glosses": [
+   "ball",
+   "sphere"
+  ],
   "on": [
    "キュウ"
   ],
@@ -15324,6 +18985,13 @@
  },
  "理": {
   "meaning": "logic, arrangement",
+  "glosses": [
+   "logic",
+   "arrangement",
+   "reason",
+   "justice",
+   "truth"
+  ],
   "on": [
    "リ"
   ],
@@ -15343,6 +19011,10 @@
  },
  "璧": {
   "meaning": "sphere, ball",
+  "glosses": [
+   "sphere",
+   "ball"
+  ],
   "on": [
    "ヘキ"
   ],
@@ -15378,6 +19050,11 @@
  },
  "環": {
   "meaning": "ring, circle",
+  "glosses": [
+   "ring",
+   "circle",
+   "loop"
+  ],
   "on": [
    "カン"
   ],
@@ -15409,6 +19086,14 @@
  },
  "瓶": {
   "meaning": "bottle, vial",
+  "glosses": [
+   "bottle",
+   "vial",
+   "jar",
+   "jug",
+   "vat",
+   "urn"
+  ],
   "on": [
    "ビン",
    "ヘイ"
@@ -15441,6 +19126,13 @@
  },
  "甘": {
   "meaning": "sweet, coax",
+  "glosses": [
+   "sweet",
+   "coax",
+   "pamper",
+   "be content",
+   "sugary"
+  ],
   "on": [
    "カン"
   ],
@@ -15454,6 +19146,11 @@
  },
  "生": {
   "meaning": "life, genuine",
+  "glosses": [
+   "life",
+   "genuine",
+   "birth"
+  ],
   "on": [
    "セイ",
    "ショウ"
@@ -15482,6 +19179,15 @@
  },
  "産": {
   "meaning": "products, bear",
+  "glosses": [
+   "products",
+   "bear",
+   "give birth",
+   "yield",
+   "childbirth",
+   "native",
+   "property"
+  ],
   "on": [
    "サン"
   ],
@@ -15520,6 +19226,13 @@
  },
  "用": {
   "meaning": "utilize, business",
+  "glosses": [
+   "utilize",
+   "business",
+   "service",
+   "use",
+   "employ"
+  ],
   "on": [
    "ヨウ"
   ],
@@ -15530,6 +19243,10 @@
  },
  "田": {
   "meaning": "rice field, rice paddy",
+  "glosses": [
+   "rice field",
+   "rice paddy"
+  ],
   "on": [
    "デン"
   ],
@@ -15540,6 +19257,10 @@
  },
  "由": {
   "meaning": "wherefore, a reason",
+  "glosses": [
+   "wherefore",
+   "a reason"
+  ],
   "on": [
    "ユ",
    "ユウ",
@@ -15562,6 +19283,12 @@
  },
  "申": {
   "meaning": "have the honor to, sign of the monkey",
+  "glosses": [
+   "have the honor to",
+   "sign of the monkey",
+   "3-5PM",
+   "ninth sign of Chinese zodiac"
+  ],
   "on": [
    "シン"
   ],
@@ -15583,6 +19310,9 @@
  },
  "男": {
   "meaning": "male",
+  "glosses": [
+   "male"
+  ],
   "on": [
    "ダン",
    "ナン"
@@ -15604,6 +19334,12 @@
  },
  "町": {
   "meaning": "town, village",
+  "glosses": [
+   "town",
+   "village",
+   "block",
+   "street"
+  ],
   "on": [
    "チョウ"
   ],
@@ -15626,7 +19362,11 @@
   ]
  },
  "画": {
-  "meaning": "brush-stroke, picture",
+  "meaning": "picture",
+  "glosses": [
+   "brush-stroke",
+   "picture"
+  ],
   "on": [
    "ガ",
    "カク",
@@ -15653,10 +19393,15 @@
     "凵",
     "open box enclosure"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "界": {
   "meaning": "world, boundary",
+  "glosses": [
+   "world",
+   "boundary"
+  ],
   "on": [
    "カイ"
   ],
@@ -15678,6 +19423,10 @@
  },
  "番": {
   "meaning": "turn, number in a series",
+  "glosses": [
+   "turn",
+   "number in a series"
+  ],
   "on": [
    "バン"
   ],
@@ -15701,6 +19450,15 @@
  },
  "異": {
   "meaning": "uncommon, different",
+  "glosses": [
+   "uncommon",
+   "different",
+   "queerness",
+   "strangeness",
+   "wonderful",
+   "curious",
+   "unusual"
+  ],
   "on": [
    "イ"
   ],
@@ -15730,6 +19488,12 @@
  },
  "疑": {
   "meaning": "doubt, distrust",
+  "glosses": [
+   "doubt",
+   "distrust",
+   "be suspicious",
+   "question"
+  ],
   "on": [
    "ギ"
   ],
@@ -15761,6 +19525,11 @@
  },
  "疲": {
   "meaning": "exhausted, tire",
+  "glosses": [
+   "exhausted",
+   "tire",
+   "weary"
+  ],
   "on": [
    "ヒ"
   ],
@@ -15786,6 +19555,10 @@
  },
  "病": {
   "meaning": "ill, sick",
+  "glosses": [
+   "ill",
+   "sick"
+  ],
   "on": [
    "ビョウ",
    "ヘイ"
@@ -15816,6 +19589,12 @@
  },
  "痛": {
   "meaning": "pain, hurt",
+  "glosses": [
+   "pain",
+   "hurt",
+   "damage",
+   "bruise"
+  ],
   "on": [
    "ツウ"
   ],
@@ -15842,6 +19621,10 @@
  },
  "療": {
   "meaning": "heal, cure",
+  "glosses": [
+   "heal",
+   "cure"
+  ],
   "on": [
    "リョウ"
   ],
@@ -15871,6 +19654,10 @@
  },
  "癌": {
   "meaning": "cancer, cancerous evil",
+  "glosses": [
+   "cancer",
+   "cancerous evil"
+  ],
   "on": [
    "ガン"
   ],
@@ -15896,6 +19683,14 @@
  },
  "癖": {
   "meaning": "mannerism, habit",
+  "glosses": [
+   "mannerism",
+   "habit",
+   "vice",
+   "trait",
+   "fault",
+   "kink"
+  ],
   "on": [
    "ヘキ"
   ],
@@ -15931,7 +19726,16 @@
   ]
  },
  "発": {
-  "meaning": "departure, discharge",
+  "meaning": "to emit, set off",
+  "glosses": [
+   "departure",
+   "discharge",
+   "publish",
+   "emit",
+   "start from",
+   "disclose",
+   "counter for gunshots"
+  ],
   "on": [
    "ハツ",
    "ホツ"
@@ -15956,10 +19760,15 @@
     "癶",
     "dotted tent"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "登": {
   "meaning": "ascend, climb up",
+  "glosses": [
+   "ascend",
+   "climb up"
+  ],
   "on": [
    "トウ",
    "ト",
@@ -15992,6 +19801,9 @@
  },
  "白": {
   "meaning": "white",
+  "glosses": [
+   "white"
+  ],
   "on": [
    "ハク",
    "ビャク"
@@ -16005,6 +19817,9 @@
  },
  "百": {
   "meaning": "hundred",
+  "glosses": [
+   "hundred"
+  ],
   "on": [
    "ヒャク",
    "ビャク"
@@ -16025,6 +19840,13 @@
  },
  "的": {
   "meaning": "bull's eye, mark",
+  "glosses": [
+   "bull's eye",
+   "mark",
+   "target",
+   "object",
+   "adjective ending"
+  ],
   "on": [
    "テキ"
   ],
@@ -16048,6 +19870,10 @@
  },
  "皆": {
   "meaning": "all, everything",
+  "glosses": [
+   "all",
+   "everything"
+  ],
   "on": [
    "カイ"
   ],
@@ -16068,6 +19894,11 @@
  },
  "皿": {
   "meaning": "dish, a helping",
+  "glosses": [
+   "dish",
+   "a helping",
+   "plate"
+  ],
   "on": [
    "ベイ"
   ],
@@ -16078,6 +19909,12 @@
  },
  "益": {
   "meaning": "benefit, gain",
+  "glosses": [
+   "benefit",
+   "gain",
+   "profit",
+   "advantage"
+  ],
   "on": [
    "エキ",
    "ヤク"
@@ -16106,6 +19943,11 @@
  },
  "盗": {
   "meaning": "steal, rob",
+  "glosses": [
+   "steal",
+   "rob",
+   "pilfer"
+  ],
   "on": [
    "トウ"
   ],
@@ -16130,6 +19972,13 @@
  },
  "監": {
   "meaning": "oversee, official",
+  "glosses": [
+   "oversee",
+   "official",
+   "govt office",
+   "rule",
+   "administer"
+  ],
   "on": [
    "カン"
   ],
@@ -16155,6 +20004,15 @@
  },
  "目": {
   "meaning": "eye, class",
+  "glosses": [
+   "eye",
+   "class",
+   "look",
+   "insight",
+   "experience",
+   "care",
+   "favor"
+  ],
   "on": [
    "モク",
    "ボク"
@@ -16168,6 +20026,13 @@
  },
  "直": {
   "meaning": "straightaway, honesty",
+  "glosses": [
+   "straightaway",
+   "honesty",
+   "frankness",
+   "fix",
+   "repair"
+  ],
   "on": [
    "チョク",
    "ジキ",
@@ -16198,6 +20063,17 @@
  },
  "相": {
   "meaning": "inter-, mutual",
+  "glosses": [
+   "inter-",
+   "mutual",
+   "together",
+   "each other",
+   "minister of state",
+   "councillor",
+   "aspect",
+   "phase",
+   "physiognomy"
+  ],
   "on": [
    "ソウ",
    "ショウ"
@@ -16218,6 +20094,9 @@
  },
  "県": {
   "meaning": "prefecture",
+  "glosses": [
+   "prefecture"
+  ],
   "on": [
    "ケン"
   ],
@@ -16237,6 +20116,11 @@
  },
  "真": {
   "meaning": "true, reality",
+  "glosses": [
+   "true",
+   "reality",
+   "Buddhist sect"
+  ],
   "on": [
    "シン"
   ],
@@ -16266,6 +20150,11 @@
  },
  "眠": {
   "meaning": "sleep, die",
+  "glosses": [
+   "sleep",
+   "die",
+   "sleepy"
+  ],
   "on": [
    "ミン"
   ],
@@ -16294,6 +20183,9 @@
  },
  "眼": {
   "meaning": "eyeball",
+  "glosses": [
+   "eyeball"
+  ],
   "on": [
    "ガン",
    "ゲン"
@@ -16315,6 +20207,12 @@
  },
  "着": {
   "meaning": "don, arrive",
+  "glosses": [
+   "don",
+   "arrive",
+   "wear",
+   "counter for suits of clothing"
+  ],
   "on": [
    "チャク",
    "ジャク"
@@ -16350,6 +20248,13 @@
  },
  "督": {
   "meaning": "coach, command",
+  "glosses": [
+   "coach",
+   "command",
+   "urge",
+   "lead",
+   "supervise"
+  ],
   "on": [
    "トク"
   ],
@@ -16375,6 +20280,11 @@
  },
  "瞬": {
   "meaning": "wink, blink",
+  "glosses": [
+   "wink",
+   "blink",
+   "twinkle"
+  ],
   "on": [
    "シュン"
   ],
@@ -16411,6 +20321,10 @@
  },
  "知": {
   "meaning": "know, wisdom",
+  "glosses": [
+   "know",
+   "wisdom"
+  ],
   "on": [
    "チ"
   ],
@@ -16435,6 +20349,13 @@
  },
  "短": {
   "meaning": "short, brevity",
+  "glosses": [
+   "short",
+   "brevity",
+   "fault",
+   "defect",
+   "weak point"
+  ],
   "on": [
    "タン"
   ],
@@ -16466,6 +20387,9 @@
  },
  "石": {
   "meaning": "stone",
+  "glosses": [
+   "stone"
+  ],
   "on": [
    "セキ",
    "シャク",
@@ -16483,6 +20407,9 @@
  },
  "砂": {
   "meaning": "sand",
+  "glosses": [
+   "sand"
+  ],
   "on": [
    "サ",
    "シャ"
@@ -16511,6 +20438,11 @@
  },
  "研": {
   "meaning": "polish, study of",
+  "glosses": [
+   "polish",
+   "study of",
+   "sharpen"
+  ],
   "on": [
    "ケン"
   ],
@@ -16550,6 +20482,15 @@
  },
  "破": {
   "meaning": "rend, rip",
+  "glosses": [
+   "rend",
+   "rip",
+   "tear",
+   "break",
+   "destroy",
+   "defeat",
+   "frustrate"
+  ],
   "on": [
    "ハ"
   ],
@@ -16578,7 +20519,17 @@
   ]
  },
  "確": {
-  "meaning": "assurance, firm",
+  "meaning": "certain, sure",
+  "glosses": [
+   "assurance",
+   "firm",
+   "tight",
+   "hard",
+   "solid",
+   "confirm",
+   "clear",
+   "evident"
+  ],
   "on": [
    "カク",
    "コウ"
@@ -16604,10 +20555,18 @@
     "隹",
     "bird"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "示": {
   "meaning": "show, indicate",
+  "glosses": [
+   "show",
+   "indicate",
+   "point out",
+   "express",
+   "display"
+  ],
   "on": [
    "ジ",
    "シ"
@@ -16628,6 +20587,13 @@
  },
  "礼": {
   "meaning": "salute, bow",
+  "glosses": [
+   "salute",
+   "bow",
+   "ceremony",
+   "thanks",
+   "remuneration"
+  ],
   "on": [
    "レイ",
    "ライ"
@@ -16642,6 +20608,13 @@
  },
  "社": {
   "meaning": "company, firm",
+  "glosses": [
+   "company",
+   "firm",
+   "office",
+   "association",
+   "shrine"
+  ],
   "on": [
    "シャ"
   ],
@@ -16661,6 +20634,11 @@
  },
  "祖": {
   "meaning": "ancestor, pioneer",
+  "glosses": [
+   "ancestor",
+   "pioneer",
+   "founder"
+  ],
   "on": [
    "ソ"
   ],
@@ -16682,6 +20660,11 @@
  },
  "神": {
   "meaning": "gods, mind",
+  "glosses": [
+   "gods",
+   "mind",
+   "soul"
+  ],
   "on": [
    "シン",
    "ジン"
@@ -16708,6 +20691,12 @@
  },
  "票": {
   "meaning": "ballot, label",
+  "glosses": [
+   "ballot",
+   "label",
+   "ticket",
+   "sign"
+  ],
   "on": [
    "ヒョウ"
   ],
@@ -16733,6 +20722,14 @@
  },
  "祭": {
   "meaning": "ritual, offer prayers",
+  "glosses": [
+   "ritual",
+   "offer prayers",
+   "celebrate",
+   "deify",
+   "enshrine",
+   "worship"
+  ],
   "on": [
    "サイ"
   ],
@@ -16766,6 +20763,11 @@
  },
  "禁": {
   "meaning": "prohibition, ban",
+  "glosses": [
+   "prohibition",
+   "ban",
+   "forbid"
+  ],
   "on": [
    "キン"
   ],
@@ -16791,6 +20793,12 @@
  },
  "福": {
   "meaning": "blessing, fortune",
+  "glosses": [
+   "blessing",
+   "fortune",
+   "luck",
+   "wealth"
+  ],
   "on": [
    "フク"
   ],
@@ -16816,6 +20824,12 @@
  },
  "秀": {
   "meaning": "excel, excellence",
+  "glosses": [
+   "excel",
+   "excellence",
+   "beauty",
+   "surpass"
+  ],
   "on": [
    "シュウ"
   ],
@@ -16839,6 +20853,11 @@
  },
  "私": {
   "meaning": "private, I",
+  "glosses": [
+   "private",
+   "I",
+   "me"
+  ],
   "on": [
    "シ"
   ],
@@ -16859,6 +20878,9 @@
  },
  "秋": {
   "meaning": "autumn",
+  "glosses": [
+   "autumn"
+  ],
   "on": [
    "シュウ"
   ],
@@ -16879,6 +20901,11 @@
  },
  "科": {
   "meaning": "department, course",
+  "glosses": [
+   "department",
+   "course",
+   "section"
+  ],
   "on": [
    "カ"
   ],
@@ -16896,6 +20923,9 @@
  },
  "秒": {
   "meaning": "second (1/60 minute)",
+  "glosses": [
+   "second (1/60 minute)"
+  ],
   "on": [
    "ビョウ"
   ],
@@ -16917,6 +20947,10 @@
  },
  "秘": {
   "meaning": "secret, conceal",
+  "glosses": [
+   "secret",
+   "conceal"
+  ],
   "on": [
    "ヒ"
   ],
@@ -16946,6 +20980,14 @@
  },
  "移": {
   "meaning": "shift, move",
+  "glosses": [
+   "shift",
+   "move",
+   "change",
+   "drift",
+   "catch (cold, fire)",
+   "pass into"
+  ],
   "on": [
    "イ"
   ],
@@ -16966,6 +21008,15 @@
  },
  "程": {
   "meaning": "extent, degree",
+  "glosses": [
+   "extent",
+   "degree",
+   "law",
+   "formula",
+   "distance",
+   "limits",
+   "amount"
+  ],
   "on": [
    "テイ"
   ],
@@ -16990,6 +21041,13 @@
  },
  "種": {
   "meaning": "species, kind",
+  "glosses": [
+   "species",
+   "kind",
+   "class",
+   "variety",
+   "seed"
+  ],
   "on": [
    "シュ"
   ],
@@ -17018,6 +21076,11 @@
  },
  "稼": {
   "meaning": "earnings, work",
+  "glosses": [
+   "earnings",
+   "work",
+   "earn money"
+  ],
   "on": [
    "カ"
   ],
@@ -17041,6 +21104,12 @@
  },
  "稿": {
   "meaning": "draft, copy",
+  "glosses": [
+   "draft",
+   "copy",
+   "manuscript",
+   "straw"
+  ],
   "on": [
    "コウ"
   ],
@@ -17073,6 +21142,13 @@
  },
  "穴": {
   "meaning": "hole, aperture",
+  "glosses": [
+   "hole",
+   "aperture",
+   "slit",
+   "cave",
+   "den"
+  ],
   "on": [
    "ケツ"
   ],
@@ -17096,6 +21172,10 @@
  },
  "究": {
   "meaning": "research, study",
+  "glosses": [
+   "research",
+   "study"
+  ],
   "on": [
    "キュウ",
    "ク"
@@ -17124,6 +21204,13 @@
  },
  "空": {
   "meaning": "empty, sky",
+  "glosses": [
+   "empty",
+   "sky",
+   "void",
+   "vacant",
+   "vacuum"
+  ],
   "on": [
    "クウ"
   ],
@@ -17158,6 +21245,15 @@
  },
  "突": {
   "meaning": "stab, protruding",
+  "glosses": [
+   "stab",
+   "protruding",
+   "thrust",
+   "pierce",
+   "prick",
+   "collision",
+   "sudden"
+  ],
   "on": [
    "トツ",
    "カ"
@@ -17186,6 +21282,10 @@
  },
  "窓": {
   "meaning": "window, pane",
+  "glosses": [
+   "window",
+   "pane"
+  ],
   "on": [
    "ソウ",
    "ス"
@@ -17220,6 +21320,12 @@
  },
  "立": {
   "meaning": "stand up, rise",
+  "glosses": [
+   "stand up",
+   "rise",
+   "set up",
+   "erect"
+  ],
   "on": [
    "リツ",
    "リュウ",
@@ -17241,6 +21347,13 @@
  },
  "章": {
   "meaning": "badge, chapter",
+  "glosses": [
+   "badge",
+   "chapter",
+   "composition",
+   "poem",
+   "design"
+  ],
   "on": [
    "ショウ"
   ],
@@ -17266,6 +21379,15 @@
  },
  "競": {
   "meaning": "emulate, compete with",
+  "glosses": [
+   "emulate",
+   "compete with",
+   "bid",
+   "sell at auction",
+   "bout",
+   "contest",
+   "race"
+  ],
   "on": [
    "キョウ",
    "ケイ"
@@ -17292,6 +21414,9 @@
  },
  "笑": {
   "meaning": "laugh",
+  "glosses": [
+   "laugh"
+  ],
   "on": [
    "ショウ"
   ],
@@ -17320,6 +21445,10 @@
  },
  "第": {
   "meaning": "No., residence",
+  "glosses": [
+   "No.",
+   "residence"
+  ],
   "on": [
    "ダイ",
    "テイ"
@@ -17342,6 +21471,14 @@
  },
  "等": {
   "meaning": "etc., and so forth",
+  "glosses": [
+   "etc.",
+   "and so forth",
+   "class (first)",
+   "quality",
+   "equal",
+   "similar"
+  ],
   "on": [
    "トウ"
   ],
@@ -17371,6 +21508,10 @@
  },
  "答": {
   "meaning": "solution, answer",
+  "glosses": [
+   "solution",
+   "answer"
+  ],
   "on": [
    "トウ"
   ],
@@ -17403,6 +21544,13 @@
  },
  "策": {
   "meaning": "scheme, plan",
+  "glosses": [
+   "scheme",
+   "plan",
+   "policy",
+   "step",
+   "means"
+  ],
   "on": [
    "サク"
   ],
@@ -17440,6 +21588,13 @@
  },
  "算": {
   "meaning": "calculate, divining",
+  "glosses": [
+   "calculate",
+   "divining",
+   "number",
+   "abacus",
+   "probability"
+  ],
   "on": [
    "サン"
   ],
@@ -17467,6 +21622,14 @@
  },
  "管": {
   "meaning": "pipe, tube",
+  "glosses": [
+   "pipe",
+   "tube",
+   "wind instrument",
+   "drunken talk",
+   "control",
+   "jurisdiction"
+  ],
   "on": [
    "カン"
   ],
@@ -17494,6 +21657,13 @@
  },
  "箱": {
   "meaning": "box, chest",
+  "glosses": [
+   "box",
+   "chest",
+   "case",
+   "bin",
+   "railway car"
+  ],
   "on": [
    "ソウ"
   ],
@@ -17521,6 +21691,22 @@
  },
  "節": {
   "meaning": "node, season",
+  "glosses": [
+   "node",
+   "season",
+   "period",
+   "occasion",
+   "verse",
+   "clause",
+   "stanza",
+   "honor",
+   "joint",
+   "knuckle",
+   "knob",
+   "knot",
+   "tune",
+   "melody"
+  ],
   "on": [
    "セツ",
    "セチ"
@@ -17551,6 +21737,11 @@
  },
  "範": {
   "meaning": "pattern, example",
+  "glosses": [
+   "pattern",
+   "example",
+   "model"
+  ],
   "on": [
    "ハン"
   ],
@@ -17580,6 +21771,10 @@
  },
  "簡": {
   "meaning": "simplicity, brevity",
+  "glosses": [
+   "simplicity",
+   "brevity"
+  ],
   "on": [
    "カン",
    "ケン"
@@ -17609,6 +21804,11 @@
  },
  "米": {
   "meaning": "rice, USA",
+  "glosses": [
+   "rice",
+   "USA",
+   "metre"
+  ],
   "on": [
    "ベイ",
    "マイ",
@@ -17622,6 +21822,17 @@
  },
  "精": {
   "meaning": "refined, ghost",
+  "glosses": [
+   "refined",
+   "ghost",
+   "fairy",
+   "energy",
+   "vitality",
+   "semen",
+   "excellence",
+   "purity",
+   "skill"
+  ],
   "on": [
    "セイ",
    "ショウ"
@@ -17659,6 +21870,9 @@
  },
  "糖": {
   "meaning": "sugar",
+  "glosses": [
+   "sugar"
+  ],
   "on": [
    "トウ"
   ],
@@ -17680,6 +21894,14 @@
  },
  "紀": {
   "meaning": "chronicle, account",
+  "glosses": [
+   "chronicle",
+   "account",
+   "narrative",
+   "history",
+   "annals",
+   "geologic period"
+  ],
   "on": [
    "キ"
   ],
@@ -17704,7 +21926,12 @@
   ]
  },
  "約": {
-  "meaning": "promise, approximately",
+  "meaning": "promise",
+  "glosses": [
+   "promise",
+   "approximately",
+   "shrink"
+  ],
   "on": [
    "ヤク"
   ],
@@ -17734,10 +21961,19 @@
     "勹",
     "wrapping enclosure"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "納": {
   "meaning": "settlement, obtain",
+  "glosses": [
+   "settlement",
+   "obtain",
+   "reap",
+   "pay",
+   "supply",
+   "store"
+  ],
   "on": [
    "ノウ",
    "ナッ",
@@ -17775,6 +22011,9 @@
  },
  "紙": {
   "meaning": "paper",
+  "glosses": [
+   "paper"
+  ],
   "on": [
    "シ"
   ],
@@ -17802,6 +22041,12 @@
  },
  "素": {
   "meaning": "elementary, principle",
+  "glosses": [
+   "elementary",
+   "principle",
+   "naked",
+   "uncovered"
+  ],
   "on": [
    "ソ",
    "ス"
@@ -17838,6 +22083,12 @@
  },
  "索": {
   "meaning": "cord, rope",
+  "glosses": [
+   "cord",
+   "rope",
+   "searching",
+   "inquiring"
+  ],
   "on": [
    "サク"
   ],
@@ -17866,7 +22117,16 @@
   ]
  },
  "細": {
-  "meaning": "dainty, get thin",
+  "meaning": "thin, fine",
+  "glosses": [
+   "dainty",
+   "get thin",
+   "taper",
+   "slender",
+   "narrow",
+   "detailed",
+   "precise"
+  ],
   "on": [
    "サイ"
   ],
@@ -17893,10 +22153,16 @@
     "田",
     "rice field"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "紹": {
   "meaning": "introduce, inherit",
+  "glosses": [
+   "introduce",
+   "inherit",
+   "help"
+  ],
   "on": [
    "ショウ"
   ],
@@ -17926,6 +22192,10 @@
  },
  "終": {
   "meaning": "end, finish",
+  "glosses": [
+   "end",
+   "finish"
+  ],
   "on": [
    "シュウ"
   ],
@@ -17958,6 +22228,16 @@
  },
  "組": {
   "meaning": "association, braid",
+  "glosses": [
+   "association",
+   "braid",
+   "plait",
+   "construct",
+   "assemble",
+   "unite",
+   "cooperate",
+   "grapple"
+  ],
   "on": [
    "ソ"
   ],
@@ -17990,7 +22270,14 @@
   ]
  },
  "経": {
-  "meaning": "sutra, longitude",
+  "meaning": "to pass through, manage",
+  "glosses": [
+   "sutra",
+   "longitude",
+   "pass thru",
+   "expire",
+   "warp"
+  ],
   "on": [
    "ケイ",
    "キョウ",
@@ -18024,10 +22311,20 @@
     "又",
     "or again"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "結": {
   "meaning": "tie, bind",
+  "glosses": [
+   "tie",
+   "bind",
+   "contract",
+   "join",
+   "organize",
+   "do up hair",
+   "fasten"
+  ],
   "on": [
    "ケツ",
    "ケチ"
@@ -18062,6 +22359,11 @@
  },
  "絡": {
   "meaning": "entwine, coil around",
+  "glosses": [
+   "entwine",
+   "coil around",
+   "get caught in"
+  ],
   "on": [
    "ラク"
   ],
@@ -18094,6 +22396,14 @@
  },
  "給": {
   "meaning": "salary, wage",
+  "glosses": [
+   "salary",
+   "wage",
+   "gift",
+   "allow",
+   "grant",
+   "bestow on"
+  ],
   "on": [
    "キュウ"
   ],
@@ -18131,6 +22441,12 @@
  },
  "統": {
   "meaning": "overall, relationship",
+  "glosses": [
+   "overall",
+   "relationship",
+   "ruling",
+   "governing"
+  ],
   "on": [
    "トウ"
   ],
@@ -18166,6 +22482,12 @@
  },
  "絵": {
   "meaning": "picture, drawing",
+  "glosses": [
+   "picture",
+   "drawing",
+   "painting",
+   "sketch"
+  ],
   "on": [
    "カイ",
    "エ"
@@ -18200,6 +22522,18 @@
  },
  "絶": {
   "meaning": "discontinue, sever",
+  "glosses": [
+   "discontinue",
+   "sever",
+   "cut off",
+   "abstain",
+   "interrupt",
+   "suppress",
+   "be beyond",
+   "without match",
+   "peerless",
+   "unparalleled"
+  ],
   "on": [
    "ゼツ"
   ],
@@ -18229,6 +22563,11 @@
  },
  "続": {
   "meaning": "continue, series",
+  "glosses": [
+   "continue",
+   "series",
+   "sequel"
+  ],
   "on": [
    "ゾク",
    "ショク",
@@ -18269,6 +22608,11 @@
  },
  "維": {
   "meaning": "fiber, tie",
+  "glosses": [
+   "fiber",
+   "tie",
+   "rope"
+  ],
   "on": [
    "イ"
   ],
@@ -18294,6 +22638,13 @@
  },
  "緊": {
   "meaning": "tense, solid",
+  "glosses": [
+   "tense",
+   "solid",
+   "hard",
+   "reliable",
+   "tight"
+  ],
   "on": [
    "キン"
   ],
@@ -18326,6 +22677,9 @@
  },
  "緑": {
   "meaning": "green",
+  "glosses": [
+   "green"
+  ],
   "on": [
    "リョク",
    "ロク"
@@ -18362,6 +22716,15 @@
  },
  "緒": {
   "meaning": "thong, beginning",
+  "glosses": [
+   "thong",
+   "beginning",
+   "inception",
+   "end",
+   "cord",
+   "strap",
+   "mental or emotional state"
+  ],
   "on": [
    "ショ",
    "チョ"
@@ -18395,6 +22758,10 @@
  },
  "線": {
   "meaning": "line, track",
+  "glosses": [
+   "line",
+   "track"
+  ],
   "on": [
    "セン"
   ],
@@ -18426,6 +22793,14 @@
  },
  "練": {
   "meaning": "practice, gloss",
+  "glosses": [
+   "practice",
+   "gloss",
+   "train",
+   "drill",
+   "polish",
+   "refine"
+  ],
   "on": [
    "レン"
   ],
@@ -18466,6 +22841,11 @@
  },
  "績": {
   "meaning": "exploits, achievements",
+  "glosses": [
+   "exploits",
+   "achievements",
+   "unreeling cocoons"
+  ],
   "on": [
    "セキ"
   ],
@@ -18511,6 +22891,10 @@
  },
  "織": {
   "meaning": "weave, fabric",
+  "glosses": [
+   "weave",
+   "fabric"
+  ],
   "on": [
    "ショク",
    "シキ"
@@ -18555,6 +22939,14 @@
  },
  "繰": {
   "meaning": "winding, reel",
+  "glosses": [
+   "winding",
+   "reel",
+   "spin",
+   "turn (pages)",
+   "look up",
+   "refer to"
+  ],
   "on": [
    "ソウ"
   ],
@@ -18590,6 +22982,14 @@
  },
  "罪": {
   "meaning": "guilt, sin",
+  "glosses": [
+   "guilt",
+   "sin",
+   "crime",
+   "fault",
+   "blame",
+   "offense"
+  ],
   "on": [
    "ザイ"
   ],
@@ -18609,6 +23009,16 @@
  },
  "置": {
   "meaning": "placement, put",
+  "glosses": [
+   "placement",
+   "put",
+   "set",
+   "deposit",
+   "leave behind",
+   "keep",
+   "employ",
+   "pawn"
+  ],
   "on": [
    "チ"
   ],
@@ -18637,6 +23047,10 @@
  },
  "美": {
   "meaning": "beauty, beautiful",
+  "glosses": [
+   "beauty",
+   "beautiful"
+  ],
   "on": [
    "ビ",
    "ミ"
@@ -18665,6 +23079,14 @@
  },
  "義": {
   "meaning": "righteousness, justice",
+  "glosses": [
+   "righteousness",
+   "justice",
+   "morality",
+   "honor",
+   "loyalty",
+   "meaning"
+  ],
   "on": [
    "ギ"
   ],
@@ -18702,6 +23124,9 @@
  },
  "習": {
   "meaning": "learn",
+  "glosses": [
+   "learn"
+  ],
   "on": [
    "シュウ",
    "ジュ"
@@ -18727,6 +23152,13 @@
  },
  "翻": {
   "meaning": "flip, turn over",
+  "glosses": [
+   "flip",
+   "turn over",
+   "wave",
+   "flutter",
+   "change (mind)"
+  ],
   "on": [
    "ホン",
    "ハン"
@@ -18760,6 +23192,11 @@
  },
  "老": {
   "meaning": "old man, old age",
+  "glosses": [
+   "old man",
+   "old age",
+   "grow old"
+  ],
   "on": [
    "ロウ"
   ],
@@ -18776,6 +23213,10 @@
  },
  "考": {
   "meaning": "consider, think over",
+  "glosses": [
+   "consider",
+   "think over"
+  ],
   "on": [
    "コウ"
   ],
@@ -18796,6 +23237,10 @@
  },
  "者": {
   "meaning": "someone, person",
+  "glosses": [
+   "someone",
+   "person"
+  ],
   "on": [
    "シャ"
   ],
@@ -18815,6 +23260,10 @@
  },
  "耐": {
   "meaning": "-proof, enduring",
+  "glosses": [
+   "-proof",
+   "enduring"
+  ],
   "on": [
    "タイ"
   ],
@@ -18834,6 +23283,9 @@
  },
  "耳": {
   "meaning": "ear",
+  "glosses": [
+   "ear"
+  ],
   "on": [
    "ジ"
   ],
@@ -18844,6 +23296,11 @@
  },
  "聞": {
   "meaning": "hear, ask",
+  "glosses": [
+   "hear",
+   "ask",
+   "listen"
+  ],
   "on": [
    "ブン",
    "モン"
@@ -18865,6 +23322,11 @@
  },
  "職": {
   "meaning": "post, employment",
+  "glosses": [
+   "post",
+   "employment",
+   "work"
+  ],
   "on": [
    "ショク",
    "ソク"
@@ -18895,6 +23357,9 @@
  },
  "肉": {
   "meaning": "meat",
+  "glosses": [
+   "meat"
+  ],
   "on": [
    "ニク"
   ],
@@ -18914,6 +23379,12 @@
  },
  "肌": {
   "meaning": "texture, skin",
+  "glosses": [
+   "texture",
+   "skin",
+   "body",
+   "grain"
+  ],
   "on": [
    "キ"
   ],
@@ -18933,6 +23404,9 @@
  },
  "肩": {
   "meaning": "shoulder",
+  "glosses": [
+   "shoulder"
+  ],
   "on": [
    "ケン"
   ],
@@ -18960,6 +23434,12 @@
  },
  "育": {
   "meaning": "bring up, grow up",
+  "glosses": [
+   "bring up",
+   "grow up",
+   "raise",
+   "rear"
+  ],
   "on": [
    "イク"
   ],
@@ -18986,6 +23466,16 @@
  },
  "背": {
   "meaning": "stature, height",
+  "glosses": [
+   "stature",
+   "height",
+   "back",
+   "behind",
+   "disobey",
+   "defy",
+   "go back on",
+   "rebel"
+  ],
   "on": [
    "ハイ"
   ],
@@ -19012,6 +23502,13 @@
  },
  "胸": {
   "meaning": "bosom, breast",
+  "glosses": [
+   "bosom",
+   "breast",
+   "chest",
+   "heart",
+   "feelings"
+  ],
   "on": [
    "キョウ"
   ],
@@ -19044,6 +23541,12 @@
  },
  "能": {
   "meaning": "ability, talent",
+  "glosses": [
+   "ability",
+   "talent",
+   "skill",
+   "capacity"
+  ],
   "on": [
    "ノウ"
   ],
@@ -19068,6 +23571,14 @@
  },
  "脱": {
   "meaning": "undress, removing",
+  "glosses": [
+   "undress",
+   "removing",
+   "escape from",
+   "get rid of",
+   "be left out",
+   "take off"
+  ],
   "on": [
    "ダツ"
   ],
@@ -19096,6 +23607,10 @@
  },
  "脳": {
   "meaning": "brain, memory",
+  "glosses": [
+   "brain",
+   "memory"
+  ],
   "on": [
    "ノウ",
    "ドウ"
@@ -19120,6 +23635,11 @@
  },
  "腕": {
   "meaning": "arm, ability",
+  "glosses": [
+   "arm",
+   "ability",
+   "talent"
+  ],
   "on": [
    "ワン"
   ],
@@ -19147,6 +23667,12 @@
  },
  "腰": {
   "meaning": "loins, hips",
+  "glosses": [
+   "loins",
+   "hips",
+   "waist",
+   "low wainscoting"
+  ],
   "on": [
    "ヨウ"
   ],
@@ -19170,6 +23696,11 @@
  },
  "腹": {
   "meaning": "abdomen, belly",
+  "glosses": [
+   "abdomen",
+   "belly",
+   "stomach"
+  ],
   "on": [
    "フク"
   ],
@@ -19209,6 +23740,10 @@
  },
  "膝": {
   "meaning": "knee, lap",
+  "glosses": [
+   "knee",
+   "lap"
+  ],
   "on": [
    "シツ"
   ],
@@ -19236,6 +23771,11 @@
  },
  "臓": {
   "meaning": "entrails, viscera",
+  "glosses": [
+   "entrails",
+   "viscera",
+   "bowels"
+  ],
   "on": [
    "ゾウ"
   ],
@@ -19271,6 +23811,9 @@
  },
  "自": {
   "meaning": "oneself",
+  "glosses": [
+   "oneself"
+  ],
   "on": [
    "ジ",
    "シ"
@@ -19289,6 +23832,16 @@
  },
  "致": {
   "meaning": "doth, do",
+  "glosses": [
+   "doth",
+   "do",
+   "send",
+   "forward",
+   "cause",
+   "exert",
+   "incur",
+   "engage"
+  ],
   "on": [
    "チ"
   ],
@@ -19320,6 +23873,13 @@
  },
  "興": {
   "meaning": "entertain, revive",
+  "glosses": [
+   "entertain",
+   "revive",
+   "retrieve",
+   "interest",
+   "pleasure"
+  ],
   "on": [
    "コウ",
    "キョウ"
@@ -19353,6 +23913,13 @@
  },
  "舎": {
   "meaning": "cottage, inn",
+  "glosses": [
+   "cottage",
+   "inn",
+   "hut",
+   "house",
+   "mansion"
+  ],
   "on": [
    "シャ",
    "セキ"
@@ -19377,6 +23944,12 @@
  },
  "舞": {
   "meaning": "dance, flit",
+  "glosses": [
+   "dance",
+   "flit",
+   "circle",
+   "wheel"
+  ],
   "on": [
    "ブ"
   ],
@@ -19418,6 +23991,14 @@
  },
  "般": {
   "meaning": "carrier, carry",
+  "glosses": [
+   "carrier",
+   "carry",
+   "all",
+   "general",
+   "sort",
+   "kind"
+  ],
   "on": [
    "ハン"
   ],
@@ -19443,6 +24024,10 @@
  },
  "船": {
   "meaning": "ship, boat",
+  "glosses": [
+   "ship",
+   "boat"
+  ],
   "on": [
    "セン"
   ],
@@ -19467,6 +24052,9 @@
  },
  "色": {
   "meaning": "color",
+  "glosses": [
+   "color"
+  ],
   "on": [
    "ショク",
    "シキ"
@@ -19487,6 +24075,9 @@
  },
  "花": {
   "meaning": "flower",
+  "glosses": [
+   "flower"
+  ],
   "on": [
    "カ",
    "ケ"
@@ -19511,6 +24102,15 @@
  },
  "芸": {
   "meaning": "technique, art",
+  "glosses": [
+   "technique",
+   "art",
+   "craft",
+   "performance",
+   "acting",
+   "trick",
+   "stunt"
+  ],
   "on": [
    "ゲイ",
    "ウン"
@@ -19537,6 +24137,14 @@
  },
  "若": {
   "meaning": "young, if",
+  "glosses": [
+   "young",
+   "if",
+   "perhaps",
+   "possibly",
+   "low number",
+   "immature"
+  ],
   "on": [
    "ジャク",
    "ニャク",
@@ -19571,6 +24179,14 @@
  },
  "苦": {
   "meaning": "suffering, trial",
+  "glosses": [
+   "suffering",
+   "trial",
+   "worry",
+   "hardship",
+   "feel bitter",
+   "scowl"
+  ],
   "on": [
    "ク"
   ],
@@ -19599,6 +24215,13 @@
  },
  "英": {
   "meaning": "England, English",
+  "glosses": [
+   "England",
+   "English",
+   "hero",
+   "outstanding",
+   "calyx"
+  ],
   "on": [
    "エイ"
   ],
@@ -19626,6 +24249,9 @@
  },
  "茶": {
   "meaning": "tea",
+  "glosses": [
+   "tea"
+  ],
   "on": [
    "チャ",
    "サ"
@@ -19648,6 +24274,14 @@
  },
  "草": {
   "meaning": "grass, weeds",
+  "glosses": [
+   "grass",
+   "weeds",
+   "herbs",
+   "pasture",
+   "write",
+   "draft"
+  ],
   "on": [
    "ソウ"
   ],
@@ -19673,6 +24307,15 @@
  },
  "荷": {
   "meaning": "baggage, shoulder-pole load",
+  "glosses": [
+   "baggage",
+   "shoulder-pole load",
+   "bear (a burden)",
+   "shoulder (a gun)",
+   "load",
+   "cargo",
+   "freight"
+  ],
   "on": [
    "カ"
   ],
@@ -19704,6 +24347,11 @@
  },
  "菜": {
   "meaning": "vegetable, side dish",
+  "glosses": [
+   "vegetable",
+   "side dish",
+   "greens"
+  ],
   "on": [
    "サイ"
   ],
@@ -19727,6 +24375,13 @@
  },
  "落": {
   "meaning": "fall, drop",
+  "glosses": [
+   "fall",
+   "drop",
+   "come down",
+   "village",
+   "hamlet"
+  ],
   "on": [
    "ラク"
   ],
@@ -19756,6 +24411,17 @@
  },
  "葉": {
   "meaning": "leaf, plane",
+  "glosses": [
+   "leaf",
+   "plane",
+   "lobe",
+   "needle",
+   "blade",
+   "spear",
+   "counter for flat things",
+   "fragment",
+   "piece"
+  ],
   "on": [
    "ヨウ"
   ],
@@ -19779,6 +24445,13 @@
  },
  "蔵": {
   "meaning": "storehouse, hide",
+  "glosses": [
+   "storehouse",
+   "hide",
+   "own",
+   "have",
+   "possess"
+  ],
   "on": [
    "ゾウ",
    "ソウ"
@@ -19813,6 +24486,12 @@
  },
  "薄": {
   "meaning": "dilute, thin",
+  "glosses": [
+   "dilute",
+   "thin",
+   "weak (tea)",
+   "pampas grass"
+  ],
   "on": [
    "ハク"
   ],
@@ -19856,6 +24535,13 @@
  },
  "薬": {
   "meaning": "medicine, chemical",
+  "glosses": [
+   "medicine",
+   "chemical",
+   "enamel",
+   "gunpowder",
+   "benefit"
+  ],
   "on": [
    "ヤク"
   ],
@@ -19883,6 +24569,10 @@
  },
  "虎": {
   "meaning": "tiger, drunkard",
+  "glosses": [
+   "tiger",
+   "drunkard"
+  ],
   "on": [
    "コ"
   ],
@@ -19914,6 +24604,11 @@
  },
  "虫": {
   "meaning": "insect, bug",
+  "glosses": [
+   "insect",
+   "bug",
+   "temper"
+  ],
   "on": [
    "チュウ",
    "キ"
@@ -19925,6 +24620,9 @@
  },
  "血": {
   "meaning": "blood",
+  "glosses": [
+   "blood"
+  ],
   "on": [
    "ケツ"
   ],
@@ -19940,6 +24638,16 @@
  },
  "行": {
   "meaning": "going, journey",
+  "glosses": [
+   "going",
+   "journey",
+   "carry out",
+   "conduct",
+   "act",
+   "line",
+   "row",
+   "bank"
+  ],
   "on": [
    "コウ",
    "ギョウ",
@@ -19964,6 +24672,15 @@
  },
  "術": {
   "meaning": "art, technique",
+  "glosses": [
+   "art",
+   "technique",
+   "skill",
+   "means",
+   "trick",
+   "resources",
+   "magic"
+  ],
   "on": [
    "ジュツ"
   ],
@@ -19995,6 +24712,11 @@
  },
  "街": {
   "meaning": "boulevard, street",
+  "glosses": [
+   "boulevard",
+   "street",
+   "town"
+  ],
   "on": [
    "ガイ",
    "カイ"
@@ -20018,7 +24740,13 @@
   ]
  },
  "表": {
-  "meaning": "surface, table",
+  "meaning": "to show, express",
+  "glosses": [
+   "surface",
+   "table",
+   "chart",
+   "diagram"
+  ],
   "on": [
    "ヒョウ"
   ],
@@ -20050,10 +24778,22 @@
     "亠",
     "kettle lid"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "被": {
   "meaning": "incur, cover",
+  "glosses": [
+   "incur",
+   "cover",
+   "veil",
+   "brood over",
+   "shelter",
+   "wear",
+   "put on",
+   "be exposed (film)",
+   "receiving"
+  ],
   "on": [
    "ヒ"
   ],
@@ -20080,6 +24820,13 @@
  },
  "装": {
   "meaning": "attire, dress",
+  "glosses": [
+   "attire",
+   "dress",
+   "pretend",
+   "disguise",
+   "profess"
+  ],
   "on": [
    "ソウ",
    "ショウ"
@@ -20109,6 +24856,18 @@
  },
  "裏": {
   "meaning": "back, amidst",
+  "glosses": [
+   "back",
+   "amidst",
+   "in",
+   "reverse",
+   "inside",
+   "palm",
+   "sole",
+   "rear",
+   "lining",
+   "wrong side"
+  ],
   "on": [
    "リ"
   ],
@@ -20132,6 +24891,11 @@
  },
  "裕": {
   "meaning": "abundant, rich",
+  "glosses": [
+   "abundant",
+   "rich",
+   "fertile"
+  ],
   "on": [
    "ユウ"
   ],
@@ -20161,6 +24925,10 @@
  },
  "製": {
   "meaning": "made in..., manufacture",
+  "glosses": [
+   "made in...",
+   "manufacture"
+  ],
   "on": [
    "セイ"
   ],
@@ -20190,6 +24958,12 @@
  },
  "複": {
   "meaning": "duplicate, double",
+  "glosses": [
+   "duplicate",
+   "double",
+   "compound",
+   "multiple"
+  ],
   "on": [
    "フク"
   ],
@@ -20215,6 +24989,13 @@
  },
  "襲": {
   "meaning": "attack, advance on",
+  "glosses": [
+   "attack",
+   "advance on",
+   "succeed to",
+   "pile",
+   "heap"
+  ],
   "on": [
    "シュウ"
   ],
@@ -20243,6 +25024,10 @@
  },
  "西": {
   "meaning": "west, Spain",
+  "glosses": [
+   "west",
+   "Spain"
+  ],
   "on": [
    "セイ",
    "サイ",
@@ -20255,6 +25040,13 @@
  },
  "要": {
   "meaning": "need, main point",
+  "glosses": [
+   "need",
+   "main point",
+   "essence",
+   "pivot",
+   "key to"
+  ],
   "on": [
    "ヨウ"
   ],
@@ -20275,6 +25067,13 @@
  },
  "覆": {
   "meaning": "capsize, cover",
+  "glosses": [
+   "capsize",
+   "cover",
+   "shade",
+   "mantle",
+   "be ruined"
+  ],
   "on": [
    "フク"
   ],
@@ -20308,6 +25107,15 @@
  },
  "見": {
   "meaning": "see, hopes",
+  "glosses": [
+   "see",
+   "hopes",
+   "chances",
+   "idea",
+   "opinion",
+   "look at",
+   "visible"
+  ],
   "on": [
    "ケン"
   ],
@@ -20329,6 +25137,10 @@
  },
  "規": {
   "meaning": "standard, measure",
+  "glosses": [
+   "standard",
+   "measure"
+  ],
   "on": [
    "キ"
   ],
@@ -20358,6 +25170,12 @@
  },
  "視": {
   "meaning": "inspection, regard as",
+  "glosses": [
+   "inspection",
+   "regard as",
+   "see",
+   "look at"
+  ],
   "on": [
    "シ"
   ],
@@ -20377,6 +25195,13 @@
  },
  "覚": {
   "meaning": "memorize, learn",
+  "glosses": [
+   "memorize",
+   "learn",
+   "remember",
+   "awake",
+   "sober up"
+  ],
   "on": [
    "カク"
   ],
@@ -20403,6 +25228,13 @@
  },
  "親": {
   "meaning": "parent, intimacy",
+  "glosses": [
+   "parent",
+   "intimacy",
+   "relative",
+   "familiarity",
+   "dealer (cards)"
+  ],
   "on": [
    "シン"
   ],
@@ -20441,6 +25273,13 @@
  },
  "観": {
   "meaning": "outlook, look",
+  "glosses": [
+   "outlook",
+   "look",
+   "appearance",
+   "condition",
+   "view"
+  ],
   "on": [
    "カン"
   ],
@@ -20469,6 +25308,13 @@
  },
  "角": {
   "meaning": "angle, corner",
+  "glosses": [
+   "angle",
+   "corner",
+   "square",
+   "horn",
+   "antlers"
+  ],
   "on": [
    "カク"
   ],
@@ -20489,6 +25335,21 @@
  },
  "解": {
   "meaning": "unravel, notes",
+  "glosses": [
+   "unravel",
+   "notes",
+   "key",
+   "explanation",
+   "understanding",
+   "untie",
+   "undo",
+   "solve",
+   "answer",
+   "cancel",
+   "absolve",
+   "explain",
+   "minute"
+  ],
   "on": [
    "カイ",
    "ゲ"
@@ -20519,6 +25380,15 @@
  },
  "触": {
   "meaning": "contact, touch",
+  "glosses": [
+   "contact",
+   "touch",
+   "feel",
+   "hit",
+   "proclaim",
+   "announce",
+   "conflict"
+  ],
   "on": [
    "ショク"
   ],
@@ -20540,6 +25410,10 @@
  },
  "言": {
   "meaning": "say, word",
+  "glosses": [
+   "say",
+   "word"
+  ],
   "on": [
    "ゲン",
    "ゴン"
@@ -20552,6 +25426,12 @@
  },
  "計": {
   "meaning": "plot, plan",
+  "glosses": [
+   "plot",
+   "plan",
+   "scheme",
+   "measure"
+  ],
   "on": [
    "ケイ"
   ],
@@ -20572,6 +25452,13 @@
  },
  "討": {
   "meaning": "chastise, attack",
+  "glosses": [
+   "chastise",
+   "attack",
+   "defeat",
+   "destroy",
+   "conquer"
+  ],
   "on": [
    "トウ"
   ],
@@ -20591,6 +25478,12 @@
  },
  "訓": {
   "meaning": "instruction, Japanese character reading",
+  "glosses": [
+   "instruction",
+   "Japanese character reading",
+   "explanation",
+   "read"
+  ],
   "on": [
    "クン",
    "キン"
@@ -20612,7 +25505,12 @@
   ]
  },
  "記": {
-  "meaning": "scribe, account",
+  "meaning": "to record",
+  "glosses": [
+   "scribe",
+   "account",
+   "narrative"
+  ],
   "on": [
    "キ"
   ],
@@ -20628,10 +25526,17 @@
     "已",
     "stop"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "訪": {
   "meaning": "call on, visit",
+  "glosses": [
+   "call on",
+   "visit",
+   "look up",
+   "offer sympathy"
+  ],
   "on": [
    "ホウ"
   ],
@@ -20653,6 +25558,11 @@
  },
  "設": {
   "meaning": "establishment, provision",
+  "glosses": [
+   "establishment",
+   "provision",
+   "prepare"
+  ],
   "on": [
    "セツ"
   ],
@@ -20680,6 +25590,10 @@
  },
  "許": {
   "meaning": "permit, approve",
+  "glosses": [
+   "permit",
+   "approve"
+  ],
   "on": [
    "キョ"
   ],
@@ -20712,6 +25626,12 @@
  },
  "訳": {
   "meaning": "translate, reason",
+  "glosses": [
+   "translate",
+   "reason",
+   "circumstance",
+   "case"
+  ],
   "on": [
    "ヤク"
   ],
@@ -20735,6 +25655,12 @@
  },
  "訴": {
   "meaning": "accusation, sue",
+  "glosses": [
+   "accusation",
+   "sue",
+   "complain of pain",
+   "appeal to"
+  ],
   "on": [
    "ソ"
   ],
@@ -20758,6 +25684,11 @@
  },
  "証": {
   "meaning": "evidence, proof",
+  "glosses": [
+   "evidence",
+   "proof",
+   "certificate"
+  ],
   "on": [
    "ショウ"
   ],
@@ -20781,6 +25712,11 @@
  },
  "評": {
   "meaning": "evaluate, criticism",
+  "glosses": [
+   "evaluate",
+   "criticism",
+   "comment"
+  ],
   "on": [
    "ヒョウ"
   ],
@@ -20806,6 +25742,13 @@
  },
  "試": {
   "meaning": "test, try",
+  "glosses": [
+   "test",
+   "try",
+   "attempt",
+   "experiment",
+   "ordeal"
+  ],
   "on": [
    "シ"
   ],
@@ -20830,6 +25773,10 @@
  },
  "詩": {
   "meaning": "poem, poetry",
+  "glosses": [
+   "poem",
+   "poetry"
+  ],
   "on": [
    "シ"
   ],
@@ -20853,6 +25800,10 @@
  },
  "話": {
   "meaning": "tale, talk",
+  "glosses": [
+   "tale",
+   "talk"
+  ],
   "on": [
    "ワ"
   ],
@@ -20877,6 +25828,13 @@
  },
  "詳": {
   "meaning": "detailed, full",
+  "glosses": [
+   "detailed",
+   "full",
+   "minute",
+   "accurate",
+   "well-informed"
+  ],
   "on": [
    "ショウ"
   ],
@@ -20905,6 +25863,12 @@
  },
  "誉": {
   "meaning": "reputation, praise",
+  "glosses": [
+   "reputation",
+   "praise",
+   "honor",
+   "glory"
+  ],
   "on": [
    "ヨ"
   ],
@@ -20933,6 +25897,10 @@
  },
  "誌": {
   "meaning": "document, records",
+  "glosses": [
+   "document",
+   "records"
+  ],
   "on": [
    "シ"
   ],
@@ -20953,7 +25921,15 @@
   ]
  },
  "認": {
-  "meaning": "acknowledge, witness",
+  "meaning": "to acknowledge",
+  "glosses": [
+   "acknowledge",
+   "witness",
+   "discern",
+   "recognize",
+   "appreciate",
+   "believe"
+  ],
   "on": [
    "ニン"
   ],
@@ -20978,10 +25954,18 @@
     "丶",
     "dot"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "誕": {
   "meaning": "nativity, be born",
+  "glosses": [
+   "nativity",
+   "be born",
+   "declension",
+   "lie",
+   "be arbitrary"
+  ],
   "on": [
    "タン"
   ],
@@ -21007,6 +25991,16 @@
  },
  "誘": {
   "meaning": "entice, lead",
+  "glosses": [
+   "entice",
+   "lead",
+   "tempt",
+   "invite",
+   "ask",
+   "call for",
+   "seduce",
+   "allure"
+  ],
   "on": [
    "ユウ"
   ],
@@ -21035,6 +26029,11 @@
  },
  "語": {
   "meaning": "word, speech",
+  "glosses": [
+   "word",
+   "speech",
+   "language"
+  ],
   "on": [
    "ゴ"
   ],
@@ -21059,6 +26058,12 @@
  },
  "説": {
   "meaning": "opinion, theory",
+  "glosses": [
+   "opinion",
+   "theory",
+   "explanation",
+   "rumor"
+  ],
   "on": [
    "セツ",
    "ゼイ"
@@ -21087,6 +26092,9 @@
  },
  "読": {
   "meaning": "read",
+  "glosses": [
+   "read"
+  ],
   "on": [
    "ドク",
    "トク",
@@ -21117,6 +26125,11 @@
  },
  "誰": {
   "meaning": "who, someone",
+  "glosses": [
+   "who",
+   "someone",
+   "somebody"
+  ],
   "on": [
    "スイ"
   ],
@@ -21138,6 +26151,18 @@
  },
  "調": {
   "meaning": "tune, tone",
+  "glosses": [
+   "tune",
+   "tone",
+   "meter",
+   "key (music)",
+   "writing style",
+   "prepare",
+   "exorcise",
+   "investigate",
+   "harmonize",
+   "mediate"
+  ],
   "on": [
    "チョウ"
   ],
@@ -21167,7 +26192,11 @@
   ]
  },
  "談": {
-  "meaning": "discuss, talk",
+  "meaning": "talk",
+  "glosses": [
+   "discuss",
+   "talk"
+  ],
   "on": [
    "ダン"
   ],
@@ -21181,10 +26210,15 @@
     "言",
     "say"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "論": {
   "meaning": "argument, discourse",
+  "glosses": [
+   "argument",
+   "discourse"
+  ],
   "on": [
    "ロン"
   ],
@@ -21216,6 +26250,13 @@
  },
  "謎": {
   "meaning": "riddle, puzzle",
+  "glosses": [
+   "riddle",
+   "puzzle",
+   "enigma",
+   "hint",
+   "tip"
+  ],
   "on": [
    "メイ",
    "ベイ"
@@ -21240,6 +26281,11 @@
  },
  "謝": {
   "meaning": "apologize, thank",
+  "glosses": [
+   "apologize",
+   "thank",
+   "refuse"
+  ],
   "on": [
    "シャ"
   ],
@@ -21262,7 +26308,12 @@
   ]
  },
  "識": {
-  "meaning": "discriminating, know",
+  "meaning": "to know, recognise",
+  "glosses": [
+   "discriminating",
+   "know",
+   "write"
+  ],
   "on": [
    "シキ"
   ],
@@ -21291,10 +26342,15 @@
     "戈",
     "halberd"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "警": {
   "meaning": "admonish, commandment",
+  "glosses": [
+   "admonish",
+   "commandment"
+  ],
   "on": [
    "ケイ"
   ],
@@ -21333,7 +26389,13 @@
   ]
  },
  "議": {
-  "meaning": "deliberation, consultation",
+  "meaning": "discussion",
+  "glosses": [
+   "deliberation",
+   "consultation",
+   "debate",
+   "consideration"
+  ],
   "on": [
    "ギ"
   ],
@@ -21371,10 +26433,15 @@
     "手",
     "hand"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "護": {
   "meaning": "safeguard, protect",
+  "glosses": [
+   "safeguard",
+   "protect"
+  ],
   "on": [
    "ゴ"
   ],
@@ -21402,6 +26469,14 @@
  },
  "象": {
   "meaning": "elephant, pattern after",
+  "glosses": [
+   "elephant",
+   "pattern after",
+   "imitate",
+   "image",
+   "shape",
+   "sign (of the times)"
+  ],
   "on": [
    "ショウ",
    "ゾウ"
@@ -21430,6 +26505,15 @@
  },
  "負": {
   "meaning": "defeat, negative",
+  "glosses": [
+   "defeat",
+   "negative",
+   "-",
+   "minus",
+   "bear",
+   "owe",
+   "assume a responsibility"
+  ],
   "on": [
    "フ"
   ],
@@ -21459,6 +26543,12 @@
  },
  "財": {
   "meaning": "property, money",
+  "glosses": [
+   "property",
+   "money",
+   "wealth",
+   "assets"
+  ],
   "on": [
    "ザイ",
    "サイ",
@@ -21496,6 +26586,11 @@
  },
  "販": {
   "meaning": "marketing, sell",
+  "glosses": [
+   "marketing",
+   "sell",
+   "trade"
+  ],
   "on": [
    "ハン"
   ],
@@ -21525,6 +26620,11 @@
  },
  "責": {
   "meaning": "blame, condemn",
+  "glosses": [
+   "blame",
+   "condemn",
+   "censure"
+  ],
   "on": [
    "セキ"
   ],
@@ -21560,6 +26660,9 @@
  },
  "買": {
   "meaning": "buy",
+  "glosses": [
+   "buy"
+  ],
   "on": [
    "バイ"
   ],
@@ -21583,6 +26686,9 @@
  },
  "貸": {
   "meaning": "lend",
+  "glosses": [
+   "lend"
+  ],
   "on": [
    "タイ"
   ],
@@ -21616,6 +26722,13 @@
  },
  "費": {
   "meaning": "expense, cost",
+  "glosses": [
+   "expense",
+   "cost",
+   "spend",
+   "consume",
+   "waste"
+  ],
   "on": [
    "ヒ"
   ],
@@ -21644,6 +26757,15 @@
  },
  "資": {
   "meaning": "assets, resources",
+  "glosses": [
+   "assets",
+   "resources",
+   "capital",
+   "funds",
+   "data",
+   "be conducive to",
+   "contribute to"
+  ],
   "on": [
    "シ"
   ],
@@ -21673,6 +26795,13 @@
  },
  "賛": {
   "meaning": "approve, praise",
+  "glosses": [
+   "approve",
+   "praise",
+   "title or inscription on picture",
+   "assist",
+   "agree with"
+  ],
   "on": [
    "サン"
   ],
@@ -21713,6 +26842,11 @@
  },
  "賞": {
   "meaning": "prize, reward",
+  "glosses": [
+   "prize",
+   "reward",
+   "praise"
+  ],
   "on": [
    "ショウ"
   ],
@@ -21748,6 +26882,12 @@
  },
  "賢": {
   "meaning": "intelligent, wise",
+  "glosses": [
+   "intelligent",
+   "wise",
+   "wisdom",
+   "cleverness"
+  ],
   "on": [
    "ケン"
   ],
@@ -21779,6 +26919,12 @@
  },
  "質": {
   "meaning": "substance, quality",
+  "glosses": [
+   "substance",
+   "quality",
+   "matter",
+   "temperament"
+  ],
   "on": [
    "シツ",
    "シチ",
@@ -21811,6 +26957,10 @@
  },
  "購": {
   "meaning": "subscription, buy",
+  "glosses": [
+   "subscription",
+   "buy"
+  ],
   "on": [
    "コウ"
   ],
@@ -21844,6 +26994,9 @@
  },
  "赤": {
   "meaning": "red",
+  "glosses": [
+   "red"
+  ],
   "on": [
    "セキ",
    "シャク"
@@ -21864,6 +27017,9 @@
  },
  "走": {
   "meaning": "run",
+  "glosses": [
+   "run"
+  ],
   "on": [
    "ソウ"
   ],
@@ -21879,6 +27035,11 @@
  },
  "起": {
   "meaning": "rouse, wake up",
+  "glosses": [
+   "rouse",
+   "wake up",
+   "get up"
+  ],
   "on": [
    "キ"
   ],
@@ -21906,6 +27067,13 @@
  },
  "越": {
   "meaning": "surpass, cross over",
+  "glosses": [
+   "surpass",
+   "cross over",
+   "move to",
+   "exceed",
+   "Vietnam"
+  ],
   "on": [
    "エツ",
    "オツ"
@@ -21934,6 +27102,15 @@
  },
  "趣": {
   "meaning": "purport, gist",
+  "glosses": [
+   "purport",
+   "gist",
+   "elegance",
+   "interest",
+   "proceed to",
+   "tend",
+   "become"
+  ],
   "on": [
    "シュ"
   ],
@@ -21962,6 +27139,12 @@
  },
  "足": {
   "meaning": "leg, foot",
+  "glosses": [
+   "leg",
+   "foot",
+   "be sufficient",
+   "counter for pairs of footwear"
+  ],
   "on": [
    "ソク"
   ],
@@ -21984,6 +27167,11 @@
  },
  "距": {
   "meaning": "long-distance, spur",
+  "glosses": [
+   "long-distance",
+   "spur",
+   "fetlock"
+  ],
   "on": [
    "キョ"
   ],
@@ -22016,6 +27204,12 @@
  },
  "路": {
   "meaning": "path, route",
+  "glosses": [
+   "path",
+   "route",
+   "road",
+   "distance"
+  ],
   "on": [
    "ロ",
    "ル"
@@ -22045,6 +27239,12 @@
  },
  "踊": {
   "meaning": "jump, dance",
+  "glosses": [
+   "jump",
+   "dance",
+   "leap",
+   "skip"
+  ],
   "on": [
    "ヨウ"
   ],
@@ -22075,17 +27275,26 @@
   ]
  },
  "身": {
-  "meaning": "somebody, person",
+  "meaning": "body, self",
+  "glosses": [
+   "somebody",
+   "person",
+   "one's station in life"
+  ],
   "on": [
    "シン"
   ],
   "kun": [
    "み"
   ],
-  "parts": []
+  "parts": [],
+  "fixed": true
  },
  "車": {
   "meaning": "car",
+  "glosses": [
+   "car"
+  ],
   "on": [
    "シャ"
   ],
@@ -22096,6 +27305,13 @@
  },
  "軍": {
   "meaning": "army, force",
+  "glosses": [
+   "army",
+   "force",
+   "troops",
+   "war",
+   "battle"
+  ],
   "on": [
    "グン"
   ],
@@ -22115,6 +27331,11 @@
  },
  "転": {
   "meaning": "revolve, turn around",
+  "glosses": [
+   "revolve",
+   "turn around",
+   "change"
+  ],
   "on": [
    "テン"
   ],
@@ -22145,6 +27366,11 @@
  },
  "軽": {
   "meaning": "lightly, trifling",
+  "glosses": [
+   "lightly",
+   "trifling",
+   "unimportant"
+  ],
   "on": [
    "ケイ",
    "キョウ",
@@ -22172,6 +27398,10 @@
  },
  "較": {
   "meaning": "contrast, compare",
+  "glosses": [
+   "contrast",
+   "compare"
+  ],
   "on": [
    "カク",
    "コウ"
@@ -22196,6 +27426,13 @@
  },
  "輝": {
   "meaning": "radiance, shine",
+  "glosses": [
+   "radiance",
+   "shine",
+   "sparkle",
+   "gleam",
+   "twinkle"
+  ],
   "on": [
    "キ"
   ],
@@ -22227,6 +27464,12 @@
  },
  "辛": {
   "meaning": "spicy, bitter",
+  "glosses": [
+   "spicy",
+   "bitter",
+   "hot",
+   "acrid"
+  ],
   "on": [
    "シン"
   ],
@@ -22249,6 +27492,12 @@
  },
  "辞": {
   "meaning": "resign, word",
+  "glosses": [
+   "resign",
+   "word",
+   "term",
+   "expression"
+  ],
   "on": [
    "ジ"
   ],
@@ -22281,6 +27530,12 @@
  },
  "辺": {
   "meaning": "environs, boundary",
+  "glosses": [
+   "environs",
+   "boundary",
+   "border",
+   "vicinity"
+  ],
   "on": [
    "ヘン"
   ],
@@ -22302,6 +27557,11 @@
  },
  "迎": {
   "meaning": "welcome, meet",
+  "glosses": [
+   "welcome",
+   "meet",
+   "greet"
+  ],
   "on": [
    "ゲイ"
   ],
@@ -22321,6 +27581,12 @@
  },
  "近": {
   "meaning": "near, early",
+  "glosses": [
+   "near",
+   "early",
+   "akin",
+   "tantamount"
+  ],
   "on": [
    "キン",
    "コン"
@@ -22341,6 +27607,12 @@
  },
  "返": {
   "meaning": "return, answer",
+  "glosses": [
+   "return",
+   "answer",
+   "fade",
+   "repay"
+  ],
   "on": [
    "ヘン"
   ],
@@ -22367,6 +27639,12 @@
  },
  "述": {
   "meaning": "mention, state",
+  "glosses": [
+   "mention",
+   "state",
+   "speak",
+   "relate"
+  ],
   "on": [
    "ジュツ"
   ],
@@ -22394,6 +27672,14 @@
  },
  "迷": {
   "meaning": "astray, be perplexed",
+  "glosses": [
+   "astray",
+   "be perplexed",
+   "in doubt",
+   "lost",
+   "err",
+   "illusion"
+  ],
   "on": [
    "メイ"
   ],
@@ -22413,6 +27699,13 @@
  },
  "追": {
   "meaning": "chase, drive away",
+  "glosses": [
+   "chase",
+   "drive away",
+   "follow",
+   "pursue",
+   "meanwhile"
+  ],
   "on": [
    "ツイ"
   ],
@@ -22432,6 +27725,10 @@
  },
  "送": {
   "meaning": "escort, send",
+  "glosses": [
+   "escort",
+   "send"
+  ],
   "on": [
    "ソウ"
   ],
@@ -22463,6 +27760,13 @@
  },
  "逃": {
   "meaning": "escape, flee",
+  "glosses": [
+   "escape",
+   "flee",
+   "shirk",
+   "evade",
+   "set free"
+  ],
   "on": [
    "トウ"
   ],
@@ -22489,6 +27793,12 @@
  },
  "逆": {
   "meaning": "inverted, reverse",
+  "glosses": [
+   "inverted",
+   "reverse",
+   "opposite",
+   "wicked"
+  ],
   "on": [
    "ギャク",
    "ゲキ"
@@ -22515,6 +27825,11 @@
  },
  "途": {
   "meaning": "route, way",
+  "glosses": [
+   "route",
+   "way",
+   "road"
+  ],
   "on": [
    "ト"
   ],
@@ -22550,6 +27865,13 @@
  },
  "通": {
   "meaning": "traffic, pass through",
+  "glosses": [
+   "traffic",
+   "pass through",
+   "avenue",
+   "commute",
+   "counter for letters, notes, documents, etc."
+  ],
   "on": [
    "ツウ",
    "ツ"
@@ -22581,6 +27903,10 @@
  },
  "速": {
   "meaning": "quick, fast",
+  "glosses": [
+   "quick",
+   "fast"
+  ],
   "on": [
    "ソク"
   ],
@@ -22615,6 +27941,12 @@
  },
  "造": {
   "meaning": "create, make",
+  "glosses": [
+   "create",
+   "make",
+   "structure",
+   "physique"
+  ],
   "on": [
    "ゾウ"
   ],
@@ -22644,6 +27976,15 @@
  },
  "連": {
   "meaning": "take along, lead",
+  "glosses": [
+   "take along",
+   "lead",
+   "join",
+   "connect",
+   "party",
+   "gang",
+   "clique"
+  ],
   "on": [
    "レン"
   ],
@@ -22666,6 +28007,10 @@
  },
  "逮": {
   "meaning": "apprehend, chase",
+  "glosses": [
+   "apprehend",
+   "chase"
+  ],
   "on": [
    "タイ"
   ],
@@ -22691,6 +28036,9 @@
  },
  "週": {
   "meaning": "week",
+  "glosses": [
+   "week"
+  ],
   "on": [
    "シュウ"
   ],
@@ -22716,6 +28064,12 @@
  },
  "進": {
   "meaning": "advance, proceed",
+  "glosses": [
+   "advance",
+   "proceed",
+   "progress",
+   "promote"
+  ],
   "on": [
    "シン"
   ],
@@ -22736,6 +28090,12 @@
  },
  "遅": {
   "meaning": "slow, late",
+  "glosses": [
+   "slow",
+   "late",
+   "back",
+   "later"
+  ],
   "on": [
    "チ"
   ],
@@ -22769,6 +28129,9 @@
  },
  "遊": {
   "meaning": "play",
+  "glosses": [
+   "play"
+  ],
   "on": [
    "ユウ",
    "ユ"
@@ -22798,6 +28161,16 @@
  },
  "運": {
   "meaning": "carry, luck",
+  "glosses": [
+   "carry",
+   "luck",
+   "destiny",
+   "fate",
+   "lot",
+   "transport",
+   "progress",
+   "advance"
+  ],
   "on": [
    "ウン"
   ],
@@ -22821,6 +28194,12 @@
  },
  "過": {
   "meaning": "overdo, exceed",
+  "glosses": [
+   "overdo",
+   "exceed",
+   "go beyond",
+   "error"
+  ],
   "on": [
    "カ"
   ],
@@ -22849,6 +28228,15 @@
  },
  "道": {
   "meaning": "road-way, street",
+  "glosses": [
+   "road-way",
+   "street",
+   "district",
+   "journey",
+   "course",
+   "moral",
+   "teachings"
+  ],
   "on": [
    "ドウ",
    "トウ"
@@ -22878,6 +28266,12 @@
  },
  "達": {
   "meaning": "accomplished, reach",
+  "glosses": [
+   "accomplished",
+   "reach",
+   "arrive",
+   "attain"
+  ],
   "on": [
    "タツ",
    "ダ"
@@ -22909,7 +28303,11 @@
   ]
  },
  "違": {
-  "meaning": "difference, differ",
+  "meaning": "to differ, be wrong",
+  "glosses": [
+   "difference",
+   "differ"
+  ],
   "on": [
    "イ"
   ],
@@ -22934,10 +28332,15 @@
     "韋",
     "tanned leather"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "遠": {
   "meaning": "distant, far",
+  "glosses": [
+   "distant",
+   "far"
+  ],
   "on": [
    "エン",
    "オン"
@@ -22966,6 +28369,12 @@
  },
  "選": {
   "meaning": "elect, select",
+  "glosses": [
+   "elect",
+   "select",
+   "choose",
+   "prefer"
+  ],
   "on": [
    "セン"
   ],
@@ -22995,6 +28404,14 @@
  },
  "避": {
   "meaning": "evade, avoid",
+  "glosses": [
+   "evade",
+   "avoid",
+   "avert",
+   "ward off",
+   "shirk",
+   "shun"
+  ],
   "on": [
    "ヒ"
   ],
@@ -23031,6 +28448,11 @@
  },
  "邪": {
   "meaning": "wicked, injustice",
+  "glosses": [
+   "wicked",
+   "injustice",
+   "wrong"
+  ],
   "on": [
    "ジャ"
   ],
@@ -23050,6 +28472,16 @@
  },
  "部": {
   "meaning": "section, bureau",
+  "glosses": [
+   "section",
+   "bureau",
+   "dept",
+   "class",
+   "copy",
+   "part",
+   "portion",
+   "counter for copies of a newspaper or magazine"
+  ],
   "on": [
    "ブ"
   ],
@@ -23073,6 +28505,12 @@
  },
  "都": {
   "meaning": "metropolis, capital",
+  "glosses": [
+   "metropolis",
+   "capital",
+   "all",
+   "everything"
+  ],
   "on": [
    "ト",
    "ツ"
@@ -23097,6 +28535,12 @@
  },
  "配": {
   "meaning": "distribute, spouse",
+  "glosses": [
+   "distribute",
+   "spouse",
+   "exile",
+   "rationing"
+  ],
   "on": [
    "ハイ"
   ],
@@ -23116,6 +28560,10 @@
  },
  "酒": {
   "meaning": "sake, alcohol",
+  "glosses": [
+   "sake",
+   "alcohol"
+  ],
   "on": [
    "シュ"
   ],
@@ -23136,6 +28584,16 @@
  },
  "重": {
   "meaning": "heavy, important",
+  "glosses": [
+   "heavy",
+   "important",
+   "esteem",
+   "respect",
+   "heap up",
+   "pile up",
+   "nest of boxes",
+   "-fold"
+  ],
   "on": [
    "ジュウ",
    "チョウ"
@@ -23170,6 +28628,12 @@
  },
  "野": {
   "meaning": "plains, field",
+  "glosses": [
+   "plains",
+   "field",
+   "rustic",
+   "civilian life"
+  ],
   "on": [
    "ヤ",
    "ショ"
@@ -23195,6 +28659,15 @@
  },
  "量": {
   "meaning": "quantity, measure",
+  "glosses": [
+   "quantity",
+   "measure",
+   "weight",
+   "amount",
+   "consider",
+   "estimate",
+   "surmise"
+  ],
   "on": [
    "リョウ"
   ],
@@ -23218,6 +28691,9 @@
  },
  "金": {
   "meaning": "gold",
+  "glosses": [
+   "gold"
+  ],
   "on": [
    "キン",
    "コン",
@@ -23249,6 +28725,13 @@
  },
  "釣": {
   "meaning": "angling, fish",
+  "glosses": [
+   "angling",
+   "fish",
+   "catch",
+   "allure",
+   "ensnare"
+  ],
   "on": [
    "チョウ"
   ],
@@ -23274,6 +28757,9 @@
  },
  "銀": {
   "meaning": "silver",
+  "glosses": [
+   "silver"
+  ],
   "on": [
    "ギン"
   ],
@@ -23293,6 +28779,10 @@
  },
  "銃": {
   "meaning": "gun, arms",
+  "glosses": [
+   "gun",
+   "arms"
+  ],
   "on": [
    "ジュウ"
   ],
@@ -23320,6 +28810,9 @@
  },
  "録": {
   "meaning": "record",
+  "glosses": [
+   "record"
+  ],
   "on": [
    "ロク"
   ],
@@ -23348,6 +28841,9 @@
  },
  "鍵": {
   "meaning": "key",
+  "glosses": [
+   "key"
+  ],
   "on": [
    "ケン"
   ],
@@ -23371,6 +28867,12 @@
  },
  "鏡": {
   "meaning": "mirror, speculum",
+  "glosses": [
+   "mirror",
+   "speculum",
+   "barrel-head",
+   "round rice-cake offering"
+  ],
   "on": [
    "キョウ",
    "ケイ"
@@ -23403,6 +28905,12 @@
  },
  "長": {
   "meaning": "long, leader",
+  "glosses": [
+   "long",
+   "leader",
+   "superior",
+   "senior"
+  ],
   "on": [
    "チョウ"
   ],
@@ -23414,6 +28922,10 @@
  },
  "門": {
   "meaning": "gate, counter for cannons",
+  "glosses": [
+   "gate",
+   "counter for cannons"
+  ],
   "on": [
    "モン"
   ],
@@ -23425,6 +28937,10 @@
  },
  "閉": {
   "meaning": "closed, shut",
+  "glosses": [
+   "closed",
+   "shut"
+  ],
   "on": [
    "ヘイ"
   ],
@@ -23456,6 +28972,11 @@
  },
  "開": {
   "meaning": "open, unfold",
+  "glosses": [
+   "open",
+   "unfold",
+   "unseal"
+  ],
   "on": [
    "カイ"
   ],
@@ -23492,6 +29013,10 @@
  },
  "間": {
   "meaning": "interval, space",
+  "glosses": [
+   "interval",
+   "space"
+  ],
   "on": [
    "カン",
    "ケン"
@@ -23514,6 +29039,13 @@
  },
  "関": {
   "meaning": "connection, barrier",
+  "glosses": [
+   "connection",
+   "barrier",
+   "gateway",
+   "involve",
+   "concerning"
+  ],
   "on": [
    "カン"
   ],
@@ -23557,6 +29089,12 @@
  },
  "降": {
   "meaning": "descend, precipitate",
+  "glosses": [
+   "descend",
+   "precipitate",
+   "fall",
+   "surrender"
+  ],
   "on": [
    "コウ",
    "ゴ"
@@ -23586,6 +29124,11 @@
  },
  "限": {
   "meaning": "limit, restrict",
+  "glosses": [
+   "limit",
+   "restrict",
+   "to best of ability"
+  ],
   "on": [
    "ゲン"
   ],
@@ -23607,6 +29150,13 @@
  },
  "院": {
   "meaning": "Inst., institution",
+  "glosses": [
+   "Inst.",
+   "institution",
+   "temple",
+   "mansion",
+   "school"
+  ],
   "on": [
    "イン"
   ],
@@ -23636,6 +29186,14 @@
  },
  "除": {
   "meaning": "exclude, division (x/3)",
+  "glosses": [
+   "exclude",
+   "division (x/3)",
+   "remove",
+   "abolish",
+   "cancel",
+   "except"
+  ],
   "on": [
    "ジョ",
    "ジ"
@@ -23665,6 +29223,13 @@
  },
  "険": {
   "meaning": "precipitous, inaccessible place",
+  "glosses": [
+   "precipitous",
+   "inaccessible place",
+   "impregnable position",
+   "steep place",
+   "sharp eyes"
+  ],
   "on": [
    "ケン"
   ],
@@ -23692,6 +29257,14 @@
  },
  "陽": {
   "meaning": "sunshine, yang principle",
+  "glosses": [
+   "sunshine",
+   "yang principle",
+   "positive",
+   "male",
+   "heaven",
+   "daytime"
+  ],
   "on": [
    "ヨウ"
   ],
@@ -23719,6 +29292,11 @@
  },
  "階": {
   "meaning": "storey, stair",
+  "glosses": [
+   "storey",
+   "stair",
+   "counter for storeys of a building"
+  ],
   "on": [
    "カイ"
   ],
@@ -23742,6 +29320,17 @@
  },
  "際": {
   "meaning": "occasion, side",
+  "glosses": [
+   "occasion",
+   "side",
+   "edge",
+   "verge",
+   "dangerous",
+   "adventurous",
+   "indecent",
+   "time",
+   "when"
+  ],
   "on": [
    "サイ"
   ],
@@ -23778,6 +29367,11 @@
  },
  "障": {
   "meaning": "hinder, hurt",
+  "glosses": [
+   "hinder",
+   "hurt",
+   "harm"
+  ],
   "on": [
    "ショウ"
   ],
@@ -23809,6 +29403,11 @@
  },
  "隠": {
   "meaning": "conceal, hide",
+  "glosses": [
+   "conceal",
+   "hide",
+   "cover"
+  ],
   "on": [
    "イン",
    "オン"
@@ -23844,6 +29443,9 @@
  },
  "隣": {
   "meaning": "neighboring",
+  "glosses": [
+   "neighboring"
+  ],
   "on": [
    "リン"
   ],
@@ -23872,6 +29474,13 @@
  },
  "集": {
   "meaning": "gather, meet",
+  "glosses": [
+   "gather",
+   "meet",
+   "congregate",
+   "swarm",
+   "flock"
+  ],
   "on": [
    "シュウ"
   ],
@@ -23893,6 +29502,9 @@
  },
  "雑": {
   "meaning": "miscellaneous",
+  "glosses": [
+   "miscellaneous"
+  ],
   "on": [
    "ザツ",
    "ゾウ"
@@ -23918,6 +29530,12 @@
  },
  "離": {
   "meaning": "detach, separation",
+  "glosses": [
+   "detach",
+   "separation",
+   "disjoin",
+   "digress"
+  ],
   "on": [
    "リ"
   ],
@@ -23946,6 +29564,13 @@
  },
  "難": {
   "meaning": "difficult, impossible",
+  "glosses": [
+   "difficult",
+   "impossible",
+   "trouble",
+   "accident",
+   "defect"
+  ],
   "on": [
    "ナン"
   ],
@@ -23986,6 +29611,9 @@
  },
  "雨": {
   "meaning": "rain",
+  "glosses": [
+   "rain"
+  ],
   "on": [
    "ウ"
   ],
@@ -23998,6 +29626,9 @@
  },
  "雪": {
   "meaning": "snow",
+  "glosses": [
+   "snow"
+  ],
   "on": [
    "セツ"
   ],
@@ -24017,6 +29648,10 @@
  },
  "雰": {
   "meaning": "atmosphere, fog",
+  "glosses": [
+   "atmosphere",
+   "fog"
+  ],
   "on": [
    "フン"
   ],
@@ -24038,6 +29673,9 @@
  },
  "雲": {
   "meaning": "cloud",
+  "glosses": [
+   "cloud"
+  ],
   "on": [
    "ウン"
   ],
@@ -24066,6 +29704,9 @@
  },
  "電": {
   "meaning": "electricity",
+  "glosses": [
+   "electricity"
+  ],
   "on": [
    "デン"
   ],
@@ -24087,6 +29728,13 @@
  },
  "震": {
   "meaning": "quake, shake",
+  "glosses": [
+   "quake",
+   "shake",
+   "tremble",
+   "quiver",
+   "shiver"
+  ],
   "on": [
    "シン"
   ],
@@ -24117,6 +29765,10 @@
  },
  "青": {
   "meaning": "blue, green",
+  "glosses": [
+   "blue",
+   "green"
+  ],
   "on": [
    "セイ",
    "ショウ"
@@ -24147,6 +29799,9 @@
  },
  "静": {
   "meaning": "quiet",
+  "glosses": [
+   "quiet"
+  ],
   "on": [
    "セイ",
    "ジョウ"
@@ -24194,6 +29849,13 @@
  },
  "非": {
   "meaning": "un-, mistake",
+  "glosses": [
+   "un-",
+   "mistake",
+   "negative",
+   "injustice",
+   "non-"
+  ],
   "on": [
    "ヒ"
   ],
@@ -24204,6 +29866,12 @@
  },
  "面": {
   "meaning": "mask, face",
+  "glosses": [
+   "mask",
+   "face",
+   "features",
+   "surface"
+  ],
   "on": [
    "メン",
    "ベン"
@@ -24217,6 +29885,9 @@
  },
  "靴": {
   "meaning": "shoes",
+  "glosses": [
+   "shoes"
+  ],
   "on": [
    "カ"
   ],
@@ -24240,6 +29911,10 @@
  },
  "音": {
   "meaning": "sound, noise",
+  "glosses": [
+   "sound",
+   "noise"
+  ],
   "on": [
    "オン",
    "イン",
@@ -24262,6 +29937,13 @@
  },
  "響": {
   "meaning": "echo, sound",
+  "glosses": [
+   "echo",
+   "sound",
+   "resound",
+   "ring",
+   "vibrate"
+  ],
   "on": [
    "キョウ"
   ],
@@ -24297,6 +29979,11 @@
  },
  "頃": {
   "meaning": "time, about",
+  "glosses": [
+   "time",
+   "about",
+   "toward"
+  ],
   "on": [
    "ケイ",
    "キョウ"
@@ -24331,6 +30018,11 @@
  },
  "頑": {
   "meaning": "stubborn, foolish",
+  "glosses": [
+   "stubborn",
+   "foolish",
+   "firmly"
+  ],
   "on": [
    "ガン"
   ],
@@ -24370,6 +30062,13 @@
  },
  "領": {
   "meaning": "jurisdiction, dominion",
+  "glosses": [
+   "jurisdiction",
+   "dominion",
+   "territory",
+   "fief",
+   "reign"
+  ],
   "on": [
    "リョウ"
   ],
@@ -24409,6 +30108,10 @@
  },
  "頭": {
   "meaning": "head, counter for large animals",
+  "glosses": [
+   "head",
+   "counter for large animals"
+  ],
   "on": [
    "トウ",
    "ズ",
@@ -24453,6 +30156,10 @@
  },
  "頼": {
   "meaning": "trust, request",
+  "glosses": [
+   "trust",
+   "request"
+  ],
   "on": [
    "ライ"
   ],
@@ -24490,6 +30197,10 @@
  },
  "題": {
   "meaning": "topic, subject",
+  "glosses": [
+   "topic",
+   "subject"
+  ],
   "on": [
    "ダイ"
   ],
@@ -24523,6 +30234,10 @@
  },
  "顔": {
   "meaning": "face, expression",
+  "glosses": [
+   "face",
+   "expression"
+  ],
   "on": [
    "ガン"
   ],
@@ -24566,6 +30281,13 @@
  },
  "願": {
   "meaning": "petition, request",
+  "glosses": [
+   "petition",
+   "request",
+   "vow",
+   "wish",
+   "hope"
+  ],
   "on": [
    "ガン"
   ],
@@ -24606,6 +30328,13 @@
  },
  "類": {
   "meaning": "sort, kind",
+  "glosses": [
+   "sort",
+   "kind",
+   "variety",
+   "class",
+   "genus"
+  ],
   "on": [
    "ルイ"
   ],
@@ -24641,6 +30370,12 @@
  },
  "風": {
   "meaning": "wind, air",
+  "glosses": [
+   "wind",
+   "air",
+   "style",
+   "manner"
+  ],
   "on": [
    "フウ",
    "フ"
@@ -24666,6 +30401,11 @@
  },
  "飛": {
   "meaning": "fly, skip (pages)",
+  "glosses": [
+   "fly",
+   "skip (pages)",
+   "scatter"
+  ],
   "on": [
    "ヒ"
   ],
@@ -24678,6 +30418,10 @@
  },
  "食": {
   "meaning": "eat, food",
+  "glosses": [
+   "eat",
+   "food"
+  ],
   "on": [
    "ショク",
    "ジキ"
@@ -24692,6 +30436,10 @@
  },
  "飯": {
   "meaning": "meal, boiled rice",
+  "glosses": [
+   "meal",
+   "boiled rice"
+  ],
   "on": [
    "ハン"
   ],
@@ -24715,6 +30463,11 @@
  },
  "飲": {
   "meaning": "drink, smoke",
+  "glosses": [
+   "drink",
+   "smoke",
+   "take"
+  ],
   "on": [
    "イン",
    "オン"
@@ -24736,6 +30489,12 @@
  },
  "飼": {
   "meaning": "domesticate, raise",
+  "glosses": [
+   "domesticate",
+   "raise",
+   "keep",
+   "feed"
+  ],
   "on": [
    "シ"
   ],
@@ -24767,6 +30526,12 @@
  },
  "飽": {
   "meaning": "sated, tired of",
+  "glosses": [
+   "sated",
+   "tired of",
+   "bored",
+   "satiate"
+  ],
   "on": [
    "ホウ"
   ],
@@ -24792,6 +30557,12 @@
  },
  "餌": {
   "meaning": "food, bait",
+  "glosses": [
+   "food",
+   "bait",
+   "prey",
+   "tempting profit"
+  ],
   "on": [
    "ジ",
    "ニ"
@@ -24819,6 +30590,12 @@
  },
  "館": {
   "meaning": "building, mansion",
+  "glosses": [
+   "building",
+   "mansion",
+   "large building",
+   "palace"
+  ],
   "on": [
    "カン"
   ],
@@ -24843,6 +30620,10 @@
  },
  "首": {
   "meaning": "neck, counter for songs and poems",
+  "glosses": [
+   "neck",
+   "counter for songs and poems"
+  ],
   "on": [
    "シュ"
   ],
@@ -24866,6 +30647,11 @@
  },
  "香": {
   "meaning": "incense, smell",
+  "glosses": [
+   "incense",
+   "smell",
+   "perfume"
+  ],
   "on": [
    "コウ",
    "キョウ"
@@ -24888,6 +30674,9 @@
  },
  "馬": {
   "meaning": "horse",
+  "glosses": [
+   "horse"
+  ],
   "on": [
    "バ",
    "メ",
@@ -24908,6 +30697,14 @@
  },
  "駄": {
   "meaning": "burdensome, pack horse",
+  "glosses": [
+   "burdensome",
+   "pack horse",
+   "horse load",
+   "send by horse",
+   "trivial",
+   "worthless"
+  ],
   "on": [
    "ダ",
    "タ"
@@ -24934,6 +30731,9 @@
  },
  "駅": {
   "meaning": "station",
+  "glosses": [
+   "station"
+  ],
   "on": [
    "エキ"
   ],
@@ -24959,6 +30759,11 @@
  },
  "駐": {
   "meaning": "stop-over, reside in",
+  "glosses": [
+   "stop-over",
+   "reside in",
+   "resident"
+  ],
   "on": [
    "チュウ"
   ],
@@ -24983,7 +30788,12 @@
   ]
  },
  "験": {
-  "meaning": "verification, effect",
+  "meaning": "test, trial",
+  "glosses": [
+   "verification",
+   "effect",
+   "testing"
+  ],
   "on": [
    "ケン",
    "ゲン"
@@ -25015,10 +30825,17 @@
     "杰",
     "hero"
    ]
-  ]
+  ],
+  "fixed": true
  },
  "驚": {
   "meaning": "wonder, be surprised",
+  "glosses": [
+   "wonder",
+   "be surprised",
+   "frightened",
+   "amazed"
+  ],
   "on": [
    "キョウ"
   ],
@@ -25063,6 +30880,12 @@
  },
  "骨": {
   "meaning": "skeleton, bone",
+  "glosses": [
+   "skeleton",
+   "bone",
+   "remains",
+   "frame"
+  ],
   "on": [
    "コツ"
   ],
@@ -25086,6 +30909,11 @@
  },
  "高": {
   "meaning": "tall, high",
+  "glosses": [
+   "tall",
+   "high",
+   "expensive"
+  ],
   "on": [
    "コウ"
   ],
@@ -25113,6 +30941,9 @@
  },
  "髪": {
   "meaning": "hair of the head",
+  "glosses": [
+   "hair of the head"
+  ],
   "on": [
    "ハツ"
   ],
@@ -25144,6 +30975,11 @@
  },
  "魅": {
   "meaning": "fascination, charm",
+  "glosses": [
+   "fascination",
+   "charm",
+   "bewitch"
+  ],
   "on": [
    "ミ"
   ],
@@ -25189,6 +31025,11 @@
  },
  "魔": {
   "meaning": "witch, demon",
+  "glosses": [
+   "witch",
+   "demon",
+   "evil spirit"
+  ],
   "on": [
    "マ"
   ],
@@ -25230,6 +31071,9 @@
  },
  "魚": {
   "meaning": "fish",
+  "glosses": [
+   "fish"
+  ],
   "on": [
    "ギョ"
   ],
@@ -25251,6 +31095,10 @@
  },
  "鳥": {
   "meaning": "bird, chicken",
+  "glosses": [
+   "bird",
+   "chicken"
+  ],
   "on": [
    "チョウ"
   ],
@@ -25266,6 +31114,15 @@
  },
  "鳴": {
   "meaning": "chirp, cry",
+  "glosses": [
+   "chirp",
+   "cry",
+   "bark",
+   "sound",
+   "ring",
+   "echo",
+   "honk"
+  ],
   "on": [
    "メイ"
   ],
@@ -25291,6 +31148,9 @@
  },
  "鹿": {
   "meaning": "deer",
+  "glosses": [
+   "deer"
+  ],
   "on": [
    "ロク"
   ],
@@ -25311,6 +31171,9 @@
  },
  "黄": {
   "meaning": "yellow",
+  "glosses": [
+   "yellow"
+  ],
   "on": [
    "コウ",
    "オウ"
@@ -25332,6 +31195,9 @@
  },
  "黒": {
   "meaning": "black",
+  "glosses": [
+   "black"
+  ],
   "on": [
    "コク"
   ],
@@ -25353,6 +31219,12 @@
  },
  "黙": {
   "meaning": "silence, become silent",
+  "glosses": [
+   "silence",
+   "become silent",
+   "stop speaking",
+   "leave as is"
+  ],
   "on": [
    "モク",
    "ボク"
@@ -25382,6 +31254,10 @@
  },
  "鼻": {
   "meaning": "nose, snout",
+  "glosses": [
+   "nose",
+   "snout"
+  ],
   "on": [
    "ビ"
   ],
@@ -25409,6 +31285,9 @@
  },
  "齢": {
   "meaning": "age",
+  "glosses": [
+   "age"
+  ],
   "on": [
    "レイ"
   ],

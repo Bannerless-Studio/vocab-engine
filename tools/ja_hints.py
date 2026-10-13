@@ -11,7 +11,9 @@ Sources (EDRDG, CC BY-SA 4.0; never committed, cached in .cache/ja-src/):
   (SKIP codes inside KANJIDIC2 carry a separate licence and are not used.)
 
 meaning   the first two English glosses of KANJIDIC2 that are not radical notes, ", "-joined; tools/ja_hints_overrides.json
-          "_meanings" wins for a kanji (the 々 repeat mark has no KANJIDIC entry).
+          "_meanings" wins for a kanji (the 々 repeat mark has no KANJIDIC entry) and sets "fixed": true.
+glosses   every gloss of the kanji that is not a radical note, in KANJIDIC2 order; kanji-aids picks the one that
+          appears in a compound unit's English (core/kanji_aids.py), so a compound never joins two senses.
 on, kun   readings from KANJIDIC2, okurigana dots removed.
 parts     [[component, gloss-or-null]] from KRADFILE in its order, the kanji itself left out (a
           primitive has none) and non-CJK strokes (｜) left out; gloss is the first KANJIDIC2
@@ -115,7 +117,10 @@ def build(kanji, kd, kr, meanings):
             if comp == c or not (KANJI_RE.match(comp) or KANA_RE.match(comp)):
                 continue
             parts.append([comp, gloss_of((kd.get(comp) or {}).get("glosses") or [])])
-        table[c] = {"meaning": meaning, "on": e["on"], "kun": e["kun"], "parts": parts}
+        entry = {"meaning": meaning, "glosses": kept, "on": e["on"], "kun": e["kun"], "parts": parts}
+        if meanings.get(c):
+            entry["fixed"] = True
+        table[c] = entry
     return table
 
 

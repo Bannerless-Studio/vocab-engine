@@ -6,12 +6,17 @@ tools/ja_furigana.py; no network) and writes:
 
   * characters.json `hint` on every unit, one entry per code point of `t`: a kanji gets its line,
     a kana position null. A one-character unit reads "<parts>: <meaning>" (KRADFILE parts with the
-    component's gloss, the kanji's KANJIDIC meaning); a unit of two or more characters gets one
-    line per kanji, "<meaning in that word>: <parts>" with the parts only when the pack has no
-    one-character unit for that kanji (that unit's card teaches them). A key "<unit>:<kanji>" in
-    tools/ja_hints_overrides.json "_meanings" sets the meaning of that kanji in that unit; a bare
-    kanji key sets it everywhere; a top-level kanji key with a string sets a one-character
-    unit's whole hint.
+    component's gloss only when every part is a semantic radical, else the meaning alone; the kanji's
+    KANJIDIC meaning). Any other unit gets one line per kanji, "<meaning in that word>: <parts>" with the
+    parts only when the pack has no one-character unit for that kanji (that unit's card teaches them).
+    The meaning in a word is, first match wins: "<unit>:<kanji>" in tools/ja_hints_overrides.json
+    "_meanings"; a bare kanji key there (a kanji's sense in every unit); the KANJIDIC gloss that appears in
+    the unit's English (else the first gloss only); a one-kanji unit with okurigana (行く) reads as its
+    English; a unit starting with 〜 gets " (suffix)" unless overridden. "<kanji>:<kanji>" sets
+    a one-character unit's meaning. A top-level kanji key with a string
+    is a hook "<story>: <meaning>": it is the whole hint of the one-character unit, the story of a
+    one-kanji unit with okurigana (its meaning stays the English), and the parts of that kanji in other
+    units that have no one-character unit.
   * words.json `ruby` on every kanji word: [[start, end, reading]] in UTF-16 units of `w`
     (tools/ja_furigana.json, keyed by word id; the headword must match).
   * attribution.json "kanji_dictionary" and "word_furigana" (EDRDG, CC BY-SA 4.0), and pack.json
@@ -47,45 +52,113 @@ ATTRIBUTION = {
 }
 
 
+# KRADFILE lists search pieces next to true components; these never read as a part of anything.
+JUNK_PARTS = set("并艾乞个化込疔杰亅")
+MAX_LINE = 60
+ONE_WORD = re.compile(r"[A-Za-z][A-Za-z'-]*")
+
+
 def _breakdown(c, table):
+    """"<part> <gloss> + ..." from KRADFILE, or "" unless every part is a semantic radical: it has a KANJIDIC
+    entry whose first gloss is one word and is not a known search piece (the others read as noise)."""
     parts = table[c]["parts"]
-    return " + ".join(f"{comp} {g}" if g else comp for comp, g in parts)
+    if not parts or any(comp in JUNK_PARTS or not g or not ONE_WORD.fullmatch(g) for comp, g in parts):
+        return ""
+    return " + ".join(f"{comp} {g}" for comp, g in parts)
 
 
 def _join(head, tail):
     return f"{head}: {tail}" if head and tail else (head or tail or None)
 
 
-def attach_hints(units, table, meanings, overrides):
-    """Sets each unit's `hint` (see the module docstring). Returns the number of kanji lines written."""
+def _clip(text, n=MAX_LINE):
+    """Cuts at the last ", " or "; " that fits, else at n characters."""
+    if len(text) <= n:
+        return text
+    cut = max(text.rfind(", ", 0, n), text.rfind("; ", 0, n))
+    return text[:cut] if cut > 0 else text[:n].rstrip()
+
+
+def _gloss_in_en(table_entry, en):
+    """The KANJIDIC gloss of the kanji that appears (whole words, case-folded) in the unit's English, else the
+    first gloss; None when the kanji has no gloss."""
+    glosses = table_entry.get("glosses") or [g for g in re.split(r",\s*", table_entry.get("meaning") or "") if g]
+    haystack = " " + " ".join(re.findall(r"[a-z0-9'-]+", (en or "").casefold())) + " "
+    for g in glosses:
+        words = " ".join(re.findall(r"[a-z0-9'-]+", g.casefold()))
+        if words and f" {words} " in haystack:
+            return g
+    return glosses[0] if glosses else None
+
+
+def _kanji_of(t):
+    return [c for c in t if KANJI_RE.match(c)]
+
+
+def _split_hook(hook):
+    story, _, tail = hook.rpartition(": ")
+    return story, tail
+
+
+def attach_hints(units, table, meanings, overrides, words=None):
+    """Sets each unit's `hint` (see the module docstring). Returns the number of kanji lines written.
+    Meaning of a kanji in a unit: meanings["<t>:<kanji>"], else the kanji's fixed (bare) override, else the
+    KANJIDIC gloss found in the unit's English, else the first gloss; a one-kanji unit with okurigana reads
+    as its English. A unit whose t starts with 〜 gets " (suffix)" when it has no per-word override."""
     kanji = {c for u in units for c in u["t"] if KANJI_RE.match(c)}
     missing = sorted(c for c in kanji if c not in table)
     if missing:
         raise SystemExit(f"kanji-aids: kanji missing from tools/ja_hints.json (run tools/ja_hints.py): {''.join(missing)}")
-    multi = {u["t"] for u in units if len(u["t"]) > 1}
-    stale = sorted(k for k in meanings if ":" in k and k.partition(":")[0] not in multi)
+    known = {u["t"] for u in units}
+    stale = sorted(k for k in meanings if ":" in k and k.partition(":")[0] not in known)
     if stale:
         raise SystemExit(f"kanji-aids: _meanings keys match no unit: {stale[:10]}")
+    unused = sorted(k for k in overrides if k not in kanji)
+    if unused:
+        raise SystemExit(f"kanji-aids: hook keys match no kanji of any unit: {unused[:10]}")
+    en_of = {w["id"]: w.get("en") for w in (words or [])}
     single = {u["t"] for u in units if len(u["t"]) == 1}
     n = 0
     for u in units:
         t = u["t"]
+        ks = _kanji_of(t)
+        en = en_of.get(u["words"][0]) if u.get("words") else None
+        one = len(ks) == 1 and not t.startswith("〜")
         if len(t) == 1:
             c = t
             if not KANJI_RE.match(c):
                 h = [None]
-            elif t in overrides:
-                h = [overrides[t]]
             else:
-                h = [_join(_breakdown(c, table), table[c]["meaning"])]
+                m = meanings.get(f"{t}:{t}")
+                if t in overrides:
+                    h = [_join(_split_hook(overrides[t])[0], m) if m else overrides[t]]
+                else:
+                    h = [_join(_breakdown(c, table), m or table[c]["meaning"])]
         else:
             h = []
             for c in t:
                 if not KANJI_RE.match(c):
                     h.append(None)
                     continue
-                m = meanings.get(f"{t}:{c}") or table[c]["meaning"]
-                b = "" if c in single else _breakdown(c, table)
+                m = meanings.get(f"{t}:{c}")
+                if not m:
+                    if table[c].get("fixed"):
+                        m = table[c]["meaning"]
+                    elif one and en:
+                        m = _clip(en, 40)
+                    else:
+                        m = _gloss_in_en(table[c], en) or table[c]["meaning"]
+                    if t.startswith("〜") and m:
+                        m += " (suffix)"
+                if one and c in overrides:
+                    h.append(_join(_split_hook(overrides[c])[0], m))
+                    continue
+                if c in single:
+                    b = ""
+                elif c in overrides:
+                    b = _split_hook(overrides[c])[0]
+                else:
+                    b = _breakdown(c, table)
                 h.append(_join(m, b))
         n += sum(1 for x in h if x)
         if any(h):
@@ -118,7 +191,7 @@ def _overrides(data):
 
 
 def enrich_data(pack, units, words, pack_attr, table, furigana, meanings, hints):
-    n_hint = attach_hints(units, table, meanings, hints)
+    n_hint = attach_hints(units, table, meanings, hints, words)
     n_ruby = attach_ruby(words, furigana)
     attr = dict(pack_attr)
     attr.update(ATTRIBUTION)
