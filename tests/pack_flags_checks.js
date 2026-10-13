@@ -2,7 +2,7 @@
 // tests/lib/pack_flags.js: the FLAG_SINCE table stays complete and true for the kept flags, and packAsOf reproduces the
 // flag set the committed zh pack had at the commit before each flag landed. The flag collapse (COLLAPSED: engine default,
 // key ignored) holds across the tooling: no generator emits a collapsed key, tools/pack_collapsed.py mirrors the list, and
-// tools/validate_pack.py warns on a stale one.
+// tools/validate_pack.py errors on a stale one.
 // Run: node tests/pack_flags_checks.js
 const fs = require("fs");
 const path = require("path");
@@ -131,7 +131,7 @@ if (tool) {
   const emitted = Object.entries(tool.flags).map(([c, ks]) => [c, ks.filter(k => FLAG_ONLY.includes(k))]).filter(([, ks]) => ks.length);
   check(`no LanguageSpec.port_flags() emits a collapsed key (${Object.keys(tool.flags).join(" ")})`, emitted.length === 0, emitted.map(([c, ks]) => c + ": " + ks.join(",")).join("; "));
 }
-// validate_pack.py: a stale collapsed key warns (exit 0), a goal-less progressMap: true warns, a pack without eta errors
+// validate_pack.py: a stale collapsed key errors (exit 1), a goal-less progressMap: true errors, a pack without eta errors
 {
   const ZH = path.join(ROOT, "packs", "zh");
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "pf-stale-"));
@@ -146,10 +146,10 @@ if (tool) {
   };
   try {
     const stale = Object.assign(JSON.parse(JSON.stringify(PACK)), Object.fromEntries(FLAG_ONLY.map(k => [k, true])));
-    const a = run(stale), line = (a.out.match(/WARN\s+pack\.json keys the engine no longer reads[^\n]*/) || [""])[0];
-    check(`validate_pack: every stale collapsed key warns in one line, exit 0 (exit ${a.code})`, a.code === 0 && FLAG_ONLY.every(k => new RegExp("\\b" + k + "\\b").test(line)), a.out.split("\n").filter(l => /ERR|no longer reads/.test(l)).join("\n"));
+    const a = run(stale), line = (a.out.match(/ERROR\s+pack\.json keys the engine no longer reads[^\n]*/) || [""])[0];
+    check(`validate_pack: every stale collapsed key errors in one line, exit 1 (exit ${a.code})`, a.code === 1 && FLAG_ONLY.every(k => new RegExp("\\b" + k + "\\b").test(line)), a.out.split("\n").filter(l => /ERR|no longer reads/.test(l)).join("\n"));
     const b = run(Object.assign(JSON.parse(JSON.stringify(PACK)), { progressMap: true }));
-    check(`validate_pack: progressMap: true (no goals) warns, exit 0 (exit ${b.code})`, b.code === 0 && /WARN\s+pack\.progressMap: true is ignored/.test(b.out), b.out.split("\n").filter(l => /ERR|progressMap/.test(l)).join("\n"));
+    check(`validate_pack: progressMap: true (no goals) errors, exit 1 (exit ${b.code})`, b.code === 1 && /ERROR\s+pack\.progressMap: true is ignored/.test(b.out), b.out.split("\n").filter(l => /ERR|progressMap/.test(l)).join("\n"));
     const noEta = JSON.parse(JSON.stringify(PACK)); delete noEta.eta;
     const c = run(noEta);
     check(`validate_pack: a pack without eta is an error (exit ${c.code})`, c.code !== 0 && /pack\.eta is required/.test(c.out), c.out.split("\n").filter(l => /ERR/.test(l)).join("\n"));

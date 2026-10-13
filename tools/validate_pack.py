@@ -66,11 +66,11 @@ LEVEL_GATE = 0.7
 
 
 def check_collapsed(pack, rep):
-    """A collapsed flag (tools/pack_collapsed.py) left in a pack: the engine ignores it. A warning until the next republish
-    round's enrich drops the keys from every live pack (TODO.md), then an error."""
+    """A collapsed flag (tools/pack_collapsed.py) left in a pack: the engine ignores it, so the pack is an error. Every
+    live pack was rebuilt without them (round d2876d8); packbuilder enrich drops them from a pack being generated."""
     stale = stale_collapsed(pack)
     if stale:
-        rep.warn("pack.json keys the engine no longer reads (default behaviour since the flag collapse; enrich drops them): " + ", ".join(stale))
+        rep.err("pack.json keys the engine no longer reads (default behaviour since the flag collapse; enrich drops them): " + ", ".join(stale))
 
 
 def check_pack(pack, rep):
@@ -171,7 +171,7 @@ def check_pack(pack, rep):
                     elif not isinstance(g["label"], str) or not g["label"].strip():
                         rep.err(f"pack.progressMap.goals[{i}].label must be a non-empty string")
         elif pm is True:
-            rep.warn("pack.progressMap: true is ignored since the flag collapse (no goals, no progress map); give {goals: [...]}")
+            rep.err("pack.progressMap: true is ignored since the flag collapse (no goals, no progress map); give {goals: [...]}")
         elif pm is not False:
             rep.err("pack.progressMap must be false or {goals: [...]}")
     # levelExam (docs/PACK_SCHEMA.md "levelExam"): level id -> "pinyin" | "characters".

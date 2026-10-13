@@ -1,6 +1,6 @@
 """Pack keys the engine no longer reads (flag collapse, TODO.md "Flag collapse"): each was identical in all 14 live packs and
 is default engine behaviour since its collapse stage (docs/PACK_SCHEMA.md "Flags"). The engine ignores them in a pack.json;
-tools/validate_pack.py warns on them, packbuilder enrich drops them, tools/round/pack_diff_guard.py allows their removal.
+tools/validate_pack.py errors on them, packbuilder enrich drops them, tools/round/pack_diff_guard.py allows their removal.
 Mirrors tests/lib/pack_flags.js COLLAPSED, less progressMap (its goals stay pack data)."""
 
 # stage 1: core planning flags (levelGate is the constant LEVEL_GATE 0.7 in engine/core.js)
