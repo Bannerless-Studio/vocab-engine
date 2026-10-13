@@ -1353,6 +1353,40 @@ Math.random = mulberry32(20261004);
     } catch(e){ check(`${name}: section threw: ${e.stack}`, false); }
   }
 
+  // ---------------------------------------------------------------- ja kanji hints (kanji-aids pack)
+  // characters.json `hint` from packbuilder kanji-aids over ../japanese: teach cards and reveals show it,
+  // no stimulus or option does, and the pack's credits are data the footer reads (app.html packCredits).
+  // Runs on a scratch build (JA_HINTS_PACK, else .cache/ja-scratch/pack); NOTE when absent.
+  console.log("\n[ja-hints] ja kanji hints: teach cards and reveals only, every kanji hinted");
+  {
+    const dir = process.env.JA_HINTS_PACK || path.join(ROOT, ".cache", "ja-scratch", "pack");
+    if(!fs.existsSync(path.join(dir, "characters.js"))) console.log(`NOTE  no kanji-aids pack at ${dir}, skipped`);
+    else try {
+      const L = (f, v) => loadConst(path.join(dir, f), v);
+      const pk = L("pack.js", "PACK"), ws = L("words.js", "WORDS"), ss = L("sentences.js", "SENTENCES"), us = L("characters.js", "CHARACTERS");
+      const { api } = await boot({ pack: pk, words: ws, sentences: ss, units: us, lessons: [], passages: [] });
+      api.setProg(VC.normalizeProg({}, pk));
+      const kanjiAt = (t, i) => /[\u3400-\u9fff\uf900-\ufaff々]/.test([...t][i]);
+      const unhinted = us.filter(u => [...u.t].some((c, i) => kanjiAt(u.t, i) && !(Array.isArray(u.hint) && u.hint[i])));
+      check(`every kanji of every unit has a hint (${us.length} units, ${unhinted.length} unhinted${unhinted[0] ? ": " + unhinted.slice(0, 5).map(u => u.t).join(" ") : ""})`, unhinted.length === 0);
+      check("pack.credits names EDRDG with an https licence link", Array.isArray(pk.credits) && pk.credits.some(c => /EDRDG/.test(c.name) && /^https:\/\/www\.edrdg\.org\//.test(c.url) && /CC BY-SA/.test(c.licence)));
+      check("app.html renders pack.credits as a footer built with text nodes (packCredits)", /function packCredits|\(function packCredits\(\)/.test(appHtml) && /PACK\.credits/.test(appHtml));
+      const one = us.find(u => u.t === "私");
+      api.charTeach({ units: [one], index: 0, total: 1 }, { label: "x" }, () => {});
+      const card = stripTags(api.html("panel"));
+      check(`teach card 私 shows its hint "${one.hint[0]}"`, card.includes(one.hint[0]));
+      const it = api.charDrillItem("charRead", one);
+      check("reveal of 私 shows its hint", it.reveal.includes('class="chint"') && stripTags(it.reveal).includes(one.hint[0]));
+      let stimBad = [], n = 0;
+      us.forEach(u => ["charRead", "charSound", "charPick", "charRecall"].forEach(k => {
+        const d = api.charDrillItem(k, u); n++;
+        const stim = d.html + d.opts.map(o => d.optHtml ? d.optHtml(o) : o).join("");
+        if(/class="chint"/.test(stim)) stimBad.push(`${k} ${u.t}`);
+      }));
+      check(`no stimulus or option carries a hint (${n} items, ${stimBad.length} bad${stimBad[0] ? ": " + stimBad.slice(0, 5).join(", ") : ""})`, stimBad.length === 0);
+    } catch(e){ check(`[ja-hints] threw ${e.stack}`, false); }
+  }
+
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);
   process.exit(fails ? 1 : 0);
 })().catch(e => { console.log(`FAIL  harness threw: ${e.stack}`); process.exit(1); });

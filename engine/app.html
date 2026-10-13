@@ -53,6 +53,8 @@
   header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex:0 0 auto}
   h1{font-size:18px;font-weight:600;margin:0}
   .score{color:var(--mute);font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .credits{margin:8px 16px 104px;font-size:12px;color:var(--mute);line-height:1.5;text-align:center}
+  .credits a{color:inherit}
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 16px;flex:1 1 auto;display:flex;flex-direction:column}
   #panel > .done{display:flex;flex-direction:column;flex:1 1 auto}
   .next:last-child, .primary:last-child, .done .next{margin-top:auto}
@@ -508,6 +510,24 @@ const SENT_INDEX = new Map(SENT_ALL.map((s,i)=>[s, i]));
 const TYPING = VC.typingEnabled(PACK) && !VC.pronTypingOn(PACK);
 const levelLabel = lv => VC.levelLabel(PACK, lv);
 document.title = PACK.name.replace(/\s*\([^)]*\)\s*$/, "");
+// pack.credits (docs/PACK_SCHEMA.md "credits"): the sources of the pack's data, each with its licence and,
+// when https, a link. Absent, the page gets no footer.
+(function packCredits(){
+  const list = Array.isArray(PACK.credits) ? PACK.credits.filter(c => c && typeof c.name === "string") : [];
+  const wrap = list.length ? document.querySelector(".wrap") : null;
+  if(!wrap) return;
+  const f = document.createElement("footer"); f.className = "credits";
+  list.forEach((c, i) => {
+    if(i) f.appendChild(document.createTextNode(" \u00b7 "));
+    const linked = typeof c.url === "string" && /^https:\/\//.test(c.url);
+    const el = document.createElement(linked ? "a" : "span");
+    if(linked){ el.href = c.url; el.rel = "noopener"; el.target = "_blank"; }
+    el.textContent = c.name;
+    f.appendChild(el);
+    if(typeof c.licence === "string") f.appendChild(document.createTextNode(" (" + c.licence + ")"));
+  });
+  wrap.appendChild(f);
+})();
 // tw() wraps inline target text in an isolating <bdi> so it never reorders the English or
 // number text around it.
 const DISP = VC.scriptDisplay(PACK);

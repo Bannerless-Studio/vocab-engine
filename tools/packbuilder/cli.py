@@ -11,6 +11,7 @@
             touches no other file
     enrich  <repo>: pack/words.json `ft`, the pack.json port flag block and `eta` (core/enrich.py);
             --check verifies the shipped pack, --emit DIR writes an enriched copy elsewhere
+    kanji-aids  <repo> (ja): characters.json `hint`, words.json `ruby`, attribution keys from the tools/ja_*.json tables (core/kanji_aids.py)
     gender  <repo>: tools/word_gender.json, the noun `g` by word id from a build (--check, --out FILE); enrich applies it
             (core/gender.py)
     audio   recorded audio (docs/AUDIO.md): <repo>/audio/{w,s,p,x}/*.opus + manifest.json,
@@ -56,6 +57,10 @@ def main(argv=None):
     en = common(sub.add_parser("enrich", help="frequency tiers + port flag block + eta into the built pack"))
     en.add_argument("--check", action="store_true", help="write nothing; exit 1 when the shipped pack differs from the enrich output")
     en.add_argument("--emit", help="write the enriched pack (json + js) to this directory instead of the repo")
+    ka = common(sub.add_parser("kanji-aids", help="ja: unit hints, word furigana and attribution from the tools/ja_*.json tables"))
+    ka.add_argument("--tables", help="directory of ja_hints.json, ja_hints_overrides.json, ja_furigana.json (default: vocab-engine tools/)")
+    ka.add_argument("--check", action="store_true", help="write nothing; exit 1 when the shipped pack differs")
+    ka.add_argument("--emit", help="write the pack with kanji aids (json + js) to this directory instead of the repo")
     au = common(sub.add_parser("audio", help="recorded audio: <repo>/audio/*.opus + pack audio URLs (docs/AUDIO.md)"))
     au.add_argument("--check", action="store_true", help="report missing/stale/orphan clips and stale overrides; write nothing")
     au.add_argument("--prune", action="store_true", help="delete clips no pack item wants")
@@ -74,6 +79,10 @@ def main(argv=None):
     if args.cmd == "enrich":
         from .core.enrich import main as enrich_main
         return enrich_main(args.lang, args.repo, args.check, args.emit)
+
+    if args.cmd == "kanji-aids":
+        from .core.kanji_aids import main as kanji_aids_main
+        return kanji_aids_main(args.lang, args.repo, args.tables, args.check, args.emit)
 
     if args.cmd == "gender":
         from .core.gender import main as gender_main

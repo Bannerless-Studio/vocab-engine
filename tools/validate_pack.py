@@ -1135,6 +1135,63 @@ def passage_ruby_field(ruby, t, char_word0, where, rep):
     check_ruby(ruby, t, None, char_word0, where, rep, null_ok=True)
 
 
+def check_kanji_aids(words, chars, attribution, rep):
+    """docs/PACK_SCHEMA.md "hint" and words.json "ruby" (packbuilder kanji-aids). A pack whose
+    attribution.json names the kanji dictionary (ja) must give every kanji of every unit a hint
+    and every kanji word its ruby. A word's ruby ranges are UTF-16 units of w, each over kanji
+    (or the counters ヵ ヶ, read as their kana in 〜ヶ月), sorted and not overlapping, with a
+    hiragana reading."""
+    full = isinstance(attribution, dict) and "kanji_dictionary" in attribution
+    kanji = re.compile("[㐀-䶿一-鿿豈-﫿々]")
+    hira = re.compile("^[ぁ-ゖー]+$")
+    for i, w in enumerate(words or []):
+        t = w.get("w") if isinstance(w, dict) else None
+        if not isinstance(t, str):
+            continue
+        has_kanji = bool(kanji.search(t))
+        where = f"words[{i}]"
+        if "ruby" not in w:
+            if full and has_kanji:
+                rep.err(f"{where} {t!r} is a kanji word with no ruby")
+            continue
+        if not has_kanji:
+            rep.err(f"{where} {t!r} has ruby but no kanji")
+            continue
+        u16 = t.encode("utf-16-le")
+        prev = 0
+        if not isinstance(w["ruby"], list):
+            rep.err(f"{where}.ruby must be a list of [start, end, reading]")
+            continue
+        for k, r in enumerate(w["ruby"]):
+            rw = f"{where}.ruby[{k}]"
+            if not (isinstance(r, list) and len(r) == 3 and all(isinstance(x, int) and not isinstance(x, bool) for x in r[:2])
+                    and is_str(r[2])):
+                rep.err(f"{rw} must be [start, end, reading] with integer offsets")
+                continue
+            a, b, rd = r
+            if not (0 <= a < b <= len(u16) // 2):
+                rep.err(f"{rw} [{a}, {b}] is outside {t!r} ({len(u16) // 2} UTF-16 units)")
+                continue
+            if a < prev:
+                rep.err(f"{rw} starts at {a}, before the previous ruby's end {prev} (ruby must be sorted and not overlap)")
+            prev = b
+            seg = u16[2 * a:2 * b].decode("utf-16-le", "replace")
+            if not all(kanji.match(c) or c in "ヵヶ" for c in seg):
+                rep.err(f"{rw} covers {seg!r}, which is not kanji only (ヵヶ counters allowed)")
+            if not hira.match(rd):
+                rep.err(f"{rw} reading {rd!r} is not hiragana")
+    if not full:
+        return
+    for i, c in enumerate(chars or []):
+        t = c.get("t") if isinstance(c, dict) else None
+        if not isinstance(t, str):
+            continue
+        h = c.get("hint")
+        for j, ch in enumerate(t):
+            if kanji.match(ch) and not (isinstance(h, list) and j < len(h) and is_str(h[j])):
+                rep.err(f"characters[{i}] {t!r}: kanji {ch} has no hint (kanji dictionary pack)")
+
+
 def check_characters_data(chars, char_levels, by_id, rep):
     """pack/characters.json (required exactly when pack.characters is present):
     docs/PACK_SCHEMA.md "pack/characters.json". `char_levels` is the set of level ids
@@ -1494,6 +1551,13 @@ def validate(packdir):
     if has_chars_file and not has_pack_chars:
         rep.err("characters.json is present but pack.characters is not set")
     char_ids, char_word0 = check_characters_data(chars, char_levels, by_id, rep)
+    check_kanji_aids(words, chars, load(packdir, "attribution", rep, required=False), rep)
+    if "credits" in pack:
+        cr = pack["credits"]
+        if not (isinstance(cr, list) and cr and all(isinstance(c, dict) and is_str(c.get("name"))
+                and (c.get("licence") is None or is_str(c.get("licence")))
+                and (c.get("url") is None or (is_str(c.get("url")) and c["url"].startswith("https://"))) for c in cr)):
+            rep.err("pack.credits must be a non-empty list of {name, licence?, url?} (url https)")
     sent_spans = check_sentences(sents, levels, by_id, rep, char_word0=char_word0 if has_pack_chars else None)
     n_patterns = check_patterns(pack, patterns, levels, by_id, rep, char_word0=char_word0 if has_pack_chars else None)
     check_lessons(pack, lessons, rep)
