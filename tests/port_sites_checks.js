@@ -60,10 +60,14 @@ async function site(dirName, code){
   // enrich output
   const ftOk = D.WORDS.every(w => w.ft === 0 || w.ft === 1 || w.ft === 2) && D.WORDS.length === orig.length && D.WORDS.every((w, i) => w.id === orig[i].id);
   check(`${code}: ft on every word (0/1/2), word order and ids as shipped`, ftOk);
-  check(`${code}: port_sim withTiers equals the enrich output's ft on all ${D.WORDS.length} words`, S2.withTiers(P, orig).every((w, i) => w.ft === D.WORDS[i].ft));
+  const ovr = S2.tierOverrides(repo, orig), nOvr = Object.keys(ovr).length;
+  check(`${code}: port_sim withTiers equals the enrich output's ft on all ${D.WORDS.length} words (${nOvr} tier overrides)`, S2.withTiers(P, orig, ovr).every((w, i) => w.ft === D.WORDS[i].ft));
   const cnt = lv => [0, 1, 2].map(t => BY[lv].filter(w => w.ft === t).length);
-  const periph = LV.map(lv => cnt(lv)[2]), want = LV.map(lv => Math.floor((SHARE[lv] || 0) * BY[lv].length + 0.5));
-  check(`${code}: tiers per level [ambient core peripheral] ${LV.map(lv => `${lv} ${cnt(lv)}`).join("  ")}; peripheral = ${want.join("/")}`, JSON.stringify(periph) === JSON.stringify(want) && D.WORDS.filter(w => w.ft === 0).every(w => w.rank <= 100));
+  // the shares move by the overridden words (no backfill): expected = rule count - overridden out + overridden in
+  const ruled = S2.withTiers(P, orig), rid = Object.fromEntries(ruled.map(w => [w.id, w.ft]));
+  const periph = LV.map(lv => cnt(lv)[2]);
+  const want = LV.map(lv => Math.floor((SHARE[lv] || 0) * BY[lv].length + 0.5) + BY[lv].filter(w => w.id in ovr && ovr[w.id] === 2 && rid[w.id] !== 2).length - BY[lv].filter(w => w.id in ovr && ovr[w.id] !== 2 && rid[w.id] === 2).length);
+  check(`${code}: tiers per level [ambient core peripheral] ${LV.map(lv => `${lv} ${cnt(lv)}`).join("  ")}; peripheral = ${want.join("/")}`, JSON.stringify(periph) === JSON.stringify(want) && D.WORDS.filter(w => w.ft === 0).every(w => w.rank <= 100 || (w.id in ovr && ovr[w.id] === 0)));
   if(units.length) check(`${code}: unit ft = lowest ft of its words (${units.length} units)`, units.every(u => u.ft === Math.min(...u.words.map(i => S.BY_ID[i].ft))));
   // the collapsed keys (engine default since the flag collapse; progressMap stays goals data) are no longer emitted
   const gone = COLLAPSED.filter(k => !COLLAPSED_DATA.includes(k) && k in P);
