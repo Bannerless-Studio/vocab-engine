@@ -969,6 +969,31 @@ console.log("\n[rs] read.done[pid].t (fb46): whole seconds of the latest complet
 }
 
 
+console.log("\n[exam2] level exam repeats (prog.exam h / k / p, prog.crit with a level's critical word): boot on d2876d8 unchanged, a mark keeps them, and back");
+{
+  const LV3 = VC.levelIds(LAG_PACK)[2], wid = Object.keys(VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog.w)[0];
+  const p = VC.bootProg(JSON.stringify(mig("C mid-HSK2")), LAG_PACK).prog;
+  p.exam = { [LV3]: { r: 19, n: 20, d: "2026-10-09", h: [{ r: 14, n: 20, d: "2026-10-05", a: [wid] }, { r: 19, n: 20, d: "2026-10-09", ok: 1 }], k: 2, p: "2026-10-09" }, seen: LV3 };
+  p.crit = { [wid]: 3 };
+  const raw = JSON.stringify(p), here = VC.bootProg(raw, LAG_PACK), im = VC.applyImport(null, raw, LAG_PACK);
+  check("[exam2] boot here keeps exam and crit byte-equal, no backup; export/import keeps them; validateProgShape accepts them", here.backupRaw === null && JSON.stringify(here.prog) === raw && im.ok && JSON.stringify(im.prog.exam) === JSON.stringify(p.exam) && JSON.stringify(im.prog.crit) === JSON.stringify(p.crit) && VC.validateProgShape(p, Object.keys(p.sets)).ok);
+  for(const sha of ["d2876d8"]){
+    let eng = null, op = null;
+    try {
+      const cp = require("child_process"), f = path.join(migTmp(), `core_${sha}.js`);
+      fs.writeFileSync(f, cp.execSync(`git -C "${ROOT}" show ${sha}:engine/core.js`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] })); eng = require(f);
+      op = JSON.parse(cp.execSync(`git -C "${ROOT}" show ${sha}:packs/zh/pack.json`, { encoding: "utf8", maxBuffer: 1 << 26, stdio: ["ignore", "pipe", "ignore"] }));
+    } catch(e){ eng = null; }
+    if(!eng){ skip(`[exam2] engine ${sha} not in this checkout's history`); continue; }
+    const o = eng.bootProg(raw, op), o2 = eng.bootProg(raw, LAG_PACK);
+    check(`[exam2] engine ${sha} boots a record carrying exam h/k/p and crit (its zh pack, and this pack): no backup, progress byte-equal`, o.backupRaw === null && JSON.stringify(o.prog) === raw && o2.backupRaw === null && JSON.stringify(o2.prog) === raw);
+    const q = clone(o.prog); eng.markRec(q.w, Object.keys(q.w)[0], true, true);
+    check(`[exam2] a mark on ${sha} keeps exam and crit`, JSON.stringify(q.exam) === JSON.stringify(p.exam) && JSON.stringify(q.crit) === JSON.stringify(p.crit));
+    const back = VC.bootProg(JSON.stringify(q), LAG_PACK);
+    check(`[exam2] and back here from ${sha}: no backup, exam and crit byte-equal`, back.backupRaw === null && JSON.stringify(back.prog.exam) === JSON.stringify(p.exam) && JSON.stringify(back.prog.crit) === JSON.stringify(p.crit));
+  }
+}
+
 // Boot drops a rollback's showPron: true while a script pack's primer is unfinished (dropRollbackShowPron); a stored
 // false, a finished primer and a non-script pack keep it; without the script units nothing is dropped.
 {

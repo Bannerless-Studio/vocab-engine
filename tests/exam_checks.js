@@ -435,6 +435,161 @@ for(const [name, dir] of [["ja", process.env.JA_PACK || path.join(ROOT, "..", "j
   check(`${name}: result screen, crit written, prog.exam.${lv[0]} stored`, !api.getD() && api.fin() && api.fin().seen === 20 && Object.keys(api.getProg().crit || {}).length > 0 && VC.examResult(api.getProg(), lv[0]) !== null);
 }
 
+console.log("\n[9] repeat exams: numbering, history, unlock rule, pass rule (core)");
+{
+  check("position 3 and later are numbered (zh HSK 3, HSK 4); HSK 1 and 2 keep the single exam", VC.examNumbered(PACK, LV[2]) && VC.examNumbered(PACK, LV[3]) && !VC.examNumbered(PACK, LV[0]) && !VC.examNumbered(PACK, LV[1]));
+  const L3 = BYLV[LV[2]].slice(0, 4).map(w => w.id), p = freshRec();
+  L3.forEach(id => VC.critAdd(p, id, 2));
+  const e1 = VC.examRecord(p, LV[2], 14, 20, "2026-10-05", { numbered: true, added: L3 });
+  check("exam 1 on a numbered level: h = [{ r, n, d, a }], k 1, the top keeps the score; the 4 added words lock exam 2", JSON.stringify(e1) === JSON.stringify({ r: 14, n: 20, d: "2026-10-05", h: [{ r: 14, n: 20, d: "2026-10-05", a: L3 }], k: 1 }) && VC.examCount(p, LV[2]) === 1 && VC.examLock(p, LV[2]) === 4);
+  VC.critRemove(p, L3[0]); VC.critRemove(p, L3[1]);
+  check("unlock rule: with 2 of exam 1's words still critical the lock reads 2 (\"Exam 2 opens when 2 critical words clear\")", VC.examLock(p, LV[2]) === 2);
+  VC.critRemove(p, L3[2]); VC.critRemove(p, L3[3]);
+  check("unlock rule: every word exam 1 added has left prog.crit, exam 2 is open", VC.examLock(p, LV[2]) === 0);
+  const e2 = VC.examRecord(p, LV[2], 17, 20, "2026-10-08", { numbered: true, added: [] });
+  check("exam 2 (17 of 20, no misses): h keeps both, k 2, top = exam 2, no ok (not a pass: no pass flag)", e2.k === 2 && e2.h.length === 2 && e2.h[0].r === 14 && e2.r === 17 && VC.examHist(e2)[1].r === 17 && !("ok" in e2.h[1]) && !("p" in e2) && VC.examCount(p, LV[2]) === 2 && VC.examLock(p, LV[2]) === 0);
+  const e3 = VC.examRecord(p, LV[2], 18, 20, "2026-10-09", { numbered: true, added: [], pass: true });
+  const e4 = VC.examRecord(p, LV[2], 19, 20, "2026-10-10", { numbered: true, added: [], pass: true });
+  check("a pass: ok on its history entry, p = its ISO day; a later pass keeps the first p", e3.p === "2026-10-09" && e3.h[2].ok === 1 && e4.p === "2026-10-09" && e4.h.length === 4 && e4.h[2].ok === 1 && e4.h[3].ok === 1 && e4.k === 4);
+  const q = freshRec();
+  q.exam = { [LV[2]]: { r: 12, n: 20, d: "2026-10-01" } };
+  check("a numbered record from before the history (top only): reads as exam 1, count 1, no lock", VC.examHist(q.exam[LV[2]]).length === 1 && VC.examCount(q, LV[2]) === 1 && VC.examLock(q, LV[2]) === 0);
+  const e5 = VC.examRecord(q, LV[2], 15, 20, "2026-10-07", { numbered: true, added: [] });
+  check("that record takes a retake: h has both, k 2", e5.k === 2 && e5.h.length === 2 && e5.h[0].r === 12 && e5.h[1].r === 15);
+  const one = freshRec();
+  VC.examRecord(one, LV[0], 15, 20, "2026-10-07");
+  check("levels 1-2: the record is { r, n, d } only, as before (no h, k, a)", JSON.stringify(one.exam[LV[0]]) === JSON.stringify({ r: 15, n: 20, d: "2026-10-07" }) && VC.examCount(one, LV[0]) === 1 && VC.examLock(one, LV[0]) === 0);
+  const pr = freshRec();
+  check("pass rule: a retake at 17 of 20 (85%) with no critical word of the level passes; 16 of 20 does not; exam 1 never passes", VC.examPasses(pr, WORDS, LV[2], 17, 20, 2) && !VC.examPasses(pr, WORDS, LV[2], 16, 20, 2) && !VC.examPasses(pr, WORDS, LV[2], 20, 20, 1));
+  VC.critAdd(pr, BYLV[LV[2]][9].id, 3);
+  check("pass rule: an outstanding critical word of the level blocks the pass", !VC.examPasses(pr, WORDS, LV[2], 20, 20, 2));
+  const pr2 = freshRec(); VC.critAdd(pr2, BYLV[LV[0]][0].id, 1);
+  check("pass rule: a critical word of an earlier level does not block the pass", VC.examPasses(pr2, WORDS, LV[2], 20, 20, 2));
+}
+
+console.log("\n[10] cumulative draw from exam 2 (core)");
+{
+  const zero = BYLV[LV[0]].concat(BYLV[LV[1]]), base = freshRec();
+  zero.forEach(w => { base.w[w.id] = KNOWN_REC(); });
+  const cum = Object.assign({}, { typedOk: () => true, gapOk: s => VC.gapCandidateIndices(s, BY_ID, PACK).length > 0, canHear: () => true }, { k: 2 });
+  const kindsOf = plan => plan.reduce((m, it) => { m[it.kind] = (m[it.kind] || 0) + 1; return m; }, {});
+  const want = { hearS: 6, gap: 5, readS: 4, typeM: 3, recall: 2 };
+  let okMix = true, okSplit = true, okUnique = true, okEarlyNoCrit = true, okSentNoCrit = true;
+  for(let seed = 1; seed <= 20; seed++){
+    const plan = VC.examPlan(WORDS, SENTENCES, PACK, base, LV[2], VC.seededRng(seed), cum);
+    const k = kindsOf(plan);
+    okMix = okMix && plan.length === 20 && Object.keys(want).every(x => k[x] === want[x]);
+    okSplit = okSplit && plan.filter(it => String((it.s || it.word).lv) === LV[2]).length === 14 && plan.filter(it => String((it.s || it.word).lv) !== LV[2]).length === 6 && plan.every(it => [LV[0], LV[1], LV[2]].includes(String((it.s || it.word).lv)));
+    const ids = plan.map(it => it.s ? "s:" + it.s.id : "w:" + it.word.id);
+    okUnique = okUnique && new Set(ids).size === ids.length && new Set(plan.filter(it => it.word).map(it => it.word.id)).size === plan.filter(it => it.word).length;
+  }
+  check("exam 2 on HSK 3, 20 seeds: 20 items, 14 from HSK 3 and 6 from HSK 1-2, the kind mix 6 / 5 / 4 / 3 / 2 in every plan", okMix && okSplit);
+  check("no item twice (sentence or word) in any of the 20 plans", okUnique);
+  const crit = BYLV[LV[0]].slice(0, 2).concat(BYLV[LV[1]].slice(0, 2)).map(w => w.id);
+  const cp = clone(base); crit.forEach(id => VC.critAdd(cp, id, 4));
+  for(let seed = 1; seed <= 20; seed++){
+    const plan = VC.examPlan(WORDS, SENTENCES, PACK, cp, LV[2], VC.seededRng(seed), cum);
+    okEarlyNoCrit = okEarlyNoCrit && plan.every(it => !(it.word && VC.critHas(cp, it.word.id)));
+    okSentNoCrit = okSentNoCrit && plan.every(it => !(it.s && (it.s.words || []).some(id => VC.critHas(cp, id))) || String(it.s.lv) === LV[2]);
+  }
+  check("no critical word is drawn from the earlier levels (word items, and sentences with one), 20 seeds", okEarlyNoCrit && okSentNoCrit);
+  // Low-streak weighting: the earlier level's sentences are withheld, so its 6 items are word items; the 10 lowest-streak
+  // earlier words (pair wm 0) are the pool, 4 of them critical, so the 6 items must be the other 6 of them.
+  const lowP = freshRec(); zero.forEach(w => { lowP.w[w.id] = KNOWN_REC(); });
+  const low = BYLV[LV[0]].slice(0, 10);
+  low.forEach(w => { lowP.w[w.id] = { r: 1, w: 1, s: 0, p: { wm: [0, 1], sm: [3, 1], ws: [3, 1] } }; });
+  low.slice(0, 4).forEach(w => VC.critAdd(lowP, w.id, 4));
+  const rest = low.slice(4).map(w => w.id);
+  const sentOnlyLv = SENTENCES.filter(s => String(s.lv) === LV[2]);
+  let lowOk = true, lowN = 0;
+  for(let seed = 1; seed <= 12; seed++){
+    const plan = VC.examPlan(WORDS, sentOnlyLv, PACK, lowP, LV[2], VC.seededRng(seed), cum);
+    const early = plan.filter(it => String(it.word ? it.word.lv : it.s.lv) !== LV[2]);
+    lowOk = lowOk && early.length === 6 && early.every(it => it.word && rest.includes(it.word.id));
+    lowN += early.length;
+  }
+  check(`low streak first: earlier items are the lowest-streak non-critical earlier words (${lowN} of 72 checked slots)`, lowOk && lowN === 72);
+  const k1 = VC.examPlan(WORDS, SENTENCES, PACK, base, LV[2], VC.seededRng(7), { typedOk: () => true, gapOk: s => VC.gapCandidateIndices(s, BY_ID, PACK).length > 0, canHear: () => true, k: 1 });
+  const k0 = VC.examPlan(WORDS, SENTENCES, PACK, base, LV[2], VC.seededRng(7), { typedOk: () => true, gapOk: s => VC.gapCandidateIndices(s, BY_ID, PACK).length > 0, canHear: () => true });
+  const key = pl => pl.map(it => it.kind + ":" + (it.s || it.word).id).join(",");
+  check("exam 1 (k 1) and no k: the same level-only plan, all 20 items from HSK 3", key(k1) === key(k0) && k1.every(it => String((it.s || it.word).lv) === LV[2]) && Object.keys(want).every(x => kindsOf(k1)[x] === want[x]) && k1.length === 20);
+  const l2 = VC.examPlan(WORDS, SENTENCES, PACK, base, LV[1], VC.seededRng(7), cum);
+  check("HSK 2 (position 2) retake: level-only, unchanged", l2.length === 20 && l2.every(it => String((it.s || it.word).lv) === LV[1]));
+  const d1 = VC.examPlan(WORDS, SENTENCES, PACK, base, LV[2], VC.seededRng(11), cum), d2 = VC.examPlan(WORDS, SENTENCES, PACK, base, LV[2], VC.seededRng(11), cum);
+  check("determinism: the same seed draws the same exam 2 plan", key(d1) === key(d2));
+}
+
+console.log("\n[11] pass effect on pairs (core): zh, italian, ja units");
+{
+  const rec = {};
+  const p = freshRec(); const L = BYLV[LV[2]];
+  L.forEach((w, i) => {
+    if(i % 4 === 0) p.w[w.id] = KNOWN_REC();
+    else if(i % 4 === 1) p.w[w.id] = { r: 1, w: 0, s: 1 };
+    else if(i % 4 === 2) p.w[w.id] = { r: 1, w: 0, s: 0, p: { wm: [0, 1], ws: [3, 1], sm: [0, 1] } };
+  });
+  const crit = L[5].id; VC.critAdd(p, crit, 3);
+  const before = clone(p.w);
+  const plan = VC.examPassPlan(p, WORDS, LV[2], CHARACTERS, 7);
+  const n = VC.examPassApply(p, plan, 7);
+  const k = i => L[i].id;
+  check("zh pass: a word at wm and ws 1 gets both set to [2, 7]; a word at wm 0 gets only wm; known words, sm and the critical word are untouched", JSON.stringify(p.w[k(1)].p) === JSON.stringify({ wm: [2, 7], ws: [2, 7] }) && JSON.stringify(p.w[k(2)].p) === JSON.stringify({ wm: [2, 7], ws: [3, 1], sm: [0, 1] }) && JSON.stringify(p.w[k(0)]) === JSON.stringify(before[k(0)]) && JSON.stringify(p.w[crit]) === JSON.stringify(before[crit]) && JSON.stringify(p.w[k(2)].p.sm) === "[0,1]");
+  const expectN = L.filter((w, i) => (i % 4 === 1 || i % 4 === 2) && i !== 5).length;
+  check("zh pass: a word without a record is not created; the return value counts the words whose reading is hidden", !p.w[k(3)] && n === expectN && new Set(plan.map(x => x.w)).size === n);
+  check("zh pass: pairs at PAIR_HOLD or above stay untouched; a second pass changes nothing", VC.examPassApply(p, VC.examPassPlan(p, WORDS, LV[2], CHARACTERS, 9), 9) === 0);
+  check("zh pass: the outstanding critical word blocks the pass here; a clean record passes at 20 of 20", VC.examPasses(p, WORDS, LV[2], 20, 20, 2) === false && VC.examPasses(freshRec(), WORDS, LV[2], 20, 20, 2));
+  for(const [name, dir] of [["it", process.env.IT_PACK || path.join(ROOT, "..", "italian", "pack")], ["ja", process.env.JA_PACK || path.join(ROOT, "..", "japanese", "pack")]]){
+    if(!fs.existsSync(path.join(dir, "pack.js"))){ console.log(`NOTE  ${name}: no pack at ${dir}, skipped`); continue; }
+    const L2 = (f, v) => fs.existsSync(path.join(dir, f)) ? loadConst(path.join(dir, f), v) : undefined;
+    const pk = L2("pack.js", "PACK"), ws = L2("words.js", "WORDS"), us = L2("characters.js", "CHARACTERS");
+    const lv = VC.levelIds(pk), by = VC.wordsByLevel(ws, pk), q = VC.normalizeProg({}, pk);
+    const B1 = lv[2], list = by[B1];
+    list.slice(0, 6).forEach(w => { q.w[w.id] = { r: 1, w: 0, s: 1 }; });
+    list.slice(6, 9).forEach(w => { q.w[w.id] = KNOWN_REC(); });
+    check(`${name}: numbered B1 (position 3) has records under it`, VC.examNumbered(pk, B1) && list.length > 0);
+    const pl = VC.examPassPlan(q, ws, B1, us, 5);
+    const cnt = VC.examPassApply(q, pl, 5);
+    const hid = list.slice(0, 6).every(w => JSON.stringify(q.w[w.id].p.wm) === "[2,5]" && JSON.stringify(q.w[w.id].p.ws) === "[2,5]" && !q.w[w.id].p.sm);
+    const kept = list.slice(6, 9).every(w => JSON.stringify(q.w[w.id].p) === JSON.stringify(KNOWN_REC().p));
+    check(`${name}: a pass sets wm and ws to [2, 5] on the low words, sm untouched; known words untouched (${cnt} words hidden)`, hid && kept && cnt === 6);
+    if(us && us.length){
+      const cr = q.chars.c, ulist = us.filter(u => u.words && u.words[0] && VC.wordsByLevel(ws, pk)[B1].some(w => w.id === u.words[0])).slice(0, 3);
+      ulist.forEach(u => { cr[u.id] = { r: 1, w: 0, s: 1 }; });
+      const outU = us.find(u => u.words && u.words[0] && !VC.wordsByLevel(ws, pk)[B1].some(w => w.id === u.words[0]));
+      if(outU) cr[outU.id] = { r: 1, w: 0, s: 1 };
+      const pl2 = VC.examPassPlan(q, ws, B1, us, 6); VC.examPassApply(q, pl2, 6);
+      check(`${name}: units whose first word is in B1 get wm [2, 6] (not ws); a unit of another level is untouched`, ulist.length === 3 && ulist.every(u => JSON.stringify(cr[u.id].p.wm) === "[2,6]" && !cr[u.id].p.ws) && (!outU || !cr[outU.id].p));
+    }
+  }
+}
+
+console.log("\n[12] app: Test row history and lock, a retake passes");
+{
+  const p2 = freshRec(); p2.sessions = 12; p2.sn = 12; p2.placedOnce = true;
+  [0, 1, 2].forEach(i => { BYLV[LV[i]].forEach((w, j) => { p2.w[w.id] = i === 2 && j % 5 === 0 ? { r: 1, w: 0, s: 1 } : KNOWN_REC(); }); p2.sets[LV[i]] = Math.ceil(BYLV[LV[i]].length / VC.setSizeOf(PACK)); });
+  CHARACTERS.filter(u => u.words && BYLV[LV[2]].some(w => w.id === u.words[0])).forEach(u => { p2.chars.c[u.id] = { r: 6, w: 0, s: 6, p: { wm: [3, 1], ws: [3, 1] } }; });
+  const crit = BYLV[LV[2]][10].id;
+  VC.examRecord(p2, LV[2], 14, 20, DAY, { numbered: true, added: [crit] }); VC.critAdd(p2, crit, 2);
+  const { api: a1, st: st1 } = await bootWith(PACK, p2, 31);
+  a1.clickTab("test");
+  check("Test row, numbered level with exam 1 taken and a critical word outstanding: \"Exam 1: 14 of 20, today\", the button disabled, \"Exam 2 opens when 1 critical word clears\"", /Exam 1: 14 of 20, today<\/p>/.test(a1.panel()) && /id="tExam_3"[^>]*disabled/.test(a1.panel()) && /id="tExamLock_3"[^>]*>Exam 2 opens when 1 critical word clears<\/p>/.test(a1.panel()));
+  const p3 = clone(a1.getProg()); VC.critRemove(p3, crit);
+  const { api } = await bootWith(PACK, p3, 32);
+  api.clickTab("test");
+  check("the word cleared: exam 2 is open, no lock line, the button enabled", !/id="tExam_3"[^>]*disabled/.test(api.panel()) && !/tExamLock_3/.test(api.panel()));
+  examRow(api, LV[2]).click();
+  check("exam 2 starts: 20 items, header \"Level exam: HSK 3\"", api.getD() && api.getD().q.length + 1 === 20 && api.title() === "Level exam: HSK 3");
+  let guard = 0; while(api.getD() && api.getCur() && guard++ < 40){ answer(api, true); api.el("nx").click(); }
+  const fin = api.fin(), pr = api.getProg();
+  check("exam 2 at 20 of 20, no misses: the result screen names the pass and the reading hidden", fin && fin.seen === 20 && /<h2>20 of 20<\/h2>/.test(api.panel()) && /id="examPass">Level passed\. Reading hidden for \d+ words?<\/p>/.test(api.panel()));
+  const e = pr.exam[LV[2]];
+  check("the record: h has 2 entries, the second ok, k 2, p = today; the top is exam 2", e.k === 2 && e.h.length === 2 && e.h[1].ok === 1 && !e.h[0].ok && e.p === DAY && e.r === 20);
+  const hid = BYLV[LV[2]].filter(w => pr.w[w.id] && !VC.critHas(pr, w.id) && (VC.pairState(pr.w[w.id], "wm").s >= 2 && pr.w[w.id].p && Array.isArray(pr.w[w.id].p.wm) && pr.w[w.id].p.wm[0] === 2)).length;
+  check("the low words of HSK 3 carry wm [2, session] now; the words already at 3 keep 3", hid > 0 && BYLV[LV[2]].filter(w => pr.w[w.id] && pr.w[w.id].s === 1 && !pr.w[w.id].p).length === 0);
+  api.el("ok").click(); api.clickTab("today"); api.clickTab("test");
+  check("the Test row reads \"Exam 2: 20 of 20, today · passed\" under the exam 1 line", /Exam 2: 20 of 20, today · passed/.test(api.panel()) && /Exam 1: 14 of 20, today/.test(api.panel()));
+}
+
 if(OWNER){
   console.log("\n[7] owner export (read-only)");
   const o = clone(OWNER);

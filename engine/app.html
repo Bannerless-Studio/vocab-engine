@@ -1736,15 +1736,32 @@ function examMiss(it, x){
   if(n) store.save();
 }
 const WORDS_BY_ID_MAP = new Map(WORDS.map(w => [w.id, w]));
+// Level exam result (docs/PACK_SCHEMA.md "Level exam and critical set"). The outcome is worked out once, when the result
+// screen shows (summary), then recorded when the screen is shown (onShown). A pass (a numbered level's retake at 85% with no
+// critical word of the level outstanding) hides the reading of the level's known words, named on the screen.
 function examResults(lv){
-  const summary = miss => `${missSummary(miss)}<p class="pvs" id="examCrit">Added to critical: ${(D && D.ca ? D.ca.length : 0)} word${D && D.ca && D.ca.length === 1 ? "" : "s"}</p>`;
+  const numbered = VC.examNumbered(PACK, lv), k = VC.examCount(prog, lv) + 1;
+  let fin = null;
+  const outcome = (d, miss) => {
+    if(fin) return fin;
+    const r = d.seen - VC.dedupeMisses(miss).length, n = d.seen, sn = planSn();
+    const pass = numbered && VC.examPasses(prog, WORDS, lv, r, n, k);
+    fin = { r, n, sn, pass, added: (d.ca || []).slice(), plan: pass ? VC.examPassPlan(prog, WORDS, lv, CHAR_LIST, sn) : [] };
+    fin.hidden = new Set(fin.plan.map(x => x.w)).size;
+    return fin;
+  };
+  const summary = miss => { const f = outcome(D || rzFin || { seen: 0, ca: [] }, miss), n = f.added.length;
+    return `${missSummary(miss)}<p class="pvs" id="examCrit">Added to critical: ${n} word${n === 1 ? "" : "s"}</p>${f.pass ? `<p class="pvs" id="examPass">Level passed${f.hidden ? `. Reading hidden for ${f.hidden} word${f.hidden === 1 ? "" : "s"}` : ""}</p>` : ""}`; };
   summary.rzs = { s: "exam", lv }; summary.once = true;
-  return { summary, onShown: () => { const d = rzFin; if(!d) return; VC.examRecord(prog, lv, d.seen - VC.dedupeMisses(d.miss).length, d.seen, todayISO()); store.save(); } };
+  return { summary, onShown: () => { const d = rzFin; if(!d) return; const f = outcome(d, d.miss);
+    VC.examRecord(prog, lv, f.r, f.n, todayISO(), { numbered, added: f.added, pass: f.pass });
+    if(f.pass) VC.examPassApply(prog, f.plan, f.sn);
+    store.save(); } };
 }
 const examOpts = () => ({ typedOk: w => typedKindFits(w, "writtenMeaning"), gapOk: s => gapIdxs(s).length > 0, canHear: canHearWord });
 function startExam(lv){
   const rng = VC.seededRng(VC.hashSeed(`exam:${lv}:${prog.sessions || 0}:${VC.daySn(prog)}:${Object.keys(prog.exam || {}).length}`));
-  const plan = VC.examPlan(WORDS, SENTENCES, PACK, prog, lv, rng, examOpts());
+  const plan = VC.examPlan(WORDS, SENTENCES, PACK, prog, lv, rng, Object.assign(examOpts(), { k: VC.examCount(prog, lv) + 1 }));
   const r = examResults(lv);
   drill(plan.map(p => examItem(p.kind, p.s || p.word)), testRender, r.summary, r.onShown);
 }
@@ -3392,8 +3409,7 @@ function testRender(){
       ${tg.words ? `${hearN ? `<button class="ghost" id="tListen">Listen${cnt(hearN)}</button>` : lockNote("tListenLock", "Listen test: no items until a voice or recording is available.")}
       <button class="ghost" id="tRecall">Recall${cnt(n20)}</button>` : ""}
       ${tg.sentences ? `<button class="ghost" id="tSentences">Sentences${cnt(sentN)}</button>` : sentNote}${charN ? `
-      <button class="ghost" id="tChars">Characters${cnt(charN)}</button>` : charNote}${examLvs.map(lv => { const e = VC.examResult(prog, lv); return `
-      <button class="ghost" id="tExam_${escapeHtml(lv)}">Level exam: ${escapeHtml(levelLabel(lv))}</button>${e ? `<p class="q" id="tExamLast_${escapeHtml(lv)}" style="margin:0">${e.r} of ${e.n}, ${VC.examAgo(e, todayISO())}</p>` : ""}`; }).join("")}
+      <button class="ghost" id="tChars">Characters${cnt(charN)}</button>` : charNote}${examLvs.map(lv => examRowHTML(lv)).join("")}
     </div>`;
   if(!placed){
     if(needMore) $("needPlace").onclick = enterPlacementFromToday;
@@ -3410,6 +3426,14 @@ function testRender(){
   examLvs.forEach(lv => { $("tExam_" + lv).onclick = () => startExam(lv); });
   setTitle("Test"); testName = null;
   [["tListen", "Listen"], ["tRecall", "Recall"], ["tSentences", "Sentences"], ["tChars", "Characters"], ...examLvs.map(lv => ["tExam_" + lv, "Level exam: " + levelLabel(lv)])].forEach(([id, t]) => { const b = $(id); const f = b && b.onclick; if(f) b.onclick = () => { testName = t; setTitle(t); f(); }; });
+}
+// Level exam row (docs/PACK_SCHEMA.md "Level exam and critical set"): a numbered level lists every exam taken, and the next
+// one waits while a critical word the last exam added is still critical.
+function examRowHTML(lv){
+  const e = VC.examResult(prog, lv), numbered = VC.examNumbered(PACK, lv), lock = numbered ? VC.examLock(prog, lv) : 0, today = todayISO();
+  const lines = e ? (numbered ? VC.examHist(e) : [e]).map((h, i) => `${numbered ? `Exam ${i + 1}: ` : ""}${h.r} of ${h.n}, ${VC.examAgo(h, today)}${h.ok ? " · passed" : ""}`) : [];
+  return `
+      <button class="ghost" id="tExam_${escapeHtml(lv)}"${lock ? " disabled" : ""}>Level exam: ${escapeHtml(levelLabel(lv))}</button>${e ? `<p class="q" id="tExamLast_${escapeHtml(lv)}" style="margin:0">${lines.join("<br>")}</p>` : ""}${lock ? `<p class="q" id="tExamLock_${escapeHtml(lv)}" style="margin:0">Exam ${VC.examCount(prog, lv) + 1} opens when ${lock} critical word${lock === 1 ? "" : "s"} clear${lock === 1 ? "s" : ""}</p>` : ""}`;
 }
 function placeRender(){
   stopSpeaking();
