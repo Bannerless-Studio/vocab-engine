@@ -839,7 +839,7 @@ Required when `pack.script` is set, absent otherwise. `{units, notes?}`.
 
 | field | type | meaning |
 |---|---|---|
-| `id` | string, unique | Progress key. |
+| `id` | string, unique | Progress key (`prog.s`, day log `s:<id>`); the engine treats it as an opaque string, never as a position. Builders keep it text-stable: `tools/sentence_ids_v1.json` (`{"issued": {id: text}}`) maps every id ever issued to its exact `t`, a rebuilt sentence reclaims the id of the same text, new text takes an id above the highest issued, and a retired id is never reissued (`packbuilder/core/sentence_ids.py`; zh: vocab-engine `tools/sentence_ids_v1.json`). Changed `t` is a new id; changed `en`, `words`, `spans`, `ruby` or `audio` keep the id. `pack_diff_guard.py` fails a republish where a live id changes text or disappears. |
 | `t` | string | Sentence text in the target language. It is shown, spoken, and used for cloze. |
 | `en` | string | Translation, used as the answer label and in sentence distractors. |
 | `lv` | levelId | Level. A sentence becomes available once all its `words` are learned, or once the learner is past this level. |

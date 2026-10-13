@@ -710,6 +710,23 @@ def assign_ids(words, idmap):
     return reused
 
 
+def persist_ids(path, out_words):
+    """Add every shipped "lemma|pos" -> id the frozen map lacks (never rewrite an entry, never reuse an
+    id), so a word that took a fresh id keeps it on the next rebuild. Returns the number added."""
+    idmap = json.loads(path.read_text()) if path.exists() else {}
+    taken = set(idmap.values())
+    added = 0
+    for wd in out_words:
+        key = f"{wd['lemma']}|{wd['pos']}"
+        if key not in idmap and wd["id"] not in taken:
+            idmap[key] = wd["id"]
+            taken.add(wd["id"])
+            added += 1
+    if added:
+        path.write_text(json.dumps(idmap, ensure_ascii=False, indent=0, sort_keys=True) + "\n")
+    return added
+
+
 def load_gloss_display(repo, path="tools/gloss_display.json"):
     """The repo's display-only gloss table {"lemma|pos": en} ({} without the
     file; keys starting with _ are comments)."""

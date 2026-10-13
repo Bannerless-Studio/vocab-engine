@@ -59,6 +59,7 @@ tools/gloss_overrides.json hand gloss fixes, "lemma|pos": "gloss" (keys starting
 tools/gloss_display.json   optional display-only glosses, same key format (see below)
 tools/forced_a1.txt        A1 core list: [NOUN] / [VERB] / [ADJ] / [ADV] headers, then lemmas
 tools/bad_sentences.txt    optional: hand-reviewed sentences to drop verbatim, one per line, "#..." comments
+tools/sentence_ids_v1.json {"issued": {sentence id: exact text}}: written by every build, carries ids forward by text (core/sentence_ids.py; `packbuilder sentence-ids --bootstrap` writes it from the committed pack)
 tools/id_map_v1.json       frozen "lemma|pos" -> word id (keeps learner progress across rebuilds)
 tools/REPORT.md            generated; text between <!-- manual:begin/end --> is kept
 build.sh check.sh README.md TODO.md

@@ -3,19 +3,21 @@ pack/*.json, attribution.json, build_stats.json and REPORT.md."""
 import json
 import re
 import time
+from pathlib import Path
 from collections import Counter, defaultdict
 
 from .english import EN_VOCAB, EN_WORD_RE, en_stems
 from .freq import corpus_usage, stage_freq
 from .lex import stage_lex
 from .lexicon import Lexicon, FUNCTION_UPOS
+from . import sentence_ids
 from .report import write_report
 from .script import build_script
 from .sentences import build_sentences
 from .sources import ensure_downloaded, stage_corpus, audio_recorders
 from .tag import stage_tag, truecase_stats, iter_tagged, tag_rows
 from .util import STATS, log, stat, dump_json, write_json
-from .words import build_words, apply_gloss_display, split_alt_forms, sort_by_rank, check_gloss_overrides
+from .words import persist_ids, build_words, apply_gloss_display, split_alt_forms, sort_by_rank, check_gloss_overrides
 
 STAGES = ["all", "corpus", "tag", "lex", "freq", "words", "sentences", "final"]
 WORD_FIELDS = ("id", "w", "lemma", "pos", "en", "lv", "rank", "pron", "alt", "forms", "bare", "g")
@@ -34,6 +36,9 @@ def build_pack_json(env, words, raw_upos):
             continue       # modal/aux verbs (potere, stare...) are drilled as words
         if k in sp.fixed_word or k[0] in sp.function_lemmas or (c and c.most_common(1)[0][0] in FUNCTION_UPOS):
             fids.append(w["id"])
+    # patterns.json is authored in the site's pack/ (docs/PACK_SCHEMA.md "patterns"); a rebuild must not
+    # drop the flags that switch it on (the es rebuild did, 2026-10-13)
+    patterns = {"patterns": True, "patternCue": "after"} if (env.pack / "patterns.json").exists() else {}
     return {
         "key": sp.code,
         "name": sp.pack_name,
@@ -47,6 +52,7 @@ def build_pack_json(env, words, raw_upos):
         "typing": sp.typing,
         "showPron": sp.show_pron,
         "hasLessons": sp.has_lessons,
+        **patterns,
         **sp.pack_json_extra(),     # script display fields (fa: rtl, langTag, fontFamily, fonts, lineHeight)
     }
 
@@ -245,6 +251,10 @@ def run(env, stage="all", check_remote=False):
     write_json(env.pack / "words.json", out_words)     # -rsi gate may revert entries
     units = write_characters(env, out_words, sentences)
     write_json(env.pack / "sentences.json", sentences)
+    repo = Path(sp.repo)
+    if "sentence_issued" in ctx:
+        sentence_ids.save(repo / sp.sentence_id_map_file, ctx["sentence_issued"])
+    stat("word_ids_added_to_map", persist_ids(repo / sp.id_map_file, out_words))
     pack_json = build_pack_json(env, words, ctx["raw_upos"])
     pack_json.update(characters_pack_fields(sp, units))
     pack_json.update(script_pack_fields(sp, write_script(env, out_words)))

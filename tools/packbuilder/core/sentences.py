@@ -1,9 +1,11 @@
 """Stage sentences: in-context word links, sentence choice per word (2 each),
 and the linked-sentence -rsi gate."""
 import re
+from pathlib import Path
 from collections import Counter, defaultdict
 from itertools import chain
 
+from . import sentence_ids
 from .lexicon import CONTENT_GROUPS, GROUP_LABEL, SKIP_UPOS
 from .spans import sentence_spans
 from .tag import iter_tagged
@@ -527,11 +529,16 @@ def build_sentences(env, ctx, words, top3000):
     sentences = []
     n_examples = 0
     users = set()
+    texts = [sp.clean_sentence_text(rows[sid][1]) for sid in sel]
+    issued = sentence_ids.load(Path(sp.repo) / sp.sentence_id_map_file if sp.repo else None)
+    out_ids, new_issued, id_stats = sentence_ids.assign(texts, issued)
+    ctx["sentence_issued"] = new_issued    # written by pipeline.run with sentences.json
+    stat("sentence_ids", {"kept": id_stats["kept"], "new": id_stats["new"], "retired": id_stats["retired"]})
     for i, sid in enumerate(sel):
         n, remoto, aud, maxlv, links = info[sid]
         lv = top_lv if remoto else maxlv
         row = rows[sid]
-        rec = {"id": f"s{i+1:04d}", "t": sp.clean_sentence_text(row[1]), "en": row[3], "lv": lv,
+        rec = {"id": out_ids[i], "t": texts[i], "en": row[3], "lv": lv,
                "words": links}
         if row[4] is not None:
             rec["audio"] = f"https://tatoeba.org/audio/download/{row[4]}"

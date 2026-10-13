@@ -57,6 +57,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "tools"))
+from packbuilder.core import sentence_ids  # noqa: E402
 from packbuilder.core.spans import make_spans  # noqa: E402
 
 # English for hsk sentences whose upstream `en` is unusable (the hsk repo is read-only):
@@ -65,6 +66,7 @@ EN_OVERRIDES = {
     "我们应该看自己的优点，也要改变缺点。": "We should look at our own strengths, and also change our weaknesses.",
 }
 OUT = os.path.join(ROOT, "packs", "zh")
+SENTENCE_IDS = os.path.join(ROOT, "tools", "sentence_ids_v1.json")   # text-stable ids (core/sentence_ids.py); source order was positional
 GLOSS_REPORT = os.path.join(ROOT, "docs", "ZH_GLOSS.md")
 TIERS_REPORT = os.path.join(ROOT, "docs", "ZH_TIERS.md")
 FREQ = os.path.join(ROOT, "tools", "zh_freq.json")
@@ -376,7 +378,8 @@ def main(argv):
     # --out DIR: write the pack and the gloss report there instead (tests/engine_checks.js drift
     # check: a fresh run must reproduce packs/zh byte for byte).
     global OUT, GLOSS_REPORT, TIERS_REPORT, PATTERNS_REPORT
-    if "--out" in argv:
+    custom_out = "--out" in argv
+    if custom_out:
         i = argv.index("--out")
         OUT = os.path.abspath(argv[i + 1])
         GLOSS_REPORT = os.path.join(OUT, "ZH_GLOSS.md")
@@ -474,8 +477,9 @@ def main(argv):
         ruby.sort(key=lambda r: r[0])
         return ids, ruby, recs
 
+    sent_ids, issued_now, _ = sentence_ids.assign([s["zh"] for s in sentences], sentence_ids.load(SENTENCE_IDS))
     for i, s in enumerate(sentences):
-        sid = f"s{i + 1:04d}"
+        sid = sent_ids[i]
         ids, ruby, recs = resolve_sentence(sid, s)
         rec = {"id": sid, "t": s["zh"], "en": EN_OVERRIDES.get(s["zh"], s["en"]), "lv": str(s["lv"]), "words": ids, "pron": s["py"]}
         if ruby:
@@ -632,6 +636,8 @@ def main(argv):
     dump(os.path.join(OUT, "pack.json"), pack)
     dump(os.path.join(OUT, "words.json"), words)
     dump(os.path.join(OUT, "sentences.json"), out_sent)
+    if not custom_out:
+        sentence_ids.save(SENTENCE_IDS, issued_now)
     dump(os.path.join(OUT, "lessons.json"), lessons)
     dump(os.path.join(OUT, "characters.json"), characters)
     dump(os.path.join(OUT, "legacy.json"), legacy)
