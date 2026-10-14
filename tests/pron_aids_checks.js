@@ -1100,7 +1100,10 @@ function walk(api, stopAt){
     const SUw = WORDS.find(w => w.id === "w0542"), BUTw = WORDS.find(w => w.id === "w0162");
     const GW = WORDS.filter(w => w.pron && w.w && unitOf(w.id) && ![SUw, BUTw].includes(w) && ![SU, BUT, Y, Z].some(c => c && c.wids.includes(w.id))).slice(0, 2);
     if(!SU || !BUT || !Y || !Z || !SUw || !BUTw || GW.length < 2) throw new Error("need 4 disjoint pattern marks and 4 pron words");
-    const ALLW = [...new Set([...[SU, BUT, Y, Z].flatMap(c => c.wids), ...[SUw, BUTw, ...GW].map(w => w.id)])];
+    // owner 2026-10-14 screenshot: 他五分钟___做完了 offered 就 and 才 without readings while 一 and 过 kept theirs
+    const JI = cands.find(c => c.t === "就"), CA = cands.find(c => c.t === "才"), YI = cands.find(c => c.t === "一"), GU = cands.find(c => c.t === "过");
+    if(!JI || !CA || !YI || !GU) throw new Error("need the zh marks 就 才 一 过");
+    const ALLW = [...new Set([...[SU, BUT, Y, Z, JI, CA, YI, GU].flatMap(c => c.wids), ...[SUw, BUTw, ...GW].map(w => w.id)])];
     // characters started (as section [14] does); the listed word ids get bare records, the rest non-bare
     const progFor = bareIds => { const p = VC.normalizeProg({ placedOnce: true, soundsOpened: true, sessions: 12 }, PACK_NOW);
       p.sets = { "1": NS("1"), "2": 0, "3": 0, "4": 0 }; p.sn = 12;
@@ -1123,6 +1126,13 @@ function walk(api, stopAt){
     check(`pattern: answer 但是 is the only non-bare option, every reading shown (${shown(rB)})`, rB.every(x => x.vis));
     const rC = pat([SU, Y], SU, [Y, BUT, Z]);
     check(`pattern: 2 bare, 2 not, no leak: bare 虽然 and Y hidden, 但是 and Z kept (${shown(rC)})`, rC.every(x => x.vis === ![SU.t, Y.t].includes(x.o)));
+    // every contrast mark has its own reading in the pattern data (no lookup miss): the fade is the unit's bare tier alone
+    const rE = pat([JI, CA], JI, [CA, YI, GU]);
+    check(`pattern 就 vs 才 (owner screenshot): 就 and 才 bare hide their readings, 一 and 过 keep theirs (${shown(rE)})`, rE.every(x => x.vis === ![JI.t, CA.t].includes(x.o)));
+    const rF = pat([], JI, [CA, YI, GU]);
+    check(`pattern 就 vs 才 control: no unit bare, all four readings shown, so 就 and 才 are not a lookup miss (${shown(rF)})`, rF.every(x => x.vis));
+    const rG = pat([JI, CA, YI, GU], JI, [CA, YI, GU]);
+    check(`pattern 就 vs 才: all four bare, no reading shown (${shown(rG)})`, rG.every(x => !x.vis));
     const rD = pat([], SU, [BUT, Y, Z]);
     check(`pattern control: no bare option, every reading shown (${shown(rD)})`, rD.every(x => x.vis));
     const gA = gap([SUw], SUw, [BUTw, ...GW]);
