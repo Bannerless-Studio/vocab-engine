@@ -14,11 +14,11 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from packbuilder.core.pipeline import story_attribution, story_ids  # noqa: E402
+from packbuilder.core.pipeline import passage_stories, story_attribution, story_ids  # noqa: E402
 from packbuilder.core.sentences import build_sentences  # noqa: E402
 from packbuilder.langs import get_spec  # noqa: E402
 from packbuilder.langs.base import STORY_SID_BASE  # noqa: E402
-from packbuilder.qa.check import story_attribution_errors  # noqa: E402
+from packbuilder.qa.check import passage_story_errors, story_attribution_errors  # noqa: E402
 from packbuilder.tests.test_sentence_spans import READ, WORDS, Lexicon, tokens  # noqa: E402
 
 PANE = ["Compro il pane grande.", "Compra il pane grande.", "Mangio il pane grande.", "Mangia il pane grande.",
@@ -245,6 +245,35 @@ class Attribution(unittest.TestCase):
         self.assertEqual(story_attribution(env, [{"id": "c"}]), {})
         self.assertEqual(story_ids(self.S), ["7", "8"])
         self.assertEqual(story_attribution_errors(self.S, {"story_sentences": blk}), [])
+
+
+class PassageStories(unittest.TestCase):
+    P = [{"id": "p1", "src": "story", "st": "7"}, {"id": "p2", "src": "story", "st": "7"}, {"id": "p3", "src": "gen"}]
+    OK = {"story_passages": {"count": 2, "stories": [{"id": "7"}]}}
+
+    def test_check(self):
+        self.assertEqual(passage_story_errors(self.P, self.OK), [])
+        self.assertEqual(passage_story_errors([{"id": "p3", "src": "gen"}], {}), [])
+        self.assertTrue(passage_story_errors(self.P, {}))
+        self.assertTrue(any("story 7" in e for e in passage_story_errors(self.P, {"story_passages": {"count": 2, "stories": []}})))
+        self.assertTrue(any("story 9" in e for e in passage_story_errors(self.P, {"story_passages": {"count": 2, "stories": [{"id": "7"}, {"id": "9"}]}})))
+        self.assertTrue(any("count" in e for e in passage_story_errors(self.P, {"story_passages": {"count": 1, "stories": [{"id": "7"}]}})))
+        self.assertTrue(any("without st" in e for e in passage_story_errors([{"id": "x", "src": "story"}], self.OK)))
+
+    def test_build_block_from_passages_src(self):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "tools").mkdir()
+            src = {"passages": [{"id": "p1", "story": {"id": "9", "title": "B"}},
+                                {"id": "p2", "story": {"id": "7", "title": "A"}},
+                                {"id": "p3", "story": {"id": "7", "title": "A"}}, {"id": "p4"}]}
+            (Path(d) / "tools" / "passages_src.json").write_text(json.dumps(src))
+            env = SimpleNamespace(spec=SimpleNamespace(repo=d, story_source=lambda: {}))
+            blk = story_attribution(env, [])["story_passages"]
+            self.assertEqual((blk["count"], [s["id"] for s in blk["stories"]]), (3, ["7", "9"]))
+            self.assertNotIn("story_sentences", story_attribution(env, []))
+            self.assertEqual(list(passage_stories(env)), ["7", "9"])
+            self.assertEqual(passage_story_errors([{"id": "p", "src": "story", "st": "7"}] * 3 + [{"id": "q", "src": "story", "st": "9"}],
+                                                  {"story_passages": {**blk, "count": 4}}), [])
 
 
 if __name__ == "__main__":

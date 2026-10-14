@@ -79,6 +79,31 @@ def story_attribution_errors(sentences, attribution):
     return errs
 
 
+def passage_story_errors(passages, attribution):
+    """Every shipped story passage names its story ("st"), that story is in
+    attribution.json story_passages.stories, and the reverse; the block's
+    count equals the shipped story passages."""
+    errs = []
+    shipped = [p for p in passages if p.get("src") == "story"]
+    for p in shipped:
+        if not p.get("st"):
+            errs.append(f"passage {p.get('id')}: src story without st")
+    used = {p["st"] for p in shipped if p.get("st")}
+    block = (attribution or {}).get("story_passages")
+    if not block:
+        if shipped:
+            errs.append("story passages ship but attribution.json has no story_passages")
+        return errs
+    listed = {st.get("id") for st in block.get("stories", [])}
+    for i in sorted(used - listed):
+        errs.append(f"story {i}: passage ships but story is not in attribution story_passages")
+    for i in sorted(listed - used):
+        errs.append(f"story {i}: in attribution story_passages but no passage ships")
+    if block.get("count") != len(shipped):
+        errs.append(f"attribution story_passages count {block.get('count')} != {len(shipped)} shipped")
+    return errs
+
+
 def word_ceiling_violation(spec, w):
     """A word below the top level whose gloss matches spec.word_ceiling_re."""
     rx = getattr(spec, "word_ceiling_re", None)
@@ -159,6 +184,8 @@ def check(spec):
 
     pj = spec.repo / "pack" / "passages.json"
     if pj.exists():
+        for e in passage_story_errors(json.loads(pj.read_text()), json.loads(ap.read_text()) if ap.exists() else None):
+            fail(e)
         from ..passages import shipped_level_errors
         for e in shipped_level_errors(spec.repo, spec.level_ids, words, json.loads(pj.read_text())):
             fail(e)
