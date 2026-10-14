@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""Stage-0 measure of fetched story caches against a pack (Urdu defaults).
-Usage: python3 tools/story_fetch/measure.py --pack ../urdu --dirs ../urdu/.cache/stories/ur ../urdu/.cache/stories/ur-lra [--population 292]
+"""Stage-0 measure of fetched story caches against a pack. --lang ur (default, generated Urdu forms), ko, sw or any other code (generic rules).
+Usage: python3 tools/story_fetch/measure.py --pack ../urdu --dirs ../urdu/.cache/stories/ur ../urdu/.cache/stories/ur-lra [--lang ur] [--population 292]
+Per-language rules (LANG table): token regex, sentence-end punctuation, text fold. Non-ur surfaces = words.json w/lemma/forms/alt + every surface the
+pack's own sentences.json spans link to a pack word; ko also accepts an eojeol that splits fully into known surfaces (stem + particle pieces).
 Reads <id>.json records (status ok = twin found; twin_null stories count for text-only numbers).
 Proxy rules, stricter or looser than the builder where noted: a sentence 'passes' when 4..14 tokens and every token
 is a pack surface (word, lemma, generated forms, pronoun forms); the builder's real filter is on content lemmas
@@ -9,14 +11,37 @@ import argparse, glob, json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..'))
-from packbuilder.langs import ur  # noqa: E402
+from packbuilder.langs import ur  # noqa: E402  (ur only)
 
-TOK = re.compile(r'[؀-ۿ]+')
-END = re.compile(r'(?<=[۔؟!?])\s+|\n+')
+LANG = {  # token regex, sentence split, split-into-known-pieces flag
+    'ur': (re.compile(r'[؀-ۿ]+'), re.compile(r'(?<=[۔؟!?])\s+|\n+'), False),
+    'ko': (re.compile(r'[가-힣]+'), re.compile(r'(?<=[.?!。])\s+|\n+'), True),
+    'sw': (re.compile(r"[a-z]+(?:'[a-z]+)*"), re.compile(r'(?<=[.?!])\s+|\n+'), False),
+}
+TOK, END, SPLIT = LANG['ur']
+LANGCODE = 'ur'
 RULES = {'coverage': {'A1': 0.95, 'A2': 0.95, 'B1': 0.93}, 'words': {'A1': (60, 90), 'A2': (100, 140), 'B1': (150, 200)}}
 
 
+def generic_surfaces(pack):
+    import unicodedata
+    f = lambda x: unicodedata.normalize('NFC', x).lower()
+    words = json.load(open(os.path.join(pack, 'pack/words.json')))
+    s = set()
+    for w in words:
+        for x in [w['w'], w['lemma']] + list(w.get('forms') or []) + list(w.get('alt') or []):
+            s.add(f(x).lstrip('-'))
+    sp = os.path.join(pack, 'pack/sentences.json')
+    if os.path.exists(sp):
+        for r in json.load(open(sp)):
+            for a, b, _ in r.get('spans') or []:
+                s.add(f(r['t'][a:b]))
+    return s
+
+
 def surfaces(pack):
+    if LANGCODE != 'ur':
+        return generic_surfaces(pack)
     words = json.load(open(os.path.join(pack, 'pack/words.json')))
     s = set()
     for w in words:
@@ -32,19 +57,47 @@ def surfaces(pack):
     return s
 
 
+def _norm(t):
+    if LANGCODE == 'ur':
+        return ur.text_norm(t)
+    import unicodedata
+    return unicodedata.normalize('NFC', t).replace('\u2019', "'").replace('\u2018', "'")
+
+
 def toks(t):
-    return TOK.findall(ur.fold(ur.text_norm(t)))
+    t = _norm(t)
+    return TOK.findall(ur.fold(t) if LANGCODE == 'ur' else t.lower())
 
 
 def sents(t):
-    return [x.strip() for x in END.split(ur.text_norm(t)) if x.strip()]
+    return [x.strip() for x in END.split(_norm(t)) if x.strip()]
+
+
+_memo = {}
+
+
+def known(x, S):
+    """token in pack surfaces; ko: or splits fully into known surfaces (every piece known)"""
+    if x in S:
+        return True
+    if not SPLIT:
+        return False
+    if x not in _memo:
+        ok = [True] + [False] * len(x)
+        for i in range(1, len(x) + 1):
+            ok[i] = any(ok[j] and x[j:i] in S for j in range(max(0, i - 6), i))
+        _memo[x] = ok[len(x)]
+    return _memo[x]
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--pack', required=True); ap.add_argument('--dirs', nargs='+', required=True)
+    ap.add_argument('--pack', required=True); ap.add_argument('--lang', default='ur'); ap.add_argument('--dirs', nargs='+', required=True)
     ap.add_argument('--population', type=int, default=0, help='number of CC BY stories the sample stands for (extrapolation)')
     a = ap.parse_args()
+    global TOK, END, SPLIT, LANGCODE
+    LANGCODE = a.lang
+    TOK, END, SPLIT = LANG.get(a.lang, (re.compile(r'\w+'), re.compile(r'(?<=[.?!])\s+|\n+'), False))
     S = surfaces(a.pack)
     recs = []
     for d in a.dirs:
@@ -64,9 +117,9 @@ def main():
         tw = [p['text'] for p in r['twin']['text_pages']] if r.get('twin') else None
         tk_all = [toks(t) for t in st]
         flat = [x for t in tk_all for x in t]
-        cov = sum(1 for x in flat if x in S) / max(1, len(flat))
+        cov = sum(1 for x in flat if known(x, S)) / max(1, len(flat))
         story_cov.append(cov)
-        tot['tokens'] += len(flat); tot['in_pack'] += sum(1 for x in flat if x in S)
+        tot['tokens'] += len(flat); tot['in_pack'] += sum(1 for x in flat if known(x, S))
         ps = 0
         for i, t in enumerate(st):
             tot['pages'] += 1
@@ -80,7 +133,7 @@ def main():
                 if len(k) <= 14: tot['le14'] += 1
                 if 4 <= len(k) <= 14:
                     tot['in4_14'] += 1
-                    oov = sum(1 for x in k if x not in S)
+                    oov = sum(1 for x in k if not known(x, S))
                     if oov <= 1: tot['pass_oov1'] += 1
                     if oov == 0:
                         tot['pass'] += 1; ps += 1
@@ -93,7 +146,7 @@ def main():
                 for j in range(i, len(tk_all)):
                     run += tk_all[j]
                     if len(run) > hi: break
-                    if len(run) >= lo and sum(1 for x in run if x in S) / len(run) >= RULES['coverage'][lv]:
+                    if len(run) >= lo and sum(1 for x in run if known(x, S)) / len(run) >= RULES['coverage'][lv]:
                         ok = True; break
                 if ok: break
             excerpts[lv] += ok
