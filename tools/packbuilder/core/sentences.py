@@ -336,15 +336,23 @@ def live_candidates(sp, info, rows):
     return {sid for sid in info if sp.live_text(rows[sid][1]) in live_texts}
 
 
-def keep_live(primary, live_sids, info, st):
+def keep_live(primary, live_sids, info, st, text_of=None):
     """A live sentence stays selected while any of its pack words remains (a priority, not a tie-break):
-    those not chosen as an example are added under their first link."""
+    those not chosen as an example are added under their first link. With `text_of`, a corpus row whose text
+    is already selected (the same sentence in two corpora) is not added a second time."""
+    taken = {text_of(s) for s in primary} if text_of else set()
     for sid in sorted(live_sids - set(primary)):
+        if text_of:
+            t = text_of(sid)
+            if t in taken:
+                st["live_sentences_duplicate_text_skipped"] += 1
+                continue
+            taken.add(t)
         primary[sid] = info[sid][4][0]
         st["live_sentences_kept_unchosen"] += 1
 
 
-def build_sentences(env, ctx, words, top3000):
+def build_sentences(env, ctx, words, top3000, decide_words=False):
     sp = env.spec
     lv_ord = {b: i for i, b in enumerate(sp.level_ids)}
     lexicon = ctx["lexicon"]
@@ -505,10 +513,10 @@ def build_sentences(env, ctx, words, top3000):
     remoto_blocked = Counter()
     first_lv, top_lv = sp.level_ids[0], sp.level_ids[-1]    # marked past tense: top level only
     order = sorted(cands, key=lambda w: (len(cands[w]), w))
-    live_sids = live_candidates(sp, info, rows) if sp.keep_live_sentences else set()
+    live_sids = live_candidates(sp, info, rows) if sp.keep_live_sentences and not decide_words else set()
     # a live story sentence is kept (keep_live) but ranks as any story row: priority from live-ness would let it take one of
     # the two non-story slots, so every rebuild of a shipped pack would pull in more story sentences (not a fixed point)
-    live_rank = live_priority(live_sids, story_rows)
+    live_rank = live_priority(live_sids, story_rows) if sp.live_ranks_first else set()
     surface_of = {w["id"]: sp.fold(w["_key"][0]) for w in words} if sp.example_shows_word else {}
     for wid in order:
         lv = lv_of[wid]
@@ -556,7 +564,7 @@ def build_sentences(env, ctx, words, top3000):
             use[s] += 1
             primary.setdefault(s, wid)
 
-    keep_live(primary, live_sids, info, st)
+    keep_live(primary, live_sids, info, st, lambda sid: sp.clean_sentence_text(rows[sid][1]))
     sel = sorted(primary)
     sentences = []
     n_examples = 0

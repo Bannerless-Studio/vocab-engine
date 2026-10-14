@@ -48,7 +48,7 @@ class StoryLang:
     ratio_pad: int = 6                        # +pad on both char lengths before the ratio
     ratio_lo: float = 0.7
     ratio_hi: float = 1.4
-    names_kept: bool = False                  # the translation keeps character names: a name present in both sides is faithful, not renamed
+    names_kept: bool = False                  # the translation keeps character names; story_name = checks.renamed(target, en): a name the English edition spells differently
     agree_gate: bool = False                  # checks.agree_pair(target, en) must hold: no word's gloss in the English means the pair is another text
 
 
@@ -226,8 +226,10 @@ def pair_reason(lang, u, en, toks, min_tokens, max_tokens, glued=None, names=fro
         return "wrong_sense"
     if lang.agree_gate and checks and not checks.agree_pair(u, en):
         return "no_agreement"
-    if names and any(w.split("'")[0] in names and not (lang.names_kept and w.split("'")[0].lower() in u.lower())
-                     for w in re.findall(r"[A-Za-z']+", en)):
+    if lang.names_kept:
+        if checks and checks.renamed(u, en):
+            return "story_name"
+    elif names and any(w.split("'")[0] in names for w in re.findall(r"[A-Za-z']+", en)):
         return "story_name"
     if EN_META.search(en) or lang.meta_target.search(u):
         return "meta_line"

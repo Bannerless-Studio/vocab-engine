@@ -73,13 +73,17 @@ class SwahiliRows(unittest.TestCase):                 # real African Storybook p
         self.assertEqual(out, [])
         self.assertEqual(st["opener"], 1)
 
-    def test_name_kept_on_both_sides_is_faithful(self):
-        out, st = sw_run({1: "Aliona unyoya mrefu."}, {1: "The hawk saw a long feather."})
-        self.assertEqual(len(out), 1)
-        out, st = sw_run({1: "Banti hulia darasani kila siku."}, {1: "The little girl Banti cries in class every day."})
-        self.assertEqual(st["story_name"], 0)
-        out, st = sw_run({1: "Msichana hulia darasani kila siku."}, {1: "The little girl Banti cries in class every day."})
-        self.assertEqual(st["story_name"], 1)             # the Swahili edition does not carry the name: renamed
+    def test_name_rename_is_the_specs_call(self):          # Lucia / Lucy: sw.py checks.renamed decides; no checks, no name filter
+        class Ck:
+            noun = staticmethod(lambda t: False)
+            wrong_sense = staticmethod(lambda toks, en: False)
+            story_rate = staticmethod(lambda pairs: None)
+            agree_pair = staticmethod(lambda u, e: True)
+            renamed = staticmethod(lambda u, e: "Lucia" in u and "Lucia" not in e)
+        out, st = sw_run({1: "Pamoja na Lucia, watoto walienda kutafuta matunda."}, {1: "Together with Lucy, the children went to pick fruit."}, Ck)
+        self.assertEqual((out, st["story_name"]), ([], 1))
+        out, st = sw_run({1: "Pamoja na Lucia, watoto walienda kutafuta matunda."}, {1: "Together with Lucy, the children went to pick fruit."})
+        self.assertEqual((len(out), st["story_name"]), (1, 0))
 
     def test_too_short_and_digits_dropped(self):
         out, st = sw_run({1: "Simba anaunguruma."}, {1: "A lion roars."})
@@ -112,6 +116,21 @@ class CreditParsing(unittest.TestCase):
 
     def test_gloss_stems_share_ur_stemmer(self):
         self.assertEqual(A.gloss_stems("to love; (like) children"), {"love", "child"})
+
+
+class KeepLive(unittest.TestCase):
+    def test_same_text_in_two_corpora_is_added_once(self):     # sw "Je hiyo inamaanisha nini?" lives in Tatoeba and GlobalVoices
+        from collections import Counter
+        from packbuilder.core import sentences as SE
+        info = {1: (4, False, False, "A1", ["w1"]), 2: (4, False, False, "A1", ["w2"]), 3: (4, False, False, "A1", ["w3"])}
+        text = {1: "a", 2: "a", 3: "b"}
+        primary, st = {}, Counter()
+        SE.keep_live(primary, {1, 2, 3}, info, st, text.get)
+        self.assertEqual(sorted(primary), [1, 3])
+        self.assertEqual(st["live_sentences_duplicate_text_skipped"], 1)
+        primary2 = {1: "w1"}
+        SE.keep_live(primary2, {1, 2, 3}, info, Counter(), text.get)
+        self.assertEqual(sorted(primary2), [1, 3])
 
 
 if __name__ == "__main__":

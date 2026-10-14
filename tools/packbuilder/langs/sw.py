@@ -30,11 +30,13 @@ import zipfile
 import tarfile
 from collections import Counter, defaultdict
 
+import difflib
 import hashlib
 import math
 from pathlib import Path
 
-from .base import (LanguageSpec, DEFAULT_GROUP_KPOS, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG,
+from .. import sw_story
+from .base import (STORY_SID_BASE, LanguageSpec, DEFAULT_GROUP_KPOS, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG,
                    TATOEBA_AUDIO, drop_all_re, make_word_ceiling_re, EXAMPLE_SID_BASE)
 
 GV_BASE = 60_000_000        # sids of OPUS GlobalVoices rows
@@ -1342,6 +1344,10 @@ class Analyser:
         return low, "NOUN", {"Unk": "Yes"}
 
 
+# copulas and clause glue carry no gloss to check a story pair against ("to be, to become" never shows in "was worried")
+STORY_FUNCTION_LEMMAS = {"wa", "ni", "na", "si", "kuwa", "ngali", "li", "ki", "ku", "ka", "me", "ta", "ja", "sa", "ndi", "enda", "fanya"}
+
+
 class Swahili(LanguageSpec):
     code = "sw"
     name_en = "Swahili"
@@ -1873,6 +1879,140 @@ class Swahili(LanguageSpec):
             "audio": {"source": "none", "note": "no recorded Swahili audio: browser TTS (sw-KE / sw-TZ voices "
                                                 "exist on Android Chrome; most desktop browsers have none)"},
         }
+
+    # ---- stories: African Storybook ---------------------------------------------------------
+    keep_live_sentences = True          # story rows only add; every live sentence id stays (republish guard)
+    live_ranks_first = False            # live priority moved one B1 word of the shipped list (mkesha -> tairi): kept live sentences are only added back
+    examples_per_word = 4               # picks 3-4 are story sentences only (story_rows)
+    min_story_tokens = 3                # a Swahili clause is 3 words where Urdu needs 4 (verb prefixes carry subject and tense)
+    STORY_LICENCE = "CC-BY-4.0"
+    STORY_URL = "https://www.africanstorybook.org/"
+
+    def _stories(self, env):
+        """Cached African Storybook Kiswahili books with an English twin (tools/story_fetch/asb_fetch.py), by book id."""
+        cache = getattr(self, "_story_cache", None)
+        if cache is not None and cache[0] == env.repo:
+            return cache[1]
+        d = env.repo / ".cache" / "stories" / "sw-asb"
+        out = {}
+        files = sorted(d.glob("[0-9]*.json"), key=lambda f: int(f.stem)) if d.is_dir() else []
+        for f in files:
+            st = json.loads(f.read_text(encoding="utf-8"))
+            tw = st.get("twin")
+            if st.get("status") != "ok" or not tw or st.get("licence_line") != "Attribution 4.0" \
+                    or tw.get("licence_line") != "Attribution 4.0":
+                continue
+            out[st["id"]] = st
+        self._story_cache = (env.repo, out)
+        return out
+
+    def story_rows(self, env):
+        from ..core.util import stat
+        stories = self._stories(env)
+        seen = set()
+        live = env.repo / "pack" / "sentences.json"
+        if live.exists():
+            seen.update(s["t"] for s in json.loads(live.read_text(encoding="utf-8")) if s.get("src") != "story")   # a shipped story sentence must stay offered on the next build
+        seen.update(r[1] for r in self.extra_corpus_rows(env))
+        stats = sw_story.A.Stats()
+        checks = self._story_checks(env)
+        en_lower = {w for st in stories.values() for p in st["twin"]["text_pages"]
+                    for w in re.findall(r"(?<![A-Za-z])[a-z]+(?![A-Za-z])", sw_story.A.norm_en(p["text"])) if w}
+        rows = []
+        for sid_, st in stories.items():
+            for u, e, page in sw_story.story_pairs(st, self.word_re, lambda t: t, seen, stats, self.min_story_tokens, self.max_len,
+                                                    en_lower, checks):
+                rows.append([STORY_SID_BASE + len(rows), u, "", e, None, sid_])
+        stat("story_rows", {"stories_read": len(stories), "rows": len(rows), "filters": dict(stats)})
+        return rows
+
+    def _story_checks(self, env):
+        """Dictionary checks for story_pairs: nouns (the opener rule) and the page-level gloss agreement
+        (story_rate). No sentence-level wrong_sense for Swahili: the analyser keeps no per-sense glosses."""
+        sp, an = self, self.analyser()
+        stems = {}
+        wp = env.repo / "pack" / "words.json"
+        if wp.exists():
+            for w in json.loads(wp.read_text(encoding="utf-8")):
+                if w["pos"] in ("noun", "verb", "adj", "adv") and fold_word(w["lemma"]) not in STORY_FUNCTION_LEMMAS:
+                    stems.setdefault(fold_word(w["lemma"]), set()).update(sw_story.A.gloss_stems(w["en"]))
+        memo = {}
+
+        def lemma_stems(page):
+            if page in memo:
+                return memo[page]
+            got = set()
+            for t in sp.tag_texts([sw_story.norm_sw(page)])[0]:
+                if t[2] in ("PUNCT", "NUM", "PROPN"):
+                    continue
+                got.add(frozenset(stems.get(fold_word(t[1]), ())))
+            memo[page] = [g for g in got if g]
+            return memo[page]
+
+        class Checks:
+            @staticmethod
+            def noun(tok):
+                t = fold_word(tok.lower())
+                return t in an.noun or t in an.noun_form
+
+            @staticmethod
+            def wrong_sense(toks, en):
+                return False
+
+            @staticmethod
+            def renamed(u, en):
+                """A mid-sentence name of the Swahili sentence that is no dictionary word and has no match in the English edition
+                (Lucia / Lucy, Maria / Mary). Names that are dictionary words (Buibui, Jua, Kasa) are translated, not renamed;
+                a sentence-initial name cannot be told from a capitalised verb and is never flagged; a name only the English has
+                (Swahili says he) is no rename."""
+                have = {w.lower() for w in re.findall(r"[A-Za-z']+", en)} | {w.lower().split("'")[0] for w in re.findall(r"[A-Za-z']+", en)}
+                for t in sp.tag_texts([sw_story.norm_sw(u)])[0]:
+                    if t[2] == "PROPN" and t[0].lower() not in CAPITALISED and fold_word(t[0].lower()) not in an.all_words \
+                            and not any(difflib.SequenceMatcher(None, t[0].lower(), w).ratio() >= 0.75 for w in have):
+                        return True
+                return False
+
+            @staticmethod
+            def agree_pair(u, en):
+                """True when no word of the sentence has a pack gloss, or one gloss stem shows up in the English."""
+                gl = lemma_stems(u)
+                return not gl or any(g & sw_story.A.gloss_stems(sw_story.A.norm_en(en)) for g in gl)
+
+            @staticmethod
+            def story_rate(pairs):
+                """Share of pages where some word's gloss shows up in the English page; None under 3 comparable pages."""
+                got = hit = 0
+                for u, e in pairs:
+                    gl = lemma_stems(u)
+                    if not gl:
+                        continue
+                    got += 1
+                    es = sw_story.A.gloss_stems(sw_story.A.norm_en(e))
+                    hit += any(g & es for g in gl)
+                return hit / got if got >= 3 else None
+        return Checks
+
+    def story_source(self):
+        return {"source": "African Storybook Initiative, Kiswahili books with their English edition",
+                "licence": self.STORY_LICENCE, "url": self.STORY_URL,
+                "note": "Sentences are split out of the book text, Swahili and English realigned sentence by sentence; "
+                        "typographic quotes became plain, nothing else was changed."}
+
+    def story_meta(self, env, story_id):
+        """The book's credits from its back cover: author, translation, illustration (and adaptation) lines and the copyright holder."""
+        st = self._stories(env)[story_id]
+        tw = st["twin"]
+        meta = {"id": story_id, "title": st["title"], "english_title": tw["title"],
+                "authors": sw_story.names_of(st.get("authors")), "translators": sw_story.names_of(st.get("translators")),
+                "illustrators": sw_story.names_of(st.get("illustrators")), "copyright_holder": sw_story.holder(st.get("copyright_block")),
+                "licence": self.STORY_LICENCE, "url": st["url"], "english_url": tw["url"]}
+        if st.get("adapters"):
+            meta["adapters"] = sw_story.names_of(st["adapters"])
+        return meta
+
+    def story_credit(self):
+        return {"name": "African Storybook stories (African Storybook Initiative and book creators)", "licence": "CC BY 4.0",
+                "url": self.STORY_URL}
 
     # ---- display ------------------------------------------------------------------------
     @staticmethod

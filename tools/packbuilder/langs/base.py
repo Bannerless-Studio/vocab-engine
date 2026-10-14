@@ -254,6 +254,7 @@ class LanguageSpec:
     bad_sentences_file = "tools/bad_sentences.txt"   # optional hand-reviewed drop list, one sentence per line
     id_map_file = "tools/id_map_v1.json"
     keep_live_sentences = False   # the committed pack's sentences stay selected while any of their pack words remains: a priority in example choice, then added when unchosen (relink rounds: the republish guard keeps every live id)
+    live_ranks_first = True       # live sentences rank ahead of fresh candidates in example choice; False: they are only added back when unchosen (keep_live), so choice equals a build without keep_live (sw: the word list was decided before keep_live existed)
     sentence_id_map_file = "tools/sentence_ids_v1.json"   # {"issued": {id: text}}, core/sentence_ids.py
     report_file = "tools/REPORT.md"
 
