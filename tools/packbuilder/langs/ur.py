@@ -38,7 +38,8 @@ import json
 import re
 from collections import Counter
 
-from .base import make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LOWER_LEVEL_ALCOHOL_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN, SENSITIVE_GLOSS_EN, drop_all_re
+from .. import ur_story
+from .base import STORY_SID_BASE, make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LOWER_LEVEL_ALCOHOL_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN, SENSITIVE_GLOSS_EN, drop_all_re
 
 ZWNJ = "‌"
 LET = "ء-غف-يٱ-ۓۺ-ۿ"
@@ -917,6 +918,8 @@ class Urdu(LanguageSpec):
     }
     untranslated_rows = True
     extra_corpus_files = ("tools/generated_sentences.tsv",)
+    keep_live_sentences = True          # story rows only add; every live sentence id stays (republish guard)
+    examples_per_word = 4               # picks 3-4 are story sentences only (story_rows)
     use_audio = False                   # 2 permissive Tatoeba clips: none shipped
     sentence_end_re = re.compile(r"[.!?…؟۔][\"'»”)]*$")     # ۔ Urdu full stop
 
@@ -2367,6 +2370,222 @@ class Urdu(LanguageSpec):
         if row[0] >= GEN_SID_BASE:
             rec["src"] = "gen"
         return rec
+
+    STORY_URL = "https://www.letsreadasia.org/"
+    STORY_LICENCE = "CC-BY-4.0"
+
+    def _stories(self, env):
+        """Cached Let's Read Asia stories with an English twin (tools/story_fetch/lra_fetch.py), by book id;
+        a second book with the same title is the same story and is skipped."""
+        cache = getattr(self, "_story_cache", None)
+        if cache is not None and cache[0] == env.repo:
+            return cache[1]
+        d = env.repo / ".cache" / "stories" / "ur-lra"
+        out, titles = {}, set()
+        for f in sorted(d.glob("*-*-*.json")) if d.is_dir() else []:
+            st = json.loads(f.read_text(encoding="utf-8"))
+            tw = st.get("twin")
+            if st.get("status") != "ok" or not tw or st.get("licence") != self.STORY_LICENCE \
+                    or tw.get("licence") != self.STORY_LICENCE:
+                continue
+            k = ur_story.title_key(st["title"])
+            if k in titles:
+                continue
+            titles.add(k)
+            out[st["id"]] = st
+        self._story_cache = (env.repo, out)
+        return out
+
+    def story_rows(self, env):
+        from ..core.util import stat
+        stories = self._stories(env)
+        seen = set()
+        live = env.repo / "pack" / "sentences.json"
+        if live.exists():
+            seen.update(s["t"] for s in json.loads(live.read_text(encoding="utf-8")) if s.get("src") != "story")   # a shipped story sentence must stay offered on the next build
+        seen.update(text_norm(r[1]) for r in self.extra_corpus_rows(env))
+        stats = ur_story.Stats()
+        freq = Counter(fold(t) for st in stories.values() for p in st["text_pages"] for t in self.word_re.findall(text_norm(p["text"])))
+        glued = self._glued_checker(freq)
+        checks = self._story_checks(env)
+        en_lower = {w for st in stories.values() for p in st["twin"]["text_pages"]
+                    for w in re.findall(r"(?<![A-Za-z])[a-z]+(?![A-Za-z])", ur_story.norm_en(p["text"])) if w}
+        rows = []
+        for sid_, st in stories.items():
+            for u, e, page in ur_story.story_pairs(st, self.word_re, text_norm, seen, stats, self.min_story_tokens, self.max_len, glued, en_lower, checks):
+                rows.append([STORY_SID_BASE + len(rows), u, "", e, None, sid_])
+        stat("story_rows", {"stories_read": len(stories), "rows": len(rows), "filters": dict(stats)})
+        return rows
+
+    min_story_tokens = 4
+
+    def live_text(self, t):
+        return text_norm(self.clean_sentence_text(t))      # sentence_fields stores text_norm; a raw لئے row never matched its live لیے text
+
+    GLUE_PIECES = set(FUNCTION) | set(PRONOUNS) | set(POSTPS) | {
+        "کے", "کی", "ہے", "ہیں", "تھا", "تھی", "تھے", "ایک", "ہر", "کوئی", "کچھ", "سب", "بہت", "کر", "کیا", "کون", "اپنے", "اپنی",
+        "اپنا", "ہو", "رہا", "رہی", "رہے", "گیا", "گئی", "گئے", "لیے", "ساتھ", "بعد", "پہلے", "اس", "ان", "ہوں", "کرتا", "کرتی", "کرتے"}
+
+    def _glued_checker(self, freq):
+        """token -> True when it is no dictionary form but splits into 2+ dictionary forms of 2+ letters
+        (book text that lost its spaces: کےبازو, پسندکرتا). A split with no function-word piece that the story
+        text repeats 3+ times is a real compound or loan (ڈریگن, سکرین), not lost spaces. A name that happens
+        to split is dropped too, the safe side."""
+        d = self._dict()
+        known = set(d["forms"]) | set(d["info"]) | self.GLUE_PIECES
+        known = {fold(k) for k in known}
+        known |= {k.replace("یے", "ئے") for k in known if "یے" in k}      # دیے is also written دیئے
+        func = {fold(k) for k in self.GLUE_PIECES}
+
+        def glued(tok):
+            t = fold(tok)
+            if t in known or len(t) < 4:
+                return False
+            best = [None] * (len(t) + 1)           # best[i]: fewest-piece split of t[:i] as a tuple of pieces
+            best[0] = ()
+            for i in range(2, len(t) + 1):
+                for j in range(max(0, i - 12), i - 1):
+                    if best[j] is not None and t[j:i] in known and (best[i] is None or len(best[j]) + 1 < len(best[i])):
+                        best[i] = best[j] + (t[j:i],)
+            parts = best[len(t)]
+            if not parts or len(parts) < 2:
+                return False
+            return any(p in func for p in parts) or freq.get(t, 0) < 3
+        return glued
+
+    GLOSS_STOP = set("the an of to in on at and or is are was were be been it its he she they we you my your our his her their this that "
+                     "these those with for from by as not no do does did have has had will would can could what who how when where there "
+                     "here then than so but if one form used".split())
+
+    @staticmethod
+    def _estem(w):
+        w = w.lower()
+        if w.endswith("ves"):
+            w = w[:-3] + "f"
+        elif w.endswith("ies"):
+            w = w[:-3] + "y"
+        elif w.endswith("es") and len(w) > 4:
+            w = w[:-2]
+        elif w.endswith("s") and len(w) > 3:
+            w = w[:-1]
+        if w.endswith("ing") and len(w) > 5:
+            w = w[:-3]
+        elif w.endswith("ed") and len(w) > 4:
+            w = w[:-2]
+        return w[:5]
+
+    _content_free = set()      # filled by _story_checks: pronoun/postposition/particle tokens carry no sense to conflict on
+
+    def _stems(self, text):
+        return {self._estem(w) for w in re.findall(r"[A-Za-z]{3,}", re.sub(r"\([^)]*\)", " ", text)) if w.lower() not in self.GLOSS_STOP}
+
+    def _story_checks(self, env):
+        """Dictionary-based checks for ur_story.story_pairs: nouns, gloss/English agreement, wrong sense."""
+        sp, d = self, self._dict()
+        pack = {}
+        wp = env.repo / "pack" / "words.json"
+        if wp.exists():
+            for w in json.loads(wp.read_text(encoding="utf-8")):
+                pack.setdefault(fold(w["w"]), []).append(w["en"])
+        memo = {}
+        sp._content_free = {fold(x) for x in self.GLUE_PIECES}
+
+        def keys(tok):
+            t = fold(tok)
+            ks = {t}
+            for lem, pos in d["forms"].get(t, [])[:3]:
+                ks.add(fold(lem))
+            for k in list(ks):
+                if k in d["alt"]:
+                    ks.add(fold(d["alt"][k][0]))
+            return ks
+
+        def senses(tok):
+            """(stems of the pack word(s) of this spelling or None, stems of each dictionary entry the pack
+            glosses do not touch, all stems). A pack spelling shared by two words (bat/cat) counts both."""
+            if tok in memo:
+                return memo[tok]
+            ks = keys(tok)
+            pk = None
+            for k in sorted(ks):
+                if k in pack:
+                    pk = (pk or set()).union(*[sp._stems(g) for g in pack[k]])
+            rows = [sp._stems(r[4] or "") for k in ks for r in d["info"].get(k, [])]
+            rows = [r for r in rows if r]
+            other = [r - pk for r in rows if pk is not None and not (r & pk)]
+            memo[tok] = (pk, other, set().union(*rows, pk or set()))
+            return memo[tok]
+
+        class Checks:
+            @staticmethod
+            def noun(tok):
+                t = fold(tok)
+                return any(pos == "noun" for _, pos in d["forms"].get(t, [])) or any(r[1] == "noun" for r in d["info"].get(t, []))
+
+            @staticmethod
+            def agree(toks, en):
+                es = sp._stems(en)
+                have = [senses(t)[2] for t in toks if senses(t)[2]]
+                return not have or any(g & es for g in have)
+
+            @staticmethod
+            def wrong_sense(toks, en):
+                es = sp._stems(en)
+                for t in toks:
+                    pk, other, _ = senses(t)
+                    if pk and not (pk & es) and any(r & es for r in other) and fold(t) not in sp._content_free:
+                        return True
+                return False
+
+            @staticmethod
+            def story_rate(pairs):
+                """Share of pages where some word's gloss shows up in the English page (the good books' median is
+                0.79; a twin off by a page sits near 0.3); None under 3 comparable pages."""
+                got = hit = 0
+                for u, e in pairs:
+                    toks = sp.word_re.findall(text_norm(ur_story.norm_ur(u)))
+                    if not any(senses(t)[2] for t in toks):
+                        continue
+                    got += 1
+                    es = sp._stems(ur_story.norm_en(e))
+                    hit += any(senses(t)[2] & es for t in toks)
+                return hit / got if got >= 3 else None
+        return Checks
+
+    def story_source(self):
+        return {"source": "Let's Read Asia (The Asia Foundation), Urdu books with their English edition",
+                "licence": self.STORY_LICENCE, "url": self.STORY_URL,
+                "note": "Sentences are split out of the book text, Urdu and English realigned sentence by sentence; "
+                        "typographic quotes became plain, nothing else was changed."}
+
+    def story_meta(self, env, story_id):
+        """The book's credits. LRA keeps the Urdu edition's translators and other contributors only in
+        raw.contributingUsers (no TRANSLATOR role exists in its data), so they are listed as `contributors`."""
+        st = self._stories(env)[story_id]
+        by = {}
+        for src in (st.get("roles") or {}, (st.get("twin") or {}).get("roles") or {}):
+            for role, names in src.items():
+                lst = by.setdefault(role.upper(), [])
+                lst.extend(n for n in names if n and n not in lst)
+        named = {n for v in by.values() for n in v}
+        contrib = []
+        for n in (st.get("raw") or {}).get("contributingUsers") or []:
+            n = (n or "").strip()
+            if n and n not in named and n not in contrib:
+                contrib.append(n)
+        meta = {"id": story_id, "title": st["title"], "english_title": st["twin"]["title"],
+                "authors": by.get("AUTHOR", []), "illustrators": by.get("ILLUSTRATOR", []), "publisher": by.get("PUBLISHER", []),
+                "contributors": contrib, "licence": st["licence"], "url": st["url"]}
+        for role, key in (("EDITOR", "editors"), ("NARRATOR", "narrators"), ("SIGNER", "signers"), ("DESIGNER", "designers")):
+            if by.get(role):
+                meta[key] = by[role]
+        if st.get("original_url"):
+            meta["original_url"] = st["original_url"]
+        return meta
+
+    def story_credit(self):
+        return {"name": "Let's Read Asia stories (The Asia Foundation and book creators)", "licence": "CC BY 4.0",
+                "url": self.STORY_URL}
 
     def extra_attribution(self, env, sentences):
         n = sum(1 for s in sentences if s.get("src") == "gen")

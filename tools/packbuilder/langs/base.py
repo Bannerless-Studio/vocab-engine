@@ -507,6 +507,11 @@ class LanguageSpec:
     def clean_sentence_text(self, t):
         return t
 
+    def live_text(self, t):
+        """A corpus row's text as the committed pack stores it, to match live sentences (keep_live_sentences).
+        Default: the cleaned text; ur adds text_norm, which the pack applies after cleaning."""
+        return self.clean_sentence_text(t)
+
     def check_word(self, w):
         """Language-specific pack assertion on one word; error string or None."""
         return None

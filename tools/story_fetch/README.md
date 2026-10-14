@@ -44,3 +44,9 @@ Anonymous, no login, maker/admin endpoints untouched. `GET /booklistjs.php`: one
 Licence is per book on the back cover only, so listing alone cannot count usable books. Rule: exactly `Attribution 4.0`, else `licence_rejected`.
 Twin: English Original or Translation entries only (Adaptations are re-written texts), ids resolved by loose title match in the English list, same reading level required (other levels of one title are different texts; seen on "Lynne's birthday surprise"), equal non-empty page count, licence rule, at most 6 tried.
 Run: `python3 tools/story_fetch/asb_fetch.py --lang sw --site ../swahili [--limit N] [--resume]` (sw, ar, en, ur) -> `<site>/.cache/stories/<lang>-asb/`.
+
+## Passage windows (passage_windows.py)
+`PYTHONPATH=tools <site>/.venv/bin/python tools/story_fetch/passage_windows.py --repo ../urdu [--top 30] [--out f.json]` lists, per story, the best run of consecutive pages that meets the site's `tools/passages_src.json` rules (words band, coverage over lemmas through the passages Linker, level budget). Writes nothing to the site. Urdu 2026-10-15: 207 stories with an English twin, 49 have a passing window, 71 best windows (story x level).
+
+## Urdu rows (langs/ur.py story_rows, packbuilder/ur_story.py)
+Filters and counts per run are in the build stats (`story_rows`) and `tools/README.md` of the urdu site.
