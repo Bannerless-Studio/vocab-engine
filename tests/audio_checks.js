@@ -234,7 +234,7 @@ function faData(withAudio){
 }
 const NOVOICE = [{ lang: "en-US", name: "en" }], FAVOICE = [{ lang: "fa-IR", name: "fa" }];
 
-// The no-voice notice: v1 copy, or VOICE_NOTICE_V2 for packs on appView v2 (../persian ships v2).
+// The no-voice notice: v1 copy, or VOICE_NOTICE_V2 for packs on appView v2 (appView collapsed to v2; absent = v2).
 const VOICE_RE = /no text-to-speech voice|No voice for this language in this browser/i;
 async function appChecks(){
   if(!fs.existsSync(path.join(FA, "pack.js"))){ console.log("\nNOTE  ../persian/pack missing: app checks skipped"); return; }
@@ -269,10 +269,10 @@ async function appChecks(){
     check("panel data-wid tap plays the clip", log.played.join() === c2.audio);
     // Teach rows and the hint.
     api.vocabTeach([c1, plain], "A1", () => {});
-    // ../persian ships appView v2 (no teach hint line): there the clip word's row carries the play icon and the plain one none
+    // appView collapsed to v2; absent = v2 (no teach hint line): there the clip word's row carries the play icon and the plain one none
     const rowsIcon = api.el("tl").children.filter(c => c.className === "rowset").map(c => /<svg/.test(c.innerHTML));
     check("vocabTeach: a listed word with a clip is marked hearable ('Tap a word to hear it.' in v1; the row's play icon in v2)",
-      D.pack.appView === "v2" ? rowsIcon[0] === true && rowsIcon[1] === false : /Tap a word to hear it\./.test(api.html("panel")));
+      D.pack.appView !== "v1" ? rowsIcon[0] === true && rowsIcon[1] === false : /Tap a word to hear it\./.test(api.html("panel")));
     const tl = api.el("tl");
     log.played.length = 0; tl.children[0].onclick && tl.children[0].onclick();
     check("vocabTeach: a clip word's row is clickable and plays it; a plain word's row is not",
