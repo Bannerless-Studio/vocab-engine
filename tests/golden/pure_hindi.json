@@ -238,7 +238,7 @@
     },
     {
      "kind": "hear",
-     "id": "w0006"
+     "id": "w0007"
     },
     {
      "kind": "hear",
@@ -262,13 +262,13 @@
     },
     {
      "kind": "read",
-     "id": "w0007"
+     "id": "w0006"
     }
    ],
    "recallPlan": [
     {
      "kind": "recall",
-     "id": "w0006"
+     "id": "w0007"
     },
     {
      "kind": "recall",
@@ -276,7 +276,7 @@
     },
     {
      "kind": "type",
-     "id": "w0007"
+     "id": "w0006"
     },
     {
      "kind": "type",
@@ -830,11 +830,11 @@
    "reviewPlan": [
     {
      "kind": "hear",
-     "id": "w0017"
+     "id": "w0018"
     },
     {
      "kind": "recall",
-     "id": "w0007"
+     "id": "w0006"
     },
     {
      "kind": "type",
@@ -850,7 +850,7 @@
     },
     {
      "kind": "hear",
-     "id": "w0006"
+     "id": "w0007"
     },
     {
      "kind": "recall",
@@ -892,7 +892,7 @@
    "recallPlan": [
     {
      "kind": "recall",
-     "id": "w0006"
+     "id": "w0007"
     },
     {
      "kind": "type",
@@ -900,7 +900,7 @@
     },
     {
      "kind": "recall",
-     "id": "w0007"
+     "id": "w0006"
     },
     {
      "kind": "type",
