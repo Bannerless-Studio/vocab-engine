@@ -136,6 +136,111 @@ def _fue_fuera(toks, i, lex):
     return None
 
 
+# the pack has no neuter-article "lo" and no "ago" word, so these tokens
+# carry no link of their own (QA 2026-10-14: "lo que", "hace un mes que")
+LO_NEUTER_NEXT = {"que", "cual", "de", "más", "menos", "mejor", "peor", "mismo", "bastante", "suficientemente",
+                  "antes", "mucho", "poco", "demás", "tanto", "bien", "mal", "mayor", "menor", "contrario", "general",
+                  "largo", "suficiente", "bello", "visto", "ancho", "alto"}
+PARTICIPLE_ENDINGS = ("ado", "ido", "ada", "ida", "ados", "idos")
+SOLO_FORMS = {"solo", "sola", "solos", "solas"}
+DET_BEFORE_SOLO = {"un", "una", "el", "la", "este", "esta", "ese", "esa", "mi", "tu", "su", "ningún", "ninguna",
+                   "cada", "otro", "otra", "aquel", "aquella", "nuestro", "nuestra"}
+TIME_NOUNS = {"año", "años", "mes", "meses", "día", "días", "semana", "semanas", "hora", "horas", "minuto",
+              "minutos", "segundo", "segundos", "rato", "tiempo", "siglo", "siglos", "década", "décadas",
+              "momento", "momentos"}
+TIME_QTY = {"un", "una", "unos", "unas", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez",
+            "once", "doce", "quince", "veinte", "treinta", "mucho", "mucha", "muchos", "muchas", "poco", "pocos",
+            "pocas", "varios", "varias", "algunos", "algunas", "medio", "media", "cien"}
+# verbs that take an indirect object: "se lo dijimos" is le lo, not a reflexive
+DITRANSITIVE = {"decir", "dar", "explicar", "pedir", "contar", "mandar", "enviar", "mostrar", "enseñar", "ofrecer",
+                "prometer", "preguntar", "devolver", "prestar", "regalar", "vender", "traer", "escribir",
+                "recomendar", "entregar", "comunicar", "confesar", "revelar", "repetir", "responder", "servir",
+                "sugerir", "proponer", "pagar", "cantar", "leer", "recordar", "advertir", "anunciar", "comentar"}
+PERIPHRASIS_SKIP = {"ir", "a", "de", "que", "poder", "querer", "deber", "soler", "tener", "haber", "estar",
+                    "empezar", "comenzar", "acabar", "volver", "no", "ya", "nunca", "también"}
+
+
+def _neuter_lo(toks, i, lex=None):
+    """The tagger reads some finite verbs after a clitic as ADJ ("que lo preguntes", "y lo preparo"), so an
+    ADJ-tagged word counts only when it has an adjective reading or is a participle."""
+    if toks[i][0].lower() != "lo" or i + 1 >= len(toks):
+        return False
+    nxt = toks[i + 1]
+    low = nxt[0].lower()
+    if low in LO_NEUTER_NEXT:
+        return True
+    return nxt[2] == "ADJ" and (lex is None or low.endswith(PARTICIPLE_ENDINGS) or bool(lex.candidates(low, ["adj"])))
+
+
+def _solo_for_single(toks, i):
+    """un solo tiro, el solo hecho: "only", not "alone" (solo after its noun, un hombre solo, stays alone)."""
+    return toks[i][0].lower() in SOLO_FORMS and 0 < i and i + 1 < len(toks) and \
+        toks[i - 1][0].lower() in DET_BEFORE_SOLO and toks[i + 1][2] in ("NOUN", "PROPN")
+
+
+def _hace_ago(toks, i):
+    """hace/hacía + amount of time ("hace dos años", "hace un mes que", "hace poco") is the temporal
+    expression; weather and making ("hace mucho frío", "hace una prueba") keep hacer."""
+    if toks[i][1].lower() != "hacer" or toks[i][0].lower() not in ("hace", "hacía"):
+        return False
+    n = len(toks)
+    j = i + 1
+    if j < n and toks[j][0].lower() in TIME_QTY or j < n and toks[j][2] == "NUM":
+        j += 1
+    else:
+        j = i + 1
+    if j >= n:
+        return False
+    low = toks[j][0].lower()
+    after = toks[j + 1] if j + 1 < n else None
+    if j > i + 1 and toks[j - 1][0].lower() in ("mucho", "poco") and (low in ("que",) or toks[j][2] in ("VERB", "AUX", "PUNCT")):
+        return True
+    if low in TIME_NOUNS:
+        if low in ("día", "momento") and not (after is None or after[0].lower() == "que" or after[2] == "PUNCT"):
+            return False
+        return True
+    return False
+
+
+def _se_for_le(toks, i):
+    """se before lo/la/los/las and a verb of giving or telling is the indirect object le."""
+    if toks[i][0].lower() != "se" or i + 1 >= len(toks) or toks[i + 1][0].lower() not in ("lo", "la", "los", "las"):
+        return False
+    for t in toks[i + 2:i + 7]:
+        if t[2] in ("PUNCT", "CCONJ", "SCONJ") and t[0].lower() != "que":
+            return False
+        lem = t[1].lower()
+        if lem in DITRANSITIVE:
+            return True
+        if t[2] in ("VERB", "AUX") and lem not in PERIPHRASIS_SKIP and t[0].lower() not in PERIPHRASIS_SKIP:
+            return False
+    return False
+
+
+def _linker_fixes(toks, lex=None):
+    """[(i, kind)] for the QA link classes; kind is lo / solo / hace / se."""
+    out = []
+    for i in range(len(toks)):
+        if _neuter_lo(toks, i, lex):
+            out.append((i, "lo"))
+        elif _solo_for_single(toks, i):
+            out.append((i, "solo"))
+        elif _hace_ago(toks, i):
+            out.append((i, "hace"))
+        elif _se_for_le(toks, i):
+            out.append((i, "se"))
+    return out
+
+
+# kind -> (shipped key, token carrying that key, key a passage relinks to; None unlinks)
+LINKER_KINDS = {
+    "lo": (("lo", "PRON"), lambda t: t[0].lower() == "lo", None),
+    "solo": (("solo", "ADJ"), lambda t: t[0].lower() in SOLO_FORMS, ("solo", "ADV")),
+    "hace": (("hacer", "VERB"), lambda t: t[1].lower() == "hacer", None),
+    "se": (("se", "PRON"), lambda t: t[0].lower() == "se", ("le", "PRON")),
+}
+
+
 def _strip_acute(s):
     return s.translate(str.maketrans("áéíóú", "aeiou"))
 
@@ -601,6 +706,39 @@ class Spanish(LanguageSpec):
             fue = _fue_fuera(toks, i, lex)
             if fue:
                 out[i] = fue
+        for i, kind in _linker_fixes(toks, lex):
+            if LINKER_KINDS[kind][2]:
+                out[i] = LINKER_KINDS[kind][2]
+        return out
+
+    def passage_no_link(self, toks):
+        # an unresolved token falls back to the pack word spelled like it (lo, hace)
+        return {i for i, kind in _linker_fixes(toks, getattr(self, "_lex", None)) if LINKER_KINDS[kind][2] is None}
+
+    def fix_links(self, row, toks, links, key_to_id):
+        """The _linker_fixes classes for sentences.json only (a rule in
+        post_resolve would move the frequency pass). A token whose link is
+        unlinked leaves its id when no other token of the sentence carries it;
+        solo becomes the "only" word; se is unlinked, not relinked to le,
+        because an example for le must show the word le."""
+        fixes = _linker_fixes(toks, getattr(self, "_lex", None))
+        if not fixes or not links:
+            return links
+        out = list(links)
+        for kind in dict.fromkeys(k for _, k in fixes):
+            key, same, _ = LINKER_KINDS[kind]
+            wid = key_to_id.get(key)
+            if wid not in out:
+                continue
+            bad = {i for i, k in fixes if k == kind}
+            if any(same(t) for j, t in enumerate(toks) if j not in bad):
+                continue
+            at = out.index(wid)
+            repl = key_to_id.get(("solo", "ADV")) if kind == "solo" else None
+            if repl and repl not in out:
+                out[at] = repl
+            else:
+                out.pop(at)
         return out
 
     def numeral_may_be_verb(self, lexicon, surface):

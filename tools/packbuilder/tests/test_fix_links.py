@@ -32,7 +32,7 @@ class Default(unittest.TestCase):
             self.assertEqual(LanguageSpec.example_rows(None, SimpleNamespace(repo=Path(d))), [])
 
     def test_other_specs_inherit_noop(self):
-        for code in ("it", "es", "fr", "de", "ru", "id", "ko", "ja"):
+        for code in ("it", "fr", "de", "ru", "id", "ko", "ja"):
             self.assertIs(type(get_spec(code, None)).fix_links, LanguageSpec.fix_links, code)
 
 
