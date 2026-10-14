@@ -109,6 +109,7 @@ CLITIC_SUFFIXES = {"م", "ت", "ش", "مان", "تان", "شان", "ی", "یم",
                    "یش", "یی", "ایم", "مون", "تون", "شون"}
 COLLOQ_RAFTAN = {"برم", "بری", "بره", "بریم", "برن", "میرم", "میری", "میره", "میریم", "میرید", "میرن",
                  "نمیرم", "نمیری", "نمیره", "نمیریم", "نمیرید", "نمیرن", "نرم", "نره"}
+OWN_WORD_MARGIN = 1.0       # zipf points a whole spelling must lead its clitic-stripped host by
 TOKEN_PUNCT = "،؛؟!.:«»\"'()…"
 PART_ADJ = {"پیچیده", "گسترده", "پخته", "سوخته", "یخزده"}   # participles taught as adjectives
 GEN_SID_BASE = 90_000_000          # corpus sids of sentences written for the pack
@@ -1514,6 +1515,16 @@ class Persian(LanguageSpec):
             if text in HOMOGRAPH_DENY:
                 out[i] = None       # دعوی "lawsuit" is not دعوا "quarrel"; حقوق "law, salary" is not حق
                 continue
+            if r[1] in ("NOUN", "ADJ") and r[0] != text and text.startswith(r[0]) and \
+                    text[len(r[0]):] not in ("ی", "ای", "یی") and GRAM_SUFFIX_RE.fullmatch(text[len(r[0]):]) and \
+                    lx.usable_entries(text, self.group_kpos[r[1]]) and \
+                    lx.zipf(text) >= lx.zipf(r[0]) + OWN_WORD_MARGIN:
+                # the tagger lemma is a host that lost a clitic or plural ending
+                # (قهرمان "hero" read as قهر + مان "our sulking"), but the whole
+                # spelling is a dictionary word far more frequent than the host:
+                # a host + clitic form is never that much more frequent (دلم is
+                # level with دل, ماست and کارت well below ما and کار)
+                out[i] = r = (text, r[1])
             if r[0] != text and text.startswith(r[0]) and not GRAM_SUFFIX_RE.fullmatch(text[len(r[0]):]):
                 # token-boundary guard: a lemma never matches inside a longer word
                 # (مهربان is not مهر, فردیت is not فرد, شرور is not شر); the word itself or nothing

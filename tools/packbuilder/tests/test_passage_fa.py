@@ -151,6 +151,49 @@ class DeclaredName(unittest.TestCase):
         self.assertEqual(self.retag([T("پیشی", "NOUN")], {"پیشی"})[0][1:3], ["پیشی", "PROPN"])
 
 
+class _Lex:
+    """Dictionary stub: entries by spelling, zipf by spelling."""
+    def __init__(self, entries, zipf):
+        self.entries, self.z = entries, zipf
+
+    def usable_entries(self, word, kpos):
+        return [e for e in self.entries.get(word, []) if kpos is None or e in kpos]
+
+    def zipf(self, w):
+        return self.z.get(w, 0.0)
+
+
+class OwnWordOverHost(unittest.TestCase):
+    """post_resolve: a tagger lemma that is the host of a clitic or plural ending
+    gives way to the whole spelling when that is a dictionary word far more
+    frequent than the host (قهرمان "hero", not قهر + مان)."""
+
+    def run_post(self, text, host, entries, zipf, upos="NOUN"):
+        sp = fa_spec()
+        sp._lx = _Lex(entries, zipf)
+        return sp.post_resolve([[text, host, upos, ""]], [(host, upos)])[0]
+
+    def test_hero_is_not_sulking(self):
+        out = self.run_post("قهرمان", "قهر", {"قهرمان": ["noun"], "قهر": ["noun"]}, {"قهرمان": 5.22, "قهر": 3.98})
+        self.assertEqual(out, ("قهرمان", "NOUN"))
+
+    def test_a_clitic_form_keeps_its_host(self):
+        out = self.run_post("کارت", "کار", {"کارت": ["noun"], "کار": ["noun"]}, {"کارت": 5.39, "کار": 6.3})
+        self.assertEqual(out, ("کار", "NOUN"))
+
+    def test_a_form_level_with_its_host_keeps_the_host(self):
+        out = self.run_post("دلم", "دل", {"دلم": ["noun"], "دل": ["noun"]}, {"دلم": 5.4, "دل": 5.35})
+        self.assertEqual(out, ("دل", "NOUN"))
+
+    def test_the_indefinite_ending_is_not_this_rule(self):
+        out = self.run_post("بیماری", "بیمار", {"بیماری": ["noun"], "بیمار": ["noun"]}, {"بیماری": 5.29, "بیمار": 3.0})
+        self.assertEqual(out, ("بیمار", "NOUN"))
+
+    def test_a_spelling_with_no_entry_keeps_the_host(self):
+        out = self.run_post("قهرمان", "قهر", {"قهر": ["noun"]}, {"قهرمان": 5.22, "قهر": 3.98})
+        self.assertEqual(out, ("قهر", "NOUN"))
+
+
 class BareIndefiniteStem(unittest.TestCase):
     """A pack noun X+ی the tagger kept whole is the stem when the English names
     only the stem (بیماری "a patient"), with or without یک."""
