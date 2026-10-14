@@ -41,9 +41,9 @@
      0
     ],
     "toGo": [
-     183,
-     278,
-     335
+     173,
+     298,
+     338
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -52,22 +52,22 @@
      "p": 0,
      "all": false
     },
-    "eta": 183,
+    "eta": 173,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
     "position": 0
    },
-   "todayFirst": "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+   "todayFirst": "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
    "today": [
-    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
-    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
-    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
    ],
    "progress": {
-    "start": "0 sessions, A1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy A1 0 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy A1 30 learned Still shaky y estar lo te Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy A1 0 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy A1 30 learned Still shaky y estar lo te Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -391,9 +391,9 @@
      0.002
     ],
     "toGo": [
-     182,
-     277,
-     333
+     172,
+     297,
+     336
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -402,7 +402,7 @@
      "p": 0.006667,
      "all": false
     },
-    "eta": 182,
+    "eta": 172,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -464,13 +464,13 @@
     ],
     "positions": [
      0.05,
-     0.023462,
-     0.015333
+     0.022462,
+     0.0145
     ],
     "toGo": [
-     172,
-     266,
-     320
+     161,
+     287,
+     324
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -479,22 +479,22 @@
      "p": 0.05,
      "all": false
     },
-    "eta": 172,
+    "eta": 161,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.015417
+    "position": 0.014375
    },
-   "todayFirst": "Session 13 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
    "today": [
-    "Session 13 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
-    "Session 14 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
-    "Session 15 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+    "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
    ],
    "progress": {
-    "start": "12 sessions, A1 In 6 sessions since your last visit +13 mastered Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy A1 120 learned Still shaky no ir poder ver nos volver la gente entre Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
-    "end": "15 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy A1 150 learned Still shaky ir cómo ahora solo gustar la mujer el hijo mí buscar Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+    "start": "12 sessions, A1 In 6 sessions since your last visit +13 mastered Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy A1 120 learned Still shaky no ir poder ver nos volver la gente entre Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy A1 150 learned Still shaky ir cómo ahora solo gustar la mujer el hijo mí buscar Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -943,13 +943,13 @@
     ],
     "positions": [
      0.063333,
-     0.029615,
-     0.019333
+     0.028615,
+     0.0185
     ],
     "toGo": [
-     169,
-     263,
-     316
+     158,
+     283,
+     320
     ],
     "toGoTotal": 194,
     "currentGoal": {
@@ -958,12 +958,12 @@
      "p": 0.063333,
      "all": false
     },
-    "eta": 169,
+    "eta": 158,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.019167
+    "position": 0.018125
    },
    "items": {
     "items": 250,
@@ -1009,8 +1009,8 @@
     ],
     "toGo": [
      0,
-     88,
-     166
+     100,
+     159
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -1019,7 +1019,7 @@
      "p": 0.730769,
      "all": false
     },
-    "eta": 88,
+    "eta": 100,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1029,15 +1029,15 @@
     },
     "position": 0.35625
    },
-   "todayFirst": "Session 1 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Mi día Level exam ready: A1 Start",
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 100 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Mi día Level exam ready: A1 Start",
    "today": [
-    "Session 1 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Mi día Level exam ready: A1 Start",
-    "Session 2 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Mi día Level exam ready: A1 Start",
-    "Session 3 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Mi día Level exam ready: A1 Start"
+    "Session 1 Goal 2 of 3 ≈ 100 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Mi día Level exam ready: A1 Start",
+    "Session 2 Goal 2 of 3 ≈ 100 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Mi día Level exam ready: A1 Start",
+    "Session 3 Goal 2 of 3 ≈ 100 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Mi día Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, A2 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A2 Goal 2 of 3 ≈ 90 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered sentences 3 · reading 1 of 20 A2 380 learned Still shaky le ese once muchas gracias detener enseñar el/la bebé maldito distinto la corte votar interesar Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 100 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 100 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered sentences 3 · reading 1 of 20 A2 380 learned Still shaky le ese once muchas gracias detener enseñar el/la bebé maldito distinto la corte votar interesar Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -1495,8 +1495,8 @@
     ],
     "toGo": [
      0,
-     90,
-     168
+     101,
+     161
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -1505,7 +1505,7 @@
      "p": 0.716923,
      "all": false
     },
-    "eta": 90,
+    "eta": 101,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1586,8 +1586,8 @@
     "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Una decisión difícil Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Still shaky hacer la semana bajar unir el cabo revisar el vuelo la función guapo la calma sino el modo Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 30 B1 0 of 700 mastered reading 0 of 30 Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 30 B1 0 of 700 mastered reading 0 of 30 Still shaky hacer la semana bajar unir el cabo revisar el vuelo la función guapo la calma sino el modo Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2028,9 +2028,9 @@
      0.06
     ],
     "toGo": [
-     129,
-     228,
-     284
+     120,
+     246,
+     285
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -2039,29 +2039,29 @@
      "p": 0.2,
      "all": false
     },
-    "eta": 129,
+    "eta": 120,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
      "pct": 25
     },
     "gateNote": "A2 waits · A1 at 25% known",
-    "gateOpensIn": 33,
+    "gateOpensIn": 35,
     "suggestPassage": {
      "id": "p0001",
      "lv": "A1"
     },
     "position": 0.05625
    },
-   "todayFirst": "Session 21 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Listen Recall Sentences Read Mi día Start",
+   "todayFirst": "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 35 sessions. Listen Recall Sentences Read Mi día Start",
    "today": [
-    "Session 21 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Listen Recall Sentences Read Mi día Start",
-    "Session 22 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 34 sessions. Listen Recall Sentences Read Mi día Start",
-    "Session 23 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 34 sessions. Listen Recall Sentences Read Mi día Start"
+    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 35 sessions. Listen Recall Sentences Read Mi día Start",
+    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 36 sessions. Listen Recall Sentences Read Mi día Start",
+    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 36 sessions. Listen Recall Sentences Read Mi día Start"
    ],
    "progress": {
-    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
-    "end": "23 sessions, A1 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy A1 149 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 34 sessions. Still shaky saber el tiempo tomar buscar empezar la muerte la policía siguiente el médico de acuerdo Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 35 sessions. Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy A1 149 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 36 sessions. Still shaky saber el tiempo tomar buscar empezar la muerte la policía siguiente el médico de acuerdo Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2431,9 +2431,9 @@
      0.0596
     ],
     "toGo": [
-     130,
-     228,
-     284
+     120,
+     246,
+     285
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -2442,14 +2442,14 @@
      "p": 0.198667,
      "all": false
     },
-    "eta": 130,
+    "eta": 120,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
      "pct": 24
     },
     "gateNote": "A2 waits · A1 at 24% known",
-    "gateOpensIn": 34,
+    "gateOpensIn": 36,
     "suggestPassage": {
      "id": "p0002",
      "lv": "A1"

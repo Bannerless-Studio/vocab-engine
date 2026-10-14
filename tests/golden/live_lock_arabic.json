@@ -44,9 +44,9 @@
      0
     ],
     "toGo": [
-     168,
-     275,
-     332
+     171,
+     303,
+     339
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -55,7 +55,7 @@
      "p": 0,
      "all": false
     },
-    "eta": 168,
+    "eta": 171,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -397,9 +397,9 @@
      0.0024
     ],
     "toGo": [
-     166,
-     273,
-     330
+     169,
+     301,
+     337
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -408,7 +408,7 @@
      "p": 0.008,
      "all": false
     },
-    "eta": 166,
+    "eta": 169,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -473,13 +473,13 @@
     ],
     "positions": [
      0.055333,
-     0.025923,
-     0.016933
+     0.024923,
+     0.0161
     ],
     "toGo": [
-     154,
-     261,
-     316
+     157,
+     288,
+     324
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -488,22 +488,22 @@
      "p": 0.055333,
      "all": false
     },
-    "eta": 154,
+    "eta": 157,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.016917
+    "position": 0.015875
    },
-   "todayFirst": "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
    "today": [
-    "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
-    "Session 14 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
-    "Session 15 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+    "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
    ],
    "progress": {
-    "start": "12 sessions, A1 In 6 sessions since your last visit +15 mastered Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 120 learned Still shaky شيء قام علم لأن كيف عند خاص طريق Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 150 learned Still shaky قال قام استطاع شكل منذ طريق رئيس حول لماذا ابن مشكلة Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "12 sessions, A1 In 6 sessions since your last visit +15 mastered Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 120 learned Still shaky شيء قام علم لأن كيف عند خاص طريق Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 150 learned Still shaky قال قام استطاع شكل منذ طريق رئيس حول لماذا ابن مشكلة Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -963,13 +963,13 @@
     ],
     "positions": [
      0.062,
-     0.029,
-     0.018933
+     0.028,
+     0.0181
     ],
     "toGo": [
-     152,
-     259,
-     314
+     155,
+     286,
+     322
     ],
     "toGoTotal": 197,
     "currentGoal": {
@@ -978,12 +978,12 @@
      "p": 0.062,
      "all": false
     },
-    "eta": 152,
+    "eta": 155,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.018792
+    "position": 0.01775
    },
    "items": {
     "items": 258,
@@ -1032,7 +1032,7 @@
     ],
     "toGo": [
      0,
-     89,
+     109,
      167
     ],
     "toGoTotal": null,
@@ -1042,7 +1042,7 @@
      "p": 0.730769,
      "all": false
     },
-    "eta": 89,
+    "eta": 109,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1052,15 +1052,15 @@
     },
     "position": 0.35625
    },
-   "todayFirst": "Session 1 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read يوم أحمد Level exam ready: A1 Start",
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 110 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read يوم أحمد Level exam ready: A1 Start",
    "today": [
-    "Session 1 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read يوم أحمد Level exam ready: A1 Start",
-    "Session 2 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read يوم أحمد Level exam ready: A1 Start",
-    "Session 3 Goal 2 of 3 ≈ 90 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read يوم أحمد Level exam ready: A1 Start"
+    "Session 1 Goal 2 of 3 ≈ 110 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read يوم أحمد Level exam ready: A1 Start",
+    "Session 2 Goal 2 of 3 ≈ 110 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read يوم أحمد Level exam ready: A1 Start",
+    "Session 3 Goal 2 of 3 ≈ 110 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read يوم أحمد Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, A2 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A2 Goal 2 of 3 ≈ 91 sessions daily life: directions, simple chat, short notices الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered sentences 3 · reading 1 of 20 A2 380 learned Still shaky وصل كتاب رائع دور هيا ميت تناول تبع صفحة سرعة مفتوح بقي Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 110 sessions daily life: directions, simple chat, short notices الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 110 sessions daily life: directions, simple chat, short notices الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered sentences 3 · reading 1 of 20 A2 380 learned Still shaky وصل كتاب رائع دور هيا ميت تناول تبع صفحة سرعة مفتوح بقي Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -1519,7 +1519,7 @@
     ],
     "toGo": [
      0,
-     91,
+     112,
      169
     ],
     "toGoTotal": null,
@@ -1529,7 +1529,7 @@
      "p": 0.714615,
      "all": false
     },
-    "eta": 91,
+    "eta": 112,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1613,8 +1613,8 @@
     "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read عطلة على الشاطئ Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered sentences 1 · reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Still shaky بالنسبة لـ مختلف حاجة حل جار مفهوم تجاري أخفى ساحر ميناء يا أحمر Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 30 B1 0 of 700 mastered reading 0 of 30 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles الأبجدية 0 / 36 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered sentences 1 · reading 0 of 30 B1 0 of 700 mastered reading 0 of 30 Still shaky بالنسبة لـ مختلف حاجة حل جار مفهوم تجاري أخفى ساحر ميناء يا أحمر Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2062,9 +2062,9 @@
      0.06
     ],
     "toGo": [
-     116,
-     225,
-     282
+     117,
+     251,
+     288
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -2073,29 +2073,29 @@
      "p": 0.2,
      "all": false
     },
-    "eta": 116,
+    "eta": 117,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
      "pct": 25
     },
     "gateNote": "A2 waits · A1 at 25% known",
-    "gateOpensIn": 31,
+    "gateOpensIn": 33,
     "suggestPassage": {
      "id": "p0001",
      "lv": "A1"
     },
     "position": 0.05625
    },
-   "todayFirst": "الأبجدية first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn الأبجدية , sets 1–2 of 7 A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read يوم أحمد",
+   "todayFirst": "الأبجدية first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn الأبجدية , sets 1–2 of 7 A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Listen Recall Sentences Read يوم أحمد",
    "today": [
-    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read يوم أحمد Start",
-    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read يوم أحمد Start",
-    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 31 sessions. Listen Recall Sentences Read يوم أحمد Start"
+    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Listen Recall Sentences Read يوم أحمد Start",
+    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Listen Recall Sentences Read يوم أحمد Start",
+    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 33 sessions. Listen Recall Sentences Read يوم أحمد Start"
    ],
    "progress": {
-    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 148 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 31 sessions. Still shaky أراد بقي عمر أم دكتور شجرة الجمعة عذرا ستون ثلاثة عشر Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 33 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy الأبجدية 0 / 36 taught · 0 mastered A1 148 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 33 sessions. Still shaky أراد بقي عمر أم دكتور شجرة الجمعة عذرا ستون ثلاثة عشر Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2466,9 +2466,9 @@
      0.0592
     ],
     "toGo": [
-     116,
-     226,
-     282
+     118,
+     252,
+     288
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -2477,14 +2477,14 @@
      "p": 0.197333,
      "all": false
     },
-    "eta": 116,
+    "eta": 118,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
      "pct": 24
     },
     "gateNote": "A2 waits · A1 at 24% known",
-    "gateOpensIn": 31,
+    "gateOpensIn": 33,
     "suggestPassage": {
      "id": "p0002",
      "lv": "A1"

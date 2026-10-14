@@ -44,9 +44,9 @@
      0
     ],
     "toGo": [
-     172,
-     273,
-     332
+     178,
+     293,
+     333
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -55,22 +55,22 @@
      "p": 0,
      "all": false
     },
-    "eta": 172,
+    "eta": 178,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
     "position": 0
    },
-   "todayFirst": "حروفِ تہجی first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until a set is learned Learn حروفِ تہجی , sets 1–2 of 8 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
+   "todayFirst": "حروفِ تہجی first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review skipped until a set is learned Learn حروفِ تہجی , sets 1–2 of 8 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
    "today": [
-    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
-    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
-    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
    ],
    "progress": {
-    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 30 learned Still shaky میں ایک ہو جانا دینا Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 180 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 30 learned Still shaky میں ایک ہو جانا دینا Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -396,9 +396,9 @@
      0.0028
     ],
     "toGo": [
-     170,
-     270,
-     330
+     175,
+     291,
+     331
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -407,7 +407,7 @@
      "p": 0.009333,
      "all": false
     },
-    "eta": 170,
+    "eta": 175,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -472,13 +472,13 @@
     ],
     "positions": [
      0.067333,
-     0.031462,
-     0.020533
+     0.030462,
+     0.0197
     ],
     "toGo": [
-     156,
-     255,
-     313
+     160,
+     275,
+     314
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -487,12 +487,12 @@
      "p": 0.067333,
      "all": false
     },
-    "eta": 156,
+    "eta": 160,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.020292
+    "position": 0.01925
    },
    "todayFirst": "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
    "today": [
@@ -502,7 +502,7 @@
    ],
    "progress": {
     "start": "12 sessions, A1 In 6 sessions since your last visit +24 mastered Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 120 learned Still shaky سکنا چاہنا نام استعمال کرنا جاننا خود کم چکنا آج Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 150 learned Still shaky لینا سکنا نام جاننا سا چکنا پورا پہلا ساتھ Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 150 learned Still shaky لینا سکنا نام جاننا سا چکنا پورا پہلا ساتھ Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -956,13 +956,13 @@
     ],
     "positions": [
      0.079333,
-     0.037,
-     0.024133
+     0.036,
+     0.0233
     ],
     "toGo": [
-     154,
-     252,
-     310
+     157,
+     272,
+     311
     ],
     "toGoTotal": 152,
     "currentGoal": {
@@ -971,12 +971,12 @@
      "p": 0.079333,
      "all": false
     },
-    "eta": 154,
+    "eta": 157,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.023667
+    "position": 0.022625
    },
    "items": {
     "items": 252,
@@ -1025,8 +1025,8 @@
     ],
     "toGo": [
      0,
-     87,
-     169
+     96,
+     157
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -1035,7 +1035,7 @@
      "p": 0.730769,
      "all": false
     },
-    "eta": 87,
+    "eta": 96,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1045,15 +1045,15 @@
     },
     "position": 0.35625
    },
-   "todayFirst": "Session 1 Goal 2 of 3 ≈ 87 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read احمد کا دن Level exam ready: A1 Start",
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 96 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read احمد کا دن Level exam ready: A1 Start",
    "today": [
-    "Session 1 Goal 2 of 3 ≈ 87 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read احمد کا دن Level exam ready: A1 Start",
-    "Session 2 Goal 2 of 3 ≈ 88 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read احمد کا دن Level exam ready: A1 Start",
-    "Session 3 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read احمد کا دن Level exam ready: A1 Start"
+    "Session 1 Goal 2 of 3 ≈ 96 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read احمد کا دن Level exam ready: A1 Start",
+    "Session 2 Goal 2 of 3 ≈ 97 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read احمد کا دن Level exam ready: A1 Start",
+    "Session 3 Goal 2 of 3 ≈ 98 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read احمد کا دن Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, A2 Goal 2 of 3 ≈ 87 sessions daily life: directions, simple chat, short notices حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A2 Goal 2 of 3 ≈ 90 sessions daily life: directions, simple chat, short notices حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 of 600 mastered reading 1 of 20 A2 380 learned Still shaky کا ملنا دو بچہ حملہ طریقہ گنا خاتون کھانا چین پاگل فرض Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 96 sessions daily life: directions, simple chat, short notices حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 99 sessions daily life: directions, simple chat, short notices حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 of 600 mastered reading 1 of 20 A2 380 learned Still shaky کا ملنا دو بچہ حملہ طریقہ گنا خاتون کھانا چین پاگل فرض Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -1518,8 +1518,8 @@
     ],
     "toGo": [
      0,
-     90,
-     170
+     99,
+     159
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -1528,7 +1528,7 @@
      "p": 0.713846,
      "all": false
     },
-    "eta": 90,
+    "eta": 99,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1612,8 +1612,8 @@
     "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read ایک مشکل فیصلہ Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Still shaky صاف کرنا دفعہ عوامی بھاگنا کپتان نسل معنی پانچواں باڑ مل جانا خوبصورت کھلنا Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 30 B1 0 of 700 mastered reading 0 of 30 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles حروفِ تہجی 0 / 40 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 30 B1 0 of 700 mastered reading 0 of 30 Still shaky صاف کرنا دفعہ عوامی بھاگنا کپتان نسل معنی پانچواں باڑ مل جانا خوبصورت کھلنا Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2067,9 +2067,9 @@
      0.06
     ],
     "toGo": [
-     121,
-     223,
-     283
+     125,
+     240,
+     281
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -2078,29 +2078,29 @@
      "p": 0.2,
      "all": false
     },
-    "eta": 121,
+    "eta": 125,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
      "pct": 25
     },
     "gateNote": "A2 waits · A1 at 25% known",
-    "gateOpensIn": 30,
+    "gateOpensIn": 32,
     "suggestPassage": {
      "id": "p0001",
      "lv": "A1"
     },
     "position": 0.05625
    },
-   "todayFirst": "حروفِ تہجی first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn حروفِ تہجی , sets 1–2 of 8 A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Listen Recall Sentences Read احمد کا دن",
+   "todayFirst": "حروفِ تہجی first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn حروفِ تہجی , sets 1–2 of 8 A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read احمد کا دن",
    "today": [
-    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Listen Recall Sentences Read احمد کا دن Start",
-    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 30 sessions. Listen Recall Sentences Read احمد کا دن Start",
-    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 30 sessions. Listen Recall Sentences Read احمد کا دن Start"
+    "Session 21 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read احمد کا دن Start",
+    "Session 22 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 32 sessions. Listen Recall Sentences Read احمد کا دن Start",
+    "Session 23 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 32 sessions. Listen Recall Sentences Read احمد کا دن Start"
    ],
    "progress": {
-    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 30 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 149 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 30 sessions. Still shaky سکنا وقت بار کی طرح چھوٹا رکھ دینا گنا پیسہ انتخاب Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy حروفِ تہجی 0 / 40 taught · 0 mastered A1 149 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 32 sessions. Still shaky سکنا وقت بار کی طرح چھوٹا رکھ دینا گنا پیسہ انتخاب Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2471,9 +2471,9 @@
      0.0596
     ],
     "toGo": [
-     121,
-     224,
-     283
+     126,
+     241,
+     281
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -2482,14 +2482,14 @@
      "p": 0.198667,
      "all": false
     },
-    "eta": 121,
+    "eta": 126,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
      "pct": 24
     },
     "gateNote": "A2 waits · A1 at 24% known",
-    "gateOpensIn": 30,
+    "gateOpensIn": 32,
     "suggestPassage": {
      "id": "p0002",
      "lv": "A1"

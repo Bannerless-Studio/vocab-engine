@@ -41,9 +41,9 @@
      0
     ],
     "toGo": [
-     167,
-     283,
-     334
+     171,
+     292,
+     333
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -52,7 +52,7 @@
      "p": 0,
      "all": false
     },
-    "eta": 167,
+    "eta": 171,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -390,9 +390,9 @@
      0.0028
     ],
     "toGo": [
-     165,
-     280,
-     331
+     168,
+     289,
+     330
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -401,7 +401,7 @@
      "p": 0.009333,
      "all": false
     },
-    "eta": 165,
+    "eta": 168,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -463,13 +463,13 @@
     ],
     "positions": [
      0.052667,
-     0.024692,
-     0.016133
+     0.023692,
+     0.0153
     ],
     "toGo": [
-     154,
-     268,
-     319
+     157,
+     277,
+     318
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -478,21 +478,21 @@
      "p": 0.052667,
      "all": false
     },
-    "eta": 154,
+    "eta": 157,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.016167
+    "position": 0.015125
    },
-   "todayFirst": "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
    "today": [
-    "Session 13 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
-    "Session 14 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
-    "Session 15 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+    "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
    ],
    "progress": {
-    "start": "12 sessions, A1 In 6 sessions since your last visit +12 mastered Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy A1 120 learned Still shaky kuweza kufanya kuna serikali baada kwenda mtoto kuchukua kuonekana kutoka suala Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "start": "12 sessions, A1 In 6 sessions since your last visit +12 mastered Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy A1 120 learned Still shaky kuweza kufanya kuna serikali baada kwenda mtoto kuchukua kuonekana kutoka suala Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
     "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy A1 150 learned Still shaky kuwa wakati mtandao kusema baada jambo haki kupiga kitu kupa nguvu dhidi Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
@@ -957,13 +957,13 @@
     ],
     "positions": [
      0.063333,
-     0.029615,
-     0.019333
+     0.028615,
+     0.0185
     ],
     "toGo": [
-     151,
-     265,
-     316
+     154,
+     273,
+     315
     ],
     "toGoTotal": 194,
     "currentGoal": {
@@ -972,12 +972,12 @@
      "p": 0.063333,
      "all": false
     },
-    "eta": 151,
+    "eta": 154,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.019167
+    "position": 0.018125
    },
    "items": {
     "items": 265,
@@ -1023,8 +1023,8 @@
     ],
     "toGo": [
      0,
-     96,
-     169
+     94,
+     156
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -1033,7 +1033,7 @@
      "p": 0.730769,
      "all": false
     },
-    "eta": 96,
+    "eta": 94,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1043,15 +1043,15 @@
     },
     "position": 0.35625
    },
-   "todayFirst": "Session 1 Goal 2 of 3 ≈ 96 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Familia ya Juma Level exam ready: A1 Start",
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 94 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Familia ya Juma Level exam ready: A1 Start",
    "today": [
-    "Session 1 Goal 2 of 3 ≈ 96 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Familia ya Juma Level exam ready: A1 Start",
-    "Session 2 Goal 2 of 3 ≈ 97 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Familia ya Juma Level exam ready: A1 Start",
-    "Session 3 Goal 2 of 3 ≈ 98 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Familia ya Juma Level exam ready: A1 Start"
+    "Session 1 Goal 2 of 3 ≈ 94 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read Familia ya Juma Level exam ready: A1 Start",
+    "Session 2 Goal 2 of 3 ≈ 95 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read Familia ya Juma Level exam ready: A1 Start",
+    "Session 3 Goal 2 of 3 ≈ 96 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read Familia ya Juma Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, A2 Goal 2 of 3 ≈ 96 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A2 Goal 2 of 3 ≈ 99 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered sentences 1 · reading 1 of 20 A2 380 learned Still shaky kuwa ndani tena kiasi kuandaa mchezo yai salama redio pigano mali mgomo Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 94 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 97 sessions daily life: directions, simple chat, short notices A1 0 of 600 mastered sentences 1 · reading 1 of 20 A2 380 learned Still shaky kuwa ndani tena kiasi kuandaa mchezo yai salama redio pigano mali mgomo Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -1508,8 +1508,8 @@
     ],
     "toGo": [
      0,
-     99,
-     171
+     97,
+     158
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -1518,7 +1518,7 @@
      "p": 0.713077,
      "all": false
     },
-    "eta": 99,
+    "eta": 97,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1599,8 +1599,8 @@
     "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read Uamuzi mgumu Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered sentences 1 · reading 0 of 20 Still shaky kupokea kiraia mgogoro kikosi kufariki uandishi mwanasheria mtalii jeraha kusomeka mwishowe milioni Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 30 B1 0 of 700 mastered reading 0 of 30 Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 30 B1 0 of 700 mastered sentences 1 · reading 0 of 30 Still shaky kupokea kiraia mgogoro kikosi kufariki uandishi mwanasheria mtalii jeraha kusomeka mwishowe milioni Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2056,9 +2056,9 @@
      0.06
     ],
     "toGo": [
-     115,
-     233,
-     284
+     117,
+     238,
+     280
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -2067,29 +2067,29 @@
      "p": 0.2,
      "all": false
     },
-    "eta": 115,
+    "eta": 117,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
      "pct": 25
     },
     "gateNote": "A2 waits · A1 at 25% known",
-    "gateOpensIn": 31,
+    "gateOpensIn": 32,
     "suggestPassage": {
      "id": "p0001",
      "lv": "A1"
     },
     "position": 0.05625
    },
-   "todayFirst": "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Familia ya Juma Start",
+   "todayFirst": "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read Familia ya Juma Start",
    "today": [
-    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Familia ya Juma Start",
-    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Familia ya Juma Start",
-    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Listen Recall Sentences Read Familia ya Juma Start"
+    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read Familia ya Juma Start",
+    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read Familia ya Juma Start",
+    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read Familia ya Juma Start"
    ],
    "progress": {
-    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 31 sessions. Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
-    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy A1 149 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 31 sessions. Still shaky kuona mji kuonekana mwanamke hapo neno kuleta tafadhali kusafiri Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy A1 149 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 33 sessions. Still shaky kuona mji kuonekana mwanamke hapo neno kuleta tafadhali kusafiri Show all Settings New material: on Dark theme Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2462,9 +2462,9 @@
      0.0596
     ],
     "toGo": [
-     115,
-     233,
-     284
+     117,
+     238,
+     280
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -2473,14 +2473,14 @@
      "p": 0.198667,
      "all": false
     },
-    "eta": 115,
+    "eta": 117,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
      "pct": 24
     },
     "gateNote": "A2 waits · A1 at 24% known",
-    "gateOpensIn": 31,
+    "gateOpensIn": 33,
     "suggestPassage": {
      "id": "p0002",
      "lv": "A1"

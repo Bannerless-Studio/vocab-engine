@@ -44,9 +44,9 @@
      0
     ],
     "toGo": [
-     174,
-     277,
-     331
+     188,
+     301,
+     335
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -55,22 +55,22 @@
      "p": 0,
      "all": false
     },
-    "eta": 174,
+    "eta": 188,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
     "position": 0
    },
-   "todayFirst": "한글 first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until a set is learned Learn 한글, sets 1–2 of 7 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
+   "todayFirst": "한글 first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 190 sessions survive a trip: greet, order, count, buy Review skipped until a set is learned Learn 한글, sets 1–2 of 7 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available",
    "today": [
-    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
-    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
-    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
+    "New here? Placement finds where to start. Take the placement test Session 1 Goal 1 of 3 ≈ 190 sessions survive a trip: greet, order, count, buy Review skipped until 5+ words are learned Learn A1, set 1 Listen skipped until something is learned Recall skipped until something is learned Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 2 Goal 1 of 3 ≈ 190 sessions survive a trip: greet, order, count, buy Review Learn A1, set 2 Listen Recall Sentences skipped until 8+ sentences are available Start",
+    "New here? Placement finds where to start. Take the placement test Session 3 Goal 1 of 3 ≈ 190 sessions survive a trip: greet, order, count, buy Review Learn A1, set 3 Listen Recall Sentences skipped until 8+ sentences are available Start"
    ],
    "progress": {
-    "start": "0 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 0 learned Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 30 learned Still shaky 하다 있다 없다 주다 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, A1 Goal 1 of 3 ≈ 190 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 0 learned Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A1 Goal 1 of 3 ≈ 190 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 30 learned Still shaky 하다 있다 없다 주다 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -395,9 +395,9 @@
      0.0024
     ],
     "toGo": [
-     172,
-     274,
-     329
+     186,
+     298,
+     333
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -406,7 +406,7 @@
      "p": 0.008,
      "all": false
     },
-    "eta": 172,
+    "eta": 186,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -471,13 +471,13 @@
     ],
     "positions": [
      0.056667,
-     0.026538,
-     0.017333
+     0.025538,
+     0.0165
     ],
     "toGo": [
-     159,
-     259,
-     315
+     173,
+     282,
+     318
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -486,22 +486,22 @@
      "p": 0.056667,
      "all": false
     },
-    "eta": 159,
+    "eta": 173,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.017292
+    "position": 0.01625
    },
-   "todayFirst": "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+   "todayFirst": "Session 13 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
    "today": [
-    "Session 13 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
-    "Session 14 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
-    "Session 15 Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
+    "Session 13 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 13 Listen Recall Sentences Start",
+    "Session 14 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 14 Listen Recall Sentences Start",
+    "Session 15 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy Review Learn A1, set 15 Listen Recall Sentences Start"
    ],
    "progress": {
-    "start": "12 sessions, A1 In 6 sessions since your last visit +17 mastered Goal 1 of 3 ≈ 160 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 120 learned Still shaky 되다 아니다 잘 좋아하다 먹다 어디 가장 아주 이야기 시작하다 사랑하다 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "15 sessions, A1 Goal 1 of 3 ≈ 150 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 150 learned Still shaky 되다 아니다 잘 모르다 좋아하다 사랑하다 후 부르다 손 잡다 내일 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "12 sessions, A1 In 6 sessions since your last visit +17 mastered Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 120 learned Still shaky 되다 아니다 잘 좋아하다 먹다 어디 가장 아주 이야기 시작하다 사랑하다 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "15 sessions, A1 Goal 1 of 3 ≈ 170 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 150 learned Still shaky 되다 아니다 잘 모르다 좋아하다 사랑하다 후 부르다 손 잡다 내일 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -966,13 +966,13 @@
     ],
     "positions": [
      0.071333,
-     0.033308,
-     0.021733
+     0.032308,
+     0.0209
     ],
     "toGo": [
-     154,
-     254,
-     310
+     166,
+     277,
+     313
     ],
     "toGoTotal": 171,
     "currentGoal": {
@@ -981,12 +981,12 @@
      "p": 0.071333,
      "all": false
     },
-    "eta": 154,
+    "eta": 166,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.021417
+    "position": 0.020375
    },
    "items": {
     "items": 263,
@@ -1035,8 +1035,8 @@
     ],
     "toGo": [
      0,
-     89,
-     165
+     99,
+     153
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -1045,7 +1045,7 @@
      "p": 0.730769,
      "all": false
     },
-    "eta": 89,
+    "eta": 99,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1055,15 +1055,15 @@
     },
     "position": 0.35625
    },
-   "todayFirst": "Session 1 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read 민수의 하루 Level exam ready: A1 Start",
+   "todayFirst": "Session 1 Goal 2 of 3 ≈ 99 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read 민수의 하루 Level exam ready: A1 Start",
    "today": [
-    "Session 1 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read 민수의 하루 Level exam ready: A1 Start",
-    "Session 2 Goal 2 of 3 ≈ 90 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read 민수의 하루 Level exam ready: A1 Start",
-    "Session 3 Goal 2 of 3 ≈ 91 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read 민수의 하루 Level exam ready: A1 Start"
+    "Session 1 Goal 2 of 3 ≈ 99 sessions daily life: directions, simple chat, short notices Review Learn A2, set 36 Listen Recall Sentences Read 민수의 하루 Level exam ready: A1 Start",
+    "Session 2 Goal 2 of 3 ≈ 99 sessions daily life: directions, simple chat, short notices Review Learn A2, set 37 Listen Recall Sentences Read 민수의 하루 Level exam ready: A1 Start",
+    "Session 3 Goal 2 of 3 ≈ 100 sessions daily life: directions, simple chat, short notices Review Learn A2, set 38 Listen Recall Sentences Read 민수의 하루 Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, A2 Goal 2 of 3 ≈ 89 sessions daily life: directions, simple chat, short notices 한글 0 / 47 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, A2 Goal 2 of 3 ≈ 91 sessions daily life: directions, simple chat, short notices 한글 0 / 47 taught · 0 mastered A1 0 of 600 mastered sentences 2 · reading 1 of 20 A2 380 learned Still shaky -의 -에서 또 작다 배 맞다 사실 흐르다 고객 거래 대답 시간 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, A2 Goal 2 of 3 ≈ 99 sessions daily life: directions, simple chat, short notices 한글 0 / 47 taught · 0 mastered A1 0 of 600 mastered reading 0 of 20 A2 350 learned Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, A2 Goal 2 of 3 ≈ 100 sessions daily life: directions, simple chat, short notices 한글 0 / 47 taught · 0 mastered A1 0 of 600 mastered sentences 2 · reading 1 of 20 A2 380 learned Still shaky -의 -에서 또 작다 배 맞다 사실 흐르다 고객 거래 대답 시간 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -1519,8 +1519,8 @@
     ],
     "toGo": [
      0,
-     91,
-     167
+     101,
+     154
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -1529,7 +1529,7 @@
      "p": 0.716154,
      "all": false
     },
-    "eta": 91,
+    "eta": 101,
     "gateHold": null,
     "gateNote": null,
     "gateOpensIn": null,
@@ -1613,8 +1613,8 @@
     "Session 3 All goals 99% follow a slow drama with subtitles Review Learn everything covered Listen Recall Sentences Read 어려운 결정 Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles 한글 0 / 47 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered reading 0 of 20 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles 한글 0 / 47 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 20 B1 0 of 700 mastered sentences 1 · reading 0 of 20 Still shaky 지금 일어나다 생기다 시작 올해 월요일 그들 숨 밝다 있다 나오다 마리 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, B1 All goals 100% follow a slow drama with subtitles 한글 0 / 47 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 30 B1 0 of 700 mastered reading 0 of 30 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 All goals 99% follow a slow drama with subtitles 한글 0 / 47 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered reading 0 of 30 B1 0 of 700 mastered sentences 1 · reading 0 of 30 Still shaky 지금 일어나다 생기다 시작 올해 월요일 그들 숨 밝다 있다 나오다 마리 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2058,8 +2058,8 @@
      0.06
     ],
     "toGo": [
-     119,
-     224,
+     132,
+     243,
      280
     ],
     "toGoTotal": null,
@@ -2069,7 +2069,7 @@
      "p": 0.2,
      "all": false
     },
-    "eta": 119,
+    "eta": 132,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
@@ -2083,15 +2083,15 @@
     },
     "position": 0.05625
    },
-   "todayFirst": "한글 first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn 한글, sets 1–2 of 7 A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read 민수의 하루",
+   "todayFirst": "한글 first: learn to read the script, symbol by symbol, before A1. If you can already read it, skip it. You can change this later in Progress. Learn the script I can read it, skip Session 21 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn 한글, sets 1–2 of 7 A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read 민수의 하루",
    "today": [
-    "Session 21 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read 민수의 하루 Start",
-    "Session 22 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 32 sessions. Listen Recall Sentences Read 민수의 하루 Start",
-    "Session 23 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 32 sessions. Listen Recall Sentences Read 민수의 하루 Start"
+    "Session 21 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Listen Recall Sentences Read 민수의 하루 Start",
+    "Session 22 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 33 sessions. Listen Recall Sentences Read 민수의 하루 Start",
+    "Session 23 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy Review Learn A2 opens at 70% of A1 known. Now 24%, ≈ 33 sessions. Listen Recall Sentences Read 민수의 하루 Start"
    ],
    "progress": {
-    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
-    "end": "23 sessions, A1 Goal 1 of 3 ≈ 120 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 147 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 32 sessions. Still shaky 오다 보다 -에 보내다 일어나다 자주 빠르다 설명하다 미안합니다 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
+    "start": "20 sessions, A1 So far 150 mastered Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 150 of 600 mastered reading 0 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 25%, ≈ 32 sessions. Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress",
+    "end": "23 sessions, A1 Goal 1 of 3 ≈ 130 sessions survive a trip: greet, order, count, buy 한글 0 / 47 taught · 0 mastered A1 147 of 600 mastered reading 1 of 20 A2 0 learned A2 opens at 70% of A1 known. Now 24%, ≈ 33 sessions. Still shaky 오다 보다 -에 보내다 일어나다 자주 빠르다 설명하다 미안합니다 Show all Settings New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
@@ -2464,8 +2464,8 @@
      0.0588
     ],
     "toGo": [
-     120,
-     225,
+     133,
+     244,
      280
     ],
     "toGoTotal": null,
@@ -2475,14 +2475,14 @@
      "p": 0.196,
      "all": false
     },
-    "eta": 120,
+    "eta": 133,
     "gateHold": {
      "lv": "A2",
      "prev": "A1",
      "pct": 24
     },
     "gateNote": "A2 waits · A1 at 24% known",
-    "gateOpensIn": 32,
+    "gateOpensIn": 33,
     "suggestPassage": {
      "id": "p0002",
      "lv": "A1"

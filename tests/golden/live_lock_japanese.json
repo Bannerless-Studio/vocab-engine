@@ -515,13 +515,13 @@
     ],
     "positions": [
      0.032143,
-     0.015021,
-     0.009846
+     0.014021,
+     0.009013
     ],
     "toGo": [
      524,
-     533,
-     553
+     534,
+     554
     ],
     "toGoTotal": null,
     "currentGoal": {
@@ -535,7 +535,7 @@
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.008231
+    "position": 0.007189
    },
    "todayFirst": "Session 13 Goal 1 of 3 ≈ 520 sessions survive a trip: greet, order, count, buy Review Learn A1, set 9 Listen Recall Sentences Start",
    "today": [
@@ -1001,13 +1001,13 @@
     ],
     "positions": [
      0.045732,
-     0.021081,
-     0.013784
+     0.020081,
+     0.012951
     ],
     "toGo": [
      516,
-     525,
-     547
+     527,
+     548
     ],
     "toGoTotal": 270,
     "currentGoal": {
@@ -1021,7 +1021,7 @@
     "gateNote": null,
     "gateOpensIn": null,
     "suggestPassage": null,
-    "position": 0.010046
+    "position": 0.009004
    },
    "items": {
     "items": 250,
@@ -1640,8 +1640,8 @@
     "Session 3 Goal 1 of 3 ≈ 380 sessions survive a trip: greet, order, count, buy Review Learn 漢字 A1, set 3 of 47 Listen Recall Sentences Read 一人で暮らして Level exam ready: A1 Start"
    ],
    "progress": {
-    "start": "0 sessions, B1 Goal 1 of 3 ≈ 370 sessions survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered characters only 0 of 585 · reading 0 of 20 B1 0 of 700 mastered characters only 0 of 557 · reading 0 of 20 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
-    "end": "3 sessions, B1 Goal 1 of 3 ≈ 380 sessions survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered characters only 0 of 585 · sentences 1 · reading 0 of 20 B1 0 of 700 mastered characters only 0 of 557 · reading 0 of 20 Still shaky ほんとう しんじる ひみつ たび ようい じんこう しょくぎょう 〜つ とる ねる し あいて Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
+    "start": "0 sessions, B1 Goal 1 of 3 ≈ 370 sessions survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered characters only 0 of 585 · reading 0 of 30 B1 0 of 700 mastered characters only 0 of 557 · reading 0 of 30 Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress",
+    "end": "3 sessions, B1 Goal 1 of 3 ≈ 380 sessions survive a trip: greet, order, count, buy ひらがな 0 / 108 taught · 0 mastered カタカナ 0 / 121 taught · 0 mastered A1 0 of 600 mastered A2 0 of 700 mastered characters only 0 of 585 · sentences 1 · reading 0 of 30 B1 0 of 700 mastered characters only 0 of 557 · reading 0 of 30 Still shaky ほんとう しんじる ひみつ たび ようい じんこう しょくぎょう 〜つ とる ねる し あいて Show all Settings Show reading New material: on Dark theme Script primer on Script primer off Changes what Today's Learn step teaches next. Nothing you've learned is lost. Mix known characters into sentences Export progress Import progress Load Placement test Reset all progress"
    },
    "words": {
     "start": {
