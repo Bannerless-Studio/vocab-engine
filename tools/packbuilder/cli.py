@@ -49,6 +49,8 @@ def main(argv=None):
     pg.add_argument("repo", help="language repo root, or a flat pack dir (packs/zh)")
     pg.add_argument("--lang", help="language code (default: pack/pack.json key)")
     pg.add_argument("--check", action="store_true", help="report coverage/validation only, write nothing")
+    pg.add_argument("--emit", metavar="DIR", help="write passages.json + REPORT_passages.md into DIR, leave the repo untouched")
+    pg.add_argument("--src", metavar="FILE", help="read this passages_src.json instead of the repo's (scratch runs with --emit)")
     sc = sub.add_parser("script", help="script primer: pack/script.json + pack.json script key")
     sc.add_argument("repo", help="language repo root (holds pack/)")
     sc.add_argument("--lang", required=True, help="language code (packbuilder/langs/<code>.py)")
@@ -77,7 +79,7 @@ def main(argv=None):
 
     if args.cmd == "passages":
         from .passages import main as passages_main
-        return passages_main(args.repo, args.lang, args.check)
+        return passages_main(args.repo, args.lang, args.check, args.emit, args.src)
 
     if args.cmd == "enrich":
         from .core.enrich import main as enrich_main

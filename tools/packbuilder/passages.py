@@ -234,6 +234,10 @@ class Linker:
             lex._passage_wrapped = True
         self.tagged = {}     # (text, en, names) -> tokens
         self.lowered = {}    # (text, en, names) -> indices of tokens truecase_after lowered
+        # lemmas of capitalised tokens a resolver read as a name (PROPN) that the
+        # tagger did not tag PROPN and no declared name covers, left out of the
+        # pack: classify counts them as out-of-pack, run reads the set per passage
+        self.cap_oop = set()
 
     def pretag(self, items):
         """Tag (text, en) pairs, or (text, en, names) triples, in one tagger run (one model load; Stanza
@@ -341,8 +345,11 @@ class Linker:
 
     def classify(self, toks, en=None, lowered=()):
         """Per counted token: (surface, lemma, word id or None, may link, token index).
-        Names (capitalised), numerals, punctuation and symbols are skipped
-        (not counted). A lowercase token the tagger calls PROPN is counted.
+        Names, numerals, punctuation and symbols are skipped (not counted). A
+        name is a capitalised token the tagger tags PROPN (declared names are
+        retagged first); a capitalised token only the resolver reads as PROPN
+        is counted, and out-of-pack when it links nothing. A lowercase token
+        the tagger calls PROPN is counted.
         A token with no pack id by its reading falls back to:
         - the pack phrase it sits in ("favor" of "por favor", "embargo" of
           "sin embargo"): that phrase's id;
@@ -397,7 +404,14 @@ class Linker:
                         r = rj
                         break
             cap = text_t[:1].isupper()
-            name = (upos == "PROPN" or (r is not None and r[1] == "PROPN")) and cap
+            # a name is a token the tagger tags PROPN (a declared name is retagged
+            # PROPN before this) or the dictionary lists as a proper name; a
+            # resolver's PROPN reading alone is not one (de: an unlisted
+            # capitalised noun, Taxi, resolves to PROPN)
+            name = upos == "PROPN" and cap
+            soft_name = cap and not name and r is not None and r[1] == "PROPN"
+            if soft_name and any(e["p"] == "name" for e in self.lexicon.E.get(low, ())):
+                name, soft_name = True, False      # the dictionary lists it as a proper name (Lena, Wagner)
             if name or (sp.caps_mark_names and not was_initial and cap):
                 continue
             if r is not None and r[1] == "NUM":
@@ -449,6 +463,9 @@ class Linker:
                 and i not in no_link        # spec.passage_no_link: ru "друг другу" is not friend
             if wid is None and i in uncounted:
                 continue
+            if wid is None and soft_name:
+                fold = getattr(sp, "span_fold", None) or (lambda x: x)
+                self.cap_oop.add(fold(lem))
             out.append((text_t, lem, wid, may_link, i))
         return out
 
@@ -569,7 +586,20 @@ class Linker:
                 if wid not in ws and wid not in extra:
                     extra.append(wid)
         ids = ws + extra
-        return ids, cl, make_spans(text, offsets, recs, ids), claimed
+        spans = make_spans(text, offsets, recs, ids)
+        return order_words(ids, spans), cl, spans, claimed
+
+
+def order_words(ids, spans):
+    """A sentence's `words` in a deterministic order: by the start of the
+    word's first span, then id; a word with no span after all spanned ones,
+    by id. Independent of the order the link passes found them in, so a
+    builder change never reorders identical id sets."""
+    first = {}
+    for a, _b, wid in spans:
+        if wid not in first or a < first[wid]:
+            first[wid] = a
+    return sorted(dict.fromkeys(ids), key=lambda w: (w not in first, first.get(w, 0), w))
 
 
 def load_span_glosses(tools_dir, shipped):
@@ -701,10 +731,10 @@ def shipped_level_errors(repo, level_ids, words, passages):
     return list(dict.fromkeys(errors))
 
 
-def run(spec, check_only=False, out=sys.stdout):
+def run(spec, check_only=False, out=sys.stdout, emit=None, src_path=None):
     repo = spec.repo
     tools_dir, pack_dir = layout(repo)
-    src = json.loads((tools_dir / "passages_src.json").read_text())
+    src = json.loads((Path(src_path) if src_path else tools_dir / "passages_src.json").read_text())
     rules = {**DEFAULT_RULES, **src.get("rules", {})}
     shipped = {w["id"]: w for w in json.loads((pack_dir / "words.json").read_text())}
     for w in shipped.values():
@@ -724,6 +754,11 @@ def run(spec, check_only=False, out=sys.stdout):
     n_spans = n_ids = 0
     unplaced = []       # (passage id, sentence index, headword, id) linked but with no span
     ids = set()
+    # passage ids already shipped: an undeclared out-of-pack capitalised noun
+    # (Linker.cap_oop) is a warning there and an error in a new passage
+    shipped_pids = set()
+    if (pack_dir / "passages.json").exists():
+        shipped_pids = {x["id"] for x in json.loads((pack_dir / "passages.json").read_text())}
     # a linker's declared(p) (zh) widens the per-passage names into its own
     # segmentation units (names plus declared oop words)
     names_of = {id(p): lk.declared(p) if hasattr(lk, "declared") else
@@ -752,6 +787,10 @@ def run(spec, check_only=False, out=sys.stdout):
         sent_toks = []
         linked = 0
         used_oop = set()     # declared oop lemmas met as names or in questions/options
+        cap_oop = getattr(lk, "cap_oop", set())
+        cap_oop.clear()
+        soft = pid in shipped_pids
+        warns = []
         for t, en in p["sentences"]:
             toks = lk.tag(t, en, names)
             sent_toks.append(toks)
@@ -779,6 +818,9 @@ def run(spec, check_only=False, out=sys.stdout):
         if cov < rules["coverage"][lv]:
             perr.append(f"coverage {cov:.3f} < {rules['coverage'][lv]}")
         unlisted = sorted(set(oop) - set(oop_ok))
+        if soft:
+            warns += [f"out-of-pack lemma without a reason: {oop_name.get(k, k)}" for k in unlisted if k in cap_oop]
+            unlisted = [k for k in unlisted if k not in cap_oop]
         if unlisted:
             perr.append(f"out-of-pack lemmas without a reason: {[oop_name.get(k, k) for k in unlisted]}")
         # a linker's n_words (zh, unspaced): the sentences' tokens after segmentation
@@ -826,7 +868,9 @@ def run(spec, check_only=False, out=sys.stdout):
                     lem = ofold(lem)
                     if wid is None and lem in oop_ok:
                         used_oop.add(lem)
-                    if wid is None and lem not in oop_ok:
+                    if wid is None and lem not in oop_ok and soft and lem in cap_oop:
+                        warns.append(f"out-of-pack {lem!r} in {qt!r}")
+                    elif wid is None and lem not in oop_ok:
                         qe.append(f"out-of-pack {lem!r} in {qt!r}")
                     elif wid is not None and lv_rank[lv_of[wid]] > lv_rank[lv]:
                         above.setdefault(lv_of[wid], set()).add(shipped[wid]["lemma"])
@@ -899,9 +943,11 @@ def run(spec, check_only=False, out=sys.stdout):
                      "counted": len(counted), "link": linked / len(counted) if counted else 0.0, "oop": dict(sorted((oop_name.get(k, k), n) for k, n in oop.items())),
                      "oop_reason": p.get("oop", {}),
                      "above": {k: sorted(v) for k, v in sorted(above.items())},
-                     "q": Counter(q["type"] for q in qs), "err": perr, "note": list(dict.fromkeys(note))})
+                     "q": Counter(q["type"] for q in qs), "err": perr, "note": list(dict.fromkeys(note)), "warn": list(dict.fromkeys(warns))})
         errors += [f"{pid}: {e}" for e in perr]
     for r in rows:
+        for w_ in r["warn"]:
+            print(f"warning: {r['id']}: {w_} (shipped passage: declare it in oop at the next pass)", file=out)
         flag = "  <-- " + "; ".join(r["err"]) if r["err"] else ""
         print(f"{r['id']} {r['lv']} w={r['words']:3d} cov={r['cov']:.3f} link={r['link']:.3f} oop={r['oop']} above={r['above']}{flag}",
               file=out)
@@ -931,8 +977,14 @@ def run(spec, check_only=False, out=sys.stdout):
         if errors:
             print("passages: not writing pack/passages.json (fix the errors first)", file=out)
             return 1
-        write_json(pack_dir / "passages.json", passages)
-        write_report(repo, rows, rules, tools_dir, getattr(spec, "passage_unspaced", False), extra)
+        if emit:        # a scratch copy: passages.json and REPORT_passages.md land in DIR, the repo is untouched
+            emit = Path(emit)
+            emit.mkdir(parents=True, exist_ok=True)
+            write_json(emit / "passages.json", passages)
+            write_report(repo, rows, rules, emit, getattr(spec, "passage_unspaced", False), extra)
+        else:
+            write_json(pack_dir / "passages.json", passages)
+            write_report(repo, rows, rules, tools_dir, getattr(spec, "passage_unspaced", False), extra)
         print(f"passages: wrote {len(passages)} passages", file=out)
     return 1 if errors else 0
 
@@ -982,6 +1034,10 @@ def write_report(repo, rows, rules, tools_dir=None, unspaced=False, extra=()):
         lines += ["", "Title words, and question/option words the budget does not count (a numeral-like",
                   "pack word), that are out of the pack or above the passage's level (report only;",
                   "the budget rule above is unchanged):", ""] + notes
+    warns = [f"- {r['id']}: " + "; ".join(r["warn"]) for r in rows if r.get("warn")]
+    if warns:
+        lines += ["", "Out-of-pack capitalised nouns the tagger does not tag PROPN, undeclared in shipped",
+                  "passages (warning only; an error in a new passage id): declare them in oop.", ""] + warns
     if extra:
         lines += [""] + list(extra)
     path = tools_dir / "REPORT_passages.md"
@@ -991,9 +1047,9 @@ def write_report(repo, rows, rules, tools_dir=None, unspaced=False, extra=()):
     path.write_text("\n".join(lines) + "\n\n" + MANUAL_MARK + (manual or "\n"))
 
 
-def main(repo, lang=None, check_only=False):
+def main(repo, lang=None, check_only=False, emit=None, src_path=None):
     from .langs import get_spec
     repo = Path(repo).resolve()
     if lang is None:
         lang = json.loads((layout(repo)[1] / "pack.json").read_text())["key"]
-    return run(get_spec(lang, str(repo)), check_only)
+    return run(get_spec(lang, str(repo)), check_only, emit=emit, src_path=src_path)
