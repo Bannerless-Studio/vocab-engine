@@ -544,7 +544,7 @@ class Arabic(LanguageSpec):
         TATOEBA_ENG[0]: TATOEBA_ENG[1],
         TATOEBA_AUDIO[0]: TATOEBA_AUDIO[1],
     }
-    versions = {"corpus": "c1", "tag": "t45", "lex": "l1"}
+    versions = {"corpus": "c1", "tag": "t46", "lex": "l1"}
     fix_links_floor = 2     # a homograph-link drop never leaves a word under 2 sentences
 
     # typed production on: lenient accents fold harakat/tatweel/ZWNJ/ZWJ on
@@ -1069,6 +1069,12 @@ class Arabic(LanguageSpec):
         - a geminate/assimilated imperfect read as a defective verb (أشك: شَكَّ,
           not شكا; تدعه: وَدَعَ "let", not دعا)."""
         s = lfold(bare)
+        hit = self._exact_stem(raw, lem, upos, m)
+        if hit:
+            return hit
+        hit = self._hollow_jussive(bare, lem, upos, m)
+        if hit:
+            return hit
         if m.get("Prc1") in ("bi_prep", "li_prep", "ka_prep"):
             for e in ("",) + ENC_SUFFIX:
                 c = s[:-len(e)] if e and s.endswith(e) else (s if not e else None)
@@ -1138,6 +1144,79 @@ class Arabic(LanguageSpec):
                 if cands:
                     return max(cands, key=lambda c: (cnt.get(c, 0), c)), "VERB"
         return lem, upos
+
+    def _written_cores(self, raw, m):
+        """The written word with the analysis' proclitics and enclitic taken off, hamza kept
+        (fold, not lfold): the surface stem candidates, longest first."""
+        t = raw
+        if m.get("Prc2") not in (None, "", "0", "na") and t[:1] in "وف" and len(t) > 3:
+            t = t[1:]
+        if m.get("Prc0") == "Al_det":
+            for p in ("لل", "بال", "كال", "ال"):
+                if t.startswith(p) and len(t) - len(p) >= 2:
+                    t = t[len(p):]
+                    break
+        elif m.get("Prc1") in ("bi_prep", "li_prep", "ka_prep") and t[:1] in "بلك" and len(t) > 3:
+            t = t[1:]
+        out = [t]
+        if m.get("Enc0") not in (None, "", "0", "na"):
+            out += [t[:-len(e)] for e in ENC_SUFFIX if t.endswith(e) and len(t) - len(e) >= 3]
+        if m.get("Number") in ("Dual", "Plur"):
+            # the dual and sound plural endings (الأذنان, المعلمين, ...) come off the stem too
+            out += [x[:-2] for x in list(out) if x.endswith(("ان", "ين", "ات", "ون")) and len(x) - 2 >= 3]
+        return out
+
+    def _exact_stem(self, raw, lem, upos, m):
+        """CAMeL's lemma is a different lexeme than the word the writer's own spelling names:
+        - hamza seat: the text writes أ or إ and CAMeL's spelling-variant analysis (Src spvar)
+          reads the other seat (للأذن "for the ear" read as إذن "permission"; الإمام read as أمام,
+          ألف "thousand" as إلف). The two seats are lexical (أُذُن, إِذْن), so the written one
+          decides when it is a headword of the same group. A madda or a missing hamza stays
+          CAMeL's call (آسف / أسف are written both ways for one word);
+        - the plural of an elative (أفاعل: أقارب "relatives", read as the elative أقرب "nearer")
+          that has a headword of its own."""
+        if upos not in ("NOUN", "ADJ"):
+            return None
+        cores = self._written_cores(raw, m)
+        if m.get("Src") == "spvar":
+            for c in cores:
+                if c != lem and len(c) >= 3 and lfold(c) == lfold(lem) and c[:1] in "أإ" and lem[:1] in "أإ" and \
+                        c[:1] != lem[:1] and c[1:] == lem[1:] and not self._plural_form(c) and \
+                        not self._plural_form(lem):
+                    for u in (upos, "ADJ" if upos == "NOUN" else "NOUN"):
+                        if self._has(c, POS_KAIKKI[u]):
+                            return c, u
+        if m.get("Number") == "Plur" and len(lem) == 4 and lem[0] == "أ" and self._has(lem, ("adj",)):
+            plural = lem[:2] + "ا" + lem[2:]
+            if plural in cores and self._has(plural, ("noun", "adj")):
+                return plural, "NOUN" if self._has(plural, ("noun",)) else "ADJ"
+        return None
+
+    def _plural_form(self, w):
+        """The spelling is also a plural of another word in the dictionary (أخوة "brotherhood" and
+        the plural of أخ): the written seat settles nothing there."""
+        return any(not r[5] and PLURAL_OF_RE.search(r[6] or "") for r in self._info().get(w, []))
+
+    def _hollow_jussive(self, bare, lem, upos, m):
+        """A hollow verb's apocopated imperfect (تخف: خاف, لم يقم: قام) read as the form IV verb whose
+        jussive spells the same two letters (أخفى, أقام): the written form is the same, so
+        the verb the corpus lemmatises more often decides (خاف 90, أخفى 65: CAMeL's own errors sit in both counts)."""
+        if upos != "VERB" or m.get("Aspect") not in ("Imp", "Cmd") or len(lem) != 4 or lem[0] != "أ":
+            return None
+        core = lfold(bare)
+        core = core[1:] if core[:1] in "وف" and len(core) > 3 else core
+        if m.get("Enc0") not in (None, "", "0", "na"):
+            core = next((core[:-len(e)] for e in ENC_SUFFIX if core.endswith(e) and len(core) - len(e) >= 3), core)
+        if len(core) != 3 or core[0] not in "يتنا":
+            return None
+        cnt = self._verb_counts()
+        skeleton = {"ىي": lem[1] + lem[2], "ا": lem[1] + lem[3]}
+        for end, letters in skeleton.items():
+            if (lem[3] in end if end == "ىي" else lem[2] == end) and core[1:] == lfold(letters):
+                cand = letters[0] + "ا" + letters[1]
+                if self._has(cand, ("verb",)) and cnt.get(cand, 0) >= max(5, cnt.get(lem, 0)):
+                    return cand, "VERB"
+        return None
 
     def _noun_head(self, w):
         """A usable noun headword, or a verbal noun kaikki has only as "verbal
@@ -1320,6 +1399,8 @@ class Arabic(LanguageSpec):
             elif t[1] == "لم" and t[2] == "PART" and re.search(r"\bwhy\b", low) and \
                     (i + 1 == len(toks) or toks[i + 1][2] != "VERB" or "Aspect=Imp" not in toks[i + 1][3]):
                 t[1], t[2] = "لم", "ADV"    # لِمَ "why" (+ past or a noun), not لَمْ + jussive
+        for i, t in enumerate(toks):
+            self._modified_noun(toks, i, t)
         # unhamzated ان/انه/اني... opening a clause (sentence start, after
         # punctuation or قال) is إنّ; BERT reads أنّ
         for i, t in enumerate(toks):
@@ -1338,6 +1419,23 @@ class Arabic(LanguageSpec):
                     ok = [c for c, _, _ in VERB_COMP_INDEX[t[1]] if _en_supports(COMPOUNDS[c][0], words)]
                     t[3] = (t[3] + "|" if t[3] else "") + "EnComp=" + ";".join(ok)
         return toks
+
+    def _modified_noun(self, toks, i, t):
+        """fix_token reads an accusative noun the dictionary also has as an adverb as that adverb
+        (يوما "one day"). Before an adjective or numeral that agrees with it (قضينا يوما هادئا,
+        اختر شخصا واحدا) and after كم it is the noun; a bare adverbial use (يعمل ليلا, يوما ما)
+        keeps the adverb. An adjective that is itself an adverb (تقريبا نهائيا) modifies the verb."""
+        if len(t) < 4 or t[2] != "ADV" or "Raw=noun" not in t[3] or not t[0].endswith("ا") or len(t[0]) < 4:
+            return
+        nxt = toks[i + 1] if i + 1 < len(toks) else None
+        counted = i and len(toks[i - 1]) > 2 and toks[i - 1][1] == "كم"        # كم يوما: the counted noun
+        if not counted and (nxt is None or len(nxt) < 4 or nxt[2] not in ("ADJ", "NUM") or not nxt[0].endswith("ا") or
+                            any(self._has(k, ("adv",)) for k in self._lfold_index().get(nxt[0], ()))):
+            return
+        base = t[0][:-1]
+        if any(r[0] == "noun" and r[5] and not (r[6] or "").startswith("verbal noun of")
+               for r in self._info().get(base, [])):
+            t[1], t[2] = base, "NOUN"
 
     def fallback_lemma(self, surface, lemma):
         """A frequency-list surface the tagged corpus never shows: the CAMeL MLE
@@ -1816,6 +1914,10 @@ class Arabic(LanguageSpec):
             w = wid.get(i)
             if w is None or w["pos"] not in ("noun", "verb", "adj", "adv") or " " in w["lemma"]:
                 continue
+            mine = [t for t in toks if len(t) > 2 and fold(t[1]) == fold(w["lemma"]) and t[2] != "PROPN"]
+            if mine and all(self._cross_pos_unsupported(t[2], w, en) for t in mine):
+                drop.add(i)
+                continue
             free = words - set().union(*(v for j, v in claim.items() if j != i))
             # a token spelling a name wins even when the English has the word
             # elsewhere (يومي Yumi, بيتي Betty: the word plus ي in "the day after tomorrow")
@@ -1941,8 +2043,8 @@ class Arabic(LanguageSpec):
             for r in info.get(k, []):
                 if not r[5] or r[0] not in ("noun", "verb", "adj", "adv"):
                     continue
-                if k == lem and r[7] and _vnorm(r[7]) in self._own_vocs(w):
-                    continue            # the pack word's own reading (any POS: خَطَأ noun/adj)
+                if k == lem and r[7] and _vnorm(r[7]) in self._own_vocs(w) and (r[0] == "verb") == (w["pos"] == "verb"):
+                    continue            # the pack word's own reading (noun/adj alike: خَطَأ; a verb never: أَحْسَن)
                 if r[7] and _vnorm(r[7]) in {_vnorm(v) for v in re.findall(f"[{LET}{MARKS}]+", own_full)} and \
                         (k, r[0]) not in self._pack_lemma_pos():
                     continue            # the verb of its own verbal noun (شَدَّ for شدة), unless a card of its own (فعل)
@@ -2012,6 +2114,27 @@ class Arabic(LanguageSpec):
         return out
 
     noun_head_template = "ar-noun"
+
+    def _cross_pos_unsupported(self, group, word, en):
+        """A link that crosses between a verb and a noun/adjective/adverb (the tagger read one,
+        the pack has the other under the same spelling) is the verbal noun and its verb (السكن,
+        التأخر, فتح: the same word family) or a different lexeme: وعم الصمت "silence prevailed"
+        read the verb عمّ, the pack has only the noun عم "uncle"; أحسن "best" (adjective) against
+        the verb "do well". Only the first stays, and so does a pair whose gloss the sentence
+        English carries (a tagger error: ذهبا "went"). No English (questions, options) means no
+        judgement."""
+        if not en or (group == "VERB") == (word["pos"] == "verb") or \
+                group not in ("VERB", "NOUN", "ADJ", "ADV") or word["pos"] not in ("verb", "noun", "adj", "adv"):
+            return False
+        if any(r[0] == "noun" and "verbal noun of" in (r[6] or "") for r in self._info().get(fold(word["lemma"]), [])):
+            return False
+        words = set(re.findall(r"[a-z]+", en.lower()))
+        return not _en_supports(word["en"], words)
+
+    def passage_fallback_ok(self, lexicon, reading, word, en=""):
+        """Passages: the lemma fallback across verb and noun/adjective/adverb needs a verbal noun
+        and its verb, or English that carries the pack word (_cross_pos_unsupported)."""
+        return not self._cross_pos_unsupported(reading[1], word, en)
 
     def noun_display(self, lemma, gender, plural, en):
         """Indefinite, bare. A feminine noun that does not end in ة says so."""
