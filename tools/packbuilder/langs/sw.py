@@ -198,6 +198,13 @@ for _r in REL_SUFFIXES:
     CLOSED.setdefault("na" + _r, ("na", "CCONJ"))            # nacho, nayo: "with it"
     for _sm in ("ni", "u", "a", "tu", "m", "wa", "i", "li", "ya", "ki", "vi", "zi", "ku", "pa"):
         CLOSED.setdefault(_sm + "na" + _r, ("na", "VERB"))  # ninacho, unayo: "have it"
+# SM + tense + REL + na + REL (alizonazo "which she had", aliyenacho, anayenayo): the relative of
+# "have", one word. Without it the -na is read as a reciprocal and the tail as the stem (zona -> zoa).
+# Both RELs are the head noun's concord, so they are the same.
+for _sm in ("ni", "u", "a", "tu", "m", "wa", "i", "li", "ya", "ki", "vi", "zi", "ku", "pa"):
+    for _t in ("li", "na", "taka"):
+        for _r in REL_SUFFIXES:
+            CLOSED.setdefault(_sm + _t + _r + "na" + _r, ("na", "VERB"))
 # SM + li + REL + locative (aliyeko, iliyopo, walioko): "who/which is (there)" -> kuwa
 # SM + si + REL (+ locative) (asiye, isiyo, wasio, kisichokuwa): "who/which is not" -> never linked
 _REL_OF = {"a": "ye", "u": "o", "wa": "o", "i": "yo", "li": "lo", "ya": "yo", "ki": "cho", "vi": "vyo",
@@ -253,6 +260,32 @@ OM_HOMOGRAPHS = (
     ("tupa", "pa", "pa", re.compile(r"\bthr[eo]w|\bthrown\b|\btoss|\bdump|\bdiscard|\bcast\b|\bwaste", re.I),
      re.compile(r"\bg[ai]ve[ns]?\b|\bgiving\b|\bprovid|\boffer|\bgrant", re.I)),
 )
+
+
+# Sense homographs: a surface whose second sense has no pack word (the pack teaches sare "uniform",
+# not "draw"; lango "gate", not "goal"; hifadhi the verb "preserve", not the noun "park"; mwongozo
+# "guideline", not the person). The analyser reads the surface as X (known, never linked, so neither
+# the lemma nor the cross-POS fallback links the taught sense) from its neighbours; fix_links does the
+# same from the English of a corpus sentence. "prev"/"nxt" are the neighbour's lemma / surface, "near"
+# the lemmas of the two words before (a team's sare and a stadium's lango stay the taught sense, so no
+# clause-wide cue).
+GOAL_NEAR = {"mpira", "kipa", "golikipa", "bao", "mabao", "goli"}
+SENSE_SPLITS = {
+    "sare": {"prev": {"kwa"}, "nxt": {"tasa", "#"},
+             "other": re.compile(r"\b(?:draws?|drew|drawn|ties|tied|stalemate)\b", re.I),
+             "own": re.compile(r"\buniforms?\b", re.I)},
+    "lango": {"near": GOAL_NEAR,
+              "other": re.compile(r"\bgoals?(?:posts?|keeper)?\b|\bnet\b", re.I),
+              "own": re.compile(r"\bgates?\b|\bportal|\bdoor|\bentrance", re.I)},
+    "hifadhi": {"prev": {"katika", "kwenye", "a", "kwa", "ndani", "hadi", "mpaka"}, "nxt": {"ya"},
+                "other": re.compile(r"\bparks?\b|\breserves?\b|\bsanctuar|\bnature\b", re.I),
+                "own": re.compile(r"\bpreserv|\bkeep|\bsav(?:e|es|ed|ing)\b|\bstor(?:e|es|ed|ing)\b|\bprotect|"
+                                  r"\bconserv|\bback\s?up\b|\bsafekeep", re.I)},
+    "mwongozo": {"agent": True,
+                 "other": re.compile(r"\bguides?\b", re.I),
+                 "own": re.compile(r"\bguidelines?\b|\bguidance\b|\bguidebooks?\b|\bmanuals?\b|\bhandbooks?\b|"
+                                   r"\binstructions?\b|\bdirections?\b|\bguides? (?:to|for|on|in|of)\b", re.I)},
+}
 
 
 def _has_object_prefix(prefix):
@@ -813,6 +846,12 @@ class Analyser:
         if finals == "e" and rest.endswith("a"):
             return None     # a subjunctive of an -a verb ends in -e: i-menyesha is i-me-nyesha
         if rest in self.verb:
+            # a dictionary passive folded into its base that is the passive of an -ea stem: chochewa
+            # is chochea + -wa (kept as its own word), not chocha + -wa
+            if rest.endswith("ewa") and len(rest) > 5 and self.verb[rest] != rest:
+                ea = self.verb.get(rest[:-3] + "ea")
+                if ea and ea != self.verb[rest] and self.verb_raw.get(rest, ("", ""))[1] == "passive":
+                    return ea, False
             return self.verb[rest], False
         cands = [rest]
         if rest[-1:] in finals and rest[-1:] in "ie":
@@ -975,7 +1014,7 @@ class Analyser:
         """analyse with a cache: context matters only for CONTEXT_WORDS and
         adjective forms (after a noun)."""
         memo = self.__dict__.setdefault("_memo", {})
-        if low in self.CONTEXT_WORDS or (prev is None and nxt in IMP_NEXT) or \
+        if low in self.CONTEXT_WORDS or low in SENSE_SPLITS or (prev is None and nxt in IMP_NEXT) or \
                 (prev is not None and prev[0] == "tafadhali"):
             key = (low, prev, prev2, nxt, tuple(right) if right is not None else None)
         elif low in self.adj_form or "adj" in self.other.get(low, ()):
@@ -1055,6 +1094,19 @@ class Analyser:
                 return "kuwa", "SCONJ", {}
         return verb
 
+    def sense_other(self, low, prev, prev2, right):
+        """low (a SENSE_SPLITS surface) is in the sense the pack has no word for, by its neighbours."""
+        cue = SENSE_SPLITS[low]
+        nxt = right[0] if right else None
+        if prev is not None and prev[0] in cue.get("prev", ()) or nxt in cue.get("nxt", ()):
+            return True
+        near = cue.get("near", ())
+        if near and any(p is not None and p[0] in near for p in (prev, prev2)):
+            return True
+        # mwongozo wetu alituongoza: a person has an animate subject marker (a-, wa-); a guideline takes u-
+        return bool(cue.get("agent") and len(right) > 1 and right[0] in POSS_FORMS and
+                    (right[1][:1] == "a" or right[1][:2] == "wa") and self._finite(right[1]))
+
     def analyse(self, low, prev=None, prev2=None, nxt=None, right=None):
         """(lemma, UPOS, feats) for a lowercase word token; prev: the previous
         token's (lemma, UPOS), nxt: the next lowercase surface, right: the
@@ -1107,6 +1159,8 @@ class Analyser:
         if low == "basi" and (prev is not None and prev[0] in BUS_BEFORE or
                               nxt is not None and (nxt in LI_AGREE or self._sm_verb(nxt, "li"))):
             return "basi", "NOUN", {}           # kwa basi "by bus", basi hili, basi limefika; not "so, well"
+        if low in SENSE_SPLITS and self.sense_other(low, prev, prev2, right):
+            return low, "X", {}
         if low == "huenda":
             # habitual kwenda before a destination (huenda sokoni, huenda nje ya
             # nchi) or ending its clause; "maybe" before a clause (huenda
@@ -1478,7 +1532,7 @@ class Swahili(LanguageSpec):
                 if low == "kuwa":
                     lem, upos, feats = an.kuwa_reading(prev, *_clause_right(raw, j),
                                                        prev_surface=toks[-1][0] if prev is not None else "")
-                elif low == "kutoka" or prev is None and nxt in IMP_NEXT:
+                elif low == "kutoka" or low in SENSE_SPLITS or prev is None and nxt in IMP_NEXT:
                     lem, upos, feats = an.analyse_memo(low, prev, prev2, nxt, _clause_right(raw, j)[0])
                 else:
                     lem, upos, feats = an.analyse_memo(low, prev, prev2, nxt)
@@ -1596,6 +1650,18 @@ class Swahili(LanguageSpec):
                         out[i] = nid
                 else:
                     out.pop(i)
+        # a sense homograph the English reads as the sense the pack has no word for (a draw, a goal, a
+        # park, a guide) is unlinked; the taught sense's own English keeps it
+        for t in toks:
+            surf = t[0].lower()
+            cue = SENSE_SPLITS.get(surf)
+            if cue is None or t[1] != surf or t[2] not in ("NOUN", "VERB") or not cue["other"].search(en) or \
+                    cue["own"].search(en):
+                continue
+            for pos in ("NOUN", "VERB"):
+                wid = key_to_id.get((surf, pos))
+                if wid in out:
+                    out.remove(wid)
         # wako / yako after a noun are also the locative copula (w-a-ko "they are
         # there": Majina yako katika ...); -ako always carries "you" in the English,
         # so without it the copula is the reading
