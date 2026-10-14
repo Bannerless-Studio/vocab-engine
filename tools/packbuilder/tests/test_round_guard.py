@@ -64,9 +64,13 @@ class WordRows(unittest.TestCase):
         self.assertEqual(rc, 0, out)
 
     def test_order_change_fails(self):
-        rc, out = self.run_guard(W("a", "b"), [W("a", "b")[1], W("a", "b")[0]])
+        rc, out = self.run_guard(W("a", "b"), [W("a", "b")[1], W("a", "b")[0]], "--word-fields", "ft")
         self.assertEqual(rc, 1)
         self.assertIn("order", out)
+
+    def test_rank_allowed_reorders_ok(self):
+        rc, out = self.run_guard(W("a", "b"), [W("a", "b")[1], W("a", "b")[0]])
+        self.assertEqual(rc, 0, out)
 
 
 if __name__ == "__main__":

@@ -49,7 +49,8 @@ def rows(name, old, new, fields, bad, stats, removed=frozenset(), added=frozense
                            f" (unexpected {sorted(got - want)}, missing {sorted(want - got)})")
         if len(new) - len(old) != len(fresh) - len(gone):
             bad.append(f"{name}: length {len(old)} -> {len(new)} is not the removed/added ids")
-        if [r["id"] for r in old if r["id"] in ni] != [r["id"] for r in new if r["id"] in oi]:
+        # the file is sorted by rank, so an allowed rank change legitimately reorders the kept rows
+        if "rank" not in fields and [r["id"] for r in old if r["id"] in ni] != [r["id"] for r in new if r["id"] in oi]:
             bad.append(f"{name}: order of the kept ids changed")
         if gone or fresh:
             stats["ids removed"] = len(gone)
