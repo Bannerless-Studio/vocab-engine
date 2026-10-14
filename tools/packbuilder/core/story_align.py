@@ -48,6 +48,7 @@ class StoryLang:
     ratio_pad: int = 6                        # +pad on both char lengths before the ratio
     ratio_lo: float = 0.7
     ratio_hi: float = 1.4
+    beads: tuple = ((1, 1), (2, 1), (1, 2))   # (target sentences, English sentences) steps of the aligner
     names_kept: bool = False                  # the translation keeps character names; story_name = checks.renamed(target, en): a name the English edition spells differently
     agree_gate: bool = False                  # checks.agree_pair(target, en) must hold: no word's gloss in the English means the pair is another text
 
@@ -149,7 +150,7 @@ def align_page(lang, us, es):
         for j in range(m + 1):
             if cost[i][j] == INF:
                 continue
-            for di, dj in ((1, 1), (2, 1), (1, 2)):
+            for di, dj in lang.beads:
                 a, b = i + di, j + dj
                 if a > n or b > m:
                     continue

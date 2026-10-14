@@ -210,9 +210,10 @@ def finish_words(env, ctx, words, records, top3000):
     if sp.refill_unexampled:
         # words no sentence could illustrate give their slot to the next-ranked word (once). With story rows the probe
         # decides as if there were none and no live sentence were kept: a story or a kept live sentence never rescues a
-        # word, so a pack built without stories keeps its word list and ids
+        # word, so a pack built without stories keeps its word list and ids. live_ranks_first False (sw) declares the same for kept live sentences
+        # even with no story rows
         probe = sentences
-        if ctx.get("story_rows"):
+        if ctx.get("story_rows") or not sp.live_ranks_first:
             probe = build_sentences(env, {**ctx, "story_rows": {}, "story_tagged": []}, words, top3000, decide_words=True)[0]
         used = {wid for s in probe for wid in s["words"]}
         drop = sorted(w["_key"] for w in words if w["id"] not in used and not records[w["_key"]]["forced"])

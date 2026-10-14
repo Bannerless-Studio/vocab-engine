@@ -1882,7 +1882,7 @@ class Swahili(LanguageSpec):
 
     # ---- stories: African Storybook ---------------------------------------------------------
     keep_live_sentences = True          # story rows only add; every live sentence id stays (republish guard)
-    live_ranks_first = False            # live priority moved one B1 word of the shipped list (mkesha -> tairi): kept live sentences are only added back
+    live_ranks_first = False            # live priority or a live sentence counted as an example moved one B1 word of the shipped list (mkesha -> tairi): kept live sentences are only added back
     examples_per_word = 4               # picks 3-4 are story sentences only (story_rows)
     min_story_tokens = 3                # a Swahili clause is 3 words where Urdu needs 4 (verb prefixes carry subject and tense)
     STORY_LICENCE = "CC-BY-4.0"

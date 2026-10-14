@@ -3,9 +3,11 @@
 The alignment machinery is core/story_align.py; this module holds what is Swahili: sentence ends, script test,
 quote normaliser, opener and relative words, credit-line patterns, and the credit parser for the cache written by
 tools/story_fetch/asb_fetch.py (<repo>/.cache/stories/sw-asb/<bookId>.json).
-Swahili differs from Urdu in four rules. No pronoun openers (the subject sits in the verb, so only the English
+Swahili differs from Urdu in five rules. No pronoun openers (the subject sits in the verb, so only the English
 dangling-pronoun rule and the Swahili connectives decide). No glued-words check (the ASb text keeps its spaces).
-A character name present on both sides is a faithful pair, not a rename (names_kept). A per-sentence gloss
+A character name present on both sides is a faithful pair, not a rename (names_kept). No 1:2 bead (one Swahili sentence
+against two English ones): hand-read 2026-10-15, those rows mostly carried an English sentence the Swahili
+edition does not have, the 1:1 rows almost never did (StoryLang.beads drops it). A per-sentence gloss
 agreement gate (agree_gate), because ASb translations are often free: a pair whose words' glosses never show up
 in the English is another sentence.
 """
@@ -35,7 +37,7 @@ def _foreign(u, e):
 
 
 SW = A.StoryLang(code="sw", end=SW_END, split_re=SPLIT_SW, norm=norm_sw, foreign=_foreign, connective_open=SW_CONNECTIVE_OPEN,
-                 relative=SW_RELATIVE, meta_target=SW_META, abbrev=SW_ABBREV, names_kept=True, agree_gate=True)
+                 relative=SW_RELATIVE, meta_target=SW_META, abbrev=SW_ABBREV, names_kept=True, agree_gate=True, beads=((1, 1), (2, 1)))
 
 
 def story_pairs(story, word_re, norm_key, seen, stats, min_tokens=3, max_tokens=14, en_lower=frozenset(), checks=None):

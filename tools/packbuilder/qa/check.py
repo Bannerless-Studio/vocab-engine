@@ -51,6 +51,7 @@ def bad_sentences_dead(spec):
     if not corpus_path(env).exists():
         return []
     seen = {spec.bad_sentence_norm(r[1]) for r in stage_corpus(env)["rows"]}
+    seen |= {spec.bad_sentence_norm(r[1]) for r in spec.story_rows(env)}   # story rows go through the same list
     return sorted(spec.bad_sentences - seen)
 
 

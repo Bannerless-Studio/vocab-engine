@@ -564,6 +564,9 @@ def build_sentences(env, ctx, words, top3000, decide_words=False):
             use[s] += 1
             primary.setdefault(s, wid)
 
+    if story_rows:
+        stat("example_picks_per_word", dict(sorted(Counter(len(v) for v in chosen.values()).items())))
+        stat("example_story_picks_per_word", dict(sorted(Counter(sum(1 for s_ in v if s_ in story_rows) for v in chosen.values()).items())))
     keep_live(primary, live_sids, info, st, lambda sid: sp.clean_sentence_text(rows[sid][1]))
     sel = sorted(primary)
     sentences = []
@@ -663,7 +666,7 @@ def build_sentences(env, ctx, words, top3000, decide_words=False):
         "zero_sentence_words": [w["w"] for w in words if not chosen.get(w["id"])],
         "rsi_reverted_to_base": st_rev,
     })
-    if sp.bad_sentences:
+    if sp.bad_sentences and not decide_words:   # the probe pass runs without story rows: their entries would all read dead
         dead = sorted(sp.bad_sentences - bad_sentences_matched)
         st["bad_sentences_dead"] = dead[:5]
         st["bad_sentences_dead_count"] = len(dead)
