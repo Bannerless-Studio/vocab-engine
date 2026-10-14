@@ -2,7 +2,7 @@
 """Passage candidates from cached stories (Let's Read Asia ur, African Storybook sw): lemma-level coverage per contiguous page window.
 
 Usage (site venv, from vocab-engine/): PYTHONPATH=tools <site>/.venv/bin/python tools/story_fetch/passage_windows.py \
-        --repo ../urdu [--lang ur|sw] [--top 30] [--out windows.json]
+        --repo ../urdu [--lang ur|sw|fa] [--top 30] [--out windows.json]
 
 Uses the passages Linker (the same tagger and link rules as `packbuilder passages`), so coverage is over
 lemmas and counts exactly what a shipped passage's coverage counts: names and numerals are skipped, a token
@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from packbuilder import passages as P  # noqa: E402
 from packbuilder.core.util import Env  # noqa: E402
-from packbuilder import sw_story, ur_story  # noqa: E402
+from packbuilder import fa_story, sw_story, ur_story  # noqa: E402
 from packbuilder.core import story_align as A  # noqa: E402
 from packbuilder.langs import get_spec  # noqa: E402
 
@@ -29,13 +29,13 @@ from packbuilder.langs import get_spec  # noqa: E402
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", required=True)
-    ap.add_argument("--lang", default="ur", choices=["ur", "sw"], help="story language (ur: Let's Read Asia cache, sw: African Storybook cache)")
+    ap.add_argument("--lang", default="ur", choices=["ur", "sw", "fa"], help="story language (ur, fa: Let's Read Asia cache, sw: African Storybook cache)")
     ap.add_argument("--top", type=int, default=30)
     ap.add_argument("--out")
     a = ap.parse_args()
     repo = Path(a.repo).resolve()
     spec = get_spec(a.lang, str(repo))
-    lang = {"ur": ur_story.UR, "sw": sw_story.SW}[a.lang]
+    lang = {"ur": ur_story.UR, "sw": sw_story.SW, "fa": fa_story.FA}[a.lang]
     env = Env(spec)
     src = json.loads((repo / "tools" / "passages_src.json").read_text())
     rules = {**P.DEFAULT_RULES, **src.get("rules", {})}
