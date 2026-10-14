@@ -207,7 +207,7 @@ def build_words(env, ctx):
         if len([gg for gg in lemma_groups.get(lem, {}) if gg != "PROPN" and lemma_groups[lem][gg] >= 5]) > 1:
             multi_pos += 1
         kpos = sp.group_kpos.get(g) if g != "?" else None
-        ents = sp.choose_entries(lexicon, lem, g, lexicon.usable_entries(lem, kpos), ctx["surf"])
+        ents = sp.choose_entries(lexicon, lem, g, lexicon.usable_entries(lem, kpos), ctx["surf"], morph.get((lem, g)))
         if not ents and forced:
             ents = lexicon.usable_entries(lem, None)
         if not ents:

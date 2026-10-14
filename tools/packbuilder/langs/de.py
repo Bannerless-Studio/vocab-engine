@@ -613,11 +613,13 @@ class German(LanguageSpec):
                 out[i] = None                     # a particle is never the preposition
         return self._linker_classes(toks, out)
 
-    def choose_entries(self, lexicon, lem, group, ents, surf):
+    def choose_entries(self, lexicon, lem, group, ents, surf, morph=None):
         """A loan homograph (die Gang "gang") never beats the native noun (der Gang) on
         English-gloss overlap alone: it is kept only when the corpus shows a surface the
         loan has and the native noun lacks (its -s plural), and dropped when the native
-        noun's own forms (Gänge, Gängen) are attested and the loan's are not."""
+        noun's own forms (Gänge, Gängen) are attested and the loan's are not. A feminine
+        article on the singular (die Gang: the tagger's Gender=Fem outweighs Masc+Neut, at least
+        3 tokens) is the loan's evidence too, and keeps it."""
         if group != "NOUN":
             return ents
         loans = [e for e in ents if e.get("b")]
@@ -634,7 +636,9 @@ class German(LanguageSpec):
         native_forms = set().union(*[plurals(e) for e in native])
         keep = [e for e in loans if used(plurals(e) - native_forms) > 0]
         loan_forms = set().union(*[plurals(e) for e in loans])
-        if keep or used(native_forms - loan_forms) < 3:
+        fem = (morph or {}).get("Gender=Fem", 0)
+        fem_loan = fem >= 3 and fem > (morph or {}).get("Gender=Masc", 0) + (morph or {}).get("Gender=Neut", 0)
+        if keep or fem_loan or used(native_forms - loan_forms) < 3:
             return ents
         return native
 
@@ -665,7 +669,7 @@ class German(LanguageSpec):
             for i in range(len(toks) - n + 1):
                 if tuple(low[i:i + n]) != words:
                     continue
-                if words == ("vor", "allem") and any(t[1].lower() in VOR_GOVERNORS for t in toks[max(0, i - 3):i]):
+                if words == ("vor", "allem") and self._vor_governed(toks, i):
                     continue
                 out.add(i + k)
         for i, t in enumerate(toks):
@@ -675,8 +679,25 @@ class German(LanguageSpec):
                 out.add(i)
         return out
 
+    @staticmethod
+    def _vor_governed(toks, i):
+        """A VOR_GOVERNORS word within 3 tokens before i, not across punctuation (a comma
+        ends the governor's reach: "sicher, vor allem ...")."""
+        for t in reversed(toks[max(0, i - 3):i]):
+            if t[2] == "PUNCT":
+                return False
+            if t[1].lower() in VOR_GOVERNORS:
+                return True
+        return False
+
     def passage_no_link(self, toks):
         return self._no_link(toks)
+
+    @staticmethod
+    def _perfect_aux(toks, j, end):
+        """sein/werden at j is a perfect/passive auxiliary, not a copula: a participle follows in
+        the clause ("Wir sind rein gegangen")."""
+        return any("VerbForm=Part" in t[3] and t[2] == "VERB" for t in toks[j + 1:end + 1])
 
     def _linker_classes(self, toks, out):
         """Context classes the dictionary alone gets wrong, applied to the corpus build and
@@ -693,7 +714,8 @@ class German(LanguageSpec):
             nxt = toks[i + 1] if i + 1 < len(toks) else None
             if low in PRED_ADJ_ADVERBS and r == (low, "ADJ") and lx.usable_entries(low, ["adv"]):
                 a, b = self._clause_span(toks, i)
-                predicate = any(t[1].lower() in COPULAS and t[2] in ("AUX", "VERB") for t in toks[a:b + 1])
+                predicate = any(t[1].lower() in COPULAS and t[2] in ("AUX", "VERB") and
+                                not self._perfect_aux(toks, j, b) for j, t in enumerate(toks[a:b + 1], a))
                 if not predicate or (nxt is not None and nxt[2] in ("ADJ", "ADV", "NUM")):
                     out[i] = (low, "ADV")     # "Lass den Hund rein", "rein familiär"; "Das Wasser ist rein" stays
             elif r[1] == "VERB" and upos in ("ADJ", "ADV", "VERB") and low.endswith("end") and low == r[0] + "d" and \

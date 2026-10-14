@@ -106,6 +106,19 @@ class DirectionAdverb(unittest.TestCase):
         out = run(t, [None, None, None, ("rein", "ADJ"), None], ADJ_ADV)
         self.assertEqual(out[3], ("rein", "ADV"))
 
+    def test_perfect_auxiliary_sein_is_not_a_copula(self):
+        gegangen = ["gegangen", "gehen", "VERB", "VerbForm=Part|Tag=VVPP"]
+        t = [T("Wir", "PRON"), T("sind", "AUX", "sein"), T("rein", "ADJ", tag="ADJD"), gegangen, T(".", "PUNCT")]
+        out = run(t, [None, None, ("rein", "ADJ"), None, None], ADJ_ADV)
+        self.assertEqual(out[2], ("rein", "ADV"))
+
+    def test_copula_with_a_participle_in_another_clause_still_predicate(self):
+        gegangen = ["gegangen", "gehen", "VERB", "VerbForm=Part|Tag=VVPP"]
+        t = [T("Das", "PRON"), T("Wasser", "NOUN"), T("ist", "AUX", "sein"), T("rein", "ADJ", tag="ADJD"), T(",", "PUNCT"),
+             T("er", "PRON"), T("ist", "AUX", "sein"), gegangen]
+        out = run(t, [None, None, None, ("rein", "ADJ"), None, None, None, None], ADJ_ADV)
+        self.assertEqual(out[3], ("rein", "ADJ"))
+
     def test_inflected_adjective_is_not_touched(self):
         t = [T("reine", "ADJ", "rein", tag="ADJA"), T("Luft", "NOUN")]
         self.assertEqual(run(t, [("rein", "ADJ"), None], ADJ_ADV)[0], ("rein", "ADJ"))
@@ -180,8 +193,32 @@ class LoanHomograph(unittest.TestCase):
         b = {"p": "noun", "g": "n|Bars||"}
         self.assertEqual(self.pick([a, b], {"bars": 9}), [a, b])
 
+    def pick_morph(self, counts, morph, ents=None):
+        surf = {s: Counter({("gang", "NOUN"): n}) for s, n in counts.items()}
+        return spec().choose_entries(None, "gang", "NOUN", ents or [self.G_LOAN, self.G_NAT], surf, Counter(morph))
+
+    def test_feminine_article_keeps_the_loan(self):
+        ents = [self.G_LOAN, self.G_NAT]
+        self.assertEqual(self.pick_morph({"gänge": 5, "gängen": 3}, {"Gender=Fem": 6, "Gender=Masc": 2}), ents)
+
+    def test_masculine_or_weak_feminine_evidence_is_der_gang(self):
+        for m in ({"Gender=Fem": 2}, {"Gender=Fem": 5, "Gender=Masc": 40}, {"Gender=Masc": 30}, {}):
+            self.assertEqual(self.pick_morph({"gänge": 5, "gängen": 3}, m), [self.G_NAT], m)
+
     def test_other_groups_untouched(self):
         self.assertEqual(spec().choose_entries(None, "x", "VERB", [self.G_LOAN, self.G_NAT], {}), [self.G_LOAN, self.G_NAT])
+
+
+class VorAllemWindow(unittest.TestCase):
+    def test_comma_ends_the_governor_reach(self):
+        t = [T("Er", "PRON"), T("ist", "AUX"), T("sicher", "ADJ"), T(",", "PUNCT"), T("vor", "ADP"), T("allem", "PRON"), T("klug", "ADJ")]
+        self.assertEqual(spec()._no_link(t), {5})
+
+    def test_governor_without_comma_still_holds(self):
+        t = [T("Sie", "PRON"), T("ist", "AUX"), T("sicher", "ADJ"), T("vor", "ADP"), T("allem", "PRON")]
+        self.assertEqual(spec()._no_link(t), set())
+        t = [T("Er", "PRON"), T("hat", "AUX"), T("Angst", "NOUN"), T("vor", "ADP"), T("allem", "PRON")]
+        self.assertEqual(spec()._no_link(t), set())
 
 
 class PassageNoLink(unittest.TestCase):
@@ -248,6 +285,60 @@ class KeepLive(unittest.TestCase):
         (repo / "pack").mkdir()
         (repo / "pack" / "sentences.json").write_text('[{"id": "s0001", "t": "Hallo."}]', encoding="utf-8")
         self.assertEqual(sentence_ids.shipped_sentences(repo), [{"id": "s0001", "t": "Hallo."}])
+
+
+class LiveSentences(unittest.TestCase):
+    """core/sentences.py live_candidates + keep_live (keep_live_sentences): a live sentence is kept
+    while any of its pack words remains; one that stopped being a candidate is dropped."""
+
+    class SP:
+        repo = None
+
+        @staticmethod
+        def clean_sentence_text(t):
+            return t.strip()
+
+    def setUp(self):
+        self.repo = Path(tempfile.mkdtemp())
+        (self.repo / "pack").mkdir()
+        import json
+        (self.repo / "pack" / "sentences.json").write_text(json.dumps(
+            [{"id": "s1", "t": "Alt eins."}, {"id": "s2", "t": "Alt zwei."}, {"id": "s3", "t": "Alt drei."}]), encoding="utf-8")
+        self.sp = self.SP()
+        self.sp.repo = self.repo
+        self.rows = {10: [0, "Alt eins."], 11: [0, "Alt zwei."], 12: [0, "Neu."]}   # row[1] is the text
+        self.info = {10: (3, False, False, "A1", ["w1", "w2"]), 11: (3, False, False, "A1", ["w3"]),
+                     12: (3, False, False, "A1", ["w4"])}   # "Alt drei." is no candidate any more
+
+    def test_pinned_kept_and_non_candidate_dropped(self):
+        from packbuilder.core import sentences
+        live = sentences.live_candidates(self.sp, self.info, self.rows)
+        self.assertEqual(live, {10, 11})
+        st, primary = Counter(), {12: "w4"}
+        sentences.keep_live(primary, live, self.info, st)
+        self.assertEqual(sorted(primary), [10, 11, 12])
+        self.assertEqual(primary[10], "w1")
+        self.assertEqual(primary[11], "w3")
+
+    def test_stat_counts_only_the_unchosen(self):
+        from packbuilder.core import sentences
+        st, primary = Counter(), {10: "w1"}
+        sentences.keep_live(primary, {10, 11}, self.info, st)
+        self.assertEqual(st["live_sentences_kept_unchosen"], 1)
+        self.assertEqual(primary, {10: "w1", 11: "w3"})
+
+    def test_idempotent_over_its_own_output(self):
+        from packbuilder.core import sentences
+        import json
+        st, primary = Counter(), {12: "w4"}
+        sentences.keep_live(primary, sentences.live_candidates(self.sp, self.info, self.rows), self.info, st)
+        first = sorted(primary)
+        texts = [self.rows[i][1] for i in first]
+        (self.repo / "pack" / "sentences.json").write_text(
+            json.dumps([{"id": f"s{i}", "t": t} for i, t in enumerate(texts)]), encoding="utf-8")
+        st2, primary2 = Counter(), {12: "w4"}
+        sentences.keep_live(primary2, sentences.live_candidates(self.sp, self.info, self.rows), self.info, st2)
+        self.assertEqual(sorted(primary2), first)
 
 
 if __name__ == "__main__":
