@@ -23,12 +23,12 @@
   {
    "step": 2,
    "label": "Listen",
-   "html": "<div class=\"drill-body\"><p class=\"q\">Which word is this?</p><div class=\"med\" style=\"text-align:center\">to do to exhaustion</div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">Which word is this?</p><div class=\"med\" style=\"text-align:center\">&#39;s <span class=\"dim\">(particle)</span>, of <span class=\"gx\">(<span class=\"dim\">(nominaliser)</span>)</span></div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   },
   {
    "step": 3,
    "label": "Recall",
-   "html": "<div class=\"drill-body\"><p class=\"q\">Which word is this?</p><div class=\"med\" style=\"text-align:center\">to become</div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">Which word is this?</p><div class=\"med\" style=\"text-align:center\">attendance, presence</div><div class=\"opts opts-hero opts-w\" id=\"o\"></div><div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   },
   {
    "step": 4,

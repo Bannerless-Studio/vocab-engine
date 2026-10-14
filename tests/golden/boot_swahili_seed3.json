@@ -23,7 +23,7 @@
   {
    "step": 2,
    "label": "Listen",
-   "html": "<div class=\"drill-body\"><p class=\"q\">Type the word</p><div class=\"med\" style=\"text-align:center\">dispute <span class=\"dim\">(m/mi)</span></div>\n    <input type=\"text\" id=\"tin\" autocomplete=\"off\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\" data-tl lang=\"sw\" placeholder=\"type the word…\">\n    <div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"submit\">Check</button><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">Type the word</p><div class=\"med\" style=\"text-align:center\">crisis, dispute <span class=\"dim\">(m/mi)</span></div>\n    <input type=\"text\" id=\"tin\" autocomplete=\"off\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\" data-tl lang=\"sw\" placeholder=\"type the word…\">\n    <div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"submit\">Check</button><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   },
   {
    "step": 3,

@@ -13,7 +13,7 @@
   {
    "step": 0,
    "label": "Review",
-   "html": "<div class=\"drill-body\"><p class=\"q\">Type the word</p><div class=\"med\" style=\"text-align:center\">distress <span class=\"dim\">(f)</span></div>\n    <input type=\"text\" id=\"tin\" autocomplete=\"off\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\" data-tl lang=\"ur\" dir=\"rtl\" placeholder=\"type the word\">\n    <div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"submit\">Check</button><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">Type the word</p><div class=\"med\" style=\"text-align:center\">worry, trouble, distress <span class=\"dim\">(f)</span></div>\n    <input type=\"text\" id=\"tin\" autocomplete=\"off\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\" data-tl lang=\"ur\" dir=\"rtl\" placeholder=\"type the word\">\n    <div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"submit\">Check</button><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   },
   {
    "step": 1,
@@ -23,7 +23,7 @@
   {
    "step": 2,
    "label": "Listen",
-   "html": "<div class=\"drill-body\"><p class=\"q\">Type the word</p><div class=\"med\" style=\"text-align:center\">to bring</div>\n    <input type=\"text\" id=\"tin\" autocomplete=\"off\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\" data-tl lang=\"ur\" dir=\"rtl\" placeholder=\"type the word\">\n    <div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"submit\">Check</button><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
+   "html": "<div class=\"drill-body\"><p class=\"q\">Type the word</p><div class=\"med\" style=\"text-align:center\">to bring along, to fetch</div>\n    <input type=\"text\" id=\"tin\" autocomplete=\"off\" autocapitalize=\"off\" autocorrect=\"off\" spellcheck=\"false\" data-tl lang=\"ur\" dir=\"rtl\" placeholder=\"type the word\">\n    <div class=\"reveal\" id=\"rv\"></div></div><div class=\"actions\"><button class=\"next\" id=\"submit\">Check</button><button class=\"next\" id=\"nx\" style=\"display:none\">Next</button></div>"
   },
   {
    "step": 3,
