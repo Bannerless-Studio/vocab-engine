@@ -54,8 +54,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--lid', required=True); ap.add_argument('--code', required=True); ap.add_argument('--site', required=True)
     ap.add_argument('--limit', type=int, default=0); ap.add_argument('--resume', action='store_true')
+    ap.add_argument('--recover-offcount', action='store_true', help='re-fetch the English twin of twin_null books whose only reject is a text page count off by 1-2; stored with status ok_off and twin.page_diff (the aligner must vouch for the pairs)')
     a = ap.parse_args()
     cd = os.path.join(a.site, '.cache/stories', a.code + '-lra'); os.makedirs(cd, exist_ok=True)
+    if a.recover_offcount:
+        return recover(cd)
     lp = os.path.join(cd, 'list.json')
     if os.path.exists(lp):
         books = json.load(open(lp))
@@ -115,6 +118,30 @@ def main():
             man[bid] = {'status': 'error', 'error': str(e)[:200]}; print(bid[:8], 'error', e, flush=True)
         json.dump(man, open(mp, 'w'), indent=1)
     print('DONE calls', calls, '429', c429, flush=True)
+
+
+def recover(cd):
+    n = 0
+    for fn in sorted(os.listdir(cd)):
+        if not re.fullmatch(r'[0-9a-f-]{36}\.json', fn):
+            continue
+        rec = json.load(open(os.path.join(cd, fn)))
+        tried = rec.get('twin_tried') or [{}]
+        why = tried[0].get('rejected') or []
+        m = re.fullmatch(r'textpages_(\d+)_vs_(\d+)', why[0]) if len(why) == 1 else None
+        if rec.get('status') != 'twin_null' or not m or not (1 <= abs(int(m[1]) - int(m[2])) <= 2):
+            continue
+        t = get('/v5/book/preview/language/undefined/book/' + tried[0]['id'])
+        if t.get('license') != 'CC-BY-4.0':
+            continue
+        tp = pages(t)
+        rec['twin'] = {'id': tried[0]['id'], 'title': t.get('name'), 'lang': 'English', 'pages': len(tp), 'licence': 'CC-BY-4.0',
+                       'roles': roles(t), 'text_pages': tp, 'page_diff': int(m[1]) - int(m[2])}
+        rec['status'] = 'ok_off'
+        json.dump(rec, open(os.path.join(cd, fn), 'w'), ensure_ascii=False, indent=1)
+        n += 1
+        print(fn[:8], 'ok_off', rec['twin']['page_diff'], flush=True)
+    print('RECOVERED', n, 'calls', calls, '429', c429, flush=True)
 
 
 main()

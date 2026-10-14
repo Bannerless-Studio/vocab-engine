@@ -29,11 +29,13 @@ gimana and the discourse particles are A2+ words glossed "(colloquial)".
 The A1 core list, gloss overrides and generated sentences live in the
 indonesian repo (tools/).
 """
+import difflib
 import json
 import re
 from collections import Counter
 
-from .base import LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, drop_all_re
+from .. import id_story
+from .base import STORY_SID_BASE, LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, drop_all_re
 
 DAYS = "senin selasa rabu kamis jumat sabtu minggu".split()
 MONTHS = "januari februari maret april mei juni juli agustus september oktober november desember".split()
@@ -311,6 +313,10 @@ def overlaps(a, b):
 
 def gloss_words(g):
     return {w for w in re.findall(r"[a-z]+", re.sub(r"\(.*?\)", " ", g.lower())) if w not in GLOSS_STOP}
+
+
+# copulas and clause glue carry no gloss to check a story pair against
+STORY_FUNCTION_LEMMAS = {"adalah", "ialah", "ada", "jadi", "menjadi", "punya", "mempunyai", "buat", "membuat", "bisa", "dapat", "mau"}
 
 
 class Indonesian(LanguageSpec):
@@ -711,6 +717,183 @@ class Indonesian(LanguageSpec):
 
     def pack_json_extra(self):
         return {"clitics": self.clitics}
+
+    # ---- stories: Let's Read Asia + Bloom Library ---------------------------------------------
+    keep_live_sentences = True          # story rows only add; every live sentence id stays (republish guard)
+    live_ranks_first = False            # as sw: a kept live sentence is only added back, it never changes the choice for a word
+    examples_per_word = 4               # picks 3-4 are story sentences only (story_rows)
+    min_story_tokens = 3                # "Dia makan nasi." is a sentence
+    STORY_URL = "https://www.letsreadasia.org/ ; https://bloomlibrary.org/"
+    LRA_URL = "https://www.letsreadasia.org/"
+    BLOOM_URL = "https://bloomlibrary.org/"
+
+    def _stories(self, env):
+        """Cached Let's Read Asia (id-lra: status ok or ok_off) and Bloom (id-bloom, no Bible-story books) Indonesian books
+        with their English twin, by book id. Licence rule again here (fail closed): LRA CC-BY-4.0 both sides; Bloom cc-by or cc-by-sa."""
+        cache = getattr(self, "_story_cache", None)
+        if cache is not None and cache[0] == env.repo:
+            return cache[1]
+        out = {}
+        base = env.repo / ".cache" / "stories"
+        for d in ("id-lra", "id-bloom"):
+            files = sorted((base / d).glob("*.json")) if (base / d).is_dir() else []
+            for f in files:
+                st = json.loads(f.read_text(encoding="utf-8"))
+                if not isinstance(st, dict) or "text_pages" not in st:
+                    continue
+                tw = st.get("twin")
+                if not tw or st.get("status") not in ("ok", "ok_off"):
+                    continue
+                if st.get("source") == "lra":
+                    if st.get("licence") != "CC-BY-4.0" or tw.get("licence") != "CC-BY-4.0":
+                        continue
+                else:
+                    if st.get("licence") not in ("cc-by", "cc-by-sa") or tw.get("licence") not in ("cc-by", "cc-by-sa") \
+                            or id_story.is_bible(st):
+                        continue
+                out[st["id"]] = st
+        self._story_cache = (env.repo, out)
+        return out
+
+    def story_rows(self, env):
+        from ..core.util import stat
+        stories = self._stories(env)
+        seen = set()
+        live = env.repo / "pack" / "sentences.json"
+        if live.exists():
+            seen.update(s["t"] for s in json.loads(live.read_text(encoding="utf-8")) if s.get("src") != "story")   # a shipped story sentence must stay offered on the next build
+        seen.update(r[1] for r in self.extra_corpus_rows(env))
+        stats = id_story.A.Stats()
+        checks = self._story_checks(env)
+        en_lower = {w for st in stories.values() for p in st["twin"]["text_pages"]
+                    for w in re.findall(r"(?<![A-Za-z])[a-z]+(?![A-Za-z])", id_story.A.norm_en(p["text"])) if w}
+        rows = []
+        for sid_, st in stories.items():
+            for u, e, page in id_story.story_pairs(st, self.word_re, lambda t: t, seen, stats, self.min_story_tokens, self.max_len,
+                                                    en_lower, checks):
+                rows.append([STORY_SID_BASE + len(rows), u, "", e, None, sid_])
+        stat("story_rows", {"stories_read": len(stories), "rows": len(rows), "filters": dict(stats)})
+        return rows
+
+    def _story_checks(self, env):
+        """Dictionary checks for story_pairs: nouns (the opener rule), the page-level gloss agreement (story_rate), the per-pair
+        agreement gate and the rename check. Surfaces come from pack/words.json (headword, lemma, forms, alt), then the Sastrawi
+        root. No sentence-level wrong_sense."""
+        sp = self
+        surf, nouns, stems = {}, set(), {}
+        wp = env.repo / "pack" / "words.json"
+        if wp.exists():
+            for w in json.loads(wp.read_text(encoding="utf-8")):
+                gs = id_story.A.gloss_stems(w["en"])
+                content = w["pos"] in ("noun", "verb", "adj", "adv") and w["lemma"] not in STORY_FUNCTION_LEMMAS
+                for f in [w["w"], w["lemma"]] + list(w.get("forms") or []) + list(w.get("alt") or []):
+                    f = f.lower()
+                    surf.setdefault(f, w)
+                    if content:
+                        stems.setdefault(f, set()).update(gs)
+                    if w["pos"] == "noun":
+                        nouns.add(f)
+        names_ok = set(surf) | {x.lower() for x in DAYS + MONTHS}
+        memo, rmemo = {}, {}
+
+        def root(t):
+            if t not in rmemo:
+                rmemo[t] = sp._stem(t) if len(t) > 4 else t
+            return rmemo[t]
+
+        def tok_stems(t):
+            t = t.lower()
+            g = stems.get(t) or stems.get(root(t))
+            return frozenset(g) if g else None
+
+        def lemma_stems(page):
+            if page in memo:
+                return memo[page]
+            got = set()
+            for t in sp.word_re.findall(id_story.norm_id(page)):
+                g = tok_stems(t)
+                if g:
+                    got.add(g)
+            memo[page] = [g for g in got if g]
+            return memo[page]
+
+        class Checks:
+            @staticmethod
+            def noun(tok):
+                t = tok.lower()
+                return t in nouns or root(t) in nouns
+
+            @staticmethod
+            def wrong_sense(toks, en):
+                return False
+
+            @staticmethod
+            def renamed(u, en):
+                """A mid-sentence capitalised word of the Indonesian sentence that is no dictionary word and has no match in the
+                English (Ani / Amy). A sentence-initial capital cannot be told from a name and is never flagged."""
+                have = {w.lower() for w in re.findall(r"[A-Za-z']+", en)} | {w.lower().split("'")[0] for w in re.findall(r"[A-Za-z']+", en)}
+                toks = sp.word_re.findall(id_story.norm_id(u))
+                for j, t in enumerate(toks):
+                    if j and t[:1].isupper() and not t.isupper() and t.lower() not in names_ok and root(t.lower()) not in names_ok \
+                            and not any(difflib.SequenceMatcher(None, t.lower(), w).ratio() >= 0.75 for w in have):
+                        return True
+                return False
+
+            @staticmethod
+            def agree_pair(u, en):
+                gl = lemma_stems(u)
+                return not gl or any(g & id_story.A.gloss_stems(id_story.A.norm_en(en)) for g in gl)
+
+            @staticmethod
+            def story_rate(pairs):
+                got = hit = 0
+                for u, e in pairs:
+                    gl = lemma_stems(u)
+                    if not gl:
+                        continue
+                    got += 1
+                    es = id_story.A.gloss_stems(id_story.A.norm_en(e))
+                    hit += any(g & es for g in gl)
+                return hit / got if got >= 3 else None
+        return Checks
+
+    def story_source(self):
+        return {"source": "Let's Read Asia (Asia Foundation, books republished from Pratham Books/StoryWeaver, Book Dash, Room to Read and others) "
+                          "and Bloom Library (non-Bible books), Indonesian books with their English edition",
+                "licence": "CC-BY-4.0 (Let's Read Asia; Bloom cc-by) / CC-BY-SA-4.0 (Bloom cc-by-sa)",
+                "url": self.LRA_URL + " ; " + self.BLOOM_URL,
+                "note": "Sentences are split out of the book text, Indonesian and English realigned sentence by sentence; "
+                        "typographic quotes became plain, nothing else was changed."}
+
+    def story_meta(self, env, story_id):
+        """The book's credits: authors, illustrators, publisher or copyright holder, licence, and both editions' urls."""
+        st = self._stories(env)[story_id]
+        tw = st["twin"]
+        if st["source"] == "lra":
+            roles, troles = st.get("roles") or {}, tw.get("roles") or {}
+            meta = {"id": story_id, "source": "Let's Read Asia", "title": st["title"], "english_title": tw["title"],
+                    "authors": id_story.names_of(roles.get("AUTHOR")), "illustrators": id_story.names_of(roles.get("ILLUSTRATOR")),
+                    "publisher": id_story.names_of(roles.get("PUBLISHER")), "licence": "CC-BY-4.0", "url": st["url"],
+                    "english_url": "https://www.letsreadasia.org/book/" + tw["id"]}
+            if st.get("original_url"):
+                meta["original_url"] = st["original_url"]
+            if st.get("origin_lang") and st["origin_lang"] != "English":
+                meta["origin_language"] = st["origin_lang"]
+            if troles.get("AUTHOR") and troles.get("AUTHOR") != roles.get("AUTHOR"):
+                meta["english_authors"] = id_story.names_of(troles["AUTHOR"])
+            return meta
+        lic = {"cc-by": "CC-BY-4.0", "cc-by-sa": "CC-BY-SA-4.0"}[st["licence"]]
+        meta = {"id": story_id, "source": "Bloom Library", "title": st["title"], "english_title": tw["title"],
+                "authors": id_story.names_of(st.get("authors")), "translators": id_story.names_of(st.get("translators")),
+                "illustrators": id_story.names_of(st.get("illustrators")), "copyright_holder": id_story.holder(st.get("copyright")),
+                "licence": lic, "url": st["url"], "english_url": "https://bloomlibrary.org/book/" + tw["id"]}
+        if (st.get("credits") or "").strip():
+            meta["credits"] = re.sub(r"\s+", " ", st["credits"]).strip()[:300]
+        return meta
+
+    def story_credit(self):
+        return {"name": "Let's Read Asia and Bloom Library stories (book authors, illustrators, translators and publishers)",
+                "licence": "CC BY 4.0 / CC BY-SA 4.0", "url": self.LRA_URL}
 
     def _stem(self, w):
         if self._stemmer is None:

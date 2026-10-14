@@ -53,3 +53,10 @@ Filters and counts per run are in the build stats (`story_rows`) and `tools/READ
 
 ## Swahili rows (langs/sw.py story_rows, packbuilder/sw_story.py), 2026-10-15
 African Storybook Kiswahili books with an English twin (`.cache/stories/sw-asb/`, status ok, back cover `Attribution 4.0` on both). Alignment is `core/story_align.py` shared with Urdu. Swahili specifics: min 3 tokens, `.?!` ends, connective openers (na, lakini, kisha ...), no pronoun openers, per-sentence gloss agreement gate (ASb translations are often free), rename check for mid-sentence names that are no dictionary word, no glued-words check. The fetch is rate bound (3.5 s per call, about 3.4 books a minute, 629 listed, about 3 hours). Counts per build are in the build stats `story_rows`; credits (author, translation, illustration, copyright holder, urls) come from the back cover into attribution.json `story_sentences.stories`.
+
+## Let's Read Asia off-count twins (lra_fetch.py --recover-offcount), 2026-10-15, Indonesian
+The default run drops a book when its English twin has a different number of text pages (`twin_null`, `twin_tried[0].rejected = textpages_A_vs_B`). `--recover-offcount` re-fetches the twin of every `twin_null` book whose only reject is a page-count difference of 1 or 2 (CC-BY-4.0 twin) and stores it with `twin.page_diff` and status `ok_off`; the story aligner (best page shift, story_rate, agreement gate) decides which pairs survive. Indonesian: 165 CC-BY books, 93 `ok`, 68 `ok_off`, 4 still `twin_null`. Indonesian language id 6260074016145408 (English 4846240843956224). Bloom Indonesian (`bloom_fetch.py --lang id`): 371 listed, 240 licence-usable, 24 with a twin, 14 of those Bible-story derivatives (left out at row time).
+
+## Indonesian rows (langs/id.py story_rows, packbuilder/id_story.py)
+Filters and counts per run are in the build stats (`story_rows`) and `tools/README.md` of the indonesian site.
+
