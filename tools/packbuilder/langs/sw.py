@@ -267,11 +267,11 @@ OM_HOMOGRAPHS = (
 # "guideline", not the person). The analyser reads the surface as X (known, never linked, so neither
 # the lemma nor the cross-POS fallback links the taught sense) from its neighbours; fix_links does the
 # same from the English of a corpus sentence. "prev"/"nxt" are the neighbour's lemma / surface, "near"
-# the lemmas of the two words before (a team's sare and a stadium's lango stay the taught sense, so no
+# the lemmas of the two words before, "after" a preposition + the verb before it (a team's sare and a stadium's lango stay the taught sense, so no
 # clause-wide cue).
 GOAL_NEAR = {"mpira", "kipa", "golikipa", "bao", "mabao", "goli"}
 SENSE_SPLITS = {
-    "sare": {"prev": {"kwa"}, "nxt": {"tasa", "#"},
+    "sare": {"after": {"kwa": {"isha", "malizika", "malizia", "toka", "kwisha", "ishia", "maliza"}}, "nxt": {"tasa", "#"},
              "other": re.compile(r"\b(?:draws?|drew|drawn|ties|tied|stalemate)\b", re.I),
              "own": re.compile(r"\buniforms?\b", re.I)},
     "lango": {"near": GOAL_NEAR,
@@ -1099,6 +1099,11 @@ class Analyser:
         cue = SENSE_SPLITS[low]
         nxt = right[0] if right else None
         if prev is not None and prev[0] in cue.get("prev", ()) or nxt in cue.get("nxt", ()):
+            return True
+        # kwa sare "in a draw" only after a result verb and with no genitive after it (walivaa kwa sare za shule
+        # is "in uniform")
+        if prev is not None and prev2 is not None and prev2[0] in cue.get("after", {}).get(prev[0], ()) and \
+                nxt not in ASSOC_FORMS:
             return True
         near = cue.get("near", ())
         if near and any(p is not None and p[0] in near for p in (prev, prev2)):

@@ -79,6 +79,8 @@ class SenseHomographs(Base):
         self.assertEqual(self.reading("Mchezo uliisha kwa sare.", "sare"), ("sare", "X"))
         self.assertEqual(self.reading("Mechi iliisha sare tasa.", "sare"), ("sare", "X"))
         self.assertEqual(self.reading("Wanafunzi walivaa sare ya shule.", "sare"), ("sare", "NOUN"))
+        self.assertEqual(self.reading("Wanafunzi walivaa kwa sare za shule.", "sare"), ("sare", "NOUN"))
+        self.assertEqual(self.reading("Wanafunzi walivaa kwa sare.", "sare"), ("sare", "NOUN"))
         self.assertEqual(self.reading("Timu walivaa sare nzuri.", "sare"), ("sare", "NOUN"))
 
     def test_lango_goal_vs_gate(self):
