@@ -434,8 +434,8 @@ class HookOwners(unittest.TestCase):
             self.assertEqual(bool(sp.passage_form_base), m == "fr", m)
             self.assertEqual(bool(sp.passage_names_never_link), m in ("id", "sw"), m)
             self.assertEqual(own(sp, "passage_text"), m in ("fr", "id", "ja"), m)
-            for h in ("passage_fallback_ok", "passage_phrase_ranges"):
-                self.assertEqual(own(sp, h), m in ("fr", "id", "ja"), (m, h))
+            self.assertEqual(own(sp, "passage_fallback_ok"), m in ("fr", "id", "ja", "ar"), m)
+            self.assertEqual(own(sp, "passage_phrase_ranges"), m in ("fr", "id", "ja"), m)
             self.assertEqual(hasattr(sp, "passage_uncounted"), m in ("ja", "ar", "hi", "ur"), m)
             self.assertEqual(bool(getattr(sp, "passage_words_counted", False)), m in ("ja", "hi"), m)
             self.assertEqual(own(sp, "standalone_intj_ok"), m == "sw", m)
