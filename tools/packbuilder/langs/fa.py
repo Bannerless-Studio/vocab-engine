@@ -109,6 +109,7 @@ CLITIC_SUFFIXES = {"م", "ت", "ش", "مان", "تان", "شان", "ی", "یم",
                    "یش", "یی", "ایم", "مون", "تون", "شون"}
 COLLOQ_RAFTAN = {"برم", "بری", "بره", "بریم", "برن", "میرم", "میری", "میره", "میریم", "میرید", "میرن",
                  "نمیرم", "نمیری", "نمیره", "نمیریم", "نمیرید", "نمیرن", "نرم", "نره"}
+OWN_WORD_MARGIN = 1.0       # zipf points a whole spelling must lead its clitic-stripped host by
 TOKEN_PUNCT = "،؛؟!.:«»\"'()…"
 PART_ADJ = {"پیچیده", "گسترده", "پخته", "سوخته", "یخزده"}   # participles taught as adjectives
 GEN_SID_BASE = 90_000_000          # corpus sids of sentences written for the pack
@@ -847,7 +848,11 @@ class Persian(LanguageSpec):
     # reading passages only (never run by `build`)
     X_POS = (("noun", "NOUN"), ("adj", "ADJ"), ("adv", "ADV"), ("pron", "PRON"), ("prep", "ADP"))
 
-    def passage_retag(self, toks):
+    passage_retag_names = True      # passage_retag gets the declared names (no capitals mark them)
+    # endings a declared name may carry (ezafe/indefinite ی, plural, pronoun clitic)
+    NAME_SUFFIXES = ("ی", "ای", "یی", "ها", "های", "ش", "م", "ت", "مان", "تان", "شان")
+
+    def passage_retag(self, toks, names=frozenset()):
         """Seraji leaves some plain words as X, mostly the parts of a set
         phrase ("فردا شب", "به سر کار"): X is skipped, so they would be
         neither counted nor linked. A letters-only X token gets its
@@ -859,6 +864,16 @@ class Persian(LanguageSpec):
         surface is a past stem is that verb. An ordinal the pack lacks (سیزدهم)
         is a numeral."""
         info, infs, pack = self._info(), self._verbs()[0], self._passage_pack()
+        # a declared name beats every reading of its spelling: Persian has no
+        # capitals, so کیان tagged NOUN would resolve as کی + plural ان. A name
+        # with an ending (ezafe ی, clitic) counts unless that spelling is a pack word.
+        nm = {fold(n): n for n in names if n}
+        for t in toks:
+            f = fold(t[0] or "")
+            base = f if f in nm else next((b for b in nm if f.startswith(b) and f[len(b):] in self.NAME_SUFFIXES
+                                           and f not in pack), None)
+            if base is not None:
+                t[1], t[2] = nm[base], "PROPN"
         for k, t in enumerate(toks):
             if t[2] == "X" and t[0] and all(ch.isalpha() or ch == ZWNJ for ch in t[0]):
                 rows = info.get(fold(t[0]), [])
@@ -909,6 +924,8 @@ class Persian(LanguageSpec):
         (بهترین: بهتر). Then, against the pack's own lemmas: a light-verb
         compound the pack lacks splits into its parts, and a noun/adjective
         with indefinite/ezafe ی read as a non-pack derived word is its stem, and
+        a pack noun X+ی the tagger kept whole is X when the English names only X
+        (EnStem: بیماری "a patient"), and
         a preposition with a pronoun clitic (برایت) is the preposition, and a
         comparative kept whole (بزرگ‌ترها) is its adjective. A compound whose
         noun is the object of a bare preposition (بعد از غذا بخورید) splits,
@@ -936,6 +953,9 @@ class Persian(LanguageSpec):
         pack = self._passage_pack()
         for i, t in enumerate(toks):
             r, w = out[i], fold(t[0] or "")
+            if r and r == (w, "NOUN") and "EnStem=Yes" in (t[3] or "") and "noun" in pack.get(w[:-1], ()):
+                out[i] = (w[:-1], "NOUN")        # بیماری "a patient": the stem, not "illness"
+                continue
             if r and r[1] == "NOUN" and t[2] == "NOUN" and t[1] == w and w != r[0] and \
                     "noun" in pack.get(w, ()) and "noun" in pack.get(r[0], ()) and \
                     any(w == r[0] + e for e in ("ی", "ای", "یی")) and "EnGloss=Yes" in (t[3] or ""):
@@ -1353,15 +1373,26 @@ class Persian(LanguageSpec):
         flag EnGloss=Yes when the English names a gloss word of X+ی ("a large
         fish", "a new phone"). passage_post_resolve keeps such a token whole;
         without the flag it is X + indefinite/ezafe ی (یک دوستی: a friend,
-        ماهی یک بار: once a month)."""
+        ماهی یک بار: once a month). A token the tagger kept whole as a noun
+        gets EnStem=Yes when the English names only the stem (بیماری "a
+        patient"): passage_post_resolve reads it as the stem."""
         pack, gl = self._passage_pack(), self._passage_gloss()
         ew = set(re.findall("[a-z]+", en.lower()))
         ew |= {w[:-1] for w in ew if w.endswith("s")} | {w[:-2] for w in ew if w.endswith("es")}
+        def words(key):
+            return set(re.findall("[a-z]{3,}", re.sub(r"\(.*?\)", " ", gl.get(key, "").lower()))) - EN_GLOSS_STOP
         for t in toks:
             w = fold(t[0] or "")
-            if w.endswith("ی") and "noun" in pack.get(w, ()) and "noun" in pack.get(w[:-1], ()) and \
-                    ew & (set(re.findall("[a-z]{3,}", re.sub(r"\(.*?\)", " ", gl.get(w, "").lower()))) - EN_GLOSS_STOP):
-                t[3] = (t[3] + "|" if t[3] else "") + "EnGloss=Yes"
+            if w.endswith("ی") and "noun" in pack.get(w, ()) and "noun" in pack.get(w[:-1], ()):
+                whole, stem = words(w), words(w[:-1])
+                if ew & whole:
+                    t[3] = (t[3] + "|" if t[3] else "") + "EnGloss=Yes"
+                elif t[2] == "NOUN" and t[1] == w and ew & {x for x in stem if not any(
+                        x.startswith(y) or y.startswith(x) for y in whole)}:
+                    # the English names the stem and nothing of the whole word: بیماری
+                    # "a patient" (بیمار), not "illness". A stem word that only abbreviates a
+                    # whole-word gloss (dark / darkness) says nothing and does not mark.
+                    t[3] = (t[3] + "|" if t[3] else "") + "EnStem=Yes"
 
     SHARED_STEM = {("کشیدن", "کشتن"), ("کشتن", "کشیدن"), ("شدن", "شستن")}
 
@@ -1484,6 +1515,16 @@ class Persian(LanguageSpec):
             if text in HOMOGRAPH_DENY:
                 out[i] = None       # دعوی "lawsuit" is not دعوا "quarrel"; حقوق "law, salary" is not حق
                 continue
+            if r[1] in ("NOUN", "ADJ") and r[0] != text and text.startswith(r[0]) and \
+                    text[len(r[0]):] not in ("ی", "ای", "یی") and GRAM_SUFFIX_RE.fullmatch(text[len(r[0]):]) and \
+                    lx.usable_entries(text, self.group_kpos[r[1]]) and \
+                    lx.zipf(text) >= lx.zipf(r[0]) + OWN_WORD_MARGIN:
+                # the tagger lemma is a host that lost a clitic or plural ending
+                # (قهرمان "hero" read as قهر + مان "our sulking"), but the whole
+                # spelling is a dictionary word far more frequent than the host:
+                # a host + clitic form is never that much more frequent (دلم is
+                # level with دل, ماست and کارت well below ما and کار)
+                out[i] = r = (text, r[1])
             if r[0] != text and text.startswith(r[0]) and not GRAM_SUFFIX_RE.fullmatch(text[len(r[0]):]):
                 # token-boundary guard: a lemma never matches inside a longer word
                 # (مهربان is not مهر, فردیت is not فرد, شرور is not شر); the word itself or nothing
