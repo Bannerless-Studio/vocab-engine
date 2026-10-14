@@ -324,6 +324,11 @@ def bad_sentence_dropped(sp, text, matched=None):
     return True
 
 
+def live_priority(live_sids, story_rows):
+    """Live sentences that rank ahead of fresh candidates: every live row but the story ones (those are kept, not ranked)."""
+    return set(live_sids) - set(story_rows)
+
+
 def live_candidates(sp, info, rows):
     """Candidate sentence ids whose cleaned text is in the committed pack (keep_live_sentences). A live
     sentence that is no longer a candidate (filtered, or every link gone) is not in `info`, so it is dropped."""
@@ -503,7 +508,7 @@ def build_sentences(env, ctx, words, top3000):
     live_sids = live_candidates(sp, info, rows) if sp.keep_live_sentences else set()
     # a live story sentence is kept (keep_live) but ranks as any story row: priority from live-ness would let it take one of
     # the two non-story slots, so every rebuild of a shipped pack would pull in more story sentences (not a fixed point)
-    live_rank = live_sids - set(story_rows)
+    live_rank = live_priority(live_sids, story_rows)
     surface_of = {w["id"]: sp.fold(w["_key"][0]) for w in words} if sp.example_shows_word else {}
     for wid in order:
         lv = lv_of[wid]
