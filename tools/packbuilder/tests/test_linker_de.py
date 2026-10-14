@@ -298,6 +298,8 @@ class LiveSentences(unittest.TestCase):
         def clean_sentence_text(t):
             return t.strip()
 
+        live_text = clean_sentence_text
+
     def setUp(self):
         self.repo = Path(tempfile.mkdtemp())
         (self.repo / "pack").mkdir()

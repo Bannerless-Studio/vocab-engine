@@ -38,7 +38,8 @@ import json
 import re
 from collections import Counter
 
-from .base import make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LOWER_LEVEL_ALCOHOL_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN, SENSITIVE_GLOSS_EN, drop_all_re
+from .. import ur_story
+from .base import STORY_SID_BASE, make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LOWER_LEVEL_ALCOHOL_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN, SENSITIVE_GLOSS_EN, drop_all_re
 
 ZWNJ = "‌"
 LET = "ء-غف-يٱ-ۓۺ-ۿ"
@@ -917,6 +918,8 @@ class Urdu(LanguageSpec):
     }
     untranslated_rows = True
     extra_corpus_files = ("tools/generated_sentences.tsv",)
+    keep_live_sentences = True          # story rows only add; every live sentence id stays (republish guard)
+    examples_per_word = 4               # picks 3-4 are story sentences only (story_rows)
     use_audio = False                   # 2 permissive Tatoeba clips: none shipped
     sentence_end_re = re.compile(r"[.!?…؟۔][\"'»”)]*$")     # ۔ Urdu full stop
 
@@ -2367,6 +2370,109 @@ class Urdu(LanguageSpec):
         if row[0] >= GEN_SID_BASE:
             rec["src"] = "gen"
         return rec
+
+    STORY_URL = "https://www.letsreadasia.org/"
+    STORY_LICENCE = "CC-BY-4.0"
+
+    def _stories(self, env):
+        """Cached Let's Read Asia stories with an English twin (tools/story_fetch/lra_fetch.py), by book id;
+        a second book with the same title is the same story and is skipped."""
+        cache = getattr(self, "_story_cache", None)
+        if cache is not None and cache[0] == env.repo:
+            return cache[1]
+        d = env.repo / ".cache" / "stories" / "ur-lra"
+        out, titles = {}, set()
+        for f in sorted(d.glob("*-*-*.json")) if d.is_dir() else []:
+            st = json.loads(f.read_text(encoding="utf-8"))
+            tw = st.get("twin")
+            if st.get("status") != "ok" or not tw or st.get("licence") != self.STORY_LICENCE \
+                    or tw.get("licence") != self.STORY_LICENCE:
+                continue
+            k = ur_story.title_key(st["title"])
+            if k in titles:
+                continue
+            titles.add(k)
+            out[st["id"]] = st
+        self._story_cache = (env.repo, out)
+        return out
+
+    def story_rows(self, env):
+        from ..core.util import stat
+        stories = self._stories(env)
+        seen = set()
+        live = env.repo / "pack" / "sentences.json"
+        if live.exists():
+            seen.update(s["t"] for s in json.loads(live.read_text(encoding="utf-8")) if s.get("src") != "story")   # a shipped story sentence must stay offered on the next build
+        seen.update(text_norm(r[1]) for r in self.extra_corpus_rows(env))
+        stats = ur_story.Stats()
+        freq = Counter(fold(t) for st in stories.values() for p in st["text_pages"] for t in self.word_re.findall(text_norm(p["text"])))
+        glued = self._glued_checker(freq)
+        en_lower = {w for st in stories.values() for p in st["twin"]["text_pages"]
+                    for w in re.findall(r"(?<![A-Za-z])[a-z]+(?![A-Za-z])", ur_story.norm_en(p["text"])) if w}
+        rows = []
+        for sid_, st in stories.items():
+            for u, e, page in ur_story.story_pairs(st, self.word_re, text_norm, seen, stats, self.min_story_tokens, self.max_len, glued, en_lower):
+                rows.append([STORY_SID_BASE + len(rows), u, "", e, None, sid_])
+        stat("story_rows", {"stories_read": len(stories), "rows": len(rows), "filters": dict(stats)})
+        return rows
+
+    min_story_tokens = 4
+
+    def live_text(self, t):
+        return text_norm(self.clean_sentence_text(t))      # sentence_fields stores text_norm; a raw لئے row never matched its live لیے text
+
+    GLUE_PIECES = set(FUNCTION) | set(PRONOUNS) | set(POSTPS) | {
+        "کے", "کی", "ہے", "ہیں", "تھا", "تھی", "تھے", "ایک", "ہر", "کوئی", "کچھ", "سب", "بہت", "کر", "کیا", "کون", "اپنے", "اپنی",
+        "اپنا", "ہو", "رہا", "رہی", "رہے", "گیا", "گئی", "گئے", "لیے", "ساتھ", "بعد", "پہلے", "اس", "ان", "ہوں", "کرتا", "کرتی", "کرتے"}
+
+    def _glued_checker(self, freq):
+        """token -> True when it is no dictionary form but splits into 2+ dictionary forms of 2+ letters
+        (book text that lost its spaces: کےبازو, پسندکرتا). A split with no function-word piece that the story
+        text repeats 3+ times is a real compound or loan (ڈریگن, سکرین), not lost spaces. A name that happens
+        to split is dropped too, the safe side."""
+        d = self._dict()
+        known = set(d["forms"]) | set(d["info"]) | self.GLUE_PIECES
+        known = {fold(k) for k in known}
+        known |= {k.replace("یے", "ئے") for k in known if "یے" in k}      # دیے is also written دیئے
+        func = {fold(k) for k in self.GLUE_PIECES}
+
+        def glued(tok):
+            t = fold(tok)
+            if t in known or len(t) < 4:
+                return False
+            best = [None] * (len(t) + 1)           # best[i]: fewest-piece split of t[:i] as a tuple of pieces
+            best[0] = ()
+            for i in range(2, len(t) + 1):
+                for j in range(max(0, i - 12), i - 1):
+                    if best[j] is not None and t[j:i] in known and (best[i] is None or len(best[j]) + 1 < len(best[i])):
+                        best[i] = best[j] + (t[j:i],)
+            parts = best[len(t)]
+            if not parts or len(parts) < 2:
+                return False
+            return any(p in func for p in parts) or freq.get(t, 0) < 3
+        return glued
+
+    def story_source(self):
+        return {"source": "Let's Read Asia (The Asia Foundation), Urdu books with their English edition",
+                "licence": self.STORY_LICENCE, "url": self.STORY_URL,
+                "note": "Sentences are split out of the book text, Urdu and English realigned sentence by sentence; "
+                        "typographic quotes became plain, nothing else was changed."}
+
+    def story_meta(self, env, story_id):
+        st = self._stories(env)[story_id]
+        by = {}
+        for src in (st.get("roles") or {}, (st.get("twin") or {}).get("roles") or {}):
+            for role, names in src.items():
+                lst = by.setdefault(role.upper(), [])
+                lst.extend(n for n in names if n not in lst)
+        return {"id": story_id, "title": st["title"], "english_title": st["twin"]["title"],
+                "authors": by.get("AUTHOR", []), "illustrators": by.get("ILLUSTRATOR", []),
+                "translators": by.get("TRANSLATOR", []), "publisher": by.get("PUBLISHER", []),
+                "licence": st["licence"], "url": st["url"]}
+
+    def story_credit(self):
+        return {"name": "Let's Read Asia stories (The Asia Foundation and book creators)", "licence": "CC BY 4.0",
+                "url": self.STORY_URL}
 
     def extra_attribution(self, env, sentences):
         n = sum(1 for s in sentences if s.get("src") == "gen")

@@ -29,3 +29,9 @@ Run: `python3 tools/story_fetch/lra_fetch.py --lid 5732871486570496 --code ur --
 
 ## Measure
 `python3 tools/story_fetch/measure.py --pack ../urdu --dirs <cache dirs> [--population N]` prints the stage-0 numbers (sentences per story, share <= 14 tokens, pack coverage, proxy pass counts, passage excerpt counts by level). Token coverage uses pack surfaces plus generated forms, so it is a lower bound for the builder's lemma-based filter.
+
+## Passage windows (passage_windows.py)
+`PYTHONPATH=tools <site>/.venv/bin/python tools/story_fetch/passage_windows.py --repo ../urdu [--top 30] [--out f.json]` lists, per story, the best run of consecutive pages that meets the site's `tools/passages_src.json` rules (words band, coverage over lemmas through the passages Linker, level budget). Writes nothing to the site. Urdu 2026-10-15: 207 stories with an English twin, 49 have a passing window, 71 best windows (story x level).
+
+## Urdu rows (langs/ur.py story_rows, packbuilder/ur_story.py)
+Filters and counts per run are in the build stats (`story_rows`) and `tools/README.md` of the urdu site.
