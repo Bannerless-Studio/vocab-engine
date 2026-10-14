@@ -140,8 +140,23 @@ def attribution(env, ctx, users, sentences):
             "licence": "CC-BY-SA-4.0", "count": ctx["example_rows_shipped"],
             "note": "Example sentences only, for words whose corpus sentences are missing or dropped by policy; no audio."}}
            if ctx.get("example_rows_shipped") else {}),
+        **story_attribution(env, sentences),
         **sp.extra_attribution(env, sentences),
     }
+
+
+def story_ids(sentences):
+    return sorted({s["st"] for s in sentences if s.get("src") == "story"})
+
+
+def story_attribution(env, sentences):
+    sp = env.spec
+    ids = story_ids(sentences)
+    if not ids:
+        return {}
+    n = sum(1 for s in sentences if s.get("src") == "story")
+    return {"story_sentences": {**sp.story_source(), "count": n,
+                                "stories": [sp.story_meta(env, i) for i in ids]}}
 
 
 def prepare(env, ctx):
@@ -165,6 +180,9 @@ def prepare(env, ctx):
     ex = env.spec.example_rows(env)
     ctx["example_rows"] = {r[0]: r for r in ex}
     ctx["example_tagged"] = tag_rows(env.spec, ex, ctx["truecase"]) if ex else []
+    sr = env.spec.story_rows(env)
+    ctx["story_rows"] = {r[0]: r for r in sr}
+    ctx["story_tagged"] = tag_rows(env.spec, sr, ctx["truecase"]) if sr else []
     ctx["lexicon"] = Lexicon(stage_lex(env), env.spec)
     if env.spec.lemma_tiebreak_corpus:
         ctx["lexicon"].count_lemma_votes(iter_tagged(ctx["tagged"]))
@@ -276,6 +294,9 @@ def run(env, stage="all", check_remote=False):
     stat("word_ids_added_to_map", added)
     stat("word_id_shipped_keys_held_by_other_ids", held)
     pack_json = build_pack_json(env, words, ctx["raw_upos"])
+    credit = sp.story_credit() if story_ids(sentences) else None
+    if credit:
+        pack_json["credits"] = [*pack_json.get("credits", []), credit]
     pack_json.update(characters_pack_fields(sp, units))
     pack_json.update(script_pack_fields(sp, write_script(env, out_words)))
     write_json(env.pack / "pack.json", pack_json, compact=False)

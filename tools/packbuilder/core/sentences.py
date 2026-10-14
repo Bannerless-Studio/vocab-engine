@@ -359,6 +359,8 @@ def build_sentences(env, ctx, words, top3000):
     refl_by_sid = {}
     rows = {**ctx["rows_by_sid"], **ctx.get("example_rows", {})}
     example_rows = ctx.get("example_rows", {})
+    story_rows = ctx.get("story_rows", {})
+    rows.update(story_rows)
     key_to_id = {w["_key"]: w["id"] for w in words}
     sp.note_words(words)
     lv_of = {w["id"]: w["lv"] for w in words}
@@ -385,7 +387,7 @@ def build_sentences(env, ctx, words, top3000):
     spec_dropped = {}  # sid -> links before fix_links (spec.fix_links_floor only)
     merge_sids = defaultdict(set)  # wid -> sids linked to it through a drop_keys merge (spec.merge_sense_examples only)
     bad_sentences_matched = set()   # bad_sentences.txt entries seen among corpus rows (dead-entry report below)
-    for sid, toks in chain(iter_tagged(ctx["tagged"]), ctx.get("example_tagged", ())):
+    for sid, toks in chain(iter_tagged(ctx["tagged"]), ctx.get("example_tagged", ()), ctx.get("story_tagged", ())):
         text = rows[sid][1]
         if sp.untranslated_rows and not rows[sid][3]:
             continue            # tagged for evidence only: no English translation
@@ -512,6 +514,7 @@ def build_sentences(env, ctx, words, top3000):
         if lv == first_lv and len(good) < 2:
             good += [s for s in ok if info[s][0] == 3]
         good.sort(key=lambda s: (lv_ord[info[s][3]] > lv_ord[lv], s not in live_sids,
+                                 s not in story_rows,
                                  rank_pen[(s, lv)] - (sp.audio_rank_bonus if info[s][2] else 0),
                                  hw_tier.get((s, wid), 0),
                                  not info[s][2],
@@ -536,7 +539,10 @@ def build_sentences(env, ctx, words, top3000):
             if merged_good and not any(s in merged_good for s in good[:2]):
                 good.remove(merged_good[0])
                 good.insert(min(1, len(good)), merged_good[0])
-        for s in good[:2]:
+        picks = good[:2]
+        if sp.examples_per_word > 2:
+            picks += [s for s in good[2:] if s in story_rows][:sp.examples_per_word - 2]
+        for s in picks:
             chosen[wid].append(s)
             use[s] += 1
             primary.setdefault(s, wid)
@@ -556,6 +562,8 @@ def build_sentences(env, ctx, words, top3000):
         if row[4] is not None:
             rec["audio"] = f"https://tatoeba.org/audio/download/{row[4]}"
         rec.update(sp.sentence_fields(row))     # fa: "src": "gen" on sentences written for the pack
+        if sid in story_rows:
+            rec["src"], rec["st"] = "story", str(row[5])
         if sid in example_rows:
             rec.setdefault("src", "gen")        # written for the pack (spec.example_rows)
             n_examples += 1
