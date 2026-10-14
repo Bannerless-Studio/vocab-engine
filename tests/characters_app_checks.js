@@ -161,7 +161,7 @@ return {
   legacyNotice: () => legacyNotice, legacyFail: () => legacyFail, readOnly: () => storeReadOnly, getPrep: () => todayPrep,
   sayWord, sayUnit, saySentence, typeItem, vocabTeach,
   rubyTextHTML, pfRubyText, rubyTextOr, rubyTw, sentenceRowHTML, sentenceRevealBlock, readSentence, charDrillItem, passageSentenceHTML, hasChars: () => HAS_CHARACTERS,
-  onShowWritten, gapSentence, recallItem, readItem, hearItem, revealBlock, wordRowHTML, glossHTML, passagePlainHTML, charTeach, revealWritten, pronFirst: () => PRON_FIRST, tokTap,
+  onShowWritten, gapSentence, recallItem, readItem, hearItem, revealBlock, wordRowHTML, glossHTML, passagePlainHTML, charTeach, revealWritten, bigWordHTML, wordOptHtml, missRowParts, pronFirst: () => PRON_FIRST, tokTap,
   panelListeners: () => document.getElementById("panel")._listeners.click || [],
   wordsSearch: q => { tab = "words"; wordsQuery = q; render(); }, startPassage: p => { tab = "read"; startPassage(p); },
   readQ: i => { RD.qi = i; RD.shown = false; readQuestionScreen(); }, getRD: () => RD,
@@ -1043,7 +1043,7 @@ Math.random = mulberry32(20261004);
           const w = by[u.words[0]]; if(!w || !VC.exampleSentences(w, ss, pk, Infinity).some(s => shows(u, s))) return;
           possible++;
           const ex = (cards[j] || "").split('<div class="sent')[1] || "";
-          if(!u.words.some(id => new RegExp(`data-tok="${id}"[^>]*><ruby>`).test(ex))) bad.push(u.t);
+          if(!u.words.some(id => new RegExp(`data-tok="${id}"[^>]*>(?:<w-r[^>]*>)?<ruby>`).test(ex))) bad.push(u.t);
         });
       }
       check(`${name}: ${possible} of ${us.length} units have a sentence that can show them written; every such card does (${bad.length} bad${bad[0] ? ": " + bad.slice(0, 5).join(" ") : ""})`, possible > 0 && bad.length === 0);
@@ -1385,6 +1385,86 @@ Math.random = mulberry32(20261004);
       }));
       check(`no stimulus or option carries a hint (${n} items, ${stimBad.length} bad${stimBad[0] ? ": " + stimBad.slice(0, 5).join(", ") : ""})`, stimBad.length === 0);
     } catch(e){ check(`[ja-hints] threw ${e.stack}`, false); }
+  }
+
+  // ---------------------------------------------------------------- ja word ruby (per-kanji furigana)
+  // words.json `ruby` [[start, end, reading]]: the reading sits over the kanji spans only (食 た, べる plain) at every
+  // site a written word shows its reading; a pack without the field, or a word without it, renders as on 41b5fff.
+  console.log("\n[ja-ruby] word ruby: reading over the kanji spans at word sites and sentence tokens");
+  {
+    const dir = process.env.JA_PACK || path.join(ROOT, "..", "japanese", "pack");
+    if(!fs.existsSync(path.join(dir, "characters.js"))) console.log(`NOTE  no ja pack at ${dir}, skipped`);
+    else try {
+      const L = (f, v) => loadConst(path.join(dir, f), v);
+      const pk = L("pack.js", "PACK"), ws = L("words.js", "WORDS"), ss = L("sentences.js", "SENTENCES"), us = L("characters.js", "CHARACTERS");
+      const cfg = pk.characters, ub = VC.unitByWord(us);
+      const wd = ws.find(w => w.w === "食べる");
+      const seed = (w, s) => { const prog = VC.normalizeProg({ placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true, mix: true } }, pk); prog.chars.c[ub.get(w.id).id] = { r: 3, w: 0, s }; return prog; };
+      const mk = async (words, prog, extra) => { const { api } = await boot(Object.assign({ pack: pk, words, sentences: ss, units: us, lessons: [], passages: [] }, extra || {})); api.setProg(prog); return api; };
+      const R = '<ruby class="wr">食<rt>た</rt></ruby>べる', RB = '<ruby class="wr bare">食<rt>た</rt></ruby>べる';
+      check("data: 食べる has ruby [[0,1,た]] and the unit exists", !!wd && JSON.stringify(wd.ruby) === '[[0,1,"た"]]' && !!ub.get(wd.id));
+      const ap = await mk(ws, seed(wd, cfg.mastered));
+      const row = ap.wordRowHTML(wd), rev = ap.revealBlock(wd), gl = ap.glossHTML(wd.id), big = ap.bigWordHTML(wd);
+      check("ruby tier: Words row, reveal, popover, stimulus show the reading over 食 only, plain べる", [row, rev, gl, big].every(h => h.includes(R)));
+      check("ruby tier: no separate reading beside the word (no pr / rp / gp / pron block)", !/class="pr"|class="rp"|class="gp"|class="pron"/.test(row + rev + gl + big));
+      check("ruby tier: the live region still reads the written form then the whole-word reading", [row, rev, gl, big].every(h => h.includes('<w-r data-t="食べる" data-r="たべる">')));
+      const opt = ap.wordOptHtml({ [wd.w]: wd }, null, false, null, true)(wd.w);
+      if(process.env.JA_RUBY_DUMP) [["reveal", rev], ["Words row", row], ["popover", gl], ["bare stimulus", await mk(ws, seed(wd, cfg.bare)).then(a => a.bigWordHTML(wd))], ["option", opt]].forEach(([n, h]) => console.log(`    SAMPLE ${n}: ${h}`));
+      check("ruby tier: an option label carries the same ruby, no .op span", opt.includes(R) && !/class="op"/.test(opt));
+      const mr = ap.missRowParts({ key: "w:" + wd.id });
+      check("ruby tier: Missed row form takes the ruby, no reading cell", mr.form.includes(R) && mr.reading === "");
+      const teach = (api, u) => { api.charTeach({ units: [u], index: 0, total: 1 }, { label: "x" }, () => {}); return api.html("panel"); };
+      check("ruby tier: unit teach card for 食べる (unit = word) takes the ruby", teach(ap, us.find(u => u.t === "食べる")).includes(R));
+      const apb = await mk(ws, seed(wd, cfg.bare));
+      check("bare tier: stimulus and options keep the ruby with the rt hidden (class bare), reveal shows it plain", apb.bigWordHTML(wd).includes(RB) && apb.wordOptHtml({ [wd.w]: wd }, null, false, null, false)(wd.w).includes(RB) && apb.revealBlock(wd).includes(R) && /<w-r data-t="食べる" data-r="">/.test(apb.bigWordHTML(wd)));
+      const ap0 = await mk(ws, VC.normalizeProg({ placedOnce: true, sessions: 5 }, pk));
+      check("pron tier (unit unmastered): the word shows by its reading with show-written, no ruby", !ap0.wordRowHTML(wd).includes("<ruby") && /data-showw/.test(ap0.wordRowHTML(wd)));
+      const kana = ws.find(w => !Array.isArray(w.ruby) && /^[぀-ヿ]+$/.test(w.w));
+      check("a kana word renders without ruby", !!kana && !ap.wordRowHTML(kana).includes("<ruby") && ap.wordRowHTML(kana).includes(`>${kana.w}<`));
+      const bad = Object.assign({}, wd, { ruby: [[0, 9, "た"]] });
+      check("a word with an out-of-range span falls back to the whole-word form (reading beside)", !ap.wordRowHTML(bad).includes("<ruby") && ap.wordRowHTML(bad).includes('class="pr"'));
+      // sentence and passage tokens
+      const sw = s => (s.ruby || []).map(k => ({ k, w: k[3] ? ws.find(x => x.id === k[3]) : null })).find(x => x.w && x.w.ruby && x.w.ruby.length > 0 && s.t.slice(x.k[0], x.k[1]) === x.w.w && VC.tokenRubyParts(s.t, { start: x.k[0], end: x.k[1], reading: x.k[2] }, x.w));
+      const sent = ss.find(s => sw(s)), hit = sent && sw(sent);
+      check("data: a sentence has a token that is exactly a ruby word", !!hit);
+      const tw = ws.find(x => x.id === hit.w.id), tp = VC.wordRubyParts(tw);
+      const prog = seed(tw, cfg.mastered); const api2 = await mk(ws, prog);
+      const html = api2.sentenceRowHTML(sent);
+      const exp = tp.map(q => q.reading == null ? q.text : `<ruby>${q.text}<rt>${q.reading}</rt></ruby>`).join("");
+      if(process.env.JA_RUBY_DUMP) console.log(`    SAMPLE sentence row: ${html}`);
+      check(`sentence token ${tw.w} splits: ${exp.slice(0, 60)} in the row`, html.includes(exp));
+      const toks = VC.rubyTiers(sent, us, prog, pk, true, Object.fromEntries(ws.map(w => [w.id, w])));
+      check("rubyTiers tags the token with parts only with the words map, same tiers", toks.some(k => k.parts) && VC.rubyTiers(sent, us, prog, pk, true).every(k => !k.parts) && JSON.stringify(toks.map(k => k.tier)) === JSON.stringify(VC.rubyTiers(sent, us, prog, pk, true).map(k => k.tier)));
+      const apBare = await mk(ws, seed(tw, cfg.bare)); const hb = apBare.sentenceRowHTML(sent);
+      check("bare tier: the split token's rts are hidden (class bare), plain kana unwrapped", tp.filter(q => q.reading != null).every(q => hb.includes(`<ruby class="bare">${q.text}<rt>${q.reading}</rt></ruby>`)));
+      const apPron = await mk(ws, VC.normalizeProg({ placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true, mix: true } }, pk)); const hp = apPron.sentenceRowHTML(sent);
+      check("pron tier token (unit unrecorded): shown by its reading, no ruby for it", !hp.includes(exp));
+      // flag-off controls: the field stripped, new engine = 41b5fff, ja and zh
+      const sh = f => require("child_process").execFileSync("git", ["show", "41b5fff:" + f], { cwd: ROOT, encoding: "utf8", maxBuffer: 64 << 20 });
+      const oldVC = new Function("module", "exports", sh("engine/core.js") + "\nreturn module.exports;")({ exports: {} }, {});
+      const oldHtml = sh("engine/app.html"), oldBlocks = [...oldHtml.matchAll(/<script>([\s\S]*?)<\/script>/g)], oldSrc = oldBlocks[oldBlocks.length - 1][1];
+      const stripped = ws.map(w => { const c = Object.assign({}, w); delete c.ruby; return c; });
+      const sample = (api, words, sents, ids) => {
+        const out = [];
+        words.forEach(w => { out.push(api.wordRowHTML(w), api.revealBlock(w), api.glossHTML(w.id), api.bigWordHTML(w)); });
+        sents.forEach(s => { out.push(api.sentenceRowHTML(s)); });
+        return out.join("\n");
+      };
+      const sampleW = stripped.filter((w, i) => i % 7 === 0), sampleS = ss.filter((s, i) => i % 15 === 0);
+      for(const [tier, st] of [["pron", 0], ["ruby", cfg.mastered], ["bare", cfg.bare]]){
+        const mkp = () => { const prog = VC.normalizeProg({ placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true, mix: true } }, pk); if(st) us.forEach(u => { prog.chars.c[u.id] = { r: 3, w: 0, s: st }; }); return prog; };
+        const nw = await mk(stripped, mkp()), od = await mk(stripped, mkp(), { vc: oldVC, appSrc: oldSrc });
+        check(`control (ja, ruby stripped, ${tier} tier): ${sampleW.length} words x4 sites + ${sampleS.length} sentences byte-equal to 41b5fff`, sample(nw, sampleW, sampleS) === sample(od, sampleW, sampleS));
+      }
+      const pz = PACK_ZH, zw = loadConst(path.join(ZH, "words.js"), "WORDS"), zs = loadConst(path.join(ZH, "sentences.js"), "SENTENCES"), zu = loadConst(path.join(ZH, "characters.js"), "CHARACTERS");
+      for(const st of [0, 3, 6]){
+        const mkp = () => { const prog = VC.normalizeProg({ placedOnce: true, sessions: 5, chars: { choiceSeen: true, defer: true, mix: true } }, pz); if(st) zu.forEach(u => { prog.chars.c[u.id] = { r: 3, w: 0, s: st }; }); return prog; };
+        const nw = (await boot({ pack: pz, words: zw, sentences: zs, units: zu, lessons: [], passages: [] })).api, od = (await boot({ pack: pz, words: zw, sentences: zs, units: zu, lessons: [], passages: [], vc: oldVC, appSrc: oldSrc })).api;
+        nw.setProg(mkp()); od.setProg(mkp());
+        const zsw = zw.filter((w, i) => i % 9 === 0), zss = zs.filter((s, i) => i % 20 === 0);
+        check(`control (zh, streak ${st}): ${zsw.length} words x4 sites + ${zss.length} sentences byte-equal to 41b5fff`, sample(nw, zsw, zss) === sample(od, zsw, zss));
+      }
+    } catch(e){ check(`[ja-ruby] threw ${e.stack}`, false); }
   }
 
   console.log(`\n${fails ? "FAILED" : "ALL PASSED"}: ${passes} passed, ${fails} failed`);

@@ -848,6 +848,25 @@ function placeCharsChecks(){
   check(`[placeChars] zh: placedCharsThrough names the last placed set (level ${thr && thr.lv}, set ${thr && thr.set}); null without records and without learn lag`, !!thr && thr.lv === lastSet.lv && thr.set === lastSet.k + 1 && VC.placedCharsThrough(PACK, UNITS, fresh()) === null && VC.placedCharsThrough(off, UNITS, out) === null);
 }
 
+// words.json `ruby` (per-kanji furigana): the span splitter. Readings sit over kanji spans only.
+function wordRubySplitChecks(){
+  const J = JSON.stringify, P = (w, ruby) => VC.wordRubyParts({ w, ruby });
+  check(`[ruby] 食べる [[0,1,た]] -> ${J(P("食べる", [[0, 1, "た"]]))}`, J(P("食べる", [[0, 1, "た"]])) === '[{"text":"食","reading":"た"},{"text":"べる","reading":null}]');
+  check("[ruby] several spans: 自分 [[0,1,じ],[1,2,ぶん]] and a kana gap 引き出し", J(P("自分", [[0, 1, "じ"], [1, 2, "ぶん"]])) === '[{"text":"自","reading":"じ"},{"text":"分","reading":"ぶん"}]'
+    && J(P("引き出し", [[0, 1, "ひ"], [2, 3, "だ"]])) === '[{"text":"引","reading":"ひ"},{"text":"き","reading":null},{"text":"出","reading":"だ"},{"text":"し","reading":null}]');
+  check("[ruby] leading 〜 is skipped by the offsets and stays plain text", J(P("〜年", [[1, 2, "ねん"]])) === '[{"text":"〜","reading":null},{"text":"年","reading":"ねん"}]');
+  check("[ruby] kana-only word, no field, empty field: null", P("ありがとう", undefined) === null && P("ありがとう", []) === null && VC.wordRubyParts(null) === null && VC.wordRubyParts({ w: "", ruby: [[0, 1, "x"]] }) === null);
+  const bad = [[[0, 9, "た"]], [[1, 1, "た"]], [[1, 2, "た"], [0, 1, "か"]], [[0, 2, "た"], [1, 3, "か"]], [[0, 1, ""]], [[0, 1]], [["0", 1, "た"]], "x", [null]];
+  check(`[ruby] a bad span (out of range, empty, backwards, overlapping, no reading, wrong type) gives null (${bad.filter(r => P("食べる", r) === null).length} of ${bad.length})`, bad.every(r => P("食べる", r) === null));
+  check("[ruby] a span splitting a surrogate pair gives null", P("𠮷野", [[1, 2, "よし"]]) === null && P("𠮷野", [[0, 2, "よし"], [2, 3, "の"]]) !== null);
+  const tok = (t, s, e, r) => ({ start: s, end: e, reading: r }), w = { w: "食べる", pron: "たべる", ruby: [[0, 1, "た"]] };
+  check("[ruby] token = word with its own reading splits; single-kanji word without kana does not", J(VC.tokenRubyParts("私は食べる", tok("", 2, 5, "たべる"), w)) === J(P("食べる", w.ruby))
+    && VC.tokenRubyParts("私は", tok("", 0, 1, "わたし"), { w: "私", ruby: [[0, 1, "わたし"]] }) === null);
+  check("[ruby] token in another reading, a longer or shorter span, or a word without ruby does not split", VC.tokenRubyParts("今日は", tok("", 0, 2, "こんにち"), { w: "今日", ruby: [[0, 2, "きょう"]] }) === null
+    && VC.tokenRubyParts("食べた", tok("", 0, 3, "たべた"), w) === null && VC.tokenRubyParts("食べる", tok("", 0, 1, "た"), w) === null && VC.tokenRubyParts("食べる", tok("", 0, 3, "たべる"), { w: "食べる", pron: "たべる" }) === null);
+  check("[ruby] a word with a leading 〜 matches a token reading without it", J(VC.tokenRubyParts("〜年", tok("", 0, 2, "ねん"), { w: "〜年", ruby: [[1, 2, "ねん"]] })) === '[{"text":"〜","reading":null},{"text":"年","reading":"ねん"}]');
+}
+
 suite(zhLike());
 suite(jaLike());
 teachExampleChecks();
@@ -857,6 +876,7 @@ pronFirstSentenceChecks();
 b8Checks(zhLike());
 flagOffEquality();
 placeCharsChecks();
+wordRubySplitChecks();
 
 console.log(`\n${fails === 0 ? "ALL PASSED" : "FAILED"}: ${passes} passed, ${fails} failed`);
 process.exit(fails === 0 ? 0 : 1);

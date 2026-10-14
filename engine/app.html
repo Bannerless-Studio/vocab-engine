@@ -327,6 +327,8 @@
   .psent .ptxt.hasruby{line-height:2.3}
   .hasruby ruby{ruby-position:over}
   .hasruby rt{font-family:var(--font);font-size:0.5em;line-height:1;color:var(--mute);font-weight:400}
+  ruby.wr{ruby-position:over}
+  ruby.wr rt{font-family:var(--font);font-size:0.5em;line-height:1;color:var(--mute);font-weight:400}
   ruby.bare rt{visibility:hidden}  /* global: stems, options, titles, results too, not only .hasruby scopes */
   .sent{padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}
   .sent .st{font-family:var(--wfont);font-size:17px}
@@ -991,8 +993,8 @@ CHAR_LIST.forEach(u => { const t = String((u && u.t) || ""); if([...t].length ==
 const charReading = c => CHAR_READING.get(c) || "";
 const SOUNDS_REF = PACK.soundsReference === true && HAS_LESSONS;
 function bigWordHTML(entry){
-  const p = pronAsked(entry);
-  return `<div class="big wd"${TA}>${wordFormHTML(entry)}</div>${p ? `<div class="pron">${readingHTML(p)}</div>` : ""}`;
+  const { form, p } = wordRead(entry, true);
+  return `<div class="big wd"${TA}>${form}</div>${p ? `<div class="pron">${readingHTML(p)}</div>` : ""}`;
 }
 // Answer-leak guard (owner 2026-10-12): when the answer is the only option with its bare state (the only bare one,
 // or the only one showing its reading), every option shows its reading, so the answer does not stand out.
@@ -1006,8 +1008,10 @@ function gapOptsHtml(entry, gc, mode){ const noPron = !!entry.pronInGloss;
 // Recall keys options by word id, so `written` gives the label for a value that is not one.
 // mode (optScript): one label mode for the whole set, "pron" or "written"; null: each its own.
 function wordOptHtml(byKey, written, noPron, mode, plain){
-  if(mode) return o => { const e = byKey[o]; const asPron = mode === "pron" && !!(e && e.pron); const p = e && !noPron && !asPron ? (plain ? pronBeside(e) : pronAsked(e)) : ""; return `${asPron ? twReading(e.pron) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
-  return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const p = e && !noPron ? (plain ? pronBeside(e) : pronAsked(e)) : ""; return `${d && d.isPron ? twReading(d.text) : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
+  // An option written as its word (not a recall label) with `ruby` carries its reading over the span of characters it covers (wordRead).
+  const rb = (e, o, asked) => RUBY_WORDS && e && !noPron && (written ? written(o) === e.w : o === e.w) ? wordRead(e, asked) : null;
+  if(mode) return o => { const e = byKey[o]; const asPron = mode === "pron" && !!(e && e.pron); const r = !asPron ? rb(e, o, !plain) : null; const p = r ? r.p : e && !noPron && !asPron ? (plain ? pronBeside(e) : pronAsked(e)) : ""; return `${asPron ? twReading(e.pron) : r ? `<bdi${TA}>${r.form}</bdi>` : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
+  return o => { const e = byKey[o]; const d = e ? dispWord(e) : null; const r = d && !d.isPron ? rb(e, o, !plain) : null; const p = r ? r.p : e && !noPron ? (plain ? pronBeside(e) : pronAsked(e)) : ""; return `${d && d.isPron ? twReading(d.text) : r ? `<bdi${TA}>${r.form}</bdi>` : tw(written ? written(o) : o)}${p ? `<span class="op"${UIA}><bdi>${readingHTML(p)}</bdi></span>` : ""}`; };
 }
 // pack.optsOneScript (docs/PACK_SCHEMA.md "optsOneScript"): one option in characters among
 // readings (or the reverse) is the answer, so a set is labelled in one mode. Distractors shown
@@ -1086,7 +1090,7 @@ function setScore(answered, total){
 }
 function announce(html){
   const el = $("live"); if(!el) return;
-  const tmp = document.createElement("div"); tmp.innerHTML = html || "";
+  const tmp = document.createElement("div"); tmp.innerHTML = String(html || "").replace(/<w-r data-t="([^"]*)" data-r="([^"]*)">[\s\S]*?<\/w-r>/g, "$1$2");
   tmp.querySelectorAll("[data-showw],[data-pcue]").forEach(x => x.remove()); // the show-written button's label is not content
   el.textContent = tmp.textContent || "";
 }
@@ -1410,13 +1414,36 @@ function highlightHTML(s, entry){
 // null when the sentence renders exactly as without characters (showPron off hides all ruby).
 function sentenceRuby(s){
   if(BARE_ITEM || !HAS_CHARACTERS || !s || !Array.isArray(s.ruby) || (!showPron() && !PRON_FIRST)) return null;
-  return VC.rubyTiers(s, CHAR_LIST, prog, PACK, VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU));
+  return VC.rubyTiers(s, CHAR_LIST, prog, PACK, VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU), WORDS_BY_ID);
 }
 // The bare tier keeps its <rt> with visibility:hidden, so a token's width never changes
 // across tiers and a line wraps the same either way.
-const rubyTokHTML = (base, k) => k.tier === "bare"
+const rubyTokHTML = (base, k) => k.parts ? rubyPartsHTML(k.parts, k.tier === "bare", "", k.reading == null ? "" : String(k.reading)) : k.tier === "bare"
   ? `<ruby class="bare">${base}<rt>${readingHTML(k.reading)}</rt></ruby>`
   : `<ruby>${base}<rt>${readingHTML(k.reading)}</rt></ruby>`;
+// A word or token with `ruby` (VC.wordRubyParts): the reading sits over the covered spans only, the plain text between stays plain.
+// The <w-r> wrapper keeps the live region reading the written form and the whole-word reading, as before the split
+// (announce); announced "" is a word site whose bare tier showed no reading at all.
+function rubyPartsHTML(parts, bare, cls, announced){
+  const c = (cls ? cls + (bare ? " bare" : "") : bare ? "bare" : "");
+  return `<w-r data-t="${escapeHtml(parts.map(q => q.text).join(""))}" data-r="${escapeHtml(announced)}">` + parts.map(q => q.reading == null ? escapeHtml(q.text) : `<ruby${c ? ` class="${c}"` : ""}>${escapeHtml(q.text)}<rt>${readingHTML(q.reading)}</rt></ruby>`).join("") + "</w-r>";
+}
+// Word sites: the reading that sat beside a written word sits over the covered spans instead when the word has `ruby`.
+// asked: the drill-question rule (pronAsked, a bare word hides its reading, here its rt). Returns the form and the
+// reading still to show beside it ("" when the ruby carries it).
+const RUBY_WORDS = HAS_CHARACTERS && WORDS.some(w => w && Array.isArray(w.ruby) && w.ruby.length);
+function wordRead(e, asked, tap){
+  const beside = asked ? pronAsked(e) : pronBeside(e);
+  const parts = RUBY_WORDS && e && pronBeside(e) ? VC.wordRubyParts(e) : null;
+  if(!parts) return { form: wordFormHTML(e, tap), p: beside };
+  return { form: rubyPartsHTML(parts, !beside, "wr", beside), p: "" };
+}
+// A unit that is its first word written the same way takes that word's ruby (charTeach, Missed rows).
+function unitRead(u, reading){
+  const w = RUBY_WORDS && reading ? VC.unitWord(u, WORDS_BY_ID) : null;
+  const parts = w && w.w === u.t && showPron() && !BARE_ITEM && VC.pronShown(w) === reading ? VC.wordRubyParts(w) : null;
+  return parts ? { form: rubyPartsHTML(parts, false, "wr", reading), reading: "" } : { form: escapeHtml(u.t), reading };
+}
 // A malformed token (overlapping, out of range) renders as plain text.
 function rubyTextHTML(s, toks, entry, taps){
   const t = String(s.t || ""); const hits = [];
@@ -1444,7 +1471,7 @@ function rubyTextHTML(s, toks, entry, taps){
 // false: the sentence could only show its reading line, where no blank can be placed.
 function pfSentence(s, entry, blank, written, taps){
   if(!PRON_FIRST || BARE_ITEM) return null;
-  const d = VC.sentenceDisplay(s, CHAR_LIST, prog, PACK, VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU), blank, written);
+  const d = VC.sentenceDisplay(s, CHAR_LIST, prog, PACK, VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU), blank, written, WORDS_BY_ID);
   if(d === null) return blank ? false : null;
   if(d.mode === "text") return null;
   if(d.mode === "pron") return { html: readingHTML(d.text), ruby: false, written: String(s.t || ""), taps: false };
@@ -1485,10 +1512,10 @@ function exampleSentencesHTML(entry){
 }
 function revealBlock(entry){ return unbare(() => revealBlockHTML(entry)); }
 function revealBlockHTML(entry){
-  const p = pronBeside(entry), hear = canHearWord(entry);
+  const { form, p } = wordRead(entry, false), hear = canHearWord(entry);
   // The examples carry no "Examples:" heading in a reveal.
   const ex = exampleSentencesHTML(entry).replace(/^<p class="q" style="margin-top:12px">Examples?:<\/p>/, "");
-  return revealRow(wordFormHTML(entry), p ? readingHTML(p) : "", glossOut(VC.gloss(entry), true), hear ? entry.id : null, VC.typedSynWords(entry, WORDS_BY_ID).length ? `<div class="syn" style="color:var(--mute);font-size:15px">${synAlsoHTML(entry)}</div>` : "") + (ex ? `<div class="rvx">${ex}</div>` : "");
+  return revealRow(form, p ? readingHTML(p) : "", glossOut(VC.gloss(entry), true), hear ? entry.id : null, VC.typedSynWords(entry, WORDS_BY_ID).length ? `<div class="syn" style="color:var(--mute);font-size:15px">${synAlsoHTML(entry)}</div>` : "") + (ex ? `<div class="rvx">${ex}</div>` : "");
 }
 const meaningChoices = entry => [VC.gloss(entry), ...VC.meaningOpts(entry, WORDS, wordMix()).map(d=>VC.gloss(d))];
 // Plans skip unplayable words (hearableKinds, learnPair); this fallback covers a voice lost
@@ -2078,13 +2105,13 @@ let sentById = null;
 function missRowParts(item){
   const k = String(item.key || ""), id = k.slice(2);
   if(k.startsWith("w:") && WORDS_BY_ID[id]){
-    const w = WORDS_BY_ID[id], p = pronBeside(w);
-    return { form: `<span class="mw"${TA}>${wordFormHTML(w, false)}</span>`, reading: p ? readingHTML(p) : "", gloss: glossPrimary(VC.gloss(w)), say: VC.wordSay(w) || w.w, wid: canHearWord(w) ? w.id : null };
+    const w = WORDS_BY_ID[id], { form, p } = wordRead(w, false, false);
+    return { form: `<span class="mw"${TA}>${form}</span>`, reading: p ? readingHTML(p) : "", gloss: glossPrimary(VC.gloss(w)), say: VC.wordSay(w) || w.w, wid: canHearWord(w) ? w.id : null };
   }
   if(k.startsWith("c:")){
     const u = CHAR_LIST.find(x => x.id === id); if(!u) return null;
-    const w = VC.unitWord(u, WORDS_BY_ID), r = VC.unitReading(u, WORDS_BY_ID);
-    return { form: `<span class="mw"${TA}>${escapeHtml(u.t)}</span>`, reading: r ? readingHTML(r) : "", gloss: glossPrimary(VC.unitGloss(u, WORDS_BY_ID)), say: u.t, wid: w && canHearWord(w) ? w.id : null };
+    const w = VC.unitWord(u, WORDS_BY_ID), r = VC.unitReading(u, WORDS_BY_ID), ur = unitRead(u, r);
+    return { form: `<span class="mw"${TA}>${ur.form}</span>`, reading: ur.reading ? readingHTML(ur.reading) : "", gloss: glossPrimary(VC.unitGloss(u, WORDS_BY_ID)), say: u.t, wid: w && canHearWord(w) ? w.id : null };
   }
   // A sentence row reads by its English: its written form may hold characters the drill showed by their reading.
   const s = k.startsWith("p:") ? item.mrowSent : k.startsWith("s:") ? (sentById || (sentById = new Map(SENTENCES.map(x => [x.id, x])))).get(id) : null;
@@ -2721,8 +2748,8 @@ function todayFinish(){
 function wordRowHTML(w, cls){
   // Pron + gloss share one .info column: a pron shrunk to width:0 beside a long gloss made
   // unbreakable transliterations ("budan") overlap the gloss text.
-  const p = pronBeside(w);
-  return `<span class="wd${dispWord(w).isPron ? " pf" : ""}"${TA}>${wordFormHTML(w)}</span><span class="info">${p ? `<span class="pr">${readingHTML(p)}</span>` : ""}<span class="en">${glossOut(VC.gloss(w))}</span>${VC.typedSynWords(w, WORDS_BY_ID).length ? `<span class="en syn">${synAlsoHTML(w)}</span>` : ""}</span>`;
+  const { form, p } = wordRead(w, false);
+  return `<span class="wd${dispWord(w).isPron ? " pf" : ""}"${TA}>${form}</span><span class="info">${p ? `<span class="pr">${readingHTML(p)}</span>` : ""}<span class="en">${glossOut(VC.gloss(w))}</span>${VC.typedSynWords(w, WORDS_BY_ID).length ? `<span class="en syn">${synAlsoHTML(w)}</span>` : ""}</span>`;
 }
 function vocabTeach(list, lv, onDrill, set){
   setScore(0,0); screenTop();
@@ -2754,9 +2781,9 @@ function charTeach(cs, stage, onDrill){
   const hinted = new Set();
   const cards = cs.units.map(u => {
     const w = VC.unitWord(u, WORDS_BY_ID), reading = VC.unitReading(u, WORDS_BY_ID);
-    const tap = w && canHearWord(w);
+    const tap = w && canHearWord(w), ur = unitRead(u, reading);
     const ex = VC.unitExampleSentences(u, w, SENTENCES, PACK, 1);
-    return `<div class="charteach"><div class="chead"${tap ? ` data-wid="${escapeHtml(w.id)}" style="cursor:pointer"` : ""}><span class="cform"${TA}>${escapeHtml(u.t)}</span><span class="info">${reading ? `<span class="pr">${readingHTML(reading)}</span>` : ""}<span class="en">${glossOut(VC.unitGloss(u, WORDS_BY_ID))}</span>${charHintHTML(u, hinted)}</span>${tap ? `<span style="color:var(--mute);flex:0 0 auto">${TEACH_PLAY_SVG}</span>` : ""}</div>${ex.map(s => sentenceRowHTML(s, w, u.words)).join("")}</div>`;
+    return `<div class="charteach"><div class="chead"${tap ? ` data-wid="${escapeHtml(w.id)}" style="cursor:pointer"` : ""}><span class="cform"${TA}>${ur.form}</span><span class="info">${ur.reading ? `<span class="pr">${readingHTML(ur.reading)}</span>` : ""}<span class="en">${glossOut(VC.unitGloss(u, WORDS_BY_ID))}</span>${charHintHTML(u, hinted)}</span>${tap ? `<span style="color:var(--mute);flex:0 0 auto">${TEACH_PLAY_SVG}</span>` : ""}</div>${ex.map(s => sentenceRowHTML(s, w, u.words)).join("")}</div>`;
   }).join("");
   P.innerHTML = `<p class="pva">${cs.lv !== undefined ? `${escapeHtml(levelLabel(cs.lv))} characters, set ${cs.lvIndex+1} of ${cs.lvTotal}` : `Characters, set ${cs.index+1} of ${cs.total}`}</p>
     <div id="ctl">${cards}</div><div class="actions"><button class="next" id="dr">Drill this set</button></div>`;
@@ -3121,7 +3148,7 @@ const TOKBOX = PRON_FIRST ? " data-tokbox" : ""; // passage reveals hold word ta
 function pfRubyText(t, ruby){
   if(!PRON_FIRST || !Array.isArray(ruby) || !ruby.length) return null;
   const obj = { t: String(t == null ? "" : t), ruby };
-  const toks = VC.rubyTiers(obj, CHAR_LIST, prog, PACK, VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU));
+  const toks = VC.rubyTiers(obj, CHAR_LIST, prog, PACK, VC.charsStarted(PACK, WORDS, CHAR_LIST, prog, SU), WORDS_BY_ID);
   if(!toks) return null;
   let hasRuby = false, anyPron = false;
   const html = VC.sentencePieces(obj, toks).map(p => {
@@ -3160,8 +3187,8 @@ function glossHTML(id, spanGloss, head, hint){
     const hp = r && showPron() ? r : "";
     return `<span class="gw"${TA}>${escapeHtml(head.surface)}</span>${hp ? ` <span class="gp"${LTR}>${readingHTML(hp)}</span>` : ""}${ge}`;
   }
-  const p = pronBeside(w);
-  return `<span class="gw"${TA}>${wordFormHTML(w)}</span>${p ? ` <span class="gp"${LTR}>${readingHTML(p)}</span>` : ""}${ge}`;
+  const { form, p } = wordRead(w, false);
+  return `<span class="gw"${TA}>${form}</span>${p ? ` <span class="gp"${LTR}>${readingHTML(p)}</span>` : ""}${ge}`;
 }
 // The container's innerHTML is replaced on every render, so listeners never accumulate.
 function wirePassage(box, glossEl){

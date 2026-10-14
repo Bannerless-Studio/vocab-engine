@@ -3437,9 +3437,38 @@ function sentenceTokenTier(streak, started, mix, pack){
   const t = charTier(streak, pack);
   return t === "pron" && !(pack && pack.pronFirst === true) ? "ruby" : t;
 }
+// Word `ruby` (docs/PACK_SCHEMA.md words.json): [[start, end, reading]] over `w`, covered spans only.
+// Returns the text cut into {text, reading} parts (reading null for the plain kana between and
+// after the spans), or null when the field is absent or any span is unusable, so a bad row falls
+// back to the whole-word form.
+function wordRubyParts(word){
+  const w = String((word && word.w) || ""), r = word && word.ruby;
+  if(!w || !Array.isArray(r) || !r.length) return null;
+  const out = []; let pos = 0;
+  for(const k of r){
+    if(!Array.isArray(k)) return null;
+    const [a, b, rd] = k;
+    if(!(Number.isInteger(a) && Number.isInteger(b) && a >= pos && b > a && b <= w.length && typeof rd === "string" && rd)) return null;
+    if(/[\udc00-\udfff]/.test(w.charAt(a)) || /[\ud800-\udbff]/.test(w.charAt(b - 1))) return null;
+    if(a > pos) out.push({ text: w.slice(pos, a), reading: null });
+    out.push({ text: w.slice(a, b), reading: rd }); pos = b;
+  }
+  if(pos < w.length) out.push({ text: w.slice(pos), reading: null });
+  return out;
+}
+// The parts of a sentence or passage token that is exactly a word with `ruby` and carries the
+// word's own reading. A token in another reading (今日 こんにち against きょう) or a longer or
+// shorter span keeps one reading over the whole token.
+function tokenRubyParts(t, k, word){
+  if(!word || !Array.isArray(word.ruby) || t.slice(k.start, k.end) !== word.w) return null;
+  const parts = wordRubyParts(word); if(!parts) return null;
+  const strip = x => String(x).replace(/\u301c/g, "");
+  if(strip(parts.map(p => p.reading == null ? p.text : p.reading).join("")) !== strip(k.reading == null ? "" : k.reading)) return null;
+  return parts.some(p => p.reading == null) || parts.length > 1 ? parts : null;
+}
 // pronFirst: tokens are "pron" before characters start or with mix off, as in the
 // predecessor app's reading-only sentences.
-function rubyTiers(sentence, units, prog, pack, started){
+function rubyTiers(sentence, units, prog, pack, started, words){
   const mix = !!(prog && isObj(prog.chars) && prog.chars.mix !== false);
   const pf = pronFirstOn(pack);
   if(!charsConfig(pack) || !sentence || !Array.isArray(sentence.ruby)) return null;
@@ -3448,7 +3477,10 @@ function rubyTiers(sentence, units, prog, pack, started){
   return sentence.ruby.map(([start, end, reading, wordId]) => {
     const u = byWord.get(wordId) || null; const rec = u && hasCharRec(recs, u.id) ? recs[u.id] : null;
     const tier = pf && !(started && mix) ? "pron" : rec && pairBare(rec, u, prog, pack) ? "bare" : sentenceTokenTier(rec ? rec.s : 0, true, true, pack);
-    return { start, end, reading, wordId, unitId: u ? u.id : null, tier };
+    const tok = { start, end, reading, wordId, unitId: u ? u.id : null, tier };
+    const parts = words && wordId != null ? tokenRubyParts(String(sentence.t || ""), tok, words[wordId]) : null;
+    if(parts) tok.parts = parts;
+    return tok;
   });
 }
 
@@ -3501,6 +3533,7 @@ function sentencePieces(sentence, toks, blank, cuts){
     const piece = { kind:"tok", start: k.start, end: k.end, text: pr ? String(k.reading == null ? "" : k.reading) : t.slice(k.start, k.end), pre:"", tier: k.tier, reading: k.reading };
     if(k.wordId !== undefined) piece.wordId = k.wordId;
     if(k.unitId !== undefined) piece.unitId = k.unitId;
+    if(k.parts) piece.parts = k.parts;
     out.push(piece); pos = k.end;
   });
   if(!blankDone){ text(pos, b.start); putBlank(); pos = b.end; }
@@ -3550,11 +3583,11 @@ function unitExampleSentences(unit, word, sentences, pack, n){
   return [...tiers[0], ...tiers[1], ...tiers[2]].slice(0, n);
 }
 // "pron" (the reading line) is never used for a blank: that sentence cannot be a gap item.
-function sentenceDisplay(sentence, units, prog, pack, started, blank, written){
+function sentenceDisplay(sentence, units, prog, pack, started, blank, written, words){
   if(!pronFirstOn(pack) || !sentence) return null;
   const t = String(sentence.t || "");
   const ws = new Set(written || []);
-  const rt = rubyTiers(sentence, units, prog, pack, started);
+  const rt = rubyTiers(sentence, units, prog, pack, started, words);
   const toks = rt && rt.map(k => k.tier === "pron" && ws.has(k.wordId) ? Object.assign({}, k, { tier:"ruby" }) : k);
   if(toks && rubyCovers(t, toks)) return { mode:"pieces", pieces: sentencePieces(sentence, toks, blank) };
   if(!HAN_RE.test(t)) return { mode:"text" };
@@ -4828,7 +4861,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, settleUnitProv, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,
   charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
-  charTier, sentenceTokenTier, rubyTiers, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, mixPick,
+  charTier, sentenceTokenTier, rubyTiers, wordRubyParts, tokenRubyParts, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, mixPick,
   learnCharPlan, charReviewScore, rankUnified, unifiedReviewPlan, unifiedRecallPlan, todaySnapshot, newCharUnits, charTestPlan, pickWeighted,
   pronUntilPrimerOn, scriptPrimerDone, showPronOn, SCRIPT_PROG_VERSION, SCRIPT_MASTERED, SCRIPT_SETS_PER_SESSION, REVIEW_SIZE_SCRIPT, SCRIPT_KINDS, scriptConfig,
   defaultScriptProg, validateScriptShape, normalizeScriptProg, ensureScript, scriptRecs, scriptSkipped, setScriptSkipped, answerScriptChoice,
