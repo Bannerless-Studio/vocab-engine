@@ -432,10 +432,15 @@ const pmLine = (n, g, p0, step) => Array.from({ length: n }, (_, i) => ({ sn: 10
     const ZE = JSON.parse(fs.readFileSync(ZH_ETA, "utf8"));
     check("constants: no PM_MIN, PM_KEEP 14; no ETA_GAIN / ETA_KNOWN zh fallback (pack.eta is required pack data since the flag collapse)", VC.PM_MIN === undefined && VC.PM_KEEP === 14 && VC.ETA_GAIN === undefined && VC.ETA_KNOWN === undefined);
     check("zh pack.eta = tools/zh_eta.json: a curve per goal + a knownCurve per gated level, no legacy keys", JSON.stringify(PACK.eta) === JSON.stringify(ZE) && PACK.eta.curve.length === GOALS.length && LV.slice(0, -1).every(lv => Array.isArray(PACK.eta.knownCurve[lv])) && !("gain" in PACK.eta) && !("known" in PACK.eta));
-    { const D = VC.GOAL_DONE, tr = [...Array(10).fill(0.5), D + .01, ...Array(19).fill(0.7), ...Array(10).fill(D + .02)], mono = [0, .3, .6, D, .95, 1], hi = [D + .01, D + .01], dip = [0, D, .8];
-      check("crossOf is sustained: touch at s10, drop, hold from s30 = 30; monotone trace = first touch; held from the start = 0; a touch that ends under = null; goalCurve counts sessions to the sustained crossing",
+    { const D = VC.GOAL_DONE, T = EC.CROSS_TOL, tr = [...Array(10).fill(0.5), D + .01, ...Array(19).fill(0.7), ...Array(10).fill(D + .02)], mono = [0, .3, .6, D, .95, 1], hi = [D + .01, D + .01], dip = [0, D, .8],
+        shallow = [0, .5, D + .01, D - .011, D - .011, D + .01, D + .02], deep = [0, .5, D + .01, D - .03, D - .03, D + .01, D + .02], endShallow = [0, D, D - .015], old = (xs) => { let c = null; for(let i = xs.length - 1; i >= 0 && xs[i] >= D; i--) c = i; return c; };
+      check("CROSS_TOL 0.02 (exported); the strict sustained rule is the tolerance-0 special case",
+        T === 0.02 && old(tr) === 30 && old(shallow) === 5);
+      check("crossOf: touch at s10, drop to .7, hold from s30 = 30; monotone = first touch; held from the start = 0; a touch ending under = null; empty = null",
         EC.crossOf(tr) === 30 && EC.crossOf(mono) === 3 && EC.crossOf(hi) === 0 && EC.crossOf(dip) === null && EC.crossOf([]) === null
-        && JSON.stringify(EC.goalCurve([tr, tr])[0]) === JSON.stringify([0, 30])); }
+        && JSON.stringify(EC.goalCurve([tr, tr])[0]) === JSON.stringify([0, 30]));
+      check("crossOf tolerates a shallow dip: first touch then dip .011 crosses at the touch (2); dip .03 crosses after the dip (5); a trace ending .015 under still crosses at the touch; never touching = null",
+        EC.crossOf(shallow) === 2 && EC.crossOf(deep) === 5 && EC.crossOf(endShallow) === 1 && EC.crossOf([0, .5, D - .001, D - .001]) === null && EC.crossOf([0, .5, .8]) === null); }
     // etaCurveAt: interpolation, endpoints, null
     const C = [[0, 100], [0.5, 30], [0.9, 0]];
     check("etaCurveAt: 0 -> 100, 0.25 -> 65, 0.5 -> 30, 0.7 -> 15, 0.9 -> 0, past the last -> 0, below the first -> its value, null / [] -> null",

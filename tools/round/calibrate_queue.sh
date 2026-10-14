@@ -3,17 +3,21 @@
 # Simulations never run inside a worker turn: start this as ONE background job and tail its log (README.md).
 #
 #   calibrate_queue.sh [--sessions N] [--gate-sessions N] [--force] [--out DIR] [--engine-sha SHA]
-#                      [--procs N] [--sites-parallel N] <site-dir>...
+#                      [--procs N] [--sites-parallel N] [--refit [--runs-sha OLD]] <site-dir>...
 #
 # Per site writes (default layout) <site>/tools/eta.json and <site>/.cache/eta/{calibrate.log,gate.log,verdict.txt};
 # with --out DIR the same four files go to DIR/<site>/ and the repo is untouched.
 # Process cap: sites-parallel (2) x procs (3) = 6 simulation processes. Resumable: a site with a verdict for this
 # engine sha is skipped (and --force redoes it); finished seeds are kept in <cache>/runs-*/ and reused.
+# --refit: no simulation. Recompute eta.json + verdict.txt from the existing runs-cal-<OLD>-N / runs-gate-<OLD>-GN seed
+# files (OLD = --runs-sha, default the engine sha). A site whose seeds are not all there is skipped with a line.
+# Valid only when engine/ and tools/packbuilder are unchanged between OLD and the engine sha (checked here); the previous
+# verdict/eta/logs are kept beside as verdict-OLD.txt, eta-OLD.json, calibrate-OLD.log, gate-OLD.log.
 set -uo pipefail
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 one() {
-  local site name cdir etaf verdict sha ct code N GN runs_c runs_g t0 rc cmpl
+  local site name cdir etaf verdict sha ct code N GN runs_c runs_g t0 rc cmpl rsha f
   site="$(abspath_dir "$1")"; name="$(basename "$site")"
   load_site_env "$site"
   N="${Q_SESSIONS:-$ETA_SESSIONS}"; GN="${Q_GATE_SESSIONS:-$ETA_GATE_SESSIONS}"
@@ -29,14 +33,26 @@ one() {
     say "$name: skip (eta.json newer than engine $sha; verdict: $(cut -c1-110 "$verdict")). --force redoes it"; return 0
   fi
   code="$(site_lang "$site")"
-  runs_c="$cdir/runs-cal-$sha-$N"; runs_g="$cdir/runs-gate-$sha-$GN"
-  if [ "$Q_FORCE" = 1 ]; then rm -f "$verdict" "$runs_c/seed5.json" "$runs_c/seed6.json" "$runs_c/seed7.json" "$runs_g/seed8.json" "$runs_g/seed9.json" "$runs_g/seed10.json"; fi
+  rsha="${Q_RUNS_SHA:-$sha}"
+  runs_c="$cdir/runs-cal-$rsha-$N"; runs_g="$cdir/runs-gate-$rsha-$GN"
+  if [ "$Q_REFIT" = 1 ]; then
+    local s miss=""
+    for s in 5 6 7; do [ -f "$runs_c/seed$s.json" ] || miss="$miss cal$s"; done
+    for s in 8 9 10; do [ -f "$runs_g/seed$s.json" ] || miss="$miss gate$s"; done
+    if [ -n "$miss" ]; then say "$name: refit skipped, seeds missing under $rsha:$miss"; return 0; fi
+    # keep the "before" beside the new files, once
+    for f in "verdict.txt:verdict-$rsha.txt" "$(basename "$etaf"):eta-$rsha.json" "calibrate.log:calibrate-$rsha.log" "gate.log:gate-$rsha.log"; do
+      [ -f "$cdir/${f%%:*}" ] && [ ! -f "$cdir/${f##*:}" ] && grep -q "sha=$rsha " "$cdir/verdict.txt" 2>/dev/null && cp "$cdir/${f%%:*}" "$cdir/${f##*:}"
+    done
+  elif [ "$Q_FORCE" = 1 ]; then rm -f "$verdict" "$runs_c/seed5.json" "$runs_c/seed6.json" "$runs_c/seed7.json" "$runs_g/seed8.json" "$runs_g/seed9.json" "$runs_g/seed10.json"; fi
   say "$name: start (lang $code, calibrate $N sessions seeds 5/6/7, gate $GN sessions seeds 8/9/10, $Q_PROCS procs)"
   mkdir -p "$runs_c" "$runs_g"; : > "$cdir/calibrate.log"; : > "$cdir/gate.log"
 
   # 1. enriched copy of the pack (the repo is read only), then the calibration seeds
-  PYTHONPATH="$ENGINE_ROOT/tools" "$PY" -m packbuilder enrich --lang "$code" --repo "$site" --emit "$cdir/pack-cal" > "$cdir/enrich.log" 2>&1 \
+  if [ "$Q_REFIT" = 1 ] && [ -d "$cdir/pack-cal" ]; then : > "$cdir/enrich.log"  # the pack the seeds ran on
+  else PYTHONPATH="$ENGINE_ROOT/tools" "$PY" -m packbuilder enrich --lang "$code" --repo "$site" --emit "$cdir/pack-cal" > "$cdir/enrich.log" 2>&1 \
     || { echo "enrich failed:"; tail -5 "$cdir/enrich.log"; return 1; }
+  fi
   sims "$runs_c" 5 6 7 -- "$cdir/pack-cal" --calibrate "$N" "$cdir/calibrate.log" || return 1
   t0=$SECONDS
   "$NODE" "$ROUND_DIR/etadrv.js" --pack "$cdir/pack-cal" --calibrate --sessions "$N" --runsdir "$runs_c" --seeds 5,6,7 --write "$etaf.part" >> "$cdir/calibrate.log" 2>&1 \
@@ -45,8 +61,10 @@ one() {
   say "$name: calibrated -> $etaf ($(grep -c '^GATE' "$cdir/calibrate.log") gates; $(grep '^GATE' "$cdir/calibrate.log" | grep -c FAIL) written null)"
 
   # 2. gate on the pack carrying the written curves, seeds the curves never saw
-  PYTHONPATH="$ENGINE_ROOT/tools" "$PY" -m packbuilder enrich --lang "$code" --repo "$site" --emit "$cdir/pack-gate" >> "$cdir/enrich.log" 2>&1 \
+  if [ "$Q_REFIT" = 1 ] && [ -d "$cdir/pack-cal" ]; then rm -rf "$cdir/pack-gate" && cp -R "$cdir/pack-cal" "$cdir/pack-gate" || return 1
+  else PYTHONPATH="$ENGINE_ROOT/tools" "$PY" -m packbuilder enrich --lang "$code" --repo "$site" --emit "$cdir/pack-gate" >> "$cdir/enrich.log" 2>&1 \
     || { echo "enrich (gate pack) failed"; return 1; }
+  fi
   "$NODE" -e '
     const fs=require("fs"),[pj, ef]=process.argv.slice(1), p=JSON.parse(fs.readFileSync(pj,"utf8")), e=JSON.parse(fs.readFileSync(ef,"utf8"));
     p.eta={}; for(const k of ["curve","knownCurve","placed","gain","known"]) if(k in e) p.eta[k]=e[k];
@@ -58,7 +76,8 @@ one() {
   # 3. one-line verdict (last: its presence means the site is done)
   cmpl="$(summarize "$cdir/calibrate.log")"
   { printf 'sha=%s sessions=%s/%s result=%s' "$sha" "$N" "$GN" "$([ $rc -eq 0 ] && echo OK || echo FAIL)"
-    printf ' cal[%s] oos[%s] at=%s\n' "$cmpl" "$(summarize "$cdir/gate.log")" "$(date +%Y-%m-%dT%H:%M:%S)"; } > "$verdict"
+    printf ' cal[%s] oos[%s] at=%s' "$cmpl" "$(summarize "$cdir/gate.log")" "$(date +%Y-%m-%dT%H:%M:%S)"
+    [ "$Q_REFIT" = 1 ] && printf ' refit, runs from %s' "$rsha"; printf '\n'; } > "$verdict"
   say "$name: DONE $(cat "$verdict")"
   return 0
 }
@@ -81,7 +100,7 @@ sims() {
 
 if [ "${1:-}" = "--one" ]; then shift; one "$1"; exit $?; fi
 
-Q_SESSIONS=""; Q_GATE_SESSIONS=""; Q_FORCE=0; Q_OUT=""; Q_SHA=""; Q_PROCS=3; PAR=2
+Q_SESSIONS=""; Q_GATE_SESSIONS=""; Q_FORCE=0; Q_OUT=""; Q_SHA=""; Q_PROCS=3; PAR=2; Q_REFIT=0; Q_RUNS_SHA=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --sessions) Q_SESSIONS="$2"; shift 2 ;;
@@ -89,6 +108,8 @@ while [ $# -gt 0 ]; do
     --force) Q_FORCE=1; shift ;;
     --out) mkdir -p "$2"; Q_OUT="$(abspath_dir "$2")"; shift 2 ;;
     --engine-sha) Q_SHA="$2"; shift 2 ;;
+    --refit) Q_REFIT=1; shift ;;
+    --runs-sha) Q_RUNS_SHA="$2"; shift 2 ;;
     --procs) Q_PROCS="$2"; shift 2 ;;
     --sites-parallel) PAR="$2"; shift 2 ;;
     -h|--help) sed -n 2,14p "$0"; exit 0 ;;
@@ -106,8 +127,15 @@ if [ -z "$Q_SHA" ]; then Q_SHA="$head"; else
   git -C "$ENGINE_ROOT" diff --quiet "$Q_SHA" HEAD -- engine tests tools/packbuilder tools/jsonify_pack.py \
     || die "this checkout's engine/tests/packbuilder differ from $Q_SHA: run the queue from a checkout of that sha"
 fi
+[ -z "$Q_RUNS_SHA" ] || [ "$Q_REFIT" = 1 ] || die "--runs-sha needs --refit"
+if [ "$Q_REFIT" = 1 ]; then
+  [ -z "$Q_RUNS_SHA" ] || Q_RUNS_SHA="$(git -C "$ENGINE_ROOT" rev-parse --short=7 "$Q_RUNS_SHA^{commit}")" || die "unknown --runs-sha"
+  # the seeds were simulated by the old engine and packbuilder: a refit only re-reads them, so those must be the same code
+  [ -z "$Q_RUNS_SHA" ] || git -C "$ENGINE_ROOT" diff --quiet "$Q_RUNS_SHA" "$Q_SHA" -- engine/ tools/packbuilder/ \
+    || die "engine/ or tools/packbuilder differ between $Q_RUNS_SHA and $Q_SHA: the seeds are not valid for a refit, resimulate"
+fi
 git -C "$ENGINE_ROOT" diff --quiet HEAD -- engine tests tools/packbuilder || die "uncommitted changes in engine/tests/packbuilder: the sha would not describe the simulation"
-export Q_SESSIONS Q_GATE_SESSIONS Q_FORCE Q_OUT Q_SHA Q_PROCS
+export Q_SESSIONS Q_GATE_SESSIONS Q_FORCE Q_OUT Q_SHA Q_PROCS Q_REFIT Q_RUNS_SHA
 say "calibrate queue: engine $Q_SHA, $# site(s), $PAR at a time x $Q_PROCS procs, output ${Q_OUT:-in each site}"
 fail=0
 printf '%s\n' "$@" | xargs -P "$PAR" -I{} bash "${BASH_SOURCE[0]}" --one {} || fail=$?

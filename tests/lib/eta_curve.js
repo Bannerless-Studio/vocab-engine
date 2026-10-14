@@ -6,9 +6,16 @@ const path = require("path");
 const VC = require(path.join(__dirname, "..", "..", "engine", "core.js"));
 const TOL = 0.30, PROBES = [0, 0.25, 0.5, 0.75];
 const firstAt = (xs, x) => { if(x <= xs[0]) return 0; const i = xs.findIndex(v => v >= x - 1e-9); return i < 0 ? null : i; };
-// Crossing = first session from which the position stays >= GOAL_DONE through the end of the trace (sustained); a touch that
-// drops back again is not a crossing (a goal position oscillates with the teaching waves: ja goal 1 touched .9 at s367, held from s553).
-const crossOf = xs => { let c = null; for(let i = xs.length - 1; i >= 0 && xs[i] >= VC.GOAL_DONE; i--) c = i; return c; };
+// Crossing = the earliest session at GOAL_DONE from which the position never falls below GOAL_DONE - CROSS_TOL again. The
+// ETA models the first time the learner reaches the goal Today shows; a later shallow dip is refresh-miss noise (a goal near
+// its ceiling plateaus at .90-.92 and ordinary misses dip it to .89 for 20-30 sessions). The strict sustained rule (CROSS_TOL
+// 0) put the crossing ~120 sessions late on some seeds (hindi arabic german russian goal 1). Measured on 42 traces: tolerance
+// .01 / .015 / .02 realign 34 / 37 / 39 to the first touch; ja goal 1 still differs by design (its dips reach .86-.88 from the
+// character-unit term). A touch that ends the trace below the tolerance is still not a crossing.
+const CROSS_TOL = 0.02;
+const crossOf = xs => { let c = null, floor = VC.GOAL_DONE - CROSS_TOL - 1e-9;
+  for(let i = xs.length - 1; i >= 0 && xs[i] >= floor; i--) if(xs[i] >= VC.GOAL_DONE - 1e-9) c = i;
+  return c; };
 const r2 = x => Math.round(x * 100) / 100, r1 = x => Math.round(x * 10) / 10;
 const mean = xs => xs.reduce((a, b) => a + b, 0) / xs.length;
 // Arithmetic mean over the runs at each grid position; a goal fewer than 2 runs cross is null (no estimate).
@@ -78,4 +85,4 @@ function knownGate(curve, runsHolds){
     return { ok: e.every(x => Math.abs(x.err) <= TOL), note: e.map(x => `${x.lv}: ${x.v} vs ${x.a} (${Math.round(x.err * 100)}%)`).join(", ") }; });
   return { ok: per.filter(x => x.ok).length >= 2, per };
 }
-module.exports = { TOL, PROBES, probeRun, tailRule, goalCurve, knownCurve, holdsOf, goalGate, knownGate, crossOf, firstAt, est };
+module.exports = { TOL, PROBES, probeRun, tailRule, goalCurve, knownCurve, holdsOf, goalGate, knownGate, crossOf, CROSS_TOL, firstAt, est };
