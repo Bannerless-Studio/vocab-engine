@@ -428,7 +428,7 @@ class HookOwners(unittest.TestCase):
             self.assertEqual(bool(sp.passage_lemma_alias), m in ("de", "fa", "ko", "ur"), m)
             self.assertEqual(bool(sp.passage_adverb_from), m == "ru", m)
             self.assertEqual(own(sp, "passage_retag"), m in ("ru", "fr", "id", "fa", "ko", "ja", "ar", "hi", "ur"), m)
-            self.assertEqual(own(sp, "passage_no_link"), m in ("ru", "es", "hi"), m)
+            self.assertEqual(own(sp, "passage_no_link"), m in ("ru", "es", "hi", "de"), m)
             self.assertEqual(own(sp, "passage_post_resolve"), m in ("es", "de", "fr", "id", "fa", "ja", "hi"), m)
             self.assertEqual(bool(sp.passage_span_glosses), m in ("zh", "ja"), m)
             self.assertEqual(bool(sp.passage_form_base), m == "fr", m)

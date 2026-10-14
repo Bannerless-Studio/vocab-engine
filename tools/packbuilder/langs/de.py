@@ -122,6 +122,20 @@ SEP_PARTICLES = {"ab", "an", "auf", "aus", "bei", "ein", "fest", "fort", "her", 
                  "herum", "um", "wieder", "statt", "teil", "frei", "kennen", "hoch", "runter", "rüber", "rein", "raus",
                  "herunter", "hinunter", "entgegen", "dazu", "fern", "nieder", "bereit", "kaputt", "vorwärts"}
 INSEP_PREFIXES = ("be", "ge", "er", "ver", "zer", "ent", "emp", "miss")
+COPULAS = {"sein", "werden", "bleiben", "scheinen"}
+# fixed expressions where one member's pack word has another sense; (surfaces, index of the member
+# that links nothing). The other members keep their literal links.
+IDIOM_UNLINK = ((("denn", "je"), 0),                     # schöner denn je: "than ever", not the conjunction
+                (("recht", "und", "billig"), 2),         # fair, not cheap
+                (("billig", "und", "recht"), 0),
+                (("vor", "allem"), 1))                   # above all, not "everything"
+# a word that takes vor in its literal sense: "Angst vor allem" stays alles
+VOR_GOVERNORS = {"angst", "furcht", "respekt", "achtung", "schutz", "warnung", "grauen", "ekel", "scheu",
+                 "fürchten", "warnen", "schützen", "bewahren", "hüten", "flüchten", "fliehen", "verstecken",
+                 "retten", "verschonen", "sichern", "sicher", "bang", "bange", "erschrecken", "davonlaufen",
+                 "weglaufen"}
+# unflected adjective that doubles as a direction adverb (Lass mich rein): adjective only as a predicate
+PRED_ADJ_ADVERBS = {"rein"}
 COMPARATIVES = {"mehr", "weniger", "lieber", "eher", "besser", "anders", "schlechter", "größer", "kleiner", "älter",
                 "jünger", "früher", "später", "schneller", "länger", "höher", "weiter", "öfter", "schöner"}
 SAY_VERBS = {"sagen", "antworten", "nicken", "stimmen"}
@@ -183,6 +197,7 @@ class German(LanguageSpec):
     pack_name = "German (A1–B1)"
     tts = "de-DE"
     emit_gender = True
+    keep_live_sentences = True
     stt = "de-DE"
     tatoeba_code = "deu"
 
@@ -339,6 +354,7 @@ class German(LanguageSpec):
         self.plural_debug = []
         self._pr_cache = {}
         self.sep_examples = {}
+        self._pack_verbs = self._pack_keys = None
 
     def load(self):
         """The A1 core list is written with German capitalisation (Haus);
@@ -595,6 +611,119 @@ class German(LanguageSpec):
                 self.sep_stats["no_verb"] += 1
             if upos == "ADP" and "Tag=PTKVZ" in ms:
                 out[i] = None                     # a particle is never the preposition
+        return self._linker_classes(toks, out)
+
+    def choose_entries(self, lexicon, lem, group, ents, surf, morph=None):
+        """A loan homograph (die Gang "gang") never beats the native noun (der Gang) on
+        English-gloss overlap alone: it is kept only when the corpus shows a surface the
+        loan has and the native noun lacks (its -s plural), and dropped when the native
+        noun's own forms (Gänge, Gängen) are attested and the loan's are not. A feminine
+        article on the singular (die Gang: the tagger's Gender=Fem outweighs Masc+Neut, at least
+        3 tokens) is the loan's evidence too, and keeps it."""
+        if group != "NOUN":
+            return ents
+        loans = [e for e in ents if e.get("b")]
+        native = [e for e in ents if not e.get("b")]
+        if not loans or not native:
+            return ents
+
+        def plurals(e):
+            parts = (e.get("g") or "").split("|")
+            return {x.lower() for x in re.split(r"[,/ ]+", parts[1]) if x and x != "-"} if len(parts) > 1 else set()
+
+        def used(forms):
+            return sum(n for f in forms for (lm, g), n in surf.get(f, {}).items() if lm == lem and g == group)
+        native_forms = set().union(*[plurals(e) for e in native])
+        keep = [e for e in loans if used(plurals(e) - native_forms) > 0]
+        loan_forms = set().union(*[plurals(e) for e in loans])
+        fem = (morph or {}).get("Gender=Fem", 0)
+        fem_loan = fem >= 3 and fem > (morph or {}).get("Gender=Masc", 0) + (morph or {}).get("Gender=Neut", 0)
+        if keep or fem_loan or used(native_forms - loan_forms) < 3:
+            return ents
+        return native
+
+    def note_words(self, words):
+        self._pack_keys = {w["_key"] for w in words}
+        self._pack_verbs = {k[0] for k in self._pack_keys if k[1] == "VERB"}
+
+    def _participle_reading(self, low):
+        """The adjective/adverb group an uninflected present participle (eingehend) may link
+        as: one the dictionary lists and, once the pack is known, one the pack holds."""
+        groups = [g for g in ("ADJ", "ADV") if self._lex.usable_entries(low, [g.lower()])]
+        return [g for g in groups if self._pack_keys is None or (low, g) in self._pack_keys]
+
+    def _no_link(self, toks):
+        """Token indices that link nothing, from the tokens alone: a member of a fixed
+        expression whose pack word has another sense (IDIOM_UNLINK) and an uninflected
+        present participle (infinitive + d: adverb or predicate) with no adjective entry of
+        its own (eingehend "thoroughly" is not eingehen "to go into"); inflected ones
+        (liebendes Volk) keep their verb. Once the sentence stage knows the pack (note_words) only a
+        participle of a pack verb is unlinked (or linked as the pack's adjective): another one stays
+        an out-of-pack content word, so its sentence is still refused rather than admitted with an
+        unlinked word."""
+        lx = self._lex
+        low = [t[0].lower() for t in toks]
+        out = set()
+        for words, k in IDIOM_UNLINK:
+            n = len(words)
+            for i in range(len(toks) - n + 1):
+                if tuple(low[i:i + n]) != words:
+                    continue
+                if words == ("vor", "allem") and self._vor_governed(toks, i):
+                    continue
+                out.add(i + k)
+        for i, t in enumerate(toks):
+            if t[2] in ("ADJ", "ADV", "VERB") and low[i].endswith("end") and len(low[i]) > 5 and \
+                    lx.usable_entries(low[i][:-1], ["verb"]) and not self._participle_reading(low[i]) and \
+                    (self._pack_verbs is None or low[i][:-1] in self._pack_verbs):
+                out.add(i)
+        return out
+
+    @staticmethod
+    def _vor_governed(toks, i):
+        """A VOR_GOVERNORS word within 3 tokens before i, not across punctuation (a comma
+        ends the governor's reach: "sicher, vor allem ...")."""
+        for t in reversed(toks[max(0, i - 3):i]):
+            if t[2] == "PUNCT":
+                return False
+            if t[1].lower() in VOR_GOVERNORS:
+                return True
+        return False
+
+    def passage_no_link(self, toks):
+        return self._no_link(toks)
+
+    @staticmethod
+    def _perfect_aux(toks, j, end):
+        """sein/werden at j is a perfect/passive auxiliary, not a copula: a participle follows in
+        the clause ("Wir sind rein gegangen")."""
+        return any("VerbForm=Part" in t[3] and t[2] == "VERB" for t in toks[j + 1:end + 1])
+
+    def _linker_classes(self, toks, out):
+        """Context classes the dictionary alone gets wrong, applied to the corpus build and
+        the passages alike: a direction adverb read as its homograph adjective, a present
+        participle with an adjective entry read as its verb, and the _no_link tokens (the
+        corpus build drops their link; a passage keeps the reading, counted, through
+        passage_no_link)."""
+        lx = self._lex
+        for i, (text, sl, upos, ms) in enumerate(toks):
+            r = out[i]
+            if r is None:
+                continue
+            low = text.lower()
+            nxt = toks[i + 1] if i + 1 < len(toks) else None
+            if low in PRED_ADJ_ADVERBS and r == (low, "ADJ") and lx.usable_entries(low, ["adv"]):
+                a, b = self._clause_span(toks, i)
+                predicate = any(t[1].lower() in COPULAS and t[2] in ("AUX", "VERB") and
+                                not self._perfect_aux(toks, j, b) for j, t in enumerate(toks[a:b + 1], a))
+                if not predicate or (nxt is not None and nxt[2] in ("ADJ", "ADV", "NUM")):
+                    out[i] = (low, "ADV")     # "Lass den Hund rein", "rein familiär"; "Das Wasser ist rein" stays
+            elif r[1] == "VERB" and upos in ("ADJ", "ADV", "VERB") and low.endswith("end") and low == r[0] + "d" and \
+                    self._participle_reading(low):
+                out[i] = (low, self._participle_reading(low)[0])   # spannend: the adjective, never spannen
+        if not self.passage_mode:
+            for i in self._no_link(toks):
+                out[i] = None
         return out
 
     def passage_post_resolve(self, toks, out):
