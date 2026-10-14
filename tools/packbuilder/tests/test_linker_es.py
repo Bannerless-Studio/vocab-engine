@@ -104,6 +104,10 @@ class HaceAgo(unittest.TestCase):
         self.assertIsNone(passage(toks, {"hace": ("hacer", "VERB")})[0])
         self.assertEqual(SP.fix_links(None, toks, ["hacer", "que"], K2I), ["que"])
 
+    def test_relative_que_tagged_pron_still_closes(self):
+        toks = [T("Hace", "VERB", "hacer"), T("un", "DET"), T("mes", "NOUN"), T("que", "PRON"), T("estás", "VERB")]
+        self.assertIsNone(passage(toks, {"hace": ("hacer", "VERB")})[0])
+
     def test_hace_poco_and_hace_dos_anos(self):
         for rest in ([T("poco", "ADV"), T("recibió", "VERB")], [T("dos", "NUM"), T("años", "NOUN")]):
             toks = [T("Hace", "VERB", "hacer")] + rest
@@ -114,6 +118,23 @@ class HaceAgo(unittest.TestCase):
             toks = [T("Hace", "VERB", "hacer")] + rest
             self.assertEqual(passage(toks, {"hace": ("hacer", "VERB")})[0], ("hacer", "VERB"))
             self.assertEqual(SP.fix_links(None, toks, ["hacer"], K2I), ["hacer"])
+
+    def test_subject_before_hace_keeps_hacer(self):
+        toks = [T("Ella", "PRON"), T("hace", "VERB", "hacer"), T("horas", "NOUN"), T("extras", "ADJ")]
+        self.assertEqual(passage(toks, {"hace": ("hacer", "VERB")})[1], ("hacer", "VERB"))
+        self.assertEqual(SP.fix_links(None, toks, ["hacer"], K2I), ["hacer"])
+
+    def test_hace_tiempo_para_keeps_hacer(self):
+        toks = [T("Siempre", "ADV"), T("hace", "VERB", "hacer"), T("tiempo", "NOUN"), T("para", "ADP"), T("sus", "DET"),
+                T("hijos", "NOUN")]
+        self.assertEqual(passage(toks, {"hace": ("hacer", "VERB")})[1], ("hacer", "VERB"))
+
+    def test_past_verb_and_desde_close_the_phrase(self):
+        past = [T("Hace", "VERB", "hacer"), T("dos", "NUM"), T("años", "NOUN"), T("dejé", "VERB", "dejar", "Tense=Past")]
+        self.assertIsNone(passage(past, {"hace": ("hacer", "VERB")})[0])
+        desde = [T("Desde", "ADP"), T("hace", "VERB", "hacer"), T("tres", "NUM"), T("días", "NOUN"), T("me", "PRON"),
+                 T("duele", "VERB", "doler", "Tense=Pres")]
+        self.assertIsNone(passage(desde, {"hace": ("hacer", "VERB")})[1])
 
     def test_other_hacer_token_keeps_id(self):
         toks = [T("Hace", "VERB", "hacer"), T("un", "DET"), T("año", "NOUN"), T("hizo", "VERB", "hacer"), T("eso", "PRON")]

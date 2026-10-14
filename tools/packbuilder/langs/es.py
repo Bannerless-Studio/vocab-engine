@@ -142,6 +142,8 @@ LO_NEUTER_NEXT = {"que", "cual", "de", "más", "menos", "mejor", "peor", "mismo"
                   "antes", "mucho", "poco", "demás", "tanto", "bien", "mal", "mayor", "menor", "contrario", "general",
                   "largo", "suficiente", "bello", "visto", "ancho", "alto"}
 PARTICIPLE_ENDINGS = ("ado", "ido", "ada", "ida", "ados", "idos")
+SUBJECT_PRONOUNS = {"yo", "tú", "él", "ella", "usted", "nosotros", "nosotras", "vosotros", "vosotras", "ellos",
+                    "ellas", "ustedes"}
 SOLO_FORMS = {"solo", "sola", "solos", "solas"}
 DET_BEFORE_SOLO = {"un", "una", "el", "la", "este", "esta", "ese", "esa", "mi", "tu", "su", "ningún", "ninguna",
                    "cada", "otro", "otra", "aquel", "aquella", "nuestro", "nuestra"}
@@ -178,28 +180,45 @@ def _solo_for_single(toks, i):
         toks[i - 1][0].lower() in DET_BEFORE_SOLO and toks[i + 1][2] in ("NOUN", "PROPN")
 
 
+def _hace_subject_before(toks, i):
+    """A subject before hace makes it the verb ("Ella hace horas extras", "Tom hace un año ..."). A noun before
+    it is a subject only when no verb came earlier ("Fue ascendido a coronel hace dos años")."""
+    if i == 0:
+        return False
+    prev = toks[i - 1]
+    if prev[2] == "PRON" and prev[0].lower() in SUBJECT_PRONOUNS or prev[2] == "PROPN":
+        return True
+    return prev[2] == "NOUN" and not any(t[2] in ("VERB", "AUX") for t in toks[:i])
+
+
 def _hace_ago(toks, i):
-    """hace/hacía + amount of time ("hace dos años", "hace un mes que", "hace poco") is the temporal
-    expression; weather and making ("hace mucho frío", "hace una prueba") keep hacer."""
-    if toks[i][1].lower() != "hacer" or toks[i][0].lower() not in ("hace", "hacía"):
+    """hace/hacía + amount of time, in adverbial position and closed by que, the clause end, a conjunction or
+    a past-tense verb ("hace un mes que", "hace dos años dejé", "desde hace años"), is the temporal
+    expression. Weather, making and "hace tiempo para" keep hacer."""
+    if toks[i][1].lower() != "hacer" or toks[i][0].lower() not in ("hace", "hacía") or _hace_subject_before(toks, i):
         return False
     n = len(toks)
     j = i + 1
-    if j < n and toks[j][0].lower() in TIME_QTY or j < n and toks[j][2] == "NUM":
+    if j < n and (toks[j][0].lower() in TIME_QTY or toks[j][2] == "NUM"):
         j += 1
-    else:
-        j = i + 1
     if j >= n:
         return False
     low = toks[j][0].lower()
-    after = toks[j + 1] if j + 1 < n else None
-    if j > i + 1 and toks[j - 1][0].lower() in ("mucho", "poco") and (low in ("que",) or toks[j][2] in ("VERB", "AUX", "PUNCT")):
-        return True
+    qty = j > i + 1 and toks[j - 1][0].lower() in ("mucho", "poco")
+    if not (low in TIME_NOUNS or qty and (low == "que" or toks[j][2] in ("VERB", "AUX", "PUNCT"))):
+        return False
     if low in TIME_NOUNS:
+        k = j + 1
+        while k < n and toks[k][2] == "PRON" and toks[k][0].lower() not in SUBJECT_PRONOUNS | {"que"}:
+            k += 1
+        after = toks[k] if k < n else None
+        closed = after is None or after[2] in ("PUNCT", "CCONJ") or after[0].lower() == "que" or \
+            (after[2] in ("VERB", "AUX") and ("Tense=Past" in after[3] or "Tense=Imp" in after[3]))
+        if not (closed or i and toks[i - 1][0].lower() == "desde"):
+            return False
         if low in ("día", "momento") and not (after is None or after[0].lower() == "que" or after[2] == "PUNCT"):
             return False
-        return True
-    return False
+    return True
 
 
 def _se_for_le(toks, i):
