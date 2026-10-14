@@ -1,5 +1,5 @@
 """An id decision never depends on hand gloss text once the id is issued. A second-POS entry folds into the
-first (same-sense rule) only when the record it drops has no "lemma|pos" key marked shipped in the id map (core/words.py
+first (same-sense rule) unless BOTH keys of the pair are marked shipped in the id map (core/words.py
 second_pos_merges, shipped_markers, persist_ids, build_words). Stdlib only.
 
     python3 -m pytest -q tools/packbuilder/tests/test_id_merge.py     (from vocab-engine/)
@@ -93,7 +93,7 @@ class Markers(Fixture):
 class BuildWordsSecondPos(Fixture):
     """build_words over a stub lexicon: jibu verb "to answer" and jibu noun "answer, reply" share a stem."""
 
-    def run_build(self, order, idmap, forced=(), pack_ids=None):
+    def run_build(self, order, idmap, forced=(), pack_ids=None, to_words=False, word_pos=None):
         if idmap is not None:
             self.map.write_text(json.dumps(idmap))
         if pack_ids is not None:
@@ -103,6 +103,8 @@ class BuildWordsSecondPos(Fixture):
         sp.id_map_file = self.map.name
         sp.forced = list(forced)
         sp.drop_keys, sp.gloss_overrides, sp.fixed_gloss = {}, {}, {}
+        if word_pos:
+            sp.word_pos = word_pos
         en = {"VERB": "to answer", "NOUN": "answer, reply"}
         pos = {"VERB": "verb", "NOUN": "noun"}
         lex = SimpleNamespace(E={}, usable_entries=lambda lem, kpos: [{"p": p, "s": [], "g": None} for p in (
@@ -119,20 +121,26 @@ class BuildWordsSecondPos(Fixture):
 
         def stat(k, v):
             stats[k] = v
-            if k == "second_pos_entries_in_pool":
+            if k == "second_pos_entries_in_pool" and not to_words:
                 raise Stop
+
+        def sort_by_rank(level_ids, words):
+            stats["words"] = words
+            raise Stop
 
         def senses(e, g, df, nsent, closed, *a):
             return [{"g": en[g], "score": 1.0, "defn": False, "demote": False, "idx": 0}]
 
         patches = mock.patch.multiple(W, sense_candidates=senses, compose_gloss=lambda rows: (rows[0]["g"], rows[0]),
                                       english_bags=lambda *a, **k: {(("jibu", g)): [10, Counter()] for g in order},
-                                      stat=stat)
+                                      stat=stat, **({"sort_by_rank": sort_by_rank} if to_words else {}))
         with patches, mock.patch("wordfreq.top_n_list", lambda *a, **k: []):
             try:
                 W.build_words(SimpleNamespace(spec=sp, repo=self.tmp, pack=self.tmp / "pack"), ctx)
             except Stop:
                 pass
+        if to_words:
+            return stats["words"]
         return stats["second_pos_entries_in_pool"], stats["excluded"]
 
     IDS = {"jibu|verb": "w1", "jibu|noun": "w2"}
@@ -149,31 +157,45 @@ class BuildWordsSecondPos(Fixture):
             kept, _ = self.run_build(order, {**self.IDS, "_shipped": []})
             self.assertEqual(kept, [])
 
-    def test_marked_second_is_kept_both_orders(self):
-        # the record the merge would exclude holds an issued id: it stays, with or without the first's marker
+    def ids_of(self, words):
+        ids = W.persisted_idmap(self.map)
+        W.assign_ids(words, ids)
+        return {(w["lemma"], w["pos"]): w["id"] for w in words}
+
+    def test_both_marked_keeps_pair_both_orders(self):
+        # two shipped ids would collapse into one
         for order, second in ((["VERB", "NOUN"], "NOUN"), (["NOUN", "VERB"], "VERB")):
-            for first_marked in (False, True):
-                marked = [f"jibu|{second.lower()}"] + ([f"jibu|{'verb' if second == 'NOUN' else 'noun'}"] if first_marked else [])
-                kept, excl = self.run_build(order, {**self.IDS, "_shipped": marked})
-                self.assertEqual(kept, [f"jibu {second}"], (order, marked))
-                self.assertEqual(sum(excl.values()), 0)
+            kept, excl = self.run_build(order, {**self.IDS, "_shipped": ["jibu|verb", "jibu|noun"]})
+            self.assertEqual(kept, [f"jibu {second}"], order)
+            self.assertEqual(sum(excl.values()), 0)
 
-    def test_only_first_marked_still_merges_the_unissued_second(self):
-        # no issued id is lost: the second never had one, so it folds as before (re-admitting it would add a word)
-        for order in (["VERB", "NOUN"], ["NOUN", "VERB"]):
-            first = "jibu|verb" if order[0] == "VERB" else "jibu|noun"
-            kept, excl = self.run_build(order, {**self.IDS, "_shipped": [first]})
-            self.assertEqual(kept, [])
-            self.assertEqual(sum(excl.values()), 1)
+    def test_dropped_side_marked_merges_and_the_shipped_id_survives(self):
+        # ar أمر / عال / كاف: the dropped second holds the shipped id, the survivor key is unissued. The merge
+        # is harmless when the merged record still gets that id (here the label follows the dropped key's pos,
+        # as ar word_pos does from the dictionary entry) and keeping both would add a same-sense duplicate
+        ar_like = lambda rec, pos, keys: "noun"
+        kept, excl = self.run_build(["VERB", "NOUN"], {**self.IDS, "_shipped": ["jibu|noun"]})
+        self.assertEqual((kept, sum(excl.values())), ([], 1))
+        words = self.run_build(["VERB", "NOUN"], {**self.IDS, "_shipped": ["jibu|noun"]}, to_words=True, word_pos=ar_like)
+        self.assertEqual(self.ids_of(words), {("jibu", "noun"): "w2"})
 
-    def test_forced_replace_skipped_only_when_the_first_is_marked(self):
+    def test_survivor_side_marked_merges(self):
+        for order, first_key in ((["VERB", "NOUN"], "jibu|verb"), (["NOUN", "VERB"], "jibu|noun")):
+            kept, excl = self.run_build(order, {**self.IDS, "_shipped": [first_key]})
+            self.assertEqual((kept, sum(excl.values())), ([], 1), order)
+        words = self.run_build(["VERB", "NOUN"], {**self.IDS, "_shipped": ["jibu|verb"]}, to_words=True)
+        self.assertEqual(self.ids_of(words), {("jibu", "verb"): "w1"})
+
+    def test_forced_replace_both_ways(self):
         forced = [("jibu", "NOUN")]
         kept, _ = self.run_build(["VERB", "NOUN"], None, forced=forced)
-        self.assertEqual(kept, [])                       # forced noun replaces the unissued verb record
+        self.assertEqual(kept, [])                                        # forced noun replaces the verb record
+        kept, _ = self.run_build(["VERB", "NOUN"], {**self.IDS, "_shipped": ["jibu|verb", "jibu|noun"]}, forced=forced)
+        self.assertEqual(kept, ["jibu NOUN"])                             # both shipped: nothing collapses
         kept, _ = self.run_build(["VERB", "NOUN"], {**self.IDS, "_shipped": ["jibu|verb"]}, forced=forced)
-        self.assertEqual(kept, ["jibu NOUN"])            # the verb record holds an issued id: it stays
-        kept, _ = self.run_build(["VERB", "NOUN"], {**self.IDS, "_shipped": ["jibu|noun"]}, forced=forced)
-        self.assertEqual(kept, [])                       # the forced noun is kept anyway; nothing issued is lost
+        self.assertEqual(kept, [])                                        # dropped verb marked, survivor not: merge
+        words = self.run_build(["VERB", "NOUN"], {**self.IDS, "_shipped": ["jibu|noun"]}, forced=forced, to_words=True)
+        self.assertEqual(self.ids_of(words), {("jibu", "noun"): "w2"})    # forced survivor keeps its shipped id
 
     def test_map_without_marker_seeds_from_pack(self):
         kept, _ = self.run_build(["VERB", "NOUN"], self.IDS, pack_ids=["w1", "w2"])
