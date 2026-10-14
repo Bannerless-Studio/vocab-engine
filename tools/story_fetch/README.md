@@ -21,3 +21,11 @@ Node 22 + Playwright 1.62.1 (path in `PLAYWRIGHT_PATH`, default the china-harbou
 
 ## Cache
 `<id>.json`: normalised fields + `text_pages[{n,pageId,html,text}]`, `twin{...,text_pages}`, `twin_tried[]` with reject reasons, `raw{list_item,read_meta,detail,cover_credits,licence}` (list item without coverImage). `manifest.json` id -> status (`ok`, `twin_null`, `licence_rejected`, `error`). `list-L<n>.json` caches the level lists, `run-stats.json` counters.
+
+## Let's Read Asia (lra_fetch.py), measured 2026-10-14
+Public JSON API, plain HTTP, no session. List `GET /api/v5/book/search?cardName=&limit=100&fLimit=100&lId=<langId>&cursor=`; book `GET /api/v5/book/preview/language/undefined/book/<id>` (the language path part is the literal "undefined"; the id decides). Page text is `pages[].extractedLongContentValue`, each page record repeated 3x (dedupe by pageNum). Fields: `license` (exact CC-BY-4.0 required), `collaboratorsByRole{AUTHOR,ILLUSTRATOR,PUBLISHER,...}`, `masterBookMetaData{title,languageName,license}`, `originalUrl` (often a StoryWeaver or digitallibrary page, so overlap with StoryWeaver), `masterBookId`, `nonMasterMetaDatas[{id,languageId}]`.
+Urdu: 602 titles, 292 CC-BY-4.0, 196 BY-NC, 81 BY-NC-SA, 27 Copyright, 5 BY-3.0. English twin: the master when it is English, else an English sibling; page equality is on non-empty text pages (cover and credit pages differ by one).
+Run: `python3 tools/story_fetch/lra_fetch.py --lid 5732871486570496 --code ur --site ../urdu [--limit N] [--resume]`.
+
+## Measure
+`python3 tools/story_fetch/measure.py --pack ../urdu --dirs <cache dirs> [--population N]` prints the stage-0 numbers (sentences per story, share <= 14 tokens, pack coverage, proxy pass counts, passage excerpt counts by level). Token coverage uses pack surfaces plus generated forms, so it is a lower bound for the builder's lemma-based filter.
