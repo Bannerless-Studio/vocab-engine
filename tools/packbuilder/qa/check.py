@@ -54,6 +54,31 @@ def bad_sentences_dead(spec):
     return sorted(spec.bad_sentences - seen)
 
 
+def story_attribution_errors(sentences, attribution):
+    """Every shipped story sentence names its story ("st") and that story is in
+    attribution.json story_sentences.stories, and the reverse; the block's
+    count equals the shipped story sentences."""
+    errs = []
+    shipped = [s for s in sentences if s.get("src") == "story"]
+    for s in shipped:
+        if not s.get("st"):
+            errs.append(f"sentence {s.get('id')}: src story without st")
+    used = {s["st"] for s in shipped if s.get("st")}
+    block = (attribution or {}).get("story_sentences")
+    if not block:
+        if shipped:
+            errs.append("story sentences ship but attribution.json has no story_sentences")
+        return errs
+    listed = {st.get("id") for st in block.get("stories", [])}
+    for i in sorted(used - listed):
+        errs.append(f"story {i}: sentence ships but story is not in attribution story_sentences")
+    for i in sorted(listed - used):
+        errs.append(f"story {i}: in attribution story_sentences but no sentence ships")
+    if block.get("count") != len(shipped):
+        errs.append(f"attribution story_sentences count {block.get('count')} != {len(shipped)} shipped")
+    return errs
+
+
 def word_ceiling_violation(spec, w):
     """A word below the top level whose gloss matches spec.word_ceiling_re."""
     rx = getattr(spec, "word_ceiling_re", None)
@@ -127,6 +152,10 @@ def check(spec):
         for wid in s.get("words", []):
             if wid not in ids_seen:
                 fail(f"sentence {s['id']} references unknown word id {wid}")
+
+    ap = spec.repo / "pack" / "attribution.json"
+    for e in story_attribution_errors(sentences, json.loads(ap.read_text()) if ap.exists() else None):
+        fail(e)
 
     pj = spec.repo / "pack" / "passages.json"
     if pj.exists():

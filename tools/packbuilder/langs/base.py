@@ -107,6 +107,7 @@ def make_lower_level_gloss_re(own=None, flags=re.I):
 
 
 EXAMPLE_SID_BASE = 95_000_000   # sids of example-only written sentences (spec.example_rows)
+STORY_SID_BASE = 97_000_000     # sids of story sentences (spec.story_rows), above Tatoeba, example and ur/fa/hi gen sids (id/ja/ko GEN_BASE is 1e9, apart)
 
 TATOEBA_AUDIO = ("audio.tar.bz2", "https://downloads.tatoeba.org/exports/sentences_with_audio.tar.bz2")
 
@@ -556,6 +557,31 @@ class LanguageSpec:
             text, en = line.split("\t")[:2]
             rows.append([EXAMPLE_SID_BASE + len(rows), text.strip(), "", en.strip(), None, None])
         return rows
+
+    examples_per_word = 2        # sentences chosen per word; picks past 2 are story sentences only (story_rows)
+
+    def story_rows(self, env):
+        """Corpus-format rows [sid, text, "", english, None, story_id] from
+        human-written story text (docs/PACKBUILDER_HOOKS.md "story_rows"), sids
+        from STORY_SID_BASE, row[5] the story id. Tagged apart like example_rows
+        and joined to sentence choice only (never the frequency pass), so words
+        and word ids cannot move. Unlike example rows they get no filter bypass.
+        Default: none."""
+        return []
+
+    def story_meta(self, env, story_id):
+        """attribution.json story_sentences.stories entry for a story id that
+        shipped a sentence; must carry "id"."""
+        return {"id": story_id}
+
+    def story_source(self):
+        """Fixed part of attribution.json story_sentences (source, licence, url)."""
+        return {}
+
+    def story_credit(self):
+        """pack.json credits entry {name, licence?, url?} added when a story
+        sentence ships, or None."""
+        return None
 
     def extra_corpus_rows(self, env):
         """Extra corpus rows [sid, text, user, english, audio_id, licence]

@@ -187,6 +187,10 @@ pip install https://github.com/explosion/spacy-models/releases/download/es_core_
     - Enable GitHub Pages from the repo root.
     - When the language module is new or changed in vocab-engine, commit that there first. Then bump the submodule in the language repo with `git submodule update --remote engine`, rebuild, and check that `./check.sh` passes.
 
+## Story sentences
+
+A spec may set `examples_per_word` (default 2) and override `story_rows(env)` (default none). Story rows are tagged apart, join sentence choice only, rank ahead of other candidates only at equal fit (same rank penalty and headword tier), and fill picks 3..`examples_per_word` only; a word with no story sentence keeps 2. They ship as `"src": "story", "st": <story id>` and must be listed in attribution.json `story_sentences` (`check` enforces it both ways). Hook details: docs/PACKBUILDER_HOOKS.md `story_rows`.
+
 ## Hooks
 
 Every `LanguageSpec` hook (normalisation and finishing, lemma/gloss/selection, passage, linker-level) and the zh/ja passage rules are documented in docs/PACKBUILDER_HOOKS.md. Each hook defaults to off or a no-op, so adding one never changes another language's output.
