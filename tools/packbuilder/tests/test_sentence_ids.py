@@ -140,8 +140,9 @@ class WordIdMap(unittest.TestCase):
             words = [{"lemma": "a", "pos": "noun", "id": "w0001"}, {"lemma": "b", "pos": "noun", "id": "w0006"},
                      {"lemma": "c", "pos": "verb", "id": "w0007"}]
             self.assertEqual(persist_ids(p, words), (2, []))
-            self.assertEqual(json.loads(p.read_text()),
-                             {"a|noun": "w0001", "gone|noun": "w0005", "b|noun": "w0006", "c|verb": "w0007"})
+            saved = json.loads(p.read_text())
+            self.assertEqual(saved.pop("_shipped"), ["a|noun", "b|noun", "c|verb"])      # keys whose id ships; gone|noun cleared
+            self.assertEqual(saved, {"a|noun": "w0001", "gone|noun": "w0005", "b|noun": "w0006", "c|verb": "w0007"})
             self.assertEqual(persist_ids(p, words), (0, []))
 
     def test_persist_refuses_a_key_that_would_hand_out_another_id(self):
