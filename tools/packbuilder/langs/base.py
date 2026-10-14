@@ -252,6 +252,7 @@ class LanguageSpec:
     forced_a1_file = "tools/forced_a1.txt"
     bad_sentences_file = "tools/bad_sentences.txt"   # optional hand-reviewed drop list, one sentence per line
     id_map_file = "tools/id_map_v1.json"
+    keep_live_sentences = False   # the committed pack's sentences stay selected while they are still candidates, and win ties (relink rounds: the republish guard keeps every live id)
     sentence_id_map_file = "tools/sentence_ids_v1.json"   # {"issued": {id: text}}, core/sentence_ids.py
     report_file = "tools/REPORT.md"
 
@@ -334,6 +335,11 @@ class LanguageSpec:
 
     def is_verb_lemma(self, w):
         return self.verb_endings is None or w.endswith(self.verb_endings)
+
+    def choose_entries(self, lexicon, lem, group, ents, surf):
+        """Dictionary entries a (lemma, group) word may take its sense, gender and gloss from,
+        after the corpus is counted (surf: lowercase surface -> Counter((lemma, group))). Default: all."""
+        return ents
 
     def is_profane(self, w):
         return w in self.profanity or (bool(self.profane_stems) and w.startswith(self.profane_stems))

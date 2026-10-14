@@ -15,6 +15,12 @@ def load(path):
     return dict(issued)
 
 
+def shipped_sentences(repo):
+    """The committed pack's sentence records ([] before the first build)."""
+    p = Path(repo) / "pack" / "sentences.json" if repo else None
+    return json.loads(p.read_text(encoding="utf-8")) if p is not None and p.exists() else []
+
+
 def save(path, issued):
     ordered = {k: issued[k] for k in sorted(issued, key=lambda k: int(k[1:]))}
     Path(path).write_text(json.dumps({"issued": ordered}, ensure_ascii=False, indent=0, separators=(",", ":")) + "\n",

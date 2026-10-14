@@ -482,6 +482,11 @@ def build_sentences(env, ctx, words, top3000):
     remoto_blocked = Counter()
     first_lv, top_lv = sp.level_ids[0], sp.level_ids[-1]    # marked past tense: top level only
     order = sorted(cands, key=lambda w: (len(cands[w]), w))
+    live_sids = set()
+    if sp.keep_live_sentences:
+        # the committed pack's sentences: a relink must not retire a shipped sentence (republish guard)
+        live_texts = {r["t"] for r in sentence_ids.shipped_sentences(sp.repo)}
+        live_sids = {sid for sid in info if sp.clean_sentence_text(rows[sid][1]) in live_texts}
     surface_of = {w["id"]: sp.fold(w["_key"][0]) for w in words} if sp.example_shows_word else {}
     for wid in order:
         lv = lv_of[wid]
@@ -495,7 +500,7 @@ def build_sentences(env, ctx, words, top3000):
         good = [s for s in ok if sp.min_len[lv] <= info[s][0]]
         if lv == first_lv and len(good) < 2:
             good += [s for s in ok if info[s][0] == 3]
-        good.sort(key=lambda s: (lv_ord[info[s][3]] > lv_ord[lv],
+        good.sort(key=lambda s: (lv_ord[info[s][3]] > lv_ord[lv], s not in live_sids,
                                  rank_pen[(s, lv)] - (sp.audio_rank_bonus if info[s][2] else 0),
                                  hw_tier.get((s, wid), 0),
                                  not info[s][2],
@@ -525,6 +530,9 @@ def build_sentences(env, ctx, words, top3000):
             use[s] += 1
             primary.setdefault(s, wid)
 
+    for sid in sorted(live_sids - set(primary)):
+        primary[sid] = info[sid][4][0]
+        st["live_sentences_kept_unchosen"] += 1
     sel = sorted(primary)
     sentences = []
     n_examples = 0
