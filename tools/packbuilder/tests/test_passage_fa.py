@@ -18,9 +18,11 @@ from packbuilder.langs import get_spec  # noqa: E402
 TMP = tempfile.mkdtemp()
 PACK = {"ماه": {"noun"}, "ماهی": {"noun"}, "گوش": {"noun"}, "گوشی": {"noun"}, "دوست": {"noun"},
         "دوستی": {"noun"}, "ثبت": {"noun"}, "نام": {"noun"}, "در": {"prep", "noun"}, "کردن": {"verb"},
-        "هفته": {"noun"}, "سال": {"noun"}, "نفر": {"noun"}}
+        "هفته": {"noun"}, "سال": {"noun"}, "نفر": {"noun"}, "بیمار": {"noun"}, "بیماری": {"noun"},
+        "تاریک": {"noun"}, "تاریکی": {"noun"}, "پیش": {"prep"}, "پیشی": {"noun"}, "کی": {"pron"}}
 GLOSS = {"ماهی": "fish", "گوشی": "mobile phone, smartphone", "دوستی": "friendship", "ماه": "month; moon",
-         "گوش": "ear", "دوست": "friend"}
+         "گوش": "ear", "دوست": "friend", "بیماری": "illness, disease", "بیمار": "patient, sick person",
+         "تاریکی": "darkness", "تاریک": "dark"}
 
 
 def fa_spec():
@@ -117,6 +119,71 @@ class CompoundHead(unittest.TestCase):
         sp = fa_spec()
         out = sp.passage_post_resolve([T("دوستی", "NOUN")], [("دوستی", "NOUN")])
         self.assertEqual(out[0], ("دوستی", "NOUN"))
+
+
+class DeclaredName(unittest.TestCase):
+    """A declared passage name wins over any dictionary reading of its spelling
+    (Persian has no capitals): کیان is not کی + ان, نوری not نور + ی."""
+
+    def retag(self, toks, names):
+        return fa_spec().passage_retag([list(t) for t in toks], frozenset(names))
+
+    def test_a_noun_tagged_name_is_propn(self):
+        out = self.retag([T("کیان", "NOUN"), T("آمد", "VERB", "آمدن")], {"کیان"})
+        self.assertEqual(out[0][1:3], ["کیان", "PROPN"])
+
+    def test_a_verb_tagged_name_is_propn(self):
+        self.assertEqual(self.retag([T("کیان", "VERB", "کیدن")], {"کیان"})[0][1:3], ["کیان", "PROPN"])
+
+    def test_name_with_ezafe_or_clitic_is_the_name(self):
+        for surface in ("کیانی", "کیانش", "کیانها"):
+            self.assertEqual(self.retag([T(surface, "NOUN")], {"کیان"})[0][1:3], ["کیان", "PROPN"], surface)
+
+    def test_without_the_declaration_the_noun_stays(self):
+        self.assertEqual(self.retag([T("کیان", "NOUN")], set())[0][2], "NOUN")
+        self.assertEqual(self.retag([T("کیان", "NOUN")], {"سارا"})[0][2], "NOUN")
+
+    def test_a_pack_word_with_a_name_prefix_stays(self):
+        # the name پیش + ی would swallow the pack noun پیشی
+        self.assertEqual(self.retag([T("پیشی", "NOUN")], {"پیش"})[0][2], "NOUN")
+
+    def test_the_exact_name_beats_a_pack_word(self):
+        self.assertEqual(self.retag([T("پیشی", "NOUN")], {"پیشی"})[0][1:3], ["پیشی", "PROPN"])
+
+
+class BareIndefiniteStem(unittest.TestCase):
+    """A pack noun X+ی the tagger kept whole is the stem when the English names
+    only the stem (بیماری "a patient"), with or without یک."""
+
+    def resolve(self, words, en):
+        sp = fa_spec()
+        toks = sp.fix_sentence([T(w, "NUM" if w == "یک" else "NOUN") for w in words], row(en), None)
+        out = [None if w == "یک" else (w, "NOUN") for w in words]
+        return toks, sp.passage_post_resolve(toks, out)
+
+    def test_a_patient_is_the_stem(self):
+        for words in (["بیماری"], ["یک", "بیماری"]):
+            toks, out = self.resolve(words, "A patient went to the doctor.")
+            self.assertEqual(out[-1], ("بیمار", "NOUN"), words)
+
+    def test_illness_stays_the_whole_word(self):
+        toks, out = self.resolve(["بیماری"], "His illness got better.")
+        self.assertEqual(out[0], ("بیماری", "NOUN"))
+        self.assertIn("EnGloss=Yes", toks[0][3])
+
+    def test_a_stem_gloss_that_abbreviates_the_whole_says_nothing(self):
+        toks, out = self.resolve(["تاریکی"], "People stayed in the dark.")
+        self.assertEqual(out[0], ("تاریکی", "NOUN"))
+        self.assertNotIn("EnStem", toks[0][3])
+
+    def test_english_naming_neither_keeps_the_resolver_reading(self):
+        toks, out = self.resolve(["بیماری"], "It was a quiet evening.")
+        self.assertEqual(out[0], ("بیماری", "NOUN"))
+
+    def test_corpus_rows_are_never_marked(self):
+        sp = fa_spec()
+        toks = sp.fix_sentence([T("بیماری", "NOUN")], ["s1", "", None, "a patient", None, None], None)
+        self.assertNotIn("EnStem", toks[0][3])
 
 
 if __name__ == "__main__":
