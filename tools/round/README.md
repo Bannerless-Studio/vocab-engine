@@ -64,7 +64,7 @@ Not scripted here. Scratch-site feature check (360x780 touch, light and dark; po
 
 ## Per-site settings
 
-Plain shell, loaded in this order: defaults in `lib.sh` `load_site_env`, `sites/<dirname>.env` (versioned), `<site>/.cache/round/site.env` (local override). Variables: `LANG_CODE`, `ETA_MODE` (`sim` | `external`), `ETA_SESSIONS`, `ETA_GATE_SESSIONS`, `PAGE`, `LIVE_URL`, `ENRICH_CMD`, `CONTROLS`, `PACKDIFF_PACK_KEYS`, `PACKDIFF_WORD_FIELDS`, `PACKDIFF_UNIT_FIELDS`, `PACKDIFF_FREE_FILES`.
+Plain shell, loaded in this order: defaults in `lib.sh` `load_site_env`, `sites/<dirname>.env` (versioned), `<site>/.cache/round/site.env` (local override). Variables: `LANG_CODE`, `ETA_MODE` (`sim` | `external`), `ETA_SESSIONS`, `ETA_GATE_SESSIONS`, `PAGE`, `LIVE_URL`, `ENRICH_CMD`, `CONTROLS`, `PACKDIFF_PACK_KEYS`, `PACKDIFF_WORD_FIELDS`, `PACKDIFF_UNIT_FIELDS`, `PACKDIFF_FREE_FILES`, `PACKDIFF_WORD_IDS_REMOVED`, `PACKDIFF_WORD_IDS_ADDED`. The guard matches words.json rows by id: a round whose linker or ranking fix swaps words (sw 2026-10-14: chocha w1823 and zoa w2000 out, nafsi w2054 and mkesha w2055 in) lists the exact removed and added ids in the two last variables; any other id gained or lost fails, and the sets must match exactly.
 
 A round that adds noun `g` to a site published before the builders emitted it (it es fr de): `packbuilder gender --lang <x> --repo <site>` writes `<site>/tools/word_gender.json` first (a full build run, about 2 min, nothing under pack/ changes; commit the file with the site), then enrich copies `g` by id and the site env lists `PACKDIFF_WORD_FIELDS="ft,g"` (sites/{italian,spanish,french,german}.env) for that round only.
 

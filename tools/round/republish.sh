@@ -150,7 +150,7 @@ s_check() {
 }
 
 s_guard() {
-  local args=(--repo "$SITE" --prev "$(prev_val prev_head)" --word-fields "${PACKDIFF_WORD_FIELDS// /,}" --unit-fields "${PACKDIFF_UNIT_FIELDS// /,}" --pack-keys "${PACKDIFF_PACK_KEYS// /,}" --free-files "${PACKDIFF_FREE_FILES// /,}")
+  local args=(--repo "$SITE" --prev "$(prev_val prev_head)" --word-fields "${PACKDIFF_WORD_FIELDS// /,}" --unit-fields "${PACKDIFF_UNIT_FIELDS// /,}" --pack-keys "${PACKDIFF_PACK_KEYS// /,}" --free-files "${PACKDIFF_FREE_FILES// /,}" --word-ids-removed "${PACKDIFF_WORD_IDS_REMOVED// /,}" --word-ids-added "${PACKDIFF_WORD_IDS_ADDED// /,}")
   [ -z "$ENRICH_CMD" ] && args+=(--lang "$CODE" --engine-tools "$ENGINE_DIR/tools")
   "$PY" "$ROUND_DIR/pack_diff_guard.py" "${args[@]}"
 }

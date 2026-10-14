@@ -4,12 +4,14 @@ allowed places. Exit 1 and print every offending key otherwise.
 
   pack_diff_guard.py --repo SITE --prev REV [--pack-dir pack] [--lang CODE --engine-tools DIR]
         [--pack-keys a,b] [--word-fields ft] [--unit-fields ft] [--free-files x.json,y.json]
+        [--word-ids-removed w1,w2 --word-ids-added w3,w4]
 
 Allowed: pack.json top-level keys = spec.port_flags() keys (needs --lang/--engine-tools) + eta + --pack-keys, and the removal
 of a collapsed flag (tools/pack_collapsed.py: the engine ignores it, enrich drops it);
-words.json per-word fields = --word-fields; characters.json per-unit fields = --unit-fields; any other *.json
+words.json per-word fields = --word-fields (rows match by id; an id only in old or only in new must be listed in
+--word-ids-removed / --word-ids-added, exact sets); characters.json per-unit fields = --unit-fields; any other *.json
 byte-equal after parsing, unless listed in --free-files; sentences.json is held to the sentence id rule
-(sentence_ids_rule: every live id keeps its text and stays, new texts take new ids, other fields free) unless listed in --free-files. Same ids, same order, same length everywhere else."""
+(sentence_ids_rule: every live id keeps its text and stays, new texts take new ids, other fields free) unless listed in --free-files. Same ids, same order, same length everywhere else (characters.json too)."""
 import argparse
 import json
 import subprocess
@@ -30,16 +32,34 @@ def git_files(repo, rev, d):
     return sorted(Path(x).name for x in out.split() if x.endswith(".json"))
 
 
-def rows(name, old, new, fields, bad, stats):
-    if len(old) != len(new):
-        bad.append(f"{name}: length {len(old)} -> {len(new)}")
-        return
-    for i, (a, b) in enumerate(zip(old, new)):
+def rows(name, old, new, fields, bad, stats, removed=frozenset(), added=frozenset()):
+    """Rows match by id, not by position: a removed or added row never shifts the rows after it. An id only in
+    old / only in new must be listed in removed / added (exact set equality)."""
+    if not all(isinstance(r, dict) and "id" in r for r in old + new):
+        if len(old) != len(new):
+            bad.append(f"{name}: length {len(old)} -> {len(new)}")
+            return
+        pairs = list(enumerate(zip(old, new)))
+    else:
+        oi, ni = {r["id"]: r for r in old}, {r["id"]: r for r in new}
+        gone, fresh = set(oi) - set(ni), set(ni) - set(oi)
+        for label, got, want in (("removed", gone, set(removed)), ("added", fresh, set(added))):
+            if got != want:
+                bad.append(f"{name}: ids {label} {sorted(got)} but the allowed list is {sorted(want)}"
+                           f" (unexpected {sorted(got - want)}, missing {sorted(want - got)})")
+        if len(new) - len(old) != len(fresh) - len(gone):
+            bad.append(f"{name}: length {len(old)} -> {len(new)} is not the removed/added ids")
+        # the file is sorted by rank, so an allowed rank change legitimately reorders the kept rows
+        if "rank" not in fields and [r["id"] for r in old if r["id"] in ni] != [r["id"] for r in new if r["id"] in oi]:
+            bad.append(f"{name}: order of the kept ids changed")
+        if gone or fresh:
+            stats["ids removed"] = len(gone)
+            stats["ids added"] = len(fresh)
+        pairs = [(i, (oi[r["id"]], r)) for i, r in enumerate(new) if r["id"] in oi]
+    for i, (a, b) in pairs:
         if isinstance(a, dict) and isinstance(b, dict):
             keys = set(a) | set(b)
             diff = sorted(k for k in keys if a.get(k, "<absent>") != b.get(k, "<absent>"))
-            if a.get("id") != b.get("id"):
-                bad.append(f"{name}[{i}]: id {a.get('id')!r} -> {b.get('id')!r}")
             for k in diff:
                 if k in fields:
                     stats[k] = stats.get(k, 0) + 1
@@ -75,6 +95,8 @@ def main():
     ap.add_argument("--word-fields", default="ft")
     ap.add_argument("--unit-fields", default="ft")
     ap.add_argument("--free-files", default="")
+    ap.add_argument("--word-ids-removed", default="")
+    ap.add_argument("--word-ids-added", default="")
     a = ap.parse_args()
     split = lambda s: {x for x in s.split(",") if x}
     allow_keys = split(a.pack_keys) | {"eta"}
@@ -105,7 +127,7 @@ def main():
         elif n == "sentences.json":
             sentence_ids_rule(old, new, bad, notes)
         elif n == "words.json":
-            rows(n, old, new, wf, bad, stats)
+            rows(n, old, new, wf, bad, stats, split(a.word_ids_removed), split(a.word_ids_added))
         elif n == "characters.json":
             rows(n, old, new, uf, bad, stats)
         else:
