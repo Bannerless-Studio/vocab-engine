@@ -785,6 +785,11 @@ def run(spec, check_only=False, out=sys.stdout):
         nw = sum(lk.n_words(tk) for tk in sent_toks) if hasattr(lk, "n_words") else n_words(text)
         if getattr(spec, "passage_words_counted", False):
             nw = len(counted)       # ja (unspaced): the counted tokens after segmentation
+            if hasattr(spec, "passage_band_credit"):
+                # hi: grammar tokens that link nothing (aux रहना, conjunction पर) were counted
+                # while they linked; the band keeps counting them
+                nw += sum(len(spec.passage_band_credit(tk, lk.lexicon.resolve_sentence(tk, lk.groups)))
+                          for tk in sent_toks)
         lo, hi = rules["words_per_passage"][lv]
         if not lo <= nw <= hi:
             perr.append(f"{nw} words outside {lo}-{hi}")

@@ -518,6 +518,17 @@ GENDER_FIX = {"चीज़": "f", "ख़याल": "m", "ख़्याल":
 POSTP_NOUN_HEADS = frozenset(_f(["वजह", "ओर", "तरफ़", "तरह", "जगह", "दिशा"]))
 VECTOR_V2 = _f(["जाना", "देना", "लेना", "डालना", "पड़ना", "बैठना", "उठना"])
 ASPECT_AUX = frozenset(_f(["रहना", "सकना", "चुकना"]))
+# रहना as the progressive/continuative auxiliary (कर रहा, पढ़ता रहा, चलती रही) is
+# grammar, not "to live, to stay": it links nothing, like conjunctive कर and passive जाना.
+# The progressive is रहा/रही/रहीं (रहे/रहें only before a copula: बना रहे हैं);
+# रहता/रहेगा/रहे-without-copula after a bare ā-form is the intransitive's perfective
+# participle plus "remain" (जाम लगा रहता था, भरोसा बना रहे)
+RAHNA_PROG = frozenset(_f(["रहा", "रही", "रहीं"]))
+RAHNA_PROG_PL = frozenset(_f(["रहे", "रहें"]))
+IMPF_PART_RE = re.compile("(?:ता|ती|ते|तीं)$")
+GAP_AUX = frozenset(_f(["सकना", "चुकना", "पाना", "देना", "लेना", "डालना"]))     # stem-taking auxiliaries a negation may follow the stem of
+STEM_GAP = frozenset(_f(["नहीं", "भी", "ही", "तो", "न", "मत", "ना"]))
+CONJ_PAR = fold("पर")
 STEM_AUX = _f(["रहना", "सकना", "चुकना", "जाना", "देना", "लेना", "पाना", "डालना", "पड़ना", "बैठना", "उठना"])
 VECTOR_V1_F = {fold(k): fold(v) for k, v in VECTOR_V1.items()}
 # nukta-distinct lemma pairs the fold() nukta-drop merges (सज़ा/सजा): before
@@ -1127,8 +1138,19 @@ class Hindi(LanguageSpec):
             if r[0] not in (caus, intr) or not {caus, intr} <= set(vforms.get(txt[i], ())):
                 continue
             nx = txt[i + 1] if i + 1 < n else ""
-            nr = out[i + 1] if i + 1 < n else None
-            framed = nx in ("कर", "के") or (nr and nr[1] == "VERB" and (nr[0] in STEM_AUX or nr[0] in VECTOR_V2))
+            # a negation or particle may stand between the stem and its auxiliary
+            # (आग जला नहीं सकता: जलाना)
+            j = i + 1
+            while j < n and txt[j] in STEM_GAP:
+                j += 1
+            nr = out[j] if j < n else None
+            vframe = bool(nr and nr[1] == "VERB" and (nr[0] in STEM_AUX or nr[0] in VECTOR_V2))
+            if vframe and nr[0] == "रहना":
+                vframe = self._rahna_progressive(toks, j)
+            elif vframe and j > i + 1:
+                # passive/vector जाना after a particle (चोर पकड़ा ही जाएगा) stays the base verb
+                vframe = nr[0] in GAP_AUX
+            framed = nx in ("कर", "के") or vframe
             out[i] = (caus if framed else intr, "VERB")
         # reflexive अपने आप "oneself, by itself": आप is no "you"
         for i in range(1, n):
@@ -1319,7 +1341,47 @@ class Hindi(LanguageSpec):
             elif t[2] in ("VERB", "AUX") and r[1] in ("NOUN", "ADJ") and txt[i] in vforms \
                     and not (lx is not None and lx.usable_entries(txt[i], ["adj"]) and r[1] == "ADJ"):
                 out[i] = (vforms[txt[i]][0], "VERB")
+        # grammar tokens link nothing: the aux रहना (the main verb stays linked)
+        # and the conjunction पर "but" (not the postposition "on")
+        for i in range(n):
+            if out[i] and ((out[i][0] == "रहना" and self.aux_rahna(toks, i, out)) or self.conj_par(toks, i)):
+                out[i] = None
         return out
+
+    def _rahna_progressive(self, toks, j):
+        """toks[j] is रहना after a bare ā-form: the progressive auxiliary, not
+        the continuative "remain" of the perfective participle."""
+        t = fold(toks[j][0])
+        if t in RAHNA_PROG:
+            return True
+        nx = fold(toks[j + 1][0]) if j + 1 < len(toks) else ""
+        return t in RAHNA_PROG_PL and nx in COPULA_F
+
+    def aux_rahna(self, toks, i, out=None):
+        """रहना as an auxiliary: tagged AUX, or after an imperfective participle
+        (खाते रहे) the tagger calls a verb. "stay" after a noun or adjective
+        (जयपुर में रहता हूँ, व्यस्त रहा) is the main verb."""
+        if fold(toks[i][1]) != "रहना":
+            return False
+        if toks[i][2] == "AUX":
+            return True
+        j = i - 1
+        while j >= 0 and fold(toks[j][0]) in STEM_GAP:
+            j -= 1
+        # a participle the tagger calls a noun (खाते रहे) counts when it links as a verb
+        verb = j >= 0 and (toks[j][2] in ("VERB", "AUX") or bool(out and out[j] and out[j][1] == "VERB"))
+        return verb and bool(IMPF_PART_RE.search(fold(toks[j][0])))
+
+    def conj_par(self, toks, i):
+        """पर "but": the tagger's conjunction, or a पर opening the sentence,
+        after a comma/danda, or after a finite copula (है पर); the postposition
+        follows a noun, pronoun or non-finite verb (आने पर)."""
+        if fold(toks[i][0]) != CONJ_PAR:
+            return False
+        if toks[i][2] in ("CCONJ", "SCONJ"):
+            return True
+        pv = fold(toks[i - 1][0]) if i else ""
+        return i == 0 or pv in (",", "।", ";", "—") or (pv in COPULA_F and toks[i - 1][2] in ("AUX", "VERB"))
 
     # passages: Devanagari matras are not \w, so the regex word count splits
     # words; the band rule counts the counted tokens instead (as ja). Spans
@@ -1422,9 +1484,19 @@ class Hindi(LanguageSpec):
             prev_verb = i > 0 and (toks[i - 1][2] in ("VERB", "AUX") or
                                    (resolved[i - 1] is not None and resolved[i - 1][1] == "VERB"))
             if t[2] == "AUX" or (t[2] == "VERB" and t[1] in gram and prev_verb) or \
-                    (t[0] in ("कर", "के") and prev_verb) or t[0] == "लेकर":
+                    (t[0] in ("कर", "के") and prev_verb) or t[0] == "लेकर" or self.aux_rahna(toks, i, resolved):
                 out.add(i)
         return out
+
+    def passage_band_credit(self, toks, resolved):
+        """The length band counted the auxiliary रहना while it linked; it links
+        nothing now and stays in the word count."""
+        return {i for i, r in enumerate(resolved) if r is None and self.aux_rahna(toks, i, resolved)}
+
+    def passage_no_link(self, toks):
+        """Conjunction पर "but" stays counted (it is a pack word's surface) and
+        links nothing: the surface fallback would read it as the postposition."""
+        return {i for i in range(len(toks)) if self.conj_par(toks, i)}
 
     # the tagger's POS split vs the pack's one entry: कल/आज tagged NOUN are the
     # adverbs, बहुत/ज़्यादा/कम tagged DET the adverb/adjective (QA 2026-09-26)
