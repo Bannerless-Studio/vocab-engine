@@ -159,6 +159,7 @@ def build_words(env, ctx):
     records = {}
     done_lemma = {}
     second_entries, pronominal, overridden, second_diag = [], [], [], []
+    issued_keys = shipped_issued_keys(env.repo / sp.id_map_file, env.pack / "words.json")   # gloss text must not undo these
     for k in pool:
         lem, g = k
         forced = k in forced_set
@@ -350,7 +351,9 @@ def build_words(env, ctx):
             same_sense = bool(gloss_stems(gloss) & gloss_stems(first["en"])) or first["group"] == g or \
                 same_words(gloss, first["en"]) or bool(nominalised)
             weak_evidence = top["score"] <= 0 or top["defn"] or top["demote"] or overlap > SECOND_SENSE_OVERLAP
-            if same_sense or (weak_evidence and lem not in sp.second_entry_overlap_exempt):
+            issued_pair = id_key(lem, GROUP_LABEL.get(g, g.lower())) in issued_keys and \
+                id_key(first["lemma"], GROUP_LABEL.get(first["group"], first["group"].lower())) in issued_keys
+            if second_pos_merges(lem, same_sense, weak_evidence, sp.second_entry_overlap_exempt, issued_pair):
                 if not forced or first["forced"]:
                     exclude("second POS entry without a distinct sense", lem); continue
                 del records[fk]              # the forced POS replaces a same-sense entry
@@ -558,8 +561,7 @@ def build_words(env, ctx):
         words.append(word)
     sort_by_rank(sp.level_ids, words)
 
-    id_map = env.repo / sp.id_map_file
-    idmap = json.loads(id_map.read_text()) if id_map.exists() else {}
+    idmap = persisted_idmap(env.repo / sp.id_map_file)
     stat("ids_reused_from_v1", assign_ids(words, idmap))
 
     top3000 = set()
@@ -694,6 +696,31 @@ def id_key(lemma, pos):
     """The one spelling of an id-map key. assign_ids reads it from the build's lemma and pos, persist_ids
     writes it for the shipped lemma and pos (and for the build's, when a finishing pass changed them)."""
     return f"{lemma}|{pos}"
+
+
+def second_pos_merges(lem, same_sense, weak_evidence, overlap_exempt, issued_pair):
+    """True when a second-POS entry is folded into the first (excluded, or replacing it when forced). The
+    same-sense and weak-evidence signals read hand gloss text, so they decide only for entries without a
+    shipped id: when both entries already ship under issued ids the pair stays whatever the gloss says."""
+    if issued_pair:
+        return False
+    return same_sense or (weak_evidence and lem not in overlap_exempt)
+
+
+def shipped_issued_keys(id_map_path, words_path):
+    """The "lemma|pos" keys of the frozen id map whose id the committed pack/words.json ships. A key the map
+    holds for a word an earlier build shipped and a later one dropped is not here: it has no live id to protect."""
+    idmap = persisted_idmap(id_map_path)
+    try:
+        shipped = {w["id"] for w in json.loads(words_path.read_text())}
+    except (OSError, ValueError, TypeError, KeyError):
+        return set()
+    return {k for k, v in idmap.items() if v in shipped}
+
+
+def persisted_idmap(path):
+    """The frozen "lemma|pos" -> id map ({} when the repo has none yet)."""
+    return json.loads(path.read_text()) if path.exists() else {}
 
 
 def ids_for_keys(keys, idmap):
