@@ -122,7 +122,7 @@ span, and the engine locates it by surface. Rules and hooks: docs/PACKBUILDER_HO
 
 ### Reading passages
 
-`passages` tags `tools/passages_src.json` with the language's own tagger and writes `pack/passages.json`; run fa/id/ja with the language repo's own `.venv` (Stanza, SudachiPy). Run `tools/jsonify_pack.py` after writing. Details: docs/PACKBUILDER_HOOKS.md "Reading passages" onward.
+`passages` tags `tools/passages_src.json` with the language's own tagger and writes `pack/passages.json`; run fa/id/ja with the language repo's own `.venv` (Stanza, SudachiPy). Run `tools/jsonify_pack.py` after writing. Details: docs/PACKBUILDER_HOOKS.md "Reading passages" onward. A sentence's `words` are ordered by the start of each word's first span, then id (a word with no span last), so a rerun and a builder change never reorder identical links. A capitalised token is a name (not counted) only when the tagger tags it PROPN (a `names` entry is retagged PROPN first) or the dictionary lists it as a proper name; a capitalised token only the resolver reads as PROPN (de Taxi, Radfahrer) counts as out-of-pack and needs an `oop` reason. In a passage id already in pack/passages.json an undeclared one is a warning (printed, and a REPORT section); in a new id it is an error. `passages --emit DIR` writes passages.json and REPORT_passages.md into DIR and leaves the repo untouched; `--src FILE` reads another passages_src.json.
 
 To work on packbuilder itself against a language repo, point the shim at your checkout with `PACKBUILDER_PATH=../vocab-engine/tools python3 tools/build_pack.py`.
 

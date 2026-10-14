@@ -193,7 +193,7 @@ class OneIdPerToken(unittest.TestCase):
         lk = self.linker([("tok", 1, 1, "BENE")],
                          [("molto", "molto", "MOLTO", True, 0), ("bene", "bene", "BENE", True, 1)])
         ids, _cl, spans, _ = lk.links_all(toks, "molto bene", "")
-        self.assertEqual(ids, ["BENE", "MOLTO"])
+        self.assertEqual(ids, ["MOLTO", "BENE"])        # words: first span start, then id
         self.assertEqual(spans, [[0, 5, "MOLTO"], [6, 10, "BENE"]])
 
     def test_compound_head_links_nothing(self):

@@ -317,9 +317,9 @@ Never offered as a wrong option here: p14.
 Never offered as a wrong option here: p13, p14, p25.
 
 - 都十点了，他[才]起床。 Dōu shí diǎn le, tā cái qǐchuáng. It was already ten and he only then got up.
-- 我六点[就]起床了。 Wǒ liù diǎn jiù qǐchuáng le. I was up at six already.
+- 我六点[就]已经起床了。 Wǒ liù diǎn jiù yǐjīng qǐchuáng le. I was already up by six.
 - 都十二点了，她[才]回家。 Dōu shí'èr diǎn le, tā cái huí jiā. It was twelve already when she finally got home.
-- 他五分钟[就]做完了。 Tā wǔ fēnzhōng jiù zuò wán le. He was done in just five minutes.
+- 他只用了五分钟[就]做完了。 Tā zhǐ yòng le wǔ fēnzhōng jiù zuò wán le. He was done in just five minutes.
 - 我等了一个小时他[才]来。 Wǒ děng le yī gè xiǎoshí tā cái lái. I waited an hour before he finally came.
 - 过了很久，他[才]说话。 Guò le hěn jiǔ, tā cái shuōhuà. It was a long time before he spoke.
 - 我们很快[就]到了。 Wǒmen hěn kuài jiù dào le. We got there in no time.

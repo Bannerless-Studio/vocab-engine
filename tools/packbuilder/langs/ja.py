@@ -272,6 +272,23 @@ READING_FIX = {"私": "ワタシ", "明日": "アシタ", "何": "ナニ", "富�
 # verbs used as auxiliaries after て/で (ている, てしまう, てみる ...): no link
 # unless listed here (てください is the request word)
 AUX_VERB_KEEP = {"ください"}
+# sequences (a surface, or a tuple of alternatives per position) Sudachi splits although they
+# are one lexicalised word (ま+も+なく "soon", 間もない "newly"): every part would link a word of its own sense (ま "interval", も, ない), so the
+# whole sequence links nothing (post_resolve; passage_retag marks it grammar)
+FRAGMENT_SEQUENCES = ((("ま", "間"), "も", ("なく", "ない", "なかっ")),)
+# te-form auxiliaries (てみる "try", ておく "in advance") whose pack word has no
+# auxiliary sense in its gloss: dictionary lemma -> initial of the kana surface
+# the passage fallback would otherwise re-link by its surface (みる -> 見る "to see")
+TE_AUX_NO_SENSE = {"見る": "み", "みる": "み", "置く": "お", "おく": "お"}
+# nouns that make 起きる "happen" (起こる) when they are its subject (X が/は ... 起きる)
+# or the head of its relative clause (起きる事故); whole word or the end of a compound
+# (交通事故, 核戦争). こと is a subject only: 起きることができる is "can get up"
+EVENT_SUBJECTS = frozenset("何 なに 何か それ これ あれ こと 事 出来事 トラブル デモ 騒ぎ 異変 異常 津波 洪水 停電 事態".split())
+EVENT_SUFFIXES = ("事故", "事件", "災害", "火事", "火災", "戦争", "爆発", "衝突", "地震", "反応", "変化",
+                  "問題", "危機", "現象", "故障", "犯罪", "革命", "発作", "症状")
+# の + で after a clause is the conjunction ので "because"; の + では/でも/である... is the
+# nominaliser の and the copula で, whose parts link normally
+NODE_NOT_CONJ = frozenset("は も ある あっ あり ない なかっ なく さえ すら こそ".split())
 NUMERAL_CHARS = frozenset("0123456789０１２３４５６７８９一二三四五六七八九十百千万〇")
 NAME_SUFFIX = frozenset({"城", "寺"})    # after a declared name, when the joined form is
                                           # itself declared: じょう/じ, not the noun 城 しろ, 寺 てら
@@ -870,10 +887,20 @@ class Japanese(LanguageSpec):
                     i += 1
             out = joined
         res, i = [], 0
+        frag = self._fragment_idx(out)
         while i < len(out):
             t = out[i]
             prev = res[-1] if res else None
+            if i in frag or self._node_conj(out, i) or (i and self._node_conj(out, i - 1)) or \
+                    (t[0] == "と" and t[2] in ("PART", "ADP") and "接続助詞" in feats_of(t[3]).get("Pos", "")):
+                # grammar the passage fallback must not re-link by surface (post_resolve
+                # leaves it unlinked): まもなく, ので, conditional と
+                res.append([t[0], t[1], "X", t[3]])
+                i += 1
+                continue
             if i not in name_at and prev is not None and self._te_form(prev) and (
+                    (t[1] in TE_AUX_NO_SENSE and t[0][:1] == TE_AUX_NO_SENSE[t[1]] and
+                     "非自立可能" in feats_of(t[3]).get("Pos", "")) or
                     t[1] in ("欲しい", "ほしい") or
                     (t[1] in ("行く", "いく") and t[0][:1] in ("い", "ゆ")) or
                     (t[1] in ("来る", "くる") and t[0][:1] in ("く", "き", "こ"))):
@@ -1022,6 +1049,52 @@ class Japanese(LanguageSpec):
                 if plain in lv and r[0] in lv and rank.get(lv[plain], 99) < rank.get(lv[r[0]], 99):
                     out[i] = (plain, "NOUN")
         return out
+
+    @staticmethod
+    def _fragment_idx(toks):
+        """Indices of the tokens inside a FRAGMENT_SEQUENCES sequence."""
+        out = set()
+        for seq in FRAGMENT_SEQUENCES:
+            n = len(seq)
+            for i in range(len(toks) - n + 1):
+                if all(toks[i + k][0] in (alt if isinstance(alt, tuple) else (alt,)) for k, alt in enumerate(seq)):
+                    out.update(range(i, i + n))
+        return out
+
+    @staticmethod
+    def _node_conj(toks, i):
+        """toks[i:i+2] is の (nominalising particle) + で (copula, te-form) read as the
+        conjunction ので, and not の + では/である."""
+        if i + 1 >= len(toks):
+            return False
+        a, b = toks[i], toks[i + 1]
+        if a[0] != "の" or "準体助詞" not in feats_of(a[3]).get("Pos", "") or b[0] != "で" or b[2] != "AUX":
+            return False
+        return (toks[i + 2][0] if i + 2 < len(toks) else "") not in NODE_NOT_CONJ
+
+    @staticmethod
+    def _is_event(tok, whole=True):
+        s = tok[0]
+        return (whole and (s in EVENT_SUBJECTS or tok[1] in EVENT_SUBJECTS)) or \
+            (s not in ("こと", "事") and s.endswith(EVENT_SUFFIXES))
+
+    def _okiru_happens(self, toks, i):
+        """起きる is "happen" (起こる) when an event is its subject or the head of its
+        clause: 事故が起きた, 何が起きる, 起きる事故, 多くの事故は、夕方に起きている.
+        Everything else (6時に起きる, 早く起きた) is "get up"."""
+        j = i + 1
+        while j < len(toks) and (toks[j][2] == "AUX" or toks[j][0] == "て" or
+                                 (toks[j][2] == "VERB" and "非自立可能" in feats_of(toks[j][3]).get("Pos", ""))):
+            j += 1
+        if j < len(toks) and self._is_event(toks[j], whole=False):
+            return True
+        for k in range(i - 1, 0, -1):
+            t = toks[k]
+            if t[0] in ("が", "は") and t[2] == "PART":
+                return self._is_event(toks[k - 1])
+            if t[2] in ("VERB", "AUX") or t[0] == "。" or (t[2] == "PART" and "接続助詞" in feats_of(t[3]).get("Pos", "")):
+                return False
+        return False
 
     def passage_phrase_ranges(self, toks):
         """X + に read as the adverb Xに (passage_post_resolve): one span."""
@@ -2390,10 +2463,15 @@ class Japanese(LanguageSpec):
         spaced scripts): drop grammar tokens, keep one (lemma, group) per
         content token."""
         res = []
-        skip = set()
+        skip = self._fragment_idx(toks)
         for i, (surf, lemma, upos, ms) in enumerate(toks):
             if i in skip:
                 res.append(None)
+                continue
+            if self._node_conj(toks, i):
+                self.stats["ので left unlinked (の + で split)"] += 1
+                res.append(None)
+                skip.add(i + 1)
                 continue
             if upos in ("PUNCT", "SYM", "X", "SPACE") or not lemma:
                 res.append(None)
@@ -2427,9 +2505,17 @@ class Japanese(LanguageSpec):
             if upos == "PART":
                 if lemma == "で" and "接続助詞" in feats_of(ms).get("Pos", ""):
                     lemma = "て"            # 住んで, 読んで: the te-form, not で "at, by"
+                if lemma == "と" and "接続助詞" in feats_of(ms).get("Pos", ""):
+                    self.stats["conditional と left unlinked (not and / with)"] += 1
+                    res.append(None)        # 見ると, 春になると: "if, when", a sense the word と lacks
+                    continue
                 res.append((lemma, "PART") if lemma in PARTICLES else None)
                 continue
             f = feats_of(ms)
+            if upos == "VERB" and lemma == "起きる" and self._okiru_happens(toks, i) and self._usable("起こる", "VERB"):
+                self.stats["起きる \"happen\" linked 起こる (event subject)"] += 1
+                res.append(("起こる", "VERB"))
+                continue
             if upos == "VERB" and "非自立可能" in f.get("Pos", "") and prev is not None and \
                     prev[0] in ("て", "で") and lemma not in AUX_VERB_KEEP:
                 res.append(None)            # ている, てしまう, てみる: grammar, not the verb
