@@ -159,7 +159,7 @@ def build_words(env, ctx):
     records = {}
     done_lemma = {}
     second_entries, pronominal, overridden, second_diag = [], [], [], []
-    issued_keys = shipped_issued_keys(env.repo / sp.id_map_file, env.pack / "words.json")   # gloss text must not undo these
+    issued_keys = shipped_markers(env.repo / sp.id_map_file, env.pack / "words.json")   # shipped ids: gloss text must not undo them
     for k in pool:
         lem, g = k
         forced = k in forced_set
@@ -351,8 +351,8 @@ def build_words(env, ctx):
             same_sense = bool(gloss_stems(gloss) & gloss_stems(first["en"])) or first["group"] == g or \
                 same_words(gloss, first["en"]) or bool(nominalised)
             weak_evidence = top["score"] <= 0 or top["defn"] or top["demote"] or overlap > SECOND_SENSE_OVERLAP
-            issued_pair = id_key(lem, GROUP_LABEL.get(g, g.lower())) in issued_keys and \
-                id_key(first["lemma"], GROUP_LABEL.get(first["group"], first["group"].lower())) in issued_keys
+            lost = (first["lemma"], first["group"]) if forced and not first["forced"] else (lem, g)   # the record the merge drops
+            issued_pair = id_key(lost[0], GROUP_LABEL.get(lost[1], lost[1].lower())) in issued_keys
             if second_pos_merges(lem, same_sense, weak_evidence, sp.second_entry_overlap_exempt, issued_pair):
                 if not forced or first["forced"]:
                     exclude("second POS entry without a distinct sense", lem); continue
@@ -700,27 +700,43 @@ def id_key(lemma, pos):
 
 def second_pos_merges(lem, same_sense, weak_evidence, overlap_exempt, issued_pair):
     """True when a second-POS entry is folded into the first (excluded, or replacing it when forced). The
-    same-sense and weak-evidence signals read hand gloss text, so they decide only for entries without a
-    shipped id: when both entries already ship under issued ids the pair stays whatever the gloss says."""
+    same-sense and weak-evidence signals read hand gloss text, so they decide only for records without an issued
+    id: when the record the merge would drop (the second, or the first on the forced-replace path) has its
+    "lemma|pos" key marked shipped in the id map, the pair stays whatever the gloss says."""
     if issued_pair:
         return False
     return same_sense or (weak_evidence and lem not in overlap_exempt)
 
 
-def shipped_issued_keys(id_map_path, words_path):
-    """The "lemma|pos" keys of the frozen id map whose id the committed pack/words.json ships. A key the map
-    holds for a word an earlier build shipped and a later one dropped is not here: it has no live id to protect."""
-    idmap = persisted_idmap(id_map_path)
-    try:
-        shipped = {w["id"] for w in json.loads(words_path.read_text())}
-    except (OSError, ValueError, TypeError, KeyError):
-        return set()
-    return {k for k, v in idmap.items() if v in shipped}
+SHIPPED_MARKER = "_shipped"     # id map entry: sorted keys whose id is in the pack of the last persisted build
+
+
+def load_idmap(path):
+    """(ids, shipped): the frozen "lemma|pos" -> id map and its shipped marker. shipped is None for a map
+    written before markers existed."""
+    raw = json.loads(path.read_text()) if path.exists() else {}
+    marker = raw.pop(SHIPPED_MARKER, None)
+    return raw, (set(marker) if marker is not None else None)
 
 
 def persisted_idmap(path):
-    """The frozen "lemma|pos" -> id map ({} when the repo has none yet)."""
-    return json.loads(path.read_text()) if path.exists() else {}
+    """The frozen "lemma|pos" -> id map, without the marker ({} when the repo has none yet)."""
+    return load_idmap(path)[0]
+
+
+def shipped_markers(id_map_path, words_path):
+    """Keys of the id map whose word was in the pack at the last persisted build (the marker persist_ids
+    keeps). A map without a marker (written before markers) is seeded once from pack/words.json when it
+    exists: every key whose id the pack ships. A key held for a word a later build dropped is not marked,
+    so it has no say in a merge."""
+    ids, shipped = load_idmap(id_map_path)
+    if shipped is not None:
+        return shipped
+    try:
+        in_pack = {w["id"] for w in json.loads(words_path.read_text())}
+    except (OSError, ValueError, TypeError, KeyError):
+        return set()
+    return {k for k, v in ids.items() if v in in_pack}
 
 
 def ids_for_keys(keys, idmap):
@@ -768,7 +784,7 @@ def persist_ids(path, out_words, lookup_keys=None, write=True):
     never reuses an id. Then replays the lookup over the saved map and raises ValueError when any shipped
     word would not get its own id back (a fresh id on the next rebuild).
     Returns (added keys, shipped keys another word already holds in the map)."""
-    idmap = json.loads(path.read_text()) if path.exists() else {}
+    idmap, old_marker = load_idmap(path)
     lookup_keys = lookup_keys or [id_key(wd["lemma"], wd["pos"]) for wd in out_words]
     added = 0
     held = []
@@ -788,8 +804,10 @@ def persist_ids(path, out_words, lookup_keys=None, write=True):
     bad = [(k, w["id"], g) for k, w, g in zip(lookup_keys, out_words, got) if g != w["id"]]
     if bad:
         raise ValueError(f"{len(bad)} id map keys would not round-trip (key, shipped id, id the map gives): {bad[:5]}")
-    if added and write:
-        path.write_text(json.dumps(idmap, ensure_ascii=False, indent=0, sort_keys=True) + "\n")
+    marker = {k for k, v in idmap.items() if v in {wd["id"] for wd in out_words}}   # ids in this pack, every key they hold
+    if write and (added or marker != old_marker):
+        path.write_text(json.dumps({**idmap, SHIPPED_MARKER: sorted(marker)}, ensure_ascii=False, indent=0,
+                                   sort_keys=True) + "\n")
     return added, held
 
 

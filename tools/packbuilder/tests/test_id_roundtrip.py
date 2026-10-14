@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools"))
 
 from packbuilder.core import sentence_ids as si  # noqa: E402
-from packbuilder.core.words import assign_ids, persist_ids  # noqa: E402
+from packbuilder.core.words import assign_ids, persist_ids, persisted_idmap  # noqa: E402
 
 NUKTA = "़"
 
@@ -29,7 +29,7 @@ def build_words(spec_rows, idmap):
 
 class WordFixtures(unittest.TestCase):
     def rebuild(self, rows, mapfile):
-        idmap = json.loads(mapfile.read_text()) if mapfile.exists() else {}
+        idmap = persisted_idmap(mapfile)
         shipped, keys = build_words(rows, idmap)
         persist_ids(mapfile, shipped, keys)
         return {s["lemma"] + "|" + s["pos"]: s["id"] for s in shipped}
@@ -45,7 +45,7 @@ class WordFixtures(unittest.TestCase):
             self.assertEqual(first, {"बात|noun": "w0001", "तारीफ" + NUKTA + "|noun": "w0002"})
             for _ in range(2):
                 self.assertEqual(self.rebuild(rows, p), first)
-            saved = json.loads(p.read_text())
+            saved = persisted_idmap(p)
             self.assertEqual(saved["तारीफ" + NUKTA + "|noun"], "w0002")    # keyed by the shipped text
             self.assertEqual(saved["तारीफ|noun"], "w0002")                 # and by the key the build looks up
 
@@ -64,7 +64,7 @@ class WordFixtures(unittest.TestCase):
             p = Path(d) / "id_map_v1.json"
             p.write_text(json.dumps({"jahr|noun": "w0079"}))
             self.assertEqual(self.rebuild(rows, p), {"Jahr|noun": "w0079"})
-            self.assertEqual(json.loads(p.read_text()), {"Jahr|noun": "w0079", "jahr|noun": "w0079"})
+            self.assertEqual(persisted_idmap(p), {"Jahr|noun": "w0079", "jahr|noun": "w0079"})
 
     def test_two_words_with_one_build_key_fail_loudly(self):
         rows = [("a", "noun", "a", "noun"), ("a", "noun", "A", "noun")]
