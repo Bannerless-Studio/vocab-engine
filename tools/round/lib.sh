@@ -32,6 +32,8 @@ load_site_env() {
   PACKDIFF_WORD_FIELDS="ft"
   PACKDIFF_UNIT_FIELDS="ft"
   PACKDIFF_FREE_FILES=""  # comma list of pack json files allowed to change freely
+  PACKDIFF_WORD_IDS_REMOVED=""   # word ids allowed to leave words.json this round (exact set; rows match by id)
+  PACKDIFF_WORD_IDS_ADDED=""     # word ids allowed to enter words.json this round (exact set)
   for f in "$ROUND_DIR/sites/$name.env" "$site/.cache/round/site.env"; do
     # shellcheck disable=SC1090
     [ -f "$f" ] && . "$f"
