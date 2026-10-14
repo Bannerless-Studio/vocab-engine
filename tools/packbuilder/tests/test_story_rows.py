@@ -29,7 +29,7 @@ def toks_of(text):
     return tokens(text.rstrip(".").split() + ["."])
 
 
-def build(plain, story, epw=2, live=None, wid="w_pane", setup=None):
+def build(plain, story, epw=2, live=None, wid="w_pane", setup=None, decide=False):
     """plain/story: texts; returns (records by text, spec)."""
     tmp = Path(tempfile.mkdtemp())
     sp = get_spec("it", tmp)
@@ -50,7 +50,7 @@ def build(plain, story, epw=2, live=None, wid="w_pane", setup=None):
         stagged.append([sid, toks_of(t)])
     ctx = {"lexicon": Lexicon(sp), "lemma_groups": {}, "tagged": tagged, "rows_by_sid": rows,
            "story_rows": srows, "story_tagged": stagged}
-    sents, _, _ = build_sentences(SimpleNamespace(spec=sp), ctx, words, {w[0] for w in WORDS})
+    sents, _, _ = build_sentences(SimpleNamespace(spec=sp), ctx, words, {w[0] for w in WORDS}, decide_words=decide)
     return {s["t"]: s for s in sents}, sp
 
 

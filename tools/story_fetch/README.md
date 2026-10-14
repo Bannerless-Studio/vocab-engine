@@ -50,3 +50,6 @@ Run: `python3 tools/story_fetch/asb_fetch.py --lang sw --site ../swahili [--limi
 
 ## Urdu rows (langs/ur.py story_rows, packbuilder/ur_story.py)
 Filters and counts per run are in the build stats (`story_rows`) and `tools/README.md` of the urdu site.
+
+## Swahili rows (langs/sw.py story_rows, packbuilder/sw_story.py), 2026-10-15
+African Storybook Kiswahili books with an English twin (`.cache/stories/sw-asb/`, status ok, back cover `Attribution 4.0` on both). Alignment is `core/story_align.py` shared with Urdu. Swahili specifics: min 3 tokens, `.?!` ends, connective openers (na, lakini, kisha ...), no pronoun openers, per-sentence gloss agreement gate (ASb translations are often free), rename check for mid-sentence names that are no dictionary word, no glued-words check. The fetch is rate bound (3.5 s per call, about 3.4 books a minute, 629 listed, about 3 hours). Counts per build are in the build stats `story_rows`; credits (author, translation, illustration, copyright holder, urls) come from the back cover into attribution.json `story_sentences.stories`.
