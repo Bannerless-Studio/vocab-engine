@@ -29,13 +29,15 @@ def toks_of(text):
     return tokens(text.rstrip(".").split() + ["."])
 
 
-def build(plain, story, epw=2, live=None):
+def build(plain, story, epw=2, live=None, wid="w_pane", setup=None):
     """plain/story: texts; returns (records by text, spec)."""
     tmp = Path(tempfile.mkdtemp())
     sp = get_spec("it", tmp)
     sp.examples_per_word = epw
-    words = [{"id": wid, "_key": (lem, g), "lemma": lem, "w": lem, "en": lem, "pos": g.lower(), "lv": "A1",
-              "rank": i, "_sidx": i} for i, (lem, g, wid) in enumerate(WORDS) if wid == "w_pane"]
+    if setup:
+        setup(sp)
+    words = [{"id": i_wid, "_key": (lem, g), "lemma": lem, "w": lem, "en": lem, "pos": g.lower(), "lv": "A1",
+              "rank": i, "_sidx": i} for i, (lem, g, i_wid) in enumerate(WORDS) if i_wid == wid]
     tagged = tmp / "tagged.jsonl.gz"
     rows, srows, stagged = {}, {}, []
     with gzip.open(tagged, "wt", encoding="utf-8") as f:
@@ -126,6 +128,91 @@ class Sorting(unittest.TestCase):
     def test_without_story_rows_corpus_picks_are_the_same_two_as_before(self):
         out, _ = build(PANE, [], epw=2)
         self.assertEqual(len(out), 2)
+
+
+class EqualFit(Sorting):
+    MELA = dict(wid="w_mela", epw=2)
+
+    def prefer_hw(self, sp):
+        sp.prefer_headword_sentence = True
+
+    def test_story_with_worse_headword_tier_loses_to_clean_corpus_sentence(self):
+        # mele is not the headword mela: tier 2 vs tier 0
+        out, _ = build(["Compro la mela grande."], ["Compro le mele grandi."], setup=self.prefer_hw, **self.MELA)
+        self.assertEqual(sorted(out), ["Compro la mela grande.", "Compro le mele grandi."])
+        out, _ = build(["Compro la mela grande.", "Mangio la mela grande."], ["Compro le mele grandi."],
+                       setup=self.prefer_hw, **self.MELA)
+        self.assertEqual(sorted(out), ["Compro la mela grande.", "Mangio la mela grande."])
+
+    def test_story_with_worse_rank_penalty_loses(self):
+        def pen(sp):
+            sp.sentence_rank = lambda toks, lv: 3 if any(t[0] == "grandi" for t in toks) else 0
+        out, _ = build(["Compro la mela grande.", "Mangio la mela grande."], ["Compro le mele grandi."],
+                       setup=pen, **self.MELA)
+        self.assertNotIn("Compro le mele grandi.", out)
+
+    def test_exact_tie_goes_to_story(self):
+        out, _ = build(["Compro la mela grande.", "Mangio la mela grande."], ["Compra la mela grande."],
+                       setup=self.prefer_hw, **self.MELA)
+        self.assertIn("Compra la mela grande.", out)
+        self.assertEqual(len(out), 2)
+
+
+class CheckIntegration(unittest.TestCase):
+    def run_check(self, attribution):
+        import contextlib
+        import io
+        from packbuilder.qa.check import check
+        tmp = Path(tempfile.mkdtemp())
+        (tmp / "pack").mkdir()
+        (tmp / "pack" / "pack.json").write_text("{}")
+        (tmp / "pack" / "words.json").write_text("[]")
+        (tmp / "pack" / "sentences.json").write_text(json.dumps(
+            [{"id": "s1", "t": "x.", "en": "x", "lv": "A1", "words": [], "src": "story", "st": "7"}]))
+        (tmp / "pack" / "attribution.json").write_text(json.dumps(attribution))
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            check(get_spec("it", tmp))
+        return buf.getvalue()
+
+    def test_missing_attribution_entry_fails(self):
+        out = self.run_check({"story_sentences": {"count": 1, "stories": []}})
+        self.assertIn("story 7: sentence ships but story is not in attribution", out)
+
+    def test_attribution_without_shipped_sentence_fails(self):
+        out = self.run_check({"story_sentences": {"count": 1, "stories": [{"id": "7"}, {"id": "8"}]}})
+        self.assertIn("story 8: in attribution", out)
+
+    def test_consistent_attribution_adds_no_story_failure(self):
+        out = self.run_check({"story_sentences": {"count": 1, "stories": [{"id": "7"}]}})
+        self.assertNotIn("story", out.replace("story_sentences", ""))
+
+
+class Overrides(unittest.TestCase):
+    def test_extra_attribution_cannot_replace_story_sentences(self):
+        from packbuilder.core.pipeline import attribution
+        sp = get_spec("it", None, load=False)
+        sp.extra_attribution = lambda env, sents: {"story_sentences": {"count": 99}}
+        env = SimpleNamespace(spec=sp)
+        sp.sources = {sp.subtitles_file: "", sp.kaikki_file: "", sp.sentences_file: ""}
+        sp.story_source = lambda: {"source": "X"}
+        from unittest import mock
+        with mock.patch("packbuilder.core.pipeline.audio_recorders", lambda e, s: {}):
+            attr = attribution(env, {}, [], [{"id": "a", "src": "story", "st": "7"}])
+        self.assertEqual(attr["story_sentences"]["count"], 1)
+
+    def test_sid_collision_asserts(self):
+        with self.assertRaises(AssertionError):
+            self._collide()
+
+    def _collide(self):
+        import packbuilder.tests.test_story_rows as m
+        orig = m.STORY_SID_BASE
+        m.STORY_SID_BASE = 1
+        try:
+            build(["Compro il pane grande."], ["Mangio il pane grande."])
+        finally:
+            m.STORY_SID_BASE = orig
 
 
 class Attribution(unittest.TestCase):

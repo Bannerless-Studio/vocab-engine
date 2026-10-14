@@ -189,7 +189,7 @@ pip install https://github.com/explosion/spacy-models/releases/download/es_core_
 
 ## Story sentences
 
-A spec may set `examples_per_word` (default 2) and override `story_rows(env)` (default none). Story rows are tagged apart, join sentence choice only, rank ahead of other candidates at equal live/level standing, and fill picks 3..`examples_per_word` only; a word with no story sentence keeps 2. They ship as `"src": "story", "st": <story id>` and must be listed in attribution.json `story_sentences` (`check` enforces it both ways). Hook details: docs/PACKBUILDER_HOOKS.md `story_rows`.
+A spec may set `examples_per_word` (default 2) and override `story_rows(env)` (default none). Story rows are tagged apart, join sentence choice only, rank ahead of other candidates only at equal fit (same rank penalty and headword tier), and fill picks 3..`examples_per_word` only; a word with no story sentence keeps 2. They ship as `"src": "story", "st": <story id>` and must be listed in attribution.json `story_sentences` (`check` enforces it both ways). Hook details: docs/PACKBUILDER_HOOKS.md `story_rows`.
 
 ## Hooks
 

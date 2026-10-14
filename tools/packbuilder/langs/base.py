@@ -107,7 +107,7 @@ def make_lower_level_gloss_re(own=None, flags=re.I):
 
 
 EXAMPLE_SID_BASE = 95_000_000   # sids of example-only written sentences (spec.example_rows)
-STORY_SID_BASE = 97_000_000     # sids of story sentences (spec.story_rows), above every corpus and example sid
+STORY_SID_BASE = 97_000_000     # sids of story sentences (spec.story_rows), above Tatoeba, example and ur/fa/hi gen sids (id/ja/ko GEN_BASE is 1e9, apart)
 
 TATOEBA_AUDIO = ("audio.tar.bz2", "https://downloads.tatoeba.org/exports/sentences_with_audio.tar.bz2")
 

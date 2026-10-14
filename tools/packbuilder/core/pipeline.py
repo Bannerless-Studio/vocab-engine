@@ -140,8 +140,8 @@ def attribution(env, ctx, users, sentences):
             "licence": "CC-BY-SA-4.0", "count": ctx["example_rows_shipped"],
             "note": "Example sentences only, for words whose corpus sentences are missing or dropped by policy; no audio."}}
            if ctx.get("example_rows_shipped") else {}),
-        **story_attribution(env, sentences),
         **sp.extra_attribution(env, sentences),
+        **story_attribution(env, sentences),     # last: story_sentences comes from the story hooks only
     }
 
 

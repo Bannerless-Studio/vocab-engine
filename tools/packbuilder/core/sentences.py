@@ -360,6 +360,7 @@ def build_sentences(env, ctx, words, top3000):
     rows = {**ctx["rows_by_sid"], **ctx.get("example_rows", {})}
     example_rows = ctx.get("example_rows", {})
     story_rows = ctx.get("story_rows", {})
+    assert not set(story_rows) & set(rows), "story sids collide with corpus or example sids"
     rows.update(story_rows)
     key_to_id = {w["_key"]: w["id"] for w in words}
     sp.note_words(words)
@@ -514,9 +515,9 @@ def build_sentences(env, ctx, words, top3000):
         if lv == first_lv and len(good) < 2:
             good += [s for s in ok if info[s][0] == 3]
         good.sort(key=lambda s: (lv_ord[info[s][3]] > lv_ord[lv], s not in live_sids,
-                                 s not in story_rows,
                                  rank_pen[(s, lv)] - (sp.audio_rank_bonus if info[s][2] else 0),
                                  hw_tier.get((s, wid), 0),
+                                 s not in story_rows,
                                  not info[s][2],
                                  abs(info[s][0] - sp.target_len[lv]), use[s] == 0, s))
         if sp.example_shows_word and good:
