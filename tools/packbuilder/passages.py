@@ -23,6 +23,8 @@ Source format (tools/passages_src.json):
     {"rules": {"coverage": {"A1": 0.95, ...}, "budget": {"A1": ["A2", 3], ...}},
      "passages": [{"id", "lv", "title", "sentences": [[it, en], ...],
                    "oop": {lemma: reason}, "names": [declared name, ...] (optional),
+                   "story": {"id", "title", "url", "licence", ...} (optional: the passage is cut from a
+                   published story; emitted as src "story" + st, listed in attribution.json story_passages),
                    "questions": [{"q", "en", "type",
                    "options" | null, "answer", "words": [lemma, ...], "sentence"}]}]}
 Coverage = in-pack tokens / counted tokens; names, numerals, punctuation and
@@ -935,8 +937,11 @@ def run(spec, check_only=False, out=sys.stdout, emit=None, src_path=None):
         if stale:
             perr.append(f"oop lists lemmas used nowhere: {stale}")
         perr += budget_errors(lv, above, rules["budget"])
+        story = p.get("story")      # a passage cut from a published story: provenance, attribution.json story_passages
+        if story is not None and not (isinstance(story, dict) and story.get("id")):
+            perr.append("story needs an id")
         passages.append({"id": pid, "lv": lv, "title": p["title"], "text": text, "sentences": sents,
-                         "questions": qs, "src": "gen"})
+                         "questions": qs, **({"src": "story", "st": str(story["id"])} if story and story.get("id") else {"src": "gen"})})
         # unspaced script (zh): the app's length is the linked word count
         ws_n = sum(len(s["words"]) for s in sents) if getattr(spec, "passage_unspaced", False) else len(text.split())
         rows.append({"id": pid, "lv": lv, "title": p["title"], "words": nw, "ws_words": ws_n, "cov": cov,

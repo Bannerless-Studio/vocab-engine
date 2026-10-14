@@ -888,7 +888,8 @@ Optional. When present and non-empty, the app shows a **Read** tab. Without it n
 | `lv` | levelId | Must be one of `pack.levels[].id` (`"A1"`, `"A2"`, `"B1"`; zh would use `"1"`…). |
 | `title` | string | Target-language title, shown in the passage list. |
 | `text` | string | The full passage. Each `sentences[].t` should appear in it verbatim (warning otherwise). Length in the list is whitespace tokens of `text`, or the linked word count when `pack.spaced` is false. |
-| `src` | string | Optional provenance, e.g. `"gen"` for build-time generated passages. Not shown. |
+| `src` | string | Optional provenance: `"gen"` for build-time generated passages, `"story"` for a passage cut from a published story (`passages_src.json` `story` entry). Not shown. |
+| `st` | string | Present with `"src": "story"`: the story id, listed in attribution.json `story_passages.stories[].id` (`packbuilder check` fails on a mismatch either way; `story_passages.count` = shipped story passages). Not shown, never read by the engine. |
 | `sentences[].t` | string | One sentence of the passage, rendered in order. |
 | `sentences[].en` | string | English translation, shown in question feedback and results. |
 | `sentences[].words` | `[wordId]` | Linked pack words. Each is tappable for its gloss: at its `spans` when it has any, otherwise wherever its `w`, an `alt`, a `forms` entry or its bare form is visible in `t` (core.js `passageSegments`, longest match wins, so 为什么 beats 为, and a surface hit never covers a span). A linked word with neither is shown as a chip under the sentence, so every linked word stays tappable. |

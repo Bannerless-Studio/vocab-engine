@@ -149,14 +149,35 @@ def story_ids(sentences):
     return sorted({s["st"] for s in sentences if s.get("src") == "story"})
 
 
+def passage_stories(env):
+    """tools/passages_src.json passages carrying a `story` entry -> {story id: entry}, sorted by id."""
+    repo = getattr(env.spec, "repo", None)
+    src = Path(repo) / "tools" / "passages_src.json" if repo else None
+    if not src or not src.exists():
+        return {}
+    out = {}
+    for p in json.loads(src.read_text()).get("passages", []):
+        st = p.get("story")
+        if st and st.get("id"):
+            out.setdefault(str(st["id"]), {"passages": 0, **st})["passages"] += 1
+    return {k: out[k] for k in sorted(out)}
+
+
 def story_attribution(env, sentences):
     sp = env.spec
     ids = story_ids(sentences)
-    if not ids:
-        return {}
-    n = sum(1 for s in sentences if s.get("src") == "story")
-    return {"story_sentences": {**sp.story_source(), "count": n,
-                                "stories": [sp.story_meta(env, i) for i in ids]}}
+    res = {}
+    if ids:
+        n = sum(1 for s in sentences if s.get("src") == "story")
+        res["story_sentences"] = {**sp.story_source(), "count": n,
+                                  "stories": [sp.story_meta(env, i) for i in ids]}
+    ps = passage_stories(env)
+    if ps:
+        res["story_passages"] = {"note": "Reading passages cut from these stories; Urdu text and English realigned, "
+                                         "normalised typography only (tools/passages_src.json `story`).",
+                                 "count": sum(v.pop("passages") for v in ps.values()),
+                                 "stories": list(ps.values())}
+    return res
 
 
 def prepare(env, ctx):
@@ -294,7 +315,7 @@ def run(env, stage="all", check_remote=False):
     stat("word_ids_added_to_map", added)
     stat("word_id_shipped_keys_held_by_other_ids", held)
     pack_json = build_pack_json(env, words, ctx["raw_upos"])
-    credit = sp.story_credit() if story_ids(sentences) else None
+    credit = sp.story_credit() if story_ids(sentences) or passage_stories(env) else None
     if credit:
         pack_json["credits"] = [*pack_json.get("credits", []), credit]
     pack_json.update(characters_pack_fields(sp, units))
