@@ -352,7 +352,9 @@ def build_words(env, ctx):
                 same_words(gloss, first["en"]) or bool(nominalised)
             weak_evidence = top["score"] <= 0 or top["defn"] or top["demote"] or overlap > SECOND_SENSE_OVERLAP
             lost = (first["lemma"], first["group"]) if forced and not first["forced"] else (lem, g)   # the record the merge drops
-            issued_pair = id_key(lost[0], GROUP_LABEL.get(lost[1], lost[1].lower())) in issued_keys
+            kept = (lem, g) if lost == (first["lemma"], first["group"]) else (first["lemma"], first["group"])
+            label = lambda r: id_key(r[0], GROUP_LABEL.get(r[1], r[1].lower()))
+            issued_pair = label(lost) in issued_keys and label(kept) in issued_keys    # two shipped ids would collapse
             if second_pos_merges(lem, same_sense, weak_evidence, sp.second_entry_overlap_exempt, issued_pair):
                 if not forced or first["forced"]:
                     exclude("second POS entry without a distinct sense", lem); continue
@@ -700,9 +702,10 @@ def id_key(lemma, pos):
 
 def second_pos_merges(lem, same_sense, weak_evidence, overlap_exempt, issued_pair):
     """True when a second-POS entry is folded into the first (excluded, or replacing it when forced). The
-    same-sense and weak-evidence signals read hand gloss text, so they decide only for records without an issued
-    id: when the record the merge would drop (the second, or the first on the forced-replace path) has its
-    "lemma|pos" key marked shipped in the id map, the pair stays whatever the gloss says."""
+    same-sense and weak-evidence signals read hand gloss text, so they decide only while the merge keeps every
+    shipped id: when BOTH the dropped record's key and the surviving record's key are marked shipped in the id
+    map (second and first, or first and forced second), two shipped ids would collapse into one and the pair
+    stays whatever the gloss says. One marked key merges (the shipped id lives on in the merged word)."""
     if issued_pair:
         return False
     return same_sense or (weak_evidence and lem not in overlap_exempt)
