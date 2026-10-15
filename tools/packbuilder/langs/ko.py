@@ -36,7 +36,8 @@ import math
 import re
 from collections import Counter, defaultdict
 
-from .base import LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, drop_all_re
+from .. import ko_story
+from .base import STORY_SID_BASE, LanguageSpec, SENSITIVE_EN, SENSITIVE_GLOSS_EN, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, drop_all_re
 
 S0, NV, NT = 0xAC00, 21, 28
 T_JAMO = ["", "ㄱ", "ㄲ", "ㄳ", "ㄴ", "ㄵ", "ㄶ", "ㄷ", "ㄹ", "ㄺ", "ㄻ", "ㄼ", "ㄽ", "ㄾ", "ㄿ", "ㅀ", "ㅁ", "ㅂ",
@@ -1373,6 +1374,11 @@ def ko_romanize(text):
 KO_SPELLINGS = {("아니요", "INTJ"): ("아뇨",)}
 
 
+STORY_FUNCTION_LEMMAS = {"하다", "있다", "없다", "되다", "이다", "아니다", "않다", "그렇다", "이렇다", "같다", "나", "너", "우리", "그", "이", "저", "것", "수", "때", "거"}
+STORY_PARTICLES = ("은", "는", "이", "가", "을", "를", "의", "에", "에서", "에게", "한테", "도", "와", "과", "하고", "로", "으로", "만", "보다", "처럼",
+                   "부터", "까지", "께", "께서", "이랑", "랑", "마다", "에는", "에도", "에서는", "에게는", "으로는", "로는", "이에요", "예요", "이야", "야", "이다", "입니다")
+
+
 class Korean(LanguageSpec):
     code = "ko"
     name_en = "Korean"
@@ -2240,6 +2246,188 @@ class Korean(LanguageSpec):
         return {"generated_sentences": {
             "source": "written for this pack (tools/generated_sentences.tsv), marked \"src\": \"gen\"",
             "licence": "CC-BY-SA-4.0", "count": n, "audio": "none (TTS)"}}
+
+    # ---- stories: Storybooks Korea (Global Storybooks) + Global Digital Library ---------------------
+    keep_live_sentences = True          # story rows only add; every live sentence id stays (republish guard)
+    examples_per_word = 4               # picks 3-4 are story sentences only (story_rows)
+    min_story_tokens = 2                # "고양이는 뛰었어요." is a sentence (two eojeols)
+    GSB_URL = "https://global-asp.github.io/storybooks-korea/"
+    GDL_URL = "https://digitallibrary.io/"
+    STORY_LICENCES = {"3.0": "CC-BY-3.0", "4.0": "CC-BY-4.0"}
+
+    def _stories(self, env):
+        """Cached Storybooks Korea (ko-gsb) and Global Digital Library (ko-gdl) Korean books with their English twin, keyed
+        "gsb-<story>" / "gdl-<post>". Licence rule again here (fail closed): both sides exactly cc-by 3.0 or 4.0."""
+        cache = getattr(self, "_story_cache", None)
+        if cache is not None and cache[0] == env.repo:
+            return cache[1]
+        out = {}
+        base = env.repo / ".cache" / "stories"
+        for d in ("ko-gsb", "ko-gdl"):
+            files = sorted((base / d).glob("*.json")) if (base / d).is_dir() else []
+            for f in files:
+                st = json.loads(f.read_text(encoding="utf-8"))
+                if not isinstance(st, dict) or "text_pages" not in st or st.get("status") != "ok":
+                    continue
+                tw = st.get("twin")
+                if not tw or st.get("licence") != "cc-by" or tw.get("licence") != "cc-by" \
+                        or st.get("licence_version") not in self.STORY_LICENCES or st.get("licence_version") != tw.get("licence_version"):
+                    continue
+                out[f"{st['source']}-{st['id']}"] = st
+        self._story_cache = (env.repo, out)
+        return out
+
+    def story_rows(self, env):
+        from ..core.util import stat
+        stories = self._stories(env)
+        seen = set()
+        live = env.repo / "pack" / "sentences.json"
+        if live.exists():
+            seen.update(s["t"] for s in json.loads(live.read_text(encoding="utf-8")) if s.get("src") != "story")   # a shipped story sentence must stay offered on the next build
+        seen.update(r[1] for r in self.extra_corpus_rows(env))
+        stats = ko_story.A.Stats()
+        en_lower = {w for st in stories.values() for p in st["twin"]["text_pages"]
+                    for w in re.findall(r"(?<![A-Za-z])[a-z]+(?![A-Za-z])", ko_story.A.norm_en(p["text"])) if w}
+        checks = self._story_checks(env, en_lower)
+        rows = []
+        for sid_, st in stories.items():
+            for u, e, page in ko_story.story_pairs(st, self.word_re, lambda t: t, seen, stats, self.min_story_tokens, self.max_len,
+                                                    en_lower, checks):
+                rows.append([STORY_SID_BASE + len(rows), u, "", e, None, sid_])
+        stat("story_rows", {"stories_read": len(stories), "rows": len(rows), "filters": dict(stats)})
+        return rows
+
+    def _story_checks(self, env, en_lower=frozenset()):
+        """Dictionary checks for story_pairs, from pack/words.json: an eojeol resolves to a pack word by its exact surface
+        (headword, lemma, forms, alt), by noun + particle, or by a verb / adjective stem of two or more syllables.
+        nouns feed the opener rule; content words' glosses feed the page-level story_rate and the per-pair agreement gate."""
+        surf, stems, nouns, vstems = {}, {}, set(), []
+        wp = env.repo / "pack" / "words.json"
+        if wp.exists():
+            for w in json.loads(wp.read_text(encoding="utf-8")):
+                if w["pos"] not in ("noun", "verb", "adj", "adv") or w["lemma"] in STORY_FUNCTION_LEMMAS:
+                    continue
+                gs = ko_story.A.gloss_stems(w["en"])
+                for f in [w["w"], w["lemma"]] + list(w.get("forms") or []) + list(w.get("alt") or []):
+                    surf.setdefault(f, set()).update(gs)
+                    if w["pos"] == "noun":
+                        nouns.add(f)
+                if w["pos"] in ("verb", "adj") and w["lemma"].endswith("다") and len(w["lemma"]) >= 3:
+                    vstems.append((w["lemma"][:-1], gs))
+        vstems.sort(key=lambda x: -len(x[0]))
+        particles = sorted(STORY_PARTICLES, key=lambda x: -len(x))
+
+        def split_noun(e):
+            for p in particles:
+                if len(e) > len(p) and e.endswith(p) and e[:-len(p)] in nouns:
+                    return e[:-len(p)]
+            return None
+
+        def eojeol_stems(e):
+            if e in surf:
+                return frozenset(surf[e])
+            n = split_noun(e)
+            if n:
+                return frozenset(surf[n])
+            for stem, gs in vstems:
+                if e.startswith(stem):
+                    return frozenset(gs)
+            return None
+        memo, common = {}, []
+
+        def en_common():
+            """Lowercase English words of the twin texts plus those the Tatoeba English corpus uses at least 25 times: Eagle, Rabbit,
+            Hippo, capitalised in a story as a character, are common nouns the Korean edition translates."""
+            if not common:
+                import bz2
+                from collections import Counter
+                c = Counter()
+                p = env.cache / TATOEBA_ENG[0]
+                if p.exists():
+                    for line in bz2.open(p, "rt", encoding="utf-8"):
+                        q = line.split("\t")
+                        if len(q) >= 3:
+                            c.update(re.findall(r"(?<![A-Za-z])[a-z]+(?![A-Za-z])", q[2]))
+                common.append(set(en_lower) | {w for w, n in c.items() if n >= 25})
+            return common[0]
+
+        def lemma_stems(page):
+            if page in memo:
+                return memo[page]
+            got = set()
+            for t in self.word_re.findall(ko_story.norm_ko(page)):
+                g = eojeol_stems(t)
+                if g:
+                    got.add(g)
+            memo[page] = [g for g in got if g]
+            return memo[page]
+
+        class Checks:
+            @staticmethod
+            def noun(tok):
+                return tok in nouns or split_noun(tok) is not None
+
+            @staticmethod
+            def wrong_sense(toks, en):
+                return False
+
+            @staticmethod
+            def renamed(u, en):
+                """The English sentence holds a character name (a capitalised word whose lowercase form occurs in no twin text, so
+                Cow / Hare, written with a capital but a common noun elsewhere, pass): the Korean edition spells it in Hangul or
+                gave another name, and the pair cannot be told from a renamed one."""
+                common = en_common()
+                return any(ko_story.A.CAP_WORD.fullmatch(w) and w not in ko_story.A.NOT_NAMES and w.lower() not in common
+                           for w in (x.split("'")[0] for x in re.findall(r"[A-Za-z']+", en)))
+
+            @staticmethod
+            def agree_pair(u, en):
+                gl = lemma_stems(u)
+                return not gl or any(g & ko_story.A.gloss_stems(ko_story.A.norm_en(en)) for g in gl)
+
+            @staticmethod
+            def story_rate(pairs):
+                got = hit = 0
+                for u, e in pairs:
+                    gl = lemma_stems(u)
+                    if not gl:
+                        continue
+                    got += 1
+                    es = ko_story.A.gloss_stems(ko_story.A.norm_en(e))
+                    hit += any(g & es for g in gl)
+                return hit / got if got >= 3 else None
+        return Checks
+
+    def story_source(self):
+        return {"source": "Storybooks Korea (Global Storybooks, African Storybook stories translated into Korean) and the Global Digital Library "
+                          "(Let's Read, The Asia Foundation), Korean books with their English edition",
+                "licence": "CC-BY-3.0 / CC-BY-4.0 (per story, see stories)",
+                "url": self.GSB_URL + " ; " + self.GDL_URL,
+                "note": "Sentences are split out of the book text, Korean and English realigned sentence by sentence; "
+                        "typographic quotes became plain, nothing else was changed."}
+
+    def story_meta(self, env, story_id):
+        """The book's credits: authors, illustrators, translators, original story, licence and both editions' urls."""
+        st = self._stories(env)[story_id]
+        tw = st["twin"]
+        lic = self.STORY_LICENCES[st["licence_version"]]
+        if st["source"] == "gsb":
+            meta = {"id": story_id, "source": "Storybooks Korea (Global Storybooks)", "title": st["title"], "english_title": tw["title"],
+                    "authors": ko_story.names_of(st.get("authors")), "illustrators": ko_story.names_of(st.get("illustrators")),
+                    "translators": ko_story.names_of(st.get("translators")), "licence": lic, "url": st["url"], "english_url": tw["url"]}
+            if st.get("source_story"):
+                meta["original"] = "African Storybook: " + st["source_story"]["title"]
+                meta["original_url"] = st["source_story"]["url"]
+            return meta
+        meta = {"id": story_id, "source": "Global Digital Library (Let's Read, The Asia Foundation)", "title": st["title"],
+                "english_title": tw["title"], "authors": ko_story.names_of(st.get("authors")),
+                "illustrators": ko_story.names_of(st.get("illustrators")), "translators": ko_story.contributing_translators(st.get("credit_text")),
+                "publisher": st.get("publisher"), "licence": lic, "url": st["url"], "english_url": tw["url"]}
+        return meta
+
+    def story_credit(self):
+        return {"name": "Storybooks Korea and Global Digital Library stories (story authors, illustrators and translators)",
+                "licence": "CC BY 3.0 / CC BY 4.0", "url": self.GSB_URL}
 
     def pack_json_extra(self):
         return {"spaced": True, "rtl": False, "langTag": "ko",
