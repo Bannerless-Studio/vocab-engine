@@ -260,6 +260,45 @@ def twin_candidates(b, rec, a, en_by_title):
     return [], names[0] if names else None
 
 
+def recover(d, a, max_diff=6):
+    """twin_null books whose only reject is textpages_A_vs_B with 1 <= |A-B| <= max_diff: fetch that English book (licence tag and its own credit page, fail closed),
+    keep its text as the twin with page_diff = A - B and status ok_off. Pairing is NOT decided here: core/story_align.page_shift + the build's story_rate and
+    agreement gates guard every pair."""
+    en = {str(c['id']): c for c in list_books(EN_TERM, os.path.join(d, 'list-en.json'))}
+    mf_path = os.path.join(d, 'manifest.json')
+    mf = json.load(open(mf_path))
+    n = 0
+    for fn in sorted(os.listdir(d)):
+        if not re.fullmatch(r'\d+\.json', fn):
+            continue
+        rec = json.load(open(os.path.join(d, fn)))
+        tried = rec.get('twin_tried') or []
+        m = re.fullmatch(r'textpages_(\d+)_vs_(\d+)', tried[0].get('rejected', '')) if tried else None
+        if rec.get('status') != 'twin_null' or not m or len(tried) != 1 or not 1 <= abs(int(m[1]) - int(m[2])) <= max_diff:
+            continue
+        c = en.get(tried[0]['id'])
+        lq = licence_class(c) if c else None
+        if not lq:
+            continue
+        title = html.unescape(c['title']['rendered'])
+        m2, p2 = fetch_epub(c['id'], 'en', title)
+        t2 = text_pages(p2)
+        cr2 = credit_text(p2)
+        if book_licence(cr2)[1] or not t2:
+            continue
+        t = dict(tried[0], licence=OK_LICENCES[lq][0], licence_version=OK_LICENCES[lq][1], pages=len(t2), publisher=m2['publisher'], roles=m2['roles'],
+                 authors=m2['roles'].get('Author', []), illustrators=m2['roles'].get('Illustrator', []), translators=m2['roles'].get('Translator', []),
+                 text_pages=t2, credit_text=cr2, page_diff=int(m[1]) - int(m[2]))
+        t.pop('rejected', None)
+        rec['twin'], rec['status'] = t, 'ok_off'
+        save(os.path.join(d, fn), rec)
+        mf[rec['id']] = {'status': 'ok_off', 'why': f'page_diff {t["page_diff"]}', 'fetched_at': time.strftime('%Y-%m-%dT%H:%M:%S')}
+        save(mf_path, mf)
+        n += 1
+        print(rec['id'], 'ok_off', t['page_diff'], flush=True)
+    print('RECOVERED', n, '429', c429, flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--term', type=int, required=True, help='GDL language term id (ko 1862, hi 1719)')
@@ -270,11 +309,15 @@ def main():
     ap.add_argument('--resume', action='store_true')
     ap.add_argument('--twin', choices=['slug', 'title'], default='slug')
     ap.add_argument('--max-twins', type=int, default=4)
+    ap.add_argument('--recover-offcount', action='store_true', help='twin_null books whose only reject is a page-count mismatch of 1-6: fetch that English twin, status ok_off + page_diff (the build gates the pairing)')
     a = ap.parse_args()
     d = os.path.join(a.site, '.cache', 'stories', a.out or f'{a.code}-gdl')
     os.makedirs(d, exist_ok=True)
     mf_path = os.path.join(d, 'manifest.json')
     mf = json.load(open(mf_path)) if a.resume and os.path.exists(mf_path) else {}
+    if a.recover_offcount:
+        recover(d, a)
+        return
     books = list_books(a.term)
     save(os.path.join(d, 'list.json'), books)
     print(f'{len(books)} books listed', flush=True)
