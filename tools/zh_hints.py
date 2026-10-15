@@ -28,6 +28,12 @@ first sense of its own entry. tools/zh_hints_overrides.json (each with a reason 
 source) wins over the rules. A character the source lacks, or whose hint has no usable
 parts or runs over MAX_WORDS words, gets null.
 
+A unit of two or more characters can also carry a `hook`, one line about the whole word
+("learn + practise = study"), and a character line can be given its breakdown although the
+character has its own unit (taught later): both hand data in tools/zh_hint_compounds.json,
+checked by load_compounds, merged by pack_from_hsk.attach_hints. A mnemonic that is not
+etymology starts with "think:".
+
 A character of a unit of two or more characters that is also a one-character unit shows only its
 meaning there (its breakdown is taught on its own card). Any other character shows
 "<meaning in the word>: <breakdown>", the breakdown from tools/zh_hint_parts.json (owner
@@ -61,6 +67,7 @@ OUT = os.path.join(ROOT, "tools", "zh_hints.json")
 MEANINGS_OUT = os.path.join(ROOT, "tools", "zh_hint_meanings.json")
 PARTS_OUT = os.path.join(ROOT, "tools", "zh_hint_parts.json")
 OVERRIDES = os.path.join(ROOT, "tools", "zh_hints_overrides.json")
+COMPOUNDS = os.path.join(ROOT, "tools", "zh_hint_compounds.json")
 MAX_WORDS = 14
 IDS = set(chr(c) for c in range(0x2FF0, 0x2FFC))
 BINARY_IDS = IDS - {"⿲", "⿳"}
@@ -334,6 +341,31 @@ def load_meaning_overrides(path=OVERRIDES):
     return {k: e["meaning"] for k, e in data.items()}
 
 
+def load_compounds(words, path=COMPOUNDS):
+    """Checks tools/zh_hint_compounds.json against the vocabulary and returns it. "hooks": a
+    multi-character word -> one line of at most MAX_WORDS words (the `hook` of its unit, merged
+    by pack_from_hsk.attach_hints, shown after the per-character lines). "parts": "word:char"
+    -> a breakdown string, or true (use zh_hint_parts.json); the char must be in the word.
+    The merge itself fails on a key no unit has; this fails early, on the vocabulary."""
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    multi = {w["w"] for w in words if len(w["w"]) > 1}
+    for k, v in data.get("hooks", {}).items():
+        if k not in multi:
+            raise SystemExit(f"zh_hints: compounds hook {k}: not a multi-character word of the vocabulary")
+        if not isinstance(v, str) or not v.strip() or words_of(v) > MAX_WORDS:
+            raise SystemExit(f"zh_hints: compounds hook {k}: needs a line of at most {MAX_WORDS} words")
+    for k, v in data.get("parts", {}).items():
+        word, _, c = k.partition(":")
+        if word not in multi or len(c) != 1 or c not in word:
+            raise SystemExit(f"zh_hints: compounds parts {k}: key must be word:char with char in a multi-character word")
+        if not (v is True or (isinstance(v, str) and v.strip() and words_of(v) <= MAX_WORDS)):
+            raise SystemExit(f"zh_hints: compounds parts {k}: true or a breakdown of at most {MAX_WORDS} words")
+    return data
+
+
 def build_meanings(words, dic, overrides):
     gloss = {w["w"]: w["en"] for w in words if len(w["w"]) == 1}
     out = {}
@@ -388,11 +420,13 @@ def main(argv):
     parts = build_parts(words, dic, load_overrides())
     with open(PARTS_OUT, "w", encoding="utf-8") as f:
         f.write(json.dumps(parts, ensure_ascii=False, indent=0, sort_keys=True) + "\n")
+    comp = load_compounds(words)
     han = [c for c in table if HAN.match(c)]
     missing = [c for c in han if c not in dic]
     hinted = sum(1 for v in table.values() if v)
     print(f"distinct characters {len(table)} (han {len(han)}): hint {hinted}, "
-          f"not in source {len(missing)} {''.join(missing)}, no usable template {len(han) - len(missing) - hinted}")
+          f"not in source {len(missing)} {''.join(missing)}, no usable template {len(han) - len(missing) - hinted}; "
+          f"compound hooks {len(comp.get('hooks', {}))}, forced breakdowns {len(comp.get('parts', {}))}")
     return 0
 
 

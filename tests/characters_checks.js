@@ -875,6 +875,14 @@ pronFirstChecks(jaLike());
 pronFirstSentenceChecks();
 b8Checks(zhLike());
 flagOffEquality();
+function unitHookChecks(){
+  const h = u => VC.unitHints(u).map(x => `${x.c}|${x.hint}`);
+  check("[hook] per-character lines first, then the whole-word hook under the word", JSON.stringify(h({ t: "学习", hint: ["to study: x", "to study"], hook: "learn + practise = study" })) === JSON.stringify(["学|to study: x", "习|to study", "学习|learn + practise = study"]));
+  check("[hook] a hook without a hint array still lists", JSON.stringify(h({ t: "学习", hook: "learn + practise = study" })) === JSON.stringify(["学习|learn + practise = study"]));
+  check("[hook] ignored on a one-character unit and when not a string", h({ t: "好", hook: "x" }).length === 0 && h({ t: "好吃", hook: 5 }).length === 0);
+  check("[hook] no hook: output unchanged", JSON.stringify(h({ t: "妈妈", hint: ["mother", "mother"] })) === JSON.stringify(["妈|mother"]));
+}
+unitHookChecks();
 placeCharsChecks();
 wordRubySplitChecks();
 

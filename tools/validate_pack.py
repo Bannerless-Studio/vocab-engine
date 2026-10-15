@@ -1246,6 +1246,11 @@ def check_characters_data(chars, char_levels, by_id, rep):
                 rep.err(f"{where}.hint has {len(h)} entries for {len(t)} characters of t")
             elif not any(h):
                 rep.err(f"{where}.hint has no hint; leave the field out instead")
+        if "hook" in c:
+            if not is_str(c["hook"]):
+                rep.err(f"{where}.hook must be a non-empty string when present")
+            elif is_str(c.get("t")) and len(c["t"]) < 2:
+                rep.err(f"{where}.hook is for a unit of two or more characters; a one-character unit's hint is its hook")
         if "say" in c:
             if not (is_str(c["say"]) and c["say"] != c.get("t")):
                 rep.err(f"{where}.say must be a non-empty string other than t when present")
