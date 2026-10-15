@@ -2166,7 +2166,6 @@ function bareBoost(cands, prog, pack, sn, d, o){
   const psn = Number.isInteger(o.sn) ? o.sn : sn, out = [];
   cands.forEach(c => {
     if(c.t !== "c" || !isObj(c.rec) || charTier(c.rec.s || 0, pack) !== "ruby") return;
-    if(wordKnownBare(c.rec, c.x, prog, pack)) return; // already bare through its known word: no pair ask needed
     const wm = pairJudge(c.rec, c.x, prog, "wm"); if(!wm || wm.s < BARE_PAIR) return;
     const ws = pairJudge(c.rec, c.x, prog, "ws"); if(ws && ws.s >= BARE_PAIR) return;
     if(ws && psn > 0 && ws.a === psn) return;

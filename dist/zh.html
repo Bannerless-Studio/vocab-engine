@@ -2625,7 +2625,6 @@ function bareBoost(cands, prog, pack, sn, d, o){
   const psn = Number.isInteger(o.sn) ? o.sn : sn, out = [];
   cands.forEach(c => {
     if(c.t !== "c" || !isObj(c.rec) || charTier(c.rec.s || 0, pack) !== "ruby") return;
-    if(wordKnownBare(c.rec, c.x, prog, pack)) return; // already bare through its known word: no pair ask needed
     const wm = pairJudge(c.rec, c.x, prog, "wm"); if(!wm || wm.s < BARE_PAIR) return;
     const ws = pairJudge(c.rec, c.x, prog, "ws"); if(ws && ws.s >= BARE_PAIR) return;
     if(ws && psn > 0 && ws.a === psn) return;
@@ -6602,7 +6601,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "2831591336-2401190";
+const VE_BUILD = "1098213948-2401077";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -8888,4 +8887,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:4036169148-2400514-->
+<!--ve-build:1912150924-2400401-->
