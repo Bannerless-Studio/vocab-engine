@@ -3192,8 +3192,18 @@ function bareWord(word, units, prog, pack){
 // the typed credit keep rec.s.
 const BARE_PAIR = 2;
 function bareByPairOn(pack){ const c = charsConfig(pack); return !!(c && c.bareByPair); }
+// A known word (owner 2026-10-15: 286 known words, yet 388 units sat at ruby with no pair streak, so sentences still
+// showed readings for words known 50+ sessions; pair asks ride on word reviews and a known word is rarely reviewed):
+// a ruby-tier unit whose word's streak is at `bare` and whose wm / ws pair (unit or word, latest answer) is not judged missed counts as bare
+// without pair streaks. A miss resets the word streak (below bare) and zeroes the pair, so a recent wrong ends it.
+function wordKnownBare(rec, unit, prog, pack){
+  const c = charsConfig(pack), wid = unit && (unit.words || [])[0], w = wid != null && prog && isObj(prog.w) ? prog.w[wid] : null;
+  if(!c || !isObj(w) || (+w.s || 0) < c.bare) return false;
+  return ["wm", "ws"].every(k => { const j = pairJudge(rec, unit, prog, k); return !j || j.s > 0; });
+}
 function pairBare(rec, unit, prog, pack){
   if(!bareByPairOn(pack) || !isObj(rec) || charTier(rec.s || 0, pack) !== "ruby") return false;
+  if(wordKnownBare(rec, unit, prog, pack)) return true;
   return (pairJudge(rec, unit, prog, "wm") || { s: 0 }).s >= BARE_PAIR && (pairJudge(rec, unit, prog, "ws") || { s: 0 }).s >= BARE_PAIR;
 }
 // A unit pair's judged state: the unit's and the word's records are separate streams per pair; the most
@@ -4860,7 +4870,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, levelPosition, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
-  BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, settleUnitProv, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
+  BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, wordKnownBare, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, settleUnitProv, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,
   charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, wordRubyParts, tokenRubyParts, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, mixPick,

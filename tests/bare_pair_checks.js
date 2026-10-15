@@ -197,7 +197,15 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     ["ruby (4), ws 5 only (another pair)", { r: 5, w: 0, s: 4, p: { ws: [5, 9] } }, null, false],
     ["ruby (3), its word's wm 2", { r: 3, w: 0, s: 3 }, { r: 6, w: 0, s: 4, p: { wm: [2, 9], ws: [2, 9] } }, true],
     ["ruby (3), its word's wm 1, sm 4", { r: 3, w: 0, s: 3 }, { r: 6, w: 0, s: 4, p: { wm: [1, 9], sm: [4, 9] } }, false],
-    ["ruby (3), its word at streak 6 with no pair answered (boot not counted)", { r: 3, w: 0, s: 3 }, { r: 6, w: 0, s: 6 }, false],
+    ["ruby (3), a known word (streak 6) with no pair answered (known-word rule, 2026-10-15)", { r: 3, w: 0, s: 3 }, { r: 6, w: 0, s: 6 }, true],
+    ["ruby (4), a known word (streak 5, bare) with no pair answered", { r: 3, w: 0, s: 4 }, { r: 6, w: 0, s: 5 }, true],
+    ["ruby (3), known word that was missed long ago (w 2, streak 5 since)", { r: 3, w: 0, s: 3 }, { r: 9, w: 2, s: 5, p: { wm: [3, 9] } }, true],
+    ["pron (2), a known word (streak 6): below mastered stays pron", { r: 3, w: 0, s: 2 }, { r: 6, w: 0, s: 6 }, false],
+    ["ruby (3), word streak 4 (not yet known)", { r: 3, w: 0, s: 3 }, { r: 6, w: 0, s: 4 }, false],
+    ["ruby (3), word streak 0 after a recent wrong (w 1)", { r: 3, w: 0, s: 3 }, { r: 6, w: 1, s: 0 }, false],
+    ["ruby (3), known word but its ws pair missed last (0)", { r: 3, w: 0, s: 3 }, { r: 6, w: 0, s: 5, p: { ws: [0, 9] } }, false],
+    ["ruby (3), known word, unit's own wm missed last (0)", { r: 3, w: 0, s: 3, p: { wm: [0, 9] } }, { r: 6, w: 0, s: 5 }, false],
+    ["ruby (3), known word, an old unit miss superseded by a later word wm 3", { r: 3, w: 0, s: 3, p: { wm: [0, 4] } }, { r: 6, w: 0, s: 5, p: { wm: [3, 8] } }, true],
     ["pron (2), wm 3 (below mastered stays pron)", { r: 5, w: 0, s: 2, p: { wm: [3, 9] } }, null, false],
     ["malformed wm", { r: 5, w: 0, s: 3, p: { wm: ["2", 9] } }, null, false],
     ["ruby (3), unit wm 2 (sn 4), word wm 2 (sn 5)", { r: 5, w: 0, s: 3, p: { wm: [2, 4], ws: [2, 4] } }, { r: 6, w: 0, s: 4, p: { wm: [2, 5], ws: [2, 5] } }, true],
@@ -211,7 +219,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
   T.forEach(([name, rec, wrec, want]) => console.log(`    ${name.padEnd(72)} ${want ? "bare" : "-"}`));
   check(`${T.length} rule cases`, T.every(([, rec, wrec, want]) => pb(rec, wrec) === want), T.filter(([, rec, wrec, want]) => pb(rec, wrec) !== want).map(x => x[0]).join("\n"));
   check("bare (5) stays bare by its streak; pairBare adds nothing there", pb({ r: 5, w: 0, s: 5 }) === false && VC.charTier(5, PACK) === "bare");
-  check("flag off (bareByPair stripped): never", T.every(([, rec, wrec]) => !pb(rec, wrec, PACK_OFF)));
+  check("flag off (bareByPair stripped): never, known word included", T.every(([, rec, wrec]) => !pb(rec, wrec, PACK_OFF)));
   {
     const p = withRec({ r: 5, w: 0, s: 3, p: { wm: [2, 9], ws: [2, 9] } }), r = p.chars.c[U0.id];
     const was = VC.pairBare(r, U0, p, PACK);
@@ -330,7 +338,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     const line = (name, c) => console.log(`    ${name.padEnd(46)} units ${c.taught} taught, ${c.ruby} ruby: bare ${c.before} -> ${c.after}; passage tokens ${c.toks}: bare ${c.bOff} -> ${c.bOn} (+${c.bOn - c.bOff}); wm-only rule would flip ${c.wmOnly}, units with a ws answer ${c.wsAns}`);
     const boot0 = VC.bootProg(JSON.stringify(OWNER), PACK).prog, c0 = count(boot0);
     line("as exported (no pair answered yet)", c0);
-    check("as exported: no unit flips (the export predates pairs: no p on any record)", c0.after === c0.before && c0.bOn === c0.bOff);
+    check("as exported: the export predates pairs (no p on any record), so the pair rule flips nothing; flips are known-word units only (wm-only would flip 0)", c0.wmOnly === 0 && c0.wsAns === 0 && c0.after > c0.before);
     // Were the boot (legacy streak) counted, every ruby unit would be bare at once: the reason it is not.
     const bootFlip = CHARACTERS.filter(u => { const r = VC.charRecs(boot0)[u.id]; return r && VC.charTier(r.s, PACK) === "ruby" && VC.pairState(r, "wm", VC.pairUnitHeld(PACK)).s >= VC.BARE_PAIR; }).length;
     console.log(`    (counting the pair boot instead: ${bootFlip} of ${c0.ruby} ruby units would show bare at once)`);
@@ -394,6 +402,59 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     // Recall plans are not boosted.
     const rc = p => VC.buildRecallPlan(lw(p), p, PACK, 12, po(4));
     check("Recall plan unchanged by the flag (not boosted)", JSON.stringify(rc(p1)) === JSON.stringify(VC.buildRecallPlan(lw(p1), p1, PACK_OFF, 12, po(4))));
+  }
+
+  console.log("\n[8] known word -> bare without pair streaks (owner 2026-10-15: 286 known words, 388 of 595 units at 3-4 with no pair streak)");
+  {
+    const F9 = [process.env.PAIRS_OWNER9, "/Users/ishmum/.claude/uploads/9e41e879-e4d7-4530-b040-c9be1286edd7/ec1cfcb2-vocab_zh_progress_9.json"].find(f => f && fs.existsSync(f));
+    if(!F9) skip("owner record 9 missing ($PAIRS_OWNER9)");
+    else {
+      const prog = VC.bootProg(fs.readFileSync(F9, "utf8"), PACK).prog, recs = VC.charRecs(prog), cfg = PACK.characters;
+      const us = CHARACTERS.filter(u => recs[u.id]);
+      const was = u => VC.charTier(recs[u.id].s, PACK) === "bare";
+      const flips = us.filter(u => !was(u) && VC.pairBare(recs[u.id], u, prog, PACK));
+      const off = us.filter(u => !was(u) && VC.pairBare(recs[u.id], u, prog, PACK_OFF));
+      const ruby = us.filter(u => VC.charTier(recs[u.id].s, PACK) === "ruby").length;
+      console.log(`    ${us.length} units, ${ruby} ruby, ${us.filter(was).length} bare by streak; known-word flips ${flips.length}`);
+      const U = id => CHARACTERS.find(u => u.id === id);
+      check("owner record: 我 (c0091) and 了 (c0018) show bare in a sentence", ["c0091", "c0018"].every(id => VC.pairBare(recs[id], U(id), prog, PACK)));
+      const pairOnly = u => VC.pairJudge(recs[u.id], u, prog, "wm") && VC.pairJudge(recs[u.id], u, prog, "wm").s >= VC.BARE_PAIR && VC.pairJudge(recs[u.id], u, prog, "ws") && VC.pairJudge(recs[u.id], u, prog, "ws").s >= VC.BARE_PAIR;
+      const known = u => prog.w[u.words[0]] && prog.w[u.words[0]].s >= cfg.bare;
+      const viaWord = flips.filter(u => !pairOnly(u));
+      console.log(`    flips: ${flips.length} (${viaWord.length} only by the known-word rule, ${flips.length - viaWord.length} already by pair streaks)`);
+      check("owner record: every flip is a ruby unit that is pair-bare or has a known word (streak >= characters.bare)", flips.every(u => VC.charTier(recs[u.id].s, PACK) === "ruby" && (pairOnly(u) || known(u))) && viaWord.every(known));
+      check("owner record: no flip with the flag off", off.length === 0);
+      check("owner record: every ruby unit with a known word flips unless a pair was just missed (c0337)", flips.length > 0 && us.filter(u => VC.charTier(recs[u.id].s, PACK) === "ruby" && known(u)).every(u => flips.includes(u) || ["wm", "ws"].some(k => { const j = VC.pairJudge(recs[u.id], u, prog, k); return j && j.s === 0; })));
+      const st = VC.charsStarted(PACK, WORDS, CHARACTERS, prog, SENTENCES);
+      const s = SENTENCES.find(x => (x.ruby || []).some(k => k[3] === "w0091"));
+      const tk = VC.rubyTiers(s, CHARACTERS, prog, PACK, st).find(k => k.wordId === "w0091");
+      check("rubyTiers: 我 token bare on the owner record; ruby with the flag off", tk && tk.tier === "bare" && VC.rubyTiers(s, CHARACTERS, prog, PACK_OFF, st).find(k => k.wordId === "w0091").tier === "ruby");
+      const p2 = clone(prog); p2.w.w0091 = Object.assign({}, p2.w.w0091, { w: 1, s: 0 });
+      check("owner record: a recent wrong on the word returns the reading", !VC.pairBare(p2.chars.c.c0091, U("c0091"), p2, PACK));
+      const p3 = clone(prog); p3.chars.c.c0091.s = 2;
+      check("owner record: a unit at 2 stays pron", !VC.pairBare(p3.chars.c.c0091, U("c0091"), p3, PACK) && VC.charTier(2, PACK) === "pron");
+      check("known-word rule writes nothing (round trip byte-equal)", JSON.stringify(VC.bootProg(JSON.stringify(prog), PACK).prog) === JSON.stringify(prog));
+    }
+  }
+
+  console.log("\n[9] japanese pack (mastered 3, bare 6, bareByPair): a known word's kanji unit goes bare");
+  {
+    const JA = path.join(ROOT, "..", "japanese", "pack");
+    if(!fs.existsSync(path.join(JA, "pack.js"))) skip("../japanese/pack missing");
+    else {
+      const JP = loadConst(path.join(JA, "pack.js"), "PACK"), JC = loadConst(path.join(JA, "characters.js"), "CHARACTERS");
+      const u = JC[0], wid = u.words[0], cfg = JP.characters;
+      const mk = (us, ws, extra) => { const p = VC.normalizeProg({ placedOnce: true, sessions: 30 }, JP); p.sn = 30; p.chars = Object.assign(p.chars || {}, { choiceSeen: true, c: { [u.id]: { r: 5, w: 0, s: us } } }); p.w[wid] = Object.assign({ r: 8, w: 0, s: ws }, extra || {}); return p; };
+      const pb = p => VC.pairBare(p.chars.c[u.id], u, p, JP);
+      check(`ja config: bareByPair on, mastered ${cfg.mastered}, bare ${cfg.bare}`, VC.bareByPairOn(JP) && cfg.mastered === 3 && cfg.bare === 6);
+      check("ja: word known (s 6), unit ruby (3, 4, 5): bare without pair streaks", [3, 4, 5].every(s => pb(mk(s, 6))));
+      check("ja: unit at 2 (pron) stays pron; unit at 6 is bare by streak, not pairBare", !pb(mk(2, 6)) && VC.charTier(6, JP) === "bare" && !pb(mk(6, 6)));
+      check("ja: word below bare (5) or with a recent wrong (s 0) keeps the reading", !pb(mk(3, 5)) && !pb(mk(3, 0, { w: 1 })));
+      check("ja: known word but its ws pair missed last: reading stays", !pb(mk(3, 6, { p: { ws: [0, 30] } })));
+      check("ja: pair path unchanged (word 4, wm and ws at 2 on the unit)", (() => { const p = mk(3, 4); p.chars.c[u.id].p = { wm: [2, 9], ws: [2, 9] }; return pb(p); })());
+      const w = JP && loadConst(path.join(JA, "words.js"), "WORDS").find(x => x.id === wid), p = mk(3, 6);
+      check("ja: bareWord true for the known word's unit, false with the word at 5", VC.bareWord(w, JC, p, JP) && !VC.bareWord(w, JC, mk(3, 5), JP));
+    }
   }
 
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
