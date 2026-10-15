@@ -36,7 +36,8 @@ import json
 import re
 import unicodedata
 
-from .base import (make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LOWER_LEVEL_ALCOHOL_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN,
+from .. import hi_story
+from .base import (STORY_SID_BASE, make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LOWER_LEVEL_ALCOHOL_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN,
                    SENSITIVE_GLOSS_EN, drop_all_re, make_word_ceiling_re)
 
 DEV = "\u0900-\u0963\u0971-\u097f"          # Devanagari letters and signs (no danda, no digits)
@@ -1869,6 +1870,164 @@ class Hindi(LanguageSpec):
         if grp == "sign":
             return {"ं": "अं", "ँ": "आँ", "ः": "अः"}.get(g)
         return g
+
+
+    # ---- stories: Bloom Library ---------------------------------------------------------------
+    keep_live_sentences = True          # story rows only add; every live sentence id stays (republish guard)
+    examples_per_word = 4               # picks 3-4 are story sentences only (story_rows)
+    min_story_tokens = 3                # "मैं खेलता हूँ।" is a sentence
+    STORY_URL = "https://bloomlibrary.org/"
+    BLOOM_LICENCES = {"cc-by": "CC-BY-4.0", "cc-by-sa": "CC-BY-SA-4.0", "cc0": "CC0-1.0"}
+
+    def _stories(self, env):
+        """Cached Bloom Library Hindi books (.cache/stories/hi-bloom, tools/story_fetch/bloom_fetch.py) with an English twin, by book id.
+        Licence rule again here (fail closed): cc-by / cc-by-sa (version 4.0 in the book's own licenseUrl) or cc0, the twin under the same
+        licence; scripture books (hi_story.is_bible) are left out; a second book with the same Hindi or English title is the same story and is skipped.
+        Each story gets `_licence` (the book's own)."""
+        cache = getattr(self, "_story_cache", None)
+        if cache is not None and cache[0] == env.repo:
+            return cache[1]
+        out, titles = {}, set()
+        d = env.repo / ".cache" / "stories" / "hi-bloom"
+        for f in sorted(d.glob("*.json")) if d.is_dir() else []:
+            if f.name in ("manifest.json", "list.json", "run-stats.json"):
+                continue
+            st = json.loads(f.read_text(encoding="utf-8"))
+            tw = st.get("twin")
+            lic = self.BLOOM_LICENCES.get(st.get("licence"))
+            if st.get("status") != "ok" or not tw or not lic or tw.get("licence") != st.get("licence") \
+                    or (st["licence"] != "cc0" and st.get("licence_version") != "4.0") or hi_story.is_bible(st):
+                continue
+            ks = {hi_story.A.title_key(st["title"]), hi_story.A.title_key(tw["title"] if not tw.get("same_book") else (st.get("all_titles") or {}).get("en") or tw["title"])}
+            if ks & titles:      # the same story filed twice (Hindi title, or the English title when Bloom has one)
+                continue
+            titles |= ks
+            out[st["id"]] = dict(st, _licence=lic)
+        self._story_cache = (env.repo, out)
+        return out
+
+    def story_rows(self, env):
+        from ..core.util import stat
+        stories = self._stories(env)
+        seen = set()
+        live = env.repo / "pack" / "sentences.json"
+        if live.exists():
+            seen.update(self.bad_sentence_norm(s["t"]) for s in json.loads(live.read_text(encoding="utf-8")) if s.get("src") != "story")   # a shipped story sentence must stay offered on the next build
+        seen.update(self.bad_sentence_norm(r[1]) for r in self.example_rows(env))
+        stats = hi_story.A.Stats()
+        checks = self._story_checks(env)
+        en_lower = {w for st in stories.values() for p in st["twin"]["text_pages"]
+                    for w in re.findall(r"(?<![A-Za-z])[a-z]+(?![A-Za-z])", hi_story.A.norm_en(p["text"])) if w}
+        self._story_en_lower = en_lower
+        rows = []
+        for sid_, st in stories.items():
+            for u, e, page in hi_story.story_pairs(st, self.word_re, self.bad_sentence_norm, seen, stats, self.min_story_tokens, self.max_len,
+                                                   None, en_lower, checks):
+                rows.append([STORY_SID_BASE + len(rows), u, "", e, None, sid_])
+        stat("story_rows", {"stories_read": len(stories), "rows": len(rows), "filters": dict(stats)})
+        return rows
+
+    _story_en_lower = frozenset()
+
+    def _story_checks(self, env):
+        """Pack-based checks for hi_story.story_pairs: nouns (the opener rule), the transliteration rename check and the page-level
+        gloss agreement (story_rate, agree_pair). Pack surfaces (headword, lemma, forms, alt) only, so the rates are lower bounds; no
+        sentence-level wrong_sense."""
+        sp = self
+        gloss_stems = hi_story.A.gloss_stems
+        nouns, stems = set(), {}
+        wp = env.repo / "pack" / "words.json"
+        if wp.exists():
+            for w in json.loads(wp.read_text(encoding="utf-8")):
+                if w["pos"] not in ("noun", "verb", "adj", "adv"):
+                    continue
+                gs = gloss_stems(w["en"])
+                for f in [w["w"], w["lemma"]] + list(w.get("forms") or []) + list(w.get("alt") or []):
+                    k = fold(f)
+                    if w["pos"] == "noun":
+                        nouns.add(k)
+                    stems.setdefault(k, set()).update(gs)
+        roman = {}
+
+        def tokens(u):
+            return [fold(t) for t in sp.word_re.findall(hi_story.norm_hi(u))]
+
+        def rom(t):
+            if t not in roman:
+                roman[t] = translit(t)
+            return roman[t]
+
+        class Checks:
+            @staticmethod
+            def noun(tok):
+                return fold(tok) in nouns
+
+            @staticmethod
+            def wrong_sense(toks, en):
+                return False
+
+            @staticmethod
+            def renamed(u, en):
+                """An English character name of the sentence that no Hindi token spells (transliteration, consonant skeleton) and no
+                pack gloss translates (Rhino -> गैंडा): the edition renamed the character."""
+                toks = tokens(u)
+                for name in hi_story.english_names(en, sp._story_en_lower):
+                    if any(hi_story.translit_ok(rom(t), name) for t in toks):
+                        continue
+                    ns = gloss_stems(name)
+                    if ns and any(stems.get(t, frozenset()) & ns for t in toks):
+                        continue
+                    return True
+                return False
+
+            @staticmethod
+            def agree_pair(u, en):
+                """True when no word of the sentence has a pack gloss, or one gloss stem shows up in the English."""
+                gl = [stems[t] for t in tokens(u) if t in stems]
+                return not gl or any(g & gloss_stems(hi_story.A.norm_en(en)) for g in gl)
+
+            @staticmethod
+            def story_rate(pairs):
+                """Share of pages where some word's gloss shows up in the English page; None under 3 comparable pages."""
+                got = hit = 0
+                for u, e in pairs:
+                    gl = [stems[t] for t in tokens(u) if t in stems]
+                    if not gl:
+                        continue
+                    got += 1
+                    es = gloss_stems(hi_story.A.norm_en(e))
+                    hit += any(g & es for g in gl)
+                return hit / got if got >= 3 else None
+        return Checks
+
+    def story_source(self):
+        return {"source": "Bloom Library, Hindi books with their English edition (each book carries its own licence entry; scripture books are left out)",
+                "licence": "CC-BY-4.0 (each book's own licence is in its entry)",
+                "url": self.STORY_URL,
+                "note": "Sentences are split out of the book text, Hindi and English realigned sentence by sentence; typographic quotes became "
+                        "plain, a sentence-final full stop became the danda; nothing else was changed."}
+
+    def story_meta(self, env, story_id):
+        """The book's credits: authors, translators and illustrators as Bloom lists them, the copyright line and credit text of the
+        book, the original publisher, and the book's own licence."""
+        st = self._stories(env)[story_id]
+        tw = st["twin"]
+        meta = {"id": story_id, "source": "Bloom Library", "title": st["title"],
+                "english_title": (st.get("all_titles") or {}).get("en") or tw["title"],
+                "authors": hi_story.names_of(st.get("authors")), "translators": hi_story.names_of(st.get("translators")),
+                "illustrators": hi_story.names_of(st.get("illustrators")), "licence": st["_licence"], "url": st["url"],
+                "english_url": "https://bloomlibrary.org/book/" + tw["id"]}
+        if (st.get("original_publisher") or "").strip().lower() not in ("", "n-a", "n/a", "na", "-"):
+            meta["original_publisher"] = st["original_publisher"].strip()
+        if (st.get("copyright") or "").strip():
+            meta["copyright"] = re.sub(r"\s+", " ", st["copyright"]).strip()[:300]
+        if (st.get("credits") or "").strip():
+            meta["credits"] = re.sub(r"\s+", " ", st["credits"]).strip()[:400]
+        return meta
+
+    def story_credit(self):
+        return {"name": "Bloom Library stories (book authors, translators, illustrators and publishers named in the pack's attribution)",
+                "licence": "CC BY 4.0 / CC BY-SA 4.0 / CC0", "url": self.STORY_URL}
 
 
 SPEC = Hindi

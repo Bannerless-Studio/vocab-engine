@@ -63,3 +63,5 @@ The default run drops a book when its English twin has a different number of tex
 ## Indonesian rows (langs/id.py story_rows, packbuilder/id_story.py)
 Filters and counts per run are in the build stats (`story_rows`) and `tools/README.md` of the indonesian site.
 
+## Hindi rows (langs/hi.py story_rows, packbuilder/hi_story.py), 2026-10-15
+Bloom Library Hindi books with an English twin (`.cache/stories/hi-bloom/`, status ok, licence cc-by / cc-by-sa 4.0 / cc0 on both sides, no scripture). Alignment is `core/story_align.py` shared. Hindi specifics: min 3 tokens, danda `।॥?!.` ends, connective and pronoun openers, relative words, per-sentence gloss agreement gate, rename check by transliteration skeleton, no 1:2 bead. Measured 2026-10-15 (bloom_fetch --lang hi): 151 listed, 52 licence-usable, 16 with a twin (the other 36 are Hindi-only Pratham mirrors with no English book on Bloom), 8 of those 16 are font-mapped PDF text and are dropped by `hi_story.garbled_story`. `measure.py` has no Devanagari token regex (`\w` drops vowel signs), so its coverage numbers for hi are not meaningful; the build stats `story_rows` are.

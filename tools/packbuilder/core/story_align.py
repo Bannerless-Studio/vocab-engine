@@ -92,21 +92,28 @@ def _merge_unbalanced(pieces):
     return out
 
 
+CLOSERS = "\"'\u201d\u2019\u00bb)]"            # quote and bracket marks that close the sentence the stop ended
+
+
+def _boundary(lang):
+    return re.compile(r"(?<=[" + re.escape(lang.end) + r"])[" + re.escape(CLOSERS) + r"]*\s+")
+
+
 def split_target(lang, page):
+    """Sentences of one target page. The boundary is a stop (lang.end), any closing quotes or brackets, then space; the closers
+    stay with the sentence they close (re.split would drop them, leaving a quoted sentence unbalanced and merged with the next).
+    lang.abbrev, when set, names a ending that does not end a sentence."""
     text = lang.norm(page)
-    if lang.abbrev is None:
-        pieces = [p.strip() for p in lang.split_re.split(text) if p.strip()]
-    else:
-        pieces, start = [], 0
-        for m in lang.split_re.finditer(text):
-            if lang.abbrev.search(text[start:m.start()]):
-                continue
-            pieces.append(text[start:m.end()].strip())
-            start = m.end()
-        tail = text[start:].strip()
-        if tail:
-            pieces.append(tail)
-    return _merge_unbalanced(pieces)
+    pieces, start = [], 0
+    for m in _boundary(lang).finditer(text):
+        if lang.abbrev is not None and lang.abbrev.search(text[start:m.start()]):
+            continue
+        pieces.append(text[start:m.end()].strip())
+        start = m.end()
+    tail = text[start:].strip()
+    if tail:
+        pieces.append(tail)
+    return _merge_unbalanced([p for p in pieces if p])
 
 
 def split_en(page):
