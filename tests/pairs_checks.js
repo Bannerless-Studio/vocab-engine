@@ -18,6 +18,10 @@ const cp = require("child_process");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
+// ja-stall: the held typed asks of the level being completed (core.js PAIR_HELD) are engine default; controls against older engines run the current engine with share 0.
+const HELD0 = VC.PAIR_HELD.share;
+const heldOffSync = fn => { VC.PAIR_HELD.share = 0; try { return fn(); } finally { VC.PAIR_HELD.share = HELD0; } };
+const heldOff = async fn => { VC.PAIR_HELD.share = 0; try { return await fn(); } finally { VC.PAIR_HELD.share = HELD0; } };
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "3901e2e"; // main before pairs
 const PY = process.env.PYTHON3 || "python3";
@@ -424,8 +428,8 @@ const pairOfItem = it => it.word ? (it.kind === "type" ? it.pair : VC.PAIR_OF_KI
         const z = zrec(seed, nw);
         for(const o of [planOpts(seed), planOpts(seed, { script: [], size: 20 })]){
           tot += 2;
-          if(JSON.stringify(VC.buildReviewPlan(z.lw, z.p, PACK, Object.assign({}, o, { rng: mulberry32(seed) }))) === JSON.stringify(OLD3.buildReviewPlan(z.lw, z.p, withCollapsed(PACK), Object.assign({}, o, { rng: mulberry32(seed) })))) same++;
-          if(JSON.stringify(VC.buildRecallPlan(z.lw, z.p, PACK, 8, Object.assign({}, o, { rng: mulberry32(seed) }))) === JSON.stringify(OLD3.buildRecallPlan(z.lw, z.p, withCollapsed(PACK), 8, Object.assign({}, o, { rng: mulberry32(seed) })))) same++;
+          if(JSON.stringify(heldOffSync(() => VC.buildReviewPlan(z.lw, z.p, PACK, Object.assign({}, o, { rng: mulberry32(seed) })))) === JSON.stringify(OLD3.buildReviewPlan(z.lw, z.p, withCollapsed(PACK), Object.assign({}, o, { rng: mulberry32(seed) })))) same++;
+          if(JSON.stringify(heldOffSync(() => VC.buildRecallPlan(z.lw, z.p, PACK, 8, Object.assign({}, o, { rng: mulberry32(seed) })))) === JSON.stringify(OLD3.buildRecallPlan(z.lw, z.p, withCollapsed(PACK), 8, Object.assign({}, o, { rng: mulberry32(seed) })))) same++;
         }
       }
       check(`zh (pairs on, no script): Review + Recall plans byte-identical to ${E3} on 3 seeded records (${same}/${tot})`, same === tot);

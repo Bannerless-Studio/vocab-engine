@@ -170,6 +170,7 @@ return {
   }
   function answer(api, right){
     const it = api.getCur();
+    if(stats.log) stats.log.push([String(it.key || ""), it.kind, right ? 1 : 0]);
     if(it.kind === "type"){
       stats.typedAsked++;
       const t = right ? typedAnswer(it) : null;

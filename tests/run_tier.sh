@@ -52,6 +52,7 @@ pairs_checks||pairs
 freq_tiers_checks||pairs
 patterns_checks||pairs,patterns
 bare_pair_checks||pairs
+held_level_checks||pairs
 pause_checks||-
 level_gate_checks||pairs
 opts_mix_checks||options
