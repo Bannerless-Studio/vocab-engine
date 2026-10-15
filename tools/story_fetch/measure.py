@@ -16,6 +16,7 @@ from packbuilder.langs import ur  # noqa: E402  (ur only)
 LANG = {  # token regex, sentence split, split-into-known-pieces flag
     'ur': (re.compile(r'[؀-ۿ]+'), re.compile(r'(?<=[۔؟!?])\s+|\n+'), False),
     'ko': (re.compile(r'[가-힣]+'), re.compile(r'(?<=[.?!。])\s+|\n+'), True),
+    'hi': (re.compile(r'[\u0900-\u0963\u0966-\u097f]+'), re.compile(r'(?<=[।?!.])\s+|\n+'), False),  # Devanagari incl. matras, danda splits
     'sw': (re.compile(r"[a-z]+(?:'[a-z]+)*"), re.compile(r'(?<=[.?!])\s+|\n+'), False),
 }
 TOK, END, SPLIT = LANG['ur']

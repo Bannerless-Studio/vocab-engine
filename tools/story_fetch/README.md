@@ -63,3 +63,6 @@ The default run drops a book when its English twin has a different number of tex
 ## Indonesian rows (langs/id.py story_rows, packbuilder/id_story.py)
 Filters and counts per run are in the build stats (`story_rows`) and `tools/README.md` of the indonesian site.
 
+
+## Global Digital Library (gdl_fetch.py), measured 2026-10-15, Hindi
+`python3 -I tools/story_fetch/gdl_fetch.py --term 1719 --code hi --site ../hindi --out hi-gdl --twin title [--resume]` (ko: `--term 1862 --twin slug`). Licence read from the book's own credit page, fail closed (CC BY 4.0, BY-SA 4.0, CC0 only); statuses ok / twin_null / licence_rejected / scripture / no_text. `--twin title`: StoryWeaver "Based on Original story: ' X '" from the credit page matched on normalised title against the GDL English list (`list-en.json`, 2622 books). The epub generator returns the WRONG book for some older English ids (2412 -> a Bhojpuri reader); output is checked against expected language/title and else the stored epub (`customMeta.epub`, `content/chapter-N.xhtml`) is parsed. `measure.py --lang hi` uses a Devanagari token regex and danda splits.
