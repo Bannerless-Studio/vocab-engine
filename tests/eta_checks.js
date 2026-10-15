@@ -385,9 +385,9 @@ async function packMode(){
   for(const seed of seeds){
     const t0 = Date.now(), rows = [];
     await S.playSessions(P, start(), N, seed, ACC, (sn, api) => { const q = api.getProg();
-      rows.push({ sn: sn + 1, g: VC.goalPositions(q, P, D.WORDS, units, pass), k: Object.fromEntries(LVS.map(lv => [lv, VC.levelKnownPct(D.WORDS, P, q, lv, units)])), gate: VC.levelGateHold(D.WORDS, P, q, units) }); }, { read: true, patterns: false });
+      rows.push({ sn: sn + 1, b: (() => { const rc = VC.charRecs(q), us = units.filter(u => rc[u.id]); return [us.length, us.filter(u => VC.charTier(rc[u.id].s, P) === "bare" || VC.pairBare(rc[u.id], u, q, P)).length]; })(), g: VC.goalPositions(q, P, D.WORDS, units, pass), k: Object.fromEntries(LVS.map(lv => [lv, VC.levelKnownPct(D.WORDS, P, q, lv, units)])), gate: VC.levelGateHold(D.WORDS, P, q, units) }); }, { read: true, patterns: false });
     const tr = goals.map((_, g) => rows.map(r => r.g[g])), holds = EC.holdsOf(rows, VC.LEVEL_GATE);
-    runs.push({ seed, tr, holds, secs: Math.round((Date.now() - t0) / 1000) });
+    runs.push({ seed, tr, holds, bare: rows.map(r => r.b), secs: Math.round((Date.now() - t0) / 1000) });
     console.log(`seed ${seed} (${runs[runs.length - 1].secs} s): goals from ${rows[0].g.map(x => x.toFixed(3)).join("/")} reach ${VC.GOAL_DONE} after ${tr.map(t => { const c = EC.crossOf(t); return c === null ? `>${N}` : c; }).join("/")} sessions; holds ${holds.map(h => `from ${(h[0] * 100).toFixed(1)}% open after ${h.length - 1}`).join(", ") || "none"}; typed asks answered right as intended ${S.stats.typedMatched}/${S.stats.typedRight}`);
   }
   // --calibrate measures the curves on its seeds; --gate checks the pack's own eta (a legacy {gain, known} as a straight line)
@@ -413,6 +413,7 @@ async function packMode(){
   verdicts.forEach(v => { console.log(v.ok === null ? `GATE  ${v.what}: no estimate (${calibrateMode ? "fewer than 2 seeds reached it / no hold" : "pack.eta null"})` : `GATE  ${v.what}: ${v.ok ? (v.tail ? "PASS (tail rule)" : "PASS") : calibrateMode ? "FAIL (written null: no estimate shown)" : "FAIL"} within +-${EC.TOL * 100}%; curve ${fmtC(v.curve)}`);
     (v.probes || []).forEach(p => console.log(`        at ${p.q}: ${p.ok ? "pass" : p.tail ? "tail" : "fail"} ${p.per.map(x => x.note).join(" | ")}`)); (v.per || []).forEach(x => console.log(`        ${x.note}`)); });
   console.log(`result: ${JSON.stringify(out)}; wall ${Math.round((Date.now() - t00) / 1000)} s`);
+  if(arg("--rows")) fs.writeFileSync(arg("--rows"), JSON.stringify(runs.map(r => ({ seed: r.seed, tr: r.tr, bare: r.bare }))));
   if(arg("--write")){ fs.writeFileSync(arg("--write"), JSON.stringify(out) + "\n"); console.log(`wrote ${arg("--write")}`); }
   if(!calibrateMode && verdicts.some(v => v.ok === false)) process.exitCode = 1;
 }

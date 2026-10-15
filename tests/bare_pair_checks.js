@@ -437,6 +437,26 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
     }
   }
 
+  console.log("\n[9] japanese pack (mastered 3, bare 6, bareByPair): a known word's kanji unit goes bare");
+  {
+    const JA = path.join(ROOT, "..", "japanese", "pack");
+    if(!fs.existsSync(path.join(JA, "pack.js"))) skip("../japanese/pack missing");
+    else {
+      const JP = loadConst(path.join(JA, "pack.js"), "PACK"), JC = loadConst(path.join(JA, "characters.js"), "CHARACTERS");
+      const u = JC[0], wid = u.words[0], cfg = JP.characters;
+      const mk = (us, ws, extra) => { const p = VC.normalizeProg({ placedOnce: true, sessions: 30 }, JP); p.sn = 30; p.chars = Object.assign(p.chars || {}, { choiceSeen: true, c: { [u.id]: { r: 5, w: 0, s: us } } }); p.w[wid] = Object.assign({ r: 8, w: 0, s: ws }, extra || {}); return p; };
+      const pb = p => VC.pairBare(p.chars.c[u.id], u, p, JP);
+      check(`ja config: bareByPair on, mastered ${cfg.mastered}, bare ${cfg.bare}`, VC.bareByPairOn(JP) && cfg.mastered === 3 && cfg.bare === 6);
+      check("ja: word known (s 6), unit ruby (3, 4, 5): bare without pair streaks", [3, 4, 5].every(s => pb(mk(s, 6))));
+      check("ja: unit at 2 (pron) stays pron; unit at 6 is bare by streak, not pairBare", !pb(mk(2, 6)) && VC.charTier(6, JP) === "bare" && !pb(mk(6, 6)));
+      check("ja: word below bare (5) or with a recent wrong (s 0) keeps the reading", !pb(mk(3, 5)) && !pb(mk(3, 0, { w: 1 })));
+      check("ja: known word but its ws pair missed last: reading stays", !pb(mk(3, 6, { p: { ws: [0, 30] } })));
+      check("ja: pair path unchanged (word 4, wm and ws at 2 on the unit)", (() => { const p = mk(3, 4); p.chars.c[u.id].p = { wm: [2, 9], ws: [2, 9] }; return pb(p); })());
+      const w = JP && loadConst(path.join(JA, "words.js"), "WORDS").find(x => x.id === wid), p = mk(3, 6);
+      check("ja: bareWord true for the known word's unit, false with the word at 5", VC.bareWord(w, JC, p, JP) && !VC.bareWord(w, JC, mk(3, 5), JP));
+    }
+  }
+
   console.log(`\n${passes} passed, ${fails} failed, ${skips} skipped`);
   process.exit(fails ? 1 : 0);
 })();
