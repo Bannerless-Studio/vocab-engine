@@ -32,7 +32,8 @@ import json
 import os
 import re
 
-from .base import (make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN,
+from .. import ar_story
+from .base import (STORY_SID_BASE, make_lower_level_gloss_re, LOWER_LEVEL_DRUGS_EN, LanguageSpec, TATOEBA_ENG, TATOEBA_AUDIO, DEFAULT_GROUP_KPOS, SENSITIVE_EN,
                    SENSITIVE_GLOSS_EN, drop_all_re)
 
 LET = "ء-غف-يٱ"          # hamza .. ghain, feh .. yeh, alef wasla
@@ -2373,6 +2374,194 @@ class Arabic(LanguageSpec):
         if g == "إ":
             return g + "\u0650"        # hamza below carries i: إِ, not إَ
         return g if g in "اويىآ" else g + "\u064e"
+
+
+    # ---- stories: African Storybook + Bloom Library ------------------------------------------
+    keep_live_sentences = True          # story rows only add; every live sentence id stays (republish guard)
+    live_ranks_first = False            # live priority moved words of the shipped list (as sw): kept live sentences are only added back
+    examples_per_word = 4               # picks 3-4 are story sentences only (story_rows)
+    min_story_tokens = 3                # pro-drop: an Arabic clause of three words is complete
+    STORY_URL = "https://www.africanstorybook.org/"
+    BLOOM_LICENCES = {"cc-by": "CC-BY-4.0", "cc-by-sa": "CC-BY-SA-4.0", "cc0": "CC0-1.0"}
+
+    def _stories(self, env):
+        """Cached African Storybook Arabic books (.cache/stories/ar-asb, asb_fetch.py) and Bloom Library Arabic books
+        (.cache/stories/ar-bloom, bloom_fetch.py) with an English twin, by book id; a second book with the same
+        English title is the same story and is skipped. Each story gets `_licence` (the book's own)."""
+        cache = getattr(self, "_story_cache", None)
+        if cache is not None and cache[0] == env.repo:
+            return cache[1]
+        out, titles = {}, set()
+        base = env.repo / ".cache" / "stories"
+        d = base / "ar-asb"
+        for f in sorted(d.glob("[0-9]*.json"), key=lambda f: int(f.stem)) if d.is_dir() else []:
+            st = json.loads(f.read_text(encoding="utf-8"))
+            tw = st.get("twin")
+            if st.get("status") != "ok" or not tw or st.get("licence_line") != "Attribution 4.0" \
+                    or tw.get("licence_line") != "Attribution 4.0":
+                continue
+            k = ar_story.A.title_key(tw["title"])
+            if k in titles:
+                continue
+            titles.add(k)
+            out[st["id"]] = dict(st, _licence="CC-BY-4.0")
+        d = base / "ar-bloom"
+        for f in sorted(d.glob("*.json")) if d.is_dir() else []:
+            if f.name in ("manifest.json", "list.json", "run-stats.json"):
+                continue
+            st = json.loads(f.read_text(encoding="utf-8"))
+            tw = st.get("twin")
+            lic = self.BLOOM_LICENCES.get(st.get("licence"))
+            if st.get("status") != "ok" or not tw or not lic or tw.get("licence") != st.get("licence") \
+                    or (st["licence"] != "cc0" and st.get("licence_version") != "4.0"):
+                continue
+            k = ar_story.A.title_key(tw["title"] if not tw.get("same_book") else (st.get("all_titles") or {}).get("en") or tw["title"])
+            if k in titles:
+                continue
+            titles.add(k)
+            out[st["id"]] = dict(st, _licence=lic)
+        self._story_cache = (env.repo, out)
+        return out
+
+    def bad_sentence_norm(self, s):
+        return " ".join(ar_story.norm_ar(self.clean_sentence_text(s)).split())
+
+    def story_rows(self, env):
+        from ..core.util import stat
+        stories = self._stories(env)
+        seen = set()
+        live = env.repo / "pack" / "sentences.json"
+        if live.exists():
+            seen.update(s["t"] for s in json.loads(live.read_text(encoding="utf-8")) if s.get("src") != "story")   # a shipped story sentence must stay offered on the next build
+        stats = ar_story.A.Stats()
+        checks = self._story_checks(env)
+        en_lower = {w for st in stories.values() for p in st["twin"]["text_pages"]
+                    for w in re.findall(r"(?<![A-Za-z])[a-z]+(?![A-Za-z])", ar_story.A.norm_en(p["text"])) if w}
+        self._story_en_lower = en_lower
+        rows = []
+        for sid_, st in stories.items():
+            for u, e, page in ar_story.story_pairs(st, self.word_re, lambda t: self.clean_sentence_text(t), seen, stats,
+                                                    self.min_story_tokens, self.max_len, None, en_lower, checks):
+                rows.append([STORY_SID_BASE + len(rows), u, "", e, None, sid_])
+        stat("story_rows", {"stories_read": len(stories), "rows": len(rows), "filters": dict(stats)})
+        return rows
+
+    _story_en_lower = frozenset()
+    _STORY_PREFIXES = ("وال", "فال", "بال", "كال", "لل", "ولل", "ال", "و", "ف", "ب", "ل", "ك", "وب", "ول", "فب", "فل")
+    _STORY_SUFFIXES = ("ها", "هم", "هن", "هما", "كم", "كن", "نا", "ني", "ك", "ه", "ي", "ات", "ان", "ون", "ين", "ة", "ا")
+
+    def _story_keys(self, tok):
+        """Lookup keys of an Arabic token: itself, minus one conjunction / preposition / article prefix, minus one clitic or
+        plural suffix. Pack words only, no inflection model, so everything built on it is a lower bound."""
+        t = lfold(tok)
+        out = [t]
+        for pre in self._STORY_PREFIXES:
+            if t.startswith(pre) and len(t) - len(pre) >= 2:
+                out.append(t[len(pre):])
+        for suf in self._STORY_SUFFIXES:
+            for b in list(out):
+                if b.endswith(suf) and len(b) - len(suf) >= 2:
+                    out.append(b[:-len(suf)])
+        return out
+
+    def _story_checks(self, env):
+        """Pack-based checks for ar_story.story_pairs: nouns (the opener rule), the transliteration rename check and the
+        page-level gloss agreement (story_rate, agree_pair). Pack words only, so the rates are lower bounds; no sentence-level wrong_sense."""
+        sp = self
+        gloss_stems = ar_story.A.gloss_stems
+        nouns, stems = set(), {}
+        wp = env.repo / "pack" / "words.json"
+        if wp.exists():
+            for w in json.loads(wp.read_text(encoding="utf-8")):
+                if w["pos"] not in ("noun", "verb", "adj", "adv"):
+                    continue
+                for k in {lfold(w["w"]), lfold(w["lemma"])} | {lfold(a) for a in (w.get("alt") or [])}:
+                    if w["pos"] == "noun":
+                        nouns.add(k)
+                    stems.setdefault(k, set()).update(gloss_stems(w["en"]))
+
+        def keys(tok):
+            return sp._story_keys(tok)
+
+        def tokens(u):
+            return sp.word_re.findall(ar_story.norm_ar(u))
+
+        class Checks:
+            @staticmethod
+            def noun(tok):
+                return any(k in nouns for k in keys(tok))
+
+            @staticmethod
+            def wrong_sense(toks, en):
+                return False
+
+            @staticmethod
+            def renamed(u, en):
+                """An English character name of the sentence that no Arabic token spells (transliteration, consonant
+                skeleton) and no pack gloss translates (Rhino -> وحيد القرن): the edition renamed the character."""
+                toks = tokens(u)
+                for name in ar_story.english_names(en, sp._story_en_lower):
+                    if any(_translit_ok(k, name) for t in toks for k in keys(t)):
+                        continue
+                    ns = gloss_stems(name)
+                    if ns and any(stems.get(k, frozenset()) & ns for t in toks for k in keys(t)):
+                        continue
+                    return True
+                return False
+
+            @staticmethod
+            def agree_pair(u, en):
+                """True when no word of the sentence has a pack gloss, or one gloss stem shows up in the English."""
+                gl = [stems[k] for t in tokens(u) for k in keys(t) if k in stems]
+                return not gl or any(g & gloss_stems(ar_story.A.norm_en(en)) for g in gl)
+
+            @staticmethod
+            def story_rate(pairs):
+                """Share of pages where some word's gloss shows up in the English page; None under 3 comparable pages."""
+                got = hit = 0
+                for u, e in pairs:
+                    gl = [stems[k] for t in tokens(u) for k in keys(t) if k in stems]
+                    if not gl:
+                        continue
+                    got += 1
+                    es = gloss_stems(ar_story.A.norm_en(e))
+                    hit += any(g & es for g in gl)
+                return hit / got if got >= 3 else None
+        return Checks
+
+    def story_source(self):
+        return {"source": "African Storybook Initiative, Arabic books with their English edition (Bloom Library Arabic books qualify the same way and carry their own licence entry)",
+                "licence": "CC-BY-4.0 (each book's own licence is in its entry)",
+                "url": self.STORY_URL,
+                "note": "Sentences are split out of the book text, Arabic and English realigned sentence by sentence; typographic quotes became "
+                        "plain, vowel marks (harakat) and tatweel were removed, and a page-final stop missing in the Arabic was added from the "
+                        "English page. Dialect-only wording was dropped."}
+
+    def story_meta(self, env, story_id):
+        """The book's credits: ASb back cover author / translation / illustration lines and copyright holder; for a Bloom
+        book its copyright, original publisher, illustrators and contribution text."""
+        st = self._stories(env)[story_id]
+        tw = st["twin"]
+        meta = {"id": story_id, "title": st["title"], "english_title": tw["title"] if st.get("source") != "bloom" else (st.get("all_titles") or {}).get("en", tw["title"]),
+                "licence": st["_licence"], "url": st["url"], "english_url": tw.get("url") or st["url"]}
+        if st.get("source") == "bloom":
+            meta["source"] = "Bloom Library"
+            meta["copyright"] = st.get("copyright") or ""
+            meta["original_publisher"] = st.get("original_publisher") or ""
+            meta["illustrators"] = ar_story.names_of(st.get("illustrators"))
+            contrib = ((st.get("html_fields") or {}).get("originalContributions") or {}).get("en") or ""
+            meta["contributions"] = [ln.strip() for ln in contrib.split("\n") if ln.strip()]
+        else:
+            meta["source"] = "African Storybook"
+            meta.update({"authors": ar_story.names_of(st.get("authors")), "translators": ar_story.names_of(st.get("translators")),
+                         "illustrators": ar_story.names_of(st.get("illustrators")), "copyright_holder": ar_story.holder(st.get("copyright_block"))})
+            if st.get("adapters"):
+                meta["adapters"] = ar_story.names_of(st["adapters"])
+        return meta
+
+    def story_credit(self):
+        return {"name": "African Storybook stories (African Storybook Initiative, authors, translators and illustrators named in the pack's attribution)",
+                "licence": "CC BY 4.0", "url": self.STORY_URL}
 
 
 DOUBLE_FINAL = {"stop", "sit", "run", "get", "put", "cut", "swim", "shop", "plan", "hit", "set", "let", "win",
