@@ -205,11 +205,19 @@ async function playSessions(pack, seedP, sessions, seed, acc, onSession, opts){
 }
 const SIM = clone(PACK); // the planner sims run on a copy of the pack
 const LV = VC.levelIds(PACK), BYLV = VC.wordsByLevel(WORDS, PACK), GOALS = VC.progressMapGoals(PACK);
+// Diagnostic (pinyin-bare): taught units, how many show bare (streak or pairBare), and passage-sentence tokens bare.
+function bareShare(q){
+  const recs = VC.charRecs(q), us = CHARACTERS.filter(u => recs[u.id]), st = VC.charsStarted(PACK, WORDS, CHARACTERS, q, []);
+  const bare = us.filter(u => VC.charTier(recs[u.id].s, PACK) === "bare" || VC.pairBare(recs[u.id], u, q, PACK)).length;
+  let tok = 0, tb = 0;
+  PASSAGES.forEach(p => p.sentences.forEach(sn => { const t = VC.rubyTiers(sn, CHARACTERS, q, PACK, st) || []; tok += t.length; tb += t.filter(x => x.tier === "bare").length; }));
+  return [us.length, bare, tok, tb];
+}
 // Per session: every goal's position and every level's known share (passages counted as in the app; the sim skips reading).
 async function trace(start, n, seed, acc, opts){
   const rows = [];
   await playSessions(SIM, start, n, seed, acc, (sn, api) => { const q = api.getProg();
-    rows.push({ sn: sn + 1, prov: Object.fromEntries(LV.map(lv => [lv, BYLV[lv].filter(w => q.w[w.id] && q.w[w.id].prov).length])), g: VC.goalPositions(q, PACK, WORDS, CHARACTERS, PASSAGES), k: LV.map(lv => VC.levelKnownPct(WORDS, PACK, q, lv, CHARACTERS)), cg: (VC.currentGoal(q, PACK, WORDS, CHARACTERS, PASSAGES) || {}).i, pm: clone(q.pm || []), gate: VC.levelGateHold(WORDS, PACK, q, CHARACTERS), parts: GOALS.map((_, g) => parts(q, g)) }); }, opts);
+    rows.push({ sn: sn + 1, b: bareShare(q), prov: Object.fromEntries(LV.map(lv => [lv, BYLV[lv].filter(w => q.w[w.id] && q.w[w.id].prov).length])), g: VC.goalPositions(q, PACK, WORDS, CHARACTERS, PASSAGES), k: LV.map(lv => VC.levelKnownPct(WORDS, PACK, q, lv, CHARACTERS)), cg: (VC.currentGoal(q, PACK, WORDS, CHARACTERS, PASSAGES) || {}).i, pm: clone(q.pm || []), gate: VC.levelGateHold(WORDS, PACK, q, CHARACTERS), parts: GOALS.map((_, g) => parts(q, g)) }); }, opts);
   return rows;
 }
 // Goal g's three parts (core.js goalPosition): known words, units past pron, passages with a listening pass.
@@ -256,7 +264,7 @@ async function traceMode(){
   const i = argv.indexOf("--trace"), [who, seed, N, out] = argv.slice(i + 1, i + 5);
   const st0 = who === "owner" ? ownerStart() : who.startsWith("placed") ? placedStart(+who.slice(6)) : freshStart(); delete st0.pm;
   const rows = await trace(st0, +N, +seed, 0.85, { passages: PASSAGES, patterns: true, read: true });
-  fs.writeFileSync(out, JSON.stringify(rows.map(r => ({ sn: r.sn, g: r.g, k: Object.fromEntries(LV.map((lv, j) => [lv, r.k[j]])), gate: r.gate ? { lv: r.gate.lv, prev: r.gate.prev } : null, prov: r.prov }))));
+  fs.writeFileSync(out, JSON.stringify(rows.map(r => ({ sn: r.sn, g: r.g, b: r.b, k: Object.fromEntries(LV.map((lv, j) => [lv, r.k[j]])), gate: r.gate ? { lv: r.gate.lv, prev: r.gate.prev } : null, prov: r.prov }))));
 }
 // --trace-dir <dir> keeps each run's rows there and reuses a run already saved (same record, seed and session count).
 function runTraces(jobs){
