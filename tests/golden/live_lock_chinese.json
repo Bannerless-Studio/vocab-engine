@@ -968,7 +968,7 @@
     {
      "key": "c:c0121",
      "kind": "mc",
-     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0121\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\">现在</span><span class=\"rp\"><span class=\"t4\">xiàn</span><span class=\"t4\">zài</span></span><span class=\"rg\">now <span class=\"gx\">(at present)</span></span></div></div><div class=\"ucue\" aria-label=\"字 2/5\"><span data-tl lang=\"zh\">字</span> ●●○○○</div><div><span class=\"chint\"><span><span class=\"hc\" data-tl lang=\"zh\">现</span> now: to see <span data-tl lang=\"zh\">见</span> jade <span data-tl lang=\"zh\">王</span></span><span><span class=\"hc\" data-tl lang=\"zh\">在</span> at</span></span></div>"
+     "html": "<div class=\"rvrow\"><div class=\"rvm\" data-wid=\"w0121\" style=\"cursor:pointer\"><span class=\"rw\" data-tl lang=\"zh\">现在</span><span class=\"rp\"><span class=\"t4\">xiàn</span><span class=\"t4\">zài</span></span><span class=\"rg\">now <span class=\"gx\">(at present)</span></span></div></div><div class=\"ucue\" aria-label=\"字 2/5\"><span data-tl lang=\"zh\">字</span> ●●○○○</div><div><span class=\"chint\"><span><span class=\"hc\" data-tl lang=\"zh\">现</span> now: to see <span data-tl lang=\"zh\">见</span> jade <span data-tl lang=\"zh\">王</span></span><span><span class=\"hc\" data-tl lang=\"zh\">在</span> at</span><span><span class=\"hc\" data-tl lang=\"zh\">现在</span> appear + exist = now</span></span></div>"
     },
     {
      "key": "c:c0072",
