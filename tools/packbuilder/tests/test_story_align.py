@@ -135,3 +135,38 @@ class KeepLive(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SplitKeepsClosers(unittest.TestCase):
+    """A closing quote or bracket after a stop stays with the sentence it closes (Latin, Arabic-script, Devanagari; with and without abbrev)."""
+
+    def langs(self):
+        import re as _re
+        from packbuilder import ur_story, sw_story, hi_story
+        return ur_story.UR, sw_story.SW, hi_story.HI, _re
+
+    def check(self, lang, text, want):
+        self.assertEqual(A.split_target(lang, text), want)
+
+    def test_latin_no_abbrev(self):
+        ur, sw, hi, _ = self.langs()
+        self.check(sw, 'Alisema, "Njoo hapa." Kisha akaondoka.', ['Alisema, "Njoo hapa."', 'Kisha akaondoka.'])
+        self.check(sw, 'Alikula (mkate mwingi.) Kisha akalala.', ['Alikula (mkate mwingi.)', 'Kisha akalala.'])
+
+    def test_arabic_script_no_abbrev(self):
+        ur = self.langs()[0]
+        self.check(ur, 'اس نے کہا، "یہاں آؤ۔" پھر وہ چلا گیا۔', ['اس نے کہا، "یہاں آؤ۔"', 'پھر وہ چلا گیا۔'])
+
+    def test_devanagari_with_and_without_abbrev(self):
+        hi = self.langs()[2]
+        self.check(hi, 'उसने कहा, "यहाँ आओ।" फिर वह चला गया।', ['उसने कहा, "यहाँ आओ।"', 'फिर वह चला गया।'])
+        self.check(hi, 'डॉ. राम आए। उसने कहा, "चलो।" सब गए।', ['डॉ. राम आए।', 'उसने कहा, "चलो।"', 'सब गए।'])
+        import dataclasses
+        noabbrev = dataclasses.replace(hi, abbrev=None)
+        self.check(noabbrev, 'उसने कहा, "यहाँ आओ।" फिर वह चला गया।', ['उसने कहा, "यहाँ आओ।"', 'फिर वह चला गया।'])
+
+    def test_abbrev_still_blocks(self):
+        import dataclasses, re
+        sw = self.langs()[1]
+        ab = dataclasses.replace(sw, abbrev=re.compile(r"\bDr\.$"))
+        self.check(ab, 'Dr. Juma alikuja. "Habari." Sawa.', ['Dr. Juma alikuja.', '"Habari."', 'Sawa.'])
