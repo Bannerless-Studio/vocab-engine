@@ -19,6 +19,9 @@ parts     [[component, gloss-or-null]] from KRADFILE in its order, the kanji its
           primitive has none) and non-CJK strokes (｜) left out; gloss is the first KANJIDIC2
           gloss of the component when it has one, else null.
 
+tools/ja_hint_compounds.json is hand data, not generated: a `hook` per multi-kanji unit and breakdowns for kanji lines
+that would otherwise be a meaning alone (kanji-aids merges it, see core/kanji_aids.py); this script only checks it.
+
 Usage: python3 tools/ja_hints.py [JA_REPO_DIR] [--fetch]   (default ../japanese)
 """
 import gzip
@@ -38,6 +41,8 @@ KANJIDIC_PATH = os.path.join(CACHE, "kanjidic2.xml.gz")
 KRADZIP_PATH = os.path.join(CACHE, "kradzip.zip")
 OUT = os.path.join(ROOT, "tools", "ja_hints.json")
 OVERRIDES = os.path.join(ROOT, "tools", "ja_hints_overrides.json")
+COMPOUNDS = os.path.join(ROOT, "tools", "ja_hint_compounds.json")
+MAX_WORDS = 12
 KANJI_RE = re.compile("[㐀-䶿一-鿿豈-﫿々]")
 KANA_RE = re.compile("[ぁ-ゖァ-ヺー]")
 MEANINGS_PER_KANJI = 2
@@ -97,6 +102,30 @@ def load_overrides(path=OVERRIDES):
     return meanings
 
 
+def load_compounds(units, kanji, path=COMPOUNDS):
+    """Checks tools/ja_hint_compounds.json against the pack's units and returns it. "hooks": multi-kanji unit text -> a
+    line of at most MAX_WORDS words; "parts": bare kanji (a kanji of some unit) or "unit:kanji" -> true or a breakdown
+    of at most MAX_WORDS words; "levels": the unit levels the bare keys apply to. kanji-aids fails on the rest."""
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    by_t = {u["t"]: u for u in units}
+    words_of = lambda s: len(s.split())
+    for k, v in data.get("hooks", {}).items():
+        if k not in by_t or sum(1 for c in k if KANJI_RE.match(c)) < 2:
+            raise SystemExit(f"ja_hints: compounds hook {k}: not a unit with two or more kanji")
+        if not isinstance(v, str) or not v.strip() or words_of(v) > MAX_WORDS:
+            raise SystemExit(f"ja_hints: compounds hook {k}: needs a line of at most {MAX_WORDS} words")
+    for k, v in data.get("parts", {}).items():
+        unit, _, c = k.rpartition(":") if ":" in k else ("", "", k)
+        if len(c) != 1 or c not in kanji or (unit and (unit not in by_t or c not in unit)):
+            raise SystemExit(f"ja_hints: compounds parts {k}: key must be a kanji or unit:kanji of the pack")
+        if not (v is True or (isinstance(v, str) and v.strip() and words_of(v) <= MAX_WORDS)):
+            raise SystemExit(f"ja_hints: compounds parts {k}: true or a breakdown of at most {MAX_WORDS} words")
+    return data
+
+
 def gloss_of(glosses):
     """The learner gloss of a list of KANJIDIC2 glosses: radical notes dropped, "radical" removed."""
     kept = [g for g in glosses if not RADICAL_NOTE.search(g)] or glosses
@@ -137,11 +166,14 @@ def main(argv):
     table = build(kanji, load_kanjidic(), load_kradfile(), load_overrides())
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(json.dumps(dict(sorted(table.items())), ensure_ascii=False, indent=1) + "\n")
+    chars = os.path.join(ja, "pack", "characters.json")
+    comp = load_compounds(json.load(open(chars, encoding="utf-8")) if os.path.exists(chars) else [], set(kanji))
     no_meaning = [c for c, e in table.items() if not e["meaning"]]
     no_parts = [c for c, e in table.items() if e["meaning"] and not e["parts"]]
     print(f"distinct kanji {len(table)}: meaning {len(table) - len(no_meaning)}, "
           f"with parts {len(table) - len(no_parts) - len(no_meaning)}, meaning only {len(no_parts)} "
-          f"{''.join(no_parts)}, no meaning {len(no_meaning)} {''.join(no_meaning)}")
+          f"{''.join(no_parts)}, no meaning {len(no_meaning)} {''.join(no_meaning)}; "
+          f"compound hooks {len(comp.get('hooks', {}))}, breakdowns {len(comp.get('parts', {}))}")
     return 0
 
 

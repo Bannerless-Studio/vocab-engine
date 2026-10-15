@@ -17,6 +17,9 @@ tools/ja_furigana.py; no network) and writes:
     is a hook "<story>: <meaning>": it is the whole hint of the one-character unit, the story of a
     one-kanji unit with okurigana (its meaning stays the English), and the parts of that kanji in other
     units that have no one-character unit.
+  * characters.json `hook` on a unit of two or more characters, and a breakdown forced onto a kanji line though
+    the kanji has its own (later) unit: hand data tools/ja_hint_compounds.json {hooks, parts}, checked by
+    tools/ja_hints.py. A mnemonic that is not etymology starts with "think:".
   * words.json `ruby` on every kanji word: [[start, end, reading]] in UTF-16 units of `w`
     (tools/ja_furigana.json, keyed by word id; the headword must match).
   * attribution.json "kanji_dictionary" and "word_furigana" (EDRDG, CC BY-SA 4.0), and pack.json
@@ -100,8 +103,15 @@ def _split_hook(hook):
     return story, tail
 
 
-def attach_hints(units, table, meanings, overrides, words=None):
+def attach_hints(units, table, meanings, overrides, words=None, compounds=None):
     """Sets each unit's `hint` (see the module docstring). Returns the number of kanji lines written.
+    `compounds` is tools/ja_hint_compounds.json: "hooks" (unit text -> `hook`, one line about the whole word, on a
+    unit of two or more characters), "levels" (the unit levels hooks and bare "parts" apply to) and "parts": "unit:kanji" ->
+    breakdown for that kanji's line in that unit (a string, or true for the table breakdown / hook story); a bare
+    "kanji" key -> breakdown for that kanji's line in every unit of those levels, unless the kanji's own
+    one-character unit comes earlier in the file (its card has taught it; the line stays the meaning alone).
+    Used for a kanji whose own unit is later or absent and has no table breakdown. A key that matches no unit
+    or line, a kanji not in its unit, or a true without a table breakdown, fails the run.
     Meaning of a kanji in a unit: meanings["<t>:<kanji>"], else the kanji's fixed (bare) override, else the
     KANJIDIC gloss found in the unit's English, else the first gloss; a one-kanji unit with okurigana reads
     as its English. A unit whose t starts with 〜 gets " (suffix)" when it has no per-word override."""
@@ -116,10 +126,33 @@ def attach_hints(units, table, meanings, overrides, words=None):
     unused = sorted(k for k in overrides if k not in kanji)
     if unused:
         raise SystemExit(f"kanji-aids: hook keys match no kanji of any unit: {unused[:10]}")
+    compounds = compounds or {}
+    hooks, parts_all = compounds.get("hooks", {}), compounds.get("parts", {})
+    levels = set(compounds.get("levels", []))
+    forced = {k: v for k, v in parts_all.items() if ":" in k}
+    bare = {k: v for k, v in parts_all.items() if ":" not in k}
+    multi = {u["t"] for u in units if len(u["t"]) > 1}
+    bad = sorted(k for k in hooks if k not in multi) + sorted(
+        k for k in forced if k.partition(":")[0] not in multi
+        or k.partition(":")[2] not in k.partition(":")[0] or not KANJI_RE.match(k.partition(":")[2])) + sorted(
+        k for k in bare if len(k) != 1 or not KANJI_RE.match(k))
+    if bare and not levels:
+        raise SystemExit("kanji-aids: ja_hint_compounds.json has bare kanji parts but no levels")
+    if bad:
+        raise SystemExit(f"kanji-aids: ja_hint_compounds.json keys match no multi-character unit: {bad[:10]}")
+    empty = sorted(k for k, v in hooks.items() if not (isinstance(v, str) and v.strip()))
+    empty += sorted(k for k, v in parts_all.items() if not (v is True or (isinstance(v, str) and v.strip())))
+    if empty:
+        raise SystemExit(f"kanji-aids: ja_hint_compounds.json empty or unusable values: {empty[:10]}")
     en_of = {w["id"]: w.get("en") for w in (words or [])}
     single = {u["t"] for u in units if len(u["t"]) == 1}
+    first_single = {}
+    for i, u in enumerate(units):
+        if len(u["t"]) == 1:
+            first_single.setdefault(u["t"], i)
+    used_bare = set()
     n = 0
-    for u in units:
+    for idx, u in enumerate(units):
         t = u["t"]
         ks = _kanji_of(t)
         en = en_of.get(u["words"][0]) if u.get("words") else None
@@ -153,7 +186,15 @@ def attach_hints(units, table, meanings, overrides, words=None):
                 if one and c in overrides:
                     h.append(_join(_split_hook(overrides[c])[0], m))
                     continue
-                if c in single:
+                f = forced.get(f"{t}:{c}")
+                if not f and c in bare and u.get("lv") in levels and first_single.get(c, len(units)) > idx:
+                    f = bare[c]
+                    used_bare.add(c)
+                if f:
+                    b = f if f is not True else (_split_hook(overrides[c])[0] if c in overrides else _breakdown(c, table))
+                    if not b:
+                        raise SystemExit(f"kanji-aids: ja_hint_compounds.json parts {t}:{c} is true but {c} has no breakdown")
+                elif c in single:
                     b = ""
                 elif c in overrides:
                     b = _split_hook(overrides[c])[0]
@@ -165,6 +206,12 @@ def attach_hints(units, table, meanings, overrides, words=None):
             u["hint"] = h
         else:
             u.pop("hint", None)
+        u.pop("hook", None)
+        if len(t) > 1 and t in hooks and (not levels or u.get("lv") in levels):
+            u["hook"] = hooks[t]
+    unused_bare = sorted(set(bare) - used_bare)
+    if unused_bare:
+        raise SystemExit(f"kanji-aids: ja_hint_compounds.json bare parts match no kanji line: {''.join(unused_bare)}")
     return n
 
 
@@ -190,8 +237,8 @@ def _overrides(data):
     return meanings, hints
 
 
-def enrich_data(pack, units, words, pack_attr, table, furigana, meanings, hints):
-    n_hint = attach_hints(units, table, meanings, hints, words)
+def enrich_data(pack, units, words, pack_attr, table, furigana, meanings, hints, compounds=None):
+    n_hint = attach_hints(units, table, meanings, hints, words, compounds)
     n_ruby = attach_ruby(words, furigana)
     attr = dict(pack_attr)
     attr.update(ATTRIBUTION)
@@ -213,8 +260,10 @@ def main(lang, repo, tables=None, check=False, emit=None):
     table = json.loads((tables / "ja_hints.json").read_text(encoding="utf-8"))
     furigana = json.loads((tables / "ja_furigana.json").read_text(encoding="utf-8"))
     meanings, hints = _overrides(json.loads((tables / "ja_hints_overrides.json").read_text(encoding="utf-8")))
+    cpath = tables / "ja_hint_compounds.json"
+    compounds = json.loads(cpath.read_text(encoding="utf-8")) if cpath.exists() else {}
     new_pack, new_units, new_words, new_attr, n_hint, n_ruby = enrich_data(
-        pack, json.loads(json.dumps(units)), json.loads(json.dumps(words)), attr, table, furigana, meanings, hints)
+        pack, json.loads(json.dumps(units)), json.loads(json.dumps(words)), attr, table, furigana, meanings, hints, compounds)
     print(f"kanji-aids: {n_hint} hint lines on {len(new_units)} units, {n_ruby} words with ruby")
     parts = [("pack", "PACK", pack, new_pack), ("words", "WORDS", words, new_words), ("characters", "CHARACTERS", units, new_units)]
     stale = [stem for stem, _, old, new in parts if old != new] + (["attribution"] if attr != new_attr else [])
