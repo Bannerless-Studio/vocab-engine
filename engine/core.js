@@ -3238,12 +3238,14 @@ function unitGloss(unit, byId){ return gloss(unitWord(unit, byId)); }
 // `t` with the same hint (妈妈) or without a hint is listed once or not at all (docs/PACK_SCHEMA.md).
 // The dedupe key is character + hint text (hintKey), so one character in two senses lists twice.
 function hintKey(x){ return x.c + "\u0001" + x.hint; }
+// `hook` (a unit of two or more characters): one line about the whole word, listed last under the whole word as its "character".
 function unitHints(unit){
   const h = unit && unit.hint;
-  if(!Array.isArray(h)) return [];
+  const hook = unit && typeof unit.hook === "string" && unit.hook && [...String(unit.t || "")].length > 1 ? [{ c: String(unit.t), hint: unit.hook }] : [];
+  if(!Array.isArray(h)) return hook;
   const out = [], seen = new Set();
   [...String(unit.t || "")].forEach((c, i) => { const x = h[i]; if(typeof x === "string" && x && !seen.has(hintKey({ c, hint: x }))){ seen.add(hintKey({ c, hint: x })); out.push({ c, hint: x }); } });
-  return out;
+  return out.concat(hook);
 }
 const UNIT_BY_WORD = new WeakMap();
 function unitByWord(units){

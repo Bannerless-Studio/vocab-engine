@@ -132,6 +132,11 @@ console.log("Checking tools/validate_pack.py characters/legacy/ruby cases (Node 
     ["rejects: hint not a list", [{ hint: "picture of x" }], 1, /hint must be a list/],
     ["rejects: hint with an empty string", [{ hint: ["", null] }], 1, /hint must be a list/],
     ["rejects: hint all null", [{ hint: [null, null] }], 1, /no hint; leave the field out/],
+    ["accepts: hook line on a two-character unit", [{ hook: "a + b = ab" }], 0, null],
+    ["accepts: hook without hint", [{ hook: "a + b = ab", hint: ["x", null] }], 0, null],
+    ["rejects: hook not a string", [{ hook: ["a + b"] }], 1, /hook must be a non-empty string/],
+    ["rejects: empty hook", [{ hook: "" }], 1, /hook must be a non-empty string/],
+    ["rejects: hook on a one-character unit", [{ t: "字", hook: "a + b" }], 1, /hook is for a unit of two or more/],
   ];
   for(const [name, extra, want, re] of cases){
     const dir = mkPack({ pack: basePack({ characters: baseCharacters() }), words });

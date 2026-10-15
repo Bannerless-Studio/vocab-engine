@@ -82,6 +82,7 @@ PERIPHERAL_SHARE = {"1": 0.10, "2": 0.20, "3": 0.35, "4": 0.45}
 HINTS = os.path.join(ROOT, "tools", "zh_hints.json")
 HINT_MEANINGS = os.path.join(ROOT, "tools", "zh_hint_meanings.json")
 HINT_PARTS = os.path.join(ROOT, "tools", "zh_hint_parts.json")
+HINT_COMPOUNDS = os.path.join(ROOT, "tools", "zh_hint_compounds.json")
 PATTERNS_REPORT = os.path.join(ROOT, "docs", "ZH_PATTERNS.md")
 PATTERNS_ATTRIBUTION = {"source": "hand-authored for this pack (chinese repo data/hsk_patterns.js)", "licence": "CC-BY-SA-4.0"}
 ATTRIBUTION = {
@@ -271,7 +272,7 @@ def dump(path, data):
         print(f"wrote {os.path.relpath(path, ROOT)}")
 
 
-def attach_hints(units, hints, meanings, parts):
+def attach_hints(units, hints, meanings, parts, compounds=None):
     """Sets each unit's `hint` (one per character of `t`, null where none; omitted when all
     are null). A one-character unit takes the component hint from the zh_hints.py table; a
     unit of two or more takes each character's meaning from tools/zh_hint_meanings.json
@@ -280,7 +281,24 @@ def attach_hints(units, hints, meanings, parts):
     that unit's card) and the source has a breakdown; a "compound:char" key (that unit's
     `t`) wins over the bare character key. A character a table lacks means the table is stale:
     tools/zh_hints.py reads the same hsk input, so rerun it. A compound key that matches no unit
-    fails too (a stale `_meanings` override)."""
+    fails too (a stale `_meanings` override).
+
+    `compounds` is tools/zh_hint_compounds.json: "hooks" (unit text -> `hook`, one line about the
+    whole word, set on a unit of two or more characters) and "parts" ("unit:char" -> breakdown
+    forced onto that character's line though it has its own unit: a string, or true for the
+    character's table breakdown). A key that matches no unit, or a character not in its unit,
+    or a missing breakdown, fails the build."""
+    compounds = compounds or {}
+    hooks, forced = compounds.get("hooks", {}), compounds.get("parts", {})
+    by_t = {u["t"]: u for u in units}
+    bad = sorted(k for k in hooks if len(k) < 2 or k not in by_t) + sorted(
+        k for k in forced if ":" not in k or k.partition(":")[0] not in by_t or k.partition(":")[2] not in k.partition(":")[0])
+    if bad:
+        raise SystemExit(f"pack_from_hsk: zh_hint_compounds.json keys match no multi-character unit: {bad[:10]}")
+    empty = sorted(k for k, v in hooks.items() if not (isinstance(v, str) and v.strip()))
+    empty += sorted(k for k, v in forced.items() if not (v is True or (isinstance(v, str) and v.strip())) or (v is True and not parts.get(k.partition(":")[2])))
+    if empty:
+        raise SystemExit(f"pack_from_hsk: zh_hint_compounds.json empty or unusable values: {empty[:10]}")
     missing = sorted({c for u in units for c in u["t"] if c not in hints or c not in meanings or c not in parts})
     if missing:
         raise SystemExit(f"pack_from_hsk: characters missing from tools/zh_hints.json, zh_hint_meanings.json or zh_hint_parts.json (run tools/zh_hints.py): {''.join(missing)}")
@@ -292,6 +310,10 @@ def attach_hints(units, hints, meanings, parts):
 
     def compound_line(t, c):
         m = meanings.get(f"{t}:{c}") or meanings[c]
+        f = forced.get(f"{t}:{c}")
+        if f:
+            b = parts[c] if f is True else f
+            return f"{m}: {b}" if m else b
         if c in single or not parts[c]:
             return m
         return f"{m}: {parts[c]}" if m else parts[c]
@@ -303,6 +325,9 @@ def attach_hints(units, hints, meanings, parts):
             u["hint"] = h
         else:
             u.pop("hint", None)
+        u.pop("hook", None)
+        if len(t) > 1 and t in hooks:
+            u["hook"] = hooks[t]
 
 
 def load_tier_overrides(words):
@@ -617,7 +642,7 @@ def main(argv):
             "ft": w["ft"],
         }
         characters.append(unit)
-    attach_hints(characters, hints, json.load(open(HINT_MEANINGS, encoding="utf-8")), json.load(open(HINT_PARTS, encoding="utf-8")))
+    attach_hints(characters, hints, json.load(open(HINT_MEANINGS, encoding="utf-8")), json.load(open(HINT_PARTS, encoding="utf-8")), json.load(open(HINT_COMPOUNDS, encoding="utf-8")) if os.path.exists(HINT_COMPOUNDS) else None)
     # legacy map for the hsk_pinyin -> vocab_zh progress migration (docs/HSK_MERGE.md §4)
     legacy = {
         "w": {w["w"]: w["id"] for w in words},
@@ -655,7 +680,7 @@ def main(argv):
     ruby_tokens = sum(len(s.get("ruby", ())) for s in out_sent)
     print(f"words {len(words)}  sentences {len(out_sent)}  lessons {len(lessons)}  functionWords {len(fw)}")
     hinted = {c for u in characters for c, h in zip(u["t"], u.get("hint", ())) if h}
-    print(f"character hints: {len(hinted)} of {len({c for u in characters for c in u['t']})} distinct characters; units with hint {sum(1 for u in characters if 'hint' in u)}")
+    print(f"character hints: {len(hinted)} of {len({c for u in characters for c in u['t']})} distinct characters; units with hint {sum(1 for u in characters if 'hint' in u)}, with hook {sum(1 for u in characters if 'hook' in u)}")
     print(f"say carriers {len(say)}")
     print(f"characters {len(characters)}  legacy w={len(legacy['w'])} s={len(legacy['s'])} c={len(legacy['c'])}")
     print(f"sentence tokens {total_tokens}: {sum(fallback.values())} resolved via SENTENCE_EXTRA base, {len(unresolved)} unresolved, ruby tokens {ruby_tokens}, unplaced (no ruby) {len(unplaced)}")
