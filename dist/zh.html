@@ -2625,6 +2625,7 @@ function bareBoost(cands, prog, pack, sn, d, o){
   const psn = Number.isInteger(o.sn) ? o.sn : sn, out = [];
   cands.forEach(c => {
     if(c.t !== "c" || !isObj(c.rec) || charTier(c.rec.s || 0, pack) !== "ruby") return;
+    if(wordKnownBare(c.rec, c.x, prog, pack)) return; // already bare through its known word: no pair ask needed
     const wm = pairJudge(c.rec, c.x, prog, "wm"); if(!wm || wm.s < BARE_PAIR) return;
     const ws = pairJudge(c.rec, c.x, prog, "ws"); if(ws && ws.s >= BARE_PAIR) return;
     if(ws && psn > 0 && ws.a === psn) return;
@@ -3651,8 +3652,18 @@ function bareWord(word, units, prog, pack){
 // the typed credit keep rec.s.
 const BARE_PAIR = 2;
 function bareByPairOn(pack){ const c = charsConfig(pack); return !!(c && c.bareByPair); }
+// A known word (owner 2026-10-15: 286 known words, yet 388 units sat at ruby with no pair streak, so sentences still
+// showed readings for words known 50+ sessions; pair asks ride on word reviews and a known word is rarely reviewed):
+// a ruby-tier unit whose word's streak is at `bare` and whose wm / ws pair (unit or word, latest answer) is not judged missed counts as bare
+// without pair streaks. A miss resets the word streak (below bare) and zeroes the pair, so a recent wrong ends it.
+function wordKnownBare(rec, unit, prog, pack){
+  const c = charsConfig(pack), wid = unit && (unit.words || [])[0], w = wid != null && prog && isObj(prog.w) ? prog.w[wid] : null;
+  if(!c || !isObj(w) || (+w.s || 0) < c.bare) return false;
+  return ["wm", "ws"].every(k => { const j = pairJudge(rec, unit, prog, k); return !j || j.s > 0; });
+}
 function pairBare(rec, unit, prog, pack){
   if(!bareByPairOn(pack) || !isObj(rec) || charTier(rec.s || 0, pack) !== "ruby") return false;
+  if(wordKnownBare(rec, unit, prog, pack)) return true;
   return (pairJudge(rec, unit, prog, "wm") || { s: 0 }).s >= BARE_PAIR && (pairJudge(rec, unit, prog, "ws") || { s: 0 }).s >= BARE_PAIR;
 }
 // A unit pair's judged state: the unit's and the word's records are separate streams per pair; the most
@@ -5317,7 +5328,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   READ_UNLOCK, READ_WEIGHT, READ_REREAD_DAYS, readState, readingLevels, updateReadUnlocks, suggestPassage, nextReadItem, readPassMode, passageForPass, listenAudioOnly, passageLength, passageSegments,
   gradeQuestion, passageWeakWords, applyWeakWords, markPassageDone, readingStats, readingSpeed, readTimeKeep, passageUnits, progressMapOn, progressMapGoals, progressPosition, goalPosition, goalPositions, levelPosition, currentGoal, GOAL_DONE, recordProgressMap, sessionsToGo, PM_KEEP, sessionsToGoX, levelOpensIn, etaGain, etaKnown, etaCurveAt, etaPlaced, SETTLED, levelSettled, unitAtTarget, progressTotals, progressVisit, progressDeltas, noteProgressVisit, recentMisses, WEEK_SESSIONS,
   CHARS_PROG_VERSION, CHAR_SET_SIZE, CHAR_MASTERED, CHAR_BARE, REVIEW_SIZE_CHARS, CHAR_KINDS, charsConfig,
-  BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, settleUnitProv, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
+  BARE_PAIR, BARE_BOOST, bareBoost, bareByPairOn, wordKnownBare, pairBare, pairJudge, defaultCharsProg, validateCharsShape, normalizeCharsProg, ensureChars, charRecs, markChar, settleUnitProv, answerCharChoice, setCharOrder, seedCharOrder, charOrder, setCharMode, typedBareOn, TYPED_WRITTEN_KINDS, typedUnitWords, markUnitTyped, bareWord, typedUnitDue,
   unitWord, unitReading, unitGloss, unitHints, hintKey, unitByWord, recordedUnits,
   charStageUnits, rampSetOf, levelChunks, charSets, charSetTaught, nextCharSet, charStages, stagePath, nextStage, lagOn, lagUnits, lagStage, pauseOn, setPause, lagCharSet, lagResume, charsWithWords, learnTurnDone, charsUnlocked, charsStarted, showCharChoice,
   charTier, sentenceTokenTier, rubyTiers, wordRubyParts, tokenRubyParts, pronFirstOn, displayForm, pronClash, sentencePieces, sentenceDisplay, charOpts, recallCharOpts, charSoundOpts, charReadOpts, charItem, mixPick,
@@ -6591,7 +6602,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1772764686-2400170";
+const VE_BUILD = "2831591336-2401190";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -8877,4 +8888,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2634076427-2399494-->
+<!--ve-build:4036169148-2400514-->
