@@ -41,15 +41,27 @@ ID = A.StoryLang(code="id", end=ID_END, split_re=SPLIT_ID, norm=norm_id, foreign
                  relative=ID_RELATIVE, meta_target=ID_META, abbrev=ID_ABBREV, names_kept=True, agree_gate=True, beads=((1, 1), (2, 1)))
 
 
+OFF_COUNT_MIN_RATE = 0.7        # a recovered (page count off by 1-2) twin must agree on 70% of its pages, an exact twin on 50% (story_align)
+
+
 def story_pairs(story, word_re, norm_key, seen, stats, min_tokens=3, max_tokens=14, en_lower=frozenset(), checks=None):
+    if checks and (story.get("twin") or {}).get("page_diff"):
+        # one global page shift cannot repair a page inserted mid-book: a recovered twin is trusted only at page shift 0 (shifted ones were 17% bad vs 7% in the strict re-read) and when its pages agree clearly
+        ua, ea = A._pages(story["text_pages"]), A._pages(story["twin"]["text_pages"])
+        shift = A.page_shift(ua, ea)
+        r = checks.story_rate([(ua[n], ea[n + shift]) for n in sorted(ua) if ua[n] and ea.get(n + shift)])
+        if shift != 0 or r is None or r < OFF_COUNT_MIN_RATE:
+            stats["off_count_rejected"] += sum(len(A.split_target(ID, ua[n])) for n in ua if ua[n])
+            stats["stories_rejected"] += 1
+            return []
     return A.story_pairs(ID, story, word_re, norm_key, seen, stats, min_tokens, max_tokens, None, en_lower, checks)
 
 
-BIBLE_RE = re.compile(r"Open Bible Stories|unfoldingWord|Sweet Publishing|Wycliffe|Door43", re.I)
+BIBLE_RE = re.compile(r"Open Bible Stories|unfoldingWord|Sweet Publishing|Wycliffe|Door43|Book for Christmas|Nativity", re.I)
 
 
 def is_bible(rec):
-    """A Bloom book of the Bible-story series (topic:Bible tag or an Open Bible Stories credit): scripture, left out."""
+    """A Bloom book of the Bible-story series (topic:Bible tag, an Open Bible Stories credit, or a Christmas / Nativity story book): scripture, left out."""
     tags = (rec.get("raw") or {}).get("tags") or []
     return "topic:Bible" in tags or bool(BIBLE_RE.search((rec.get("credits") or "") + " " + " ".join(rec.get("illustrators") or [])))
 

@@ -144,4 +144,5 @@ def recover(cd):
     print('RECOVERED', n, 'calls', calls, '429', c429, flush=True)
 
 
-main()
+if __name__ == '__main__':
+    main()
