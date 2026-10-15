@@ -1903,8 +1903,23 @@ class Hindi(LanguageSpec):
                 continue
             titles |= ks
             out[st["id"]] = dict(st, _licence=lic)
+        d = env.repo / ".cache" / "stories" / "hi-gdl"
+        for f in sorted(d.glob("[0-9]*.json"), key=lambda f: int(f.stem)) if d.is_dir() else []:
+            st = json.loads(f.read_text(encoding="utf-8"))
+            tw = st.get("twin")
+            lic = self.GDL_LICENCES.get(st.get("licence_read"))
+            tlic = bool(tw) and (tw.get("licence"), tw.get("licence_version")) == ("cc-by", "4.0")
+            if st.get("status") not in ("ok", "ok_off") or not tw or not lic or not tlic or hi_story.is_bible_gdl(st):
+                continue
+            ks = {hi_story.A.title_key(st["title"]), hi_story.A.title_key(tw["title"])}
+            if ks & titles:
+                continue
+            titles |= ks
+            out[st["id"]] = dict(st, _licence=lic)
         self._story_cache = (env.repo, out)
         return out
+
+    GDL_LICENCES = {"CC-BY-4.0": "CC-BY-4.0"}
 
     def story_rows(self, env):
         from ..core.util import stat
@@ -2001,17 +2016,27 @@ class Hindi(LanguageSpec):
         return Checks
 
     def story_source(self):
-        return {"source": "Bloom Library, Hindi books with their English edition (each book carries its own licence entry; scripture books are left out)",
+        return {"source": "Global Digital Library (StoryWeaver / Pratham Books mirrors) and Bloom Library, Hindi books with their English edition (each book carries its own licence entry; scripture books are left out)",
                 "licence": "CC-BY-4.0 (each book's own licence is in its entry)",
-                "url": self.STORY_URL,
+                "url": "https://www.digitallibrary.io/ ; " + self.STORY_URL,
                 "note": "Sentences are split out of the book text, Hindi and English realigned sentence by sentence; typographic quotes became "
                         "plain, a sentence-final full stop became the danda; nothing else was changed."}
 
     def story_meta(self, env, story_id):
-        """The book's credits: authors, translators and illustrators as Bloom lists them, the copyright line and credit text of the
-        book, the original publisher, and the book's own licence."""
+        """The book's credits: authors, translators and illustrators as the source lists them, the copyright line and credit text of the
+        book, the publisher, and the book's own licence."""
         st = self._stories(env)[story_id]
         tw = st["twin"]
+        if st.get("source") == "gdl":
+            meta = {"id": story_id, "source": st.get("source_name") or "Global Digital Library", "title": st["title"], "english_title": tw["title"],
+                    "authors": hi_story.names_of(st.get("authors")), "translators": hi_story.names_of(st.get("translators")),
+                    "illustrators": hi_story.names_of(st.get("illustrators")), "licence": st["_licence"], "url": st["url"], "english_url": tw["url"]}
+            if (st.get("publisher") or "").strip():
+                meta["publisher"] = st["publisher"].strip()
+            meta["credits"] = hi_story.gdl_attribution(st.get("credit_text"))
+            if tw.get("authors") and tw["authors"] != st.get("authors"):
+                meta["english_authors"] = hi_story.names_of(tw["authors"])
+            return meta
         meta = {"id": story_id, "source": "Bloom Library", "title": st["title"],
                 "english_title": (st.get("all_titles") or {}).get("en") or tw["title"],
                 "authors": hi_story.names_of(st.get("authors")), "translators": hi_story.names_of(st.get("translators")),
@@ -2026,8 +2051,8 @@ class Hindi(LanguageSpec):
         return meta
 
     def story_credit(self):
-        return {"name": "Bloom Library stories (book authors, translators, illustrators and publishers named in the pack's attribution)",
-                "licence": "CC BY 4.0 / CC BY-SA 4.0 / CC0", "url": self.STORY_URL}
+        return {"name": "Global Digital Library / StoryWeaver (Pratham Books) and Bloom Library stories (book authors, translators, illustrators and publishers named in the pack's attribution)",
+                "licence": "CC BY 4.0 / CC BY-SA 4.0 / CC0", "url": "https://www.digitallibrary.io/ ; " + self.STORY_URL}
 
 
 SPEC = Hindi

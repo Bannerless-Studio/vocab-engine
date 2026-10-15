@@ -68,5 +68,52 @@ class Names(unittest.TestCase):
         self.assertFalse(S.is_bible({"credits": "Pratham Books", "all_titles": {"en": "I can help"}}))
 
 
+class GdlRows(unittest.TestCase):
+    """Global Digital Library / StoryWeaver Hindi books (real pairs from "एक था मोटा राजा", "गहरे सागर के अंदर!")."""
+
+    def test_two_to_two_pairs(self):               # the second opens on वह, the first stands alone
+        out, st = run("कुत्ते ने एक चिड़िया को देखा। वह कुत्ता उस चिड़िया के पीछे दौड़ा।", "The dog sees a bird. The dog runs after the bird.")
+        self.assertEqual([e for _, e, _ in out], ["The dog sees a bird."])
+        self.assertEqual(st["opener"], 1)
+
+    def test_bible_gdl_title(self):
+        self.assertTrue(S.is_bible_gdl({"title": "यीशु का जन्म"}))
+        self.assertFalse(S.is_bible_gdl({"title": "एक था मोटा राजा", "twin": {"title": "Fat King Thin Dog"}, "publisher": "Pratham books"}))
+
+    def test_attribution_line(self):
+        credit = ("This book was made possible by Pratham Books' StoryWeaver platform. Story Attribution: This story: खोया पाया is translated by Poonam S. Kudesia . "
+                  "The \u00a9 for this translation lies with Pratham Books, 2014. Released under CC BY 4.0 license. Other Credits: This book has been published")
+        a = S.gdl_attribution(credit)
+        self.assertTrue(a.startswith("This story: खोया पाया is translated by Poonam S. Kudesia"))
+        self.assertNotIn("Other Credits", a)
+
+    def test_off_count_twin_needs_agreement(self):
+        class Checks:
+            @staticmethod
+            def story_rate(pairs):
+                return 0.5
+
+            @staticmethod
+            def noun(tok):
+                return False
+
+            @staticmethod
+            def renamed(u, en):
+                return False
+
+            @staticmethod
+            def agree_pair(u, en):
+                return True
+
+            @staticmethod
+            def wrong_sense(toks, en):
+                return False
+        story = {"text_pages": [{"n": 1, "text": "कुत्ते ने एक चिड़िया को देखा।"}],
+                 "twin": {"page_diff": 1, "text_pages": [{"n": 1, "text": "The dog sees a bird."}]}}
+        stats = S.A.Stats()
+        self.assertEqual(S.story_pairs(story, WORD, lambda s: s, set(), stats, checks=Checks), [])
+        self.assertEqual(stats["stories_rejected"], 1)
+
+
 if __name__ == "__main__":
     unittest.main()

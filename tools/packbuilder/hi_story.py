@@ -59,6 +59,9 @@ def garbled(text):
     return bool(SIGN_START.search(norm_hi(text)))
 
 
+OFF_COUNT_MIN_RATE = 0.7        # a recovered (page count off) twin must agree on 70% of its pages
+
+
 def garbled_story(story, rate=0.01):
     """True when 1% or more of the book's tokens open on a vowel sign or virama (a font-mapped PDF): the whole book is left out."""
     toks = [t for p in story["text_pages"] for t in norm_hi(p["text"]).split()]
@@ -66,6 +69,15 @@ def garbled_story(story, rate=0.01):
 
 
 def story_pairs(story, word_re, norm_key, seen, stats, min_tokens=3, max_tokens=14, glued=None, en_lower=frozenset(), checks=None):
+    if checks and (story.get("twin") or {}).get("page_diff"):
+        # a recovered twin (page count off by 1-6): trusted only at page shift 0 and when its pages agree clearly; one global shift cannot repair a page inserted mid-book
+        ua, ea = A._pages(story["text_pages"]), A._pages(story["twin"]["text_pages"])
+        shift = A.page_shift(ua, ea)
+        r = checks.story_rate([(ua[n], ea[n + shift]) for n in sorted(ua) if ua[n] and ea.get(n + shift)])
+        if shift != 0 or r is None or r < OFF_COUNT_MIN_RATE:
+            stats["off_count_rejected"] += sum(len(A.split_target(HI, ua[n])) for n in ua if ua[n])
+            stats["stories_rejected"] += 1
+            return []
     if garbled_story(story):
         stats["garbled_story"] += sum(len(A.split_target(HI, p["text"])) for p in story["text_pages"])
         stats["stories_rejected"] += 1
@@ -135,3 +147,16 @@ def names_of(v):
             if n and n not in out:
                 out.append(n)
     return out
+
+
+def is_bible_gdl(rec):
+    """A GDL book of scripture or a Christmas / Nativity story (the fetcher already tags status scripture; the Hindi title is checked again)."""
+    blob = " ".join([rec.get("title") or "", rec.get("epub_title") or "", (rec.get("twin") or {}).get("title") or "", rec.get("publisher") or ""])
+    return bool(BIBLE_RE.search(blob) or re.search(r"बाइबिल|यीशु|ईसा मसीह|क्रिसमस|पवित्र शास्त्र", blob))
+
+
+def gdl_attribution(credit):
+    """The book's own attribution line from its StoryWeaver credit page: from 'Story Attribution:' to the 'Other Credits' / 'Illustration Attributions' block."""
+    c = (credit or "").replace("\xad", "")
+    m = re.search(r"Story Attribution:(.*?)(?:Other Credits:|Illustration Attributions:|$)", c, re.S)
+    return re.sub(r"\s+", " ", m.group(1) if m else c).strip()[:500]
