@@ -17,6 +17,10 @@ const cp = require("child_process");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
+// ja-stall: the held typed asks of the level being completed (core.js PAIR_HELD) are engine default; controls against older engines run the current engine with share 0.
+const HELD0 = VC.PAIR_HELD.share;
+const heldOffSync = fn => { VC.PAIR_HELD.share = 0; try { return fn(); } finally { VC.PAIR_HELD.share = HELD0; } };
+const heldOff = async fn => { VC.PAIR_HELD.share = 0; try { return await fn(); } finally { VC.PAIR_HELD.share = HELD0; } };
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "1a762a3"; // main before patterns (frequency tiers, character ramp)
 const PY = process.env.PYTHON3 || "python3";
@@ -438,13 +442,13 @@ const ptKey = it => String(it.key).startsWith("p:");
       return out;
     };
     const ref = await walk(PACK_OFF, baseHtml, BASE, undefined);
-    const off = await walk(PACK_OFF, appHtml, VC, PATTERNS);
+    const off = await heldOff(() => walk(PACK_OFF, appHtml, VC, PATTERNS));
     check(`flag off (pack.patterns absent, PATTERNS present): two-session walk byte-identical to ${BASE_SHA}`, JSON.stringify(off) === JSON.stringify(ref), off.findIndex((x, i) => x !== ref[i]));
-    const nofile = await walk(PACK, appHtml, VC, undefined);
+    const nofile = await heldOff(() => walk(PACK, appHtml, VC, undefined));
     const refOn = await walk(PACK, baseHtml, BASE, undefined);
     check(`flag on without patterns.json: byte-identical to ${BASE_SHA}`, JSON.stringify(nofile) === JSON.stringify(refOn), nofile.findIndex((x, i) => x !== refOn[i]));
     const ctl = (core, pack) => { const p = synth(["1", "2", "3"], 2, 4, 9); return JSON.stringify([core.buildReviewPlan(VC.learnedWords(WORDS, pack, p), p, pack, { canHear: () => true, today: "2026-10-05", rng: mulberry32(4), sn: 10 }).map(x => [x.kind, x.word && x.word.id]), core.validateProgShape(p, ["1", "2", "3", "4"]).ok]); };
-    check("core plans unchanged (Review plan, validateProgShape)", ctl(VC, PACK) === ctl(BASE, withCollapsed(PACK)));
+    check("core plans unchanged (Review plan, validateProgShape)", heldOffSync(() => ctl(VC, PACK)) === ctl(BASE, withCollapsed(PACK)));
   }
 
   console.log("\n[10] the owner's export (a48ee4d3, read-only; $PAIRS_OWNER overrides) under this pack");
@@ -515,7 +519,7 @@ const ptKey = it => String(it.key).startsWith("p:");
       api.tab("progress"); await tick(); out.push(noBars(api.panel()));
       return out;
     };
-    const ref = await walk(baseHtml, BASE), cur = await walk(appHtml, VC);
+    const ref = await walk(baseHtml, BASE), cur = await heldOff(() => walk(appHtml, VC));
     check(`patternCue absent: two-session walk + Sentences test byte-identical to ${BASE_SHA} (patterns on)`, JSON.stringify(ref) === JSON.stringify(cur) && ref.length >= 7, cur.findIndex((x, i) => x !== ref[i]));
   }
 

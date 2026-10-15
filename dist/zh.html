@@ -2449,6 +2449,9 @@ const PAIRS = ["wm", "sm", "ws"];
 // (owner-confirmed 2026-10-05). PAIR_REFRESH: the plan's share for known pairs, oldest first; 0.1, not
 // the 0.2 first planned: at 0.2 words reaching known per week fell below main (fb23 measure, owner export).
 const PAIR_KNOWN = 3, PAIR_HOLD = 2, PAIR_REFRESH = 0.1;
+// Share of a plan the held typed asks of the level being completed take first (pairPick). An object so the flag-off controls
+// against engines before it (tests/*_checks.js) can set share 0 for the current engine: no pack flag gates it (default behaviour).
+const PAIR_HELD = { share: 0.125 };
 // Frequency tiers (docs/PACK_SCHEMA.md "freqTiers", default since the flag collapse; owner 2026-10-06: "give more priority to words that
 // come up more in real life and the exam ... mastery requirements as well", then "why not typed asks
 // but much less frequent?"): words.json ft sets how often a word is practised and its known bar; pair
@@ -2596,6 +2599,12 @@ function pairPick(cands, n, d, rng, sn, pack, o, pre){
     const al = alias(e); if(seen.has(e.c.key) || (al && seen.has(al))) continue;
     seen.add(e.c.key); if(al) seen.add(al); out.push(e); list[i] = null; } };
   const rk = Math.min(Math.ceil(n * PAIR_REFRESH), new Set(hi.map(e => e.c.key)).size);
+  // Near-done level: a word of the level being completed (c.cl, pairPlan) whose pair sits at PAIR_HOLD moves on only by a typed
+  // ask, and by streak order alone it waited behind every newer word's lower pair: the level's known share oscillated for hundreds
+  // of sessions near its goal (ja A1 445 -> 416 -> 509 -> 456, about 150 held, 1 typed ask a session). Up to PAIR_HELD.share of the
+  // plan, oldest asked first, comes before the streak order; the plan keeps its size and every other pick follows as before.
+  const hk = Math.min(Math.ceil(n * PAIR_HELD.share), n - rk);
+  if(hk > 0) take(lo.filter(e => e && e.c.cl && e.kind === "type" && e.s === PAIR_HOLD && e.c.tier !== FT_PERIPHERAL).sort((x, y) => x.a - y.a || x.j - y.j), out.length + hk);
   take(lo, n - rk);
   // freqTiers (owner 2026-10-06/07): on every other plan (odd session ordinal; no storage) one refresh
   // slot goes to the oldest known peripheral pair (halved age), so peripheral items keep a trickle while
@@ -2664,11 +2673,20 @@ function critPre(cands, prog, pack, n, o, sn){
   }
   return out;
 }
+// The level being completed: the lowest level (pack order) with a recorded word not yet known, once a later level has records (teaching has moved past it); null otherwise.
+function completingLevel(learned, prog, pack){
+  const ids = levelIds(pack), w = (prog && prog.w) || {}; let best = -1, top = -1;
+  (learned || []).forEach(x => { const i = ids.indexOf(String(x.lv)); if(i < 0 || !isObj(w[x.id])) return;
+    if(i > top) top = i;
+    if((best < 0 || i < best) && !wordKnown(w[x.id], x, pack)) best = i; });
+  return best < 0 || best >= top ? null : ids[best];
+}
 // Review and Recall by pairs. o.extra (paused) is ignored: a paused Review stays at n items.
 // sx: pairScriptPre's script items, taken first.
 function pairPlan(learned, prog, pack, n, o, wk, ck, boost, sx){
   const d = dayLog(prog, o.today), sn = daySn(prog), wc = dayWordCan(pack, o.canHear);
-  const cands = [...(learned || []).map(pairWordCand(prog, wk, wc, pack)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
+  const cl = completingLevel(learned, prog, pack);
+  const cands = [...(learned || []).map(pairWordCand(prog, wk, wc, pack)).map(c => (cl !== null && String(c.x.lv) === cl ? Object.assign(c, { cl: true }) : c)), ...recordedUnits(o.units, prog, pack).map(pairCharCand(prog, pack, ck, o.typedUnits))];
   // Owner 2026-10-06: a paused session's 40-item Review is too long to keep focus and remember mistakes,
   // so the paused growth (o.extra) is ignored and Review keeps its normal size.
   const bb = boost ? bareBoost(cands, prog, pack, sn, d, o) : undefined;
@@ -5310,7 +5328,7 @@ const API = { shuffle, escapeHtml, gloss, firstTwoWords, normKey,
   SESSION_VERSION, SESSION_MAX_AGE_MS, sessionKey, sessionHash, sessionStale,
   FT_AMBIENT, FT_CORE, FT_PERIPHERAL, wordTier, unitTier, knownBarAt, wordPairs, wordKnown, settleProv, unitDone,
   PATTERN_DONE, PATTERN_OPEN, PATTERN_SHARE, patternsOn, patternCount, patternWords, patternState, patternFirstMeeting, openPatterns, notePattern, patternPick, patternMarkText, patternMarkIndex, patternOpts, patternSentenceIndex, patternStats,
-  PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan,
+  PAIRS, PAIR_KNOWN, PAIR_HOLD, PAIR_REFRESH, PAIR_OF_KIND, PAIR_OF_TYPED, PAIR_HARD, pairTypedKinds, pairUnitHeld, pairBoot, pairState, notePair, pairOpts, pairKind, pairPick, pairPlan, completingLevel, PAIR_HELD,
   DAY_REFRESH_SHARE, DAY_AGAIN_SHARE, DAY_CONSOLIDATE_SHARE, DAY_TYPED_CONSOLIDATE_SHARE, DAY_RECENT_SESSIONS, DAY_MISS_SHARE, DAY_WEAK_FLOOR, DAY_HELD_SHARE_REVIEW, DAY_HELD_SHARE_RECALL, DAY_HELD_UNIT_SHARE, RECALL_SIZE, RECALL_SIZE_HELD, recallSize, DAY_MISS_MAX_SESSIONS, dayMissKinds, dayWordCan, daySentenceCan, dayAgedOut, dayLog, dayStart, daySessionStart, daySn, noteDay, dayTier, DAY_PRODUCTION, daySettles, daySettlesAt, dayPending, dayPick, dayItemKind, dayPlanKinds, dayPickList, dayWordKinds, dayCharKinds, daySentenceKinds, isoDayNumber,
   markRec, WORD_HOLD, markWordRec, typedWordDue, weakScore, weakFirst, provPick, learnedWords, EXAM_SIZE, EXAM_MIX, CRIT_SLOTS, critMap, critHas, critAdd, critRemove, critWords, critSettle, critPick, critPre, examLevels, examResult, examRecord, examReady, examSeen, noteExamSeen, EXAM_SENT_CRIT, EXAM_CRIT_MAX, examMissWords, examAgo, examPlan, EXAM_MIX_LEVEL, EXAM_MIX_EARLIER, EXAM_NUMBERED, EXAM_REPEAT_FROM, EXAM_PASS, examNumbered, examHist, examCount, examLock, examCritLeft, examPasses, examPassPlan, examPassApply, seededRng, hashSeed, counterOrder, levelNewSet, nextNewSet, LEVEL_GATE, placedProv, wordKnownP, levelKnownPct, levelGateHold, levelGateNote, nextNewSetOpen, levelExamOn, wordKnownX, knownCtx, settleSetCounter, hearableKinds, pinPrefixRecords, ensureWordRec, currentLevelIndex, availableSentences,
   PRODUCTION_KINDS, MISS_KINDS, applyMissedKinds, markMissKind, REVIEW_SIZE, REVIEW_PRODUCTION_SHARE, kindMix, buildReviewPlan, buildRecallPlan, sentenceKind,
@@ -6591,7 +6609,7 @@ const sessStore = (() => {
 // while the page is still parsing, when boot resumes. A page built without it falls back to
 // the trailing <!--ve-build--> marker, read once parsing is over; dev mode has neither. A pack
 // fingerprint is added either way.
-const VE_BUILD = "1772764686-2400170";
+const VE_BUILD = "3040513332-2401955";
 const SESSION_PACK_FP = VC.sessionHash(JSON.stringify([PACK, WORDS.map(w => w.id), SENTENCES.length, PASSAGE_LIST.map(p => p.id), CHAR_LIST.length, LESSON_LIST.length]));
 let sessBuildMark = /^__VE_/.test(VE_BUILD) ? null : VE_BUILD;
 function sessionBuild(){
@@ -8877,4 +8895,4 @@ function legacyFailHTML(why){
 </script>
 </body>
 </html>
-<!--ve-build:2634076427-2399494-->
+<!--ve-build:469755324-2401279-->

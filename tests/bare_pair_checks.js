@@ -16,6 +16,10 @@ const cp = require("child_process");
 
 const ROOT = path.join(__dirname, "..");
 const VC = require(path.join(ROOT, "engine", "core.js"));
+// ja-stall: the held typed asks of the level being completed (core.js PAIR_HELD) are engine default; controls against older engines run the current engine with share 0.
+const HELD0 = VC.PAIR_HELD.share;
+const heldOffSync = fn => { VC.PAIR_HELD.share = 0; try { return fn(); } finally { VC.PAIR_HELD.share = HELD0; } };
+const heldOff = async fn => { VC.PAIR_HELD.share = 0; try { return await fn(); } finally { VC.PAIR_HELD.share = HELD0; } };
 const ZH = path.join(ROOT, "packs", "zh");
 const MAIN = "3044601"; // main before bareByPair
 const PY = process.env.PYTHON3 || "python3";
@@ -300,7 +304,7 @@ const passageSents = () => PASSAGES.flatMap(p => p.sentences);
         return out;
       };
       // zh-read-order: the passage title now carries hasruby (line-height for its ruby); d3632b8 marks none
-      const ref = await walk(baseHtml, BASE), cur = (await walk(appHtml, VC)).map(x => x.replace(/<h2 class="ptitle hasruby"/g, '<h2 class="ptitle"'));
+      const ref = await walk(baseHtml, BASE), cur = (await heldOff(() => walk(appHtml, VC))).map(x => x.replace(/<h2 class="ptitle hasruby"/g, '<h2 class="ptitle"'));
       check(`flag off (bareByPair stripped): Today, two sessions, three Read passages, Progress and records byte-identical to ${BASE_SHA} (${ref.join("").length} chars)`, JSON.stringify(ref) === JSON.stringify(cur.map(stripExam)), cur.findIndex((x, i) => stripExam(x) !== ref[i]));
     }
     const p = OWNER ? clone(OWNER) : synth();
