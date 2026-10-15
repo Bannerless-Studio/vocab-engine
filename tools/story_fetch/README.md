@@ -56,3 +56,10 @@ African Storybook Kiswahili books with an English twin (`.cache/stories/sw-asb/`
 
 ## Arabic rows (langs/ar.py story_rows, packbuilder/ar_story.py), 2026-10-15
 African Storybook Arabic (66 listed, 18 with an English twin) plus Bloom Arabic (2 licence-usable). Same alignment as Swahili with the 1:2 bead kept (the Arabic edition often joins two English sentences). Yield is thin: 23 shipped from 13 books; the ASb Arabic vocabulary mostly falls outside the pack's lemma rule and 44% of sentences sit on pages that do not align. `passage_windows.py --lang ar` finds no passing window (best band-sized window coverage A1 0.96).
+
+## Let's Read Asia off-count twins (lra_fetch.py --recover-offcount), 2026-10-15, Indonesian
+The default run drops a book when its English twin has a different number of text pages (`twin_null`, `twin_tried[0].rejected = textpages_A_vs_B`). `--recover-offcount` re-fetches the twin of every `twin_null` book whose only reject is a page-count difference of 1 or 2 (CC-BY-4.0 twin) and stores it with `twin.page_diff` and status `ok_off`; the story aligner decides which pairs survive. id_story.py trusts an `ok_off` book only at page shift 0 and story_rate >= 0.7 (strict re-read: pairs at shift != 0 were 17% bad, shift 0 6.7%, exact twins 7.4%). Indonesian: 165 CC-BY books, 93 `ok`, 68 `ok_off`, 4 still `twin_null`. Indonesian language id 6260074016145408 (English 4846240843956224). Bloom Indonesian (`bloom_fetch.py --lang id`): 371 listed, 240 licence-usable, 24 with a twin, 14 of those Bible-story derivatives (left out at row time).
+
+## Indonesian rows (langs/id.py story_rows, packbuilder/id_story.py)
+Filters and counts per run are in the build stats (`story_rows`) and `tools/README.md` of the indonesian site.
+
